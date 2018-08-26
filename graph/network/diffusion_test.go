@@ -12,6 +12,7 @@ import (
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/ordered"
+	"gonum.org/v1/gonum/graph/iterator"
 	"gonum.org/v1/gonum/graph/simple"
 	"gonum.org/v1/gonum/mat"
 )
@@ -307,7 +308,7 @@ type sortedNodeGraph struct {
 func (g sortedNodeGraph) Nodes() graph.Nodes {
 	n := graph.NodesOf(g.Graph.Nodes())
 	sort.Sort(ordered.ByID(n))
-	return simple.NewNodeIterator(n)
+	return iterator.NewOrderedNodes(n)
 }
 
 var diffuseToEquilibriumTests = []struct {

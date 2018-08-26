@@ -19,6 +19,7 @@ import (
 	"gonum.org/v1/gonum/graph/encoding"
 	"gonum.org/v1/gonum/graph/encoding/dot"
 	"gonum.org/v1/gonum/graph/graphs/gen"
+	"gonum.org/v1/gonum/graph/iterator"
 	"gonum.org/v1/gonum/graph/simple"
 	"gonum.org/v1/gonum/graph/topo"
 )
@@ -240,7 +241,7 @@ func duplication(n int, delta, alpha, sigma float64) func() *simple.DirectedGrap
 		if err != nil {
 			panic(err)
 		}
-		for _, e := range g.Edges() {
+		for _, e := range graph.EdgesOf(g.Edges()) {
 			if rnd.Intn(2) == 0 {
 				g.RemoveEdge(e.From().ID(), e.To().ID())
 			}
@@ -254,7 +255,7 @@ type undirected struct {
 }
 
 func (g undirected) From(id int64) graph.Nodes {
-	return simple.NewNodeIterator(append(
+	return iterator.NewOrderedNodes(append(
 		graph.NodesOf(g.DirectedGraph.From(id)),
 		graph.NodesOf(g.DirectedGraph.To(id))...))
 }

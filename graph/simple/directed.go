@@ -9,6 +9,7 @@ import (
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/uid"
+	"gonum.org/v1/gonum/graph/iterator"
 )
 
 // DirectedGraph implements a generalized directed graph.
@@ -141,18 +142,18 @@ func (g *DirectedGraph) Nodes() graph.Nodes {
 		nodes[i] = n
 		i++
 	}
-	return NewNodeIterator(nodes)
+	return iterator.NewOrderedNodes(nodes)
 }
 
 // Edges returns all the edges in the graph.
-func (g *DirectedGraph) Edges() []graph.Edge {
+func (g *DirectedGraph) Edges() graph.Edges {
 	var edges []graph.Edge
 	for _, u := range g.nodes {
 		for _, e := range g.from[u.ID()] {
 			edges = append(edges, e)
 		}
 	}
-	return edges
+	return iterator.NewOrderedEdges(edges)
 }
 
 // From returns all nodes in g that can be reached directly from n.
@@ -167,7 +168,7 @@ func (g *DirectedGraph) From(id int64) graph.Nodes {
 		from[i] = g.nodes[vid]
 		i++
 	}
-	return NewNodeIterator(from)
+	return iterator.NewOrderedNodes(from)
 }
 
 // To returns all nodes in g that can reach directly to n.
@@ -182,7 +183,7 @@ func (g *DirectedGraph) To(id int64) graph.Nodes {
 		to[i] = g.nodes[uid]
 		i++
 	}
-	return NewNodeIterator(to)
+	return iterator.NewOrderedNodes(to)
 }
 
 // HasEdgeBetween returns whether an edge exists between nodes x and y without

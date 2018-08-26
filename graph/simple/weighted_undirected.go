@@ -9,6 +9,7 @@ import (
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/uid"
+	"gonum.org/v1/gonum/graph/iterator"
 )
 
 // WeightedUndirectedGraph implements a generalized weighted undirected graph.
@@ -139,7 +140,7 @@ func (g *WeightedUndirectedGraph) Nodes() graph.Nodes {
 		nodes[i] = n
 		i++
 	}
-	return NewNodeIterator(nodes)
+	return iterator.NewOrderedNodes(nodes)
 }
 
 // Edges returns all the edges in the graph.
@@ -161,7 +162,7 @@ func (g *WeightedUndirectedGraph) Edges() graph.Edges {
 			edges = append(edges, e)
 		}
 	}
-	return NewEdgeIterator(edges)
+	return iterator.NewOrderedEdges(edges)
 }
 
 // WeightedEdges returns all the weighted edges in the graph.
@@ -180,7 +181,7 @@ func (g *WeightedUndirectedGraph) WeightedEdges() graph.WeightedEdges {
 			edges = append(edges, e)
 		}
 	}
-	return NewWeightedEdgeIterator(edges)
+	return iterator.NewOrderedWeightedEdges(edges)
 }
 
 // From returns all nodes in g that can be reached directly from n.
@@ -195,7 +196,7 @@ func (g *WeightedUndirectedGraph) From(id int64) graph.Nodes {
 		nodes[i] = g.nodes[from]
 		i++
 	}
-	return NewNodeIterator(nodes)
+	return iterator.NewOrderedNodes(nodes)
 }
 
 // HasEdgeBetween returns whether an edge exists between nodes x and y.

@@ -6,6 +6,7 @@ package main
 
 import (
 	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/iterator"
 	"gonum.org/v1/gonum/graph/simple"
 )
 
@@ -103,7 +104,7 @@ func (g *GraphNode) Nodes() graph.Nodes {
 		}
 	}
 
-	return simple.NewNodeIterator(toReturn)
+	return iterator.NewOrderedNodes(toReturn)
 }
 
 func (g *GraphNode) nodes(list []graph.Node, visited map[int64]struct{}) []graph.Node {
@@ -133,7 +134,7 @@ func (g *GraphNode) nodes(list []graph.Node, visited map[int64]struct{}) []graph
 
 func (g *GraphNode) From(id int64) graph.Nodes {
 	if id == g.ID() {
-		return simple.NewNodeIterator(g.neighbors)
+		return iterator.NewOrderedNodes(g.neighbors)
 	}
 
 	visited := map[int64]struct{}{g.id: {}}
@@ -141,7 +142,7 @@ func (g *GraphNode) From(id int64) graph.Nodes {
 		visited[root.ID()] = struct{}{}
 
 		if result := root.findNeighbors(id, visited); result != nil {
-			return simple.NewNodeIterator(result)
+			return iterator.NewOrderedNodes(result)
 		}
 	}
 
@@ -150,7 +151,7 @@ func (g *GraphNode) From(id int64) graph.Nodes {
 
 		if gn, ok := neigh.(*GraphNode); ok {
 			if result := gn.findNeighbors(id, visited); result != nil {
-				return simple.NewNodeIterator(result)
+				return iterator.NewOrderedNodes(result)
 			}
 		}
 	}

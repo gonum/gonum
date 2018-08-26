@@ -9,6 +9,7 @@ import (
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/ordered"
+	"gonum.org/v1/gonum/graph/iterator"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -89,14 +90,14 @@ func (g *DirectedMatrix) Nodes() graph.Nodes {
 	if g.nodes != nil {
 		nodes := make([]graph.Node, len(g.nodes))
 		copy(nodes, g.nodes)
-		return NewNodeIterator(nodes)
+		return iterator.NewOrderedNodes(nodes)
 	}
 	r, _ := g.mat.Dims()
-	return newImplicitIterator(0, r)
+	return iterator.NewImplicitNodes(0, r, newSimpleNode)
 }
 
 // Edges returns all the edges in the graph.
-func (g *DirectedMatrix) Edges() []graph.Edge {
+func (g *DirectedMatrix) Edges() graph.Edges {
 	var edges []graph.Edge
 	r, _ := g.mat.Dims()
 	for i := 0; i < r; i++ {
@@ -109,7 +110,7 @@ func (g *DirectedMatrix) Edges() []graph.Edge {
 			}
 		}
 	}
-	return edges
+	return iterator.NewOrderedEdges(edges)
 }
 
 // From returns all nodes in g that can be reached directly from n.
@@ -128,7 +129,7 @@ func (g *DirectedMatrix) From(id int64) graph.Nodes {
 			nodes = append(nodes, g.Node(int64(j)))
 		}
 	}
-	return NewNodeIterator(nodes)
+	return iterator.NewOrderedNodes(nodes)
 }
 
 // To returns all nodes in g that can reach directly to n.
@@ -147,7 +148,7 @@ func (g *DirectedMatrix) To(id int64) graph.Nodes {
 			nodes = append(nodes, g.Node(int64(i)))
 		}
 	}
-	return NewNodeIterator(nodes)
+	return iterator.NewOrderedNodes(nodes)
 }
 
 // HasEdgeBetween returns whether an edge exists between nodes x and y without

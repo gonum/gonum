@@ -9,6 +9,7 @@ import (
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/uid"
+	"gonum.org/v1/gonum/graph/iterator"
 )
 
 // UndirectedGraph implements a generalized undirected graph.
@@ -133,11 +134,11 @@ func (g *UndirectedGraph) Nodes() graph.Nodes {
 		nodes[i] = n
 		i++
 	}
-	return NewNodeIterator(nodes)
+	return iterator.NewOrderedNodes(nodes)
 }
 
 // Edges returns all the edges in the graph.
-func (g *UndirectedGraph) Edges() []graph.Edge {
+func (g *UndirectedGraph) Edges() graph.Edges {
 	if len(g.edges) == 0 {
 		return nil
 	}
@@ -155,7 +156,7 @@ func (g *UndirectedGraph) Edges() []graph.Edge {
 			edges = append(edges, e)
 		}
 	}
-	return edges
+	return iterator.NewOrderedEdges(edges)
 }
 
 // From returns all nodes in g that can be reached directly from n.
@@ -170,7 +171,7 @@ func (g *UndirectedGraph) From(id int64) graph.Nodes {
 		nodes[i] = g.nodes[from]
 		i++
 	}
-	return NewNodeIterator(nodes)
+	return iterator.NewOrderedNodes(nodes)
 }
 
 // HasEdgeBetween returns whether an edge exists between nodes x and y.

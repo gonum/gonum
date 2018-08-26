@@ -14,7 +14,7 @@ import (
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/internal/set"
-	"gonum.org/v1/gonum/graph/simple"
+	"gonum.org/v1/gonum/graph/iterator"
 )
 
 // UndirectedMultiplex is an undirected multiplex graph.
@@ -225,7 +225,7 @@ func (g *ReducedUndirectedMultiplex) Nodes() graph.Nodes {
 	for i := range g.nodes {
 		nodes[i] = node(i)
 	}
-	return simple.NewNodeIterator(nodes)
+	return iterator.NewOrderedNodes(nodes)
 }
 
 // Depth returns the number of layers in the multiplex graph.
@@ -469,7 +469,7 @@ func (g undirectedLayerHandle) Nodes() graph.Nodes {
 	for i := range g.multiplex.nodes {
 		nodes[i] = node(i)
 	}
-	return simple.NewNodeIterator(nodes)
+	return iterator.NewOrderedNodes(nodes)
 }
 
 // From returns all nodes in g that can be reached directly from u.
@@ -479,7 +479,7 @@ func (g undirectedLayerHandle) From(uid int64) graph.Nodes {
 	for i, vid := range out {
 		nodes[i] = g.multiplex.nodes[vid]
 	}
-	return simple.NewNodeIterator(nodes)
+	return iterator.NewOrderedNodes(nodes)
 }
 
 // HasEdgeBetween returns whether an edge exists between nodes x and y.

@@ -9,7 +9,7 @@ import (
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/uid"
-	"gonum.org/v1/gonum/graph/simple"
+	"gonum.org/v1/gonum/graph/iterator"
 )
 
 var (
@@ -158,12 +158,12 @@ func (g *WeightedUndirectedGraph) Nodes() graph.Nodes {
 		nodes[i] = n
 		i++
 	}
-	return simple.NewNodeIterator(nodes)
+	return iterator.NewOrderedNodes(nodes)
 }
 
 // Edges returns all the edges in the graph. Each edge in the returned slice
 // is a multi.Edge.
-func (g *WeightedUndirectedGraph) Edges() []graph.Edge {
+func (g *WeightedUndirectedGraph) Edges() graph.Edges {
 	if len(g.lines) == 0 {
 		return nil
 	}
@@ -185,7 +185,7 @@ func (g *WeightedUndirectedGraph) Edges() []graph.Edge {
 			}
 		}
 	}
-	return edges
+	return iterator.NewOrderedEdges(edges)
 }
 
 // From returns all nodes in g that can be reached directly from n.
@@ -200,7 +200,7 @@ func (g *WeightedUndirectedGraph) From(id int64) graph.Nodes {
 		nodes[i] = g.nodes[from]
 		i++
 	}
-	return simple.NewNodeIterator(nodes)
+	return iterator.NewOrderedNodes(nodes)
 }
 
 // HasEdgeBetween returns whether an edge exists between nodes x and y.
@@ -231,7 +231,7 @@ func (g *WeightedUndirectedGraph) LinesBetween(xid, yid int64) graph.Lines {
 		seen[lid] = struct{}{}
 		lines = append(lines, l)
 	}
-	return NewLineIterator(lines)
+	return iterator.NewOrderedLines(lines)
 }
 
 // Edge returns the edge from u to v if such an edge exists and nil otherwise.
@@ -284,7 +284,7 @@ func (g *WeightedUndirectedGraph) WeightedLinesBetween(xid, yid int64) graph.Wei
 		seen[lid] = struct{}{}
 		lines = append(lines, l)
 	}
-	return NewWeightedLineIterator(lines)
+	return iterator.NewOrderedWeightedLines(lines)
 }
 
 // Weight returns the weight for the lines between x and y summarised by the receiver's

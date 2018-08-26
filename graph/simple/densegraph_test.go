@@ -136,13 +136,13 @@ func TestDenseLists(t *testing.T) {
 		}
 	}
 
-	edges := dg.Edges()
+	edges := graph.EdgesOf(dg.Edges())
 	if len(edges) != 15*14 {
 		t.Errorf("Improper number of edges for passable dense graph")
 	}
 
 	dg.RemoveEdge(int64(12), int64(11))
-	edges = dg.Edges()
+	edges = graph.EdgesOf(dg.Edges())
 	if len(edges) != (15*14)-1 {
 		t.Errorf("Removing edge didn't affect edge listing properly")
 	}

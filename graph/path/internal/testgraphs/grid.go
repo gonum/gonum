@@ -10,6 +10,7 @@ import (
 	"math"
 
 	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/iterator"
 	"gonum.org/v1/gonum/graph/simple"
 )
 
@@ -98,7 +99,7 @@ func (g *Grid) Nodes() graph.Nodes {
 			nodes = append(nodes, simple.Node(id))
 		}
 	}
-	return simple.NewNodeIterator(nodes)
+	return iterator.NewOrderedNodes(nodes)
 }
 
 // Has returns whether n is a node in the grid. The state of
@@ -171,7 +172,7 @@ func (g *Grid) From(uid int64) graph.Nodes {
 			}
 		}
 	}
-	return simple.NewNodeIterator(to)
+	return iterator.NewOrderedNodes(to)
 }
 
 // HasEdgeBetween returns whether there is an edge between u and v.

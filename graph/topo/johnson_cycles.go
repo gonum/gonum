@@ -10,7 +10,7 @@ import (
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/internal/set"
-	"gonum.org/v1/gonum/graph/simple"
+	"gonum.org/v1/gonum/graph/iterator"
 )
 
 // johnson implements Johnson's "Finding all the elementary
@@ -245,7 +245,7 @@ func (g johnsonGraph) Nodes() graph.Nodes {
 	for id := range g.nodes {
 		n = append(n, johnsonGraphNode(id))
 	}
-	return simple.NewNodeIterator(n)
+	return iterator.NewOrderedNodes(n)
 }
 
 // Successors is required to satisfy Tarjan.
@@ -258,7 +258,7 @@ func (g johnsonGraph) From(id int64) graph.Nodes {
 	for id := range adj {
 		succ = append(succ, johnsonGraphNode(id))
 	}
-	return simple.NewNodeIterator(succ)
+	return iterator.NewOrderedNodes(succ)
 }
 
 func (johnsonGraph) Has(int64) bool {

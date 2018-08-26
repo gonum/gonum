@@ -598,7 +598,7 @@ func TestDStarLiteDynamic(t *testing.T) {
 			}
 
 			dp.dump(true)
-			dp.printEdges("Initial world knowledge: %s\n\n", simpleWeightedEdgesOf(l, world.Edges()))
+			dp.printEdges("Initial world knowledge: %s\n\n", simpleWeightedEdgesOf(l, graph.EdgesOf(world.Edges())))
 			for d.Step() {
 				changes, _ := l.MoveTo(d.Here())
 				got = append(got, l.Location)

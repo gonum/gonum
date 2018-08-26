@@ -9,7 +9,7 @@ import (
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/uid"
-	"gonum.org/v1/gonum/graph/simple"
+	"gonum.org/v1/gonum/graph/iterator"
 )
 
 var (
@@ -154,12 +154,12 @@ func (g *UndirectedGraph) Nodes() graph.Nodes {
 		nodes[i] = n
 		i++
 	}
-	return simple.NewNodeIterator(nodes)
+	return iterator.NewOrderedNodes(nodes)
 }
 
 // Edges returns all the edges in the graph. Each edge in the returned slice
 // is a multi.Edge.
-func (g *UndirectedGraph) Edges() []graph.Edge {
+func (g *UndirectedGraph) Edges() graph.Edges {
 	if len(g.lines) == 0 {
 		return nil
 	}
@@ -181,7 +181,7 @@ func (g *UndirectedGraph) Edges() []graph.Edge {
 			}
 		}
 	}
-	return edges
+	return iterator.NewOrderedEdges(edges)
 }
 
 // From returns all nodes in g that can be reached directly from n.
@@ -196,7 +196,7 @@ func (g *UndirectedGraph) From(id int64) graph.Nodes {
 		nodes[i] = g.nodes[from]
 		i++
 	}
-	return simple.NewNodeIterator(nodes)
+	return iterator.NewOrderedNodes(nodes)
 }
 
 // HasEdgeBetween returns whether an edge exists between nodes x and y.
@@ -233,5 +233,5 @@ func (g *UndirectedGraph) LinesBetween(xid, yid int64) graph.Lines {
 	for _, l := range g.lines[xid][yid] {
 		lines = append(lines, l)
 	}
-	return NewLineIterator(lines)
+	return iterator.NewOrderedLines(lines)
 }

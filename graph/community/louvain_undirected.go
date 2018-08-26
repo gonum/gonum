@@ -13,7 +13,7 @@ import (
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/internal/set"
-	"gonum.org/v1/gonum/graph/simple"
+	"gonum.org/v1/gonum/graph/iterator"
 )
 
 // qUndirected returns the modularity Q score of the graph g subdivided into the
@@ -307,7 +307,7 @@ func (g *ReducedUndirected) Nodes() graph.Nodes {
 	for i := range g.nodes {
 		nodes[i] = node(i)
 	}
-	return simple.NewNodeIterator(nodes)
+	return iterator.NewOrderedNodes(nodes)
 }
 
 // From returns all nodes in g that can be reached directly from u.
@@ -317,7 +317,7 @@ func (g *ReducedUndirected) From(uid int64) graph.Nodes {
 	for i, vid := range out {
 		nodes[i] = g.nodes[vid]
 	}
-	return simple.NewNodeIterator(nodes)
+	return iterator.NewOrderedNodes(nodes)
 }
 
 // HasEdgeBetween returns whether an edge exists between nodes x and y.

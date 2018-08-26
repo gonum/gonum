@@ -9,7 +9,7 @@ import (
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/uid"
-	"gonum.org/v1/gonum/graph/simple"
+	"gonum.org/v1/gonum/graph/iterator"
 )
 
 var (
@@ -165,7 +165,7 @@ func (g *DirectedGraph) Nodes() graph.Nodes {
 		nodes[i] = n
 		i++
 	}
-	return simple.NewNodeIterator(nodes)
+	return iterator.NewOrderedNodes(nodes)
 }
 
 // Edges returns all the edges in the graph. Each edge in the returned slice
@@ -183,7 +183,7 @@ func (g *DirectedGraph) Edges() graph.Edges {
 			}
 		}
 	}
-	return simple.NewEdgeIterator(edges)
+	return iterator.NewOrderedEdges(edges)
 }
 
 // From returns all nodes in g that can be reached directly from n.
@@ -198,7 +198,7 @@ func (g *DirectedGraph) From(id int64) graph.Nodes {
 		from[i] = g.nodes[vid]
 		i++
 	}
-	return simple.NewNodeIterator(from)
+	return iterator.NewOrderedNodes(from)
 }
 
 // To returns all nodes in g that can reach directly to n.
@@ -213,7 +213,7 @@ func (g *DirectedGraph) To(id int64) graph.Nodes {
 		to[i] = g.nodes[uid]
 		i++
 	}
-	return simple.NewNodeIterator(to)
+	return iterator.NewOrderedNodes(to)
 }
 
 // HasEdgeBetween returns whether an edge exists between nodes x and y without
@@ -248,7 +248,7 @@ func (g *DirectedGraph) Lines(uid, vid int64) graph.Lines {
 	for _, l := range edge {
 		lines = append(lines, l)
 	}
-	return NewLineIterator(lines)
+	return iterator.NewOrderedLines(lines)
 }
 
 // HasEdgeFromTo returns whether an edge exists in the graph from u to v.

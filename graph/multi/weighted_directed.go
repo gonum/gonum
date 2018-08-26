@@ -9,7 +9,7 @@ import (
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/uid"
-	"gonum.org/v1/gonum/graph/simple"
+	"gonum.org/v1/gonum/graph/iterator"
 )
 
 var (
@@ -172,7 +172,7 @@ func (g *WeightedDirectedGraph) Nodes() graph.Nodes {
 		i++
 	}
 
-	return simple.NewNodeIterator(nodes)
+	return iterator.NewOrderedNodes(nodes)
 }
 
 // Edges returns all the edges in the graph. Each edge in the returned slice
@@ -191,7 +191,7 @@ func (g *WeightedDirectedGraph) Edges() graph.Edges {
 			}
 		}
 	}
-	return simple.NewEdgeIterator(edges)
+	return iterator.NewOrderedEdges(edges)
 }
 
 // WeightedEdges returns all the edges in the graph. Each edge in the returned slice
@@ -210,7 +210,7 @@ func (g *WeightedDirectedGraph) WeightedEdges() graph.WeightedEdges {
 			}
 		}
 	}
-	return simple.NewWeightedEdgeIterator(edges)
+	return iterator.NewOrderedWeightedEdges(edges)
 }
 
 // From returns all nodes in g that can be reached directly from n.
@@ -225,7 +225,7 @@ func (g *WeightedDirectedGraph) From(id int64) graph.Nodes {
 		from[i] = g.nodes[vid]
 		i++
 	}
-	return simple.NewNodeIterator(from)
+	return iterator.NewOrderedNodes(from)
 }
 
 // To returns all nodes in g that can reach directly to n.
@@ -240,7 +240,7 @@ func (g *WeightedDirectedGraph) To(id int64) graph.Nodes {
 		to[i] = g.nodes[uid]
 		i++
 	}
-	return simple.NewNodeIterator(to)
+	return iterator.NewOrderedNodes(to)
 }
 
 // HasEdgeBetween returns whether an edge exists between nodes x and y without
@@ -290,7 +290,7 @@ func (g *WeightedDirectedGraph) Lines(uid, vid int64) graph.Lines {
 	for _, l := range edge {
 		lines = append(lines, l)
 	}
-	return NewLineIterator(lines)
+	return iterator.NewOrderedLines(lines)
 }
 
 // WeightedLines returns the weighted lines from u to v if such any such lines exists
@@ -304,7 +304,7 @@ func (g *WeightedDirectedGraph) WeightedLines(uid, vid int64) graph.WeightedLine
 	for _, l := range edge {
 		lines = append(lines, l)
 	}
-	return NewWeightedLineIterator(lines)
+	return iterator.NewOrderedWeightedLines(lines)
 }
 
 // Weight returns the weight for the lines between x and y summarised by the receiver's

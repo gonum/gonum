@@ -71,7 +71,7 @@ func DorgqlTest(t *testing.T, impl Dorgqler) {
 					h := eye(m, m)
 					jj := m - k + l
 					j := n - k + l
-					v := blas64.Vector{make([]float64, m), 1}
+					v := blas64.Vector{Data: make([]float64, m), Inc: 1}
 					for i := 0; i < jj; i++ {
 						v.Data[i] = a.Data[i*a.Stride+j]
 					}

@@ -27,7 +27,7 @@ func (e *edgeWithPorts) ToPort() (string, string) {
 func ExamplePorter() {
 	g := simple.NewUndirectedGraph()
 	g.SetEdge(&edgeWithPorts{
-		Edge:     simple.Edge{simple.Node(1), simple.Node(0)},
+		Edge:     simple.Edge{F: simple.Node(1), T: simple.Node(0)},
 		fromPort: "p1",
 		toPort:   "p2",
 	})

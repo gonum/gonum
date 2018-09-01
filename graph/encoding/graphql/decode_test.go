@@ -193,7 +193,7 @@ func (e *edge) SetLabel(l string) {
 }
 
 func (e *edge) Attributes() []encoding.Attribute {
-	return []encoding.Attribute{{"label", e.label}}
+	return []encoding.Attribute{{Key: "label", Value: e.label}}
 }
 
 type attributes map[string]encoding.Attribute

@@ -478,12 +478,12 @@ func (c *Cholesky) SymRankOne(orig *Cholesky, alpha float64, x Vector) (ok bool)
 		tmp.CopyVec(x)
 		xmat = tmp.RawVector()
 	}
-	blas64.Copy(n, xmat, blas64.Vector{work, 1})
+	blas64.Copy(n, xmat, blas64.Vector{Data: work, Inc: 1})
 
 	if alpha > 0 {
 		// Compute rank-1 update.
 		if alpha != 1 {
-			blas64.Scal(n, math.Sqrt(alpha), blas64.Vector{work, 1})
+			blas64.Scal(n, math.Sqrt(alpha), blas64.Vector{Data: work, Inc: 1})
 		}
 		umat := c.chol.mat
 		stride := umat.Stride
@@ -504,8 +504,8 @@ func (c *Cholesky) SymRankOne(orig *Cholesky, alpha float64, x Vector) (ok bool)
 				// the Givens matrix from the left. Only
 				// the i-th row and x are modified.
 				blas64.Rot(n-i-1,
-					blas64.Vector{umat.Data[i*stride+i+1 : i*stride+n], 1},
-					blas64.Vector{work[i+1 : n], 1},
+					blas64.Vector{Data: umat.Data[i*stride+i+1 : i*stride+n], Inc: 1},
+					blas64.Vector{Data: work[i+1 : n], Inc: 1},
 					c, s)
 			}
 		}
@@ -516,7 +516,7 @@ func (c *Cholesky) SymRankOne(orig *Cholesky, alpha float64, x Vector) (ok bool)
 	// Compute rank-1 downdate.
 	alpha = math.Sqrt(-alpha)
 	if alpha != 1 {
-		blas64.Scal(n, alpha, blas64.Vector{work, 1})
+		blas64.Scal(n, alpha, blas64.Vector{Data: work, Inc: 1})
 	}
 	// Solve U^T * p = x storing the result into work.
 	ok = lapack64.Trtrs(blas.Trans, c.chol.RawTriangular(), blas64.General{
@@ -530,7 +530,7 @@ func (c *Cholesky) SymRankOne(orig *Cholesky, alpha float64, x Vector) (ok bool)
 		// the factorization is valid.
 		panic(badCholesky)
 	}
-	norm := blas64.Nrm2(n, blas64.Vector{work, 1})
+	norm := blas64.Nrm2(n, blas64.Vector{Data: work, Inc: 1})
 	if norm >= 1 {
 		// The updated matrix is not positive definite.
 		return false
@@ -557,7 +557,10 @@ func (c *Cholesky) SymRankOne(orig *Cholesky, alpha float64, x Vector) (ok bool)
 		// Apply Givens matrices to U.
 		// TODO(vladimir-ch): Use workspace to avoid modifying the
 		// receiver in case an invalid factorization is created.
-		blas64.Rot(n-i, blas64.Vector{work[i:n], 1}, blas64.Vector{umat.Data[i*stride+i : i*stride+n], 1}, cos[i], sin[i])
+		blas64.Rot(n-i,
+			blas64.Vector{Data: work[i:n], Inc: 1},
+			blas64.Vector{Data: umat.Data[i*stride+i : i*stride+n], Inc: 1},
+			cos[i], sin[i])
 		if umat.Data[i*stride+i] == 0 {
 			// The matrix is singular (may rarely happen due to
 			// floating-point effects?).
@@ -567,7 +570,7 @@ func (c *Cholesky) SymRankOne(orig *Cholesky, alpha float64, x Vector) (ok bool)
 			// that on the i-th row the diagonal is negative,
 			// multiply U from the left by an identity matrix that
 			// has -1 on the i-th row.
-			blas64.Scal(n-i, -1, blas64.Vector{umat.Data[i*stride+i : i*stride+n], 1})
+			blas64.Scal(n-i, -1, blas64.Vector{Data: umat.Data[i*stride+i : i*stride+n], Inc: 1})
 		}
 	}
 	if ok {

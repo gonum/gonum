@@ -169,3 +169,16 @@ func BenchmarkNormalQuantile(b *testing.B) {
 		}
 	}
 }
+
+// See https://github.com/gonum/gonum/issues/577 for details.
+func TestNormalIssue577(t *testing.T) {
+	x := -36.0
+	max := 1.e-282
+	cdf := Normal{Mu: 0, Sigma: 1}.CDF(x)
+	if cdf <= 0 {
+		t.Errorf("Normal{0,1}.CDF(%e) should be positive. got: %e", x, cdf)
+	}
+	if cdf > max {
+		t.Errorf("Normal{0,1}.CDF(%e) is greater than %e. got: %e", x, max, cdf)
+	}
+}

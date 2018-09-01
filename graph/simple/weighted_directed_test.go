@@ -7,16 +7,6 @@ package simple
 import (
 	"math"
 	"testing"
-
-	"gonum.org/v1/gonum/graph"
-)
-
-var (
-	weightedDirectedGraph = (*WeightedDirectedGraph)(nil)
-
-	_ graph.Graph            = weightedDirectedGraph
-	_ graph.Directed         = weightedDirectedGraph
-	_ graph.WeightedDirected = weightedDirectedGraph
 )
 
 // Tests Issue #27

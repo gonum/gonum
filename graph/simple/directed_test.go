@@ -4,18 +4,7 @@
 
 package simple
 
-import (
-	"testing"
-
-	"gonum.org/v1/gonum/graph"
-)
-
-var (
-	directedGraph = (*DirectedGraph)(nil)
-
-	_ graph.Graph    = directedGraph
-	_ graph.Directed = directedGraph
-)
+import "testing"
 
 // Tests Issue #27
 func TestEdgeOvercounting(t *testing.T) {

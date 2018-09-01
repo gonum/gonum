@@ -11,14 +11,6 @@ import (
 	"gonum.org/v1/gonum/graph"
 )
 
-var (
-	weightedUndirectedGraph = (*WeightedUndirectedGraph)(nil)
-
-	_ graph.Graph              = weightedUndirectedGraph
-	_ graph.Undirected         = weightedUndirectedGraph
-	_ graph.WeightedUndirected = weightedUndirectedGraph
-)
-
 func TestAssertWeightedMutableNotDirected(t *testing.T) {
 	var g graph.UndirectedWeightedBuilder = NewWeightedUndirectedGraph(0, math.Inf(1))
 	if _, ok := g.(graph.Directed); ok {

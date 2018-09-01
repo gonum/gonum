@@ -10,13 +10,6 @@ import (
 	"gonum.org/v1/gonum/graph"
 )
 
-var (
-	undirectedGraph = (*UndirectedGraph)(nil)
-
-	_ graph.Graph      = undirectedGraph
-	_ graph.Undirected = undirectedGraph
-)
-
 func TestMaxID(t *testing.T) {
 	g := NewUndirectedGraph()
 	nodes := make(map[graph.Node]struct{})

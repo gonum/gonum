@@ -9,22 +9,7 @@ import (
 	"sort"
 	"testing"
 
-	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/ordered"
-)
-
-var (
-	directedMatrix = (*DirectedMatrix)(nil)
-
-	_ graph.Graph            = directedMatrix
-	_ graph.Directed         = directedMatrix
-	_ graph.WeightedDirected = directedMatrix
-
-	undirectedMatrix = (*UndirectedMatrix)(nil)
-
-	_ graph.Graph              = undirectedMatrix
-	_ graph.Undirected         = undirectedMatrix
-	_ graph.WeightedUndirected = undirectedMatrix
 )
 
 func TestBasicDenseImpassable(t *testing.T) {

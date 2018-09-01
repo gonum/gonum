@@ -16,11 +16,16 @@ var (
 	wug *WeightedUndirectedGraph
 
 	_ graph.Graph                        = wug
+	_ graph.Weighted                     = wug
 	_ graph.Undirected                   = wug
 	_ graph.WeightedUndirected           = wug
 	_ graph.Multigraph                   = wug
 	_ graph.UndirectedMultigraph         = wug
 	_ graph.WeightedUndirectedMultigraph = wug
+	_ graph.NodeAdder                    = wug
+	_ graph.NodeRemover                  = wug
+	_ graph.WeightedLineAdder            = wug
+	_ graph.LineRemover                  = wug
 )
 
 // WeightedUndirectedGraph implements a generalized undirected graph.
@@ -86,12 +91,12 @@ func (g *WeightedUndirectedGraph) RemoveNode(id int64) {
 // NewLine returns a new WeightedLine from the source to the destination node.
 // The returned WeightedLine will have a graph-unique ID.
 // The Line's ID does not become valid in g until the Line is added to g.
-func (g *WeightedUndirectedGraph) NewLine(from, to graph.Node) graph.WeightedLine {
-	return &WeightedLine{F: from, T: to, UID: g.lineIDs.NewID()}
+func (g *WeightedUndirectedGraph) NewWeightedLine(from, to graph.Node, weight float64) graph.WeightedLine {
+	return &WeightedLine{F: from, T: to, W: weight, UID: g.lineIDs.NewID()}
 }
 
-// SetWeighted adds l, a line from one node to another. If the nodes do not exist, they are added.
-func (g *WeightedUndirectedGraph) SetWeighted(l graph.WeightedLine) {
+// SetWeightedLine adds l, a line from one node to another. If the nodes do not exist, they are added.
+func (g *WeightedUndirectedGraph) SetWeightedLine(l graph.WeightedLine) {
 	var (
 		from = l.From()
 		fid  = from.ID()

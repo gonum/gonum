@@ -741,7 +741,7 @@ var encodeTests = []struct {
 	},
 	{
 		g: directedNodeAttrGraphFrom(powerMethodGraph, [][]encoding.Attribute{
-			2: {{"fontsize", "16"}, {"shape", "ellipse"}},
+			2: {{Key: "fontsize", Value: "16"}, {Key: "shape", Value: "ellipse"}},
 			4: {},
 		}),
 
@@ -768,7 +768,7 @@ var encodeTests = []struct {
 	},
 	{
 		g: undirectedNodeAttrGraphFrom(powerMethodGraph, [][]encoding.Attribute{
-			2: {{"fontsize", "16"}, {"shape", "ellipse"}},
+			2: {{Key: "fontsize", Value: "16"}, {Key: "shape", Value: "ellipse"}},
 			4: {},
 		}),
 
@@ -795,7 +795,7 @@ var encodeTests = []struct {
 	},
 	{
 		g: directedNamedIDNodeAttrGraphFrom(powerMethodGraph, [][]encoding.Attribute{
-			2: {{"fontsize", "16"}, {"shape", "ellipse"}},
+			2: {{Key: "fontsize", Value: "16"}, {Key: "shape", Value: "ellipse"}},
 			4: {},
 		}),
 
@@ -824,7 +824,7 @@ var encodeTests = []struct {
 		g: undirectedNamedIDNodeAttrGraphFrom(powerMethodGraph, [][]encoding.Attribute{
 			0: nil,
 			1: nil,
-			2: {{"fontsize", "16"}, {"shape", "ellipse"}},
+			2: {{Key: "fontsize", Value: "16"}, {Key: "shape", Value: "ellipse"}},
 			3: nil,
 			4: {},
 		}),
@@ -896,9 +896,9 @@ var encodeTests = []struct {
 	},
 	{
 		g: directedEdgeAttrGraphFrom(powerMethodGraph, map[edge][]encoding.Attribute{
-			{from: 0, to: 2}: {{"label", `"???"`}, {"style", "dashed"}},
+			{from: 0, to: 2}: {{Key: "label", Value: `"???"`}, {Key: "style", Value: "dashed"}},
 			{from: 2, to: 4}: {},
-			{from: 3, to: 4}: {{"color", "red"}},
+			{from: 3, to: 4}: {{Key: "color", Value: "red"}},
 		}),
 
 		want: `digraph {
@@ -924,9 +924,9 @@ var encodeTests = []struct {
 	},
 	{
 		g: undirectedEdgeAttrGraphFrom(powerMethodGraph, map[edge][]encoding.Attribute{
-			{from: 0, to: 2}: {{"label", `"???"`}, {"style", "dashed"}},
+			{from: 0, to: 2}: {{Key: "label", Value: `"???"`}, {Key: "style", Value: "dashed"}},
 			{from: 2, to: 4}: {},
-			{from: 3, to: 4}: {{"color", "red"}},
+			{from: 3, to: 4}: {{Key: "color", Value: "red"}},
 		}),
 
 		want: `graph {
@@ -997,8 +997,8 @@ var encodeTests = []struct {
 	{
 		g: directedPortedAttrGraphFrom(powerMethodGraph,
 			[][]encoding.Attribute{
-				2: {{"shape", "record"}, {"label", `"<Two>English|<Zwei>German"`}},
-				4: {{"shape", "record"}, {"label", `"<Four>English|<Vier>German"`}},
+				2: {{Key: "shape", Value: "record"}, {Key: "label", Value: `"<Two>English|<Zwei>German"`}},
+				4: {{Key: "shape", Value: "record"}, {Key: "label", Value: `"<Four>English|<Vier>German"`}},
 			},
 			map[edge]portedEdge{
 				{from: 0, to: 1}: {fromCompass: "s"},
@@ -1037,8 +1037,8 @@ var encodeTests = []struct {
 	{
 		g: undirectedPortedAttrGraphFrom(powerMethodGraph,
 			[][]encoding.Attribute{
-				2: {{"shape", "record"}, {"label", `"<Two>English|<Zwei>German"`}},
-				4: {{"shape", "record"}, {"label", `"<Four>English|<Vier>German"`}},
+				2: {{Key: "shape", Value: "record"}, {Key: "label", Value: `"<Two>English|<Zwei>German"`}},
+				4: {{Key: "shape", Value: "record"}, {Key: "label", Value: `"<Four>English|<Vier>German"`}},
 			},
 			map[edge]portedEdge{
 				{from: 0, to: 1}: {fromCompass: "s"},
@@ -1078,9 +1078,9 @@ var encodeTests = []struct {
 	// Handling graph attributes.
 	{
 		g: graphAttributer{Graph: undirectedEdgeAttrGraphFrom(powerMethodGraph, map[edge][]encoding.Attribute{
-			{from: 0, to: 2}: {{"label", `"???"`}, {"style", "dashed"}},
+			{from: 0, to: 2}: {{Key: "label", Value: `"???"`}, {Key: "style", Value: "dashed"}},
 			{from: 2, to: 4}: {},
-			{from: 3, to: 4}: {{"color", "red"}},
+			{from: 3, to: 4}: {{Key: "color", Value: "red"}},
 		})},
 
 		want: `graph {
@@ -1106,12 +1106,12 @@ var encodeTests = []struct {
 	},
 	{
 		g: graphAttributer{Graph: undirectedEdgeAttrGraphFrom(powerMethodGraph, map[edge][]encoding.Attribute{
-			{from: 0, to: 2}: {{"label", `"???"`}, {"style", "dashed"}},
+			{from: 0, to: 2}: {{Key: "label", Value: `"???"`}, {Key: "style", Value: "dashed"}},
 			{from: 2, to: 4}: {},
-			{from: 3, to: 4}: {{"color", "red"}},
+			{from: 3, to: 4}: {{Key: "color", Value: "red"}},
 		}),
-			graph: []encoding.Attribute{{"rankdir", `"LR"`}},
-			node:  []encoding.Attribute{{"fontsize", "16"}, {"shape", "ellipse"}},
+			graph: []encoding.Attribute{{Key: "rankdir", Value: `"LR"`}},
+			node:  []encoding.Attribute{{Key: "fontsize", Value: "16"}, {Key: "shape", Value: "ellipse"}},
 		},
 
 		want: `graph {

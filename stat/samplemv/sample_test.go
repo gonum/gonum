@@ -26,8 +26,8 @@ func TestLatinHypercube(t *testing.T) {
 	src := rand.New(rand.NewSource(1))
 	for _, nSamples := range []int{1, 2, 5, 10, 20} {
 		for _, dist := range []lhDist{
-			distmv.NewUniform([]distmv.Bound{{0, 3}}, src),
-			distmv.NewUniform([]distmv.Bound{{0, 3}, {-1, 5}, {-4, -1}}, src),
+			distmv.NewUniform([]distmv.Bound{{Min: 0, Max: 3}}, src),
+			distmv.NewUniform([]distmv.Bound{{Min: 0, Max: 3}, {Min: -1, Max: 5}, {Min: -4, Max: -1}}, src),
 		} {
 			dim := dist.Dim()
 			batch := mat.NewDense(nSamples, dim, nil)

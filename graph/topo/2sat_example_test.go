@@ -131,8 +131,8 @@ func twoSat(r io.Reader) (state map[string]bool, ok bool) {
 		}
 
 		// Add implications to the graph.
-		g.SetEdge(simple.Edge{variables[0].negated(), variables[1]})
-		g.SetEdge(simple.Edge{variables[1].negated(), variables[0]})
+		g.SetEdge(simple.Edge{F: variables[0].negated(), T: variables[1]})
+		g.SetEdge(simple.Edge{F: variables[1].negated(), T: variables[0]})
 	}
 
 	// Find implication inconsistencies.

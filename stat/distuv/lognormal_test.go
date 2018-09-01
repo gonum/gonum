@@ -42,3 +42,16 @@ func TestLognormal(t *testing.T) {
 		checkProbQuantContinuous(t, i, x, f, tol)
 	}
 }
+
+// See https://github.com/gonum/gonum/issues/577 for details.
+func TestLognormalIssue577(t *testing.T) {
+	x := 1.0e-16
+	max := 1.0e-295
+	cdf := LogNormal{Mu: 0, Sigma: 1}.CDF(x)
+	if cdf <= 0 {
+		t.Errorf("LogNormal{0,1}.CDF(%e) should be positive. got: %e", x, cdf)
+	}
+	if cdf > max {
+		t.Errorf("LogNormal{0,1}.CDF(%e) is greater than %e. got: %e", x, max, cdf)
+	}
+}

@@ -1290,7 +1290,7 @@ func isRightEigenvectorOf(a blas64.General, xRe, xIm []float64, lambda complex12
 
 	// Compute A real(x) and store the result into xReAns.
 	xReAns := make([]float64, n)
-	blas64.Gemv(blas.NoTrans, 1, a, blas64.Vector{xRe, 1}, 0, blas64.Vector{xReAns, 1})
+	blas64.Gemv(blas.NoTrans, 1, a, blas64.Vector{Data: xRe, Inc: 1}, 0, blas64.Vector{Data: xReAns, Inc: 1})
 
 	if imag(lambda) == 0 && xIm == nil {
 		// Real eigenvalue and eigenvector.
@@ -1308,7 +1308,7 @@ func isRightEigenvectorOf(a blas64.General, xRe, xIm []float64, lambda complex12
 
 	// Compute A imag(x) and store the result into xImAns.
 	xImAns := make([]float64, n)
-	blas64.Gemv(blas.NoTrans, 1, a, blas64.Vector{xIm, 1}, 0, blas64.Vector{xImAns, 1})
+	blas64.Gemv(blas.NoTrans, 1, a, blas64.Vector{Data: xIm, Inc: 1}, 0, blas64.Vector{Data: xImAns, Inc: 1})
 
 	// Compute λx and store the result into lambdax.
 	lambdax := make([]complex128, n)
@@ -1349,7 +1349,7 @@ func isLeftEigenvectorOf(a blas64.General, yRe, yIm []float64, lambda complex128
 
 	// Compute A^T real(y) and store the result into yReAns.
 	yReAns := make([]float64, n)
-	blas64.Gemv(blas.Trans, 1, a, blas64.Vector{yRe, 1}, 0, blas64.Vector{yReAns, 1})
+	blas64.Gemv(blas.Trans, 1, a, blas64.Vector{Data: yRe, Inc: 1}, 0, blas64.Vector{Data: yReAns, Inc: 1})
 
 	if imag(lambda) == 0 && yIm == nil {
 		// Real eigenvalue and eigenvector.
@@ -1367,7 +1367,7 @@ func isLeftEigenvectorOf(a blas64.General, yRe, yIm []float64, lambda complex128
 
 	// Compute A^T imag(y) and store the result into yImAns.
 	yImAns := make([]float64, n)
-	blas64.Gemv(blas.Trans, 1, a, blas64.Vector{yIm, 1}, 0, blas64.Vector{yImAns, 1})
+	blas64.Gemv(blas.Trans, 1, a, blas64.Vector{Data: yIm, Inc: 1}, 0, blas64.Vector{Data: yImAns, Inc: 1})
 
 	// Compute conj(λ)y and store the result into lambday.
 	lambda = cmplx.Conj(lambda)

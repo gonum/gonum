@@ -92,12 +92,12 @@ func testDgebal(t *testing.T, impl Dgebaler, job lapack.BalanceJob, a blas64.Gen
 		t.Errorf("%v: invalid ordering of ilo=%v and ihi=%v", prefix, ilo, ihi)
 	}
 
-	if ilo >= 2 && !isUpperTriangular(blas64.General{ilo - 1, ilo - 1, a.Data, a.Stride}) {
+	if ilo >= 2 && !isUpperTriangular(blas64.General{Rows: ilo - 1, Cols: ilo - 1, Data: a.Data, Stride: a.Stride}) {
 		t.Errorf("%v: T1 is not upper triangular", prefix)
 	}
 	m := n - ihi - 1 // Order of T2.
 	k := ihi + 1
-	if m >= 2 && !isUpperTriangular(blas64.General{m, m, a.Data[k*a.Stride+k:], a.Stride}) {
+	if m >= 2 && !isUpperTriangular(blas64.General{Rows: m, Cols: m, Data: a.Data[k*a.Stride+k:], Stride: a.Stride}) {
 		t.Errorf("%v: T2 is not upper triangular", prefix)
 	}
 
@@ -145,13 +145,13 @@ func testDgebal(t *testing.T, impl Dgebaler, job lapack.BalanceJob, a blas64.Gen
 		p := eye(n, n)
 		for j := n - 1; j > ihi; j-- {
 			blas64.Swap(n,
-				blas64.Vector{p.Data[j:], p.Stride},
-				blas64.Vector{p.Data[int(scale[j]):], p.Stride})
+				blas64.Vector{Data: p.Data[j:], Inc: p.Stride},
+				blas64.Vector{Data: p.Data[int(scale[j]):], Inc: p.Stride})
 		}
 		for j := 0; j < ilo; j++ {
 			blas64.Swap(n,
-				blas64.Vector{p.Data[j:], p.Stride},
-				blas64.Vector{p.Data[int(scale[j]):], p.Stride})
+				blas64.Vector{Data: p.Data[j:], Inc: p.Stride},
+				blas64.Vector{Data: p.Data[int(scale[j]):], Inc: p.Stride})
 		}
 		// Compute P^T*A*P and store into want.
 		ap := zeros(n, n, n)

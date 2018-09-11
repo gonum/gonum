@@ -5,8 +5,8 @@
 package quat
 
 import (
+	"bytes"
 	"fmt"
-	"strings"
 )
 
 var zero Quat
@@ -47,7 +47,9 @@ func (q Quat) Format(fs fmt.State, c rune) {
 
 // This is horrible, but it's what we have.
 func fmtString(fs fmt.State, c rune, prec, width int, wantPlus bool) string {
-	var b strings.Builder
+	// TODO(kortschak) Replace this with strings.Builder
+	// when go1.9 support is dropped from Gonum.
+	var b bytes.Buffer
 	b.WriteByte('%')
 	for _, f := range "0+- " {
 		if fs.Flag(int(f)) || (f == '+' && wantPlus) {

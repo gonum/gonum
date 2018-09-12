@@ -3,4 +3,4 @@
 // license that can be found in the LICENSE file.
 
 // Package quat provides quaternion functions.
-package quat // imports "gonum.org/v1/gonum/quat"
+package quat // imports "gonum.org/v1/gonum/num/quat"

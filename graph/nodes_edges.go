@@ -4,6 +4,7 @@
 
 package graph
 
+// Iterator is a item iterator.
 type Iterator interface {
 	// Next advances the iterator and returns whether
 	// the next call to the item method will return a
@@ -33,6 +34,7 @@ type Nodes interface {
 	Node() Node
 }
 
+// NodeSlicer wraps the NodeSlice method.
 type NodeSlicer interface {
 	// NodeSlice returns the set of nodes remaining
 	// to be iterated by a Nodes iterator.
@@ -68,6 +70,7 @@ type Edges interface {
 	Edge() Edge
 }
 
+// EdgeSlicer wraps the EdgeSlice method.
 type EdgeSlicer interface {
 	// EdgeSlice returns the set of edges remaining
 	// to be iterated by an Edges iterator.
@@ -103,6 +106,7 @@ type WeightedEdges interface {
 	WeightedEdge() WeightedEdge
 }
 
+// WeightedEdgeSlicer wraps the WeightedEdgeSlice method.
 type WeightedEdgeSlicer interface {
 	// EdgeSlice returns the set of edges remaining
 	// to be iterated by an Edges iterator.
@@ -139,6 +143,7 @@ type Lines interface {
 	Line() Line
 }
 
+// LineSlicer wraps the LineSlice method.
 type LineSlicer interface {
 	// LineSlice returns the set of lines remaining
 	// to be iterated by an Lines iterator.
@@ -174,6 +179,7 @@ type WeightedLines interface {
 	WeightedLine() WeightedLine
 }
 
+// WeightedLineSlicer wraps the WeightedLineSlice method.
 type WeightedLineSlicer interface {
 	// LineSlice returns the set of lines remaining
 	// to be iterated by an Lines iterator.

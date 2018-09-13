@@ -45,7 +45,7 @@ type NodeSlicer interface {
 	NodeSlice() []Node
 }
 
-// NodesOf returns it.Len() nodes from it. If it is an NodeSlicer, the NodeSlice method
+// NodesOf returns it.Len() nodes from it. If it is a NodeSlicer, the NodeSlice method
 // is used to obtain the nodes. It is safe to pass a nil Nodes to NodesOf.
 func NodesOf(it Nodes) []Node {
 	if it == nil {

@@ -22,7 +22,7 @@ type Dsteqrer interface {
 
 func DsteqrTest(t *testing.T, impl Dsteqrer) {
 	rnd := rand.New(rand.NewSource(1))
-	for _, compz := range []lapack.EVComp{lapack.OriginalEV, lapack.TridiagEV} {
+	for _, compz := range []lapack.EVComp{lapack.EVOrig, lapack.EVTridiag} {
 		for _, test := range []struct {
 			n, lda int
 		}{
@@ -59,7 +59,7 @@ func DsteqrTest(t *testing.T, impl Dsteqrer) {
 				copy(eCopy, e)
 				aCopy := make([]float64, len(a))
 				copy(aCopy, a)
-				if compz == lapack.OriginalEV {
+				if compz == lapack.EVOrig {
 					uplo := blas.Upper
 					tau := make([]float64, n)
 					work := make([]float64, 1)
@@ -92,7 +92,7 @@ func DsteqrTest(t *testing.T, impl Dsteqrer) {
 				copy(dAns, d)
 
 				var truth blas64.General
-				if compz == lapack.OriginalEV {
+				if compz == lapack.EVOrig {
 					truth = blas64.General{
 						Rows:   n,
 						Cols:   n,
@@ -130,7 +130,7 @@ func DsteqrTest(t *testing.T, impl Dsteqrer) {
 				}
 				if !eigenDecompCorrect(d, truth, V) {
 					t.Errorf("Eigen reconstruction mismatch. fromFull = %v, n = %v",
-						compz == lapack.OriginalEV, n)
+						compz == lapack.EVOrig, n)
 				}
 
 				// Compare eigenvalues when not computing eigenvectors.

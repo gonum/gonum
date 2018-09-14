@@ -45,6 +45,7 @@ const (
 	badNorm       = "lapack: bad norm"
 	badPivot      = "lapack: bad pivot"
 	badS          = "lapack: s has insufficient length"
+	badSchurComp  = "lapack: bad SchurComp"
 	badSchurJob   = "lapack: bad SchurJob"
 	badShifts     = "lapack: bad shifts"
 	badSide       = "lapack: bad side"

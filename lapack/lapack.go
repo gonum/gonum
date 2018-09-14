@@ -127,23 +127,13 @@ const (
 	GSVDNone GSVDJob = 'N' // Do not compute orthogonal matrix
 )
 
-// EVComp specifies how eigenvectors are computed.
+// EVComp specifies how eigenvectors are computed in Dsteqr.
 type EVComp byte
 
 const (
-	// OriginalEV specifies to compute the eigenvectors of the original
-	// matrix.
-	OriginalEV EVComp = 'V'
-	// TridiagEV specifies to compute both the eigenvectors of the input
-	// tridiagonal matrix.
-	TridiagEV EVComp = 'I'
-	// HessEV specifies to compute both the eigenvectors of the input upper
-	// Hessenberg matrix.
-	HessEV EVComp = 'I'
-
-	// UpdateSchur specifies that the matrix of Schur vectors will be
-	// updated by Dtrexc.
-	UpdateSchur EVComp = 'V'
+	EVOrig     EVComp = 'V' // Compute eigenvectors of the original symmetric matrix.
+	EVTridiag  EVComp = 'I' // Compute eigenvectors of the tridiagonal matrix.
+	EVCompNone EVComp = 'N' // Do not compute eigenvectors.
 )
 
 // EVJob specifies whether eigenvectors are computed in Dsyev.
@@ -186,6 +176,23 @@ type SchurJob byte
 const (
 	EigenvaluesOnly     SchurJob = 'E'
 	EigenvaluesAndSchur SchurJob = 'S'
+)
+
+// SchurComp specifies whether and how the Schur vectors are computed in Dhseqr.
+type SchurComp byte
+
+const (
+	SchurNone SchurComp = 'N' // Schur vectors are not computed.
+	SchurHess SchurComp = 'I' // Schur vectors of the upper Hessenberg marix are computed.
+	SchurOrig SchurComp = 'V' // Schur vectors of the original matrix are computed.
+)
+
+// UpdateSchurComp specifies whether the matrix of Schur vectors is updated in Dtrexc.
+type UpdateSchurComp byte
+
+const (
+	UpdateSchur     UpdateSchurComp = 'V' // The matrix of Schur vectors is updated.
+	UpdateSchurNone UpdateSchurComp = 'N' // The matrix of Schur vectors is not updated.
 )
 
 // EVSide specifies what eigenvectors are computed in Dtrevc3.

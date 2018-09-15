@@ -7,6 +7,8 @@ package quat
 import (
 	"fmt"
 	"testing"
+
+	"gonum.org/v1/gonum/floats"
 )
 
 var arithTests = []struct {
@@ -112,4 +114,11 @@ func TestFormat(t *testing.T) {
 			t.Errorf("unexpected result for fmt.Sprintf(%q, %#v): got:%q, want:%q", test.format, test.q, got, test.want)
 		}
 	}
+}
+
+func equalApprox(a, b Quat, tol float64) bool {
+	return floats.EqualWithinAbsOrRel(a.Real, b.Real, tol, tol) &&
+		floats.EqualWithinAbsOrRel(a.Imag, b.Imag, tol, tol) &&
+		floats.EqualWithinAbsOrRel(a.Jmag, b.Jmag, tol, tol) &&
+		floats.EqualWithinAbsOrRel(a.Kmag, b.Kmag, tol, tol)
 }

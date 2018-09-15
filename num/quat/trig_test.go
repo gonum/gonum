@@ -17,9 +17,10 @@ var sinTests = []struct {
 }
 
 func TestSin(t *testing.T) {
+	const tol = 1e-14
 	for _, test := range sinTests {
 		got := Sin(test.q)
-		if got != test.want {
+		if !equalApprox(got, test.want, tol) {
 			t.Errorf("unexpected result for Sin(%v): got:%v want:%v", test.q, got, test.want)
 		}
 	}
@@ -33,9 +34,10 @@ var sinhTests = []struct {
 }
 
 func TestSinh(t *testing.T) {
+	const tol = 1e-14
 	for _, test := range sinhTests {
 		got := Sinh(test.q)
-		if got != test.want {
+		if !equalApprox(got, test.want, tol) {
 			t.Errorf("unexpected result for Sinh(%v): got:%v want:%v", test.q, got, test.want)
 		}
 	}
@@ -49,9 +51,10 @@ var cosTests = []struct {
 }
 
 func TestCos(t *testing.T) {
+	const tol = 1e-14
 	for _, test := range cosTests {
 		got := Cos(test.q)
-		if got != test.want {
+		if !equalApprox(got, test.want, tol) {
 			t.Errorf("unexpected result for Cos(%v): got:%v want:%v", test.q, got, test.want)
 		}
 	}
@@ -65,9 +68,10 @@ var coshTests = []struct {
 }
 
 func TestCosh(t *testing.T) {
+	const tol = 1e-14
 	for _, test := range coshTests {
 		got := Cosh(test.q)
-		if got != test.want {
+		if !equalApprox(got, test.want, tol) {
 			t.Errorf("unexpected result for Cosh(%v): got:%v want:%v", test.q, got, test.want)
 		}
 	}
@@ -81,9 +85,10 @@ var tanTests = []struct {
 }
 
 func TestTan(t *testing.T) {
+	const tol = 1e-14
 	for _, test := range tanTests {
 		got := Tan(test.q)
-		if got != test.want {
+		if !equalApprox(got, test.want, tol) {
 			t.Errorf("unexpected result for Tan(%v): got:%v want:%v", test.q, got, test.want)
 		}
 	}
@@ -97,9 +102,10 @@ var tanhTests = []struct {
 }
 
 func TestTanh(t *testing.T) {
+	const tol = 1e-14
 	for _, test := range tanhTests {
 		got := Tanh(test.q)
-		if got != test.want {
+		if !equalApprox(got, test.want, tol) {
 			t.Errorf("unexpected result for Tanh(%v): got:%v want:%v", test.q, got, test.want)
 		}
 	}
@@ -113,9 +119,10 @@ var asinTests = []struct {
 }
 
 func TestAsin(t *testing.T) {
+	const tol = 1e-14
 	for _, test := range asinTests {
 		got := Asin(test.q)
-		if got != test.want {
+		if !equalApprox(got, test.want, tol) {
 			t.Errorf("unexpected result for Asin(%v): got:%v want:%v", test.q, got, test.want)
 		}
 	}
@@ -129,9 +136,10 @@ var asinhTests = []struct {
 }
 
 func TestAsinh(t *testing.T) {
+	const tol = 1e-14
 	for _, test := range asinhTests {
 		got := Asinh(test.q)
-		if got != test.want {
+		if !equalApprox(got, test.want, tol) {
 			t.Errorf("unexpected result for Asinh(%v): got:%v want:%v", test.q, got, test.want)
 		}
 	}
@@ -145,9 +153,10 @@ var acosTests = []struct {
 }
 
 func TestAcos(t *testing.T) {
+	const tol = 1e-14
 	for _, test := range acosTests {
 		got := Acos(test.q)
-		if got != test.want {
+		if !equalApprox(got, test.want, tol) {
 			t.Errorf("unexpected result for Acos(%v): got:%v want:%v", test.q, got, test.want)
 		}
 	}
@@ -161,9 +170,10 @@ var acoshTests = []struct {
 }
 
 func TestAcosh(t *testing.T) {
+	const tol = 1e-14
 	for _, test := range acoshTests {
 		got := Acosh(test.q)
-		if got != test.want {
+		if !equalApprox(got, test.want, tol) {
 			t.Errorf("unexpected result for Acosh(%v): got:%v want:%v", test.q, got, test.want)
 		}
 	}
@@ -177,9 +187,10 @@ var atanTests = []struct {
 }
 
 func TestAtan(t *testing.T) {
+	const tol = 1e-14
 	for _, test := range atanTests {
 		got := Atan(test.q)
-		if got != test.want {
+		if !equalApprox(got, test.want, tol) {
 			t.Errorf("unexpected result for Atan(%v): got:%v want:%v", test.q, got, test.want)
 		}
 	}
@@ -193,9 +204,10 @@ var atanhTests = []struct {
 }
 
 func TestAtanh(t *testing.T) {
+	const tol = 1e-14
 	for _, test := range atanhTests {
 		got := Atanh(test.q)
-		if got != test.want {
+		if !equalApprox(got, test.want, tol) {
 			t.Errorf("unexpected result for Atanh(%v): got:%v want:%v", test.q, got, test.want)
 		}
 	}

@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"fmt"
 	"strconv"
+	"strings"
 )
 
 var zero Quat
@@ -123,11 +124,21 @@ func Parse(s string) (Quat, error) {
 	if len(s) == 0 {
 		return Quat{}, parseError{string: orig, state: -1}
 	}
+	switch s[0] {
+	case 'n', 'N':
+		if strings.ToLower(s) == "nan" {
+			return NaN(), nil
+		}
+	case 'i', 'I':
+		if strings.ToLower(s) == "inf" {
+			return Inf(), nil
+		}
+	}
 
 	var q Quat
 	var parts byte
 	for i := 0; i < 4; i++ {
-		end, p, err := floatPart(s)
+		beg, end, p, err := floatPart(s)
 		if err != nil {
 			return q, parseError{string: orig, state: -1}
 		}
@@ -148,7 +159,7 @@ func Parse(s string) (Quat, error) {
 			}
 			v = 1
 		default:
-			v, err = strconv.ParseFloat(s[:end], 64)
+			v, err = strconv.ParseFloat(s[beg:end], 64)
 			if err != nil {
 				return q, err
 			}
@@ -178,13 +189,22 @@ func Parse(s string) (Quat, error) {
 	return q, parseError{string: orig, state: -1}
 }
 
-func floatPart(s string) (end int, part uint, err error) {
+func floatPart(s string) (beg, end int, part uint, err error) {
 	const (
 		wantMantSign = iota
+		wantMantIntInit
 		wantMantInt
 		wantMantFrac
 		wantExpSign
 		wantExpInt
+
+		wantInfN
+		wantInfF
+		wantCloseInf
+
+		wantNaNA
+		wantNaNN
+		wantCloseNaN
 	)
 	var i, state int
 	var r rune
@@ -193,17 +213,43 @@ func floatPart(s string) (end int, part uint, err error) {
 		case wantMantSign:
 			switch {
 			default:
-				return i, 0, parseError{string: s, state: state, rune: r}
-			case isSign(r) || isDigit(r):
+				return 0, i, 0, parseError{string: s, state: state, rune: r}
+			case isSign(r):
+				state = wantMantIntInit
+			case isDigit(r):
 				state = wantMantInt
 			case isDot(r):
 				state = wantMantFrac
+			case r == 'i', r == 'I':
+				state = wantInfN
+			case r == 'n', r == 'N':
+				state = wantNaNA
+			}
+
+		case wantMantIntInit:
+			switch {
+			default:
+				return 0, i, 0, parseError{string: s, state: state, rune: r}
+			case isDigit(r):
+				state = wantMantInt
+			case isDot(r):
+				state = wantMantFrac
+			case r == 'i':
+				// We need to sneak a look-ahead here.
+				if i == len(s)-1 || s[i+1] == '-' || s[i+1] == '+' {
+					return 0, i, 1, nil
+				}
+				fallthrough
+			case r == 'I':
+				state = wantInfN
+			case r == 'n', r == 'N':
+				state = wantNaNA
 			}
 
 		case wantMantInt:
 			switch {
 			default:
-				return i, 0, parseError{string: s, state: state, rune: r}
+				return 0, i, 0, parseError{string: s, state: state, rune: r}
 			case isDigit(r):
 				// Do nothing
 			case isDot(r):
@@ -211,37 +257,37 @@ func floatPart(s string) (end int, part uint, err error) {
 			case isExponent(r):
 				state = wantExpSign
 			case isSign(r):
-				return i, 0, nil
+				return 0, i, 0, nil
 			case r == 'i':
-				return i, 1, nil
+				return 0, i, 1, nil
 			case r == 'j':
-				return i, 2, nil
+				return 0, i, 2, nil
 			case r == 'k':
-				return i, 3, nil
+				return 0, i, 3, nil
 			}
 
 		case wantMantFrac:
 			switch {
 			default:
-				return i, 0, parseError{string: s, state: state, rune: r}
+				return 0, i, 0, parseError{string: s, state: state, rune: r}
 			case isDigit(r):
 				// Do nothing
 			case isExponent(r):
 				state = wantExpSign
 			case isSign(r):
-				return i, 0, nil
+				return 0, i, 0, nil
 			case r == 'i':
-				return i, 1, nil
+				return 0, i, 1, nil
 			case r == 'j':
-				return i, 2, nil
+				return 0, i, 2, nil
 			case r == 'k':
-				return i, 3, nil
+				return 0, i, 3, nil
 			}
 
 		case wantExpSign:
 			switch {
 			default:
-				return i, 0, parseError{string: s, state: state, rune: r}
+				return 0, i, 0, parseError{string: s, state: state, rune: r}
 			case isSign(r) || isDigit(r):
 				state = wantExpInt
 			}
@@ -249,17 +295,68 @@ func floatPart(s string) (end int, part uint, err error) {
 		case wantExpInt:
 			switch {
 			default:
-				return i, 0, parseError{string: s, state: state, rune: r}
+				return 0, i, 0, parseError{string: s, state: state, rune: r}
 			case isDigit(r):
 				// Do nothing
 			case isSign(r):
-				return i, 0, nil
+				return 0, i, 0, nil
 			case r == 'i':
-				return i, 1, nil
+				return 0, i, 1, nil
 			case r == 'j':
-				return i, 2, nil
+				return 0, i, 2, nil
 			case r == 'k':
-				return i, 3, nil
+				return 0, i, 3, nil
+			}
+
+		case wantInfN:
+			if r != 'n' && r != 'N' {
+				return 0, i, 0, parseError{string: s, state: state, rune: r}
+			}
+			state = wantInfF
+		case wantInfF:
+			if r != 'f' && r != 'F' {
+				return 0, i, 0, parseError{string: s, state: state, rune: r}
+			}
+			state = wantCloseInf
+		case wantCloseInf:
+			switch {
+			default:
+				return 0, i, 0, parseError{string: s, state: state, rune: r}
+			case isSign(r):
+				return 0, i, 0, nil
+			case r == 'i':
+				return 0, i, 1, nil
+			case r == 'j':
+				return 0, i, 2, nil
+			case r == 'k':
+				return 0, i, 3, nil
+			}
+
+		case wantNaNA:
+			if r != 'a' && r != 'A' {
+				return 0, i, 0, parseError{string: s, state: state, rune: r}
+			}
+			state = wantNaNN
+		case wantNaNN:
+			if r != 'n' && r != 'N' {
+				return 0, i, 0, parseError{string: s, state: state, rune: r}
+			}
+			state = wantCloseNaN
+		case wantCloseNaN:
+			if isSign(rune(s[0])) {
+				beg = 1
+			}
+			switch {
+			default:
+				return beg, i, 0, parseError{string: s, state: state, rune: r}
+			case isSign(r):
+				return beg, i, 0, nil
+			case r == 'i':
+				return beg, i, 1, nil
+			case r == 'j':
+				return beg, i, 2, nil
+			case r == 'k':
+				return beg, i, 3, nil
 			}
 		}
 	}
@@ -268,9 +365,9 @@ func floatPart(s string) (end int, part uint, err error) {
 		if state == wantExpInt && isDigit(r) {
 			break
 		}
-		return i, 0, parseError{string: s, state: state, rune: r}
+		return 0, i, 0, parseError{string: s, state: state, rune: r}
 	}
-	return len(s), 0, nil
+	return 0, len(s), 0, nil
 }
 
 func isSign(r rune) bool {

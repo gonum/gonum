@@ -6,6 +6,7 @@ package quat
 
 import (
 	"fmt"
+	"math"
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
@@ -152,6 +153,20 @@ var parseTests = []struct {
 	{s: "(1e-4-4k+10.3e6j-i)", want: Quat{Real: 1e-4, Imag: -1, Jmag: 10.3e6, Kmag: -4}},
 	{s: "(1e-4i-4k+10.3e6j-1)", want: Quat{Real: -1, Imag: 1e-4, Jmag: 10.3e6, Kmag: -4}},
 	{s: "(1e-4i-4k+10.3e6j+1)", want: Quat{Real: 1, Imag: 1e-4, Jmag: 10.3e6, Kmag: -4}},
+	{s: "NaN", want: NaN()},
+	{s: "nan", want: NaN()},
+	{s: "Inf", want: Inf()},
+	{s: "inf", want: Inf()},
+	{s: "(Inf+Infi)", want: Quat{Real: math.Inf(1), Imag: math.Inf(1)}},
+	{s: "(-Inf+Infi)", want: Quat{Real: math.Inf(-1), Imag: math.Inf(1)}},
+	{s: "(+Inf-Infi)", want: Quat{Real: math.Inf(1), Imag: math.Inf(-1)}},
+	{s: "(inf+infi)", want: Quat{Real: math.Inf(1), Imag: math.Inf(1)}},
+	{s: "(-inf+infi)", want: Quat{Real: math.Inf(-1), Imag: math.Inf(1)}},
+	{s: "(+inf-infi)", want: Quat{Real: math.Inf(1), Imag: math.Inf(-1)}},
+	{s: "(nan+nani)", want: Quat{Real: math.NaN(), Imag: math.NaN()}},
+	{s: "(nan-nani)", want: Quat{Real: math.NaN(), Imag: math.NaN()}},
+	{s: "(nan+nani+1k)", want: Quat{Real: math.NaN(), Imag: math.NaN(), Kmag: 1}},
+	{s: "(nan-nani+1k)", want: Quat{Real: math.NaN(), Imag: math.NaN(), Kmag: 1}},
 }
 
 func TestParse(t *testing.T) {
@@ -163,7 +178,7 @@ func TestParse(t *testing.T) {
 		if err != nil {
 			continue
 		}
-		if got != test.want {
+		if !sameQuat(got, test.want) {
 			t.Errorf("unexpected result for Parse(%q): got:%v, want:%v", test.s, got, test.want)
 		}
 	}
@@ -174,4 +189,15 @@ func equalApprox(a, b Quat, tol float64) bool {
 		floats.EqualWithinAbsOrRel(a.Imag, b.Imag, tol, tol) &&
 		floats.EqualWithinAbsOrRel(a.Jmag, b.Jmag, tol, tol) &&
 		floats.EqualWithinAbsOrRel(a.Kmag, b.Kmag, tol, tol)
+}
+
+func sameQuat(a, b Quat) bool {
+	return a == b || (sameFloat(a.Real, b.Real) &&
+		sameFloat(a.Imag, b.Imag) &&
+		sameFloat(a.Jmag, b.Jmag) &&
+		sameFloat(a.Kmag, b.Kmag))
+}
+
+func sameFloat(a, b float64) bool {
+	return a == b || (math.IsNaN(a) && math.IsNaN(b))
 }

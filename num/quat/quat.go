@@ -7,6 +7,7 @@ package quat
 import (
 	"bytes"
 	"fmt"
+	"strconv"
 )
 
 var zero Quat
@@ -102,4 +103,201 @@ func Mul(x, y Quat) Quat {
 // Scale returns q scaled by f.
 func Scale(f float64, q Quat) Quat {
 	return Quat{Real: f * q.Real, Imag: f * q.Imag, Jmag: f * q.Jmag, Kmag: f * q.Kmag}
+}
+
+// Parse converts the string s to a Quat. The string may be parenthesized and
+// has the format [±]N±Ni±Nj±Nk. The order of the components is not strict.
+func Parse(s string) (Quat, error) {
+	if len(s) == 0 {
+		return Quat{}, parseError{state: -1}
+	}
+	orig := s
+
+	wantClose := s[0] == '('
+	if wantClose {
+		if s[len(s)-1] != ')' {
+			return Quat{}, parseError{string: orig, state: -1}
+		}
+		s = s[1 : len(s)-1]
+	}
+	if len(s) == 0 {
+		return Quat{}, parseError{string: orig, state: -1}
+	}
+
+	var q Quat
+	var parts byte
+	for i := 0; i < 4; i++ {
+		end, p, err := floatPart(s)
+		if err != nil {
+			return q, parseError{string: orig, state: -1}
+		}
+		if parts&(1<<p) != 0 {
+			return q, parseError{string: orig, state: -1}
+		}
+		parts |= 1 << p
+		var v float64
+		switch s[:end] {
+		case "-":
+			if len(s[end:]) == 0 {
+				return q, parseError{string: orig, state: -1}
+			}
+			v = -1
+		case "+":
+			if len(s[end:]) == 0 {
+				return q, parseError{string: orig, state: -1}
+			}
+			v = 1
+		default:
+			v, err = strconv.ParseFloat(s[:end], 64)
+			if err != nil {
+				return q, err
+			}
+		}
+		s = s[end:]
+		switch p {
+		case 0:
+			q.Real = v
+		case 1:
+			q.Imag = v
+			s = s[1:]
+		case 2:
+			q.Jmag = v
+			s = s[1:]
+		case 3:
+			q.Kmag = v
+			s = s[1:]
+		}
+		if len(s) == 0 {
+			return q, nil
+		}
+		if !isSign(rune(s[0])) {
+			return q, parseError{string: orig, state: -1}
+		}
+	}
+
+	return q, parseError{string: orig, state: -1}
+}
+
+func floatPart(s string) (end int, part uint, err error) {
+	const (
+		wantMantSign = iota
+		wantMantInt
+		wantMantFrac
+		wantExpSign
+		wantExpInt
+	)
+	var i, state int
+	var r rune
+	for i, r = range s {
+		switch state {
+		case wantMantSign:
+			switch {
+			default:
+				return i, 0, parseError{string: s, state: state, rune: r}
+			case isSign(r) || isDigit(r):
+				state = wantMantInt
+			case isDot(r):
+				state = wantMantFrac
+			}
+
+		case wantMantInt:
+			switch {
+			default:
+				return i, 0, parseError{string: s, state: state, rune: r}
+			case isDigit(r):
+				// Do nothing
+			case isDot(r):
+				state = wantMantFrac
+			case isExponent(r):
+				state = wantExpSign
+			case isSign(r):
+				return i, 0, nil
+			case r == 'i':
+				return i, 1, nil
+			case r == 'j':
+				return i, 2, nil
+			case r == 'k':
+				return i, 3, nil
+			}
+
+		case wantMantFrac:
+			switch {
+			default:
+				return i, 0, parseError{string: s, state: state, rune: r}
+			case isDigit(r):
+				// Do nothing
+			case isExponent(r):
+				state = wantExpSign
+			case isSign(r):
+				return i, 0, nil
+			case r == 'i':
+				return i, 1, nil
+			case r == 'j':
+				return i, 2, nil
+			case r == 'k':
+				return i, 3, nil
+			}
+
+		case wantExpSign:
+			switch {
+			default:
+				return i, 0, parseError{string: s, state: state, rune: r}
+			case isSign(r) || isDigit(r):
+				state = wantExpInt
+			}
+
+		case wantExpInt:
+			switch {
+			default:
+				return i, 0, parseError{string: s, state: state, rune: r}
+			case isDigit(r):
+				// Do nothing
+			case isSign(r):
+				return i, 0, nil
+			case r == 'i':
+				return i, 1, nil
+			case r == 'j':
+				return i, 2, nil
+			case r == 'k':
+				return i, 3, nil
+			}
+		}
+	}
+	switch state {
+	case wantMantSign, wantExpSign, wantExpInt:
+		if state == wantExpInt && isDigit(r) {
+			break
+		}
+		return i, 0, parseError{string: s, state: state, rune: r}
+	}
+	return len(s), 0, nil
+}
+
+func isSign(r rune) bool {
+	return r == '+' || r == '-'
+}
+
+func isDigit(r rune) bool {
+	return '0' <= r && r <= '9'
+}
+
+func isExponent(r rune) bool {
+	return r == 'e' || r == 'E'
+}
+
+func isDot(r rune) bool {
+	return r == '.'
+}
+
+type parseError struct {
+	string string
+	state  int
+	rune   rune
+}
+
+func (e parseError) Error() string {
+	if e.state < 0 {
+		return fmt.Sprintf("quat: failed to parse: %q", e.string)
+	}
+	return fmt.Sprintf("quat: failed to parse in state %d with %q: %q", e.state, e.rune, e.string)
 }

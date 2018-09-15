@@ -116,6 +116,59 @@ func TestFormat(t *testing.T) {
 	}
 }
 
+var parseTests = []struct {
+	s       string
+	want    Quat
+	wantErr error
+}{
+	// Simple error states:
+	{s: "", wantErr: parseError{state: -1}},
+	{s: "()", wantErr: parseError{string: "()", state: -1}},
+	{s: "(1", wantErr: parseError{string: "(1", state: -1}},
+	{s: "1)", wantErr: parseError{string: "1)", state: -1}},
+
+	// Ambiguous parse error states:
+	{s: "1+2i+3i", wantErr: parseError{string: "1+2i+3i", state: -1}},
+	{s: "1+2i3j", wantErr: parseError{string: "1+2i3j", state: -1}},
+	{s: "1e-4i-4k+10.3e6j+", wantErr: parseError{string: "1e-4i-4k+10.3e6j+", state: -1}},
+	{s: "1e-4i-4k+10.3e6j-", wantErr: parseError{string: "1e-4i-4k+10.3e6j-", state: -1}},
+
+	// Valid input:
+	{s: "1+4i", want: Quat{Real: 1, Imag: 4}},
+	{s: "4i+1", want: Quat{Real: 1, Imag: 4}},
+	{s: "+1+4i", want: Quat{Real: 1, Imag: 4}},
+	{s: "+4i+1", want: Quat{Real: 1, Imag: 4}},
+	{s: "1e-4-4k+10.3e6j+1i", want: Quat{Real: 1e-4, Imag: 1, Jmag: 10.3e6, Kmag: -4}},
+	{s: "1e-4-4k+10.3e6j+i", want: Quat{Real: 1e-4, Imag: 1, Jmag: 10.3e6, Kmag: -4}},
+	{s: "1e-4-4k+10.3e6j-i", want: Quat{Real: 1e-4, Imag: -1, Jmag: 10.3e6, Kmag: -4}},
+	{s: "1e-4i-4k+10.3e6j-1", want: Quat{Real: -1, Imag: 1e-4, Jmag: 10.3e6, Kmag: -4}},
+	{s: "1e-4i-4k+10.3e6j+1", want: Quat{Real: 1, Imag: 1e-4, Jmag: 10.3e6, Kmag: -4}},
+	{s: "(1+4i)", want: Quat{Real: 1, Imag: 4}},
+	{s: "(4i+1)", want: Quat{Real: 1, Imag: 4}},
+	{s: "(+1+4i)", want: Quat{Real: 1, Imag: 4}},
+	{s: "(+4i+1)", want: Quat{Real: 1, Imag: 4}},
+	{s: "(1e-4-4k+10.3e6j+1i)", want: Quat{Real: 1e-4, Imag: 1, Jmag: 10.3e6, Kmag: -4}},
+	{s: "(1e-4-4k+10.3e6j+i)", want: Quat{Real: 1e-4, Imag: 1, Jmag: 10.3e6, Kmag: -4}},
+	{s: "(1e-4-4k+10.3e6j-i)", want: Quat{Real: 1e-4, Imag: -1, Jmag: 10.3e6, Kmag: -4}},
+	{s: "(1e-4i-4k+10.3e6j-1)", want: Quat{Real: -1, Imag: 1e-4, Jmag: 10.3e6, Kmag: -4}},
+	{s: "(1e-4i-4k+10.3e6j+1)", want: Quat{Real: 1, Imag: 1e-4, Jmag: 10.3e6, Kmag: -4}},
+}
+
+func TestParse(t *testing.T) {
+	for _, test := range parseTests {
+		got, err := Parse(test.s)
+		if err != test.wantErr {
+			t.Errorf("unexpected error for Parse(%q): got:%#v, want:%#v", test.s, err, test.wantErr)
+		}
+		if err != nil {
+			continue
+		}
+		if got != test.want {
+			t.Errorf("unexpected result for Parse(%q): got:%v, want:%v", test.s, got, test.want)
+		}
+	}
+}
+
 func equalApprox(a, b Quat, tol float64) bool {
 	return floats.EqualWithinAbsOrRel(a.Real, b.Real, tol, tol) &&
 		floats.EqualWithinAbsOrRel(a.Imag, b.Imag, tol, tol) &&

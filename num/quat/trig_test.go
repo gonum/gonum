@@ -6,6 +6,7 @@ package quat
 
 import (
 	"math"
+	"math/cmplx"
 	"testing"
 )
 
@@ -14,6 +15,10 @@ var sinTests = []struct {
 	want Quat
 }{
 	{q: Quat{}, want: Quat{}},
+	{q: Quat{Real: math.Pi / 2}, want: Quat{Real: 1}},
+	{q: Quat{Imag: math.Pi / 2}, want: func() Quat { return Quat{Imag: imag(cmplx.Sin(complex(0, math.Pi/2)))} }()},
+	{q: Quat{Jmag: math.Pi / 2}, want: func() Quat { return Quat{Jmag: imag(cmplx.Sin(complex(0, math.Pi/2)))} }()},
+	{q: Quat{Kmag: math.Pi / 2}, want: func() Quat { return Quat{Kmag: imag(cmplx.Sin(complex(0, math.Pi/2)))} }()},
 }
 
 func TestSin(t *testing.T) {
@@ -31,6 +36,10 @@ var sinhTests = []struct {
 	want Quat
 }{
 	{q: Quat{}, want: Quat{}},
+	{q: Quat{Real: math.Pi / 2}, want: Quat{Real: math.Sinh(math.Pi / 2)}},
+	{q: Quat{Imag: math.Pi / 2}, want: func() Quat { return Quat{Imag: imag(cmplx.Sinh(complex(0, math.Pi/2)))} }()},
+	{q: Quat{Jmag: math.Pi / 2}, want: func() Quat { return Quat{Jmag: imag(cmplx.Sinh(complex(0, math.Pi/2)))} }()},
+	{q: Quat{Kmag: math.Pi / 2}, want: func() Quat { return Quat{Kmag: imag(cmplx.Sinh(complex(0, math.Pi/2)))} }()},
 }
 
 func TestSinh(t *testing.T) {
@@ -48,6 +57,10 @@ var cosTests = []struct {
 	want Quat
 }{
 	{q: Quat{}, want: Quat{Real: 1}},
+	{q: Quat{Real: math.Pi / 2}, want: Quat{Real: 0}},
+	{q: Quat{Imag: math.Pi / 2}, want: func() Quat { return Quat{Real: real(cmplx.Cos(complex(0, math.Pi/2)))} }()},
+	{q: Quat{Jmag: math.Pi / 2}, want: func() Quat { return Quat{Real: real(cmplx.Cos(complex(0, math.Pi/2)))} }()},
+	{q: Quat{Kmag: math.Pi / 2}, want: func() Quat { return Quat{Real: real(cmplx.Cos(complex(0, math.Pi/2)))} }()},
 }
 
 func TestCos(t *testing.T) {
@@ -65,6 +78,10 @@ var coshTests = []struct {
 	want Quat
 }{
 	{q: Quat{}, want: Quat{Real: 1}},
+	{q: Quat{Real: math.Pi / 2}, want: Quat{Real: math.Cosh(math.Pi / 2)}},
+	{q: Quat{Imag: math.Pi / 2}, want: func() Quat { return Quat{Imag: imag(cmplx.Cosh(complex(0, math.Pi/2)))} }()},
+	{q: Quat{Jmag: math.Pi / 2}, want: func() Quat { return Quat{Jmag: imag(cmplx.Cosh(complex(0, math.Pi/2)))} }()},
+	{q: Quat{Kmag: math.Pi / 2}, want: func() Quat { return Quat{Kmag: imag(cmplx.Cosh(complex(0, math.Pi/2)))} }()},
 }
 
 func TestCosh(t *testing.T) {
@@ -82,6 +99,10 @@ var tanTests = []struct {
 	want Quat
 }{
 	{q: Quat{}, want: Quat{}},
+	{q: Quat{Real: math.Pi / 4}, want: Quat{Real: math.Tan(math.Pi / 4)}},
+	{q: Quat{Imag: math.Pi / 4}, want: func() Quat { return Quat{Imag: imag(cmplx.Tan(complex(0, math.Pi/4)))} }()},
+	{q: Quat{Jmag: math.Pi / 4}, want: func() Quat { return Quat{Jmag: imag(cmplx.Tan(complex(0, math.Pi/4)))} }()},
+	{q: Quat{Kmag: math.Pi / 4}, want: func() Quat { return Quat{Kmag: imag(cmplx.Tan(complex(0, math.Pi/4)))} }()},
 }
 
 func TestTan(t *testing.T) {
@@ -99,6 +120,10 @@ var tanhTests = []struct {
 	want Quat
 }{
 	{q: Quat{}, want: Quat{}},
+	{q: Quat{Real: math.Pi / 4}, want: Quat{Real: math.Tanh(math.Pi / 4)}},
+	{q: Quat{Imag: math.Pi / 4}, want: func() Quat { return Quat{Imag: imag(cmplx.Tanh(complex(0, math.Pi/4)))} }()},
+	{q: Quat{Jmag: math.Pi / 4}, want: func() Quat { return Quat{Jmag: imag(cmplx.Tanh(complex(0, math.Pi/4)))} }()},
+	{q: Quat{Kmag: math.Pi / 4}, want: func() Quat { return Quat{Kmag: imag(cmplx.Tanh(complex(0, math.Pi/4)))} }()},
 }
 
 func TestTanh(t *testing.T) {
@@ -116,6 +141,10 @@ var asinTests = []struct {
 	want Quat
 }{
 	{q: Quat{}, want: Quat{}},
+	{q: Quat{Real: 1}, want: Quat{Real: math.Pi / 2}},
+	{q: Quat{Imag: 1}, want: func() Quat { return Quat{Imag: real(cmplx.Asinh(1))} }()},
+	{q: Quat{Jmag: 1}, want: func() Quat { return Quat{Jmag: real(cmplx.Asinh(1))} }()},
+	{q: Quat{Kmag: 1}, want: func() Quat { return Quat{Kmag: real(cmplx.Asinh(1))} }()},
 }
 
 func TestAsin(t *testing.T) {
@@ -133,6 +162,10 @@ var asinhTests = []struct {
 	want Quat
 }{
 	{q: Quat{}, want: Quat{}},
+	{q: Quat{Real: 1}, want: Quat{Real: math.Asinh(1)}},
+	{q: Quat{Imag: 1}, want: Quat{Imag: math.Pi / 2}},
+	{q: Quat{Jmag: 1}, want: Quat{Jmag: math.Pi / 2}},
+	{q: Quat{Kmag: 1}, want: Quat{Kmag: math.Pi / 2}},
 }
 
 func TestAsinh(t *testing.T) {
@@ -150,6 +183,10 @@ var acosTests = []struct {
 	want Quat
 }{
 	{q: Quat{}, want: Quat{Real: math.Pi / 2}},
+	{q: Quat{Real: 1}, want: Quat{Real: 0}},
+	{q: Quat{Imag: 1}, want: func() Quat { return Quat{Real: real(cmplx.Acos(1i)), Imag: imag(cmplx.Acos(1i))} }()},
+	{q: Quat{Jmag: 1}, want: func() Quat { return Quat{Real: real(cmplx.Acos(1i)), Jmag: imag(cmplx.Acos(1i))} }()},
+	{q: Quat{Kmag: 1}, want: func() Quat { return Quat{Real: real(cmplx.Acos(1i)), Kmag: imag(cmplx.Acos(1i))} }()},
 }
 
 func TestAcos(t *testing.T) {
@@ -167,6 +204,10 @@ var acoshTests = []struct {
 	want Quat
 }{
 	{q: Quat{}, want: Quat{Real: math.Pi / 2}},
+	{q: Quat{Real: 1}, want: Quat{Real: math.Acosh(1)}},
+	{q: Quat{Imag: 1}, want: func() Quat { return Quat{Real: real(cmplx.Acosh(1i)), Imag: imag(cmplx.Acosh(1i))} }()},
+	{q: Quat{Jmag: 1}, want: func() Quat { return Quat{Real: real(cmplx.Acosh(1i)), Jmag: imag(cmplx.Acosh(1i))} }()},
+	{q: Quat{Kmag: 1}, want: func() Quat { return Quat{Real: real(cmplx.Acosh(1i)), Kmag: imag(cmplx.Acosh(1i))} }()},
 }
 
 func TestAcosh(t *testing.T) {
@@ -184,6 +225,10 @@ var atanTests = []struct {
 	want Quat
 }{
 	{q: Quat{}, want: Quat{}},
+	{q: Quat{Real: 1}, want: Quat{Real: math.Pi / 4}},
+	{q: Quat{Imag: 0.5}, want: func() Quat { return Quat{Real: real(cmplx.Atan(0.5i)), Imag: imag(cmplx.Atan(0.5i))} }()},
+	{q: Quat{Jmag: 0.5}, want: func() Quat { return Quat{Real: real(cmplx.Atan(0.5i)), Jmag: imag(cmplx.Atan(0.5i))} }()},
+	{q: Quat{Kmag: 0.5}, want: func() Quat { return Quat{Real: real(cmplx.Atan(0.5i)), Kmag: imag(cmplx.Atan(0.5i))} }()},
 }
 
 func TestAtan(t *testing.T) {
@@ -201,6 +246,10 @@ var atanhTests = []struct {
 	want Quat
 }{
 	{q: Quat{}, want: Quat{}},
+	{q: Quat{Real: 1}, want: Quat{Real: math.Atanh(1)}},
+	{q: Quat{Imag: 0.5}, want: func() Quat { return Quat{Real: real(cmplx.Atanh(0.5i)), Imag: imag(cmplx.Atanh(0.5i))} }()},
+	{q: Quat{Jmag: 0.5}, want: func() Quat { return Quat{Real: real(cmplx.Atanh(0.5i)), Jmag: imag(cmplx.Atanh(0.5i))} }()},
+	{q: Quat{Kmag: 0.5}, want: func() Quat { return Quat{Real: real(cmplx.Atanh(0.5i)), Kmag: imag(cmplx.Atanh(0.5i))} }()},
 }
 
 func TestAtanh(t *testing.T) {

@@ -23,7 +23,6 @@ func Exp(q Quat) Quat {
 }
 
 // Log returns the natural logarithm of q.
-
 func Log(q Quat) Quat {
 	w, uv := split(q)
 	if uv == zero {

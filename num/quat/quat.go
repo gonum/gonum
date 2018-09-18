@@ -24,7 +24,7 @@ func (q Quat) Format(fs fmt.State, c rune) {
 	if !pOk {
 		prec = -1
 	}
-	width, wOk := fs.Precision()
+	width, wOk := fs.Width()
 	if !wOk {
 		width = -1
 	}

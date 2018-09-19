@@ -31,7 +31,7 @@ func (q Quat) Format(fs fmt.State, c rune) {
 	switch c {
 	case 'v':
 		if fs.Flag('#') {
-			fmt.Fprintf(fs, "%T{%v, %v, %v, %v}", q, q.Real, q.Imag, q.Jmag, q.Kmag)
+			fmt.Fprintf(fs, "%T{%#v, %#v, %#v, %#v}", q, q.Real, q.Imag, q.Jmag, q.Kmag)
 			return
 		}
 		c = 'g'

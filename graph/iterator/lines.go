@@ -41,7 +41,7 @@ func (e *OrderedLines) Next() bool {
 }
 
 // Line returns the current line of the iterator. Next must have been
-// called prior a call to Line.
+// called prior to a call to Line.
 func (e *OrderedLines) Line() graph.Line {
 	if e.idx >= len(e.lines) || e.idx < 0 {
 		return nil
@@ -49,7 +49,8 @@ func (e *OrderedLines) Line() graph.Line {
 	return e.lines[e.idx]
 }
 
-// LineSlice returns all the remaining lines in the iterator.
+// LineSlice returns all the remaining lines in the iterator and advances
+// the iterator.
 func (e *OrderedLines) LineSlice() []graph.Line {
 	if e.idx >= len(e.lines) {
 		return nil
@@ -102,7 +103,7 @@ func (e *OrderedWeightedLines) Next() bool {
 }
 
 // WeightedLine returns the current line of the iterator. Next must have been
-// called prior a call to WeightedLine.
+// called prior to a call to WeightedLine.
 func (e *OrderedWeightedLines) WeightedLine() graph.WeightedLine {
 	if e.idx >= len(e.lines) || e.idx < 0 {
 		return nil
@@ -110,7 +111,8 @@ func (e *OrderedWeightedLines) WeightedLine() graph.WeightedLine {
 	return e.lines[e.idx]
 }
 
-// WeightedLineSlice returns all the remaining lines in the iterator.
+// WeightedLineSlice returns all the remaining lines in the iterator and advances
+// the iterator.
 func (e *OrderedWeightedLines) WeightedLineSlice() []graph.WeightedLine {
 	if e.idx >= len(e.lines) {
 		return nil

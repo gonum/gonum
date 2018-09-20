@@ -41,7 +41,7 @@ func (e *OrderedEdges) Next() bool {
 }
 
 // Edge returns the current edge of the iterator. Next must have been
-// called prior a call to Edge.
+// called prior to a call to Edge.
 func (e *OrderedEdges) Edge() graph.Edge {
 	if e.idx >= len(e.edges) || e.idx < 0 {
 		return nil
@@ -49,7 +49,8 @@ func (e *OrderedEdges) Edge() graph.Edge {
 	return e.edges[e.idx]
 }
 
-// EdgeSlice returns all the remaining edges in the iterator.
+// EdgeSlice returns all the remaining edges in the iterator and advances
+// the iterator.
 func (e *OrderedEdges) EdgeSlice() []graph.Edge {
 	if e.idx >= len(e.edges) {
 		return nil
@@ -102,7 +103,7 @@ func (e *OrderedWeightedEdges) Next() bool {
 }
 
 // WeightedEdge returns the current edge of the iterator. Next must have been
-// called prior a call to WeightedEdge.
+// called prior to a call to WeightedEdge.
 func (e *OrderedWeightedEdges) WeightedEdge() graph.WeightedEdge {
 	if e.idx >= len(e.edges) || e.idx < 0 {
 		return nil
@@ -110,7 +111,8 @@ func (e *OrderedWeightedEdges) WeightedEdge() graph.WeightedEdge {
 	return e.edges[e.idx]
 }
 
-// WeightedEdgeSlice returns all the remaining edges in the iterator.
+// WeightedEdgeSlice returns all the remaining edges in the iterator and advances
+// the iterator.
 func (e *OrderedWeightedEdges) WeightedEdgeSlice() []graph.WeightedEdge {
 	if e.idx >= len(e.edges) {
 		return nil

@@ -41,7 +41,7 @@ func (n *OrderedNodes) Next() bool {
 }
 
 // Node returns the current node of the iterator. Next must have been
-// called prior a call to Node.
+// called prior to a call to Node.
 func (n *OrderedNodes) Node() graph.Node {
 	if n.idx >= len(n.nodes) || n.idx < 0 {
 		return nil
@@ -49,7 +49,8 @@ func (n *OrderedNodes) Node() graph.Node {
 	return n.nodes[n.idx]
 }
 
-// NodeSlice returns all the remaining nodes in the iterator.
+// NodeSlice returns all the remaining nodes in the iterator and advances
+// the iterator.
 func (n *OrderedNodes) NodeSlice() []graph.Node {
 	if n.idx >= len(n.nodes) {
 		return nil
@@ -100,7 +101,7 @@ func (n *ImplicitNodes) Next() bool {
 }
 
 // Node returns the current node of the iterator. Next must have been
-// called prior a call to Node.
+// called prior to a call to Node.
 func (n *ImplicitNodes) Node() graph.Node {
 	if n.Len() == -1 || n.curr < n.beg {
 		return nil

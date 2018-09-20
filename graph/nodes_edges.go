@@ -4,7 +4,7 @@
 
 package graph
 
-// Iterator is a item iterator.
+// Iterator is an item iterator.
 type Iterator interface {
 	// Next advances the iterator and returns whether
 	// the next call to the item method will return a
@@ -81,7 +81,7 @@ type EdgeSlicer interface {
 	EdgeSlice() []Edge
 }
 
-// NodesOf returns it.Len() nodes from it. If it is an EdgeSlicer, the EdgeSlice method is used
+// EdgesOf returns it.Len() nodes from it. If it is an EdgeSlicer, the EdgeSlice method is used
 // to obtain the edges. It is safe to pass a nil Edges to EdgesOf.
 func EdgesOf(it Edges) []Edge {
 	if it == nil {
@@ -98,7 +98,7 @@ func EdgesOf(it Edges) []Edge {
 	return n
 }
 
-// WeightedEdges is an Edge iterator.
+// WeightedEdges is a WeightedEdge iterator.
 type WeightedEdges interface {
 	Iterator
 
@@ -117,9 +117,9 @@ type WeightedEdgeSlicer interface {
 	WeightedEdgeSlice() []WeightedEdge
 }
 
-// WeightedEdgesOf returns it.Len() weighted edge from it. If it is an WeightedEdgeSlicer, the
-// WeightedEdgeSlice method is used to obtain the edges. It is safe to pass a nil Edges to
-// WeightedEdgesOf.
+// WeightedEdgesOf returns it.Len() weighted edge from it. If it is a WeightedEdgeSlicer, the
+// WeightedEdgeSlice method is used to obtain the edges. It is safe to pass a nil WeightedEdges
+// to WeightedEdgesOf.
 func WeightedEdgesOf(it WeightedEdges) []WeightedEdge {
 	if it == nil {
 		return nil
@@ -135,7 +135,7 @@ func WeightedEdgesOf(it WeightedEdges) []WeightedEdge {
 	return n
 }
 
-// Lines is an Line iterator.
+// Lines is a Line iterator.
 type Lines interface {
 	Iterator
 
@@ -154,7 +154,7 @@ type LineSlicer interface {
 	LineSlice() []Line
 }
 
-// NodesOf returns it.Len() nodes from it. If it is an LineSlicer, the LineSlice method is used
+// LinesOf returns it.Len() nodes from it. If it is a LineSlicer, the LineSlice method is used
 // to obtain the lines. It is safe to pass a nil Lines to LinesOf.
 func LinesOf(it Lines) []Line {
 	if it == nil {
@@ -171,7 +171,7 @@ func LinesOf(it Lines) []Line {
 	return n
 }
 
-// WeightedLines is an Line iterator.
+// WeightedLines is a WeightedLine iterator.
 type WeightedLines interface {
 	Iterator
 
@@ -190,9 +190,9 @@ type WeightedLineSlicer interface {
 	WeightedLineSlice() []WeightedLine
 }
 
-// WeightedLinesOf returns it.Len() weighted line from it. If it is an WeightedLineSlicer, the
-// WeightedLineSlice method is used to obtain the lines. It is safe to pass a nil Lines to
-// WeightedLinesOf.
+// WeightedLinesOf returns it.Len() weighted line from it. If it is a WeightedLineSlicer, the
+// WeightedLineSlice method is used to obtain the lines. It is safe to pass a nil WeightedLines
+// to WeightedLinesOf.
 func WeightedLinesOf(it WeightedLines) []WeightedLine {
 	if it == nil {
 		return nil

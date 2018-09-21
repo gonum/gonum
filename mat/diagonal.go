@@ -71,7 +71,7 @@ func (d *DiagDense) Dims() (r, c int) {
 
 // T returns the transpose of the matrix.
 func (d *DiagDense) T() Matrix {
-	return Transpose{d}
+	return d
 }
 
 // TTri returns the transpose of the matrix. Note that Diagonal matrices are

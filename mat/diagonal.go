@@ -80,10 +80,12 @@ func (d *DiagDense) TTri() Triangular {
 	return TransposeTri{d}
 }
 
+// Symmetric implements the Symmetric interface.
 func (d *DiagDense) Symmetric() int {
 	return d.n
 }
 
+// Triangle implements the Triangular interface.
 func (d *DiagDense) Triangle() (int, TriKind) {
 	return d.n, Upper
 }

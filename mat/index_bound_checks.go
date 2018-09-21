@@ -231,3 +231,34 @@ func (s *SymBandDense) set(i, j int, v float64) {
 	}
 	s.mat.Data[i*s.mat.Stride+pj] = v
 }
+
+// At returns the element at row i, column j.
+func (d *Diagonal) At(i, j int) float64 {
+	return d.at(i, j)
+}
+
+func (d *Diagonal) at(i, j int) float64 {
+	if uint(i) >= uint(d.n) {
+		panic(ErrRowAccess)
+	}
+	if uint(j) >= uint(d.n) {
+		panic(ErrColAccess)
+	}
+	if i != j {
+		return 0
+	}
+	return d.data[i]
+}
+
+// SetDiag sets the element at row i, column i to the value v.
+// It panics if the location is outside the appropriate region of the matrix.
+func (d *Diagonal) SetDiag(i int, v float64) {
+	return d.setDiag(i, v)
+}
+
+func (d *Diagonal) setDiag(i int, v float64) {
+	if uint(i) >= uint(s.mat.N) {
+		panic(ErrRowAccess)
+	}
+	d.data[i] = v
+}

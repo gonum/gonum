@@ -234,7 +234,7 @@ func legalDims(a Matrix, m, n int) bool {
 			return false
 		}
 		return true
-	case *SymDense, *TriDense, *basicSymmetric, *basicTriangular:
+	case *SymDense, *TriDense, *basicSymmetric, *basicTriangular, *DiagDense:
 		if m < 0 || n < 0 || m != n {
 			return false
 		}
@@ -279,6 +279,14 @@ func returnAs(a, t Matrix) Matrix {
 			return mat
 		case *basicTriangular:
 			return asBasicTriangular(mat)
+		}
+	case *DiagDense:
+		switch t.(type) {
+		default:
+			panic("bad type")
+		case *DiagDense:
+			return mat
+			// TODO(btracey): basic diagonaler
 		}
 	}
 }
@@ -393,6 +401,15 @@ func makeRandOf(a Matrix, m, n int) Matrix {
 			}
 		}
 		rMatrix = returnAs(mat, t)
+	case *DiagDense:
+		if m != n {
+			panic("bad size")
+		}
+		diag := NewDiagonal(m, nil)
+		for i := 0; i < n; i++ {
+			diag.SetDiag(i, rand.NormFloat64())
+		}
+		rMatrix = returnAs(diag, t)
 	}
 	if mr, mc := rMatrix.Dims(); mr != m || mc != n {
 		panic(fmt.Sprintf("makeRandOf for %T returns wrong size: %d×%d != %d×%d", a, m, n, mr, mc))
@@ -449,6 +466,14 @@ func makeCopyOf(a Matrix) Matrix {
 		}
 		copy(m.m, t.m)
 		return m
+	case *DiagDense:
+		d := &DiagDense{
+			data: make([]float64, t.n),
+			n:    t.n,
+			cap:  t.cap,
+		}
+		copy(d.data, t.data)
+		return d
 	}
 }
 
@@ -582,6 +607,7 @@ var testMatrices = []Matrix{
 	NewTriDense(3, true, nil),
 	NewTriDense(3, false, nil),
 	NewVecDense(0, nil),
+	&DiagDense{},
 	&basicVector{},
 	&VecDense{mat: blas64.Vector{Inc: 10}},
 	&basicMatrix{},
@@ -596,6 +622,8 @@ var testMatrices = []Matrix{
 	TransposeTri{NewTriDense(3, false, nil)},
 	Transpose{NewVecDense(0, nil)},
 	Transpose{&VecDense{mat: blas64.Vector{Inc: 10}}},
+	Transpose{&DiagDense{}},
+	TransposeTri{&DiagDense{}},
 	Transpose{&basicMatrix{}},
 	Transpose{&basicSymmetric{}},
 	Transpose{&basicTriangular{cap: 3, mat: blas64.Triangular{N: 3, Stride: 3, Uplo: blas.Upper}}},

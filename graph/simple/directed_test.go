@@ -21,7 +21,7 @@ var (
 func TestEdgeOvercounting(t *testing.T) {
 	g := generateDummyGraph()
 
-	if neigh := g.From(int64(2)); len(neigh) != 2 {
+	if neigh := graph.NodesOf(g.From(int64(2))); len(neigh) != 2 {
 		t.Errorf("Node 2 has incorrect number of neighbors got neighbors %v (count %d), expected 2 neighbors {0,1}", neigh, len(neigh))
 	}
 }

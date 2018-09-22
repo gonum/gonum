@@ -10,6 +10,7 @@ import (
 	"math"
 
 	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/iterator"
 	"gonum.org/v1/gonum/graph/simple"
 )
 
@@ -91,14 +92,14 @@ func NewGridFrom(rows ...string) *Grid {
 
 // Nodes returns all the open nodes in the grid if AllVisible is
 // false, otherwise all nodes are returned.
-func (g *Grid) Nodes() []graph.Node {
+func (g *Grid) Nodes() graph.Nodes {
 	var nodes []graph.Node
 	for id, ok := range g.open {
 		if ok || g.AllVisible {
 			nodes = append(nodes, simple.Node(id))
 		}
 	}
-	return nodes
+	return iterator.NewOrderedNodes(nodes)
 }
 
 // Has returns whether n is a node in the grid. The state of
@@ -158,7 +159,7 @@ func (g *Grid) NodeAt(r, c int) graph.Node {
 
 // From returns all the nodes reachable from u. Reachabilty requires that both
 // ends of an edge must be open.
-func (g *Grid) From(uid int64) []graph.Node {
+func (g *Grid) From(uid int64) graph.Nodes {
 	if !g.HasOpen(uid) {
 		return nil
 	}
@@ -171,7 +172,7 @@ func (g *Grid) From(uid int64) []graph.Node {
 			}
 		}
 	}
-	return to
+	return iterator.NewOrderedNodes(to)
 }
 
 // HasEdgeBetween returns whether there is an edge between u and v.

@@ -6,6 +6,7 @@ package main
 
 import (
 	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/iterator"
 	"gonum.org/v1/gonum/graph/simple"
 )
 
@@ -83,7 +84,7 @@ func (g *GraphNode) has(id int64, visited map[int64]struct{}) bool {
 	return false
 }
 
-func (g *GraphNode) Nodes() []graph.Node {
+func (g *GraphNode) Nodes() graph.Nodes {
 	toReturn := []graph.Node{g}
 	visited := map[int64]struct{}{g.id: {}}
 
@@ -103,7 +104,7 @@ func (g *GraphNode) Nodes() []graph.Node {
 		}
 	}
 
-	return toReturn
+	return iterator.NewOrderedNodes(toReturn)
 }
 
 func (g *GraphNode) nodes(list []graph.Node, visited map[int64]struct{}) []graph.Node {
@@ -131,9 +132,9 @@ func (g *GraphNode) nodes(list []graph.Node, visited map[int64]struct{}) []graph
 	return list
 }
 
-func (g *GraphNode) From(id int64) []graph.Node {
+func (g *GraphNode) From(id int64) graph.Nodes {
 	if id == g.ID() {
-		return g.neighbors
+		return iterator.NewOrderedNodes(g.neighbors)
 	}
 
 	visited := map[int64]struct{}{g.id: {}}
@@ -141,7 +142,7 @@ func (g *GraphNode) From(id int64) []graph.Node {
 		visited[root.ID()] = struct{}{}
 
 		if result := root.findNeighbors(id, visited); result != nil {
-			return result
+			return iterator.NewOrderedNodes(result)
 		}
 	}
 
@@ -150,7 +151,7 @@ func (g *GraphNode) From(id int64) []graph.Node {
 
 		if gn, ok := neigh.(*GraphNode); ok {
 			if result := gn.findNeighbors(id, visited); result != nil {
-				return result
+				return iterator.NewOrderedNodes(result)
 			}
 		}
 	}

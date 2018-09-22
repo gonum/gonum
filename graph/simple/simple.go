@@ -18,6 +18,10 @@ func (n Node) ID() int64 {
 	return int64(n)
 }
 
+func newSimpleNode(id int) graph.Node {
+	return Node(id)
+}
+
 // Edge is a simple graph edge.
 type Edge struct {
 	F, T graph.Node

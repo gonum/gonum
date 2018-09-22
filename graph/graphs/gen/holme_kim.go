@@ -69,7 +69,7 @@ func TunableClusteringScaleFree(dst graph.UndirectedBuilder, n, m int, p float64
 		for i := 0; i < m; i++ {
 			// Triad formation.
 			if i != 0 && rnd() < p {
-				for _, w := range permute(dst.From(int64(u)), rndN) {
+				for _, w := range permute(graph.NodesOf(dst.From(int64(u))), rndN) {
 					wid := w.ID()
 					if wid == int64(v) || dst.HasEdgeBetween(wid, int64(v)) {
 						continue

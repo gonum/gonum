@@ -109,7 +109,7 @@ type edge struct {
 }
 
 func (p *printer) print(g graph.Graph, name string, needsIndent, isSubgraph bool) error {
-	nodes := g.Nodes()
+	nodes := graph.NodesOf(g.Nodes())
 	sort.Sort(ordered.ByID(nodes))
 
 	p.buf.WriteString(p.prefix)
@@ -156,7 +156,7 @@ func (p *printer) print(g graph.Graph, name string, needsIndent, isSubgraph bool
 		if s, ok := n.(Subgrapher); ok {
 			// If the node is not linked to any other node
 			// the graph needs to be written now.
-			if len(g.From(n.ID())) == 0 {
+			if g.From(n.ID()).Len() == 0 {
 				g := s.Subgraph()
 				_, subIsDirected := g.(graph.Directed)
 				if subIsDirected != isDirected {
@@ -188,7 +188,7 @@ func (p *printer) print(g graph.Graph, name string, needsIndent, isSubgraph bool
 	havePrintedEdgeHeader := false
 	for _, n := range nodes {
 		nid := n.ID()
-		to := g.From(nid)
+		to := graph.NodesOf(g.From(nid))
 		sort.Sort(ordered.ByID(to))
 		for _, t := range to {
 			tid := t.ID()

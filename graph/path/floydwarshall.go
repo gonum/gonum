@@ -19,13 +19,14 @@ func FloydWarshall(g graph.Graph) (paths AllShortest, ok bool) {
 		weight = UniformCost(g)
 	}
 
-	nodes := g.Nodes()
+	nodes := graph.NodesOf(g.Nodes())
 	paths = newAllShortest(nodes, true)
 	for i, u := range nodes {
 		paths.dist.Set(i, i, 0)
 		uid := u.ID()
-		for _, v := range g.From(uid) {
-			vid := v.ID()
+		to := g.From(uid)
+		for to.Next() {
+			vid := to.Node().ID()
 			j := paths.indexOf[vid]
 			w, ok := weight(uid, vid)
 			if !ok {

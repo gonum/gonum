@@ -95,11 +95,11 @@ func Modularize(g graph.Graph, resolution float64, src rand.Source) ReducedGraph
 
 // Multiplex is a multiplex graph.
 type Multiplex interface {
-	// Nodes returns the slice of nodes
+	// Nodes returns the nodes
 	// for the multiplex graph.
 	// All layers must refer to the same
 	// set of nodes.
-	Nodes() []graph.Node
+	Nodes() graph.Nodes
 
 	// Depth returns the number of layers
 	// in the multiplex graph.

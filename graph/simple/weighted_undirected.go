@@ -9,6 +9,7 @@ import (
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/uid"
+	"gonum.org/v1/gonum/graph/iterator"
 )
 
 // WeightedUndirectedGraph implements a generalized weighted undirected graph.
@@ -129,7 +130,7 @@ func (g *WeightedUndirectedGraph) Has(id int64) bool {
 }
 
 // Nodes returns all the nodes in the graph.
-func (g *WeightedUndirectedGraph) Nodes() []graph.Node {
+func (g *WeightedUndirectedGraph) Nodes() graph.Nodes {
 	if len(g.nodes) == 0 {
 		return nil
 	}
@@ -139,11 +140,11 @@ func (g *WeightedUndirectedGraph) Nodes() []graph.Node {
 		nodes[i] = n
 		i++
 	}
-	return nodes
+	return iterator.NewOrderedNodes(nodes)
 }
 
 // Edges returns all the edges in the graph.
-func (g *WeightedUndirectedGraph) Edges() []graph.Edge {
+func (g *WeightedUndirectedGraph) Edges() graph.Edges {
 	if len(g.edges) == 0 {
 		return nil
 	}
@@ -161,11 +162,11 @@ func (g *WeightedUndirectedGraph) Edges() []graph.Edge {
 			edges = append(edges, e)
 		}
 	}
-	return edges
+	return iterator.NewOrderedEdges(edges)
 }
 
 // WeightedEdges returns all the weighted edges in the graph.
-func (g *WeightedUndirectedGraph) WeightedEdges() []graph.WeightedEdge {
+func (g *WeightedUndirectedGraph) WeightedEdges() graph.WeightedEdges {
 	var edges []graph.WeightedEdge
 	seen := make(map[[2]int64]struct{})
 	for _, u := range g.edges {
@@ -180,11 +181,11 @@ func (g *WeightedUndirectedGraph) WeightedEdges() []graph.WeightedEdge {
 			edges = append(edges, e)
 		}
 	}
-	return edges
+	return iterator.NewOrderedWeightedEdges(edges)
 }
 
 // From returns all nodes in g that can be reached directly from n.
-func (g *WeightedUndirectedGraph) From(id int64) []graph.Node {
+func (g *WeightedUndirectedGraph) From(id int64) graph.Nodes {
 	if !g.Has(id) {
 		return nil
 	}
@@ -195,7 +196,7 @@ func (g *WeightedUndirectedGraph) From(id int64) []graph.Node {
 		nodes[i] = g.nodes[from]
 		i++
 	}
-	return nodes
+	return iterator.NewOrderedNodes(nodes)
 }
 
 // HasEdgeBetween returns whether an edge exists between nodes x and y.
@@ -244,12 +245,4 @@ func (g *WeightedUndirectedGraph) Weight(xid, yid int64) (w float64, ok bool) {
 		}
 	}
 	return g.absent, false
-}
-
-// Degree returns the degree of n in g.
-func (g *WeightedUndirectedGraph) Degree(id int64) int {
-	if _, ok := g.nodes[id]; !ok {
-		return 0
-	}
-	return len(g.edges[id])
 }

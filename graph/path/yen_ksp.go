@@ -8,6 +8,7 @@ import (
 	"sort"
 
 	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/iterator"
 )
 
 // YenKShortestPaths returns the k-shortest loopless paths from s to t in g.
@@ -116,8 +117,8 @@ type yenKSPAdjuster struct {
 	visitedEdges map[[2]int64]struct{}
 }
 
-func (g yenKSPAdjuster) From(id int64) []graph.Node {
-	nodes := g.Graph.From(id)
+func (g yenKSPAdjuster) From(id int64) graph.Nodes {
+	nodes := graph.NodesOf(g.Graph.From(id))
 	for i := 0; i < len(nodes); {
 		if g.canWalk(id, nodes[i].ID()) {
 			i++
@@ -126,7 +127,7 @@ func (g yenKSPAdjuster) From(id int64) []graph.Node {
 		nodes[i] = nodes[len(nodes)-1]
 		nodes = nodes[:len(nodes)-1]
 	}
-	return nodes
+	return iterator.NewOrderedNodes(nodes)
 }
 
 func (g yenKSPAdjuster) canWalk(u, v int64) bool {

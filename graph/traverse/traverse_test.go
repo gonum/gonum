@@ -371,7 +371,7 @@ func gnpUndirected(n int, p float64) graph.Undirected {
 }
 
 func benchmarkWalkAllBreadthFirst(b *testing.B, g graph.Undirected) {
-	n := len(g.Nodes())
+	n := g.Nodes().Len()
 	b.ResetTimer()
 	var bft BreadthFirst
 	for i := 0; i < b.N; i++ {
@@ -402,7 +402,7 @@ func BenchmarkWalkAllBreadthFirstGnp_1000_half(b *testing.B) {
 }
 
 func benchmarkWalkAllDepthFirst(b *testing.B, g graph.Undirected) {
-	n := len(g.Nodes())
+	n := g.Nodes().Len()
 	b.ResetTimer()
 	var dft DepthFirst
 	for i := 0; i < b.N; i++ {

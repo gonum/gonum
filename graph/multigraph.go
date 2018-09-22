@@ -24,11 +24,11 @@ type Multigraph interface {
 	Has(id int64) bool
 
 	// Nodes returns all the nodes in the multigraph.
-	Nodes() []Node
+	Nodes() Nodes
 
 	// From returns all nodes that can be reached directly
 	// from the node with the given ID.
-	From(id int64) []Node
+	From(id int64) Nodes
 
 	// HasEdgeBetween returns whether an edge exists between
 	// nodes with IDs xid and yid without considering direction.
@@ -38,7 +38,7 @@ type Multigraph interface {
 	// vid, if any such lines exist and nil otherwise. The
 	// node v must be directly reachable from u as defined by
 	// the From method.
-	Lines(uid, vid int64) []Line
+	Lines(uid, vid int64) Lines
 }
 
 // WeightedMultigraph is a weighted multigraph.
@@ -49,7 +49,7 @@ type WeightedMultigraph interface {
 	// with IDs uid and vid if any such lines exist and nil
 	// otherwise. The node v must be directly reachable
 	// from u as defined by the From method.
-	WeightedLines(uid, vid int64) []WeightedLine
+	WeightedLines(uid, vid int64) WeightedLines
 }
 
 // UndirectedMultigraph is an undirected multigraph.
@@ -58,7 +58,7 @@ type UndirectedMultigraph interface {
 
 	// LinesBetween returns the lines between nodes x and y
 	// with IDs xid and yid.
-	LinesBetween(xid, yid int64) []Line
+	LinesBetween(xid, yid int64) Lines
 }
 
 // WeightedUndirectedMultigraph is a weighted undirected multigraph.
@@ -67,7 +67,7 @@ type WeightedUndirectedMultigraph interface {
 
 	// WeightedLinesBetween returns the lines between nodes
 	// x and y with IDs xid and yid.
-	WeightedLinesBetween(xid, yid int64) []WeightedLine
+	WeightedLinesBetween(xid, yid int64) WeightedLines
 }
 
 // DirectedMultigraph is a directed multigraph.
@@ -81,7 +81,7 @@ type DirectedMultigraph interface {
 
 	// To returns all nodes that can reach directly
 	// to the node with the given ID.
-	To(id int64) []Node
+	To(id int64) Nodes
 }
 
 // WeightedDirectedMultigraph is a weighted directed multigraph.
@@ -95,7 +95,7 @@ type WeightedDirectedMultigraph interface {
 
 	// To returns all nodes that can reach directly
 	// to the node with the given ID.
-	To(id int64) []Node
+	To(id int64) Nodes
 }
 
 // LineAdder is an interface for adding lines to a multigraph.

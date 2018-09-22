@@ -9,6 +9,7 @@ import (
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/ordered"
+	"gonum.org/v1/gonum/graph/iterator"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -85,22 +86,18 @@ func (g *UndirectedMatrix) has(id int64) bool {
 }
 
 // Nodes returns all the nodes in the graph.
-func (g *UndirectedMatrix) Nodes() []graph.Node {
+func (g *UndirectedMatrix) Nodes() graph.Nodes {
 	if g.nodes != nil {
 		nodes := make([]graph.Node, len(g.nodes))
 		copy(nodes, g.nodes)
-		return nodes
+		return iterator.NewOrderedNodes(nodes)
 	}
 	r := g.mat.Symmetric()
-	nodes := make([]graph.Node, r)
-	for i := 0; i < r; i++ {
-		nodes[i] = Node(i)
-	}
-	return nodes
+	return iterator.NewImplicitNodes(0, r, newSimpleNode)
 }
 
 // Edges returns all the edges in the graph.
-func (g *UndirectedMatrix) Edges() []graph.Edge {
+func (g *UndirectedMatrix) Edges() graph.Edges {
 	var edges []graph.Edge
 	r, _ := g.mat.Dims()
 	for i := 0; i < r; i++ {
@@ -110,15 +107,15 @@ func (g *UndirectedMatrix) Edges() []graph.Edge {
 			}
 		}
 	}
-	return edges
+	return iterator.NewOrderedEdges(edges)
 }
 
 // From returns all nodes in g that can be reached directly from n.
-func (g *UndirectedMatrix) From(id int64) []graph.Node {
+func (g *UndirectedMatrix) From(id int64) graph.Nodes {
 	if !g.has(id) {
 		return nil
 	}
-	var neighbors []graph.Node
+	var nodes []graph.Node
 	r := g.mat.Symmetric()
 	for i := 0; i < r; i++ {
 		if int64(i) == id {
@@ -126,10 +123,10 @@ func (g *UndirectedMatrix) From(id int64) []graph.Node {
 		}
 		// id is not greater than maximum int by this point.
 		if !isSame(g.mat.At(int(id), i), g.absent) {
-			neighbors = append(neighbors, g.Node(int64(i)))
+			nodes = append(nodes, g.Node(int64(i)))
 		}
 	}
-	return neighbors
+	return iterator.NewOrderedNodes(nodes)
 }
 
 // HasEdgeBetween returns whether an edge exists between nodes x and y.
@@ -224,25 +221,6 @@ func (g *UndirectedMatrix) RemoveEdge(fid, tid int64) {
 	}
 	// fid and tid are not greater than maximum int by this point.
 	g.mat.SetSym(int(fid), int(tid), g.absent)
-}
-
-// Degree returns the degree of n in g.
-func (g *UndirectedMatrix) Degree(id int64) int {
-	if !g.has(id) {
-		return 0
-	}
-	var deg int
-	r := g.mat.Symmetric()
-	for i := 0; i < r; i++ {
-		if int64(i) == id {
-			continue
-		}
-		// id is not greater than maximum int by this point.
-		if !isSame(g.mat.At(int(id), i), g.absent) {
-			deg++
-		}
-	}
-	return deg
 }
 
 // Matrix returns the mat.Matrix representation of the graph.

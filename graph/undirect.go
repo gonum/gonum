@@ -15,25 +15,11 @@ var _ Undirected = Undirect{}
 func (g Undirect) Has(id int64) bool { return g.G.Has(id) }
 
 // Nodes returns all the nodes in the graph.
-func (g Undirect) Nodes() []Node { return g.G.Nodes() }
+func (g Undirect) Nodes() Nodes { return g.G.Nodes() }
 
 // From returns all nodes in g that can be reached directly from u.
-func (g Undirect) From(uid int64) []Node {
-	var nodes []Node
-	seen := make(map[int64]struct{})
-	for _, n := range g.G.From(uid) {
-		seen[n.ID()] = struct{}{}
-		nodes = append(nodes, n)
-	}
-	for _, n := range g.G.To(uid) {
-		id := n.ID()
-		if _, ok := seen[id]; ok {
-			continue
-		}
-		seen[n.ID()] = struct{}{}
-		nodes = append(nodes, n)
-	}
-	return nodes
+func (g Undirect) From(uid int64) Nodes {
+	return newNodeFilterIterator(g.G.From(uid), g.G.To(uid))
 }
 
 // HasEdgeBetween returns whether an edge exists between nodes x and y.
@@ -94,25 +80,11 @@ var (
 func (g UndirectWeighted) Has(id int64) bool { return g.G.Has(id) }
 
 // Nodes returns all the nodes in the graph.
-func (g UndirectWeighted) Nodes() []Node { return g.G.Nodes() }
+func (g UndirectWeighted) Nodes() Nodes { return g.G.Nodes() }
 
 // From returns all nodes in g that can be reached directly from u.
-func (g UndirectWeighted) From(uid int64) []Node {
-	var nodes []Node
-	seen := make(map[int64]struct{})
-	for _, n := range g.G.From(uid) {
-		seen[n.ID()] = struct{}{}
-		nodes = append(nodes, n)
-	}
-	for _, n := range g.G.To(uid) {
-		id := n.ID()
-		if _, ok := seen[id]; ok {
-			continue
-		}
-		seen[n.ID()] = struct{}{}
-		nodes = append(nodes, n)
-	}
-	return nodes
+func (g UndirectWeighted) From(uid int64) Nodes {
+	return newNodeFilterIterator(g.G.From(uid), g.G.To(uid))
 }
 
 // HasEdgeBetween returns whether an edge exists between nodes x and y.
@@ -224,3 +196,54 @@ type WeightedEdgePair struct {
 
 // Weight returns the merged edge weights of the two edges.
 func (e WeightedEdgePair) Weight() float64 { return e.W }
+
+// nodeFilterIterator combines two Nodes to produce a single stream of
+// unique nodes.
+type nodeFilterIterator struct {
+	a, b Nodes
+
+	// unique indicates the node in b with the key ID is unique.
+	unique map[int64]bool
+}
+
+func newNodeFilterIterator(a, b Nodes) *nodeFilterIterator {
+	n := nodeFilterIterator{a: a, b: b, unique: make(map[int64]bool)}
+	for n.b.Next() {
+		n.unique[n.b.Node().ID()] = true
+	}
+	n.b.Reset()
+	for n.a.Next() {
+		n.unique[n.a.Node().ID()] = false
+	}
+	n.a.Reset()
+	return &n
+}
+
+func (n *nodeFilterIterator) Len() int {
+	return len(n.unique)
+}
+
+func (n *nodeFilterIterator) Next() bool {
+	n.Len()
+	if n.a.Next() {
+		return true
+	}
+	for n.b.Next() {
+		if n.unique[n.b.Node().ID()] {
+			return true
+		}
+	}
+	return false
+}
+
+func (n *nodeFilterIterator) Node() Node {
+	if n.a.Len() != 0 {
+		return n.a.Node()
+	}
+	return n.b.Node()
+}
+
+func (n *nodeFilterIterator) Reset() {
+	n.a.Reset()
+	n.b.Reset()
+}

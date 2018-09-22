@@ -16,7 +16,7 @@ var _ Graph = graph.Graph(nil)
 type Graph interface {
 	// From returns all nodes that can be reached directly
 	// from the node with the given ID.
-	From(id int64) []graph.Node
+	From(id int64) graph.Nodes
 
 	// Edge returns the edge from u to v, with IDs uid and vid,
 	// if such an edge exists and nil otherwise. The node v
@@ -56,7 +56,9 @@ func (b *BreadthFirst) Walk(g Graph, from graph.Node, until func(n graph.Node, d
 			return t
 		}
 		tid := t.ID()
-		for _, n := range g.From(tid) {
+		to := g.From(tid)
+		for to.Next() {
+			n := to.Node()
 			nid := n.ID()
 			if b.EdgeFilter != nil && !b.EdgeFilter(g.Edge(tid, nid)) {
 				continue
@@ -87,7 +89,9 @@ func (b *BreadthFirst) Walk(g Graph, from graph.Node, until func(n graph.Node, d
 // during is called on each node as it is traversed.
 func (b *BreadthFirst) WalkAll(g graph.Undirected, before, after func(), during func(graph.Node)) {
 	b.Reset()
-	for _, from := range g.Nodes() {
+	nodes := g.Nodes()
+	for nodes.Next() {
+		from := nodes.Node()
 		if b.Visited(from) {
 			continue
 		}
@@ -143,7 +147,9 @@ func (d *DepthFirst) Walk(g Graph, from graph.Node, until func(graph.Node) bool)
 			return t
 		}
 		tid := t.ID()
-		for _, n := range g.From(tid) {
+		to := g.From(tid)
+		for to.Next() {
+			n := to.Node()
 			nid := n.ID()
 			if d.EdgeFilter != nil && !d.EdgeFilter(g.Edge(tid, nid)) {
 				continue
@@ -168,7 +174,9 @@ func (d *DepthFirst) Walk(g Graph, from graph.Node, until func(graph.Node) bool)
 // during is called on each node as it is traversed.
 func (d *DepthFirst) WalkAll(g graph.Undirected, before, after func(), during func(graph.Node)) {
 	d.Reset()
-	for _, from := range g.Nodes() {
+	nodes := g.Nodes()
+	for nodes.Next() {
+		from := nodes.Node()
 		if d.Visited(from) {
 			continue
 		}

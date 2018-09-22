@@ -36,8 +36,9 @@ func ExampleBellmanFordFrom_negativecycles() {
 	}
 
 	// Add a zero-cost path to all nodes from a new node Q.
-	for _, n := range g.Nodes() {
-		g.SetWeightedEdge(simple.WeightedEdge{F: simple.Node('Q'), T: n})
+	nodes := g.Nodes()
+	for nodes.Next() {
+		g.SetWeightedEdge(simple.WeightedEdge{F: simple.Node('Q'), T: nodes.Node()})
 	}
 
 	// Find the shortest path to each node from Q.

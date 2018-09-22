@@ -4,6 +4,11 @@
 
 package mat
 
+import (
+	"gonum.org/v1/gonum/blas"
+	"gonum.org/v1/gonum/blas/blas64"
+)
+
 var (
 	diagDense *DiagDense
 	_         Matrix          = diagDense
@@ -11,17 +16,15 @@ var (
 	_         MutableDiagonal = diagDense
 	_         Triangular      = diagDense
 	_         Symmetric       = diagDense
+	_         Banded          = diagDense
+	_         RawBander       = diagDense
+	_         RawSymBander    = diagDense
 )
 
 // Diagonal represents a diagonal matrix, that is a square matrix that only
 // has non-zero terms on the diagonal.
 type Diagonal interface {
 	Matrix
-	Symmetric() int
-	TTri() Triangular
-	// Triangle implements the Triangular interface. Implementers of Diagonal
-	// should return Upper as the default TriKind.
-	Triangle() (int, TriKind)
 	// Diag returns the number of rows/columns in the matrix
 	Diag() int
 }
@@ -35,8 +38,6 @@ type MutableDiagonal interface {
 // DiagDense represents a diagonal matrix in dense storage format.
 type DiagDense struct {
 	data []float64
-	n    int
-	cap  int
 }
 
 // NewDiagonal creates a new Diagonal matrix with n rows and n columns.
@@ -54,19 +55,17 @@ func NewDiagonal(n int, data []float64) *DiagDense {
 	}
 	return &DiagDense{
 		data: data,
-		n:    n,
-		cap:  n,
 	}
 }
 
 // Diag returns the dimension of the receiver.
 func (d *DiagDense) Diag() int {
-	return d.n
+	return len(d.data)
 }
 
 // Dims returns the dimensions of the matrix.
 func (d *DiagDense) Dims() (r, c int) {
-	return d.n, d.n
+	return len(d.data), len(d.data)
 }
 
 // T returns the transpose of the matrix.
@@ -80,12 +79,41 @@ func (d *DiagDense) TTri() Triangular {
 	return TransposeTri{d}
 }
 
+func (d *DiagDense) TBand() Banded {
+	return TransposeBand{d}
+}
+
+func (d *DiagDense) Bandwidth() (kl, ku int) {
+	return 0, 0
+}
+
 // Symmetric implements the Symmetric interface.
 func (d *DiagDense) Symmetric() int {
-	return d.n
+	return len(d.data)
 }
 
 // Triangle implements the Triangular interface.
 func (d *DiagDense) Triangle() (int, TriKind) {
-	return d.n, Upper
+	return len(d.data), Upper
+}
+
+func (d *DiagDense) RawBand() blas64.Band {
+	return blas64.Band{
+		Rows:   len(d.data),
+		Cols:   len(d.data),
+		KL:     0,
+		KU:     0,
+		Stride: 1,
+		Data:   d.data,
+	}
+}
+
+func (d *DiagDense) RawSymBand() blas64.SymmetricBand {
+	return blas64.SymmetricBand{
+		N:      len(d.data),
+		K:      0,
+		Stride: 1,
+		Uplo:   blas.Upper,
+		Data:   d.data,
+	}
 }

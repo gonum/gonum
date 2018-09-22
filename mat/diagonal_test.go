@@ -21,8 +21,6 @@ func TestNewDiagonal(t *testing.T) {
 			n:    6,
 			mat: &DiagDense{
 				data: []float64{1, 2, 3, 4, 5, 6},
-				n:    6,
-				cap:  6,
 			},
 			dense: NewDense(6, 6, []float64{
 				1, 0, 0, 0, 0, 0,

@@ -468,9 +468,7 @@ func makeCopyOf(a Matrix) Matrix {
 		return m
 	case *DiagDense:
 		d := &DiagDense{
-			data: make([]float64, t.n),
-			n:    t.n,
-			cap:  t.cap,
+			data: make([]float64, len(t.data)),
 		}
 		copy(d.data, t.data)
 		return d

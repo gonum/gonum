@@ -238,10 +238,10 @@ func (d *Diagonal) At(i, j int) float64 {
 }
 
 func (d *Diagonal) at(i, j int) float64 {
-	if uint(i) >= uint(d.n) {
+	if uint(i) >= uint(len(d.data)) {
 		panic(ErrRowAccess)
 	}
-	if uint(j) >= uint(d.n) {
+	if uint(j) >= uint(len(d.data)) {
 		panic(ErrColAccess)
 	}
 	if i != j {
@@ -257,7 +257,7 @@ func (d *Diagonal) SetDiag(i int, v float64) {
 }
 
 func (d *Diagonal) setDiag(i int, v float64) {
-	if uint(i) >= uint(s.mat.N) {
+	if uint(i) >= uint(len(d.data)) {
 		panic(ErrRowAccess)
 	}
 	d.data[i] = v

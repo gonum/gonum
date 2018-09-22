@@ -212,7 +212,7 @@ func (cma *CmaEsChol) Init(dim, tasks int) int {
 		// Set the initial Cholesky to I.
 		b := mat.NewDiagonal(dim, nil)
 		for i := 0; i < dim; i++ {
-			b.SetSymBand(i, i, 1)
+			b.SetDiag(i, 1)
 		}
 		var chol mat.Cholesky
 		ok := chol.Factorize(b)

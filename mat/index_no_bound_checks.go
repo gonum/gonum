@@ -238,10 +238,10 @@ func (s *SymBandDense) set(i, j int, v float64) {
 
 // At returns the element at row i, column j.
 func (d *DiagDense) At(i, j int) float64 {
-	if uint(i) >= uint(d.n) {
+	if uint(i) >= uint(len(d.data)) {
 		panic(ErrRowAccess)
 	}
-	if uint(j) >= uint(d.n) {
+	if uint(j) >= uint(len(d.data)) {
 		panic(ErrColAccess)
 	}
 	return d.at(i, j)
@@ -257,7 +257,7 @@ func (d *DiagDense) at(i, j int) float64 {
 // SetDiag sets the element at row i, column i to the value v.
 // It panics if the location is outside the appropriate region of the matrix.
 func (d *DiagDense) SetDiag(i int, v float64) {
-	if uint(i) >= uint(d.n) {
+	if uint(i) >= uint(len(d.data)) {
 		panic(ErrRowAccess)
 	}
 	d.setDiag(i, v)

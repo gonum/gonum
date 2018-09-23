@@ -128,7 +128,7 @@ func (impl Implementation) Dgeev(jobvl lapack.LeftEVJob, jobvr lapack.RightEVJob
 		maxwrk = max(maxwrk, n+int(work[0]))
 		maxwrk = max(maxwrk, 4*n)
 	} else {
-		impl.Dhseqr(lapack.EigenvaluesOnly, lapack.None, n, 0, n-1,
+		impl.Dhseqr(lapack.EigenvaluesOnly, lapack.SchurNone, n, 0, n-1,
 			nil, 1, nil, nil, nil, 1, work, -1)
 		maxwrk = max(maxwrk, max(n+1, n+int(work[0])))
 	}
@@ -197,7 +197,7 @@ func (impl Implementation) Dgeev(jobvl lapack.LeftEVJob, jobvr lapack.RightEVJob
 	} else {
 		// Compute eigenvalues only.
 		iwrk = n
-		first = impl.Dhseqr(lapack.EigenvaluesOnly, lapack.None, n, ilo, ihi,
+		first = impl.Dhseqr(lapack.EigenvaluesOnly, lapack.SchurNone, n, ilo, ihi,
 			a, lda, wr, wi, nil, 1, work[iwrk:], lwork-iwrk)
 	}
 

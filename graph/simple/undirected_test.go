@@ -10,13 +10,6 @@ import (
 	"gonum.org/v1/gonum/graph"
 )
 
-var (
-	undirectedGraph = (*UndirectedGraph)(nil)
-
-	_ graph.Graph      = undirectedGraph
-	_ graph.Undirected = undirectedGraph
-)
-
 func TestAssertMutableNotDirected(t *testing.T) {
 	var g graph.UndirectedBuilder = NewUndirectedGraph()
 	if _, ok := g.(graph.Directed); ok {

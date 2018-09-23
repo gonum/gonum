@@ -13,6 +13,13 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
+var (
+	_ graph.Graph        = (*DirectedMatrix)(nil)
+	_ graph.Directed     = (*DirectedMatrix)(nil)
+	_ edgeSetter         = (*DirectedMatrix)(nil)
+	_ weightedEdgeSetter = (*DirectedMatrix)(nil)
+)
+
 // DirectedMatrix represents a directed graph using an adjacency
 // matrix such that all IDs are in a contiguous block from 0 to n-1.
 // Edges are stored implicitly as an edge weight, so edges stored in

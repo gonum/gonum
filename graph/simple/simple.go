@@ -53,3 +53,11 @@ func (e WeightedEdge) Weight() float64 { return e.W }
 func isSame(a, b float64) bool {
 	return a == b || (math.IsNaN(a) && math.IsNaN(b))
 }
+
+type edgeSetter interface {
+	SetEdge(e graph.Edge)
+}
+
+type weightedEdgeSetter interface {
+	SetWeightedEdge(e graph.WeightedEdge)
+}

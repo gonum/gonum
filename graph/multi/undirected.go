@@ -19,6 +19,10 @@ var (
 	_ graph.Undirected           = ug
 	_ graph.Multigraph           = ug
 	_ graph.UndirectedMultigraph = ug
+	_ graph.NodeAdder            = ug
+	_ graph.NodeRemover          = ug
+	_ graph.LineAdder            = ug
+	_ graph.LineRemover          = ug
 )
 
 // UndirectedGraph implements a generalized undirected graph.

@@ -12,6 +12,19 @@ import (
 	"gonum.org/v1/gonum/graph/iterator"
 )
 
+var (
+	wug *WeightedUndirectedGraph
+
+	_ graph.Graph              = wug
+	_ graph.Weighted           = wug
+	_ graph.Undirected         = wug
+	_ graph.WeightedUndirected = wug
+	_ graph.NodeAdder          = wug
+	_ graph.NodeRemover        = wug
+	_ graph.WeightedEdgeAdder  = wug
+	_ graph.EdgeRemover        = wug
+)
+
 // WeightedUndirectedGraph implements a generalized weighted undirected graph.
 type WeightedUndirectedGraph struct {
 	nodes map[int64]graph.Node

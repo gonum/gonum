@@ -12,6 +12,17 @@ import (
 	"gonum.org/v1/gonum/graph/iterator"
 )
 
+var (
+	dg *DirectedGraph
+
+	_ graph.Graph       = dg
+	_ graph.Directed    = dg
+	_ graph.NodeAdder   = dg
+	_ graph.NodeRemover = dg
+	_ graph.EdgeAdder   = dg
+	_ graph.EdgeRemover = dg
+)
+
 // DirectedGraph implements a generalized directed graph.
 type DirectedGraph struct {
 	nodes map[int64]graph.Node

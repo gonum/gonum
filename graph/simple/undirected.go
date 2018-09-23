@@ -12,6 +12,17 @@ import (
 	"gonum.org/v1/gonum/graph/iterator"
 )
 
+var (
+	ug *UndirectedGraph
+
+	_ graph.Graph       = ug
+	_ graph.Undirected  = ug
+	_ graph.NodeAdder   = ug
+	_ graph.NodeRemover = ug
+	_ graph.EdgeAdder   = ug
+	_ graph.EdgeRemover = ug
+)
+
 // UndirectedGraph implements a generalized undirected graph.
 type UndirectedGraph struct {
 	nodes map[int64]graph.Node

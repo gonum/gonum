@@ -131,8 +131,8 @@ func (g *WeightedDirectedGraph) SetWeightedLine(l graph.WeightedLine) {
 	g.lineIDs.Use(l.ID())
 }
 
-// RemoveLine removes l from the graph, leaving the terminal nodes. If the line does not exist
-// it is a no-op.
+// RemoveLine removes the line with the given end point and line IDs from the graph,
+// leaving the terminal nodes. If the line does not exist it is a no-op.
 func (g *WeightedDirectedGraph) RemoveLine(fid, tid, id int64) {
 	if _, ok := g.nodes[fid]; !ok {
 		return

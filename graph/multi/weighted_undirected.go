@@ -88,7 +88,7 @@ func (g *WeightedUndirectedGraph) RemoveNode(id int64) {
 	g.nodeIDs.Release(id)
 }
 
-// NewLine returns a new WeightedLine from the source to the destination node.
+// NewWeightedLine returns a new WeightedLine from the source to the destination node.
 // The returned WeightedLine will have a graph-unique ID.
 // The Line's ID does not become valid in g until the Line is added to g.
 func (g *WeightedUndirectedGraph) NewWeightedLine(from, to graph.Node, weight float64) graph.WeightedLine {

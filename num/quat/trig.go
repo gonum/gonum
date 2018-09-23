@@ -19,7 +19,7 @@ func Sin(q Quat) Quat {
 	v := Abs(uv)
 	s, c := math.Sincos(w)
 	sh, ch := sinhcosh(v)
-	return Add(lift(s*ch), Scale(c*sh/v, uv))
+	return join(s*ch, Scale(c*sh/v, uv))
 }
 
 // Sinh returns the hyperbolic sine of q.
@@ -31,7 +31,7 @@ func Sinh(q Quat) Quat {
 	v := Abs(uv)
 	s, c := math.Sincos(v)
 	sh, ch := sinhcosh(w)
-	return Add(lift(c*sh), Scale(s*ch/v, uv))
+	return join(c*sh, Scale(s*ch/v, uv))
 }
 
 // Cos returns the cosine of q.
@@ -43,7 +43,7 @@ func Cos(q Quat) Quat {
 	v := Abs(uv)
 	s, c := math.Sincos(w)
 	sh, ch := sinhcosh(v)
-	return Sub(lift(c*ch), Scale(s*sh/v, uv))
+	return join(c*ch, Scale(-s*sh/v, uv))
 }
 
 // Cosh returns the hyperbolic cosine of q.
@@ -55,7 +55,7 @@ func Cosh(q Quat) Quat {
 	v := Abs(uv)
 	s, c := math.Sincos(v)
 	sh, ch := sinhcosh(w)
-	return Add(lift(c*ch), Scale(s*sh/v, uv))
+	return join(c*ch, Scale(s*sh/v, uv))
 }
 
 // Tan returns the tangent of q.
@@ -94,7 +94,7 @@ func Asinh(q Quat) Quat {
 // Acos returns the inverse cosine of q.
 func Acos(q Quat) Quat {
 	w, uv := split(Asin(q))
-	return Sub(lift(math.Pi/2-w), uv)
+	return join(math.Pi/2-w, Scale(-1, uv))
 }
 
 // Acosh returns the inverse hyperbolic cosine of q.

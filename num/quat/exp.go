@@ -19,7 +19,7 @@ func Exp(q Quat) Quat {
 	v := Abs(uv)
 	e := math.Exp(w)
 	s, c := math.Sincos(v)
-	return Add(lift(e*c), Scale(e*s/v, uv))
+	return join(e*c, Scale(e*s/v, uv))
 }
 
 // Log returns the natural logarithm of q.
@@ -29,7 +29,7 @@ func Log(q Quat) Quat {
 		return lift(math.Log(w))
 	}
 	v := Abs(uv)
-	return Add(lift(math.Log(Abs(q))), Scale(math.Atan2(v, w)/v, uv))
+	return join(math.Log(Abs(q)), Scale(math.Atan2(v, w)/v, uv))
 }
 
 // Pow return q**r, the base-q exponential of r.

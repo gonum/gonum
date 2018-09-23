@@ -16,6 +16,11 @@ func split(q Quat) (float64, Quat) {
 	return q.Real, Quat{Imag: q.Imag, Jmag: q.Jmag, Kmag: q.Kmag}
 }
 
+func join(w float64, uv Quat) Quat {
+	uv.Real = w
+	return uv
+}
+
 func unit(q Quat) Quat {
 	return Scale(1/Abs(q), q)
 }

@@ -106,7 +106,7 @@ func DsyevTest(t *testing.T, impl Dsyever) {
 				for i := range work {
 					work[i] = rnd.Float64()
 				}
-				impl.Dsyev(lapack.None, uplo, n, a, lda, w, work, len(work))
+				impl.Dsyev(lapack.EVNone, uplo, n, a, lda, w, work, len(work))
 				if !floats.EqualApprox(w, wAns, 1e-8) {
 					t.Errorf("Eigenvalue mismatch when vectors not computed")
 				}

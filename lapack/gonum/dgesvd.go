@@ -86,13 +86,13 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 	wantus := jobU == lapack.SVDInPlace
 	wantuas := wantua || wantus
 	wantuo := jobU == lapack.SVDOverwrite
-	wantun := jobU == lapack.None
+	wantun := jobU == lapack.SVDNone
 
 	wantva := jobVT == lapack.SVDAll
 	wantvs := jobVT == lapack.SVDInPlace
 	wantvas := wantva || wantvs
 	wantvo := jobVT == lapack.SVDOverwrite
-	wantvn := jobVT == lapack.None
+	wantvn := jobVT == lapack.SVDNone
 
 	bi := blas64.Implementation()
 	var mnthr int

@@ -4,7 +4,11 @@
 
 package multi
 
-import "testing"
+import (
+	"testing"
+
+	"gonum.org/v1/gonum/graph"
+)
 
 // Tests Issue #27
 func TestWeightedEdgeOvercounting(t *testing.T) {

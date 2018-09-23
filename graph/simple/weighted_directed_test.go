@@ -7,6 +7,8 @@ package simple
 import (
 	"math"
 	"testing"
+
+	"gonum.org/v1/gonum/graph"
 )
 
 // Tests Issue #27

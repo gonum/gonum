@@ -26,8 +26,8 @@ import (
 // Dsteqr will panic otherwise.
 //
 // z, on entry, contains the n×n orthogonal matrix used in the reduction to
-// tridiagonal form if compz == lapack.EVOriginal. On exit, if
-// compz == lapack.EVOriginal, z contains the orthonormal eigenvectors of the
+// tridiagonal form if compz == lapack.EVOrig. On exit, if
+// compz == lapack.EVOrig, z contains the orthonormal eigenvectors of the
 // original symmetric matrix, and if compz == lapack.EVTridiag, z contains the
 // orthonormal eigenvectors of the symmetric tridiagonal matrix. z is not used
 // if compz == lapack.EVCompNone.

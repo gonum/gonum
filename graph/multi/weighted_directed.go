@@ -103,7 +103,7 @@ func (g *WeightedDirectedGraph) NewWeightedLine(from, to graph.Node, weight floa
 	return &WeightedLine{F: from, T: to, W: weight, UID: g.lineIDs.NewID()}
 }
 
-// SetWeightedLine adds l, a line from one node to another. If the nodes do not exist, they are added.
+// SetWeightedLine adds l, a line from one node to another. If the nodes do not exist, they are added
 // and are set to the nodes of the line otherwise.
 func (g *WeightedDirectedGraph) SetWeightedLine(l graph.WeightedLine) {
 	var (

@@ -157,16 +157,17 @@ func (g *WeightedDirectedGraph) RemoveLine(fid, tid, id int64) {
 	g.lineIDs.Release(id)
 }
 
-// Node returns the node in the graph with the given ID.
-func (g *WeightedDirectedGraph) Node(id int64) graph.Node {
-	return g.nodes[id]
-}
-
 // Has returns whether the node exists within the graph.
 func (g *WeightedDirectedGraph) Has(id int64) bool {
 	_, ok := g.nodes[id]
 
 	return ok
+}
+
+// Node returns the node in the graph with the given ID if it exists,
+// and nil otherwise.
+func (g *WeightedDirectedGraph) Node(id int64) graph.Node {
+	return g.nodes[id]
 }
 
 // Nodes returns all the nodes in the graph.

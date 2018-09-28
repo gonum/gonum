@@ -341,7 +341,8 @@ func (g *ReducedDirected) Has(id int64) bool {
 	return 0 <= id && id < int64(len(g.nodes))
 }
 
-// Node returns the node with the given ID if it exists in the graph.
+// Node returns the node in the graph with the given ID if it exists,
+// and nil otherwise.
 func (g *ReducedDirected) Node(id int64) graph.Node {
 	if g.Has(id) {
 		return g.nodes[id]

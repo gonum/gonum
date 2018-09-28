@@ -71,17 +71,6 @@ func NewDirectedMatrixFrom(nodes []graph.Node, init, self, absent float64) *Dire
 	return g
 }
 
-// Node returns the node in the graph with the given ID.
-func (g *DirectedMatrix) Node(id int64) graph.Node {
-	if !g.has(id) {
-		return nil
-	}
-	if g.nodes == nil {
-		return Node(id)
-	}
-	return g.nodes[id]
-}
-
 // Has returns whether the node exists within the graph.
 func (g *DirectedMatrix) Has(id int64) bool {
 	return g.has(id)
@@ -90,6 +79,18 @@ func (g *DirectedMatrix) Has(id int64) bool {
 func (g *DirectedMatrix) has(id int64) bool {
 	r, _ := g.mat.Dims()
 	return 0 <= id && id < int64(r)
+}
+
+// Node returns the node in the graph with the given ID if it exists,
+// and nil otherwise.
+func (g *DirectedMatrix) Node(id int64) graph.Node {
+	if !g.has(id) {
+		return nil
+	}
+	if g.nodes == nil {
+		return Node(id)
+	}
+	return g.nodes[id]
 }
 
 // Nodes returns all the nodes in the graph.
@@ -215,13 +216,15 @@ func (g *DirectedMatrix) Weight(xid, yid int64) (w float64, ok bool) {
 }
 
 // SetEdge sets e, an edge from one node to another with unit weight. If the ends of the edge
-// are not in g or the edge is a self loop, SetEdge panics.
+// are not in g or the edge is a self loop, SetEdge panics. SetEdge will store the nodes of
+// e in the graph if it was initialized with NewDirectedMatrixFrom.
 func (g *DirectedMatrix) SetEdge(e graph.Edge) {
 	g.setWeightedEdge(e, 1)
 }
 
 // SetWeightedEdge sets e, an edge from one node to another. If the ends of the edge are not in g
-// or the edge is a self loop, SetWeightedEdge panics.
+// or the edge is a self loop, SetWeightedEdge panics. SetWeightedEdge will store the nodes of
+// e in the graph if it was initialized with NewDirectedMatrixFrom.
 func (g *DirectedMatrix) SetWeightedEdge(e graph.WeightedEdge) {
 	g.setWeightedEdge(e, e.Weight())
 }

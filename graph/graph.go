@@ -32,7 +32,7 @@ type Graph interface {
 	Has(id int64) bool
 
 	// Node returns the node with the given ID if it exists
-	// in the graph.
+	// in the graph, and nil otherwise.
 	Node(id int64) Node
 
 	// Nodes returns all the nodes in the graph.

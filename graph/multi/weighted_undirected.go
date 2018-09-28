@@ -95,7 +95,8 @@ func (g *WeightedUndirectedGraph) NewWeightedLine(from, to graph.Node, weight fl
 	return &WeightedLine{F: from, T: to, W: weight, UID: g.lineIDs.NewID()}
 }
 
-// SetWeightedLine adds l, a line from one node to another. If the nodes do not exist, they are added.
+// SetWeightedLine adds l, a line from one node to another. If the nodes do not exist, they are added
+// and are set to the nodes of the line otherwise.
 func (g *WeightedUndirectedGraph) SetWeightedLine(l graph.WeightedLine) {
 	var (
 		from = l.From()
@@ -107,12 +108,16 @@ func (g *WeightedUndirectedGraph) SetWeightedLine(l graph.WeightedLine) {
 
 	if !g.Has(fid) {
 		g.AddNode(from)
+	} else {
+		g.nodes[fid] = from
 	}
 	if g.lines[fid][tid] == nil {
 		g.lines[fid][tid] = make(map[int64]graph.WeightedLine)
 	}
 	if !g.Has(tid) {
 		g.AddNode(to)
+	} else {
+		g.nodes[tid] = to
 	}
 	if g.lines[tid][fid] == nil {
 		g.lines[tid][fid] = make(map[int64]graph.WeightedLine)

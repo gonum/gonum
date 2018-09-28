@@ -166,6 +166,14 @@ func (l *LimitedVisionGrid) Has(id int64) bool {
 	return 0 <= id && id < int64(len(l.Grid.open))
 }
 
+// Node return a node from g if it exists.
+func (l *LimitedVisionGrid) Node(id int64) graph.Node {
+	if l.Has(id) {
+		return simple.Node(id)
+	}
+	return nil
+}
+
 // From returns nodes that are optimistically reachable from u.
 func (l *LimitedVisionGrid) From(uid int64) graph.Nodes {
 	if !l.Has(uid) {

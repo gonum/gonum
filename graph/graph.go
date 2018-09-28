@@ -31,6 +31,10 @@ type Graph interface {
 	// within the graph.
 	Has(id int64) bool
 
+	// Node returns the node with the given ID if it exists
+	// in the graph.
+	Node(id int64) Node
+
 	// Nodes returns all the nodes in the graph.
 	Nodes() Nodes
 
@@ -146,8 +150,10 @@ type EdgeAdder interface {
 	// will be added if they do not exist, otherwise
 	// SetEdge will panic.
 	// The behavior of an EdgeAdder when the IDs
-	// returned by e.From and e.To are equal is
+	// returned by e.From() and e.To() are equal is
 	// implementation-dependent.
+	// Whether e, e.From() and e.To() are stored
+	// within the graph is implementation dependent.
 	SetEdge(e Edge)
 }
 
@@ -162,8 +168,10 @@ type WeightedEdgeAdder interface {
 	// the nodes will be added if they do not exist,
 	// otherwise SetWeightedEdge will panic.
 	// The behavior of a WeightedEdgeAdder when the IDs
-	// returned by e.From and e.To are equal is
+	// returned by e.From() and e.To() are equal is
 	// implementation-dependent.
+	// Whether e, e.From() and e.To() are stored
+	// within the graph is implementation dependent.
 	SetWeightedEdge(e WeightedEdge)
 }
 

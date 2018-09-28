@@ -92,7 +92,8 @@ func (g *WeightedUndirectedGraph) NewWeightedEdge(from, to graph.Node, weight fl
 	return &WeightedEdge{F: from, T: to, W: weight}
 }
 
-// SetWeightedEdge adds a weighted edge from one node to another. If the nodes do not exist, they are added.
+// SetWeightedEdge adds a weighted edge from one node to another. If the nodes do not exist, they are added
+// and are set to the nodes of the edge otherwise.
 // It will panic if the IDs of the e.From and e.To are equal.
 func (g *WeightedUndirectedGraph) SetWeightedEdge(e graph.WeightedEdge) {
 	var (
@@ -108,9 +109,13 @@ func (g *WeightedUndirectedGraph) SetWeightedEdge(e graph.WeightedEdge) {
 
 	if !g.Has(fid) {
 		g.AddNode(from)
+	} else {
+		g.nodes[fid] = from
 	}
 	if !g.Has(tid) {
 		g.AddNode(to)
+	} else {
+		g.nodes[tid] = to
 	}
 
 	g.edges[fid][tid] = e

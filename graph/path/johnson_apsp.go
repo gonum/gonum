@@ -93,6 +93,10 @@ func (g johnsonWeightAdjuster) Has(id int64) bool {
 	panic("path: unintended use of johnsonWeightAdjuster")
 }
 
+func (g johnsonWeightAdjuster) Node(id int64) graph.Node {
+	panic("path: unintended use of johnsonWeightAdjuster")
+}
+
 func (g johnsonWeightAdjuster) Nodes() graph.Nodes {
 	if g.bellmanFord {
 		return newJohnsonNodeIterator(g.q, g.g.Nodes())

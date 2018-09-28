@@ -102,11 +102,18 @@ func (g *Grid) Nodes() graph.Nodes {
 	return iterator.NewOrderedNodes(nodes)
 }
 
-// Has returns whether n is a node in the grid. The state of
-// the AllVisible field determines whether a non-open node is
-// present.
+// Has returns whether id represents a node in the grid. The state of
+// the AllVisible field determines whether a non-open node is present.
 func (g *Grid) Has(id int64) bool {
 	return 0 <= id && id < int64(len(g.open)) && (g.AllVisible || g.open[id])
+}
+
+// Node return a node from g if it exists.
+func (g *Grid) Node(id int64) graph.Node {
+	if g.Has(id) {
+		return simple.Node(id)
+	}
+	return nil
 }
 
 // HasOpen returns whether n is an open node in the grid.

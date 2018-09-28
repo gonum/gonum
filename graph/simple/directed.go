@@ -92,7 +92,8 @@ func (g *DirectedGraph) NewEdge(from, to graph.Node) graph.Edge {
 	return &Edge{F: from, T: to}
 }
 
-// SetEdge adds e, an edge from one node to another. If the nodes do not exist, they are added.
+// SetEdge adds e, an edge from one node to another. If the nodes do not exist, they are added
+// and are set to the nodes of the edge otherwise.
 // It will panic if the IDs of the e.From and e.To are equal.
 func (g *DirectedGraph) SetEdge(e graph.Edge) {
 	var (
@@ -108,9 +109,13 @@ func (g *DirectedGraph) SetEdge(e graph.Edge) {
 
 	if !g.Has(fid) {
 		g.AddNode(from)
+	} else {
+		g.nodes[fid] = from
 	}
 	if !g.Has(tid) {
 		g.AddNode(to)
+	} else {
+		g.nodes[tid] = to
 	}
 
 	g.from[fid][tid] = e

@@ -98,7 +98,8 @@ func (g *DirectedGraph) NewLine(from, to graph.Node) graph.Line {
 	return &Line{F: from, T: to, UID: g.lineIDs.NewID()}
 }
 
-// SetLine adds l, a line from one node to another. If the nodes do not exist, they are added.
+// SetLine adds l, a line from one node to another. If the nodes do not exist, they are added
+// and are set to the nodes of the line otherwise.
 func (g *DirectedGraph) SetLine(l graph.Line) {
 	var (
 		from = l.From()
@@ -110,12 +111,16 @@ func (g *DirectedGraph) SetLine(l graph.Line) {
 
 	if !g.Has(fid) {
 		g.AddNode(from)
+	} else {
+		g.nodes[fid] = from
 	}
 	if g.from[fid][tid] == nil {
 		g.from[fid][tid] = make(map[int64]graph.Line)
 	}
 	if !g.Has(tid) {
 		g.AddNode(to)
+	} else {
+		g.nodes[tid] = to
 	}
 	if g.to[tid][fid] == nil {
 		g.to[tid][fid] = make(map[int64]graph.Line)

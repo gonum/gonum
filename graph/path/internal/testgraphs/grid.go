@@ -108,7 +108,7 @@ func (g *Grid) Has(id int64) bool {
 	return 0 <= id && id < int64(len(g.open)) && (g.AllVisible || g.open[id])
 }
 
-// Node returns the node in the graph with the given ID if it exists,
+// Node returns the node with the given ID if it exists in the graph,
 // and nil otherwise.
 func (g *Grid) Node(id int64) graph.Node {
 	if g.Has(id) {

@@ -150,7 +150,7 @@ func (g *WeightedDirectedGraph) Has(id int64) bool {
 	return ok
 }
 
-// Node returns the node in the graph with the given ID if it exists,
+// Node returns the node with the given ID if it exists in the graph,
 // and nil otherwise.
 func (g *WeightedDirectedGraph) Node(id int64) graph.Node {
 	return g.nodes[id]

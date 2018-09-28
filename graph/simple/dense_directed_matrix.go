@@ -81,7 +81,7 @@ func (g *DirectedMatrix) has(id int64) bool {
 	return 0 <= id && id < int64(r)
 }
 
-// Node returns the node in the graph with the given ID if it exists,
+// Node returns the node with the given ID if it exists in the graph,
 // and nil otherwise.
 func (g *DirectedMatrix) Node(id int64) graph.Node {
 	if !g.has(id) {

@@ -463,7 +463,7 @@ func (g undirectedLayerHandle) Has(id int64) bool {
 	return 0 <= id && id < int64(len(g.multiplex.nodes))
 }
 
-// Node returns the node in the graph with the given ID if it exists,
+// Node returns the node with the given ID if it exists in the graph,
 // and nil otherwise.
 func (g undirectedLayerHandle) Node(id int64) graph.Node {
 	if g.Has(id) {

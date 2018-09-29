@@ -1,23 +1,21 @@
+---
+name: Feature request
+about: Request an addition to an existing package
+
+---
 <!--
 Please make sure your issue title matches the Go convention; a summary
 of the problem, prefixed by the primary affected package.
-
-If the issue is a question about usage or similar, please ask at the
-Gonum discussion list rather than filing an issue:
-
-https://groups.google.com/forum/#!forum/gonum-dev
 -->
 ### What are you trying to do?
+<!-- Describe the problem you are trying to solve. -->
 
 
-### What did you do?
+### What did you try?
 <!-- Please include a link to a minimal reproducer here. -->
 
 
-### What did you expect to happen?
-
-
-### What actually happened?
+### How does Gonum not allow you to achieve your goal?
 
 
 ### What version of Go and Gonum are you using?
@@ -27,5 +25,9 @@ the output of `(cd $(go env GOPATH)/src/gonum.org/v1/gonum && git rev-parse HEAD
 -->
 
 
-### Does this issue reproduce with the current master?
+### Is this feature absent from the current master?
+
+
+### Are you able to help contribute the feature?
+<!-- Can you provide code contributions or information to help? -->
 

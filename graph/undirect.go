@@ -14,7 +14,8 @@ var _ Undirected = Undirect{}
 // Has returns whether the node exists within the graph.
 func (g Undirect) Has(id int64) bool { return g.G.Has(id) }
 
-// Node returns the node with the given ID from the graph if it exists.
+// Node returns the node with the given ID if it exists in the graph,
+// and nil otherwise.
 func (g Undirect) Node(id int64) Node { return g.G.Node(id) }
 
 // Nodes returns all the nodes in the graph.
@@ -82,7 +83,8 @@ var (
 // Has returns whether the node exists within the graph.
 func (g UndirectWeighted) Has(id int64) bool { return g.G.Has(id) }
 
-// Node returns the node with the given ID from the graph if it exists.
+// Node returns the node with the given ID if it exists in the graph,
+// and nil otherwise.
 func (g UndirectWeighted) Node(id int64) Node { return g.G.Node(id) }
 
 // Nodes returns all the nodes in the graph.

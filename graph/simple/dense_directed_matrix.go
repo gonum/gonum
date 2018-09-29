@@ -71,17 +71,6 @@ func NewDirectedMatrixFrom(nodes []graph.Node, init, self, absent float64) *Dire
 	return g
 }
 
-// Node returns the node in the graph with the given ID.
-func (g *DirectedMatrix) Node(id int64) graph.Node {
-	if !g.has(id) {
-		return nil
-	}
-	if g.nodes == nil {
-		return Node(id)
-	}
-	return g.nodes[id]
-}
-
 // Has returns whether the node exists within the graph.
 func (g *DirectedMatrix) Has(id int64) bool {
 	return g.has(id)
@@ -90,6 +79,18 @@ func (g *DirectedMatrix) Has(id int64) bool {
 func (g *DirectedMatrix) has(id int64) bool {
 	r, _ := g.mat.Dims()
 	return 0 <= id && id < int64(r)
+}
+
+// Node returns the node with the given ID if it exists in the graph,
+// and nil otherwise.
+func (g *DirectedMatrix) Node(id int64) graph.Node {
+	if !g.has(id) {
+		return nil
+	}
+	if g.nodes == nil {
+		return Node(id)
+	}
+	return g.nodes[id]
 }
 
 // Nodes returns all the nodes in the graph.
@@ -215,20 +216,24 @@ func (g *DirectedMatrix) Weight(xid, yid int64) (w float64, ok bool) {
 }
 
 // SetEdge sets e, an edge from one node to another with unit weight. If the ends of the edge
-// are not in g or the edge is a self loop, SetEdge panics.
+// are not in g or the edge is a self loop, SetEdge panics. SetEdge will store the nodes of
+// e in the graph if it was initialized with NewDirectedMatrixFrom.
 func (g *DirectedMatrix) SetEdge(e graph.Edge) {
 	g.setWeightedEdge(e, 1)
 }
 
 // SetWeightedEdge sets e, an edge from one node to another. If the ends of the edge are not in g
-// or the edge is a self loop, SetWeightedEdge panics.
+// or the edge is a self loop, SetWeightedEdge panics. SetWeightedEdge will store the nodes of
+// e in the graph if it was initialized with NewDirectedMatrixFrom.
 func (g *DirectedMatrix) SetWeightedEdge(e graph.WeightedEdge) {
 	g.setWeightedEdge(e, e.Weight())
 }
 
 func (g *DirectedMatrix) setWeightedEdge(e graph.Edge, weight float64) {
-	fid := e.From().ID()
-	tid := e.To().ID()
+	from := e.From()
+	fid := from.ID()
+	to := e.To()
+	tid := to.ID()
 	if fid == tid {
 		panic("simple: set illegal edge")
 	}
@@ -237,6 +242,10 @@ func (g *DirectedMatrix) setWeightedEdge(e graph.Edge, weight float64) {
 	}
 	if int64(int(tid)) != tid {
 		panic("simple: unavailable to node ID for dense graph")
+	}
+	if g.nodes != nil {
+		g.nodes[fid] = from
+		g.nodes[tid] = to
 	}
 	// fid and tid are not greater than maximum int by this point.
 	g.mat.Set(int(fid), int(tid), weight)

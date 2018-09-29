@@ -264,6 +264,9 @@ func (g johnsonGraph) From(id int64) graph.Nodes {
 func (johnsonGraph) Has(int64) bool {
 	panic("topo: unintended use of johnsonGraph")
 }
+func (johnsonGraph) Node(int64) graph.Node {
+	panic("topo: unintended use of johnsonGraph")
+}
 func (johnsonGraph) HasEdgeBetween(_, _ int64) bool {
 	panic("topo: unintended use of johnsonGraph")
 }

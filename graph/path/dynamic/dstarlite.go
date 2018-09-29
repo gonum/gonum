@@ -35,7 +35,6 @@ type DStarLite struct {
 type WorldModel interface {
 	graph.WeightedBuilder
 	graph.WeightedDirected
-	Node(id int64) graph.Node
 }
 
 // NewDStarLite returns a new DStarLite planner for the path from s to t in g using the

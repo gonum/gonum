@@ -100,7 +100,8 @@ func (g *WeightedDirectedGraph) NewWeightedEdge(from, to graph.Node, weight floa
 	return &WeightedEdge{F: from, T: to, W: weight}
 }
 
-// SetWeightedEdge adds a weighted edge from one node to another. If the nodes do not exist, they are added.
+// SetWeightedEdge adds a weighted edge from one node to another. If the nodes do not exist, they are added
+// and are set to the nodes of the edge otherwise.
 // It will panic if the IDs of the e.From and e.To are equal.
 func (g *WeightedDirectedGraph) SetWeightedEdge(e graph.WeightedEdge) {
 	var (
@@ -116,9 +117,13 @@ func (g *WeightedDirectedGraph) SetWeightedEdge(e graph.WeightedEdge) {
 
 	if !g.Has(fid) {
 		g.AddNode(from)
+	} else {
+		g.nodes[fid] = from
 	}
 	if !g.Has(tid) {
 		g.AddNode(to)
+	} else {
+		g.nodes[tid] = to
 	}
 
 	g.from[fid][tid] = e
@@ -139,15 +144,16 @@ func (g *WeightedDirectedGraph) RemoveEdge(fid, tid int64) {
 	delete(g.to[tid], fid)
 }
 
-// Node returns the node in the graph with the given ID.
-func (g *WeightedDirectedGraph) Node(id int64) graph.Node {
-	return g.nodes[id]
-}
-
 // Has returns whether the node exists within the graph.
 func (g *WeightedDirectedGraph) Has(id int64) bool {
 	_, ok := g.nodes[id]
 	return ok
+}
+
+// Node returns the node with the given ID if it exists in the graph,
+// and nil otherwise.
+func (g *WeightedDirectedGraph) Node(id int64) graph.Node {
+	return g.nodes[id]
 }
 
 // Nodes returns all the nodes in the graph.

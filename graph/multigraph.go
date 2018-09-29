@@ -23,6 +23,10 @@ type Multigraph interface {
 	// within the multigraph.
 	Has(id int64) bool
 
+	// Node returns the node with the given ID if it exists
+	// in the multigraph, and nil otherwise.
+	Node(id int64) Node
+
 	// Nodes returns all the nodes in the multigraph.
 	Nodes() Nodes
 
@@ -107,6 +111,8 @@ type LineAdder interface {
 	// If the multigraph supports node addition the nodes
 	// will be added if they do not exist, otherwise
 	// SetLine will panic.
+	// Whether l, l.From() and l.To() are stored
+	// within the graph is implementation dependent.
 	SetLine(l Line)
 }
 
@@ -120,7 +126,9 @@ type WeightedLineAdder interface {
 	// to another. If the multigraph supports node addition
 	// the nodes will be added if they do not exist,
 	// otherwise SetWeightedLine will panic.
-	SetWeightedLine(e WeightedLine)
+	// Whether l, l.From() and l.To() are stored
+	// within the graph is implementation dependent.
+	SetWeightedLine(l WeightedLine)
 }
 
 // LineRemover is an interface for removing lines from a multigraph.

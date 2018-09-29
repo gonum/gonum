@@ -17,34 +17,38 @@ type GraphNode struct {
 }
 
 func (g *GraphNode) Has(id int64) bool {
+	return g.Node(id) != nil
+}
+
+func (g *GraphNode) Node(id int64) graph.Node {
 	if id == g.id {
-		return true
+		return g
 	}
 
 	visited := map[int64]struct{}{g.id: {}}
 	for _, root := range g.roots {
 		if root.ID() == id {
-			return true
+			return root
 		}
 
 		if root.has(id, visited) {
-			return true
+			return root
 		}
 	}
 
 	for _, neigh := range g.neighbors {
 		if neigh.ID() == id {
-			return true
+			return neigh
 		}
 
 		if gn, ok := neigh.(*GraphNode); ok {
 			if gn.has(id, visited) {
-				return true
+				return gn
 			}
 		}
 	}
 
-	return false
+	return nil
 }
 
 func (g *GraphNode) has(id int64, visited map[int64]struct{}) bool {

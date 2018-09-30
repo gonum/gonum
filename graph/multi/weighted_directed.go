@@ -114,7 +114,7 @@ func (g *WeightedDirectedGraph) SetWeightedLine(l graph.WeightedLine) {
 		lid  = l.ID()
 	)
 
-	if !g.Has(fid) {
+	if _, ok := g.nodes[fid]; !ok {
 		g.AddNode(from)
 	} else {
 		g.nodes[fid] = from
@@ -122,7 +122,7 @@ func (g *WeightedDirectedGraph) SetWeightedLine(l graph.WeightedLine) {
 	if g.from[fid][tid] == nil {
 		g.from[fid][tid] = make(map[int64]graph.WeightedLine)
 	}
-	if !g.Has(tid) {
+	if _, ok := g.nodes[tid]; !ok {
 		g.AddNode(to)
 	} else {
 		g.nodes[tid] = to
@@ -155,13 +155,6 @@ func (g *WeightedDirectedGraph) RemoveLine(fid, tid, id int64) {
 		delete(g.to[tid], fid)
 	}
 	g.lineIDs.Release(id)
-}
-
-// Has returns whether the node exists within the graph.
-func (g *WeightedDirectedGraph) Has(id int64) bool {
-	_, ok := g.nodes[id]
-
-	return ok
 }
 
 // Node returns the node with the given ID if it exists in the graph,

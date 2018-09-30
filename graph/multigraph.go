@@ -19,10 +19,6 @@ type WeightedLine interface {
 
 // Multigraph is a generalized multigraph.
 type Multigraph interface {
-	// Has returns whether the node with the given ID exists
-	// within the multigraph.
-	Has(id int64) bool
-
 	// Node returns the node with the given ID if it exists
 	// in the multigraph, and nil otherwise.
 	Node(id int64) Node

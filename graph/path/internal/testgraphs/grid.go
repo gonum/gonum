@@ -102,19 +102,19 @@ func (g *Grid) Nodes() graph.Nodes {
 	return iterator.NewOrderedNodes(nodes)
 }
 
-// Has returns whether id represents a node in the grid. The state of
-// the AllVisible field determines whether a non-open node is present.
-func (g *Grid) Has(id int64) bool {
-	return 0 <= id && id < int64(len(g.open)) && (g.AllVisible || g.open[id])
-}
-
 // Node returns the node with the given ID if it exists in the graph,
 // and nil otherwise.
 func (g *Grid) Node(id int64) graph.Node {
-	if g.Has(id) {
+	if g.has(id) {
 		return simple.Node(id)
 	}
 	return nil
+}
+
+// has returns whether id represents a node in the grid. The state of
+// the AllVisible field determines whether a non-open node is present.
+func (g *Grid) has(id int64) bool {
+	return 0 <= id && id < int64(len(g.open)) && (g.AllVisible || g.open[id])
 }
 
 // HasOpen returns whether n is an open node in the grid.
@@ -150,7 +150,7 @@ func (g *Grid) RowCol(id int64) (r, c int) {
 // XY returns the cartesian coordinates of n. If n is not a node
 // in the grid, (NaN, NaN) is returned.
 func (g *Grid) XY(id int64) (x, y float64) {
-	if !g.Has(id) {
+	if !g.has(id) {
 		return math.NaN(), math.NaN()
 	}
 	r, c := g.RowCol(id)
@@ -279,7 +279,7 @@ func (g *Grid) Render(path []graph.Node) ([]byte, error) {
 	// want to draw as much as possible before failing.
 	for i, n := range path {
 		id := n.ID()
-		if !g.Has(id) || (i != 0 && !g.HasEdgeBetween(path[i-1].ID(), id)) {
+		if !g.has(id) || (i != 0 && !g.HasEdgeBetween(path[i-1].ID(), id)) {
 			if 0 <= id && id < int64(len(g.open)) {
 				r, c := g.RowCol(id)
 				b[r*(g.c+1)+c] = '!'

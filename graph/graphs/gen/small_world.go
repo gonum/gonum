@@ -40,7 +40,7 @@ func NavigableSmallWorld(dst GraphBuilder, dims []int, p, q int, r float64, src 
 		n *= d
 	}
 	for i := 0; i < n; i++ {
-		if !dst.Has(int64(i)) {
+		if dst.Node(int64(i)) == nil {
 			dst.AddNode(simple.Node(i))
 		}
 	}

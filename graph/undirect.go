@@ -11,9 +11,6 @@ type Undirect struct {
 
 var _ Undirected = Undirect{}
 
-// Has returns whether the node exists within the graph.
-func (g Undirect) Has(id int64) bool { return g.G.Has(id) }
-
 // Node returns the node with the given ID if it exists in the graph,
 // and nil otherwise.
 func (g Undirect) Node(id int64) Node { return g.G.Node(id) }
@@ -79,9 +76,6 @@ var (
 	_ Undirected         = UndirectWeighted{}
 	_ WeightedUndirected = UndirectWeighted{}
 )
-
-// Has returns whether the node exists within the graph.
-func (g UndirectWeighted) Has(id int64) bool { return g.G.Has(id) }
 
 // Node returns the node with the given ID if it exists in the graph,
 // and nil otherwise.

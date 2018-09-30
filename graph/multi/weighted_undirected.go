@@ -106,7 +106,7 @@ func (g *WeightedUndirectedGraph) SetWeightedLine(l graph.WeightedLine) {
 		lid  = l.ID()
 	)
 
-	if !g.Has(fid) {
+	if _, ok := g.nodes[fid]; !ok {
 		g.AddNode(from)
 	} else {
 		g.nodes[fid] = from
@@ -114,7 +114,7 @@ func (g *WeightedUndirectedGraph) SetWeightedLine(l graph.WeightedLine) {
 	if g.lines[fid][tid] == nil {
 		g.lines[fid][tid] = make(map[int64]graph.WeightedLine)
 	}
-	if !g.Has(tid) {
+	if _, ok := g.nodes[tid]; !ok {
 		g.AddNode(to)
 	} else {
 		g.nodes[tid] = to
@@ -144,12 +144,6 @@ func (g *WeightedUndirectedGraph) RemoveLine(fid, tid, id int64) {
 		delete(g.lines[tid], fid)
 	}
 	g.lineIDs.Release(id)
-}
-
-// Has returns whether the node exists within the graph.
-func (g *WeightedUndirectedGraph) Has(id int64) bool {
-	_, ok := g.nodes[id]
-	return ok
 }
 
 // Node returns the node with the given ID if it exists in the graph,
@@ -201,7 +195,7 @@ func (g *WeightedUndirectedGraph) Edges() graph.Edges {
 
 // From returns all nodes in g that can be reached directly from n.
 func (g *WeightedUndirectedGraph) From(id int64) graph.Nodes {
-	if !g.Has(id) {
+	if _, ok := g.nodes[id]; !ok {
 		return nil
 	}
 

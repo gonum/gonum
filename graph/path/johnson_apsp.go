@@ -86,14 +86,10 @@ var (
 	_ graph.Weighted = johnsonWeightAdjuster{}
 )
 
-func (g johnsonWeightAdjuster) Has(id int64) bool {
-	if g.bellmanFord && id == g.q {
-		return true
-	}
-	panic("path: unintended use of johnsonWeightAdjuster")
-}
-
 func (g johnsonWeightAdjuster) Node(id int64) graph.Node {
+	if g.bellmanFord && id == g.q {
+		return simple.Node(id)
+	}
 	panic("path: unintended use of johnsonWeightAdjuster")
 }
 
@@ -116,7 +112,7 @@ func (g johnsonWeightAdjuster) WeightedEdge(_, _ int64) graph.WeightedEdge {
 }
 
 func (g johnsonWeightAdjuster) Edge(uid, vid int64) graph.Edge {
-	if g.bellmanFord && uid == g.q && g.g.Has(vid) {
+	if g.bellmanFord && uid == g.q && g.g.Node(vid) != nil {
 		return simple.Edge{F: johnsonGraphNode(g.q), T: simple.Node(vid)}
 	}
 	return g.edgeTo(uid, vid)

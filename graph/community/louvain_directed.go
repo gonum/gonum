@@ -336,18 +336,18 @@ func reduceDirected(g graph.Directed, communities [][]graph.Node) *ReducedDirect
 	return &r
 }
 
-// Has returns whether the node exists within the graph.
-func (g *ReducedDirected) Has(id int64) bool {
-	return 0 <= id && id < int64(len(g.nodes))
-}
-
 // Node returns the node with the given ID if it exists in the graph,
 // and nil otherwise.
 func (g *ReducedDirected) Node(id int64) graph.Node {
-	if g.Has(id) {
+	if g.has(id) {
 		return g.nodes[id]
 	}
 	return nil
+}
+
+// has returns whether the node exists within the graph.
+func (g *ReducedDirected) has(id int64) bool {
+	return 0 <= id && id < int64(len(g.nodes))
 }
 
 // Nodes returns all the nodes in the graph.

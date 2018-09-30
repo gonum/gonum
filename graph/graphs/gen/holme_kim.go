@@ -48,7 +48,7 @@ func TunableClusteringScaleFree(dst graph.UndirectedBuilder, n, m int, p float64
 	// Initial condition.
 	wt := make([]float64, n)
 	for u := 0; u < m; u++ {
-		if !dst.Has(int64(0)) {
+		if dst.Node(int64(0)) == nil {
 			dst.AddNode(simple.Node(u))
 		}
 		// We need to give equal probability for
@@ -129,7 +129,7 @@ func PreferentialAttachment(dst graph.UndirectedBuilder, n, m int, src rand.Sour
 	// Initial condition.
 	wt := make([]float64, n)
 	for u := 0; u < m; u++ {
-		if !dst.Has(int64(u)) {
+		if dst.Node(int64(u)) == nil {
 			dst.AddNode(simple.Node(u))
 		}
 		// We need to give equal probability for

@@ -71,16 +71,6 @@ func NewDirectedMatrixFrom(nodes []graph.Node, init, self, absent float64) *Dire
 	return g
 }
 
-// Has returns whether the node exists within the graph.
-func (g *DirectedMatrix) Has(id int64) bool {
-	return g.has(id)
-}
-
-func (g *DirectedMatrix) has(id int64) bool {
-	r, _ := g.mat.Dims()
-	return 0 <= id && id < int64(r)
-}
-
 // Node returns the node with the given ID if it exists in the graph,
 // and nil otherwise.
 func (g *DirectedMatrix) Node(id int64) graph.Node {
@@ -91,6 +81,11 @@ func (g *DirectedMatrix) Node(id int64) graph.Node {
 		return Node(id)
 	}
 	return g.nodes[id]
+}
+
+func (g *DirectedMatrix) has(id int64) bool {
+	r, _ := g.mat.Dims()
+	return 0 <= id && id < int64(r)
 }
 
 // Nodes returns all the nodes in the graph.

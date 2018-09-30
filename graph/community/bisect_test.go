@@ -62,7 +62,7 @@ func init() {
 	friends = simple.NewWeightedUndirectedGraph(0, 0)
 	for u, e := range middleEast.friends {
 		// Ensure unconnected nodes are included.
-		if !friends.Has(int64(u)) {
+		if friends.Node(int64(u)) == nil {
 			friends.AddNode(simple.Node(u))
 		}
 		for v := range e {
@@ -72,7 +72,7 @@ func init() {
 	enemies = simple.NewWeightedUndirectedGraph(0, 0)
 	for u, e := range middleEast.enemies {
 		// Ensure unconnected nodes are included.
-		if !enemies.Has(int64(u)) {
+		if enemies.Node(int64(u)) == nil {
 			enemies.AddNode(simple.Node(u))
 		}
 		for v := range e {
@@ -127,7 +127,7 @@ func TestProfileUndirected(t *testing.T) {
 		g := simple.NewUndirectedGraph()
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
-			if !g.Has(int64(u)) {
+			if g.Node(int64(u)) == nil {
 				g.AddNode(simple.Node(u))
 			}
 			for v := range e {
@@ -144,7 +144,7 @@ func TestProfileWeightedUndirected(t *testing.T) {
 		g := simple.NewWeightedUndirectedGraph(0, 0)
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
-			if !g.Has(int64(u)) {
+			if g.Node(int64(u)) == nil {
 				g.AddNode(simple.Node(u))
 			}
 			for v := range e {
@@ -186,7 +186,7 @@ func TestProfileDirected(t *testing.T) {
 		g := simple.NewDirectedGraph()
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
-			if !g.Has(int64(u)) {
+			if g.Node(int64(u)) == nil {
 				g.AddNode(simple.Node(u))
 			}
 			for v := range e {
@@ -203,7 +203,7 @@ func TestProfileWeightedDirected(t *testing.T) {
 		g := simple.NewWeightedDirectedGraph(0, 0)
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
-			if !g.Has(int64(u)) {
+			if g.Node(int64(u)) == nil {
 				g.AddNode(simple.Node(u))
 			}
 			for v := range e {

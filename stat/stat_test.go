@@ -1749,3 +1749,98 @@ func TestStdScore(t *testing.T) {
 		}
 	}
 }
+
+func TestFractionalRank(t *testing.T) {
+
+	for _, v := range []struct {
+		x      []float64
+		ranks  []float64
+		inds   []int
+		sorted []float64
+		eranks []float64 // correct ranks
+	}{
+		{
+			[]float64{3, 1, 5, 4},
+			[]float64{0, 0, 0, 0},
+			nil,
+			nil,
+			[]float64{1, 0, 3, 2},
+		},
+		{
+			[]float64{3, 2, 2, 1, 0},
+			[]float64{0, 0, 0, 0, 0},
+			nil,
+			nil,
+			[]float64{4, 2.5, 2.5, 1, 0},
+		},
+		{
+			[]float64{2, 2, 2, 3, 3, 3},
+			[]float64{0, 0, 0, 0, 0, 0},
+			nil,
+			nil,
+			[]float64{1, 1, 1, 4, 4, 4},
+		},
+		{
+			[]float64{1, 0, 2, 2, 1, 3},
+			[]float64{0, 0, 0, 0, 0, 0},
+			nil,
+			nil,
+			[]float64{1.5, 0, 3.5, 3.5, 1.5, 5},
+		},
+	} {
+		FractionalRank(v.x, v.ranks, v.inds, v.sorted)
+		if !floats.Equal(v.ranks, v.eranks) {
+			t.Fail()
+		}
+
+	}
+}
+
+func TestMannWhitneyU(t *testing.T) {
+
+	for _, v := range []struct {
+		x      []float64
+		y      []float64
+		stat   float64
+		pvalue float64
+	}{
+		{
+			[]float64{1, 3, 5},
+			[]float64{2, 4, 6},
+			3,
+			0.6625205835400574,
+		},
+		{
+			[]float64{1, 2, 3},
+			[]float64{2, 3, 4},
+			2,
+			0.36868826936178156,
+		},
+		{
+			[]float64{1, 3, 6, 3},
+			[]float64{2, 2},
+			6,
+			0.474549143449401,
+		},
+		{
+			[]float64{2, 2},
+			[]float64{1, 3, 6, 3},
+			2,
+			0.474549143449401,
+		},
+		{
+			[]float64{2, 2},
+			[]float64{3, 2, 1, 2},
+			4,
+			0.7841912294016191,
+		},
+	} {
+		stat, pvalue, _, _ := MannWhitneyU(v.x, v.y)
+		if math.Abs(stat-v.stat) > 1e-6 {
+			t.Fail()
+		}
+		if math.Abs(pvalue-v.pvalue) > 1e-6 {
+			t.Fail()
+		}
+	}
+}

@@ -1261,3 +1261,88 @@ func MeanVariance(x, weights []float64) (mean, variance float64) {
 	variance = (ss - compensation*compensation/sumWeights) / (sumWeights - 1)
 	return
 }
+
+// FractionalRank calculates the ranks of the elements in the input slice, using
+// the average rank for ties.  The fractional ranks are placed in the ranks argument,
+// which must have the same length as the input slice.  The inds and sorted arguments
+// contain the results of calling argsort on x, and the sorted values of x, respectively.
+// inds and sorted may be passed as nil arrays.
+func FractionalRank(x []float64, ranks []float64, inds []int, sorted []float64) {
+
+	n := len(x)
+
+	if len(ranks) != n {
+		panic("stat: wrong length for ranks argument")
+	}
+
+	if len(inds) != n {
+		inds = make([]int, n)
+	}
+
+	if len(sorted) != n {
+		sorted = make([]float64, n)
+	}
+
+	copy(sorted, x)
+	floats.Argsort(sorted, inds)
+
+	for i := 0; i < n; {
+		var j int
+		f := float64(i)
+		for j = i + 1; j < n && sorted[j] == sorted[i]; j++ {
+			f += float64(j)
+		}
+		f /= float64(j - i)
+		for ; i < j; i++ {
+			ranks[inds[i]] = f
+		}
+	}
+}
+
+// MannWhitneyU conducts a two-sided Mann-Whitney U test for the null hypothesis
+// that two samples are drawn independently from the same population.  The two samples
+// are provided as slices.  The returned values are the U test statistic, the p-value
+// (with continuity correction), the mean of the U statistic under the null distribution,
+// and the standard deviation of the U statistic under the null distribution.
+func MannWhitneyU(x, y []float64) (float64, float64, float64, float64) {
+
+	n1, n2 := len(x), len(y)
+	m := n1 + n2
+
+	xy := make([]float64, m)
+	copy(xy, x)
+	copy(xy[n1:m], y)
+
+	ranks := make([]float64, m)
+	sorted := make([]float64, m)
+	FractionalRank(xy, ranks, nil, sorted)
+
+	// The U statistic
+	u1 := float64(n1) + floats.Sum(ranks[0:n1]) - float64(n1*(n1+1)/2)
+	u2 := float64(n1*n2) - u1
+	bigu := u1
+	if u2 > u1 {
+		bigu = u2
+	}
+
+	// The null mean
+	mean := float64(n1*n2)/2 + 0.5
+
+	// The null standard deviation, corrected for ties
+	sd := 0.0
+	var i, j int
+	for i < m {
+		for j = i + 1; j < m && sorted[j] == sorted[i]; j++ {
+		}
+		t := float64(j - i)
+		sd += t * (t*t - 1) / float64(m*(m-1))
+		i = j
+	}
+	sd = float64(n1*n2) * (float64(m) + 1 - sd) / 12
+	sd = math.Sqrt(sd)
+
+	zscore := (bigu - mean) / sd
+	pvalue := 1 + math.Erf(-math.Abs(zscore)/math.Sqrt(2))
+
+	return u1, pvalue, mean, sd
+}

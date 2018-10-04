@@ -1076,6 +1076,7 @@ func empiricalQuantile(p float64, x, weights []float64, sumWeights float64) floa
 // Skew computes the skewness of the sample data.
 // If weights is nil then all of the weights are 1. If weights is not nil, then
 // len(x) must equal len(weights).
+// Note that in case of weights summing to 1, a biaised variance estimator must be used instead
 func Skew(x, weights []float64) float64 {
 
 	mean, std := MeanStdDev(x, weights)
@@ -1195,7 +1196,8 @@ func StdDev(x, weights []float64) float64 {
 	return std
 }
 
-// MeanStdDev returns the sample mean and standard deviation
+// MeanStdDev returns the sample mean and unbiaised standard deviation
+// Note that in case of weights summing to 1, a biaised variance estimator must be used instead
 func MeanStdDev(x, weights []float64) (mean, std float64) {
 	mean, variance := MeanVariance(x, weights)
 	return mean, math.Sqrt(variance)
@@ -1213,28 +1215,30 @@ func StdScore(x, mean, std float64) float64 {
 	return (x - mean) / std
 }
 
-// Variance computes the weighted sample variance:
+// Variance computes the unbiaised weighted sample variance:
 //  \sum_i w_i (x_i - mean)^2 / (sum_i w_i - 1)
 // If weights is nil then all of the weights are 1. If weights is not nil, then
 // len(x) must equal len(weights).
+// Note that in case of weights summing to 1, a biaised variance estimator must be used instead
 func Variance(x, weights []float64) float64 {
 	_, variance := MeanVariance(x, weights)
 	return variance
 }
 
-// MeanVariance computes the sample mean and variance, where the mean and variance are
+// MeanVariance computes the sample mean and unbiaised variance, where the mean and variance are
 //  \sum_i w_i * x_i / (sum_i w_i)
 //  \sum_i w_i (x_i - mean)^2 / (sum_i w_i - 1)
 // respectively.
 // If weights is nil then all of the weights are 1. If weights is not nil, then
 // len(x) must equal len(weights).
-func MeanVariance(x, weights []float64) (mean, variance float64) {
+// Note that in case of weights summing to 1, a biaised variance estimator must be used instead
+func MeanVariance(x, weights []float64) (float64, float64) {
 	// This uses the corrected two-pass algorithm (1.7), from "Algorithms for computing
 	// the sample variance: Analysis and recommendations" by Chan, Tony F., Gene H. Golub,
 	// and Randall J. LeVeque.
 
 	// note that this will panic if the slice lengths do not match
-	mean = Mean(x, weights)
+	mean := Mean(x, weights)
 	var (
 		ss           float64
 		compensation float64
@@ -1245,8 +1249,8 @@ func MeanVariance(x, weights []float64) (mean, variance float64) {
 			ss += d * d
 			compensation += d
 		}
-		variance = (ss - compensation*compensation/float64(len(x))) / float64(len(x)-1)
-		return
+		variance := (ss - compensation*compensation/float64(len(x))) / float64(len(x)-1)
+		return mean, variance
 	}
 
 	var sumWeights float64
@@ -1258,6 +1262,6 @@ func MeanVariance(x, weights []float64) (mean, variance float64) {
 		compensation += wd
 		sumWeights += w
 	}
-	variance = (ss - compensation*compensation/sumWeights) / (sumWeights - 1)
-	return
+	variance := (ss - compensation*compensation/sumWeights) / (sumWeights - 1)
+	return mean, variance
 }

@@ -20,6 +20,8 @@ type CumulantKind int
 const (
 	// Empirical treats the distribution as the actual empirical distribution.
 	Empirical CumulantKind = 1
+	// LinInterp use a linear interpolation on the empirical distribution.
+	LinInterp CumulantKind = 2
 )
 
 // bhattacharyyaCoeff computes the Bhattacharyya Coefficient for probability distributions given by:
@@ -1028,6 +1030,7 @@ func MomentAbout(moment float64, x []float64, mean float64, weights []float64) f
 // CumulantKind behaviors:
 //  - Empirical: Returns the lowest value q for which q is greater than or equal
 //  to the fraction p of samples
+//  - LinInterp: Returns the linearly interpolated value
 func Quantile(p float64, c CumulantKind, x, weights []float64) float64 {
 	if !(p >= 0 && p <= 1) {
 		panic("stat: percentile out of bounds")
@@ -1052,6 +1055,8 @@ func Quantile(p float64, c CumulantKind, x, weights []float64) float64 {
 	switch c {
 	case Empirical:
 		return empiricalQuantile(p, x, weights, sumWeights)
+	case LinInterp:
+		return linInterpQuantile(p, x, weights, sumWeights)
 	default:
 		panic("stat: bad cumulant kind")
 	}
@@ -1068,6 +1073,30 @@ func empiricalQuantile(p float64, x, weights []float64, sumWeights float64) floa
 		}
 		if cumsum >= fidx {
 			return x[i]
+		}
+	}
+	panic("impossible")
+}
+
+func linInterpQuantile(p float64, x, weights []float64, sumWeights float64) float64 {
+	var cumsum float64
+	fidx := p * sumWeights
+	for i := range x {
+		if weights == nil {
+			cumsum++
+		} else {
+			cumsum += weights[i]
+		}
+		if cumsum >= fidx {
+			if i == 0 {
+				return x[i]
+			}
+			width := 1.0
+			if weights != nil {
+				width = weights[i]
+			}
+			t := (cumsum - fidx) / width
+			return t*x[i-1] + (1.0-t)*x[i]
 		}
 	}
 	panic("impossible")

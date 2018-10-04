@@ -185,7 +185,7 @@ tests:
 			// orthonormal by comparing V^T*V to the identity matrix.
 			I := mat.NewDiagonal(c, nil)
 			for k := 0; k < c; k++ {
-				I.SetSymBand(k, k, 1)
+				I.SetDiag(k, 1)
 			}
 			var vv mat.Dense
 			vv.Mul(vecs.T(), vecs)

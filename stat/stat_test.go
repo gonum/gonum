@@ -576,7 +576,7 @@ and 0 data points above 1000. Since dividers has length 5, there will be 4 bins.
 	max := floats.Max(x)
 	// Increase the maximum divider so that the maximum value of x is contained
 	// within the last bucket.
-	max += 1
+	max++
 	floats.Span(dividers, min, max)
 	// Span includes the min and the max. Trim the dividers to create 10 buckets
 	hist = Histogram(nil, dividers, x, nil)

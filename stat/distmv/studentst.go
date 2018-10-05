@@ -226,17 +226,17 @@ func findUnob(observed []int, dim int) (unobserved []int) {
 //  covariance(i, j) = E[(x_i - E[x_i])(x_j - E[x_j])]
 // If the input matrix is nil a new matrix is allocated, otherwise the result
 // is stored in-place into the input.
-func (st *StudentsT) CovarianceMatrix(s *mat.SymDense) *mat.SymDense {
-	if s == nil {
-		s = mat.NewSymDense(st.dim, nil)
+func (s *StudentsT) CovarianceMatrix(m *mat.SymDense) *mat.SymDense {
+	if m == nil {
+		m = mat.NewSymDense(s.dim, nil)
 	}
-	sn := s.Symmetric()
-	if sn != st.dim {
+	sn := m.Symmetric()
+	if sn != s.dim {
 		panic("normal: input matrix size mismatch")
 	}
-	s.CopySym(&st.sigma)
-	s.ScaleSym(st.nu/(st.nu-2), s)
-	return s
+	m.CopySym(&s.sigma)
+	m.ScaleSym(s.nu/(s.nu-2), m)
+	return m
 }
 
 // Dim returns the dimension of the distribution.
@@ -293,8 +293,8 @@ func (s *StudentsT) MarginalStudentsT(vars []int, src rand.Source) (dist *Studen
 	return NewStudentsT(newMean, &newSigma, s.nu, src)
 }
 
-// MarginalStudentsT returns the marginal distribution of the given input variable.
-// That is, MarginalStudentsT returns
+// MarginalStudentsTSingle returns the marginal distribution of the given input variable.
+// That is, MarginalStudentsTSingle returns
 //  p(x_i) = \int_{x_o} p(x_i | x_o) p(x_o) dx_o
 // where i is the input index, and x_o are the remaining dimensions.
 // See https://en.wikipedia.org/wiki/Marginal_distribution for more information.

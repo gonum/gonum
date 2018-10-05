@@ -10,6 +10,7 @@ import (
 	"golang.org/x/exp/rand"
 )
 
+// Bound represents [Min, Max] bounds
 type Bound struct {
 	Min float64
 	Max float64

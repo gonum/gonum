@@ -30,7 +30,11 @@ var (
 
 // WeightedDirectedGraph implements a generalized directed graph.
 type WeightedDirectedGraph struct {
-	EdgeWeightFunc func([]graph.WeightedLine) float64
+	// EdgeWEightFunc is used to provide
+	// the WeightFunc function for WeightedEdge
+	// values returned by the graph.
+	// WeightFunc must accept a nil input.
+	EdgeWeightFunc func(graph.WeightedLines) float64
 
 	nodes map[int64]graph.Node
 	from  map[int64]map[int64]map[int64]graph.WeightedLine
@@ -188,16 +192,22 @@ func (g *WeightedDirectedGraph) Nodes() graph.Nodes {
 // Edges returns all the edges in the graph. Each edge in the returned slice
 // is a multi.WeightedEdge.
 func (g *WeightedDirectedGraph) Edges() graph.Edges {
+	if len(g.nodes) == 0 {
+		return nil
+	}
 	var edges []graph.Edge
 	for _, u := range g.nodes {
 		for _, e := range g.from[u.ID()] {
-			var lines WeightedEdge
+			var lines []graph.WeightedLine
 			for _, l := range e {
-				lines.Lines = append(lines.Lines, l)
+				lines = append(lines, l)
 			}
-			if len(lines.Lines) != 0 {
-				lines.WeightFunc = g.EdgeWeightFunc
-				edges = append(edges, lines)
+			if len(lines) != 0 {
+				edges = append(edges, WeightedEdge{
+					F: u, T: lines[0].To(),
+					WeightedLines: iterator.NewOrderedWeightedLines(lines),
+					WeightFunc:    g.EdgeWeightFunc,
+				})
 			}
 		}
 	}
@@ -207,16 +217,22 @@ func (g *WeightedDirectedGraph) Edges() graph.Edges {
 // WeightedEdges returns all the edges in the graph. Each edge in the returned slice
 // is a multi.WeightedEdge.
 func (g *WeightedDirectedGraph) WeightedEdges() graph.WeightedEdges {
+	if len(g.nodes) == 0 {
+		return nil
+	}
 	var edges []graph.WeightedEdge
 	for _, u := range g.nodes {
 		for _, e := range g.from[u.ID()] {
-			var lines WeightedEdge
+			var lines []graph.WeightedLine
 			for _, l := range e {
-				lines.Lines = append(lines.Lines, l)
+				lines = append(lines, l)
 			}
-			if len(lines.Lines) != 0 {
-				lines.WeightFunc = g.EdgeWeightFunc
-				edges = append(edges, lines)
+			if len(lines) != 0 {
+				edges = append(edges, WeightedEdge{
+					F: u, T: lines[0].To(),
+					WeightedLines: iterator.NewOrderedWeightedLines(lines),
+					WeightFunc:    g.EdgeWeightFunc,
+				})
 			}
 		}
 	}
@@ -282,11 +298,15 @@ func (g *WeightedDirectedGraph) Edge(uid, vid int64) graph.Edge {
 // The node v must be directly reachable from u as defined by the From method.
 // The returned graph.WeightedEdge is a multi.WeightedEdge if an edge exists.
 func (g *WeightedDirectedGraph) WeightedEdge(uid, vid int64) graph.WeightedEdge {
-	lines := graph.WeightedLinesOf(g.WeightedLines(uid, vid))
-	if len(lines) == 0 {
+	lines := g.WeightedLines(uid, vid)
+	if lines == nil {
 		return nil
 	}
-	return WeightedEdge{Lines: lines, WeightFunc: g.EdgeWeightFunc}
+	return WeightedEdge{
+		F: g.Node(uid), T: g.Node(vid),
+		WeightedLines: lines,
+		WeightFunc:    g.EdgeWeightFunc,
+	}
 }
 
 // Lines returns the lines from u to v if such any such lines exists and nil otherwise.
@@ -320,6 +340,6 @@ func (g *WeightedDirectedGraph) WeightedLines(uid, vid int64) graph.WeightedLine
 // Weight returns the weight for the lines between x and y summarised by the receiver's
 // EdgeWeightFunc. Weight returns true if an edge exists between x and y, false otherwise.
 func (g *WeightedDirectedGraph) Weight(uid, vid int64) (w float64, ok bool) {
-	lines := graph.WeightedLinesOf(g.WeightedLines(uid, vid))
-	return WeightedEdge{Lines: lines, WeightFunc: g.EdgeWeightFunc}.Weight(), len(lines) != 0
+	lines := g.WeightedLines(uid, vid)
+	return WeightedEdge{WeightedLines: lines, WeightFunc: g.EdgeWeightFunc}.Weight(), lines != nil
 }

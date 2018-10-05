@@ -20,7 +20,7 @@ type CumulantKind int
 const (
 	// Empirical treats the distribution as the actual empirical distribution.
 	Empirical CumulantKind = 1
-	// LinInterp use a linear interpolation on the empirical distribution.
+	// LinInterp uses a linear interpolation on the empirical distribution.
 	LinInterp CumulantKind = 4
 )
 
@@ -1091,12 +1091,11 @@ func linInterpQuantile(p float64, x, weights []float64, sumWeights float64) floa
 			if i == 0 {
 				return x[i]
 			}
-			width := 1.0
+			t := cumsum - fidx
 			if weights != nil {
-				width = weights[i]
+				t /= weights[i]
 			}
-			t := (cumsum - fidx) / width
-			return t*x[i-1] + (1.0-t)*x[i]
+			return t*x[i-1] + (1-t)*x[i]
 		}
 	}
 	panic("impossible")

@@ -21,7 +21,7 @@ const (
 	// Empirical treats the distribution as the actual empirical distribution.
 	Empirical CumulantKind = 1
 	// LinInterp use a linear interpolation on the empirical distribution.
-	LinInterp CumulantKind = 2
+	LinInterp CumulantKind = 4
 )
 
 // bhattacharyyaCoeff computes the Bhattacharyya Coefficient for probability distributions given by:

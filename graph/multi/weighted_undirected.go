@@ -197,7 +197,7 @@ func (g *WeightedUndirectedGraph) Edges() graph.Edges {
 			}
 			if len(lines) != 0 {
 				edges = append(edges, WeightedEdge{
-					F: lines[0].From(), T: lines[0].To(),
+					F: g.Node(lines[0].From().ID()), T: g.Node(lines[0].To().ID()),
 					WeightedLines: iterator.NewOrderedWeightedLines(lines),
 					WeightFunc:    g.EdgeWeightFunc,
 				})
@@ -228,7 +228,7 @@ func (g *WeightedUndirectedGraph) WeightedEdges() graph.WeightedEdges {
 			}
 			if len(lines) != 0 {
 				edges = append(edges, WeightedEdge{
-					F: lines[0].From(), T: lines[0].To(),
+					F: g.Node(lines[0].From().ID()), T: g.Node(lines[0].To().ID()),
 					WeightedLines: iterator.NewOrderedWeightedLines(lines),
 					WeightFunc:    g.EdgeWeightFunc,
 				})

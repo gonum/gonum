@@ -39,8 +39,8 @@ var gexfExampleTests = []struct {
 						{ID: "0", Source: "0", Target: "1"},
 					},
 				},
-				DefaultEdgeType: "directed",
-				Mode:            "static",
+				DefaultEdgeType: stringPtr("directed"),
+				Mode:            stringPtr("static"),
 			},
 			Version: "1.2",
 		},
@@ -66,7 +66,7 @@ var gexfExampleTests = []struct {
 				LastModified: time.Date(2009, 03, 20, 0, 0, 0, 0, time.UTC),
 			},
 			Graph: Graph{
-				Attributes: &Attributes{
+				Attributes: []Attributes{{
 					Class: "node",
 					Attributes: []Attribute{
 						{
@@ -86,7 +86,7 @@ var gexfExampleTests = []struct {
 							Default: stringPtr("true"),
 						},
 					},
-				},
+				}},
 				Nodes: Nodes{
 					Nodes: []Node{
 						{
@@ -129,7 +129,7 @@ var gexfExampleTests = []struct {
 						{ID: "4", Source: "0", Target: "3"},
 					},
 				},
-				DefaultEdgeType: "directed",
+				DefaultEdgeType: stringPtr("directed"),
 			},
 			Version: "1.2",
 		},
@@ -239,8 +239,8 @@ var gexfExampleTests = []struct {
 						{ID: "8", Source: "a", Target: "j"},
 					},
 				},
-				DefaultEdgeType: "directed",
-				Mode:            "static",
+				DefaultEdgeType: stringPtr("directed"),
+				Mode:            stringPtr("static"),
 			},
 			Version: "1.2",
 		},
@@ -315,8 +315,8 @@ var gexfExampleTests = []struct {
 						{ID: "3", Source: "f", Target: "a"},
 					},
 				},
-				DefaultEdgeType: "directed",
-				Mode:            "static",
+				DefaultEdgeType: stringPtr("directed"),
+				Mode:            stringPtr("static"),
 			},
 			Version: "1.2",
 		},

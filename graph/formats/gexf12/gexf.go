@@ -61,9 +61,9 @@ func (t *Meta) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 
 // Graph stores the graph nodes, edges, dynamics and visualization data.
 type Graph struct {
-	Attributes *Attributes `xml:"attributes"`
-	Nodes      Nodes       `xml:"nodes"`
-	Edges      Edges       `xml:"edges"`
+	Attributes []Attributes `xml:"attributes"`
+	Nodes      Nodes        `xml:"nodes"`
+	Edges      Edges        `xml:"edges"`
 	// TimeFormat may be one of "integer", "double", "date" or "dateTime".
 	TimeFormat *string `xml:"timeformat,attr,omitempty"`
 	Start      *string `xml:"start,attr,omitempty"`
@@ -71,11 +71,11 @@ type Graph struct {
 	End        *string `xml:"end,attr,omitempty"`
 	Endopen    *string `xml:"endopen,attr,omitempty"`
 	// DefaultEdgeType may be one of "directed", "undirected" or "mutual".
-	DefaultEdgeType string `xml:"defaultedgetype,attr,omitempty"`
+	DefaultEdgeType *string `xml:"defaultedgetype,attr,omitempty"`
 	// IDType may be one of "integer" or "string".
-	IDType string `xml:"idtype,attr,omitempty"`
+	IDType *string `xml:"idtype,attr,omitempty"`
 	// Mode may be "static" or "dynamic".
-	Mode string `xml:"mode,attr,omitempty"`
+	Mode *string `xml:"mode,attr,omitempty"`
 }
 
 // Attributes holds a collection of potentially dynamic attributes
@@ -99,8 +99,8 @@ type Attribute struct {
 	// Type may be one of "integer", "long", "double", "float",
 	// "boolean", "liststring", "string", or "anyURI".
 	Type    string  `xml:"type,attr"`
-	Default *string `xml:"default"`
-	Options *string `xml:"options"`
+	Default *string `xml:"default,omitempty"`
+	Options *string `xml:"options,omitempty"`
 }
 
 // Nodes holds a collection of nodes constituting a graph or subgraph.

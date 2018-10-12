@@ -13,9 +13,6 @@ import (
 	"time"
 )
 
-func stringPtr(s string) *string    { return &s }
-func float64Ptr(f float64) *float64 { return &f }
-
 var gexfExampleTests = []struct {
 	path        string
 	unmarshaled Content
@@ -39,8 +36,8 @@ var gexfExampleTests = []struct {
 						{ID: "0", Source: "0", Target: "1"},
 					},
 				},
-				DefaultEdgeType: stringPtr("directed"),
-				Mode:            stringPtr("static"),
+				DefaultEdgeType: "directed",
+				Mode:            "static",
 			},
 			Version: "1.2",
 		},
@@ -83,7 +80,7 @@ var gexfExampleTests = []struct {
 							ID:      "2",
 							Title:   "frog",
 							Type:    "boolean",
-							Default: stringPtr("true"),
+							Default: "true",
 						},
 					},
 				}},
@@ -129,7 +126,7 @@ var gexfExampleTests = []struct {
 						{ID: "4", Source: "0", Target: "3"},
 					},
 				},
-				DefaultEdgeType: stringPtr("directed"),
+				DefaultEdgeType: "directed",
 			},
 			Version: "1.2",
 		},
@@ -239,8 +236,8 @@ var gexfExampleTests = []struct {
 						{ID: "8", Source: "a", Target: "j"},
 					},
 				},
-				DefaultEdgeType: stringPtr("directed"),
-				Mode:            stringPtr("static"),
+				DefaultEdgeType: "directed",
+				Mode:            "static",
 			},
 			Version: "1.2",
 		},
@@ -298,13 +295,13 @@ var gexfExampleTests = []struct {
 			Graph: Graph{
 				Nodes: Nodes{
 					Nodes: []Node{
-						{ID: "g", Label: "frog2", ParentID: stringPtr("e")},
+						{ID: "g", Label: "frog2", ParentID: "e"},
 						{ID: "a", Label: "Kevin Bacon"},
-						{ID: "c", Label: "human1", ParentID: stringPtr("b")},
-						{ID: "b", Label: "God", ParentID: stringPtr("a")},
-						{ID: "e", Label: "Me", ParentID: stringPtr("a")},
-						{ID: "d", Label: "human2", ParentID: stringPtr("b")},
-						{ID: "f", Label: "frog1", ParentID: stringPtr("e")},
+						{ID: "c", Label: "human1", ParentID: "b"},
+						{ID: "b", Label: "God", ParentID: "a"},
+						{ID: "e", Label: "Me", ParentID: "a"},
+						{ID: "d", Label: "human2", ParentID: "b"},
+						{ID: "f", Label: "frog1", ParentID: "e"},
 					},
 				},
 				Edges: Edges{
@@ -315,8 +312,8 @@ var gexfExampleTests = []struct {
 						{ID: "3", Source: "f", Target: "a"},
 					},
 				},
-				DefaultEdgeType: stringPtr("directed"),
-				Mode:            stringPtr("static"),
+				DefaultEdgeType: "directed",
+				Mode:            "static",
 			},
 			Version: "1.2",
 		},
@@ -364,7 +361,7 @@ var gexfExampleTests = []struct {
 				},
 				Edges: Edges{
 					Edges: nil,
-					Count: nil,
+					Count: 0,
 				},
 			},
 			Version: "1.2",
@@ -399,7 +396,7 @@ var gexfExampleTests = []struct {
 								R: 239,
 								G: 173,
 								B: 66,
-								A: float64Ptr(0.6),
+								A: 0.6,
 							},
 							Position: &Position{
 								X: 15.783598,

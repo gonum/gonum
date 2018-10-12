@@ -23,8 +23,8 @@ type Content struct {
 	Meta    *Meta    `xml:"meta,omitempty"`
 	Graph   Graph    `xml:"graph"`
 	// Version must be "1.2".
-	Version string  `xml:"version,attr"`
-	Variant *string `xml:"variant,attr,omitempty"`
+	Version string `xml:"version,attr"`
+	Variant string `xml:"variant,attr,omitempty"`
 }
 
 // Meta holds optional metadata associated with the graph.
@@ -65,17 +65,17 @@ type Graph struct {
 	Nodes      Nodes        `xml:"nodes"`
 	Edges      Edges        `xml:"edges"`
 	// TimeFormat may be one of "integer", "double", "date" or "dateTime".
-	TimeFormat *string `xml:"timeformat,attr,omitempty"`
-	Start      *string `xml:"start,attr,omitempty"`
-	Startopen  *string `xml:"startopen,attr,omitempty"`
-	End        *string `xml:"end,attr,omitempty"`
-	Endopen    *string `xml:"endopen,attr,omitempty"`
+	TimeFormat string `xml:"timeformat,attr,omitempty"`
+	Start      string `xml:"start,attr,omitempty"`
+	Startopen  string `xml:"startopen,attr,omitempty"`
+	End        string `xml:"end,attr,omitempty"`
+	Endopen    string `xml:"endopen,attr,omitempty"`
 	// DefaultEdgeType may be one of "directed", "undirected" or "mutual".
-	DefaultEdgeType *string `xml:"defaultedgetype,attr,omitempty"`
+	DefaultEdgeType string `xml:"defaultedgetype,attr,omitempty"`
 	// IDType may be one of "integer" or "string".
-	IDType *string `xml:"idtype,attr,omitempty"`
+	IDType string `xml:"idtype,attr,omitempty"`
 	// Mode may be "static" or "dynamic".
-	Mode *string `xml:"mode,attr,omitempty"`
+	Mode string `xml:"mode,attr,omitempty"`
 }
 
 // Attributes holds a collection of potentially dynamic attributes
@@ -85,11 +85,11 @@ type Attributes struct {
 	// Class be one of "node" or "edge".
 	Class string `xml:"class,attr"`
 	// Mode may be "static" or "dynamic".
-	Mode      *string `xml:"mode,attr,omitempty"`
-	Start     *string `xml:"start,attr,omitempty"`
-	Startopen *string `xml:"startopen,attr,omitempty"`
-	End       *string `xml:"end,attr,omitempty"`
-	Endopen   *string `xml:"endopen,attr,omitempty"`
+	Mode      string `xml:"mode,attr,omitempty"`
+	Start     string `xml:"start,attr,omitempty"`
+	Startopen string `xml:"startopen,attr,omitempty"`
+	End       string `xml:"end,attr,omitempty"`
+	Endopen   string `xml:"endopen,attr,omitempty"`
 }
 
 // Attribute holds a single graph attribute.
@@ -98,14 +98,14 @@ type Attribute struct {
 	Title string `xml:"title,attr"`
 	// Type may be one of "integer", "long", "double", "float",
 	// "boolean", "liststring", "string", or "anyURI".
-	Type    string  `xml:"type,attr"`
-	Default *string `xml:"default,omitempty"`
-	Options *string `xml:"options,omitempty"`
+	Type    string `xml:"type,attr"`
+	Default string `xml:"default,omitempty"`
+	Options string `xml:"options,omitempty"`
 }
 
 // Nodes holds a collection of nodes constituting a graph or subgraph.
 type Nodes struct {
-	Count *int   `xml:"count,attr,omitempty"`
+	Count int    `xml:"count,attr,omitempty"`
 	Nodes []Node `xml:"node,omitempty"`
 }
 
@@ -117,16 +117,16 @@ type Node struct {
 	Spells    *Spells    `xml:"spells"`
 	Nodes     *Nodes     `xml:"nodes"`
 	Edges     *Edges     `xml:"edges"`
-	ParentID  *string    `xml:"pid,attr,omitempty"`
+	ParentID  string     `xml:"pid,attr,omitempty"`
 	Parents   *Parents   `xml:"parents"`
 	Color     *Color     `xml:"http://www.gexf.net/1.2draft/viz color"`
 	Position  *Position  `xml:"http://www.gexf.net/1.2draft/viz position"`
 	Size      *Size      `xml:"http://www.gexf.net/1.2draft/viz size"`
 	Shape     *NodeShape `xml:"http://www.gexf.net/1.2draft/viz shape"`
-	Start     *string    `xml:"start,attr,omitempty"`
-	Startopen *string    `xml:"startopen,attr,omitempty"`
-	End       *string    `xml:"end,attr,omitempty"`
-	Endopen   *string    `xml:"endopen,attr,omitempty"`
+	Start     string     `xml:"start,attr,omitempty"`
+	Startopen string     `xml:"startopen,attr,omitempty"`
+	End       string     `xml:"end,attr,omitempty"`
+	Endopen   string     `xml:"endopen,attr,omitempty"`
 }
 
 // NodeShape holds the visual representation of a node with associated
@@ -135,30 +135,30 @@ type NodeShape struct {
 	Spells *Spells `xml:"spells,omitempty"`
 	// Value be one of "disc", "square", "triangle",
 	// "diamond" or "image".
-	Shape     string  `xml:"value,attr"`
-	URI       *string `xml:"uri,attr,omitempty"`
-	Start     *string `xml:"start,attr,omitempty"`
-	Startopen *string `xml:"startopen,attr,omitempty"`
-	End       *string `xml:"end,attr,omitempty"`
-	Endopen   *string `xml:"endopen,attr,omitempty"`
+	Shape     string `xml:"value,attr"`
+	URI       string `xml:"uri,attr,omitempty"`
+	Start     string `xml:"start,attr,omitempty"`
+	Startopen string `xml:"startopen,attr,omitempty"`
+	End       string `xml:"end,attr,omitempty"`
+	Endopen   string `xml:"endopen,attr,omitempty"`
 }
 
 // Color represents a node or edge color and its associated dynamics.
 type Color struct {
-	Spells    *Spells  `xml:"spells,omitempty"`
-	R         byte     `xml:"r,attr"`
-	G         byte     `xml:"g,attr"`
-	B         byte     `xml:"b,attr"`
-	A         *float64 `xml:"a,attr,omitempty"`
-	Start     *string  `xml:"start,attr,omitempty"`
-	Startopen *string  `xml:"startopen,attr,omitempty"`
-	End       *string  `xml:"end,attr,omitempty"`
-	Endopen   *string  `xml:"endopen,attr,omitempty"`
+	Spells    *Spells `xml:"spells,omitempty"`
+	R         byte    `xml:"r,attr"`
+	G         byte    `xml:"g,attr"`
+	B         byte    `xml:"b,attr"`
+	A         float64 `xml:"a,attr,omitempty"`
+	Start     string  `xml:"start,attr,omitempty"`
+	Startopen string  `xml:"startopen,attr,omitempty"`
+	End       string  `xml:"end,attr,omitempty"`
+	Endopen   string  `xml:"endopen,attr,omitempty"`
 }
 
 // Edges holds a collection of edges constituting a graph or subgraph.
 type Edges struct {
-	Count *int   `xml:"count,attr,omitempty"`
+	Count int    `xml:"count,attr,omitempty"`
 	Edges []Edge `xml:"edge,omitempty"`
 }
 
@@ -170,16 +170,16 @@ type Edge struct {
 	Color     *Color     `xml:"http://www.gexf.net/1.2draft/viz color"`
 	Thickness *Thickness `xml:"http://www.gexf.net/1.2draft/viz thickness"`
 	Shape     *Edgeshape `xml:"http://www.gexf.net/1.2draft/viz shape"`
-	Start     *string    `xml:"start,attr,omitempty"`
-	Startopen *string    `xml:"startopen,attr,omitempty"`
-	End       *string    `xml:"end,attr,omitempty"`
-	Endopen   *string    `xml:"endopen,attr,omitempty"`
+	Start     string     `xml:"start,attr,omitempty"`
+	Startopen string     `xml:"startopen,attr,omitempty"`
+	End       string     `xml:"end,attr,omitempty"`
+	Endopen   string     `xml:"endopen,attr,omitempty"`
 	// Type may be one of directed, undirected, mutual
-	Type   *string  `xml:"type,attr,omitempty"`
-	Label  *string  `xml:"label,attr,omitempty"`
-	Source string   `xml:"source,attr"`
-	Target string   `xml:"target,attr"`
-	Weight *float64 `xml:"weight,attr,omitempty"`
+	Type   string  `xml:"type,attr,omitempty"`
+	Label  string  `xml:"label,attr,omitempty"`
+	Source string  `xml:"source,attr"`
+	Target string  `xml:"target,attr"`
+	Weight float64 `xml:"weight,attr,omitempty"`
 }
 
 // AttVlues holds a collection of attribute values.
@@ -189,12 +189,12 @@ type AttValues struct {
 
 // AttValues holds a single attribute value and its associated dynamics.
 type AttValue struct {
-	For       string  `xml:"for,attr"`
-	Value     string  `xml:"value,attr"`
-	Start     *string `xml:"start,attr,omitempty"`
-	Startopen *string `xml:"startopen,attr,omitempty"`
-	End       *string `xml:"end,attr,omitempty"`
-	Endopen   *string `xml:"endopen,attr,omitempty"`
+	For       string `xml:"for,attr"`
+	Value     string `xml:"value,attr"`
+	Start     string `xml:"start,attr,omitempty"`
+	Startopen string `xml:"startopen,attr,omitempty"`
+	End       string `xml:"end,attr,omitempty"`
+	Endopen   string `xml:"endopen,attr,omitempty"`
 }
 
 // EdgeShape holds the visual representation of an edge with associated
@@ -203,10 +203,10 @@ type Edgeshape struct {
 	// Shape be one of solid, dotted, dashed, double
 	Shape     string  `xml:"value,attr"`
 	Spells    *Spells `xml:"spells,omitempty"`
-	Start     *string `xml:"start,attr,omitempty"`
-	Startopen *string `xml:"startopen,attr,omitempty"`
-	End       *string `xml:"end,attr,omitempty"`
-	Endopen   *string `xml:"endopen,attr,omitempty"`
+	Start     string  `xml:"start,attr,omitempty"`
+	Startopen string  `xml:"startopen,attr,omitempty"`
+	End       string  `xml:"end,attr,omitempty"`
+	Endopen   string  `xml:"endopen,attr,omitempty"`
 }
 
 // Parents holds parent relationships between nodes in a hierarchical
@@ -226,30 +226,30 @@ type Position struct {
 	Y         float64 `xml:"y,attr"`
 	Z         float64 `xml:"z,attr"`
 	Spells    *Spells `xml:"spells,omitempty"`
-	Start     *string `xml:"start,attr,omitempty"`
-	Startopen *string `xml:"startopen,attr,omitempty"`
-	End       *string `xml:"end,attr,omitempty"`
-	Endopen   *string `xml:"endopen,attr,omitempty"`
+	Start     string  `xml:"start,attr,omitempty"`
+	Startopen string  `xml:"startopen,attr,omitempty"`
+	End       string  `xml:"end,attr,omitempty"`
+	Endopen   string  `xml:"endopen,attr,omitempty"`
 }
 
 // Size hold the visual size of a node and its dynamics.
 type Size struct {
 	Value     float64 `xml:"value,attr"`
 	Spells    *Spells `xml:"http://www.gexf.net/1.2draft/viz spells,omitempty"`
-	Start     *string `xml:"start,attr,omitempty"`
-	Startopen *string `xml:"startopen,attr,omitempty"`
-	End       *string `xml:"end,attr,omitempty"`
-	Endopen   *string `xml:"endopen,attr,omitempty"`
+	Start     string  `xml:"start,attr,omitempty"`
+	Startopen string  `xml:"startopen,attr,omitempty"`
+	End       string  `xml:"end,attr,omitempty"`
+	Endopen   string  `xml:"endopen,attr,omitempty"`
 }
 
 // Thickness hold the visual thickness of an edge and its dynamics.
 type Thickness struct {
 	Value     float64 `xml:"value,attr"`
 	Spells    *Spells `xml:"http://www.gexf.net/1.2draft/viz spells,omitempty"`
-	Start     *string `xml:"start,attr,omitempty"`
-	Startopen *string `xml:"startopen,attr,omitempty"`
-	End       *string `xml:"end,attr,omitempty"`
-	Endopen   *string `xml:"endopen,attr,omitempty"`
+	Start     string  `xml:"start,attr,omitempty"`
+	Startopen string  `xml:"startopen,attr,omitempty"`
+	End       string  `xml:"end,attr,omitempty"`
+	Endopen   string  `xml:"endopen,attr,omitempty"`
 }
 
 // Spells holds a collection of time dynamics for a graph entity.
@@ -259,10 +259,10 @@ type Spells struct {
 
 // Spell is a time interval.
 type Spell struct {
-	Start     *string `xml:"start,attr,omitempty"`
-	Startopen *string `xml:"startopen,attr,omitempty"`
-	End       *string `xml:"end,attr,omitempty"`
-	Endopen   *string `xml:"endopen,attr,omitempty"`
+	Start     string `xml:"start,attr,omitempty"`
+	Startopen string `xml:"startopen,attr,omitempty"`
+	End       string `xml:"end,attr,omitempty"`
+	Endopen   string `xml:"endopen,attr,omitempty"`
 }
 
 type xsdDate time.Time

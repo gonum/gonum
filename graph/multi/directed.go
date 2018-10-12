@@ -181,15 +181,22 @@ func (g *DirectedGraph) Nodes() graph.Nodes {
 // Edges returns all the edges in the graph. Each edge in the returned slice
 // is a multi.Edge.
 func (g *DirectedGraph) Edges() graph.Edges {
+	if len(g.nodes) == 0 {
+		return nil
+	}
 	var edges []graph.Edge
 	for _, u := range g.nodes {
 		for _, e := range g.from[u.ID()] {
-			var lines Edge
+			var lines []graph.Line
 			for _, l := range e {
 				lines = append(lines, l)
 			}
 			if len(lines) != 0 {
-				edges = append(edges, lines)
+				edges = append(edges, Edge{
+					F:     g.Node(u.ID()),
+					T:     g.Node(lines[0].To().ID()),
+					Lines: iterator.NewOrderedLines(lines),
+				})
 			}
 		}
 	}
@@ -240,11 +247,11 @@ func (g *DirectedGraph) HasEdgeBetween(xid, yid int64) bool {
 // The node v must be directly reachable from u as defined by the From method.
 // The returned graph.Edge is a multi.Edge if an edge exists.
 func (g *DirectedGraph) Edge(uid, vid int64) graph.Edge {
-	lines := graph.LinesOf(g.Lines(uid, vid))
-	if len(lines) == 0 {
+	l := g.Lines(uid, vid)
+	if l == nil {
 		return nil
 	}
-	return Edge(lines)
+	return Edge{F: g.Node(uid), T: g.Node(vid), Lines: l}
 }
 
 // Lines returns the lines from u to v if such any such lines exists and nil otherwise.

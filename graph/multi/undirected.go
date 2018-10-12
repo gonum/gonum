@@ -171,7 +171,7 @@ func (g *UndirectedGraph) Edges() graph.Edges {
 	seen := make(map[int64]struct{})
 	for _, u := range g.lines {
 		for _, e := range u {
-			var lines Edge
+			var lines []graph.Line
 			for _, l := range e {
 				lid := l.ID()
 				if _, ok := seen[lid]; ok {
@@ -181,7 +181,11 @@ func (g *UndirectedGraph) Edges() graph.Edges {
 				lines = append(lines, l)
 			}
 			if len(lines) != 0 {
-				edges = append(edges, lines)
+				edges = append(edges, Edge{
+					F:     g.Node(lines[0].From().ID()),
+					T:     g.Node(lines[0].To().ID()),
+					Lines: iterator.NewOrderedLines(lines),
+				})
 			}
 		}
 	}
@@ -218,11 +222,11 @@ func (g *UndirectedGraph) EdgeBetween(xid, yid int64) graph.Edge {
 // The node v must be directly reachable from u as defined by the From method.
 // The returned graph.Edge is a multi.Edge if an edge exists.
 func (g *UndirectedGraph) Edge(uid, vid int64) graph.Edge {
-	lines := graph.LinesOf(g.LinesBetween(uid, vid))
-	if len(lines) == 0 {
+	l := g.LinesBetween(uid, vid)
+	if l == nil {
 		return nil
 	}
-	return Edge(lines)
+	return Edge{F: g.Node(uid), T: g.Node(vid), Lines: l}
 }
 
 // Lines returns the lines from u to v if such an edge exists and nil otherwise.
@@ -233,6 +237,9 @@ func (g *UndirectedGraph) Lines(uid, vid int64) graph.Lines {
 
 // LinesBetween returns the lines between nodes x and y.
 func (g *UndirectedGraph) LinesBetween(xid, yid int64) graph.Lines {
+	if !g.HasEdgeBetween(xid, yid) {
+		return nil
+	}
 	var lines []graph.Line
 	for _, l := range g.lines[xid][yid] {
 		lines = append(lines, l)

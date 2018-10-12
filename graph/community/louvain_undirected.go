@@ -307,7 +307,7 @@ func (g *ReducedUndirected) Node(id int64) graph.Node {
 
 // has returns whether the node exists within the graph.
 func (g *ReducedUndirected) has(id int64) bool {
-	return 0 <= id || id < int64(len(g.nodes))
+	return 0 <= id && id < int64(len(g.nodes))
 }
 
 // Nodes returns all the nodes in the graph.

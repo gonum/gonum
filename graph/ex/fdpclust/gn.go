@@ -16,10 +16,6 @@ type GraphNode struct {
 	roots     []*GraphNode
 }
 
-func (g *GraphNode) Has(id int64) bool {
-	return g.Node(id) != nil
-}
-
 func (g *GraphNode) Node(id int64) graph.Node {
 	if id == g.id {
 		return g

@@ -22,7 +22,7 @@ import (
 func DijkstraFrom(u graph.Node, g traverse.Graph) Shortest {
 	var path Shortest
 	if h, ok := g.(graph.Graph); ok {
-		if !h.Has(u.ID()) {
+		if h.Node(u.ID()) == nil {
 			return Shortest{from: u}
 		}
 		path = newShortestFrom(u, graph.NodesOf(h.Nodes()))

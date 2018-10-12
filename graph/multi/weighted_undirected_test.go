@@ -23,7 +23,7 @@ func TestWeightedMaxID(t *testing.T) {
 	delete(nodes, Node(2))
 	n := g.NewNode()
 	g.AddNode(n)
-	if !g.Has(n.ID()) {
+	if g.Node(n.ID()) == nil {
 		t.Error("added node does not exist in graph")
 	}
 	if _, exists := nodes[n]; exists {

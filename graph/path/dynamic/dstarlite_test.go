@@ -389,7 +389,7 @@ var dynamicDStarLiteTests = []struct {
 			l.Grid.AllVisible = false
 			for _, n := range graph.NodesOf(l.Nodes()) {
 				id := n.ID()
-				l.Known[id] = !l.Grid.Has(id)
+				l.Known[id] = l.Grid.Node(id) == nil
 			}
 			l.Grid.AllVisible = all
 

@@ -115,12 +115,12 @@ func (g *WeightedDirectedGraph) SetWeightedEdge(e graph.WeightedEdge) {
 		panic("simple: adding self edge")
 	}
 
-	if !g.Has(fid) {
+	if _, ok := g.nodes[fid]; !ok {
 		g.AddNode(from)
 	} else {
 		g.nodes[fid] = from
 	}
-	if !g.Has(tid) {
+	if _, ok := g.nodes[tid]; !ok {
 		g.AddNode(to)
 	} else {
 		g.nodes[tid] = to
@@ -142,12 +142,6 @@ func (g *WeightedDirectedGraph) RemoveEdge(fid, tid int64) {
 
 	delete(g.from[fid], tid)
 	delete(g.to[tid], fid)
-}
-
-// Has returns whether the node exists within the graph.
-func (g *WeightedDirectedGraph) Has(id int64) bool {
-	_, ok := g.nodes[id]
-	return ok
 }
 
 // Node returns the node with the given ID if it exists in the graph,

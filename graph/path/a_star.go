@@ -24,7 +24,7 @@ import (
 // falling back to NullHeuristic otherwise. If the graph does not implement Weighted,
 // UniformCost is used. AStar will panic if g has an A*-reachable negative edge weight.
 func AStar(s, t graph.Node, g graph.Graph, h Heuristic) (path Shortest, expanded int) {
-	if !g.Has(s.ID()) || !g.Has(t.ID()) {
+	if g.Node(s.ID()) == nil || g.Node(t.ID()) == nil {
 		return Shortest{from: s}, 0
 	}
 	var weight Weighting

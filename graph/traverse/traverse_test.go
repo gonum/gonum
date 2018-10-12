@@ -136,7 +136,7 @@ func TestBreadthFirst(t *testing.T) {
 		g := simple.NewUndirectedGraph()
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
-			if !g.Has(int64(u)) {
+			if g.Node(int64(u)) == nil {
 				g.AddNode(simple.Node(u))
 			}
 			for v := range e {
@@ -224,7 +224,7 @@ func TestDepthFirst(t *testing.T) {
 		g := simple.NewUndirectedGraph()
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
-			if !g.Has(int64(u)) {
+			if g.Node(int64(u)) == nil {
 				g.AddNode(simple.Node(u))
 			}
 			for v := range e {
@@ -285,11 +285,11 @@ func TestWalkAll(t *testing.T) {
 		g := simple.NewUndirectedGraph()
 
 		for u, e := range test.g {
-			if !g.Has(int64(u)) {
+			if g.Node(int64(u)) == nil {
 				g.AddNode(simple.Node(u))
 			}
 			for v := range e {
-				if !g.Has(int64(v)) {
+				if g.Node(int64(v)) == nil {
 					g.AddNode(simple.Node(v))
 				}
 				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v)})

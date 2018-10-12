@@ -36,7 +36,7 @@ func Gnp(dst GraphBuilder, n int, p float64, src rand.Source) error {
 	}
 
 	for i := 0; i < n; i++ {
-		if !dst.Has(int64(i)) {
+		if dst.Node(int64(i)) == nil {
 			dst.AddNode(simple.Node(i))
 		}
 	}
@@ -112,7 +112,7 @@ func Gnm(dst GraphBuilder, n, m int, src rand.Source) error {
 	}
 
 	for i := 0; i < n; i++ {
-		if !dst.Has(int64(i)) {
+		if dst.Node(int64(i)) == nil {
 			dst.AddNode(simple.Node(i))
 		}
 	}
@@ -183,7 +183,7 @@ func SmallWorldsBB(dst GraphBuilder, n, d int, p float64, src rand.Source) error
 	}
 
 	for i := 0; i < n; i++ {
-		if !dst.Has(int64(i)) {
+		if dst.Node(int64(i)) == nil {
 			dst.AddNode(simple.Node(i))
 		}
 	}

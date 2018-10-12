@@ -27,10 +27,6 @@ type WeightedEdge interface {
 
 // Graph is a generalized graph.
 type Graph interface {
-	// Has returns whether a node with the given ID exists
-	// within the graph.
-	Has(id int64) bool
-
 	// Node returns the node with the given ID if it exists
 	// in the graph, and nil otherwise.
 	Node(id int64) Node

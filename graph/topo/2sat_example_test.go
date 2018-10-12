@@ -123,7 +123,7 @@ func twoSat(r io.Reader) (state map[string]bool, ok bool) {
 		// Check for tautology.
 		if variables[0].negated().ID() == variables[1].ID() {
 			for _, v := range variables {
-				if !g.Has(v.ID()) {
+				if g.Node(v.ID()) == nil {
 					g.AddNode(v)
 				}
 			}

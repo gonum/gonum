@@ -109,7 +109,7 @@ func (g *DirectedGraph) SetLine(l graph.Line) {
 		lid  = l.ID()
 	)
 
-	if !g.Has(fid) {
+	if _, ok := g.nodes[fid]; !ok {
 		g.AddNode(from)
 	} else {
 		g.nodes[fid] = from
@@ -117,7 +117,7 @@ func (g *DirectedGraph) SetLine(l graph.Line) {
 	if g.from[fid][tid] == nil {
 		g.from[fid][tid] = make(map[int64]graph.Line)
 	}
-	if !g.Has(tid) {
+	if _, ok := g.nodes[tid]; !ok {
 		g.AddNode(to)
 	} else {
 		g.nodes[tid] = to

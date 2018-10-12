@@ -71,16 +71,6 @@ func NewUndirectedMatrixFrom(nodes []graph.Node, init, self, absent float64) *Un
 	return g
 }
 
-// Has returns whether the node exists within the graph.
-func (g *UndirectedMatrix) Has(id int64) bool {
-	return g.has(id)
-}
-
-func (g *UndirectedMatrix) has(id int64) bool {
-	r := g.mat.Symmetric()
-	return 0 <= id && id < int64(r)
-}
-
 // Node returns the node with the given ID if it exists in the graph,
 // and nil otherwise.
 func (g *UndirectedMatrix) Node(id int64) graph.Node {
@@ -91,6 +81,11 @@ func (g *UndirectedMatrix) Node(id int64) graph.Node {
 		return Node(id)
 	}
 	return g.nodes[id]
+}
+
+func (g *UndirectedMatrix) has(id int64) bool {
+	r := g.mat.Symmetric()
+	return 0 <= id && id < int64(r)
 }
 
 // Nodes returns all the nodes in the graph.

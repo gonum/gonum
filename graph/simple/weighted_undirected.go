@@ -107,12 +107,12 @@ func (g *WeightedUndirectedGraph) SetWeightedEdge(e graph.WeightedEdge) {
 		panic("simple: adding self edge")
 	}
 
-	if !g.Has(fid) {
+	if _, ok := g.nodes[fid]; !ok {
 		g.AddNode(from)
 	} else {
 		g.nodes[fid] = from
 	}
-	if !g.Has(tid) {
+	if _, ok := g.nodes[tid]; !ok {
 		g.AddNode(to)
 	} else {
 		g.nodes[tid] = to
@@ -134,12 +134,6 @@ func (g *WeightedUndirectedGraph) RemoveEdge(fid, tid int64) {
 
 	delete(g.edges[fid], tid)
 	delete(g.edges[tid], fid)
-}
-
-// Has returns whether the node exists within the graph.
-func (g *WeightedUndirectedGraph) Has(id int64) bool {
-	_, ok := g.nodes[id]
-	return ok
 }
 
 // Node returns the node with the given ID if it exists in the graph,
@@ -205,7 +199,7 @@ func (g *WeightedUndirectedGraph) WeightedEdges() graph.WeightedEdges {
 
 // From returns all nodes in g that can be reached directly from n.
 func (g *WeightedUndirectedGraph) From(id int64) graph.Nodes {
-	if !g.Has(id) {
+	if _, ok := g.nodes[id]; !ok {
 		return nil
 	}
 

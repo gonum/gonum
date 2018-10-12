@@ -193,7 +193,8 @@ func (g *DirectedGraph) Edges() graph.Edges {
 			}
 			if len(lines) != 0 {
 				edges = append(edges, Edge{
-					F: g.Node(u.ID()), T: g.Node(lines[0].To().ID()),
+					F:     g.Node(u.ID()),
+					T:     g.Node(lines[0].To().ID()),
 					Lines: iterator.NewOrderedLines(lines),
 				})
 			}

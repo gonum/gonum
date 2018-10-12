@@ -30,7 +30,7 @@ var (
 
 // WeightedDirectedGraph implements a generalized directed graph.
 type WeightedDirectedGraph struct {
-	// EdgeWEightFunc is used to provide
+	// EdgeWeightFunc is used to provide
 	// the WeightFunc function for WeightedEdge
 	// values returned by the graph.
 	// WeightFunc must accept a nil input.
@@ -204,7 +204,8 @@ func (g *WeightedDirectedGraph) Edges() graph.Edges {
 			}
 			if len(lines) != 0 {
 				edges = append(edges, WeightedEdge{
-					F: g.Node(u.ID()), T: g.Node(lines[0].To().ID()),
+					F:             g.Node(u.ID()),
+					T:             g.Node(lines[0].To().ID()),
 					WeightedLines: iterator.NewOrderedWeightedLines(lines),
 					WeightFunc:    g.EdgeWeightFunc,
 				})
@@ -229,7 +230,8 @@ func (g *WeightedDirectedGraph) WeightedEdges() graph.WeightedEdges {
 			}
 			if len(lines) != 0 {
 				edges = append(edges, WeightedEdge{
-					F: g.Node(u.ID()), T: g.Node(lines[0].To().ID()),
+					F:             g.Node(u.ID()),
+					T:             g.Node(lines[0].To().ID()),
 					WeightedLines: iterator.NewOrderedWeightedLines(lines),
 					WeightFunc:    g.EdgeWeightFunc,
 				})

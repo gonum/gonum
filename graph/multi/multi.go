@@ -56,8 +56,8 @@ type WeightedEdge struct {
 	// weight of the lines in Lines. If
 	// WeightFunc is nil, the sum of weights
 	// is used as the edge weight.
-	// The graph.WeightedLines cam be expected
-	// to be positioned at the first line og
+	// The graph.WeightedLines can be expected
+	// to be positioned at the first line of
 	// the iterator on entry and must be
 	// Reset before exit.
 	// WeightFunc must accept a nil input.
@@ -70,7 +70,10 @@ func (e WeightedEdge) From() graph.Node { return e.F }
 // To returns the to-node of the edge.
 func (e WeightedEdge) To() graph.Node { return e.T }
 
-// Weight returns the weight of the edge.
+// Weight returns the weight of the edge. Weight uses WeightFunc
+// field to calculate the weight, so the WeightedLines field is
+// expected to be positioned at the first line and is reset before
+// Weight returns.
 func (e WeightedEdge) Weight() float64 {
 	if e.WeightedLines == nil {
 		return 0

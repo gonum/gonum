@@ -351,7 +351,7 @@ var gexfExampleTests = []struct {
 						{ID: "a", Label: "cheese"},
 						{ID: "b", Label: "cherry"},
 						{ID: "c", Label: "cake", Parents: &Parents{
-							Parent: []Parent{
+							Parents: []Parent{
 								{For: "a"},
 								{For: "b"},
 							},

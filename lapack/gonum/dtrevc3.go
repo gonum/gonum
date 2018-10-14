@@ -33,7 +33,7 @@ import (
 //
 // If side == lapack.EVRight, only right eigenvectors will be computed.
 // If side == lapack.EVLeft, only left eigenvectors will be computed.
-// If side == lapack.EVRightLeft, both right and left eigenvectors will be computed.
+// If side == lapack.EVBoth, both right and left eigenvectors will be computed.
 // For other values of side, Dtrevc3 will panic.
 //
 // If howmny == lapack.EVAll, all right and/or left eigenvectors will be
@@ -61,12 +61,12 @@ import (
 // large, Dtrevc3 will panic.
 //
 // On entry, if howmny is lapack.EVAllMulQ, it is assumed that VL (if side
-// is lapack.EVLeft or lapack.EVRightLeft) contains an n×n matrix QL,
-// and that VR (if side is lapack.EVLeft or lapack.EVRightLeft) contains
+// is lapack.EVLeft or lapack.EVBoth) contains an n×n matrix QL,
+// and that VR (if side is lapack.EVLeft or lapack.EVBoth) contains
 // an n×n matrix QR. QL and QR are typically the orthogonal matrix Q of Schur
 // vectors returned by Dhseqr.
 //
-// On return, if side is lapack.EVLeft or lapack.EVRightLeft,
+// On return, if side is lapack.EVLeft or lapack.EVBoth,
 // VL will contain:
 //  if howmny == lapack.EVAll,      the matrix Y of left eigenvectors of T,
 //  if howmny == lapack.EVAllMulQ,  the matrix Q*Y,
@@ -76,7 +76,7 @@ import (
 //                                  eigenvalues.
 // VL is not referenced if side == lapack.EVRight.
 //
-// On return, if side is lapack.EVRight or lapack.EVRightLeft,
+// On return, if side is lapack.EVRight or lapack.EVBoth,
 // VR will contain:
 //  if howmny == lapack.EVAll,      the matrix X of right eigenvectors of T,
 //  if howmny == lapack.EVAllMulQ,  the matrix Q*X,
@@ -109,7 +109,7 @@ func (impl Implementation) Dtrevc3(side lapack.EVSide, howmny lapack.EVHowMany, 
 	switch side {
 	default:
 		panic(badEVSide)
-	case lapack.EVRight, lapack.EVLeft, lapack.EVRightLeft:
+	case lapack.EVRight, lapack.EVLeft, lapack.EVBoth:
 	}
 	switch howmny {
 	default:
@@ -158,10 +158,10 @@ func (impl Implementation) Dtrevc3(side lapack.EVSide, howmny lapack.EVHowMany, 
 			panic("lapack: insufficient number of columns")
 		}
 		checkMatrix(n, n, t, ldt)
-		if (side == lapack.EVRight || side == lapack.EVRightLeft) && m > 0 {
+		if (side == lapack.EVRight || side == lapack.EVBoth) && m > 0 {
 			checkMatrix(n, m, vr, ldvr)
 		}
-		if (side == lapack.EVLeft || side == lapack.EVRightLeft) && m > 0 {
+		if (side == lapack.EVLeft || side == lapack.EVBoth) && m > 0 {
 			checkMatrix(n, m, vl, ldvl)
 		}
 	}

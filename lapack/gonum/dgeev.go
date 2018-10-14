@@ -181,7 +181,7 @@ func (impl Implementation) Dgeev(jobvl lapack.LeftEVJob, jobvr lapack.RightEVJob
 		if wantvr {
 			// Want left and right eigenvectors.
 			// Copy Schur vectors to VR.
-			side = lapack.EVRightLeft
+			side = lapack.EVBoth
 			impl.Dlacpy(blas.All, n, n, vl, ldvl, vr, ldvr)
 		}
 	} else if wantvr {

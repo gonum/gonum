@@ -26,7 +26,7 @@ const noSVDO = "dgesvd: not coded for overwrite"
 // jobU and jobVT are options for computing the singular vectors. The behavior
 // is as follows
 //  jobU == lapack.SVDAll       All m columns of U are returned in u
-//  jobU == lapack.SVDInPlace   The first min(m,n) columns are returned in u
+//  jobU == lapack.SVDStore     The first min(m,n) columns are returned in u
 //  jobU == lapack.SVDOverwrite The first min(m,n) columns of U are written into a
 //  jobU == lapack.SVDNone      The columns of U are not computed.
 // The behavior is the same for jobVT and the rows of V^T. At most one of jobU
@@ -40,12 +40,12 @@ const noSVDO = "dgesvd: not coded for overwrite"
 // values in decreasing order.
 //
 // u contains the left singular vectors on exit, stored column-wise. If
-// jobU == lapack.SVDAll, u is of size m×m. If jobU == lapack.SVDInPlace u is
+// jobU == lapack.SVDAll, u is of size m×m. If jobU == lapack.SVDStore u is
 // of size m×min(m,n). If jobU == lapack.SVDOverwrite or lapack.SVDNone, u is
 // not used.
 //
 // vt contains the left singular vectors on exit, stored row-wise. If
-// jobV == lapack.SVDAll, vt is of size n×m. If jobVT == lapack.SVDInPlace vt is
+// jobV == lapack.SVDAll, vt is of size n×m. If jobVT == lapack.SVDStore vt is
 // of size min(m,n)×n. If jobVT == lapack.SVDOverwrite or lapack.SVDNone, vt is
 // not used.
 //
@@ -61,12 +61,12 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 	checkMatrix(m, n, a, lda)
 	if jobU == lapack.SVDAll {
 		checkMatrix(m, m, u, ldu)
-	} else if jobU == lapack.SVDInPlace {
+	} else if jobU == lapack.SVDStore {
 		checkMatrix(m, minmn, u, ldu)
 	}
 	if jobVT == lapack.SVDAll {
 		checkMatrix(n, n, vt, ldvt)
-	} else if jobVT == lapack.SVDInPlace {
+	} else if jobVT == lapack.SVDStore {
 		checkMatrix(minmn, n, vt, ldvt)
 	}
 	if jobU == lapack.SVDOverwrite && jobVT == lapack.SVDOverwrite {
@@ -83,13 +83,13 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 	}
 
 	wantua := jobU == lapack.SVDAll
-	wantus := jobU == lapack.SVDInPlace
+	wantus := jobU == lapack.SVDStore
 	wantuas := wantua || wantus
 	wantuo := jobU == lapack.SVDOverwrite
 	wantun := jobU == lapack.SVDNone
 
 	wantva := jobVT == lapack.SVDAll
-	wantvs := jobVT == lapack.SVDInPlace
+	wantvs := jobVT == lapack.SVDStore
 	wantvas := wantva || wantvs
 	wantvo := jobVT == lapack.SVDOverwrite
 	wantvn := jobVT == lapack.SVDNone

@@ -111,16 +111,16 @@ func DgesvdTest(t *testing.T, impl Dgesvder) {
 		svdCheck(t, false, errStr, m, n, s, a, u, ldu, vt, ldvt, aCopy, lda)
 		svdCheckPartial(t, impl, lapack.SVDAll, errStr, uAllOrig, vtAllOrig, aCopy, m, n, a, lda, s, u, ldu, vt, ldvt, work, false)
 
-		// Test InPlace
-		jobU = lapack.SVDInPlace
-		jobVT = lapack.SVDInPlace
+		// Test SVDStore
+		jobU = lapack.SVDStore
+		jobVT = lapack.SVDStore
 		copy(a, aCopy)
 		copy(u, uAllOrig)
 		copy(vt, vtAllOrig)
 
 		impl.Dgesvd(jobU, jobVT, m, n, a, lda, s, u, ldu, vt, ldvt, work, len(work))
 		svdCheck(t, true, errStr, m, n, s, a, u, ldu, vt, ldvt, aCopy, lda)
-		svdCheckPartial(t, impl, lapack.SVDInPlace, errStr, uAllOrig, vtAllOrig, aCopy, m, n, a, lda, s, u, ldu, vt, ldvt, work, false)
+		svdCheckPartial(t, impl, lapack.SVDStore, errStr, uAllOrig, vtAllOrig, aCopy, m, n, a, lda, s, u, ldu, vt, ldvt, work, false)
 	}
 }
 

@@ -197,9 +197,9 @@ const (
 type EVSide byte
 
 const (
-	EVRight     EVSide = 'R' // Only right eigenvectors are computed.
-	EVLeft      EVSide = 'L' // Only left eigenvectors are computed.
-	EVRightLeft EVSide = 'B' // Both right and left eigenvectors are computed.
+	EVRight EVSide = 'R' // Only right eigenvectors are computed.
+	EVLeft  EVSide = 'L' // Only left eigenvectors are computed.
+	EVBoth  EVSide = 'B' // Both right and left eigenvectors are computed.
 )
 
 // EVHowMany specifies which eigenvectors are computed in Dtrevc3 and how.

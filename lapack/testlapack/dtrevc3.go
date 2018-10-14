@@ -22,7 +22,7 @@ type Dtrevc3er interface {
 
 func Dtrevc3Test(t *testing.T, impl Dtrevc3er) {
 	rnd := rand.New(rand.NewSource(1))
-	for _, side := range []lapack.EVSide{lapack.EVRight, lapack.EVLeft, lapack.EVRightLeft} {
+	for _, side := range []lapack.EVSide{lapack.EVRight, lapack.EVLeft, lapack.EVBoth} {
 		for _, howmny := range []lapack.EVHowMany{lapack.EVAll, lapack.EVAllMulQ, lapack.EVSelected} {
 			for _, n := range []int{0, 1, 2, 3, 4, 5, 10, 34, 100} {
 				for _, extra := range []int{0, 11} {

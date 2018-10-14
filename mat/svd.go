@@ -26,15 +26,14 @@ type SVD struct {
 //
 // The full singular value decomposition (kind == SVDFull) deconstructs A as
 //  A = U * Σ * V^T
-// where Σ is an m×n diagonal matrix of singular vectors, U is an m×m unitary
+// where Σ is an m×n diagonal matrix of singular values, U is an m×m unitary
 // matrix of left singular vectors, and V is an n×n matrix of right singular vectors.
 //
 // It is frequently not necessary to compute the full SVD. Computation time and
 // storage costs can be reduced using the appropriate kind. Only the singular
 // values can be computed (kind == SVDNone), or a "thin" representation of the
 // singular vectors (kind = SVDThin). The thin representation can save a significant
-// amount of memory if m >> n. See the documentation for the lapack.SVDKind values
-// for more information.
+// amount of memory if m >> n.
 //
 // Factorize returns whether the decomposition succeeded. If the decomposition
 // failed, routines that require a successful factorization will panic.
@@ -81,8 +80,8 @@ func (svd *SVD) Factorize(a Matrix, kind SVDKind) (ok bool) {
 			Stride: n,
 			Data:   use(svd.vt.Data, min(m, n)*n),
 		}
-		jobU = lapack.SVDInPlace
-		jobVT = lapack.SVDInPlace
+		jobU = lapack.SVDStore
+		jobVT = lapack.SVDStore
 	}
 
 	// A is destroyed on call, so copy the matrix.
@@ -119,7 +118,7 @@ func (svd *SVD) Cond() float64 {
 // Values returns the singular values of the factorized matrix in decreasing order.
 // If the input slice is non-nil, the values will be stored in-place into the slice.
 // In this case, the slice must have length min(m,n), and Values will panic with
-// matrix.ErrSliceLengthMismatch otherwise. If the input slice is nil,
+// ErrSliceLengthMismatch otherwise. If the input slice is nil,
 // a new slice of the appropriate length will be allocated and returned.
 //
 // Values will panic if the receiver does not contain a successful factorization.

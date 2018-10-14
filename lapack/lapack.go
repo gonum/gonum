@@ -108,10 +108,10 @@ const (
 type SVDJob byte
 
 const (
-	SVDAll       SVDJob = 'A' // Compute all singular vectors
-	SVDInPlace   SVDJob = 'S' // Compute the first singular vectors and store them in provided storage.
-	SVDOverwrite SVDJob = 'O' // Compute the singular vectors and store them in input matrix
-	SVDNone      SVDJob = 'N' // Do not compute singular vectors
+	SVDAll       SVDJob = 'A' // Compute all columns of the matrix U or V.
+	SVDStore     SVDJob = 'S' // Compute the singular vectors and store them in the matrix U or V.
+	SVDOverwrite SVDJob = 'O' // Compute the singular vectors and overwrite them on the input matrix A.
+	SVDNone      SVDJob = 'N' // Do not compute singular vectors.
 )
 
 // GSVDJob specifies the singular vector computation type for Generalized SVD.

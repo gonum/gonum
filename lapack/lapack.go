@@ -74,12 +74,12 @@ const (
 type MatrixType byte
 
 const (
-	General  MatrixType = 'G' // A dense matrix (like blas64.General).
+	General  MatrixType = 'G' // A general dense matrix.
 	UpperTri MatrixType = 'U' // An upper triangular matrix.
 	LowerTri MatrixType = 'L' // A lower triangular matrix.
 )
 
-// Pivot specifies the pivot type for plane rotations
+// Pivot specifies the pivot type for plane rotations.
 type Pivot byte
 
 const (
@@ -118,11 +118,11 @@ const (
 type GSVDJob byte
 
 const (
-	GSVDU    GSVDJob = 'U' // Compute orthogonal matrix U
-	GSVDV    GSVDJob = 'V' // Compute orthogonal matrix V
-	GSVDQ    GSVDJob = 'Q' // Compute orthogonal matrix Q
-	GSVDUnit GSVDJob = 'I' // Use unit-initialized matrix
-	GSVDNone GSVDJob = 'N' // Do not compute orthogonal matrix
+	GSVDU    GSVDJob = 'U' // Compute orthogonal matrix U.
+	GSVDV    GSVDJob = 'V' // Compute orthogonal matrix V.
+	GSVDQ    GSVDJob = 'Q' // Compute orthogonal matrix Q.
+	GSVDUnit GSVDJob = 'I' // Use unit-initialized matrix.
+	GSVDNone GSVDJob = 'N' // Do not compute orthogonal matrix.
 )
 
 // EVComp specifies how eigenvectors are computed in Dsteqr.

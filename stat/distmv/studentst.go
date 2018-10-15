@@ -293,8 +293,8 @@ func (s *StudentsT) MarginalStudentsT(vars []int, src rand.Source) (dist *Studen
 	return NewStudentsT(newMean, &newSigma, s.nu, src)
 }
 
-// MarginalStudentsT returns the marginal distribution of the given input variable.
-// That is, MarginalStudentsT returns
+// MarginalStudentsTSingle returns the marginal distribution of the given input variable.
+// That is, MarginalStudentsTSingle returns
 //  p(x_i) = \int_{x_o} p(x_i | x_o) p(x_o) dx_o
 // where i is the input index, and x_o are the remaining dimensions.
 // See https://en.wikipedia.org/wiki/Marginal_distribution for more information.

@@ -226,17 +226,17 @@ func findUnob(observed []int, dim int) (unobserved []int) {
 //  covariance(i, j) = E[(x_i - E[x_i])(x_j - E[x_j])]
 // If the input matrix is nil a new matrix is allocated, otherwise the result
 // is stored in-place into the input.
-func (s *StudentsT) CovarianceMatrix(m *mat.SymDense) *mat.SymDense {
-	if m == nil {
-		m = mat.NewSymDense(s.dim, nil)
+func (st *StudentsT) CovarianceMatrix(s *mat.SymDense) *mat.SymDense {
+	if s == nil {
+		s = mat.NewSymDense(st.dim, nil)
 	}
-	sn := m.Symmetric()
-	if sn != s.dim {
+	sn := s.Symmetric()
+	if sn != st.dim {
 		panic("normal: input matrix size mismatch")
 	}
-	m.CopySym(&s.sigma)
-	m.ScaleSym(s.nu/(s.nu-2), m)
-	return m
+	s.CopySym(&st.sigma)
+	s.ScaleSym(st.nu/(st.nu-2), s)
+	return s
 }
 
 // Dim returns the dimension of the distribution.

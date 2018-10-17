@@ -167,8 +167,8 @@ func (impl Implementation) Dggsvd3(jobU, jobV, jobQ lapack.GSVDJob, m, n, p int,
 	}
 
 	// Compute the Frobenius norm of matrices A and B.
-	anorm := impl.Dlange(lapack.NormFrob, m, n, a, lda, nil)
-	bnorm := impl.Dlange(lapack.NormFrob, p, n, b, ldb, nil)
+	anorm := impl.Dlange(lapack.Frobenius, m, n, a, lda, nil)
+	bnorm := impl.Dlange(lapack.Frobenius, p, n, b, ldb, nil)
 
 	// Get machine precision and set up threshold for determining
 	// the effective numerical rank of the matrices A and B.

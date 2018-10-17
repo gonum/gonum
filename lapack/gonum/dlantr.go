@@ -17,7 +17,7 @@ import (
 func (impl Implementation) Dlantr(norm lapack.MatrixNorm, uplo blas.Uplo, diag blas.Diag, m, n int, a []float64, lda int, work []float64) float64 {
 	checkMatrix(m, n, a, lda)
 	switch norm {
-	case lapack.MaxRowSum, lapack.MaxColumnSum, lapack.NormFrob, lapack.MaxAbs:
+	case lapack.MaxRowSum, lapack.MaxColumnSum, lapack.Frobenius, lapack.MaxAbs:
 	default:
 		panic(badNorm)
 	}
@@ -211,7 +211,7 @@ func (impl Implementation) Dlantr(norm lapack.MatrixNorm, uplo blas.Uplo, diag b
 				return maxsum
 			}
 		}
-	case lapack.NormFrob:
+	case lapack.Frobenius:
 		var nrm float64
 		if diag == blas.Unit {
 			if uplo == blas.Upper {

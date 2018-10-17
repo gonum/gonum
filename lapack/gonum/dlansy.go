@@ -17,7 +17,7 @@ import (
 func (impl Implementation) Dlansy(norm lapack.MatrixNorm, uplo blas.Uplo, n int, a []float64, lda int, work []float64) float64 {
 	checkMatrix(n, n, a, lda)
 	switch norm {
-	case lapack.MaxRowSum, lapack.MaxColumnSum, lapack.NormFrob, lapack.MaxAbs:
+	case lapack.MaxRowSum, lapack.MaxColumnSum, lapack.Frobenius, lapack.MaxAbs:
 	default:
 		panic(badNorm)
 	}
@@ -98,7 +98,7 @@ func (impl Implementation) Dlansy(norm lapack.MatrixNorm, uplo blas.Uplo, n int,
 			}
 		}
 		return max
-	case lapack.NormFrob:
+	case lapack.Frobenius:
 		if uplo == blas.Upper {
 			var sum float64
 			for i := 0; i < n; i++ {

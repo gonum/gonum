@@ -64,10 +64,10 @@ const (
 type MatrixNorm byte
 
 const (
-	MaxAbs       MatrixNorm = 'M' // max(abs(A(i,j)))  ('M')
-	MaxColumnSum MatrixNorm = 'O' // Maximum column sum (one norm) ('1', 'O')
-	MaxRowSum    MatrixNorm = 'I' // Maximum row sum (infinity norm) ('I', 'i')
-	NormFrob     MatrixNorm = 'F' // Frobenius norm (sqrt of sum of squares) ('F', 'f', E, 'e')
+	MaxAbs       MatrixNorm = 'M' // max(abs(A(i,j)))
+	MaxColumnSum MatrixNorm = 'O' // Maximum absolute column sum (one norm)
+	MaxRowSum    MatrixNorm = 'I' // Maximum absolute row sum (infinity norm)
+	Frobenius    MatrixNorm = 'F' // Frobenius norm (sqrt of sum of squares)
 )
 
 // MatrixType represents the kind of matrix represented in the data.

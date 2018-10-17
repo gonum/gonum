@@ -108,8 +108,8 @@ const (
 type SVDJob byte
 
 const (
-	SVDAll       SVDJob = 'A' // Compute all columns of the matrix U or V.
-	SVDStore     SVDJob = 'S' // Compute the singular vectors and store them in the matrix U or V.
+	SVDAll       SVDJob = 'A' // Compute all columns of the orthogonal matrix U or V.
+	SVDStore     SVDJob = 'S' // Compute the singular vectors and store them in the orthogonal matrix U or V.
 	SVDOverwrite SVDJob = 'O' // Compute the singular vectors and overwrite them on the input matrix A.
 	SVDNone      SVDJob = 'N' // Do not compute singular vectors.
 )
@@ -138,24 +138,24 @@ const (
 type EVJob byte
 
 const (
-	EVCompute EVJob = 'V' // Eigenvectors are computed.
-	EVNone    EVJob = 'N' // Eigenvectors are not computed.
+	EVCompute EVJob = 'V' // Compute eigenvectors.
+	EVNone    EVJob = 'N' // Do not compute eigenvectors.
 )
 
 // LeftEVJob specifies whether left eigenvectors are computed in Dgeev.
 type LeftEVJob byte
 
 const (
-	LeftEVCompute LeftEVJob = 'V' // Left eigenvectors are computed.
-	LeftEVNone    LeftEVJob = 'N' // Left eigenvectors are not computed.
+	LeftEVCompute LeftEVJob = 'V' // Compute left eigenvectors.
+	LeftEVNone    LeftEVJob = 'N' // Do not compute left eigenvectors.
 )
 
 // RightEVJob specifies whether right eigenvectors are computed in Dgeev.
 type RightEVJob byte
 
 const (
-	RightEVCompute RightEVJob = 'V' // Right eigenvectors are computed.
-	RightEVNone    RightEVJob = 'N' // Right eigenvectors are not computed.
+	RightEVCompute RightEVJob = 'V' // Compute right eigenvectors.
+	RightEVNone    RightEVJob = 'N' // Do not compute right eigenvectors.
 )
 
 // BalanceJob specifies matrix balancing operation.
@@ -180,26 +180,26 @@ const (
 type SchurComp byte
 
 const (
-	SchurNone SchurComp = 'N' // Schur vectors are not computed.
-	SchurHess SchurComp = 'I' // Schur vectors of the upper Hessenberg marix are computed.
-	SchurOrig SchurComp = 'V' // Schur vectors of the original matrix are computed.
+	SchurOrig SchurComp = 'V' // Compute Schur vectors of the original matrix.
+	SchurHess SchurComp = 'I' // Compute Schur vectors of the upper Hessenberg matrix.
+	SchurNone SchurComp = 'N' // Do not compute Schur vectors.
 )
 
 // UpdateSchurComp specifies whether the matrix of Schur vectors is updated in Dtrexc.
 type UpdateSchurComp byte
 
 const (
-	UpdateSchur     UpdateSchurComp = 'V' // The matrix of Schur vectors is updated.
-	UpdateSchurNone UpdateSchurComp = 'N' // The matrix of Schur vectors is not updated.
+	UpdateSchur     UpdateSchurComp = 'V' // Update the matrix of Schur vectors.
+	UpdateSchurNone UpdateSchurComp = 'N' // Do not update the matrix of Schur vectors.
 )
 
 // EVSide specifies what eigenvectors are computed in Dtrevc3.
 type EVSide byte
 
 const (
-	EVRight EVSide = 'R' // Only right eigenvectors are computed.
-	EVLeft  EVSide = 'L' // Only left eigenvectors are computed.
-	EVBoth  EVSide = 'B' // Both right and left eigenvectors are computed.
+	EVRight EVSide = 'R' // Compute only right eigenvectors.
+	EVLeft  EVSide = 'L' // Compute only left eigenvectors.
+	EVBoth  EVSide = 'B' // Compute both right and left eigenvectors.
 )
 
 // EVHowMany specifies which eigenvectors are computed in Dtrevc3 and how.

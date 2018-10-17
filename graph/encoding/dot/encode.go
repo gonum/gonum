@@ -55,15 +55,30 @@ type Structurer interface {
 	Structure() []Graph
 }
 
+// Structurer represents a graph.Multigraph that can define sub-multigraphs.
+type MultiStructurer interface {
+	Structure() []Multigraph
+}
+
 // Graph wraps named graph.Graph values.
 type Graph interface {
 	graph.Graph
 	DOTID() string
 }
 
+type Multigraph interface {
+	graph.Multigraph
+	DOTID() string
+}
+
 // Subgrapher wraps graph.Node values that represent subgraphs.
 type Subgrapher interface {
 	Subgraph() graph.Graph
+}
+
+// MultiSubgrapher wraps graph.Node values that represent sub-multigraphs.
+type MultiSubgrapher interface {
+	Subgraph() graph.Multigraph
 }
 
 // Marshal returns the DOT encoding for the graph g, applying the prefix
@@ -77,10 +92,32 @@ type Subgrapher interface {
 // implementation of the Node, Attributer, Porter, Attributers, Structurer,
 // Subgrapher and Graph interfaces.
 func Marshal(g graph.Graph, name, prefix, indent string) ([]byte, error) {
-	var p printer
+	var p graphprinter
 	p.indent = indent
 	p.prefix = prefix
 	p.visited = make(map[edge]bool)
+	err := p.print(g, name, false, false)
+	if err != nil {
+		return nil, err
+	}
+	return p.buf.Bytes(), nil
+}
+
+// MarshalMulti returns the DOT encoding for the multigraph g, applying the
+// prefix and indent to the encoding. Name is used to specify the graph name. If
+// name is empty and g implements Graph, the returned string from DOTID
+// will be used. If strict is true the output bytes will be prefixed with
+// the DOT "strict" keyword.
+//
+// Graph serialization will work for a graph.Multigraph without modification,
+// however, advanced GraphViz DOT features provided by Marshal depend on
+// implementation of the Node, Attributer, Porter, Attributers, Structurer,
+// MultiSubgrapher and Multigraph interfaces.
+func MarshalMulti(g graph.Multigraph, name, prefix, indent string) ([]byte, error) {
+	var p multiprinter
+	p.indent = indent
+	p.prefix = prefix
+	p.visited = make(map[line]bool)
 	err := p.print(g, name, false, false)
 	if err != nil {
 		return nil, err
@@ -95,30 +132,21 @@ type printer struct {
 	indent string
 	depth  int
 
-	visited map[edge]bool
-
 	err error
 }
 
-type edge struct {
-	inGraph  string
-	from, to int64
-}
-
-func (p *printer) print(g graph.Graph, name string, needsIndent, isSubgraph bool) error {
-	nodes := graph.NodesOf(g.Nodes())
-	sort.Sort(ordered.ByID(nodes))
-
+func (p *printer) printFrontMatter(name string, needsIndent, isSubgraph, isDirected, isStrict bool) error {
 	p.buf.WriteString(p.prefix)
 	if needsIndent {
 		for i := 0; i < p.depth; i++ {
 			p.buf.WriteString(p.indent)
 		}
 	}
-	if !isSubgraph {
+
+	if !isSubgraph && isStrict {
 		p.buf.WriteString("strict ")
 	}
-	_, isDirected := g.(graph.Directed)
+
 	if isSubgraph {
 		p.buf.WriteString("sub")
 	} else if isDirected {
@@ -126,17 +154,143 @@ func (p *printer) print(g graph.Graph, name string, needsIndent, isSubgraph bool
 	}
 	p.buf.WriteString("graph")
 
-	if name == "" {
-		if g, ok := g.(Graph); ok {
-			name = g.DOTID()
-		}
-	}
 	if name != "" {
 		p.buf.WriteByte(' ')
 		p.buf.WriteString(name)
 	}
 
 	p.openBlock(" {")
+	return nil
+}
+
+func (p *printer) printBackMatter() {
+	p.closeBlock("}")
+}
+
+func (p *printer) writeNode(n graph.Node) {
+	p.buf.WriteString(nodeID(n))
+}
+
+func (p *printer) writePorts(port, cp string) {
+	if port != "" {
+		p.buf.WriteByte(':')
+		p.buf.WriteString(port)
+	}
+	if cp != "" {
+		p.buf.WriteByte(':')
+		p.buf.WriteString(cp)
+	}
+}
+
+func nodeID(n graph.Node) string {
+	switch n := n.(type) {
+	case Node:
+		return n.DOTID()
+	default:
+		return fmt.Sprint(n.ID())
+	}
+}
+
+func graphID(g interface{}, n graph.Node) string {
+	switch g := g.(type) {
+	case Node:
+		return g.DOTID()
+	default:
+		return nodeID(n)
+	}
+}
+
+func (p *printer) writeAttributeList(a encoding.Attributer) {
+	attributes := a.Attributes()
+	switch len(attributes) {
+	case 0:
+	case 1:
+		p.buf.WriteString(" [")
+		p.buf.WriteString(attributes[0].Key)
+		p.buf.WriteByte('=')
+		p.buf.WriteString(attributes[0].Value)
+		p.buf.WriteString("]")
+	default:
+		p.openBlock(" [")
+		for _, att := range attributes {
+			p.newline()
+			p.buf.WriteString(att.Key)
+			p.buf.WriteByte('=')
+			p.buf.WriteString(att.Value)
+		}
+		p.closeBlock("]")
+	}
+}
+
+var attType = []string{"graph", "node", "edge"}
+
+func (p *printer) writeAttributeComplex(ca Attributers) {
+	g, n, e := ca.DOTAttributers()
+	haveWrittenBlock := false
+	for i, a := range []encoding.Attributer{g, n, e} {
+		attributes := a.Attributes()
+		if len(attributes) == 0 {
+			continue
+		}
+		if haveWrittenBlock {
+			p.buf.WriteByte(';')
+		}
+		p.newline()
+		p.buf.WriteString(attType[i])
+		p.openBlock(" [")
+		for _, att := range attributes {
+			p.newline()
+			p.buf.WriteString(att.Key)
+			p.buf.WriteByte('=')
+			p.buf.WriteString(att.Value)
+		}
+		p.closeBlock("]")
+		haveWrittenBlock = true
+	}
+	if haveWrittenBlock {
+		p.buf.WriteString(";\n")
+	}
+}
+
+func (p *printer) newline() {
+	p.buf.WriteByte('\n')
+	p.buf.WriteString(p.prefix)
+	for i := 0; i < p.depth; i++ {
+		p.buf.WriteString(p.indent)
+	}
+}
+
+func (p *printer) openBlock(b string) {
+	p.buf.WriteString(b)
+	p.depth++
+}
+
+func (p *printer) closeBlock(b string) {
+	p.depth--
+	p.newline()
+	p.buf.WriteString(b)
+}
+
+type graphprinter struct {
+	printer
+	visited map[edge]bool
+}
+
+type edge struct {
+	inGraph  string
+	from, to int64
+}
+
+func (p *graphprinter) print(g graph.Graph, name string, needsIndent, isSubgraph bool) error {
+	if name == "" {
+		if g, ok := g.(Graph); ok {
+			name = g.DOTID()
+		}
+	}
+
+	_, isDirected := g.(graph.Directed)
+	p.printFrontMatter(name, needsIndent, isSubgraph, isDirected, true)
+
 	if a, ok := g.(Attributers); ok {
 		p.writeAttributeComplex(a)
 	}
@@ -150,6 +304,9 @@ func (p *printer) print(g graph.Graph, name string, needsIndent, isSubgraph bool
 			p.print(g, g.DOTID(), true, true)
 		}
 	}
+
+	nodes := graph.NodesOf(g.Nodes())
+	sort.Sort(ordered.ByID(nodes))
 
 	havePrintedNodeHeader := false
 	for _, n := range nodes {
@@ -265,111 +422,165 @@ func (p *printer) print(g graph.Graph, name string, needsIndent, isSubgraph bool
 			p.buf.WriteByte(';')
 		}
 	}
-	p.closeBlock("}")
+
+	p.printBackMatter()
 
 	return nil
 }
 
-func (p *printer) writeNode(n graph.Node) {
-	p.buf.WriteString(nodeID(n))
+type multiprinter struct {
+	printer
+	visited map[line]bool
 }
 
-func (p *printer) writePorts(port, cp string) {
-	if port != "" {
-		p.buf.WriteByte(':')
-		p.buf.WriteString(port)
-	}
-	if cp != "" {
-		p.buf.WriteByte(':')
-		p.buf.WriteString(cp)
-	}
+type line struct {
+	inGraph string
+	id      int64
 }
 
-func nodeID(n graph.Node) string {
-	switch n := n.(type) {
-	case Node:
-		return n.DOTID()
-	default:
-		return fmt.Sprint(n.ID())
-	}
-}
-
-func graphID(g graph.Graph, n graph.Node) string {
-	switch g := g.(type) {
-	case Node:
-		return g.DOTID()
-	default:
-		return nodeID(n)
-	}
-}
-
-func (p *printer) writeAttributeList(a encoding.Attributer) {
-	attributes := a.Attributes()
-	switch len(attributes) {
-	case 0:
-	case 1:
-		p.buf.WriteString(" [")
-		p.buf.WriteString(attributes[0].Key)
-		p.buf.WriteByte('=')
-		p.buf.WriteString(attributes[0].Value)
-		p.buf.WriteString("]")
-	default:
-		p.openBlock(" [")
-		for _, att := range attributes {
-			p.newline()
-			p.buf.WriteString(att.Key)
-			p.buf.WriteByte('=')
-			p.buf.WriteString(att.Value)
+func (p *multiprinter) print(g graph.Multigraph, name string, needsIndent, isSubgraph bool) error {
+	if name == "" {
+		if g, ok := g.(Multigraph); ok {
+			name = g.DOTID()
 		}
-		p.closeBlock("]")
 	}
-}
 
-var attType = []string{"graph", "node", "edge"}
+	_, isDirected := g.(graph.Directed)
+	p.printFrontMatter(name, needsIndent, isSubgraph, isDirected, false)
 
-func (p *printer) writeAttributeComplex(ca Attributers) {
-	g, n, e := ca.DOTAttributers()
-	haveWrittenBlock := false
-	for i, a := range []encoding.Attributer{g, n, e} {
-		attributes := a.Attributes()
-		if len(attributes) == 0 {
+	if a, ok := g.(Attributers); ok {
+		p.writeAttributeComplex(a)
+	}
+	if s, ok := g.(MultiStructurer); ok {
+		for _, g := range s.Structure() {
+			_, subIsDirected := g.(graph.Directed)
+			if subIsDirected != isDirected {
+				return errors.New("dot: mismatched graph type")
+			}
+			p.buf.WriteByte('\n')
+			p.print(g, g.DOTID(), true, true)
+		}
+	}
+
+	nodes := graph.NodesOf(g.Nodes())
+	sort.Sort(ordered.ByID(nodes))
+
+	havePrintedNodeHeader := false
+	for _, n := range nodes {
+		if s, ok := n.(MultiSubgrapher); ok {
+			// If the node is not linked to any other node
+			// the graph needs to be written now.
+			if g.From(n.ID()).Len() == 0 {
+				g := s.Subgraph()
+				_, subIsDirected := g.(graph.Directed)
+				if subIsDirected != isDirected {
+					return errors.New("dot: mismatched graph type")
+				}
+				if !havePrintedNodeHeader {
+					p.newline()
+					p.buf.WriteString("// Node definitions.")
+					havePrintedNodeHeader = true
+				}
+				p.newline()
+				p.print(g, graphID(g, n), false, true)
+			}
 			continue
 		}
-		if haveWrittenBlock {
-			p.buf.WriteByte(';')
+		if !havePrintedNodeHeader {
+			p.newline()
+			p.buf.WriteString("// Node definitions.")
+			havePrintedNodeHeader = true
 		}
 		p.newline()
-		p.buf.WriteString(attType[i])
-		p.openBlock(" [")
-		for _, att := range attributes {
-			p.newline()
-			p.buf.WriteString(att.Key)
-			p.buf.WriteByte('=')
-			p.buf.WriteString(att.Value)
+		p.writeNode(n)
+		if a, ok := n.(encoding.Attributer); ok {
+			p.writeAttributeList(a)
 		}
-		p.closeBlock("]")
-		haveWrittenBlock = true
+		p.buf.WriteByte(';')
 	}
-	if haveWrittenBlock {
-		p.buf.WriteString(";\n")
+
+	havePrintedEdgeHeader := false
+	for _, n := range nodes {
+		nid := n.ID()
+		to := graph.NodesOf(g.From(nid))
+		sort.Sort(ordered.ByID(to))
+
+		for _, t := range to {
+			tid := t.ID()
+
+			lines := graph.LinesOf(g.Lines(nid, tid))
+			sort.Sort(ordered.LinesByIDs(lines))
+
+			for _, l := range lines {
+				lid := l.ID()
+				if p.visited[line{inGraph: name, id: lid}] {
+					continue
+				}
+				p.visited[line{inGraph: name, id: lid}] = true
+
+				if !havePrintedEdgeHeader {
+					p.buf.WriteByte('\n')
+					p.buf.WriteString(strings.TrimRight(p.prefix, " \t\n")) // Trim whitespace suffix.
+					p.newline()
+					p.buf.WriteString("// Edge definitions.")
+					havePrintedEdgeHeader = true
+				}
+				p.newline()
+
+				if s, ok := n.(MultiSubgrapher); ok {
+					g := s.Subgraph()
+					_, subIsDirected := g.(graph.Directed)
+					if subIsDirected != isDirected {
+						return errors.New("dot: mismatched graph type")
+					}
+					p.print(g, graphID(g, n), false, true)
+				} else {
+					p.writeNode(n)
+				}
+
+				porter, edgeIsPorter := l.(Porter)
+				if edgeIsPorter {
+					if l.From().ID() == nid {
+						p.writePorts(porter.FromPort())
+					} else {
+						p.writePorts(porter.ToPort())
+					}
+				}
+
+				if isDirected {
+					p.buf.WriteString(" -> ")
+				} else {
+					p.buf.WriteString(" -- ")
+				}
+
+				if s, ok := t.(MultiSubgrapher); ok {
+					g := s.Subgraph()
+					_, subIsDirected := g.(graph.Directed)
+					if subIsDirected != isDirected {
+						return errors.New("dot: mismatched graph type")
+					}
+					p.print(g, graphID(g, t), false, true)
+				} else {
+					p.writeNode(t)
+				}
+				if edgeIsPorter {
+					if l.From().ID() == nid {
+						p.writePorts(porter.ToPort())
+					} else {
+						p.writePorts(porter.FromPort())
+					}
+				}
+
+				if a, ok := l.(encoding.Attributer); ok {
+					p.writeAttributeList(a)
+				}
+
+				p.buf.WriteByte(';')
+			}
+		}
 	}
-}
 
-func (p *printer) newline() {
-	p.buf.WriteByte('\n')
-	p.buf.WriteString(p.prefix)
-	for i := 0; i < p.depth; i++ {
-		p.buf.WriteString(p.indent)
-	}
-}
+	p.printBackMatter()
 
-func (p *printer) openBlock(b string) {
-	p.buf.WriteString(b)
-	p.depth++
-}
-
-func (p *printer) closeBlock(b string) {
-	p.depth--
-	p.newline()
-	p.buf.WriteString(b)
+	return nil
 }

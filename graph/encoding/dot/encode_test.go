@@ -9,6 +9,7 @@ import (
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/encoding"
+	"gonum.org/v1/gonum/graph/multi"
 	"gonum.org/v1/gonum/graph/simple"
 )
 
@@ -1408,6 +1409,261 @@ var encodeTests = []struct {
 func TestEncode(t *testing.T) {
 	for i, test := range encodeTests {
 		got, err := Marshal(test.g, test.name, test.prefix, "\t")
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+			continue
+		}
+		if string(got) != test.want {
+			t.Errorf("unexpected DOT result for test %d:\ngot: %s\nwant:%s", i, got, test.want)
+		}
+	}
+}
+
+type intlist []int64
+
+func createMultigraph(g []intlist) graph.Multigraph {
+	dg := multi.NewUndirectedGraph()
+	for u, e := range g {
+		u := int64(u)
+		nu := multi.Node(u)
+		for _, v := range e {
+			nv := multi.Node(v)
+			dg.SetLine(dg.NewLine(nu, nv))
+		}
+	}
+	return dg
+}
+
+func createNamedMultigraph(g []intlist) graph.Multigraph {
+	dg := multi.NewUndirectedGraph()
+	for u, e := range g {
+		u := int64(u)
+		nu := namedNode{id: u, name: alpha[u : u+1]}
+		for _, v := range e {
+			nv := namedNode{id: v, name: alpha[v : v+1]}
+			dg.SetLine(dg.NewLine(nu, nv))
+		}
+	}
+	return dg
+}
+
+func createDirectedMultigraph(g []intlist) graph.Multigraph {
+	dg := multi.NewDirectedGraph()
+	for u, e := range g {
+		u := int64(u)
+		nu := multi.Node(u)
+		for _, v := range e {
+			nv := multi.Node(v)
+			dg.SetLine(dg.NewLine(nu, nv))
+		}
+	}
+	return dg
+}
+
+func createNamedDirectedMultigraph(g []intlist) graph.Multigraph {
+	dg := multi.NewDirectedGraph()
+	for u, e := range g {
+		u := int64(u)
+		nu := namedNode{id: u, name: alpha[u : u+1]}
+		for _, v := range e {
+			nv := namedNode{id: v, name: alpha[v : v+1]}
+			dg.SetLine(dg.NewLine(nu, nv))
+		}
+	}
+	return dg
+}
+
+var encodeMultiTests = []struct {
+	name string
+	g    graph.Multigraph
+
+	prefix string
+
+	want string
+}{
+	{
+		g: createMultigraph([]intlist{}),
+		want: `graph {
+}`,
+	},
+	{
+		g: createMultigraph([]intlist{
+			0: {1},
+			1: {0, 2},
+			2: {},
+		}),
+		want: `graph {
+	// Node definitions.
+	0;
+	1;
+	2;
+
+	// Edge definitions.
+	0 -- 1;
+	0 -- 1;
+	1 -- 2;
+}`,
+	},
+	{
+		g: createMultigraph([]intlist{
+			0: {1},
+			1: {2, 2},
+			2: {0, 0, 0},
+		}),
+		want: `graph {
+	// Node definitions.
+	0;
+	1;
+	2;
+
+	// Edge definitions.
+	0 -- 1;
+	0 -- 2;
+	0 -- 2;
+	0 -- 2;
+	1 -- 2;
+	1 -- 2;
+}`,
+	},
+	{
+		g: createNamedMultigraph([]intlist{
+			0: {1},
+			1: {2, 2},
+			2: {0, 0, 0},
+		}),
+		want: `graph {
+	// Node definitions.
+	A;
+	B;
+	C;
+
+	// Edge definitions.
+	A -- B;
+	A -- C;
+	A -- C;
+	A -- C;
+	B -- C;
+	B -- C;
+}`,
+	},
+	{
+		g: createMultigraph([]intlist{
+			0: {2, 1, 0},
+			1: {2, 1, 0},
+			2: {2, 1, 0},
+		}),
+		want: `graph {
+	// Node definitions.
+	0;
+	1;
+	2;
+
+	// Edge definitions.
+	0 -- 0;
+	0 -- 1;
+	0 -- 1;
+	0 -- 2;
+	0 -- 2;
+	1 -- 1;
+	1 -- 2;
+	1 -- 2;
+	2 -- 2;
+}`,
+	},
+	{
+		g: createDirectedMultigraph([]intlist{}),
+		want: `digraph {
+}`,
+	},
+	{
+		g: createDirectedMultigraph([]intlist{
+			0: {1},
+			1: {0, 2},
+			2: {},
+		}),
+		want: `digraph {
+	// Node definitions.
+	0;
+	1;
+	2;
+
+	// Edge definitions.
+	0 -> 1;
+	1 -> 0;
+	1 -> 2;
+}`,
+	},
+	{
+		g: createDirectedMultigraph([]intlist{
+			0: {1},
+			1: {2, 2},
+			2: {0, 0, 0},
+		}),
+		want: `digraph {
+	// Node definitions.
+	0;
+	1;
+	2;
+
+	// Edge definitions.
+	0 -> 1;
+	1 -> 2;
+	1 -> 2;
+	2 -> 0;
+	2 -> 0;
+	2 -> 0;
+}`,
+	},
+	{
+		g: createNamedDirectedMultigraph([]intlist{
+			0: {1},
+			1: {2, 2},
+			2: {0, 0, 0},
+		}),
+		want: `digraph {
+	// Node definitions.
+	A;
+	B;
+	C;
+
+	// Edge definitions.
+	A -> B;
+	B -> C;
+	B -> C;
+	C -> A;
+	C -> A;
+	C -> A;
+}`,
+	},
+	{
+		g: createDirectedMultigraph([]intlist{
+			0: {2, 1, 0},
+			1: {2, 1, 0},
+			2: {2, 1, 0},
+		}),
+		want: `digraph {
+	// Node definitions.
+	0;
+	1;
+	2;
+
+	// Edge definitions.
+	0 -> 0;
+	0 -> 1;
+	0 -> 2;
+	1 -> 0;
+	1 -> 1;
+	1 -> 2;
+	2 -> 0;
+	2 -> 1;
+	2 -> 2;
+}`,
+	},
+}
+
+func TestEncodeMulti(t *testing.T) {
+	for i, test := range encodeMultiTests {
+		got, err := MarshalMulti(test.g, test.name, test.prefix, "\t")
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 			continue

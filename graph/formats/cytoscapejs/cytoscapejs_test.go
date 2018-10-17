@@ -63,7 +63,7 @@ func TestUnmarshalElements(t *testing.T) {
 		}
 		var gotNodes, gotEdges int
 		for _, e := range got {
-			typ, err := e.Tyoe()
+			typ, err := e.Type()
 			if err != nil {
 				t.Errorf("unexpected error finding element type for %+v: %v", e, err)
 			}

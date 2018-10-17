@@ -34,7 +34,7 @@ type Element struct {
 	Scratch          interface{} `json:"scratch,omitempty"`
 }
 
-// ElemType is described an Element type.
+// ElemType describes an Element type.
 type ElemType int
 
 const (
@@ -46,7 +46,7 @@ const (
 // Type returns the element type of the receiver. It returns an error if the Element Group
 // is invalid or does not match the Element Data, or if the Elelement Data is an incomplete
 // edge.
-func (e Element) Tyoe() (ElemType, error) {
+func (e Element) Type() (ElemType, error) {
 	et := InvalidElement
 	switch {
 	case e.Data.Source == "" && e.Data.Target == "":
@@ -54,7 +54,7 @@ func (e Element) Tyoe() (ElemType, error) {
 	case e.Data.Source != "" && e.Data.Target != "":
 		et = EdgeElement
 	default:
-		return et, errors.New("cytoscapejs: invalid element")
+		return et, errors.New("cytoscapejs: invalid element: incomplete edge")
 	}
 	switch {
 	case e.Group == "":
@@ -64,7 +64,7 @@ func (e Element) Tyoe() (ElemType, error) {
 	case e.Group == "edge" && et == EdgeElement:
 		return NodeElement, nil
 	default:
-		return InvalidElement, errors.New("cytoscapejs: invalid element")
+		return InvalidElement, errors.New("cytoscapejs: invalid element: mismatched group")
 	}
 }
 

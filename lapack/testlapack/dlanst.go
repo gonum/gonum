@@ -20,7 +20,7 @@ type Dlanster interface {
 
 func DlanstTest(t *testing.T, impl Dlanster) {
 	rnd := rand.New(rand.NewSource(1))
-	for _, norm := range []lapack.MatrixNorm{lapack.MaxAbs, lapack.MaxColumnSum, lapack.MaxRowSum, lapack.NormFrob} {
+	for _, norm := range []lapack.MatrixNorm{lapack.MaxAbs, lapack.MaxColumnSum, lapack.MaxRowSum, lapack.Frobenius} {
 		for _, n := range []int{1, 3, 10, 100} {
 			for cas := 0; cas < 100; cas++ {
 				d := make([]float64, n)

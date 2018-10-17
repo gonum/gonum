@@ -80,7 +80,7 @@ func DlangeTest(t *testing.T, impl Dlanger) {
 		}
 
 		// Test Frobenius norm
-		norm = impl.Dlange(lapack.NormFrob, m, n, a, lda, work)
+		norm = impl.Dlange(lapack.Frobenius, m, n, a, lda, work)
 		ans = 0
 		for i := 0; i < m; i++ {
 			sum := blas64.Nrm2(n, blas64.Vector{Inc: 1, Data: aCopy[i*lda:]})
@@ -88,7 +88,7 @@ func DlangeTest(t *testing.T, impl Dlanger) {
 		}
 		ans = math.Sqrt(ans)
 		if math.Abs(norm-ans) > 1e-14 {
-			t.Errorf("NormFrob mismatch. Want %v, got %v.", ans, norm)
+			t.Errorf("Frobenius norm mismatch. Want %v, got %v.", ans, norm)
 		}
 	}
 }

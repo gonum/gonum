@@ -77,8 +77,8 @@ func DtgsjaTest(t *testing.T, impl Dtgsjaer) {
 		b := blockedUpperTriGeneral(p, n, k, l, ldb, false, rnd)
 		bCopy := cloneGeneral(b)
 
-		tola := float64(max(m, n)) * impl.Dlange(lapack.NormFrob, m, n, a.Data, a.Stride, nil) * dlamchE
-		tolb := float64(max(p, n)) * impl.Dlange(lapack.NormFrob, p, n, b.Data, b.Stride, nil) * dlamchE
+		tola := float64(max(m, n)) * impl.Dlange(lapack.Frobenius, m, n, a.Data, a.Stride, nil) * dlamchE
+		tolb := float64(max(p, n)) * impl.Dlange(lapack.Frobenius, p, n, b.Data, b.Stride, nil) * dlamchE
 
 		alpha := make([]float64, n)
 		beta := make([]float64, n)

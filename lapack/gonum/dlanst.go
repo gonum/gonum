@@ -55,7 +55,7 @@ func (impl Implementation) Dlanst(norm lapack.MatrixNorm, n int, d, e []float64)
 			}
 		}
 		return anorm
-	case lapack.NormFrob:
+	case lapack.Frobenius:
 		var scale float64
 		sum := 1.0
 		if n > 1 {

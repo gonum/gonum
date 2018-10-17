@@ -762,7 +762,7 @@ func normLapack(norm float64, aTrans bool) lapack.MatrixNorm {
 		}
 		return n
 	case 2:
-		return lapack.NormFrob
+		return lapack.Frobenius
 	case math.Inf(1):
 		n := lapack.MaxRowSum
 		if aTrans {

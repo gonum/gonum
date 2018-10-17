@@ -73,8 +73,8 @@ func Dggsvp3Test(t *testing.T, impl Dggsvp3er) {
 		b := randomGeneral(p, n, ldb, rnd)
 		bCopy := cloneGeneral(b)
 
-		tola := float64(max(m, n)) * impl.Dlange(lapack.NormFrob, m, n, a.Data, a.Stride, nil) * dlamchE
-		tolb := float64(max(p, n)) * impl.Dlange(lapack.NormFrob, p, n, b.Data, b.Stride, nil) * dlamchE
+		tola := float64(max(m, n)) * impl.Dlange(lapack.Frobenius, m, n, a.Data, a.Stride, nil) * dlamchE
+		tolb := float64(max(p, n)) * impl.Dlange(lapack.Frobenius, p, n, b.Data, b.Stride, nil) * dlamchE
 
 		u := nanGeneral(m, m, ldu)
 		v := nanGeneral(p, p, ldv)

@@ -163,8 +163,8 @@ func LinfDist(s, t []float64) float64 {
 //  }
 func Sum(x []float64) float64 {
 	var sum float64
-	for i := range x {
-		sum += x[i]
+	for _, v := range x {
+		sum += v
 	}
 	return sum
 }

@@ -557,7 +557,6 @@ func TestLinfDist(t *testing.T) {
 			expect: 6,
 		},
 	} {
-
 		sg_ln, tg_ln := 4+j%2, 4+j%3
 		v.s, v.t = guardVector(v.s, s_gd, sg_ln), guardVector(v.t, t_gd, tg_ln)
 		s_lc, t_lc := v.s[sg_ln:len(v.s)-sg_ln], v.t[tg_ln:len(v.t)-tg_ln]
@@ -622,14 +621,14 @@ func TestSum(t *testing.T) {
 		},
 	} {
 		gdLn := 4 + j%2
-		v.src = guardVector(v.src, srcGd, gdLn)
-		src := v.src[gdLn : len(v.src)-gdLn]
+		gsrc := guardVector(v.src, srcGd, gdLn)
+		src := gsrc[gdLn : len(gsrc)-gdLn]
 		ret := Sum(src)
 		if !same(ret, v.expect) {
 			t.Errorf("Test %d Sum error Got: %v Expected: %v", j, ret, v.expect)
 		}
-		if !isValidGuard(v.src, srcGd, gdLn) {
-			t.Errorf("Test %d Guard violated in src vector %v %v", j, v.src[:gdLn], v.src[len(v.src)-gdLn:])
+		if !isValidGuard(gsrc, srcGd, gdLn) {
+			t.Errorf("Test %d Guard violated in src vector %v %v", j, gsrc[:gdLn], gsrc[len(gsrc)-gdLn:])
 		}
 	}
 }

@@ -1,4 +1,4 @@
-// Copyright ©2016 The Gonum Authors. All rights reserved.
+// Copyright ©2018 The Gonum Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -41,8 +41,8 @@ TEXT ·Sum(SB), NOSPLIT, $0
 
 no_trim:
 	MOVQ LEN, TAIL
-	SHRQ $4, LEN        // LEN = floor( n / 16 )
-	JZ   sum_tail_start // if LEN == 0 { goto tail_start }
+	SHRQ $4, LEN   // LEN = floor( n / 16 )
+	JZ   sum_tail8 // if LEN == 0 { goto sum_tail8 }
 
 sum_loop: // sum 16x wide do {
 	ADDPD (SI)(AX*8), SUM      // sum_i += x[i:i+1]
@@ -57,7 +57,7 @@ sum_loop: // sum 16x wide do {
 	DECQ  LEN
 	JNZ   sum_loop             // } while --CX > 0
 
-sum_tail_start: // Reset loop registers
+sum_tail8:
 	TESTQ $8, TAIL
 	JZ    sum_tail4
 
@@ -88,7 +88,7 @@ sum_tail2:
 	ADDQ  $2, IDX
 
 sum_tail1:
-	HADDPD SUM, SUM
+	HADDPD SUM, SUM // sum_i[0] += sum_i[1]
 
 	TESTQ $1, TAIL
 	JZ    sum_end

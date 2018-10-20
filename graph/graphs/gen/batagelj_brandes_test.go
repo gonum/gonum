@@ -56,9 +56,14 @@ func TestGnpUndirected(t *testing.T) {
 	for n := 2; n <= 20; n++ {
 		for p := 0.; p <= 1; p += 0.1 {
 			g := &gnUndirected{UndirectedBuilder: simple.NewUndirectedGraph()}
+			orig := g.NewNode()
+			g.AddNode(orig)
 			err := Gnp(g, n, p, nil)
 			if err != nil {
 				t.Fatalf("unexpected error: n=%d, p=%v: %v", n, p, err)
+			}
+			if g.From(orig.ID()).Len() != 0 {
+				t.Errorf("edge added from already existing node: n=%d, p=%v", n, p)
 			}
 			if g.addBackwards {
 				t.Errorf("edge added with From.ID > To.ID: n=%d, p=%v", n, p)
@@ -77,9 +82,14 @@ func TestGnpDirected(t *testing.T) {
 	for n := 2; n <= 20; n++ {
 		for p := 0.; p <= 1; p += 0.1 {
 			g := &gnDirected{DirectedBuilder: simple.NewDirectedGraph()}
+			orig := g.NewNode()
+			g.AddNode(orig)
 			err := Gnp(g, n, p, nil)
 			if err != nil {
 				t.Fatalf("unexpected error: n=%d, p=%v: %v", n, p, err)
+			}
+			if g.From(orig.ID()).Len() != 0 {
+				t.Errorf("edge added from already existing node: n=%d, p=%v", n, p)
 			}
 			if g.addSelfLoop {
 				t.Errorf("unexpected self edge: n=%d, p=%v", n, p)
@@ -96,9 +106,14 @@ func TestGnmUndirected(t *testing.T) {
 		nChoose2 := (n - 1) * n / 2
 		for m := 0; m <= nChoose2; m++ {
 			g := &gnUndirected{UndirectedBuilder: simple.NewUndirectedGraph()}
+			orig := g.NewNode()
+			g.AddNode(orig)
 			err := Gnm(g, n, m, nil)
 			if err != nil {
 				t.Fatalf("unexpected error: n=%d, m=%d: %v", n, m, err)
+			}
+			if g.From(orig.ID()).Len() != 0 {
+				t.Errorf("edge added from already existing node: n=%d, m=%d", n, m)
 			}
 			if g.addBackwards {
 				t.Errorf("edge added with From.ID > To.ID: n=%d, m=%d", n, m)
@@ -118,9 +133,14 @@ func TestGnmDirected(t *testing.T) {
 		nChoose2 := (n - 1) * n / 2
 		for m := 0; m <= nChoose2*2; m++ {
 			g := &gnDirected{DirectedBuilder: simple.NewDirectedGraph()}
+			orig := g.NewNode()
+			g.AddNode(orig)
 			err := Gnm(g, n, m, nil)
 			if err != nil {
 				t.Fatalf("unexpected error: n=%d, m=%d: %v", n, m, err)
+			}
+			if g.From(orig.ID()).Len() != 0 {
+				t.Errorf("edge added from already existing node: n=%d, m=%d", n, m)
 			}
 			if g.addSelfLoop {
 				t.Errorf("unexpected self edge: n=%d, m=%d", n, m)

@@ -48,7 +48,7 @@ func TunableClusteringScaleFree(dst graph.UndirectedBuilder, n, m int, p float64
 	// Initial condition.
 	wt := make([]float64, n)
 	for u := 0; u < m; u++ {
-		if dst.Node(int64(0)) == nil {
+		if dst.Node(int64(u)) == nil {
 			dst.AddNode(simple.Node(u))
 		}
 		// We need to give equal probability for

@@ -45,7 +45,7 @@ no_trim:
 	JZ   sum_tail8 // if LEN == 0 { goto sum_tail8 }
 
 sum_loop: // sum 16x wide do {
-	ADDPD (SI)(AX*8), SUM      // sum_i += x[i:i+1]
+	ADDPD (SI)(AX*8), SUM      // sum_i += x[i:i+2]
 	ADDPD 16(SI)(AX*8), SUM_1
 	ADDPD 32(SI)(AX*8), SUM_2
 	ADDPD 48(SI)(AX*8), SUM_3
@@ -61,7 +61,7 @@ sum_tail8:
 	TESTQ $8, TAIL
 	JZ    sum_tail4
 
-	ADDPD (SI)(AX*8), SUM     // sum_i += x[i:i+1]
+	ADDPD (SI)(AX*8), SUM     // sum_i += x[i:i+2]
 	ADDPD 16(SI)(AX*8), SUM_1
 	ADDPD 32(SI)(AX*8), SUM_2
 	ADDPD 48(SI)(AX*8), SUM_3
@@ -74,7 +74,7 @@ sum_tail4:
 	TESTQ $4, TAIL
 	JZ    sum_tail2
 
-	ADDPD (SI)(AX*8), SUM     // sum_i += x[i:i+1]
+	ADDPD (SI)(AX*8), SUM     // sum_i += x[i:i+2]
 	ADDPD 16(SI)(AX*8), SUM_1
 	ADDQ  $4, IDX
 
@@ -84,7 +84,7 @@ sum_tail2:
 	TESTQ $2, TAIL
 	JZ    sum_tail1
 
-	ADDPD (SI)(AX*8), SUM // sum_i += x[i:i+1]
+	ADDPD (SI)(AX*8), SUM // sum_i += x[i:i+2]
 	ADDQ  $2, IDX
 
 sum_tail1:

@@ -20,7 +20,7 @@ import (
 // between nodes are formed with the probability, p. If src is not nil it is used
 // as the random source, otherwise rand.Float64 is used. The graph is constructed
 // in O(n+m) time where m is the number of edges added.
-func Gnp(dst GraphBuilder, n int, p float64, src rand.Source) error {
+func Gnp(dst graph.Builder, n int, p float64, src rand.Source) error {
 	if p == 0 {
 		for i := 0; i < n; i++ {
 			dst.AddNode(dst.NewNode())

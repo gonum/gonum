@@ -157,9 +157,14 @@ func TestSmallWorldsBBUndirected(t *testing.T) {
 		for d := 1; d <= (n-1)/2; d++ {
 			for p := 0.; p < 1; p += 0.1 {
 				g := &gnUndirected{UndirectedBuilder: simple.NewUndirectedGraph()}
+				orig := g.NewNode()
+				g.AddNode(orig)
 				err := SmallWorldsBB(g, n, d, p, nil)
 				if err != nil {
 					t.Fatalf("unexpected error: n=%d, d=%d, p=%v: %v", n, d, p, err)
+				}
+				if g.From(orig.ID()).Len() != 0 {
+					t.Errorf("edge added from already existing node: n=%d, d=%d, p=%v", n, d, p)
 				}
 				if g.addBackwards {
 					t.Errorf("edge added with From.ID > To.ID: n=%d, d=%d, p=%v", n, d, p)
@@ -180,9 +185,14 @@ func TestSmallWorldsBBDirected(t *testing.T) {
 		for d := 1; d <= (n-1)/2; d++ {
 			for p := 0.; p < 1; p += 0.1 {
 				g := &gnDirected{DirectedBuilder: simple.NewDirectedGraph()}
+				orig := g.NewNode()
+				g.AddNode(orig)
 				err := SmallWorldsBB(g, n, d, p, nil)
 				if err != nil {
 					t.Fatalf("unexpected error: n=%d, d=%d, p=%v: %v", n, d, p, err)
+				}
+				if g.From(orig.ID()).Len() != 0 {
+					t.Errorf("edge added from already existing node: n=%d, d=%d, p=%v", n, d, p)
 				}
 				if g.addSelfLoop {
 					t.Errorf("unexpected self edge: n=%d, d=%d, p=%v", n, d, p)

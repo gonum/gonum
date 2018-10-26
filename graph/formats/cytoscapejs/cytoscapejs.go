@@ -24,8 +24,8 @@ type GraphElem struct {
 type Element struct {
 	Group            string      `json:"group,omitempty"`
 	Data             ElemData    `json:"data"`
-	Position         Position    `json:"position,omitempty"`
-	RenderedPosition Position    `json:"renderedPosition,omitempty"`
+	Position         *Position   `json:"position,omitempty"`
+	RenderedPosition *Position   `json:"renderedPosition,omitempty"`
 	Selected         bool        `json:"selected,omitempty"`
 	Selectable       bool        `json:"selectable,omitempty"`
 	Locked           bool        `json:"locked,omitempty"`
@@ -85,13 +85,13 @@ var (
 // MarshalJSON implements the json.Marshaler interface.
 func (e *ElemData) MarshalJSON() ([]byte, error) {
 	if e.Attributes == nil {
-		type edge struct {
+		type elem struct {
 			ID     string `json:"id"`
-			Source string `json:"source"`
-			Target string `json:"target"`
+			Source string `json:"source,omitempty"`
+			Target string `json:"target,omitempty"`
 			Parent string `json:"parent,omitempty"`
 		}
-		return json.Marshal(edge{ID: e.ID, Source: e.Source, Target: e.Target, Parent: e.Parent})
+		return json.Marshal(elem{ID: e.ID, Source: e.Source, Target: e.Target, Parent: e.Parent})
 	}
 	e.Attributes["id"] = e.ID
 	if e.Source != "" {
@@ -167,8 +167,8 @@ type Elements struct {
 // Node is a Cytoscape.js node.
 type Node struct {
 	Data             NodeData    `json:"data"`
-	Position         Position    `json:"position,omitempty"`
-	RenderedPosition Position    `json:"renderedPosition,omitempty"`
+	Position         *Position   `json:"position,omitempty"`
+	RenderedPosition *Position   `json:"renderedPosition,omitempty"`
 	Selected         bool        `json:"selected,omitempty"`
 	Selectable       bool        `json:"selectable,omitempty"`
 	Locked           bool        `json:"locked,omitempty"`

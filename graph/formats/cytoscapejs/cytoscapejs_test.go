@@ -181,7 +181,7 @@ var cytoscapejsNodeEdgeTests = []struct {
 					"y":            -357509.32,
 				},
 			},
-			Position: Position{
+			Position: &Position{
 				X: 1398668.75,
 				Y: -357509.32,
 			},

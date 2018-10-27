@@ -55,7 +55,11 @@ func NodesOf(it Nodes) []Node {
 	case NodeSlicer:
 		return it.NodeSlice()
 	}
-	n := make([]Node, 0, it.Len())
+	len := it.Len()
+	if len == 0 {
+		return nil
+	}
+	n := make([]Node, 0, len)
 	for it.Next() {
 		n = append(n, it.Node())
 	}
@@ -91,11 +95,15 @@ func EdgesOf(it Edges) []Edge {
 	case EdgeSlicer:
 		return it.EdgeSlice()
 	}
-	n := make([]Edge, 0, it.Len())
-	for it.Next() {
-		n = append(n, it.Edge())
+	len := it.Len()
+	if len == 0 {
+		return nil
 	}
-	return n
+	e := make([]Edge, 0, len)
+	for it.Next() {
+		e = append(e, it.Edge())
+	}
+	return e
 }
 
 // WeightedEdges is a WeightedEdge iterator.
@@ -128,11 +136,15 @@ func WeightedEdgesOf(it WeightedEdges) []WeightedEdge {
 	case WeightedEdgeSlicer:
 		return it.WeightedEdgeSlice()
 	}
-	n := make([]WeightedEdge, 0, it.Len())
-	for it.Next() {
-		n = append(n, it.WeightedEdge())
+	len := it.Len()
+	if len == 0 {
+		return nil
 	}
-	return n
+	e := make([]WeightedEdge, 0, len)
+	for it.Next() {
+		e = append(e, it.WeightedEdge())
+	}
+	return e
 }
 
 // Lines is a Line iterator.
@@ -164,11 +176,15 @@ func LinesOf(it Lines) []Line {
 	case LineSlicer:
 		return it.LineSlice()
 	}
-	n := make([]Line, 0, it.Len())
-	for it.Next() {
-		n = append(n, it.Line())
+	len := it.Len()
+	if len == 0 {
+		return nil
 	}
-	return n
+	l := make([]Line, 0, len)
+	for it.Next() {
+		l = append(l, it.Line())
+	}
+	return l
 }
 
 // WeightedLines is a WeightedLine iterator.
@@ -201,9 +217,13 @@ func WeightedLinesOf(it WeightedLines) []WeightedLine {
 	case WeightedLineSlicer:
 		return it.WeightedLineSlice()
 	}
-	n := make([]WeightedLine, 0, it.Len())
-	for it.Next() {
-		n = append(n, it.WeightedLine())
+	len := it.Len()
+	if len == 0 {
+		return nil
 	}
-	return n
+	l := make([]WeightedLine, 0, len)
+	for it.Next() {
+		l = append(l, it.WeightedLine())
+	}
+	return l
 }

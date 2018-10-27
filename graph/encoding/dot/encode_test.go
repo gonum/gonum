@@ -410,9 +410,8 @@ func undirectedSubGraphFrom(g []intset, s map[int64][]intset) graph.Graph {
 }
 
 var encodeTests = []struct {
-	name   string
-	g      graph.Graph
-	strict bool
+	name string
+	g    graph.Graph
 
 	prefix string
 
@@ -423,7 +422,7 @@ var encodeTests = []struct {
 		name: "PageRank",
 		g:    directedGraphFrom(pageRankGraph),
 
-		want: `digraph PageRank {
+		want: `strict digraph PageRank {
 	// Node definitions.
 	0;
 	1;
@@ -460,7 +459,7 @@ var encodeTests = []struct {
 	{
 		g: undirectedGraphFrom(pageRankGraph),
 
-		want: `graph {
+		want: `strict graph {
 	// Node definitions.
 	0;
 	1;
@@ -495,7 +494,7 @@ var encodeTests = []struct {
 	{
 		g: directedGraphFrom(powerMethodGraph),
 
-		want: `digraph {
+		want: `strict digraph {
 	// Node definitions.
 	0;
 	1;
@@ -516,7 +515,7 @@ var encodeTests = []struct {
 	{
 		g: undirectedGraphFrom(powerMethodGraph),
 
-		want: `graph {
+		want: `strict graph {
 	// Node definitions.
 	0;
 	1;
@@ -538,7 +537,7 @@ var encodeTests = []struct {
 		g:      undirectedGraphFrom(powerMethodGraph),
 		prefix: "# ",
 
-		want: `# graph {
+		want: `# strict graph {
 # 	// Node definitions.
 # 	0;
 # 	1;
@@ -562,7 +561,7 @@ var encodeTests = []struct {
 		name: "PageRank",
 		g:    directedNamedIDGraphFrom(pageRankGraph),
 
-		want: `digraph PageRank {
+		want: `strict digraph PageRank {
 	// Node definitions.
 	A;
 	B;
@@ -599,7 +598,7 @@ var encodeTests = []struct {
 	{
 		g: undirectedNamedIDGraphFrom(pageRankGraph),
 
-		want: `graph {
+		want: `strict graph {
 	// Node definitions.
 	A;
 	B;
@@ -634,7 +633,7 @@ var encodeTests = []struct {
 	{
 		g: directedNamedIDGraphFrom(powerMethodGraph),
 
-		want: `digraph {
+		want: `strict digraph {
 	// Node definitions.
 	A;
 	B;
@@ -655,7 +654,7 @@ var encodeTests = []struct {
 	{
 		g: undirectedNamedIDGraphFrom(powerMethodGraph),
 
-		want: `graph {
+		want: `strict graph {
 	// Node definitions.
 	A;
 	B;
@@ -677,7 +676,7 @@ var encodeTests = []struct {
 		g:      undirectedNamedIDGraphFrom(powerMethodGraph),
 		prefix: "# ",
 
-		want: `# graph {
+		want: `# strict graph {
 # 	// Node definitions.
 # 	A;
 # 	B;
@@ -700,7 +699,7 @@ var encodeTests = []struct {
 	{
 		g: directedNodeAttrGraphFrom(powerMethodGraph, nil),
 
-		want: `digraph {
+		want: `strict digraph {
 	// Node definitions.
 	0;
 	1;
@@ -721,7 +720,7 @@ var encodeTests = []struct {
 	{
 		g: undirectedNodeAttrGraphFrom(powerMethodGraph, nil),
 
-		want: `graph {
+		want: `strict graph {
 	// Node definitions.
 	0;
 	1;
@@ -745,7 +744,7 @@ var encodeTests = []struct {
 			4: {},
 		}),
 
-		want: `digraph {
+		want: `strict digraph {
 	// Node definitions.
 	0;
 	1;
@@ -772,7 +771,7 @@ var encodeTests = []struct {
 			4: {},
 		}),
 
-		want: `graph {
+		want: `strict graph {
 	// Node definitions.
 	0;
 	1;
@@ -799,7 +798,7 @@ var encodeTests = []struct {
 			4: {},
 		}),
 
-		want: `digraph {
+		want: `strict digraph {
 	// Node definitions.
 	A;
 	B;
@@ -829,7 +828,7 @@ var encodeTests = []struct {
 			4: {},
 		}),
 
-		want: `graph {
+		want: `strict graph {
 	// Node definitions.
 	A;
 	B;
@@ -855,7 +854,7 @@ var encodeTests = []struct {
 	{
 		g: directedEdgeAttrGraphFrom(powerMethodGraph, nil),
 
-		want: `digraph {
+		want: `strict digraph {
 	// Node definitions.
 	0;
 	1;
@@ -876,7 +875,7 @@ var encodeTests = []struct {
 	{
 		g: undirectedEdgeAttrGraphFrom(powerMethodGraph, nil),
 
-		want: `graph {
+		want: `strict graph {
 	// Node definitions.
 	0;
 	1;
@@ -901,7 +900,7 @@ var encodeTests = []struct {
 			{from: 3, to: 4}: {{Key: "color", Value: "red"}},
 		}),
 
-		want: `digraph {
+		want: `strict digraph {
 	// Node definitions.
 	0;
 	1;
@@ -929,7 +928,7 @@ var encodeTests = []struct {
 			{from: 3, to: 4}: {{Key: "color", Value: "red"}},
 		}),
 
-		want: `graph {
+		want: `strict graph {
 	// Node definitions.
 	0;
 	1;
@@ -955,7 +954,7 @@ var encodeTests = []struct {
 	{
 		g: directedPortedAttrGraphFrom(powerMethodGraph, nil, nil),
 
-		want: `digraph {
+		want: `strict digraph {
 	// Node definitions.
 	0;
 	1;
@@ -976,7 +975,7 @@ var encodeTests = []struct {
 	{
 		g: undirectedPortedAttrGraphFrom(powerMethodGraph, nil, nil),
 
-		want: `graph {
+		want: `strict graph {
 	// Node definitions.
 	0;
 	1;
@@ -1010,7 +1009,7 @@ var encodeTests = []struct {
 			},
 		),
 
-		want: `digraph {
+		want: `strict digraph {
 	// Node definitions.
 	0;
 	1;
@@ -1050,7 +1049,7 @@ var encodeTests = []struct {
 			},
 		),
 
-		want: `graph {
+		want: `strict graph {
 	// Node definitions.
 	0;
 	1;
@@ -1083,7 +1082,7 @@ var encodeTests = []struct {
 			{from: 3, to: 4}: {{Key: "color", Value: "red"}},
 		})},
 
-		want: `graph {
+		want: `strict graph {
 	// Node definitions.
 	0;
 	1;
@@ -1114,7 +1113,7 @@ var encodeTests = []struct {
 			node:  []encoding.Attribute{{Key: "fontsize", Value: "16"}, {Key: "shape", Value: "ellipse"}},
 		},
 
-		want: `graph {
+		want: `strict graph {
 	graph [
 		rankdir="LR"
 	];
@@ -1148,7 +1147,7 @@ var encodeTests = []struct {
 	{
 		g: undirectedStructuredGraphFrom(nil, powerMethodGraph, pageRankGraph),
 
-		want: `graph {
+		want: `strict graph {
 	subgraph A {
 		// Node definitions.
 		0;
@@ -1202,7 +1201,7 @@ var encodeTests = []struct {
 	{
 		g: undirectedStructuredGraphFrom([]edge{{from: 0, to: 9}}, powerMethodGraph, pageRankGraph),
 
-		want: `graph {
+		want: `strict graph {
 	subgraph A {
 		// Node definitions.
 		0;
@@ -1264,7 +1263,7 @@ var encodeTests = []struct {
 	{
 		g: undirectedSubGraphFrom(pageRankGraph, map[int64][]intset{2: powerMethodGraph}),
 
-		want: `graph {
+		want: `strict graph {
 	// Node definitions.
 	5;
 	6;
@@ -1312,9 +1311,8 @@ var encodeTests = []struct {
 }`,
 	},
 	{
-		name:   "H",
-		g:      undirectedSubGraphFrom(pageRankGraph, map[int64][]intset{1: powerMethodGraph}),
-		strict: true,
+		name: "H",
+		g:    undirectedSubGraphFrom(pageRankGraph, map[int64][]intset{1: powerMethodGraph}),
 
 		want: `strict graph H {
 	// Node definitions.
@@ -1409,7 +1407,7 @@ var encodeTests = []struct {
 
 func TestEncode(t *testing.T) {
 	for i, test := range encodeTests {
-		got, err := Marshal(test.g, test.name, test.prefix, "\t", test.strict)
+		got, err := Marshal(test.g, test.name, test.prefix, "\t")
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 			continue

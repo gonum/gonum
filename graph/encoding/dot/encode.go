@@ -76,14 +76,11 @@ type Subgrapher interface {
 // however, advanced GraphViz DOT features provided by Marshal depend on
 // implementation of the Node, Attributer, Porter, Attributers, Structurer,
 // Subgrapher and Graph interfaces.
-func Marshal(g graph.Graph, name, prefix, indent string, strict bool) ([]byte, error) {
+func Marshal(g graph.Graph, name, prefix, indent string) ([]byte, error) {
 	var p printer
 	p.indent = indent
 	p.prefix = prefix
 	p.visited = make(map[edge]bool)
-	if strict {
-		p.buf.WriteString("strict ")
-	}
 	err := p.print(g, name, false, false)
 	if err != nil {
 		return nil, err
@@ -117,6 +114,9 @@ func (p *printer) print(g graph.Graph, name string, needsIndent, isSubgraph bool
 		for i := 0; i < p.depth; i++ {
 			p.buf.WriteString(p.indent)
 		}
+	}
+	if !isSubgraph {
+		p.buf.WriteString("strict ")
 	}
 	_, isDirected := g.(graph.Directed)
 	if isSubgraph {

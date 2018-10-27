@@ -32,7 +32,7 @@ var decodeTests = []struct {
 			0xa3cff1a4c3ef3bb6: true,
 			0xb39aa14d66aedad5: true,
 		},
-		wantDOT: `digraph {
+		wantDOT: `strict digraph {
   // Node definitions.
   0x8a10d5a2611fd03f [name="Richard Marquand"];
   0xa3cff1a4c3ef3bb6 [
@@ -70,7 +70,7 @@ var decodeTests = []struct {
 			0xfd90205a458151f:  true,
 			0x52a80955d40ec819: true,
 		},
-		wantDOT: `digraph {
+		wantDOT: `strict digraph {
   // Node definitions.
   0x892a6da7ee1fbdec [
     age=55
@@ -139,7 +139,7 @@ func TestDecode(t *testing.T) {
 			}
 			continue
 		}
-		b, err := dot.Marshal(dst, "", "", "  ", false)
+		b, err := dot.Marshal(dst, "", "", "  ")
 		if err != nil {
 			t.Fatalf("failed to DOT marshal graph %q: %v", test.name, err)
 		}

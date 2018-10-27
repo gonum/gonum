@@ -27,7 +27,7 @@ var cliqueGraphTests = []struct {
 			5: nil,
 			6: nil,
 		},
-		want: `graph {
+		want: `strict graph {
   // Node definitions.
   0 [nodes="[0 1 2 6]"];
   1 [nodes="[0 1 4 6]"];
@@ -46,7 +46,7 @@ var cliqueGraphTests = []struct {
 	},
 	{
 		g: batageljZaversnikGraph,
-		want: `graph {
+		want: `strict graph {
   // Node definitions.
   0 [nodes="[0]"];
   1 [nodes="[1 2]"];
@@ -102,7 +102,7 @@ func TestCliqueGraph(t *testing.T) {
 		dst := simple.NewUndirectedGraph()
 		CliqueGraph(dst, g)
 
-		b, _ := dot.Marshal(dst, "", "", "  ", false)
+		b, _ := dot.Marshal(dst, "", "", "  ")
 		got := string(b)
 
 		if got != test.want {

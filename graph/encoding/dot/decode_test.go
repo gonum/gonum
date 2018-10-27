@@ -55,7 +55,7 @@ func TestRoundTrip(t *testing.T) {
 			t.Errorf("i=%d: unable to unmarshal DOT graph; %v", i, err)
 			continue
 		}
-		buf, err := Marshal(dst, "", "", "\t", false)
+		buf, err := Marshal(dst, "", "", "\t")
 		if err != nil {
 			t.Errorf("i=%d: unable to marshal graph; %v", i, dst)
 			continue
@@ -68,7 +68,7 @@ func TestRoundTrip(t *testing.T) {
 	}
 }
 
-const directed = `digraph {
+const directed = `strict digraph {
 	graph [
 		outputorder=edgesfirst
 	];
@@ -89,7 +89,7 @@ const directed = `digraph {
 	A -> B [label="baz 2"];
 }`
 
-const undirected = `graph {
+const undirected = `strict graph {
 	graph [
 		outputorder=edgesfirst
 	];
@@ -110,7 +110,7 @@ const undirected = `graph {
 	A -- B [label="baz 2"];
 }`
 
-const directedID = `digraph G {
+const directedID = `strict digraph G {
 	// Node definitions.
 	A;
 	B;
@@ -119,7 +119,7 @@ const directedID = `digraph G {
 	A -> B;
 }`
 
-const undirectedID = `graph H {
+const undirectedID = `strict graph H {
 	// Node definitions.
 	A;
 	B;
@@ -128,7 +128,7 @@ const undirectedID = `graph H {
 	A -- B;
 }`
 
-const directedWithPorts = `digraph {
+const directedWithPorts = `strict digraph {
 	// Node definitions.
 	A;
 	B;
@@ -146,7 +146,7 @@ const directedWithPorts = `digraph {
 	E:_ -> F:c;
 }`
 
-const undirectedWithPorts = `graph {
+const undirectedWithPorts = `strict graph {
 	// Node definitions.
 	A;
 	B;
@@ -192,7 +192,7 @@ func TestChainedEdgeAttributes(t *testing.T) {
 			t.Errorf("i=%d: unable to unmarshal DOT graph; %v", i, err)
 			continue
 		}
-		buf, err := Marshal(dst, "", "", "\t", false)
+		buf, err := Marshal(dst, "", "", "\t")
 		if err != nil {
 			t.Errorf("i=%d: unable to marshal graph; %v", i, dst)
 			continue
@@ -205,7 +205,7 @@ func TestChainedEdgeAttributes(t *testing.T) {
 	}
 }
 
-const directedChained = `digraph {
+const directedChained = `strict digraph {
 	graph [
 		outputorder=edgesfirst
 	];
@@ -226,7 +226,7 @@ const directedChained = `digraph {
 	A -> B -> A [label="baz 2"];
 }`
 
-const directedNonchained = `digraph {
+const directedNonchained = `strict digraph {
 	graph [
 		outputorder=edgesfirst
 	];
@@ -270,7 +270,7 @@ const undirectedChained = `graph {
 	A -- B -- C [label="baz 2"];
 }`
 
-const undirectedNonchained = `graph {
+const undirectedNonchained = `strict graph {
 	graph [
 		outputorder=edgesfirst
 	];

@@ -32,7 +32,7 @@ func ExamplePorter() {
 		toPort:   "p2",
 	})
 
-	result, _ := dot.Marshal(g, "", "", "  ", true)
+	result, _ := dot.Marshal(g, "", "", "  ")
 	fmt.Print(string(result))
 
 	// Output:

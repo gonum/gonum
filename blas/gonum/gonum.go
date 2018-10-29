@@ -10,30 +10,6 @@ import "math"
 
 type Implementation struct{}
 
-// The following are panic strings used during parameter checks.
-const (
-	zeroIncX = "blas: zero x index increment"
-	zeroIncY = "blas: zero y index increment"
-
-	mLT0  = "blas: m < 0"
-	nLT0  = "blas: n < 0"
-	kLT0  = "blas: k < 0"
-	kLLT0 = "blas: kL < 0"
-	kULT0 = "blas: kU < 0"
-
-	badUplo      = "blas: illegal triangle"
-	badTranspose = "blas: illegal transpose"
-	badDiag      = "blas: illegal diagonal"
-	badSide      = "blas: illegal side"
-
-	badLdA = "blas: bad leading dimension of A"
-	badLdB = "blas: bad leading dimension of B"
-	badLdC = "blas: bad leading dimension of C"
-
-	badX = "blas: bad length of x"
-	badY = "blas: bad length of y"
-)
-
 // [SD]gemm behavior constants. These are kept here to keep them out of the
 // way during single precision code genration.
 const (

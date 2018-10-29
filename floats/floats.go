@@ -897,11 +897,7 @@ func SubTo(dst, s, t []float64) []float64 {
 
 // Sum returns the sum of the elements of the slice.
 func Sum(s []float64) float64 {
-	var sum float64
-	for _, val := range s {
-		sum += val
-	}
-	return sum
+	return f64.Sum(s)
 }
 
 // Within returns the first index i where s[i] <= v < s[i+1]. Within panics if:

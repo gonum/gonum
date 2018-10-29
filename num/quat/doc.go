@@ -2,5 +2,5 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package quat provides quaternion numeric type and functions.
+// Package quat provides the quaternion numeric type and functions.
 package quat // imports "gonum.org/v1/gonum/num/quat"

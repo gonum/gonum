@@ -25,13 +25,28 @@ func dCosh(x float64) float64  { return math.Sinh(x) }
 func dTanh(x float64) float64  { return sech(x) * sech(x) }
 func dAsinh(x float64) float64 { return 1 / math.Sqrt(x*x+1) }
 func dAcosh(x float64) float64 { return 1 / (math.Sqrt(x-1) * math.Sqrt(x+1)) }
-func dAtanh(x float64) float64 { return 1 / (1 - x*x) }
+func dAtanh(x float64) float64 {
+	switch {
+	case math.Abs(x) == 1:
+		return math.NaN()
+	case math.IsInf(x, 0):
+		return negZero
+	}
+	return 1 / (1 - x*x)
+}
 
 func dExp(x float64) float64    { return math.Exp(x) }
 func dLog(x float64) float64    { return 1 / x }
 func dPow(x, y float64) float64 { return y * math.Pow(x, y-1) }
-func dSqrt(x float64) float64   { return 0.5 * math.Pow(x, -0.5) }
-func dInv(x float64) float64    { return -1 / (x * x) }
+func dSqrt(x float64) float64 {
+	// For whatever reason, math.Sqrt(-0) returns -0.
+	// In this case, that is clearly a wrong approach.
+	if x == 0 {
+		return math.Inf(1)
+	}
+	return 0.5 / math.Sqrt(x)
+}
+func dInv(x float64) float64 { return -1 / (x * x) }
 
 // Second derivatives:
 
@@ -52,8 +67,17 @@ func d2Atanh(x float64) float64 { return 2 * x / ((1 - x*x) * (1 - x*x)) }
 func d2Exp(x float64) float64    { return math.Exp(x) }
 func d2Log(x float64) float64    { return -1 / (x * x) }
 func d2Pow(x, y float64) float64 { return y * (y - 1) * math.Pow(x, y-2) }
-func d2Sqrt(x float64) float64   { return -0.25 * math.Pow(x, -1.5) }
-func d2Inv(x float64) float64    { return 2 / (x * x * x) }
+func d2Sqrt(x float64) float64 {
+	// Again math.Sqyu, and math.Pow are odd.
+	switch x {
+	case math.Inf(1):
+		return 0
+	case math.Inf(-1):
+		return math.NaN()
+	}
+	return -0.25 * math.Pow(x, -1.5)
+}
+func d2Inv(x float64) float64 { return 2 / (x * x * x) }
 
 // Helpers:
 
@@ -70,7 +94,7 @@ var hyperdualTests = []struct {
 }{
 	{
 		name:        "sin",
-		x:           []float64{0, math.Pi / 4, 1, math.Pi / 2, math.Pi, 2 * math.Pi},
+		x:           []float64{math.NaN(), math.Inf(-1), -3, -2, -1, -0.5, negZero, 0, 0.5, 1, 2, 3, math.Inf(1)},
 		fnHyperdual: Sin,
 		fn:          math.Sin,
 		dFn:         dSin,
@@ -78,7 +102,7 @@ var hyperdualTests = []struct {
 	},
 	{
 		name:        "cos",
-		x:           []float64{0, math.Pi / 4, 1, math.Pi / 2, math.Pi, 2 * math.Pi},
+		x:           []float64{math.NaN(), math.Inf(-1), -3, -2, -1, -0.5, negZero, 0, 0.5, 1, 2, 3, math.Inf(1)},
 		fnHyperdual: Cos,
 		fn:          math.Cos,
 		dFn:         dCos,
@@ -86,7 +110,7 @@ var hyperdualTests = []struct {
 	},
 	{
 		name:        "tan",
-		x:           []float64{0, math.Pi / 4, 1, math.Pi / 2, math.Pi, 2 * math.Pi},
+		x:           []float64{math.NaN(), math.Inf(-1), -3, -2, -1, -0.5, negZero, 0, 0.5, 1, 2, 3, math.Inf(1)},
 		fnHyperdual: Tan,
 		fn:          math.Tan,
 		dFn:         dTan,
@@ -94,7 +118,7 @@ var hyperdualTests = []struct {
 	},
 	{
 		name:        "sinh",
-		x:           []float64{0, math.Pi / 4, 1, math.Pi / 2, math.Pi, 2 * math.Pi},
+		x:           []float64{math.NaN(), math.Inf(-1), -3, -2, -1, -0.5, negZero, 0, 0.5, 1, 2, 3, math.Inf(1)},
 		fnHyperdual: Sinh,
 		fn:          math.Sinh,
 		dFn:         dSinh,
@@ -102,7 +126,7 @@ var hyperdualTests = []struct {
 	},
 	{
 		name:        "cosh",
-		x:           []float64{0, math.Pi / 4, 1, math.Pi / 2, math.Pi, 2 * math.Pi},
+		x:           []float64{math.NaN(), math.Inf(-1), -3, -2, -1, -0.5, negZero, 0, 0.5, 1, 2, 3, math.Inf(1)},
 		fnHyperdual: Cosh,
 		fn:          math.Cosh,
 		dFn:         dCosh,
@@ -110,7 +134,7 @@ var hyperdualTests = []struct {
 	},
 	{
 		name:        "tanh",
-		x:           []float64{0, math.Pi / 4, 1, math.Pi / 2, math.Pi, 2 * math.Pi},
+		x:           []float64{math.NaN(), math.Inf(-1), -3, -2, -1, -0.5, negZero, 0, 0.5, 1, 2, 3, math.Inf(1)},
 		fnHyperdual: Tanh,
 		fn:          math.Tanh,
 		dFn:         dTanh,
@@ -119,7 +143,7 @@ var hyperdualTests = []struct {
 
 	{
 		name:        "asin",
-		x:           []float64{0, math.Pi / 4, math.Pi / 2, math.Pi, 2 * math.Pi},
+		x:           []float64{math.NaN(), math.Inf(-1), -3, -2, -1, -0.5, negZero, 0, 0.5, 1, 2, 3, math.Inf(1)},
 		fnHyperdual: Asin,
 		fn:          math.Asin,
 		dFn:         dAsin,
@@ -127,7 +151,7 @@ var hyperdualTests = []struct {
 	},
 	{
 		name:        "acos",
-		x:           []float64{0, math.Pi / 4, math.Pi / 2, math.Pi, 2 * math.Pi},
+		x:           []float64{math.NaN(), math.Inf(-1), -3, -2, -1, -0.5, negZero, 0, 0.5, 1, 2, 3, math.Inf(1)},
 		fnHyperdual: Acos,
 		fn:          math.Acos,
 		dFn:         dAcos,
@@ -135,7 +159,7 @@ var hyperdualTests = []struct {
 	},
 	{
 		name:        "atan",
-		x:           []float64{0, math.Pi / 4, 1, math.Pi / 2, math.Pi, 2 * math.Pi},
+		x:           []float64{math.NaN(), math.Inf(-1), -3, -2, -1, -0.5, negZero, 0, 0.5, 1, 2, 3, math.Inf(1)},
 		fnHyperdual: Atan,
 		fn:          math.Atan,
 		dFn:         dAtan,
@@ -143,7 +167,7 @@ var hyperdualTests = []struct {
 	},
 	{
 		name:        "asinh",
-		x:           []float64{0, math.Pi / 4, 1, math.Pi / 2, math.Pi, 2 * math.Pi},
+		x:           []float64{math.NaN(), math.Inf(-1), -3, -2, -1, -0.5, negZero, 0, 0.5, 1, 2, 3, math.Inf(1)},
 		fnHyperdual: Asinh,
 		fn:          math.Asinh,
 		dFn:         dAsinh,
@@ -151,7 +175,7 @@ var hyperdualTests = []struct {
 	},
 	{
 		name:        "acosh",
-		x:           []float64{ /*0,*/ math.Pi / 2, math.Pi, 2 * math.Pi, 5},
+		x:           []float64{math.NaN(), math.Inf(-1), -3, -2, -1, -0.5, negZero, 0, 0.5, 1, 2, 3, math.Inf(1)},
 		fnHyperdual: Acosh,
 		fn:          math.Acosh,
 		dFn:         dAcosh,
@@ -159,7 +183,7 @@ var hyperdualTests = []struct {
 	},
 	{
 		name:        "atanh",
-		x:           []float64{0, math.Pi / 4, math.Pi / 2, math.Pi},
+		x:           []float64{math.NaN(), math.Inf(-1), -3, -2, -1, -0.5, negZero, 0, 0.5, 1, 2, 3, math.Inf(1)},
 		fnHyperdual: Atanh,
 		fn:          math.Atanh,
 		dFn:         dAtanh,
@@ -168,7 +192,7 @@ var hyperdualTests = []struct {
 
 	{
 		name:        "exp",
-		x:           []float64{0, 1, 2, 3},
+		x:           []float64{math.NaN(), math.Inf(-1), -3, -2, -1, -0.5, negZero, 0, 0.5, 1, 2, 3, math.Inf(1)},
 		fnHyperdual: Exp,
 		fn:          math.Exp,
 		dFn:         dExp,
@@ -176,7 +200,7 @@ var hyperdualTests = []struct {
 	},
 	{
 		name:        "log",
-		x:           []float64{ /*0,*/ 1, 2, 3},
+		x:           []float64{math.NaN(), math.Inf(-1), -3, -2, -1, -0.5, negZero, 0, 0.5, 1, 2, 3, math.Inf(1)},
 		fnHyperdual: Log,
 		fn:          math.Log,
 		dFn:         dLog,
@@ -184,7 +208,7 @@ var hyperdualTests = []struct {
 	},
 	{
 		name:        "inv",
-		x:           []float64{ /*0,*/ 1, 2, 3},
+		x:           []float64{math.NaN(), math.Inf(-1), -3, -2, -1, -0.5, negZero, 0, 0.5, 1, 2, 3, math.Inf(1)},
 		fnHyperdual: Inv,
 		fn:          func(x float64) float64 { return 1 / x },
 		dFn:         dInv,
@@ -192,7 +216,7 @@ var hyperdualTests = []struct {
 	},
 	{
 		name:        "sqrt",
-		x:           []float64{ /*0,*/ 1, 2, 3},
+		x:           []float64{math.NaN(), math.Inf(-1), -3, -2, -1, -0.5, negZero, 0, 0.5, 1, 2, 3, math.Inf(1)},
 		fnHyperdual: Sqrt,
 		fn:          math.Sqrt,
 		dFn:         dSqrt,
@@ -249,5 +273,6 @@ func TestHyperdual(t *testing.T) {
 }
 
 func same(a, b, tol float64) bool {
-	return (math.IsNaN(a) && math.IsNaN(b)) || floats.EqualWithinAbsOrRel(a, b, tol, tol)
+	return (math.IsNaN(a) && math.IsNaN(b)) ||
+		(floats.EqualWithinAbsOrRel(a, b, tol, tol) && math.Float64bits(a)&(1<<63) == math.Float64bits(b)&(1<<63))
 }

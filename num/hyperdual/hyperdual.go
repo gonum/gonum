@@ -15,7 +15,10 @@ type Number struct {
 	Real, E1mag, E2mag, E1E2mag float64
 }
 
-var zero = Number{}
+var (
+	zero    = Number{}
+	negZero = math.Float64frombits(1 << 63)
+)
 
 // Format implements fmt.Formatter.
 func (d Number) Format(fs fmt.State, c rune) {
@@ -102,6 +105,14 @@ func Mul(x, y Number) Number {
 
 // Inv returns the hyperdual inverse of d.
 func Inv(d Number) Number {
+	if d.Real == 0 {
+		return Number{
+			Real:    1 / d.Real,
+			E1mag:   math.Inf(-1),
+			E2mag:   math.Inf(-1),
+			E1E2mag: 1 / d.Real, // Return a signed inf from a signed zero.
+		}
+	}
 	d2 := d.Real * d.Real
 	return Number{
 		Real:    1 / d.Real,

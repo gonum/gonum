@@ -30,6 +30,7 @@ package dual
 
 import "math"
 
+// Pow returns x**p, the base-x exponential of p.
 func PowReal(d Number, p float64) Number {
 	const tol = 1e-15
 
@@ -54,7 +55,36 @@ func Pow(d, p Number) Number {
 	return Exp(Mul(p, Log(d)))
 }
 
-// Exp returns e**d, the base-e exponential of d.
+// Sqrt returns the square root of d
+//
+// Special cases are:
+//	Sqrt(+Inf) = +Inf
+//	Sqrt(±0) = (±0+Infϵ)
+//	Sqrt(x < 0) = NaN
+//	Sqrt(NaN) = NaN
+func Sqrt(d Number) Number {
+	if d.Real <= 0 {
+		if d.Real == 0 {
+			return Number{
+				Real: d.Real,
+				Emag: math.Inf(1),
+			}
+		}
+		return Number{
+			Real: math.NaN(),
+			Emag: math.NaN(),
+		}
+	}
+	return PowReal(d, 0.5)
+}
+
+// Exp returns e**q, the base-e exponential of d.
+//
+// Special cases are:
+//	Exp(+Inf) = +Inf
+//	Exp(NaN) = NaN
+// Very large values overflow to 0 or +Inf.
+// Very small values underflow to 1.
 func Exp(d Number) Number {
 	fnDeriv := math.Exp(d.Real)
 	return Number{
@@ -64,7 +94,25 @@ func Exp(d Number) Number {
 }
 
 // Log returns the natural logarithm of d.
+//
+// Special cases are:
+//	Log(+Inf) = (+Inf+0ϵ)
+//	Log(0) = (-Inf±Infϵ)
+//	Log(x < 0) = NaN
+//	Log(NaN) = NaN
 func Log(d Number) Number {
+	switch d.Real {
+	case 0:
+		return Number{
+			Real: math.Log(d.Real),
+			Emag: math.Copysign(math.Inf(1), d.Real),
+		}
+	case math.Inf(1):
+		return Number{
+			Real: math.Log(d.Real),
+			Emag: 0,
+		}
+	}
 	return Number{
 		Real: math.Log(d.Real),
 		Emag: d.Emag / d.Real,
@@ -72,7 +120,18 @@ func Log(d Number) Number {
 }
 
 // Sin returns the sine of d.
+//
+// Special cases are:
+//	Sin(±0) = (±0+Nϵ)
+//	Sin(±Inf) = NaN
+//	Sin(NaN) = NaN
 func Sin(d Number) Number {
+	if d.Real == 0 {
+		return Number{
+			Real: d.Real,
+			Emag: d.Emag,
+		}
+	}
 	fn := math.Sin(d.Real)
 	deriv := math.Cos(d.Real)
 	return Number{
@@ -82,6 +141,10 @@ func Sin(d Number) Number {
 }
 
 // Cos returns the cosine of d.
+//
+// Special cases are:
+//	Cos(±Inf) = NaN
+//	Cos(NaN) = NaN
 func Cos(d Number) Number {
 	fn := math.Cos(d.Real)
 	deriv := -math.Sin(d.Real)
@@ -92,7 +155,18 @@ func Cos(d Number) Number {
 }
 
 // Tan returns the tangent of d.
+//
+// Special cases are:
+//	Tan(±0) = (±0+Nϵ)
+//	Tan(±Inf) = NaN
+//	Tan(NaN) = NaN
 func Tan(d Number) Number {
+	if d.Real == 0 {
+		return Number{
+			Real: d.Real,
+			Emag: d.Emag,
+		}
+	}
 	fn := math.Tan(d.Real)
 	deriv := 1 + fn*fn
 	return Number{
@@ -102,7 +176,29 @@ func Tan(d Number) Number {
 }
 
 // Asin returns the inverse sine of d.
+//
+// Special cases are:
+//	Asin(±0) = (±0+Nϵ)
+//	Asin(±1) = (±Inf+Infϵ)
+//	Asin(x) = NaN if x < -1 or x > 1
 func Asin(d Number) Number {
+	if d.Real == 0 {
+		return Number{
+			Real: d.Real,
+			Emag: d.Emag,
+		}
+	} else if m := math.Abs(d.Real); m >= 1 {
+		if m == 1 {
+			return Number{
+				Real: math.Asin(d.Real),
+				Emag: math.Inf(1),
+			}
+		}
+		return Number{
+			Real: math.NaN(),
+			Emag: math.NaN(),
+		}
+	}
 	fn := math.Asin(d.Real)
 	deriv := 1 / math.Sqrt(1-d.Real*d.Real)
 	return Number{
@@ -112,7 +208,24 @@ func Asin(d Number) Number {
 }
 
 // Acos returns the inverse cosine of d.
+//
+// Special cases are:
+//	Acos(-1) = (Pi-Infϵ)
+//	Acos(1) = (0-Infϵ)
+//	Acos(x) = NaN if x < -1 or x > 1
 func Acos(d Number) Number {
+	if m := math.Abs(d.Real); m >= 1 {
+		if m == 1 {
+			return Number{
+				Real: math.Acos(d.Real),
+				Emag: math.Inf(-1),
+			}
+		}
+		return Number{
+			Real: math.NaN(),
+			Emag: math.NaN(),
+		}
+	}
 	fn := math.Acos(d.Real)
 	deriv := -1 / math.Sqrt(1-d.Real*d.Real)
 	return Number{
@@ -122,16 +235,21 @@ func Acos(d Number) Number {
 }
 
 // Atan returns the inverse tangent of d.
+//
+// Special cases are:
+//	Atan(±0) = (±0+Nϵ)
+//	Atan(±Inf) = (±Pi/2+0ϵ)
 func Atan(d Number) Number {
+	if d.Real == 0 {
+		return Number{
+			Real: d.Real,
+			Emag: d.Emag,
+		}
+	}
 	fn := math.Atan(d.Real)
 	deriv := 1 / (1 + d.Real*d.Real)
 	return Number{
 		Real: fn,
 		Emag: deriv * d.Emag,
 	}
-}
-
-// Sqrt returns the square root of d.
-func Sqrt(d Number) Number {
-	return PowReal(d, 0.5)
 }

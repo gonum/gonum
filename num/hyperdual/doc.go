@@ -4,3 +4,6 @@
 
 // Package hyperdual provides the hyperdual numeric type and functions.
 package hyperdual // imports "gonum.org/v1/gonum/num/hyperdual"
+
+// TODO(kortschak): Handle special cases properly.
+//  - Pow

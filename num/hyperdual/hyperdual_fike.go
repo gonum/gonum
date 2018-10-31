@@ -30,7 +30,33 @@ package hyperdual
 
 import "math"
 
-// Pow returns x**p, the base-x exponential of p.
+// PowReal returns x**p, the base-x exponential of p.
+//
+// Special cases are (in order):
+//	PowReal(NaN+xϵ₁+yϵ₂, ±0) = 1+NaNϵ₁+NaNϵ₂+NaNϵ₁ϵ₂ for any x and y
+//	PowReal(x, ±0) = 1 for any x
+//	PowReal(1+xϵ₁+yϵ₂, z) = 1+xzϵ₁+yzϵ₂+2xyzϵ₁ϵ₂ for any z
+//	PowReal(NaN+xϵ₁+yϵ₂, 1) = NaN+xϵ₁+yϵ₂+NaNϵ₁ϵ₂ for any x
+//	PowReal(x, 1) = x for any x
+//	PowReal(NaN+xϵ₁+xϵ₂, y) = NaN+NaNϵ₁+NaNϵ₂+NaNϵ₁ϵ₂
+//	PowReal(x, NaN) = NaN+NaNϵ₁+NaNϵ₂+NaNϵ₁ϵ₂
+//	PowReal(±0, y) = ±Inf for y an odd integer < 0
+//	PowReal(±0, -Inf) = +Inf
+//	PowReal(±0, +Inf) = +0
+//	PowReal(±0, y) = +Inf for finite y < 0 and not an odd integer
+//	PowReal(±0, y) = ±0 for y an odd integer > 0
+//	PowReal(±0, y) = +0 for finite y > 0 and not an odd integer
+//	PowReal(-1, ±Inf) = 1
+//	PowReal(x+0ϵ₁+0ϵ₂, +Inf) = +Inf+NaNϵ₁+NaNϵ₂+NaNϵ₁ϵ₂ for |x| > 1
+//	PowReal(x+xϵ₁+yϵ₂, +Inf) = +Inf+Infϵ₁+Infϵ₂+NaNϵ₁ϵ₂ for |x| > 1
+//	PowReal(x, -Inf) = +0+NaNϵ₁+NaNϵ₂+NaNϵ₁ϵ₂ for |x| > 1
+//	PowReal(x+yϵ₁+zϵ₂, +Inf) = +0+NaNϵ₁+NaNϵ₂+NaNϵ₁ϵ₂ for |x| < 1
+//	PowReal(x+0ϵ₁+0ϵ₂, -Inf) = +Inf+NaNϵ₁+NaNϵ₂+NaNϵ₁ϵ₂ for |x| < 1
+//	PowReal(x, -Inf) = +Inf-Infϵ₁-Infϵ₂+NaNϵ₁ϵ₂ for |x| < 1
+//	PowReal(+Inf, y) = +Inf for y > 0
+//	PowReal(+Inf, y) = +0 for y < 0
+//	PowReal(-Inf, y) = Pow(-0, -y)
+//	PowReal(x, y) = NaN+NaNϵ₁+NaNϵ₂+NaNϵ₁ϵ₂ for finite x < 0 and finite non-integer y
 func PowReal(d Number, p float64) Number {
 	const tol = 1e-15
 

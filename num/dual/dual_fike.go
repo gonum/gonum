@@ -30,7 +30,32 @@ package dual
 
 import "math"
 
-// Pow returns x**p, the base-x exponential of p.
+// PowReal returns x**p, the base-x exponential of p.
+//
+// Special cases are (in order):
+//	PowReal(NaN+xϵ, ±0) = 1+NaNϵ for any x
+//	PowReal(x, ±0) = 1 for any x
+//	PowReal(1+xϵ, y) = 1+xyϵ for any y
+//	PowReal(x, 1) = x for any x
+//	PowReal(NaN+xϵ, y) = NaN+NaNϵ
+//	PowReal(x, NaN) = NaN+NaNϵ
+//	PowReal(±0, y) = ±Inf for y an odd integer < 0
+//	PowReal(±0, -Inf) = +Inf
+//	PowReal(±0, +Inf) = +0
+//	PowReal(±0, y) = +Inf for finite y < 0 and not an odd integer
+//	PowReal(±0, y) = ±0 for y an odd integer > 0
+//	PowReal(±0, y) = +0 for finite y > 0 and not an odd integer
+//	PowReal(-1, ±Inf) = 1
+//	PowReal(x+0ϵ, +Inf) = +Inf+NaNϵ for |x| > 1
+//	PowReal(x+yϵ, +Inf) = +Inf for |x| > 1
+//	PowReal(x, -Inf) = +0+NaNϵ for |x| > 1
+//	PowReal(x, +Inf) = +0+NaNϵ for |x| < 1
+//	PowReal(x+0ϵ, -Inf) = +Inf+NaNϵ for |x| < 1
+//	PowReal(x, -Inf) = +Inf-Infϵ for |x| < 1
+//	PowReal(+Inf, y) = +Inf for y > 0
+//	PowReal(+Inf, y) = +0 for y < 0
+//	PowReal(-Inf, y) = Pow(-0, -y)
+//	PowReal(x, y) = NaN+NaNϵ for finite x < 0 and finite non-integer y
 func PowReal(d Number, p float64) Number {
 	const tol = 1e-15
 

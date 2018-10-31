@@ -215,6 +215,146 @@ func TestDual(t *testing.T) {
 	}
 }
 
+var powRealTests = []struct {
+	d    Number
+	p    float64
+	want Number
+}{
+	// PowReal(NaN+xϵ, ±0) = 1+NaNϵ for any x
+	{d: Number{Real: math.NaN(), Emag: 0}, p: 0, want: Number{Real: 1, Emag: math.NaN()}},
+	{d: Number{Real: math.NaN(), Emag: 0}, p: negZero, want: Number{Real: 1, Emag: math.NaN()}},
+	{d: Number{Real: math.NaN(), Emag: 1}, p: 0, want: Number{Real: 1, Emag: math.NaN()}},
+	{d: Number{Real: math.NaN(), Emag: 2}, p: negZero, want: Number{Real: 1, Emag: math.NaN()}},
+	{d: Number{Real: math.NaN(), Emag: 3}, p: 0, want: Number{Real: 1, Emag: math.NaN()}},
+	{d: Number{Real: math.NaN(), Emag: 1}, p: negZero, want: Number{Real: 1, Emag: math.NaN()}},
+	{d: Number{Real: math.NaN(), Emag: 2}, p: 0, want: Number{Real: 1, Emag: math.NaN()}},
+	{d: Number{Real: math.NaN(), Emag: 3}, p: negZero, want: Number{Real: 1, Emag: math.NaN()}},
+
+	// PowReal(x, ±0) = 1 for any x
+	{d: Number{Real: 0, Emag: 0}, p: 0, want: Number{Real: 1, Emag: 0}},
+	{d: Number{Real: negZero, Emag: 0}, p: negZero, want: Number{Real: 1, Emag: 0}},
+	{d: Number{Real: math.Inf(1), Emag: 0}, p: 0, want: Number{Real: 1, Emag: 0}},
+	{d: Number{Real: math.Inf(-1), Emag: 0}, p: negZero, want: Number{Real: 1, Emag: 0}},
+	{d: Number{Real: 0, Emag: 1}, p: 0, want: Number{Real: 1, Emag: 0}},
+	{d: Number{Real: negZero, Emag: 1}, p: negZero, want: Number{Real: 1, Emag: 0}},
+	{d: Number{Real: math.Inf(1), Emag: 1}, p: 0, want: Number{Real: 1, Emag: 0}},
+	{d: Number{Real: math.Inf(-1), Emag: 1}, p: negZero, want: Number{Real: 1, Emag: 0}},
+
+	// PowReal(1+xϵ, y) = (1+xyϵ) for any y
+	{d: Number{Real: 1, Emag: 0}, p: 0, want: Number{Real: 1, Emag: 0}},
+	{d: Number{Real: 1, Emag: 0}, p: 1, want: Number{Real: 1, Emag: 0}},
+	{d: Number{Real: 1, Emag: 0}, p: 2, want: Number{Real: 1, Emag: 0}},
+	{d: Number{Real: 1, Emag: 0}, p: 3, want: Number{Real: 1, Emag: 0}},
+	{d: Number{Real: 1, Emag: 1}, p: 0, want: Number{Real: 1, Emag: 0}},
+	{d: Number{Real: 1, Emag: 1}, p: 1, want: Number{Real: 1, Emag: 1}},
+	{d: Number{Real: 1, Emag: 1}, p: 2, want: Number{Real: 1, Emag: 2}},
+	{d: Number{Real: 1, Emag: 1}, p: 3, want: Number{Real: 1, Emag: 3}},
+	{d: Number{Real: 1, Emag: 2}, p: 0, want: Number{Real: 1, Emag: 0}},
+	{d: Number{Real: 1, Emag: 2}, p: 1, want: Number{Real: 1, Emag: 2}},
+	{d: Number{Real: 1, Emag: 2}, p: 2, want: Number{Real: 1, Emag: 4}},
+	{d: Number{Real: 1, Emag: 2}, p: 3, want: Number{Real: 1, Emag: 6}},
+
+	// PowReal(x, 1) = x for any x
+	{d: Number{Real: 0, Emag: 0}, p: 1, want: Number{Real: 0, Emag: 0}},
+	{d: Number{Real: negZero, Emag: 0}, p: 1, want: Number{Real: negZero, Emag: 0}},
+	{d: Number{Real: 0, Emag: 1}, p: 1, want: Number{Real: 0, Emag: 1}},
+	{d: Number{Real: negZero, Emag: 1}, p: 1, want: Number{Real: negZero, Emag: 1}},
+	{d: Number{Real: math.NaN(), Emag: 0}, p: 1, want: Number{Real: math.NaN(), Emag: 0}},
+	{d: Number{Real: math.NaN(), Emag: 1}, p: 1, want: Number{Real: math.NaN(), Emag: 1}},
+	{d: Number{Real: math.NaN(), Emag: 2}, p: 1, want: Number{Real: math.NaN(), Emag: 2}},
+
+	// PowReal(NaN+xϵ, y) = NaN+NaNϵ
+	{d: Number{Real: math.NaN(), Emag: 0}, p: 2, want: Number{Real: math.NaN(), Emag: math.NaN()}},
+	{d: Number{Real: math.NaN(), Emag: 0}, p: 3, want: Number{Real: math.NaN(), Emag: math.NaN()}},
+	{d: Number{Real: math.NaN(), Emag: 1}, p: 2, want: Number{Real: math.NaN(), Emag: math.NaN()}},
+	{d: Number{Real: math.NaN(), Emag: 1}, p: 3, want: Number{Real: math.NaN(), Emag: math.NaN()}},
+	{d: Number{Real: math.NaN(), Emag: 2}, p: 2, want: Number{Real: math.NaN(), Emag: math.NaN()}},
+	{d: Number{Real: math.NaN(), Emag: 2}, p: 3, want: Number{Real: math.NaN(), Emag: math.NaN()}},
+
+	// PowReal(x, NaN) = NaN+NaNϵ
+	{d: Number{Real: 0, Emag: 0}, p: math.NaN(), want: Number{Real: math.NaN(), Emag: math.NaN()}},
+	{d: Number{Real: 2, Emag: 0}, p: math.NaN(), want: Number{Real: math.NaN(), Emag: math.NaN()}},
+	{d: Number{Real: 3, Emag: 0}, p: math.NaN(), want: Number{Real: math.NaN(), Emag: math.NaN()}},
+	{d: Number{Real: 0, Emag: 1}, p: math.NaN(), want: Number{Real: math.NaN(), Emag: math.NaN()}},
+	{d: Number{Real: 2, Emag: 1}, p: math.NaN(), want: Number{Real: math.NaN(), Emag: math.NaN()}},
+	{d: Number{Real: 3, Emag: 1}, p: math.NaN(), want: Number{Real: math.NaN(), Emag: math.NaN()}},
+	{d: Number{Real: 0, Emag: 2}, p: math.NaN(), want: Number{Real: math.NaN(), Emag: math.NaN()}},
+	{d: Number{Real: 2, Emag: 2}, p: math.NaN(), want: Number{Real: math.NaN(), Emag: math.NaN()}},
+	{d: Number{Real: 3, Emag: 2}, p: math.NaN(), want: Number{Real: math.NaN(), Emag: math.NaN()}},
+
+	// Handled by math.Pow tests:
+	//
+	// Pow(±0, y) = ±Inf for y an odd integer < 0
+	// Pow(±0, -Inf) = +Inf
+	// Pow(±0, +Inf) = +0
+	// Pow(±0, y) = +Inf for finite y < 0 and not an odd integer
+	// Pow(±0, y) = ±0 for y an odd integer > 0
+	// Pow(±0, y) = +0 for finite y > 0 and not an odd integer
+	// Pow(-1, ±Inf) = 1
+
+	// PowReal(x+0ϵ, +Inf) = +Inf+NaNϵ for |x| > 1
+	{d: Number{Real: 2, Emag: 0}, p: math.Inf(1), want: Number{Real: math.Inf(1), Emag: math.NaN()}},
+	{d: Number{Real: 3, Emag: 0}, p: math.Inf(1), want: Number{Real: math.Inf(1), Emag: math.NaN()}},
+
+	// PowReal(x+yϵ, +Inf) = +Inf for |x| > 1
+	{d: Number{Real: 2, Emag: 1}, p: math.Inf(1), want: Number{Real: math.Inf(1), Emag: math.Inf(1)}},
+	{d: Number{Real: 3, Emag: 1}, p: math.Inf(1), want: Number{Real: math.Inf(1), Emag: math.Inf(1)}},
+	{d: Number{Real: 2, Emag: 2}, p: math.Inf(1), want: Number{Real: math.Inf(1), Emag: math.Inf(1)}},
+	{d: Number{Real: 3, Emag: 2}, p: math.Inf(1), want: Number{Real: math.Inf(1), Emag: math.Inf(1)}},
+
+	// PowReal(x, -Inf) = +0+NaNϵ for |x| > 1
+	{d: Number{Real: 2, Emag: 0}, p: math.Inf(-1), want: Number{Real: 0, Emag: math.NaN()}},
+	{d: Number{Real: 3, Emag: 0}, p: math.Inf(-1), want: Number{Real: 0, Emag: math.NaN()}},
+	{d: Number{Real: 2, Emag: 1}, p: math.Inf(-1), want: Number{Real: 0, Emag: math.NaN()}},
+	{d: Number{Real: 3, Emag: 1}, p: math.Inf(-1), want: Number{Real: 0, Emag: math.NaN()}},
+	{d: Number{Real: 2, Emag: 2}, p: math.Inf(-1), want: Number{Real: 0, Emag: math.NaN()}},
+	{d: Number{Real: 3, Emag: 2}, p: math.Inf(-1), want: Number{Real: 0, Emag: math.NaN()}},
+
+	// PowReal(x+yϵ, +Inf) = +0+NaNϵ for |x| < 1
+	{d: Number{Real: 0.1, Emag: 0}, p: math.Inf(1), want: Number{Real: 0, Emag: math.NaN()}},
+	{d: Number{Real: 0.1, Emag: 0.1}, p: math.Inf(1), want: Number{Real: 0, Emag: math.NaN()}},
+	{d: Number{Real: 0.2, Emag: 0.2}, p: math.Inf(1), want: Number{Real: 0, Emag: math.NaN()}},
+	{d: Number{Real: 0.5, Emag: 0.5}, p: math.Inf(1), want: Number{Real: 0, Emag: math.NaN()}},
+
+	// PowReal(x+0ϵ, -Inf) = +Inf+NaNϵ for |x| < 1
+	{d: Number{Real: 0.1, Emag: 0}, p: math.Inf(-1), want: Number{Real: math.Inf(1), Emag: math.NaN()}},
+	{d: Number{Real: 0.2, Emag: 0}, p: math.Inf(-1), want: Number{Real: math.Inf(1), Emag: math.NaN()}},
+
+	// PowReal(x, -Inf) = +Inf-Infϵ for |x| < 1
+	{d: Number{Real: 0.1, Emag: 0.1}, p: math.Inf(-1), want: Number{Real: math.Inf(1), Emag: math.Inf(-1)}},
+	{d: Number{Real: 0.2, Emag: 0.1}, p: math.Inf(-1), want: Number{Real: math.Inf(1), Emag: math.Inf(-1)}},
+	{d: Number{Real: 0.1, Emag: 0.2}, p: math.Inf(-1), want: Number{Real: math.Inf(1), Emag: math.Inf(-1)}},
+	{d: Number{Real: 0.2, Emag: 0.2}, p: math.Inf(-1), want: Number{Real: math.Inf(1), Emag: math.Inf(-1)}},
+	{d: Number{Real: 0.1, Emag: 1}, p: math.Inf(-1), want: Number{Real: math.Inf(1), Emag: math.Inf(-1)}},
+	{d: Number{Real: 0.2, Emag: 1}, p: math.Inf(-1), want: Number{Real: math.Inf(1), Emag: math.Inf(-1)}},
+	{d: Number{Real: 0.1, Emag: 2}, p: math.Inf(-1), want: Number{Real: math.Inf(1), Emag: math.Inf(-1)}},
+	{d: Number{Real: 0.2, Emag: 2}, p: math.Inf(-1), want: Number{Real: math.Inf(1), Emag: math.Inf(-1)}},
+
+	// Handled by math.Pow tests:
+	//
+	// Pow(+Inf, y) = +Inf for y > 0
+	// Pow(+Inf, y) = +0 for y < 0
+	// Pow(-Inf, y) = Pow(-0, -y)
+
+	// PowReal(x, y) = NaN+NaNϵ for finite x < 0 and finite non-integer y
+	{d: Number{Real: -1, Emag: -1}, p: 0.5, want: Number{Real: math.NaN(), Emag: math.NaN()}},
+	{d: Number{Real: -1, Emag: 2}, p: 0.5, want: Number{Real: math.NaN(), Emag: math.NaN()}},
+}
+
+func TestPowReal(t *testing.T) {
+	const tol = 1e-15
+	for _, test := range powRealTests {
+		got := PowReal(test.d, test.p)
+		if !sameDual(got, test.want, tol) {
+			t.Errorf("unexpected PowReal(%v, %v): got:%v want:%v", test.d, test.p, got, test.want)
+		}
+	}
+}
+
+func sameDual(a, b Number, tol float64) bool {
+	return same(a.Real, b.Real, tol) && same(a.Emag, b.Emag, tol)
+}
+
 func same(a, b, tol float64) bool {
 	return (math.IsNaN(a) && math.IsNaN(b)) || floats.EqualWithinAbsOrRel(a, b, tol, tol)
 }

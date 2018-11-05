@@ -14,10 +14,12 @@ import (
 )
 
 var (
-	_ graph.Graph        = (*UndirectedMatrix)(nil)
-	_ graph.Undirected   = (*UndirectedMatrix)(nil)
-	_ edgeSetter         = (*UndirectedMatrix)(nil)
-	_ weightedEdgeSetter = (*UndirectedMatrix)(nil)
+	um *UndirectedMatrix
+
+	_ graph.Graph        = um
+	_ graph.Undirected   = um
+	_ edgeSetter         = um
+	_ weightedEdgeSetter = um
 )
 
 // UndirectedMatrix represents an undirected graph using an adjacency
@@ -71,32 +73,15 @@ func NewUndirectedMatrixFrom(nodes []graph.Node, init, self, absent float64) *Un
 	return g
 }
 
-// Node returns the node with the given ID if it exists in the graph,
-// and nil otherwise.
-func (g *UndirectedMatrix) Node(id int64) graph.Node {
-	if !g.has(id) {
-		return nil
-	}
-	if g.nodes == nil {
-		return Node(id)
-	}
-	return g.nodes[id]
+// Edge returns the edge from u to v if such an edge exists and nil otherwise.
+// The node v must be directly reachable from u as defined by the From method.
+func (g *UndirectedMatrix) Edge(uid, vid int64) graph.Edge {
+	return g.WeightedEdgeBetween(uid, vid)
 }
 
-func (g *UndirectedMatrix) has(id int64) bool {
-	r := g.mat.Symmetric()
-	return 0 <= id && id < int64(r)
-}
-
-// Nodes returns all the nodes in the graph.
-func (g *UndirectedMatrix) Nodes() graph.Nodes {
-	if g.nodes != nil {
-		nodes := make([]graph.Node, len(g.nodes))
-		copy(nodes, g.nodes)
-		return iterator.NewOrderedNodes(nodes)
-	}
-	r := g.mat.Symmetric()
-	return iterator.NewImplicitNodes(0, r, newSimpleNode)
+// EdgeBetween returns the edge between nodes x and y.
+func (g *UndirectedMatrix) EdgeBetween(uid, vid int64) graph.Edge {
+	return g.WeightedEdgeBetween(uid, vid)
 }
 
 // Edges returns all the edges in the graph.
@@ -144,45 +129,47 @@ func (g *UndirectedMatrix) HasEdgeBetween(uid, vid int64) bool {
 	return uid != vid && !isSame(g.mat.At(int(uid), int(vid)), g.absent)
 }
 
-// Edge returns the edge from u to v if such an edge exists and nil otherwise.
-// The node v must be directly reachable from u as defined by the From method.
-func (g *UndirectedMatrix) Edge(uid, vid int64) graph.Edge {
-	return g.WeightedEdgeBetween(uid, vid)
+// Matrix returns the mat.Matrix representation of the graph.
+func (g *UndirectedMatrix) Matrix() mat.Matrix {
+	// Prevent alteration of dimensions of the returned matrix.
+	m := *g.mat
+	return &m
 }
 
-// WeightedEdge returns the weighted edge from u to v if such an edge exists and nil otherwise.
-// The node v must be directly reachable from u as defined by the From method.
-func (g *UndirectedMatrix) WeightedEdge(uid, vid int64) graph.WeightedEdge {
-	return g.WeightedEdgeBetween(uid, vid)
-}
-
-// EdgeBetween returns the edge between nodes x and y.
-func (g *UndirectedMatrix) EdgeBetween(uid, vid int64) graph.Edge {
-	return g.WeightedEdgeBetween(uid, vid)
-}
-
-// WeightedEdgeBetween returns the weighted edge between nodes x and y.
-func (g *UndirectedMatrix) WeightedEdgeBetween(uid, vid int64) graph.WeightedEdge {
-	if g.HasEdgeBetween(uid, vid) {
-		// uid and vid are not greater than maximum int by this point.
-		return WeightedEdge{F: g.Node(uid), T: g.Node(vid), W: g.mat.At(int(uid), int(vid))}
+// Node returns the node with the given ID if it exists in the graph,
+// and nil otherwise.
+func (g *UndirectedMatrix) Node(id int64) graph.Node {
+	if !g.has(id) {
+		return nil
 	}
-	return nil
+	if g.nodes == nil {
+		return Node(id)
+	}
+	return g.nodes[id]
 }
 
-// Weight returns the weight for the edge between x and y if Edge(x, y) returns a non-nil Edge.
-// If x and y are the same node or there is no joining edge between the two nodes the weight
-// value returned is either the graph's absent or self value. Weight returns true if an edge
-// exists between x and y or if x and y have the same ID, false otherwise.
-func (g *UndirectedMatrix) Weight(xid, yid int64) (w float64, ok bool) {
-	if xid == yid {
-		return g.self, true
+// Nodes returns all the nodes in the graph.
+func (g *UndirectedMatrix) Nodes() graph.Nodes {
+	if g.nodes != nil {
+		nodes := make([]graph.Node, len(g.nodes))
+		copy(nodes, g.nodes)
+		return iterator.NewOrderedNodes(nodes)
 	}
-	if g.has(xid) && g.has(yid) {
-		// xid and yid are not greater than maximum int by this point.
-		return g.mat.At(int(xid), int(yid)), true
+	r := g.mat.Symmetric()
+	return iterator.NewImplicitNodes(0, r, newSimpleNode)
+}
+
+// RemoveEdge removes the edge with the given end point IDs from the graph, leaving the terminal
+// nodes. If the edge does not exist it is a no-op.
+func (g *UndirectedMatrix) RemoveEdge(fid, tid int64) {
+	if !g.has(fid) {
+		return
 	}
-	return g.absent, false
+	if !g.has(tid) {
+		return
+	}
+	// fid and tid are not greater than maximum int by this point.
+	g.mat.SetSym(int(fid), int(tid), g.absent)
 }
 
 // SetEdge sets e, an edge from one node to another with unit weight. If the ends of the edge are
@@ -221,22 +208,37 @@ func (g *UndirectedMatrix) setWeightedEdge(e graph.Edge, weight float64) {
 	g.mat.SetSym(int(fid), int(tid), weight)
 }
 
-// RemoveEdge removes the edge with the given end point IDs from the graph, leaving the terminal
-// nodes. If the edge does not exist it is a no-op.
-func (g *UndirectedMatrix) RemoveEdge(fid, tid int64) {
-	if !g.has(fid) {
-		return
+// Weight returns the weight for the edge between x and y if Edge(x, y) returns a non-nil Edge.
+// If x and y are the same node or there is no joining edge between the two nodes the weight
+// value returned is either the graph's absent or self value. Weight returns true if an edge
+// exists between x and y or if x and y have the same ID, false otherwise.
+func (g *UndirectedMatrix) Weight(xid, yid int64) (w float64, ok bool) {
+	if xid == yid {
+		return g.self, true
 	}
-	if !g.has(tid) {
-		return
+	if g.has(xid) && g.has(yid) {
+		// xid and yid are not greater than maximum int by this point.
+		return g.mat.At(int(xid), int(yid)), true
 	}
-	// fid and tid are not greater than maximum int by this point.
-	g.mat.SetSym(int(fid), int(tid), g.absent)
+	return g.absent, false
 }
 
-// Matrix returns the mat.Matrix representation of the graph.
-func (g *UndirectedMatrix) Matrix() mat.Matrix {
-	// Prevent alteration of dimensions of the returned matrix.
-	m := *g.mat
-	return &m
+// WeightedEdge returns the weighted edge from u to v if such an edge exists and nil otherwise.
+// The node v must be directly reachable from u as defined by the From method.
+func (g *UndirectedMatrix) WeightedEdge(uid, vid int64) graph.WeightedEdge {
+	return g.WeightedEdgeBetween(uid, vid)
+}
+
+// WeightedEdgeBetween returns the weighted edge between nodes x and y.
+func (g *UndirectedMatrix) WeightedEdgeBetween(uid, vid int64) graph.WeightedEdge {
+	if g.HasEdgeBetween(uid, vid) {
+		// uid and vid are not greater than maximum int by this point.
+		return WeightedEdge{F: g.Node(uid), T: g.Node(vid), W: g.mat.At(int(uid), int(vid))}
+	}
+	return nil
+}
+
+func (g *UndirectedMatrix) has(id int64) bool {
+	r := g.mat.Symmetric()
+	return 0 <= id && id < int64(r)
 }

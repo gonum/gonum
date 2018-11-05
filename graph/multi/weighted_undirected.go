@@ -54,18 +54,6 @@ func NewWeightedUndirectedGraph() *WeightedUndirectedGraph {
 	}
 }
 
-// NewNode returns a new unique Node to be added to g. The Node's ID does
-// not become valid in g until the Node is added to g.
-func (g *WeightedUndirectedGraph) NewNode() graph.Node {
-	if len(g.nodes) == 0 {
-		return Node(0)
-	}
-	if int64(len(g.nodes)) == uid.Max {
-		panic("simple: cannot allocate node: no slot")
-	}
-	return Node(g.nodeIDs.NewID())
-}
-
 // AddNode adds n to the graph. It panics if the added node ID matches an existing node ID.
 func (g *WeightedUndirectedGraph) AddNode(n graph.Node) {
 	if _, exists := g.nodes[n.ID()]; exists {
@@ -76,98 +64,16 @@ func (g *WeightedUndirectedGraph) AddNode(n graph.Node) {
 	g.nodeIDs.Use(n.ID())
 }
 
-// RemoveNode removes the node with the given ID from the graph, as well as any edges attached
-// to it. If the node is not in the graph it is a no-op.
-func (g *WeightedUndirectedGraph) RemoveNode(id int64) {
-	if _, ok := g.nodes[id]; !ok {
-		return
-	}
-	delete(g.nodes, id)
-
-	for from := range g.lines[id] {
-		delete(g.lines[from], id)
-	}
-	delete(g.lines, id)
-
-	g.nodeIDs.Release(id)
+// Edge returns the edge from u to v if such an edge exists and nil otherwise.
+// The node v must be directly reachable from u as defined by the From method.
+// The returned graph.Edge is a multi.WeightedEdge if an edge exists.
+func (g *WeightedUndirectedGraph) Edge(uid, vid int64) graph.Edge {
+	return g.WeightedEdge(uid, vid)
 }
 
-// NewWeightedLine returns a new WeightedLine from the source to the destination node.
-// The returned WeightedLine will have a graph-unique ID.
-// The Line's ID does not become valid in g until the Line is added to g.
-func (g *WeightedUndirectedGraph) NewWeightedLine(from, to graph.Node, weight float64) graph.WeightedLine {
-	return &WeightedLine{F: from, T: to, W: weight, UID: g.lineIDs.NewID()}
-}
-
-// SetWeightedLine adds l, a line from one node to another. If the nodes do not exist, they are added
-// and are set to the nodes of the line otherwise.
-func (g *WeightedUndirectedGraph) SetWeightedLine(l graph.WeightedLine) {
-	var (
-		from = l.From()
-		fid  = from.ID()
-		to   = l.To()
-		tid  = to.ID()
-		lid  = l.ID()
-	)
-
-	if _, ok := g.nodes[fid]; !ok {
-		g.AddNode(from)
-	} else {
-		g.nodes[fid] = from
-	}
-	if g.lines[fid][tid] == nil {
-		g.lines[fid][tid] = make(map[int64]graph.WeightedLine)
-	}
-	if _, ok := g.nodes[tid]; !ok {
-		g.AddNode(to)
-	} else {
-		g.nodes[tid] = to
-	}
-	if g.lines[tid][fid] == nil {
-		g.lines[tid][fid] = make(map[int64]graph.WeightedLine)
-	}
-
-	g.lines[fid][tid][lid] = l
-	g.lines[tid][fid][lid] = l
-	g.lineIDs.Use(lid)
-}
-
-// RemoveLine removes the line with the given end point and line IDs from the graph,
-// leaving the terminal nodes. If the line does not exist it is a no-op.
-func (g *WeightedUndirectedGraph) RemoveLine(fid, tid, id int64) {
-	if _, ok := g.nodes[fid]; !ok {
-		return
-	}
-	if _, ok := g.nodes[tid]; !ok {
-		return
-	}
-
-	delete(g.lines[fid], tid)
-	delete(g.lines[tid], fid)
-	if len(g.lines[tid][fid]) == 0 {
-		delete(g.lines[tid], fid)
-	}
-	g.lineIDs.Release(id)
-}
-
-// Node returns the node with the given ID if it exists in the graph,
-// and nil otherwise.
-func (g *WeightedUndirectedGraph) Node(id int64) graph.Node {
-	return g.nodes[id]
-}
-
-// Nodes returns all the nodes in the graph.
-func (g *WeightedUndirectedGraph) Nodes() graph.Nodes {
-	if len(g.nodes) == 0 {
-		return nil
-	}
-	nodes := make([]graph.Node, len(g.nodes))
-	i := 0
-	for _, n := range g.nodes {
-		nodes[i] = n
-		i++
-	}
-	return iterator.NewOrderedNodes(nodes)
+// EdgeBetween returns the edge between nodes x and y.
+func (g *WeightedUndirectedGraph) EdgeBetween(xid, yid int64) graph.Edge {
+	return g.WeightedEdge(xid, yid)
 }
 
 // Edges returns all the edges in the graph. Each edge in the returned slice
@@ -200,38 +106,6 @@ func (g *WeightedUndirectedGraph) Edges() graph.Edges {
 		}
 	}
 	return iterator.NewOrderedEdges(edges)
-}
-
-// WeightedEdges returns all the edges in the graph. Each edge in the returned slice
-// is a multi.Edge.
-func (g *WeightedUndirectedGraph) WeightedEdges() graph.WeightedEdges {
-	if len(g.lines) == 0 {
-		return nil
-	}
-	var edges []graph.WeightedEdge
-	seen := make(map[int64]struct{})
-	for _, u := range g.lines {
-		for _, e := range u {
-			var lines []graph.WeightedLine
-			for _, l := range e {
-				lid := l.ID()
-				if _, ok := seen[lid]; ok {
-					continue
-				}
-				seen[lid] = struct{}{}
-				lines = append(lines, l)
-			}
-			if len(lines) != 0 {
-				edges = append(edges, WeightedEdge{
-					F:             g.Node(lines[0].From().ID()),
-					T:             g.Node(lines[0].To().ID()),
-					WeightedLines: iterator.NewOrderedWeightedLines(lines),
-					WeightFunc:    g.EdgeWeightFunc,
-				})
-			}
-		}
-	}
-	return iterator.NewOrderedWeightedEdges(edges)
 }
 
 // From returns all nodes in g that can be reached directly from n.
@@ -280,16 +154,117 @@ func (g *WeightedUndirectedGraph) LinesBetween(xid, yid int64) graph.Lines {
 	return iterator.NewOrderedLines(lines)
 }
 
-// Edge returns the edge from u to v if such an edge exists and nil otherwise.
-// The node v must be directly reachable from u as defined by the From method.
-// The returned graph.Edge is a multi.WeightedEdge if an edge exists.
-func (g *WeightedUndirectedGraph) Edge(uid, vid int64) graph.Edge {
-	return g.WeightedEdge(uid, vid)
+// NewNode returns a new unique Node to be added to g. The Node's ID does
+// not become valid in g until the Node is added to g.
+func (g *WeightedUndirectedGraph) NewNode() graph.Node {
+	if len(g.nodes) == 0 {
+		return Node(0)
+	}
+	if int64(len(g.nodes)) == uid.Max {
+		panic("simple: cannot allocate node: no slot")
+	}
+	return Node(g.nodeIDs.NewID())
 }
 
-// EdgeBetween returns the edge between nodes x and y.
-func (g *WeightedUndirectedGraph) EdgeBetween(xid, yid int64) graph.Edge {
-	return g.WeightedEdge(xid, yid)
+// NewWeightedLine returns a new WeightedLine from the source to the destination node.
+// The returned WeightedLine will have a graph-unique ID.
+// The Line's ID does not become valid in g until the Line is added to g.
+func (g *WeightedUndirectedGraph) NewWeightedLine(from, to graph.Node, weight float64) graph.WeightedLine {
+	return &WeightedLine{F: from, T: to, W: weight, UID: g.lineIDs.NewID()}
+}
+
+// Node returns the node with the given ID if it exists in the graph,
+// and nil otherwise.
+func (g *WeightedUndirectedGraph) Node(id int64) graph.Node {
+	return g.nodes[id]
+}
+
+// Nodes returns all the nodes in the graph.
+func (g *WeightedUndirectedGraph) Nodes() graph.Nodes {
+	if len(g.nodes) == 0 {
+		return nil
+	}
+	nodes := make([]graph.Node, len(g.nodes))
+	i := 0
+	for _, n := range g.nodes {
+		nodes[i] = n
+		i++
+	}
+	return iterator.NewOrderedNodes(nodes)
+}
+
+// RemoveLine removes the line with the given end point and line IDs from the graph,
+// leaving the terminal nodes. If the line does not exist it is a no-op.
+func (g *WeightedUndirectedGraph) RemoveLine(fid, tid, id int64) {
+	if _, ok := g.nodes[fid]; !ok {
+		return
+	}
+	if _, ok := g.nodes[tid]; !ok {
+		return
+	}
+
+	delete(g.lines[fid], tid)
+	delete(g.lines[tid], fid)
+	if len(g.lines[tid][fid]) == 0 {
+		delete(g.lines[tid], fid)
+	}
+	g.lineIDs.Release(id)
+}
+
+// RemoveNode removes the node with the given ID from the graph, as well as any edges attached
+// to it. If the node is not in the graph it is a no-op.
+func (g *WeightedUndirectedGraph) RemoveNode(id int64) {
+	if _, ok := g.nodes[id]; !ok {
+		return
+	}
+	delete(g.nodes, id)
+
+	for from := range g.lines[id] {
+		delete(g.lines[from], id)
+	}
+	delete(g.lines, id)
+
+	g.nodeIDs.Release(id)
+}
+
+// SetWeightedLine adds l, a line from one node to another. If the nodes do not exist, they are added
+// and are set to the nodes of the line otherwise.
+func (g *WeightedUndirectedGraph) SetWeightedLine(l graph.WeightedLine) {
+	var (
+		from = l.From()
+		fid  = from.ID()
+		to   = l.To()
+		tid  = to.ID()
+		lid  = l.ID()
+	)
+
+	if _, ok := g.nodes[fid]; !ok {
+		g.AddNode(from)
+	} else {
+		g.nodes[fid] = from
+	}
+	if g.lines[fid][tid] == nil {
+		g.lines[fid][tid] = make(map[int64]graph.WeightedLine)
+	}
+	if _, ok := g.nodes[tid]; !ok {
+		g.AddNode(to)
+	} else {
+		g.nodes[tid] = to
+	}
+	if g.lines[tid][fid] == nil {
+		g.lines[tid][fid] = make(map[int64]graph.WeightedLine)
+	}
+
+	g.lines[fid][tid][lid] = l
+	g.lines[tid][fid][lid] = l
+	g.lineIDs.Use(lid)
+}
+
+// Weight returns the weight for the lines between x and y summarised by the receiver's
+// EdgeWeightFunc. Weight returns true if an edge exists between x and y, false otherwise.
+func (g *WeightedUndirectedGraph) Weight(xid, yid int64) (w float64, ok bool) {
+	lines := g.WeightedLines(xid, yid)
+	return WeightedEdge{WeightedLines: lines, WeightFunc: g.EdgeWeightFunc}.Weight(), lines != nil
 }
 
 // WeightedEdge returns the weighted edge from u to v if such an edge exists and nil otherwise.
@@ -310,6 +285,38 @@ func (g *WeightedUndirectedGraph) WeightedEdge(uid, vid int64) graph.WeightedEdg
 // WeightedEdgeBetween returns the weighted edge between nodes x and y.
 func (g *WeightedUndirectedGraph) WeightedEdgeBetween(xid, yid int64) graph.WeightedEdge {
 	return g.WeightedEdge(xid, yid)
+}
+
+// WeightedEdges returns all the edges in the graph. Each edge in the returned slice
+// is a multi.Edge.
+func (g *WeightedUndirectedGraph) WeightedEdges() graph.WeightedEdges {
+	if len(g.lines) == 0 {
+		return nil
+	}
+	var edges []graph.WeightedEdge
+	seen := make(map[int64]struct{})
+	for _, u := range g.lines {
+		for _, e := range u {
+			var lines []graph.WeightedLine
+			for _, l := range e {
+				lid := l.ID()
+				if _, ok := seen[lid]; ok {
+					continue
+				}
+				seen[lid] = struct{}{}
+				lines = append(lines, l)
+			}
+			if len(lines) != 0 {
+				edges = append(edges, WeightedEdge{
+					F:             g.Node(lines[0].From().ID()),
+					T:             g.Node(lines[0].To().ID()),
+					WeightedLines: iterator.NewOrderedWeightedLines(lines),
+					WeightFunc:    g.EdgeWeightFunc,
+				})
+			}
+		}
+	}
+	return iterator.NewOrderedWeightedEdges(edges)
 }
 
 // WeightedLines returns the lines from u to v if such an edge exists and nil otherwise.
@@ -335,11 +342,4 @@ func (g *WeightedUndirectedGraph) WeightedLinesBetween(xid, yid int64) graph.Wei
 		lines = append(lines, l)
 	}
 	return iterator.NewOrderedWeightedLines(lines)
-}
-
-// Weight returns the weight for the lines between x and y summarised by the receiver's
-// EdgeWeightFunc. Weight returns true if an edge exists between x and y, false otherwise.
-func (g *WeightedUndirectedGraph) Weight(xid, yid int64) (w float64, ok bool) {
-	lines := g.WeightedLines(xid, yid)
-	return WeightedEdge{WeightedLines: lines, WeightFunc: g.EdgeWeightFunc}.Weight(), lines != nil
 }

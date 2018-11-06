@@ -1,4 +1,4 @@
-// Copyright ©2017 The Gonum Authors. All rights reserved.
+// Copyright ©2018 The Gonum Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -15,14 +15,15 @@ import (
 
 // Binomial implements the binomial distribution, a discrete probability distribution
 // that expresses the probability of a given number of successful Bernoulli trials
-// out of n total, each with successs probability p.
-// The poisson distribution has density function:
+// out of a total of n, each with successs probability p.
+// The binomial distribution has density function:
 //  f(k) = (n choose k) p^k (1-p)^(n-k)
 // For more information, see https://en.wikipedia.org/wiki/Binomial_distribution.
 type Binomial struct {
-	// N is the total number of Bernoulli trials. Must be greater than 0.
-	// P is the probablity of success in any given trial. Must be on [0, 1]
-	N, P float64
+	// N is the total number of Bernoulli trials. N must be greater than 0.
+	N float64
+	// P is the probablity of success in any given trial. P must be on [0, 1].
+	P float64
 
 	Src rand.Source
 }
@@ -106,6 +107,7 @@ func (b Binomial) Rand() float64 {
 	}
 
 	if am < 1.0 {
+		// Use rejection method with Poisson proposal.
 		var bnl float64
 		z := -p
 		pclog := (1.0 + 0.5*z) * z / (1.0 + (1.0+0.16666666666666666*z)*z)
@@ -134,6 +136,7 @@ func (b Binomial) Rand() float64 {
 		return bnl
 	}
 
+	// Use rejection method with Cauchy proposal.
 	g, _ := math.Lgamma(b.N + 1.0)
 	plog := math.Log(p)
 	pclog := math.Log1p(-p)

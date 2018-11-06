@@ -1,4 +1,4 @@
-// Copyright ©2017 The Gonum Authors. All rights reserved.
+// Copyright ©2018 The Gonum Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -21,6 +21,7 @@ func TestBinomialProb(t *testing.T) {
 		p    float64
 		want float64
 	}{
+		// Probabilities computed with Wolfram|Alpha (http://wwww.wolframalpha.com)
 		{0, 10, 0.5, 0.0009765625},
 		{1, 10, 0.5, 0.009765625},
 		{2, 10, 0.5, 0.0439453125},
@@ -72,6 +73,7 @@ func TestBinomialCDF(t *testing.T) {
 		p    float64
 		want float64
 	}{
+		// Cumulative probabilities computed with SciPy
 		{0, 10, 0.5, 9.765625e-04},
 		{1, 10, 0.5, 1.0742187499999998e-02},
 		{2, 10, 0.5, 5.468749999999999e-02},
@@ -120,7 +122,7 @@ func TestBinomial(t *testing.T) {
 }
 
 func testBinomial(t *testing.T, b Binomial, i int) {
-	tol := 1e-2
+	const tol = 1e-2
 	const n = 1e6
 	x := make([]float64, n)
 	generateSamples(x, b)

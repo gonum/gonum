@@ -98,6 +98,13 @@ type WeightedDirectedMultigraph interface {
 	To(id int64) Nodes
 }
 
+// LineStreamer is an interface for retrieving a line stream from a graph.
+type LineStreamer interface {
+	// LineStream returns a Line iterator ordered by some expected
+	// specification.
+	LineStream() Lines
+}
+
 // LineAdder is an interface for adding lines to a multigraph.
 type LineAdder interface {
 	// NewLine returns a new Line from the source to the destination node.

@@ -51,6 +51,67 @@ func NewWeightedDirectedGraph(self, absent float64) *WeightedDirectedGraph {
 	}
 }
 
+// AddNode adds n to the graph. It panics if the added node ID matches an existing node ID.
+func (g *WeightedDirectedGraph) AddNode(n graph.Node) {
+	if _, exists := g.nodes[n.ID()]; exists {
+		panic(fmt.Sprintf("simple: node ID collision: %d", n.ID()))
+	}
+	g.nodes[n.ID()] = n
+	g.from[n.ID()] = make(map[int64]graph.WeightedEdge)
+	g.to[n.ID()] = make(map[int64]graph.WeightedEdge)
+	g.nodeIDs.Use(n.ID())
+}
+
+// Edge returns the edge from u to v if such an edge exists and nil otherwise.
+// The node v must be directly reachable from u as defined by the From method.
+func (g *WeightedDirectedGraph) Edge(uid, vid int64) graph.Edge {
+	return g.WeightedEdge(uid, vid)
+}
+
+// Edges returns all the edges in the graph.
+func (g *WeightedDirectedGraph) Edges() graph.Edges {
+	var edges []graph.Edge
+	for _, u := range g.nodes {
+		for _, e := range g.from[u.ID()] {
+			edges = append(edges, e)
+		}
+	}
+	return iterator.NewOrderedEdges(edges)
+}
+
+// From returns all nodes in g that can be reached directly from n.
+func (g *WeightedDirectedGraph) From(id int64) graph.Nodes {
+	if _, ok := g.from[id]; !ok {
+		return nil
+	}
+
+	from := make([]graph.Node, len(g.from[id]))
+	i := 0
+	for vid := range g.from[id] {
+		from[i] = g.nodes[vid]
+		i++
+	}
+	return iterator.NewOrderedNodes(from)
+}
+
+// HasEdgeBetween returns whether an edge exists between nodes x and y without
+// considering direction.
+func (g *WeightedDirectedGraph) HasEdgeBetween(xid, yid int64) bool {
+	if _, ok := g.from[xid][yid]; ok {
+		return true
+	}
+	_, ok := g.from[yid][xid]
+	return ok
+}
+
+// HasEdgeFromTo returns whether an edge exists in the graph from u to v.
+func (g *WeightedDirectedGraph) HasEdgeFromTo(uid, vid int64) bool {
+	if _, ok := g.from[uid][vid]; !ok {
+		return false
+	}
+	return true
+}
+
 // NewNode returns a new unique Node to be added to g. The Node's ID does
 // not become valid in g until the Node is added to g.
 func (g *WeightedDirectedGraph) NewNode() graph.Node {
@@ -63,15 +124,43 @@ func (g *WeightedDirectedGraph) NewNode() graph.Node {
 	return Node(g.nodeIDs.NewID())
 }
 
-// AddNode adds n to the graph. It panics if the added node ID matches an existing node ID.
-func (g *WeightedDirectedGraph) AddNode(n graph.Node) {
-	if _, exists := g.nodes[n.ID()]; exists {
-		panic(fmt.Sprintf("simple: node ID collision: %d", n.ID()))
+// NewWeightedEdge returns a new weighted edge from the source to the destination node.
+func (g *WeightedDirectedGraph) NewWeightedEdge(from, to graph.Node, weight float64) graph.WeightedEdge {
+	return &WeightedEdge{F: from, T: to, W: weight}
+}
+
+// Node returns the node with the given ID if it exists in the graph,
+// and nil otherwise.
+func (g *WeightedDirectedGraph) Node(id int64) graph.Node {
+	return g.nodes[id]
+}
+
+// Nodes returns all the nodes in the graph.
+func (g *WeightedDirectedGraph) Nodes() graph.Nodes {
+	if len(g.from) == 0 {
+		return nil
 	}
-	g.nodes[n.ID()] = n
-	g.from[n.ID()] = make(map[int64]graph.WeightedEdge)
-	g.to[n.ID()] = make(map[int64]graph.WeightedEdge)
-	g.nodeIDs.Use(n.ID())
+	nodes := make([]graph.Node, len(g.nodes))
+	i := 0
+	for _, n := range g.nodes {
+		nodes[i] = n
+		i++
+	}
+	return iterator.NewOrderedNodes(nodes)
+}
+
+// RemoveEdge removes the edge with the given end point IDs from the graph, leaving the terminal
+// nodes. If the edge does not exist it is a no-op.
+func (g *WeightedDirectedGraph) RemoveEdge(fid, tid int64) {
+	if _, ok := g.nodes[fid]; !ok {
+		return
+	}
+	if _, ok := g.nodes[tid]; !ok {
+		return
+	}
+
+	delete(g.from[fid], tid)
+	delete(g.to[tid], fid)
 }
 
 // RemoveNode removes the node with the given ID from the graph, as well as any edges attached
@@ -93,11 +182,6 @@ func (g *WeightedDirectedGraph) RemoveNode(id int64) {
 	delete(g.to, id)
 
 	g.nodeIDs.Release(id)
-}
-
-// NewWeightedEdge returns a new weighted edge from the source to the destination node.
-func (g *WeightedDirectedGraph) NewWeightedEdge(from, to graph.Node, weight float64) graph.WeightedEdge {
-	return &WeightedEdge{F: from, T: to, W: weight}
 }
 
 // SetWeightedEdge adds a weighted edge from one node to another. If the nodes do not exist, they are added
@@ -130,77 +214,6 @@ func (g *WeightedDirectedGraph) SetWeightedEdge(e graph.WeightedEdge) {
 	g.to[tid][fid] = e
 }
 
-// RemoveEdge removes the edge with the given end point IDs from the graph, leaving the terminal
-// nodes. If the edge does not exist it is a no-op.
-func (g *WeightedDirectedGraph) RemoveEdge(fid, tid int64) {
-	if _, ok := g.nodes[fid]; !ok {
-		return
-	}
-	if _, ok := g.nodes[tid]; !ok {
-		return
-	}
-
-	delete(g.from[fid], tid)
-	delete(g.to[tid], fid)
-}
-
-// Node returns the node with the given ID if it exists in the graph,
-// and nil otherwise.
-func (g *WeightedDirectedGraph) Node(id int64) graph.Node {
-	return g.nodes[id]
-}
-
-// Nodes returns all the nodes in the graph.
-func (g *WeightedDirectedGraph) Nodes() graph.Nodes {
-	if len(g.from) == 0 {
-		return nil
-	}
-	nodes := make([]graph.Node, len(g.nodes))
-	i := 0
-	for _, n := range g.nodes {
-		nodes[i] = n
-		i++
-	}
-	return iterator.NewOrderedNodes(nodes)
-}
-
-// Edges returns all the edges in the graph.
-func (g *WeightedDirectedGraph) Edges() graph.Edges {
-	var edges []graph.Edge
-	for _, u := range g.nodes {
-		for _, e := range g.from[u.ID()] {
-			edges = append(edges, e)
-		}
-	}
-	return iterator.NewOrderedEdges(edges)
-}
-
-// WeightedEdges returns all the weighted edges in the graph.
-func (g *WeightedDirectedGraph) WeightedEdges() []graph.WeightedEdge {
-	var edges []graph.WeightedEdge
-	for _, u := range g.nodes {
-		for _, e := range g.from[u.ID()] {
-			edges = append(edges, e)
-		}
-	}
-	return edges
-}
-
-// From returns all nodes in g that can be reached directly from n.
-func (g *WeightedDirectedGraph) From(id int64) graph.Nodes {
-	if _, ok := g.from[id]; !ok {
-		return nil
-	}
-
-	from := make([]graph.Node, len(g.from[id]))
-	i := 0
-	for vid := range g.from[id] {
-		from[i] = g.nodes[vid]
-		i++
-	}
-	return iterator.NewOrderedNodes(from)
-}
-
 // To returns all nodes in g that can reach directly to n.
 func (g *WeightedDirectedGraph) To(id int64) graph.Nodes {
 	if _, ok := g.from[id]; !ok {
@@ -214,40 +227,6 @@ func (g *WeightedDirectedGraph) To(id int64) graph.Nodes {
 		i++
 	}
 	return iterator.NewOrderedNodes(to)
-}
-
-// HasEdgeBetween returns whether an edge exists between nodes x and y without
-// considering direction.
-func (g *WeightedDirectedGraph) HasEdgeBetween(xid, yid int64) bool {
-	if _, ok := g.from[xid][yid]; ok {
-		return true
-	}
-	_, ok := g.from[yid][xid]
-	return ok
-}
-
-// Edge returns the edge from u to v if such an edge exists and nil otherwise.
-// The node v must be directly reachable from u as defined by the From method.
-func (g *WeightedDirectedGraph) Edge(uid, vid int64) graph.Edge {
-	return g.WeightedEdge(uid, vid)
-}
-
-// WeightedEdge returns the weighted edge from u to v if such an edge exists and nil otherwise.
-// The node v must be directly reachable from u as defined by the From method.
-func (g *WeightedDirectedGraph) WeightedEdge(uid, vid int64) graph.WeightedEdge {
-	edge, ok := g.from[uid][vid]
-	if !ok {
-		return nil
-	}
-	return edge
-}
-
-// HasEdgeFromTo returns whether an edge exists in the graph from u to v.
-func (g *WeightedDirectedGraph) HasEdgeFromTo(uid, vid int64) bool {
-	if _, ok := g.from[uid][vid]; !ok {
-		return false
-	}
-	return true
 }
 
 // Weight returns the weight for the edge between x and y if Edge(x, y) returns a non-nil Edge.
@@ -264,4 +243,25 @@ func (g *WeightedDirectedGraph) Weight(xid, yid int64) (w float64, ok bool) {
 		}
 	}
 	return g.absent, false
+}
+
+// WeightedEdge returns the weighted edge from u to v if such an edge exists and nil otherwise.
+// The node v must be directly reachable from u as defined by the From method.
+func (g *WeightedDirectedGraph) WeightedEdge(uid, vid int64) graph.WeightedEdge {
+	edge, ok := g.from[uid][vid]
+	if !ok {
+		return nil
+	}
+	return edge
+}
+
+// WeightedEdges returns all the weighted edges in the graph.
+func (g *WeightedDirectedGraph) WeightedEdges() []graph.WeightedEdge {
+	var edges []graph.WeightedEdge
+	for _, u := range g.nodes {
+		for _, e := range g.from[u.ID()] {
+			edges = append(edges, e)
+		}
+	}
+	return edges
 }

@@ -41,18 +41,6 @@ func NewUndirectedGraph() *UndirectedGraph {
 	}
 }
 
-// NewNode returns a new unique Node to be added to g. The Node's ID does
-// not become valid in g until the Node is added to g.
-func (g *UndirectedGraph) NewNode() graph.Node {
-	if len(g.nodes) == 0 {
-		return Node(0)
-	}
-	if int64(len(g.nodes)) == uid.Max {
-		panic("simple: cannot allocate node: no slot")
-	}
-	return Node(g.nodeIDs.NewID())
-}
-
 // AddNode adds n to the graph. It panics if the added node ID matches an existing node ID.
 func (g *UndirectedGraph) AddNode(n graph.Node) {
 	if _, exists := g.nodes[n.ID()]; exists {
@@ -63,89 +51,19 @@ func (g *UndirectedGraph) AddNode(n graph.Node) {
 	g.nodeIDs.Use(n.ID())
 }
 
-// RemoveNode removes the node with the given ID from the graph, as well as any edges attached
-// to it. If the node is not in the graph it is a no-op.
-func (g *UndirectedGraph) RemoveNode(id int64) {
-	if _, ok := g.nodes[id]; !ok {
-		return
-	}
-	delete(g.nodes, id)
-
-	for from := range g.edges[id] {
-		delete(g.edges[from], id)
-	}
-	delete(g.edges, id)
-
-	g.nodeIDs.Release(id)
+// Edge returns the edge from u to v if such an edge exists and nil otherwise.
+// The node v must be directly reachable from u as defined by the From method.
+func (g *UndirectedGraph) Edge(uid, vid int64) graph.Edge {
+	return g.EdgeBetween(uid, vid)
 }
 
-// NewEdge returns a new Edge from the source to the destination node.
-func (g *UndirectedGraph) NewEdge(from, to graph.Node) graph.Edge {
-	return &Edge{F: from, T: to}
-}
-
-// SetEdge adds e, an edge from one node to another. If the nodes do not exist, they are added
-// and are set to the nodes of the edge otherwise.
-// It will panic if the IDs of the e.From and e.To are equal.
-func (g *UndirectedGraph) SetEdge(e graph.Edge) {
-	var (
-		from = e.From()
-		fid  = from.ID()
-		to   = e.To()
-		tid  = to.ID()
-	)
-
-	if fid == tid {
-		panic("simple: adding self edge")
-	}
-
-	if _, ok := g.nodes[fid]; !ok {
-		g.AddNode(from)
-	} else {
-		g.nodes[fid] = from
-	}
-	if _, ok := g.nodes[tid]; !ok {
-		g.AddNode(to)
-	} else {
-		g.nodes[tid] = to
-	}
-
-	g.edges[fid][tid] = e
-	g.edges[tid][fid] = e
-}
-
-// RemoveEdge removes the edge with the given end IDs from the graph, leaving the terminal nodes.
-// If the edge does not exist it is a no-op.
-func (g *UndirectedGraph) RemoveEdge(fid, tid int64) {
-	if _, ok := g.nodes[fid]; !ok {
-		return
-	}
-	if _, ok := g.nodes[tid]; !ok {
-		return
-	}
-
-	delete(g.edges[fid], tid)
-	delete(g.edges[tid], fid)
-}
-
-// Node returns the node with the given ID if it exists in the graph,
-// and nil otherwise.
-func (g *UndirectedGraph) Node(id int64) graph.Node {
-	return g.nodes[id]
-}
-
-// Nodes returns all the nodes in the graph.
-func (g *UndirectedGraph) Nodes() graph.Nodes {
-	if len(g.nodes) == 0 {
+// EdgeBetween returns the edge between nodes x and y.
+func (g *UndirectedGraph) EdgeBetween(xid, yid int64) graph.Edge {
+	edge, ok := g.edges[xid][yid]
+	if !ok {
 		return nil
 	}
-	nodes := make([]graph.Node, len(g.nodes))
-	i := 0
-	for _, n := range g.nodes {
-		nodes[i] = n
-		i++
-	}
-	return iterator.NewOrderedNodes(nodes)
+	return edge
 }
 
 // Edges returns all the edges in the graph.
@@ -191,17 +109,99 @@ func (g *UndirectedGraph) HasEdgeBetween(xid, yid int64) bool {
 	return ok
 }
 
-// Edge returns the edge from u to v if such an edge exists and nil otherwise.
-// The node v must be directly reachable from u as defined by the From method.
-func (g *UndirectedGraph) Edge(uid, vid int64) graph.Edge {
-	return g.EdgeBetween(uid, vid)
+// NewEdge returns a new Edge from the source to the destination node.
+func (g *UndirectedGraph) NewEdge(from, to graph.Node) graph.Edge {
+	return &Edge{F: from, T: to}
 }
 
-// EdgeBetween returns the edge between nodes x and y.
-func (g *UndirectedGraph) EdgeBetween(xid, yid int64) graph.Edge {
-	edge, ok := g.edges[xid][yid]
-	if !ok {
+// NewNode returns a new unique Node to be added to g. The Node's ID does
+// not become valid in g until the Node is added to g.
+func (g *UndirectedGraph) NewNode() graph.Node {
+	if len(g.nodes) == 0 {
+		return Node(0)
+	}
+	if int64(len(g.nodes)) == uid.Max {
+		panic("simple: cannot allocate node: no slot")
+	}
+	return Node(g.nodeIDs.NewID())
+}
+
+// Node returns the node with the given ID if it exists in the graph,
+// and nil otherwise.
+func (g *UndirectedGraph) Node(id int64) graph.Node {
+	return g.nodes[id]
+}
+
+// Nodes returns all the nodes in the graph.
+func (g *UndirectedGraph) Nodes() graph.Nodes {
+	if len(g.nodes) == 0 {
 		return nil
 	}
-	return edge
+	nodes := make([]graph.Node, len(g.nodes))
+	i := 0
+	for _, n := range g.nodes {
+		nodes[i] = n
+		i++
+	}
+	return iterator.NewOrderedNodes(nodes)
+}
+
+// RemoveEdge removes the edge with the given end IDs from the graph, leaving the terminal nodes.
+// If the edge does not exist it is a no-op.
+func (g *UndirectedGraph) RemoveEdge(fid, tid int64) {
+	if _, ok := g.nodes[fid]; !ok {
+		return
+	}
+	if _, ok := g.nodes[tid]; !ok {
+		return
+	}
+
+	delete(g.edges[fid], tid)
+	delete(g.edges[tid], fid)
+}
+
+// RemoveNode removes the node with the given ID from the graph, as well as any edges attached
+// to it. If the node is not in the graph it is a no-op.
+func (g *UndirectedGraph) RemoveNode(id int64) {
+	if _, ok := g.nodes[id]; !ok {
+		return
+	}
+	delete(g.nodes, id)
+
+	for from := range g.edges[id] {
+		delete(g.edges[from], id)
+	}
+	delete(g.edges, id)
+
+	g.nodeIDs.Release(id)
+}
+
+// SetEdge adds e, an edge from one node to another. If the nodes do not exist, they are added
+// and are set to the nodes of the edge otherwise.
+// It will panic if the IDs of the e.From and e.To are equal.
+func (g *UndirectedGraph) SetEdge(e graph.Edge) {
+	var (
+		from = e.From()
+		fid  = from.ID()
+		to   = e.To()
+		tid  = to.ID()
+	)
+
+	if fid == tid {
+		panic("simple: adding self edge")
+	}
+
+	if _, ok := g.nodes[fid]; !ok {
+		g.AddNode(from)
+	} else {
+		g.nodes[fid] = from
+	}
+	if _, ok := g.nodes[tid]; !ok {
+		g.AddNode(to)
+	} else {
+		g.nodes[tid] = to
+	}
+
+	g.edges[fid][tid] = e
+	g.edges[tid][fid] = e
 }

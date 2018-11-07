@@ -47,18 +47,6 @@ func NewDirectedGraph() *DirectedGraph {
 	}
 }
 
-// NewNode returns a new unique Node to be added to g. The Node's ID does
-// not become valid in g until the Node is added to g.
-func (g *DirectedGraph) NewNode() graph.Node {
-	if len(g.nodes) == 0 {
-		return Node(0)
-	}
-	if int64(len(g.nodes)) == uid.Max {
-		panic("simple: cannot allocate node: no slot")
-	}
-	return Node(g.nodeIDs.NewID())
-}
-
 // AddNode adds n to the graph. It panics if the added node ID matches an existing node ID.
 func (g *DirectedGraph) AddNode(n graph.Node) {
 	if _, exists := g.nodes[n.ID()]; exists {
@@ -70,112 +58,15 @@ func (g *DirectedGraph) AddNode(n graph.Node) {
 	g.nodeIDs.Use(n.ID())
 }
 
-// RemoveNode removes the node with the given ID from the graph, as well as any edges attached
-// to it. If the node is not in the graph it is a no-op.
-func (g *DirectedGraph) RemoveNode(id int64) {
-	if _, ok := g.nodes[id]; !ok {
-		return
-	}
-	delete(g.nodes, id)
-
-	for from := range g.from[id] {
-		delete(g.to[from], id)
-	}
-	delete(g.from, id)
-
-	for to := range g.to[id] {
-		delete(g.from[to], id)
-	}
-	delete(g.to, id)
-
-	g.nodeIDs.Release(id)
-}
-
-// NewLine returns a new Line from the source to the destination node.
-// The returned Line will have a graph-unique ID.
-// The Line's ID does not become valid in g until the Line is added to g.
-func (g *DirectedGraph) NewLine(from, to graph.Node) graph.Line {
-	return &Line{F: from, T: to, UID: g.lineIDs.NewID()}
-}
-
-// SetLine adds l, a line from one node to another. If the nodes do not exist, they are added
-// and are set to the nodes of the line otherwise.
-func (g *DirectedGraph) SetLine(l graph.Line) {
-	var (
-		from = l.From()
-		fid  = from.ID()
-		to   = l.To()
-		tid  = to.ID()
-		lid  = l.ID()
-	)
-
-	if _, ok := g.nodes[fid]; !ok {
-		g.AddNode(from)
-	} else {
-		g.nodes[fid] = from
-	}
-	if g.from[fid][tid] == nil {
-		g.from[fid][tid] = make(map[int64]graph.Line)
-	}
-	if _, ok := g.nodes[tid]; !ok {
-		g.AddNode(to)
-	} else {
-		g.nodes[tid] = to
-	}
-	if g.to[tid][fid] == nil {
-		g.to[tid][fid] = make(map[int64]graph.Line)
-	}
-
-	g.from[fid][tid][lid] = l
-	g.to[tid][fid][lid] = l
-	g.lineIDs.Use(lid)
-}
-
-// RemoveLine removes the line with the given end point and line IDs from the graph, leaving
-// the terminal nodes. If the line does not exist it is a no-op.
-func (g *DirectedGraph) RemoveLine(fid, tid, id int64) {
-	if _, ok := g.nodes[fid]; !ok {
-		return
-	}
-	if _, ok := g.nodes[tid]; !ok {
-		return
-	}
-
-	delete(g.from[fid][tid], id)
-	if len(g.from[fid][tid]) == 0 {
-		delete(g.from[fid], tid)
-	}
-	delete(g.to[tid][fid], id)
-	if len(g.to[tid][fid]) == 0 {
-		delete(g.to[tid], fid)
-	}
-	g.lineIDs.Release(id)
-}
-
-// Has returns whether the node exists within the graph.
-func (g *DirectedGraph) Has(id int64) bool {
-	_, ok := g.nodes[id]
-	return ok
-}
-
-// Node returns the node with the given ID if it exists in the graph,
-// and nil otherwise.
-func (g *DirectedGraph) Node(id int64) graph.Node {
-	return g.nodes[id]
-}
-
-// Nodes returns all the nodes in the graph.
-func (g *DirectedGraph) Nodes() graph.Nodes {
-	if len(g.nodes) == 0 {
+// Edge returns the edge from u to v if such an edge exists and nil otherwise.
+// The node v must be directly reachable from u as defined by the From method.
+// The returned graph.Edge is a multi.Edge if an edge exists.
+func (g *DirectedGraph) Edge(uid, vid int64) graph.Edge {
+	l := g.Lines(uid, vid)
+	if l == nil {
 		return nil
 	}
-	nodes := make([]graph.Node, len(g.nodes))
-	i := 0
-	for _, n := range g.nodes {
-		nodes[i] = n
-		i++
-	}
-	return iterator.NewOrderedNodes(nodes)
+	return Edge{F: g.Node(uid), T: g.Node(vid), Lines: l}
 }
 
 // Edges returns all the edges in the graph. Each edge in the returned slice
@@ -218,21 +109,6 @@ func (g *DirectedGraph) From(id int64) graph.Nodes {
 	return iterator.NewOrderedNodes(from)
 }
 
-// To returns all nodes in g that can reach directly to n.
-func (g *DirectedGraph) To(id int64) graph.Nodes {
-	if _, ok := g.from[id]; !ok {
-		return nil
-	}
-
-	to := make([]graph.Node, len(g.to[id]))
-	i := 0
-	for uid := range g.to[id] {
-		to[i] = g.nodes[uid]
-		i++
-	}
-	return iterator.NewOrderedNodes(to)
-}
-
 // HasEdgeBetween returns whether an edge exists between nodes x and y without
 // considering direction.
 func (g *DirectedGraph) HasEdgeBetween(xid, yid int64) bool {
@@ -243,15 +119,10 @@ func (g *DirectedGraph) HasEdgeBetween(xid, yid int64) bool {
 	return ok
 }
 
-// Edge returns the edge from u to v if such an edge exists and nil otherwise.
-// The node v must be directly reachable from u as defined by the From method.
-// The returned graph.Edge is a multi.Edge if an edge exists.
-func (g *DirectedGraph) Edge(uid, vid int64) graph.Edge {
-	l := g.Lines(uid, vid)
-	if l == nil {
-		return nil
-	}
-	return Edge{F: g.Node(uid), T: g.Node(vid), Lines: l}
+// HasEdgeFromTo returns whether an edge exists in the graph from u to v.
+func (g *DirectedGraph) HasEdgeFromTo(uid, vid int64) bool {
+	_, ok := g.from[uid][vid]
+	return ok
 }
 
 // Lines returns the lines from u to v if such any such lines exists and nil otherwise.
@@ -268,8 +139,131 @@ func (g *DirectedGraph) Lines(uid, vid int64) graph.Lines {
 	return iterator.NewOrderedLines(lines)
 }
 
-// HasEdgeFromTo returns whether an edge exists in the graph from u to v.
-func (g *DirectedGraph) HasEdgeFromTo(uid, vid int64) bool {
-	_, ok := g.from[uid][vid]
-	return ok
+// NewLine returns a new Line from the source to the destination node.
+// The returned Line will have a graph-unique ID.
+// The Line's ID does not become valid in g until the Line is added to g.
+func (g *DirectedGraph) NewLine(from, to graph.Node) graph.Line {
+	return &Line{F: from, T: to, UID: g.lineIDs.NewID()}
+}
+
+// NewNode returns a new unique Node to be added to g. The Node's ID does
+// not become valid in g until the Node is added to g.
+func (g *DirectedGraph) NewNode() graph.Node {
+	if len(g.nodes) == 0 {
+		return Node(0)
+	}
+	if int64(len(g.nodes)) == uid.Max {
+		panic("simple: cannot allocate node: no slot")
+	}
+	return Node(g.nodeIDs.NewID())
+}
+
+// Node returns the node with the given ID if it exists in the graph,
+// and nil otherwise.
+func (g *DirectedGraph) Node(id int64) graph.Node {
+	return g.nodes[id]
+}
+
+// Nodes returns all the nodes in the graph.
+func (g *DirectedGraph) Nodes() graph.Nodes {
+	if len(g.nodes) == 0 {
+		return nil
+	}
+	nodes := make([]graph.Node, len(g.nodes))
+	i := 0
+	for _, n := range g.nodes {
+		nodes[i] = n
+		i++
+	}
+	return iterator.NewOrderedNodes(nodes)
+}
+
+// RemoveLine removes the line with the given end point and line IDs from the graph, leaving
+// the terminal nodes. If the line does not exist it is a no-op.
+func (g *DirectedGraph) RemoveLine(fid, tid, id int64) {
+	if _, ok := g.nodes[fid]; !ok {
+		return
+	}
+	if _, ok := g.nodes[tid]; !ok {
+		return
+	}
+
+	delete(g.from[fid][tid], id)
+	if len(g.from[fid][tid]) == 0 {
+		delete(g.from[fid], tid)
+	}
+	delete(g.to[tid][fid], id)
+	if len(g.to[tid][fid]) == 0 {
+		delete(g.to[tid], fid)
+	}
+	g.lineIDs.Release(id)
+}
+
+// RemoveNode removes the node with the given ID from the graph, as well as any edges attached
+// to it. If the node is not in the graph it is a no-op.
+func (g *DirectedGraph) RemoveNode(id int64) {
+	if _, ok := g.nodes[id]; !ok {
+		return
+	}
+	delete(g.nodes, id)
+
+	for from := range g.from[id] {
+		delete(g.to[from], id)
+	}
+	delete(g.from, id)
+
+	for to := range g.to[id] {
+		delete(g.from[to], id)
+	}
+	delete(g.to, id)
+
+	g.nodeIDs.Release(id)
+}
+
+// SetLine adds l, a line from one node to another. If the nodes do not exist, they are added
+// and are set to the nodes of the line otherwise.
+func (g *DirectedGraph) SetLine(l graph.Line) {
+	var (
+		from = l.From()
+		fid  = from.ID()
+		to   = l.To()
+		tid  = to.ID()
+		lid  = l.ID()
+	)
+
+	if _, ok := g.nodes[fid]; !ok {
+		g.AddNode(from)
+	} else {
+		g.nodes[fid] = from
+	}
+	if g.from[fid][tid] == nil {
+		g.from[fid][tid] = make(map[int64]graph.Line)
+	}
+	if _, ok := g.nodes[tid]; !ok {
+		g.AddNode(to)
+	} else {
+		g.nodes[tid] = to
+	}
+	if g.to[tid][fid] == nil {
+		g.to[tid][fid] = make(map[int64]graph.Line)
+	}
+
+	g.from[fid][tid][lid] = l
+	g.to[tid][fid][lid] = l
+	g.lineIDs.Use(lid)
+}
+
+// To returns all nodes in g that can reach directly to n.
+func (g *DirectedGraph) To(id int64) graph.Nodes {
+	if _, ok := g.from[id]; !ok {
+		return nil
+	}
+
+	to := make([]graph.Node, len(g.to[id]))
+	i := 0
+	for uid := range g.to[id] {
+		to[i] = g.nodes[uid]
+		i++
+	}
+	return iterator.NewOrderedNodes(to)
 }

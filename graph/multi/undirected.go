@@ -45,18 +45,6 @@ func NewUndirectedGraph() *UndirectedGraph {
 	}
 }
 
-// NewNode returns a new unique Node to be added to g. The Node's ID does
-// not become valid in g until the Node is added to g.
-func (g *UndirectedGraph) NewNode() graph.Node {
-	if len(g.nodes) == 0 {
-		return Node(0)
-	}
-	if int64(len(g.nodes)) == uid.Max {
-		panic("simple: cannot allocate node: no slot")
-	}
-	return Node(g.nodeIDs.NewID())
-}
-
 // AddNode adds n to the graph. It panics if the added node ID matches an existing node ID.
 func (g *UndirectedGraph) AddNode(n graph.Node) {
 	if _, exists := g.nodes[n.ID()]; exists {
@@ -67,98 +55,20 @@ func (g *UndirectedGraph) AddNode(n graph.Node) {
 	g.nodeIDs.Use(n.ID())
 }
 
-// RemoveNode removes the node with the given ID from the graph, as well as any edges attached
-// to it. If the node is not in the graph it is a no-op.
-func (g *UndirectedGraph) RemoveNode(id int64) {
-	if _, ok := g.nodes[id]; !ok {
-		return
-	}
-	delete(g.nodes, id)
-
-	for from := range g.lines[id] {
-		delete(g.lines[from], id)
-	}
-	delete(g.lines, id)
-
-	g.nodeIDs.Release(id)
-}
-
-// NewLine returns a new Line from the source to the destination node.
-// The returned Line will have a graph-unique ID.
-// The Line's ID does not become valid in g until the Line is added to g.
-func (g *UndirectedGraph) NewLine(from, to graph.Node) graph.Line {
-	return &Line{F: from, T: to, UID: g.lineIDs.NewID()}
-}
-
-// SetLine adds l, a line from one node to another. If the nodes do not exist, they are added
-// and are set to the nodes of the line otherwise.
-func (g *UndirectedGraph) SetLine(l graph.Line) {
-	var (
-		from = l.From()
-		fid  = from.ID()
-		to   = l.To()
-		tid  = to.ID()
-		lid  = l.ID()
-	)
-
-	if _, ok := g.nodes[fid]; !ok {
-		g.AddNode(from)
-	} else {
-		g.nodes[fid] = from
-	}
-	if g.lines[fid][tid] == nil {
-		g.lines[fid][tid] = make(map[int64]graph.Line)
-	}
-	if _, ok := g.nodes[tid]; !ok {
-		g.AddNode(to)
-	} else {
-		g.nodes[tid] = to
-	}
-	if g.lines[tid][fid] == nil {
-		g.lines[tid][fid] = make(map[int64]graph.Line)
-	}
-
-	g.lines[fid][tid][lid] = l
-	g.lines[tid][fid][lid] = l
-	g.lineIDs.Use(lid)
-}
-
-// RemoveLine removes the line with the given end point and line Ids from the graph, leaving
-// the terminal nodes. If the line does not exist it is a no-op.
-func (g *UndirectedGraph) RemoveLine(fid, tid, id int64) {
-	if _, ok := g.nodes[fid]; !ok {
-		return
-	}
-	if _, ok := g.nodes[tid]; !ok {
-		return
-	}
-
-	delete(g.lines[fid], tid)
-	delete(g.lines[tid], fid)
-	if len(g.lines[tid][fid]) == 0 {
-		delete(g.lines[tid], fid)
-	}
-	g.lineIDs.Release(id)
-}
-
-// Node returns the node with the given ID if it exists in the graph,
-// and nil otherwise.
-func (g *UndirectedGraph) Node(id int64) graph.Node {
-	return g.nodes[id]
-}
-
-// Nodes returns all the nodes in the graph.
-func (g *UndirectedGraph) Nodes() graph.Nodes {
-	if len(g.nodes) == 0 {
+// Edge returns the edge from u to v if such an edge exists and nil otherwise.
+// The node v must be directly reachable from u as defined by the From method.
+// The returned graph.Edge is a multi.Edge if an edge exists.
+func (g *UndirectedGraph) Edge(uid, vid int64) graph.Edge {
+	l := g.LinesBetween(uid, vid)
+	if l == nil {
 		return nil
 	}
-	nodes := make([]graph.Node, len(g.nodes))
-	i := 0
-	for _, n := range g.nodes {
-		nodes[i] = n
-		i++
-	}
-	return iterator.NewOrderedNodes(nodes)
+	return Edge{F: g.Node(uid), T: g.Node(vid), Lines: l}
+}
+
+// EdgeBetween returns the edge between nodes x and y.
+func (g *UndirectedGraph) EdgeBetween(xid, yid int64) graph.Edge {
+	return g.Edge(xid, yid)
 }
 
 // Edges returns all the edges in the graph. Each edge in the returned slice
@@ -213,22 +123,6 @@ func (g *UndirectedGraph) HasEdgeBetween(xid, yid int64) bool {
 	return ok
 }
 
-// EdgeBetween returns the edge between nodes x and y.
-func (g *UndirectedGraph) EdgeBetween(xid, yid int64) graph.Edge {
-	return g.Edge(xid, yid)
-}
-
-// Edge returns the edge from u to v if such an edge exists and nil otherwise.
-// The node v must be directly reachable from u as defined by the From method.
-// The returned graph.Edge is a multi.Edge if an edge exists.
-func (g *UndirectedGraph) Edge(uid, vid int64) graph.Edge {
-	l := g.LinesBetween(uid, vid)
-	if l == nil {
-		return nil
-	}
-	return Edge{F: g.Node(uid), T: g.Node(vid), Lines: l}
-}
-
 // Lines returns the lines from u to v if such an edge exists and nil otherwise.
 // The node v must be directly reachable from u as defined by the From method.
 func (g *UndirectedGraph) Lines(uid, vid int64) graph.Lines {
@@ -245,4 +139,110 @@ func (g *UndirectedGraph) LinesBetween(xid, yid int64) graph.Lines {
 		lines = append(lines, l)
 	}
 	return iterator.NewOrderedLines(lines)
+}
+
+// NewLine returns a new Line from the source to the destination node.
+// The returned Line will have a graph-unique ID.
+// The Line's ID does not become valid in g until the Line is added to g.
+func (g *UndirectedGraph) NewLine(from, to graph.Node) graph.Line {
+	return &Line{F: from, T: to, UID: g.lineIDs.NewID()}
+}
+
+// NewNode returns a new unique Node to be added to g. The Node's ID does
+// not become valid in g until the Node is added to g.
+func (g *UndirectedGraph) NewNode() graph.Node {
+	if len(g.nodes) == 0 {
+		return Node(0)
+	}
+	if int64(len(g.nodes)) == uid.Max {
+		panic("simple: cannot allocate node: no slot")
+	}
+	return Node(g.nodeIDs.NewID())
+}
+
+// Node returns the node with the given ID if it exists in the graph,
+// and nil otherwise.
+func (g *UndirectedGraph) Node(id int64) graph.Node {
+	return g.nodes[id]
+}
+
+// Nodes returns all the nodes in the graph.
+func (g *UndirectedGraph) Nodes() graph.Nodes {
+	if len(g.nodes) == 0 {
+		return nil
+	}
+	nodes := make([]graph.Node, len(g.nodes))
+	i := 0
+	for _, n := range g.nodes {
+		nodes[i] = n
+		i++
+	}
+	return iterator.NewOrderedNodes(nodes)
+}
+
+// RemoveLine removes the line with the given end point and line Ids from the graph, leaving
+// the terminal nodes. If the line does not exist it is a no-op.
+func (g *UndirectedGraph) RemoveLine(fid, tid, id int64) {
+	if _, ok := g.nodes[fid]; !ok {
+		return
+	}
+	if _, ok := g.nodes[tid]; !ok {
+		return
+	}
+
+	delete(g.lines[fid], tid)
+	delete(g.lines[tid], fid)
+	if len(g.lines[tid][fid]) == 0 {
+		delete(g.lines[tid], fid)
+	}
+	g.lineIDs.Release(id)
+}
+
+// RemoveNode removes the node with the given ID from the graph, as well as any edges attached
+// to it. If the node is not in the graph it is a no-op.
+func (g *UndirectedGraph) RemoveNode(id int64) {
+	if _, ok := g.nodes[id]; !ok {
+		return
+	}
+	delete(g.nodes, id)
+
+	for from := range g.lines[id] {
+		delete(g.lines[from], id)
+	}
+	delete(g.lines, id)
+
+	g.nodeIDs.Release(id)
+}
+
+// SetLine adds l, a line from one node to another. If the nodes do not exist, they are added
+// and are set to the nodes of the line otherwise.
+func (g *UndirectedGraph) SetLine(l graph.Line) {
+	var (
+		from = l.From()
+		fid  = from.ID()
+		to   = l.To()
+		tid  = to.ID()
+		lid  = l.ID()
+	)
+
+	if _, ok := g.nodes[fid]; !ok {
+		g.AddNode(from)
+	} else {
+		g.nodes[fid] = from
+	}
+	if g.lines[fid][tid] == nil {
+		g.lines[fid][tid] = make(map[int64]graph.Line)
+	}
+	if _, ok := g.nodes[tid]; !ok {
+		g.AddNode(to)
+	} else {
+		g.nodes[tid] = to
+	}
+	if g.lines[tid][fid] == nil {
+		g.lines[tid][fid] = make(map[int64]graph.Line)
+	}
+
+	g.lines[fid][tid][lid] = l
+	g.lines[tid][fid][lid] = l
+	g.lineIDs.Use(lid)
 }

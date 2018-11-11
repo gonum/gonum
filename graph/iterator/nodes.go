@@ -113,3 +113,13 @@ func (n *ImplicitNodes) Node() graph.Node {
 func (n *ImplicitNodes) Reset() {
 	n.curr = n.beg - 1
 }
+
+// NodeSlice returns all the remaining nodes in the iterator and advances
+// the iterator.
+func (n *ImplicitNodes) NodeSlice() []graph.Node {
+	nodes := make([]graph.Node, 0, n.Len())
+	for n.curr++; n.curr < n.end; n.curr++ {
+		nodes = append(nodes, n.newNode(n.curr))
+	}
+	return nodes
+}

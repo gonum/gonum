@@ -248,7 +248,7 @@ func (g *DirectedMatrix) Weight(xid, yid int64) (w float64, ok bool) {
 	if xid == yid {
 		return g.self, true
 	}
-	if g.has(xid) && g.has(yid) {
+	if g.HasEdgeFromTo(xid, yid) {
 		// xid and yid are not greater than maximum int by this point.
 		return g.mat.At(int(xid), int(yid)), true
 	}
@@ -263,6 +263,23 @@ func (g *DirectedMatrix) WeightedEdge(uid, vid int64) graph.WeightedEdge {
 		return WeightedEdge{F: g.Node(uid), T: g.Node(vid), W: g.mat.At(int(uid), int(vid))}
 	}
 	return nil
+}
+
+// WeightedEdges returns all the edges in the graph.
+func (g *DirectedMatrix) WeightedEdges() graph.WeightedEdges {
+	var edges []graph.WeightedEdge
+	r, _ := g.mat.Dims()
+	for i := 0; i < r; i++ {
+		for j := 0; j < r; j++ {
+			if i == j {
+				continue
+			}
+			if w := g.mat.At(i, j); !isSame(w, g.absent) {
+				edges = append(edges, WeightedEdge{F: g.Node(int64(i)), T: g.Node(int64(j)), W: w})
+			}
+		}
+	}
+	return iterator.NewOrderedWeightedEdges(edges)
 }
 
 func (g *DirectedMatrix) has(id int64) bool {

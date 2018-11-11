@@ -216,7 +216,7 @@ func (g *UndirectedMatrix) Weight(xid, yid int64) (w float64, ok bool) {
 	if xid == yid {
 		return g.self, true
 	}
-	if g.has(xid) && g.has(yid) {
+	if g.HasEdgeBetween(xid, yid) {
 		// xid and yid are not greater than maximum int by this point.
 		return g.mat.At(int(xid), int(yid)), true
 	}
@@ -236,6 +236,20 @@ func (g *UndirectedMatrix) WeightedEdgeBetween(uid, vid int64) graph.WeightedEdg
 		return WeightedEdge{F: g.Node(uid), T: g.Node(vid), W: g.mat.At(int(uid), int(vid))}
 	}
 	return nil
+}
+
+// WeightedEdges returns all the edges in the graph.
+func (g *UndirectedMatrix) WeightedEdges() graph.WeightedEdges {
+	var edges []graph.WeightedEdge
+	r, _ := g.mat.Dims()
+	for i := 0; i < r; i++ {
+		for j := i + 1; j < r; j++ {
+			if w := g.mat.At(i, j); !isSame(w, g.absent) {
+				edges = append(edges, WeightedEdge{F: g.Node(int64(i)), T: g.Node(int64(j)), W: w})
+			}
+		}
+	}
+	return iterator.NewOrderedWeightedEdges(edges)
 }
 
 func (g *UndirectedMatrix) has(id int64) bool {

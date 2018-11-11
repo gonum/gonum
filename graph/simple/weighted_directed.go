@@ -256,12 +256,12 @@ func (g *WeightedDirectedGraph) WeightedEdge(uid, vid int64) graph.WeightedEdge 
 }
 
 // WeightedEdges returns all the weighted edges in the graph.
-func (g *WeightedDirectedGraph) WeightedEdges() []graph.WeightedEdge {
+func (g *WeightedDirectedGraph) WeightedEdges() graph.WeightedEdges {
 	var edges []graph.WeightedEdge
 	for _, u := range g.nodes {
 		for _, e := range g.from[u.ID()] {
 			edges = append(edges, e)
 		}
 	}
-	return edges
+	return iterator.NewOrderedWeightedEdges(edges)
 }

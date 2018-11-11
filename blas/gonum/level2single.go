@@ -21,7 +21,7 @@ var _ blas.Float32Level2 = Implementation{}
 func (Implementation) Sger(m, n int, alpha float32, x []float32, incX int, y []float32, incY int, a []float32, lda int) {
 	// Check inputs
 	if m < 0 {
-		panic("m < 0")
+		panic(mLT0)
 	}
 	if n < 0 {
 		panic(nLT0)
@@ -33,10 +33,10 @@ func (Implementation) Sger(m, n int, alpha float32, x []float32, incX int, y []f
 		panic(zeroIncY)
 	}
 	if (incX > 0 && (m-1)*incX >= len(x)) || (incX < 0 && (1-m)*incX >= len(x)) {
-		panic(badX)
+		panic(shortX)
 	}
 	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
-		panic(badY)
+		panic(shortY)
 	}
 	if lda*(m-1)+n > len(a) || lda < max(1, n) {
 		panic(badLdA)
@@ -96,10 +96,10 @@ func (Implementation) Sgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float32, 
 		lenY = m
 	}
 	if (incX > 0 && (lenX-1)*incX >= len(x)) || (incX < 0 && (1-lenX)*incX >= len(x)) {
-		panic(badX)
+		panic(shortX)
 	}
 	if (incY > 0 && (lenY-1)*incY >= len(y)) || (incY < 0 && (1-lenY)*incY >= len(y)) {
-		panic(badY)
+		panic(shortY)
 	}
 	if lda*(min(m, n+kL)-1)+kL+kU+1 > len(a) || lda < kL+kU+1 {
 		panic(badLdA)
@@ -223,7 +223,7 @@ func (Implementation) Strmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 		panic(zeroIncX)
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
-		panic(badX)
+		panic(shortX)
 	}
 	if lda*(n-1)+n > len(a) || lda < max(1, n) {
 		panic(badLdA)
@@ -381,7 +381,7 @@ func (Implementation) Strsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 		panic(zeroIncX)
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
-		panic(badX)
+		panic(shortX)
 	}
 	// Quick return if possible
 	if n == 0 {
@@ -549,10 +549,10 @@ func (Implementation) Ssymv(ul blas.Uplo, n int, alpha float32, a []float32, lda
 		panic(zeroIncY)
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
-		panic(badX)
+		panic(shortX)
 	}
 	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
-		panic(badY)
+		panic(shortY)
 	}
 	if lda*(n-1)+n > len(a) || lda < max(1, n) {
 		panic(badLdA)
@@ -699,7 +699,7 @@ func (Implementation) Stbmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k i
 		panic(zeroIncX)
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
-		panic(badX)
+		panic(shortX)
 	}
 	if n == 0 {
 		return
@@ -900,7 +900,7 @@ func (Implementation) Stpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 		panic(zeroIncX)
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
-		panic(badX)
+		panic(shortX)
 	}
 	if n == 0 {
 		return
@@ -1083,7 +1083,7 @@ func (Implementation) Stbsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k i
 		panic(zeroIncX)
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
-		panic(badX)
+		panic(shortX)
 	}
 	if n == 0 {
 		return
@@ -1284,10 +1284,10 @@ func (Implementation) Ssbmv(ul blas.Uplo, n, k int, alpha float32, a []float32, 
 		panic(zeroIncY)
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
-		panic(badX)
+		panic(shortX)
 	}
 	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
-		panic(badY)
+		panic(shortY)
 	}
 	if lda*(n-1)+k+1 > len(a) || lda < k+1 {
 		panic(badLdA)
@@ -1419,7 +1419,7 @@ func (Implementation) Ssyr(ul blas.Uplo, n int, alpha float32, x []float32, incX
 		panic(zeroIncX)
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
-		panic(badX)
+		panic(shortX)
 	}
 	if lda*(n-1)+n > len(a) || lda < max(1, n) {
 		panic(badLdA)
@@ -1510,10 +1510,10 @@ func (Implementation) Ssyr2(ul blas.Uplo, n int, alpha float32, x []float32, inc
 		panic(zeroIncY)
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
-		panic(badX)
+		panic(shortX)
 	}
 	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
-		panic(badY)
+		panic(shortY)
 	}
 	if lda*(n-1)+n > len(a) || lda < max(1, n) {
 		panic(badLdA)
@@ -1621,7 +1621,7 @@ func (Implementation) Stpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 		panic(zeroIncX)
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
-		panic(badX)
+		panic(shortX)
 	}
 	if n == 0 {
 		return
@@ -1794,10 +1794,10 @@ func (Implementation) Sspmv(ul blas.Uplo, n int, alpha float32, a []float32, x [
 		panic(zeroIncY)
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
-		panic(badX)
+		panic(shortX)
 	}
 	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
-		panic(badY)
+		panic(shortY)
 	}
 	// Quick return if possible
 	if n == 0 || (alpha == 0 && beta == 1) {
@@ -1931,7 +1931,7 @@ func (Implementation) Sspr(ul blas.Uplo, n int, alpha float32, x []float32, incX
 		panic(zeroIncX)
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
-		panic(badX)
+		panic(shortX)
 	}
 	if len(a) < (n*(n+1))/2 {
 		panic(badLdA)
@@ -2018,10 +2018,10 @@ func (Implementation) Sspr2(ul blas.Uplo, n int, alpha float32, x []float32, inc
 		panic(zeroIncY)
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
-		panic(badX)
+		panic(shortX)
 	}
 	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
-		panic(badY)
+		panic(shortY)
 	}
 	if len(ap) < (n*(n+1))/2 {
 		panic(badLdA)

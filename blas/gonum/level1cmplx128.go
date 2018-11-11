@@ -26,7 +26,7 @@ func (Implementation) Dzasum(n int, x []complex128, incX int) float64 {
 	var sum float64
 	if incX == 1 {
 		if len(x) < n {
-			panic(badX)
+			panic(shortX)
 		}
 		for _, v := range x[:n] {
 			sum += dcabs1(v)
@@ -34,7 +34,7 @@ func (Implementation) Dzasum(n int, x []complex128, incX int) float64 {
 		return sum
 	}
 	if (n-1)*incX >= len(x) {
-		panic(badX)
+		panic(shortX)
 	}
 	for i := 0; i < n; i++ {
 		v := x[i*incX]
@@ -60,7 +60,7 @@ func (Implementation) Dznrm2(n int, x []complex128, incX int) float64 {
 		panic(nLT0)
 	}
 	if (n-1)*incX >= len(x) {
-		panic(badX)
+		panic(shortX)
 	}
 	var (
 		scale float64
@@ -134,7 +134,7 @@ func (Implementation) Izamax(n int, x []complex128, incX int) int {
 		panic(nLT0)
 	}
 	if len(x) <= (n-1)*incX {
-		panic(badX)
+		panic(shortX)
 	}
 	idx := 0
 	max := dcabs1(x[0])
@@ -176,10 +176,10 @@ func (Implementation) Zaxpy(n int, alpha complex128, x []complex128, incX int, y
 		panic(nLT0)
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
-		panic(badX)
+		panic(shortX)
 	}
 	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
-		panic(badY)
+		panic(shortY)
 	}
 	if alpha == 0 {
 		return
@@ -213,10 +213,10 @@ func (Implementation) Zcopy(n int, x []complex128, incX int, y []complex128, inc
 		panic(nLT0)
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
-		panic(badX)
+		panic(shortX)
 	}
 	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
-		panic(badY)
+		panic(shortY)
 	}
 	if incX == 1 && incY == 1 {
 		copy(y[:n], x[:n])
@@ -254,10 +254,10 @@ func (Implementation) Zdotc(n int, x []complex128, incX int, y []complex128, inc
 	}
 	if incX == 1 && incY == 1 {
 		if len(x) < n {
-			panic(badX)
+			panic(shortX)
 		}
 		if len(y) < n {
-			panic(badY)
+			panic(shortY)
 		}
 		return c128.DotcUnitary(x[:n], y[:n])
 	}
@@ -269,10 +269,10 @@ func (Implementation) Zdotc(n int, x []complex128, incX int, y []complex128, inc
 		iy = (-n + 1) * incY
 	}
 	if ix >= len(x) || (n-1)*incX >= len(x) {
-		panic(badX)
+		panic(shortX)
 	}
 	if iy >= len(y) || (n-1)*incY >= len(y) {
-		panic(badY)
+		panic(shortY)
 	}
 	return c128.DotcInc(x, y, uintptr(n), uintptr(incX), uintptr(incY), uintptr(ix), uintptr(iy))
 }
@@ -295,10 +295,10 @@ func (Implementation) Zdotu(n int, x []complex128, incX int, y []complex128, inc
 	}
 	if incX == 1 && incY == 1 {
 		if len(x) < n {
-			panic(badX)
+			panic(shortX)
 		}
 		if len(y) < n {
-			panic(badY)
+			panic(shortY)
 		}
 		return c128.DotuUnitary(x[:n], y[:n])
 	}
@@ -310,10 +310,10 @@ func (Implementation) Zdotu(n int, x []complex128, incX int, y []complex128, inc
 		iy = (-n + 1) * incY
 	}
 	if ix >= len(x) || (n-1)*incX >= len(x) {
-		panic(badX)
+		panic(shortX)
 	}
 	if iy >= len(y) || (n-1)*incY >= len(y) {
-		panic(badY)
+		panic(shortY)
 	}
 	return c128.DotuInc(x, y, uintptr(n), uintptr(incX), uintptr(incY), uintptr(ix), uintptr(iy))
 }
@@ -328,7 +328,7 @@ func (Implementation) Zdscal(n int, alpha float64, x []complex128, incX int) {
 		return
 	}
 	if (n-1)*incX >= len(x) {
-		panic(badX)
+		panic(shortX)
 	}
 	if n < 1 {
 		if n == 0 {
@@ -372,7 +372,7 @@ func (Implementation) Zscal(n int, alpha complex128, x []complex128, incX int) {
 		return
 	}
 	if (n-1)*incX >= len(x) {
-		panic(badX)
+		panic(shortX)
 	}
 	if n < 1 {
 		if n == 0 {
@@ -415,10 +415,10 @@ func (Implementation) Zswap(n int, x []complex128, incX int, y []complex128, inc
 		panic(nLT0)
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
-		panic(badX)
+		panic(shortX)
 	}
 	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
-		panic(badY)
+		panic(shortY)
 	}
 	if incX == 1 && incY == 1 {
 		x = x[:n]

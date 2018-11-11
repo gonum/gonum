@@ -20,11 +20,16 @@ const (
 	badTranspose = "blas: illegal transpose"
 	badDiag      = "blas: illegal diagonal"
 	badSide      = "blas: illegal side"
+	badFlag      = "blas: illegal rotm flag"
 
 	badLdA = "blas: bad leading dimension of A"
 	badLdB = "blas: bad leading dimension of B"
 	badLdC = "blas: bad leading dimension of C"
 
-	badX = "blas: bad length of x"
-	badY = "blas: bad length of y"
+	shortX  = "blas: insufficient length of x"
+	shortY  = "blas: insufficient length of y"
+	shortAP = "blas: insufficient length of ap"
+	shortA  = "blas: insufficient length of a"
+	shortB  = "blas: insufficient length of b"
+	shortC  = "blas: insufficient length of c"
 )

@@ -861,7 +861,7 @@ func (Implementation) Zhpmv(uplo blas.Uplo, n int, alpha complex128, ap []comple
 	checkZVector('x', n, x, incX)
 	checkZVector('y', n, y, incY)
 	if len(ap) < n*(n+1)/2 {
-		panic("blas: insufficient A packed matrix slice length")
+		panic(shortAP)
 	}
 
 	if n == 0 || (alpha == 0 && beta == 1) {
@@ -1007,7 +1007,7 @@ func (Implementation) Zhpr(uplo blas.Uplo, n int, alpha float64, x []complex128,
 	}
 	checkZVector('x', n, x, incX)
 	if len(ap) < n*(n+1)/2 {
-		panic("blas: insufficient A packed matrix slice length")
+		panic(shortAP)
 	}
 
 	if n == 0 || alpha == 0 {
@@ -1127,7 +1127,7 @@ func (Implementation) Zhpr2(uplo blas.Uplo, n int, alpha complex128, x []complex
 	checkZVector('x', n, x, incX)
 	checkZVector('y', n, y, incY)
 	if len(ap) < n*(n+1)/2 {
-		panic("blas: insufficient A packed matrix slice length")
+		panic(shortAP)
 	}
 
 	if n == 0 || alpha == 0 {
@@ -1685,7 +1685,7 @@ func (Implementation) Ztpmv(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag
 	}
 	checkZVector('x', n, x, incX)
 	if len(ap) < n*(n+1)/2 {
-		panic("blas: insufficient A packed matrix slice length")
+		panic(shortAP)
 	}
 
 	if n == 0 {
@@ -1911,7 +1911,7 @@ func (Implementation) Ztpsv(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag
 		panic(badDiag)
 	}
 	if len(ap) < n*(n+1)/2 {
-		panic("blas: insufficient A packed matrix slice length")
+		panic(shortAP)
 	}
 	checkZVector('x', n, x, incX)
 

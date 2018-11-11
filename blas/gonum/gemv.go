@@ -44,10 +44,10 @@ func (Implementation) Dgemv(tA blas.Transpose, m, n int, alpha float64, a []floa
 		lenY = m
 	}
 	if (incX > 0 && (lenX-1)*incX >= len(x)) || (incX < 0 && (1-lenX)*incX >= len(x)) {
-		panic(badX)
+		panic(shortX)
 	}
 	if (incY > 0 && (lenY-1)*incY >= len(y)) || (incY < 0 && (1-lenY)*incY >= len(y)) {
-		panic(badY)
+		panic(shortY)
 	}
 	if lda*(m-1)+n > len(a) || lda < max(1, n) {
 		panic(badLdA)
@@ -111,10 +111,10 @@ func (Implementation) Sgemv(tA blas.Transpose, m, n int, alpha float32, a []floa
 		lenY = m
 	}
 	if (incX > 0 && (lenX-1)*incX >= len(x)) || (incX < 0 && (1-lenX)*incX >= len(x)) {
-		panic(badX)
+		panic(shortX)
 	}
 	if (incY > 0 && (lenY-1)*incY >= len(y)) || (incY < 0 && (1-lenY)*incY >= len(y)) {
-		panic(badY)
+		panic(shortY)
 	}
 	if lda*(m-1)+n > len(a) || lda < max(1, n) {
 		panic(badLdA)

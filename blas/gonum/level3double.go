@@ -240,7 +240,7 @@ func (Implementation) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 // is a scalar.
 func (Implementation) Dsymm(s blas.Side, ul blas.Uplo, m, n int, alpha float64, a []float64, lda int, b []float64, ldb int, beta float64, c []float64, ldc int) {
 	if s != blas.Right && s != blas.Left {
-		panic("goblas: bad side")
+		panic(badSide)
 	}
 	if ul != blas.Lower && ul != blas.Upper {
 		panic(badUplo)

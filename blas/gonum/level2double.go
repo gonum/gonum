@@ -17,7 +17,7 @@ var _ blas.Float64Level2 = Implementation{}
 func (Implementation) Dger(m, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64, lda int) {
 	// Check inputs
 	if m < 0 {
-		panic("m < 0")
+		panic(mLT0)
 	}
 	if n < 0 {
 		panic(nLT0)
@@ -29,10 +29,10 @@ func (Implementation) Dger(m, n int, alpha float64, x []float64, incX int, y []f
 		panic(zeroIncY)
 	}
 	if (incX > 0 && (m-1)*incX >= len(x)) || (incX < 0 && (1-m)*incX >= len(x)) {
-		panic(badX)
+		panic(shortX)
 	}
 	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
-		panic(badY)
+		panic(shortY)
 	}
 	if lda*(m-1)+n > len(a) || lda < max(1, n) {
 		panic(badLdA)
@@ -90,10 +90,10 @@ func (Implementation) Dgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float64, 
 		lenY = m
 	}
 	if (incX > 0 && (lenX-1)*incX >= len(x)) || (incX < 0 && (1-lenX)*incX >= len(x)) {
-		panic(badX)
+		panic(shortX)
 	}
 	if (incY > 0 && (lenY-1)*incY >= len(y)) || (incY < 0 && (1-lenY)*incY >= len(y)) {
-		panic(badY)
+		panic(shortY)
 	}
 	if lda*(min(m, n+kL)-1)+kL+kU+1 > len(a) || lda < kL+kU+1 {
 		panic(badLdA)
@@ -215,7 +215,7 @@ func (Implementation) Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 		panic(zeroIncX)
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
-		panic(badX)
+		panic(shortX)
 	}
 	if lda*(n-1)+n > len(a) || lda < max(1, n) {
 		panic(badLdA)
@@ -371,7 +371,7 @@ func (Implementation) Dtrsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 		panic(zeroIncX)
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
-		panic(badX)
+		panic(shortX)
 	}
 	// Quick return if possible
 	if n == 0 {
@@ -537,10 +537,10 @@ func (Implementation) Dsymv(ul blas.Uplo, n int, alpha float64, a []float64, lda
 		panic(zeroIncY)
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
-		panic(badX)
+		panic(shortX)
 	}
 	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
-		panic(badY)
+		panic(shortY)
 	}
 	if lda*(n-1)+n > len(a) || lda < max(1, n) {
 		panic(badLdA)
@@ -685,7 +685,7 @@ func (Implementation) Dtbmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k i
 		panic(zeroIncX)
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
-		panic(badX)
+		panic(shortX)
 	}
 	if n == 0 {
 		return
@@ -884,7 +884,7 @@ func (Implementation) Dtpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 		panic(zeroIncX)
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
-		panic(badX)
+		panic(shortX)
 	}
 	if n == 0 {
 		return
@@ -1065,7 +1065,7 @@ func (Implementation) Dtbsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k i
 		panic(zeroIncX)
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
-		panic(badX)
+		panic(shortX)
 	}
 	if n == 0 {
 		return
@@ -1264,10 +1264,10 @@ func (Implementation) Dsbmv(ul blas.Uplo, n, k int, alpha float64, a []float64, 
 		panic(zeroIncY)
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
-		panic(badX)
+		panic(shortX)
 	}
 	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
-		panic(badY)
+		panic(shortY)
 	}
 	if lda*(n-1)+k+1 > len(a) || lda < k+1 {
 		panic(badLdA)
@@ -1397,7 +1397,7 @@ func (Implementation) Dsyr(ul blas.Uplo, n int, alpha float64, x []float64, incX
 		panic(zeroIncX)
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
-		panic(badX)
+		panic(shortX)
 	}
 	if lda*(n-1)+n > len(a) || lda < max(1, n) {
 		panic(badLdA)
@@ -1486,10 +1486,10 @@ func (Implementation) Dsyr2(ul blas.Uplo, n int, alpha float64, x []float64, inc
 		panic(zeroIncY)
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
-		panic(badX)
+		panic(shortX)
 	}
 	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
-		panic(badY)
+		panic(shortY)
 	}
 	if lda*(n-1)+n > len(a) || lda < max(1, n) {
 		panic(badLdA)
@@ -1595,7 +1595,7 @@ func (Implementation) Dtpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 		panic(zeroIncX)
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
-		panic(badX)
+		panic(shortX)
 	}
 	if n == 0 {
 		return
@@ -1766,10 +1766,10 @@ func (Implementation) Dspmv(ul blas.Uplo, n int, alpha float64, a []float64, x [
 		panic(zeroIncY)
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
-		panic(badX)
+		panic(shortX)
 	}
 	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
-		panic(badY)
+		panic(shortY)
 	}
 	// Quick return if possible
 	if n == 0 || (alpha == 0 && beta == 1) {
@@ -1901,7 +1901,7 @@ func (Implementation) Dspr(ul blas.Uplo, n int, alpha float64, x []float64, incX
 		panic(zeroIncX)
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
-		panic(badX)
+		panic(shortX)
 	}
 	if len(a) < (n*(n+1))/2 {
 		panic(badLdA)
@@ -1986,10 +1986,10 @@ func (Implementation) Dspr2(ul blas.Uplo, n int, alpha float64, x []float64, inc
 		panic(zeroIncY)
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
-		panic(badX)
+		panic(shortX)
 	}
 	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
-		panic(badY)
+		panic(shortY)
 	}
 	if len(ap) < (n*(n+1))/2 {
 		panic(badLdA)

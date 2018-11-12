@@ -1028,17 +1028,33 @@ func (Implementation) Zher2(uplo blas.Uplo, n int, alpha complex128, x []complex
 // Hermitian matrix in packed form. The imaginary parts of the diagonal
 // elements of A are ignored and assumed to be zero.
 func (Implementation) Zhpmv(uplo blas.Uplo, n int, alpha complex128, ap []complex128, x []complex128, incX int, beta complex128, y []complex128, incY int) {
-	if uplo != blas.Upper && uplo != blas.Lower {
+	switch uplo {
+	default:
 		panic(badUplo)
+	case blas.Upper, blas.Lower:
 	}
-	checkZVector('x', n, x, incX)
-	checkZVector('y', n, y, incY)
-	if len(ap) < n*(n+1)/2 {
-		panic(shortAP)
+	if n < 0 {
+		panic(nLT0)
+	}
+	if incX == 0 {
+		panic(zeroIncX)
+	}
+	if incY == 0 {
+		panic(zeroIncY)
 	}
 
 	if n == 0 || (alpha == 0 && beta == 1) {
 		return
+	}
+
+	if len(ap) < n*(n+1)/2 {
+		panic(shortAP)
+	}
+	if (incX > 0 && len(x) <= (n-1)*incX) || (incX < 0 && len(x) <= (1-n)*incX) {
+		panic(shortX)
+	}
+	if (incY > 0 && len(y) <= (n-1)*incY) || (incY < 0 && len(y) <= (1-n)*incY) {
+		panic(shortY)
 	}
 
 	// Set up the start indices in X and Y.
@@ -1172,19 +1188,27 @@ func (Implementation) Zhpmv(uplo blas.Uplo, n int, alpha complex128, ap []comple
 // in packed form. On entry, the imaginary parts of the diagonal elements are
 // assumed to be zero, and on return they are set to zero.
 func (Implementation) Zhpr(uplo blas.Uplo, n int, alpha float64, x []complex128, incX int, ap []complex128) {
-	if uplo != blas.Upper && uplo != blas.Lower {
+	switch uplo {
+	default:
 		panic(badUplo)
+	case blas.Upper, blas.Lower:
 	}
 	if n < 0 {
 		panic(nLT0)
 	}
-	checkZVector('x', n, x, incX)
-	if len(ap) < n*(n+1)/2 {
-		panic(shortAP)
+	if incX == 0 {
+		panic(zeroIncX)
 	}
 
 	if n == 0 || alpha == 0 {
 		return
+	}
+
+	if (incX > 0 && len(x) <= (n-1)*incX) || (incX < 0 && len(x) <= (1-n)*incX) {
+		panic(shortX)
+	}
+	if len(ap) < n*(n+1)/2 {
+		panic(shortAP)
 	}
 
 	// Set up start index in X.
@@ -1291,20 +1315,33 @@ func (Implementation) Zhpr(uplo blas.Uplo, n int, alpha float64, x []complex128,
 // n×n Hermitian matrix, supplied in packed form. On entry, the imaginary parts
 // of the diagonal elements are assumed to be zero, and on return they are set to zero.
 func (Implementation) Zhpr2(uplo blas.Uplo, n int, alpha complex128, x []complex128, incX int, y []complex128, incY int, ap []complex128) {
-	if uplo != blas.Upper && uplo != blas.Lower {
+	switch uplo {
+	default:
 		panic(badUplo)
+	case blas.Upper, blas.Lower:
 	}
 	if n < 0 {
 		panic(nLT0)
 	}
-	checkZVector('x', n, x, incX)
-	checkZVector('y', n, y, incY)
-	if len(ap) < n*(n+1)/2 {
-		panic(shortAP)
+	if incX == 0 {
+		panic(zeroIncX)
+	}
+	if incY == 0 {
+		panic(zeroIncY)
 	}
 
 	if n == 0 || alpha == 0 {
 		return
+	}
+
+	if (incX > 0 && len(x) <= (n-1)*incX) || (incX < 0 && len(x) <= (1-n)*incX) {
+		panic(shortX)
+	}
+	if (incY > 0 && len(y) <= (n-1)*incY) || (incY < 0 && len(y) <= (1-n)*incY) {
+		panic(shortY)
+	}
+	if len(ap) < n*(n+1)/2 {
+		panic(shortAP)
 	}
 
 	// Set up start indices in X and Y.
@@ -1893,22 +1930,37 @@ func (Implementation) Ztbsv(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag
 // where x is an n element vector and A is an n×n triangular matrix, supplied in
 // packed form.
 func (Implementation) Ztpmv(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag, n int, ap []complex128, x []complex128, incX int) {
-	if uplo != blas.Upper && uplo != blas.Lower {
+	switch uplo {
+	default:
 		panic(badUplo)
+	case blas.Upper, blas.Lower:
 	}
-	if trans != blas.NoTrans && trans != blas.Trans && trans != blas.ConjTrans {
+	switch trans {
+	default:
 		panic(badTranspose)
+	case blas.NoTrans, blas.Trans, blas.ConjTrans:
 	}
-	if diag != blas.Unit && diag != blas.NonUnit {
+	switch diag {
+	default:
 		panic(badDiag)
+	case blas.NonUnit, blas.Unit:
 	}
-	checkZVector('x', n, x, incX)
-	if len(ap) < n*(n+1)/2 {
-		panic(shortAP)
+	if n < 0 {
+		panic(nLT0)
+	}
+	if incX == 0 {
+		panic(zeroIncX)
 	}
 
 	if n == 0 {
 		return
+	}
+
+	if len(ap) < n*(n+1)/2 {
+		panic(shortAP)
+	}
+	if (incX > 0 && len(x) <= (n-1)*incX) || (incX < 0 && len(x) <= (1-n)*incX) {
+		panic(shortX)
 	}
 
 	// Set up start index in X.
@@ -2120,22 +2172,37 @@ func (Implementation) Ztpmv(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag
 // No test for singularity or near-singularity is included in this
 // routine. Such tests must be performed before calling this routine.
 func (Implementation) Ztpsv(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag, n int, ap []complex128, x []complex128, incX int) {
-	if uplo != blas.Upper && uplo != blas.Lower {
+	switch uplo {
+	default:
 		panic(badUplo)
+	case blas.Upper, blas.Lower:
 	}
-	if trans != blas.NoTrans && trans != blas.Trans && trans != blas.ConjTrans {
+	switch trans {
+	default:
 		panic(badTranspose)
+	case blas.NoTrans, blas.Trans, blas.ConjTrans:
 	}
-	if diag != blas.Unit && diag != blas.NonUnit {
+	switch diag {
+	default:
 		panic(badDiag)
+	case blas.NonUnit, blas.Unit:
 	}
-	if len(ap) < n*(n+1)/2 {
-		panic(shortAP)
+	if n < 0 {
+		panic(nLT0)
 	}
-	checkZVector('x', n, x, incX)
+	if incX == 0 {
+		panic(zeroIncX)
+	}
 
 	if n == 0 {
 		return
+	}
+
+	if len(ap) < n*(n+1)/2 {
+		panic(shortAP)
+	}
+	if (incX > 0 && len(x) <= (n-1)*incX) || (incX < 0 && len(x) <= (1-n)*incX) {
+		panic(shortX)
 	}
 
 	// Set up start index in X.

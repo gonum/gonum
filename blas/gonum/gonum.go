@@ -37,21 +37,6 @@ func min(a, b int) int {
 	return a
 }
 
-func checkZhbMatrix(name byte, n, k int, ab []complex128, ldab int) {
-	if n < 0 {
-		panic(nLT0)
-	}
-	if k < 0 {
-		panic(kLT0)
-	}
-	if ldab < k+1 {
-		panic("blas: illegal stride of Hermitian band matrix " + string(name))
-	}
-	if len(ab) < (n-1)*ldab+k+1 {
-		panic("blas: insufficient " + string(name) + " Hermitian band matrix slice length")
-	}
-}
-
 func checkZtbMatrix(name byte, n, k int, ab []complex128, ldab int) {
 	if n < 0 {
 		panic(nLT0)

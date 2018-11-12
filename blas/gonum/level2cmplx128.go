@@ -177,16 +177,25 @@ func (Implementation) Zgbmv(trans blas.Transpose, m, n, kL, kU int, alpha comple
 //  y = alpha * A^H * x + beta * y  if trans = blas.ConjTrans
 // where alpha and beta are scalars, x and y are vectors, and A is an m×n dense matrix.
 func (Implementation) Zgemv(trans blas.Transpose, m, n int, alpha complex128, a []complex128, lda int, x []complex128, incX int, beta complex128, y []complex128, incY int) {
-	checkZMatrix('A', m, n, a, lda)
 	switch trans {
 	default:
 		panic(badTranspose)
-	case blas.NoTrans:
-		checkZVector('x', n, x, incX)
-		checkZVector('y', m, y, incY)
-	case blas.Trans, blas.ConjTrans:
-		checkZVector('x', m, x, incX)
-		checkZVector('y', n, y, incY)
+	case blas.NoTrans, blas.Trans, blas.ConjTrans:
+	}
+	if m < 0 {
+		panic(mLT0)
+	}
+	if n < 0 {
+		panic(nLT0)
+	}
+	if lda < max(1, n) {
+		panic(badLdA)
+	}
+	if incX == 0 {
+		panic(zeroIncX)
+	}
+	if incY == 0 {
+		panic(zeroIncY)
 	}
 
 	if m == 0 || n == 0 || (alpha == 0 && beta == 1) {
@@ -201,6 +210,16 @@ func (Implementation) Zgemv(trans blas.Transpose, m, n int, alpha complex128, a 
 		lenX = m
 		lenY = n
 	}
+	if len(a) < lda*(m-1)+n {
+		panic(shortA)
+	}
+	if (incX > 0 && len(x) <= (lenX-1)*incX) || (incX < 0 && len(x) <= (1-lenX)*incX) {
+		panic(shortX)
+	}
+	if (incY > 0 && len(y) <= (lenY-1)*incY) || (incY < 0 && len(y) <= (1-lenY)*incY) {
+		panic(shortY)
+	}
+
 	var kx int
 	if incX < 0 {
 		kx = (1 - lenX) * incX
@@ -305,12 +324,34 @@ func (Implementation) Zgemv(trans blas.Transpose, m, n int, alpha complex128, a 
 // where A is an m×n dense matrix, alpha is a scalar, x is an m element vector,
 // and y is an n element vector.
 func (Implementation) Zgerc(m, n int, alpha complex128, x []complex128, incX int, y []complex128, incY int, a []complex128, lda int) {
-	checkZMatrix('A', m, n, a, lda)
-	checkZVector('x', m, x, incX)
-	checkZVector('y', n, y, incY)
+	if m < 0 {
+		panic(mLT0)
+	}
+	if n < 0 {
+		panic(nLT0)
+	}
+	if lda < max(1, n) {
+		panic(badLdA)
+	}
+	if incX == 0 {
+		panic(zeroIncX)
+	}
+	if incY == 0 {
+		panic(zeroIncY)
+	}
 
 	if m == 0 || n == 0 || alpha == 0 {
 		return
+	}
+
+	if (incX > 0 && len(x) <= (m-1)*incX) || (incX < 0 && len(x) <= (1-m)*incX) {
+		panic(shortX)
+	}
+	if (incY > 0 && len(y) <= (n-1)*incY) || (incY < 0 && len(y) <= (1-n)*incY) {
+		panic(shortY)
+	}
+	if len(a) < lda*(m-1)+n {
+		panic(shortA)
 	}
 
 	var kx, jy int
@@ -334,12 +375,34 @@ func (Implementation) Zgerc(m, n int, alpha complex128, x []complex128, incX int
 // where A is an m×n dense matrix, alpha is a scalar, x is an m element vector,
 // and y is an n element vector.
 func (Implementation) Zgeru(m, n int, alpha complex128, x []complex128, incX int, y []complex128, incY int, a []complex128, lda int) {
-	checkZMatrix('A', m, n, a, lda)
-	checkZVector('x', m, x, incX)
-	checkZVector('y', n, y, incY)
+	if m < 0 {
+		panic(mLT0)
+	}
+	if n < 0 {
+		panic(nLT0)
+	}
+	if lda < max(1, n) {
+		panic(badLdA)
+	}
+	if incX == 0 {
+		panic(zeroIncX)
+	}
+	if incY == 0 {
+		panic(zeroIncY)
+	}
 
 	if m == 0 || n == 0 || alpha == 0 {
 		return
+	}
+
+	if (incX > 0 && len(x) <= (m-1)*incX) || (incX < 0 && len(x) <= (1-m)*incX) {
+		panic(shortX)
+	}
+	if (incY > 0 && len(y) <= (n-1)*incY) || (incY < 0 && len(y) <= (1-n)*incY) {
+		panic(shortY)
+	}
+	if len(a) < lda*(m-1)+n {
+		panic(shortA)
 	}
 
 	var kx int
@@ -515,15 +578,36 @@ func (Implementation) Zhbmv(uplo blas.Uplo, n, k int, alpha complex128, ab []com
 // Hermitian matrix. The imaginary parts of the diagonal elements of A are
 // ignored and assumed to be zero.
 func (Implementation) Zhemv(uplo blas.Uplo, n int, alpha complex128, a []complex128, lda int, x []complex128, incX int, beta complex128, y []complex128, incY int) {
-	if uplo != blas.Upper && uplo != blas.Lower {
+	switch uplo {
+	default:
 		panic(badUplo)
+	case blas.Upper, blas.Lower:
 	}
-	checkZMatrix('A', n, n, a, lda)
-	checkZVector('x', n, x, incX)
-	checkZVector('y', n, y, incY)
+	if n < 0 {
+		panic(nLT0)
+	}
+	if lda < max(1, n) {
+		panic(badLdA)
+	}
+	if incX == 0 {
+		panic(zeroIncX)
+	}
+	if incY == 0 {
+		panic(zeroIncY)
+	}
 
 	if n == 0 || (alpha == 0 && beta == 1) {
 		return
+	}
+
+	if len(a) < lda*(n-1)+n {
+		panic(shortA)
+	}
+	if (incX > 0 && len(x) <= (n-1)*incX) || (incX < 0 && len(x) <= (1-n)*incX) {
+		panic(shortX)
+	}
+	if (incY > 0 && len(y) <= (n-1)*incY) || (incY < 0 && len(y) <= (1-n)*incY) {
+		panic(shortY)
 	}
 
 	// Set up the start indices in X and Y.
@@ -647,14 +731,30 @@ func (Implementation) Zhemv(uplo blas.Uplo, n int, alpha complex128, a []complex
 // element vector. On entry, the imaginary parts of the diagonal elements of A
 // are ignored and assumed to be zero, on return they will be set to zero.
 func (Implementation) Zher(uplo blas.Uplo, n int, alpha float64, x []complex128, incX int, a []complex128, lda int) {
-	if uplo != blas.Upper && uplo != blas.Lower {
+	switch uplo {
+	default:
 		panic(badUplo)
+	case blas.Upper, blas.Lower:
 	}
-	checkZMatrix('A', n, n, a, lda)
-	checkZVector('x', n, x, incX)
+	if n < 0 {
+		panic(nLT0)
+	}
+	if lda < max(1, n) {
+		panic(badLdA)
+	}
+	if incX == 0 {
+		panic(zeroIncX)
+	}
 
 	if n == 0 || alpha == 0 {
 		return
+	}
+
+	if (incX > 0 && len(x) <= (n-1)*incX) || (incX < 0 && len(x) <= (1-n)*incX) {
+		panic(shortX)
+	}
+	if len(a) < lda*(n-1)+n {
+		panic(shortA)
 	}
 
 	var kx int
@@ -746,15 +846,36 @@ func (Implementation) Zher(uplo blas.Uplo, n int, alpha float64, x []complex128,
 // Hermitian matrix. On entry, the imaginary parts of the diagonal elements are
 // ignored and assumed to be zero. On return they will be set to zero.
 func (Implementation) Zher2(uplo blas.Uplo, n int, alpha complex128, x []complex128, incX int, y []complex128, incY int, a []complex128, lda int) {
-	if uplo != blas.Upper && uplo != blas.Lower {
+	switch uplo {
+	default:
 		panic(badUplo)
+	case blas.Upper, blas.Lower:
 	}
-	checkZMatrix('A', n, n, a, lda)
-	checkZVector('x', n, x, incX)
-	checkZVector('y', n, y, incY)
+	if n < 0 {
+		panic(nLT0)
+	}
+	if lda < max(1, n) {
+		panic(badLdA)
+	}
+	if incX == 0 {
+		panic(zeroIncX)
+	}
+	if incY == 0 {
+		panic(zeroIncY)
+	}
 
 	if n == 0 || alpha == 0 {
 		return
+	}
+
+	if (incX > 0 && len(x) <= (n-1)*incX) || (incX < 0 && len(x) <= (1-n)*incX) {
+		panic(shortX)
+	}
+	if (incY > 0 && len(y) <= (n-1)*incY) || (incY < 0 && len(y) <= (1-n)*incY) {
+		panic(shortY)
+	}
+	if len(a) < lda*(n-1)+n {
+		panic(shortA)
 	}
 
 	var kx, ky int
@@ -2113,20 +2234,40 @@ func (Implementation) Ztpsv(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag
 //  x = A^H * x  if trans = blas.ConjTrans
 // where x is a vector, and A is an n×n triangular matrix.
 func (Implementation) Ztrmv(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag, n int, a []complex128, lda int, x []complex128, incX int) {
-	if uplo != blas.Upper && uplo != blas.Lower {
-		panic(badUplo)
-	}
-	if trans != blas.NoTrans && trans != blas.Trans && trans != blas.ConjTrans {
+	switch trans {
+	default:
 		panic(badTranspose)
+	case blas.NoTrans, blas.Trans, blas.ConjTrans:
 	}
-	if diag != blas.Unit && diag != blas.NonUnit {
+	switch uplo {
+	default:
+		panic(badUplo)
+	case blas.Upper, blas.Lower:
+	}
+	switch diag {
+	default:
 		panic(badDiag)
+	case blas.NonUnit, blas.Unit:
 	}
-	checkZMatrix('A', n, n, a, lda)
-	checkZVector('x', n, x, incX)
+	if n < 0 {
+		panic(nLT0)
+	}
+	if lda < max(1, n) {
+		panic(badLdA)
+	}
+	if incX == 0 {
+		panic(zeroIncX)
+	}
 
 	if n == 0 {
 		return
+	}
+
+	if len(a) < lda*(n-1)+n {
+		panic(shortA)
+	}
+	if (incX > 0 && len(x) <= (n-1)*incX) || (incX < 0 && len(x) <= (1-n)*incX) {
+		panic(shortX)
 	}
 
 	// Set up start index in X.
@@ -2305,20 +2446,40 @@ func (Implementation) Ztrmv(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag
 // No test for singularity or near-singularity is included in this
 // routine. Such tests must be performed before calling this routine.
 func (Implementation) Ztrsv(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag, n int, a []complex128, lda int, x []complex128, incX int) {
-	if uplo != blas.Upper && uplo != blas.Lower {
-		panic(badUplo)
-	}
-	if trans != blas.NoTrans && trans != blas.Trans && trans != blas.ConjTrans {
+	switch trans {
+	default:
 		panic(badTranspose)
+	case blas.NoTrans, blas.Trans, blas.ConjTrans:
 	}
-	if diag != blas.Unit && diag != blas.NonUnit {
+	switch uplo {
+	default:
+		panic(badUplo)
+	case blas.Upper, blas.Lower:
+	}
+	switch diag {
+	default:
 		panic(badDiag)
+	case blas.NonUnit, blas.Unit:
 	}
-	checkZMatrix('A', n, n, a, lda)
-	checkZVector('x', n, x, incX)
+	if n < 0 {
+		panic(nLT0)
+	}
+	if lda < max(1, n) {
+		panic(badLdA)
+	}
+	if incX == 0 {
+		panic(zeroIncX)
+	}
 
 	if n == 0 {
 		return
+	}
+
+	if len(a) < lda*(n-1)+n {
+		panic(shortA)
+	}
+	if (incX > 0 && len(x) <= (n-1)*incX) || (incX < 0 && len(x) <= (1-n)*incX) {
+		panic(shortX)
 	}
 
 	// Set up start index in X.

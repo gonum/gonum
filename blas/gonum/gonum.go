@@ -37,21 +37,6 @@ func min(a, b int) int {
 	return a
 }
 
-func checkZMatrix(name byte, m, n int, a []complex128, lda int) {
-	if m < 0 {
-		panic(mLT0)
-	}
-	if n < 0 {
-		panic(nLT0)
-	}
-	if lda < max(1, n) {
-		panic("blas: illegal stride of " + string(name))
-	}
-	if len(a) < (m-1)*lda+n {
-		panic("blas: insufficient " + string(name) + " matrix slice length")
-	}
-}
-
 func checkZBandMatrix(name byte, m, n, kL, kU int, ab []complex128, ldab int) {
 	if m < 0 {
 		panic(mLT0)

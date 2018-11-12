@@ -465,16 +465,40 @@ func (Implementation) Zgeru(m, n int, alpha complex128, x []complex128, incX int
 // where alpha and beta are scalars, x and y are vectors, and A is an n×n
 // Hermitian band matrix with k super-diagonals. The imaginary parts of
 // the diagonal elements of A are ignored and assumed to be zero.
-func (Implementation) Zhbmv(uplo blas.Uplo, n, k int, alpha complex128, ab []complex128, ldab int, x []complex128, incX int, beta complex128, y []complex128, incY int) {
-	if uplo != blas.Upper && uplo != blas.Lower {
+func (Implementation) Zhbmv(uplo blas.Uplo, n, k int, alpha complex128, a []complex128, lda int, x []complex128, incX int, beta complex128, y []complex128, incY int) {
+	switch uplo {
+	default:
 		panic(badUplo)
+	case blas.Upper, blas.Lower:
 	}
-	checkZhbMatrix('A', n, k, ab, ldab)
-	checkZVector('x', n, x, incX)
-	checkZVector('y', n, y, incY)
+	if n < 0 {
+		panic(nLT0)
+	}
+	if k < 0 {
+		panic(kLT0)
+	}
+	if lda < k+1 {
+		panic(badLdA)
+	}
+	if incX == 0 {
+		panic(zeroIncX)
+	}
+	if incY == 0 {
+		panic(zeroIncY)
+	}
 
 	if n == 0 || (alpha == 0 && beta == 1) {
 		return
+	}
+
+	if len(a) < lda*(n-1)+k+1 {
+		panic(shortA)
+	}
+	if (incX > 0 && len(x) <= (n-1)*incX) || (incX < 0 && len(x) <= (1-n)*incX) {
+		panic(shortX)
+	}
+	if (incY > 0 && len(y) <= (n-1)*incY) || (incY < 0 && len(y) <= (1-n)*incY) {
+		panic(shortY)
 	}
 
 	// Set up the start indices in X and Y.
@@ -519,13 +543,13 @@ func (Implementation) Zhbmv(uplo blas.Uplo, n, k int, alpha complex128, ab []com
 		return
 	}
 
-	// The elements of A are accessed sequentially with one pass through ab.
+	// The elements of A are accessed sequentially with one pass through a.
 	switch uplo {
 	case blas.Upper:
 		iy := ky
 		if incX == 1 {
 			for i := 0; i < n; i++ {
-				aRow := ab[i*ldab:]
+				aRow := a[i*lda:]
 				alphaxi := alpha * x[i]
 				sum := alphaxi * complex(real(aRow[0]), 0)
 				u := min(k+1, n-i)
@@ -542,7 +566,7 @@ func (Implementation) Zhbmv(uplo blas.Uplo, n, k int, alpha complex128, ab []com
 		} else {
 			ix := kx
 			for i := 0; i < n; i++ {
-				aRow := ab[i*ldab:]
+				aRow := a[i*lda:]
 				alphaxi := alpha * x[ix]
 				sum := alphaxi * complex(real(aRow[0]), 0)
 				u := min(k+1, n-i)
@@ -567,7 +591,7 @@ func (Implementation) Zhbmv(uplo blas.Uplo, n, k int, alpha complex128, ab []com
 				l := max(0, k-i)
 				alphaxi := alpha * x[i]
 				jy := l * incY
-				aRow := ab[i*ldab:]
+				aRow := a[i*lda:]
 				for j := l; j < k; j++ {
 					v := aRow[j]
 					y[iy] += alpha * v * x[i-k+j]
@@ -584,7 +608,7 @@ func (Implementation) Zhbmv(uplo blas.Uplo, n, k int, alpha complex128, ab []com
 				alphaxi := alpha * x[ix]
 				jx := l * incX
 				jy := l * incY
-				aRow := ab[i*ldab:]
+				aRow := a[i*lda:]
 				for j := l; j < k; j++ {
 					v := aRow[j]
 					y[iy] += alpha * v * x[ix-k*incX+jx]

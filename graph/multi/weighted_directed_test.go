@@ -2,13 +2,87 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package multi
+package multi_test
 
 import (
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/internal/set"
+	"gonum.org/v1/gonum/graph/multi"
+	"gonum.org/v1/gonum/graph/testgraph"
 )
+
+func weightedDirectedBuilder(nodes []graph.Node, edges []graph.WeightedLine, self, absent float64) (g graph.Graph, n []graph.Node, e []graph.Edge, s, a float64, ok bool) {
+	seen := make(set.Nodes)
+	dg := multi.NewWeightedDirectedGraph()
+	dg.EdgeWeightFunc = func(l graph.WeightedLines) float64 {
+		// TODO(kortschak): Remove nil guard if nil iterators
+		// are forbidden, https://github.com/gonum/gonum/issues/614.
+		if l == nil || l.Len() == 0 {
+			return absent
+		}
+		var w float64
+		for l.Next() {
+			w += l.WeightedLine().Weight()
+		}
+		l.Reset()
+		return w
+	}
+	for _, n := range nodes {
+		seen.Add(n)
+		dg.AddNode(n)
+	}
+	for _, edge := range edges {
+		f := dg.Node(edge.From().ID())
+		if f == nil {
+			f = edge.From()
+		}
+		t := dg.Node(edge.To().ID())
+		if t == nil {
+			t = edge.To()
+		}
+		cl := multi.WeightedLine{F: f, T: t, UID: edge.ID(), W: edge.Weight()}
+		seen.Add(cl.F)
+		seen.Add(cl.T)
+		e = append(e, cl)
+		dg.SetWeightedLine(cl)
+	}
+	if len(seen) != 0 {
+		n = make([]graph.Node, 0, len(seen))
+	}
+	for _, sn := range seen {
+		n = append(n, sn)
+	}
+	return dg, n, e, self, absent, true
+}
+
+func TestWeightedDirected(t *testing.T) {
+	t.Run("EdgeExistence", func(t *testing.T) {
+		testgraph.EdgeExistence(t, weightedDirectedBuilder)
+	})
+	t.Run("NodeExistence", func(t *testing.T) {
+		testgraph.NodeExistence(t, weightedDirectedBuilder)
+	})
+	t.Run("ReturnAdjacentNodes", func(t *testing.T) {
+		testgraph.ReturnAdjacentNodes(t, weightedDirectedBuilder)
+	})
+	t.Run("ReturnAllLines", func(t *testing.T) {
+		testgraph.ReturnAllLines(t, weightedDirectedBuilder)
+	})
+	t.Run("ReturnAllNodes", func(t *testing.T) {
+		testgraph.ReturnAllNodes(t, weightedDirectedBuilder)
+	})
+	t.Run("ReturnAllWeightedLines", func(t *testing.T) {
+		testgraph.ReturnAllWeightedLines(t, weightedDirectedBuilder)
+	})
+	t.Run("ReturnNodeSlice", func(t *testing.T) {
+		testgraph.ReturnNodeSlice(t, weightedDirectedBuilder)
+	})
+	t.Run("Weight", func(t *testing.T) {
+		testgraph.Weight(t, weightedDirectedBuilder)
+	})
+}
 
 // Tests Issue #27
 func TestWeightedEdgeOvercounting(t *testing.T) {
@@ -19,7 +93,7 @@ func TestWeightedEdgeOvercounting(t *testing.T) {
 	}
 }
 
-func generateDummyWeightedGraph() *WeightedDirectedGraph {
+func generateDummyWeightedGraph() *multi.WeightedDirectedGraph {
 	nodes := [4]struct{ srcID, targetID int }{
 		{2, 1},
 		{1, 0},
@@ -27,10 +101,10 @@ func generateDummyWeightedGraph() *WeightedDirectedGraph {
 		{0, 2},
 	}
 
-	g := NewWeightedDirectedGraph()
+	g := multi.NewWeightedDirectedGraph()
 
 	for i, n := range nodes {
-		g.SetWeightedLine(WeightedLine{F: Node(n.srcID), T: Node(n.targetID), W: 1, UID: int64(i)})
+		g.SetWeightedLine(multi.WeightedLine{F: multi.Node(n.srcID), T: multi.Node(n.targetID), W: 1, UID: int64(i)})
 	}
 
 	return g
@@ -43,7 +117,7 @@ func TestIssue123WeightedDirectedGraph(t *testing.T) {
 			t.Errorf("unexpected panic: %v", r)
 		}
 	}()
-	g := NewWeightedDirectedGraph()
+	g := multi.NewWeightedDirectedGraph()
 
 	n0 := g.NewNode()
 	g.AddNode(n0)

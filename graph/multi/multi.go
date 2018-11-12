@@ -75,18 +75,18 @@ func (e WeightedEdge) To() graph.Node { return e.T }
 // expected to be positioned at the first line and is reset before
 // Weight returns.
 func (e WeightedEdge) Weight() float64 {
+	if e.WeightFunc != nil {
+		return e.WeightFunc(e.WeightedLines)
+	}
 	if e.WeightedLines == nil {
 		return 0
 	}
-	if e.WeightFunc == nil {
-		var w float64
-		for e.Next() {
-			w += e.WeightedLine().Weight()
-		}
-		e.WeightedLines.Reset()
-		return w
+	var w float64
+	for e.Next() {
+		w += e.WeightedLine().Weight()
 	}
-	return e.WeightFunc(e.WeightedLines)
+	e.WeightedLines.Reset()
+	return w
 }
 
 // WeightedLine is a weighted multigraph edge.

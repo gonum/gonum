@@ -17,24 +17,52 @@ import (
 //  y = alpha * A^H * x + beta * y  if trans = blas.ConjTrans
 // where alpha and beta are scalars, x and y are vectors, and A is an m×n band matrix
 // with kL sub-diagonals and kU super-diagonals.
-func (Implementation) Zgbmv(trans blas.Transpose, m, n, kL, kU int, alpha complex128, ab []complex128, ldab int, x []complex128, incX int, beta complex128, y []complex128, incY int) {
-	checkZBandMatrix('A', m, n, kL, kU, ab, ldab)
-	var lenX, lenY int
+func (Implementation) Zgbmv(trans blas.Transpose, m, n, kL, kU int, alpha complex128, a []complex128, lda int, x []complex128, incX int, beta complex128, y []complex128, incY int) {
 	switch trans {
 	default:
 		panic(badTranspose)
-	case blas.NoTrans:
-		lenX = n
-		lenY = m
-	case blas.Trans, blas.ConjTrans:
-		lenX = m
-		lenY = n
+	case blas.NoTrans, blas.Trans, blas.ConjTrans:
 	}
-	checkZVector('x', lenX, x, incX)
-	checkZVector('y', lenY, y, incY)
+	if m < 0 {
+		panic(mLT0)
+	}
+	if n < 0 {
+		panic(nLT0)
+	}
+	if kL < 0 {
+		panic(kLLT0)
+	}
+	if kU < 0 {
+		panic(kULT0)
+	}
+	if lda < kL+kU+1 {
+		panic(badLdA)
+	}
+	if incX == 0 {
+		panic(zeroIncX)
+	}
+	if incY == 0 {
+		panic(zeroIncY)
+	}
 
 	if m == 0 || n == 0 || (alpha == 0 && beta == 1) {
 		return
+	}
+
+	if len(a) < lda*(min(m, n+kL)-1)+kL+kU+1 {
+		panic(shortA)
+	}
+	var lenX, lenY int
+	if trans == blas.NoTrans {
+		lenX, lenY = n, m
+	} else {
+		lenX, lenY = m, n
+	}
+	if (incX > 0 && len(x) <= (lenX-1)*incX) || (incX < 0 && len(x) <= (1-lenX)*incX) {
+		panic(shortX)
+	}
+	if (incY > 0 && len(y) <= (lenY-1)*incY) || (incY < 0 && len(y) <= (1-lenY)*incY) {
+		panic(shortY)
 	}
 
 	var kx int
@@ -82,7 +110,7 @@ func (Implementation) Zgbmv(trans blas.Transpose, m, n, kL, kU int, alpha comple
 			for i := 0; i < nRow; i++ {
 				l := max(0, kL-i)
 				u := min(nCol, n+kL-i)
-				aRow := ab[i*ldab+l : i*ldab+u]
+				aRow := a[i*lda+l : i*lda+u]
 				off := max(0, i-kL)
 				xtmp := x[off : off+u-l]
 				var sum complex128
@@ -96,7 +124,7 @@ func (Implementation) Zgbmv(trans blas.Transpose, m, n, kL, kU int, alpha comple
 			for i := 0; i < nRow; i++ {
 				l := max(0, kL-i)
 				u := min(nCol, n+kL-i)
-				aRow := ab[i*ldab+l : i*ldab+u]
+				aRow := a[i*lda+l : i*lda+u]
 				off := max(0, i-kL) * incX
 				jx := kx
 				var sum complex128
@@ -113,7 +141,7 @@ func (Implementation) Zgbmv(trans blas.Transpose, m, n, kL, kU int, alpha comple
 			for i := 0; i < nRow; i++ {
 				l := max(0, kL-i)
 				u := min(nCol, n+kL-i)
-				aRow := ab[i*ldab+l : i*ldab+u]
+				aRow := a[i*lda+l : i*lda+u]
 				off := max(0, i-kL) * incY
 				alphaxi := alpha * x[i]
 				jy := ky
@@ -127,7 +155,7 @@ func (Implementation) Zgbmv(trans blas.Transpose, m, n, kL, kU int, alpha comple
 			for i := 0; i < nRow; i++ {
 				l := max(0, kL-i)
 				u := min(nCol, n+kL-i)
-				aRow := ab[i*ldab+l : i*ldab+u]
+				aRow := a[i*lda+l : i*lda+u]
 				off := max(0, i-kL) * incY
 				alphaxi := alpha * x[ix]
 				jy := ky
@@ -143,7 +171,7 @@ func (Implementation) Zgbmv(trans blas.Transpose, m, n, kL, kU int, alpha comple
 			for i := 0; i < nRow; i++ {
 				l := max(0, kL-i)
 				u := min(nCol, n+kL-i)
-				aRow := ab[i*ldab+l : i*ldab+u]
+				aRow := a[i*lda+l : i*lda+u]
 				off := max(0, i-kL) * incY
 				alphaxi := alpha * x[i]
 				jy := ky
@@ -157,7 +185,7 @@ func (Implementation) Zgbmv(trans blas.Transpose, m, n, kL, kU int, alpha comple
 			for i := 0; i < nRow; i++ {
 				l := max(0, kL-i)
 				u := min(nCol, n+kL-i)
-				aRow := ab[i*ldab+l : i*ldab+u]
+				aRow := a[i*lda+l : i*lda+u]
 				off := max(0, i-kL) * incY
 				alphaxi := alpha * x[ix]
 				jy := ky

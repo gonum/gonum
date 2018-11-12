@@ -15,7 +15,6 @@ var _ blas.Float64Level2 = Implementation{}
 //  A += alpha * x * y^T
 // where A is an m×n dense matrix, x and y are vectors, and alpha is a scalar.
 func (Implementation) Dger(m, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64, lda int) {
-	// Check inputs
 	if m < 0 {
 		panic(mLT0)
 	}
@@ -520,7 +519,6 @@ func (Implementation) Dtrsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 // where A is an n×n symmetric matrix, x and y are vectors, and alpha and
 // beta are scalars.
 func (Implementation) Dsymv(ul blas.Uplo, n int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int) {
-	// Check inputs
 	if ul != blas.Lower && ul != blas.Upper {
 		panic(badUplo)
 	}

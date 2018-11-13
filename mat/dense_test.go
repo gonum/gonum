@@ -831,7 +831,7 @@ func TestMul(t *testing.T) {
 		// These probably warrant a better check and failure. They should never happen in the wild though.
 		temp.mat.Data = nil
 		panicked, message := panics(func() { temp.Mul(a, b) })
-		if !panicked || message != "blas: index of c out of range" {
+		if !panicked || message != "blas: insufficient length of c" {
 			if message != "" {
 				t.Errorf("expected runtime panic for nil data slice: got %q", message)
 			} else {

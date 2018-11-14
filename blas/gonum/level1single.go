@@ -27,7 +27,7 @@ func (Implementation) Snrm2(n int, x []float32, incX int) float32 {
 		}
 		return 0
 	}
-	if incX > 0 && (n-1)*incX >= len(x) {
+	if len(x) <= (n-1)*incX {
 		panic(shortX)
 	}
 	if n < 2 {
@@ -103,7 +103,7 @@ func (Implementation) Sasum(n int, x []float32, incX int) float32 {
 		}
 		return 0
 	}
-	if incX > 0 && (n-1)*incX >= len(x) {
+	if len(x) <= (n-1)*incX {
 		panic(shortX)
 	}
 	if incX == 1 {
@@ -131,7 +131,7 @@ func (Implementation) Isamax(n int, x []float32, incX int) int {
 		}
 		return -1
 	}
-	if incX > 0 && (n-1)*incX >= len(x) {
+	if len(x) <= (n-1)*incX {
 		panic(shortX)
 	}
 	if n < 2 {
@@ -139,7 +139,7 @@ func (Implementation) Isamax(n int, x []float32, incX int) int {
 			return 0
 		}
 		if n == 0 {
-			return -1 // Netlib returns invalid index when n == 0
+			return -1 // Netlib returns invalid index when n == 0.
 		}
 		panic(nLT0)
 	}
@@ -185,10 +185,10 @@ func (Implementation) Sswap(n int, x []float32, incX int, y []float32, incY int)
 		}
 		panic(nLT0)
 	}
-	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
+	if (incX > 0 && len(x) <= (n-1)*incX) || (incX < 0 && len(x) <= (1-n)*incX) {
 		panic(shortX)
 	}
-	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
+	if (incY > 0 && len(y) <= (n-1)*incY) || (incY < 0 && len(y) <= (1-n)*incY) {
 		panic(shortY)
 	}
 	if incX == 1 && incY == 1 {
@@ -229,10 +229,10 @@ func (Implementation) Scopy(n int, x []float32, incX int, y []float32, incY int)
 		}
 		panic(nLT0)
 	}
-	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
+	if (incX > 0 && len(x) <= (n-1)*incX) || (incX < 0 && len(x) <= (1-n)*incX) {
 		panic(shortX)
 	}
-	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
+	if (incY > 0 && len(y) <= (n-1)*incY) || (incY < 0 && len(y) <= (1-n)*incY) {
 		panic(shortY)
 	}
 	if incX == 1 && incY == 1 {
@@ -270,10 +270,10 @@ func (Implementation) Saxpy(n int, alpha float32, x []float32, incX int, y []flo
 		}
 		panic(nLT0)
 	}
-	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
+	if (incX > 0 && len(x) <= (n-1)*incX) || (incX < 0 && len(x) <= (1-n)*incX) {
 		panic(shortX)
 	}
-	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
+	if (incY > 0 && len(y) <= (n-1)*incY) || (incY < 0 && len(y) <= (1-n)*incY) {
 		panic(shortY)
 	}
 	if alpha == 0 {
@@ -303,7 +303,7 @@ func (Implementation) Saxpy(n int, alpha float32, x []float32, incX int, y []flo
 //  c = a/r, the cosine of the plane rotation
 //  s = b/r, the sine of the plane rotation
 //
-// NOTE: There is a discrepancy between the refence implementation and the BLAS
+// NOTE: There is a discrepancy between the reference implementation and the BLAS
 // technical manual regarding the sign for r when a or b are zero.
 // Srotg agrees with the definition in the manual and other
 // common BLAS implementations.
@@ -464,10 +464,10 @@ func (Implementation) Srot(n int, x []float32, incX int, y []float32, incY int, 
 		}
 		panic(nLT0)
 	}
-	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
+	if (incX > 0 && len(x) <= (n-1)*incX) || (incX < 0 && len(x) <= (1-n)*incX) {
 		panic(shortX)
 	}
-	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
+	if (incY > 0 && len(y) <= (n-1)*incY) || (incY < 0 && len(y) <= (1-n)*incY) {
 		panic(shortY)
 	}
 	if incX == 1 && incY == 1 {
@@ -510,10 +510,10 @@ func (Implementation) Srotm(n int, x []float32, incX int, y []float32, incY int,
 		}
 		panic(nLT0)
 	}
-	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
+	if (incX > 0 && len(x) <= (n-1)*incX) || (incX < 0 && len(x) <= (1-n)*incX) {
 		panic(shortX)
 	}
-	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
+	if (incY > 0 && len(y) <= (n-1)*incY) || (incY < 0 && len(y) <= (1-n)*incY) {
 		panic(shortY)
 	}
 
@@ -614,14 +614,14 @@ func (Implementation) Sscal(n int, alpha float32, x []float32, incX int) {
 		}
 		return
 	}
-	if (n-1)*incX >= len(x) {
-		panic(shortX)
-	}
 	if n < 1 {
 		if n == 0 {
 			return
 		}
 		panic(nLT0)
+	}
+	if (n-1)*incX >= len(x) {
+		panic(shortX)
 	}
 	if alpha == 0 {
 		if incX == 1 {

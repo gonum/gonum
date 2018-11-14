@@ -57,10 +57,12 @@ func (Implementation) Strsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 		panic(badLdB)
 	}
 
+	// Quick return if possible.
 	if m == 0 || n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if len(a) < lda*(k-1)+k {
 		panic(shortA)
 	}
@@ -273,10 +275,12 @@ func (Implementation) Ssymm(s blas.Side, ul blas.Uplo, m, n int, alpha float32, 
 		panic(badLdC)
 	}
 
+	// Quick return if possible.
 	if m == 0 || n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if len(a) < lda*(k-1)+k {
 		panic(shortA)
 	}
@@ -287,9 +291,11 @@ func (Implementation) Ssymm(s blas.Side, ul blas.Uplo, m, n int, alpha float32, 
 		panic(shortC)
 	}
 
+	// Quick return if possible.
 	if alpha == 0 && beta == 1 {
 		return
 	}
+
 	if alpha == 0 {
 		if beta == 0 {
 			for i := 0; i < m; i++ {
@@ -411,10 +417,12 @@ func (Implementation) Ssyrk(ul blas.Uplo, tA blas.Transpose, n, k int, alpha flo
 		panic(badLdC)
 	}
 
+	// Quick return if possible.
 	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if len(a) < lda*(row-1)+col {
 		panic(shortA)
 	}
@@ -546,10 +554,12 @@ func (Implementation) Ssyr2k(ul blas.Uplo, tA blas.Transpose, n, k int, alpha fl
 		panic(badLdC)
 	}
 
+	// Quick return if possible.
 	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if len(a) < lda*(row-1)+col {
 		panic(shortA)
 	}
@@ -712,10 +722,12 @@ func (Implementation) Strmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 		panic(badLdB)
 	}
 
+	// Quick return if possible.
 	if m == 0 || n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if len(a) < lda*(k-1)+k {
 		panic(shortA)
 	}

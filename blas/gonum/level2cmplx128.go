@@ -45,10 +45,12 @@ func (Implementation) Zgbmv(trans blas.Transpose, m, n, kL, kU int, alpha comple
 		panic(zeroIncY)
 	}
 
-	if m == 0 || n == 0 || (alpha == 0 && beta == 1) {
+	// Quick return if possible.
+	if m == 0 || n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if len(a) < lda*(min(m, n+kL)-1)+kL+kU+1 {
 		panic(shortA)
 	}
@@ -63,6 +65,11 @@ func (Implementation) Zgbmv(trans blas.Transpose, m, n, kL, kU int, alpha comple
 	}
 	if (incY > 0 && len(y) <= (lenY-1)*incY) || (incY < 0 && len(y) <= (1-lenY)*incY) {
 		panic(shortY)
+	}
+
+	// Quick return if possible.
+	if alpha == 0 && beta == 1 {
+		return
 	}
 
 	var kx int
@@ -226,10 +233,12 @@ func (Implementation) Zgemv(trans blas.Transpose, m, n int, alpha complex128, a 
 		panic(zeroIncY)
 	}
 
-	if m == 0 || n == 0 || (alpha == 0 && beta == 1) {
+	// Quick return if possible.
+	if m == 0 || n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	var lenX, lenY int
 	if trans == blas.NoTrans {
 		lenX = n
@@ -246,6 +255,11 @@ func (Implementation) Zgemv(trans blas.Transpose, m, n int, alpha complex128, a 
 	}
 	if (incY > 0 && len(y) <= (lenY-1)*incY) || (incY < 0 && len(y) <= (1-lenY)*incY) {
 		panic(shortY)
+	}
+
+	// Quick return if possible.
+	if alpha == 0 && beta == 1 {
+		return
 	}
 
 	var kx int
@@ -368,10 +382,12 @@ func (Implementation) Zgerc(m, n int, alpha complex128, x []complex128, incX int
 		panic(zeroIncY)
 	}
 
-	if m == 0 || n == 0 || alpha == 0 {
+	// Quick return if possible.
+	if m == 0 || n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if (incX > 0 && len(x) <= (m-1)*incX) || (incX < 0 && len(x) <= (1-m)*incX) {
 		panic(shortX)
 	}
@@ -380,6 +396,11 @@ func (Implementation) Zgerc(m, n int, alpha complex128, x []complex128, incX int
 	}
 	if len(a) < lda*(m-1)+n {
 		panic(shortA)
+	}
+
+	// Quick return if possible.
+	if alpha == 0 {
+		return
 	}
 
 	var kx, jy int
@@ -419,10 +440,12 @@ func (Implementation) Zgeru(m, n int, alpha complex128, x []complex128, incX int
 		panic(zeroIncY)
 	}
 
-	if m == 0 || n == 0 || alpha == 0 {
+	// Quick return if possible.
+	if m == 0 || n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if (incX > 0 && len(x) <= (m-1)*incX) || (incX < 0 && len(x) <= (1-m)*incX) {
 		panic(shortX)
 	}
@@ -431,6 +454,11 @@ func (Implementation) Zgeru(m, n int, alpha complex128, x []complex128, incX int
 	}
 	if len(a) < lda*(m-1)+n {
 		panic(shortA)
+	}
+
+	// Quick return if possible.
+	if alpha == 0 {
+		return
 	}
 
 	var kx int
@@ -487,10 +515,12 @@ func (Implementation) Zhbmv(uplo blas.Uplo, n, k int, alpha complex128, a []comp
 		panic(zeroIncY)
 	}
 
-	if n == 0 || (alpha == 0 && beta == 1) {
+	// Quick return if possible.
+	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if len(a) < lda*(n-1)+k+1 {
 		panic(shortA)
 	}
@@ -499,6 +529,11 @@ func (Implementation) Zhbmv(uplo blas.Uplo, n, k int, alpha complex128, a []comp
 	}
 	if (incY > 0 && len(y) <= (n-1)*incY) || (incY < 0 && len(y) <= (1-n)*incY) {
 		panic(shortY)
+	}
+
+	// Quick return if possible.
+	if alpha == 0 && beta == 1 {
+		return
 	}
 
 	// Set up the start indices in X and Y.
@@ -648,10 +683,12 @@ func (Implementation) Zhemv(uplo blas.Uplo, n int, alpha complex128, a []complex
 		panic(zeroIncY)
 	}
 
-	if n == 0 || (alpha == 0 && beta == 1) {
+	// Quick return if possible.
+	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if len(a) < lda*(n-1)+n {
 		panic(shortA)
 	}
@@ -660,6 +697,11 @@ func (Implementation) Zhemv(uplo blas.Uplo, n int, alpha complex128, a []complex
 	}
 	if (incY > 0 && len(y) <= (n-1)*incY) || (incY < 0 && len(y) <= (1-n)*incY) {
 		panic(shortY)
+	}
+
+	// Quick return if possible.
+	if alpha == 0 && beta == 1 {
+		return
 	}
 
 	// Set up the start indices in X and Y.
@@ -798,15 +840,22 @@ func (Implementation) Zher(uplo blas.Uplo, n int, alpha float64, x []complex128,
 		panic(zeroIncX)
 	}
 
-	if n == 0 || alpha == 0 {
+	// Quick return if possible.
+	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if (incX > 0 && len(x) <= (n-1)*incX) || (incX < 0 && len(x) <= (1-n)*incX) {
 		panic(shortX)
 	}
 	if len(a) < lda*(n-1)+n {
 		panic(shortA)
+	}
+
+	// Quick return if possible.
+	if alpha == 0 {
+		return
 	}
 
 	var kx int
@@ -916,10 +965,12 @@ func (Implementation) Zher2(uplo blas.Uplo, n int, alpha complex128, x []complex
 		panic(zeroIncY)
 	}
 
-	if n == 0 || alpha == 0 {
+	// Quick return if possible.
+	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if (incX > 0 && len(x) <= (n-1)*incX) || (incX < 0 && len(x) <= (1-n)*incX) {
 		panic(shortX)
 	}
@@ -928,6 +979,11 @@ func (Implementation) Zher2(uplo blas.Uplo, n int, alpha complex128, x []complex
 	}
 	if len(a) < lda*(n-1)+n {
 		panic(shortA)
+	}
+
+	// Quick return if possible.
+	if alpha == 0 {
+		return
 	}
 
 	var kx, ky int
@@ -1043,10 +1099,12 @@ func (Implementation) Zhpmv(uplo blas.Uplo, n int, alpha complex128, ap []comple
 		panic(zeroIncY)
 	}
 
-	if n == 0 || (alpha == 0 && beta == 1) {
+	// Quick return if possible.
+	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if len(ap) < n*(n+1)/2 {
 		panic(shortAP)
 	}
@@ -1055,6 +1113,11 @@ func (Implementation) Zhpmv(uplo blas.Uplo, n int, alpha complex128, ap []comple
 	}
 	if (incY > 0 && len(y) <= (n-1)*incY) || (incY < 0 && len(y) <= (1-n)*incY) {
 		panic(shortY)
+	}
+
+	// Quick return if possible.
+	if alpha == 0 && beta == 1 {
+		return
 	}
 
 	// Set up the start indices in X and Y.
@@ -1200,15 +1263,22 @@ func (Implementation) Zhpr(uplo blas.Uplo, n int, alpha float64, x []complex128,
 		panic(zeroIncX)
 	}
 
-	if n == 0 || alpha == 0 {
+	// Quick return if possible.
+	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if (incX > 0 && len(x) <= (n-1)*incX) || (incX < 0 && len(x) <= (1-n)*incX) {
 		panic(shortX)
 	}
 	if len(ap) < n*(n+1)/2 {
 		panic(shortAP)
+	}
+
+	// Quick return if possible.
+	if alpha == 0 {
+		return
 	}
 
 	// Set up start index in X.
@@ -1330,10 +1400,12 @@ func (Implementation) Zhpr2(uplo blas.Uplo, n int, alpha complex128, x []complex
 		panic(zeroIncY)
 	}
 
-	if n == 0 || alpha == 0 {
+	// Quick return if possible.
+	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if (incX > 0 && len(x) <= (n-1)*incX) || (incX < 0 && len(x) <= (1-n)*incX) {
 		panic(shortX)
 	}
@@ -1342,6 +1414,11 @@ func (Implementation) Zhpr2(uplo blas.Uplo, n int, alpha complex128, x []complex
 	}
 	if len(ap) < n*(n+1)/2 {
 		panic(shortAP)
+	}
+
+	// Quick return if possible.
+	if alpha == 0 {
+		return
 	}
 
 	// Set up start indices in X and Y.
@@ -1484,10 +1561,12 @@ func (Implementation) Ztbmv(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag
 		panic(zeroIncX)
 	}
 
+	// Quick return if possible.
 	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if len(a) < lda*(n-1)+k+1 {
 		panic(shortA)
 	}
@@ -1724,10 +1803,12 @@ func (Implementation) Ztbsv(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag
 		panic(zeroIncX)
 	}
 
+	// Quick return if possible.
 	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if len(a) < lda*(n-1)+k+1 {
 		panic(shortA)
 	}
@@ -1952,10 +2033,12 @@ func (Implementation) Ztpmv(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag
 		panic(zeroIncX)
 	}
 
+	// Quick return if possible.
 	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if len(ap) < n*(n+1)/2 {
 		panic(shortAP)
 	}
@@ -2194,10 +2277,12 @@ func (Implementation) Ztpsv(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag
 		panic(zeroIncX)
 	}
 
+	// Quick return if possible.
 	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if len(ap) < n*(n+1)/2 {
 		panic(shortAP)
 	}
@@ -2424,10 +2509,12 @@ func (Implementation) Ztrmv(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag
 		panic(zeroIncX)
 	}
 
+	// Quick return if possible.
 	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if len(a) < lda*(n-1)+n {
 		panic(shortA)
 	}
@@ -2636,10 +2723,12 @@ func (Implementation) Ztrsv(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag
 		panic(zeroIncX)
 	}
 
+	// Quick return if possible.
 	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if len(a) < lda*(n-1)+n {
 		panic(shortA)
 	}

@@ -31,10 +31,12 @@ func (Implementation) Dger(m, n int, alpha float64, x []float64, incX int, y []f
 		panic(zeroIncY)
 	}
 
+	// Quick return if possible.
 	if m == 0 || n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if (incX > 0 && len(x) <= (m-1)*incX) || (incX < 0 && len(x) <= (1-m)*incX) {
 		panic(shortX)
 	}
@@ -45,7 +47,7 @@ func (Implementation) Dger(m, n int, alpha float64, x []float64, incX int, y []f
 		panic(shortA)
 	}
 
-	// Quick return if possible
+	// Quick return if possible.
 	if alpha == 0 {
 		return
 	}
@@ -87,10 +89,12 @@ func (Implementation) Dgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float64, 
 		panic(zeroIncY)
 	}
 
+	// Quick return if possible.
 	if m == 0 || n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if len(a) < lda*(min(m, n+kL)-1)+kL+kU+1 {
 		panic(shortA)
 	}
@@ -107,7 +111,7 @@ func (Implementation) Dgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float64, 
 		panic(shortY)
 	}
 
-	// Quick return if possible
+	// Quick return if possible.
 	if alpha == 0 && beta == 1 {
 		return
 	}
@@ -223,10 +227,12 @@ func (Implementation) Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 		panic(zeroIncX)
 	}
 
+	// Quick return if possible.
 	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if len(a) < lda*(n-1)+n {
 		panic(shortA)
 	}
@@ -380,10 +386,12 @@ func (Implementation) Dtrsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 		panic(zeroIncX)
 	}
 
+	// Quick return if possible.
 	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if len(a) < lda*(n-1)+n {
 		panic(shortA)
 	}
@@ -550,10 +558,12 @@ func (Implementation) Dsymv(ul blas.Uplo, n int, alpha float64, a []float64, lda
 		panic(zeroIncY)
 	}
 
+	// Quick return if possible.
 	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if len(a) < lda*(n-1)+n {
 		panic(shortA)
 	}
@@ -564,7 +574,7 @@ func (Implementation) Dsymv(ul blas.Uplo, n int, alpha float64, a []float64, lda
 		panic(shortY)
 	}
 
-	// Quick return if possible
+	// Quick return if possible.
 	if alpha == 0 && beta == 1 {
 		return
 	}
@@ -704,10 +714,12 @@ func (Implementation) Dtbmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k i
 		panic(zeroIncX)
 	}
 
+	// Quick return if possible.
 	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if len(a) < lda*(n-1)+k+1 {
 		panic(shortA)
 	}
@@ -905,10 +917,12 @@ func (Implementation) Dtpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 		panic(zeroIncX)
 	}
 
+	// Quick return if possible.
 	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if len(ap) < n*(n+1)/2 {
 		panic(shortAP)
 	}
@@ -1095,10 +1109,12 @@ func (Implementation) Dtbsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k i
 		panic(zeroIncX)
 	}
 
+	// Quick return if possible.
 	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if len(a) < lda*(n-1)+k+1 {
 		panic(shortA)
 	}
@@ -1305,10 +1321,12 @@ func (Implementation) Dsbmv(ul blas.Uplo, n, k int, alpha float64, a []float64, 
 		panic(zeroIncY)
 	}
 
+	// Quick return if possible.
 	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if len(a) < lda*(n-1)+k+1 {
 		panic(shortA)
 	}
@@ -1319,7 +1337,7 @@ func (Implementation) Dsbmv(ul blas.Uplo, n, k int, alpha float64, a []float64, 
 		panic(shortY)
 	}
 
-	// Quick return if possible
+	// Quick return if possible.
 	if alpha == 0 && beta == 1 {
 		return
 	}
@@ -1446,10 +1464,12 @@ func (Implementation) Dsyr(ul blas.Uplo, n int, alpha float64, x []float64, incX
 		panic(zeroIncX)
 	}
 
+	// Quick return if possible.
 	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if (incX > 0 && len(x) <= (n-1)*incX) || (incX < 0 && len(x) <= (1-n)*incX) {
 		panic(shortX)
 	}
@@ -1457,6 +1477,7 @@ func (Implementation) Dsyr(ul blas.Uplo, n int, alpha float64, x []float64, incX
 		panic(shortA)
 	}
 
+	// Quick return if possible.
 	if alpha == 0 {
 		return
 	}
@@ -1544,10 +1565,12 @@ func (Implementation) Dsyr2(ul blas.Uplo, n int, alpha float64, x []float64, inc
 		panic(zeroIncY)
 	}
 
+	// Quick return if possible.
 	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if (incX > 0 && len(x) <= (n-1)*incX) || (incX < 0 && len(x) <= (1-n)*incX) {
 		panic(shortX)
 	}
@@ -1558,6 +1581,7 @@ func (Implementation) Dsyr2(ul blas.Uplo, n int, alpha float64, x []float64, inc
 		panic(shortA)
 	}
 
+	// Quick return if possible.
 	if alpha == 0 {
 		return
 	}
@@ -1655,10 +1679,12 @@ func (Implementation) Dtpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 		panic(zeroIncX)
 	}
 
+	// Quick return if possible.
 	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if len(ap) < n*(n+1)/2 {
 		panic(shortAP)
 	}
@@ -1828,10 +1854,12 @@ func (Implementation) Dspmv(ul blas.Uplo, n int, alpha float64, ap []float64, x 
 		panic(zeroIncY)
 	}
 
+	// Quick return if possible.
 	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if len(ap) < n*(n+1)/2 {
 		panic(shortAP)
 	}
@@ -1842,7 +1870,7 @@ func (Implementation) Dspmv(ul blas.Uplo, n int, alpha float64, ap []float64, x 
 		panic(shortY)
 	}
 
-	// Quick return if possible
+	// Quick return if possible.
 	if alpha == 0 && beta == 1 {
 		return
 	}
@@ -1972,10 +2000,12 @@ func (Implementation) Dspr(ul blas.Uplo, n int, alpha float64, x []float64, incX
 		panic(zeroIncX)
 	}
 
+	// Quick return if possible.
 	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if (incX > 0 && len(x) <= (n-1)*incX) || (incX < 0 && len(x) <= (1-n)*incX) {
 		panic(shortX)
 	}
@@ -1983,6 +2013,7 @@ func (Implementation) Dspr(ul blas.Uplo, n int, alpha float64, x []float64, incX
 		panic(shortAP)
 	}
 
+	// Quick return if possible.
 	if alpha == 0 {
 		return
 	}
@@ -2064,10 +2095,12 @@ func (Implementation) Dspr2(ul blas.Uplo, n int, alpha float64, x []float64, inc
 		panic(zeroIncY)
 	}
 
+	// Quick return if possible.
 	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if (incX > 0 && len(x) <= (n-1)*incX) || (incX < 0 && len(x) <= (1-n)*incX) {
 		panic(shortX)
 	}
@@ -2078,6 +2111,7 @@ func (Implementation) Dspr2(ul blas.Uplo, n int, alpha float64, x []float64, inc
 		panic(shortAP)
 	}
 
+	// Quick return if possible.
 	if alpha == 0 {
 		return
 	}

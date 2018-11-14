@@ -35,10 +35,12 @@ func (Implementation) Sger(m, n int, alpha float32, x []float32, incX int, y []f
 		panic(zeroIncY)
 	}
 
+	// Quick return if possible.
 	if m == 0 || n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if (incX > 0 && len(x) <= (m-1)*incX) || (incX < 0 && len(x) <= (1-m)*incX) {
 		panic(shortX)
 	}
@@ -49,7 +51,7 @@ func (Implementation) Sger(m, n int, alpha float32, x []float32, incX int, y []f
 		panic(shortA)
 	}
 
-	// Quick return if possible
+	// Quick return if possible.
 	if alpha == 0 {
 		return
 	}
@@ -93,10 +95,12 @@ func (Implementation) Sgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float32, 
 		panic(zeroIncY)
 	}
 
+	// Quick return if possible.
 	if m == 0 || n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if len(a) < lda*(min(m, n+kL)-1)+kL+kU+1 {
 		panic(shortA)
 	}
@@ -113,7 +117,7 @@ func (Implementation) Sgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float32, 
 		panic(shortY)
 	}
 
-	// Quick return if possible
+	// Quick return if possible.
 	if alpha == 0 && beta == 1 {
 		return
 	}
@@ -231,10 +235,12 @@ func (Implementation) Strmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 		panic(zeroIncX)
 	}
 
+	// Quick return if possible.
 	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if len(a) < lda*(n-1)+n {
 		panic(shortA)
 	}
@@ -390,10 +396,12 @@ func (Implementation) Strsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 		panic(zeroIncX)
 	}
 
+	// Quick return if possible.
 	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if len(a) < lda*(n-1)+n {
 		panic(shortA)
 	}
@@ -562,10 +570,12 @@ func (Implementation) Ssymv(ul blas.Uplo, n int, alpha float32, a []float32, lda
 		panic(zeroIncY)
 	}
 
+	// Quick return if possible.
 	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if len(a) < lda*(n-1)+n {
 		panic(shortA)
 	}
@@ -576,7 +586,7 @@ func (Implementation) Ssymv(ul blas.Uplo, n int, alpha float32, a []float32, lda
 		panic(shortY)
 	}
 
-	// Quick return if possible
+	// Quick return if possible.
 	if alpha == 0 && beta == 1 {
 		return
 	}
@@ -718,10 +728,12 @@ func (Implementation) Stbmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k i
 		panic(zeroIncX)
 	}
 
+	// Quick return if possible.
 	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if len(a) < lda*(n-1)+k+1 {
 		panic(shortA)
 	}
@@ -921,10 +933,12 @@ func (Implementation) Stpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 		panic(zeroIncX)
 	}
 
+	// Quick return if possible.
 	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if len(ap) < n*(n+1)/2 {
 		panic(shortAP)
 	}
@@ -1113,10 +1127,12 @@ func (Implementation) Stbsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k i
 		panic(zeroIncX)
 	}
 
+	// Quick return if possible.
 	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if len(a) < lda*(n-1)+k+1 {
 		panic(shortA)
 	}
@@ -1325,10 +1341,12 @@ func (Implementation) Ssbmv(ul blas.Uplo, n, k int, alpha float32, a []float32, 
 		panic(zeroIncY)
 	}
 
+	// Quick return if possible.
 	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if len(a) < lda*(n-1)+k+1 {
 		panic(shortA)
 	}
@@ -1339,7 +1357,7 @@ func (Implementation) Ssbmv(ul blas.Uplo, n, k int, alpha float32, a []float32, 
 		panic(shortY)
 	}
 
-	// Quick return if possible
+	// Quick return if possible.
 	if alpha == 0 && beta == 1 {
 		return
 	}
@@ -1468,10 +1486,12 @@ func (Implementation) Ssyr(ul blas.Uplo, n int, alpha float32, x []float32, incX
 		panic(zeroIncX)
 	}
 
+	// Quick return if possible.
 	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if (incX > 0 && len(x) <= (n-1)*incX) || (incX < 0 && len(x) <= (1-n)*incX) {
 		panic(shortX)
 	}
@@ -1479,6 +1499,7 @@ func (Implementation) Ssyr(ul blas.Uplo, n int, alpha float32, x []float32, incX
 		panic(shortA)
 	}
 
+	// Quick return if possible.
 	if alpha == 0 {
 		return
 	}
@@ -1568,10 +1589,12 @@ func (Implementation) Ssyr2(ul blas.Uplo, n int, alpha float32, x []float32, inc
 		panic(zeroIncY)
 	}
 
+	// Quick return if possible.
 	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if (incX > 0 && len(x) <= (n-1)*incX) || (incX < 0 && len(x) <= (1-n)*incX) {
 		panic(shortX)
 	}
@@ -1582,6 +1605,7 @@ func (Implementation) Ssyr2(ul blas.Uplo, n int, alpha float32, x []float32, inc
 		panic(shortA)
 	}
 
+	// Quick return if possible.
 	if alpha == 0 {
 		return
 	}
@@ -1681,10 +1705,12 @@ func (Implementation) Stpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 		panic(zeroIncX)
 	}
 
+	// Quick return if possible.
 	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if len(ap) < n*(n+1)/2 {
 		panic(shortAP)
 	}
@@ -1856,10 +1882,12 @@ func (Implementation) Sspmv(ul blas.Uplo, n int, alpha float32, ap []float32, x 
 		panic(zeroIncY)
 	}
 
+	// Quick return if possible.
 	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if len(ap) < n*(n+1)/2 {
 		panic(shortAP)
 	}
@@ -1870,7 +1898,7 @@ func (Implementation) Sspmv(ul blas.Uplo, n int, alpha float32, ap []float32, x 
 		panic(shortY)
 	}
 
-	// Quick return if possible
+	// Quick return if possible.
 	if alpha == 0 && beta == 1 {
 		return
 	}
@@ -2002,10 +2030,12 @@ func (Implementation) Sspr(ul blas.Uplo, n int, alpha float32, x []float32, incX
 		panic(zeroIncX)
 	}
 
+	// Quick return if possible.
 	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if (incX > 0 && len(x) <= (n-1)*incX) || (incX < 0 && len(x) <= (1-n)*incX) {
 		panic(shortX)
 	}
@@ -2013,6 +2043,7 @@ func (Implementation) Sspr(ul blas.Uplo, n int, alpha float32, x []float32, incX
 		panic(shortAP)
 	}
 
+	// Quick return if possible.
 	if alpha == 0 {
 		return
 	}
@@ -2096,10 +2127,12 @@ func (Implementation) Sspr2(ul blas.Uplo, n int, alpha float32, x []float32, inc
 		panic(zeroIncY)
 	}
 
+	// Quick return if possible.
 	if n == 0 {
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if (incX > 0 && len(x) <= (n-1)*incX) || (incX < 0 && len(x) <= (1-n)*incX) {
 		panic(shortX)
 	}
@@ -2110,6 +2143,7 @@ func (Implementation) Sspr2(ul blas.Uplo, n int, alpha float32, x []float32, inc
 		panic(shortAP)
 	}
 
+	// Quick return if possible.
 	if alpha == 0 {
 		return
 	}

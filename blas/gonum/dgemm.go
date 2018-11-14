@@ -69,6 +69,7 @@ func (Implementation) Dgemm(tA, tB blas.Transpose, m, n, k int, alpha float64, a
 		return
 	}
 
+	// For zero matrix size the following slice length checks are trivially satisfied.
 	if aTrans {
 		if len(a) < (k-1)*lda+m {
 			panic(shortA)

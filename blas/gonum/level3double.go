@@ -42,24 +42,26 @@ func (Implementation) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 	if n < 0 {
 		panic(nLT0)
 	}
-	if ldb < n {
-		panic(badLdB)
-	}
-	var k int
+	k := n
 	if s == blas.Left {
 		k = m
-	} else {
-		k = n
 	}
-	if lda*(k-1)+k > len(a) || lda < max(1, k) {
+	if lda < max(1, k) {
 		panic(badLdA)
 	}
-	if ldb*(m-1)+n > len(b) || ldb < max(1, n) {
+	if ldb < max(1, n) {
 		panic(badLdB)
 	}
 
 	if m == 0 || n == 0 {
 		return
+	}
+
+	if len(a) < lda*(k-1)+k {
+		panic(shortA)
+	}
+	if len(b) < ldb*(m-1)+n {
+		panic(shortB)
 	}
 
 	if alpha == 0 {
@@ -251,24 +253,34 @@ func (Implementation) Dsymm(s blas.Side, ul blas.Uplo, m, n int, alpha float64, 
 	if n < 0 {
 		panic(nLT0)
 	}
-	var k int
+	k := n
 	if s == blas.Left {
 		k = m
-	} else {
-		k = n
 	}
-	if lda*(k-1)+k > len(a) || lda < max(1, k) {
+	if lda < max(1, k) {
 		panic(badLdA)
 	}
-	if ldb*(m-1)+n > len(b) || ldb < max(1, n) {
+	if ldb < max(1, n) {
 		panic(badLdB)
 	}
-	if ldc*(m-1)+n > len(c) || ldc < max(1, n) {
+	if ldc < max(1, n) {
 		panic(badLdC)
 	}
+
 	if m == 0 || n == 0 {
 		return
 	}
+
+	if len(a) < lda*(k-1)+k {
+		panic(shortA)
+	}
+	if len(b) < ldb*(m-1)+n {
+		panic(shortB)
+	}
+	if len(c) < ldc*(m-1)+n {
+		panic(shortC)
+	}
+
 	if alpha == 0 && beta == 1 {
 		return
 	}
@@ -380,21 +392,28 @@ func (Implementation) Dsyrk(ul blas.Uplo, tA blas.Transpose, n, k int, alpha flo
 	if k < 0 {
 		panic(kLT0)
 	}
-	if ldc < n {
-		panic(badLdC)
-	}
-	var row, col int
+	row, col := k, n
 	if tA == blas.NoTrans {
 		row, col = n, k
-	} else {
-		row, col = k, n
 	}
-	if lda*(row-1)+col > len(a) || lda < max(1, col) {
+	if lda < max(1, col) {
 		panic(badLdA)
 	}
-	if ldc*(n-1)+n > len(c) || ldc < max(1, n) {
+	if ldc < max(1, n) {
 		panic(badLdC)
 	}
+
+	if n == 0 {
+		return
+	}
+
+	if len(a) < lda*(row-1)+col {
+		panic(shortA)
+	}
+	if len(c) < ldc*(n-1)+n {
+		panic(shortC)
+	}
+
 	if alpha == 0 {
 		if beta == 0 {
 			if ul == blas.Upper {
@@ -503,24 +522,34 @@ func (Implementation) Dsyr2k(ul blas.Uplo, tA blas.Transpose, n, k int, alpha fl
 	if k < 0 {
 		panic(kLT0)
 	}
-	if ldc < n {
-		panic(badLdC)
-	}
-	var row, col int
+	row, col := k, n
 	if tA == blas.NoTrans {
 		row, col = n, k
-	} else {
-		row, col = k, n
 	}
-	if lda*(row-1)+col > len(a) || lda < max(1, col) {
+	if lda < max(1, col) {
 		panic(badLdA)
 	}
-	if ldb*(row-1)+col > len(b) || ldb < max(1, col) {
+	if ldb < max(1, col) {
 		panic(badLdB)
 	}
-	if ldc*(n-1)+n > len(c) || ldc < max(1, n) {
+	if ldc < max(1, n) {
 		panic(badLdC)
 	}
+
+	if n == 0 {
+		return
+	}
+
+	if len(a) < lda*(row-1)+col {
+		panic(shortA)
+	}
+	if len(b) < ldb*(row-1)+col {
+		panic(shortB)
+	}
+	if len(c) < ldc*(n-1)+n {
+		panic(shortC)
+	}
+
 	if alpha == 0 {
 		if beta == 0 {
 			if ul == blas.Upper {
@@ -660,18 +689,28 @@ func (Implementation) Dtrmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 	if n < 0 {
 		panic(nLT0)
 	}
-	var k int
+	k := n
 	if s == blas.Left {
 		k = m
-	} else {
-		k = n
 	}
-	if lda*(k-1)+k > len(a) || lda < max(1, k) {
+	if lda < max(1, k) {
 		panic(badLdA)
 	}
-	if ldb*(m-1)+n > len(b) || ldb < max(1, n) {
+	if ldb < max(1, n) {
 		panic(badLdB)
 	}
+
+	if m == 0 || n == 0 {
+		return
+	}
+
+	if len(a) < lda*(k-1)+k {
+		panic(shortA)
+	}
+	if len(b) < ldb*(m-1)+n {
+		panic(shortB)
+	}
+
 	if alpha == 0 {
 		for i := 0; i < m; i++ {
 			btmp := b[i*ldb : i*ldb+n]

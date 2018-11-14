@@ -65,7 +65,7 @@ func (Implementation) Dgemm(tA, tB blas.Transpose, m, n, k int, alpha float64, a
 	}
 
 	// Quick return if possible.
-	if m == 0 || n == 0 || ((alpha == 0 || k == 0) && beta == 1) {
+	if m == 0 || n == 0 {
 		return
 	}
 
@@ -89,6 +89,11 @@ func (Implementation) Dgemm(tA, tB blas.Transpose, m, n, k int, alpha float64, a
 	}
 	if len(c) < (m-1)*ldc+n {
 		panic(shortC)
+	}
+
+	// Quick return if possible.
+	if (alpha == 0 || k == 0) && beta == 1 {
+		return
 	}
 
 	// scale c

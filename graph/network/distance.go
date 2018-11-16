@@ -1,4 +1,4 @@
-// Copyright ©2015 The Gonum Authors. All rights reserved.
+// Copyright ©2018 The Gonum Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -18,7 +18,7 @@ import (
 //
 // For directed graphs the incoming paths are used. Infinite distances are
 // not considered.
-func Closeness(g graph.Graph, p path.AllShortest) map[int64]float64 {
+func Closeness(g graph.Graph, p path.Between) map[int64]float64 {
 	nodes := graph.NodesOf(g.Nodes())
 	c := make(map[int64]float64, len(nodes))
 	for _, u := range nodes {
@@ -47,7 +47,7 @@ func Closeness(g graph.Graph, p path.AllShortest) map[int64]float64 {
 //
 // For directed graphs the incoming paths are used. Infinite distances are
 // not considered.
-func Farness(g graph.Graph, p path.AllShortest) map[int64]float64 {
+func Farness(g graph.Graph, p path.Between) map[int64]float64 {
 	nodes := graph.NodesOf(g.Nodes())
 	f := make(map[int64]float64, len(nodes))
 	for _, u := range nodes {
@@ -76,7 +76,7 @@ func Farness(g graph.Graph, p path.AllShortest) map[int64]float64 {
 //
 // For directed graphs the incoming paths are used. Infinite distances are
 // not considered.
-func Harmonic(g graph.Graph, p path.AllShortest) map[int64]float64 {
+func Harmonic(g graph.Graph, p path.Between) map[int64]float64 {
 	nodes := graph.NodesOf(g.Nodes())
 	h := make(map[int64]float64, len(nodes))
 	for i, u := range nodes {
@@ -107,7 +107,7 @@ func Harmonic(g graph.Graph, p path.AllShortest) map[int64]float64 {
 //
 // For directed graphs the incoming paths are used. Infinite distances are
 // not considered.
-func Residual(g graph.Graph, p path.AllShortest) map[int64]float64 {
+func Residual(g graph.Graph, p path.Between) map[int64]float64 {
 	nodes := graph.NodesOf(g.Nodes())
 	r := make(map[int64]float64, len(nodes))
 	for i, u := range nodes {

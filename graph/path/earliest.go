@@ -60,7 +60,8 @@ func (e *Earliest) Weight(uid, vid int64) float64 {
 	if !ok {
 		return math.Inf(1)
 	}
-	return float64(ev.earliest - e.at)
+
+	return float64(ev.earliest)
 }
 
 // EarliestArrivalFrom computes the earliest-arrival paths to all nodes reachable from u where

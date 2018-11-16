@@ -162,81 +162,6 @@ func (gen *generator) node(dst graph.NodeAdder, id string) graph.Node {
 	return n
 }
 
-// applyPortsToEdge applies the available port metadata from an ast.Edge
-// to a graph.Edge
-func applyPortsToEdge(from ast.Vertex, to *ast.Edge, edge graph.Edge) {
-	if ps, isPortSetter := edge.(PortSetter); isPortSetter {
-		if n, vertexIsNode := from.(*ast.Node); vertexIsNode {
-			if n.Port != nil {
-				err := ps.SetFromPort(n.Port.ID, n.Port.CompassPoint.String())
-				if err != nil {
-					panic(fmt.Errorf("unable to unmarshal edge port (:%s:%s)", n.Port.ID, n.Port.CompassPoint.String()))
-				}
-			}
-		}
-
-		if n, vertexIsNode := to.Vertex.(*ast.Node); vertexIsNode {
-			if n.Port != nil {
-				err := ps.SetToPort(n.Port.ID, n.Port.CompassPoint.String())
-				if err != nil {
-					panic(fmt.Errorf("unable to unmarshal edge DOT port (:%s:%s)", n.Port.ID, n.Port.CompassPoint.String()))
-				}
-			}
-		}
-	}
-}
-
-// pushSubgraph pushes the node start index of the active subgraph onto the
-// stack.
-func (gen *generator) pushSubgraph() {
-	gen.subStart = append(gen.subStart, len(gen.subNodes))
-}
-
-// popSubgraph pops the node start index of the active subgraph from the stack,
-// and returns the nodes processed since.
-func (gen *generator) popSubgraph() []graph.Node {
-	// Get nodes processed since the subgraph became active.
-	start := gen.subStart[len(gen.subStart)-1]
-	// TODO: Figure out a better way to store subgraph nodes, so that duplicates
-	// may not occur.
-	nodes := unique(gen.subNodes[start:])
-	// Remove subgraph from stack.
-	gen.subStart = gen.subStart[:len(gen.subStart)-1]
-	if len(gen.subStart) == 0 {
-		// Remove subgraph nodes when the bottom-most subgraph has been processed.
-		gen.subNodes = gen.subNodes[:0]
-	}
-	return nodes
-}
-
-// unique returns the set of unique nodes contained within ns.
-func unique(ns []graph.Node) []graph.Node {
-	var nodes []graph.Node
-	seen := make(set.Int64s)
-	for _, n := range ns {
-		id := n.ID()
-		if seen.Has(id) {
-			// skip duplicate node
-			continue
-		}
-		seen.Add(id)
-		nodes = append(nodes, n)
-	}
-	return nodes
-}
-
-// isInSubgraph reports whether the active context is within a subgraph, that is
-// to be used as a vertex of an edge.
-func (gen *generator) isInSubgraph() bool {
-	return len(gen.subStart) > 0
-}
-
-// appendSubgraphNode appends the given node to the slice of nodes processed
-// within the context of a subgraph.
-func (gen *generator) appendSubgraphNode(n graph.Node) {
-	gen.subNodes = append(gen.subNodes, n)
-}
-
 type graphGenerator struct{ generator }
 
 // addStmt adds the given statement to the graph.
@@ -303,6 +228,30 @@ func (gen *graphGenerator) addStmt(dst encoding.Builder, stmt ast.Stmt) {
 	}
 }
 
+// applyPortsToEdge applies the available port metadata from an ast.Edge
+// to a graph.Edge
+func applyPortsToEdge(from ast.Vertex, to *ast.Edge, edge graph.Edge) {
+	if ps, isPortSetter := edge.(PortSetter); isPortSetter {
+		if n, vertexIsNode := from.(*ast.Node); vertexIsNode {
+			if n.Port != nil {
+				err := ps.SetFromPort(n.Port.ID, n.Port.CompassPoint.String())
+				if err != nil {
+					panic(fmt.Errorf("unable to unmarshal edge port (:%s:%s)", n.Port.ID, n.Port.CompassPoint.String()))
+				}
+			}
+		}
+
+		if n, vertexIsNode := to.Vertex.(*ast.Node); vertexIsNode {
+			if n.Port != nil {
+				err := ps.SetToPort(n.Port.ID, n.Port.CompassPoint.String())
+				if err != nil {
+					panic(fmt.Errorf("unable to unmarshal edge DOT port (:%s:%s)", n.Port.ID, n.Port.CompassPoint.String()))
+				}
+			}
+		}
+	}
+}
+
 // addEdgeStmt adds the given edge statement to the graph.
 func (gen *graphGenerator) addEdgeStmt(dst encoding.Builder, stmt *ast.EdgeStmt) {
 	fs := gen.addVertex(dst, stmt.From)
@@ -352,6 +301,57 @@ func (gen *graphGenerator) addEdge(dst encoding.Builder, to *ast.Edge, attrs []*
 		}
 	}
 	return fs
+}
+
+// pushSubgraph pushes the node start index of the active subgraph onto the
+// stack.
+func (gen *generator) pushSubgraph() {
+	gen.subStart = append(gen.subStart, len(gen.subNodes))
+}
+
+// popSubgraph pops the node start index of the active subgraph from the stack,
+// and returns the nodes processed since.
+func (gen *generator) popSubgraph() []graph.Node {
+	// Get nodes processed since the subgraph became active.
+	start := gen.subStart[len(gen.subStart)-1]
+	// TODO: Figure out a better way to store subgraph nodes, so that duplicates
+	// may not occur.
+	nodes := unique(gen.subNodes[start:])
+	// Remove subgraph from stack.
+	gen.subStart = gen.subStart[:len(gen.subStart)-1]
+	if len(gen.subStart) == 0 {
+		// Remove subgraph nodes when the bottom-most subgraph has been processed.
+		gen.subNodes = gen.subNodes[:0]
+	}
+	return nodes
+}
+
+// unique returns the set of unique nodes contained within ns.
+func unique(ns []graph.Node) []graph.Node {
+	var nodes []graph.Node
+	seen := make(set.Int64s)
+	for _, n := range ns {
+		id := n.ID()
+		if seen.Has(id) {
+			// skip duplicate node
+			continue
+		}
+		seen.Add(id)
+		nodes = append(nodes, n)
+	}
+	return nodes
+}
+
+// isInSubgraph reports whether the active context is within a subgraph, that is
+// to be used as a vertex of an edge.
+func (gen *generator) isInSubgraph() bool {
+	return len(gen.subStart) > 0
+}
+
+// appendSubgraphNode appends the given node to the slice of nodes processed
+// within the context of a subgraph.
+func (gen *generator) appendSubgraphNode(n graph.Node) {
+	gen.subNodes = append(gen.subNodes, n)
 }
 
 type multigraphGenerator struct{ generator }

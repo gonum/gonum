@@ -135,151 +135,11 @@ type printer struct {
 	err error
 }
 
-func (p *printer) printFrontMatter(name string, needsIndent, isSubgraph, isDirected, isStrict bool) error {
-	p.buf.WriteString(p.prefix)
-	if needsIndent {
-		for i := 0; i < p.depth; i++ {
-			p.buf.WriteString(p.indent)
-		}
-	}
-
-	if !isSubgraph && isStrict {
-		p.buf.WriteString("strict ")
-	}
-
-	if isSubgraph {
-		p.buf.WriteString("sub")
-	} else if isDirected {
-		p.buf.WriteString("di")
-	}
-	p.buf.WriteString("graph")
-
-	if name != "" {
-		p.buf.WriteByte(' ')
-		p.buf.WriteString(name)
-	}
-
-	p.openBlock(" {")
-	return nil
-}
-
-func (p *printer) printBackMatter() {
-	p.closeBlock("}")
-}
-
-func (p *printer) writeNode(n graph.Node) {
-	p.buf.WriteString(nodeID(n))
-}
-
-func (p *printer) writePorts(port, cp string) {
-	if port != "" {
-		p.buf.WriteByte(':')
-		p.buf.WriteString(port)
-	}
-	if cp != "" {
-		p.buf.WriteByte(':')
-		p.buf.WriteString(cp)
-	}
-}
-
-func nodeID(n graph.Node) string {
-	switch n := n.(type) {
-	case Node:
-		return n.DOTID()
-	default:
-		return fmt.Sprint(n.ID())
-	}
-}
-
-func graphID(g interface{}, n graph.Node) string {
-	switch g := g.(type) {
-	case Node:
-		return g.DOTID()
-	default:
-		return nodeID(n)
-	}
-}
-
-func (p *printer) writeAttributeList(a encoding.Attributer) {
-	attributes := a.Attributes()
-	switch len(attributes) {
-	case 0:
-	case 1:
-		p.buf.WriteString(" [")
-		p.buf.WriteString(attributes[0].Key)
-		p.buf.WriteByte('=')
-		p.buf.WriteString(attributes[0].Value)
-		p.buf.WriteString("]")
-	default:
-		p.openBlock(" [")
-		for _, att := range attributes {
-			p.newline()
-			p.buf.WriteString(att.Key)
-			p.buf.WriteByte('=')
-			p.buf.WriteString(att.Value)
-		}
-		p.closeBlock("]")
-	}
-}
-
-var attType = []string{"graph", "node", "edge"}
-
-func (p *printer) writeAttributeComplex(ca Attributers) {
-	g, n, e := ca.DOTAttributers()
-	haveWrittenBlock := false
-	for i, a := range []encoding.Attributer{g, n, e} {
-		attributes := a.Attributes()
-		if len(attributes) == 0 {
-			continue
-		}
-		if haveWrittenBlock {
-			p.buf.WriteByte(';')
-		}
-		p.newline()
-		p.buf.WriteString(attType[i])
-		p.openBlock(" [")
-		for _, att := range attributes {
-			p.newline()
-			p.buf.WriteString(att.Key)
-			p.buf.WriteByte('=')
-			p.buf.WriteString(att.Value)
-		}
-		p.closeBlock("]")
-		haveWrittenBlock = true
-	}
-	if haveWrittenBlock {
-		p.buf.WriteString(";\n")
-	}
-}
-
-func (p *printer) newline() {
-	p.buf.WriteByte('\n')
-	p.buf.WriteString(p.prefix)
-	for i := 0; i < p.depth; i++ {
-		p.buf.WriteString(p.indent)
-	}
-}
-
-func (p *printer) openBlock(b string) {
-	p.buf.WriteString(b)
-	p.depth++
-}
-
-func (p *printer) closeBlock(b string) {
-	p.depth--
-	p.newline()
-	p.buf.WriteString(b)
-}
-
-type graphprinter struct {
-	printer
-	visited map[edge]bool
-}
-
 type edge struct {
 	inGraph  string
 	from, to int64
 }
+
 
 func (p *graphprinter) print(g graph.Graph, name string, needsIndent, isSubgraph bool) error {
 	if name == "" {
@@ -426,6 +286,147 @@ func (p *graphprinter) print(g graph.Graph, name string, needsIndent, isSubgraph
 	p.printBackMatter()
 
 	return nil
+}
+
+func (p *printer) printFrontMatter(name string, needsIndent, isSubgraph, isDirected, isStrict bool) error {
+	p.buf.WriteString(p.prefix)
+	if needsIndent {
+		for i := 0; i < p.depth; i++ {
+			p.buf.WriteString(p.indent)
+		}
+	}
+
+	if !isSubgraph && isStrict {
+		p.buf.WriteString("strict ")
+	}
+
+	if isSubgraph {
+		p.buf.WriteString("sub")
+	} else if isDirected {
+		p.buf.WriteString("di")
+	}
+	p.buf.WriteString("graph")
+
+	if name != "" {
+		p.buf.WriteByte(' ')
+		p.buf.WriteString(name)
+	}
+
+	p.openBlock(" {")
+	return nil
+}
+
+func (p *printer) printBackMatter() {
+	p.closeBlock("}")
+}
+
+func (p *printer) writeNode(n graph.Node) {
+	p.buf.WriteString(nodeID(n))
+}
+
+func (p *printer) writePorts(port, cp string) {
+	if port != "" {
+		p.buf.WriteByte(':')
+		p.buf.WriteString(port)
+	}
+	if cp != "" {
+		p.buf.WriteByte(':')
+		p.buf.WriteString(cp)
+	}
+}
+
+func nodeID(n graph.Node) string {
+	switch n := n.(type) {
+	case Node:
+		return n.DOTID()
+	default:
+		return fmt.Sprint(n.ID())
+	}
+}
+
+func graphID(g interface{}, n graph.Node) string {
+	switch g := g.(type) {
+	case Node:
+		return g.DOTID()
+	default:
+		return nodeID(n)
+	}
+}
+
+func (p *printer) writeAttributeList(a encoding.Attributer) {
+	attributes := a.Attributes()
+	switch len(attributes) {
+	case 0:
+	case 1:
+		p.buf.WriteString(" [")
+		p.buf.WriteString(attributes[0].Key)
+		p.buf.WriteByte('=')
+		p.buf.WriteString(attributes[0].Value)
+		p.buf.WriteString("]")
+	default:
+		p.openBlock(" [")
+		for _, att := range attributes {
+			p.newline()
+			p.buf.WriteString(att.Key)
+			p.buf.WriteByte('=')
+			p.buf.WriteString(att.Value)
+		}
+		p.closeBlock("]")
+	}
+}
+
+var attType = []string{"graph", "node", "edge"}
+
+func (p *printer) writeAttributeComplex(ca Attributers) {
+	g, n, e := ca.DOTAttributers()
+	haveWrittenBlock := false
+	for i, a := range []encoding.Attributer{g, n, e} {
+		attributes := a.Attributes()
+		if len(attributes) == 0 {
+			continue
+		}
+		if haveWrittenBlock {
+			p.buf.WriteByte(';')
+		}
+		p.newline()
+		p.buf.WriteString(attType[i])
+		p.openBlock(" [")
+		for _, att := range attributes {
+			p.newline()
+			p.buf.WriteString(att.Key)
+			p.buf.WriteByte('=')
+			p.buf.WriteString(att.Value)
+		}
+		p.closeBlock("]")
+		haveWrittenBlock = true
+	}
+	if haveWrittenBlock {
+		p.buf.WriteString(";\n")
+	}
+}
+
+func (p *printer) newline() {
+	p.buf.WriteByte('\n')
+	p.buf.WriteString(p.prefix)
+	for i := 0; i < p.depth; i++ {
+		p.buf.WriteString(p.indent)
+	}
+}
+
+func (p *printer) openBlock(b string) {
+	p.buf.WriteString(b)
+	p.depth++
+}
+
+func (p *printer) closeBlock(b string) {
+	p.depth--
+	p.newline()
+	p.buf.WriteString(b)
+}
+
+type graphprinter struct {
+	printer
+	visited map[edge]bool
 }
 
 type multiprinter struct {

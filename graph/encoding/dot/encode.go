@@ -55,7 +55,7 @@ type Structurer interface {
 	Structure() []Graph
 }
 
-// Structurer represents a graph.Multigraph that can define sub-multigraphs.
+// MultiStructurer represents a graph.Multigraph that can define subgraphs.
 type MultiStructurer interface {
 	Structure() []Multigraph
 }
@@ -66,6 +66,7 @@ type Graph interface {
 	DOTID() string
 }
 
+// Multigraph wraps named graph.Multigraph values.
 type Multigraph interface {
 	graph.Multigraph
 	DOTID() string
@@ -76,7 +77,7 @@ type Subgrapher interface {
 	Subgraph() graph.Graph
 }
 
-// MultiSubgrapher wraps graph.Node values that represent sub-multigraphs.
+// MultiSubgrapher wraps graph.Node values that represent subgraphs.
 type MultiSubgrapher interface {
 	Subgraph() graph.Multigraph
 }
@@ -92,7 +93,7 @@ type MultiSubgrapher interface {
 // implementation of the Node, Attributer, Porter, Attributers, Structurer,
 // Subgrapher and Graph interfaces.
 func Marshal(g graph.Graph, name, prefix, indent string) ([]byte, error) {
-	var p graphprinter
+	var p simpleGraphPrinter
 	p.indent = indent
 	p.prefix = prefix
 	p.visited = make(map[edge]bool)
@@ -114,7 +115,7 @@ func Marshal(g graph.Graph, name, prefix, indent string) ([]byte, error) {
 // implementation of the Node, Attributer, Porter, Attributers, Structurer,
 // MultiSubgrapher and Multigraph interfaces.
 func MarshalMulti(g graph.Multigraph, name, prefix, indent string) ([]byte, error) {
-	var p multiprinter
+	var p multiGraphPrinter
 	p.indent = indent
 	p.prefix = prefix
 	p.visited = make(map[line]bool)
@@ -141,7 +142,7 @@ type edge struct {
 }
 
 
-func (p *graphprinter) print(g graph.Graph, name string, needsIndent, isSubgraph bool) error {
+func (p *simpleGraphPrinter) print(g graph.Graph, name string, needsIndent, isSubgraph bool) error {
 	if name == "" {
 		if g, ok := g.(Graph); ok {
 			name = g.DOTID()
@@ -424,12 +425,12 @@ func (p *printer) closeBlock(b string) {
 	p.buf.WriteString(b)
 }
 
-type graphprinter struct {
+type simpleGraphPrinter struct {
 	printer
 	visited map[edge]bool
 }
 
-type multiprinter struct {
+type multiGraphPrinter struct {
 	printer
 	visited map[line]bool
 }
@@ -439,7 +440,7 @@ type line struct {
 	id      int64
 }
 
-func (p *multiprinter) print(g graph.Multigraph, name string, needsIndent, isSubgraph bool) error {
+func (p *multiGraphPrinter) print(g graph.Multigraph, name string, needsIndent, isSubgraph bool) error {
 	if name == "" {
 		if g, ok := g.(Multigraph); ok {
 			name = g.DOTID()

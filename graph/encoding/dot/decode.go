@@ -75,7 +75,7 @@ func copyGraph(dst encoding.Builder, src *ast.Graph) (err error) {
 			panic(e)
 		}
 	}()
-	gen := &graphGenerator{
+	gen := &simpleGraph{
 		generator: generator{
 			directed: src.Directed,
 			ids:      make(map[string]graph.Node),
@@ -105,7 +105,7 @@ func copyMultigraph(dst encoding.MultiBuilder, src *ast.Graph) (err error) {
 			panic(e)
 		}
 	}()
-	gen := &multigraphGenerator{
+	gen := &multiGraph{
 		generator: generator{
 			directed: src.Directed,
 			ids:      make(map[string]graph.Node),
@@ -162,10 +162,10 @@ func (gen *generator) node(dst graph.NodeAdder, id string) graph.Node {
 	return n
 }
 
-type graphGenerator struct{ generator }
+type simpleGraph struct{ generator }
 
 // addStmt adds the given statement to the graph.
-func (gen *graphGenerator) addStmt(dst encoding.Builder, stmt ast.Stmt) {
+func (gen *simpleGraph) addStmt(dst encoding.Builder, stmt ast.Stmt) {
 	switch stmt := stmt.(type) {
 	case *ast.NodeStmt:
 		n, ok := gen.node(dst, stmt.Node.ID).(encoding.AttributeSetter)
@@ -253,7 +253,7 @@ func applyPortsToEdge(from ast.Vertex, to *ast.Edge, edge graph.Edge) {
 }
 
 // addEdgeStmt adds the given edge statement to the graph.
-func (gen *graphGenerator) addEdgeStmt(dst encoding.Builder, stmt *ast.EdgeStmt) {
+func (gen *simpleGraph) addEdgeStmt(dst encoding.Builder, stmt *ast.EdgeStmt) {
 	fs := gen.addVertex(dst, stmt.From)
 	ts := gen.addEdge(dst, stmt.To, stmt.Attrs)
 	for _, f := range fs {
@@ -267,7 +267,7 @@ func (gen *graphGenerator) addEdgeStmt(dst encoding.Builder, stmt *ast.EdgeStmt)
 }
 
 // addVertex adds the given vertex to the graph, and returns its set of nodes.
-func (gen *graphGenerator) addVertex(dst encoding.Builder, v ast.Vertex) []graph.Node {
+func (gen *simpleGraph) addVertex(dst encoding.Builder, v ast.Vertex) []graph.Node {
 	switch v := v.(type) {
 	case *ast.Node:
 		n := gen.node(dst, v.ID)
@@ -284,7 +284,7 @@ func (gen *graphGenerator) addVertex(dst encoding.Builder, v ast.Vertex) []graph
 }
 
 // addEdge adds the given edge to the graph, and returns its set of nodes.
-func (gen *graphGenerator) addEdge(dst encoding.Builder, to *ast.Edge, attrs []*ast.Attr) []graph.Node {
+func (gen *simpleGraph) addEdge(dst encoding.Builder, to *ast.Edge, attrs []*ast.Attr) []graph.Node {
 	if !gen.directed && to.Directed {
 		panic(fmt.Errorf("directed edge to %v in undirected graph", to.Vertex))
 	}
@@ -354,10 +354,10 @@ func (gen *generator) appendSubgraphNode(n graph.Node) {
 	gen.subNodes = append(gen.subNodes, n)
 }
 
-type multigraphGenerator struct{ generator }
+type multiGraph struct{ generator }
 
 // addStmt adds the given statement to the multigraph.
-func (gen *multigraphGenerator) addStmt(dst encoding.MultiBuilder, stmt ast.Stmt) {
+func (gen *multiGraph) addStmt(dst encoding.MultiBuilder, stmt ast.Stmt) {
 	switch stmt := stmt.(type) {
 	case *ast.NodeStmt:
 		n, ok := gen.node(dst, stmt.Node.ID).(encoding.AttributeSetter)
@@ -421,7 +421,7 @@ func (gen *multigraphGenerator) addStmt(dst encoding.MultiBuilder, stmt ast.Stmt
 }
 
 // addEdgeStmt adds the given edge statement to the multigraph.
-func (gen *multigraphGenerator) addEdgeStmt(dst encoding.MultiBuilder, stmt *ast.EdgeStmt) {
+func (gen *multiGraph) addEdgeStmt(dst encoding.MultiBuilder, stmt *ast.EdgeStmt) {
 	fs := gen.addVertex(dst, stmt.From)
 	ts := gen.addLine(dst, stmt.To, stmt.Attrs)
 	for _, f := range fs {
@@ -435,7 +435,7 @@ func (gen *multigraphGenerator) addEdgeStmt(dst encoding.MultiBuilder, stmt *ast
 }
 
 // addVertex adds the given vertex to the multigraph, and returns its set of nodes.
-func (gen *multigraphGenerator) addVertex(dst encoding.MultiBuilder, v ast.Vertex) []graph.Node {
+func (gen *multiGraph) addVertex(dst encoding.MultiBuilder, v ast.Vertex) []graph.Node {
 	switch v := v.(type) {
 	case *ast.Node:
 		n := gen.node(dst, v.ID)
@@ -452,7 +452,7 @@ func (gen *multigraphGenerator) addVertex(dst encoding.MultiBuilder, v ast.Verte
 }
 
 // addLine adds the given edge to the multigraph, and returns its set of nodes.
-func (gen *multigraphGenerator) addLine(dst encoding.MultiBuilder, to *ast.Edge, attrs []*ast.Attr) []graph.Node {
+func (gen *multiGraph) addLine(dst encoding.MultiBuilder, to *ast.Edge, attrs []*ast.Attr) []graph.Node {
 	if !gen.directed && to.Directed {
 		panic(fmt.Errorf("directed edge to %v in undirected graph", to.Vertex))
 	}

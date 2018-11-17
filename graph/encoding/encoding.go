@@ -12,7 +12,7 @@ type Builder interface {
 	graph.Builder
 }
 
-// Builder is a graph that can have user-defined nodes and edges added.
+// MultiBuilder is a graph that can have user-defined nodes and edges added.
 type MultiBuilder interface {
 	graph.Multigraph
 	graph.MultigraphBuilder

@@ -55,33 +55,24 @@ import (
 //
 // Dsytrd is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dsytrd(uplo blas.Uplo, n int, a []float64, lda int, d, e, tau, work []float64, lwork int) {
-	checkMatrix(n, n, a, lda)
-	if len(d) < n {
-		panic(badD)
-	}
-	if len(e) < n-1 {
-		panic(badE)
-	}
-	if len(tau) < n-1 {
-		panic(badTau)
-	}
-	if len(work) < lwork {
-		panic(shortWork)
-	}
-	if lwork != -1 && lwork < 1 {
-		panic(badWork)
-	}
-
-	var upper bool
 	var opts string
 	switch uplo {
 	case blas.Upper:
-		upper = true
 		opts = "U"
 	case blas.Lower:
 		opts = "L"
 	default:
 		panic(badUplo)
+	}
+	switch {
+	case n < 0:
+		panic(nLT0)
+	case lda < max(1, n):
+		panic(badLdA)
+	case lwork < 1 && lwork != -1:
+		panic(badWork)
+	case len(work) < max(1, lwork):
+		panic(shortWork)
 	}
 
 	if n == 0 {
@@ -96,21 +87,29 @@ func (impl Implementation) Dsytrd(uplo blas.Uplo, n int, a []float64, lda int, d
 		return
 	}
 
+	switch {
+	case len(a) < (n-1)*lda+n:
+		panic("lapack: insufficient length of a")
+	case len(d) < n:
+		panic(badD)
+	case len(e) < n-1:
+		panic(badE)
+	case len(tau) < n-1:
+		panic(badTau)
+	}
+
 	nx := n
+	iws := 1
 	bi := blas64.Implementation()
 	var ldwork int
 	if 1 < nb && nb < n {
 		// Determine when to cross over from blocked to unblocked code. The last
 		// block is always handled by unblocked code.
-		opts := "L"
-		if upper {
-			opts = "U"
-		}
 		nx = max(nb, impl.Ilaenv(3, "DSYTRD", opts, n, -1, -1, -1))
 		if nx < n {
 			// Determine if workspace is large enough for blocked code.
 			ldwork = nb
-			iws := n * ldwork
+			iws = n * ldwork
 			if lwork < iws {
 				// Not enough workspace to use optimal nb: determine the minimum
 				// value of nb and reduce nb or force use of unblocked code by
@@ -129,7 +128,7 @@ func (impl Implementation) Dsytrd(uplo blas.Uplo, n int, a []float64, lda int, d
 	}
 	ldwork = nb
 
-	if upper {
+	if uplo == blas.Upper {
 		// Reduce the upper triangle of A. Columns 0:kk are handled by the
 		// unblocked method.
 		var i int
@@ -174,5 +173,5 @@ func (impl Implementation) Dsytrd(uplo blas.Uplo, n int, a []float64, lda int, d
 		// Use unblocked code to reduce the last or only block.
 		impl.Dsytd2(uplo, n-i, a[i*lda+i:], lda, d[i:], e[i:], tau[i:])
 	}
-	work[0] = float64(lworkopt)
+	work[0] = float64(iws)
 }

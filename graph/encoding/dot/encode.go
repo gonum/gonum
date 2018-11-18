@@ -284,7 +284,7 @@ func (p *simpleGraphPrinter) print(g graph.Graph, name string, needsIndent, isSu
 		}
 	}
 
-	p.printBackMatter()
+	p.closeBlock("}")
 
 	return nil
 }
@@ -315,10 +315,6 @@ func (p *printer) printFrontMatter(name string, needsIndent, isSubgraph, isDirec
 
 	p.openBlock(" {")
 	return nil
-}
-
-func (p *printer) printBackMatter() {
-	p.closeBlock("}")
 }
 
 func (p *printer) writeNode(n graph.Node) {
@@ -582,7 +578,7 @@ func (p *multiGraphPrinter) print(g graph.Multigraph, name string, needsIndent, 
 		}
 	}
 
-	p.printBackMatter()
+	p.closeBlock("}")
 
 	return nil
 }

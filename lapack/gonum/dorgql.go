@@ -41,18 +41,15 @@ func (impl Implementation) Dorgql(m, n, k int, a []float64, lda int, tau, work [
 		panic(kLT0)
 	case k > n:
 		panic(kGTN)
+	case lda < max(1, n):
+		panic(badLdA)
 	case lwork < max(1, n) && lwork != -1:
 		panic(badWork)
-	case len(work) < lwork:
+	case len(work) < max(1, lwork):
 		panic(shortWork)
 	}
-	if lwork != -1 {
-		checkMatrix(m, n, a, lda)
-		if len(tau) < k {
-			panic(badTau)
-		}
-	}
 
+	// Quick return if possible.
 	if n == 0 {
 		work[0] = 1
 		return
@@ -64,10 +61,17 @@ func (impl Implementation) Dorgql(m, n, k int, a []float64, lda int, tau, work [
 		return
 	}
 
+	if len(a) < (m-1)*lda+n {
+		panic("lapack: insufficient length of a")
+	}
+	if len(tau) < k {
+		panic(badTau)
+	}
+
 	nbmin := 2
 	var nx, ldwork int
 	iws := n
-	if nb > 1 && nb < k {
+	if 1 < nb && nb < k {
 		// Determine when to cross over from blocked to unblocked code.
 		nx = max(0, impl.Ilaenv(3, "DORGQL", " ", m, n, k, -1))
 		if nx < k {
@@ -84,7 +88,7 @@ func (impl Implementation) Dorgql(m, n, k int, a []float64, lda int, tau, work [
 	}
 
 	var kk int
-	if nb >= nbmin && nb < k && nx < k {
+	if nbmin <= nb && nb < k && nx < k {
 		// Use blocked code after the first block. The last kk columns are handled
 		// by the block method.
 		kk = min(k, ((k-nx+nb-1)/nb)*nb)

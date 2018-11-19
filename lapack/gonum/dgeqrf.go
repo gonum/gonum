@@ -22,28 +22,40 @@ import (
 //
 // tau must have length at least min(m,n), and this function will panic otherwise.
 func (impl Implementation) Dgeqrf(m, n int, a []float64, lda int, tau, work []float64, lwork int) {
-	if len(work) < max(1, lwork) {
+	switch {
+	case m < 0:
+		panic(mLT0)
+	case n < 0:
+		panic(nLT0)
+	case lda < max(1, n):
+		panic(badLdA)
+	case lwork < max(1, n) && lwork != -1:
+		panic(badWork)
+	case len(work) < max(1, lwork):
 		panic(shortWork)
 	}
-	// nb is the optimal blocksize, i.e. the number of columns transformed at a time.
-	nb := impl.Ilaenv(1, "DGEQRF", " ", m, n, -1, -1)
-	lworkopt := max(1, n*nb)
-	if lwork == -1 {
-		work[0] = float64(lworkopt)
-		return
-	}
-	checkMatrix(m, n, a, lda)
-	if lwork < n {
-		panic(badWork)
-	}
+
+	// Quick return if possible.
 	k := min(m, n)
-	if len(tau) < k {
-		panic(badTau)
-	}
 	if k == 0 {
 		work[0] = 1
 		return
 	}
+
+	// nb is the optimal blocksize, i.e. the number of columns transformed at a time.
+	nb := impl.Ilaenv(1, "DGEQRF", " ", m, n, -1, -1)
+	if lwork == -1 {
+		work[0] = float64(n * nb)
+		return
+	}
+
+	if len(a) < (m-1)*lda+n {
+		panic("lapack: insufficient length of a")
+	}
+	if len(tau) < k {
+		panic(badTau)
+	}
+
 	nbmin := 2 // Minimal block size.
 	var nx int // Use unblocked (unless changed in the next for loop)
 	iws := n
@@ -64,9 +76,7 @@ func (impl Implementation) Dgeqrf(m, n int, a []float64, lda int, tau, work []fl
 			}
 		}
 	}
-	for i := range work {
-		work[i] = 0
-	}
+
 	// Compute QR using a blocked algorithm.
 	var i int
 	if nbmin <= nb && nb < k && nx < k {
@@ -94,5 +104,5 @@ func (impl Implementation) Dgeqrf(m, n int, a []float64, lda int, tau, work []fl
 	if i < k {
 		impl.Dgeqr2(m-i, n-i, a[i*lda+i:], lda, tau[i:], work)
 	}
-	work[0] = float64(lworkopt)
+	work[0] = float64(iws)
 }

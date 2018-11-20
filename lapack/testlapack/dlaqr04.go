@@ -318,7 +318,7 @@ func testDlaqr04(t *testing.T, impl Dlaqr04er, test dlaqr04Test, optwork bool, r
 	var work []float64
 	if optwork {
 		work = nanSlice(1)
-		impl.Dlaqr04(wantt, wantz, n, ilo, ihi, nil, 0, nil, nil, iloz, ihiz, nil, 0, work, -1, recur)
+		impl.Dlaqr04(wantt, wantz, n, ilo, ihi, h.Data, h.Stride, wr, wi, iloz, ihiz, z.Data, z.Stride, work, -1, recur)
 		work = nanSlice(int(work[0]))
 	} else {
 		work = nanSlice(max(1, n))

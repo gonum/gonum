@@ -108,7 +108,8 @@ func testDtrevc3(t *testing.T, impl Dtrevc3er, side lapack.EVSide, howmny lapack
 
 	work := make([]float64, max(1, 3*n))
 	if optwork {
-		impl.Dtrevc3(side, howmny, nil, n, nil, 1, nil, 1, nil, 1, mWant, work, -1)
+		impl.Dtrevc3(side, howmny, selected, n, tmat.Data, tmat.Stride,
+			vl.Data, vl.Stride, vr.Data, vr.Stride, mWant, work, -1)
 		work = make([]float64, int(work[0]))
 	}
 

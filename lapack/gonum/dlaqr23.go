@@ -137,14 +137,14 @@ func (impl Implementation) Dlaqr23(wantt, wantz bool, n, ktop, kbot, nw int, h [
 	lwkopt := max(1, 2*nw)
 	if jw > 2 {
 		// Workspace query call to Dgehrd.
-		impl.Dgehrd(jw, 0, jw-2, nil, 0, nil, work, -1)
+		impl.Dgehrd(jw, 0, jw-2, t, ldt, work, work, -1)
 		lwk1 := int(work[0])
 		// Workspace query call to Dormhr.
-		impl.Dormhr(blas.Right, blas.NoTrans, jw, jw, 0, jw-2, nil, 0, nil, nil, 0, work, -1)
+		impl.Dormhr(blas.Right, blas.NoTrans, jw, jw, 0, jw-2, t, ldt, work, v, ldv, work, -1)
 		lwk2 := int(work[0])
 		if recur > 0 {
 			// Workspace query call to Dlaqr04.
-			impl.Dlaqr04(true, true, jw, 0, jw-1, nil, 0, nil, nil, 0, jw-1, nil, 0, work, -1, recur-1)
+			impl.Dlaqr04(true, true, jw, 0, jw-1, t, ldt, sr, si, 0, jw-1, v, ldv, work, -1, recur-1)
 			lwk3 := int(work[0])
 			// Optimal workspace.
 			lwkopt = max(jw+max(lwk1, lwk2), lwk3)

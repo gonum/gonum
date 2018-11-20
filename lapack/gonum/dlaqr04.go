@@ -217,8 +217,8 @@ func (impl Implementation) Dlaqr04(wantt, wantz bool, n, ilo, ihi int, h []float
 	nsr = max(2, nsr&^1)
 
 	// Workspace query call to Dlaqr23.
-	impl.Dlaqr23(wantt, wantz, n, ilo, ihi, nwr+1, nil, 0, iloz, ihiz, nil, 0,
-		nil, nil, nil, 0, n, nil, 0, n, nil, 0, work, -1, recur)
+	impl.Dlaqr23(wantt, wantz, n, ilo, ihi, nwr+1, h, ldh, iloz, ihiz, z, ldz,
+		wr, wi, h, ldh, n, h, ldh, n, h, ldh, work, -1, recur)
 	// Optimal workspace is max(Dlaqr5, Dlaqr23).
 	lwkopt := max(3*nsr/2, int(work[0]))
 	// Quick return in case of workspace query.

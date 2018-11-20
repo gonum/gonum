@@ -181,7 +181,7 @@ func (impl Implementation) Dhseqr(job lapack.SchurJob, compz lapack.SchurComp, n
 
 	// Quick return in case of a workspace query.
 	if lwork == -1 {
-		impl.Dlaqr04(wantt, wantz, n, ilo, ihi, nil, 0, nil, nil, ilo, ihi, nil, 0, work, -1, 1)
+		impl.Dlaqr04(wantt, wantz, n, ilo, ihi, h, ldh, wr, wi, ilo, ihi, z, ldz, work, -1, 1)
 		work[0] = math.Max(float64(n), work[0])
 		return 0
 	}

@@ -117,19 +117,19 @@ func (impl Implementation) Dgeev(jobvl lapack.LeftEVJob, jobvr lapack.RightEVJob
 	if wantvl || wantvr {
 		maxwrk = max(maxwrk, 2*n+(n-1)*impl.Ilaenv(1, "DORGHR", " ", n, 1, n, -1))
 		impl.Dhseqr(lapack.EigenvaluesAndSchur, lapack.SchurOrig, n, 0, n-1,
-			nil, 1, nil, nil, nil, 1, work, -1)
+			a, lda, wr, wi, vl, ldvl, work, -1)
 		maxwrk = max(maxwrk, max(n+1, n+int(work[0])))
 		side := lapack.EVLeft
 		if wantvr {
 			side = lapack.EVRight
 		}
-		impl.Dtrevc3(side, lapack.EVAllMulQ, nil, n, nil, 1, nil, 1, nil, 1,
+		impl.Dtrevc3(side, lapack.EVAllMulQ, nil, n, a, lda, vl, ldvl, vr, ldvr,
 			n, work, -1)
 		maxwrk = max(maxwrk, n+int(work[0]))
 		maxwrk = max(maxwrk, 4*n)
 	} else {
 		impl.Dhseqr(lapack.EigenvaluesOnly, lapack.SchurNone, n, 0, n-1,
-			nil, 1, nil, nil, nil, 1, work, -1)
+			a, lda, wr, wi, vr, ldvr, work, -1)
 		maxwrk = max(maxwrk, max(n+1, n+int(work[0])))
 	}
 	maxwrk = max(maxwrk, minwrk)

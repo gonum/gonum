@@ -197,6 +197,9 @@ type AllShortest struct {
 }
 
 func newAllShortest(nodes []graph.Node, forward bool) AllShortest {
+	if len(nodes) == 0 {
+		return AllShortest{}
+	}
 	indexOf := make(map[int64]int, len(nodes))
 	for i, n := range nodes {
 		indexOf[n.ID()] = i

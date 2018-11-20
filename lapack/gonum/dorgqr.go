@@ -35,8 +35,6 @@ func (impl Implementation) Dorgqr(m, n, k int, a []float64, lda int, tau, work [
 		panic(kGTN)
 	case m < n:
 		panic(mLTN)
-	case lda < max(1, n):
-		panic(badLdA)
 	case lwork < max(1, n) && lwork != -1:
 		panic(badWork)
 	case len(work) < max(1, lwork):
@@ -55,10 +53,12 @@ func (impl Implementation) Dorgqr(m, n, k int, a []float64, lda int, tau, work [
 		return
 	}
 
-	if len(a) < (m-1)*lda+n {
+	switch {
+	case lda < max(1, n):
+		panic(badLdA)
+	case len(a) < (m-1)*lda+n:
 		panic("lapack: insuffcient length of a")
-	}
-	if len(tau) < k {
+	case len(tau) < k:
 		panic(badTau)
 	}
 

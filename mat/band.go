@@ -107,6 +107,7 @@ func (t TransposeBand) UntransposeBand() Banded {
 // BandDense will be reflected in data. If neither of these is true, NewBandDense
 // will panic. kl must be at least zero and less r, and ku must be at least zero and
 // less than c, otherwise NewBandDense will panic.
+// NewBandDense will panic if either r or c is zero.
 //
 // The data must be arranged in row-major order constructed by removing the zeros
 // from the rows outside the band and aligning the diagonals. For example, the matrix
@@ -126,7 +127,10 @@ func (t TransposeBand) UntransposeBand() Banded {
 // which is passed to NewBandDense as []float64{*, 1, 2, 3, 4, ...} with kl=1 and ku=2.
 // Only the values in the band portion of the matrix are used.
 func NewBandDense(r, c, kl, ku int, data []float64) *BandDense {
-	if r < 0 || c < 0 || kl < 0 || ku < 0 {
+	if r <= 0 || c <= 0 || kl < 0 || ku < 0 {
+		if r == 0 || c == 0 {
+			panic(ErrZeroLength)
+		}
 		panic("mat: negative dimension")
 	}
 	if kl+1 > r || ku+1 > c {

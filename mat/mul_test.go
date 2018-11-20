@@ -97,7 +97,7 @@ func TestMulTypes(t *testing.T) {
 
 		// Check that it panics if it is supposed to
 		if test.Panics {
-			c := NewDense(0, 0, nil)
+			c := &Dense{}
 			fn := func() {
 				c.Mul(a, b)
 			}
@@ -125,7 +125,7 @@ func TestMulTypes(t *testing.T) {
 		ccomp := matComp{r: ar, c: bc, data: cvecCopy}
 
 		// Do normal multiply with empty dense
-		d := NewDense(0, 0, nil)
+		d := &Dense{}
 
 		testMul(t, a, b, d, acomp, bcomp, ccomp, false, "zero receiver")
 

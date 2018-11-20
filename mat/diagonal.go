@@ -25,8 +25,11 @@ var (
 // has non-zero terms on the diagonal.
 type Diagonal interface {
 	Matrix
-	// Diag returns the number of rows/columns in the matrix
+	// Diag and Symmetric return the number of rows/columns in
+	// the matrix. Both methods are included to allow diagonal
+	// matrices to be used in functions taking symmetric inputs.
 	Diag() int
+	Symmetric() int
 }
 
 // MutableDiagonal is a Diagonal matrix whose elements can be set.

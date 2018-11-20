@@ -111,12 +111,16 @@ func (t TransposeTri) UntransposeTri() Triangular {
 // a new slice is allocated for the backing slice. If len(data) == n*n, data is
 // used as the backing slice, and changes to the elements of the returned TriDense
 // will be reflected in data. If neither of these is true, NewTriDense will panic.
+// NewTriDense will panic if n is zero.
 //
 // The data must be arranged in row-major order, i.e. the (i*c + j)-th
 // element in the data slice is the {i, j}-th element in the matrix.
 // Only the values in the triangular portion corresponding to kind are used.
 func NewTriDense(n int, kind TriKind, data []float64) *TriDense {
-	if n < 0 {
+	if n <= 0 {
+		if n == 0 {
+			panic(ErrZeroLength)
+		}
 		panic("mat: negative dimension")
 	}
 	if data != nil && len(data) != n*n {

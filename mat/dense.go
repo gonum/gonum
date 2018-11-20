@@ -38,11 +38,15 @@ type Dense struct {
 // a new slice is allocated for the backing slice. If len(data) == r*c, data is
 // used as the backing slice, and changes to the elements of the returned Dense
 // will be reflected in data. If neither of these is true, NewDense will panic.
+// NewDense will panic if either r or c is zero.
 //
 // The data must be arranged in row-major order, i.e. the (i*c + j)-th
 // element in the data slice is the {i, j}-th element in the matrix.
 func NewDense(r, c int, data []float64) *Dense {
-	if r < 0 || c < 0 {
+	if r <= 0 || c <= 0 {
+		if r == 0 || c == 0 {
+			panic(ErrZeroLength)
+		}
 		panic("mat: negative dimension")
 	}
 	if data != nil && r*c != len(data) {

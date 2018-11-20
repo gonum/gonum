@@ -55,12 +55,16 @@ type MutableSymmetric interface {
 // a new slice is allocated for the backing slice. If len(data) == n*n, data is
 // used as the backing slice, and changes to the elements of the returned SymDense
 // will be reflected in data. If neither of these is true, NewSymDense will panic.
+// NewSymDense will panic if n is zero.
 //
 // The data must be arranged in row-major order, i.e. the (i*c + j)-th
 // element in the data slice is the {i, j}-th element in the matrix.
 // Only the values in the upper triangular portion of the matrix are used.
 func NewSymDense(n int, data []float64) *SymDense {
-	if n < 0 {
+	if n <= 0 {
+		if n == 0 {
+			panic(ErrZeroLength)
+		}
 		panic("mat: negative dimension")
 	}
 	if data != nil && n*n != len(data) {

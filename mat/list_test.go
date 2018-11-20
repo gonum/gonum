@@ -315,7 +315,10 @@ func makeRandOf(a Matrix, m, n int) Matrix {
 	case Untransposer:
 		rMatrix = retranspose(a, makeRandOf(t.Untranspose(), n, m))
 	case *Dense, *basicMatrix:
-		mat := NewDense(m, n, nil)
+		var mat = &Dense{}
+		if m != 0 && n != 0 {
+			mat = NewDense(m, n, nil)
+		}
 		for i := 0; i < m; i++ {
 			for j := 0; j < n; j++ {
 				mat.Set(i, j, rand.NormFloat64())
@@ -363,7 +366,10 @@ func makeRandOf(a Matrix, m, n int) Matrix {
 		if m != n {
 			panic("bad size")
 		}
-		mat := NewSymDense(n, nil)
+		mat := &SymDense{}
+		if n != 0 {
+			mat = NewSymDense(n, nil)
+		}
 		for i := 0; i < m; i++ {
 			for j := i; j < n; j++ {
 				mat.SetSym(i, j, rand.NormFloat64())
@@ -384,6 +390,14 @@ func makeRandOf(a Matrix, m, n int) Matrix {
 			triKind = t.triKind()
 		case *basicTriangular:
 			triKind = (*TriDense)(t).triKind()
+		}
+
+		if n == 0 {
+			uplo := blas.Upper
+			if triKind == Lower {
+				uplo = blas.Lower
+			}
+			return returnAs(&TriDense{mat: blas64.Triangular{Uplo: uplo}}, t)
 		}
 
 		mat := NewTriDense(n, triKind, nil)
@@ -604,7 +618,7 @@ var testMatrices = []Matrix{
 	&SymDense{},
 	NewTriDense(3, true, nil),
 	NewTriDense(3, false, nil),
-	NewVecDense(0, nil),
+	&VecDense{mat: blas64.Vector{Inc: 1}},
 	&DiagDense{},
 	&basicVector{},
 	&VecDense{mat: blas64.Vector{Inc: 10}},
@@ -618,7 +632,7 @@ var testMatrices = []Matrix{
 	TransposeTri{NewTriDense(3, true, nil)},
 	Transpose{NewTriDense(3, false, nil)},
 	TransposeTri{NewTriDense(3, false, nil)},
-	Transpose{NewVecDense(0, nil)},
+	Transpose{&VecDense{mat: blas64.Vector{Inc: 1}}},
 	Transpose{&VecDense{mat: blas64.Vector{Inc: 10}}},
 	Transpose{&DiagDense{}},
 	TransposeTri{&DiagDense{}},

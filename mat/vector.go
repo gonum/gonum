@@ -86,8 +86,12 @@ type VecDense struct {
 // a new slice is allocated for the backing slice. If len(data) == n, data is
 // used as the backing slice, and changes to the elements of the returned VecDense
 // will be reflected in data. If neither of these is true, NewVecDense will panic.
+// NewVecDense will panic if n is zero.
 func NewVecDense(n int, data []float64) *VecDense {
-	if n < 0 {
+	if n <= 0 {
+		if n == 0 {
+			panic(ErrZeroLength)
+		}
 		panic("mat: negative dimension")
 	}
 	if len(data) != n && data != nil {

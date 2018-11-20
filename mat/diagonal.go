@@ -42,9 +42,12 @@ type DiagDense struct {
 
 // NewDiagonal creates a new Diagonal matrix with n rows and n columns.
 // The length of data must be n or data must be nil, otherwise NewDiagonal
-// will panic.
+// will panic. NewDiagonal will panic if n is zero.
 func NewDiagonal(n int, data []float64) *DiagDense {
-	if n < 0 {
+	if n <= 0 {
+		if n == 0 {
+			panic(ErrZeroLength)
+		}
 		panic("mat: negative dimension")
 	}
 	if data == nil {

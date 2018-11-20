@@ -67,7 +67,10 @@ type RawSymBander interface {
 // which is passed to NewBandDense as []float64{1, 2, 3, 4, ...} with k=2.
 // Only the values in the band portion of the matrix are used.
 func NewSymBandDense(n, k int, data []float64) *SymBandDense {
-	if n < 0 || k < 0 {
+	if n <= 0 || k < 0 {
+		if n == 0 {
+			panic(ErrZeroLength)
+		}
 		panic("mat: negative dimension")
 	}
 	if k+1 > n {

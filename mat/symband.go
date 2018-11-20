@@ -30,18 +30,10 @@ type SymBandDense struct {
 
 // SymBanded is a symmetric band matrix interface type.
 type SymBanded interface {
-	Matrix
+	Banded
 
 	// Symmetric returns the number of rows/columns in the matrix.
 	Symmetric() int
-
-	// Bandwidth returns the lower and upper bandwidth values for
-	// the matrix. The total bandwidth of the matrix is kl+ku+1.
-	Bandwidth() (kl, ku int)
-
-	// TBand is the equivalent of the T() method in the Matrix
-	// interface but guarantees the transpose is of banded type.
-	TBand() Banded
 }
 
 // MutableSymBanded is a symmetric band matrix interface type that allows elements

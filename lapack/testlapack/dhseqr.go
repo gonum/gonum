@@ -70,7 +70,7 @@ func testDhseqr(t *testing.T, impl Dhseqrer, i int, test dhseqrTest, job lapack.
 
 	work := nanSlice(max(1, n))
 	if optwork {
-		impl.Dhseqr(job, lapack.SchurHess, n, ilo, ihi, nil, h.Stride, nil, nil, nil, z.Stride, work, -1)
+		impl.Dhseqr(job, lapack.SchurHess, n, ilo, ihi, h.Data, h.Stride, wr, wi, z.Data, z.Stride, work, -1)
 		work = nanSlice(int(work[0]))
 	}
 

@@ -7,6 +7,8 @@ package mat
 import (
 	"reflect"
 	"testing"
+
+	"gonum.org/v1/gonum/blas/blas64"
 )
 
 func TestNewDiagonal(t *testing.T) {
@@ -20,7 +22,8 @@ func TestNewDiagonal(t *testing.T) {
 			data: []float64{1, 2, 3, 4, 5, 6},
 			n:    6,
 			mat: &DiagDense{
-				data: []float64{1, 2, 3, 4, 5, 6},
+				mat: blas64.Vector{Inc: 1, Data: []float64{1, 2, 3, 4, 5, 6}},
+				n:   6,
 			},
 			dense: NewDense(6, 6, []float64{
 				1, 0, 0, 0, 0, 0,
@@ -49,6 +52,75 @@ func TestNewDiagonal(t *testing.T) {
 		}
 		if !Equal(band, test.dense) {
 			t.Errorf("unexpected value via mat.Equal(band, dense) for test %d:\ngot:\n% v\nwant:\n% v", i, Formatted(band), Formatted(test.dense))
+		}
+	}
+}
+
+func TestDiagonalStride(t *testing.T) {
+	for _, test := range []struct {
+		diag  *DiagDense
+		dense *Dense
+	}{
+		{
+			diag: &DiagDense{
+				mat: blas64.Vector{Inc: 1, Data: []float64{1, 2, 3, 4, 5, 6}},
+				n:   6,
+			},
+			dense: NewDense(6, 6, []float64{
+				1, 0, 0, 0, 0, 0,
+				0, 2, 0, 0, 0, 0,
+				0, 0, 3, 0, 0, 0,
+				0, 0, 0, 4, 0, 0,
+				0, 0, 0, 0, 5, 0,
+				0, 0, 0, 0, 0, 6,
+			}),
+		},
+		{
+			diag: &DiagDense{
+				mat: blas64.Vector{Inc: 2, Data: []float64{
+					1, 0,
+					2, 0,
+					3, 0,
+					4, 0,
+					5, 0,
+					6,
+				}},
+				n: 6,
+			},
+			dense: NewDense(6, 6, []float64{
+				1, 0, 0, 0, 0, 0,
+				0, 2, 0, 0, 0, 0,
+				0, 0, 3, 0, 0, 0,
+				0, 0, 0, 4, 0, 0,
+				0, 0, 0, 0, 5, 0,
+				0, 0, 0, 0, 0, 6,
+			}),
+		},
+		{
+			diag: &DiagDense{
+				mat: blas64.Vector{Inc: 5, Data: []float64{
+					1, 0, 0, 0, 0,
+					2, 0, 0, 0, 0,
+					3, 0, 0, 0, 0,
+					4, 0, 0, 0, 0,
+					5, 0, 0, 0, 0,
+					6,
+				}},
+				n: 6,
+			},
+			dense: NewDense(6, 6, []float64{
+				1, 0, 0, 0, 0, 0,
+				0, 2, 0, 0, 0, 0,
+				0, 0, 3, 0, 0, 0,
+				0, 0, 0, 4, 0, 0,
+				0, 0, 0, 0, 5, 0,
+				0, 0, 0, 0, 0, 6,
+			}),
+		},
+	} {
+		if !Equal(test.diag, test.dense) {
+			t.Errorf("unexpected value via mat.Equal for stride %d: got: %v want: %v",
+				test.diag.mat.Inc, test.diag, test.dense)
 		}
 	}
 }

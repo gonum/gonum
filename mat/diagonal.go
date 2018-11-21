@@ -40,7 +40,8 @@ type MutableDiagonal interface {
 
 // DiagDense represents a diagonal matrix in dense storage format.
 type DiagDense struct {
-	data []float64
+	mat blas64.Vector
+	n   int
 }
 
 // NewDiagonal creates a new Diagonal matrix with n rows and n columns.
@@ -60,18 +61,19 @@ func NewDiagonal(n int, data []float64) *DiagDense {
 		panic(ErrShape)
 	}
 	return &DiagDense{
-		data: data,
+		mat: blas64.Vector{Data: data, Inc: 1},
+		n:   n,
 	}
 }
 
 // Diag returns the dimension of the receiver.
 func (d *DiagDense) Diag() int {
-	return len(d.data)
+	return d.n
 }
 
 // Dims returns the dimensions of the matrix.
 func (d *DiagDense) Dims() (r, c int) {
-	return len(d.data), len(d.data)
+	return d.n, d.n
 }
 
 // T returns the transpose of the matrix.
@@ -85,41 +87,53 @@ func (d *DiagDense) TTri() Triangular {
 	return TransposeTri{d}
 }
 
+// TBand performs an implicit transpose by returning the receiver inside a
+// TransposeBand.
 func (d *DiagDense) TBand() Banded {
 	return TransposeBand{d}
 }
 
+// Bandwidth returns the upper and lower bandwidths of the matrix.
+// These values are always zero for diagonal matrices.
 func (d *DiagDense) Bandwidth() (kl, ku int) {
 	return 0, 0
 }
 
 // Symmetric implements the Symmetric interface.
 func (d *DiagDense) Symmetric() int {
-	return len(d.data)
+	return d.n
 }
 
 // Triangle implements the Triangular interface.
 func (d *DiagDense) Triangle() (int, TriKind) {
-	return len(d.data), Upper
+	return d.n, Upper
 }
 
+// RawBand returns the underlying data used by the receiver represented
+// as a blas64.Band.
+// Changes to elements in the receiver following the call will be reflected
+// in returned blas64.Band.
 func (d *DiagDense) RawBand() blas64.Band {
 	return blas64.Band{
-		Rows:   len(d.data),
-		Cols:   len(d.data),
+		Rows:   d.n,
+		Cols:   d.n,
 		KL:     0,
 		KU:     0,
-		Stride: 1,
-		Data:   d.data,
+		Stride: d.mat.Inc,
+		Data:   d.mat.Data,
 	}
 }
 
+// RawSymBand returns the underlying data used by the receiver represented
+// as a blas64.SymmetricBand.
+// Changes to elements in the receiver following the call will be reflected
+// in returned blas64.Band.
 func (d *DiagDense) RawSymBand() blas64.SymmetricBand {
 	return blas64.SymmetricBand{
-		N:      len(d.data),
+		N:      d.n,
 		K:      0,
-		Stride: 1,
+		Stride: d.mat.Inc,
 		Uplo:   blas.Upper,
-		Data:   d.data,
+		Data:   d.mat.Data,
 	}
 }

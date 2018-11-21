@@ -482,9 +482,10 @@ func makeCopyOf(a Matrix) Matrix {
 		return m
 	case *DiagDense:
 		d := &DiagDense{
-			data: make([]float64, len(t.data)),
+			mat: blas64.Vector{Inc: 1, Data: make([]float64, len(t.mat.Data))},
+			n:   t.n,
 		}
-		copy(d.data, t.data)
+		copy(d.mat.Data, t.mat.Data)
 		return d
 	}
 }
@@ -618,10 +619,12 @@ var testMatrices = []Matrix{
 	&SymDense{},
 	NewTriDense(3, true, nil),
 	NewTriDense(3, false, nil),
-	&VecDense{mat: blas64.Vector{Inc: 1}},
-	&DiagDense{},
 	&basicVector{},
+	&VecDense{mat: blas64.Vector{Inc: 1}},
 	&VecDense{mat: blas64.Vector{Inc: 10}},
+	&DiagDense{},
+	&DiagDense{mat: blas64.Vector{Inc: 1}},
+	&DiagDense{mat: blas64.Vector{Inc: 10}},
 	&basicMatrix{},
 	&basicSymmetric{},
 	&basicTriangular{cap: 3, mat: blas64.Triangular{N: 3, Stride: 3, Uplo: blas.Upper}},

@@ -16,6 +16,7 @@ var (
 	_         MutableDiagonal = diagDense
 	_         Triangular      = diagDense
 	_         Symmetric       = diagDense
+	_         SymBanded       = diagDense
 	_         Banded          = diagDense
 	_         RawBander       = diagDense
 	_         RawSymBander    = diagDense
@@ -30,6 +31,12 @@ type Diagonal interface {
 	// matrices to be used in functions taking symmetric inputs.
 	Diag() int
 	Symmetric() int
+
+	// Bandwidth and TBand are included in the Diagonal interface
+	// to allow the use of Diagonal types in banded functions.
+	// Bandwidth will always return (0, 0).
+	Bandwidth() (kl, ku int)
+	TBand() Banded
 }
 
 // MutableDiagonal is a Diagonal matrix whose elements can be set.

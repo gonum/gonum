@@ -14,6 +14,7 @@ var (
 	_            Matrix           = symBandDense
 	_            Symmetric        = symBandDense
 	_            Banded           = symBandDense
+	_            SymBanded        = symBandDense
 	_            RawSymBander     = symBandDense
 	_            MutableSymBanded = symBandDense
 
@@ -25,6 +26,14 @@ var (
 // SymBandDense represents a symmetric band matrix in dense storage format.
 type SymBandDense struct {
 	mat blas64.SymmetricBand
+}
+
+// SymBanded is a symmetric band matrix interface type.
+type SymBanded interface {
+	Banded
+
+	// Symmetric returns the number of rows/columns in the matrix.
+	Symmetric() int
 }
 
 // MutableSymBanded is a symmetric band matrix interface type that allows elements

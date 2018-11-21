@@ -109,6 +109,76 @@ func (d *DiagDense) Triangle() (int, TriKind) {
 	return d.n, Upper
 }
 
+// Reset zeros the length of the matrix so that it can be reused as the
+// receiver of a dimensionally restricted operation.
+//
+// See the Reseter interface for more information.
+func (d *DiagDense) Reset() {
+	// No change of Inc or n to 0 may be
+	// made unless both are set to 0.
+	d.mat.Inc = 0
+	d.n = 0
+	d.mat.Data = d.mat.Data[:0]
+}
+
+// DiagOf extracts the diagonal of m into the receiver. If m can return
+// its raw representation d will be a view of the diagonal of m. Otherwise
+// the receiver will be a copy of the input's diagonal.
+// The receiver must be min(r, c) long or zero. Otherwise DiagOf will panic.
+func (d *DiagDense) DiagOf(m Matrix) {
+	// reuseAs is not used here since
+	// sensible cases should not allocate,
+	// but would uselessly if we did.
+	n := min(m.Dims())
+	if !d.IsZero() && n != d.n {
+		panic(ErrShape)
+	}
+	d.n = n
+
+	switch r := m.(type) {
+	case *DiagDense:
+		d.mat = r.mat
+	case RawBander:
+		mat := r.RawBand()
+		d.mat = blas64.Vector{
+			Inc:  mat.Stride,
+			Data: mat.Data[mat.KL : (n-1)*mat.Stride+mat.KL+1],
+		}
+	case RawMatrixer:
+		mat := r.RawMatrix()
+		d.mat = blas64.Vector{
+			Inc:  mat.Stride + 1,
+			Data: mat.Data[:(n-1)*mat.Stride+n],
+		}
+	case RawSymBander:
+		mat := r.RawSymBand()
+		d.mat = blas64.Vector{
+			Inc:  mat.Stride,
+			Data: mat.Data[:(n-1)*mat.Stride+1],
+		}
+	case RawSymmetricer:
+		mat := r.RawSymmetric()
+		d.mat = blas64.Vector{
+			Inc:  mat.Stride + 1,
+			Data: mat.Data[:(n-1)*mat.Stride+n],
+		}
+	case RawTriangular:
+		mat := r.RawTriangular()
+		d.mat = blas64.Vector{
+			Inc:  mat.Stride + 1,
+			Data: mat.Data[:(n-1)*mat.Stride+n],
+		}
+	case RawVectorer:
+		d.mat = r.RawVector()
+		d.mat.Data = d.mat.Data[:1]
+	default:
+		d.reuseAs(n)
+		for i := 0; i < n; i++ {
+			d.setDiag(i, m.At(i, i))
+		}
+	}
+}
+
 // RawBand returns the underlying data used by the receiver represented
 // as a blas64.Band.
 // Changes to elements in the receiver following the call will be reflected
@@ -136,4 +206,31 @@ func (d *DiagDense) RawSymBand() blas64.SymmetricBand {
 		Uplo:   blas.Upper,
 		Data:   d.mat.Data,
 	}
+}
+
+// reuseAs resizes an empty diagonal to a r×r diagonal,
+// or checks that a non-empty matrix is r×r.
+func (d *DiagDense) reuseAs(r int) {
+	if r == 0 {
+		panic(ErrZeroLength)
+	}
+	if d.IsZero() {
+		d.mat = blas64.Vector{
+			Inc:  1,
+			Data: use(d.mat.Data, r),
+		}
+		d.n = r
+		return
+	}
+	if r != d.n {
+		panic(ErrShape)
+	}
+}
+
+// IsZero returns whether the receiver is zero-sized. Zero-sized vectors can be the
+// receiver for size-restricted operations. DiagDenses can be zeroed using Reset.
+func (d *DiagDense) IsZero() bool {
+	// It must be the case that d.Dims() returns
+	// zeros in this case. See comment in Reset().
+	return d.mat.Inc == 0
 }

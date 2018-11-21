@@ -5,6 +5,7 @@
 package mat
 
 import (
+	"math"
 	"reflect"
 	"testing"
 
@@ -121,6 +122,202 @@ func TestDiagonalStride(t *testing.T) {
 		if !Equal(test.diag, test.dense) {
 			t.Errorf("unexpected value via mat.Equal for stride %d: got: %v want: %v",
 				test.diag.mat.Inc, test.diag, test.dense)
+		}
+	}
+}
+
+func TestDiagOf(t *testing.T) {
+	for i, test := range []struct {
+		mat  Matrix
+		want *Dense
+	}{
+		{
+			mat: NewDiagonal(6, []float64{1, 2, 3, 4, 5, 6}),
+			want: NewDense(6, 6, []float64{
+				1, 0, 0, 0, 0, 0,
+				0, 2, 0, 0, 0, 0,
+				0, 0, 3, 0, 0, 0,
+				0, 0, 0, 4, 0, 0,
+				0, 0, 0, 0, 5, 0,
+				0, 0, 0, 0, 0, 6,
+			}),
+		},
+		{
+			mat: NewBandDense(6, 6, 1, 1, []float64{
+				math.NaN(), 1, math.NaN(),
+				math.NaN(), 2, math.NaN(),
+				math.NaN(), 3, math.NaN(),
+				math.NaN(), 4, math.NaN(),
+				math.NaN(), 5, math.NaN(),
+				math.NaN(), 6, math.NaN(),
+			}),
+			want: NewDense(6, 6, []float64{
+				1, 0, 0, 0, 0, 0,
+				0, 2, 0, 0, 0, 0,
+				0, 0, 3, 0, 0, 0,
+				0, 0, 0, 4, 0, 0,
+				0, 0, 0, 0, 5, 0,
+				0, 0, 0, 0, 0, 6,
+			}),
+		},
+		{
+			mat: NewDense(6, 6, []float64{
+				1, math.NaN(), math.NaN(), math.NaN(), math.NaN(), math.NaN(),
+				math.NaN(), 2, math.NaN(), math.NaN(), math.NaN(), math.NaN(),
+				math.NaN(), math.NaN(), 3, math.NaN(), math.NaN(), math.NaN(),
+				math.NaN(), math.NaN(), math.NaN(), 4, math.NaN(), math.NaN(),
+				math.NaN(), math.NaN(), math.NaN(), math.NaN(), 5, math.NaN(),
+				math.NaN(), math.NaN(), math.NaN(), math.NaN(), math.NaN(), 6,
+			}),
+			want: NewDense(6, 6, []float64{
+				1, 0, 0, 0, 0, 0,
+				0, 2, 0, 0, 0, 0,
+				0, 0, 3, 0, 0, 0,
+				0, 0, 0, 4, 0, 0,
+				0, 0, 0, 0, 5, 0,
+				0, 0, 0, 0, 0, 6,
+			}),
+		},
+		{
+			mat: NewDense(6, 4, []float64{
+				1, math.NaN(), math.NaN(), math.NaN(),
+				math.NaN(), 2, math.NaN(), math.NaN(),
+				math.NaN(), math.NaN(), 3, math.NaN(),
+				math.NaN(), math.NaN(), math.NaN(), 4,
+				math.NaN(), math.NaN(), math.NaN(), math.NaN(),
+				math.NaN(), math.NaN(), math.NaN(), math.NaN(),
+			}),
+			want: NewDense(4, 4, []float64{
+				1, 0, 0, 0,
+				0, 2, 0, 0,
+				0, 0, 3, 0,
+				0, 0, 0, 4,
+			}),
+		},
+		{
+			mat: NewDense(4, 6, []float64{
+				1, math.NaN(), math.NaN(), math.NaN(), math.NaN(), math.NaN(),
+				math.NaN(), 2, math.NaN(), math.NaN(), math.NaN(), math.NaN(),
+				math.NaN(), math.NaN(), 3, math.NaN(), math.NaN(), math.NaN(),
+				math.NaN(), math.NaN(), math.NaN(), 4, math.NaN(), math.NaN(),
+			}),
+			want: NewDense(4, 4, []float64{
+				1, 0, 0, 0,
+				0, 2, 0, 0,
+				0, 0, 3, 0,
+				0, 0, 0, 4,
+			}),
+		},
+		{
+			mat: NewSymBandDense(6, 1, []float64{
+				1, math.NaN(),
+				2, math.NaN(),
+				3, math.NaN(),
+				4, math.NaN(),
+				5, math.NaN(),
+				6, math.NaN(),
+			}),
+			want: NewDense(6, 6, []float64{
+				1, 0, 0, 0, 0, 0,
+				0, 2, 0, 0, 0, 0,
+				0, 0, 3, 0, 0, 0,
+				0, 0, 0, 4, 0, 0,
+				0, 0, 0, 0, 5, 0,
+				0, 0, 0, 0, 0, 6,
+			}),
+		},
+		{
+			mat: NewSymDense(6, []float64{
+				1, math.NaN(), math.NaN(), math.NaN(), math.NaN(), math.NaN(),
+				math.NaN(), 2, math.NaN(), math.NaN(), math.NaN(), math.NaN(),
+				math.NaN(), math.NaN(), 3, math.NaN(), math.NaN(), math.NaN(),
+				math.NaN(), math.NaN(), math.NaN(), 4, math.NaN(), math.NaN(),
+				math.NaN(), math.NaN(), math.NaN(), math.NaN(), 5, math.NaN(),
+				math.NaN(), math.NaN(), math.NaN(), math.NaN(), math.NaN(), 6,
+			}),
+			want: NewDense(6, 6, []float64{
+				1, 0, 0, 0, 0, 0,
+				0, 2, 0, 0, 0, 0,
+				0, 0, 3, 0, 0, 0,
+				0, 0, 0, 4, 0, 0,
+				0, 0, 0, 0, 5, 0,
+				0, 0, 0, 0, 0, 6,
+			}),
+		},
+		{
+			mat: NewTriDense(6, Upper, []float64{
+				1, math.NaN(), math.NaN(), math.NaN(), math.NaN(), math.NaN(),
+				math.NaN(), 2, math.NaN(), math.NaN(), math.NaN(), math.NaN(),
+				math.NaN(), math.NaN(), 3, math.NaN(), math.NaN(), math.NaN(),
+				math.NaN(), math.NaN(), math.NaN(), 4, math.NaN(), math.NaN(),
+				math.NaN(), math.NaN(), math.NaN(), math.NaN(), 5, math.NaN(),
+				math.NaN(), math.NaN(), math.NaN(), math.NaN(), math.NaN(), 6,
+			}),
+			want: NewDense(6, 6, []float64{
+				1, 0, 0, 0, 0, 0,
+				0, 2, 0, 0, 0, 0,
+				0, 0, 3, 0, 0, 0,
+				0, 0, 0, 4, 0, 0,
+				0, 0, 0, 0, 5, 0,
+				0, 0, 0, 0, 0, 6,
+			}),
+		},
+		{
+			mat: NewTriDense(6, Lower, []float64{
+				1, math.NaN(), math.NaN(), math.NaN(), math.NaN(), math.NaN(),
+				math.NaN(), 2, math.NaN(), math.NaN(), math.NaN(), math.NaN(),
+				math.NaN(), math.NaN(), 3, math.NaN(), math.NaN(), math.NaN(),
+				math.NaN(), math.NaN(), math.NaN(), 4, math.NaN(), math.NaN(),
+				math.NaN(), math.NaN(), math.NaN(), math.NaN(), 5, math.NaN(),
+				math.NaN(), math.NaN(), math.NaN(), math.NaN(), math.NaN(), 6,
+			}),
+			want: NewDense(6, 6, []float64{
+				1, 0, 0, 0, 0, 0,
+				0, 2, 0, 0, 0, 0,
+				0, 0, 3, 0, 0, 0,
+				0, 0, 0, 4, 0, 0,
+				0, 0, 0, 0, 5, 0,
+				0, 0, 0, 0, 0, 6,
+			}),
+		},
+		{
+			mat:  NewVecDense(6, []float64{1, 2, 3, 4, 5, 6}),
+			want: NewDense(1, 1, []float64{1}),
+		},
+		{
+			mat: &basicMatrix{
+				mat: blas64.General{
+					Rows:   6,
+					Cols:   6,
+					Stride: 6,
+					Data: []float64{
+						1, math.NaN(), math.NaN(), math.NaN(), math.NaN(), math.NaN(),
+						math.NaN(), 2, math.NaN(), math.NaN(), math.NaN(), math.NaN(),
+						math.NaN(), math.NaN(), 3, math.NaN(), math.NaN(), math.NaN(),
+						math.NaN(), math.NaN(), math.NaN(), 4, math.NaN(), math.NaN(),
+						math.NaN(), math.NaN(), math.NaN(), math.NaN(), 5, math.NaN(),
+						math.NaN(), math.NaN(), math.NaN(), math.NaN(), math.NaN(), 6,
+					},
+				},
+				capRows: 6,
+				capCols: 6,
+			},
+			want: NewDense(6, 6, []float64{
+				1, 0, 0, 0, 0, 0,
+				0, 2, 0, 0, 0, 0,
+				0, 0, 3, 0, 0, 0,
+				0, 0, 0, 4, 0, 0,
+				0, 0, 0, 0, 5, 0,
+				0, 0, 0, 0, 0, 6,
+			}),
+		},
+	} {
+		var got DiagDense
+		got.DiagOf(test.mat)
+		if !Equal(&got, test.want) {
+			r, c := test.mat.Dims()
+			t.Errorf("unexpected value via mat.Equal for %d×%d %T test %d:\ngot:\n% v\nwant:\n% v",
+				r, c, test.mat, i, Formatted(&got), Formatted(test.want))
 		}
 	}
 }

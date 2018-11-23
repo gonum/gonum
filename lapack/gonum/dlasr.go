@@ -14,7 +14,7 @@ import (
 // by a depending on the value of side -- A = P * A if side == lapack.Left,
 // A = A * P^T if side == lapack.Right.
 //
-//The exact value of P depends on the value of pivot, but in all cases P is
+// The exact value of P depends on the value of pivot, but in all cases P is
 // implicitly represented by a series of 2×2 rotation matrices. The entries of
 // rotation matrix k are defined by s[k] and c[k]
 //  R(k) = [ c[k] s[k]]

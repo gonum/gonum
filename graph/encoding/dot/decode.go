@@ -184,7 +184,7 @@ func (gen *simpleGraph) addStmt(dst encoding.Builder, stmt ast.Stmt) {
 				Value: attr.Val,
 			}
 			if err := n.SetAttribute(a); err != nil {
-				panic(fmt.Errorf("unable to unmarshal node DOT attribute (%s=%s)", a.Key, a.Value))
+				panic(fmt.Errorf("unable to unmarshal node DOT attribute (%s=%s): %v", a.Key, a.Value, err))
 			}
 		}
 	case *ast.EdgeStmt:
@@ -220,7 +220,7 @@ func (gen *simpleGraph) addStmt(dst encoding.Builder, stmt ast.Stmt) {
 				Value: attr.Val,
 			}
 			if err := n.SetAttribute(a); err != nil {
-				panic(fmt.Errorf("unable to unmarshal global %s DOT attribute (%s=%s)", dst, a.Key, a.Value))
+				panic(fmt.Errorf("unable to unmarshal global %s DOT attribute (%s=%s): %v", dst, a.Key, a.Value, err))
 			}
 		}
 	case *ast.Attr:
@@ -376,7 +376,7 @@ func (gen *multiGraph) addStmt(dst encoding.MultiBuilder, stmt ast.Stmt) {
 				Value: attr.Val,
 			}
 			if err := n.SetAttribute(a); err != nil {
-				panic(fmt.Errorf("unable to unmarshal node DOT attribute (%s=%s)", a.Key, a.Value))
+				panic(fmt.Errorf("unable to unmarshal node DOT attribute (%s=%s): %v", a.Key, a.Value, err))
 			}
 		}
 	case *ast.EdgeStmt:
@@ -412,7 +412,7 @@ func (gen *multiGraph) addStmt(dst encoding.MultiBuilder, stmt ast.Stmt) {
 				Value: attr.Val,
 			}
 			if err := n.SetAttribute(a); err != nil {
-				panic(fmt.Errorf("unable to unmarshal global %s DOT attribute (%s=%s)", dst, a.Key, a.Value))
+				panic(fmt.Errorf("unable to unmarshal global %s DOT attribute (%s=%s): %v", dst, a.Key, a.Value, err))
 			}
 		}
 	case *ast.Attr:
@@ -489,7 +489,7 @@ func addEdgeAttrs(edge graph.Edge, attrs []*ast.Attr) {
 			Value: attr.Val,
 		}
 		if err := e.SetAttribute(a); err != nil {
-			panic(fmt.Errorf("unable to unmarshal edge DOT attribute (%s=%s)", a.Key, a.Value))
+			panic(fmt.Errorf("unable to unmarshal edge DOT attribute (%s=%s): %v", a.Key, a.Value, err))
 		}
 	}
 }

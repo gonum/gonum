@@ -245,6 +245,10 @@ func (t *TriBandDense) IsZero() bool {
 	return t.mat.Stride == 0
 }
 
+// Reset zeros the dimensions of the matrix so that it can be reused as the
+// receiver of a dimensionally restricted operation.
+//
+// See the Reseter interface for more information.
 func (t *TriBandDense) Reset() {
 	t.mat.N = 0
 	t.mat.Stride = 0

@@ -121,62 +121,63 @@ func (d *DiagDense) Reset() {
 	d.mat.Data = d.mat.Data[:0]
 }
 
-// DiagOf extracts the diagonal of m into the receiver. If m can return
-// its raw representation d will be a view of the diagonal of m. Otherwise
-// the receiver will be a copy of the input's diagonal.
-// The receiver must be min(r, c) long or zero. Otherwise DiagOf will panic.
-func (d *DiagDense) DiagOf(m Matrix) {
-	// reuseAs is not used here since
-	// sensible cases should not allocate,
-	// but would uselessly if we did.
+// DiagFrom copies the diagonal of m into the receiver. The receiver must
+// be min(r, c) long or zero. Otherwise DiagOf will panic.
+func (d *DiagDense) DiagFrom(m Matrix) {
 	n := min(m.Dims())
-	if !d.IsZero() && n != d.n {
-		panic(ErrShape)
-	}
-	d.n = n
+	d.reuseAs(n)
 
+	var vec blas64.Vector
 	switch r := m.(type) {
 	case *DiagDense:
-		d.mat = r.mat
+		vec = r.mat
 	case RawBander:
 		mat := r.RawBand()
-		d.mat = blas64.Vector{
+		vec = blas64.Vector{
 			Inc:  mat.Stride,
 			Data: mat.Data[mat.KL : (n-1)*mat.Stride+mat.KL+1],
 		}
 	case RawMatrixer:
 		mat := r.RawMatrix()
-		d.mat = blas64.Vector{
+		vec = blas64.Vector{
 			Inc:  mat.Stride + 1,
 			Data: mat.Data[:(n-1)*mat.Stride+n],
 		}
 	case RawSymBander:
 		mat := r.RawSymBand()
-		d.mat = blas64.Vector{
+		vec = blas64.Vector{
 			Inc:  mat.Stride,
 			Data: mat.Data[:(n-1)*mat.Stride+1],
 		}
 	case RawSymmetricer:
 		mat := r.RawSymmetric()
-		d.mat = blas64.Vector{
+		vec = blas64.Vector{
 			Inc:  mat.Stride + 1,
 			Data: mat.Data[:(n-1)*mat.Stride+n],
 		}
+	// TODO(kortschak): Add banded triangular handling when the type exists.
 	case RawTriangular:
 		mat := r.RawTriangular()
-		d.mat = blas64.Vector{
+		if mat.Diag == blas.Unit {
+			for i := 0; i < n; i += d.mat.Inc {
+				d.mat.Data[i] = 1
+			}
+			return
+		}
+		vec = blas64.Vector{
 			Inc:  mat.Stride + 1,
 			Data: mat.Data[:(n-1)*mat.Stride+n],
 		}
 	case RawVectorer:
-		d.mat = r.RawVector()
-		d.mat.Data = d.mat.Data[:1]
+		d.mat.Data[0] = r.RawVector().Data[0]
+		return
 	default:
-		d.reuseAs(n)
 		for i := 0; i < n; i++ {
 			d.setDiag(i, m.At(i, i))
 		}
+		return
 	}
+	blas64.Copy(n, vec, d.mat)
 }
 
 // RawBand returns the underlying data used by the receiver represented

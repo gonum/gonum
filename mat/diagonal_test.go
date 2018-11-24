@@ -126,7 +126,7 @@ func TestDiagonalStride(t *testing.T) {
 	}
 }
 
-func TestDiagOf(t *testing.T) {
+func TestDiagFrom(t *testing.T) {
 	for i, test := range []struct {
 		mat  Matrix
 		want *Dense
@@ -313,7 +313,7 @@ func TestDiagOf(t *testing.T) {
 		},
 	} {
 		var got DiagDense
-		got.DiagOf(test.mat)
+		got.DiagFrom(test.mat)
 		if !Equal(&got, test.want) {
 			r, c := test.mat.Dims()
 			t.Errorf("unexpected value via mat.Equal for %d×%d %T test %d:\ngot:\n% v\nwant:\n% v",

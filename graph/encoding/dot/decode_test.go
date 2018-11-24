@@ -10,6 +10,7 @@ import (
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/encoding"
+	"gonum.org/v1/gonum/graph/multi"
 	"gonum.org/v1/gonum/graph/simple"
 )
 
@@ -291,6 +292,107 @@ const undirectedNonchained = `strict graph {
 	// Edge definitions.
 	A -- B [label="baz 2"];
 	B -- C [label="baz 2"];
+}`
+
+func TestMultigraphDecoding(t *testing.T) {
+	for i, test := range []struct {
+		directed bool
+		input    string
+		expected string
+	}{
+		{
+			directed: true,
+			input:    directedMultigraph,
+			expected: directedMultigraph,
+		},
+		{
+			directed: false,
+			input:    undirectedMultigraph,
+			expected: undirectedMultigraph,
+		},
+		{
+			directed: true,
+			input: directedSelfLoopMultigraph,
+			expected: directedSelfLoopMultigraph,
+		},
+		{
+			directed: false,
+			input: undirectedSelfLoopMultigraph,
+			expected: undirectedSelfLoopMultigraph,
+		},
+	} {
+		var dst encoding.MultiBuilder
+		if test.directed {
+			dst = multi.NewDirectedGraph()
+		} else {
+			dst = multi.NewUndirectedGraph()
+		}
+
+		if err := UnmarshalMulti([]byte(test.input), dst); err != nil {
+			t.Errorf("i=%d: unable to unmarshal DOT graph; %v", i, err)
+			continue
+		}
+		buf, err := MarshalMulti(dst, "", "", "\t")
+		if err != nil {
+			t.Errorf("i=%d: unable to marshal graph; %v", i, dst)
+			continue
+		}
+		actual := string(buf)
+		if actual != test.expected {
+			t.Errorf("i=%d: graph content mismatch; want:\n%s\n\nactual:\n%s", i, test.expected, actual)
+			continue
+		}
+	}
+}
+
+const directedMultigraph = `digraph {
+	// Node definitions.
+	0;
+	1;
+	2;
+
+	// Edge definitions.
+	0 -> 1;
+	0 -> 1;
+	0 -> 2;
+	2 -> 0;
+}`
+
+const undirectedMultigraph = `graph {
+	// Node definitions.
+	0;
+	1;
+	2;
+
+	// Edge definitions.
+	0 -- 1;
+	0 -- 1;
+	0 -- 2;
+	0 -- 2;
+}`
+
+const directedSelfLoopMultigraph = `digraph {
+	// Node definitions.
+	0;
+	1;
+
+	// Edge definitions.
+	0 -> 0;
+	0 -> 0;
+	1 -> 1;
+	1 -> 1;
+}`
+
+const undirectedSelfLoopMultigraph = `graph {
+	// Node definitions.
+	0;
+	1;
+
+	// Edge definitions.
+	0 -- 0;
+	0 -- 0;
+	1 -- 1;
+	1 -- 1;
 }`
 
 // Below follows a minimal implementation of a graph capable of validating the

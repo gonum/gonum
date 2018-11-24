@@ -55,15 +55,31 @@ type Structurer interface {
 	Structure() []Graph
 }
 
+// MultiStructurer represents a graph.Multigraph that can define subgraphs.
+type MultiStructurer interface {
+	Structure() []Multigraph
+}
+
 // Graph wraps named graph.Graph values.
 type Graph interface {
 	graph.Graph
 	DOTID() string
 }
 
+// Multigraph wraps named graph.Multigraph values.
+type Multigraph interface {
+	graph.Multigraph
+	DOTID() string
+}
+
 // Subgrapher wraps graph.Node values that represent subgraphs.
 type Subgrapher interface {
 	Subgraph() graph.Graph
+}
+
+// MultiSubgrapher wraps graph.Node values that represent subgraphs.
+type MultiSubgrapher interface {
+	Subgraph() graph.Multigraph
 }
 
 // Marshal returns the DOT encoding for the graph g, applying the prefix
@@ -76,10 +92,32 @@ type Subgrapher interface {
 // implementation of the Node, Attributer, Porter, Attributers, Structurer,
 // Subgrapher and Graph interfaces.
 func Marshal(g graph.Graph, name, prefix, indent string) ([]byte, error) {
-	var p printer
+	var p simpleGraphPrinter
 	p.indent = indent
 	p.prefix = prefix
 	p.visited = make(map[edge]bool)
+	err := p.print(g, name, false, false)
+	if err != nil {
+		return nil, err
+	}
+	return p.buf.Bytes(), nil
+}
+
+// MarshalMulti returns the DOT encoding for the multigraph g, applying the
+// prefix and indent to the encoding. Name is used to specify the graph name. If
+// name is empty and g implements Graph, the returned string from DOTID
+// will be used. If strict is true the output bytes will be prefixed with
+// the DOT "strict" keyword.
+//
+// Graph serialization will work for a graph.Multigraph without modification,
+// however, advanced GraphViz DOT features provided by Marshal depend on
+// implementation of the Node, Attributer, Porter, Attributers, Structurer,
+// MultiSubgrapher and Multigraph interfaces.
+func MarshalMulti(g graph.Multigraph, name, prefix, indent string) ([]byte, error) {
+	var p multiGraphPrinter
+	p.indent = indent
+	p.prefix = prefix
+	p.visited = make(map[line]bool)
 	err := p.print(g, name, false, false)
 	if err != nil {
 		return nil, err
@@ -94,8 +132,6 @@ type printer struct {
 	indent string
 	depth  int
 
-	visited map[edge]bool
-
 	err error
 }
 
@@ -104,38 +140,17 @@ type edge struct {
 	from, to int64
 }
 
-func (p *printer) print(g graph.Graph, name string, needsIndent, isSubgraph bool) error {
-	nodes := graph.NodesOf(g.Nodes())
-	sort.Sort(ordered.ByID(nodes))
 
-	p.buf.WriteString(p.prefix)
-	if needsIndent {
-		for i := 0; i < p.depth; i++ {
-			p.buf.WriteString(p.indent)
-		}
-	}
-	if !isSubgraph {
-		p.buf.WriteString("strict ")
-	}
-	_, isDirected := g.(graph.Directed)
-	if isSubgraph {
-		p.buf.WriteString("sub")
-	} else if isDirected {
-		p.buf.WriteString("di")
-	}
-	p.buf.WriteString("graph")
-
+func (p *simpleGraphPrinter) print(g graph.Graph, name string, needsIndent, isSubgraph bool) error {
 	if name == "" {
 		if g, ok := g.(Graph); ok {
 			name = g.DOTID()
 		}
 	}
-	if name != "" {
-		p.buf.WriteByte(' ')
-		p.buf.WriteString(name)
-	}
 
-	p.openBlock(" {")
+	_, isDirected := g.(graph.Directed)
+	p.printFrontMatter(name, needsIndent, isSubgraph, isDirected, true)
+
 	if a, ok := g.(Attributers); ok {
 		p.writeAttributeComplex(a)
 	}
@@ -149,6 +164,9 @@ func (p *printer) print(g graph.Graph, name string, needsIndent, isSubgraph bool
 			p.print(g, g.DOTID(), true, true)
 		}
 	}
+
+	nodes := graph.NodesOf(g.Nodes())
+	sort.Sort(ordered.ByID(nodes))
 
 	havePrintedNodeHeader := false
 	for _, n := range nodes {
@@ -264,8 +282,37 @@ func (p *printer) print(g graph.Graph, name string, needsIndent, isSubgraph bool
 			p.buf.WriteByte(';')
 		}
 	}
+
 	p.closeBlock("}")
 
+	return nil
+}
+
+func (p *printer) printFrontMatter(name string, needsIndent, isSubgraph, isDirected, isStrict bool) error {
+	p.buf.WriteString(p.prefix)
+	if needsIndent {
+		for i := 0; i < p.depth; i++ {
+			p.buf.WriteString(p.indent)
+		}
+	}
+
+	if !isSubgraph && isStrict {
+		p.buf.WriteString("strict ")
+	}
+
+	if isSubgraph {
+		p.buf.WriteString("sub")
+	} else if isDirected {
+		p.buf.WriteString("di")
+	}
+	p.buf.WriteString("graph")
+
+	if name != "" {
+		p.buf.WriteByte(' ')
+		p.buf.WriteString(name)
+	}
+
+	p.openBlock(" {")
 	return nil
 }
 
@@ -293,7 +340,7 @@ func nodeID(n graph.Node) string {
 	}
 }
 
-func graphID(g graph.Graph, n graph.Node) string {
+func graphID(g interface{}, n graph.Node) string {
 	switch g := g.(type) {
 	case Node:
 		return g.DOTID()
@@ -371,4 +418,166 @@ func (p *printer) closeBlock(b string) {
 	p.depth--
 	p.newline()
 	p.buf.WriteString(b)
+}
+
+type simpleGraphPrinter struct {
+	printer
+	visited map[edge]bool
+}
+
+type multiGraphPrinter struct {
+	printer
+	visited map[line]bool
+}
+
+type line struct {
+	inGraph string
+	id      int64
+}
+
+func (p *multiGraphPrinter) print(g graph.Multigraph, name string, needsIndent, isSubgraph bool) error {
+	if name == "" {
+		if g, ok := g.(Multigraph); ok {
+			name = g.DOTID()
+		}
+	}
+
+	_, isDirected := g.(graph.Directed)
+	p.printFrontMatter(name, needsIndent, isSubgraph, isDirected, false)
+
+	if a, ok := g.(Attributers); ok {
+		p.writeAttributeComplex(a)
+	}
+	if s, ok := g.(MultiStructurer); ok {
+		for _, g := range s.Structure() {
+			_, subIsDirected := g.(graph.Directed)
+			if subIsDirected != isDirected {
+				return errors.New("dot: mismatched graph type")
+			}
+			p.buf.WriteByte('\n')
+			p.print(g, g.DOTID(), true, true)
+		}
+	}
+
+	nodes := graph.NodesOf(g.Nodes())
+	sort.Sort(ordered.ByID(nodes))
+
+	havePrintedNodeHeader := false
+	for _, n := range nodes {
+		if s, ok := n.(MultiSubgrapher); ok {
+			// If the node is not linked to any other node
+			// the graph needs to be written now.
+			if g.From(n.ID()).Len() == 0 {
+				g := s.Subgraph()
+				_, subIsDirected := g.(graph.Directed)
+				if subIsDirected != isDirected {
+					return errors.New("dot: mismatched graph type")
+				}
+				if !havePrintedNodeHeader {
+					p.newline()
+					p.buf.WriteString("// Node definitions.")
+					havePrintedNodeHeader = true
+				}
+				p.newline()
+				p.print(g, graphID(g, n), false, true)
+			}
+			continue
+		}
+		if !havePrintedNodeHeader {
+			p.newline()
+			p.buf.WriteString("// Node definitions.")
+			havePrintedNodeHeader = true
+		}
+		p.newline()
+		p.writeNode(n)
+		if a, ok := n.(encoding.Attributer); ok {
+			p.writeAttributeList(a)
+		}
+		p.buf.WriteByte(';')
+	}
+
+	havePrintedEdgeHeader := false
+	for _, n := range nodes {
+		nid := n.ID()
+		to := graph.NodesOf(g.From(nid))
+		sort.Sort(ordered.ByID(to))
+
+		for _, t := range to {
+			tid := t.ID()
+
+			lines := graph.LinesOf(g.Lines(nid, tid))
+			sort.Sort(ordered.LinesByIDs(lines))
+
+			for _, l := range lines {
+				lid := l.ID()
+				if p.visited[line{inGraph: name, id: lid}] {
+					continue
+				}
+				p.visited[line{inGraph: name, id: lid}] = true
+
+				if !havePrintedEdgeHeader {
+					p.buf.WriteByte('\n')
+					p.buf.WriteString(strings.TrimRight(p.prefix, " \t\n")) // Trim whitespace suffix.
+					p.newline()
+					p.buf.WriteString("// Edge definitions.")
+					havePrintedEdgeHeader = true
+				}
+				p.newline()
+
+				if s, ok := n.(MultiSubgrapher); ok {
+					g := s.Subgraph()
+					_, subIsDirected := g.(graph.Directed)
+					if subIsDirected != isDirected {
+						return errors.New("dot: mismatched graph type")
+					}
+					p.print(g, graphID(g, n), false, true)
+				} else {
+					p.writeNode(n)
+				}
+
+				porter, edgeIsPorter := l.(Porter)
+				if edgeIsPorter {
+					if l.From().ID() == nid {
+						p.writePorts(porter.FromPort())
+					} else {
+						p.writePorts(porter.ToPort())
+					}
+				}
+
+				if isDirected {
+					p.buf.WriteString(" -> ")
+				} else {
+					p.buf.WriteString(" -- ")
+				}
+
+				if s, ok := t.(MultiSubgrapher); ok {
+					g := s.Subgraph()
+					_, subIsDirected := g.(graph.Directed)
+					if subIsDirected != isDirected {
+						return errors.New("dot: mismatched graph type")
+					}
+					p.print(g, graphID(g, t), false, true)
+				} else {
+					p.writeNode(t)
+				}
+				if edgeIsPorter {
+					if l.From().ID() == nid {
+						p.writePorts(porter.ToPort())
+					} else {
+						p.writePorts(porter.FromPort())
+					}
+				}
+
+				if a, ok := l.(encoding.Attributer); ok {
+					p.writeAttributeList(a)
+				}
+
+				p.buf.WriteByte(';')
+			}
+		}
+	}
+
+	p.closeBlock("}")
+
+	return nil
 }

@@ -36,7 +36,7 @@ type TriDense struct {
 // Triangular represents a triangular matrix. Triangular matrices are always square.
 type Triangular interface {
 	Matrix
-	// Triangular returns the number of rows/columns in the matrix and its
+	// Triangle returns the number of rows/columns in the matrix and its
 	// orientation.
 	Triangle() (n int, kind TriKind)
 
@@ -45,7 +45,9 @@ type Triangular interface {
 	TTri() Triangular
 }
 
-// A RawTriangular can return a view of itself as a BLAS Triangular matrix.
+// A RawTriangular can return a blas64.Triangular representation of the receiver.
+// Changes to the blas64.Triangular.Data slice will be reflected in the original
+// matrix, changes to the N, Stride, Uplo and Diag fields will not.
 type RawTriangular interface {
 	RawTriangular() blas64.Triangular
 }
@@ -169,6 +171,17 @@ func isUpperUplo(u blas.Uplo) bool {
 		return true
 	case blas.Lower:
 		return false
+	default:
+		panic(badTriangle)
+	}
+}
+
+func uploToTriKind(u blas.Uplo) TriKind {
+	switch u {
+	case blas.Upper:
+		return Upper
+	case blas.Lower:
+		return Lower
 	default:
 		panic(badTriangle)
 	}

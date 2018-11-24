@@ -234,7 +234,7 @@ func legalDims(a Matrix, m, n int) bool {
 			return false
 		}
 		return true
-	case *SymDense, *TriDense, *basicSymmetric, *basicTriangular, *DiagDense:
+	case *SymDense, *TriDense, *basicSymmetric, *basicTriangular, *TriBandDense, *DiagDense:
 		if m < 0 || n < 0 || m != n {
 			return false
 		}
@@ -280,6 +280,14 @@ func returnAs(a, t Matrix) Matrix {
 		case *basicTriangular:
 			return asBasicTriangular(mat)
 		}
+	case *TriBandDense:
+		switch t.(type) {
+		default:
+			panic("bad type")
+		case *TriBandDense:
+			return mat
+			// TODO(btracey): basic TriBandDense
+		}
 	case *DiagDense:
 		switch t.(type) {
 		default:
@@ -295,6 +303,8 @@ func returnAs(a, t Matrix) Matrix {
 // of a.
 func retranspose(a, m Matrix) Matrix {
 	switch a.(type) {
+	case TransposeTriBand:
+		return TransposeTriBand{m.(TriBanded)}
 	case TransposeTri:
 		return TransposeTri{m.(Triangular)}
 	case Transpose:
@@ -415,6 +425,19 @@ func makeRandOf(a Matrix, m, n int) Matrix {
 			}
 		}
 		rMatrix = returnAs(mat, t)
+	case *TriBandDense:
+		if m != n {
+			panic("bad size")
+		}
+		k := t.mat.K
+		k = min(k, m-1) // Special case for small sizes.
+		data := make([]float64, m*(k+1))
+		for i := range data {
+			data[i] = rand.NormFloat64()
+		}
+		kind := uploToTriKind(t.mat.Uplo)
+		mat := NewTriBandDense(n, k, kind, data)
+		rMatrix = returnAs(mat, t)
 	case *DiagDense:
 		if m != n {
 			panic("bad size")
@@ -464,6 +487,19 @@ func makeCopyOf(a Matrix) Matrix {
 			}
 		}
 		return returnAs(m, t)
+	case *TriBandDense:
+		m := &TriBandDense{
+			mat: blas64.TriangularBand{
+				Uplo:   t.mat.Uplo,
+				Diag:   t.mat.Diag,
+				N:      t.mat.N,
+				K:      t.mat.K,
+				Data:   make([]float64, len(t.mat.Data)),
+				Stride: t.mat.Stride,
+			},
+		}
+		copy(m.mat.Data, t.mat.Data)
+		return m
 	case *VecDense:
 		m := &VecDense{
 			mat: blas64.Vector{
@@ -625,6 +661,8 @@ var testMatrices = []Matrix{
 	&DiagDense{},
 	&DiagDense{mat: blas64.Vector{Inc: 1}},
 	&DiagDense{mat: blas64.Vector{Inc: 10}},
+	NewTriBandDense(6, 2, Upper, nil),
+	NewTriBandDense(6, 2, Lower, nil),
 	&basicMatrix{},
 	&basicSymmetric{},
 	&basicTriangular{cap: 3, mat: blas64.Triangular{N: 3, Stride: 3, Uplo: blas.Upper}},
@@ -643,6 +681,12 @@ var testMatrices = []Matrix{
 	Transpose{&basicSymmetric{}},
 	Transpose{&basicTriangular{cap: 3, mat: blas64.Triangular{N: 3, Stride: 3, Uplo: blas.Upper}}},
 	Transpose{&basicTriangular{cap: 3, mat: blas64.Triangular{N: 3, Stride: 3, Uplo: blas.Lower}}},
+	Transpose{NewTriBandDense(6, 2, Upper, nil)},
+	TransposeTri{NewTriBandDense(6, 2, Upper, nil)},
+	TransposeTriBand{NewTriBandDense(6, 2, Upper, nil)},
+	Transpose{NewTriBandDense(6, 2, Lower, nil)},
+	TransposeTri{NewTriBandDense(6, 2, Lower, nil)},
+	TransposeTriBand{NewTriBandDense(6, 2, Lower, nil)},
 }
 
 var sizes = []struct {

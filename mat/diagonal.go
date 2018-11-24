@@ -15,6 +15,7 @@ var (
 	_         Diagonal        = diagDense
 	_         MutableDiagonal = diagDense
 	_         Triangular      = diagDense
+	_         TriBanded       = diagDense
 	_         Symmetric       = diagDense
 	_         SymBanded       = diagDense
 	_         Banded          = diagDense
@@ -89,7 +90,7 @@ func (d *DiagDense) T() Matrix {
 }
 
 // TTri returns the transpose of the matrix. Note that Diagonal matrices are
-// Upper by default
+// Upper by default.
 func (d *DiagDense) TTri() Triangular {
 	return TransposeTri{d}
 }
@@ -98,6 +99,12 @@ func (d *DiagDense) TTri() Triangular {
 // TransposeBand.
 func (d *DiagDense) TBand() Banded {
 	return TransposeBand{d}
+}
+
+// TTriBand performs an implicit transpose by returning the receiver inside a
+// TransposeTriBand. Note that Diagonal matrices are Upper by default.
+func (d *DiagDense) TTriBand() TriBanded {
+	return TransposeTriBand{d}
 }
 
 // Bandwidth returns the upper and lower bandwidths of the matrix.
@@ -111,9 +118,19 @@ func (d *DiagDense) Symmetric() int {
 	return d.n
 }
 
+// SymBand returns the number of rows/columns in the matrix, and the size of
+// the bandwidth.
+func (d *DiagDense) SymBand() (n, k int) {
+	return d.n, 0
+}
+
 // Triangle implements the Triangular interface.
 func (d *DiagDense) Triangle() (int, TriKind) {
 	return d.n, Upper
+}
+
+func (d *DiagDense) TriBand() (n, k int, kind TriKind) {
+	return d.n, 0, Upper
 }
 
 // Reset zeros the length of the matrix so that it can be reused as the

@@ -89,6 +89,13 @@ type UntransposeTrier interface {
 	UntransposeTri() Triangular
 }
 
+// UntransposeTriBander is a type that can undo an implicit triangular banded
+// transpose.
+type UntransposeTriBander interface {
+	// Untranspose returns the underlying Triangular stored for the implicit transpose.
+	UntransposeTriBand() TriBanded
+}
+
 // Mutable is a matrix interface type that allows elements to be altered.
 type Mutable interface {
 	// Set alters the matrix element at row i, column j to v.

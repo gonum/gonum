@@ -238,16 +238,16 @@ func (d *DiagDense) At(i, j int) float64 {
 }
 
 func (d *DiagDense) at(i, j int) float64 {
-	if uint(i) >= uint(len(d.data)) {
+	if uint(i) >= uint(d.n) {
 		panic(ErrRowAccess)
 	}
-	if uint(j) >= uint(len(d.data)) {
+	if uint(j) >= uint(d.n) {
 		panic(ErrColAccess)
 	}
 	if i != j {
 		return 0
 	}
-	return d.data[i]
+	return d.mat.Data[i*d.mat.Inc]
 }
 
 // SetDiag sets the element at row i, column i to the value v.
@@ -257,8 +257,8 @@ func (d *DiagDense) SetDiag(i int, v float64) {
 }
 
 func (d *DiagDense) setDiag(i int, v float64) {
-	if uint(i) >= uint(len(d.data)) {
+	if uint(i) >= uint(d.n) {
 		panic(ErrRowAccess)
 	}
-	d.data[i] = v
+	d.mat.Data[i*d.mat.Inc] = v
 }

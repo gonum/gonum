@@ -47,7 +47,8 @@ type MutableDiagonal interface {
 
 // DiagDense represents a diagonal matrix in dense storage format.
 type DiagDense struct {
-	data []float64
+	mat blas64.Vector
+	n   int
 }
 
 // NewDiagonal creates a new Diagonal matrix with n rows and n columns.
@@ -67,18 +68,19 @@ func NewDiagonal(n int, data []float64) *DiagDense {
 		panic(ErrShape)
 	}
 	return &DiagDense{
-		data: data,
+		mat: blas64.Vector{Data: data, Inc: 1},
+		n:   n,
 	}
 }
 
 // Diag returns the dimension of the receiver.
 func (d *DiagDense) Diag() int {
-	return len(d.data)
+	return d.n
 }
 
 // Dims returns the dimensions of the matrix.
 func (d *DiagDense) Dims() (r, c int) {
-	return len(d.data), len(d.data)
+	return d.n, d.n
 }
 
 // T returns the transpose of the matrix.
@@ -92,41 +94,151 @@ func (d *DiagDense) TTri() Triangular {
 	return TransposeTri{d}
 }
 
+// TBand performs an implicit transpose by returning the receiver inside a
+// TransposeBand.
 func (d *DiagDense) TBand() Banded {
 	return TransposeBand{d}
 }
 
+// Bandwidth returns the upper and lower bandwidths of the matrix.
+// These values are always zero for diagonal matrices.
 func (d *DiagDense) Bandwidth() (kl, ku int) {
 	return 0, 0
 }
 
 // Symmetric implements the Symmetric interface.
 func (d *DiagDense) Symmetric() int {
-	return len(d.data)
+	return d.n
 }
 
 // Triangle implements the Triangular interface.
 func (d *DiagDense) Triangle() (int, TriKind) {
-	return len(d.data), Upper
+	return d.n, Upper
 }
 
+// Reset zeros the length of the matrix so that it can be reused as the
+// receiver of a dimensionally restricted operation.
+//
+// See the Reseter interface for more information.
+func (d *DiagDense) Reset() {
+	// No change of Inc or n to 0 may be
+	// made unless both are set to 0.
+	d.mat.Inc = 0
+	d.n = 0
+	d.mat.Data = d.mat.Data[:0]
+}
+
+// DiagFrom copies the diagonal of m into the receiver. The receiver must
+// be min(r, c) long or zero. Otherwise DiagOf will panic.
+func (d *DiagDense) DiagFrom(m Matrix) {
+	n := min(m.Dims())
+	d.reuseAs(n)
+
+	var vec blas64.Vector
+	switch r := m.(type) {
+	case *DiagDense:
+		vec = r.mat
+	case RawBander:
+		mat := r.RawBand()
+		vec = blas64.Vector{
+			Inc:  mat.Stride,
+			Data: mat.Data[mat.KL : (n-1)*mat.Stride+mat.KL+1],
+		}
+	case RawMatrixer:
+		mat := r.RawMatrix()
+		vec = blas64.Vector{
+			Inc:  mat.Stride + 1,
+			Data: mat.Data[:(n-1)*mat.Stride+n],
+		}
+	case RawSymBander:
+		mat := r.RawSymBand()
+		vec = blas64.Vector{
+			Inc:  mat.Stride,
+			Data: mat.Data[:(n-1)*mat.Stride+1],
+		}
+	case RawSymmetricer:
+		mat := r.RawSymmetric()
+		vec = blas64.Vector{
+			Inc:  mat.Stride + 1,
+			Data: mat.Data[:(n-1)*mat.Stride+n],
+		}
+	// TODO(kortschak): Add banded triangular handling when the type exists.
+	case RawTriangular:
+		mat := r.RawTriangular()
+		if mat.Diag == blas.Unit {
+			for i := 0; i < n; i += d.mat.Inc {
+				d.mat.Data[i] = 1
+			}
+			return
+		}
+		vec = blas64.Vector{
+			Inc:  mat.Stride + 1,
+			Data: mat.Data[:(n-1)*mat.Stride+n],
+		}
+	case RawVectorer:
+		d.mat.Data[0] = r.RawVector().Data[0]
+		return
+	default:
+		for i := 0; i < n; i++ {
+			d.setDiag(i, m.At(i, i))
+		}
+		return
+	}
+	blas64.Copy(n, vec, d.mat)
+}
+
+// RawBand returns the underlying data used by the receiver represented
+// as a blas64.Band.
+// Changes to elements in the receiver following the call will be reflected
+// in returned blas64.Band.
 func (d *DiagDense) RawBand() blas64.Band {
 	return blas64.Band{
-		Rows:   len(d.data),
-		Cols:   len(d.data),
+		Rows:   d.n,
+		Cols:   d.n,
 		KL:     0,
 		KU:     0,
-		Stride: 1,
-		Data:   d.data,
+		Stride: d.mat.Inc,
+		Data:   d.mat.Data,
 	}
 }
 
+// RawSymBand returns the underlying data used by the receiver represented
+// as a blas64.SymmetricBand.
+// Changes to elements in the receiver following the call will be reflected
+// in returned blas64.Band.
 func (d *DiagDense) RawSymBand() blas64.SymmetricBand {
 	return blas64.SymmetricBand{
-		N:      len(d.data),
+		N:      d.n,
 		K:      0,
-		Stride: 1,
+		Stride: d.mat.Inc,
 		Uplo:   blas.Upper,
-		Data:   d.data,
+		Data:   d.mat.Data,
 	}
+}
+
+// reuseAs resizes an empty diagonal to a r×r diagonal,
+// or checks that a non-empty matrix is r×r.
+func (d *DiagDense) reuseAs(r int) {
+	if r == 0 {
+		panic(ErrZeroLength)
+	}
+	if d.IsZero() {
+		d.mat = blas64.Vector{
+			Inc:  1,
+			Data: use(d.mat.Data, r),
+		}
+		d.n = r
+		return
+	}
+	if r != d.n {
+		panic(ErrShape)
+	}
+}
+
+// IsZero returns whether the receiver is zero-sized. Zero-sized vectors can be the
+// receiver for size-restricted operations. DiagDenses can be zeroed using Reset.
+func (d *DiagDense) IsZero() bool {
+	// It must be the case that d.Dims() returns
+	// zeros in this case. See comment in Reset().
+	return d.mat.Inc == 0
 }

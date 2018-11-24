@@ -152,7 +152,8 @@ func (d *DiagDense) Triangle() (int, TriKind) {
 }
 
 // TriBand returns the number of rows/columns in the matrix, the
-// size of the bandwidth, and the orientation.
+// size of the bandwidth, and the orientation. Note that Diagonal matrices are
+// Upper by default.
 func (d *DiagDense) TriBand() (n, k int, kind TriKind) {
 	return d.n, 0, Upper
 }

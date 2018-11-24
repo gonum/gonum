@@ -39,28 +39,34 @@ type PortSetter interface {
 }
 
 // Unmarshal parses the Graphviz DOT-encoded data and stores the result in dst.
+// If the number of graphs encoded in data is not one, an error is returned and
+// dst will hold the first graph in data.
 func Unmarshal(data []byte, dst encoding.Builder) error {
 	file, err := dot.ParseBytes(data)
 	if err != nil {
 		return err
 	}
-	if len(file.Graphs) != 1 {
-		return fmt.Errorf("invalid number of graphs; expected 1, got %d", len(file.Graphs))
+	err = copyGraph(dst, file.Graphs[0])
+	if err == nil && len(file.Graphs) != 1 {
+		err = fmt.Errorf("invalid number of graphs; expected 1, got %d", len(file.Graphs))
 	}
-	return copyGraph(dst, file.Graphs[0])
+	return err
 }
 
 // UnmarshalMulti parses the Graphviz DOT-encoded data as a multigraph and
 // stores the result in dst.
+// If the number of graphs encoded in data is not one, an error is returned and
+// dst will hold the first graph in data.
 func UnmarshalMulti(data []byte, dst encoding.MultiBuilder) error {
 	file, err := dot.ParseBytes(data)
 	if err != nil {
 		return err
 	}
-	if len(file.Graphs) != 1 {
-		return fmt.Errorf("invalid number of graphs; expected 1, got %d", len(file.Graphs))
+	err = copyMultigraph(dst, file.Graphs[0])
+	if err == nil && len(file.Graphs) != 1 {
+		err = fmt.Errorf("invalid number of graphs; expected 1, got %d", len(file.Graphs))
 	}
-	return copyMultigraph(dst, file.Graphs[0])
+	return err
 }
 
 // copyGraph copies the nodes and edges from the Graphviz AST source graph to

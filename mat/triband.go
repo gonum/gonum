@@ -59,12 +59,13 @@ type MutableTriBanded interface {
 }
 
 var (
-	_ Matrix               = TransposeTriBand{}
-	_ TriBanded            = TransposeTriBand{}
-	_ Untransposer         = TransposeTriBand{}
-	_ UntransposeTrier     = TransposeTriBand{}
-	_ UntransposeBander    = TransposeTriBand{}
-	_ UntransposeTriBander = TransposeTriBand{}
+	tTriBand TransposeTriBand
+	_        Matrix               = tTriBand
+	_        TriBanded            = tTriBand
+	_        Untransposer         = tTriBand
+	_        UntransposeTrier     = tTriBand
+	_        UntransposeBander    = tTriBand
+	_        UntransposeTriBander = tTriBand
 )
 
 // TransposeBandTri is a type for performing an implicit transpose of a TriBanded
@@ -131,14 +132,17 @@ func (t TransposeTriBand) Untranspose() Matrix {
 	return t.TriBanded
 }
 
+// UntransposeTri returns the underlying Triangular matrix.
 func (t TransposeTriBand) UntransposeTri() Triangular {
 	return t.TriBanded
 }
 
+// UntransposeBand returns the underlying Banded matrix.
 func (t TransposeTriBand) UntransposeBand() Banded {
 	return t.TriBanded
 }
 
+// UntransposeTriBand returns the underlying TriBanded matrix.
 func (t TransposeTriBand) UntransposeTriBand() TriBanded {
 	return t.TriBanded
 }
@@ -239,6 +243,13 @@ func (t *TriBandDense) IsZero() bool {
 	// It must be the case that t.Dims() returns
 	// zeros in this case. See comment in Reset().
 	return t.mat.Stride == 0
+}
+
+func (t *TriBandDense) Reset() {
+	t.mat.N = 0
+	t.mat.Stride = 0
+	t.mat.K = 0
+	t.mat.Data = t.mat.Data[:0]
 }
 
 func (t *TriBandDense) isUpper() bool {

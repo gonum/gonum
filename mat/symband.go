@@ -121,6 +121,8 @@ func (s *SymBandDense) Bandwidth() (kl, ku int) {
 	return s.mat.K, s.mat.K
 }
 
+// SymBand returns the number of rows/columns in the matrix, and the size of
+// the bandwidth.
 func (s *SymBandDense) SymBand() (n, k int) {
 	return s.mat.N, s.mat.K
 }

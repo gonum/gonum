@@ -247,6 +247,7 @@ func (t *TriBandDense) At(i, j int) float64 {
 }
 
 func (t *TriBandDense) at(i, j int) float64 {
+	// TODO(btracey): Support Diag field, see #692.
 	isUpper := t.isUpper()
 	if (isUpper && i > j) || (!isUpper && i < j) {
 		return 0
@@ -283,6 +284,7 @@ func (t *TriBandDense) SetTriBand(i, j int, v float64) {
 	if pj < 0 || kl+ku+1 <= pj {
 		panic(ErrBandSet)
 	}
+	// TODO(btracey): Support Diag field, see #692.
 	t.mat.Data[i*t.mat.Stride+pj] = v
 }
 

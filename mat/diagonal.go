@@ -21,23 +21,45 @@ var (
 	_         Banded          = diagDense
 	_         RawBander       = diagDense
 	_         RawSymBander    = diagDense
+
+	diag Diagonal
+	_    Matrix     = diag
+	_    Diagonal   = diag
+	_    Triangular = diag
+	_    TriBanded  = diag
+	_    Symmetric  = diag
+	_    SymBanded  = diag
+	_    Banded     = diag
 )
 
 // Diagonal represents a diagonal matrix, that is a square matrix that only
 // has non-zero terms on the diagonal.
 type Diagonal interface {
 	Matrix
-	// Diag and Symmetric return the number of rows/columns in
-	// the matrix. Both methods are included to allow diagonal
-	// matrices to be used in functions taking symmetric inputs.
+	// Diag returns the number of rows/columns in the matrix.
 	Diag() int
-	Symmetric() int
 
 	// Bandwidth and TBand are included in the Diagonal interface
 	// to allow the use of Diagonal types in banded functions.
 	// Bandwidth will always return (0, 0).
 	Bandwidth() (kl, ku int)
 	TBand() Banded
+
+	// Triangular and TTri are included in the Diagonal interface
+	// to allow the use of Diagonal types in triangular functions.
+	Triangle() (int, TriKind)
+	TTri() Triangular
+
+	// Symmetric and SymBand are included in the Diagonal interface
+	// to allow the use of Diagonal types in symmetric and banded symmetric
+	// functions respectively.
+	Symmetric() int
+	SymBand() (n, k int)
+
+	// TriBand and TTriBand are included in the Diagonal interface
+	// to allow the use of Diagonal types in triangular banded functions.
+	TriBand() (n, k int, kind TriKind)
+	TTriBand() TriBanded
 }
 
 // MutableDiagonal is a Diagonal matrix whose elements can be set.
@@ -129,6 +151,8 @@ func (d *DiagDense) Triangle() (int, TriKind) {
 	return d.n, Upper
 }
 
+// TriBand returns the number of rows/columns in the matrix, the
+// size of the bandwidth, and the orientation.
 func (d *DiagDense) TriBand() (n, k int, kind TriKind) {
 	return d.n, 0, Upper
 }

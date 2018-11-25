@@ -487,6 +487,18 @@ func makeCopyOf(a Matrix) Matrix {
 			}
 		}
 		return returnAs(m, t)
+	case *SymBandDense:
+		m := &SymBandDense{
+			mat: blas64.SymmetricBand{
+				Uplo:   blas.Upper,
+				N:      t.mat.N,
+				K:      t.mat.K,
+				Data:   make([]float64, len(t.mat.Data)),
+				Stride: t.mat.Stride,
+			},
+		}
+		copy(m.mat.Data, t.mat.Data)
+		return m
 	case *TriBandDense:
 		m := &TriBandDense{
 			mat: blas64.TriangularBand{
@@ -648,37 +660,48 @@ func underlyingData(a Matrix) []float64 {
 }
 
 // testMatrices is a list of matrix types to test.
-// The TriDense types have actual sizes because the return from Triangular is
-// only valid when n == 0.
+// This test relies on the fact that the implementations of Triangle do not
+// corrupt the value of Uplo when they are zero-valued. This test will fail
+// if that changes (and some mechanism will need to be used to force the
+// correct TriKind to be read).
 var testMatrices = []Matrix{
 	&Dense{},
-	&SymDense{},
-	NewTriDense(3, true, nil),
-	NewTriDense(3, false, nil),
-	&basicVector{},
+	&basicMatrix{},
+	Transpose{&Dense{}},
+
 	&VecDense{mat: blas64.Vector{Inc: 1}},
 	&VecDense{mat: blas64.Vector{Inc: 10}},
-	&DiagDense{},
-	&DiagDense{mat: blas64.Vector{Inc: 1}},
-	&DiagDense{mat: blas64.Vector{Inc: 10}},
-	NewTriBandDense(6, 2, Upper, nil),
-	NewTriBandDense(6, 2, Lower, nil),
-	&basicMatrix{},
-	&basicSymmetric{},
-	&basicTriangular{cap: 3, mat: blas64.Triangular{N: 3, Stride: 3, Uplo: blas.Upper}},
-	&basicTriangular{cap: 3, mat: blas64.Triangular{N: 3, Stride: 3, Uplo: blas.Lower}},
-
-	Transpose{&Dense{}},
-	Transpose{NewTriDense(3, true, nil)},
-	TransposeTri{NewTriDense(3, true, nil)},
-	Transpose{NewTriDense(3, false, nil)},
-	TransposeTri{NewTriDense(3, false, nil)},
+	&basicVector{},
 	Transpose{&VecDense{mat: blas64.Vector{Inc: 1}}},
 	Transpose{&VecDense{mat: blas64.Vector{Inc: 10}}},
+	Transpose{&basicVector{}},
+
+	&SymDense{},
+	&basicSymmetric{},
+	Transpose{&basicSymmetric{}},
+
+	&TriDense{mat: blas64.Triangular{Uplo: blas.Upper}},
+	&TriDense{mat: blas64.Triangular{Uplo: blas.Lower}},
+	&basicTriangular{mat: blas64.Triangular{Uplo: blas.Upper}},
+	&basicTriangular{mat: blas64.Triangular{Uplo: blas.Lower}},
+	Transpose{&TriDense{mat: blas64.Triangular{Uplo: blas.Upper}}},
+	Transpose{&TriDense{mat: blas64.Triangular{Uplo: blas.Lower}}},
+	TransposeTri{&TriDense{mat: blas64.Triangular{Uplo: blas.Upper}}},
+	TransposeTri{&TriDense{mat: blas64.Triangular{Uplo: blas.Lower}}},
+	Transpose{&basicTriangular{mat: blas64.Triangular{Uplo: blas.Upper}}},
+	Transpose{&basicTriangular{mat: blas64.Triangular{Uplo: blas.Lower}}},
+	TransposeTri{&basicTriangular{mat: blas64.Triangular{Uplo: blas.Upper}}},
+	TransposeTri{&basicTriangular{mat: blas64.Triangular{Uplo: blas.Lower}}},
+
+	&SymBandDense{},
+
+	&DiagDense{mat: blas64.Vector{Inc: 1}},
+	&DiagDense{mat: blas64.Vector{Inc: 10}},
+	&TriBandDense{mat: blas64.TriangularBand{K: 2, Uplo: blas.Upper}},
+	&TriBandDense{mat: blas64.TriangularBand{K: 2, Uplo: blas.Lower}},
+
 	Transpose{&DiagDense{}},
 	TransposeTri{&DiagDense{}},
-	Transpose{&basicMatrix{}},
-	Transpose{&basicSymmetric{}},
 	Transpose{&basicTriangular{cap: 3, mat: blas64.Triangular{N: 3, Stride: 3, Uplo: blas.Upper}}},
 	Transpose{&basicTriangular{cap: 3, mat: blas64.Triangular{N: 3, Stride: 3, Uplo: blas.Lower}}},
 	Transpose{NewTriBandDense(6, 2, Upper, nil)},

@@ -154,7 +154,7 @@ func (t *TriDense) Dims() (r, c int) {
 // Triangle returns the dimension of t and its orientation. The returned
 // orientation is only valid when n is not zero.
 func (t *TriDense) Triangle() (n int, kind TriKind) {
-	return t.mat.N, TriKind(!t.IsZero()) && t.triKind()
+	return t.mat.N, t.triKind()
 }
 
 func (t *TriDense) isUpper() bool {

@@ -267,7 +267,7 @@ func (t *TriBandDense) triKind() TriKind {
 // Triangle returns the dimension of t and its orientation. The returned
 // orientation is only valid when n is not zero.
 func (t *TriBandDense) Triangle() (n int, kind TriKind) {
-	return t.mat.N, TriKind(!t.IsZero()) && t.triKind()
+	return t.mat.N, t.triKind()
 }
 
 // TTri performs an implicit transpose by returning the receiver inside a TransposeTri.

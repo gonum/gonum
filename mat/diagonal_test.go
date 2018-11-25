@@ -245,6 +245,42 @@ func TestDiagFrom(t *testing.T) {
 			}),
 		},
 		{
+			mat: NewTriBandDense(6, 2, Upper, []float64{
+				1, math.NaN(), math.NaN(),
+				2, math.NaN(), math.NaN(),
+				3, math.NaN(), math.NaN(),
+				4, math.NaN(), math.NaN(),
+				5, math.NaN(), math.NaN(),
+				6, math.NaN(), math.NaN(),
+			}),
+			want: NewDense(6, 6, []float64{
+				1, 0, 0, 0, 0, 0,
+				0, 2, 0, 0, 0, 0,
+				0, 0, 3, 0, 0, 0,
+				0, 0, 0, 4, 0, 0,
+				0, 0, 0, 0, 5, 0,
+				0, 0, 0, 0, 0, 6,
+			}),
+		},
+		{
+			mat: NewTriBandDense(6, 2, Lower, []float64{
+				math.NaN(), math.NaN(), 1,
+				math.NaN(), math.NaN(), 2,
+				math.NaN(), math.NaN(), 3,
+				math.NaN(), math.NaN(), 4,
+				math.NaN(), math.NaN(), 5,
+				math.NaN(), math.NaN(), 6,
+			}),
+			want: NewDense(6, 6, []float64{
+				1, 0, 0, 0, 0, 0,
+				0, 2, 0, 0, 0, 0,
+				0, 0, 3, 0, 0, 0,
+				0, 0, 0, 4, 0, 0,
+				0, 0, 0, 0, 5, 0,
+				0, 0, 0, 0, 0, 6,
+			}),
+		},
+		{
 			mat: NewTriDense(6, Upper, []float64{
 				1, math.NaN(), math.NaN(), math.NaN(), math.NaN(), math.NaN(),
 				math.NaN(), 2, math.NaN(), math.NaN(), math.NaN(), math.NaN(),

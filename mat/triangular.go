@@ -298,6 +298,9 @@ func (t *TriDense) isolatedWorkspace(a Triangular) (w *TriDense, restore func())
 
 // DiagView returns the diagonal as a matrix backed by the original data.
 func (t *TriDense) DiagView() Diagonal {
+	if t.mat.Diag == blas.Unit {
+		panic("mat: cannot take view of Unit diagonal")
+	}
 	n := t.mat.N
 	return &DiagDense{
 		mat: blas64.Vector{

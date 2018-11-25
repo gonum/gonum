@@ -248,6 +248,30 @@ func TestNewDiagonalRect(t *testing.T) {
 	}
 }
 
+func TestBandDiagView(t *testing.T) {
+	for cas, test := range []*BandDense{
+		NewBandDense(1, 1, 0, 0, []float64{1}),
+		NewBandDense(6, 6, 1, 2, []float64{
+			-1, 2, 3, 4,
+			5, 6, 7, 8,
+			9, 10, 11, 12,
+			13, 14, 15, 16,
+			17, 18, 19, -1,
+			21, 22, -1, -1,
+		}),
+		NewBandDense(6, 6, 2, 1, []float64{
+			-1, -1, 1, 2,
+			-1, 3, 4, 5,
+			6, 7, 8, 9,
+			10, 11, 12, 13,
+			14, 15, 16, 17,
+			18, 19, 20, -1,
+		}),
+	} {
+		testDiagView(t, cas, test)
+	}
+}
+
 func TestBandAtSet(t *testing.T) {
 	// 2  3  4  0  0  0
 	// 5  6  7  8  0  0

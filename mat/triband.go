@@ -305,3 +305,24 @@ func (t *TriBandDense) TTriBand() TriBanded {
 func (t *TriBandDense) RawTriBand() blas64.TriangularBand {
 	return t.mat
 }
+
+// DiagView returns the diagonal as a matrix backed by the original data.
+func (t *TriBandDense) DiagView() Diagonal {
+	n := t.mat.N
+	if t.isUpper() {
+		return &DiagDense{
+			mat: blas64.Vector{
+				Inc:  t.mat.Stride,
+				Data: t.mat.Data[:(n-1)*t.mat.Stride+1],
+			},
+			n: n,
+		}
+	}
+	return &DiagDense{
+		mat: blas64.Vector{
+			Inc:  t.mat.Stride,
+			Data: t.mat.Data[t.mat.K : t.mat.K+(n-1)*t.mat.Stride+1],
+		},
+		n: n,
+	}
+}

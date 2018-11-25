@@ -145,6 +145,18 @@ func (s *SymBandDense) RawSymBand() blas64.SymmetricBand {
 	return s.mat
 }
 
+// DiagView returns the diagonal as a matrix backed by the original data.
+func (s *SymBandDense) DiagView() Diagonal {
+	n := s.mat.N
+	return &DiagDense{
+		mat: blas64.Vector{
+			Inc:  s.mat.Stride,
+			Data: s.mat.Data[:(n-1)*s.mat.Stride+1],
+		},
+		n: n,
+	}
+}
+
 // DoNonZero calls the function fn for each of the non-zero elements of s. The function fn
 // takes a row/column index and the element value of s at (i, j).
 func (s *SymBandDense) DoNonZero(fn func(i, j int, v float64)) {

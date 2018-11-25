@@ -322,6 +322,42 @@ func TestDiagFrom(t *testing.T) {
 	}
 }
 
+// diagDenseViewer takes the view of the Diagonal with the underlying Diagonal
+// as the DiagDense type.
+type diagDenseViewer interface {
+	Matrix
+	DiagView() Diagonal
+}
+
+func testDiagView(t *testing.T, cas int, test diagDenseViewer) {
+	// Check the DiagView matches the Diagonal.
+	r, c := test.Dims()
+	diagView := test.DiagView()
+	for i := 0; i < min(r, c); i++ {
+		if diagView.At(i, i) != test.At(i, i) {
+			t.Errorf("Diag mismatch case %d, element %d", cas, i)
+		}
+	}
+
+	// Check that changes to the diagonal are reflected.
+	offset := 10.0
+	diag := diagView.(*DiagDense)
+	for i := 0; i < min(r, c); i++ {
+		v := test.At(i, i)
+		diag.SetDiag(i, v+offset)
+		if test.At(i, i) != v+offset {
+			t.Errorf("Diag set mismatch case %d, element %d", cas, i)
+		}
+	}
+
+	// Check that DiagView and DiagFrom match.
+	var diag2 DiagDense
+	diag2.DiagFrom(test)
+	if !Equal(diag, &diag2) {
+		t.Errorf("Cas %d: DiagView and DiagFrom mismatch", cas)
+	}
+}
+
 func TestDiagonalAtSet(t *testing.T) {
 	for _, n := range []int{1, 3, 8} {
 		for _, nilstart := range []bool{true, false} {

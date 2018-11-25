@@ -178,6 +178,18 @@ func (s *SymDense) isolatedWorkspace(a Symmetric) (w *SymDense, restore func()) 
 	}
 }
 
+// DiagView returns the diagonal as a matrix backed by the original data.
+func (s *SymDense) DiagView() Diagonal {
+	n := s.mat.N
+	return &DiagDense{
+		mat: blas64.Vector{
+			Inc:  s.mat.Stride + 1,
+			Data: s.mat.Data[:(n-1)*s.mat.Stride+n],
+		},
+		n: n,
+	}
+}
+
 func (s *SymDense) AddSym(a, b Symmetric) {
 	n := a.Symmetric()
 	if n != b.Symmetric() {

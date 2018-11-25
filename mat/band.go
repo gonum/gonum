@@ -188,6 +188,18 @@ func (b *BandDense) RawBand() blas64.Band {
 	return b.mat
 }
 
+// DiagView returns the diagonal as a matrix backed by the original data.
+func (b *BandDense) DiagView() Diagonal {
+	n := min(b.mat.Rows, b.mat.Cols)
+	return &DiagDense{
+		mat: blas64.Vector{
+			Inc:  b.mat.Stride,
+			Data: b.mat.Data[b.mat.KL : (n-1)*b.mat.Stride+b.mat.KL+1],
+		},
+		n: n,
+	}
+}
+
 // DoNonZero calls the function fn for each of the non-zero elements of b. The function fn
 // takes a row/column index and the element value of b at (i, j).
 func (b *BandDense) DoNonZero(fn func(i, j int, v float64)) {

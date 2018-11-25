@@ -179,3 +179,19 @@ func TestSymBandAtSet(t *testing.T) {
 		}
 	}
 }
+
+func TestSymBandDiagView(t *testing.T) {
+	for cas, test := range []*SymBandDense{
+		NewSymBandDense(1, 0, []float64{1}),
+		NewSymBandDense(6, 2, []float64{
+			1, 2, 3,
+			4, 5, 6,
+			7, 8, 9,
+			10, 11, 12,
+			13, 14, -1,
+			16, -1, -1,
+		}),
+	} {
+		testDiagView(t, cas, test)
+	}
+}

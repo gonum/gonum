@@ -170,6 +170,11 @@ func (d *DiagDense) Reset() {
 	d.mat.Data = d.mat.Data[:0]
 }
 
+// DiagView returns the diagonal as a matrix backed by the original data.
+func (d *DiagDense) DiagView() Diagonal {
+	return d
+}
+
 // DiagFrom copies the diagonal of m into the receiver. The receiver must
 // be min(r, c) long or zero. Otherwise DiagOf will panic.
 func (d *DiagDense) DiagFrom(m Matrix) {

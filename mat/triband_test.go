@@ -332,3 +332,30 @@ func TestTriBandAtSetUpper(t *testing.T) {
 		}
 	}
 }
+
+func TestTriBandDiagView(t *testing.T) {
+	for cas, test := range []*TriBandDense{
+		NewTriBandDense(1, 0, Upper, []float64{1}),
+		NewTriBandDense(4, 0, Upper, []float64{1, 2, 3, 4}),
+		NewTriBandDense(6, 2, Upper, []float64{
+			1, 2, 3,
+			4, 5, 6,
+			7, 8, 9,
+			10, 11, 12,
+			13, 14, -1,
+			15, -1, -1,
+		}),
+		NewTriBandDense(1, 0, Lower, []float64{1}),
+		NewTriBandDense(4, 0, Lower, []float64{1, 2, 3, 4}),
+		NewTriBandDense(6, 2, Lower, []float64{
+			-1, -1, 1,
+			-1, 2, 3,
+			4, 5, 6,
+			7, 8, 9,
+			10, 11, 12,
+			13, 14, 15,
+		}),
+	} {
+		testDiagView(t, cas, test)
+	}
+}

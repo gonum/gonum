@@ -34,13 +34,16 @@ type SymBanded interface {
 
 	// Symmetric returns the number of rows/columns in the matrix.
 	Symmetric() int
+
+	// SymBand returns the number of rows/columns in the matrix, and the size of
+	// the bandwidth.
+	SymBand() (n, k int)
 }
 
 // MutableSymBanded is a symmetric band matrix interface type that allows elements
 // to be altered.
 type MutableSymBanded interface {
-	Symmetric
-	Bandwidth() (kl, ku int)
+	SymBanded
 	SetSymBand(i, j int, v float64)
 }
 
@@ -55,7 +58,7 @@ type RawSymBander interface {
 // a new slice is allocated for the backing slice. If len(data) == n*(k+1),
 // data is used as the backing slice, and changes to the elements of the returned
 // SymBandDense will be reflected in data. If neither of these is true, NewSymBandDense
-// will panic. k must be at least zero and less than n, otherwise NewBandDense will panic.
+// will panic. k must be at least zero and less than n, otherwise NewSymBandDense will panic.
 //
 // The data must be arranged in row-major order constructed by removing the zeros
 // from the rows outside the band and aligning the diagonals. SymBandDense matrices
@@ -73,7 +76,7 @@ type RawSymBander interface {
 //    10 11 12
 //    13 14  *
 //    15  *  *
-// which is passed to NewBandDense as []float64{1, 2, 3, 4, ...} with k=2.
+// which is passed to NewSymBandDense as []float64{1, 2, ..., 15, *, *, *} with k=2.
 // Only the values in the band portion of the matrix are used.
 func NewSymBandDense(n, k int, data []float64) *SymBandDense {
 	if n <= 0 || k < 0 {
@@ -116,6 +119,12 @@ func (s *SymBandDense) Symmetric() int {
 // Bandwidth returns the bandwidths of the matrix.
 func (s *SymBandDense) Bandwidth() (kl, ku int) {
 	return s.mat.K, s.mat.K
+}
+
+// SymBand returns the number of rows/columns in the matrix, and the size of
+// the bandwidth.
+func (s *SymBandDense) SymBand() (n, k int) {
+	return s.mat.N, s.mat.K
 }
 
 // T implements the Matrix interface. Symmetric matrices, by definition, are

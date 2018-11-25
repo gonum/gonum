@@ -232,6 +232,60 @@ func (s *SymBandDense) set(i, j int, v float64) {
 	s.mat.Data[i*s.mat.Stride+pj] = v
 }
 
+func (t *TriBandDense) At(i, j int) float64 {
+	return t.at(i, j)
+}
+
+func (t *TriBandDense) at(i, j int) float64 {
+	// TODO(btracey): Support Diag field, see #692.
+	if uint(i) >= uint(t.mat.N) {
+		panic(ErrRowAccess)
+	}
+	if uint(j) >= uint(t.mat.N) {
+		panic(ErrColAccess)
+	}
+	isUpper := t.isUpper()
+	if (isUpper && i > j) || (!isUpper && i < j) {
+		return 0
+	}
+	kl, ku := t.mat.K, 0
+	if isUpper {
+		kl, ku = 0, t.mat.K
+	}
+	pj := j + kl - i
+	if pj < 0 || kl+ku+1 <= pj {
+		return 0
+	}
+	return t.mat.Data[i*t.mat.Stride+pj]
+}
+
+func (t *TriBandDense) SetTriBand(i, j int, v float64) {
+	t.setTriBand(i, j, v)
+}
+
+func (t *TriBandDense) setTriBand(i, j int, v float64) {
+	if uint(i) >= uint(t.mat.N) {
+		panic(ErrRowAccess)
+	}
+	if uint(j) >= uint(t.mat.N) {
+		panic(ErrColAccess)
+	}
+	isUpper := t.isUpper()
+	if (isUpper && i > j) || (!isUpper && i < j) {
+		panic(ErrTriangleSet)
+	}
+	kl, ku := t.mat.K, 0
+	if isUpper {
+		kl, ku = 0, t.mat.K
+	}
+	pj := j + kl - i
+	if pj < 0 || kl+ku+1 <= pj {
+		panic(ErrBandSet)
+	}
+	// TODO(btracey): Support Diag field, see #692.
+	t.mat.Data[i*t.mat.Stride+pj] = v
+}
+
 // At returns the element at row i, column j.
 func (d *DiagDense) At(i, j int) float64 {
 	return d.at(i, j)

@@ -45,7 +45,7 @@ type Diagonal interface {
 	Bandwidth() (kl, ku int)
 	TBand() Banded
 
-	// Triangular and TTri are included in the Diagonal interface
+	// Triangle and TTri are included in the Diagonal interface
 	// to allow the use of Diagonal types in triangular functions.
 	Triangle() (int, TriKind)
 	TTri() Triangular

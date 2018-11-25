@@ -68,7 +68,7 @@ var (
 	_        UntransposeTriBander = tTriBand
 )
 
-// TransposeBandTri is a type for performing an implicit transpose of a TriBanded
+// TransposeTriBand is a type for performing an implicit transpose of a TriBanded
 // matrix. It implements the TriBanded interface, returning values from the
 // transpose of the matrix within.
 type TransposeTriBand struct {
@@ -110,7 +110,7 @@ func (t TransposeTriBand) Bandwidth() (kl, ku int) {
 	return ku, kl
 }
 
-// TTri performs an implicit transpose by returning the TriBand field.
+// TBand performs an implicit transpose by returning the TriBand field.
 func (t TransposeTriBand) TBand() Banded {
 	return t.TriBanded
 }
@@ -294,7 +294,7 @@ func (t *TriBandDense) TriBand() (n, k int, kind TriKind) {
 	return t.mat.N, t.mat.K, TriKind(!t.IsZero()) && t.triKind()
 }
 
-// TBandTri performs an implicit transpose by returning the receiver inside a TransposeTriBand.
+// TTriBand performs an implicit transpose by returning the receiver inside a TransposeTriBand.
 func (t *TriBandDense) TTriBand() TriBanded {
 	return TransposeTriBand{t}
 }

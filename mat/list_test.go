@@ -563,11 +563,17 @@ func makeCopyOf(a Matrix) Matrix {
 		case *basicBanded:
 			band = (*BandDense)(s)
 		}
-		data := make([]float64, len(band.mat.Data))
-		copy(data, band.mat.Data)
-		r, c := band.Dims()
-		kl, ku := band.Bandwidth()
-		m := NewBandDense(r, c, kl, ku, data)
+		m := &BandDense{
+			mat: blas64.Band{
+				Rows:   band.mat.Rows,
+				Cols:   band.mat.Cols,
+				KL:     band.mat.KL,
+				KU:     band.mat.KU,
+				Data:   make([]float64, len(band.mat.Data)),
+				Stride: band.mat.Stride,
+			},
+		}
+		copy(m.mat.Data, band.mat.Data)
 		return returnAs(m, t)
 	case *SymBandDense, *basicSymBanded:
 		var sym *SymBandDense

@@ -510,11 +510,27 @@ func makeRandOf(a Matrix, m, n int) Matrix {
 		if m != n {
 			panic("bad size")
 		}
-		diag := NewDiagonal(m, nil)
-		for i := 0; i < n; i++ {
-			diag.SetDiag(i, rand.NormFloat64())
+		var inc int
+		switch t := t.(type) {
+		case *DiagDense:
+			inc = t.mat.Inc
+		case *basicDiagonal:
+			inc = (*DiagDense)(t).mat.Inc
 		}
-		rMatrix = returnAs(diag, t)
+		if inc == 0 {
+			inc = 1
+		}
+		mat := &DiagDense{
+			mat: blas64.Vector{
+				Inc:  inc,
+				Data: make([]float64, inc*(n-1)+1),
+			},
+			n: n,
+		}
+		for i := 0; i < n; i++ {
+			mat.SetDiag(i, rand.Float64())
+		}
+		rMatrix = returnAs(mat, t)
 	}
 	if mr, mc := rMatrix.Dims(); mr != m || mc != n {
 		panic(fmt.Sprintf("makeRandOf for %T returns wrong size: %d×%d != %d×%d", a, m, n, mr, mc))
@@ -639,7 +655,7 @@ func makeCopyOf(a Matrix) Matrix {
 			diag = (*DiagDense)(s)
 		}
 		d := &DiagDense{
-			mat: blas64.Vector{Inc: 1, Data: make([]float64, len(diag.mat.Data))},
+			mat: blas64.Vector{Inc: diag.mat.Inc, Data: make([]float64, len(diag.mat.Data))},
 			n:   diag.n,
 		}
 		copy(d.mat.Data, diag.mat.Data)
@@ -839,16 +855,21 @@ var testMatrices = []Matrix{
 	TransposeTriBand{&basicTriBanded{mat: blas64.TriangularBand{K: 2, Uplo: blas.Upper}}},
 	TransposeTriBand{&basicTriBanded{mat: blas64.TriangularBand{K: 2, Uplo: blas.Lower}}},
 
-	&DiagDense{mat: blas64.Vector{Inc: 1}},
+	&DiagDense{},
 	&DiagDense{mat: blas64.Vector{Inc: 10}},
-	Transpose{&DiagDense{mat: blas64.Vector{Inc: 1}}},
+	Transpose{&DiagDense{}},
 	Transpose{&DiagDense{mat: blas64.Vector{Inc: 10}}},
-	TransposeTri{&DiagDense{mat: blas64.Vector{Inc: 1}}},
+	TransposeTri{&DiagDense{}},
 	TransposeTri{&DiagDense{mat: blas64.Vector{Inc: 10}}},
-	TransposeBand{&DiagDense{mat: blas64.Vector{Inc: 1}}},
+	TransposeBand{&DiagDense{}},
 	TransposeBand{&DiagDense{mat: blas64.Vector{Inc: 10}}},
-	TransposeTriBand{&DiagDense{mat: blas64.Vector{Inc: 1}}},
+	TransposeTriBand{&DiagDense{}},
 	TransposeTriBand{&DiagDense{mat: blas64.Vector{Inc: 10}}},
+	&basicDiagonal{},
+	Transpose{&basicDiagonal{}},
+	TransposeTri{&basicDiagonal{}},
+	TransposeBand{&basicDiagonal{}},
+	TransposeTriBand{&basicDiagonal{}},
 }
 
 var sizes = []struct {

@@ -16,9 +16,13 @@ import (
 	"gonum.org/v1/gonum/floats"
 )
 
-func asBasicMatrix(d *Dense) Matrix            { return (*basicMatrix)(d) }
-func asBasicSymmetric(s *SymDense) Matrix      { return (*basicSymmetric)(s) }
-func asBasicTriangular(t *TriDense) Triangular { return (*basicTriangular)(t) }
+func asBasicMatrix(d *Dense) Matrix              { return (*basicMatrix)(d) }
+func asBasicSymmetric(s *SymDense) Matrix        { return (*basicSymmetric)(s) }
+func asBasicTriangular(t *TriDense) Triangular   { return (*basicTriangular)(t) }
+func asBasicBanded(b *BandDense) Banded          { return (*basicBanded)(b) }
+func asBasicSymBanded(s *SymBandDense) SymBanded { return (*basicSymBanded)(s) }
+func asBasicTriBanded(t *TriBandDense) TriBanded { return (*basicTriBanded)(t) }
+func asBasicDiagonal(d *DiagDense) Diagonal      { return (*basicDiagonal)(d) }
 
 func TestNewDense(t *testing.T) {
 	for i, test := range []struct {

@@ -229,12 +229,14 @@ func legalDims(a Matrix, m, n int) bool {
 		panic("legal dims type not coded")
 	case Untransposer:
 		return legalDims(t.Untranspose(), n, m)
-	case *Dense, *basicMatrix:
+	case *Dense, *basicMatrix, *BandDense, *basicBanded:
 		if m < 0 || n < 0 {
 			return false
 		}
 		return true
-	case *SymDense, *TriDense, *basicSymmetric, *basicTriangular, *TriBandDense, *DiagDense:
+	case *SymDense, *TriDense, *basicSymmetric, *basicTriangular,
+		*SymBandDense, *basicSymBanded, *TriBandDense, *basicTriBanded,
+		*basicDiagonal, *DiagDense:
 		if m < 0 || n < 0 || m != n {
 			return false
 		}
@@ -280,13 +282,32 @@ func returnAs(a, t Matrix) Matrix {
 		case *basicTriangular:
 			return asBasicTriangular(mat)
 		}
+	case *BandDense:
+		switch t.(type) {
+		default:
+			panic("bad type")
+		case *BandDense:
+			return mat
+		case *basicBanded:
+			return asBasicBanded(mat)
+		}
+	case *SymBandDense:
+		switch t.(type) {
+		default:
+			panic("bad type")
+		case *SymBandDense:
+			return mat
+		case *basicSymBanded:
+			return asBasicSymBanded(mat)
+		}
 	case *TriBandDense:
 		switch t.(type) {
 		default:
 			panic("bad type")
 		case *TriBandDense:
 			return mat
-			// TODO(btracey): basic TriBandDense
+		case *basicTriBanded:
+			return asBasicTriBanded(mat)
 		}
 	case *DiagDense:
 		switch t.(type) {
@@ -294,7 +315,8 @@ func returnAs(a, t Matrix) Matrix {
 			panic("bad type")
 		case *DiagDense:
 			return mat
-			// TODO(btracey): basic diagonaler
+		case *basicDiagonal:
+			return asBasicDiagonal(mat)
 		}
 	}
 }
@@ -305,6 +327,8 @@ func retranspose(a, m Matrix) Matrix {
 	switch a.(type) {
 	case TransposeTriBand:
 		return TransposeTriBand{m.(TriBanded)}
+	case TransposeBand:
+		return TransposeBand{m.(Banded)}
 	case TransposeTri:
 		return TransposeTri{m.(Triangular)}
 	case Transpose:
@@ -425,28 +449,88 @@ func makeRandOf(a Matrix, m, n int) Matrix {
 			}
 		}
 		rMatrix = returnAs(mat, t)
-	case *TriBandDense:
+	case *BandDense, *basicBanded:
+		var kl, ku int
+		switch t := t.(type) {
+		case *BandDense:
+			kl = t.mat.KL
+			ku = t.mat.KU
+		case *basicBanded:
+			ku = (*BandDense)(t).mat.KU
+			kl = (*BandDense)(t).mat.KL
+		}
+		ku = min(ku, n-1)
+		kl = min(kl, m-1)
+		data := make([]float64, min(m, n+kl)*(kl+ku+1))
+		for i := range data {
+			data[i] = rand.NormFloat64()
+		}
+		mat := NewBandDense(m, n, kl, ku, data)
+		rMatrix = returnAs(mat, t)
+	case *SymBandDense, *basicSymBanded:
 		if m != n {
 			panic("bad size")
 		}
-		k := t.mat.K
+		var k int
+		switch t := t.(type) {
+		case *SymBandDense:
+			k = t.mat.K
+		case *basicSymBanded:
+			k = (*SymBandDense)(t).mat.K
+		}
 		k = min(k, m-1) // Special case for small sizes.
 		data := make([]float64, m*(k+1))
 		for i := range data {
 			data[i] = rand.NormFloat64()
 		}
-		kind := uploToTriKind(t.mat.Uplo)
-		mat := NewTriBandDense(n, k, kind, data)
+		mat := NewSymBandDense(n, k, data)
 		rMatrix = returnAs(mat, t)
-	case *DiagDense:
+	case *TriBandDense, *basicTriBanded:
 		if m != n {
 			panic("bad size")
 		}
-		diag := NewDiagonal(m, nil)
-		for i := 0; i < n; i++ {
-			diag.SetDiag(i, rand.NormFloat64())
+		var k int
+		var triKind TriKind
+		switch t := t.(type) {
+		case *TriBandDense:
+			k = t.mat.K
+			triKind = t.triKind()
+		case *basicTriBanded:
+			k = (*TriBandDense)(t).mat.K
+			triKind = (*TriBandDense)(t).triKind()
 		}
-		rMatrix = returnAs(diag, t)
+		k = min(k, m-1) // Special case for small sizes.
+		data := make([]float64, m*(k+1))
+		for i := range data {
+			data[i] = rand.NormFloat64()
+		}
+		mat := NewTriBandDense(n, k, triKind, data)
+		rMatrix = returnAs(mat, t)
+	case *DiagDense, *basicDiagonal:
+		if m != n {
+			panic("bad size")
+		}
+		var inc int
+		switch t := t.(type) {
+		case *DiagDense:
+			inc = t.mat.Inc
+		case *basicDiagonal:
+			inc = (*DiagDense)(t).mat.Inc
+		}
+		if inc == 0 {
+			inc = 1
+		}
+		mat := &DiagDense{
+			mat: blas64.Vector{
+				Inc:  inc,
+				Data: make([]float64, inc*(n-1)+1),
+			},
+			n: n,
+		}
+		for i := 0; i < n; i++ {
+			mat.SetDiag(i, rand.Float64())
+		}
+		rMatrix = returnAs(mat, t)
 	}
 	if mr, mc := rMatrix.Dims(); mr != m || mc != n {
 		panic(fmt.Sprintf("makeRandOf for %T returns wrong size: %d×%d != %d×%d", a, m, n, mr, mc))
@@ -487,19 +571,65 @@ func makeCopyOf(a Matrix) Matrix {
 			}
 		}
 		return returnAs(m, t)
-	case *TriBandDense:
-		m := &TriBandDense{
-			mat: blas64.TriangularBand{
-				Uplo:   t.mat.Uplo,
-				Diag:   t.mat.Diag,
-				N:      t.mat.N,
-				K:      t.mat.K,
-				Data:   make([]float64, len(t.mat.Data)),
-				Stride: t.mat.Stride,
+	case *BandDense, *basicBanded:
+		var band *BandDense
+		switch s := t.(type) {
+		case *BandDense:
+			band = s
+		case *basicBanded:
+			band = (*BandDense)(s)
+		}
+		m := &BandDense{
+			mat: blas64.Band{
+				Rows:   band.mat.Rows,
+				Cols:   band.mat.Cols,
+				KL:     band.mat.KL,
+				KU:     band.mat.KU,
+				Data:   make([]float64, len(band.mat.Data)),
+				Stride: band.mat.Stride,
 			},
 		}
-		copy(m.mat.Data, t.mat.Data)
-		return m
+		copy(m.mat.Data, band.mat.Data)
+		return returnAs(m, t)
+	case *SymBandDense, *basicSymBanded:
+		var sym *SymBandDense
+		switch s := t.(type) {
+		case *SymBandDense:
+			sym = s
+		case *basicSymBanded:
+			sym = (*SymBandDense)(s)
+		}
+		m := &SymBandDense{
+			mat: blas64.SymmetricBand{
+				Uplo:   blas.Upper,
+				N:      sym.mat.N,
+				K:      sym.mat.K,
+				Data:   make([]float64, len(sym.mat.Data)),
+				Stride: sym.mat.Stride,
+			},
+		}
+		copy(m.mat.Data, sym.mat.Data)
+		return returnAs(m, t)
+	case *TriBandDense, *basicTriBanded:
+		var tri *TriBandDense
+		switch s := t.(type) {
+		case *TriBandDense:
+			tri = s
+		case *basicTriBanded:
+			tri = (*TriBandDense)(s)
+		}
+		m := &TriBandDense{
+			mat: blas64.TriangularBand{
+				Uplo:   tri.mat.Uplo,
+				Diag:   tri.mat.Diag,
+				N:      tri.mat.N,
+				K:      tri.mat.K,
+				Data:   make([]float64, len(tri.mat.Data)),
+				Stride: tri.mat.Stride,
+			},
+		}
+		copy(m.mat.Data, tri.mat.Data)
+		return returnAs(m, t)
 	case *VecDense:
 		m := &VecDense{
 			mat: blas64.Vector{
@@ -516,13 +646,20 @@ func makeCopyOf(a Matrix) Matrix {
 		}
 		copy(m.m, t.m)
 		return m
-	case *DiagDense:
-		d := &DiagDense{
-			mat: blas64.Vector{Inc: 1, Data: make([]float64, len(t.mat.Data))},
-			n:   t.n,
+	case *DiagDense, *basicDiagonal:
+		var diag *DiagDense
+		switch s := t.(type) {
+		case *DiagDense:
+			diag = s
+		case *basicDiagonal:
+			diag = (*DiagDense)(s)
 		}
-		copy(d.mat.Data, t.mat.Data)
-		return d
+		d := &DiagDense{
+			mat: blas64.Vector{Inc: diag.mat.Inc, Data: make([]float64, len(diag.mat.Data))},
+			n:   diag.n,
+		}
+		copy(d.mat.Data, diag.mat.Data)
+		return returnAs(d, t)
 	}
 }
 
@@ -648,45 +785,91 @@ func underlyingData(a Matrix) []float64 {
 }
 
 // testMatrices is a list of matrix types to test.
-// The TriDense types have actual sizes because the return from Triangular is
-// only valid when n == 0.
+// This test relies on the fact that the implementations of Triangle do not
+// corrupt the value of Uplo when they are zero-valued. This test will fail
+// if that changes (and some mechanism will need to be used to force the
+// correct TriKind to be read).
 var testMatrices = []Matrix{
 	&Dense{},
-	&SymDense{},
-	NewTriDense(3, true, nil),
-	NewTriDense(3, false, nil),
-	&basicVector{},
+	&basicMatrix{},
+	Transpose{&Dense{}},
+
 	&VecDense{mat: blas64.Vector{Inc: 1}},
 	&VecDense{mat: blas64.Vector{Inc: 10}},
-	&DiagDense{},
-	&DiagDense{mat: blas64.Vector{Inc: 1}},
-	&DiagDense{mat: blas64.Vector{Inc: 10}},
-	NewTriBandDense(6, 2, Upper, nil),
-	NewTriBandDense(6, 2, Lower, nil),
-	&basicMatrix{},
-	&basicSymmetric{},
-	&basicTriangular{cap: 3, mat: blas64.Triangular{N: 3, Stride: 3, Uplo: blas.Upper}},
-	&basicTriangular{cap: 3, mat: blas64.Triangular{N: 3, Stride: 3, Uplo: blas.Lower}},
-
-	Transpose{&Dense{}},
-	Transpose{NewTriDense(3, true, nil)},
-	TransposeTri{NewTriDense(3, true, nil)},
-	Transpose{NewTriDense(3, false, nil)},
-	TransposeTri{NewTriDense(3, false, nil)},
+	&basicVector{},
 	Transpose{&VecDense{mat: blas64.Vector{Inc: 1}}},
 	Transpose{&VecDense{mat: blas64.Vector{Inc: 10}}},
-	Transpose{&DiagDense{}},
-	TransposeTri{&DiagDense{}},
-	Transpose{&basicMatrix{}},
+	Transpose{&basicVector{}},
+
+	&BandDense{mat: blas64.Band{KL: 2, KU: 1}},
+	&BandDense{mat: blas64.Band{KL: 1, KU: 2}},
+	Transpose{&BandDense{mat: blas64.Band{KL: 2, KU: 1}}},
+	Transpose{&BandDense{mat: blas64.Band{KL: 1, KU: 2}}},
+	TransposeBand{&BandDense{mat: blas64.Band{KL: 2, KU: 1}}},
+	TransposeBand{&BandDense{mat: blas64.Band{KL: 1, KU: 2}}},
+
+	&SymDense{},
+	&basicSymmetric{},
 	Transpose{&basicSymmetric{}},
-	Transpose{&basicTriangular{cap: 3, mat: blas64.Triangular{N: 3, Stride: 3, Uplo: blas.Upper}}},
-	Transpose{&basicTriangular{cap: 3, mat: blas64.Triangular{N: 3, Stride: 3, Uplo: blas.Lower}}},
-	Transpose{NewTriBandDense(6, 2, Upper, nil)},
-	TransposeTri{NewTriBandDense(6, 2, Upper, nil)},
-	TransposeTriBand{NewTriBandDense(6, 2, Upper, nil)},
-	Transpose{NewTriBandDense(6, 2, Lower, nil)},
-	TransposeTri{NewTriBandDense(6, 2, Lower, nil)},
-	TransposeTriBand{NewTriBandDense(6, 2, Lower, nil)},
+
+	&TriDense{mat: blas64.Triangular{Uplo: blas.Upper}},
+	&TriDense{mat: blas64.Triangular{Uplo: blas.Lower}},
+	&basicTriangular{mat: blas64.Triangular{Uplo: blas.Upper}},
+	&basicTriangular{mat: blas64.Triangular{Uplo: blas.Lower}},
+	Transpose{&TriDense{mat: blas64.Triangular{Uplo: blas.Upper}}},
+	Transpose{&TriDense{mat: blas64.Triangular{Uplo: blas.Lower}}},
+	TransposeTri{&TriDense{mat: blas64.Triangular{Uplo: blas.Upper}}},
+	TransposeTri{&TriDense{mat: blas64.Triangular{Uplo: blas.Lower}}},
+	Transpose{&basicTriangular{mat: blas64.Triangular{Uplo: blas.Upper}}},
+	Transpose{&basicTriangular{mat: blas64.Triangular{Uplo: blas.Lower}}},
+	TransposeTri{&basicTriangular{mat: blas64.Triangular{Uplo: blas.Upper}}},
+	TransposeTri{&basicTriangular{mat: blas64.Triangular{Uplo: blas.Lower}}},
+
+	&SymBandDense{},
+	&basicSymBanded{},
+	Transpose{&basicSymBanded{}},
+
+	&SymBandDense{mat: blas64.SymmetricBand{K: 2}},
+	&basicSymBanded{mat: blas64.SymmetricBand{K: 2}},
+	Transpose{&basicSymBanded{mat: blas64.SymmetricBand{K: 2}}},
+	TransposeBand{&basicSymBanded{mat: blas64.SymmetricBand{K: 2}}},
+
+	&TriBandDense{mat: blas64.TriangularBand{K: 2, Uplo: blas.Upper}},
+	&TriBandDense{mat: blas64.TriangularBand{K: 2, Uplo: blas.Lower}},
+	&basicTriBanded{mat: blas64.TriangularBand{K: 2, Uplo: blas.Upper}},
+	&basicTriBanded{mat: blas64.TriangularBand{K: 2, Uplo: blas.Lower}},
+	Transpose{&TriBandDense{mat: blas64.TriangularBand{K: 2, Uplo: blas.Upper}}},
+	Transpose{&TriBandDense{mat: blas64.TriangularBand{K: 2, Uplo: blas.Lower}}},
+	Transpose{&basicTriBanded{mat: blas64.TriangularBand{K: 2, Uplo: blas.Upper}}},
+	Transpose{&basicTriBanded{mat: blas64.TriangularBand{K: 2, Uplo: blas.Lower}}},
+	TransposeTri{&TriBandDense{mat: blas64.TriangularBand{K: 2, Uplo: blas.Upper}}},
+	TransposeTri{&TriBandDense{mat: blas64.TriangularBand{K: 2, Uplo: blas.Lower}}},
+	TransposeTri{&basicTriBanded{mat: blas64.TriangularBand{K: 2, Uplo: blas.Upper}}},
+	TransposeTri{&basicTriBanded{mat: blas64.TriangularBand{K: 2, Uplo: blas.Lower}}},
+	TransposeBand{&TriBandDense{mat: blas64.TriangularBand{K: 2, Uplo: blas.Upper}}},
+	TransposeBand{&TriBandDense{mat: blas64.TriangularBand{K: 2, Uplo: blas.Lower}}},
+	TransposeBand{&basicTriBanded{mat: blas64.TriangularBand{K: 2, Uplo: blas.Upper}}},
+	TransposeBand{&basicTriBanded{mat: blas64.TriangularBand{K: 2, Uplo: blas.Lower}}},
+	TransposeTriBand{&TriBandDense{mat: blas64.TriangularBand{K: 2, Uplo: blas.Upper}}},
+	TransposeTriBand{&TriBandDense{mat: blas64.TriangularBand{K: 2, Uplo: blas.Lower}}},
+	TransposeTriBand{&basicTriBanded{mat: blas64.TriangularBand{K: 2, Uplo: blas.Upper}}},
+	TransposeTriBand{&basicTriBanded{mat: blas64.TriangularBand{K: 2, Uplo: blas.Lower}}},
+
+	&DiagDense{},
+	&DiagDense{mat: blas64.Vector{Inc: 10}},
+	Transpose{&DiagDense{}},
+	Transpose{&DiagDense{mat: blas64.Vector{Inc: 10}}},
+	TransposeTri{&DiagDense{}},
+	TransposeTri{&DiagDense{mat: blas64.Vector{Inc: 10}}},
+	TransposeBand{&DiagDense{}},
+	TransposeBand{&DiagDense{mat: blas64.Vector{Inc: 10}}},
+	TransposeTriBand{&DiagDense{}},
+	TransposeTriBand{&DiagDense{mat: blas64.Vector{Inc: 10}}},
+	&basicDiagonal{},
+	Transpose{&basicDiagonal{}},
+	TransposeTri{&basicDiagonal{}},
+	TransposeBand{&basicDiagonal{}},
+	TransposeTriBand{&basicDiagonal{}},
 }
 
 var sizes = []struct {

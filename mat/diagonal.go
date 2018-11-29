@@ -176,7 +176,7 @@ func (d *DiagDense) DiagView() Diagonal {
 }
 
 // DiagFrom copies the diagonal of m into the receiver. The receiver must
-// be min(r, c) long or zero. Otherwise DiagOf will panic.
+// be min(r, c) long or zero. Otherwise DiagFrom will panic.
 func (d *DiagDense) DiagFrom(m Matrix) {
 	n := min(m.Dims())
 	d.reuseAs(n)

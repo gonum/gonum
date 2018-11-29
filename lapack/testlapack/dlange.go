@@ -34,16 +34,23 @@ func DlangeTest(t *testing.T, impl Dlanger) {
 		if lda == 0 {
 			lda = n
 		}
+		// Allocate m×n matrix A and fill it with random numbers from [-0.5, 0.5).
 		a := make([]float64, m*lda)
 		for i := range a {
 			a[i] = rnd.Float64() - 0.5
 		}
+		// Store a copy of A for later comparison.
+		aCopy := make([]float64, len(a))
+		copy(aCopy, a)
+
+		// Allocate workspace slice.
 		work := make([]float64, n)
 		for i := range work {
 			work[i] = rnd.Float64()
 		}
-		aCopy := make([]float64, len(a))
-		copy(aCopy, a)
+
+		// Test various norms by comparing the result from Dlange with
+		// explicit calculation.
 
 		// Test MaxAbs norm.
 		norm := impl.Dlange(lapack.MaxAbs, m, n, a, lda, work)
@@ -79,7 +86,7 @@ func DlangeTest(t *testing.T, impl Dlanger) {
 			t.Errorf("MaxRowSum mismatch. Want %v, got %v.", ans, norm)
 		}
 
-		// Test Frobenius norm
+		// Test Frobenius norm.
 		norm = impl.Dlange(lapack.Frobenius, m, n, a, lda, work)
 		ans = 0
 		for i := 0; i < m; i++ {

@@ -74,16 +74,16 @@ func (b Binomial) Prob(x float64) float64 {
 // Rand returns a random sample drawn from the distribution.
 func (b Binomial) Rand() float64 {
 	// NUMERICAL RECIPES IN C: THE ART OF SCIENTIFIC COMPUTING (ISBN 0-521-43108-5)
-	// p. 294
+	// p. 295-6
 	// <http://www.aip.de/groups/soe/local/numres/bookcpdf/c7-3.pdf>
 
-	unifrnd := rand.Float64
-	exprnd := rand.ExpFloat64
+	runif := rand.Float64
+	rexp := rand.ExpFloat64
 	var rng *rand.Rand
 	if b.Src != nil {
 		rng = rand.New(b.Src)
-		unifrnd = rng.Float64
-		exprnd = rng.ExpFloat64
+		runif = rng.Float64
+		rexp = rng.ExpFloat64
 	}
 
 	p := b.P
@@ -96,7 +96,7 @@ func (b Binomial) Rand() float64 {
 		// Use direct method.
 		bnl := 0.0
 		for i := 0; i < int(b.N); i++ {
-			if unifrnd() < p {
+			if runif() < p {
 				bnl++
 			}
 		}
@@ -110,13 +110,13 @@ func (b Binomial) Rand() float64 {
 		// Use rejection method with Poisson proposal.
 		var bnl float64
 		z := -p
-		pclog := (1.0 + 0.5*z) * z / (1.0 + (1.0+0.16666666666666666*z)*z)
+		pclog := (1.0 + 0.5*z) * z / (1.0 + (1.0+1.0/6*z)*z)
 
 		for {
 			bnl = 0.0
 			t := 0.0
 			for i := 0; i < int(b.N); i++ {
-				t += exprnd()
+				t += rexp()
 				if t >= am {
 					break
 				}
@@ -124,9 +124,9 @@ func (b Binomial) Rand() float64 {
 			}
 			bnlc := b.N - bnl
 			z = -bnl / b.N
-			log1p := (1.0 + 0.5*z) * z / (1.0 + (1.0+0.16666666666666666*z)*z)
+			log1p := (1.0 + 0.5*z) * z / (1.0 + (1.0+1.0/6*z)*z)
 			t = (bnlc+0.5)*log1p + bnl - bnlc*pclog + 1/(12*bnlc) - am + 2.6e-02
-			if exprnd() >= t {
+			if rexp() >= t {
 				break
 			}
 		}
@@ -144,7 +144,7 @@ func (b Binomial) Rand() float64 {
 	for {
 		var em, y float64
 		for {
-			y = math.Tan(math.Pi * unifrnd())
+			y = math.Tan(math.Pi * runif())
 			em = sq*y + am
 			if em >= 0 && em < b.N+1.0 {
 				break
@@ -154,7 +154,7 @@ func (b Binomial) Rand() float64 {
 		lg1, _ := math.Lgamma(em + 1)
 		lg2, _ := math.Lgamma(b.N - em + 1)
 		t := 1.2 * sq * (1.0 + y*y) * math.Exp(g-lg1-lg2+em*plog+(b.N-em)*pclog)
-		if unifrnd() <= t {
+		if runif() <= t {
 			if p != b.P {
 				return b.N - em
 			}

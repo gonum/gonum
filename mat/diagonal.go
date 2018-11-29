@@ -170,8 +170,13 @@ func (d *DiagDense) Reset() {
 	d.mat.Data = d.mat.Data[:0]
 }
 
+// DiagView returns the diagonal as a matrix backed by the original data.
+func (d *DiagDense) DiagView() Diagonal {
+	return d
+}
+
 // DiagFrom copies the diagonal of m into the receiver. The receiver must
-// be min(r, c) long or zero. Otherwise DiagOf will panic.
+// be min(r, c) long or zero. Otherwise DiagFrom will panic.
 func (d *DiagDense) DiagFrom(m Matrix) {
 	n := min(m.Dims())
 	d.reuseAs(n)
@@ -204,7 +209,16 @@ func (d *DiagDense) DiagFrom(m Matrix) {
 			Inc:  mat.Stride + 1,
 			Data: mat.Data[:(n-1)*mat.Stride+n],
 		}
-	// TODO(kortschak): Add banded triangular handling when the type exists.
+	case RawTriBander:
+		mat := r.RawTriBand()
+		data := mat.Data
+		if mat.Uplo == blas.Lower {
+			data = data[mat.K:]
+		}
+		vec = blas64.Vector{
+			Inc:  mat.Stride,
+			Data: data[:(n-1)*mat.Stride+1],
+		}
 	case RawTriangular:
 		mat := r.RawTriangular()
 		if mat.Diag == blas.Unit {

@@ -245,6 +245,42 @@ func TestDiagFrom(t *testing.T) {
 			}),
 		},
 		{
+			mat: NewTriBandDense(6, 2, Upper, []float64{
+				1, math.NaN(), math.NaN(),
+				2, math.NaN(), math.NaN(),
+				3, math.NaN(), math.NaN(),
+				4, math.NaN(), math.NaN(),
+				5, math.NaN(), math.NaN(),
+				6, math.NaN(), math.NaN(),
+			}),
+			want: NewDense(6, 6, []float64{
+				1, 0, 0, 0, 0, 0,
+				0, 2, 0, 0, 0, 0,
+				0, 0, 3, 0, 0, 0,
+				0, 0, 0, 4, 0, 0,
+				0, 0, 0, 0, 5, 0,
+				0, 0, 0, 0, 0, 6,
+			}),
+		},
+		{
+			mat: NewTriBandDense(6, 2, Lower, []float64{
+				math.NaN(), math.NaN(), 1,
+				math.NaN(), math.NaN(), 2,
+				math.NaN(), math.NaN(), 3,
+				math.NaN(), math.NaN(), 4,
+				math.NaN(), math.NaN(), 5,
+				math.NaN(), math.NaN(), 6,
+			}),
+			want: NewDense(6, 6, []float64{
+				1, 0, 0, 0, 0, 0,
+				0, 2, 0, 0, 0, 0,
+				0, 0, 3, 0, 0, 0,
+				0, 0, 0, 4, 0, 0,
+				0, 0, 0, 0, 5, 0,
+				0, 0, 0, 0, 0, 6,
+			}),
+		},
+		{
 			mat: NewTriDense(6, Upper, []float64{
 				1, math.NaN(), math.NaN(), math.NaN(), math.NaN(), math.NaN(),
 				math.NaN(), 2, math.NaN(), math.NaN(), math.NaN(), math.NaN(),
@@ -319,6 +355,42 @@ func TestDiagFrom(t *testing.T) {
 			t.Errorf("unexpected value via mat.Equal for %d×%d %T test %d:\ngot:\n% v\nwant:\n% v",
 				r, c, test.mat, i, Formatted(&got), Formatted(test.want))
 		}
+	}
+}
+
+// diagDenseViewer takes the view of the Diagonal with the underlying Diagonal
+// as the DiagDense type.
+type diagDenseViewer interface {
+	Matrix
+	DiagView() Diagonal
+}
+
+func testDiagView(t *testing.T, cas int, test diagDenseViewer) {
+	// Check the DiagView matches the Diagonal.
+	r, c := test.Dims()
+	diagView := test.DiagView()
+	for i := 0; i < min(r, c); i++ {
+		if diagView.At(i, i) != test.At(i, i) {
+			t.Errorf("Diag mismatch case %d, element %d", cas, i)
+		}
+	}
+
+	// Check that changes to the diagonal are reflected.
+	offset := 10.0
+	diag := diagView.(*DiagDense)
+	for i := 0; i < min(r, c); i++ {
+		v := test.At(i, i)
+		diag.SetDiag(i, v+offset)
+		if test.At(i, i) != v+offset {
+			t.Errorf("Diag set mismatch case %d, element %d", cas, i)
+		}
+	}
+
+	// Check that DiagView and DiagFrom match.
+	var diag2 DiagDense
+	diag2.DiagFrom(test)
+	if !Equal(diag, &diag2) {
+		t.Errorf("Cas %d: DiagView and DiagFrom mismatch", cas)
 	}
 }
 

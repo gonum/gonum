@@ -278,6 +278,18 @@ func (m *Dense) rawRowView(i int) []float64 {
 	return m.mat.Data[i*m.mat.Stride : i*m.mat.Stride+m.mat.Cols]
 }
 
+// DiagView returns the diagonal as a matrix backed by the original data.
+func (m *Dense) DiagView() Diagonal {
+	n := min(m.mat.Rows, m.mat.Cols)
+	return &DiagDense{
+		mat: blas64.Vector{
+			Inc:  m.mat.Stride + 1,
+			Data: m.mat.Data[:(n-1)*m.mat.Stride+n],
+		},
+		n: n,
+	}
+}
+
 // Slice returns a new Matrix that shares backing data with the receiver.
 // The returned matrix starts at {i,j} of the receiver and extends k-i rows
 // and l-j columns. The final row in the resulting matrix is k-1 and the

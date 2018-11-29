@@ -129,6 +129,16 @@ func TestSymAtSet(t *testing.T) {
 	}
 }
 
+func TestSymDiagView(t *testing.T) {
+	for cas, test := range []*SymDense{
+		NewSymDense(1, []float64{1}),
+		NewSymDense(2, []float64{1, 2, 2, 3}),
+		NewSymDense(3, []float64{1, 2, 3, 2, 4, 5, 3, 5, 6}),
+	} {
+		testDiagView(t, cas, test)
+	}
+}
+
 func TestSymAdd(t *testing.T) {
 	for _, test := range []struct {
 		n int

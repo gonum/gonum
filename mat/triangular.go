@@ -296,6 +296,21 @@ func (t *TriDense) isolatedWorkspace(a Triangular) (w *TriDense, restore func())
 	}
 }
 
+// DiagView returns the diagonal as a matrix backed by the original data.
+func (t *TriDense) DiagView() Diagonal {
+	if t.mat.Diag == blas.Unit {
+		panic("mat: cannot take view of Unit diagonal")
+	}
+	n := t.mat.N
+	return &DiagDense{
+		mat: blas64.Vector{
+			Inc:  t.mat.Stride + 1,
+			Data: t.mat.Data[:(n-1)*t.mat.Stride+n],
+		},
+		n: n,
+	}
+}
+
 // Copy makes a copy of elements of a into the receiver. It is similar to the
 // built-in copy; it copies as much as the overlap between the two matrices and
 // returns the number of rows and columns it copied. Only elements within the

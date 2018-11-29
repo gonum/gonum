@@ -139,6 +139,19 @@ func TestTriAtSet(t *testing.T) {
 	}
 }
 
+func TestTriDiagView(t *testing.T) {
+	for cas, test := range []*TriDense{
+		NewTriDense(1, Upper, []float64{1}),
+		NewTriDense(2, Upper, []float64{1, 2, 0, 3}),
+		NewTriDense(3, Upper, []float64{1, 2, 3, 0, 4, 5, 0, 0, 6}),
+		NewTriDense(1, Lower, []float64{1}),
+		NewTriDense(2, Lower, []float64{1, 2, 2, 3}),
+		NewTriDense(3, Lower, []float64{1, 0, 0, 2, 3, 0, 4, 5, 6}),
+	} {
+		testDiagView(t, cas, test)
+	}
+}
+
 func TestTriDenseCopy(t *testing.T) {
 	for i := 0; i < 100; i++ {
 		size := rand.Intn(100)

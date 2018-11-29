@@ -360,6 +360,26 @@ func TestRowColView(t *testing.T) {
 	}
 }
 
+func TestDiagView(t *testing.T) {
+	for cas, test := range []*Dense{
+		NewDense(1, 1, []float64{1}),
+		NewDense(2, 2, []float64{1, 2, 3, 4}),
+		NewDense(3, 4, []float64{
+			1, 2, 3, 4,
+			5, 6, 7, 8,
+			9, 10, 11, 12,
+		}),
+		NewDense(4, 3, []float64{
+			1, 2, 3,
+			4, 5, 6,
+			7, 8, 9,
+			10, 11, 12,
+		}),
+	} {
+		testDiagView(t, cas, test)
+	}
+}
+
 func TestGrow(t *testing.T) {
 	m := &Dense{}
 	m = m.Grow(10, 10).(*Dense)

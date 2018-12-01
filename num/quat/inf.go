@@ -11,12 +11,12 @@ package quat
 import "math"
 
 // IsInf returns true if any of real(q), imag(q), jmag(q), or kmag(q) is an infinity.
-func IsInf(q Quat) bool {
+func IsInf(q Number) bool {
 	return math.IsInf(q.Real, 0) || math.IsInf(q.Imag, 0) || math.IsInf(q.Jmag, 0) || math.IsInf(q.Kmag, 0)
 }
 
 // Inf returns a quaternion infinity, quaternion(+Inf, +Inf, +Inf, +Inf).
-func Inf() Quat {
+func Inf() Number {
 	inf := math.Inf(1)
-	return Quat{Real: inf, Imag: inf, Jmag: inf, Kmag: inf}
+	return Number{Real: inf, Imag: inf, Jmag: inf, Kmag: inf}
 }

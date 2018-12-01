@@ -11,17 +11,17 @@ import (
 )
 
 var invTests = []struct {
-	q       Quat
+	q       Number
 	wantNaN bool
 }{
-	{q: Quat{Real: 1, Imag: 1, Jmag: 1, Kmag: 1}},
-	{q: Quat{Real: 3, Imag: -1, Jmag: 5, Kmag: -40}},
-	{q: Quat{Real: 1e6, Imag: -1e5, Jmag: 4, Kmag: -10}},
-	{q: Quat{Real: 0, Imag: 1, Jmag: 1, Kmag: 1}},
-	{q: Quat{Real: 1, Imag: 0, Jmag: 1, Kmag: 1}},
-	{q: Quat{Real: 1, Imag: 1, Jmag: 0, Kmag: 1}},
-	{q: Quat{Real: 1, Imag: 1, Jmag: 1, Kmag: 0}},
-	{q: Quat{}, wantNaN: true},
+	{q: Number{Real: 1, Imag: 1, Jmag: 1, Kmag: 1}},
+	{q: Number{Real: 3, Imag: -1, Jmag: 5, Kmag: -40}},
+	{q: Number{Real: 1e6, Imag: -1e5, Jmag: 4, Kmag: -10}},
+	{q: Number{Real: 0, Imag: 1, Jmag: 1, Kmag: 1}},
+	{q: Number{Real: 1, Imag: 0, Jmag: 1, Kmag: 1}},
+	{q: Number{Real: 1, Imag: 1, Jmag: 0, Kmag: 1}},
+	{q: Number{Real: 1, Imag: 1, Jmag: 1, Kmag: 0}},
+	{q: Number{}, wantNaN: true},
 }
 
 func TestInv(t *testing.T) {
@@ -35,7 +35,7 @@ func TestInv(t *testing.T) {
 			continue
 		}
 		if !(floats.EqualWithinAbsOrRel(got.Real, 1, tol, tol) && floats.EqualWithinAbsOrRel(Abs(got), 1, tol, tol)) {
-			t.Errorf("unexpected result for Mul(%v, Inv(%[1]v)): got:%v want:%v", test.q, got, Quat{Real: 1})
+			t.Errorf("unexpected result for Mul(%v, Inv(%[1]v)): got:%v want:%v", test.q, got, Number{Real: 1})
 		}
 	}
 }

@@ -11,7 +11,7 @@ package quat
 import "math"
 
 // Sin returns the sine of q.
-func Sin(q Quat) Quat {
+func Sin(q Number) Number {
 	w, uv := split(q)
 	if uv == zero {
 		return lift(math.Sin(w))
@@ -23,7 +23,7 @@ func Sin(q Quat) Quat {
 }
 
 // Sinh returns the hyperbolic sine of q.
-func Sinh(q Quat) Quat {
+func Sinh(q Number) Number {
 	w, uv := split(q)
 	if uv == zero {
 		return lift(math.Sinh(w))
@@ -35,7 +35,7 @@ func Sinh(q Quat) Quat {
 }
 
 // Cos returns the cosine of q.
-func Cos(q Quat) Quat {
+func Cos(q Number) Number {
 	w, uv := split(q)
 	if uv == zero {
 		return lift(math.Cos(w))
@@ -47,7 +47,7 @@ func Cos(q Quat) Quat {
 }
 
 // Cosh returns the hyperbolic cosine of q.
-func Cosh(q Quat) Quat {
+func Cosh(q Number) Number {
 	w, uv := split(q)
 	if uv == zero {
 		return lift(math.Cosh(w))
@@ -59,7 +59,7 @@ func Cosh(q Quat) Quat {
 }
 
 // Tan returns the tangent of q.
-func Tan(q Quat) Quat {
+func Tan(q Number) Number {
 	d := Cos(q)
 	if d == zero {
 		return Inf()
@@ -68,7 +68,7 @@ func Tan(q Quat) Quat {
 }
 
 // Tanh returns the hyperbolic tangent of q.
-func Tanh(q Quat) Quat {
+func Tanh(q Number) Number {
 	d := Cosh(q)
 	if d == zero {
 		return Inf()
@@ -77,28 +77,28 @@ func Tanh(q Quat) Quat {
 }
 
 // Asin returns the inverse sine of q.
-func Asin(q Quat) Quat {
+func Asin(q Number) Number {
 	_, uv := split(q)
 	if uv == zero {
 		return lift(math.Asin(q.Real))
 	}
 	u := unit(uv)
-	return Mul(Scale(-1, u), Log(Add(Mul(u, q), Sqrt(Sub(Quat{Real: 1}, Mul(q, q))))))
+	return Mul(Scale(-1, u), Log(Add(Mul(u, q), Sqrt(Sub(Number{Real: 1}, Mul(q, q))))))
 }
 
 // Asinh returns the inverse hyperbolic sine of q.
-func Asinh(q Quat) Quat {
-	return Log(Add(q, Sqrt(Add(Quat{Real: 1}, Mul(q, q)))))
+func Asinh(q Number) Number {
+	return Log(Add(q, Sqrt(Add(Number{Real: 1}, Mul(q, q)))))
 }
 
 // Acos returns the inverse cosine of q.
-func Acos(q Quat) Quat {
+func Acos(q Number) Number {
 	w, uv := split(Asin(q))
 	return join(math.Pi/2-w, Scale(-1, uv))
 }
 
 // Acosh returns the inverse hyperbolic cosine of q.
-func Acosh(q Quat) Quat {
+func Acosh(q Number) Number {
 	w := Acos(q)
 	_, uv := split(w)
 	if uv == zero {
@@ -112,7 +112,7 @@ func Acosh(q Quat) Quat {
 }
 
 // Atan returns the inverse tangent of q.
-func Atan(q Quat) Quat {
+func Atan(q Number) Number {
 	w, uv := split(q)
 	if uv == zero {
 		return lift(math.Atan(w))
@@ -122,7 +122,7 @@ func Atan(q Quat) Quat {
 }
 
 // Atanh returns the inverse hyperbolic tangent of q.
-func Atanh(q Quat) Quat {
+func Atanh(q Number) Number {
 	w, uv := split(q)
 	if uv == zero {
 		return lift(math.Atanh(w))

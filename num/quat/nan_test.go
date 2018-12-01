@@ -12,24 +12,24 @@ import (
 var nan = math.NaN()
 
 var nanTests = []struct {
-	q    Quat
+	q    Number
 	want bool
 }{
 	{q: NaN(), want: true},
-	{q: Quat{Real: nan, Imag: nan, Jmag: nan, Kmag: nan}, want: true},
-	{q: Quat{Real: nan, Imag: 0, Jmag: 0, Kmag: 0}, want: true},
-	{q: Quat{Real: 0, Imag: nan, Jmag: 0, Kmag: 0}, want: true},
-	{q: Quat{Real: 0, Imag: 0, Jmag: nan, Kmag: 0}, want: true},
-	{q: Quat{Real: 0, Imag: 0, Jmag: 0, Kmag: nan}, want: true},
-	{q: Quat{Real: inf, Imag: nan, Jmag: nan, Kmag: nan}, want: false},
-	{q: Quat{Real: nan, Imag: inf, Jmag: nan, Kmag: nan}, want: false},
-	{q: Quat{Real: nan, Imag: nan, Jmag: inf, Kmag: nan}, want: false},
-	{q: Quat{Real: nan, Imag: nan, Jmag: nan, Kmag: inf}, want: false},
-	{q: Quat{Real: -inf, Imag: nan, Jmag: nan, Kmag: nan}, want: false},
-	{q: Quat{Real: nan, Imag: -inf, Jmag: nan, Kmag: nan}, want: false},
-	{q: Quat{Real: nan, Imag: nan, Jmag: -inf, Kmag: nan}, want: false},
-	{q: Quat{Real: nan, Imag: nan, Jmag: nan, Kmag: -inf}, want: false},
-	{q: Quat{}, want: false},
+	{q: Number{Real: nan, Imag: nan, Jmag: nan, Kmag: nan}, want: true},
+	{q: Number{Real: nan, Imag: 0, Jmag: 0, Kmag: 0}, want: true},
+	{q: Number{Real: 0, Imag: nan, Jmag: 0, Kmag: 0}, want: true},
+	{q: Number{Real: 0, Imag: 0, Jmag: nan, Kmag: 0}, want: true},
+	{q: Number{Real: 0, Imag: 0, Jmag: 0, Kmag: nan}, want: true},
+	{q: Number{Real: inf, Imag: nan, Jmag: nan, Kmag: nan}, want: false},
+	{q: Number{Real: nan, Imag: inf, Jmag: nan, Kmag: nan}, want: false},
+	{q: Number{Real: nan, Imag: nan, Jmag: inf, Kmag: nan}, want: false},
+	{q: Number{Real: nan, Imag: nan, Jmag: nan, Kmag: inf}, want: false},
+	{q: Number{Real: -inf, Imag: nan, Jmag: nan, Kmag: nan}, want: false},
+	{q: Number{Real: nan, Imag: -inf, Jmag: nan, Kmag: nan}, want: false},
+	{q: Number{Real: nan, Imag: nan, Jmag: -inf, Kmag: nan}, want: false},
+	{q: Number{Real: nan, Imag: nan, Jmag: nan, Kmag: -inf}, want: false},
+	{q: Number{}, want: false},
 }
 
 func TestIsNaN(t *testing.T) {

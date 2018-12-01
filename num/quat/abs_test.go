@@ -10,16 +10,16 @@ import (
 )
 
 var absTests = []struct {
-	q    Quat
+	q    Number
 	want float64
 }{
-	{q: Quat{}, want: 0},
+	{q: Number{}, want: 0},
 	{q: NaN(), want: nan},
 	{q: Inf(), want: inf},
-	{q: Quat{Real: 1, Imag: 1, Jmag: 1, Kmag: 1}, want: 2},
-	{q: Quat{Real: -1, Imag: 1, Jmag: -1, Kmag: 1}, want: 2},
-	{q: Quat{Real: 1, Imag: 2, Jmag: 3, Kmag: 4}, want: math.Sqrt(1 + 4 + 9 + 16)},
-	{q: Quat{Real: -1, Imag: -2, Jmag: -3, Kmag: -4}, want: math.Sqrt(1 + 4 + 9 + 16)},
+	{q: Number{Real: 1, Imag: 1, Jmag: 1, Kmag: 1}, want: 2},
+	{q: Number{Real: -1, Imag: 1, Jmag: -1, Kmag: 1}, want: 2},
+	{q: Number{Real: 1, Imag: 2, Jmag: 3, Kmag: 4}, want: math.Sqrt(1 + 4 + 9 + 16)},
+	{q: Number{Real: -1, Imag: -2, Jmag: -3, Kmag: -4}, want: math.Sqrt(1 + 4 + 9 + 16)},
 }
 
 func TestAbs(t *testing.T) {

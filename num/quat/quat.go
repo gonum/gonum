@@ -11,15 +11,15 @@ import (
 	"strings"
 )
 
-var zero Quat
+var zero Number
 
-// Quat is a float64 precision quaternion.
-type Quat struct {
+// Number is a float64 precision quaternion.
+type Number struct {
 	Real, Imag, Jmag, Kmag float64
 }
 
 // Format implements fmt.Formatter.
-func (q Quat) Format(fs fmt.State, c rune) {
+func (q Number) Format(fs fmt.State, c rune) {
 	prec, pOk := fs.Precision()
 	if !pOk {
 		prec = -1
@@ -72,8 +72,8 @@ func fmtString(fs fmt.State, c rune, prec, width int, wantPlus bool) string {
 }
 
 // Add returns the sum of x and y.
-func Add(x, y Quat) Quat {
-	return Quat{
+func Add(x, y Number) Number {
+	return Number{
 		Real: x.Real + y.Real,
 		Imag: x.Imag + y.Imag,
 		Jmag: x.Jmag + y.Jmag,
@@ -82,8 +82,8 @@ func Add(x, y Quat) Quat {
 }
 
 // Sub returns the difference of x and y, x-y.
-func Sub(x, y Quat) Quat {
-	return Quat{
+func Sub(x, y Number) Number {
+	return Number{
 		Real: x.Real - y.Real,
 		Imag: x.Imag - y.Imag,
 		Jmag: x.Jmag - y.Jmag,
@@ -92,8 +92,8 @@ func Sub(x, y Quat) Quat {
 }
 
 // Mul returns the Hamiltonian product of x and y.
-func Mul(x, y Quat) Quat {
-	return Quat{
+func Mul(x, y Number) Number {
+	return Number{
 		Real: x.Real*y.Real - x.Imag*y.Imag - x.Jmag*y.Jmag - x.Kmag*y.Kmag,
 		Imag: x.Real*y.Imag + x.Imag*y.Real + x.Jmag*y.Kmag - x.Kmag*y.Jmag,
 		Jmag: x.Real*y.Jmag - x.Imag*y.Kmag + x.Jmag*y.Real + x.Kmag*y.Imag,
@@ -102,27 +102,27 @@ func Mul(x, y Quat) Quat {
 }
 
 // Scale returns q scaled by f.
-func Scale(f float64, q Quat) Quat {
-	return Quat{Real: f * q.Real, Imag: f * q.Imag, Jmag: f * q.Jmag, Kmag: f * q.Kmag}
+func Scale(f float64, q Number) Number {
+	return Number{Real: f * q.Real, Imag: f * q.Imag, Jmag: f * q.Jmag, Kmag: f * q.Kmag}
 }
 
-// Parse converts the string s to a Quat. The string may be parenthesized and
+// Parse converts the string s to a Number. The string may be parenthesized and
 // has the format [±]N±Ni±Nj±Nk. The order of the components is not strict.
-func Parse(s string) (Quat, error) {
+func Parse(s string) (Number, error) {
 	if len(s) == 0 {
-		return Quat{}, parseError{state: -1}
+		return Number{}, parseError{state: -1}
 	}
 	orig := s
 
 	wantClose := s[0] == '('
 	if wantClose {
 		if s[len(s)-1] != ')' {
-			return Quat{}, parseError{string: orig, state: -1}
+			return Number{}, parseError{string: orig, state: -1}
 		}
 		s = s[1 : len(s)-1]
 	}
 	if len(s) == 0 {
-		return Quat{}, parseError{string: orig, state: -1}
+		return Number{}, parseError{string: orig, state: -1}
 	}
 	switch s[0] {
 	case 'n', 'N':
@@ -135,7 +135,7 @@ func Parse(s string) (Quat, error) {
 		}
 	}
 
-	var q Quat
+	var q Number
 	var parts byte
 	for i := 0; i < 4; i++ {
 		beg, end, p, err := floatPart(s)

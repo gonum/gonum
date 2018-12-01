@@ -11,7 +11,7 @@ package quat
 import "math"
 
 // Exp returns e**q, the base-e exponential of q.
-func Exp(q Quat) Quat {
+func Exp(q Number) Number {
 	w, uv := split(q)
 	if uv == zero {
 		return lift(math.Exp(w))
@@ -23,7 +23,7 @@ func Exp(q Quat) Quat {
 }
 
 // Log returns the natural logarithm of q.
-func Log(q Quat) Quat {
+func Log(q Number) Number {
 	w, uv := split(q)
 	if uv == zero {
 		return lift(math.Log(w))
@@ -37,15 +37,15 @@ func Log(q Quat) Quat {
 //      Pow(0, ±0) returns 1+0i+0j+0k
 //      Pow(0, c) for real(c)<0 returns Inf+0i+0j+0k if imag(c), jmag(c), kmag(c) are zero,
 //          otherwise Inf+Inf i+Inf j+Inf k.
-func Pow(q, r Quat) Quat {
+func Pow(q, r Number) Number {
 	if q == zero {
 		w, uv := split(r)
 		switch {
 		case w == 0:
-			return Quat{Real: 1}
+			return Number{Real: 1}
 		case w < 0:
 			if uv == zero {
-				return Quat{Real: math.Inf(1)}
+				return Number{Real: math.Inf(1)}
 			}
 			return Inf()
 		case w > 0:
@@ -56,9 +56,9 @@ func Pow(q, r Quat) Quat {
 }
 
 // Sqrt returns the square root of q.
-func Sqrt(q Quat) Quat {
+func Sqrt(q Number) Number {
 	if q == zero {
 		return zero
 	}
-	return Pow(q, Quat{Real: 0.5})
+	return Pow(q, Number{Real: 0.5})
 }

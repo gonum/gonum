@@ -13,58 +13,58 @@ import (
 )
 
 var arithTests = []struct {
-	x, y Quat
+	x, y Number
 	f    float64
 
-	wantAdd   Quat
-	wantSub   Quat
-	wantMul   Quat
-	wantScale Quat
+	wantAdd   Number
+	wantSub   Number
+	wantMul   Number
+	wantScale Number
 }{
 	{
-		x: Quat{1, 1, 1, 1}, y: Quat{1, 1, 1, 1},
+		x: Number{1, 1, 1, 1}, y: Number{1, 1, 1, 1},
 		f: 2,
 
-		wantAdd:   Quat{2, 2, 2, 2},
-		wantSub:   Quat{0, 0, 0, 0},
-		wantMul:   Quat{-2, 2, 2, 2},
-		wantScale: Quat{2, 2, 2, 2},
+		wantAdd:   Number{2, 2, 2, 2},
+		wantSub:   Number{0, 0, 0, 0},
+		wantMul:   Number{-2, 2, 2, 2},
+		wantScale: Number{2, 2, 2, 2},
 	},
 	{
-		x: Quat{1, 1, 1, 1}, y: Quat{2, -1, 1, -1},
+		x: Number{1, 1, 1, 1}, y: Number{2, -1, 1, -1},
 		f: -2,
 
-		wantAdd:   Quat{3, 0, 2, 0},
-		wantSub:   Quat{-1, 2, 0, 2},
-		wantMul:   Quat{3, -1, 3, 3},
-		wantScale: Quat{-2, -2, -2, -2},
+		wantAdd:   Number{3, 0, 2, 0},
+		wantSub:   Number{-1, 2, 0, 2},
+		wantMul:   Number{3, -1, 3, 3},
+		wantScale: Number{-2, -2, -2, -2},
 	},
 	{
-		x: Quat{1, 2, 3, 4}, y: Quat{4, -3, 2, -1},
+		x: Number{1, 2, 3, 4}, y: Number{4, -3, 2, -1},
 		f: 2,
 
-		wantAdd:   Quat{5, -1, 5, 3},
-		wantSub:   Quat{-3, 5, 1, 5},
-		wantMul:   Quat{8, -6, 4, 28},
-		wantScale: Quat{2, 4, 6, 8},
+		wantAdd:   Number{5, -1, 5, 3},
+		wantSub:   Number{-3, 5, 1, 5},
+		wantMul:   Number{8, -6, 4, 28},
+		wantScale: Number{2, 4, 6, 8},
 	},
 	{
-		x: Quat{1, 2, 3, 4}, y: Quat{-4, 3, -2, 1},
+		x: Number{1, 2, 3, 4}, y: Number{-4, 3, -2, 1},
 		f: -2,
 
-		wantAdd:   Quat{-3, 5, 1, 5},
-		wantSub:   Quat{5, -1, 5, 3},
-		wantMul:   Quat{-8, 6, -4, -28},
-		wantScale: Quat{-2, -4, -6, -8},
+		wantAdd:   Number{-3, 5, 1, 5},
+		wantSub:   Number{5, -1, 5, 3},
+		wantMul:   Number{-8, 6, -4, -28},
+		wantScale: Number{-2, -4, -6, -8},
 	},
 	{
-		x: Quat{-4, 3, -2, 1}, y: Quat{1, 2, 3, 4},
+		x: Number{-4, 3, -2, 1}, y: Number{1, 2, 3, 4},
 		f: 0.5,
 
-		wantAdd:   Quat{-3, 5, 1, 5},
-		wantSub:   Quat{-5, 1, -5, -3},
-		wantMul:   Quat{-8, -16, -24, -2},
-		wantScale: Quat{-2, 1.5, -1, 0.5},
+		wantAdd:   Number{-3, 5, 1, 5},
+		wantSub:   Number{-5, 1, -5, -3},
+		wantMul:   Number{-8, -16, -24, -2},
+		wantScale: Number{-2, 1.5, -1, 0.5},
 	},
 }
 
@@ -90,22 +90,22 @@ func TestArithmetic(t *testing.T) {
 }
 
 var formatTests = []struct {
-	q      Quat
+	q      Number
 	format string
 	want   string
 }{
-	{q: Quat{1.1, 2.1, 3.1, 4.1}, format: "%#v", want: "quat.Quat{1.1, 2.1, 3.1, 4.1}"},         // Bootstrap test.
-	{q: Quat{-1.1, -2.1, -3.1, -4.1}, format: "%#v", want: "quat.Quat{-1.1, -2.1, -3.1, -4.1}"}, // Bootstrap test.
-	{q: Quat{1, 2, 3, 4}, format: "%v", want: "(1+2i+3j+4k)"},
-	{q: Quat{-1, -2, -3, -4}, format: "%v", want: "(-1-2i-3j-4k)"},
-	{q: Quat{1, 2, 3, 4}, format: "%g", want: "(1+2i+3j+4k)"},
-	{q: Quat{-1, -2, -3, -4}, format: "%g", want: "(-1-2i-3j-4k)"},
-	{q: Quat{1, 2, 3, 4}, format: "%e", want: "(1.000000e+00+2.000000e+00i+3.000000e+00j+4.000000e+00k)"},
-	{q: Quat{-1, -2, -3, -4}, format: "%e", want: "(-1.000000e+00-2.000000e+00i-3.000000e+00j-4.000000e+00k)"},
-	{q: Quat{1, 2, 3, 4}, format: "%E", want: "(1.000000E+00+2.000000E+00i+3.000000E+00j+4.000000E+00k)"},
-	{q: Quat{-1, -2, -3, -4}, format: "%E", want: "(-1.000000E+00-2.000000E+00i-3.000000E+00j-4.000000E+00k)"},
-	{q: Quat{1, 2, 3, 4}, format: "%f", want: "(1.000000+2.000000i+3.000000j+4.000000k)"},
-	{q: Quat{-1, -2, -3, -4}, format: "%f", want: "(-1.000000-2.000000i-3.000000j-4.000000k)"},
+	{q: Number{1.1, 2.1, 3.1, 4.1}, format: "%#v", want: "quat.Number{1.1, 2.1, 3.1, 4.1}"},         // Bootstrap test.
+	{q: Number{-1.1, -2.1, -3.1, -4.1}, format: "%#v", want: "quat.Number{-1.1, -2.1, -3.1, -4.1}"}, // Bootstrap test.
+	{q: Number{1, 2, 3, 4}, format: "%v", want: "(1+2i+3j+4k)"},
+	{q: Number{-1, -2, -3, -4}, format: "%v", want: "(-1-2i-3j-4k)"},
+	{q: Number{1, 2, 3, 4}, format: "%g", want: "(1+2i+3j+4k)"},
+	{q: Number{-1, -2, -3, -4}, format: "%g", want: "(-1-2i-3j-4k)"},
+	{q: Number{1, 2, 3, 4}, format: "%e", want: "(1.000000e+00+2.000000e+00i+3.000000e+00j+4.000000e+00k)"},
+	{q: Number{-1, -2, -3, -4}, format: "%e", want: "(-1.000000e+00-2.000000e+00i-3.000000e+00j-4.000000e+00k)"},
+	{q: Number{1, 2, 3, 4}, format: "%E", want: "(1.000000E+00+2.000000E+00i+3.000000E+00j+4.000000E+00k)"},
+	{q: Number{-1, -2, -3, -4}, format: "%E", want: "(-1.000000E+00-2.000000E+00i-3.000000E+00j-4.000000E+00k)"},
+	{q: Number{1, 2, 3, 4}, format: "%f", want: "(1.000000+2.000000i+3.000000j+4.000000k)"},
+	{q: Number{-1, -2, -3, -4}, format: "%f", want: "(-1.000000-2.000000i-3.000000j-4.000000k)"},
 }
 
 func TestFormat(t *testing.T) {
@@ -119,7 +119,7 @@ func TestFormat(t *testing.T) {
 
 var parseTests = []struct {
 	s       string
-	want    Quat
+	want    Number
 	wantErr error
 }{
 	// Simple error states:
@@ -135,38 +135,38 @@ var parseTests = []struct {
 	{s: "1e-4i-4k+10.3e6j-", wantErr: parseError{string: "1e-4i-4k+10.3e6j-", state: -1}},
 
 	// Valid input:
-	{s: "1+4i", want: Quat{Real: 1, Imag: 4}},
-	{s: "4i+1", want: Quat{Real: 1, Imag: 4}},
-	{s: "+1+4i", want: Quat{Real: 1, Imag: 4}},
-	{s: "+4i+1", want: Quat{Real: 1, Imag: 4}},
-	{s: "1e-4-4k+10.3e6j+1i", want: Quat{Real: 1e-4, Imag: 1, Jmag: 10.3e6, Kmag: -4}},
-	{s: "1e-4-4k+10.3e6j+i", want: Quat{Real: 1e-4, Imag: 1, Jmag: 10.3e6, Kmag: -4}},
-	{s: "1e-4-4k+10.3e6j-i", want: Quat{Real: 1e-4, Imag: -1, Jmag: 10.3e6, Kmag: -4}},
-	{s: "1e-4i-4k+10.3e6j-1", want: Quat{Real: -1, Imag: 1e-4, Jmag: 10.3e6, Kmag: -4}},
-	{s: "1e-4i-4k+10.3e6j+1", want: Quat{Real: 1, Imag: 1e-4, Jmag: 10.3e6, Kmag: -4}},
-	{s: "(1+4i)", want: Quat{Real: 1, Imag: 4}},
-	{s: "(4i+1)", want: Quat{Real: 1, Imag: 4}},
-	{s: "(+1+4i)", want: Quat{Real: 1, Imag: 4}},
-	{s: "(+4i+1)", want: Quat{Real: 1, Imag: 4}},
-	{s: "(1e-4-4k+10.3e6j+1i)", want: Quat{Real: 1e-4, Imag: 1, Jmag: 10.3e6, Kmag: -4}},
-	{s: "(1e-4-4k+10.3e6j+i)", want: Quat{Real: 1e-4, Imag: 1, Jmag: 10.3e6, Kmag: -4}},
-	{s: "(1e-4-4k+10.3e6j-i)", want: Quat{Real: 1e-4, Imag: -1, Jmag: 10.3e6, Kmag: -4}},
-	{s: "(1e-4i-4k+10.3e6j-1)", want: Quat{Real: -1, Imag: 1e-4, Jmag: 10.3e6, Kmag: -4}},
-	{s: "(1e-4i-4k+10.3e6j+1)", want: Quat{Real: 1, Imag: 1e-4, Jmag: 10.3e6, Kmag: -4}},
+	{s: "1+4i", want: Number{Real: 1, Imag: 4}},
+	{s: "4i+1", want: Number{Real: 1, Imag: 4}},
+	{s: "+1+4i", want: Number{Real: 1, Imag: 4}},
+	{s: "+4i+1", want: Number{Real: 1, Imag: 4}},
+	{s: "1e-4-4k+10.3e6j+1i", want: Number{Real: 1e-4, Imag: 1, Jmag: 10.3e6, Kmag: -4}},
+	{s: "1e-4-4k+10.3e6j+i", want: Number{Real: 1e-4, Imag: 1, Jmag: 10.3e6, Kmag: -4}},
+	{s: "1e-4-4k+10.3e6j-i", want: Number{Real: 1e-4, Imag: -1, Jmag: 10.3e6, Kmag: -4}},
+	{s: "1e-4i-4k+10.3e6j-1", want: Number{Real: -1, Imag: 1e-4, Jmag: 10.3e6, Kmag: -4}},
+	{s: "1e-4i-4k+10.3e6j+1", want: Number{Real: 1, Imag: 1e-4, Jmag: 10.3e6, Kmag: -4}},
+	{s: "(1+4i)", want: Number{Real: 1, Imag: 4}},
+	{s: "(4i+1)", want: Number{Real: 1, Imag: 4}},
+	{s: "(+1+4i)", want: Number{Real: 1, Imag: 4}},
+	{s: "(+4i+1)", want: Number{Real: 1, Imag: 4}},
+	{s: "(1e-4-4k+10.3e6j+1i)", want: Number{Real: 1e-4, Imag: 1, Jmag: 10.3e6, Kmag: -4}},
+	{s: "(1e-4-4k+10.3e6j+i)", want: Number{Real: 1e-4, Imag: 1, Jmag: 10.3e6, Kmag: -4}},
+	{s: "(1e-4-4k+10.3e6j-i)", want: Number{Real: 1e-4, Imag: -1, Jmag: 10.3e6, Kmag: -4}},
+	{s: "(1e-4i-4k+10.3e6j-1)", want: Number{Real: -1, Imag: 1e-4, Jmag: 10.3e6, Kmag: -4}},
+	{s: "(1e-4i-4k+10.3e6j+1)", want: Number{Real: 1, Imag: 1e-4, Jmag: 10.3e6, Kmag: -4}},
 	{s: "NaN", want: NaN()},
 	{s: "nan", want: NaN()},
 	{s: "Inf", want: Inf()},
 	{s: "inf", want: Inf()},
-	{s: "(Inf+Infi)", want: Quat{Real: math.Inf(1), Imag: math.Inf(1)}},
-	{s: "(-Inf+Infi)", want: Quat{Real: math.Inf(-1), Imag: math.Inf(1)}},
-	{s: "(+Inf-Infi)", want: Quat{Real: math.Inf(1), Imag: math.Inf(-1)}},
-	{s: "(inf+infi)", want: Quat{Real: math.Inf(1), Imag: math.Inf(1)}},
-	{s: "(-inf+infi)", want: Quat{Real: math.Inf(-1), Imag: math.Inf(1)}},
-	{s: "(+inf-infi)", want: Quat{Real: math.Inf(1), Imag: math.Inf(-1)}},
-	{s: "(nan+nani)", want: Quat{Real: math.NaN(), Imag: math.NaN()}},
-	{s: "(nan-nani)", want: Quat{Real: math.NaN(), Imag: math.NaN()}},
-	{s: "(nan+nani+1k)", want: Quat{Real: math.NaN(), Imag: math.NaN(), Kmag: 1}},
-	{s: "(nan-nani+1k)", want: Quat{Real: math.NaN(), Imag: math.NaN(), Kmag: 1}},
+	{s: "(Inf+Infi)", want: Number{Real: math.Inf(1), Imag: math.Inf(1)}},
+	{s: "(-Inf+Infi)", want: Number{Real: math.Inf(-1), Imag: math.Inf(1)}},
+	{s: "(+Inf-Infi)", want: Number{Real: math.Inf(1), Imag: math.Inf(-1)}},
+	{s: "(inf+infi)", want: Number{Real: math.Inf(1), Imag: math.Inf(1)}},
+	{s: "(-inf+infi)", want: Number{Real: math.Inf(-1), Imag: math.Inf(1)}},
+	{s: "(+inf-infi)", want: Number{Real: math.Inf(1), Imag: math.Inf(-1)}},
+	{s: "(nan+nani)", want: Number{Real: math.NaN(), Imag: math.NaN()}},
+	{s: "(nan-nani)", want: Number{Real: math.NaN(), Imag: math.NaN()}},
+	{s: "(nan+nani+1k)", want: Number{Real: math.NaN(), Imag: math.NaN(), Kmag: 1}},
+	{s: "(nan-nani+1k)", want: Number{Real: math.NaN(), Imag: math.NaN(), Kmag: 1}},
 }
 
 func TestParse(t *testing.T) {
@@ -178,20 +178,20 @@ func TestParse(t *testing.T) {
 		if err != nil {
 			continue
 		}
-		if !sameQuat(got, test.want) {
+		if !sameNumber(got, test.want) {
 			t.Errorf("unexpected result for Parse(%q): got:%v, want:%v", test.s, got, test.want)
 		}
 	}
 }
 
-func equalApprox(a, b Quat, tol float64) bool {
+func equalApprox(a, b Number, tol float64) bool {
 	return floats.EqualWithinAbsOrRel(a.Real, b.Real, tol, tol) &&
 		floats.EqualWithinAbsOrRel(a.Imag, b.Imag, tol, tol) &&
 		floats.EqualWithinAbsOrRel(a.Jmag, b.Jmag, tol, tol) &&
 		floats.EqualWithinAbsOrRel(a.Kmag, b.Kmag, tol, tol)
 }
 
-func sameQuat(a, b Quat) bool {
+func sameNumber(a, b Number) bool {
 	return a == b || (sameFloat(a.Real, b.Real) &&
 		sameFloat(a.Imag, b.Imag) &&
 		sameFloat(a.Jmag, b.Jmag) &&

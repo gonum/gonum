@@ -12,7 +12,7 @@ import "math"
 
 // IsNaN returns true if any of real(q), imag(q), jmag(q), or kmag(q) is NaN
 // and none are an infinity.
-func IsNaN(q Quat) bool {
+func IsNaN(q Number) bool {
 	if math.IsInf(q.Real, 0) || math.IsInf(q.Imag, 0) || math.IsInf(q.Jmag, 0) || math.IsInf(q.Kmag, 0) {
 		return false
 	}
@@ -20,7 +20,7 @@ func IsNaN(q Quat) bool {
 }
 
 // NaN returns a quaternion ``not-a-number'' value.
-func NaN() Quat {
+func NaN() Number {
 	nan := math.NaN()
-	return Quat{Real: nan, Imag: nan, Jmag: nan, Kmag: nan}
+	return Number{Real: nan, Imag: nan, Jmag: nan, Kmag: nan}
 }

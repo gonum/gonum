@@ -9,12 +9,12 @@
 package quat
 
 // Conj returns the quaternion conjugate of q.
-func Conj(q Quat) Quat {
-	return Quat{Real: q.Real, Imag: -q.Imag, Jmag: -q.Jmag, Kmag: -q.Kmag}
+func Conj(q Number) Number {
+	return Number{Real: q.Real, Imag: -q.Imag, Jmag: -q.Jmag, Kmag: -q.Kmag}
 }
 
 // Inv returns the quaternion inverse of q.
-func Inv(q Quat) Quat {
+func Inv(q Number) Number {
 	a := Abs(q)
 	return Scale(1/(a*a), Conj(q))
 }

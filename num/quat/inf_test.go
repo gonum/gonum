@@ -12,29 +12,29 @@ import (
 var inf = math.Inf(1)
 
 var infTests = []struct {
-	q    Quat
+	q    Number
 	want bool
 }{
 	{q: Inf(), want: true},
-	{q: Quat{Real: inf, Imag: inf, Jmag: inf, Kmag: inf}, want: true},
-	{q: Quat{Real: -inf, Imag: -inf, Jmag: -inf, Kmag: -inf}, want: true},
-	{q: Quat{Real: inf, Imag: nan, Jmag: nan, Kmag: nan}, want: true},
-	{q: Quat{Real: nan, Imag: inf, Jmag: nan, Kmag: nan}, want: true},
-	{q: Quat{Real: nan, Imag: nan, Jmag: inf, Kmag: nan}, want: true},
-	{q: Quat{Real: nan, Imag: nan, Jmag: nan, Kmag: inf}, want: true},
-	{q: Quat{Real: -inf, Imag: nan, Jmag: nan, Kmag: nan}, want: true},
-	{q: Quat{Real: nan, Imag: -inf, Jmag: nan, Kmag: nan}, want: true},
-	{q: Quat{Real: nan, Imag: nan, Jmag: -inf, Kmag: nan}, want: true},
-	{q: Quat{Real: nan, Imag: nan, Jmag: nan, Kmag: -inf}, want: true},
-	{q: Quat{Real: inf}, want: true},
-	{q: Quat{Imag: inf}, want: true},
-	{q: Quat{Jmag: inf}, want: true},
-	{q: Quat{Kmag: inf}, want: true},
-	{q: Quat{Real: -inf}, want: true},
-	{q: Quat{Imag: -inf}, want: true},
-	{q: Quat{Jmag: -inf}, want: true},
-	{q: Quat{Kmag: -inf}, want: true},
-	{q: Quat{}, want: false},
+	{q: Number{Real: inf, Imag: inf, Jmag: inf, Kmag: inf}, want: true},
+	{q: Number{Real: -inf, Imag: -inf, Jmag: -inf, Kmag: -inf}, want: true},
+	{q: Number{Real: inf, Imag: nan, Jmag: nan, Kmag: nan}, want: true},
+	{q: Number{Real: nan, Imag: inf, Jmag: nan, Kmag: nan}, want: true},
+	{q: Number{Real: nan, Imag: nan, Jmag: inf, Kmag: nan}, want: true},
+	{q: Number{Real: nan, Imag: nan, Jmag: nan, Kmag: inf}, want: true},
+	{q: Number{Real: -inf, Imag: nan, Jmag: nan, Kmag: nan}, want: true},
+	{q: Number{Real: nan, Imag: -inf, Jmag: nan, Kmag: nan}, want: true},
+	{q: Number{Real: nan, Imag: nan, Jmag: -inf, Kmag: nan}, want: true},
+	{q: Number{Real: nan, Imag: nan, Jmag: nan, Kmag: -inf}, want: true},
+	{q: Number{Real: inf}, want: true},
+	{q: Number{Imag: inf}, want: true},
+	{q: Number{Jmag: inf}, want: true},
+	{q: Number{Kmag: inf}, want: true},
+	{q: Number{Real: -inf}, want: true},
+	{q: Number{Imag: -inf}, want: true},
+	{q: Number{Jmag: -inf}, want: true},
+	{q: Number{Kmag: -inf}, want: true},
+	{q: Number{}, want: false},
 }
 
 func TestIsInf(t *testing.T) {

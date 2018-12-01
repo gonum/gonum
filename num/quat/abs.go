@@ -11,7 +11,7 @@ package quat
 import "math"
 
 // Abs returns the absolute value (also called the modulus) of q.
-func Abs(q Quat) float64 {
+func Abs(q Number) float64 {
 	// Special cases.
 	switch {
 	case IsInf(q):

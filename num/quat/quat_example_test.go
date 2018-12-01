@@ -18,13 +18,13 @@ type point struct {
 }
 
 // raise raises the dimensionality of a point to a quaternion.
-func raise(p point) quat.Quat {
-	return quat.Quat{Imag: p.x, Jmag: p.y, Kmag: p.z}
+func raise(p point) quat.Number {
+	return quat.Number{Imag: p.x, Jmag: p.y, Kmag: p.z}
 }
 
 // rotate performs the quaternion rotation of p by the given quaternion
 // and scaling by the scale factor.
-func rotate(p point, by quat.Quat, scale float64) point {
+func rotate(p point, by quat.Number, scale float64) point {
 	// Ensure the modulus of by is correctly scaled.
 	if len := quat.Abs(by); len != scale {
 		by = quat.Scale(math.Sqrt(scale)/len, by)

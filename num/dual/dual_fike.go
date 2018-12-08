@@ -138,6 +138,12 @@ func Log(d Number) Number {
 			Emag: 0,
 		}
 	}
+	if d.Real < 0 {
+		return Number{
+			Real: math.NaN(),
+			Emag: math.NaN(),
+		}
+	}
 	return Number{
 		Real: math.Log(d.Real),
 		Emag: d.Emag / d.Real,

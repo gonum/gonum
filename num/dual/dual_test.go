@@ -35,8 +35,13 @@ func dAtanh(x float64) float64 {
 	return 1 / (1 - x*x)
 }
 
-func dExp(x float64) float64    { return math.Exp(x) }
-func dLog(x float64) float64    { return 1 / x }
+func dExp(x float64) float64 { return math.Exp(x) }
+func dLog(x float64) float64 {
+	if x < 0 {
+		return math.NaN()
+	}
+	return 1 / x
+}
 func dPow(x, y float64) float64 { return y * math.Pow(x, y-1) }
 func dSqrt(x float64) float64 {
 	// For whatever reason, math.Sqrt(-0) returns -0.

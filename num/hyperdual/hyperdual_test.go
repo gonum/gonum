@@ -35,8 +35,13 @@ func dAtanh(x float64) float64 {
 	return 1 / (1 - x*x)
 }
 
-func dExp(x float64) float64    { return math.Exp(x) }
-func dLog(x float64) float64    { return 1 / x }
+func dExp(x float64) float64 { return math.Exp(x) }
+func dLog(x float64) float64 {
+	if x < 0 {
+		return math.NaN()
+	}
+	return 1 / x
+}
 func dPow(x, y float64) float64 { return y * math.Pow(x, y-1) }
 func dSqrt(x float64) float64 {
 	// For whatever reason, math.Sqrt(-0) returns -0.
@@ -64,8 +69,13 @@ func d2Asinh(x float64) float64 { return -x / math.Pow((x*x+1), 1.5) }
 func d2Acosh(x float64) float64 { return -x / (math.Pow(x-1, 1.5) * math.Pow(x+1, 1.5)) }
 func d2Atanh(x float64) float64 { return 2 * x / ((1 - x*x) * (1 - x*x)) }
 
-func d2Exp(x float64) float64    { return math.Exp(x) }
-func d2Log(x float64) float64    { return -1 / (x * x) }
+func d2Exp(x float64) float64 { return math.Exp(x) }
+func d2Log(x float64) float64 {
+	if x < 0 {
+		return math.NaN()
+	}
+	return -1 / (x * x)
+}
 func d2Pow(x, y float64) float64 { return y * (y - 1) * math.Pow(x, y-2) }
 func d2Sqrt(x float64) float64 {
 	// Again math.Sqyu, and math.Pow are odd.

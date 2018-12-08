@@ -114,7 +114,7 @@ func Scale(f float64, d Number) Number {
 
 // Abs returns the absolute value of d.
 func Abs(d Number) Number {
-	if math.Float64bits(d.Real)&(1<<63) == 0 {
+	if !math.Signbit(d.Real) {
 		return d
 	}
 	return Scale(-1, d)

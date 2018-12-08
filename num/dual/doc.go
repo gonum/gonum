@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package dual provides the dual numeric type and functions.
+// Package dual provides the dual numeric type and functions. Dual numbers
+// are an extension of the real numbers in the form a+bϵ where ϵ^2=0, but ϵ≠0.
 package dual // imports "gonum.org/v1/gonum/num/dual"
 
 // TODO(kortschak): Handle special cases properly.

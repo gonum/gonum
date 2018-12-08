@@ -151,6 +151,14 @@ func Log(d Number) Number {
 			E1E2mag: negZero,
 		}
 	}
+	if d.Real < 0 {
+		return Number{
+			Real:    math.NaN(),
+			E1mag:   math.NaN(),
+			E2mag:   math.NaN(),
+			E1E2mag: math.NaN(),
+		}
+	}
 	deriv1 := d.E1mag / d.Real
 	deriv2 := d.E2mag / d.Real
 	return Number{

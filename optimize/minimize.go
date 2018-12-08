@@ -143,11 +143,16 @@ func Minimize(p Problem, initX []float64, settings *Settings, method Method) (*R
 	optLoc := newLocation(dim, method)
 	optLoc.F = math.Inf(1)
 
-	if settings.FunctionConverge != nil {
-		settings.FunctionConverge.Init()
-	}
-
 	initOp, initLoc := getInitLocation(dim, initX, settings.InitValues, method)
+
+	converger := settings.Converger
+	if converger == nil {
+		converger = &FunctionConverge{
+			Absolute:   1e-10,
+			Iterations: 20,
+		}
+	}
+	converger.Init(dim)
 
 	stats.Runtime = time.Since(startTime)
 
@@ -161,7 +166,7 @@ func Minimize(p Problem, initX []float64, settings *Settings, method Method) (*R
 
 	// Run optimization
 	var status Status
-	status, err = minimize(&p, method, settings, stats, initOp, initLoc, optLoc, startTime)
+	status, err = minimize(&p, method, settings, converger, stats, initOp, initLoc, optLoc, startTime)
 
 	// Cleanup and collect results
 	if settings.Recorder != nil && err == nil {
@@ -184,7 +189,7 @@ func getDefaultMethod(p *Problem) Method {
 
 // minimize performs an optimization. minimize updates the settings and optLoc,
 // and returns the final Status and error.
-func minimize(prob *Problem, method Method, settings *Settings, stats *Stats, initOp Operation, initLoc, optLoc *Location, startTime time.Time) (Status, error) {
+func minimize(prob *Problem, method Method, settings *Settings, converger Converger, stats *Stats, initOp Operation, initLoc, optLoc *Location, startTime time.Time) (Status, error) {
 	dim := len(optLoc.X)
 	nTasks := settings.Concurrent
 	if nTasks == 0 {
@@ -317,7 +322,7 @@ func minimize(prob *Problem, method Method, settings *Settings, stats *Stats, in
 		case NoOperation:
 			// Just send the task back.
 		case MajorIteration:
-			status = performMajorIteration(optLoc, task.Location, stats, startTime, settings)
+			status = performMajorIteration(optLoc, task.Location, stats, converger, startTime, settings)
 		case MethodDone:
 			methodDone = true
 			status = MethodConverge
@@ -504,7 +509,7 @@ func updateEvaluationStats(stats *Stats, op Operation) {
 // the convergence criteria given by settings. Otherwise a corresponding status is
 // returned.
 // Unlike checkLimits, checkConvergence is called only at MajorIterations.
-func checkLocationConvergence(loc *Location, settings *Settings) Status {
+func checkLocationConvergence(loc *Location, settings *Settings, converger Converger) Status {
 	if math.IsInf(loc.F, -1) {
 		return FunctionNegativeInfinity
 	}
@@ -517,10 +522,7 @@ func checkLocationConvergence(loc *Location, settings *Settings) Status {
 	if loc.F < settings.FunctionThreshold {
 		return FunctionThreshold
 	}
-	if settings.FunctionConverge != nil {
-		return settings.FunctionConverge.FunctionConverged(loc.F)
-	}
-	return NotTerminated
+	return converger.Converged(loc)
 }
 
 // checkEvaluationLimits checks the optimization limits after an evaluation
@@ -559,11 +561,11 @@ func checkIterationLimits(loc *Location, stats *Stats, settings *Settings) Statu
 // performMajorIteration does all of the steps needed to perform a MajorIteration.
 // It increments the iteration count, updates the optimal location, and checks
 // the necessary convergence criteria.
-func performMajorIteration(optLoc, loc *Location, stats *Stats, startTime time.Time, settings *Settings) Status {
+func performMajorIteration(optLoc, loc *Location, stats *Stats, converger Converger, startTime time.Time, settings *Settings) Status {
 	copyLocation(optLoc, loc)
 	stats.MajorIterations++
 	stats.Runtime = time.Since(startTime)
-	status := checkLocationConvergence(optLoc, settings)
+	status := checkLocationConvergence(optLoc, settings, converger)
 	if status != NotTerminated {
 		return status
 	}

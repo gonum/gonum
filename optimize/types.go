@@ -185,18 +185,18 @@ type Settings struct {
 	// The default value is 1e-6.
 	GradientThreshold float64
 
-	// FunctionConverge tests that the function value decreases by a
-	// significant amount over the specified number of iterations.
+	// Converger checks if the optimization has converged based on the (history
+	// of) locations found during the optimizaiton. Minimize will pass the
+	// Location at every MajorIteration to the Converger.
 	//
-	// If f < f_best and
-	//  f_best - f > FunctionConverge.Relative * maxabs(f, f_best) + FunctionConverge.Absolute
-	// then a significant decrease has occurred, and f_best is updated.
-	//
-	// If there is no significant decrease for FunctionConverge.Iterations
-	// major iterations, FunctionConvergence status is returned.
-	//
-	// If this is nil or if FunctionConverge.Iterations == 0, it has no effect.
-	FunctionConverge *FunctionConverge
+	// If the Converger is nil, a default value of
+	//  FunctionConverge {
+	//		Absolute: 1e-10,
+	//		Iterations: 100,
+	//  }
+	// will be used. NeverTerminated can be used to always return a
+	// NotTerminated status.
+	Converger Converger
 
 	// MajorIterations is the maximum number of iterations allowed.
 	// IterationLimit status is returned if the number of major iterations
@@ -245,7 +245,7 @@ func DefaultSettingsLocal() *Settings {
 	return &Settings{
 		GradientThreshold: defaultGradientAbsTol,
 		FunctionThreshold: math.Inf(-1),
-		FunctionConverge: &FunctionConverge{
+		Converger: &FunctionConverge{
 			Absolute:   1e-10,
 			Iterations: 20,
 		},

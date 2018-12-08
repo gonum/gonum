@@ -149,7 +149,7 @@ func Minimize(p Problem, initX []float64, settings *Settings, method Method) (*R
 	if converger == nil {
 		converger = &FunctionConverge{
 			Absolute:   1e-10,
-			Iterations: 20,
+			Iterations: 100,
 		}
 	}
 	converger.Init(dim)

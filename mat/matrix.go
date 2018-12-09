@@ -336,15 +336,15 @@ func Det(a Matrix) float64 {
 // Dot returns the sum of the element-wise product of a and b.
 // Dot panics if the matrix sizes are unequal.
 func Dot(a, b Vector) float64 {
-	if arv, ok := a.(RawVectorer); ok {
-		if brv, ok := b.(RawVectorer); ok {
-			return blas64.Dot(arv.RawVector(), brv.RawVector())
-		}
-	}
 	la := a.Len()
 	lb := b.Len()
 	if la != lb {
 		panic(ErrShape)
+	}
+	if arv, ok := a.(RawVectorer); ok {
+		if brv, ok := b.(RawVectorer); ok {
+			return blas64.Dot(arv.RawVector(), brv.RawVector())
+		}
 	}
 	var sum float64
 	for i := 0; i < la; i++ {

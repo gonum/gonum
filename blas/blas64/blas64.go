@@ -158,6 +158,8 @@ func Swap(x, y Vector) {
 
 // Copy copies the elements of x into the elements of y:
 //  y[i] = x[i] for all i.
+// Note that the behavior of Copy behaves differently than the built-in copy.
+// This requires both of the input Vector to have the same length.
 func Copy(x, y Vector) {
 	if x.N != y.N {
 		panic(badLength)

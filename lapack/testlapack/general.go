@@ -836,8 +836,8 @@ func isOrthogonal(q blas64.General) bool {
 			return false
 		}
 		for j := i + 1; j < n; j++ {
-			dot := blas64.Dot(blas64.Vector{Data: q.Data[i*q.Stride:], Inc: 1},
-				blas64.Vector{Data: q.Data[j*q.Stride:], Inc: 1})
+			dot := blas64.Dot(blas64.Vector{N: n, Data: q.Data[i*q.Stride:], Inc: 1},
+				blas64.Vector{N: n, Data: q.Data[j*q.Stride:], Inc: 1})
 			if math.IsNaN(dot) {
 				return false
 			}

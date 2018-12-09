@@ -171,7 +171,7 @@ func (v *VecDense) TVec() Vector {
 //
 // See the Reseter interface for more information.
 func (v *VecDense) Reset() {
-	// No change of Inc or n to 0 may be
+	// No change of Inc or N to 0 may be
 	// made unless both are set to 0.
 	v.mat.Inc = 0
 	v.mat.N = 0

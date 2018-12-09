@@ -54,7 +54,7 @@ func (v *VecDense) AtVec(i int) float64 {
 }
 
 func (v *VecDense) at(i int) float64 {
-	if uint(i) >= uint(v.n) {
+	if uint(i) >= uint(v.mat.N) {
 		panic(ErrRowAccess)
 	}
 	return v.mat.Data[i*v.mat.Inc]
@@ -67,7 +67,7 @@ func (v *VecDense) SetVec(i int, val float64) {
 }
 
 func (v *VecDense) setVec(i int, val float64) {
-	if uint(i) >= uint(v.n) {
+	if uint(i) >= uint(v.mat.N) {
 		panic(ErrVectorAccess)
 	}
 	v.mat.Data[i*v.mat.Inc] = val
@@ -292,10 +292,10 @@ func (d *DiagDense) At(i, j int) float64 {
 }
 
 func (d *DiagDense) at(i, j int) float64 {
-	if uint(i) >= uint(d.n) {
+	if uint(i) >= uint(d.mat.N) {
 		panic(ErrRowAccess)
 	}
-	if uint(j) >= uint(d.n) {
+	if uint(j) >= uint(d.mat.N) {
 		panic(ErrColAccess)
 	}
 	if i != j {
@@ -311,7 +311,7 @@ func (d *DiagDense) SetDiag(i int, v float64) {
 }
 
 func (d *DiagDense) setDiag(i int, v float64) {
-	if uint(i) >= uint(d.n) {
+	if uint(i) >= uint(d.mat.N) {
 		panic(ErrRowAccess)
 	}
 	d.mat.Data[i*d.mat.Inc] = v

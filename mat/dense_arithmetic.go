@@ -504,12 +504,13 @@ func (m *Dense) Exp(a Matrix) {
 	a1.Copy(a)
 	v := getWorkspace(r, r, true)
 	vraw := v.RawMatrix()
-	vvec := blas64.Vector{N: r * r, Inc: 1, Data: vraw.Data}
+	n := r * r
+	vvec := blas64.Vector{N: n, Inc: 1, Data: vraw.Data}
 	defer putWorkspace(v)
 
 	u := getWorkspace(r, r, true)
 	uraw := u.RawMatrix()
-	uvec := blas64.Vector{N: r * r, Inc: 1, Data: uraw.Data}
+	uvec := blas64.Vector{N: n, Inc: 1, Data: uraw.Data}
 	defer putWorkspace(u)
 
 	a2 := getWorkspace(r, r, false)
@@ -525,7 +526,7 @@ func (m *Dense) Exp(a Matrix) {
 		// this is not as horrible as it looks.
 		p := getWorkspace(r, r, true)
 		praw := p.RawMatrix()
-		pvec := blas64.Vector{N: r * r, Inc: 1, Data: praw.Data}
+		pvec := blas64.Vector{N: n, Inc: 1, Data: praw.Data}
 		defer putWorkspace(p)
 
 		for k := 0; k < r; k++ {
@@ -573,21 +574,21 @@ func (m *Dense) Exp(a Matrix) {
 		i.set(j, j, 1)
 	}
 	iraw := i.RawMatrix()
-	ivec := blas64.Vector{N: r * r, Inc: 1, Data: iraw.Data}
+	ivec := blas64.Vector{N: n, Inc: 1, Data: iraw.Data}
 	defer putWorkspace(i)
 
 	a2raw := a2.RawMatrix()
-	a2vec := blas64.Vector{N: r * r, Inc: 1, Data: a2raw.Data}
+	a2vec := blas64.Vector{N: n, Inc: 1, Data: a2raw.Data}
 
 	a4 := getWorkspace(r, r, false)
 	a4raw := a4.RawMatrix()
-	a4vec := blas64.Vector{N: r * r, Inc: 1, Data: a4raw.Data}
+	a4vec := blas64.Vector{N: n, Inc: 1, Data: a4raw.Data}
 	defer putWorkspace(a4)
 	a4.Mul(a2, a2)
 
 	a6 := getWorkspace(r, r, false)
 	a6raw := a6.RawMatrix()
-	a6vec := blas64.Vector{N: r * r, Inc: 1, Data: a6raw.Data}
+	a6vec := blas64.Vector{N: n, Inc: 1, Data: a6raw.Data}
 	defer putWorkspace(a6)
 	a6.Mul(a2, a4)
 

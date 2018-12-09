@@ -41,7 +41,7 @@ func (m *Dense) set(i, j int, v float64) {
 // At returns the element at row i.
 // It panics if i is out of bounds or if j is not zero.
 func (v *VecDense) At(i, j int) float64 {
-	if uint(i) >= uint(v.n) {
+	if uint(i) >= uint(v.mat.N) {
 		panic(ErrRowAccess)
 	}
 	if j != 0 {
@@ -53,7 +53,7 @@ func (v *VecDense) At(i, j int) float64 {
 // AtVec returns the element at row i.
 // It panics if i is out of bounds.
 func (v *VecDense) AtVec(i int) float64 {
-	if uint(i) >= uint(v.n) {
+	if uint(i) >= uint(v.mat.N) {
 		panic(ErrRowAccess)
 	}
 	return v.at(i)
@@ -66,7 +66,7 @@ func (v *VecDense) at(i int) float64 {
 // SetVec sets the element at row i to the value val.
 // It panics if i is out of bounds.
 func (v *VecDense) SetVec(i int, val float64) {
-	if uint(i) >= uint(v.n) {
+	if uint(i) >= uint(v.mat.N) {
 		panic(ErrVectorAccess)
 	}
 	v.setVec(i, val)
@@ -299,10 +299,10 @@ func (t *TriBandDense) setTriBand(i, j int, v float64) {
 
 // At returns the element at row i, column j.
 func (d *DiagDense) At(i, j int) float64 {
-	if uint(i) >= uint(d.n) {
+	if uint(i) >= uint(d.mat.N) {
 		panic(ErrRowAccess)
 	}
-	if uint(j) >= uint(d.n) {
+	if uint(j) >= uint(d.mat.N) {
 		panic(ErrColAccess)
 	}
 	return d.at(i, j)
@@ -318,7 +318,7 @@ func (d *DiagDense) at(i, j int) float64 {
 // SetDiag sets the element at row i, column i to the value v.
 // It panics if the location is outside the appropriate region of the matrix.
 func (d *DiagDense) SetDiag(i int, v float64) {
-	if uint(i) >= uint(d.n) {
+	if uint(i) >= uint(d.mat.N) {
 		panic(ErrRowAccess)
 	}
 	d.setDiag(i, v)

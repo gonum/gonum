@@ -223,7 +223,7 @@ func (lq *LQ) SolveVec(x *VecDense, trans bool, b Vector) error {
 		if x != b {
 			x.checkOverlap(bmat)
 		}
-		b := VecDense{mat: bmat, n: b.Len()}
+		b := VecDense{mat: bmat}
 		bm = b.asDense()
 	}
 	if trans {

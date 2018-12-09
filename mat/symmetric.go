@@ -183,10 +183,10 @@ func (s *SymDense) DiagView() Diagonal {
 	n := s.mat.N
 	return &DiagDense{
 		mat: blas64.Vector{
+			N:    n,
 			Inc:  s.mat.Stride + 1,
 			Data: s.mat.Data[:(n-1)*s.mat.Stride+n],
 		},
-		n: n,
 	}
 }
 
@@ -273,7 +273,7 @@ func (s *SymDense) SymRankOne(a Symmetric, alpha float64, x Vector) {
 	xU, _ := untranspose(x)
 	if rv, ok := xU.(RawVectorer); ok {
 		xmat := rv.RawVector()
-		s.checkOverlap((&VecDense{mat: xmat, n: n}).asGeneral())
+		s.checkOverlap((&VecDense{mat: xmat}).asGeneral())
 		blas64.Syr(alpha, xmat, s.mat)
 		return
 	}
@@ -387,14 +387,14 @@ func (s *SymDense) RankTwo(a Symmetric, alpha float64, x, y Vector) {
 	xU, _ := untranspose(x)
 	if rv, ok := xU.(RawVectorer); ok {
 		xmat = rv.RawVector()
-		s.checkOverlap((&VecDense{mat: xmat, n: x.Len()}).asGeneral())
+		s.checkOverlap((&VecDense{mat: xmat}).asGeneral())
 	} else {
 		fast = false
 	}
 	yU, _ := untranspose(y)
 	if rv, ok := yU.(RawVectorer); ok {
 		ymat = rv.RawVector()
-		s.checkOverlap((&VecDense{mat: ymat, n: y.Len()}).asGeneral())
+		s.checkOverlap((&VecDense{mat: ymat}).asGeneral())
 	} else {
 		fast = false
 	}

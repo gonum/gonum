@@ -828,7 +828,7 @@ func isOrthogonal(q blas64.General) bool {
 	// an orthonormal basis of the Euclidean space R^n.
 	const tol = 1e-13
 	for i := 0; i < n; i++ {
-		nrm := blas64.Nrm2(n, blas64.Vector{Data: q.Data[i*q.Stride:], Inc: 1})
+		nrm := blas64.Nrm2(blas64.Vector{N: n, Data: q.Data[i*q.Stride:], Inc: 1})
 		if math.IsNaN(nrm) {
 			return false
 		}
@@ -836,10 +836,8 @@ func isOrthogonal(q blas64.General) bool {
 			return false
 		}
 		for j := i + 1; j < n; j++ {
-			dot := blas64.Dot(n,
-				blas64.Vector{Data: q.Data[i*q.Stride:], Inc: 1},
-				blas64.Vector{Data: q.Data[j*q.Stride:], Inc: 1},
-			)
+			dot := blas64.Dot(blas64.Vector{Data: q.Data[i*q.Stride:], Inc: 1},
+				blas64.Vector{Data: q.Data[j*q.Stride:], Inc: 1})
 			if math.IsNaN(dot) {
 				return false
 			}
@@ -860,7 +858,7 @@ func hasOrthonormalColumns(q blas64.General) bool {
 	ldq := q.Stride
 	const tol = 1e-13
 	for i := 0; i < n; i++ {
-		nrm := blas64.Nrm2(m, blas64.Vector{Data: q.Data[i:], Inc: ldq})
+		nrm := blas64.Nrm2(blas64.Vector{N: m, Data: q.Data[i:], Inc: ldq})
 		if math.IsNaN(nrm) {
 			return false
 		}
@@ -868,10 +866,8 @@ func hasOrthonormalColumns(q blas64.General) bool {
 			return false
 		}
 		for j := i + 1; j < n; j++ {
-			dot := blas64.Dot(m,
-				blas64.Vector{Data: q.Data[i:], Inc: ldq},
-				blas64.Vector{Data: q.Data[j:], Inc: ldq},
-			)
+			dot := blas64.Dot(blas64.Vector{N: m, Data: q.Data[i:], Inc: ldq},
+				blas64.Vector{N: m, Data: q.Data[j:], Inc: ldq})
 			if math.IsNaN(dot) {
 				return false
 			}

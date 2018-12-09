@@ -373,10 +373,10 @@ func makeRandOf(a Matrix, m, n int) Matrix {
 		}
 		mat := &VecDense{
 			mat: blas64.Vector{
+				N:    length,
 				Inc:  inc,
 				Data: make([]float64, inc*(length-1)+1),
 			},
-			n: length,
 		}
 		for i := 0; i < length; i++ {
 			mat.SetVec(i, rand.NormFloat64())
@@ -522,10 +522,10 @@ func makeRandOf(a Matrix, m, n int) Matrix {
 		}
 		mat := &DiagDense{
 			mat: blas64.Vector{
+				N:    n,
 				Inc:  inc,
 				Data: make([]float64, inc*(n-1)+1),
 			},
-			n: n,
 		}
 		for i := 0; i < n; i++ {
 			mat.SetDiag(i, rand.Float64())
@@ -633,10 +633,10 @@ func makeCopyOf(a Matrix) Matrix {
 	case *VecDense:
 		m := &VecDense{
 			mat: blas64.Vector{
+				N:    t.mat.N,
 				Inc:  t.mat.Inc,
-				Data: make([]float64, t.mat.Inc*(t.n-1)+1),
+				Data: make([]float64, t.mat.Inc*(t.mat.N-1)+1),
 			},
-			n: t.n,
 		}
 		copy(m.mat.Data, t.mat.Data)
 		return m
@@ -655,8 +655,7 @@ func makeCopyOf(a Matrix) Matrix {
 			diag = (*DiagDense)(s)
 		}
 		d := &DiagDense{
-			mat: blas64.Vector{Inc: diag.mat.Inc, Data: make([]float64, len(diag.mat.Data))},
-			n:   diag.n,
+			mat: blas64.Vector{N: diag.mat.N, Inc: diag.mat.Inc, Data: make([]float64, len(diag.mat.Data))},
 		}
 		copy(d.mat.Data, diag.mat.Data)
 		return returnAs(d, t)

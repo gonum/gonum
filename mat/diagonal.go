@@ -71,7 +71,6 @@ type MutableDiagonal interface {
 // DiagDense represents a diagonal matrix in dense storage format.
 type DiagDense struct {
 	mat blas64.Vector
-	n   int
 }
 
 // NewDiagonal creates a new Diagonal matrix with n rows and n columns.
@@ -91,19 +90,18 @@ func NewDiagonal(n int, data []float64) *DiagDense {
 		panic(ErrShape)
 	}
 	return &DiagDense{
-		mat: blas64.Vector{Data: data, Inc: 1},
-		n:   n,
+		mat: blas64.Vector{N: n, Data: data, Inc: 1},
 	}
 }
 
 // Diag returns the dimension of the receiver.
 func (d *DiagDense) Diag() int {
-	return d.n
+	return d.mat.N
 }
 
 // Dims returns the dimensions of the matrix.
 func (d *DiagDense) Dims() (r, c int) {
-	return d.n, d.n
+	return d.mat.N, d.mat.N
 }
 
 // T returns the transpose of the matrix.
@@ -137,25 +135,25 @@ func (d *DiagDense) Bandwidth() (kl, ku int) {
 
 // Symmetric implements the Symmetric interface.
 func (d *DiagDense) Symmetric() int {
-	return d.n
+	return d.mat.N
 }
 
 // SymBand returns the number of rows/columns in the matrix, and the size of
 // the bandwidth.
 func (d *DiagDense) SymBand() (n, k int) {
-	return d.n, 0
+	return d.mat.N, 0
 }
 
 // Triangle implements the Triangular interface.
 func (d *DiagDense) Triangle() (int, TriKind) {
-	return d.n, Upper
+	return d.mat.N, Upper
 }
 
 // TriBand returns the number of rows/columns in the matrix, the
 // size of the bandwidth, and the orientation. Note that Diagonal matrices are
 // Upper by default.
 func (d *DiagDense) TriBand() (n, k int, kind TriKind) {
-	return d.n, 0, Upper
+	return d.mat.N, 0, Upper
 }
 
 // Reset zeros the length of the matrix so that it can be reused as the
@@ -166,7 +164,7 @@ func (d *DiagDense) Reset() {
 	// No change of Inc or n to 0 may be
 	// made unless both are set to 0.
 	d.mat.Inc = 0
-	d.n = 0
+	d.mat.N = 0
 	d.mat.Data = d.mat.Data[:0]
 }
 
@@ -188,24 +186,28 @@ func (d *DiagDense) DiagFrom(m Matrix) {
 	case RawBander:
 		mat := r.RawBand()
 		vec = blas64.Vector{
+			N:    n,
 			Inc:  mat.Stride,
 			Data: mat.Data[mat.KL : (n-1)*mat.Stride+mat.KL+1],
 		}
 	case RawMatrixer:
 		mat := r.RawMatrix()
 		vec = blas64.Vector{
+			N:    n,
 			Inc:  mat.Stride + 1,
 			Data: mat.Data[:(n-1)*mat.Stride+n],
 		}
 	case RawSymBander:
 		mat := r.RawSymBand()
 		vec = blas64.Vector{
+			N:    n,
 			Inc:  mat.Stride,
 			Data: mat.Data[:(n-1)*mat.Stride+1],
 		}
 	case RawSymmetricer:
 		mat := r.RawSymmetric()
 		vec = blas64.Vector{
+			N:    n,
 			Inc:  mat.Stride + 1,
 			Data: mat.Data[:(n-1)*mat.Stride+n],
 		}
@@ -216,6 +218,7 @@ func (d *DiagDense) DiagFrom(m Matrix) {
 			data = data[mat.K:]
 		}
 		vec = blas64.Vector{
+			N:    n,
 			Inc:  mat.Stride,
 			Data: data[:(n-1)*mat.Stride+1],
 		}
@@ -228,6 +231,7 @@ func (d *DiagDense) DiagFrom(m Matrix) {
 			return
 		}
 		vec = blas64.Vector{
+			N:    n,
 			Inc:  mat.Stride + 1,
 			Data: mat.Data[:(n-1)*mat.Stride+n],
 		}
@@ -240,7 +244,7 @@ func (d *DiagDense) DiagFrom(m Matrix) {
 		}
 		return
 	}
-	blas64.Copy(n, vec, d.mat)
+	blas64.Copy(vec, d.mat)
 }
 
 // RawBand returns the underlying data used by the receiver represented
@@ -249,8 +253,8 @@ func (d *DiagDense) DiagFrom(m Matrix) {
 // in returned blas64.Band.
 func (d *DiagDense) RawBand() blas64.Band {
 	return blas64.Band{
-		Rows:   d.n,
-		Cols:   d.n,
+		Rows:   d.mat.N,
+		Cols:   d.mat.N,
 		KL:     0,
 		KU:     0,
 		Stride: d.mat.Inc,
@@ -264,7 +268,7 @@ func (d *DiagDense) RawBand() blas64.Band {
 // in returned blas64.Band.
 func (d *DiagDense) RawSymBand() blas64.SymmetricBand {
 	return blas64.SymmetricBand{
-		N:      d.n,
+		N:      d.mat.N,
 		K:      0,
 		Stride: d.mat.Inc,
 		Uplo:   blas.Upper,
@@ -283,10 +287,10 @@ func (d *DiagDense) reuseAs(r int) {
 			Inc:  1,
 			Data: use(d.mat.Data, r),
 		}
-		d.n = r
+		d.mat.N = r
 		return
 	}
-	if r != d.n {
+	if r != d.mat.N {
 		panic(ErrShape)
 	}
 }

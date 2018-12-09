@@ -23,8 +23,7 @@ func TestNewDiagonal(t *testing.T) {
 			data: []float64{1, 2, 3, 4, 5, 6},
 			n:    6,
 			mat: &DiagDense{
-				mat: blas64.Vector{Inc: 1, Data: []float64{1, 2, 3, 4, 5, 6}},
-				n:   6,
+				mat: blas64.Vector{N: 6, Inc: 1, Data: []float64{1, 2, 3, 4, 5, 6}},
 			},
 			dense: NewDense(6, 6, []float64{
 				1, 0, 0, 0, 0, 0,
@@ -64,8 +63,7 @@ func TestDiagonalStride(t *testing.T) {
 	}{
 		{
 			diag: &DiagDense{
-				mat: blas64.Vector{Inc: 1, Data: []float64{1, 2, 3, 4, 5, 6}},
-				n:   6,
+				mat: blas64.Vector{N: 6, Inc: 1, Data: []float64{1, 2, 3, 4, 5, 6}},
 			},
 			dense: NewDense(6, 6, []float64{
 				1, 0, 0, 0, 0, 0,
@@ -78,7 +76,7 @@ func TestDiagonalStride(t *testing.T) {
 		},
 		{
 			diag: &DiagDense{
-				mat: blas64.Vector{Inc: 2, Data: []float64{
+				mat: blas64.Vector{N: 6, Inc: 2, Data: []float64{
 					1, 0,
 					2, 0,
 					3, 0,
@@ -86,7 +84,6 @@ func TestDiagonalStride(t *testing.T) {
 					5, 0,
 					6,
 				}},
-				n: 6,
 			},
 			dense: NewDense(6, 6, []float64{
 				1, 0, 0, 0, 0, 0,
@@ -99,7 +96,7 @@ func TestDiagonalStride(t *testing.T) {
 		},
 		{
 			diag: &DiagDense{
-				mat: blas64.Vector{Inc: 5, Data: []float64{
+				mat: blas64.Vector{N: 6, Inc: 5, Data: []float64{
 					1, 0, 0, 0, 0,
 					2, 0, 0, 0, 0,
 					3, 0, 0, 0, 0,
@@ -107,7 +104,6 @@ func TestDiagonalStride(t *testing.T) {
 					5, 0, 0, 0, 0,
 					6,
 				}},
-				n: 6,
 			},
 			dense: NewDense(6, 6, []float64{
 				1, 0, 0, 0, 0, 0,

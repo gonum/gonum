@@ -128,7 +128,7 @@ func (v *VecDense) SolveVec(a Matrix, b Vector) error {
 		// and bm as overlapping but not identical.
 		bm := m
 		if v != b {
-			b := VecDense{mat: bmat, n: b.Len()}
+			b := VecDense{mat: bmat}
 			bm = b.asDense()
 		}
 		return m.Solve(a, bm)

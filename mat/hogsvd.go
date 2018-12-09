@@ -105,7 +105,7 @@ func (gsvd *HOGSVD) Factorize(m ...Matrix) (ok bool) {
 	var cv VecDense
 	for j := 0; j < c; j++ {
 		cv.ColViewOf(v, j)
-		cv.ScaleVec(1/blas64.Nrm2(c, cv.mat), &cv)
+		cv.ScaleVec(1/blas64.Nrm2(cv.mat), &cv)
 	}
 
 	b := make([]Dense, len(m))
@@ -183,7 +183,7 @@ func (gsvd *HOGSVD) Values(s []float64, n int) []float64 {
 		panic("hogsvd: invalid index")
 	}
 
-	r, c := gsvd.b[n].Dims()
+	_, c := gsvd.b[n].Dims()
 	if s == nil {
 		s = make([]float64, c)
 	} else if len(s) != c {
@@ -192,7 +192,7 @@ func (gsvd *HOGSVD) Values(s []float64, n int) []float64 {
 	var v VecDense
 	for j := 0; j < c; j++ {
 		v.ColViewOf(&gsvd.b[n], j)
-		s[j] = blas64.Nrm2(r, v.mat)
+		s[j] = blas64.Nrm2(v.mat)
 	}
 	return s
 }

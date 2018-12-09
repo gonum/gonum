@@ -304,10 +304,10 @@ func (t *TriDense) DiagView() Diagonal {
 	n := t.mat.N
 	return &DiagDense{
 		mat: blas64.Vector{
+			N:    n,
 			Inc:  t.mat.Stride + 1,
 			Data: t.mat.Data[:(n-1)*t.mat.Stride+n],
 		},
-		n: n,
 	}
 }
 

@@ -72,15 +72,13 @@ func testDgebak(t *testing.T, impl Dgebaker, job lapack.BalanceJob, side lapack.
 		// Make up some random permutations.
 		for i := n - 1; i > ihi; i-- {
 			scale[i] = float64(rnd.Intn(i + 1))
-			blas64.Swap(n,
-				blas64.Vector{Data: p.Data[i:], Inc: p.Stride},
-				blas64.Vector{Data: p.Data[int(scale[i]):], Inc: p.Stride})
+			blas64.Swap(blas64.Vector{N: n, Data: p.Data[i:], Inc: p.Stride},
+				blas64.Vector{N: n, Data: p.Data[int(scale[i]):], Inc: p.Stride})
 		}
 		for i := 0; i < ilo; i++ {
 			scale[i] = float64(i + rnd.Intn(ihi-i+1))
-			blas64.Swap(n,
-				blas64.Vector{Data: p.Data[i:], Inc: p.Stride},
-				blas64.Vector{Data: p.Data[int(scale[i]):], Inc: p.Stride})
+			blas64.Swap(blas64.Vector{N: n, Data: p.Data[i:], Inc: p.Stride},
+				blas64.Vector{N: n, Data: p.Data[int(scale[i]):], Inc: p.Stride})
 		}
 	}
 

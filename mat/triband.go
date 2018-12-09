@@ -318,9 +318,9 @@ func (t *TriBandDense) DiagView() Diagonal {
 	}
 	return &DiagDense{
 		mat: blas64.Vector{
+			N:    n,
 			Inc:  t.mat.Stride,
 			Data: data[:(n-1)*t.mat.Stride+1],
 		},
-		n: n,
 	}
 }

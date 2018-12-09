@@ -56,10 +56,8 @@ func isOrthonormal(q *Dense, tol float64) bool {
 	}
 	for i := 0; i < m; i++ {
 		for j := i; j < m; j++ {
-			dot := blas64.Dot(m,
-				blas64.Vector{Inc: 1, Data: q.mat.Data[i*q.mat.Stride:]},
-				blas64.Vector{Inc: 1, Data: q.mat.Data[j*q.mat.Stride:]},
-			)
+			dot := blas64.Dot(blas64.Vector{N: m, Inc: 1, Data: q.mat.Data[i*q.mat.Stride:]},
+				blas64.Vector{N: m, Inc: 1, Data: q.mat.Data[j*q.mat.Stride:]})
 			// Dot product should be 1 if i == j and 0 otherwise.
 			if i == j && math.Abs(dot-1) > tol {
 				return false

@@ -191,7 +191,7 @@ func TestTriDenseCopy(t *testing.T) {
 						if got := l.At(m, n); got != want {
 							t.Errorf("unexpected diagonal value for At(%d, %d) for test %d: got: %v want: %v", m, n, i, got, want)
 						}
-					case m < n: // Lower triangular matrix.
+					case m > n: // Lower triangular matrix.
 						if got := l.At(m, n); got != want {
 							t.Errorf("unexpected lower value for At(%d, %d) for test %d: got: %v want: %v", m, n, i, got, want)
 						}

@@ -150,10 +150,10 @@ func (s *SymBandDense) DiagView() Diagonal {
 	n := s.mat.N
 	return &DiagDense{
 		mat: blas64.Vector{
+			N:    n,
 			Inc:  s.mat.Stride,
 			Data: s.mat.Data[:(n-1)*s.mat.Stride+1],
 		},
-		n: n,
 	}
 }
 

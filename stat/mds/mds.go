@@ -81,9 +81,7 @@ func TorgersonScaling(dst *mat.Dense, eigdst []float64, dis mat.Symmetric) (k in
 func reverse(values []float64, vectors blas64.General) {
 	for i, j := 0, len(values)-1; i < j; i, j = i+1, j-1 {
 		values[i], values[j] = values[j], values[i]
-		blas64.Swap(vectors.Rows,
-			blas64.Vector{Inc: vectors.Stride, Data: vectors.Data[i:]},
-			blas64.Vector{Inc: vectors.Stride, Data: vectors.Data[j:]},
-		)
+		blas64.Swap(blas64.Vector{N: vectors.Rows, Inc: vectors.Stride, Data: vectors.Data[i:]},
+			blas64.Vector{N: vectors.Rows, Inc: vectors.Stride, Data: vectors.Data[j:]})
 	}
 }

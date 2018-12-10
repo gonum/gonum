@@ -24,10 +24,10 @@ func TestNewVecDense(t *testing.T) {
 			data: []float64{4, 5, 6},
 			vector: &VecDense{
 				mat: blas64.Vector{
+					N:    3,
 					Data: []float64{4, 5, 6},
 					Inc:  1,
 				},
-				n: 3,
 			},
 		},
 		{
@@ -35,10 +35,10 @@ func TestNewVecDense(t *testing.T) {
 			data: nil,
 			vector: &VecDense{
 				mat: blas64.Vector{
+					N:    3,
 					Data: []float64{0, 0, 0},
 					Inc:  1,
 				},
-				n: 3,
 			},
 		},
 	} {
@@ -65,50 +65,50 @@ func TestCap(t *testing.T) {
 		{
 			vector: &VecDense{
 				mat: blas64.Vector{
+					N:    3,
 					Data: make([]float64, 7, 10),
 					Inc:  3,
 				},
-				n: 3,
 			},
 			want: 4,
 		},
 		{
 			vector: &VecDense{
 				mat: blas64.Vector{
+					N:    4,
 					Data: make([]float64, 10),
 					Inc:  3,
 				},
-				n: 4,
 			},
 			want: 4,
 		},
 		{
 			vector: &VecDense{
 				mat: blas64.Vector{
+					N:    4,
 					Data: make([]float64, 11),
 					Inc:  3,
 				},
-				n: 4,
 			},
 			want: 4,
 		},
 		{
 			vector: &VecDense{
 				mat: blas64.Vector{
+					N:    4,
 					Data: make([]float64, 12),
 					Inc:  3,
 				},
-				n: 4,
 			},
 			want: 4,
 		},
 		{
 			vector: &VecDense{
 				mat: blas64.Vector{
+					N:    4,
 					Data: make([]float64, 13),
 					Inc:  3,
 				},
-				n: 4,
 			},
 			want: 5,
 		},
@@ -127,24 +127,24 @@ func TestVecDenseAtSet(t *testing.T) {
 		{
 			vector: &VecDense{
 				mat: blas64.Vector{
+					N:    3,
 					Data: []float64{0, 1, 2},
 					Inc:  1,
 				},
-				n: 3,
 			},
 		},
 		{
 			vector: &VecDense{
 				mat: blas64.Vector{
+					N:    3,
 					Data: []float64{0, 10, 10, 1, 10, 10, 2},
 					Inc:  3,
 				},
-				n: 3,
 			},
 		},
 	} {
 		v := test.vector
-		n := test.vector.n
+		n := test.vector.mat.N
 
 		for _, row := range []int{-1, n} {
 			panicked, message := panics(func() { v.At(row, 0) })
@@ -523,9 +523,9 @@ func randVecDense(size, inc int, rho float64, rnd func() float64) *VecDense {
 	}
 	return &VecDense{
 		mat: blas64.Vector{
+			N:    size,
 			Inc:  inc,
 			Data: data,
 		},
-		n: size,
 	}
 }

@@ -236,9 +236,9 @@ func (m *Dense) SetCol(j int, src []float64) {
 		panic(ErrColLength)
 	}
 
-	blas64.Copy(m.mat.Rows,
-		blas64.Vector{Inc: 1, Data: src},
-		blas64.Vector{Inc: m.mat.Stride, Data: m.mat.Data[j:]},
+	blas64.Copy(
+		blas64.Vector{N: m.mat.Rows, Inc: 1, Data: src},
+		blas64.Vector{N: m.mat.Rows, Inc: m.mat.Stride, Data: m.mat.Data[j:]},
 	)
 }
 
@@ -283,10 +283,10 @@ func (m *Dense) DiagView() Diagonal {
 	n := min(m.mat.Rows, m.mat.Cols)
 	return &DiagDense{
 		mat: blas64.Vector{
+			N:    n,
 			Inc:  m.mat.Stride + 1,
 			Data: m.mat.Data[:(n-1)*m.mat.Stride+n],
 		},
-		n: n,
 	}
 }
 
@@ -399,9 +399,8 @@ func (m *Dense) Clone(a Matrix) {
 		mat.Data = make([]float64, r*c)
 		if trans {
 			for i := 0; i < r; i++ {
-				blas64.Copy(c,
-					blas64.Vector{Inc: amat.Stride, Data: amat.Data[i : i+(c-1)*amat.Stride+1]},
-					blas64.Vector{Inc: 1, Data: mat.Data[i*c : (i+1)*c]})
+				blas64.Copy(blas64.Vector{N: c, Inc: amat.Stride, Data: amat.Data[i : i+(c-1)*amat.Stride+1]},
+					blas64.Vector{N: c, Inc: 1, Data: mat.Data[i*c : (i+1)*c]})
 			}
 		} else {
 			for i := 0; i < r; i++ {
@@ -410,10 +409,9 @@ func (m *Dense) Clone(a Matrix) {
 		}
 	case *VecDense:
 		amat := aU.mat
-		mat.Data = make([]float64, aU.n)
-		blas64.Copy(aU.n,
-			blas64.Vector{Inc: amat.Inc, Data: amat.Data},
-			blas64.Vector{Inc: 1, Data: mat.Data})
+		mat.Data = make([]float64, aU.mat.N)
+		blas64.Copy(blas64.Vector{N: aU.mat.N, Inc: amat.Inc, Data: amat.Data},
+			blas64.Vector{N: aU.mat.N, Inc: 1, Data: mat.Data})
 	default:
 		mat.Data = make([]float64, r*c)
 		w := *m
@@ -456,9 +454,8 @@ func (m *Dense) Copy(a Matrix) (r, c int) {
 				m.checkOverlap(amat)
 			}
 			for i := 0; i < r; i++ {
-				blas64.Copy(c,
-					blas64.Vector{Inc: amat.Stride, Data: amat.Data[i : i+(c-1)*amat.Stride+1]},
-					blas64.Vector{Inc: 1, Data: m.mat.Data[i*m.mat.Stride : i*m.mat.Stride+c]})
+				blas64.Copy(blas64.Vector{N: c, Inc: amat.Stride, Data: amat.Data[i : i+(c-1)*amat.Stride+1]},
+					blas64.Vector{N: c, Inc: 1, Data: m.mat.Data[i*m.mat.Stride : i*m.mat.Stride+c]})
 			}
 		} else {
 			switch o := offset(m.mat.Data, amat.Data); {
@@ -493,13 +490,11 @@ func (m *Dense) Copy(a Matrix) (r, c int) {
 		}
 		switch o := offset(m.mat.Data, amat.Data); {
 		case o < 0:
-			blas64.Copy(n,
-				blas64.Vector{Inc: -amat.Inc, Data: amat.Data},
-				blas64.Vector{Inc: -stride, Data: m.mat.Data})
+			blas64.Copy(blas64.Vector{N: n, Inc: -amat.Inc, Data: amat.Data},
+				blas64.Vector{N: n, Inc: -stride, Data: m.mat.Data})
 		case o > 0:
-			blas64.Copy(n,
-				blas64.Vector{Inc: amat.Inc, Data: amat.Data},
-				blas64.Vector{Inc: stride, Data: m.mat.Data})
+			blas64.Copy(blas64.Vector{N: n, Inc: amat.Inc, Data: amat.Data},
+				blas64.Vector{N: n, Inc: stride, Data: m.mat.Data})
 		default:
 			// Nothing to do.
 		}

@@ -144,14 +144,12 @@ func testDgebal(t *testing.T, impl Dgebaler, job lapack.BalanceJob, a blas64.Gen
 		// Create the permutation matrix P.
 		p := eye(n, n)
 		for j := n - 1; j > ihi; j-- {
-			blas64.Swap(n,
-				blas64.Vector{Data: p.Data[j:], Inc: p.Stride},
-				blas64.Vector{Data: p.Data[int(scale[j]):], Inc: p.Stride})
+			blas64.Swap(blas64.Vector{N: n, Data: p.Data[j:], Inc: p.Stride},
+				blas64.Vector{N: n, Data: p.Data[int(scale[j]):], Inc: p.Stride})
 		}
 		for j := 0; j < ilo; j++ {
-			blas64.Swap(n,
-				blas64.Vector{Data: p.Data[j:], Inc: p.Stride},
-				blas64.Vector{Data: p.Data[int(scale[j]):], Inc: p.Stride})
+			blas64.Swap(blas64.Vector{N: n, Data: p.Data[j:], Inc: p.Stride},
+				blas64.Vector{N: n, Data: p.Data[int(scale[j]):], Inc: p.Stride})
 		}
 		// Compute P^T*A*P and store into want.
 		ap := zeros(n, n, n)

@@ -193,10 +193,10 @@ func (b *BandDense) DiagView() Diagonal {
 	n := min(b.mat.Rows, b.mat.Cols)
 	return &DiagDense{
 		mat: blas64.Vector{
+			N:    n,
 			Inc:  b.mat.Stride,
 			Data: b.mat.Data[b.mat.KL : (n-1)*b.mat.Stride+b.mat.KL+1],
 		},
-		n: n,
 	}
 }
 

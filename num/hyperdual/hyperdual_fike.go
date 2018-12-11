@@ -83,7 +83,7 @@ func Pow(d, p Number) Number {
 	return Exp(Mul(p, Log(d)))
 }
 
-// Sqrt returns the square root of d
+// Sqrt returns the square root of d.
 //
 // Special cases are:
 //	Sqrt(+Inf) = +Inf

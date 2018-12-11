@@ -75,12 +75,12 @@ func PowReal(d Number, p float64) Number {
 	}
 }
 
-// Pow return d**r, the base-d exponential of r.
+// Pow returns d**r, the base-d exponential of r.
 func Pow(d, p Number) Number {
 	return Exp(Mul(p, Log(d)))
 }
 
-// Sqrt returns the square root of d
+// Sqrt returns the square root of d.
 //
 // Special cases are:
 //	Sqrt(+Inf) = +Inf

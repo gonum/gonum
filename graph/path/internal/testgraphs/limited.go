@@ -178,7 +178,7 @@ func (l *LimitedVisionGrid) has(id int64) bool {
 // From returns nodes that are optimistically reachable from u.
 func (l *LimitedVisionGrid) From(uid int64) graph.Nodes {
 	if !l.has(uid) {
-		return nil
+		return graph.Empty
 	}
 
 	nr, nc := l.RowCol(uid)
@@ -189,6 +189,9 @@ func (l *LimitedVisionGrid) From(uid int64) graph.Nodes {
 				to = append(to, v)
 			}
 		}
+	}
+	if len(to) == 0 {
+		return graph.Empty
 	}
 	return iterator.NewOrderedNodes(to)
 }

@@ -169,7 +169,7 @@ func (g *Grid) NodeAt(r, c int) graph.Node {
 // ends of an edge must be open.
 func (g *Grid) From(uid int64) graph.Nodes {
 	if !g.HasOpen(uid) {
-		return nil
+		return graph.Empty
 	}
 	nr, nc := g.RowCol(uid)
 	var to []graph.Node
@@ -179,6 +179,9 @@ func (g *Grid) From(uid int64) graph.Nodes {
 				to = append(to, v)
 			}
 		}
+	}
+	if len(to) == 0 {
+		return graph.Empty
 	}
 	return iterator.NewOrderedNodes(to)
 }

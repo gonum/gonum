@@ -80,7 +80,7 @@ func (g *WeightedUndirectedGraph) EdgeBetween(xid, yid int64) graph.Edge {
 // is a multi.Edge.
 func (g *WeightedUndirectedGraph) Edges() graph.Edges {
 	if len(g.lines) == 0 {
-		return nil
+		return graph.Empty
 	}
 	var edges []graph.Edge
 	seen := make(map[int64]struct{})
@@ -105,13 +105,16 @@ func (g *WeightedUndirectedGraph) Edges() graph.Edges {
 			}
 		}
 	}
+	if len(edges) == 0 {
+		return graph.Empty
+	}
 	return iterator.NewOrderedEdges(edges)
 }
 
 // From returns all nodes in g that can be reached directly from n.
 func (g *WeightedUndirectedGraph) From(id int64) graph.Nodes {
 	if _, ok := g.nodes[id]; !ok {
-		return nil
+		return graph.Empty
 	}
 
 	nodes := make([]graph.Node, len(g.lines[id]))
@@ -119,6 +122,9 @@ func (g *WeightedUndirectedGraph) From(id int64) graph.Nodes {
 	for from := range g.lines[id] {
 		nodes[i] = g.nodes[from]
 		i++
+	}
+	if len(nodes) == 0 {
+		return graph.Empty
 	}
 	return iterator.NewOrderedNodes(nodes)
 }
@@ -139,7 +145,7 @@ func (g *WeightedUndirectedGraph) Lines(uid, vid int64) graph.Lines {
 func (g *WeightedUndirectedGraph) LinesBetween(xid, yid int64) graph.Lines {
 	edge := g.lines[xid][yid]
 	if len(edge) == 0 {
-		return nil
+		return graph.Empty
 	}
 	var lines []graph.Line
 	seen := make(map[int64]struct{})
@@ -182,7 +188,7 @@ func (g *WeightedUndirectedGraph) Node(id int64) graph.Node {
 // Nodes returns all the nodes in the graph.
 func (g *WeightedUndirectedGraph) Nodes() graph.Nodes {
 	if len(g.nodes) == 0 {
-		return nil
+		return graph.Empty
 	}
 	nodes := make([]graph.Node, len(g.nodes))
 	i := 0
@@ -291,7 +297,7 @@ func (g *WeightedUndirectedGraph) WeightedEdgeBetween(xid, yid int64) graph.Weig
 // is a multi.Edge.
 func (g *WeightedUndirectedGraph) WeightedEdges() graph.WeightedEdges {
 	if len(g.lines) == 0 {
-		return nil
+		return graph.Empty
 	}
 	var edges []graph.WeightedEdge
 	seen := make(map[int64]struct{})
@@ -316,6 +322,9 @@ func (g *WeightedUndirectedGraph) WeightedEdges() graph.WeightedEdges {
 			}
 		}
 	}
+	if len(edges) == 0 {
+		return graph.Empty
+	}
 	return iterator.NewOrderedWeightedEdges(edges)
 }
 
@@ -329,7 +338,7 @@ func (g *WeightedUndirectedGraph) WeightedLines(uid, vid int64) graph.WeightedLi
 func (g *WeightedUndirectedGraph) WeightedLinesBetween(xid, yid int64) graph.WeightedLines {
 	edge := g.lines[xid][yid]
 	if len(edge) == 0 {
-		return nil
+		return graph.Empty
 	}
 	var lines []graph.WeightedLine
 	seen := make(map[int64]struct{})

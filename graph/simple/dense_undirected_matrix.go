@@ -95,13 +95,16 @@ func (g *UndirectedMatrix) Edges() graph.Edges {
 			}
 		}
 	}
+	if len(edges) == 0 {
+		return graph.Empty
+	}
 	return iterator.NewOrderedEdges(edges)
 }
 
 // From returns all nodes in g that can be reached directly from n.
 func (g *UndirectedMatrix) From(id int64) graph.Nodes {
 	if !g.has(id) {
-		return nil
+		return graph.Empty
 	}
 	var nodes []graph.Node
 	r := g.mat.Symmetric()
@@ -113,6 +116,9 @@ func (g *UndirectedMatrix) From(id int64) graph.Nodes {
 		if !isSame(g.mat.At(int(id), i), g.absent) {
 			nodes = append(nodes, g.Node(int64(i)))
 		}
+	}
+	if len(nodes) == 0 {
+		return graph.Empty
 	}
 	return iterator.NewOrderedNodes(nodes)
 }
@@ -156,6 +162,7 @@ func (g *UndirectedMatrix) Nodes() graph.Nodes {
 		return iterator.NewOrderedNodes(nodes)
 	}
 	r := g.mat.Symmetric()
+	// Matrix graphs must have at least one node.
 	return iterator.NewImplicitNodes(0, r, newSimpleNode)
 }
 
@@ -248,6 +255,9 @@ func (g *UndirectedMatrix) WeightedEdges() graph.WeightedEdges {
 				edges = append(edges, WeightedEdge{F: g.Node(int64(i)), T: g.Node(int64(j)), W: w})
 			}
 		}
+	}
+	if len(edges) == 0 {
+		return graph.Empty
 	}
 	return iterator.NewOrderedWeightedEdges(edges)
 }

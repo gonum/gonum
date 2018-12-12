@@ -32,10 +32,14 @@ type Graph interface {
 	Node(id int64) Node
 
 	// Nodes returns all the nodes in the graph.
+	//
+	// Nodes must not return nil.
 	Nodes() Nodes
 
 	// From returns all nodes that can be reached directly
 	// from the node with the given ID.
+	//
+	// From must not return nil.
 	From(id int64) Nodes
 
 	// HasEdgeBetween returns whether an edge exists between
@@ -99,6 +103,8 @@ type Directed interface {
 
 	// To returns all nodes that can reach directly
 	// to the node with the given ID.
+	//
+	// To must not return nil.
 	To(id int64) Nodes
 }
 
@@ -113,6 +119,8 @@ type WeightedDirected interface {
 
 	// To returns all nodes that can reach directly
 	// to the node with the given ID.
+	//
+	// To must not return nil.
 	To(id int64) Nodes
 }
 

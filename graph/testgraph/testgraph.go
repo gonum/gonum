@@ -25,16 +25,23 @@ import (
 // compared with NaN-awareness, so they may be NaN when there is no edge
 // associated with the Weight call.
 
-// BUG(kortschak): The approach of using a nil return for empty sets of nodes
-// and edges used prior to the introduction of the graph.Iterator types does
-// not interact well with interfaces. For example, it is not possible to simply
-// determine that an iterator is empty by calling it.Len without guarding that
-// with a nil check. The validity of nil iterators may change depending on the
-// outcome of https://github.com/gonum/gonum/issues/614.
-func isValidIterator(graph.Iterator) bool {
-	// TODO(kortschak): Remove nil guards in iterator
-	// loops and slicer tests if this changes.
-	return true
+func isValidIterator(it graph.Iterator) bool {
+	return it != nil
+}
+
+func checkEmptyIterator(t *testing.T, it graph.Iterator, useEmpty bool) {
+	if it.Len() != 0 {
+		return
+	}
+	if it != graph.Empty {
+		if useEmpty {
+			t.Errorf("unexpected empty iterator: got:%T", it)
+			return
+		}
+		// Only log this since we say that a graph should
+		// return a graph.Empty when it is empty.
+		t.Logf("unexpected empty iterator: got:%T", it)
+	}
 }
 
 // A Builder function returns a graph constructed from the nodes, edges and
@@ -68,7 +75,9 @@ type matrixer interface {
 // ReturnAllNodes tests the constructed graph for the ability to return all
 // the nodes it claims it has used in its construction. This is a check of
 // the Nodes method of graph.Graph and the iterator that is returned.
-func ReturnAllNodes(t *testing.T, b Builder) {
+// If useEmpty is true, graph iterators will be checked for the use of
+// graph.Empty if they are empty.
+func ReturnAllNodes(t *testing.T, b Builder, useEmpty bool) {
 	for _, test := range testCases {
 		g, want, _, _, _, ok := b(test.nodes, test.edges, test.self, test.absent)
 		if !ok {
@@ -81,8 +90,9 @@ func ReturnAllNodes(t *testing.T, b Builder) {
 			t.Errorf("invalid iterator for test %q: got:%#v", test.name, it)
 			continue
 		}
+		checkEmptyIterator(t, it, useEmpty)
 		var got []graph.Node
-		for it != nil && it.Next() {
+		for it.Next() {
 			got = append(got, it.Node())
 		}
 
@@ -99,7 +109,9 @@ func ReturnAllNodes(t *testing.T, b Builder) {
 // the nodes it claims it has used in its construction using the NodeSlicer
 // interface. This is a check of the Nodes method of graph.Graph and the
 // iterator that is returned.
-func ReturnNodeSlice(t *testing.T, b Builder) {
+// If useEmpty is true, graph iterators will be checked for the use of
+// graph.Empty if they are empty.
+func ReturnNodeSlice(t *testing.T, b Builder, useEmpty bool) {
 	for _, test := range testCases {
 		g, want, _, _, _, ok := b(test.nodes, test.edges, test.self, test.absent)
 		if !ok {
@@ -112,6 +124,7 @@ func ReturnNodeSlice(t *testing.T, b Builder) {
 			t.Errorf("invalid iterator for test %q: got:%#v", test.name, it)
 			continue
 		}
+		checkEmptyIterator(t, it, useEmpty)
 		if it == nil {
 			continue
 		}
@@ -168,7 +181,9 @@ func NodeExistence(t *testing.T, b Builder) {
 // the Edges method of graph.Graph and the iterator that is returned.
 // ReturnAllEdges  also checks that the edge end nodes exist within the graph,
 // checking the Node method of graph.Graph.
-func ReturnAllEdges(t *testing.T, b Builder) {
+// If useEmpty is true, graph iterators will be checked for the use of
+// graph.Empty if they are empty.
+func ReturnAllEdges(t *testing.T, b Builder, useEmpty bool) {
 	for _, test := range testCases {
 		g, _, want, _, _, ok := b(test.nodes, test.edges, test.self, test.absent)
 		if !ok {
@@ -184,7 +199,8 @@ func ReturnAllEdges(t *testing.T, b Builder) {
 				t.Errorf("invalid iterator for test %q: got:%#v", test.name, it)
 				continue
 			}
-			for it != nil && it.Next() {
+			checkEmptyIterator(t, it, useEmpty)
+			for it.Next() {
 				e := it.Edge()
 				got = append(got, e)
 				if g.Edge(e.From().ID(), e.To().ID()) == nil {
@@ -212,7 +228,9 @@ func ReturnAllEdges(t *testing.T, b Builder) {
 // interface. This is a check of the Edges method of graph.Graph and the
 // iterator that is returned. ReturnEdgeSlice also checks that the edge end
 // nodes exist within the graph, checking the Node method of graph.Graph.
-func ReturnEdgeSlice(t *testing.T, b Builder) {
+// If useEmpty is true, graph iterators will be checked for the use of
+// graph.Empty if they are empty.
+func ReturnEdgeSlice(t *testing.T, b Builder, useEmpty bool) {
 	for _, test := range testCases {
 		g, _, want, _, _, ok := b(test.nodes, test.edges, test.self, test.absent)
 		if !ok {
@@ -228,6 +246,7 @@ func ReturnEdgeSlice(t *testing.T, b Builder) {
 				t.Errorf("invalid iterator for test %q: got:%#v", test.name, it)
 				continue
 			}
+			checkEmptyIterator(t, it, useEmpty)
 			if it == nil {
 				continue
 			}
@@ -267,7 +286,9 @@ func ReturnEdgeSlice(t *testing.T, b Builder) {
 //
 // The edges used within and returned by the Builder function should be
 // graph.Line. The edge parameter passed to b will contain only graph.Line.
-func ReturnAllLines(t *testing.T, b Builder) {
+// If useEmpty is true, graph iterators will be checked for the use of
+// graph.Empty if they are empty.
+func ReturnAllLines(t *testing.T, b Builder, useEmpty bool) {
 	for _, test := range testCases {
 		g, _, want, _, _, ok := b(test.nodes, test.edges, test.self, test.absent)
 		if !ok {
@@ -283,6 +304,7 @@ func ReturnAllLines(t *testing.T, b Builder) {
 				t.Errorf("invalid iterator for test %q: got:%#v", test.name, it)
 				continue
 			}
+			checkEmptyIterator(t, it, useEmpty)
 			for _, e := range graph.EdgesOf(it) {
 				if g.Edge(e.From().ID(), e.To().ID()) == nil {
 					t.Errorf("missing edge for test %q: %v", test.name, e)
@@ -294,11 +316,11 @@ func ReturnAllLines(t *testing.T, b Builder) {
 				// and graph.Edges.
 				switch lit := e.(type) {
 				case graph.Lines:
-					for lit != nil && lit.Next() {
+					for lit.Next() {
 						got = append(got, lit.Line())
 					}
 				case graph.WeightedLines:
-					for lit != nil && lit.Next() {
+					for lit.Next() {
 						got = append(got, lit.WeightedLine())
 					}
 				default:
@@ -331,7 +353,9 @@ func ReturnAllLines(t *testing.T, b Builder) {
 // The edges used within and returned by the Builder function should be
 // graph.WeightedEdge. The edge parameter passed to b will contain only
 // graph.WeightedEdge.
-func ReturnAllWeightedEdges(t *testing.T, b Builder) {
+// If useEmpty is true, graph iterators will be checked for the use of
+// graph.Empty if they are empty.
+func ReturnAllWeightedEdges(t *testing.T, b Builder, useEmpty bool) {
 	for _, test := range testCases {
 		g, _, want, _, _, ok := b(test.nodes, test.edges, test.self, test.absent)
 		if !ok {
@@ -347,7 +371,8 @@ func ReturnAllWeightedEdges(t *testing.T, b Builder) {
 				t.Errorf("invalid iterator for test %q: got:%#v", test.name, it)
 				continue
 			}
-			for it != nil && it.Next() {
+			checkEmptyIterator(t, it, useEmpty)
+			for it.Next() {
 				e := it.WeightedEdge()
 				got = append(got, e)
 				switch g := g.(type) {
@@ -388,7 +413,9 @@ func ReturnAllWeightedEdges(t *testing.T, b Builder) {
 // The edges used within and returned by the Builder function should be
 // graph.WeightedEdge. The edge parameter passed to b will contain only
 // graph.WeightedEdge.
-func ReturnWeightedEdgeSlice(t *testing.T, b Builder) {
+// If useEmpty is true, graph iterators will be checked for the use of
+// graph.Empty if they are empty.
+func ReturnWeightedEdgeSlice(t *testing.T, b Builder, useEmpty bool) {
 	for _, test := range testCases {
 		g, _, want, _, _, ok := b(test.nodes, test.edges, test.self, test.absent)
 		if !ok {
@@ -404,6 +431,7 @@ func ReturnWeightedEdgeSlice(t *testing.T, b Builder) {
 				t.Errorf("invalid iterator for test %q: got:%#v", test.name, it)
 				continue
 			}
+			checkEmptyIterator(t, it, useEmpty)
 			s, ok := it.(graph.WeightedEdgeSlicer)
 			if !ok {
 				t.Errorf("invalid type for test %T: cannot return weighted edge slice", g)
@@ -442,7 +470,9 @@ func ReturnWeightedEdgeSlice(t *testing.T, b Builder) {
 // The edges used within and returned by the Builder function should be
 // graph.WeightedLine. The edge parameter passed to b will contain only
 // graph.WeightedLine.
-func ReturnAllWeightedLines(t *testing.T, b Builder) {
+// If useEmpty is true, graph iterators will be checked for the use of
+// graph.Empty if they are empty.
+func ReturnAllWeightedLines(t *testing.T, b Builder, useEmpty bool) {
 	for _, test := range testCases {
 		g, _, want, _, _, ok := b(test.nodes, test.edges, test.self, test.absent)
 		if !ok {
@@ -458,6 +488,7 @@ func ReturnAllWeightedLines(t *testing.T, b Builder) {
 				t.Errorf("invalid iterator for test %q: got:%#v", test.name, it)
 				continue
 			}
+			checkEmptyIterator(t, it, useEmpty)
 			for _, e := range graph.WeightedEdgesOf(it) {
 				if g.Edge(e.From().ID(), e.To().ID()) == nil {
 					t.Errorf("missing edge for test %q: %v", test.name, e)
@@ -469,11 +500,11 @@ func ReturnAllWeightedLines(t *testing.T, b Builder) {
 				// and graph.Edges.
 				switch lit := e.(type) {
 				case graph.Lines:
-					for lit != nil && lit.Next() {
+					for lit.Next() {
 						got = append(got, lit.Line())
 					}
 				case graph.WeightedLines:
-					for lit != nil && lit.Next() {
+					for lit.Next() {
 						got = append(got, lit.WeightedLine())
 					}
 				default:
@@ -602,7 +633,9 @@ func EdgeExistence(t *testing.T, b Builder) {
 // within the graph, checking the Node, Edge, EdgeBetween and HasEdgeBetween
 // methods of graph.Graph, the EdgeBetween method of graph.Undirected and the
 // HasEdgeFromTo method of graph.Directed.
-func ReturnAdjacentNodes(t *testing.T, b Builder) {
+// If useEmpty is true, graph iterators will be checked for the use of
+// graph.Empty if they are empty.
+func ReturnAdjacentNodes(t *testing.T, b Builder, useEmpty bool) {
 	for _, test := range testCases {
 		g, nodes, edges, _, _, ok := b(test.nodes, test.edges, test.self, test.absent)
 		if !ok {
@@ -620,7 +653,12 @@ func ReturnAdjacentNodes(t *testing.T, b Builder) {
 				// Test forward.
 				u := x
 				it := g.From(u.ID())
-				for i := 0; it != nil && it.Next(); i++ {
+				if !isValidIterator(it) {
+					t.Errorf("invalid iterator for test %q: got:%#v", test.name, it)
+					continue
+				}
+				checkEmptyIterator(t, it, useEmpty)
+				for i := 0; it.Next(); i++ {
 					v := it.Node()
 					if i == 0 && g.Node(u.ID()) == nil {
 						t.Errorf("missing from node for test %q: %v", test.name, u.ID())
@@ -645,7 +683,12 @@ func ReturnAdjacentNodes(t *testing.T, b Builder) {
 				// Test backward.
 				v := x
 				it = g.To(v.ID())
-				for i := 0; it != nil && it.Next(); i++ {
+				if !isValidIterator(it) {
+					t.Errorf("invalid iterator for test %q: got:%#v", test.name, it)
+					continue
+				}
+				checkEmptyIterator(t, it, useEmpty)
+				for i := 0; it.Next(); i++ {
 					u := it.Node()
 					if i == 0 && g.Node(v.ID()) == nil {
 						t.Errorf("missing to node for test %q: %v", test.name, v.ID())
@@ -673,7 +716,12 @@ func ReturnAdjacentNodes(t *testing.T, b Builder) {
 			case graph.Undirected:
 				u := x
 				it := g.From(u.ID())
-				for i := 0; it != nil && it.Next(); i++ {
+				if !isValidIterator(it) {
+					t.Errorf("invalid iterator for test %q: got:%#v", test.name, it)
+					continue
+				}
+				checkEmptyIterator(t, it, useEmpty)
+				for i := 0; it.Next(); i++ {
 					v := it.Node()
 					if i == 0 && g.Node(u.ID()) == nil {
 						t.Errorf("missing from node for test %q: %v", test.name, u.ID())
@@ -699,7 +747,12 @@ func ReturnAdjacentNodes(t *testing.T, b Builder) {
 			default:
 				u := x
 				it := g.From(u.ID())
-				for i := 0; it != nil && it.Next(); i++ {
+				if !isValidIterator(it) {
+					t.Errorf("invalid iterator for test %q: got:%#v", test.name, it)
+					continue
+				}
+				checkEmptyIterator(t, it, useEmpty)
+				for i := 0; it.Next(); i++ {
 					v := it.Node()
 					if i == 0 && g.Node(u.ID()) == nil {
 						t.Errorf("missing from node for test %q: %v", test.name, u.ID())

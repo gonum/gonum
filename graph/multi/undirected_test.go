@@ -53,16 +53,16 @@ func TestUndirected(t *testing.T) {
 		testgraph.NodeExistence(t, undirectedBuilder)
 	})
 	t.Run("ReturnAdjacentNodes", func(t *testing.T) {
-		testgraph.ReturnAdjacentNodes(t, undirectedBuilder)
+		testgraph.ReturnAdjacentNodes(t, undirectedBuilder, true)
 	})
 	t.Run("ReturnAllLines", func(t *testing.T) {
-		testgraph.ReturnAllLines(t, undirectedBuilder)
+		testgraph.ReturnAllLines(t, undirectedBuilder, true)
 	})
 	t.Run("ReturnAllNodes", func(t *testing.T) {
-		testgraph.ReturnAllNodes(t, undirectedBuilder)
+		testgraph.ReturnAllNodes(t, undirectedBuilder, true)
 	})
 	t.Run("ReturnNodeSlice", func(t *testing.T) {
-		testgraph.ReturnNodeSlice(t, undirectedBuilder)
+		testgraph.ReturnNodeSlice(t, undirectedBuilder, true)
 	})
 }
 

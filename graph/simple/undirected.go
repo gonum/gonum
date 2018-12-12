@@ -69,7 +69,7 @@ func (g *UndirectedGraph) EdgeBetween(xid, yid int64) graph.Edge {
 // Edges returns all the edges in the graph.
 func (g *UndirectedGraph) Edges() graph.Edges {
 	if len(g.edges) == 0 {
-		return nil
+		return graph.Empty
 	}
 	var edges []graph.Edge
 	seen := make(map[[2]int64]struct{})
@@ -85,13 +85,16 @@ func (g *UndirectedGraph) Edges() graph.Edges {
 			edges = append(edges, e)
 		}
 	}
+	if len(edges) == 0 {
+		return graph.Empty
+	}
 	return iterator.NewOrderedEdges(edges)
 }
 
 // From returns all nodes in g that can be reached directly from n.
 func (g *UndirectedGraph) From(id int64) graph.Nodes {
 	if _, ok := g.nodes[id]; !ok {
-		return nil
+		return graph.Empty
 	}
 
 	nodes := make([]graph.Node, len(g.edges[id]))
@@ -99,6 +102,9 @@ func (g *UndirectedGraph) From(id int64) graph.Nodes {
 	for from := range g.edges[id] {
 		nodes[i] = g.nodes[from]
 		i++
+	}
+	if len(nodes) == 0 {
+		return graph.Empty
 	}
 	return iterator.NewOrderedNodes(nodes)
 }
@@ -135,7 +141,7 @@ func (g *UndirectedGraph) Node(id int64) graph.Node {
 // Nodes returns all the nodes in the graph.
 func (g *UndirectedGraph) Nodes() graph.Nodes {
 	if len(g.nodes) == 0 {
-		return nil
+		return graph.Empty
 	}
 	nodes := make([]graph.Node, len(g.nodes))
 	i := 0

@@ -72,13 +72,16 @@ func (g *DirectedGraph) Edges() graph.Edges {
 			edges = append(edges, e)
 		}
 	}
+	if len(edges) == 0 {
+		return graph.Empty
+	}
 	return iterator.NewOrderedEdges(edges)
 }
 
 // From returns all nodes in g that can be reached directly from n.
 func (g *DirectedGraph) From(id int64) graph.Nodes {
 	if _, ok := g.from[id]; !ok {
-		return nil
+		return graph.Empty
 	}
 
 	from := make([]graph.Node, len(g.from[id]))
@@ -86,6 +89,9 @@ func (g *DirectedGraph) From(id int64) graph.Nodes {
 	for vid := range g.from[id] {
 		from[i] = g.nodes[vid]
 		i++
+	}
+	if len(from) == 0 {
+		return graph.Empty
 	}
 	return iterator.NewOrderedNodes(from)
 }
@@ -134,7 +140,7 @@ func (g *DirectedGraph) Node(id int64) graph.Node {
 // Nodes returns all the nodes in the graph.
 func (g *DirectedGraph) Nodes() graph.Nodes {
 	if len(g.nodes) == 0 {
-		return nil
+		return graph.Empty
 	}
 	nodes := make([]graph.Node, len(g.nodes))
 	i := 0
@@ -213,7 +219,7 @@ func (g *DirectedGraph) SetEdge(e graph.Edge) {
 // To returns all nodes in g that can reach directly to n.
 func (g *DirectedGraph) To(id int64) graph.Nodes {
 	if _, ok := g.from[id]; !ok {
-		return nil
+		return graph.Empty
 	}
 
 	to := make([]graph.Node, len(g.to[id]))
@@ -221,6 +227,9 @@ func (g *DirectedGraph) To(id int64) graph.Nodes {
 	for uid := range g.to[id] {
 		to[i] = g.nodes[uid]
 		i++
+	}
+	if len(to) == 0 {
+		return graph.Empty
 	}
 	return iterator.NewOrderedNodes(to)
 }

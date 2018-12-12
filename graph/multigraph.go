@@ -24,10 +24,14 @@ type Multigraph interface {
 	Node(id int64) Node
 
 	// Nodes returns all the nodes in the multigraph.
+	//
+	// Nodes must not return nil.
 	Nodes() Nodes
 
 	// From returns all nodes that can be reached directly
 	// from the node with the given ID.
+	//
+	// From must not return nil.
 	From(id int64) Nodes
 
 	// HasEdgeBetween returns whether an edge exists between
@@ -38,6 +42,8 @@ type Multigraph interface {
 	// vid, if any such lines exist and nil otherwise. The
 	// node v must be directly reachable from u as defined by
 	// the From method.
+	//
+	// Lines must not return nil.
 	Lines(uid, vid int64) Lines
 }
 
@@ -49,6 +55,8 @@ type WeightedMultigraph interface {
 	// with IDs uid and vid if any such lines exist and nil
 	// otherwise. The node v must be directly reachable
 	// from u as defined by the From method.
+	//
+	// WeightedLines must not return nil.
 	WeightedLines(uid, vid int64) WeightedLines
 }
 
@@ -58,6 +66,8 @@ type UndirectedMultigraph interface {
 
 	// LinesBetween returns the lines between nodes x and y
 	// with IDs xid and yid.
+	//
+	// LinesBetween must not return nil.
 	LinesBetween(xid, yid int64) Lines
 }
 
@@ -67,6 +77,8 @@ type WeightedUndirectedMultigraph interface {
 
 	// WeightedLinesBetween returns the lines between nodes
 	// x and y with IDs xid and yid.
+	//
+	// WeightedLinesBetween must not return nil.
 	WeightedLinesBetween(xid, yid int64) WeightedLines
 }
 
@@ -81,6 +93,8 @@ type DirectedMultigraph interface {
 
 	// To returns all nodes that can reach directly
 	// to the node with the given ID.
+	//
+	// To must not return nil.
 	To(id int64) Nodes
 }
 
@@ -95,6 +109,8 @@ type WeightedDirectedMultigraph interface {
 
 	// To returns all nodes that can reach directly
 	// to the node with the given ID.
+	//
+	// To must not return nil.
 	To(id int64) Nodes
 }
 

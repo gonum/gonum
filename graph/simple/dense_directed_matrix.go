@@ -93,13 +93,16 @@ func (g *DirectedMatrix) Edges() graph.Edges {
 			}
 		}
 	}
+	if len(edges) == 0 {
+		return graph.Empty
+	}
 	return iterator.NewOrderedEdges(edges)
 }
 
 // From returns all nodes in g that can be reached directly from n.
 func (g *DirectedMatrix) From(id int64) graph.Nodes {
 	if !g.has(id) {
-		return nil
+		return graph.Empty
 	}
 	var nodes []graph.Node
 	_, c := g.mat.Dims()
@@ -111,6 +114,9 @@ func (g *DirectedMatrix) From(id int64) graph.Nodes {
 		if !isSame(g.mat.At(int(id), j), g.absent) {
 			nodes = append(nodes, g.Node(int64(j)))
 		}
+	}
+	if len(nodes) == 0 {
+		return graph.Empty
 	}
 	return iterator.NewOrderedNodes(nodes)
 }
@@ -169,6 +175,7 @@ func (g *DirectedMatrix) Nodes() graph.Nodes {
 		return iterator.NewOrderedNodes(nodes)
 	}
 	r, _ := g.mat.Dims()
+	// Matrix graphs must have at least one node.
 	return iterator.NewImplicitNodes(0, r, newSimpleNode)
 }
 
@@ -224,7 +231,7 @@ func (g *DirectedMatrix) setWeightedEdge(e graph.Edge, weight float64) {
 // To returns all nodes in g that can reach directly to n.
 func (g *DirectedMatrix) To(id int64) graph.Nodes {
 	if !g.has(id) {
-		return nil
+		return graph.Empty
 	}
 	var nodes []graph.Node
 	r, _ := g.mat.Dims()
@@ -236,6 +243,9 @@ func (g *DirectedMatrix) To(id int64) graph.Nodes {
 		if !isSame(g.mat.At(i, int(id)), g.absent) {
 			nodes = append(nodes, g.Node(int64(i)))
 		}
+	}
+	if len(nodes) == 0 {
+		return graph.Empty
 	}
 	return iterator.NewOrderedNodes(nodes)
 }
@@ -278,6 +288,9 @@ func (g *DirectedMatrix) WeightedEdges() graph.WeightedEdges {
 				edges = append(edges, WeightedEdge{F: g.Node(int64(i)), T: g.Node(int64(j)), W: w})
 			}
 		}
+	}
+	if len(edges) == 0 {
+		return graph.Empty
 	}
 	return iterator.NewOrderedWeightedEdges(edges)
 }

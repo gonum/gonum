@@ -227,3 +227,40 @@ func WeightedLinesOf(it WeightedLines) []WeightedLine {
 	}
 	return l
 }
+
+// Empty is an empty set of nodes, edges or lines. It should be used when
+// a graph returns a zero-length Iterator. Empty implements the slicer
+// interfaces for nodes, edges and lines, returning nil for each of these.
+const Empty = nothing
+
+var (
+	_ Iterator           = Empty
+	_ Nodes              = Empty
+	_ NodeSlicer         = Empty
+	_ Edges              = Empty
+	_ EdgeSlicer         = Empty
+	_ WeightedEdges      = Empty
+	_ WeightedEdgeSlicer = Empty
+	_ Lines              = Empty
+	_ LineSlicer         = Empty
+	_ WeightedLines      = Empty
+	_ WeightedLineSlicer = Empty
+)
+
+const nothing = empty(true)
+
+type empty bool
+
+func (empty) Next() bool                        { return false }
+func (empty) Len() int                          { return 0 }
+func (empty) Reset()                            {}
+func (empty) Node() Node                        { return nil }
+func (empty) NodeSlice() []Node                 { return nil }
+func (empty) Edge() Edge                        { return nil }
+func (empty) EdgeSlice() []Edge                 { return nil }
+func (empty) WeightedEdge() WeightedEdge        { return nil }
+func (empty) WeightedEdgeSlice() []WeightedEdge { return nil }
+func (empty) Line() Line                        { return nil }
+func (empty) LineSlice() []Line                 { return nil }
+func (empty) WeightedLine() WeightedLine        { return nil }
+func (empty) WeightedLineSlice() []WeightedLine { return nil }

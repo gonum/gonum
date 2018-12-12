@@ -252,7 +252,7 @@ func (g johnsonGraph) Nodes() graph.Nodes {
 func (g johnsonGraph) From(id int64) graph.Nodes {
 	adj := g.succ[id]
 	if len(adj) == 0 {
-		return nil
+		return graph.Empty
 	}
 	succ := make([]graph.Node, 0, len(adj))
 	for id := range adj {

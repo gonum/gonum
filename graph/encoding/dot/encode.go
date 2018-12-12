@@ -140,7 +140,6 @@ type edge struct {
 	from, to int64
 }
 
-
 func (p *simpleGraphPrinter) print(g graph.Graph, name string, needsIndent, isSubgraph bool) error {
 	if name == "" {
 		if g, ok := g.(Graph); ok {

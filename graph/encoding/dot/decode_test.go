@@ -312,12 +312,12 @@ func TestMultigraphDecoding(t *testing.T) {
 		},
 		{
 			directed: true,
-			input: directedSelfLoopMultigraph,
+			input:    directedSelfLoopMultigraph,
 			expected: directedSelfLoopMultigraph,
 		},
 		{
 			directed: false,
-			input: undirectedSelfLoopMultigraph,
+			input:    undirectedSelfLoopMultigraph,
 			expected: undirectedSelfLoopMultigraph,
 		},
 	} {

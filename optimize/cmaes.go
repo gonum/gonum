@@ -210,7 +210,7 @@ func (cma *CmaEsChol) Init(dim, tasks int) int {
 		cma.chol.Clone(cma.InitCholesky)
 	} else {
 		// Set the initial Cholesky to I.
-		b := mat.NewDiagonal(dim, nil)
+		b := mat.NewDiagDense(dim, nil)
 		for i := 0; i < dim; i++ {
 			b.SetDiag(i, 1)
 		}

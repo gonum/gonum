@@ -73,7 +73,7 @@ func TorgersonScaling(dst *mat.Dense, eigdst []float64, dis mat.Symmetric) (k in
 
 	// TODO(kortschak): Make use of the knowledge
 	// of k to avoid doing unnecessary work.
-	dst.Mul(dst, mat.NewDiagonal(len(vals), vals))
+	dst.Mul(dst, mat.NewDiagDense(len(vals), vals))
 
 	return k, dst, eigdst
 }

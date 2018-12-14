@@ -12,7 +12,7 @@ import (
 	"gonum.org/v1/gonum/blas/blas64"
 )
 
-func TestNewDiagonal(t *testing.T) {
+func TestNewDiagDense(t *testing.T) {
 	for i, test := range []struct {
 		data  []float64
 		n     int
@@ -35,7 +35,7 @@ func TestNewDiagonal(t *testing.T) {
 			}),
 		},
 	} {
-		band := NewDiagonal(test.n, test.data)
+		band := NewDiagDense(test.n, test.data)
 		rows, cols := band.Dims()
 
 		if rows != test.n {
@@ -128,7 +128,7 @@ func TestDiagFrom(t *testing.T) {
 		want *Dense
 	}{
 		{
-			mat: NewDiagonal(6, []float64{1, 2, 3, 4, 5, 6}),
+			mat: NewDiagDense(6, []float64{1, 2, 3, 4, 5, 6}),
 			want: NewDense(6, 6, []float64{
 				1, 0, 0, 0, 0, 0,
 				0, 2, 0, 0, 0, 0,
@@ -395,10 +395,10 @@ func TestDiagonalAtSet(t *testing.T) {
 		for _, nilstart := range []bool{true, false} {
 			var diag *DiagDense
 			if nilstart {
-				diag = NewDiagonal(n, nil)
+				diag = NewDiagDense(n, nil)
 			} else {
 				data := make([]float64, n)
-				diag = NewDiagonal(n, data)
+				diag = NewDiagDense(n, data)
 				// Test the data is used.
 				for i := range data {
 					data[i] = -float64(i) - 1

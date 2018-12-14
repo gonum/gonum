@@ -15,6 +15,7 @@ import (
 // Euclidean coordinates. TorgersonScaling places the coordinates in dst and
 // returns it and the number of positive Eigenvalues if successful.
 // If the scaling is not successful, dst is returned, but will not be a valid scaling.
+// When the scaling is successful, mds will be resized to k columns wide.
 // Eigenvalues will be copied into eigdst and returned as eig if it is provided.
 //
 // If dst is nil, a new mat.Dense is allocated. If dst is not a zero matrix,
@@ -62,6 +63,7 @@ func TorgersonScaling(dst *mat.Dense, eigdst []float64, dis mat.Symmetric) (k in
 	vals := ed.Values(nil)
 	reverse(vals, dst.RawMatrix())
 	copy(eigdst, vals)
+
 	for i, v := range vals {
 		if v < 0 {
 			vals[i] = 0
@@ -71,9 +73,10 @@ func TorgersonScaling(dst *mat.Dense, eigdst []float64, dis mat.Symmetric) (k in
 		vals[i] = math.Sqrt(v)
 	}
 
-	// TODO(kortschak): Make use of the knowledge
-	// of k to avoid doing unnecessary work.
-	dst.Mul(dst, mat.NewDiagDense(len(vals), vals))
+	var tmp mat.Dense
+	tmp.Mul(dst, mat.NewDiagonalRect(n, k, vals[:k]))
+	dst = dst.Slice(0, n, 0, k).(*mat.Dense)
+	dst.Copy(&tmp)
 
 	return k, dst, eigdst
 }

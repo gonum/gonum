@@ -186,7 +186,7 @@ type Settings struct {
 	GradientThreshold float64
 
 	// Converger checks if the optimization has converged based on the (history
-	// of) locations found during the optimizaiton. Minimize will pass the
+	// of) locations found during the optimization. Minimize will pass the
 	// Location at every MajorIteration to the Converger.
 	//
 	// If the Converger is nil, a default value of

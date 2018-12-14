@@ -809,6 +809,17 @@ func Scale(c float64, dst []float64) {
 	}
 }
 
+// ScaleTo multiplies the elements in s by c and stores the result in dst.
+func ScaleTo(dst []float64, c float64, s []float64) []float64 {
+	if len(dst) != len(s) {
+		panic("floats: lengths of slices do not match")
+	}
+	if len(dst) > 0 {
+		f64.ScalUnitaryTo(dst, c, s)
+	}
+	return dst
+}
+
 // Span returns a set of N equally spaced points between l and u, where N
 // is equal to the length of the destination. The first element of the destination
 // is l, the final element of the destination is u.

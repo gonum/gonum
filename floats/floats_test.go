@@ -1341,6 +1341,22 @@ func TestScale(t *testing.T) {
 	areSlicesEqual(t, truth, s, "Bad scaling")
 }
 
+func TestScaleTo(t *testing.T) {
+	s := []float64{3, 4, 1, 7, 5}
+	sCopy := make([]float64, len(s))
+	copy(sCopy, s)
+	c := 5.0
+	truth := []float64{15, 20, 5, 35, 25}
+	dst := make([]float64, len(s))
+	ScaleTo(dst, c, s)
+	if !Same(dst, truth) {
+		t.Errorf("Scale to does not match. Got %v, want %v", dst, truth)
+	}
+	if !Same(s, sCopy) {
+		t.Errorf("Source modified during call. Got %v, want %v", s, sCopy)
+	}
+}
+
 func TestSpan(t *testing.T) {
 	receiver1 := make([]float64, 5)
 	truth := []float64{1, 2, 3, 4, 5}

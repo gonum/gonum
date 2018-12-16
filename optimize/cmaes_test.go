@@ -42,6 +42,7 @@ func cmaTestCases() []cmaTestCase {
 			},
 			settings: &Settings{
 				FunctionThreshold: 0.01,
+				Converger:         NeverTerminate{},
 			},
 			good: func(result *Result, err error, concurrent int) error {
 				if result.Status != FunctionThreshold {
@@ -63,6 +64,7 @@ func cmaTestCases() []cmaTestCase {
 			method: &CmaEsChol{},
 			settings: &Settings{
 				FunctionThreshold: math.Inf(-1),
+				Converger:         NeverTerminate{},
 			},
 			good: func(result *Result, err error, concurrent int) error {
 				if result.Status != MethodConverge {
@@ -88,6 +90,7 @@ func cmaTestCases() []cmaTestCase {
 			settings: &Settings{
 				FunctionThreshold: math.Inf(-1),
 				MajorIterations:   10,
+				Converger:         NeverTerminate{},
 			},
 			good: func(result *Result, err error, concurrent int) error {
 				if result.Status != IterationLimit {
@@ -117,6 +120,7 @@ func cmaTestCases() []cmaTestCase {
 			settings: &Settings{
 				FunctionThreshold: math.Inf(-1),
 				FuncEvaluations:   250, // Somewhere in the middle of an iteration.
+				Converger:         NeverTerminate{},
 			},
 			good: func(result *Result, err error, concurrent int) error {
 				if result.Status != FunctionEvaluationLimit {
@@ -147,6 +151,7 @@ func cmaTestCases() []cmaTestCase {
 			},
 			settings: &Settings{
 				FunctionThreshold: math.Inf(-1),
+				Converger:         NeverTerminate{},
 			},
 			good: func(result *Result, err error, concurrent int) error {
 				if result.Status != MethodConverge {
@@ -172,6 +177,7 @@ func cmaTestCases() []cmaTestCase {
 			},
 			settings: &Settings{
 				FunctionThreshold: math.Inf(-1),
+				Converger:         NeverTerminate{},
 			},
 			good: func(result *Result, err error, concurrent int) error {
 				if result.Status != MethodConverge {

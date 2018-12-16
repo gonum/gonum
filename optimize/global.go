@@ -12,7 +12,7 @@ import (
 func DefaultSettingsGlobal() *Settings {
 	return &Settings{
 		FunctionThreshold: math.Inf(-1),
-		FunctionConverge: &FunctionConverge{
+		Converger: &FunctionConverge{
 			Absolute:   1e-10,
 			Iterations: 100,
 		},

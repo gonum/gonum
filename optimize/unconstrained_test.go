@@ -1164,16 +1164,18 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 		settings.Recorder = nil
 		if method != nil && method.Needs().Gradient {
 			// Turn off function convergence checks for gradient-based methods.
-			settings.FunctionConverge = nil
+			settings.Converger = NeverTerminate{}
 		} else {
 			if test.fIter == 0 {
 				test.fIter = 20
 			}
-			settings.FunctionConverge.Iterations = test.fIter
+			c := settings.Converger.(*FunctionConverge)
+			c.Iterations = test.fIter
 			if test.fAbsTol == 0 {
 				test.fAbsTol = 1e-12
 			}
-			settings.FunctionConverge.Absolute = test.fAbsTol
+			c.Absolute = test.fAbsTol
+			settings.Converger = c
 		}
 		if test.gradTol == 0 {
 			test.gradTol = 1e-12

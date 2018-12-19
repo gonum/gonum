@@ -296,6 +296,14 @@ func TestDlatrs(t *testing.T) {
 	testlapack.DlatrsTest(t, impl)
 }
 
+func TestDlauu2(t *testing.T) {
+	testlapack.Dlauu2Test(t, impl)
+}
+
+func TestDlauum(t *testing.T) {
+	testlapack.DlauumTest(t, impl)
+}
+
 func TestDorg2r(t *testing.T) {
 	testlapack.Dorg2rTest(t, impl)
 }

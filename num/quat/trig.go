@@ -31,7 +31,7 @@ func Sinh(q Number) Number {
 	v := Abs(uv)
 	s, c := math.Sincos(v)
 	sh, ch := sinhcosh(w)
-	return join(c*sh, Scale(s*ch/v, uv))
+	return join(c*sh, scale(s*ch/v, uv))
 }
 
 // Cos returns the cosine of q.
@@ -55,7 +55,7 @@ func Cosh(q Number) Number {
 	v := Abs(uv)
 	s, c := math.Sincos(v)
 	sh, ch := sinhcosh(w)
-	return join(c*ch, Scale(s*sh/v, uv))
+	return join(c*ch, scale(s*sh/v, uv))
 }
 
 // Tan returns the tangent of q.
@@ -69,6 +69,14 @@ func Tan(q Number) Number {
 
 // Tanh returns the hyperbolic tangent of q.
 func Tanh(q Number) Number {
+	if math.IsInf(q.Real, 1) {
+		r := Number{Real: 1}
+		// Change signs dependent on imaginary parts.
+		r.Imag *= math.Sin(2 * q.Imag)
+		r.Jmag *= math.Sin(2 * q.Jmag)
+		r.Kmag *= math.Sin(2 * q.Kmag)
+		return r
+	}
 	d := Cosh(q)
 	if d == zero {
 		return Inf()
@@ -140,4 +148,24 @@ func sinhcosh(x float64) (sh, ch float64) {
 	ei := 0.5 / e
 	e *= 0.5
 	return e - ei, e + ei
+}
+
+// scale returns q scaled by f, except that inf×0 is 0.
+func scale(f float64, q Number) Number {
+	if f == 0 {
+		return Number{}
+	}
+	if q.Real != 0 {
+		q.Real *= f
+	}
+	if q.Imag != 0 {
+		q.Imag *= f
+	}
+	if q.Jmag != 0 {
+		q.Jmag *= f
+	}
+	if q.Kmag != 0 {
+		q.Kmag *= f
+	}
+	return q
 }

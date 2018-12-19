@@ -66,13 +66,18 @@ var sinhTests = []struct {
 		q := Asinh(Number{1, 1, 1, 1})
 		return Scale(0.5, Sub(Exp(q), Exp(Scale(-1, q))))
 	}()},
+	{q: Number{Real: math.Inf(1)}, want: Number{Real: math.Inf(1)}},
+	{q: Number{Real: math.Inf(1), Imag: math.Pi / 2}, want: Number{Real: math.Inf(1), Imag: math.Inf(1)}},
+	{q: Number{Real: math.Inf(1), Imag: math.Pi}, want: Number{Real: math.Inf(-1), Imag: math.Inf(1)}},
+	{q: Number{Real: math.Inf(1), Imag: 3 * math.Pi / 2}, want: Number{Real: math.Inf(-1), Imag: math.Inf(-1)}},
+	{q: Number{Real: math.Inf(1), Imag: 2 * math.Pi}, want: Number{Real: math.Inf(1), Imag: math.Inf(-1)}},
 }
 
 func TestSinh(t *testing.T) {
 	const tol = 1e-14
 	for _, test := range sinhTests {
 		got := Sinh(test.q)
-		if !equalApprox(got, test.want, tol) {
+		if !sameApprox(got, test.want, tol) {
 			t.Errorf("unexpected result for Sinh(%v): got:%v want:%v", test.q, got, test.want)
 		}
 	}
@@ -123,13 +128,18 @@ var coshTests = []struct {
 		q := Number{1, 1, 1, 1}
 		return Scale(0.5, Add(Exp(q), Exp(Scale(-1, q))))
 	}()},
+	{q: Number{Real: math.Inf(1)}, want: Number{Real: math.Inf(1)}},
+	{q: Number{Real: math.Inf(1), Imag: math.Pi / 2}, want: Number{Real: math.Inf(1), Imag: math.Inf(1)}},
+	{q: Number{Real: math.Inf(1), Imag: math.Pi}, want: Number{Real: math.Inf(-1), Imag: math.Inf(1)}},
+	{q: Number{Real: math.Inf(1), Imag: 3 * math.Pi / 2}, want: Number{Real: math.Inf(-1), Imag: math.Inf(-1)}},
+	{q: Number{Real: math.Inf(1), Imag: 2 * math.Pi}, want: Number{Real: math.Inf(1), Imag: math.Inf(-1)}},
 }
 
 func TestCosh(t *testing.T) {
 	const tol = 1e-14
 	for _, test := range coshTests {
 		got := Cosh(test.q)
-		if !equalApprox(got, test.want, tol) {
+		if !sameApprox(got, test.want, tol) {
 			t.Errorf("unexpected result for Cosh(%v): got:%v want:%v", test.q, got, test.want)
 		}
 	}
@@ -171,13 +181,18 @@ var tanhTests = []struct {
 	{q: Number{Kmag: math.Pi / 4}, want: Number{Kmag: imag(cmplx.Tanh(complex(0, math.Pi/4)))}},
 	{q: Number{Imag: 1}, want: Mul(Sinh(Number{Imag: 1}), Inv(Cosh(Number{Imag: 1})))},
 	{q: Number{1, 1, 1, 1}, want: Mul(Sinh(Number{1, 1, 1, 1}), Inv(Cosh(Number{1, 1, 1, 1})))},
+	{q: Number{Real: math.Inf(1)}, want: Number{Real: 1}},
+	{q: Number{Real: math.Inf(1), Imag: math.Pi / 4}, want: Number{Real: 1, Imag: 0 * math.Sin(math.Pi/2)}},
+	{q: Number{Real: math.Inf(1), Imag: math.Pi / 2}, want: Number{Real: 1, Imag: 0 * math.Sin(math.Pi)}},
+	{q: Number{Real: math.Inf(1), Imag: 3 * math.Pi / 4}, want: Number{Real: 1, Imag: 0 * math.Sin(3*math.Pi/2)}},
+	{q: Number{Real: math.Inf(1), Imag: math.Pi}, want: Number{Real: 1, Imag: 0 * math.Sin(2*math.Pi)}},
 }
 
 func TestTanh(t *testing.T) {
 	const tol = 1e-14
 	for _, test := range tanhTests {
 		got := Tanh(test.q)
-		if !equalApprox(got, test.want, tol) {
+		if !sameApprox(got, test.want, tol) {
 			t.Errorf("unexpected result for Tanh(%v): got:%v want:%v", test.q, got, test.want)
 		}
 	}

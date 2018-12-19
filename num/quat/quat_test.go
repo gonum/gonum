@@ -191,11 +191,28 @@ func equalApprox(a, b Number, tol float64) bool {
 		floats.EqualWithinAbsOrRel(a.Kmag, b.Kmag, tol, tol)
 }
 
+func sameApprox(a, b Number, tol float64) bool {
+	switch {
+	case a.Real == 0 && b.Real == 0:
+		return math.Signbit(a.Real) == math.Signbit(b.Real)
+	case a.Imag == 0 && b.Imag == 0:
+		return math.Signbit(a.Imag) == math.Signbit(b.Imag)
+	case a.Jmag == 0 && b.Jmag == 0:
+		return math.Signbit(a.Jmag) == math.Signbit(b.Jmag)
+	case a.Kmag == 0 && b.Kmag == 0:
+		return math.Signbit(a.Kmag) == math.Signbit(b.Kmag)
+	}
+	return (sameFloat(a.Real, b.Real) || floats.EqualWithinAbsOrRel(a.Real, b.Real, tol, tol)) &&
+		(sameFloat(a.Imag, b.Imag) || floats.EqualWithinAbsOrRel(a.Imag, b.Imag, tol, tol)) &&
+		(sameFloat(a.Jmag, b.Jmag) || floats.EqualWithinAbsOrRel(a.Jmag, b.Jmag, tol, tol)) &&
+		(sameFloat(a.Kmag, b.Kmag) || floats.EqualWithinAbsOrRel(a.Kmag, b.Kmag, tol, tol))
+}
+
 func sameNumber(a, b Number) bool {
-	return a == b || (sameFloat(a.Real, b.Real) &&
+	return sameFloat(a.Real, b.Real) &&
 		sameFloat(a.Imag, b.Imag) &&
 		sameFloat(a.Jmag, b.Jmag) &&
-		sameFloat(a.Kmag, b.Kmag))
+		sameFloat(a.Kmag, b.Kmag)
 }
 
 func sameFloat(a, b float64) bool {

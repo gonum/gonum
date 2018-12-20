@@ -26,6 +26,10 @@ type LBFGS struct {
 	// Store is the size of the limited-memory storage.
 	// If Store is 0, it will be defaulted to 15.
 	Store int
+	// GradStopThreshold sets the threshold for stopping if the gradient norm
+	// gets too small. If GradStopThreshold is 0 it is defaulted to 1e-12, and
+	// if it is NaN the setting is not used.
+	GradStopThreshold float64
 
 	status Status
 	err    error
@@ -55,7 +59,7 @@ func (l *LBFGS) Init(dim, tasks int) int {
 }
 
 func (l *LBFGS) Run(operation chan<- Task, result <-chan Task, tasks []Task) {
-	l.status, l.err = localOptimizer{}.run(l, operation, result, tasks)
+	l.status, l.err = localOptimizer{}.run(l, l.GradStopThreshold, operation, result, tasks)
 	close(operation)
 	return
 }

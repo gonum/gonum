@@ -5,6 +5,7 @@
 package optimize
 
 import (
+	"math"
 	"sort"
 
 	"gonum.org/v1/gonum/floats"
@@ -96,7 +97,7 @@ func (n *NelderMead) Init(dim, tasks int) int {
 }
 
 func (n *NelderMead) Run(operation chan<- Task, result <-chan Task, tasks []Task) {
-	n.status, n.err = localOptimizer{}.run(n, operation, result, tasks)
+	n.status, n.err = localOptimizer{}.run(n, math.NaN(), operation, result, tasks)
 	close(operation)
 	return
 }

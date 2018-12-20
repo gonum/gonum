@@ -45,6 +45,10 @@ type Newton struct {
 	// information in H.
 	// Increase must be greater than 1. If Increase is 0, it is defaulted to 5.
 	Increase float64
+	// GradStopThreshold sets the threshold for stopping if the gradient norm
+	// gets too small. If GradStopThreshold is 0 it is defaulted to 1e-12, and
+	// if it is NaN the setting is not used.
+	GradStopThreshold float64
 
 	status Status
 	err    error
@@ -67,7 +71,7 @@ func (n *Newton) Init(dim, tasks int) int {
 }
 
 func (n *Newton) Run(operation chan<- Task, result <-chan Task, tasks []Task) {
-	n.status, n.err = localOptimizer{}.run(n, operation, result, tasks)
+	n.status, n.err = localOptimizer{}.run(n, n.GradStopThreshold, operation, result, tasks)
 	close(operation)
 	return
 }

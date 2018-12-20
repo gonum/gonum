@@ -101,15 +101,11 @@ type Method interface {
 // Some Methods do not require an initial location, but initX must still be
 // specified for the dimension of the optimization problem.
 //
-// The third argument contains the settings for the minimization. The
-// DefaultSettingsLocal and DefaultSettingsGlobal functions can be called for
-// different default settings depending on the optimization method. If
-// settings is nil, DefaultSettingsLocal is used. All settings will be honored
-// for all Methods, even if that setting is counter-productive to the method.
-// However, the information used to check the Settings, and the times at which
-// they are checked, are controlled by the Method. For example, if the Method
-// never evaluates the gradient of the function then GradientThreshold will not
-// be checked. Minimize cannot guarantee strict adherence to the bounds
+// The third argument contains the settings for the minimization. If settings
+// is nil, the zero value will be used, see the documentation of the Settings
+// type for more information, and see the warning below. All settings will be
+// honored for all Methods, even if that setting is counter-productive to the
+// method. Minimize cannot guarantee strict adherence to the evaluation bounds
 // specified when performing concurrent evaluations and updates.
 //
 // The final argument is the optimization method to use. If method == nil, then
@@ -131,7 +127,7 @@ func Minimize(p Problem, initX []float64, settings *Settings, method Method) (*R
 		method = getDefaultMethod(&p)
 	}
 	if settings == nil {
-		settings = DefaultSettingsLocal()
+		settings = &Settings{}
 	}
 	stats := &Stats{}
 	dim := len(initX)
@@ -147,10 +143,7 @@ func Minimize(p Problem, initX []float64, settings *Settings, method Method) (*R
 
 	converger := settings.Converger
 	if converger == nil {
-		converger = &FunctionConverge{
-			Absolute:   1e-10,
-			Iterations: 100,
-		}
+		converger = defaultFunctionConverge()
 	}
 	converger.Init(dim)
 
@@ -370,6 +363,13 @@ func minimize(prob *Problem, method Method, settings *Settings, converger Conver
 	return finalStatus, finalError
 }
 
+func defaultFunctionConverge() *FunctionConverge {
+	return &FunctionConverge{
+		Absolute:   1e-10,
+		Iterations: 100,
+	}
+}
+
 // newLocation allocates a new locatian structure of the appropriate size. It
 // allocates memory based on the dimension and the values in Needs.
 func newLocation(dim int, method Needser) *Location {
@@ -513,14 +513,11 @@ func checkLocationConvergence(loc *Location, settings *Settings, converger Conve
 	if math.IsInf(loc.F, -1) {
 		return FunctionNegativeInfinity
 	}
-	if loc.Gradient != nil {
+	if loc.Gradient != nil && settings.GradientThreshold > 0 {
 		norm := floats.Norm(loc.Gradient, math.Inf(1))
 		if norm < settings.GradientThreshold {
 			return GradientThreshold
 		}
-	}
-	if loc.F < settings.FunctionThreshold {
-		return FunctionThreshold
 	}
 	return converger.Converged(loc)
 }

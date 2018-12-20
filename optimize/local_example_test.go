@@ -19,12 +19,7 @@ func ExampleMinimize() {
 	}
 
 	x := []float64{1.3, 0.7, 0.8, 1.9, 1.2}
-	settings := optimize.DefaultSettingsLocal()
-	settings.Recorder = nil
-	settings.GradientThreshold = 1e-12
-	settings.Converger = optimize.NeverTerminate{}
-
-	result, err := optimize.Minimize(p, x, settings, &optimize.BFGS{})
+	result, err := optimize.Minimize(p, x, nil, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

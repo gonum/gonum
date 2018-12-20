@@ -6,11 +6,11 @@ package mat
 
 import (
 	"math"
+	"strconv"
 	"testing"
 
 	"golang.org/x/exp/rand"
 
-	"gonum.org/v1/gonum/blas/testblas"
 	"gonum.org/v1/gonum/floats"
 )
 
@@ -565,33 +565,26 @@ func equalApproxChol(a, b *Cholesky, matTol, condTol float64) bool {
 	return floats.EqualWithinAbsOrRel(a.cond, b.cond, condTol, condTol)
 }
 
-func BenchmarkCholeskySmall(b *testing.B) {
-	benchmarkCholesky(b, 2)
-}
+func BenchmarkCholeskyFactorize(b *testing.B) {
+	for _, n := range []int{10, 100, 1000} {
+		b.Run("n="+strconv.Itoa(n), func(b *testing.B) {
+			rnd := rand.New(rand.NewSource(1))
 
-func BenchmarkCholeskyMedium(b *testing.B) {
-	benchmarkCholesky(b, testblas.MediumMat)
-}
+			data := make([]float64, n*n)
+			for i := range data {
+				data[i] = rnd.NormFloat64()
+			}
+			var a SymDense
+			a.SymOuterK(1, NewDense(n, n, data))
 
-func BenchmarkCholeskyLarge(b *testing.B) {
-	benchmarkCholesky(b, testblas.LargeMat)
-}
-
-func benchmarkCholesky(b *testing.B, n int) {
-	base := make([]float64, n*n)
-	for i := range base {
-		base[i] = rand.Float64()
-	}
-	bm := NewDense(n, n, base)
-	bm.Mul(bm.T(), bm)
-	am := NewSymDense(n, bm.mat.Data)
-
-	var chol Cholesky
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		ok := chol.Factorize(am)
-		if !ok {
-			panic("not pos def")
-		}
+			var chol Cholesky
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				ok := chol.Factorize(&a)
+				if !ok {
+					panic("not positive definite")
+				}
+			}
+		})
 	}
 }

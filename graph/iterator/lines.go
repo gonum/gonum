@@ -4,7 +4,10 @@
 
 package iterator
 
-import "gonum.org/v1/gonum/graph"
+import (
+	"gonum.org/v1/gonum/graph"
+	"sort"
+)
 
 // OrderedLines implements the graph.Lines and graph.LineSlicer interfaces.
 // The iteration order of OrderedLines is the order of lines passed to
@@ -66,6 +69,25 @@ func (e *OrderedLines) LineSlice() []graph.Line {
 // Reset returns the iterator to its initial state.
 func (e *OrderedLines) Reset() {
 	e.idx = -1
+}
+
+// LineStream implements the LineStreamer interface.
+type LineStream struct {
+	lines graph.Lines
+}
+
+// Create a LineStreamer that meets the given ordering specification.
+func NewLineStream(lines []graph.Line, less func(a, b graph.Line) bool) *LineStream {
+	if !sort.SliceIsSorted(lines, func (i, j int) bool {
+		return less(lines[i], lines[j])
+	}) {
+		return nil
+	}
+	return &LineStream{NewOrderedLines(lines)}
+}
+
+func (s *LineStream) LineStream() graph.Lines {
+	return s.lines
 }
 
 // OrderedWeightedLines implements the graph.Lines and graph.LineSlicer interfaces.

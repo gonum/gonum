@@ -287,11 +287,25 @@ func (c *Cholesky) ToSym(dst *SymDense) *SymDense {
 	}
 	n := c.chol.mat.N
 	if dst == nil {
-		dst = NewSymDense(n, make([]float64, n*n))
+		dst = NewSymDense(n, nil)
 	} else {
 		dst.reuseAs(n)
 	}
-	dst.SymOuterK(1, c.chol.T())
+	// Copy c.chol into a TriDense U with dst's backing slice.
+	// Operations on u are reflected in dst.
+	u := *c.chol
+	u.mat.Data = dst.mat.Data
+	u.Copy(c.chol)
+	// Compute the product U^T*U using the algorithm from LAPACK/TESTING/LIN/dpot01.f
+	a := u.mat.Data
+	lda := u.mat.Stride
+	bi := blas64.Implementation()
+	for k := n - 1; k >= 0; k-- {
+		a[k*lda+k] = bi.Ddot(k+1, a[k:], lda, a[k:], lda)
+		if k > 0 {
+			bi.Dtrmv(blas.Upper, blas.Trans, blas.NonUnit, k, a, lda, a[k:], lda)
+		}
+	}
 	return dst
 }
 

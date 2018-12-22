@@ -130,7 +130,7 @@ type NodeAdder interface {
 	// arbitrary ID.
 	NewNode() Node
 
-	// Adds a node to the graph. AddNode panics if
+	// AddNode adds a node to the graph. AddNode panics if
 	// the added node ID matches an existing node ID.
 	AddNode(Node)
 }

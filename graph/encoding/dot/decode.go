@@ -153,10 +153,10 @@ func (gen *generator) node(dst graph.NodeAdder, id string) graph.Node {
 		return n
 	}
 	n := dst.NewNode()
-	dst.AddNode(n)
 	if n, ok := n.(DOTIDSetter); ok {
 		n.SetDOTID(id)
 	}
+	dst.AddNode(n)
 	gen.ids[id] = n
 	// Check if within the context of a subgraph, that is to be used as a vertex
 	// of an edge.

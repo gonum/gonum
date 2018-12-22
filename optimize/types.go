@@ -162,7 +162,7 @@ func (p Problem) satisfies(method Needser) error {
 // Settings represents settings of the optimization run. It contains initial
 // settings, convergence information, and Recorder information. Convergence
 // settings are only checked at MajorIterations, while Evaluation thresholds
-// are checked every Operation. See the field comments for default values.
+// are checked at every Operation. See the field comments for default values.
 type Settings struct {
 	// InitValues specifies properties (function value, gradient, etc.) known
 	// at the initial location passed to Minimize. If InitValues is non-nil, then

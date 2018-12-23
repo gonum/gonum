@@ -87,6 +87,10 @@ type CG struct {
 	// If AngleRestartThreshold is 0, it will be set to -0.9.
 	// CG will panic if AngleRestartThreshold is not in the interval [-1, 0].
 	AngleRestartThreshold float64
+	// GradStopThreshold sets the threshold for stopping if the gradient norm
+	// gets too small. If GradStopThreshold is 0 it is defaulted to 1e-12, and
+	// if it is NaN the setting is not used.
+	GradStopThreshold float64
 
 	ls *LinesearchMethod
 
@@ -112,7 +116,7 @@ func (cg *CG) Init(dim, tasks int) int {
 }
 
 func (cg *CG) Run(operation chan<- Task, result <-chan Task, tasks []Task) {
-	cg.status, cg.err = localOptimizer{}.run(cg, operation, result, tasks)
+	cg.status, cg.err = localOptimizer{}.run(cg, cg.GradStopThreshold, operation, result, tasks)
 	close(operation)
 	return
 }

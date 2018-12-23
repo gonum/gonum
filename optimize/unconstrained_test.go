@@ -1160,8 +1160,8 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 			continue
 		}
 
-		settings := DefaultSettingsLocal()
-		settings.Recorder = nil
+		settings := &Settings{}
+		settings.Converger = defaultFunctionConverge()
 		if method != nil && method.Needs().Gradient {
 			// Turn off function convergence checks for gradient-based methods.
 			settings.Converger = NeverTerminate{}
@@ -1289,12 +1289,11 @@ func TestIssue76(t *testing.T) {
 	// Location very close to the minimum.
 	x := []float64{-11.594439904886773, 13.203630051265385, -0.40343948776868443, 0.2367787746745986}
 	s := &Settings{
-		FunctionThreshold: math.Inf(-1),
-		GradientThreshold: 1e-14,
-		MajorIterations:   1000000,
+		MajorIterations: 1000000,
 	}
 	m := &GradientDescent{
-		Linesearcher: &Backtracking{},
+		GradStopThreshold: 1e-14,
+		Linesearcher:      &Backtracking{},
 	}
 	// We are not interested in the error, only in the returned status.
 	r, _ := Minimize(p, x, s, m)
@@ -1312,7 +1311,7 @@ func TestNelderMeadOneD(t *testing.T) {
 	}
 	x := []float64{10}
 	m := &NelderMead{}
-	s := DefaultSettingsLocal()
+	var s *Settings
 	result, err := Minimize(p, x, s, m)
 	if err != nil {
 		t.Errorf(err.Error())

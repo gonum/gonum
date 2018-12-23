@@ -15,6 +15,10 @@ type GradientDescent struct {
 	// StepSizer determines the initial step size along each direction.
 	// If StepSizer is nil, a reasonable default will be chosen.
 	StepSizer StepSizer
+	// GradStopThreshold sets the threshold for stopping if the gradient norm
+	// gets too small. If GradStopThreshold is 0 it is defaulted to 1e-12, and
+	// if it is NaN the setting is not used.
+	GradStopThreshold float64
 
 	ls *LinesearchMethod
 
@@ -33,7 +37,7 @@ func (g *GradientDescent) Init(dim, tasks int) int {
 }
 
 func (g *GradientDescent) Run(operation chan<- Task, result <-chan Task, tasks []Task) {
-	g.status, g.err = localOptimizer{}.run(g, operation, result, tasks)
+	g.status, g.err = localOptimizer{}.run(g, g.GradStopThreshold, operation, result, tasks)
 	close(operation)
 	return
 }

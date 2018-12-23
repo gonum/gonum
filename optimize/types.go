@@ -7,13 +7,12 @@ package optimize
 import (
 	"errors"
 	"fmt"
-	"math"
 	"time"
 
 	"gonum.org/v1/gonum/mat"
 )
 
-const defaultGradientAbsTol = 1e-6
+const defaultGradientAbsTol = 1e-12
 
 // Operation represents the set of operations commanded by Method at each
 // iteration. It is a bitmap of various Iteration and Evaluation constants.
@@ -161,10 +160,9 @@ func (p Problem) satisfies(method Needser) error {
 }
 
 // Settings represents settings of the optimization run. It contains initial
-// settings, convergence information, and Recorder information. In general, users
-// should use DefaultSettings rather than constructing a Settings literal.
-//
-// If Recorder is nil, no information will be recorded.
+// settings, convergence information, and Recorder information. Convergence
+// settings are only checked at MajorIterations, while Evaluation thresholds
+// are checked at every Operation. See the field comments for default values.
 type Settings struct {
 	// InitValues specifies properties (function value, gradient, etc.) known
 	// at the initial location passed to Minimize. If InitValues is non-nil, then
@@ -172,17 +170,13 @@ type Settings struct {
 	// and other fields may be specified.
 	InitValues *Location
 
-	// FunctionThreshold is the threshold for acceptably small values of the
-	// objective function. FunctionThreshold status is returned if
-	// the objective function is less than this value.
-	// The default value is -inf.
-	FunctionThreshold float64
-
-	// GradientThreshold determines the accuracy to which the minimum is found.
-	// GradientThreshold status is returned if the infinity norm of
-	// the gradient is less than this value.
-	// Has no effect if gradient information is not used.
-	// The default value is 1e-6.
+	// GradientThreshold stops optimization with GradientThreshold status if the
+	// infinity norm of the gradient is less than this value. This defaults to
+	// a value of 0 (and so gradient convergence is not checked), however note
+	// that many Methods (LBFGS, CG, etc.) will converge with a small value of
+	// the gradient, and so to fully disable this setting the Method may need to
+	// be modified.
+	// This setting has no effect if the gradient is not used by the Method.
 	GradientThreshold float64
 
 	// Converger checks if the optimization has converged based on the (history
@@ -237,19 +231,6 @@ type Settings struct {
 
 	// Concurrent represents how many concurrent evaluations are possible.
 	Concurrent int
-}
-
-// DefaultSettingsLocal returns a new Settings struct that contains default settings
-// for running a local optimization.
-func DefaultSettingsLocal() *Settings {
-	return &Settings{
-		GradientThreshold: defaultGradientAbsTol,
-		FunctionThreshold: math.Inf(-1),
-		Converger: &FunctionConverge{
-			Absolute:   1e-10,
-			Iterations: 20,
-		},
-	}
 }
 
 // resize takes x and returns a slice of length dim. It returns a resliced x

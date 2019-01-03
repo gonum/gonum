@@ -104,21 +104,7 @@ func DlarfgTest(t *testing.T, impl Dlarfger) {
 			Data:   make([]float64, n*n),
 		}
 		blas64.Gemm(blas.Trans, blas.NoTrans, 1, hmat, hmat, 0, eye)
-		iseye := true
-		for i := 0; i < n; i++ {
-			for j := 0; j < n; j++ {
-				if i == j {
-					if math.Abs(eye.Data[i*n+j]-1) > 1e-14 {
-						iseye = false
-					}
-				} else {
-					if math.Abs(eye.Data[i*n+j]) > 1e-14 {
-						iseye = false
-					}
-				}
-			}
-		}
-		if !iseye {
+		if !isIdentity(n, eye.Data, n, 1e-14) {
 			t.Errorf("H^T * H is not I %v", eye)
 		}
 

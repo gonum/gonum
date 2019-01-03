@@ -5,7 +5,6 @@
 package testlapack
 
 import (
-	"math"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -149,23 +148,7 @@ func Dtrti2Test(t *testing.T, impl Dtrti2er) {
 				ans := make([]float64, len(a))
 				bi.Dgemm(blas.NoTrans, blas.NoTrans, n, n, n, 1, a, lda, aCopy, lda, 0, ans, lda)
 				// Check that ans is the identity matrix.
-				iseye := true
-				for i := 0; i < n; i++ {
-					for j := 0; j < n; j++ {
-						if i == j {
-							if math.Abs(ans[i*lda+i]-1) > tol {
-								iseye = false
-								break
-							}
-						} else {
-							if math.Abs(ans[i*lda+j]) > tol {
-								iseye = false
-								break
-							}
-						}
-					}
-				}
-				if !iseye {
+				if !isIdentity(n, ans, lda, tol) {
 					t.Errorf("inv(A) * A != I. Upper = %v, unit = %v, ans = %v", uplo == blas.Upper, diag == blas.Unit, ans)
 				}
 			}

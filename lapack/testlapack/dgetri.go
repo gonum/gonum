@@ -5,7 +5,6 @@
 package testlapack
 
 import (
-	"math"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -67,23 +66,8 @@ func DgetriTest(t *testing.T, impl Dgetrier) {
 		// Check that A(inv) * A = I.
 		ans := make([]float64, len(a))
 		bi.Dgemm(blas.NoTrans, blas.NoTrans, n, n, n, 1, aCopy, lda, a, lda, 0, ans, lda)
-		isEye := true
-		for i := 0; i < n; i++ {
-			for j := 0; j < n; j++ {
-				if i == j {
-					// This tolerance is so high because computing matrix inverses
-					// is very unstable.
-					if math.Abs(ans[i*lda+j]-1) > 5e-2 {
-						isEye = false
-					}
-				} else {
-					if math.Abs(ans[i*lda+j]) > 5e-2 {
-						isEye = false
-					}
-				}
-			}
-		}
-		if !isEye {
+		// The tolerance is so high because computing matrix inverses is very unstable.
+		if !isIdentity(n, ans, lda, 5e-2) {
 			t.Errorf("Inv(A) * A != I. n = %v, lda = %v", n, lda)
 		}
 	}

@@ -8,6 +8,11 @@ import (
 	"gonum.org/v1/gonum/floats"
 )
 
+var (
+	_ Method      = &LBFGS{}
+	_ localMethod = &LBFGS{}
+)
+
 // LBFGS implements the limited-memory BFGS method for gradient-based
 // unconstrained minimization.
 //
@@ -52,10 +57,13 @@ func (l *LBFGS) Status() (Status, error) {
 	return l.status, l.err
 }
 
-func (l *LBFGS) Init(dim, tasks int) int {
+func (l *LBFGS) Init(dim, tasks int, prob *Problem) (int, error) {
 	l.status = NotTerminated
 	l.err = nil
-	return 1
+	if prob.Grad == nil {
+		return 1, ErrMissingGrad
+	}
+	return 1, nil
 }
 
 func (l *LBFGS) Run(operation chan<- Task, result <-chan Task, tasks []Task) {

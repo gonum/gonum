@@ -6,6 +6,11 @@ package optimize
 
 import "gonum.org/v1/gonum/floats"
 
+var (
+	_ Method      = &GradientDescent{}
+	_ localMethod = &GradientDescent{}
+)
+
 // GradientDescent implements the steepest descent optimization method that
 // performs successive steps along the direction of the negative gradient.
 type GradientDescent struct {
@@ -30,10 +35,13 @@ func (g *GradientDescent) Status() (Status, error) {
 	return g.status, g.err
 }
 
-func (g *GradientDescent) Init(dim, tasks int) int {
+func (g *GradientDescent) Init(dim, tasks int, prob *Problem) (int, error) {
 	g.status = NotTerminated
 	g.err = nil
-	return 1
+	if prob.Grad == nil {
+		return 1, ErrMissingGrad
+	}
+	return 1, nil
 }
 
 func (g *GradientDescent) Run(operation chan<- Task, result <-chan Task, tasks []Task) {

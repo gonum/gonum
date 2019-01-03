@@ -42,6 +42,8 @@ func (n nmVertexSorter) Swap(i, j int) {
 	n.vertices[i], n.vertices[j] = n.vertices[j], n.vertices[i]
 }
 
+var _ Method = &NelderMead{}
+
 // NelderMead is an implementation of the Nelder-Mead simplex algorithm for
 // gradient-free nonlinear optimization (not to be confused with Danzig's
 // simplex algorithm for linear programming). The implementation follows the
@@ -90,10 +92,10 @@ func (n *NelderMead) Status() (Status, error) {
 	return n.status, n.err
 }
 
-func (n *NelderMead) Init(dim, tasks int) int {
+func (n *NelderMead) Init(dim, tasks int, p *Problem) (int, error) {
 	n.status = NotTerminated
 	n.err = nil
-	return 1
+	return 1, nil
 }
 
 func (n *NelderMead) Run(operation chan<- Task, result <-chan Task, tasks []Task) {

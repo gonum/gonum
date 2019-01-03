@@ -10,6 +10,8 @@ import (
 	"gonum.org/v1/gonum/stat/distmv"
 )
 
+var _ Method = &GuessAndCheck{}
+
 // GuessAndCheck is a global optimizer that evaluates the function at random
 // locations. Not a good optimizer, but useful for comparison and debugging.
 type GuessAndCheck struct {
@@ -23,7 +25,7 @@ func (g *GuessAndCheck) Needs() struct{ Gradient, Hessian bool } {
 	return struct{ Gradient, Hessian bool }{false, false}
 }
 
-func (g *GuessAndCheck) Init(dim, tasks int) int {
+func (g *GuessAndCheck) Init(dim, tasks int, p *Problem) (int, error) {
 	if dim <= 0 {
 		panic(nonpositiveDimension)
 	}
@@ -32,7 +34,7 @@ func (g *GuessAndCheck) Init(dim, tasks int) int {
 	}
 	g.bestF = math.Inf(1)
 	g.bestX = resize(g.bestX, dim)
-	return tasks
+	return tasks, nil
 }
 
 func (g *GuessAndCheck) sendNewLoc(operation chan<- Task, task Task) {

@@ -44,10 +44,10 @@ type localMethod interface {
 	// updates loc and returns the next operation.
 	iterateLocal(loc *Location) (Operation, error)
 
-	Needser
+	needser
 }
 
-type Needser interface {
+type needser interface {
 	// Needs specifies information about the objective function needed by the
 	// optimizer beyond just the function value. The information is used
 	// internally for initialization and must match evaluation types returned

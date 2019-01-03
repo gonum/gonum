@@ -12,6 +12,11 @@ import (
 
 const maxNewtonModifications = 20
 
+var (
+	_ Method      = &Newton{}
+	_ localMethod = &Newton{}
+)
+
 // Newton implements a modified Newton's method for Hessian-based unconstrained
 // minimization. It applies regularization when the Hessian is not positive
 // definite, and it can converge to a local minimum from any starting point.
@@ -64,10 +69,16 @@ func (n *Newton) Status() (Status, error) {
 	return n.status, n.err
 }
 
-func (n *Newton) Init(dim, tasks int) int {
+func (n *Newton) Init(dim, tasks int, prob *Problem) (int, error) {
 	n.status = NotTerminated
 	n.err = nil
-	return 1
+	if prob.Grad == nil {
+		return 1, ErrMissingGrad
+	}
+	if prob.Hess == nil {
+		return 1, ErrMissingHess
+	}
+	return 1, nil
 }
 
 func (n *Newton) Run(operation chan<- Task, result <-chan Task, tasks []Task) {

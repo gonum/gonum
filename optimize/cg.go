@@ -15,6 +15,11 @@ const (
 	angleRestartThreshold  = -0.9
 )
 
+var (
+	_ Method      = &CG{}
+	_ localMethod = &CG{}
+)
+
 // CGVariant calculates the scaling parameter, β, used for updating the
 // conjugate direction in the nonlinear conjugate gradient (CG) method.
 type CGVariant interface {
@@ -109,10 +114,13 @@ func (cg *CG) Status() (Status, error) {
 	return cg.status, cg.err
 }
 
-func (cg *CG) Init(dim, tasks int) int {
+func (cg *CG) Init(dim, tasks int, prob *Problem) (int, error) {
 	cg.status = NotTerminated
 	cg.err = nil
-	return 1
+	if prob.Grad == nil {
+		return 1, ErrMissingGrad
+	}
+	return 1, nil
 }
 
 func (cg *CG) Run(operation chan<- Task, result <-chan Task, tasks []Task) {

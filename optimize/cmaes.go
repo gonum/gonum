@@ -116,10 +116,6 @@ var (
 	_ Method   = (*CmaEsChol)(nil)
 )
 
-func (cma *CmaEsChol) Needs() struct{ Gradient, Hessian bool } {
-	return struct{ Gradient, Hessian bool }{false, false}
-}
-
 func (cma *CmaEsChol) methodConverged() Status {
 	sd := cma.StopLogDet
 	switch {
@@ -142,7 +138,7 @@ func (cma *CmaEsChol) Status() (Status, error) {
 	return cma.methodConverged(), nil
 }
 
-func (cma *CmaEsChol) Init(dim, tasks int) int {
+func (cma *CmaEsChol) Init(dim, tasks int, p *Problem) (int, error) {
 	if dim <= 0 {
 		panic(nonpositiveDimension)
 	}
@@ -230,7 +226,7 @@ func (cma *CmaEsChol) Init(dim, tasks int) int {
 	cma.operation = nil
 	cma.updateErr = nil
 	t := min(tasks, cma.pop)
-	return t
+	return t, nil
 }
 
 func (cma *CmaEsChol) sendInitTasks(tasks []Task) {

@@ -10,6 +10,11 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
+var (
+	_ Method      = &BFGS{}
+	_ localMethod = &BFGS{}
+)
+
 // BFGS implements the Broyden–Fletcher–Goldfarb–Shanno optimization method. It
 // is a quasi-Newton method that performs successive rank-one updates to an
 // estimate of the inverse Hessian of the objective function. It exhibits
@@ -46,10 +51,13 @@ func (b *BFGS) Status() (Status, error) {
 	return b.status, b.err
 }
 
-func (b *BFGS) Init(dim, tasks int) int {
+func (b *BFGS) Init(dim, tasks int, prob *Problem) (int, error) {
 	b.status = NotTerminated
 	b.err = nil
-	return 1
+	if prob.Grad == nil {
+		return 1, ErrMissingGrad
+	}
+	return 1, nil
 }
 
 func (b *BFGS) Run(operation chan<- Task, result <-chan Task, tasks []Task) {

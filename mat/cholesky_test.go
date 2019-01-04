@@ -616,3 +616,31 @@ func BenchmarkCholeskyToSym(b *testing.B) {
 		})
 	}
 }
+
+func BenchmarkCholeskyInverseTo(b *testing.B) {
+	for _, n := range []int{10, 100, 1000} {
+		b.Run("n="+strconv.Itoa(n), func(b *testing.B) {
+			rnd := rand.New(rand.NewSource(1))
+
+			data := make([]float64, n*n)
+			for i := range data {
+				data[i] = rnd.NormFloat64()
+			}
+			var a SymDense
+			a.SymOuterK(1, NewDense(n, n, data))
+
+			var chol Cholesky
+			ok := chol.Factorize(&a)
+			if !ok {
+				panic("not positive definite")
+			}
+
+			dst := NewSymDense(n, nil)
+
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				chol.InverseTo(dst)
+			}
+		})
+	}
+}

@@ -384,6 +384,10 @@ func TestDpotrf(t *testing.T) {
 	testlapack.DpotrfTest(t, impl)
 }
 
+func TestDpotri(t *testing.T) {
+	testlapack.DpotriTest(t, impl)
+}
+
 func TestDpotrs(t *testing.T) {
 	testlapack.DpotrsTest(t, impl)
 }

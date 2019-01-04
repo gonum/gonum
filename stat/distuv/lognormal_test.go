@@ -7,39 +7,34 @@ package distuv
 import (
 	"sort"
 	"testing"
+
+	"golang.org/x/exp/rand"
 )
 
 func TestLognormal(t *testing.T) {
+	src := rand.New(rand.NewSource(1))
 	for i, dist := range []LogNormal{
-		{
-			Mu:    0.1,
-			Sigma: 0.3,
-		},
-		{
-			Mu:    0.01,
-			Sigma: 0.01,
-		},
-		{
-			Mu:    2,
-			Sigma: 0.01,
-		},
+		{Mu: 0.1, Sigma: 0.3, Src: src},
+		{Mu: 0.01, Sigma: 0.01, Src: src},
+		{Mu: 2, Sigma: 0.01, Src: src},
 	} {
-		f := dist
-		tol := 1e-2
-		const n = 1e5
+		const (
+			tol = 1e-2
+			n   = 1e5
+		)
 		x := make([]float64, n)
-		generateSamples(x, f)
+		generateSamples(x, dist)
 		sort.Float64s(x)
 
-		checkMean(t, i, x, f, tol)
-		checkVarAndStd(t, i, x, f, tol)
-		checkEntropy(t, i, x, f, tol)
-		checkExKurtosis(t, i, x, f, 2e-1)
-		checkSkewness(t, i, x, f, 5e-2)
-		checkMedian(t, i, x, f, tol)
-		checkQuantileCDFSurvival(t, i, x, f, tol)
-		checkProbContinuous(t, i, x, f, 1e-10)
-		checkProbQuantContinuous(t, i, x, f, tol)
+		checkMean(t, i, x, dist, tol)
+		checkVarAndStd(t, i, x, dist, tol)
+		checkEntropy(t, i, x, dist, tol)
+		checkExKurtosis(t, i, x, dist, 2e-1)
+		checkSkewness(t, i, x, dist, 5e-2)
+		checkMedian(t, i, x, dist, tol)
+		checkQuantileCDFSurvival(t, i, x, dist, tol)
+		checkProbContinuous(t, i, x, dist, 1e-10)
+		checkProbQuantContinuous(t, i, x, dist, tol)
 	}
 }
 

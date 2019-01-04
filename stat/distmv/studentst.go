@@ -13,6 +13,7 @@ import (
 
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/mat"
+	"gonum.org/v1/gonum/stat"
 	"gonum.org/v1/gonum/stat/distuv"
 )
 
@@ -257,18 +258,9 @@ func (s *StudentsT) LogProb(y []float64) float64 {
 
 	t1 := lg1 - lg2 - n/2*math.Log(nu*math.Pi) - s.logSqrtDet
 
-	shift := make([]float64, len(y))
-	copy(shift, y)
-	floats.Sub(shift, s.mu)
-
-	x := mat.NewVecDense(s.dim, shift)
-
-	var tmp mat.VecDense
-	s.chol.SolveVec(&tmp, x)
-
-	dot := mat.Dot(&tmp, x)
-
-	return t1 - ((nu+n)/2)*math.Log(1+dot/nu)
+	mahal := stat.Mahalanobis(mat.NewVecDense(len(y), y), mat.NewVecDense(len(s.mu), s.mu), &s.chol)
+	mahal *= mahal
+	return t1 - ((nu+n)/2)*math.Log(1+mahal/nu)
 }
 
 // MarginalStudentsT returns the marginal distribution of the given input variables,

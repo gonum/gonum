@@ -1489,3 +1489,35 @@ func isIdentity(n int, a []float64, lda int, tol float64) bool {
 	}
 	return true
 }
+
+func sameFloat64(a, b float64) bool {
+	return a == b || math.IsNaN(a) && math.IsNaN(b)
+}
+
+// sameLowerTri returns whether n×n matrices A and B are same under the diagonal.
+func sameLowerTri(n int, a []float64, lda int, b []float64, ldb int) bool {
+	for i := 1; i < n; i++ {
+		for j := 0; j < i; j++ {
+			aij := a[i*lda+j]
+			bij := b[i*ldb+j]
+			if !sameFloat64(aij, bij) {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+// sameUpperTri returns whether n×n matrices A and B are same above the diagonal.
+func sameUpperTri(n int, a []float64, lda int, b []float64, ldb int) bool {
+	for i := 0; i < n-1; i++ {
+		for j := i + 1; j < n; j++ {
+			aij := a[i*lda+j]
+			bij := b[i*ldb+j]
+			if !sameFloat64(aij, bij) {
+				return false
+			}
+		}
+	}
+	return true
+}

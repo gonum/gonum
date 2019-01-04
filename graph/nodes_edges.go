@@ -57,7 +57,7 @@ type NodeSlicer interface {
 // NodesOf returns it.Len() nodes from it. If it is a NodeSlicer, the NodeSlice method
 // is used to obtain the nodes. It is safe to pass a nil Nodes to NodesOf.
 //
-// If the Nodes has en indeterminate length, NodesOf will panic.
+// If the Nodes has an indeterminate length, NodesOf will panic.
 func NodesOf(it Nodes) []Node {
 	if it == nil {
 		return nil
@@ -102,7 +102,7 @@ type EdgeSlicer interface {
 // EdgesOf returns it.Len() nodes from it. If it is an EdgeSlicer, the EdgeSlice method is used
 // to obtain the edges. It is safe to pass a nil Edges to EdgesOf.
 //
-// If the Edges has en indeterminate length, EdgesOf will panic.
+// If the Edges has an indeterminate length, EdgesOf will panic.
 func EdgesOf(it Edges) []Edge {
 	if it == nil {
 		return nil
@@ -148,7 +148,7 @@ type WeightedEdgeSlicer interface {
 // WeightedEdgeSlice method is used to obtain the edges. It is safe to pass a nil WeightedEdges
 // to WeightedEdgesOf.
 //
-// If the WeightedEdges has en indeterminate length, WeightedEdgesOf will panic.
+// If the WeightedEdges has an indeterminate length, WeightedEdgesOf will panic.
 func WeightedEdgesOf(it WeightedEdges) []WeightedEdge {
 	if it == nil {
 		return nil
@@ -193,7 +193,7 @@ type LineSlicer interface {
 // LinesOf returns it.Len() nodes from it. If it is a LineSlicer, the LineSlice method is used
 // to obtain the lines. It is safe to pass a nil Lines to LinesOf.
 //
-// If the Lines has en indeterminate length, LinesOf will panic.
+// If the Lines has an indeterminate length, LinesOf will panic.
 func LinesOf(it Lines) []Line {
 	if it == nil {
 		return nil
@@ -239,7 +239,7 @@ type WeightedLineSlicer interface {
 // WeightedLineSlice method is used to obtain the lines. It is safe to pass a nil WeightedLines
 // to WeightedLinesOf.
 //
-// If the WeightedLines has en indeterminate length, WeightedLinesOf will panic.
+// If the WeightedLines has an indeterminate length, WeightedLinesOf will panic.
 func WeightedLinesOf(it WeightedLines) []WeightedLine {
 	if it == nil {
 		return nil

@@ -291,10 +291,19 @@ func (c *Cholesky) ToSym(dst *SymDense) *SymDense {
 	} else {
 		dst.reuseAs(n)
 	}
-	// Copy c.chol into a TriDense U with dst's backing slice.
-	// Operations on u are reflected in dst.
-	u := *c.chol
-	u.mat.Data = dst.mat.Data
+	// Create a TriDense representing the Cholesky factor U with dst's
+	// backing slice.
+	// Operations on u are reflected in s.
+	u := &TriDense{
+		mat: blas64.Triangular{
+			Uplo:   blas.Upper,
+			Diag:   blas.NonUnit,
+			N:      n,
+			Data:   dst.mat.Data,
+			Stride: dst.mat.Stride,
+		},
+		cap: n,
+	}
 	u.Copy(c.chol)
 	// Compute the product U^T*U using the algorithm from LAPACK/TESTING/LIN/dpot01.f
 	a := u.mat.Data
@@ -318,18 +327,30 @@ func (c *Cholesky) InverseTo(s *SymDense) error {
 	if !c.valid() {
 		panic(badCholesky)
 	}
-	// TODO(btracey): Replace this code with a direct call to Dpotri when it
-	// is available.
 	s.reuseAs(c.chol.mat.N)
-	// If:
-	//  chol(A) = U^T * U
-	// Then:
-	//  chol(A^-1) = S * S^T
-	// where S = U^-1
-	var t TriDense
-	err := t.InverseTri(c.chol)
-	s.SymOuterK(1, &t)
-	return err
+	// Create a TriDense representing the Cholesky factor U with the backing
+	// slice from s.
+	// Operations on u are reflected in s.
+	u := &TriDense{
+		mat: blas64.Triangular{
+			Uplo:   blas.Upper,
+			Diag:   blas.NonUnit,
+			N:      s.mat.N,
+			Data:   s.mat.Data,
+			Stride: s.mat.Stride,
+		},
+		cap: s.mat.N,
+	}
+	u.Copy(c.chol)
+
+	_, ok := lapack64.Potri(u.mat)
+	if !ok {
+		return Condition(math.Inf(1))
+	}
+	if c.cond > ConditionTolerance {
+		return Condition(c.cond)
+	}
+	return nil
 }
 
 // Scale multiplies the original matrix A by a positive constant using

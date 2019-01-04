@@ -38,7 +38,6 @@ func dlauuTest(t *testing.T, dlauu func(blas.Uplo, int, []float64, int), uplo bl
 	rnd := rand.New(rand.NewSource(1))
 
 	for _, n := range ns {
-	loop:
 		for _, lda := range []int{max(1, n), n + 11} {
 			prefix := fmt.Sprintf("n=%v,lda=%v", n, lda)
 
@@ -59,27 +58,27 @@ func dlauuTest(t *testing.T, dlauu func(blas.Uplo, int, []float64, int), uplo bl
 				continue
 			}
 
-			// * Check that the triangle opposite to uplo has not been modified.
+			// * Check that the triangle of A opposite to uplo has not been modified.
 			// * Convert the result of Dlauu? into a dense symmetric matrix.
 			// * Zero out the triangle in aCopy opposite to uplo.
 			if uplo == blas.Upper {
+				if !sameLowerTri(n, aCopy, lda, a, lda) {
+					t.Errorf("%v: unexpected modification in lower triangle", prefix)
+					continue
+				}
 				for i := 1; i < n; i++ {
 					for j := 0; j < i; j++ {
-						if aCopy[i*lda+j] != a[i*lda+j] {
-							t.Errorf("%v: unexpected modification in lower triangle", prefix)
-							break loop
-						}
 						a[i*lda+j] = a[j*lda+i]
 						aCopy[i*lda+j] = 0
 					}
 				}
 			} else {
+				if !sameUpperTri(n, aCopy, lda, a, lda) {
+					t.Errorf("%v: unexpected modification in upper triangle", prefix)
+					continue
+				}
 				for i := 0; i < n-1; i++ {
 					for j := i + 1; j < n; j++ {
-						if aCopy[i*lda+j] != a[i*lda+j] {
-							t.Errorf("%v: unexpected modification in upper triangle", prefix)
-							break loop
-						}
 						a[i*lda+j] = a[j*lda+i]
 						aCopy[i*lda+j] = 0
 					}

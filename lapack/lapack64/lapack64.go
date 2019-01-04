@@ -37,6 +37,26 @@ func Potrf(a blas64.Symmetric) (t blas64.Triangular, ok bool) {
 	return
 }
 
+// Potri computes the inverse of a real symmetric positive definite matrix A
+// using its Cholesky factorization.
+//
+// On entry, t contains the triangular factor U or L from the Cholesky
+// factorization A = U^T*U or A = L*L^T, as computed by Potrf.
+//
+// On return, the upper or lower triangle of the (symmetric) inverse of A is
+// stored in t, overwriting the input factor U or L, and also returned in a. The
+// underlying data between a and t is shared.
+//
+// The returned bool indicates whether the inverse was computed successfully.
+func Potri(t blas64.Triangular) (a blas64.Symmetric, ok bool) {
+	ok = lapack64.Dpotri(t.Uplo, t.N, t.Data, t.Stride)
+	a.Uplo = t.Uplo
+	a.N = t.N
+	a.Data = t.Data
+	a.Stride = t.Stride
+	return
+}
+
 // Potrs solves a system of n linear equations A*X = B where A is an n×n
 // symmetric positive definite matrix and B is an n×nrhs matrix, using the
 // Cholesky factorization A = U^T*U or A = L*L^T. t contains the corresponding

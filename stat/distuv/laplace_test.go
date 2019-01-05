@@ -5,10 +5,12 @@
 package distuv
 
 import (
+	"math"
+	"sort"
+	"testing"
+
 	"golang.org/x/exp/rand"
 	"gonum.org/v1/gonum/floats"
-	"math"
-	"testing"
 )
 
 func TestLaplaceProb(t *testing.T) {
@@ -58,6 +60,39 @@ func TestLaplaceProb(t *testing.T) {
 	}
 	testDistributionProbs(t, Laplace{Mu: 0, Scale: 1}, "Laplace", pts)
 }
+
+func TestLaplace(t *testing.T) {
+	src := rand.New(rand.NewSource(1))
+	for i, dist := range []Laplace{
+		{Mu: 0, Scale: 3, Src: src},
+		{Mu: 1, Scale: 1.5, Src: src},
+		{Mu: -1, Scale: 0.9, Src: src},
+	} {
+		testLaplace(t, dist, i)
+	}
+}
+
+func testLaplace(t *testing.T, dist Laplace, i int) {
+	const (
+		tol  = 1e-2
+		n    = 3e6
+		bins = 50
+	)
+	x := make([]float64, n)
+	generateSamples(x, dist)
+	sort.Float64s(x)
+
+	checkMean(t, i, x, dist, tol)
+	checkVarAndStd(t, i, x, dist, tol)
+	checkEntropy(t, i, x, dist, tol)
+	checkExKurtosis(t, i, x, dist, tol)
+	checkSkewness(t, i, x, dist, tol)
+	checkMedian(t, i, x, dist, tol)
+	checkQuantileCDFSurvival(t, i, x, dist, tol)
+	checkProbContinuous(t, i, x, dist, 1e-10)
+	checkProbQuantContinuous(t, i, x, dist, tol)
+}
+
 func TestLaplaceFit(t *testing.T) {
 	cases := []struct {
 		samples   []float64

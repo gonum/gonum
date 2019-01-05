@@ -122,8 +122,10 @@ func TestBinomial(t *testing.T) {
 }
 
 func testBinomial(t *testing.T, b Binomial, i int) {
-	const tol = 1e-2
-	const n = 1e6
+	const (
+		tol = 1e-2
+		n   = 1e6
+	)
 	x := make([]float64, n)
 	generateSamples(x, b)
 	sort.Float64s(x)

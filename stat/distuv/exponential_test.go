@@ -49,9 +49,9 @@ func TestExponentialFitPrior(t *testing.T) {
 func TestExponential(t *testing.T) {
 	src := rand.New(rand.NewSource(1))
 	for i, dist := range []Exponential{
-		{3, src},
-		{1.5, src},
-		{0.9, src},
+		{Rate: 3, Src: src},
+		{Rate: 1.5, Src: src},
+		{Rate: 0.9, Src: src},
 	} {
 		testExponential(t, dist, i)
 	}

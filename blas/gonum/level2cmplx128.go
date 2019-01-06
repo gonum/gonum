@@ -11,6 +11,8 @@ import (
 	"gonum.org/v1/gonum/internal/asm/c128"
 )
 
+var _ blas.Complex128Level2 = Implementation{}
+
 // Zgbmv performs one of the matrix-vector operations
 //  y = alpha * A * x + beta * y    if trans = blas.NoTrans
 //  y = alpha * A^T * x + beta * y  if trans = blas.Trans

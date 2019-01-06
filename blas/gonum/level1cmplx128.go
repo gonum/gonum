@@ -7,8 +7,11 @@ package gonum
 import (
 	"math"
 
+	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/internal/asm/c128"
 )
+
+var _ blas.Complex128Level1 = Implementation{}
 
 // Dzasum returns the sum of the absolute values of the elements of x
 //  \sum_i |Re(x[i])| + |Im(x[i])|

@@ -8,6 +8,7 @@ import (
 	"math/cmplx"
 
 	"gonum.org/v1/gonum/blas"
+	"gonum.org/v1/gonum/internal/asm/c128"
 )
 
 var _ blas.Complex128Level3 = Implementation{}
@@ -246,6 +247,149 @@ func (Implementation) Zgemm(tA, tB blas.Transpose, m, n, k int, alpha complex128
 						c[i*ldc+j] = alpha * tmp
 					} else {
 						c[i*ldc+j] = alpha*tmp + beta*c[i*ldc+j]
+					}
+				}
+			}
+		}
+	}
+}
+
+// Zsyrk performs one of the symmetric rank-k operations
+//  C = alpha*A*A^T + beta*C  if trans == blas.NoTrans
+//  C = alpha*A^T*A + beta*C  if trans == blas.Trans
+// where alpha and beta are scalars, C is an n×n symmetric matrix and A is
+// an n×k matrix in the first case and a k×n matrix in the second case.
+func (Implementation) Zsyrk(uplo blas.Uplo, trans blas.Transpose, n, k int, alpha complex128, a []complex128, lda int, beta complex128, c []complex128, ldc int) {
+	var rowA, colA int
+	switch trans {
+	default:
+		panic(badTranspose)
+	case blas.NoTrans:
+		rowA, colA = n, k
+	case blas.Trans:
+		rowA, colA = k, n
+	}
+	switch {
+	case uplo != blas.Lower && uplo != blas.Upper:
+		panic(badUplo)
+	case n < 0:
+		panic(nLT0)
+	case k < 0:
+		panic(kLT0)
+	case lda < max(1, colA):
+		panic(badLdA)
+	case ldc < max(1, n):
+		panic(badLdC)
+	}
+
+	// Quick return if possible.
+	if n == 0 {
+		return
+	}
+
+	// For zero matrix size the following slice length checks are trivially satisfied.
+	if len(a) < (rowA-1)*lda+colA {
+		panic(shortA)
+	}
+	if len(c) < (n-1)*ldc+n {
+		panic(shortC)
+	}
+
+	// Quick return if possible.
+	if (alpha == 0 || k == 0) && beta == 1 {
+		return
+	}
+
+	if alpha == 0 {
+		if uplo == blas.Upper {
+			if beta == 0 {
+				for i := 0; i < n; i++ {
+					ci := c[i*ldc+i : i*ldc+n]
+					for j := range ci {
+						ci[j] = 0
+					}
+				}
+			} else {
+				for i := 0; i < n; i++ {
+					ci := c[i*ldc+i : i*ldc+n]
+					c128.ScalUnitary(beta, ci)
+				}
+			}
+		} else {
+			if beta == 0 {
+				for i := 0; i < n; i++ {
+					ci := c[i*ldc : i*ldc+i+1]
+					for j := range ci {
+						ci[j] = 0
+					}
+				}
+			} else {
+				for i := 0; i < n; i++ {
+					ci := c[i*ldc : i*ldc+i+1]
+					c128.ScalUnitary(beta, ci)
+				}
+			}
+		}
+		return
+	}
+
+	if trans == blas.NoTrans {
+		// Form  C = alpha*A*A^T + beta*C.
+		if uplo == blas.Upper {
+			for i := 0; i < n; i++ {
+				ci := c[i*ldc+i : i*ldc+n]
+				ai := a[i*lda : i*lda+k]
+				for jc, cij := range ci {
+					j := i + jc
+					ci[jc] = beta*cij + alpha*c128.DotuUnitary(ai, a[j*lda:j*lda+k])
+				}
+			}
+		} else {
+			for i := 0; i < n; i++ {
+				ci := c[i*ldc : i*ldc+i+1]
+				ai := a[i*lda : i*lda+k]
+				for j, cij := range ci {
+					ci[j] = beta*cij + alpha*c128.DotuUnitary(ai, a[j*lda:j*lda+k])
+				}
+			}
+		}
+	} else {
+		// Form  C = alpha*A^T*A + beta*C.
+		if uplo == blas.Upper {
+			for i := 0; i < n; i++ {
+				ci := c[i*ldc+i : i*ldc+n]
+				if beta == 0 {
+					for jc := range ci {
+						ci[jc] = 0
+					}
+				} else if beta != 1 {
+					for jc := range ci {
+						ci[jc] *= beta
+					}
+				}
+				for j := 0; j < k; j++ {
+					aji := a[j*lda+i]
+					if aji != 0 {
+						c128.AxpyUnitary(alpha*aji, a[j*lda+i:j*lda+n], ci)
+					}
+				}
+			}
+		} else {
+			for i := 0; i < n; i++ {
+				ci := c[i*ldc : i*ldc+i+1]
+				if beta == 0 {
+					for j := range ci {
+						ci[j] = 0
+					}
+				} else if beta != 1 {
+					for j := range ci {
+						ci[j] *= beta
+					}
+				}
+				for j := 0; j < k; j++ {
+					aji := a[j*lda+i]
+					if aji != 0 {
+						c128.AxpyUnitary(alpha*aji, a[j*lda:j*lda+i+1], ci)
 					}
 				}
 			}

@@ -13,3 +13,7 @@ import (
 func TestZgemm(t *testing.T) {
 	testblas.ZgemmTest(t, impl)
 }
+
+func TestZsyrk(t *testing.T) {
+	testblas.ZsyrkTest(t, impl)
+}

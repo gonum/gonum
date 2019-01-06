@@ -33,19 +33,6 @@ func ZgemmTest(t *testing.T, impl Zgemmer) {
 	}
 }
 
-// transString returns a string representation of blas.Transpose.
-func transString(t blas.Transpose) string {
-	switch t {
-	case blas.NoTrans:
-		return "NoTrans"
-	case blas.Trans:
-		return "Trans"
-	case blas.ConjTrans:
-		return "ConjTrans"
-	}
-	return "unknown trans"
-}
-
 func zgemmTest(t *testing.T, impl Zgemmer, tA, tB blas.Transpose, m, n, k int) {
 	const tol = 1e-13
 

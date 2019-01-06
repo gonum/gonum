@@ -652,3 +652,55 @@ func zmm(tA, tB blas.Transpose, m, n, k int, alpha complex128, a []complex128, l
 	}
 	return r
 }
+
+// transString returns a string representation of blas.Transpose.
+func transString(t blas.Transpose) string {
+	switch t {
+	case blas.NoTrans:
+		return "NoTrans"
+	case blas.Trans:
+		return "Trans"
+	case blas.ConjTrans:
+		return "ConjTrans"
+	}
+	return "unknown trans"
+}
+
+// uploString returns a string representation of blas.Uplo.
+func uploString(uplo blas.Uplo) string {
+	switch uplo {
+	case blas.Lower:
+		return "Lower"
+	case blas.Upper:
+		return "Upper"
+	}
+	return "unknown uplo"
+}
+
+// zSameLowerTri returns whether n×n matrices A and B are same under the diagonal.
+func zSameLowerTri(n int, a []complex128, lda int, b []complex128, ldb int) bool {
+	for i := 1; i < n; i++ {
+		for j := 0; j < i; j++ {
+			aij := a[i*lda+j]
+			bij := b[i*ldb+j]
+			if !sameComplex128(aij, bij) {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+// zSameUpperTri returns whether n×n matrices A and B are same above the diagonal.
+func zSameUpperTri(n int, a []complex128, lda int, b []complex128, ldb int) bool {
+	for i := 0; i < n-1; i++ {
+		for j := i + 1; j < n; j++ {
+			aij := a[i*lda+j]
+			bij := b[i*ldb+j]
+			if !sameComplex128(aij, bij) {
+				return false
+			}
+		}
+	}
+	return true
+}

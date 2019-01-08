@@ -10,6 +10,7 @@ import (
 	"gonum.org/v1/gonum/blas/testblas"
 )
 
-func TestZgemm(t *testing.T) { testblas.ZgemmTest(t, impl) }
-func TestZherk(t *testing.T) { testblas.ZherkTest(t, impl) }
-func TestZsyrk(t *testing.T) { testblas.ZsyrkTest(t, impl) }
+func TestZgemm(t *testing.T)  { testblas.ZgemmTest(t, impl) }
+func TestZherk(t *testing.T)  { testblas.ZherkTest(t, impl) }
+func TestZsyrk(t *testing.T)  { testblas.ZsyrkTest(t, impl) }
+func TestZsyr2k(t *testing.T) { testblas.Zsyr2kTest(t, impl) }

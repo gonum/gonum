@@ -254,6 +254,173 @@ func (Implementation) Zgemm(tA, tB blas.Transpose, m, n, k int, alpha complex128
 	}
 }
 
+// Zherk performs one of the hermitian rank-k operations
+//  C = alpha*A*A^H + beta*C  if trans == blas.NoTrans
+//  C = alpha*A^H*A + beta*C  if trans == blas.ConjTrans
+// where alpha and beta are real scalars, C is an n×n hermitian matrix and A is
+// an n×k matrix in the first case and a k×n matrix in the second case.
+//
+// The imaginary parts of the diagonal elements of C are assumed to be zero, and
+// on return they will be set to zero.
+func (Implementation) Zherk(uplo blas.Uplo, trans blas.Transpose, n, k int, alpha float64, a []complex128, lda int, beta float64, c []complex128, ldc int) {
+	var rowA, colA int
+	switch trans {
+	default:
+		panic(badTranspose)
+	case blas.NoTrans:
+		rowA, colA = n, k
+	case blas.ConjTrans:
+		rowA, colA = k, n
+	}
+	switch {
+	case uplo != blas.Lower && uplo != blas.Upper:
+		panic(badUplo)
+	case n < 0:
+		panic(nLT0)
+	case k < 0:
+		panic(kLT0)
+	case lda < max(1, colA):
+		panic(badLdA)
+	case ldc < max(1, n):
+		panic(badLdC)
+	}
+
+	// Quick return if possible.
+	if n == 0 {
+		return
+	}
+
+	// For zero matrix size the following slice length checks are trivially satisfied.
+	if len(a) < (rowA-1)*lda+colA {
+		panic(shortA)
+	}
+	if len(c) < (n-1)*ldc+n {
+		panic(shortC)
+	}
+
+	// Quick return if possible.
+	if (alpha == 0 || k == 0) && beta == 1 {
+		return
+	}
+
+	if alpha == 0 {
+		if uplo == blas.Upper {
+			if beta == 0 {
+				for i := 0; i < n; i++ {
+					ci := c[i*ldc+i : i*ldc+n]
+					for j := range ci {
+						ci[j] = 0
+					}
+				}
+			} else {
+				for i := 0; i < n; i++ {
+					ci := c[i*ldc+i : i*ldc+n]
+					ci[0] = complex(beta*real(ci[0]), 0)
+					if i != n-1 {
+						c128.DscalUnitary(beta, ci[1:])
+					}
+				}
+			}
+		} else {
+			if beta == 0 {
+				for i := 0; i < n; i++ {
+					ci := c[i*ldc : i*ldc+i+1]
+					for j := range ci {
+						ci[j] = 0
+					}
+				}
+			} else {
+				for i := 0; i < n; i++ {
+					ci := c[i*ldc : i*ldc+i+1]
+					if i != 0 {
+						c128.DscalUnitary(beta, ci[:i])
+					}
+					ci[i] = complex(beta*real(ci[i]), 0)
+				}
+			}
+		}
+		return
+	}
+
+	calpha := complex(alpha, 0)
+	if trans == blas.NoTrans {
+		// Form  C = alpha*A*A^H + beta*C.
+		cbeta := complex(beta, 0)
+		if uplo == blas.Upper {
+			for i := 0; i < n; i++ {
+				ci := c[i*ldc+i : i*ldc+n]
+				ai := a[i*lda : i*lda+k]
+				// Handle the i-th diagonal element of C.
+				cii := calpha*c128.DotcUnitary(ai, ai) + cbeta*ci[0]
+				ci[0] = complex(real(cii), 0)
+				// Handle the remaining elements on the i-th row of C.
+				for jc, cij := range ci[1:] {
+					j := i + 1 + jc
+					ci[jc+1] = calpha*c128.DotcUnitary(a[j*lda:j*lda+k], ai) + cbeta*cij
+				}
+			}
+		} else {
+			for i := 0; i < n; i++ {
+				ci := c[i*ldc : i*ldc+i+1]
+				ai := a[i*lda : i*lda+k]
+				// Handle the first i-1 elements on the i-th row of C.
+				for j, cij := range ci[:i] {
+					ci[j] = calpha*c128.DotcUnitary(a[j*lda:j*lda+k], ai) + cbeta*cij
+				}
+				// Handle the i-th diagonal element of C.
+				cii := calpha*c128.DotcUnitary(ai, ai) + cbeta*ci[i]
+				ci[i] = complex(real(cii), 0)
+			}
+		}
+	} else {
+		// Form  C = alpha*A^H*A + beta*C.
+		if uplo == blas.Upper {
+			for i := 0; i < n; i++ {
+				ci := c[i*ldc+i : i*ldc+n]
+				if beta == 0 {
+					for jc := range ci {
+						ci[jc] = 0
+					}
+				} else if beta != 1 {
+					c128.DscalUnitary(beta, ci)
+					ci[0] = complex(real(ci[0]), 0)
+				} else {
+					ci[0] = complex(real(ci[0]), 0)
+				}
+				for j := 0; j < k; j++ {
+					aji := cmplx.Conj(a[j*lda+i])
+					if aji != 0 {
+						c128.AxpyUnitary(calpha*aji, a[j*lda+i:j*lda+n], ci)
+					}
+				}
+				c[i*ldc+i] = complex(real(c[i*ldc+i]), 0)
+
+			}
+		} else {
+			for i := 0; i < n; i++ {
+				ci := c[i*ldc : i*ldc+i+1]
+				if beta == 0 {
+					for j := range ci {
+						ci[j] = 0
+					}
+				} else if beta != 1 {
+					c128.DscalUnitary(beta, ci)
+					ci[i] = complex(real(ci[i]), 0)
+				} else {
+					ci[i] = complex(real(ci[i]), 0)
+				}
+				for j := 0; j < k; j++ {
+					aji := cmplx.Conj(a[j*lda+i])
+					if aji != 0 {
+						c128.AxpyUnitary(calpha*aji, a[j*lda:j*lda+i+1], ci)
+					}
+				}
+				c[i*ldc+i] = complex(real(c[i*ldc+i]), 0)
+			}
+		}
+	}
+}
+
 // Zsyrk performs one of the symmetric rank-k operations
 //  C = alpha*A*A^T + beta*C  if trans == blas.NoTrans
 //  C = alpha*A^T*A + beta*C  if trans == blas.Trans

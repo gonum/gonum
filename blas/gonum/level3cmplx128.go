@@ -590,3 +590,174 @@ func (Implementation) Zsyrk(uplo blas.Uplo, trans blas.Transpose, n, k int, alph
 		}
 	}
 }
+
+// Zsyr2k performs one of the symmetric rank-2k operations
+//  C = alpha*A*B^T + alpha*B*A^T + beta*C  if trans == blas.NoTrans
+//  C = alpha*A^T*B + alpha*B^T*A + beta*C  if trans == blas.Trans
+// where alpha and beta are scalars, C is an n×n symmetric matrix and A and B
+// are n×k matrices in the first case and k×n matrices in the second case.
+func (Implementation) Zsyr2k(uplo blas.Uplo, trans blas.Transpose, n, k int, alpha complex128, a []complex128, lda int, b []complex128, ldb int, beta complex128, c []complex128, ldc int) {
+	var row, col int
+	switch trans {
+	default:
+		panic(badTranspose)
+	case blas.NoTrans:
+		row, col = n, k
+	case blas.Trans:
+		row, col = k, n
+	}
+	switch {
+	case uplo != blas.Lower && uplo != blas.Upper:
+		panic(badUplo)
+	case n < 0:
+		panic(nLT0)
+	case k < 0:
+		panic(kLT0)
+	case lda < max(1, col):
+		panic(badLdA)
+	case ldb < max(1, col):
+		panic(badLdB)
+	case ldc < max(1, n):
+		panic(badLdC)
+	}
+
+	// Quick return if possible.
+	if n == 0 {
+		return
+	}
+
+	// For zero matrix size the following slice length checks are trivially satisfied.
+	if len(a) < (row-1)*lda+col {
+		panic(shortA)
+	}
+	if len(b) < (row-1)*ldb+col {
+		panic(shortB)
+	}
+	if len(c) < (n-1)*ldc+n {
+		panic(shortC)
+	}
+
+	// Quick return if possible.
+	if (alpha == 0 || k == 0) && beta == 1 {
+		return
+	}
+
+	if alpha == 0 {
+		if uplo == blas.Upper {
+			if beta == 0 {
+				for i := 0; i < n; i++ {
+					ci := c[i*ldc+i : i*ldc+n]
+					for j := range ci {
+						ci[j] = 0
+					}
+				}
+			} else {
+				for i := 0; i < n; i++ {
+					ci := c[i*ldc+i : i*ldc+n]
+					c128.ScalUnitary(beta, ci)
+				}
+			}
+		} else {
+			if beta == 0 {
+				for i := 0; i < n; i++ {
+					ci := c[i*ldc : i*ldc+i+1]
+					for j := range ci {
+						ci[j] = 0
+					}
+				}
+			} else {
+				for i := 0; i < n; i++ {
+					ci := c[i*ldc : i*ldc+i+1]
+					c128.ScalUnitary(beta, ci)
+				}
+			}
+		}
+		return
+	}
+
+	if trans == blas.NoTrans {
+		// Form  C = alpha*A*B^T + alpha*B*A^T + beta*C.
+		if uplo == blas.Upper {
+			for i := 0; i < n; i++ {
+				ci := c[i*ldc+i : i*ldc+n]
+				ai := a[i*lda : i*lda+k]
+				bi := b[i*ldb : i*ldb+k]
+				if beta == 0 {
+					for jc := range ci {
+						j := i + jc
+						ci[jc] = alpha*c128.DotuUnitary(ai, b[j*ldb:j*ldb+k]) + alpha*c128.DotuUnitary(bi, a[j*lda:j*lda+k])
+					}
+				} else {
+					for jc, cij := range ci {
+						j := i + jc
+						ci[jc] = alpha*c128.DotuUnitary(ai, b[j*ldb:j*ldb+k]) + alpha*c128.DotuUnitary(bi, a[j*lda:j*lda+k]) + beta*cij
+					}
+				}
+			}
+		} else {
+			for i := 0; i < n; i++ {
+				ci := c[i*ldc : i*ldc+i+1]
+				ai := a[i*lda : i*lda+k]
+				bi := b[i*ldb : i*ldb+k]
+				if beta == 0 {
+					for j := range ci {
+						ci[j] = alpha*c128.DotuUnitary(ai, b[j*ldb:j*ldb+k]) + alpha*c128.DotuUnitary(bi, a[j*lda:j*lda+k])
+					}
+				} else {
+					for j, cij := range ci {
+						ci[j] = alpha*c128.DotuUnitary(ai, b[j*ldb:j*ldb+k]) + alpha*c128.DotuUnitary(bi, a[j*lda:j*lda+k]) + beta*cij
+					}
+				}
+			}
+		}
+	} else {
+		// Form  C = alpha*A^T*B + alpha*B^T*A + beta*C.
+		if uplo == blas.Upper {
+			for i := 0; i < n; i++ {
+				ci := c[i*ldc+i : i*ldc+n]
+				if beta == 0 {
+					for jc := range ci {
+						ci[jc] = 0
+					}
+				} else if beta != 1 {
+					for jc := range ci {
+						ci[jc] *= beta
+					}
+				}
+				for j := 0; j < k; j++ {
+					aji := a[j*lda+i]
+					bji := b[j*ldb+i]
+					if aji != 0 {
+						c128.AxpyUnitary(alpha*aji, b[j*ldb+i:j*ldb+n], ci)
+					}
+					if bji != 0 {
+						c128.AxpyUnitary(alpha*bji, a[j*lda+i:j*lda+n], ci)
+					}
+				}
+			}
+		} else {
+			for i := 0; i < n; i++ {
+				ci := c[i*ldc : i*ldc+i+1]
+				if beta == 0 {
+					for j := range ci {
+						ci[j] = 0
+					}
+				} else if beta != 1 {
+					for j := range ci {
+						ci[j] *= beta
+					}
+				}
+				for j := 0; j < k; j++ {
+					aji := a[j*lda+i]
+					bji := b[j*ldb+i]
+					if aji != 0 {
+						c128.AxpyUnitary(alpha*aji, b[j*ldb:j*ldb+i+1], ci)
+					}
+					if bji != 0 {
+						c128.AxpyUnitary(alpha*bji, a[j*lda:j*lda+i+1], ci)
+					}
+				}
+			}
+		}
+	}
+}

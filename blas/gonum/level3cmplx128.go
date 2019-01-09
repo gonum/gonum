@@ -350,26 +350,54 @@ func (Implementation) Zherk(uplo blas.Uplo, trans blas.Transpose, n, k int, alph
 			for i := 0; i < n; i++ {
 				ci := c[i*ldc+i : i*ldc+n]
 				ai := a[i*lda : i*lda+k]
-				// Handle the i-th diagonal element of C.
-				cii := calpha*c128.DotcUnitary(ai, ai) + cbeta*ci[0]
-				ci[0] = complex(real(cii), 0)
-				// Handle the remaining elements on the i-th row of C.
-				for jc, cij := range ci[1:] {
-					j := i + 1 + jc
-					ci[jc+1] = calpha*c128.DotcUnitary(a[j*lda:j*lda+k], ai) + cbeta*cij
+				if beta == 0 {
+					// Handle the i-th diagonal element of C.
+					ci[0] = complex(alpha*real(c128.DotcUnitary(ai, ai)), 0)
+					// Handle the remaining elements on the i-th row of C.
+					for jc := range ci[1:] {
+						j := i + 1 + jc
+						ci[jc+1] = calpha * c128.DotcUnitary(a[j*lda:j*lda+k], ai)
+					}
+				} else if beta != 1 {
+					cii := calpha*c128.DotcUnitary(ai, ai) + cbeta*ci[0]
+					ci[0] = complex(real(cii), 0)
+					for jc, cij := range ci[1:] {
+						j := i + 1 + jc
+						ci[jc+1] = calpha*c128.DotcUnitary(a[j*lda:j*lda+k], ai) + cbeta*cij
+					}
+				} else {
+					cii := calpha*c128.DotcUnitary(ai, ai) + ci[0]
+					ci[0] = complex(real(cii), 0)
+					for jc, cij := range ci[1:] {
+						j := i + 1 + jc
+						ci[jc+1] = calpha*c128.DotcUnitary(a[j*lda:j*lda+k], ai) + cij
+					}
 				}
 			}
 		} else {
 			for i := 0; i < n; i++ {
 				ci := c[i*ldc : i*ldc+i+1]
 				ai := a[i*lda : i*lda+k]
-				// Handle the first i-1 elements on the i-th row of C.
-				for j, cij := range ci[:i] {
-					ci[j] = calpha*c128.DotcUnitary(a[j*lda:j*lda+k], ai) + cbeta*cij
+				if beta == 0 {
+					// Handle the first i-1 elements on the i-th row of C.
+					for j := range ci[:i] {
+						ci[j] = calpha * c128.DotcUnitary(a[j*lda:j*lda+k], ai)
+					}
+					// Handle the i-th diagonal element of C.
+					ci[i] = complex(alpha*real(c128.DotcUnitary(ai, ai)), 0)
+				} else if beta != 1 {
+					for j, cij := range ci[:i] {
+						ci[j] = calpha*c128.DotcUnitary(a[j*lda:j*lda+k], ai) + cbeta*cij
+					}
+					cii := calpha*c128.DotcUnitary(ai, ai) + cbeta*ci[i]
+					ci[i] = complex(real(cii), 0)
+				} else {
+					for j, cij := range ci[:i] {
+						ci[j] = calpha*c128.DotcUnitary(a[j*lda:j*lda+k], ai) + cij
+					}
+					cii := calpha*c128.DotcUnitary(ai, ai) + ci[i]
+					ci[i] = complex(real(cii), 0)
 				}
-				// Handle the i-th diagonal element of C.
-				cii := calpha*c128.DotcUnitary(ai, ai) + cbeta*ci[i]
-				ci[i] = complex(real(cii), 0)
 			}
 		}
 	} else {
@@ -394,7 +422,6 @@ func (Implementation) Zherk(uplo blas.Uplo, trans blas.Transpose, n, k int, alph
 					}
 				}
 				c[i*ldc+i] = complex(real(c[i*ldc+i]), 0)
-
 			}
 		} else {
 			for i := 0; i < n; i++ {

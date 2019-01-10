@@ -20,6 +20,15 @@ type Iterator interface {
 
 	// Len returns the number of items remaining in the
 	// iterator.
+	//
+	// If the number of items in the iterator is unknown,
+	// too large to materialize or too costly to calculate
+	// then Len may return a negative value.
+	// In this case the consuming function must be able
+	// to operate on the items of the iterator directly
+	// without materializing the items into a slice.
+	// The magnitude of a negative length has
+	// implementation-dependent semantics.
 	Len() int
 
 	// Reset returns the iterator to its start position.
@@ -47,17 +56,22 @@ type NodeSlicer interface {
 
 // NodesOf returns it.Len() nodes from it. If it is a NodeSlicer, the NodeSlice method
 // is used to obtain the nodes. It is safe to pass a nil Nodes to NodesOf.
+//
+// If the Nodes has an indeterminate length, NodesOf will panic.
 func NodesOf(it Nodes) []Node {
 	if it == nil {
 		return nil
 	}
+	len := it.Len()
+	switch {
+	case len == 0:
+		return nil
+	case len < 0:
+		panic("graph: called NodesOf on indeterminate iterator")
+	}
 	switch it := it.(type) {
 	case NodeSlicer:
 		return it.NodeSlice()
-	}
-	len := it.Len()
-	if len == 0 {
-		return nil
 	}
 	n := make([]Node, 0, len)
 	for it.Next() {
@@ -87,17 +101,22 @@ type EdgeSlicer interface {
 
 // EdgesOf returns it.Len() nodes from it. If it is an EdgeSlicer, the EdgeSlice method is used
 // to obtain the edges. It is safe to pass a nil Edges to EdgesOf.
+//
+// If the Edges has an indeterminate length, EdgesOf will panic.
 func EdgesOf(it Edges) []Edge {
 	if it == nil {
 		return nil
 	}
+	len := it.Len()
+	switch {
+	case len == 0:
+		return nil
+	case len < 0:
+		panic("graph: called EdgesOf on indeterminate iterator")
+	}
 	switch it := it.(type) {
 	case EdgeSlicer:
 		return it.EdgeSlice()
-	}
-	len := it.Len()
-	if len == 0 {
-		return nil
 	}
 	e := make([]Edge, 0, len)
 	for it.Next() {
@@ -128,17 +147,22 @@ type WeightedEdgeSlicer interface {
 // WeightedEdgesOf returns it.Len() weighted edge from it. If it is a WeightedEdgeSlicer, the
 // WeightedEdgeSlice method is used to obtain the edges. It is safe to pass a nil WeightedEdges
 // to WeightedEdgesOf.
+//
+// If the WeightedEdges has an indeterminate length, WeightedEdgesOf will panic.
 func WeightedEdgesOf(it WeightedEdges) []WeightedEdge {
 	if it == nil {
 		return nil
 	}
+	len := it.Len()
+	switch {
+	case len == 0:
+		return nil
+	case len < 0:
+		panic("graph: called WeightedEdgesOf on indeterminate iterator")
+	}
 	switch it := it.(type) {
 	case WeightedEdgeSlicer:
 		return it.WeightedEdgeSlice()
-	}
-	len := it.Len()
-	if len == 0 {
-		return nil
 	}
 	e := make([]WeightedEdge, 0, len)
 	for it.Next() {
@@ -168,17 +192,22 @@ type LineSlicer interface {
 
 // LinesOf returns it.Len() nodes from it. If it is a LineSlicer, the LineSlice method is used
 // to obtain the lines. It is safe to pass a nil Lines to LinesOf.
+//
+// If the Lines has an indeterminate length, LinesOf will panic.
 func LinesOf(it Lines) []Line {
 	if it == nil {
 		return nil
 	}
+	len := it.Len()
+	switch {
+	case len == 0:
+		return nil
+	case len < 0:
+		panic("graph: called LinesOf on indeterminate iterator")
+	}
 	switch it := it.(type) {
 	case LineSlicer:
 		return it.LineSlice()
-	}
-	len := it.Len()
-	if len == 0 {
-		return nil
 	}
 	l := make([]Line, 0, len)
 	for it.Next() {
@@ -209,17 +238,22 @@ type WeightedLineSlicer interface {
 // WeightedLinesOf returns it.Len() weighted line from it. If it is a WeightedLineSlicer, the
 // WeightedLineSlice method is used to obtain the lines. It is safe to pass a nil WeightedLines
 // to WeightedLinesOf.
+//
+// If the WeightedLines has an indeterminate length, WeightedLinesOf will panic.
 func WeightedLinesOf(it WeightedLines) []WeightedLine {
 	if it == nil {
 		return nil
 	}
+	len := it.Len()
+	switch {
+	case len == 0:
+		return nil
+	case len < 0:
+		panic("graph: called WeightedLinesOf on indeterminate iterator")
+	}
 	switch it := it.(type) {
 	case WeightedLineSlicer:
 		return it.WeightedLineSlice()
-	}
-	len := it.Len()
-	if len == 0 {
-		return nil
 	}
 	l := make([]WeightedLine, 0, len)
 	for it.Next() {

@@ -448,6 +448,202 @@ func (Implementation) Zherk(uplo blas.Uplo, trans blas.Transpose, n, k int, alph
 	}
 }
 
+// Zher2k performs one of the hermitian rank-2k operations
+//  C = alpha*A*B^H + conj(alpha)*B*A^H + beta*C  if trans == blas.NoTrans
+//  C = alpha*A^H*B + conj(alpha)*B^H*A + beta*C  if trans == blas.ConjTrans
+// where alpha and beta are scalars with beta real, C is an n×n hermitian matrix
+// and A and B are n×k matrices in the first case and k×n matrices in the second case.
+//
+// The imaginary parts of the diagonal elements of C are assumed to be zero, and
+// on return they will be set to zero.
+func (Implementation) Zher2k(uplo blas.Uplo, trans blas.Transpose, n, k int, alpha complex128, a []complex128, lda int, b []complex128, ldb int, beta float64, c []complex128, ldc int) {
+	var row, col int
+	switch trans {
+	default:
+		panic(badTranspose)
+	case blas.NoTrans:
+		row, col = n, k
+	case blas.ConjTrans:
+		row, col = k, n
+	}
+	switch {
+	case uplo != blas.Lower && uplo != blas.Upper:
+		panic(badUplo)
+	case n < 0:
+		panic(nLT0)
+	case k < 0:
+		panic(kLT0)
+	case lda < max(1, col):
+		panic(badLdA)
+	case ldb < max(1, col):
+		panic(badLdB)
+	case ldc < max(1, n):
+		panic(badLdC)
+	}
+
+	// Quick return if possible.
+	if n == 0 {
+		return
+	}
+
+	// For zero matrix size the following slice length checks are trivially satisfied.
+	if len(a) < (row-1)*lda+col {
+		panic(shortA)
+	}
+	if len(b) < (row-1)*ldb+col {
+		panic(shortB)
+	}
+	if len(c) < (n-1)*ldc+n {
+		panic(shortC)
+	}
+
+	// Quick return if possible.
+	if (alpha == 0 || k == 0) && beta == 1 {
+		return
+	}
+
+	if alpha == 0 {
+		if uplo == blas.Upper {
+			if beta == 0 {
+				for i := 0; i < n; i++ {
+					ci := c[i*ldc+i : i*ldc+n]
+					for j := range ci {
+						ci[j] = 0
+					}
+				}
+			} else {
+				for i := 0; i < n; i++ {
+					ci := c[i*ldc+i : i*ldc+n]
+					ci[0] = complex(beta*real(ci[0]), 0)
+					if i != n-1 {
+						c128.DscalUnitary(beta, ci[1:])
+					}
+				}
+			}
+		} else {
+			if beta == 0 {
+				for i := 0; i < n; i++ {
+					ci := c[i*ldc : i*ldc+i+1]
+					for j := range ci {
+						ci[j] = 0
+					}
+				}
+			} else {
+				for i := 0; i < n; i++ {
+					ci := c[i*ldc : i*ldc+i+1]
+					if i != 0 {
+						c128.DscalUnitary(beta, ci[:i])
+					}
+					ci[i] = complex(beta*real(ci[i]), 0)
+				}
+			}
+		}
+		return
+	}
+
+	conjalpha := cmplx.Conj(alpha)
+	cbeta := complex(beta, 0)
+	if trans == blas.NoTrans {
+		// Form  C = alpha*A*B^H + conj(alpha)*B*A^H + beta*C.
+		if uplo == blas.Upper {
+			for i := 0; i < n; i++ {
+				ci := c[i*ldc+i+1 : i*ldc+n]
+				ai := a[i*lda : i*lda+k]
+				bi := b[i*ldb : i*ldb+k]
+				if beta == 0 {
+					cii := alpha*c128.DotcUnitary(bi, ai) + conjalpha*c128.DotcUnitary(ai, bi)
+					c[i*ldc+i] = complex(real(cii), 0)
+					for jc := range ci {
+						j := i + 1 + jc
+						ci[jc] = alpha*c128.DotcUnitary(b[j*ldb:j*ldb+k], ai) + conjalpha*c128.DotcUnitary(a[j*lda:j*lda+k], bi)
+					}
+				} else {
+					cii := alpha*c128.DotcUnitary(bi, ai) + conjalpha*c128.DotcUnitary(ai, bi) + cbeta*c[i*ldc+i]
+					c[i*ldc+i] = complex(real(cii), 0)
+					for jc, cij := range ci {
+						j := i + 1 + jc
+						ci[jc] = alpha*c128.DotcUnitary(b[j*ldb:j*ldb+k], ai) + conjalpha*c128.DotcUnitary(a[j*lda:j*lda+k], bi) + cbeta*cij
+					}
+				}
+			}
+		} else {
+			for i := 0; i < n; i++ {
+				ci := c[i*ldc : i*ldc+i]
+				ai := a[i*lda : i*lda+k]
+				bi := b[i*ldb : i*ldb+k]
+				if beta == 0 {
+					for j := range ci {
+						ci[j] = alpha*c128.DotcUnitary(b[j*ldb:j*ldb+k], ai) + conjalpha*c128.DotcUnitary(a[j*lda:j*lda+k], bi)
+					}
+					cii := alpha*c128.DotcUnitary(bi, ai) + conjalpha*c128.DotcUnitary(ai, bi)
+					c[i*ldc+i] = complex(real(cii), 0)
+				} else {
+					for j, cij := range ci {
+						ci[j] = alpha*c128.DotcUnitary(b[j*ldb:j*ldb+k], ai) + conjalpha*c128.DotcUnitary(a[j*lda:j*lda+k], bi) + cbeta*cij
+					}
+					cii := alpha*c128.DotcUnitary(bi, ai) + conjalpha*c128.DotcUnitary(ai, bi) + cbeta*c[i*ldc+i]
+					c[i*ldc+i] = complex(real(cii), 0)
+				}
+			}
+		}
+	} else {
+		// Form  C = alpha*A^H*B + conj(alpha)*B^H*A + beta*C.
+		if uplo == blas.Upper {
+			for i := 0; i < n; i++ {
+				ci := c[i*ldc+i : i*ldc+n]
+				switch {
+				case beta == 0:
+					for jc := range ci {
+						ci[jc] = 0
+					}
+				case beta != 1:
+					c128.DscalUnitary(beta, ci)
+					ci[0] = complex(real(ci[0]), 0)
+				default:
+					ci[0] = complex(real(ci[0]), 0)
+				}
+				for j := 0; j < k; j++ {
+					aji := a[j*lda+i]
+					bji := b[j*ldb+i]
+					if aji != 0 {
+						c128.AxpyUnitary(alpha*cmplx.Conj(aji), b[j*ldb+i:j*ldb+n], ci)
+					}
+					if bji != 0 {
+						c128.AxpyUnitary(conjalpha*cmplx.Conj(bji), a[j*lda+i:j*lda+n], ci)
+					}
+				}
+				ci[0] = complex(real(ci[0]), 0)
+			}
+		} else {
+			for i := 0; i < n; i++ {
+				ci := c[i*ldc : i*ldc+i+1]
+				switch {
+				case beta == 0:
+					for j := range ci {
+						ci[j] = 0
+					}
+				case beta != 1:
+					c128.DscalUnitary(beta, ci)
+					ci[i] = complex(real(ci[i]), 0)
+				default:
+					ci[i] = complex(real(ci[i]), 0)
+				}
+				for j := 0; j < k; j++ {
+					aji := a[j*lda+i]
+					bji := b[j*ldb+i]
+					if aji != 0 {
+						c128.AxpyUnitary(alpha*cmplx.Conj(aji), b[j*ldb:j*ldb+i+1], ci)
+					}
+					if bji != 0 {
+						c128.AxpyUnitary(conjalpha*cmplx.Conj(bji), a[j*lda:j*lda+i+1], ci)
+					}
+				}
+				ci[i] = complex(real(ci[i]), 0)
+			}
+		}
+	}
+}
+
 // Zsyrk performs one of the symmetric rank-k operations
 //  C = alpha*A*A^T + beta*C  if trans == blas.NoTrans
 //  C = alpha*A^T*A + beta*C  if trans == blas.Trans

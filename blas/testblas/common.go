@@ -677,6 +677,17 @@ func uploString(uplo blas.Uplo) string {
 	return "unknown uplo"
 }
 
+// sideString returns a string representation of blas.Side.
+func sideString(side blas.Side) string {
+	switch side {
+	case blas.Left:
+		return "Left"
+	case blas.Right:
+		return "Right"
+	}
+	return "unknown side"
+}
+
 // zSameLowerTri returns whether n×n matrices A and B are same under the diagonal.
 func zSameLowerTri(n int, a []complex128, lda int, b []complex128, ldb int) bool {
 	for i := 1; i < n; i++ {

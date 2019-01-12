@@ -100,11 +100,12 @@ func (Implementation) Zgemm(tA, tB blas.Transpose, m, n, k int, alpha complex128
 		case blas.NoTrans:
 			// Form  C = alpha * A * B + beta * C.
 			for i := 0; i < m; i++ {
-				if beta == 0 {
+				switch {
+				case beta == 0:
 					for j := 0; j < n; j++ {
 						c[i*ldc+j] = 0
 					}
-				} else if beta != 1 {
+				case beta != 1:
 					for j := 0; j < n; j++ {
 						c[i*ldc+j] *= beta
 					}
@@ -119,11 +120,12 @@ func (Implementation) Zgemm(tA, tB blas.Transpose, m, n, k int, alpha complex128
 		case blas.Trans:
 			// Form  C = alpha * A * B^T + beta * C.
 			for i := 0; i < m; i++ {
-				if beta == 0 {
+				switch {
+				case beta == 0:
 					for j := 0; j < n; j++ {
 						c[i*ldc+j] = 0
 					}
-				} else if beta != 1 {
+				case beta != 1:
 					for j := 0; j < n; j++ {
 						c[i*ldc+j] *= beta
 					}
@@ -138,11 +140,12 @@ func (Implementation) Zgemm(tA, tB blas.Transpose, m, n, k int, alpha complex128
 		case blas.ConjTrans:
 			// Form  C = alpha * A * B^H + beta * C.
 			for i := 0; i < m; i++ {
-				if beta == 0 {
+				switch {
+				case beta == 0:
 					for j := 0; j < n; j++ {
 						c[i*ldc+j] = 0
 					}
-				} else if beta != 1 {
+				case beta != 1:
 					for j := 0; j < n; j++ {
 						c[i*ldc+j] *= beta
 					}
@@ -350,7 +353,8 @@ func (Implementation) Zherk(uplo blas.Uplo, trans blas.Transpose, n, k int, alph
 			for i := 0; i < n; i++ {
 				ci := c[i*ldc+i : i*ldc+n]
 				ai := a[i*lda : i*lda+k]
-				if beta == 0 {
+				switch {
+				case beta == 0:
 					// Handle the i-th diagonal element of C.
 					ci[0] = complex(alpha*real(c128.DotcUnitary(ai, ai)), 0)
 					// Handle the remaining elements on the i-th row of C.
@@ -358,14 +362,14 @@ func (Implementation) Zherk(uplo blas.Uplo, trans blas.Transpose, n, k int, alph
 						j := i + 1 + jc
 						ci[jc+1] = calpha * c128.DotcUnitary(a[j*lda:j*lda+k], ai)
 					}
-				} else if beta != 1 {
+				case beta != 1:
 					cii := calpha*c128.DotcUnitary(ai, ai) + cbeta*ci[0]
 					ci[0] = complex(real(cii), 0)
 					for jc, cij := range ci[1:] {
 						j := i + 1 + jc
 						ci[jc+1] = calpha*c128.DotcUnitary(a[j*lda:j*lda+k], ai) + cbeta*cij
 					}
-				} else {
+				default:
 					cii := calpha*c128.DotcUnitary(ai, ai) + ci[0]
 					ci[0] = complex(real(cii), 0)
 					for jc, cij := range ci[1:] {
@@ -378,20 +382,21 @@ func (Implementation) Zherk(uplo blas.Uplo, trans blas.Transpose, n, k int, alph
 			for i := 0; i < n; i++ {
 				ci := c[i*ldc : i*ldc+i+1]
 				ai := a[i*lda : i*lda+k]
-				if beta == 0 {
+				switch {
+				case beta == 0:
 					// Handle the first i-1 elements on the i-th row of C.
 					for j := range ci[:i] {
 						ci[j] = calpha * c128.DotcUnitary(a[j*lda:j*lda+k], ai)
 					}
 					// Handle the i-th diagonal element of C.
 					ci[i] = complex(alpha*real(c128.DotcUnitary(ai, ai)), 0)
-				} else if beta != 1 {
+				case beta != 1:
 					for j, cij := range ci[:i] {
 						ci[j] = calpha*c128.DotcUnitary(a[j*lda:j*lda+k], ai) + cbeta*cij
 					}
 					cii := calpha*c128.DotcUnitary(ai, ai) + cbeta*ci[i]
 					ci[i] = complex(real(cii), 0)
-				} else {
+				default:
 					for j, cij := range ci[:i] {
 						ci[j] = calpha*c128.DotcUnitary(a[j*lda:j*lda+k], ai) + cij
 					}
@@ -405,14 +410,15 @@ func (Implementation) Zherk(uplo blas.Uplo, trans blas.Transpose, n, k int, alph
 		if uplo == blas.Upper {
 			for i := 0; i < n; i++ {
 				ci := c[i*ldc+i : i*ldc+n]
-				if beta == 0 {
+				switch {
+				case beta == 0:
 					for jc := range ci {
 						ci[jc] = 0
 					}
-				} else if beta != 1 {
+				case beta != 1:
 					c128.DscalUnitary(beta, ci)
 					ci[0] = complex(real(ci[0]), 0)
-				} else {
+				default:
 					ci[0] = complex(real(ci[0]), 0)
 				}
 				for j := 0; j < k; j++ {
@@ -426,14 +432,15 @@ func (Implementation) Zherk(uplo blas.Uplo, trans blas.Transpose, n, k int, alph
 		} else {
 			for i := 0; i < n; i++ {
 				ci := c[i*ldc : i*ldc+i+1]
-				if beta == 0 {
+				switch {
+				case beta == 0:
 					for j := range ci {
 						ci[j] = 0
 					}
-				} else if beta != 1 {
+				case beta != 1:
 					c128.DscalUnitary(beta, ci)
 					ci[i] = complex(real(ci[i]), 0)
-				} else {
+				default:
 					ci[i] = complex(real(ci[i]), 0)
 				}
 				for j := 0; j < k; j++ {
@@ -748,11 +755,12 @@ func (Implementation) Zsyrk(uplo blas.Uplo, trans blas.Transpose, n, k int, alph
 		if uplo == blas.Upper {
 			for i := 0; i < n; i++ {
 				ci := c[i*ldc+i : i*ldc+n]
-				if beta == 0 {
+				switch {
+				case beta == 0:
 					for jc := range ci {
 						ci[jc] = 0
 					}
-				} else if beta != 1 {
+				case beta != 1:
 					for jc := range ci {
 						ci[jc] *= beta
 					}
@@ -767,11 +775,12 @@ func (Implementation) Zsyrk(uplo blas.Uplo, trans blas.Transpose, n, k int, alph
 		} else {
 			for i := 0; i < n; i++ {
 				ci := c[i*ldc : i*ldc+i+1]
-				if beta == 0 {
+				switch {
+				case beta == 0:
 					for j := range ci {
 						ci[j] = 0
 					}
-				} else if beta != 1 {
+				case beta != 1:
 					for j := range ci {
 						ci[j] *= beta
 					}
@@ -911,11 +920,12 @@ func (Implementation) Zsyr2k(uplo blas.Uplo, trans blas.Transpose, n, k int, alp
 		if uplo == blas.Upper {
 			for i := 0; i < n; i++ {
 				ci := c[i*ldc+i : i*ldc+n]
-				if beta == 0 {
+				switch {
+				case beta == 0:
 					for jc := range ci {
 						ci[jc] = 0
 					}
-				} else if beta != 1 {
+				case beta != 1:
 					for jc := range ci {
 						ci[jc] *= beta
 					}
@@ -934,11 +944,12 @@ func (Implementation) Zsyr2k(uplo blas.Uplo, trans blas.Transpose, n, k int, alp
 		} else {
 			for i := 0; i < n; i++ {
 				ci := c[i*ldc : i*ldc+i+1]
-				if beta == 0 {
+				switch {
+				case beta == 0:
 					for j := range ci {
 						ci[j] = 0
 					}
-				} else if beta != 1 {
+				case beta != 1:
 					for j := range ci {
 						ci[j] *= beta
 					}

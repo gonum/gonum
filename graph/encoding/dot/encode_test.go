@@ -950,6 +950,35 @@ var encodeTests = []struct {
 	3 -- 4 [color=red];
 }`,
 	},
+	{
+		g: undirectedEdgeAttrGraphFrom(powerMethodGraph, map[edge][]encoding.Attribute{
+			// label attributed not quoted and containing spaces.
+			{from: 0, to: 2}: {{Key: "label", Value: `hello world`}, {Key: "style", Value: "dashed"}},
+			{from: 2, to: 4}: {},
+			{from: 3, to: 4}: {{Key: "label", Value: `foo bar`}},
+		}),
+
+		want: `strict graph {
+	// Node definitions.
+	0;
+	1;
+	2;
+	3;
+	4;
+
+	// Edge definitions.
+	0 -- 1;
+	0 -- 2 [
+		label="hello world"
+		style=dashed
+	];
+	0 -- 4;
+	1 -- 3;
+	2 -- 3;
+	2 -- 4;
+	3 -- 4 [label="foo bar"];
+}`,
+	},
 
 	// Handling nodes with ports.
 	{

@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 
 	"gonum.org/v1/gonum/graph"
@@ -356,7 +357,7 @@ func (p *printer) writeAttributeList(a encoding.Attributer) {
 		p.buf.WriteString(" [")
 		p.buf.WriteString(attributes[0].Key)
 		p.buf.WriteByte('=')
-		p.buf.WriteString(attributes[0].Value)
+		p.buf.WriteString(quoteAttr(attributes[0].Value))
 		p.buf.WriteString("]")
 	default:
 		p.openBlock(" [")
@@ -364,7 +365,7 @@ func (p *printer) writeAttributeList(a encoding.Attributer) {
 			p.newline()
 			p.buf.WriteString(att.Key)
 			p.buf.WriteByte('=')
-			p.buf.WriteString(att.Value)
+			p.buf.WriteString(quoteAttr(att.Value))
 		}
 		p.closeBlock("]")
 	}
@@ -390,7 +391,7 @@ func (p *printer) writeAttributeComplex(ca Attributers) {
 			p.newline()
 			p.buf.WriteString(att.Key)
 			p.buf.WriteByte('=')
-			p.buf.WriteString(att.Value)
+			p.buf.WriteString(quoteAttr(att.Value))
 		}
 		p.closeBlock("]")
 		haveWrittenBlock = true
@@ -579,4 +580,19 @@ func (p *multiGraphPrinter) print(g graph.Multigraph, name string, needsIndent, 
 	p.closeBlock("}")
 
 	return nil
+}
+
+// quoteAttr quotes the given string if needed in the context of an attribute
+// value. If s is already quoted, or if s does not contain any spaces or special
+// characters that need escaping, the original string is returned.
+func quoteAttr(s string) string {
+	if len(s) >= 2 && strings.HasPrefix(s, `"`) && strings.HasSuffix(s, `"`) {
+		// String already quoted.
+		return s
+	}
+	// TODO: Check if more characters need escaping.
+	if strings.ContainsAny(s, " ") {
+		return strconv.Quote(s)
+	}
+	return s
 }

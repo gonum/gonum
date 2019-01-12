@@ -6,6 +6,8 @@ package dot
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/encoding"
@@ -181,7 +183,7 @@ func (gen *simpleGraph) addStmt(dst encoding.Builder, stmt ast.Stmt) {
 		for _, attr := range stmt.Attrs {
 			a := encoding.Attribute{
 				Key:   attr.Key,
-				Value: attr.Val,
+				Value: unquoteAttr(attr.Val),
 			}
 			if err := n.SetAttribute(a); err != nil {
 				panic(fmt.Errorf("unable to unmarshal node DOT attribute (%s=%s): %v", a.Key, a.Value, err))
@@ -217,7 +219,7 @@ func (gen *simpleGraph) addStmt(dst encoding.Builder, stmt ast.Stmt) {
 		for _, attr := range stmt.Attrs {
 			a := encoding.Attribute{
 				Key:   attr.Key,
-				Value: attr.Val,
+				Value: unquoteAttr(attr.Val),
 			}
 			if err := n.SetAttribute(a); err != nil {
 				panic(fmt.Errorf("unable to unmarshal global %s DOT attribute (%s=%s): %v", dst, a.Key, a.Value, err))
@@ -373,7 +375,7 @@ func (gen *multiGraph) addStmt(dst encoding.MultiBuilder, stmt ast.Stmt) {
 		for _, attr := range stmt.Attrs {
 			a := encoding.Attribute{
 				Key:   attr.Key,
-				Value: attr.Val,
+				Value: unquoteAttr(attr.Val),
 			}
 			if err := n.SetAttribute(a); err != nil {
 				panic(fmt.Errorf("unable to unmarshal node DOT attribute (%s=%s): %v", a.Key, a.Value, err))
@@ -409,7 +411,7 @@ func (gen *multiGraph) addStmt(dst encoding.MultiBuilder, stmt ast.Stmt) {
 		for _, attr := range stmt.Attrs {
 			a := encoding.Attribute{
 				Key:   attr.Key,
-				Value: attr.Val,
+				Value: unquoteAttr(attr.Val),
 			}
 			if err := n.SetAttribute(a); err != nil {
 				panic(fmt.Errorf("unable to unmarshal global %s DOT attribute (%s=%s): %v", dst, a.Key, a.Value, err))
@@ -486,10 +488,25 @@ func addEdgeAttrs(edge graph.Edge, attrs []*ast.Attr) {
 	for _, attr := range attrs {
 		a := encoding.Attribute{
 			Key:   attr.Key,
-			Value: attr.Val,
+			Value: unquoteAttr(attr.Val),
 		}
 		if err := e.SetAttribute(a); err != nil {
 			panic(fmt.Errorf("unable to unmarshal edge DOT attribute (%s=%s): %v", a.Key, a.Value, err))
 		}
 	}
+}
+
+// unquoteAttr unquotes the given string if needed in the context of an
+// attribute value. If s is not already quoted the original string is returned.
+func unquoteAttr(s string) string {
+	if len(s) >= 2 && strings.HasPrefix(s, `"`) && strings.HasSuffix(s, `"`) {
+		// Unquote quoted string.
+		t, err := strconv.Unquote(s)
+		if err != nil {
+			// rather than panicking, return the original quoted string.
+			return s
+		}
+		return t
+	}
+	return s
 }

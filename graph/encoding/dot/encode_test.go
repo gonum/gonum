@@ -952,7 +952,7 @@ var encodeTests = []struct {
 	},
 	{
 		g: undirectedEdgeAttrGraphFrom(powerMethodGraph, map[edge][]encoding.Attribute{
-			// label attributed not quoted and containing spaces.
+			// label attribute not quoted and containing spaces.
 			{from: 0, to: 2}: {{Key: "label", Value: `hello world`}, {Key: "style", Value: "dashed"}},
 			{from: 2, to: 4}: {},
 			{from: 3, to: 4}: {{Key: "label", Value: `foo bar`}},

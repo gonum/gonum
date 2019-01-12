@@ -197,13 +197,13 @@ type DominatorTree struct {
 // Root returns the root of the tree.
 func (d DominatorTree) Root() graph.Node { return d.root }
 
-// DominatorOf returns the immediate dominator of n.
-func (d DominatorTree) DominatorOf(n graph.Node) graph.Node {
-	return d.dominatorOf[n.ID()]
+// DominatorOf returns the immediate dominator of the node with the given ID.
+func (d DominatorTree) DominatorOf(id int64) graph.Node {
+	return d.dominatorOf[id]
 }
 
-// DominatedBy returns a slice of all nodes immediately dominated by n.
-// Elements of the slice are retained by the DominatorTree.
-func (d DominatorTree) DominatedBy(n graph.Node) []graph.Node {
-	return d.dominatedBy[n.ID()]
+// DominatedBy returns a slice of all nodes immediately dominated by the node
+// with the given ID. Elements of the slice are retained by the DominatorTree.
+func (d DominatorTree) DominatedBy(id int64) []graph.Node {
+	return d.dominatedBy[id]
 }

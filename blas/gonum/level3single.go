@@ -334,7 +334,6 @@ func (Implementation) Ssymm(s blas.Side, ul blas.Uplo, m, n int, alpha float32, 
 					atmp = a[i*lda+k]
 				}
 				atmp *= alpha
-				ctmp := c[i*ldc : i*ldc+n]
 				f32.AxpyUnitaryTo(ctmp, atmp, b[k*ldb:k*ldb+n], ctmp)
 			}
 			for k := i + 1; k < m; k++ {
@@ -345,7 +344,6 @@ func (Implementation) Ssymm(s blas.Side, ul blas.Uplo, m, n int, alpha float32, 
 					atmp = a[k*lda+i]
 				}
 				atmp *= alpha
-				ctmp := c[i*ldc : i*ldc+n]
 				f32.AxpyUnitaryTo(ctmp, atmp, b[k*ldb:k*ldb+n], ctmp)
 			}
 		}

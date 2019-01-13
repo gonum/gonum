@@ -43,6 +43,14 @@ func TestRoundTrip(t *testing.T) {
 			want:     undirectedWithPorts,
 			directed: false,
 		},
+		{
+			want:     directedAttrs,
+			directed: true,
+		},
+		{
+			want:     undirectedAttrs,
+			directed: false,
+		},
 	}
 	for i, g := range golden {
 		var dst encoding.Builder
@@ -163,6 +171,46 @@ const undirectedWithPorts = `strict graph {
 	D:foo:n -- E:bar:s;
 	D:e -- F:bar:w;
 	E:_ -- F:c;
+}`
+
+const directedAttrs = `strict digraph {
+	node [
+		shape=circle
+		style=filled
+		label="NODE"
+	];
+	edge [
+		penwidth=5
+		color=gray
+		label=3.14
+	];
+
+	// Node definitions.
+	A [label=<br>];
+	B [label=-14];
+
+	// Edge definitions.
+	A -> B [label="hello world"];
+}`
+
+const undirectedAttrs = `strict graph {
+	node [
+		shape=circle
+		style=filled
+		label="NODE"
+	];
+	edge [
+		penwidth=5
+		color=gray
+		label=3.14
+	];
+
+	// Node definitions.
+	A [label=<br>];
+	B [label=-14];
+
+	// Edge definitions.
+	A -- B [label="hello world"];
 }`
 
 func TestChainedEdgeAttributes(t *testing.T) {

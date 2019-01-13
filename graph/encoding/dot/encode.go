@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -586,13 +587,61 @@ func (p *multiGraphPrinter) print(g graph.Multigraph, name string, needsIndent, 
 // value. If s is already quoted, or if s does not contain any spaces or special
 // characters that need escaping, the original string is returned.
 func quoteAttr(s string) string {
-	if len(s) >= 2 && strings.HasPrefix(s, `"`) && strings.HasSuffix(s, `"`) {
-		// String already quoted.
-		return s
+	// To use a keyword as an ID, it must be quoted.
+	if isKeyword(s) {
+		return strconv.Quote(s)
 	}
-	// TODO: Check if more characters need escaping.
-	if strings.ContainsAny(s, " ") {
+	// Quote if attribute is not an ID. This includes strings containing spaces,
+	// except if those spaces are used within HTML string IDs (e.g. <foo >).
+	if !isID(s) {
 		return strconv.Quote(s)
 	}
 	return s
+}
+
+// isKeyword reports whether the given string is a keyword in the DOT language.
+func isKeyword(s string) bool {
+	// ref: https://www.graphviz.org/doc/info/lang.html
+	keywords := []string{"node", "edge", "graph", "digraph", "subgraph", "strict"}
+	for _, keyword := range keywords {
+		if strings.EqualFold(s, keyword) {
+			return true
+		}
+	}
+	return false
+}
+
+// Regular expression to match identifier and numeral IDs.
+var (
+	reIdent   = regexp.MustCompile(`^[a-zA-Z\200-\377_][0-9a-zA-Z\200-\377_]*$`)
+	reNumeral = regexp.MustCompile(`^[-]?(\.[0-9]+|[0-9]+(\.[0-9]*)?)$`)
+)
+
+// isID reports whether the given string is an ID.
+//
+// An ID is one of the following:
+//
+// 1. Any string of alphabetic ([a-zA-Z\200-\377]) characters, underscores ('_')
+//    or digits ([0-9]), not beginning with a digit;
+// 2. a numeral [-]?(.[0-9]+ | [0-9]+(.[0-9]*)? );
+// 3. any double-quoted string ("...") possibly containing escaped quotes (\");
+// 4. an HTML string (<...>).
+func isID(s string) bool {
+	// 1. an identifier.
+	if reIdent.MatchString(s) {
+		return true
+	}
+	// 2. a numeral.
+	if reNumeral.MatchString(s) {
+		return true
+	}
+	// 3. double-quote string ID.
+	if len(s) >= 2 && strings.HasPrefix(s, `"`) && strings.HasSuffix(s, `"`) {
+		return true
+	}
+	// 4. HTML ID.
+	if len(s) >= 2 && strings.HasPrefix(s, `<`) && strings.HasSuffix(s, `>`) {
+		return true
+	}
+	return false
 }

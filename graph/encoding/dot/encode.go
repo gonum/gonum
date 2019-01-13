@@ -8,11 +8,13 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"regexp"
 	"sort"
 	"strconv"
 	"strings"
 
+	"golang.org/x/net/html"
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/encoding"
 	"gonum.org/v1/gonum/graph/internal/ordered"
@@ -93,6 +95,17 @@ type MultiSubgrapher interface {
 // however, advanced GraphViz DOT features provided by Marshal depend on
 // implementation of the Node, Attributer, Porter, Attributers, Structurer,
 // Subgrapher and Graph interfaces.
+//
+// Attributes that are not IDs are quoted during marshalling, to conform with
+// valid DOT syntax. A DOT ID is in one of four forms:
+//
+//    1. identifier
+//    2. numerals
+//    3. quoted string
+//    4. HTML string
+//
+// Quoted attributes are unquoted during unmarshaling, so the data is kept in
+// raw form.
 func Marshal(g graph.Graph, name, prefix, indent string) ([]byte, error) {
 	var p simpleGraphPrinter
 	p.indent = indent
@@ -115,6 +128,17 @@ func Marshal(g graph.Graph, name, prefix, indent string) ([]byte, error) {
 // however, advanced GraphViz DOT features provided by Marshal depend on
 // implementation of the Node, Attributer, Porter, Attributers, Structurer,
 // MultiSubgrapher and Multigraph interfaces.
+//
+// Attributes that are not IDs are quoted during marshalling, to conform with
+// valid DOT syntax. A DOT ID is in one of four forms:
+//
+//    1. identifier
+//    2. numerals
+//    3. quoted string
+//    4. HTML string
+//
+// Quoted attributes are unquoted during unmarshaling, so the data is kept in
+// raw form.
 func MarshalMulti(g graph.Multigraph, name, prefix, indent string) ([]byte, error) {
 	var p multiGraphPrinter
 	p.indent = indent
@@ -636,12 +660,26 @@ func isID(s string) bool {
 		return true
 	}
 	// 3. double-quote string ID.
-	if len(s) >= 2 && strings.HasPrefix(s, `"`) && strings.HasSuffix(s, `"`) {
+	if _, err := strconv.Unquote(s); err == nil {
 		return true
 	}
 	// 4. HTML ID.
-	if len(s) >= 2 && strings.HasPrefix(s, `<`) && strings.HasSuffix(s, `>`) {
-		return true
+	return isHTML(s)
+}
+
+// isHTML reports whether the given string is HTML, as used in HTML IDs.
+func isHTML(s string) bool {
+	h := html.NewTokenizer(strings.NewReader(s))
+	found := false
+	for {
+		switch h.Next() {
+		case html.ErrorToken:
+			if h.Err() == io.EOF {
+				return found
+			}
+			return false
+		case html.StartTagToken, html.EndTagToken, html.SelfClosingTagToken, html.DoctypeToken:
+			found = true
+		}
 	}
-	return false
 }

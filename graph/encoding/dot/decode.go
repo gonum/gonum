@@ -7,7 +7,6 @@ package dot
 import (
 	"fmt"
 	"strconv"
-	"strings"
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/encoding"
@@ -43,6 +42,17 @@ type PortSetter interface {
 // Unmarshal parses the Graphviz DOT-encoded data and stores the result in dst.
 // If the number of graphs encoded in data is not one, an error is returned and
 // dst will hold the first graph in data.
+//
+// Attributes that are not IDs are quoted during marshalling, to conform with
+// valid DOT syntax. A DOT ID is in one of four forms:
+//
+//    1. identifier
+//    2. numerals
+//    3. quoted string
+//    4. HTML string
+//
+// Quoted attributes are unquoted during unmarshaling, so the data is kept in
+// raw form.
 func Unmarshal(data []byte, dst encoding.Builder) error {
 	file, err := dot.ParseBytes(data)
 	if err != nil {
@@ -59,6 +69,17 @@ func Unmarshal(data []byte, dst encoding.Builder) error {
 // stores the result in dst.
 // If the number of graphs encoded in data is not one, an error is returned and
 // dst will hold the first graph in data.
+//
+// Attributes that are not IDs are quoted during marshalling, to conform with
+// valid DOT syntax. A DOT ID is in one of four forms:
+//
+//    1. identifier
+//    2. numerals
+//    3. quoted string
+//    4. HTML string
+//
+// Quoted attributes are unquoted during unmarshaling, so the data is kept in
+// raw form.
 func UnmarshalMulti(data []byte, dst encoding.MultiBuilder) error {
 	file, err := dot.ParseBytes(data)
 	if err != nil {
@@ -499,14 +520,12 @@ func addEdgeAttrs(edge graph.Edge, attrs []*ast.Attr) {
 // unquoteAttr unquotes the given string if needed in the context of an
 // attribute value. If s is not already quoted the original string is returned.
 func unquoteAttr(s string) string {
-	if len(s) >= 2 && strings.HasPrefix(s, `"`) && strings.HasSuffix(s, `"`) {
-		// Unquote quoted string.
-		t, err := strconv.Unquote(s)
-		if err != nil {
-			// rather than panicking, return the original quoted string.
-			return s
-		}
+	// Unquote quoted string if possible.
+	if t, err := strconv.Unquote(s); err == nil {
 		return t
 	}
+	// On error, either s is not quoted or s is quoted but contains invalid
+	// characters, in both cases we return the original string rather than
+	// panicking.
 	return s
 }

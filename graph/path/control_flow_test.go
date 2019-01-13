@@ -146,6 +146,17 @@ func TestDominators(t *testing.T) {
 			{"DominatorsSLT", DominatorsSLT},
 		} {
 			got := alg.fn(test.n, g)
+
+			if !reflect.DeepEqual(got.Root(), test.want.root) {
+				t.Errorf("unexpected dominator tree root from %s: got:%v want:%v",
+					alg.name, got.root, test.want.root)
+			}
+
+			if !reflect.DeepEqual(got.dominatorOf, test.want.dominatorOf) {
+				t.Errorf("unexpected dominator tree from %s: got:%v want:%v",
+					alg.name, got.dominatorOf, test.want.dominatorOf)
+			}
+
 			for q, want := range test.want.dominatorOf {
 				node := got.DominatorOf(q)
 				if node != want {
@@ -157,6 +168,12 @@ func TestDominators(t *testing.T) {
 			for _, nodes := range got.dominatedBy {
 				sort.Sort(ordered.ByID(nodes))
 			}
+
+			if !reflect.DeepEqual(got.dominatedBy, test.want.dominatedBy) {
+				t.Errorf("unexpected dominator tree from %s: got:%v want:%v",
+					alg.name, got.dominatedBy, test.want.dominatedBy)
+			}
+
 			for q, want := range test.want.dominatedBy {
 				nodes := got.DominatedBy(q)
 				if !reflect.DeepEqual(nodes, want) {

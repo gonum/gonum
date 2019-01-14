@@ -111,8 +111,7 @@ func Marshal(g graph.Graph, name, prefix, indent string) ([]byte, error) {
 // MarshalMulti returns the DOT encoding for the multigraph g, applying the
 // prefix and indent to the encoding. Name is used to specify the graph name. If
 // name is empty and g implements Graph, the returned string from DOTID will be
-// used. If strict is true the output bytes will be prefixed with the DOT
-// "strict" keyword.
+// used.
 //
 // Graph serialization will work for a graph.Multigraph without modification,
 // however, advanced GraphViz DOT features provided by Marshal depend on

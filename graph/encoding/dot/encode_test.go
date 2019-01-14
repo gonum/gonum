@@ -5,6 +5,8 @@
 package dot
 
 import (
+	"bytes"
+	"os/exec"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
@@ -1474,6 +1476,7 @@ func TestEncode(t *testing.T) {
 		if string(got) != test.want {
 			t.Errorf("unexpected DOT result for test %d:\ngot: %s\nwant:%s", i, got, test.want)
 		}
+		checkDOT(t, got)
 	}
 }
 
@@ -1729,5 +1732,24 @@ func TestEncodeMulti(t *testing.T) {
 		if string(got) != test.want {
 			t.Errorf("unexpected DOT result for test %d:\ngot: %s\nwant:%s", i, got, test.want)
 		}
+		checkDOT(t, got)
+	}
+}
+
+// checkDOT hands b to the dot executable if it exists and fails t if dot
+// returns an error.
+func checkDOT(t *testing.T, b []byte) {
+	dot, err := exec.LookPath("dot")
+	if err != nil {
+		t.Logf("skipping DOT syntax check: %v", err)
+		return
+	}
+	cmd := exec.Command(dot)
+	cmd.Stdin = bytes.NewReader(b)
+	stderr := &bytes.Buffer{}
+	cmd.Stderr = stderr
+	err = cmd.Run()
+	if err != nil {
+		t.Errorf("invalid DOT syntax: %v\n%s\ninput:\n%s", err, stderr.String(), b)
 	}
 }

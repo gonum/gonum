@@ -8,13 +8,11 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io"
 	"regexp"
 	"sort"
 	"strconv"
 	"strings"
 
-	"golang.org/x/net/html"
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/encoding"
 	"gonum.org/v1/gonum/graph/internal/ordered"
@@ -334,7 +332,7 @@ func (p *printer) printFrontMatter(name string, needsIndent, isSubgraph, isDirec
 
 	if name != "" {
 		p.buf.WriteByte(' ')
-		p.buf.WriteString(name)
+		p.buf.WriteString(quoteID(name))
 	}
 
 	p.openBlock(" {")
@@ -342,7 +340,7 @@ func (p *printer) printFrontMatter(name string, needsIndent, isSubgraph, isDirec
 }
 
 func (p *printer) writeNode(n graph.Node) {
-	p.buf.WriteString(nodeID(n))
+	p.buf.WriteString(quoteID(nodeID(n)))
 }
 
 func (p *printer) writePorts(port, cp string) {
@@ -380,17 +378,17 @@ func (p *printer) writeAttributeList(a encoding.Attributer) {
 	case 0:
 	case 1:
 		p.buf.WriteString(" [")
-		p.buf.WriteString(attributes[0].Key)
+		p.buf.WriteString(quoteID(attributes[0].Key))
 		p.buf.WriteByte('=')
-		p.buf.WriteString(quoteAttr(attributes[0].Value))
+		p.buf.WriteString(quoteID(attributes[0].Value))
 		p.buf.WriteString("]")
 	default:
 		p.openBlock(" [")
 		for _, att := range attributes {
 			p.newline()
-			p.buf.WriteString(att.Key)
+			p.buf.WriteString(quoteID(att.Key))
 			p.buf.WriteByte('=')
-			p.buf.WriteString(quoteAttr(att.Value))
+			p.buf.WriteString(quoteID(att.Value))
 		}
 		p.closeBlock("]")
 	}
@@ -414,9 +412,9 @@ func (p *printer) writeAttributeComplex(ca Attributers) {
 		p.openBlock(" [")
 		for _, att := range attributes {
 			p.newline()
-			p.buf.WriteString(att.Key)
+			p.buf.WriteString(quoteID(att.Key))
 			p.buf.WriteByte('=')
-			p.buf.WriteString(quoteAttr(att.Value))
+			p.buf.WriteString(quoteID(att.Value))
 		}
 		p.closeBlock("]")
 		haveWrittenBlock = true
@@ -607,16 +605,16 @@ func (p *multiGraphPrinter) print(g graph.Multigraph, name string, needsIndent, 
 	return nil
 }
 
-// quoteAttr quotes the given string if needed in the context of an attribute
-// value. If s is already quoted, or if s does not contain any spaces or special
-// characters that need escaping, the original string is returned.
-func quoteAttr(s string) string {
+// quoteID quotes the given string if needed in the context of an ID. If s is
+// already quoted, or if s does not contain any spaces or special characters
+// that need escaping, the original string is returned.
+func quoteID(s string) string {
 	// To use a keyword as an ID, it must be quoted.
 	if isKeyword(s) {
 		return strconv.Quote(s)
 	}
-	// Quote if attribute is not an ID. This includes strings containing spaces,
-	// except if those spaces are used within HTML string IDs (e.g. <foo >).
+	// Quote if s is not an ID. This includes strings containing spaces, except
+	// if those spaces are used within HTML string IDs (e.g. <foo >).
 	if !isID(s) {
 		return strconv.Quote(s)
 	}
@@ -660,26 +658,18 @@ func isID(s string) bool {
 		return true
 	}
 	// 3. double-quote string ID.
-	if _, err := strconv.Unquote(s); err == nil {
-		return true
-	}
-	// 4. HTML ID.
-	return isHTML(s)
-}
-
-// isHTML reports whether the given string is HTML, as used in HTML IDs.
-func isHTML(s string) bool {
-	h := html.NewTokenizer(strings.NewReader(s))
-	found := false
-	for {
-		switch h.Next() {
-		case html.ErrorToken:
-			if h.Err() == io.EOF {
-				return found
-			}
-			return false
-		case html.StartTagToken, html.EndTagToken, html.SelfClosingTagToken, html.DoctypeToken:
-			found = true
+	if len(s) >= 2 && strings.HasPrefix(s, `"`) && strings.HasSuffix(s, `"`) {
+		// Check that escape sequences within the double-quotes are valid.
+		if _, err := strconv.Unquote(s); err == nil {
+			return true
 		}
 	}
+	// 4. HTML ID.
+	return isHTMLID(s)
+}
+
+// isHTMLID reports whether the given string an HTML ID.
+func isHTMLID(s string) bool {
+	// HTML IDs have the format /^<.*>$/
+	return len(s) >= 2 && strings.HasPrefix(s, "<") && strings.HasSuffix(s, ">")
 }

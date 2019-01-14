@@ -257,6 +257,153 @@ func (Implementation) Zgemm(tA, tB blas.Transpose, m, n, k int, alpha complex128
 	}
 }
 
+// Zhemm performs one of the matrix-matrix operations
+//  C = alpha*A*B + beta*C  if side == blas.Left
+//  C = alpha*B*A + beta*C  if side == blas.Right
+// where alpha and beta are scalars, A is an m×m or n×n hermitian matrix and B
+// and C are m×n matrices. The imaginary parts of the diagonal elements of A are
+// assumed to be zero.
+func (Implementation) Zhemm(side blas.Side, uplo blas.Uplo, m, n int, alpha complex128, a []complex128, lda int, b []complex128, ldb int, beta complex128, c []complex128, ldc int) {
+	na := m
+	if side == blas.Right {
+		na = n
+	}
+	switch {
+	case side != blas.Left && side != blas.Right:
+		panic(badSide)
+	case uplo != blas.Lower && uplo != blas.Upper:
+		panic(badUplo)
+	case m < 0:
+		panic(mLT0)
+	case n < 0:
+		panic(nLT0)
+	case lda < max(1, na):
+		panic(badLdA)
+	case ldb < max(1, n):
+		panic(badLdB)
+	case ldc < max(1, n):
+		panic(badLdC)
+	}
+
+	// Quick return if possible.
+	if m == 0 || n == 0 {
+		return
+	}
+
+	// For zero matrix size the following slice length checks are trivially satisfied.
+	if len(a) < lda*(na-1)+na {
+		panic(shortA)
+	}
+	if len(b) < ldb*(m-1)+n {
+		panic(shortB)
+	}
+	if len(c) < ldc*(m-1)+n {
+		panic(shortC)
+	}
+
+	// Quick return if possible.
+	if alpha == 0 && beta == 1 {
+		return
+	}
+
+	if alpha == 0 {
+		if beta == 0 {
+			for i := 0; i < m; i++ {
+				ci := c[i*ldc : i*ldc+n]
+				for j := range ci {
+					ci[j] = 0
+				}
+			}
+		} else {
+			for i := 0; i < m; i++ {
+				ci := c[i*ldc : i*ldc+n]
+				c128.ScalUnitary(beta, ci)
+			}
+		}
+		return
+	}
+
+	if side == blas.Left {
+		// Form  C = alpha*A*B + beta*C.
+		for i := 0; i < m; i++ {
+			atmp := alpha * complex(real(a[i*lda+i]), 0)
+			bi := b[i*ldb : i*ldb+n]
+			ci := c[i*ldc : i*ldc+n]
+			if beta == 0 {
+				for j, bij := range bi {
+					ci[j] = atmp * bij
+				}
+			} else {
+				for j, bij := range bi {
+					ci[j] = atmp*bij + beta*ci[j]
+				}
+			}
+			if uplo == blas.Upper {
+				for k := 0; k < i; k++ {
+					atmp = alpha * cmplx.Conj(a[k*lda+i])
+					c128.AxpyUnitaryTo(ci, atmp, b[k*ldb:k*ldb+n], ci)
+				}
+				for k := i + 1; k < m; k++ {
+					atmp = alpha * a[i*lda+k]
+					c128.AxpyUnitaryTo(ci, atmp, b[k*ldb:k*ldb+n], ci)
+				}
+			} else {
+				for k := 0; k < i; k++ {
+					atmp = alpha * a[i*lda+k]
+					c128.AxpyUnitaryTo(ci, atmp, b[k*ldb:k*ldb+n], ci)
+				}
+				for k := i + 1; k < m; k++ {
+					atmp = alpha * cmplx.Conj(a[k*lda+i])
+					c128.AxpyUnitaryTo(ci, atmp, b[k*ldb:k*ldb+n], ci)
+				}
+			}
+		}
+	} else {
+		// Form  C = alpha*B*A + beta*C.
+		if uplo == blas.Upper {
+			for i := 0; i < m; i++ {
+				for j := n - 1; j >= 0; j-- {
+					abij := alpha * b[i*ldb+j]
+					aj := a[j*lda+j+1 : j*lda+n]
+					bi := b[i*ldb+j+1 : i*ldb+n]
+					ci := c[i*ldc+j+1 : i*ldc+n]
+					var tmp complex128
+					for k, ajk := range aj {
+						ci[k] += abij * ajk
+						tmp += bi[k] * cmplx.Conj(ajk)
+					}
+					ajj := complex(real(a[j*lda+j]), 0)
+					if beta == 0 {
+						c[i*ldc+j] = abij*ajj + alpha*tmp
+					} else {
+						c[i*ldc+j] = abij*ajj + alpha*tmp + beta*c[i*ldc+j]
+					}
+				}
+			}
+		} else {
+			for i := 0; i < m; i++ {
+				for j := 0; j < n; j++ {
+					abij := alpha * b[i*ldb+j]
+					aj := a[j*lda : j*lda+j]
+					bi := b[i*ldb : i*ldb+j]
+					ci := c[i*ldc : i*ldc+j]
+					var tmp complex128
+					for k, ajk := range aj {
+						ci[k] += abij * ajk
+						tmp += bi[k] * cmplx.Conj(ajk)
+					}
+					ajj := complex(real(a[j*lda+j]), 0)
+					if beta == 0 {
+						c[i*ldc+j] = abij*ajj + alpha*tmp
+					} else {
+						c[i*ldc+j] = abij*ajj + alpha*tmp + beta*c[i*ldc+j]
+					}
+				}
+			}
+		}
+	}
+}
+
 // Zherk performs one of the hermitian rank-k operations
 //  C = alpha*A*A^H + beta*C  if trans == blas.NoTrans
 //  C = alpha*A^H*A + beta*C  if trans == blas.ConjTrans

@@ -11,6 +11,7 @@ import (
 )
 
 func TestZgemm(t *testing.T)  { testblas.ZgemmTest(t, impl) }
+func TestZhemm(t *testing.T)  { testblas.ZhemmTest(t, impl) }
 func TestZherk(t *testing.T)  { testblas.ZherkTest(t, impl) }
 func TestZher2k(t *testing.T) { testblas.Zher2kTest(t, impl) }
 func TestZsymm(t *testing.T)  { testblas.ZsymmTest(t, impl) }

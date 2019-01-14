@@ -93,9 +93,7 @@ type MultiSubgrapher interface {
 // implementation of the Node, Attributer, Porter, Attributers, Structurer,
 // Subgrapher and Graph interfaces.
 //
-// Attributes and IDs are quoted if needed during marshalling, to conform with
-// valid DOT syntax. Quoted IDs and attributes are unquoted during unmarshaling,
-// so the data is kept in raw form.
+// Attributes and IDs are quoted if needed during marshalling.
 func Marshal(g graph.Graph, name, prefix, indent string) ([]byte, error) {
 	var p simpleGraphPrinter
 	p.indent = indent
@@ -118,9 +116,7 @@ func Marshal(g graph.Graph, name, prefix, indent string) ([]byte, error) {
 // implementation of the Node, Attributer, Porter, Attributers, Structurer,
 // MultiSubgrapher and Multigraph interfaces.
 //
-// Attributes and IDs are quoted if needed during marshalling, to conform with
-// valid DOT syntax. Quoted IDs and attributes are unquoted during unmarshaling,
-// so the data is kept in raw form.
+// Attributes and IDs are quoted if needed during marshalling.
 func MarshalMulti(g graph.Multigraph, name, prefix, indent string) ([]byte, error) {
 	var p multiGraphPrinter
 	p.indent = indent

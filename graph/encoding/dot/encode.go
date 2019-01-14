@@ -346,7 +346,7 @@ func (p *printer) writeNode(n graph.Node) {
 func (p *printer) writePorts(port, cp string) {
 	if port != "" {
 		p.buf.WriteByte(':')
-		p.buf.WriteString(port)
+		p.buf.WriteString(quoteID(port))
 	}
 	if cp != "" {
 		p.buf.WriteByte(':')

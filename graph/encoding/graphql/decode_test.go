@@ -5,8 +5,10 @@
 package graphql
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"os/exec"
 	"sort"
 	"strconv"
 	"strings"
@@ -147,6 +149,7 @@ func TestDecode(t *testing.T) {
 		if gotDOT != test.wantDOT {
 			t.Errorf("unexpected DOT encoding for %q:\ngot:\n%s\nwant:\n%s", test.name, gotDOT, test.wantDOT)
 		}
+		checkDOT(t, b)
 	}
 }
 
@@ -218,4 +221,22 @@ func (a attributes) Attributes() []encoding.Attribute {
 		attr = append(attr, v)
 	}
 	return attr
+}
+
+// checkDOT hands b to the dot executable if it exists and fails t if dot
+// returns an error.
+func checkDOT(t *testing.T, b []byte) {
+	dot, err := exec.LookPath("dot")
+	if err != nil {
+		t.Logf("skipping DOT syntax check: %v", err)
+		return
+	}
+	cmd := exec.Command(dot)
+	cmd.Stdin = bytes.NewReader(b)
+	stderr := &bytes.Buffer{}
+	cmd.Stderr = stderr
+	err = cmd.Run()
+	if err != nil {
+		t.Errorf("invalid DOT syntax: %v\n%s\ninput:\n%s", err, stderr.String(), b)
+	}
 }

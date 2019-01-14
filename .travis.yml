@@ -34,6 +34,11 @@ before_install:
  # Required for dot parser checks.
  - ./.travis/install-gocc.sh 0e2cfc030005b281b2e5a2de04fa7fe1d5063722
 
+addons:
+  apt:
+    packages:
+     - graphviz
+
 go_import_path: gonum.org/v1/gonum
 
 # Get deps, build, test, and ensure the code is gofmt'ed.

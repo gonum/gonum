@@ -43,16 +43,9 @@ type PortSetter interface {
 // If the number of graphs encoded in data is not one, an error is returned and
 // dst will hold the first graph in data.
 //
-// Attributes that are not IDs are quoted during marshalling, to conform with
-// valid DOT syntax. A DOT ID is in one of four forms:
-//
-//    1. identifier
-//    2. numerals
-//    3. quoted string
-//    4. HTML string
-//
-// Quoted attributes are unquoted during unmarshaling, so the data is kept in
-// raw form.
+// Attributes and IDs are quoted if needed during marshalling, to conform with
+// valid DOT syntax. Quoted IDs and attributes are unquoted during unmarshaling,
+// so the data is kept in raw form.
 func Unmarshal(data []byte, dst encoding.Builder) error {
 	file, err := dot.ParseBytes(data)
 	if err != nil {
@@ -70,16 +63,9 @@ func Unmarshal(data []byte, dst encoding.Builder) error {
 // If the number of graphs encoded in data is not one, an error is returned and
 // dst will hold the first graph in data.
 //
-// Attributes that are not IDs are quoted during marshalling, to conform with
-// valid DOT syntax. A DOT ID is in one of four forms:
-//
-//    1. identifier
-//    2. numerals
-//    3. quoted string
-//    4. HTML string
-//
-// Quoted attributes are unquoted during unmarshaling, so the data is kept in
-// raw form.
+// Attributes and IDs are quoted if needed during marshalling, to conform with
+// valid DOT syntax. Quoted IDs and attributes are unquoted during unmarshaling,
+// so the data is kept in raw form.
 func UnmarshalMulti(data []byte, dst encoding.MultiBuilder) error {
 	file, err := dot.ParseBytes(data)
 	if err != nil {

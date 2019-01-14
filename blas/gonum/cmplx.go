@@ -141,6 +141,3 @@ func (Implementation) Ztrmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 func (Implementation) Ztrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, n int, alpha complex128, a []complex128, lda int, b []complex128, ldb int) {
 	panic(noComplex)
 }
-func (Implementation) Zhemm(s blas.Side, ul blas.Uplo, m, n int, alpha complex128, a []complex128, lda int, b []complex128, ldb int, beta complex128, c []complex128, ldc int) {
-	panic(noComplex)
-}

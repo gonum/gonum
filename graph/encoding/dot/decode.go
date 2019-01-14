@@ -7,6 +7,7 @@ package dot
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/encoding"
@@ -506,6 +507,12 @@ func addEdgeAttrs(edge graph.Edge, attrs []*ast.Attr) {
 // unquoteID unquotes the given string if needed in the context of an ID. If s
 // is not already quoted the original string is returned.
 func unquoteID(s string) string {
+	// To make round-trips idempotent, don't unquote quoted HTML-like strings
+	//
+	//    /^"<.*>"$/
+	if len(s) >= 4 && strings.HasPrefix(s, `"<`) && strings.HasSuffix(s, `>"`) {
+		return s
+	}
 	// Unquote quoted string if possible.
 	if t, err := strconv.Unquote(s); err == nil {
 		return t

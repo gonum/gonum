@@ -617,6 +617,8 @@ func isKeyword(s string) bool {
 	return false
 }
 
+// FIXME: see if we rewrite this in another way to remove our regexp dependency.
+
 // Regular expression to match identifier and numeral IDs.
 var (
 	reIdent   = regexp.MustCompile(`^[a-zA-Z\200-\377_][0-9a-zA-Z\200-\377_]*$`)

@@ -8,7 +8,9 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 
 	"gonum.org/v1/gonum/graph"
@@ -82,15 +84,18 @@ type MultiSubgrapher interface {
 	Subgraph() graph.Multigraph
 }
 
-// Marshal returns the DOT encoding for the graph g, applying the prefix
-// and indent to the encoding. Name is used to specify the graph name. If
-// name is empty and g implements Graph, the returned string from DOTID
-// will be used.
+// Marshal returns the DOT encoding for the graph g, applying the prefix and
+// indent to the encoding. Name is used to specify the graph name. If name is
+// empty and g implements Graph, the returned string from DOTID will be used.
 //
 // Graph serialization will work for a graph.Graph without modification,
 // however, advanced GraphViz DOT features provided by Marshal depend on
 // implementation of the Node, Attributer, Porter, Attributers, Structurer,
 // Subgrapher and Graph interfaces.
+//
+// Attributes and IDs are quoted if needed during marshalling, to conform with
+// valid DOT syntax. Quoted IDs and attributes are unquoted during unmarshaling,
+// so the data is kept in raw form.
 func Marshal(g graph.Graph, name, prefix, indent string) ([]byte, error) {
 	var p simpleGraphPrinter
 	p.indent = indent
@@ -105,14 +110,17 @@ func Marshal(g graph.Graph, name, prefix, indent string) ([]byte, error) {
 
 // MarshalMulti returns the DOT encoding for the multigraph g, applying the
 // prefix and indent to the encoding. Name is used to specify the graph name. If
-// name is empty and g implements Graph, the returned string from DOTID
-// will be used. If strict is true the output bytes will be prefixed with
-// the DOT "strict" keyword.
+// name is empty and g implements Graph, the returned string from DOTID will be
+// used.
 //
 // Graph serialization will work for a graph.Multigraph without modification,
 // however, advanced GraphViz DOT features provided by Marshal depend on
 // implementation of the Node, Attributer, Porter, Attributers, Structurer,
 // MultiSubgrapher and Multigraph interfaces.
+//
+// Attributes and IDs are quoted if needed during marshalling, to conform with
+// valid DOT syntax. Quoted IDs and attributes are unquoted during unmarshaling,
+// so the data is kept in raw form.
 func MarshalMulti(g graph.Multigraph, name, prefix, indent string) ([]byte, error) {
 	var p multiGraphPrinter
 	p.indent = indent
@@ -308,7 +316,7 @@ func (p *printer) printFrontMatter(name string, needsIndent, isSubgraph, isDirec
 
 	if name != "" {
 		p.buf.WriteByte(' ')
-		p.buf.WriteString(name)
+		p.buf.WriteString(quoteID(name))
 	}
 
 	p.openBlock(" {")
@@ -316,13 +324,13 @@ func (p *printer) printFrontMatter(name string, needsIndent, isSubgraph, isDirec
 }
 
 func (p *printer) writeNode(n graph.Node) {
-	p.buf.WriteString(nodeID(n))
+	p.buf.WriteString(quoteID(nodeID(n)))
 }
 
 func (p *printer) writePorts(port, cp string) {
 	if port != "" {
 		p.buf.WriteByte(':')
-		p.buf.WriteString(port)
+		p.buf.WriteString(quoteID(port))
 	}
 	if cp != "" {
 		p.buf.WriteByte(':')
@@ -354,17 +362,17 @@ func (p *printer) writeAttributeList(a encoding.Attributer) {
 	case 0:
 	case 1:
 		p.buf.WriteString(" [")
-		p.buf.WriteString(attributes[0].Key)
+		p.buf.WriteString(quoteID(attributes[0].Key))
 		p.buf.WriteByte('=')
-		p.buf.WriteString(attributes[0].Value)
+		p.buf.WriteString(quoteID(attributes[0].Value))
 		p.buf.WriteString("]")
 	default:
 		p.openBlock(" [")
 		for _, att := range attributes {
 			p.newline()
-			p.buf.WriteString(att.Key)
+			p.buf.WriteString(quoteID(att.Key))
 			p.buf.WriteByte('=')
-			p.buf.WriteString(att.Value)
+			p.buf.WriteString(quoteID(att.Value))
 		}
 		p.closeBlock("]")
 	}
@@ -388,9 +396,9 @@ func (p *printer) writeAttributeComplex(ca Attributers) {
 		p.openBlock(" [")
 		for _, att := range attributes {
 			p.newline()
-			p.buf.WriteString(att.Key)
+			p.buf.WriteString(quoteID(att.Key))
 			p.buf.WriteByte('=')
-			p.buf.WriteString(att.Value)
+			p.buf.WriteString(quoteID(att.Value))
 		}
 		p.closeBlock("]")
 		haveWrittenBlock = true
@@ -579,4 +587,75 @@ func (p *multiGraphPrinter) print(g graph.Multigraph, name string, needsIndent, 
 	p.closeBlock("}")
 
 	return nil
+}
+
+// quoteID quotes the given string if needed in the context of an ID. If s is
+// already quoted, or if s does not contain any spaces or special characters
+// that need escaping, the original string is returned.
+func quoteID(s string) string {
+	// To use a keyword as an ID, it must be quoted.
+	if isKeyword(s) {
+		return strconv.Quote(s)
+	}
+	// Quote if s is not an ID. This includes strings containing spaces, except
+	// if those spaces are used within HTML string IDs (e.g. <foo >).
+	if !isID(s) {
+		return strconv.Quote(s)
+	}
+	return s
+}
+
+// isKeyword reports whether the given string is a keyword in the DOT language.
+func isKeyword(s string) bool {
+	// ref: https://www.graphviz.org/doc/info/lang.html
+	keywords := []string{"node", "edge", "graph", "digraph", "subgraph", "strict"}
+	for _, keyword := range keywords {
+		if strings.EqualFold(s, keyword) {
+			return true
+		}
+	}
+	return false
+}
+
+// FIXME: see if we rewrite this in another way to remove our regexp dependency.
+
+// Regular expression to match identifier and numeral IDs.
+var (
+	reIdent   = regexp.MustCompile(`^[a-zA-Z\200-\377_][0-9a-zA-Z\200-\377_]*$`)
+	reNumeral = regexp.MustCompile(`^[-]?(\.[0-9]+|[0-9]+(\.[0-9]*)?)$`)
+)
+
+// isID reports whether the given string is an ID.
+//
+// An ID is one of the following:
+//
+// 1. Any string of alphabetic ([a-zA-Z\200-\377]) characters, underscores ('_')
+//    or digits ([0-9]), not beginning with a digit;
+// 2. a numeral [-]?(.[0-9]+ | [0-9]+(.[0-9]*)? );
+// 3. any double-quoted string ("...") possibly containing escaped quotes (\");
+// 4. an HTML string (<...>).
+func isID(s string) bool {
+	// 1. an identifier.
+	if reIdent.MatchString(s) {
+		return true
+	}
+	// 2. a numeral.
+	if reNumeral.MatchString(s) {
+		return true
+	}
+	// 3. double-quote string ID.
+	if len(s) >= 2 && strings.HasPrefix(s, `"`) && strings.HasSuffix(s, `"`) {
+		// Check that escape sequences within the double-quotes are valid.
+		if _, err := strconv.Unquote(s); err == nil {
+			return true
+		}
+	}
+	// 4. HTML ID.
+	return isHTMLID(s)
+}
+
+// isHTMLID reports whether the given string an HTML ID.
+func isHTMLID(s string) bool {
+	// HTML IDs have the format /^<.*>$/
+	return len(s) >= 2 && strings.HasPrefix(s, "<") && strings.HasSuffix(s, ">")
 }

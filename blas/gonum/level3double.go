@@ -82,21 +82,17 @@ func (Implementation) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 				for i := m - 1; i >= 0; i-- {
 					btmp := b[i*ldb : i*ldb+n]
 					if alpha != 1 {
-						for j := range btmp {
-							btmp[j] *= alpha
-						}
+						f64.ScalUnitary(alpha, btmp)
 					}
 					for ka, va := range a[i*lda+i+1 : i*lda+m] {
-						k := ka + i + 1
 						if va != 0 {
-							f64.AxpyUnitaryTo(btmp, -va, b[k*ldb:k*ldb+n], btmp)
+							k := ka + i + 1
+							f64.AxpyUnitary(-va, b[k*ldb:k*ldb+n], btmp)
 						}
 					}
 					if nonUnit {
 						tmp := 1 / a[i*lda+i]
-						for j := 0; j < n; j++ {
-							btmp[j] *= tmp
-						}
+						f64.ScalUnitary(tmp, btmp)
 					}
 				}
 				return
@@ -104,9 +100,7 @@ func (Implementation) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 			for i := 0; i < m; i++ {
 				btmp := b[i*ldb : i*ldb+n]
 				if alpha != 1 {
-					for j := 0; j < n; j++ {
-						btmp[j] *= alpha
-					}
+					f64.ScalUnitary(alpha, btmp)
 				}
 				for k, va := range a[i*lda : i*lda+i] {
 					if va != 0 {
@@ -115,9 +109,7 @@ func (Implementation) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 				}
 				if nonUnit {
 					tmp := 1 / a[i*lda+i]
-					for j := 0; j < n; j++ {
-						btmp[j] *= tmp
-					}
+					f64.ScalUnitary(tmp, btmp)
 				}
 			}
 			return
@@ -128,21 +120,16 @@ func (Implementation) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 				btmpk := b[k*ldb : k*ldb+n]
 				if nonUnit {
 					tmp := 1 / a[k*lda+k]
-					for j := 0; j < n; j++ {
-						btmpk[j] *= tmp
-					}
+					f64.ScalUnitary(tmp, btmpk)
 				}
 				for ia, va := range a[k*lda+k+1 : k*lda+m] {
-					i := ia + k + 1
 					if va != 0 {
-						btmp := b[i*ldb : i*ldb+n]
-						f64.AxpyUnitaryTo(btmp, -va, btmpk, btmp)
+						i := ia + k + 1
+						f64.AxpyUnitary(-va, btmpk, b[i*ldb:i*ldb+n])
 					}
 				}
 				if alpha != 1 {
-					for j := 0; j < n; j++ {
-						btmpk[j] *= alpha
-					}
+					f64.ScalUnitary(alpha, btmpk)
 				}
 			}
 			return
@@ -151,20 +138,15 @@ func (Implementation) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 			btmpk := b[k*ldb : k*ldb+n]
 			if nonUnit {
 				tmp := 1 / a[k*lda+k]
-				for j := 0; j < n; j++ {
-					btmpk[j] *= tmp
-				}
+				f64.ScalUnitary(tmp, btmpk)
 			}
 			for i, va := range a[k*lda : k*lda+k] {
 				if va != 0 {
-					btmp := b[i*ldb : i*ldb+n]
-					f64.AxpyUnitaryTo(btmp, -va, btmpk, btmp)
+					f64.AxpyUnitary(-va, btmpk, b[i*ldb:i*ldb+n])
 				}
 			}
 			if alpha != 1 {
-				for j := 0; j < n; j++ {
-					btmpk[j] *= alpha
-				}
+				f64.ScalUnitary(alpha, btmpk)
 			}
 		}
 		return
@@ -175,20 +157,16 @@ func (Implementation) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 			for i := 0; i < m; i++ {
 				btmp := b[i*ldb : i*ldb+n]
 				if alpha != 1 {
-					for j := 0; j < n; j++ {
-						btmp[j] *= alpha
-					}
+					f64.ScalUnitary(alpha, btmp)
 				}
 				for k, vb := range btmp {
-					if vb != 0 {
-						if btmp[k] != 0 {
-							if nonUnit {
-								btmp[k] /= a[k*lda+k]
-							}
-							btmpk := btmp[k+1 : n]
-							f64.AxpyUnitaryTo(btmpk, -btmp[k], a[k*lda+k+1:k*lda+n], btmpk)
-						}
+					if vb == 0 {
+						continue
 					}
+					if nonUnit {
+						btmp[k] /= a[k*lda+k]
+					}
+					f64.AxpyUnitary(-btmp[k], a[k*lda+k+1:k*lda+n], btmp[k+1:n])
 				}
 			}
 			return
@@ -196,17 +174,16 @@ func (Implementation) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 		for i := 0; i < m; i++ {
 			btmp := b[i*lda : i*lda+n]
 			if alpha != 1 {
-				for j := 0; j < n; j++ {
-					btmp[j] *= alpha
-				}
+				f64.ScalUnitary(alpha, btmp)
 			}
 			for k := n - 1; k >= 0; k-- {
-				if btmp[k] != 0 {
-					if nonUnit {
-						btmp[k] /= a[k*lda+k]
-					}
-					f64.AxpyUnitaryTo(btmp, -btmp[k], a[k*lda:k*lda+k], btmp)
+				if btmp[k] == 0 {
+					continue
 				}
+				if nonUnit {
+					btmp[k] /= a[k*lda+k]
+				}
+				f64.AxpyUnitary(-btmp[k], a[k*lda:k*lda+k], btmp)
 			}
 		}
 		return

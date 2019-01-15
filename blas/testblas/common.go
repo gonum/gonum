@@ -688,6 +688,17 @@ func sideString(side blas.Side) string {
 	return "unknown side"
 }
 
+// diagString returns a string representation of blas.Diag.
+func diagString(diag blas.Diag) string {
+	switch diag {
+	case blas.Unit:
+		return "Unit"
+	case blas.NonUnit:
+		return "NonUnit"
+	}
+	return "unknown diag"
+}
+
 // zSameLowerTri returns whether n×n matrices A and B are same under the diagonal.
 func zSameLowerTri(n int, a []complex128, lda int, b []complex128, ldb int) bool {
 	for i := 1; i < n; i++ {

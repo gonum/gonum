@@ -111,7 +111,9 @@ cat level3double.go \
 | gofmt -r 'float64 -> float32' \
 \
 | gofmt -r 'f64.AxpyUnitaryTo -> f32.AxpyUnitaryTo' \
+| gofmt -r 'f64.AxpyUnitary -> f32.AxpyUnitary' \
 | gofmt -r 'f64.DotUnitary -> f32.DotUnitary' \
+| gofmt -r 'f64.ScalUnitary -> f32.ScalUnitary' \
 \
 | sed -e "s_^\(func (Implementation) \)D\(.*\)\$_$WARNING\1S\2_" \
       -e 's_^// D_// S_' \

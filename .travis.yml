@@ -10,12 +10,6 @@ go:
  - 1.11.x
  - master
 
-env:
- - TAGS=""
- - TAGS="-tags bounds"
- - TAGS="-tags noasm"
- - TAGS="-tags appengine"
-
 cache:
  directories:
    - $HOME/.cache/go-build
@@ -51,7 +45,10 @@ script:
  - ${TRAVIS_BUILD_DIR}/.travis/check-formatting.sh
  - go get -d -t -v ./...
  - go build -v ./...
- - go test -a $TAGS -v ./...
+ - go test -v ./...
+ - go test -tags bounds -v ./...
+ - go test -tags noasm -v ./...
+ - go test -tags appengine -v ./...
  - if [[ $TRAVIS_SECURE_ENV_VARS = "true" ]]; then bash ./.travis/test-coverage.sh; fi
  - ${TRAVIS_BUILD_DIR}/.travis/check-imports.sh
  # This is run last since it alters the tree.

@@ -21,6 +21,9 @@ cache:
    - $HOME/.cache/go-build
    - $HOME/gopath/pkg/mod
 
+git:
+ depth: 1
+
 matrix:
  fast_finish: true
  allow_failures:

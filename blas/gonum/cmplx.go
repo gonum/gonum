@@ -132,9 +132,3 @@ func (Implementation) Cherk(ul blas.Uplo, t blas.Transpose, n, k int, alpha floa
 func (Implementation) Cher2k(ul blas.Uplo, t blas.Transpose, n, k int, alpha complex64, a []complex64, lda int, b []complex64, ldb int, beta float32, c []complex64, ldc int) {
 	panic(noComplex)
 }
-
-// Level 3 complex128 routines.
-
-func (Implementation) Ztrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, n int, alpha complex128, a []complex128, lda int, b []complex128, ldb int) {
-	panic(noComplex)
-}

@@ -16,6 +16,11 @@ env:
  - TAGS="-tags noasm"
  - TAGS="-tags appengine"
 
+cache:
+ directories:
+   - $HOME/.cache/go-build
+   - $HOME/gopath/pkg/mod
+
 matrix:
  fast_finish: true
  allow_failures:

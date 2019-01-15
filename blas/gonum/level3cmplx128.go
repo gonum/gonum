@@ -1487,3 +1487,229 @@ func (Implementation) Ztrmm(side blas.Side, uplo blas.Uplo, trans blas.Transpose
 		}
 	}
 }
+
+// Ztrsm solves one of the matrix equations
+//  op(A) * X = alpha * B  if side == blas.Left,
+//  X * op(A) = alpha * B  if side == blas.Right,
+// where alpha is a scalar, X and B are m×n matrices, A is a unit or
+// non-unit, upper or lower triangular matrix and op(A) is one of
+//  op(A) = A    if transA == blas.NoTrans,
+//  op(A) = A^T  if transA == blas.Trans,
+//  op(A) = A^H  if transA == blas.ConjTrans.
+// On return the matrix X is overwritten on B.
+func (Implementation) Ztrsm(side blas.Side, uplo blas.Uplo, transA blas.Transpose, diag blas.Diag, m, n int, alpha complex128, a []complex128, lda int, b []complex128, ldb int) {
+	na := m
+	if side == blas.Right {
+		na = n
+	}
+	switch {
+	case side != blas.Left && side != blas.Right:
+		panic(badSide)
+	case uplo != blas.Lower && uplo != blas.Upper:
+		panic(badUplo)
+	case transA != blas.NoTrans && transA != blas.Trans && transA != blas.ConjTrans:
+		panic(badTranspose)
+	case diag != blas.Unit && diag != blas.NonUnit:
+		panic(badDiag)
+	case m < 0:
+		panic(mLT0)
+	case n < 0:
+		panic(nLT0)
+	case lda < max(1, na):
+		panic(badLdA)
+	case ldb < max(1, n):
+		panic(badLdB)
+	}
+
+	// Quick return if possible.
+	if m == 0 || n == 0 {
+		return
+	}
+
+	// For zero matrix size the following slice length checks are trivially satisfied.
+	if len(a) < (na-1)*lda+na {
+		panic(shortA)
+	}
+	if len(b) < (m-1)*ldb+n {
+		panic(shortB)
+	}
+
+	if alpha == 0 {
+		for i := 0; i < m; i++ {
+			for j := 0; j < n; j++ {
+				b[i*ldb+j] = 0
+			}
+		}
+		return
+	}
+
+	noConj := transA != blas.ConjTrans
+	noUnit := diag == blas.NonUnit
+	if side == blas.Left {
+		if transA == blas.NoTrans {
+			// Form  B = alpha*inv(A)*B.
+			if uplo == blas.Upper {
+				for i := m - 1; i >= 0; i-- {
+					bi := b[i*ldb : i*ldb+n]
+					if alpha != 1 {
+						c128.ScalUnitary(alpha, bi)
+					}
+					for ka, aik := range a[i*lda+i+1 : i*lda+m] {
+						k := i + 1 + ka
+						if aik != 0 {
+							c128.AxpyUnitary(-aik, b[k*ldb:k*ldb+n], bi)
+						}
+					}
+					if noUnit {
+						c128.ScalUnitary(1/a[i*lda+i], bi)
+					}
+				}
+			} else {
+				for i := 0; i < m; i++ {
+					bi := b[i*ldb : i*ldb+n]
+					if alpha != 1 {
+						c128.ScalUnitary(alpha, bi)
+					}
+					for j, aij := range a[i*lda : i*lda+i] {
+						if aij != 0 {
+							c128.AxpyUnitary(-aij, b[j*ldb:j*ldb+n], bi)
+						}
+					}
+					if noUnit {
+						c128.ScalUnitary(1/a[i*lda+i], bi)
+					}
+				}
+			}
+		} else {
+			// Form  B = alpha*inv(A^T)*B  or  B = alpha*inv(A^H)*B.
+			if uplo == blas.Upper {
+				for i := 0; i < m; i++ {
+					bi := b[i*ldb : i*ldb+n]
+					if noUnit {
+						if noConj {
+							c128.ScalUnitary(1/a[i*lda+i], bi)
+						} else {
+							c128.ScalUnitary(1/cmplx.Conj(a[i*lda+i]), bi)
+						}
+					}
+					for ja, aij := range a[i*lda+i+1 : i*lda+m] {
+						if aij == 0 {
+							continue
+						}
+						j := i + 1 + ja
+						if noConj {
+							c128.AxpyUnitary(-aij, bi, b[j*ldb:j*ldb+n])
+						} else {
+							c128.AxpyUnitary(-cmplx.Conj(aij), bi, b[j*ldb:j*ldb+n])
+						}
+					}
+					if alpha != 1 {
+						c128.ScalUnitary(alpha, bi)
+					}
+				}
+			} else {
+				for i := m - 1; i >= 0; i-- {
+					bi := b[i*ldb : i*ldb+n]
+					if noUnit {
+						if noConj {
+							c128.ScalUnitary(1/a[i*lda+i], bi)
+						} else {
+							c128.ScalUnitary(1/cmplx.Conj(a[i*lda+i]), bi)
+						}
+					}
+					for j, aij := range a[i*lda : i*lda+i] {
+						if aij == 0 {
+							continue
+						}
+						if noConj {
+							c128.AxpyUnitary(-aij, bi, b[j*ldb:j*ldb+n])
+						} else {
+							c128.AxpyUnitary(-cmplx.Conj(aij), bi, b[j*ldb:j*ldb+n])
+						}
+					}
+					if alpha != 1 {
+						c128.ScalUnitary(alpha, bi)
+					}
+				}
+			}
+		}
+	} else {
+		if transA == blas.NoTrans {
+			// Form  B = alpha*B*inv(A).
+			if uplo == blas.Upper {
+				for i := 0; i < m; i++ {
+					bi := b[i*ldb : i*ldb+n]
+					if alpha != 1 {
+						c128.ScalUnitary(alpha, bi)
+					}
+					for j, bij := range bi {
+						if bij == 0 {
+							continue
+						}
+						if noUnit {
+							bi[j] /= a[j*lda+j]
+						}
+						c128.AxpyUnitary(-bi[j], a[j*lda+j+1:j*lda+n], bi[j+1:n])
+					}
+				}
+			} else {
+				for i := 0; i < m; i++ {
+					bi := b[i*ldb : i*ldb+n]
+					if alpha != 1 {
+						c128.ScalUnitary(alpha, bi)
+					}
+					for j := n - 1; j >= 0; j-- {
+						if bi[j] == 0 {
+							continue
+						}
+						if noUnit {
+							bi[j] /= a[j*lda+j]
+						}
+						c128.AxpyUnitary(-bi[j], a[j*lda:j*lda+j], bi[:j])
+					}
+				}
+			}
+		} else {
+			// Form  B = alpha*B*inv(A^T)  or   B = alpha*B*inv(A^H).
+			if uplo == blas.Upper {
+				for i := 0; i < m; i++ {
+					bi := b[i*ldb : i*ldb+n]
+					for j := n - 1; j >= 0; j-- {
+						bij := alpha * bi[j]
+						if noConj {
+							bij -= c128.DotuUnitary(a[j*lda+j+1:j*lda+n], bi[j+1:n])
+							if noUnit {
+								bij /= a[j*lda+j]
+							}
+						} else {
+							bij -= c128.DotcUnitary(a[j*lda+j+1:j*lda+n], bi[j+1:n])
+							if noUnit {
+								bij /= cmplx.Conj(a[j*lda+j])
+							}
+						}
+						bi[j] = bij
+					}
+				}
+			} else {
+				for i := 0; i < m; i++ {
+					bi := b[i*ldb : i*ldb+n]
+					for j, bij := range bi {
+						bij *= alpha
+						if noConj {
+							bij -= c128.DotuUnitary(a[j*lda:j*lda+j], bi)
+							if noUnit {
+								bij /= a[j*lda+j]
+							}
+						} else {
+							bij -= c128.DotcUnitary(a[j*lda:j*lda+j], bi)
+							if noUnit {
+								bij /= cmplx.Conj(a[j*lda+j])
+							}
+						}
+						bi[j] = bij
+					}
+				}
+			}
+		}
+	}
+}

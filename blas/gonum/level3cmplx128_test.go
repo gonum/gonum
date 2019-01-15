@@ -18,3 +18,4 @@ func TestZsymm(t *testing.T)  { testblas.ZsymmTest(t, impl) }
 func TestZsyrk(t *testing.T)  { testblas.ZsyrkTest(t, impl) }
 func TestZsyr2k(t *testing.T) { testblas.Zsyr2kTest(t, impl) }
 func TestZtrmm(t *testing.T)  { testblas.ZtrmmTest(t, impl) }
+func TestZtrsm(t *testing.T)  { testblas.ZtrsmTest(t, impl) }

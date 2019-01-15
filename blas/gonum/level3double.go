@@ -172,7 +172,7 @@ func (Implementation) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 			return
 		}
 		for i := 0; i < m; i++ {
-			btmp := b[i*lda : i*lda+n]
+			btmp := b[i*ldb : i*ldb+n]
 			if alpha != 1 {
 				f64.ScalUnitary(alpha, btmp)
 			}
@@ -191,7 +191,7 @@ func (Implementation) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 	// Cases where a is transposed.
 	if ul == blas.Upper {
 		for i := 0; i < m; i++ {
-			btmp := b[i*lda : i*lda+n]
+			btmp := b[i*ldb : i*ldb+n]
 			for j := n - 1; j >= 0; j-- {
 				tmp := alpha*btmp[j] - f64.DotUnitary(a[j*lda+j+1:j*lda+n], btmp[j+1:])
 				if nonUnit {
@@ -203,7 +203,7 @@ func (Implementation) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 		return
 	}
 	for i := 0; i < m; i++ {
-		btmp := b[i*lda : i*lda+n]
+		btmp := b[i*ldb : i*ldb+n]
 		for j := 0; j < n; j++ {
 			tmp := alpha*btmp[j] - f64.DotUnitary(a[j*lda:j*lda+j], btmp)
 			if nonUnit {
@@ -635,7 +635,7 @@ func (Implementation) Dsyr2k(ul blas.Uplo, tA blas.Transpose, n, k int, alpha fl
 				}
 			}
 			for l := 0; l < k; l++ {
-				tmp1 := alpha * b[l*lda+i]
+				tmp1 := alpha * b[l*ldb+i]
 				tmp2 := alpha * a[l*lda+i]
 				btmp := b[l*ldb+i : l*ldb+n]
 				if tmp1 != 0 || tmp2 != 0 {
@@ -655,7 +655,7 @@ func (Implementation) Dsyr2k(ul blas.Uplo, tA blas.Transpose, n, k int, alpha fl
 			}
 		}
 		for l := 0; l < k; l++ {
-			tmp1 := alpha * b[l*lda+i]
+			tmp1 := alpha * b[l*ldb+i]
 			tmp2 := alpha * a[l*lda+i]
 			btmp := b[l*ldb : l*ldb+i+1]
 			if tmp1 != 0 || tmp2 != 0 {

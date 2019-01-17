@@ -19,6 +19,7 @@ type Dgetrier interface {
 }
 
 func DgetriTest(t *testing.T, impl Dgetrier) {
+	const tol = 1e-13
 	rnd := rand.New(rand.NewSource(1))
 	bi := blas64.Implementation()
 	for _, test := range []struct {
@@ -28,8 +29,11 @@ func DgetriTest(t *testing.T, impl Dgetrier) {
 		{5, 8},
 		{45, 0},
 		{45, 50},
+		{63, 70},
+		{64, 70},
 		{65, 0},
 		{65, 70},
+		{66, 70},
 		{150, 0},
 		{150, 250},
 	} {
@@ -67,8 +71,9 @@ func DgetriTest(t *testing.T, impl Dgetrier) {
 		ans := make([]float64, len(a))
 		bi.Dgemm(blas.NoTrans, blas.NoTrans, n, n, n, 1, aCopy, lda, a, lda, 0, ans, lda)
 		// The tolerance is so high because computing matrix inverses is very unstable.
-		if !isIdentity(n, ans, lda, 5e-2) {
-			t.Errorf("Inv(A) * A != I. n = %v, lda = %v", n, lda)
+		dist := distFromIdentity(n, ans, lda)
+		if dist > tol {
+			t.Errorf("|Inv(A) * A - I|_inf = %v is too large. n = %v, lda = %v", dist, n, lda)
 		}
 	}
 }

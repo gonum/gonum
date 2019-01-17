@@ -32,8 +32,9 @@ func TestDlagsy(t *testing.T) {
 			Dlagsy(n, 0, d, a, lda, rnd, work)
 			// A should be the identity matrix because
 			//  A = U * D * U^T = U * I * U^T = U * U^T = I.
-			if !isIdentity(n, a, lda, tol) {
-				t.Errorf("Case n=%v,lda=%v: unexpected result", n, lda)
+			dist := distFromIdentity(n, a, lda)
+			if dist > tol {
+				t.Errorf("Case n=%v,lda=%v: |A-I|=%v is too large", n, lda, dist)
 			}
 		}
 	}

@@ -97,9 +97,10 @@ func DpotriTest(t *testing.T, impl Dpotrier) {
 					want := make([]float64, n*ldwant)
 					bi.Dsymm(blas.Left, uplo, n, n, 1, aCopy, lda, ainv, ldainv, 0, want, ldwant)
 
-					// Check that want is the identity matrix.
-					if !isIdentity(n, want, ldwant, tol) {
-						t.Errorf("%v: A * inv(A) != I", prefix)
+					// Check that want is close to the identity matrix.
+					dist := distFromIdentity(n, want, ldwant)
+					if dist > tol {
+						t.Errorf("%v: |A * inv(A) - I| = %v is too large", prefix, dist)
 					}
 				}
 			}

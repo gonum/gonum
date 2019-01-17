@@ -91,7 +91,7 @@ func (impl Implementation) Dgetri(n int, a []float64, lda int, ipiv []int, work 
 			jb := min(nb, n-j)
 			// Copy current block column of L to work and replace
 			// with zeros.
-			for jj := j; jj < j+jb-1; jj++ {
+			for jj := j; jj < j+jb; jj++ {
 				for i := jj + 1; i < n; i++ {
 					work[i*ldwork+(jj-j)] = a[i*lda+jj]
 					a[i*lda+jj] = 0

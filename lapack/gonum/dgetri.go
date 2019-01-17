@@ -78,8 +78,8 @@ func (impl Implementation) Dgetri(n int, a []float64, lda int, ipiv []int, work 
 			}
 			if j+jb < n {
 				bi.Dgemm(blas.NoTrans, blas.NoTrans, n, jb, n-j-jb, -1, a[(j+jb):], lda, work[(j+jb)*ldwork:], ldwork, 1, a[j:], lda)
-				bi.Dtrsm(blas.Right, blas.Lower, blas.NoTrans, blas.Unit, n, jb, 1, work[j*ldwork:], ldwork, a[j:], lda)
 			}
+			bi.Dtrsm(blas.Right, blas.Lower, blas.NoTrans, blas.Unit, n, jb, 1, work[j*ldwork:], ldwork, a[j:], lda)
 		}
 	}
 	for j := n - 2; j >= 0; j-- {

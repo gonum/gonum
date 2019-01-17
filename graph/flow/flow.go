@@ -1,5 +1,5 @@
-// Package cfa provides control flow analysis functions.
-package cfa
+// Package flow provides control flow analysis functions.
+package flow
 
 import "gonum.org/v1/gonum/graph"
 

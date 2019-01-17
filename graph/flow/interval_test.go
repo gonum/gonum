@@ -1,4 +1,4 @@
-package cfa
+package flow
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ import (
 	"gonum.org/v1/gonum/graph/simple"
 )
 
-// Ensure that Interval implements the cfa.Graph interface.
+// Ensure that Interval implements the flow.Graph interface.
 var _ Graph = (*Interval)(nil)
 
 func TestIntervals(t *testing.T) {

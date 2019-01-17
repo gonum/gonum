@@ -4,7 +4,7 @@
 //
 // [1]: https://amturing.acm.org/p137-allen.pdf
 
-package cfa
+package flow
 
 import "gonum.org/v1/gonum/graph"
 

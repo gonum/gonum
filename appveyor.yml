@@ -1,0 +1,22 @@
+build: off
+
+clone_folder: c:\gopath\src\gonum.org\v1\gonum
+
+cache:
+  - '%LocalAppData%\go-build'
+
+branches:
+  only:
+    - master
+
+environment:
+  GOPATH: c:\gopath
+  PATH: '%GOPATH%\bin;%PATH%'
+
+stack: go 1.11
+
+build_script:
+  - go get -v -t ./...
+
+test_script:
+  - go test ./...

@@ -1,0 +1,47 @@
+// Sample taken from Fig. 2 in C. Cifuentes' Structuring decompiled graphs [1].
+// The same sample is presented in Fig. 6-2 in C. Cifuentes' Reverse Compilation
+// Techniques [2].
+//
+// [1]: https://pdfs.semanticscholar.org/48bf/d31773af7b67f9d1b003b8b8ac889f08271f.pdf
+// [2]: https://pdfs.semanticscholar.org/2f25/cb60ce7c12d067c0fe3dafef7e9a7896ea3c.pdf
+
+digraph G {
+	// Node definitions.
+	B1 [entry=true]
+	B2
+	B3
+	B4
+	B5
+	B6
+	B7
+	B8
+	B9
+	B10
+	B11
+	B12
+	B13
+	B14
+	B15
+
+	// Edge definitions.
+	B1 -> B2
+	B1 -> B5
+	B2 -> B3
+	B2 -> B4
+	B3 -> B5
+	B4 -> B5
+	B5 -> B6
+	B6 -> B7
+	B6 -> B12
+	B7 -> B8
+	B7 -> B9
+	B8 -> B9
+	B8 -> B10
+	B9 -> B10
+	B10 -> B11
+	B12 -> B13
+	B13 -> B14
+	B14 -> B13
+	B14 -> B15
+	B15 -> B6
+}

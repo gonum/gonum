@@ -1,0 +1,27 @@
+// Sample taken from Fig. 1 in Allen, Frances E., and John Cocke. "A program
+// data flow analysis procedure." Communications of the ACM 19.3 (1976): 137
+// [1].
+//
+// [1]: https://amturing.acm.org/p137-allen.pdf
+
+digraph {
+   // Node definitions.
+   1 [entry=true]
+   2
+   3
+   4
+   5
+   6
+   7
+
+   // Edge definitions.
+   1 -> 2
+   1 -> 7
+   2 -> 3
+   3 -> 4
+   3 -> 5
+   4 -> 6
+   5 -> 6
+   6 -> 3
+   7 -> 2
+}

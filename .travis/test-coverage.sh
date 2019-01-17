@@ -4,7 +4,7 @@ PROFILE_OUT=$PWD/profile.out
 ACC_OUT=$PWD/acc.out
 
 testCover() {
-	# set the return value to 0 (succesful)
+	# set the return value to 0 (successful)
 	retval=0
 	# get the directory to check from the parameter. Default to '.'
 	d=${1:-.}
@@ -13,7 +13,7 @@ testCover() {
 	# switch to the directory to check
 	pushd $d > /dev/null
 	# create the coverage profile
-	coverageresult=`go test -v $TAGS -coverprofile=$PROFILE_OUT`
+	coverageresult=`go test $TAGS -coverprofile=$PROFILE_OUT`
 	# output the result so we can check the shell output
 	echo ${coverageresult}
 	# append the results to acc.out if coverage didn't fail, else set the retval to 1 (failed)

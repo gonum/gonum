@@ -49,7 +49,7 @@ func (impl Implementation) Dgetri(n int, a []float64, lda int, ipiv []int, work 
 	if nb > 1 && nb < n {
 		iws := max(ldwork*n, 1)
 		if lwork < iws {
-			nb = lwork / ldwork
+			nb = lwork / n
 			nbmin = max(2, impl.Ilaenv(2, "DGETRI", " ", n, -1, -1, -1))
 		}
 	}

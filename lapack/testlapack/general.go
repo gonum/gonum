@@ -1465,29 +1465,24 @@ func constructGSVPresults(n, p, m, k, l int, a, b blas64.General) (zeroA, zeroB 
 	return zeroA, zeroB
 }
 
-// isIdentity returns whether an n×n matrix A is approximately equal to the
-// identity matrix.
-func isIdentity(n int, a []float64, lda int, tol float64) bool {
+// distFromIdentity returns the L-infinity distance of an n×n matrix A from the
+// identity. If A contains NaN elements, distFromIdentity will return +inf.
+func distFromIdentity(n int, a []float64, lda int) float64 {
+	var dist float64
 	for i := 0; i < n; i++ {
 		for j := 0; j < n; j++ {
 			aij := a[i*lda+j]
 			if math.IsNaN(aij) {
-				return false
+				return math.Inf(1)
 			}
 			if i == j {
-				if math.Abs(aij-1) > tol {
-					fmt.Println(i, j, aij)
-					return false
-				}
+				dist = math.Max(dist, math.Abs(aij-1))
 			} else {
-				if math.Abs(aij) > tol {
-					fmt.Println(i, j, aij)
-					return false
-				}
+				dist = math.Max(dist, math.Abs(aij))
 			}
 		}
 	}
-	return true
+	return dist
 }
 
 func sameFloat64(a, b float64) bool {

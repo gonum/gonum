@@ -79,9 +79,10 @@ func DtrtriTest(t *testing.T, impl Dtrtrier) {
 				ans := make([]float64, len(a))
 				bi.Dgemm(blas.NoTrans, blas.NoTrans, n, n, n, 1, a, lda, aCopy, lda, 0, ans, lda)
 				// Check that ans is the identity matrix.
-				if !isIdentity(n, ans, lda, tol) {
-					t.Errorf("inv(A) * A != I. Upper = %v, unit = %v, n = %v, lda = %v",
-						uplo == blas.Upper, diag == blas.Unit, n, lda)
+				dist := distFromIdentity(n, ans, lda)
+				if dist > tol {
+					t.Errorf("|inv(A) * A - I| = %v is too large. Upper = %v, unit = %v, n = %v, lda = %v",
+						dist, uplo == blas.Upper, diag == blas.Unit, n, lda)
 				}
 			}
 		}

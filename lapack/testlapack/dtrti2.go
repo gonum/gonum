@@ -147,9 +147,10 @@ func Dtrti2Test(t *testing.T, impl Dtrti2er) {
 				// Compute A^{-1} * A and store the result in ans.
 				ans := make([]float64, len(a))
 				bi.Dgemm(blas.NoTrans, blas.NoTrans, n, n, n, 1, a, lda, aCopy, lda, 0, ans, lda)
-				// Check that ans is the identity matrix.
-				if !isIdentity(n, ans, lda, tol) {
-					t.Errorf("inv(A) * A != I. Upper = %v, unit = %v, ans = %v", uplo == blas.Upper, diag == blas.Unit, ans)
+				// Check that ans is close to the identity matrix.
+				dist := distFromIdentity(n, ans, lda)
+				if dist > tol {
+					t.Errorf("|inv(A) * A - I| = %v. Upper = %v, unit = %v, ans = %v", dist, uplo == blas.Upper, diag == blas.Unit, ans)
 				}
 			}
 		}

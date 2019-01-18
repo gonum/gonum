@@ -10,13 +10,17 @@ branches:
     - master
 
 environment:
+  matrix:
+    - GOROOT: 'c:\go19'
+    - GOROOT: 'c:\go110'
+    - GOROOT: 'c:\go111'
   GOPATH: c:\gopath
-  PATH: '%GOPATH%\bin;%PATH%'
-
-stack: go 1.11
+  GOTOOLDIR: '%GOROOT%\pkg\tool\windows_amd64'
+  PATH: '%GOPATH%\bin;%GOROOT%\bin;%PATH%'
 
 build_script:
-  - go get -v -t ./...
+  - "%GOROOT%\\bin\\go version"
+  - "%GOROOT%\\bin\\go get -v -t ./..."
 
 test_script:
-  - go test ./...
+  - "%GOROOT%\\bin\\go test ./..."

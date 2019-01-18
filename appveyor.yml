@@ -10,6 +10,8 @@ branches:
     - master
 
 environment:
+  # Do not move these lines; they are referred to by README.md.
+  # Versions of go that are explicitly supported by gonum.
   matrix:
     - GOROOT: 'c:\go19'
     - GOROOT: 'c:\go110'

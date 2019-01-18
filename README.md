@@ -1,4 +1,4 @@
-# Gonum [![Build Status](https://www.travis-ci.org/gonum/gonum.svg?branch=master)](https://www.travis-ci.org/gonum/gonum/branches) [![Coverage Status](https://coveralls.io/repos/gonum/gonum/badge.svg?branch=master&service=github)](https://coveralls.io/github/gonum/gonum?branch=master) [![GoDoc](https://godoc.org/gonum.org/v1/gonum?status.svg)](https://godoc.org/gonum.org/v1/gonum) [![Go Report Card](https://goreportcard.com/badge/github.com/gonum/gonum)](https://goreportcard.com/report/github.com/gonum/gonum)
+# Gonum [![Build Status](https://www.travis-ci.org/gonum/gonum.svg?branch=master)](https://www.travis-ci.org/gonum/gonum/branches) [![Build status](https://ci.appveyor.com/api/projects/status/valslkp8sr50eepn/branch/master?svg=true)](https://ci.appveyor.com/project/Gonum/gonum/branch/master) [![Coverage Status](https://coveralls.io/repos/gonum/gonum/badge.svg?branch=master&service=github)](https://coveralls.io/github/gonum/gonum?branch=master) [![GoDoc](https://godoc.org/gonum.org/v1/gonum?status.svg)](https://godoc.org/gonum.org/v1/gonum) [![Go Report Card](https://goreportcard.com/badge/github.com/gonum/gonum)](https://goreportcard.com/report/github.com/gonum/gonum)
 
 ## Installation
 
@@ -10,7 +10,7 @@ go get -u gonum.org/v1/gonum/...
 
 ## Supported Go versions
 
-Gonum supports and tests on the [three most recent major versions of Go](https://github.com/gonum/gonum/blob/master/.travis.yml#L6-L11).
+Gonum supports and tests on the three most recent major versions of Go on [Linux](https://github.com/gonum/gonum/blob/master/.travis.yml#L6-L11) and [Windows](https://github.com/gonum/gonum/blob/master/appveyor.yml#L13-L18).
 
 
 ## Build tags

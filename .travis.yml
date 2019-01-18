@@ -57,7 +57,8 @@ script:
  - go get -d -t -v ./...
  - go build -v ./...
  - go test $TAGS -v ./...
- - if [[ $TRAVIS_SECURE_ENV_VARS = "true" ]]; then bash ./.travis/test-coverage.sh; fi
+ # Only run test coverage analysis if we are secure and on master.
+ - if [[ "${TRAVIS_BRANCH}" == master && "${TRAVIS_SECURE_ENV_VARS}" == true ]]; then bash ./.travis/test-coverage.sh; fi
  - ${TRAVIS_BUILD_DIR}/.travis/check-imports.sh
  # This is run last since it alters the tree.
  - ${TRAVIS_BUILD_DIR}/.travis/check-generate.sh

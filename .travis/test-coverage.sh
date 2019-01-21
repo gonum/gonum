@@ -10,7 +10,7 @@ latestRelease=$(
 	| sort -V \
 	| tail -n 1
 )
-echo Latest Go releast: $latestRelease
+echo Latest Go release: $latestRelease
 
 currentVersion=$(go version | cut -d' ' -f3)
 echo Current Go version: $currentVersion

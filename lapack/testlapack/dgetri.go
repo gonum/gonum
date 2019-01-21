@@ -56,24 +56,43 @@ func DgetriTest(t *testing.T, impl Dgetrier) {
 		ipiv := make([]int, n)
 		// Compute LU decomposition.
 		impl.Dgetrf(n, n, a, lda, ipiv)
-		// Compute inverse.
-		work := make([]float64, 1)
-		impl.Dgetri(n, a, lda, ipiv, work, -1)
-		work = make([]float64, int(work[0]))
-		lwork := len(work)
+		// Test with various workspace sizes.
+		for size := range []int{0, 1, 2} {
+			ainv := make([]float64, len(a))
+			copy(ainv, a)
 
-		ok := impl.Dgetri(n, a, lda, ipiv, work, lwork)
-		if !ok {
-			t.Errorf("Unexpected singular matrix.")
-		}
+			var lwork int
+			switch size {
+			case 0:
+				// Minimum workspace size.
+				lwork = max(1, n)
+			case 1:
+				// Medium workspace size.
+				work := make([]float64, 1)
+				impl.Dgetri(n, ainv, lda, ipiv, work, -1)
+				lwork = max(int(work[0])-2*n, n)
+			case 2:
+				// Optimum workspace size.
+				work := make([]float64, 1)
+				impl.Dgetri(n, ainv, lda, ipiv, work, -1)
+				lwork = int(work[0])
+			}
+			work := make([]float64, lwork)
 
-		// Check that A(inv) * A = I.
-		ans := make([]float64, len(a))
-		bi.Dgemm(blas.NoTrans, blas.NoTrans, n, n, n, 1, aCopy, lda, a, lda, 0, ans, lda)
-		// The tolerance is so high because computing matrix inverses is very unstable.
-		dist := distFromIdentity(n, ans, lda)
-		if dist > tol {
-			t.Errorf("|Inv(A) * A - I|_inf = %v is too large. n = %v, lda = %v", dist, n, lda)
+			// Compute inverse.
+			ok := impl.Dgetri(n, ainv, lda, ipiv, work, lwork)
+			if !ok {
+				t.Errorf("Unexpected singular matrix.")
+			}
+
+			// Check that A(inv) * A = I.
+			ans := make([]float64, len(ainv))
+			bi.Dgemm(blas.NoTrans, blas.NoTrans, n, n, n, 1, aCopy, lda, ainv, lda, 0, ans, lda)
+			// The tolerance is so high because computing matrix inverses is very unstable.
+			dist := distFromIdentity(n, ans, lda)
+			if dist > tol {
+				t.Errorf("|Inv(A) * A - I|_inf = %v is too large. n = %v, lda = %v", dist, n, lda)
+			}
 		}
 	}
 }

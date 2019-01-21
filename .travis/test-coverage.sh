@@ -15,7 +15,7 @@ echo Latest Go release: $latestRelease
 currentVersion=$(go version | cut -d' ' -f3)
 echo Current Go version: $currentVersion
 
-if [[ "$currentVersion" != "$latestRelease" ]]; then
+if [[ "${currentVersion%.*}" != "${latestRelease%.*}" ]]; then
 	echo Skipping coverage analysis.
 	exit 0
 fi

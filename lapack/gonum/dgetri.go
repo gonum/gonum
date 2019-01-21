@@ -59,14 +59,14 @@ func (impl Implementation) Dgetri(n int, a []float64, lda int, ipiv []int, work 
 	}
 
 	nbmin := 2
-	ldwork := nb
 	if 1 < nb && nb < n {
-		iws := max(n*ldwork, 1)
+		iws := max(n*nb, 1)
 		if lwork < iws {
 			nb = lwork / n
 			nbmin = max(2, impl.Ilaenv(2, "DGETRI", " ", n, -1, -1, -1))
 		}
 	}
+	ldwork := nb
 
 	bi := blas64.Implementation()
 	// Solve the equation inv(A)*L = inv(U) for inv(A).
@@ -76,12 +76,12 @@ func (impl Implementation) Dgetri(n int, a []float64, lda int, ipiv []int, work 
 		for j := n - 1; j >= 0; j-- {
 			for i := j + 1; i < n; i++ {
 				// Copy current column of L to work and replace with zeros.
-				work[i*ldwork] = a[i*lda+j]
+				work[i] = a[i*lda+j]
 				a[i*lda+j] = 0
 			}
 			// Compute current column of inv(A).
 			if j < n-1 {
-				bi.Dgemv(blas.NoTrans, n, n-j-1, -1, a[(j+1):], lda, work[(j+1)*ldwork:], ldwork, 1, a[j:], lda)
+				bi.Dgemv(blas.NoTrans, n, n-j-1, -1, a[(j+1):], lda, work[(j+1):], 1, 1, a[j:], lda)
 			}
 		}
 	} else {

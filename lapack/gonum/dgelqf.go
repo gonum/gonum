@@ -58,7 +58,6 @@ func (impl Implementation) Dgelqf(m, n int, a []float64, lda int, tau, work []fl
 	nbmin := 2
 	var nx int
 	iws := m
-	ldwork := nb
 	if 1 < nb && nb < k {
 		nx = max(0, impl.Ilaenv(3, "DGELQF", " ", m, n, -1, -1))
 		if nx < k {
@@ -69,6 +68,7 @@ func (impl Implementation) Dgelqf(m, n int, a []float64, lda int, tau, work []fl
 			}
 		}
 	}
+	ldwork := nb
 	// Computed blocked LQ factorization.
 	var i int
 	if nbmin <= nb && nb < k && nx < k {

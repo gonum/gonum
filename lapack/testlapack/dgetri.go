@@ -57,22 +57,19 @@ func DgetriTest(t *testing.T, impl Dgetrier) {
 		// Compute LU decomposition.
 		impl.Dgetrf(n, n, a, lda, ipiv)
 		// Test with various workspace sizes.
-		for size := range []int{0, 1, 2} {
+		for _, wl := range []worklen{minimumWork, mediumWork, optimumWork} {
 			ainv := make([]float64, len(a))
 			copy(ainv, a)
 
 			var lwork int
-			switch size {
-			case 0:
-				// Minimum workspace size.
+			switch wl {
+			case minimumWork:
 				lwork = max(1, n)
-			case 1:
-				// Medium workspace size.
+			case mediumWork:
 				work := make([]float64, 1)
 				impl.Dgetri(n, ainv, lda, ipiv, work, -1)
 				lwork = max(int(work[0])-2*n, n)
-			case 2:
-				// Optimum workspace size.
+			case optimumWork:
 				work := make([]float64, 1)
 				impl.Dgetri(n, ainv, lda, ipiv, work, -1)
 				lwork = int(work[0])

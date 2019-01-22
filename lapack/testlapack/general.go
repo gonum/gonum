@@ -50,6 +50,18 @@ const (
 	optimumWork
 )
 
+func (wl worklen) String() string {
+	switch wl {
+	case minimumWork:
+		return "minimum"
+	case mediumWork:
+		return "medium"
+	case optimumWork:
+		return "optimum"
+	}
+	return ""
+}
+
 // nanSlice allocates a new slice of length n filled with NaN.
 func nanSlice(n int) []float64 {
 	s := make([]float64, n)

@@ -8,6 +8,8 @@ import (
 	"math"
 	"testing"
 
+	"golang.org/x/exp/rand"
+
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/set"
 	"gonum.org/v1/gonum/graph/simple"
@@ -72,6 +74,76 @@ func TestUndirected(t *testing.T) {
 	})
 	t.Run("ReturnNodeSlice", func(t *testing.T) {
 		testgraph.ReturnNodeSlice(t, undirectedBuilder, true)
+	})
+
+	t.Run("AddNodes", func(t *testing.T) {
+		testgraph.AddNodes(t, simple.NewUndirectedGraph(), 100)
+	})
+	t.Run("AddArbitraryNodes", func(t *testing.T) {
+		testgraph.AddArbitraryNodes(t,
+			simple.NewUndirectedGraph(),
+			testgraph.NewRandomNodes(100, 1, func(id int64) graph.Node { return simple.Node(id) }),
+		)
+	})
+	t.Run("RemoveNodes", func(t *testing.T) {
+		g := simple.NewUndirectedGraph()
+		it := testgraph.NewRandomNodes(100, 1, func(id int64) graph.Node { return simple.Node(id) })
+		for it.Next() {
+			g.AddNode(it.Node())
+		}
+		it.Reset()
+		rnd := rand.New(rand.NewSource(1))
+		for it.Next() {
+			u := it.Node()
+			d := rnd.Intn(5)
+			vit := g.Nodes()
+			for d >= 0 && vit.Next() {
+				v := vit.Node()
+				if v.ID() == u.ID() {
+					continue
+				}
+				d--
+				g.SetEdge(g.NewEdge(u, v))
+			}
+		}
+		testgraph.RemoveNodes(t, g)
+	})
+	t.Run("AddEdges", func(t *testing.T) {
+		testgraph.AddEdges(t, 100,
+			simple.NewUndirectedGraph(),
+			func(id int64) graph.Node { return simple.Node(id) },
+			false, // Cannot set self-loops.
+			true,  // Can update nodes.
+		)
+	})
+	t.Run("NoLoopAddEdges", func(t *testing.T) {
+		testgraph.NoLoopAddEdges(t, 100,
+			simple.NewUndirectedGraph(),
+			func(id int64) graph.Node { return simple.Node(id) },
+		)
+	})
+	t.Run("RemoveEdges", func(t *testing.T) {
+		g := simple.NewUndirectedGraph()
+		it := testgraph.NewRandomNodes(100, 1, func(id int64) graph.Node { return simple.Node(id) })
+		for it.Next() {
+			g.AddNode(it.Node())
+		}
+		it.Reset()
+		rnd := rand.New(rand.NewSource(1))
+		for it.Next() {
+			u := it.Node()
+			d := rnd.Intn(5)
+			vit := g.Nodes()
+			for d >= 0 && vit.Next() {
+				v := vit.Node()
+				if v.ID() == u.ID() {
+					continue
+				}
+				d--
+				g.SetEdge(g.NewEdge(u, v))
+			}
+		}
+		testgraph.RemoveEdges(t, g, g.Edges())
 	})
 }
 

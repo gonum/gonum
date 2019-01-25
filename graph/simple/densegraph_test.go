@@ -9,6 +9,8 @@ import (
 	"sort"
 	"testing"
 
+	"golang.org/x/exp/rand"
+
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/internal/set"
@@ -96,6 +98,56 @@ func TestDirectedMatrix(t *testing.T) {
 	t.Run("Weight", func(t *testing.T) {
 		testgraph.Weight(t, directedMatrixBuilder)
 	})
+
+	t.Run("AddEdges", func(t *testing.T) {
+		testgraph.AddEdges(t, 100,
+			newEdgeShimDir{simple.NewDirectedMatrix(100, 0, 1, 0)},
+			func(id int64) graph.Node { return simple.Node(id) },
+			false, // Cannot set self-loops.
+			false, // Cannot update nodes.
+		)
+	})
+	t.Run("NoLoopAddEdges", func(t *testing.T) {
+		testgraph.NoLoopAddEdges(t, 100,
+			newEdgeShimDir{simple.NewDirectedMatrix(100, 0, 1, 0)},
+			func(id int64) graph.Node { return simple.Node(id) },
+		)
+	})
+	t.Run("AddWeightedEdges", func(t *testing.T) {
+		testgraph.AddWeightedEdges(t, 100,
+			newEdgeShimDir{simple.NewDirectedMatrix(100, 0, 1, 0)},
+			0.5,
+			func(id int64) graph.Node { return simple.Node(id) },
+			false, // Cannot set self-loops.
+			false, // Cannot update nodes.
+		)
+	})
+	t.Run("NoLoopAddWeightedEdges", func(t *testing.T) {
+		testgraph.NoLoopAddWeightedEdges(t, 100,
+			newEdgeShimDir{simple.NewDirectedMatrix(100, 0, 1, 0)},
+			0.5,
+			func(id int64) graph.Node { return simple.Node(id) },
+		)
+	})
+	t.Run("RemoveEdges", func(t *testing.T) {
+		g := newEdgeShimDir{simple.NewDirectedMatrix(100, 0, 1, 0)}
+		rnd := rand.New(rand.NewSource(1))
+		it := g.Nodes()
+		for it.Next() {
+			u := it.Node()
+			d := rnd.Intn(5)
+			vit := g.Nodes()
+			for d >= 0 && vit.Next() {
+				v := vit.Node()
+				if v.ID() == u.ID() {
+					continue
+				}
+				d--
+				g.SetEdge(g.NewEdge(u, v))
+			}
+		}
+		testgraph.RemoveEdges(t, g, g.Edges())
+	})
 }
 
 func directedMatrixFromBuilder(nodes []graph.Node, edges []graph.WeightedLine, self, absent float64) (g graph.Graph, n []graph.Node, e []graph.Edge, s, a float64, ok bool) {
@@ -165,6 +217,69 @@ func TestDirectedMatrixFrom(t *testing.T) {
 	t.Run("Weight", func(t *testing.T) {
 		testgraph.Weight(t, directedMatrixFromBuilder)
 	})
+
+	const numNodes = 100
+
+	t.Run("AddEdges", func(t *testing.T) {
+		testgraph.AddEdges(t, numNodes,
+			newEdgeShimDir{simple.NewDirectedMatrixFrom(makeNodes(numNodes), 0, 1, 0)},
+			func(id int64) graph.Node { return simple.Node(id) },
+			false, // Cannot set self-loops.
+			true,  // Can update nodes.
+		)
+	})
+	t.Run("NoLoopAddEdges", func(t *testing.T) {
+		testgraph.NoLoopAddEdges(t, numNodes,
+			newEdgeShimDir{simple.NewDirectedMatrixFrom(makeNodes(numNodes), 0, 1, 0)},
+			func(id int64) graph.Node { return simple.Node(id) },
+		)
+	})
+	t.Run("AddWeightedEdges", func(t *testing.T) {
+		testgraph.AddWeightedEdges(t, numNodes,
+			newEdgeShimDir{simple.NewDirectedMatrixFrom(makeNodes(numNodes), 0, 1, 0)},
+			1,
+			func(id int64) graph.Node { return simple.Node(id) },
+			false, // Cannot set self-loops.
+			true,  // Can update nodes.
+		)
+	})
+	t.Run("NoLoopAddWeightedEdges", func(t *testing.T) {
+		testgraph.NoLoopAddWeightedEdges(t, numNodes,
+			newEdgeShimDir{simple.NewDirectedMatrixFrom(makeNodes(numNodes), 0, 1, 0)},
+			1,
+			func(id int64) graph.Node { return simple.Node(id) },
+		)
+	})
+	t.Run("RemoveEdges", func(t *testing.T) {
+		g := newEdgeShimDir{simple.NewDirectedMatrixFrom(makeNodes(numNodes), 0, 1, 0)}
+		rnd := rand.New(rand.NewSource(1))
+		it := g.Nodes()
+		for it.Next() {
+			u := it.Node()
+			d := rnd.Intn(5)
+			vit := g.Nodes()
+			for d >= 0 && vit.Next() {
+				v := vit.Node()
+				if v.ID() == u.ID() {
+					continue
+				}
+				d--
+				g.SetEdge(g.NewEdge(u, v))
+			}
+		}
+		testgraph.RemoveEdges(t, g, g.Edges())
+	})
+}
+
+type newEdgeShimDir struct {
+	*simple.DirectedMatrix
+}
+
+func (g newEdgeShimDir) NewEdge(u, v graph.Node) graph.Edge {
+	return simple.Edge{F: u, T: v}
+}
+func (g newEdgeShimDir) NewWeightedEdge(u, v graph.Node, w float64) graph.WeightedEdge {
+	return simple.WeightedEdge{F: u, T: v, W: w}
 }
 
 func undirectedMatrixBuilder(nodes []graph.Node, edges []graph.WeightedLine, self, absent float64) (g graph.Graph, n []graph.Node, e []graph.Edge, s, a float64, ok bool) {
@@ -233,6 +348,56 @@ func TestUnirectedMatrix(t *testing.T) {
 	})
 	t.Run("Weight", func(t *testing.T) {
 		testgraph.Weight(t, undirectedMatrixBuilder)
+	})
+
+	t.Run("AddEdges", func(t *testing.T) {
+		testgraph.AddEdges(t, 100,
+			newEdgeShimUndir{simple.NewUndirectedMatrix(100, 0, 1, 0)},
+			func(id int64) graph.Node { return simple.Node(id) },
+			false, // Cannot set self-loops.
+			false, // Cannot update nodes.
+		)
+	})
+	t.Run("NoLoopAddEdges", func(t *testing.T) {
+		testgraph.NoLoopAddEdges(t, 100,
+			newEdgeShimUndir{simple.NewUndirectedMatrix(100, 0, 1, 0)},
+			func(id int64) graph.Node { return simple.Node(id) },
+		)
+	})
+	t.Run("AddWeightedEdges", func(t *testing.T) {
+		testgraph.AddWeightedEdges(t, 100,
+			newEdgeShimUndir{simple.NewUndirectedMatrix(100, 0, 1, 0)},
+			1,
+			func(id int64) graph.Node { return simple.Node(id) },
+			false, // Cannot set self-loops.
+			false, // Cannot update nodes.
+		)
+	})
+	t.Run("NoLoopAddWeightedEdges", func(t *testing.T) {
+		testgraph.NoLoopAddWeightedEdges(t, 100,
+			newEdgeShimUndir{simple.NewUndirectedMatrix(100, 0, 1, 0)},
+			1,
+			func(id int64) graph.Node { return simple.Node(id) },
+		)
+	})
+	t.Run("RemoveEdges", func(t *testing.T) {
+		g := newEdgeShimUndir{simple.NewUndirectedMatrix(100, 0, 1, 0)}
+		rnd := rand.New(rand.NewSource(1))
+		it := g.Nodes()
+		for it.Next() {
+			u := it.Node()
+			d := rnd.Intn(5)
+			vit := g.Nodes()
+			for d >= 0 && vit.Next() {
+				v := vit.Node()
+				if v.ID() == u.ID() {
+					continue
+				}
+				d--
+				g.SetEdge(g.NewEdge(u, v))
+			}
+		}
+		testgraph.RemoveEdges(t, g, g.Edges())
 	})
 }
 
@@ -303,6 +468,77 @@ func TestUndirectedMatrixFrom(t *testing.T) {
 	t.Run("Weight", func(t *testing.T) {
 		testgraph.Weight(t, undirectedMatrixFromBuilder)
 	})
+
+	const numNodes = 100
+
+	t.Run("AddEdges", func(t *testing.T) {
+		testgraph.AddEdges(t, numNodes,
+			newEdgeShimUndir{simple.NewUndirectedMatrixFrom(makeNodes(numNodes), 0, 1, 0)},
+			func(id int64) graph.Node { return simple.Node(id) },
+			false, // Cannot set self-loops.
+			true,  // Can update nodes.
+		)
+	})
+	t.Run("NoLoopAddEdges", func(t *testing.T) {
+		testgraph.NoLoopAddEdges(t, numNodes,
+			newEdgeShimUndir{simple.NewUndirectedMatrixFrom(makeNodes(numNodes), 0, 1, 0)},
+			func(id int64) graph.Node { return simple.Node(id) },
+		)
+	})
+	t.Run("AddWeightedEdges", func(t *testing.T) {
+		testgraph.AddWeightedEdges(t, numNodes,
+			newEdgeShimUndir{simple.NewUndirectedMatrixFrom(makeNodes(numNodes), 0, 1, 0)},
+			1,
+			func(id int64) graph.Node { return simple.Node(id) },
+			false, // Cannot set self-loops.
+			true,  // Can update nodes.
+		)
+	})
+	t.Run("NoLoopAddWeightedEdges", func(t *testing.T) {
+		testgraph.NoLoopAddWeightedEdges(t, numNodes,
+			newEdgeShimUndir{simple.NewUndirectedMatrixFrom(makeNodes(numNodes), 0, 1, 0)},
+			1,
+			func(id int64) graph.Node { return simple.Node(id) },
+		)
+	})
+	t.Run("RemoveEdges", func(t *testing.T) {
+		g := newEdgeShimUndir{simple.NewUndirectedMatrixFrom(makeNodes(numNodes), 0, 1, 0)}
+		rnd := rand.New(rand.NewSource(1))
+		it := g.Nodes()
+		for it.Next() {
+			u := it.Node()
+			d := rnd.Intn(5)
+			vit := g.Nodes()
+			for d >= 0 && vit.Next() {
+				v := vit.Node()
+				if v.ID() == u.ID() {
+					continue
+				}
+				d--
+				g.SetEdge(g.NewEdge(u, v))
+			}
+		}
+		testgraph.RemoveEdges(t, g, g.Edges())
+	})
+}
+
+type newEdgeShimUndir struct {
+	*simple.UndirectedMatrix
+}
+
+func (g newEdgeShimUndir) NewEdge(u, v graph.Node) graph.Edge {
+	return simple.Edge{F: u, T: v}
+}
+func (g newEdgeShimUndir) NewWeightedEdge(u, v graph.Node, w float64) graph.WeightedEdge {
+	return simple.WeightedEdge{F: u, T: v, W: w}
+}
+
+func makeNodes(n int) []graph.Node {
+	nodes := make([]graph.Node, n)
+	for i := range nodes {
+		nodes[i] = simple.Node(i)
+	}
+	return nodes
 }
 
 func TestBasicDenseImpassable(t *testing.T) {

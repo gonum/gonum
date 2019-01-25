@@ -8,6 +8,8 @@ import (
 	"math"
 	"testing"
 
+	"golang.org/x/exp/rand"
+
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/set"
 	"gonum.org/v1/gonum/graph/simple"
@@ -81,6 +83,78 @@ func TestWeightedDirected(t *testing.T) {
 	})
 	t.Run("Weight", func(t *testing.T) {
 		testgraph.Weight(t, weightedDirectedBuilder)
+	})
+
+	t.Run("AddNodes", func(t *testing.T) {
+		testgraph.AddNodes(t, simple.NewWeightedDirectedGraph(1, 0), 100)
+	})
+	t.Run("AddArbitraryNodes", func(t *testing.T) {
+		testgraph.AddArbitraryNodes(t,
+			simple.NewWeightedDirectedGraph(1, 0),
+			testgraph.NewRandomNodes(100, 1, func(id int64) graph.Node { return simple.Node(id) }),
+		)
+	})
+	t.Run("RemoveNodes", func(t *testing.T) {
+		g := simple.NewWeightedDirectedGraph(1, 0)
+		it := testgraph.NewRandomNodes(100, 1, func(id int64) graph.Node { return simple.Node(id) })
+		for it.Next() {
+			g.AddNode(it.Node())
+		}
+		it.Reset()
+		rnd := rand.New(rand.NewSource(1))
+		for it.Next() {
+			u := it.Node()
+			d := rnd.Intn(5)
+			vit := g.Nodes()
+			for d >= 0 && vit.Next() {
+				v := vit.Node()
+				if v.ID() == u.ID() {
+					continue
+				}
+				d--
+				g.SetWeightedEdge(g.NewWeightedEdge(u, v, 1))
+			}
+		}
+		testgraph.RemoveNodes(t, g)
+	})
+	t.Run("AddWeightedEdges", func(t *testing.T) {
+		testgraph.AddWeightedEdges(t, 100,
+			simple.NewWeightedDirectedGraph(1, 0),
+			0.5,
+			func(id int64) graph.Node { return simple.Node(id) },
+			false, // Cannot set self-loops.
+			true,  // Can update nodes.
+		)
+	})
+	t.Run("NoLoopAddWeightedEdges", func(t *testing.T) {
+		testgraph.NoLoopAddWeightedEdges(t, 100,
+			simple.NewWeightedDirectedGraph(1, 0),
+			0.5,
+			func(id int64) graph.Node { return simple.Node(id) },
+		)
+	})
+	t.Run("RemoveEdges", func(t *testing.T) {
+		g := simple.NewWeightedDirectedGraph(1, 0)
+		it := testgraph.NewRandomNodes(100, 1, func(id int64) graph.Node { return simple.Node(id) })
+		for it.Next() {
+			g.AddNode(it.Node())
+		}
+		it.Reset()
+		rnd := rand.New(rand.NewSource(1))
+		for it.Next() {
+			u := it.Node()
+			d := rnd.Intn(5)
+			vit := g.Nodes()
+			for d >= 0 && vit.Next() {
+				v := vit.Node()
+				if v.ID() == u.ID() {
+					continue
+				}
+				d--
+				g.SetWeightedEdge(g.NewWeightedEdge(u, v, 1))
+			}
+		}
+		testgraph.RemoveEdges(t, g, g.Edges())
 	})
 }
 

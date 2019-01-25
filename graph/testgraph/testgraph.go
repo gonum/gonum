@@ -13,6 +13,8 @@ import (
 	"sort"
 	"testing"
 
+	"golang.org/x/exp/rand"
+
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/internal/set"
@@ -1010,6 +1012,678 @@ func undirectedEdgeEqual(a, b graph.Edge) bool {
 	return wea.Weight() == web.Weight()
 }
 
+// NodeAdder is a graph.NodeAdder graph.
+type NodeAdder interface {
+	graph.Graph
+	graph.NodeAdder
+}
+
+// AddNodes tests whether g correctly implements the graph.NodeAdder interface.
+// AddNodes gets a new node from g and adds it to the graph, repeating this pair
+// of operations n times. The existence of added nodes is confirmed in the graph.
+// AddNodes also checks that re-adding each of the added nodes causes a panic.
+func AddNodes(t *testing.T, g NodeAdder, n int) {
+	defer func() {
+		r := recover()
+		if r != nil {
+			t.Errorf("unexpected panic: %v", r)
+		}
+	}()
+
+	var addedNodes []graph.Node
+	for i := 0; i < n; i++ {
+		node := g.NewNode()
+		prev := g.Nodes().Len()
+		if g.Node(node.ID()) != nil {
+			curr := g.Nodes().Len()
+			if curr != prev {
+				t.Fatalf("NewNode mutated graph: prev graph order != curr graph order, %d != %d", prev, curr)
+			}
+			t.Fatalf("NewNode returned existing: %#v", node)
+		}
+		g.AddNode(node)
+		addedNodes = append(addedNodes, node)
+		curr := g.Nodes().Len()
+		if curr != prev+1 {
+			t.Fatalf("AddNode failed to mutate graph: curr graph order != prev graph order+1, %d != %d", curr, prev+1)
+		}
+		if g.Node(node.ID()) == nil {
+			t.Fatalf("AddNode failed to add node to graph trying to add %#v", node)
+		}
+	}
+
+	sort.Sort(ordered.ByID(addedNodes))
+	graphNodes := graph.NodesOf(g.Nodes())
+	sort.Sort(ordered.ByID(graphNodes))
+	if !reflect.DeepEqual(addedNodes, graphNodes) {
+		if n > 20 {
+			t.Errorf("unexpected node set after node addition: got len:%v want len:%v", len(graphNodes), len(addedNodes))
+		} else {
+			t.Errorf("unexpected node set after node addition: got:\n %v\nwant:\n%v", graphNodes, addedNodes)
+		}
+	}
+
+	it := g.Nodes()
+	for it.Next() {
+		panicked := panics(func() {
+			g.AddNode(it.Node())
+		})
+		if !panicked {
+			t.Fatalf("expected panic adding existing node: %v", it.Node())
+		}
+	}
+}
+
+// AddArbitraryNodes tests whether g correctly implements the AddNode method. Not all
+// graph.NodeAdder graphs are expected to implement the semantics of this test.
+// AddArbitraryNodes iterates over add, adding each node to the graph. The existence
+// of each added node in the graph is confirmed.
+func AddArbitraryNodes(t *testing.T, g NodeAdder, add graph.Nodes) {
+	defer func() {
+		r := recover()
+		if r != nil {
+			t.Errorf("unexpected panic: %v", r)
+		}
+	}()
+
+	for add.Next() {
+		node := add.Node()
+		prev := g.Nodes().Len()
+		g.AddNode(node)
+		curr := g.Nodes().Len()
+		if curr != prev+1 {
+			t.Fatalf("AddNode failed to mutate graph: curr graph order != prev graph order+1, %d != %d", curr, prev+1)
+		}
+		if g.Node(node.ID()) == nil {
+			t.Fatalf("AddNode failed to add node to graph trying to add %#v", node)
+		}
+	}
+
+	add.Reset()
+	addedNodes := graph.NodesOf(add)
+	sort.Sort(ordered.ByID(addedNodes))
+	graphNodes := graph.NodesOf(g.Nodes())
+	sort.Sort(ordered.ByID(graphNodes))
+	if !reflect.DeepEqual(addedNodes, graphNodes) {
+		t.Errorf("unexpected node set after node addition: got:\n %v\nwant:\n%v", graphNodes, addedNodes)
+	}
+
+	it := g.Nodes()
+	for it.Next() {
+		panicked := panics(func() {
+			g.AddNode(it.Node())
+		})
+		if !panicked {
+			t.Fatalf("expected panic adding existing node: %v", it.Node())
+		}
+	}
+}
+
+// NodeRemover is a graph.NodeRemover graph.
+type NodeRemover interface {
+	graph.Graph
+	graph.NodeRemover
+}
+
+// RemoveNodes tests whether g correctly implements the graph.NodeRemover interface.
+// The input graph g must contain a set of nodes with some edges between them.
+func RemoveNodes(t *testing.T, g NodeRemover) {
+	defer func() {
+		r := recover()
+		if r != nil {
+			t.Errorf("unexpected panic: %v", r)
+		}
+	}()
+
+	it := g.Nodes()
+	first := true
+	for it.Next() {
+		u := it.Node()
+
+		seen := make(map[edge]struct{})
+
+		// Collect all incident edges.
+		var incident []graph.Edge
+		to := g.From(u.ID())
+		for to.Next() {
+			v := to.Node()
+			e := g.Edge(u.ID(), v.ID())
+			if e == nil {
+				t.Fatalf("bad graph: neighbors not connected: u=%#v v=%#v", u, v)
+			}
+			if _, ok := g.(graph.Undirected); ok {
+				seen[edge{f: e.To().ID(), t: e.From().ID()}] = struct{}{}
+			}
+			seen[edge{f: e.From().ID(), t: e.To().ID()}] = struct{}{}
+			incident = append(incident, e)
+		}
+
+		// Collect all other edges.
+		var others []graph.Edge
+		currit := g.Nodes()
+		for currit.Next() {
+			u := currit.Node()
+			to := g.From(u.ID())
+			for to.Next() {
+				v := to.Node()
+				e := g.Edge(u.ID(), v.ID())
+				if e == nil {
+					t.Fatalf("bad graph: neighbors not connected: u=%#v v=%#v", u, v)
+				}
+				seen[edge{f: e.From().ID(), t: e.To().ID()}] = struct{}{}
+				others = append(others, e)
+			}
+		}
+
+		if first && len(seen) == 0 {
+			t.Fatal("incomplete test: no edges in graph")
+		}
+		first = false
+
+		prev := g.Nodes().Len()
+		g.RemoveNode(u.ID())
+		curr := g.Nodes().Len()
+		if curr != prev-1 {
+			t.Fatalf("RemoveNode failed to mutate graph: curr graph order != prev graph order-1, %d != %d", curr, prev-1)
+		}
+		if g.Node(u.ID()) != nil {
+			t.Fatalf("failed to remove node: %#v", u)
+		}
+
+		for _, e := range incident {
+			if g.HasEdgeBetween(e.From().ID(), e.To().ID()) {
+				t.Fatalf("RemoveNode failed to remove connected edge: %#v", e)
+			}
+		}
+
+		for _, e := range others {
+			if e.From().ID() == u.ID() || e.To().ID() == u.ID() {
+				continue
+			}
+			if g.Edge(e.From().ID(), e.To().ID()) == nil {
+				t.Fatalf("RemoveNode %v removed unconnected edge: %#v", u, e)
+			}
+		}
+	}
+}
+
+// EdgeAdder is a graph.EdgeAdder graph.
+type EdgeAdder interface {
+	graph.Graph
+	graph.EdgeAdder
+}
+
+// AddEdges tests whether g correctly implements the graph.EdgeAdder interface.
+// AddEdges creates n pairs of nodes with random IDs in [0,n) and joins edges
+// each node in the pair using SetEdge. AddEdges confirms that the end point
+// nodes are added to the graph and that the edges are stored in the graph.
+// If canLoop is true, self edges may be created. If canSet is true, a second
+// call to SetEdge is made for each edge to confirm that the nodes corresponding
+// the end points are updated.
+func AddEdges(t *testing.T, n int, g EdgeAdder, newNode func(id int64) graph.Node, canLoop, canSetNode bool) {
+	defer func() {
+		r := recover()
+		if r != nil {
+			t.Errorf("unexpected panic: %v", r)
+		}
+	}()
+
+	type altNode struct {
+		graph.Node
+	}
+
+	rnd := rand.New(rand.NewSource(1))
+	for i := 0; i < n; i++ {
+		u := newNode(rnd.Int63n(int64(n)))
+		var v graph.Node
+		for {
+			v = newNode(rnd.Int63n(int64(n)))
+			if canLoop || u.ID() != v.ID() {
+				break
+			}
+		}
+		e := g.NewEdge(u, v)
+		if g.Edge(u.ID(), v.ID()) != nil {
+			t.Fatalf("NewEdge returned existing: %#v", e)
+		}
+		g.SetEdge(e)
+		if g.Edge(u.ID(), v.ID()) == nil {
+			t.Fatalf("SetEdge failed to add edge: %#v", e)
+		}
+		if g.Node(u.ID()) == nil {
+			t.Fatalf("SetEdge failed to add from node: %#v", u)
+		}
+		if g.Node(v.ID()) == nil {
+			t.Fatalf("SetEdge failed to add to node: %#v", v)
+		}
+
+		if !canSetNode {
+			continue
+		}
+
+		g.SetEdge(g.NewEdge(altNode{u}, altNode{v}))
+		if nu := g.Node(u.ID()); nu == u {
+			t.Fatalf("SetEdge failed to update from node: u=%#v nu=%#v", u, nu)
+		}
+		if nv := g.Node(v.ID()); nv == v {
+			t.Fatalf("SetEdge failed to update to node: v=%#v nv=%#v", v, nv)
+		}
+	}
+}
+
+// WeightedEdgeAdder is a graph.EdgeAdder graph.
+type WeightedEdgeAdder interface {
+	graph.Graph
+	graph.WeightedEdgeAdder
+}
+
+// AddWeightedEdges tests whether g correctly implements the graph.WeightedEdgeAdder
+// interface. AddWeightedEdges creates n pairs of nodes with random IDs in [0,n) and
+// joins edges each node in the pair using SetWeightedEdge with weight w.
+// AddWeightedEdges confirms that the end point nodes are added to the graph and that
+// the edges are stored in the graph. If canLoop is true, self edges may be created.
+// If canSet is true, a second call to SetWeightedEdge is made for each edge to
+// confirm that the nodes corresponding the end points are updated.
+func AddWeightedEdges(t *testing.T, n int, g WeightedEdgeAdder, w float64, newNode func(id int64) graph.Node, canLoop, canSetNode bool) {
+	defer func() {
+		r := recover()
+		if r != nil {
+			t.Errorf("unexpected panic: %v", r)
+		}
+	}()
+
+	type altNode struct {
+		graph.Node
+	}
+
+	rnd := rand.New(rand.NewSource(1))
+	for i := 0; i < n; i++ {
+		u := newNode(rnd.Int63n(int64(n)))
+		var v graph.Node
+		for {
+			v = newNode(rnd.Int63n(int64(n)))
+			if canLoop || u.ID() != v.ID() {
+				break
+			}
+		}
+		e := g.NewWeightedEdge(u, v, w)
+		if g.Edge(u.ID(), v.ID()) != nil {
+			t.Fatalf("NewEdge returned existing: %#v", e)
+		}
+		g.SetWeightedEdge(e)
+		ne := g.Edge(u.ID(), v.ID())
+		if ne == nil {
+			t.Fatalf("SetWeightedEdge failed to add edge: %#v", e)
+		}
+		we, ok := ne.(graph.WeightedEdge)
+		if !ok {
+			t.Fatalf("SetWeightedEdge failed to add weighted edge: %#v", e)
+		}
+		if we.Weight() != w {
+			t.Fatalf("edge weight mismatch: got:%f want:%f", we.Weight(), w)
+		}
+
+		if g.Node(u.ID()) == nil {
+			t.Fatalf("SetWeightedEdge failed to add from node: %#v", u)
+		}
+		if g.Node(v.ID()) == nil {
+			t.Fatalf("SetWeightedEdge failed to add to node: %#v", v)
+		}
+
+		if !canSetNode {
+			continue
+		}
+
+		g.SetWeightedEdge(g.NewWeightedEdge(altNode{u}, altNode{v}, w))
+		if nu := g.Node(u.ID()); nu == u {
+			t.Fatalf("SetWeightedEdge failed to update from node: u=%#v nu=%#v", u, nu)
+		}
+		if nv := g.Node(v.ID()); nv == v {
+			t.Fatalf("SetWeightedEdge failed to update to node: v=%#v nv=%#v", v, nv)
+		}
+	}
+}
+
+// NoLoopAddEdges tests whether g panics for self-loop addition. NoLoopAddEdges
+// adds n nodes with IDs in [0,n) and creates an edge from the graph with NewEdge.
+// NoLoopAddEdges confirms that this does not panic and then adds the edge to the
+// graph to ensure that SetEdge will panic when adding a self-loop.
+func NoLoopAddEdges(t *testing.T, n int, g EdgeAdder, newNode func(id int64) graph.Node) {
+	defer func() {
+		r := recover()
+		if r != nil {
+			t.Errorf("unexpected panic: %v", r)
+		}
+	}()
+
+	for id := 0; id < n; id++ {
+		node := newNode(int64(id))
+		e := g.NewEdge(node, node)
+		panicked := panics(func() {
+			g.SetEdge(e)
+		})
+		if !panicked {
+			t.Errorf("expected panic for self-edge: %#v", e)
+		}
+	}
+}
+
+// NoLoopAddWeightedEdges tests whether g panics for self-loop addition. NoLoopAddWeightedEdges
+// adds n nodes with IDs in [0,n) and creates an edge from the graph with NewWeightedEdge.
+// NoLoopAddWeightedEdges confirms that this does not panic and then adds the edge to the
+// graph to ensure that SetWeightedEdge will panic when adding a self-loop.
+func NoLoopAddWeightedEdges(t *testing.T, n int, g WeightedEdgeAdder, w float64, newNode func(id int64) graph.Node) {
+	defer func() {
+		r := recover()
+		if r != nil {
+			t.Errorf("unexpected panic: %v", r)
+		}
+	}()
+
+	for id := 0; id < n; id++ {
+		node := newNode(int64(id))
+		e := g.NewWeightedEdge(node, node, w)
+		panicked := panics(func() {
+			g.SetWeightedEdge(e)
+		})
+		if !panicked {
+			t.Errorf("expected panic for self-edge: %#v", e)
+		}
+	}
+}
+
+// LineAdder is a graph.LineAdder multigraph.
+type LineAdder interface {
+	graph.Multigraph
+	graph.LineAdder
+}
+
+// AddLines tests whether g correctly implements the graph.LineAdder interface.
+// AddLines creates n pairs of nodes with random IDs in [0,n) and joins edges
+// each node in the pair using SetLine. AddLines confirms that the end point
+// nodes are added to the graph and that the edges are stored in the graph.
+// If canSet is true, a second call to SetLine is made for each edge to confirm
+// that the nodes corresponding the end points are updated.
+func AddLines(t *testing.T, n int, g LineAdder, newNode func(id int64) graph.Node, canSetNode bool) {
+	defer func() {
+		r := recover()
+		if r != nil {
+			t.Errorf("unexpected panic: %v", r)
+		}
+	}()
+
+	type altNode struct {
+		graph.Node
+	}
+
+	rnd := rand.New(rand.NewSource(1))
+	seen := make(set.Int64s)
+	for i := 0; i < n; i++ {
+		u := newNode(rnd.Int63n(int64(n)))
+		v := newNode(rnd.Int63n(int64(n)))
+		prev := g.Lines(u.ID(), v.ID())
+		l := g.NewLine(u, v)
+		if seen.Has(l.ID()) {
+			t.Fatalf("NewLine returned an existing line: %#v", l)
+		}
+		if g.Lines(u.ID(), v.ID()).Len() != prev.Len() {
+			t.Fatalf("NewLine added a line: %#v", l)
+		}
+		g.SetLine(l)
+		seen.Add(l.ID())
+		if g.Lines(u.ID(), v.ID()).Len() != prev.Len()+1 {
+			t.Fatalf("SetLine failed to add line: %#v", l)
+		}
+		if g.Node(u.ID()) == nil {
+			t.Fatalf("SetLine failed to add from node: %#v", u)
+		}
+		if g.Node(v.ID()) == nil {
+			t.Fatalf("SetLine failed to add to node: %#v", v)
+		}
+
+		if !canSetNode {
+			continue
+		}
+
+		g.SetLine(g.NewLine(altNode{u}, altNode{v}))
+		if nu := g.Node(u.ID()); nu == u {
+			t.Fatalf("SetLine failed to update from node: u=%#v nu=%#v", u, nu)
+		}
+		if nv := g.Node(v.ID()); nv == v {
+			t.Fatalf("SetLine failed to update to node: v=%#v nv=%#v", v, nv)
+		}
+	}
+}
+
+// WeightedLineAdder is a graph.WeightedLineAdder multigraph.
+type WeightedLineAdder interface {
+	graph.Multigraph
+	graph.WeightedLineAdder
+}
+
+// AddWeightedLines tests whether g correctly implements the graph.WeightedEdgeAdder
+// interface. AddWeightedLines creates n pairs of nodes with random IDs in [0,n) and
+// joins edges each node in the pair using SetWeightedLine with weight w.
+// AddWeightedLines confirms that the end point nodes are added to the graph and that
+// the edges are stored in the graph. If canSet is true, a second call to SetWeightedLine
+// is made for each edge to confirm that the nodes corresponding the end points are
+// updated.
+func AddWeightedLines(t *testing.T, n int, g WeightedLineAdder, w float64, newNode func(id int64) graph.Node, canSetNode bool) {
+	defer func() {
+		r := recover()
+		if r != nil {
+			t.Errorf("unexpected panic: %v", r)
+		}
+	}()
+
+	type altNode struct {
+		graph.Node
+	}
+
+	rnd := rand.New(rand.NewSource(1))
+	seen := make(set.Int64s)
+	for i := 0; i < n; i++ {
+		u := newNode(rnd.Int63n(int64(n)))
+		v := newNode(rnd.Int63n(int64(n)))
+		prev := g.Lines(u.ID(), v.ID())
+		l := g.NewWeightedLine(u, v, w)
+		if seen.Has(l.ID()) {
+			t.Fatalf("NewWeightedLine returned an existing line: %#v", l)
+		}
+		if g.Lines(u.ID(), v.ID()).Len() != prev.Len() {
+			t.Fatalf("NewWeightedLine added a line: %#v", l)
+		}
+		g.SetWeightedLine(l)
+		seen.Add(l.ID())
+		curr := g.Lines(u.ID(), v.ID())
+		if curr.Len() != prev.Len()+1 {
+			t.Fatalf("SetWeightedLine failed to add line: %#v", l)
+		}
+		var found bool
+		for curr.Next() {
+			if curr.Line().ID() == l.ID() {
+				found = true
+				wl, ok := curr.Line().(graph.WeightedLine)
+				if !ok {
+					t.Fatalf("SetWeightedLine failed to add weighted line: %#v", l)
+				}
+				if wl.Weight() != w {
+					t.Fatalf("line weight mismatch: got:%f want:%f", wl.Weight(), w)
+				}
+				break
+			}
+		}
+		if !found {
+			t.Fatalf("SetWeightedLine failed to add line: %#v", l)
+		}
+		if g.Node(u.ID()) == nil {
+			t.Fatalf("SetWeightedLine failed to add from node: %#v", u)
+		}
+		if g.Node(v.ID()) == nil {
+			t.Fatalf("SetWeightedLine failed to add to node: %#v", v)
+		}
+
+		if !canSetNode {
+			continue
+		}
+
+		g.SetWeightedLine(g.NewWeightedLine(altNode{u}, altNode{v}, w))
+		if nu := g.Node(u.ID()); nu == u {
+			t.Fatalf("SetWeightedLine failed to update from node: u=%#v nu=%#v", u, nu)
+		}
+		if nv := g.Node(v.ID()); nv == v {
+			t.Fatalf("SetWeightedLine failed to update to node: v=%#v nv=%#v", v, nv)
+		}
+	}
+}
+
+// EdgeRemover is a graph.EdgeRemover graph.
+type EdgeRemover interface {
+	graph.Graph
+	graph.EdgeRemover
+}
+
+// RemoveEdges tests whether g correctly implements the graph.EdgeRemover interface.
+// The input graph g must contain a set of nodes with some edges between them.
+// RemoveEdges iterates over remove, which must contain edges in g, removing each
+// edge. RemoveEdges confirms that the edge is removed, leaving its end-point nodes
+// and all other edges in the graph.
+func RemoveEdges(t *testing.T, g EdgeRemover, remove graph.Edges) {
+	edges := make(map[edge]struct{})
+	nodes := g.Nodes()
+	for nodes.Next() {
+		u := nodes.Node()
+		uid := u.ID()
+		to := g.From(uid)
+		for to.Next() {
+			v := to.Node()
+			edges[edge{f: u.ID(), t: v.ID()}] = struct{}{}
+		}
+	}
+
+	for remove.Next() {
+		e := remove.Edge()
+		if g.Edge(e.From().ID(), e.To().ID()) == nil {
+			t.Fatalf("bad tests: missing edge: %#v", e)
+		}
+		if g.Node(e.From().ID()) == nil {
+			t.Fatalf("bad tests: missing from node: %#v", e.From())
+		}
+		if g.Node(e.To().ID()) == nil {
+			t.Fatalf("bad tests: missing to node: %#v", e.To())
+		}
+
+		g.RemoveEdge(e.From().ID(), e.To().ID())
+
+		if _, ok := g.(graph.Undirected); ok {
+			delete(edges, edge{f: e.To().ID(), t: e.From().ID()})
+		}
+		delete(edges, edge{f: e.From().ID(), t: e.To().ID()})
+		for ge := range edges {
+			if g.Edge(ge.f, ge.t) == nil {
+				t.Fatalf("unexpected missing edge after removing edge %#v: %#v", e, ge)
+			}
+		}
+
+		if ne := g.Edge(e.From().ID(), e.To().ID()); ne != nil {
+			t.Fatalf("expected nil edge: got:%#v", ne)
+		}
+		if g.Node(e.From().ID()) == nil {
+			t.Fatalf("unexpected deletion of from node: %#v", e.From())
+		}
+		if g.Node(e.To().ID()) == nil {
+			t.Fatalf("unexpected deletion  to node: %#v", e.To())
+		}
+	}
+}
+
+// LineRemover is a graph.EdgeRemove graph.
+type LineRemover interface {
+	graph.Multigraph
+	graph.LineRemover
+}
+
+// RemoveLines tests whether g correctly implements the graph.LineRemover interface.
+// The input graph g must contain a set of nodes with some lines between them.
+// RemoveLines iterates over remove, which must contain lines in g, removing each
+// line. RemoveLines confirms that the line is removed, leaving its end-point nodes
+// and all other lines in the graph.
+func RemoveLines(t *testing.T, g LineRemover, remove graph.Lines) {
+	// lines is the set of lines in the graph.
+	// The presence of a key indicates that the
+	// line should exist in the graph. The value
+	// for each key is used to indicate whether
+	// it has been found during testing.
+	lines := make(map[edge]bool)
+	nodes := g.Nodes()
+	for nodes.Next() {
+		u := nodes.Node()
+		uid := u.ID()
+		to := g.From(uid)
+		for to.Next() {
+			v := to.Node()
+			lit := g.Lines(u.ID(), v.ID())
+			for lit.Next() {
+				lines[edge{f: u.ID(), t: v.ID(), id: lit.Line().ID()}] = true
+			}
+		}
+	}
+
+	for remove.Next() {
+		l := remove.Line()
+		if g.Lines(l.From().ID(), l.To().ID()) == graph.Empty {
+			t.Fatalf("bad tests: missing line: %#v", l)
+		}
+		if g.Node(l.From().ID()) == nil {
+			t.Fatalf("bad tests: missing from node: %#v", l.From())
+		}
+		if g.Node(l.To().ID()) == nil {
+			t.Fatalf("bad tests: missing to node: %#v", l.To())
+		}
+
+		prev := g.Lines(l.From().ID(), l.To().ID())
+
+		g.RemoveLine(l.From().ID(), l.To().ID(), l.ID())
+
+		if _, ok := g.(graph.Undirected); ok {
+			delete(lines, edge{f: l.To().ID(), t: l.From().ID(), id: l.ID()})
+		}
+		delete(lines, edge{f: l.From().ID(), t: l.To().ID(), id: l.ID()})
+
+		// Mark all lines as not found.
+		for gl := range lines {
+			lines[gl] = false
+		}
+
+		// Mark found lines. This could be done far more efficiently.
+		for gl := range lines {
+			lit := g.Lines(gl.f, gl.t)
+			for lit.Next() {
+				lid := lit.Line().ID()
+				if lid == gl.id {
+					lines[gl] = true
+					break
+				}
+			}
+		}
+		for gl, found := range lines {
+			if !found {
+				t.Fatalf("unexpected missing line after removing line %#v: %#v", l, gl)
+			}
+		}
+
+		if curr := g.Lines(l.From().ID(), l.To().ID()); curr.Len() != prev.Len()-1 {
+			t.Fatalf("RemoveLine failed to mutate graph: curr edge size != prev edge size-1, %d != %d", curr.Len(), prev.Len()-1)
+		}
+		if g.Node(l.From().ID()) == nil {
+			t.Fatalf("unexpected deletion of from node: %#v", l.From())
+		}
+		if g.Node(l.To().ID()) == nil {
+			t.Fatalf("unexpected deletion  to node: %#v", l.To())
+		}
+	}
+}
+
 // undirectedIDs returns a numerical sort ordered canonicalisation of the
 // IDs of e.
 func undirectedIDs(e graph.Edge) (lo, hi int64, inverted bool) {
@@ -1023,9 +1697,87 @@ func undirectedIDs(e graph.Edge) (lo, hi int64, inverted bool) {
 }
 
 type edge struct {
-	f, t int64
+	f, t, id int64
 }
 
 func same(a, b float64) bool {
 	return (math.IsNaN(a) && math.IsNaN(b)) || a == b
+}
+
+func panics(fn func()) (ok bool) {
+	defer func() {
+		ok = recover() != nil
+	}()
+	fn()
+	return
+}
+
+// RandomNodes implements the graph.Nodes interface for a set of random nodes.
+type RandomNodes struct {
+	n       int
+	seed    uint64
+	newNode func(int64) graph.Node
+
+	curr int64
+
+	state *rand.Rand
+	seen  set.Int64s
+	count int
+}
+
+var _ graph.Nodes = (*RandomNodes)(nil)
+
+// NewRandomNodes returns a new implicit node iterator containing a set of n nodes
+// with IDs generated from a PRNG seeded by the given seed.
+// The provided new func maps the id to a graph.Node.
+func NewRandomNodes(n int, seed uint64, new func(id int64) graph.Node) *RandomNodes {
+	return &RandomNodes{
+		n:       n,
+		seed:    seed,
+		newNode: new,
+
+		state: rand.New(rand.NewSource(seed)),
+		seen:  make(set.Int64s),
+		count: 0,
+	}
+}
+
+// Len returns the remaining number of nodes to be iterated over.
+func (n *RandomNodes) Len() int {
+	return n.n - n.count
+}
+
+// Next returns whether the next call of Node will return a valid node.
+func (n *RandomNodes) Next() bool {
+	if n.count >= n.n {
+		return false
+	}
+	n.count++
+	for {
+		sign := int64(1)
+		if n.state.Float64() < 0.5 {
+			sign *= -1
+		}
+		n.curr = sign * n.state.Int63()
+		if !n.seen.Has(n.curr) {
+			n.seen.Add(n.curr)
+			return true
+		}
+	}
+}
+
+// Node returns the current node of the iterator. Next must have been
+// called prior to a call to Node.
+func (n *RandomNodes) Node() graph.Node {
+	if n.Len() == -1 || n.count == 0 {
+		return nil
+	}
+	return n.newNode(n.curr)
+}
+
+// Reset returns the iterator to its initial state.
+func (n *RandomNodes) Reset() {
+	n.state = rand.New(rand.NewSource(n.seed))
+	n.seen = make(set.Int64s)
+	n.count = 0
 }

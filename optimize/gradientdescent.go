@@ -83,3 +83,13 @@ func (g *GradientDescent) NextDirection(loc *Location, dir []float64) (stepSize 
 	floats.Scale(-1, dir)
 	return g.StepSizer.StepSize(loc, dir)
 }
+
+func (*GradientDescent) needs() struct {
+	Gradient bool
+	Hessian  bool
+} {
+	return struct {
+		Gradient bool
+		Hessian  bool
+	}{true, false}
+}

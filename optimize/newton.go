@@ -13,8 +13,8 @@ import (
 const maxNewtonModifications = 20
 
 var (
-	_ Method      = &Newton{}
-	_ localMethod = &Newton{}
+	_ Method      = (*Newton)(nil)
+	_ localMethod = (*Newton)(nil)
 )
 
 // Newton implements a modified Newton's method for Hessian-based unconstrained
@@ -69,16 +69,14 @@ func (n *Newton) Status() (Status, error) {
 	return n.status, n.err
 }
 
-func (n *Newton) Init(dim, tasks int, prob *Problem) (int, error) {
+func (*Newton) Uses(has Available) (uses Available, err error) {
+	return has.hessian()
+}
+
+func (n *Newton) Init(dim, tasks int) int {
 	n.status = NotTerminated
 	n.err = nil
-	if prob.Grad == nil {
-		return 1, ErrMissingGrad
-	}
-	if prob.Hess == nil {
-		return 1, ErrMissingHess
-	}
-	return 1, nil
+	return 1
 }
 
 func (n *Newton) Run(operation chan<- Task, result <-chan Task, tasks []Task) {
@@ -102,7 +100,6 @@ func (n *Newton) initLocal(loc *Location) (Operation, error) {
 	}
 	n.ls.Linesearcher = n.Linesearcher
 	n.ls.NextDirectioner = n
-
 	return n.ls.Init(loc)
 }
 

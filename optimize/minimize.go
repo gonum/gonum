@@ -43,18 +43,12 @@ type Location struct {
 
 // Method is a type which can search for an optimum of an objective function.
 type Method interface {
-	// Init initializes the method for optimization. The first two inputs are
-	// the problem dimension and number of available concurrent tasks. The third
-	// input communicates to the Method the available functions to call. The
-	// fields of method are non-nil if the function is present, and nil otherwise.
-	// Init should return an error if the fields of Problem do not match the
-	// requirements of the Method.
-	// Note that the functions passed in are _NOT_ the actual functions specified
-	// in problem, and should not be called.
+	// Init initializes the method for optimization. The inputs are
+	// the problem dimension and number of available concurrent tasks.
 	//
-	// Init returns the number of current processes to use, which must be
+	// Init returns the number of concurrent processes to use, which must be
 	// less than or equal to tasks.
-	Init(dim, tasks int, has *Problem) (int, error)
+	Init(dim, tasks int) (concurrent int)
 	// Run runs an optimization. The method sends Tasks on
 	// the operation channel (for performing function evaluations, major
 	// iterations, etc.). The result of the tasks will be returned on Result.
@@ -85,12 +79,12 @@ type Method interface {
 	// composed to specify the valid fields. Methods are free to use or
 	// ignore these values.
 	//
-	// Successful execution of an Operation typically requires the Method to
-	// modify the X field of Location, and MajorIteration operations may use
-	// the information in the remaining fields. Methods are encouraged to leave
-	// the remaining fields untouched so that the memory may be re-used by the
-	// problem. Methods should not allocate memory themselves for a Location,
-	// instead the memory should be left untouched or set to nil.
+	// Successful execution of an Operation may require the Method to modify
+	// fields a Location. MajorIteration calls will not modify the values in
+	// the Location, but Evaluation operations will. Methods are encouraged to
+	// leave Location fields untouched to allow memory re-use. If data needs to
+	// be stored, the respective field should be set to nil -- Methods should
+	// not allocate Location memory themselves.
 	//
 	// Method may have its own specific convergence criteria, which can
 	// be communicated using a MethodDone operation. This will trigger a
@@ -101,6 +95,11 @@ type Method interface {
 	// The operation and result tasks are guaranteed to have a buffer length
 	// equal to the return from Init.
 	Run(operation chan<- Task, result <-chan Task, tasks []Task)
+	// Uses checks if the Method is suited to the optimization problem. The
+	// input is the available functions in Problem to call, and the returns are
+	// the functions which may be used and an error if there is a mismatch
+	// between the Problem and the Method's capabilities.
+	Uses(has Available) (uses Available, err error)
 }
 
 // Minimize uses an optimizer to search for a minimum of a function. A
@@ -132,7 +131,9 @@ type Method interface {
 //
 // The final argument is the optimization method to use. If method == nil, then
 // an appropriate default is chosen based on the properties of the other arguments
-// (dimension, gradient-free or gradient-based, etc.).
+// (dimension, gradient-free or gradient-based, etc.). If method is not nil,
+// Minimize panics if the Problem is not consistent with the Method (Uses
+// returns an error).
 //
 // Minimize returns a Result struct and any error that occurred. See the
 // documentation of Result for more information.
@@ -210,11 +211,12 @@ func minimize(prob *Problem, method Method, settings *Settings, converger Conver
 	if nTasks == 0 {
 		nTasks = 1
 	}
-	fake := fakeProblem(prob)
-	newNTasks, initErr := method.Init(dim, nTasks, fake)
+	has := availFromProblem(*prob)
+	_, initErr := method.Uses(has)
 	if initErr != nil {
-		return Failure, initErr
+		panic(fmt.Sprintf("optimize: specified method inconsistent with Problem: %v", initErr))
 	}
+	newNTasks := method.Init(dim, nTasks)
 	if newNTasks > nTasks {
 		panic("optimize: too many tasks returned by Method")
 	}
@@ -389,23 +391,6 @@ func minimize(prob *Problem, method Method, settings *Settings, converger Conver
 	return finalStatus, finalError
 }
 
-// fakeProblem returns a problem structure with the same non-nil fields but with
-// different actual functions.
-func fakeProblem(p *Problem) *Problem {
-	str := "minimize: don't call"
-	r := &Problem{}
-	if p.Func != nil {
-		r.Func = func(x []float64) float64 { panic(str) }
-	}
-	if p.Grad != nil {
-		r.Grad = func(grad, x []float64) []float64 { panic(str) }
-	}
-	if p.Hess != nil {
-		r.Hess = func(h mat.Symmetric, x []float64) mat.Symmetric { panic(str) }
-	}
-	return r
-}
-
 func defaultFunctionConverge() *FunctionConverge {
 	return &FunctionConverge{
 		Absolute:   1e-10,
@@ -569,9 +554,16 @@ func checkIterationLimits(loc *Location, stats *Stats, settings *Settings) Statu
 // It increments the iteration count, updates the optimal location, and checks
 // the necessary convergence criteria.
 func performMajorIteration(optLoc, loc *Location, stats *Stats, converger Converger, startTime time.Time, settings *Settings) Status {
-	// Swap the memory between optLoc and loc. This especially allows efficient
-	// storage of the Hessian.
-	*optLoc, *loc = *loc, *optLoc
+	optLoc.F = loc.F
+	copy(optLoc.X, loc.X)
+	if loc.Gradient == nil {
+		optLoc.Gradient = nil
+	} else {
+		if optLoc.Gradient == nil {
+			optLoc.Gradient = make([]float64, len(loc.Gradient))
+		}
+		copy(optLoc.Gradient, loc.Gradient)
+	}
 	stats.MajorIterations++
 	stats.Runtime = time.Since(startTime)
 	status := checkLocationConvergence(optLoc, settings, converger)

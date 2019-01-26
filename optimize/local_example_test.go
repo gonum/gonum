@@ -27,12 +27,12 @@ func ExampleMinimize() {
 		log.Fatal(err)
 	}
 	fmt.Printf("result.Status: %v\n", result.Status)
-	fmt.Printf("result.X: %v\n", result.X)
-	fmt.Printf("result.F: %v\n", result.F)
+	fmt.Printf("result.X: %0.4g\n", result.X)
+	fmt.Printf("result.F: %0.4g\n", result.F)
 	fmt.Printf("result.Stats.FuncEvaluations: %d\n", result.Stats.FuncEvaluations)
 	// Output:
 	// result.Status: GradientThreshold
 	// result.X: [1 1 1 1 1]
-	// result.F: 0
-	// result.Stats.FuncEvaluations: 35
+	// result.F: 4.98e-30
+	// result.Stats.FuncEvaluations: 31
 }

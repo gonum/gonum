@@ -138,7 +138,11 @@ func (cma *CmaEsChol) Status() (Status, error) {
 	return cma.methodConverged(), nil
 }
 
-func (cma *CmaEsChol) Init(dim, tasks int, p *Problem) (int, error) {
+func (*CmaEsChol) Uses(has Available) (uses Available, err error) {
+	return has.function()
+}
+
+func (cma *CmaEsChol) Init(dim, tasks int) int {
 	if dim <= 0 {
 		panic(nonpositiveDimension)
 	}
@@ -226,7 +230,7 @@ func (cma *CmaEsChol) Init(dim, tasks int, p *Problem) (int, error) {
 	cma.operation = nil
 	cma.updateErr = nil
 	t := min(tasks, cma.pop)
-	return t, nil
+	return t
 }
 
 func (cma *CmaEsChol) sendInitTasks(tasks []Task) {

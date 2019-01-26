@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	_ Method      = &LBFGS{}
-	_ localMethod = &LBFGS{}
+	_ Method      = (*LBFGS)(nil)
+	_ localMethod = (*LBFGS)(nil)
 )
 
 // LBFGS implements the limited-memory BFGS method for gradient-based
@@ -57,13 +57,14 @@ func (l *LBFGS) Status() (Status, error) {
 	return l.status, l.err
 }
 
-func (l *LBFGS) Init(dim, tasks int, prob *Problem) (int, error) {
+func (*LBFGS) Uses(has Available) (uses Available, err error) {
+	return has.gradient()
+}
+
+func (l *LBFGS) Init(dim, tasks int) int {
 	l.status = NotTerminated
 	l.err = nil
-	if prob.Grad == nil {
-		return 1, ErrMissingGrad
-	}
-	return 1, nil
+	return 1
 }
 
 func (l *LBFGS) Run(operation chan<- Task, result <-chan Task, tasks []Task) {

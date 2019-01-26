@@ -39,7 +39,6 @@ func (l localOptimizer) run(method localMethod, gradThresh float64, operation ch
 		l.finish(operation, result)
 		return NotTerminated, nil
 	}
-
 	op, err := method.initLocal(task.Location)
 	if err != nil {
 		l.finishMethodDone(operation, result, task)

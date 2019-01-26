@@ -11,8 +11,8 @@ import (
 )
 
 var (
-	_ Method      = &BFGS{}
-	_ localMethod = &BFGS{}
+	_ Method      = (*BFGS)(nil)
+	_ localMethod = (*BFGS)(nil)
 )
 
 // BFGS implements the Broyden–Fletcher–Goldfarb–Shanno optimization method. It
@@ -51,13 +51,14 @@ func (b *BFGS) Status() (Status, error) {
 	return b.status, b.err
 }
 
-func (b *BFGS) Init(dim, tasks int, prob *Problem) (int, error) {
+func (*BFGS) Uses(has Available) (uses Available, err error) {
+	return has.gradient()
+}
+
+func (b *BFGS) Init(dim, tasks int) int {
 	b.status = NotTerminated
 	b.err = nil
-	if prob.Grad == nil {
-		return 1, ErrMissingGrad
-	}
-	return 1, nil
+	return 1
 }
 
 func (b *BFGS) Run(operation chan<- Task, result <-chan Task, tasks []Task) {

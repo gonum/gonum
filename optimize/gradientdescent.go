@@ -7,8 +7,8 @@ package optimize
 import "gonum.org/v1/gonum/floats"
 
 var (
-	_ Method      = &GradientDescent{}
-	_ localMethod = &GradientDescent{}
+	_ Method      = (*GradientDescent)(nil)
+	_ localMethod = (*GradientDescent)(nil)
 )
 
 // GradientDescent implements the steepest descent optimization method that
@@ -35,13 +35,14 @@ func (g *GradientDescent) Status() (Status, error) {
 	return g.status, g.err
 }
 
-func (g *GradientDescent) Init(dim, tasks int, prob *Problem) (int, error) {
+func (*GradientDescent) Uses(has Available) (uses Available, err error) {
+	return has.gradient()
+}
+
+func (g *GradientDescent) Init(dim, tasks int) int {
 	g.status = NotTerminated
 	g.err = nil
-	if prob.Grad == nil {
-		return 1, ErrMissingGrad
-	}
-	return 1, nil
+	return 1
 }
 
 func (g *GradientDescent) Run(operation chan<- Task, result <-chan Task, tasks []Task) {

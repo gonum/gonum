@@ -10,7 +10,7 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-var _ Method = &ListSearch{}
+var _ Method = (*ListSearch)(nil)
 
 // ListSearch finds the optimum location from a specified list of possible
 // optimum locations.
@@ -26,9 +26,13 @@ type ListSearch struct {
 	bestIdx int
 }
 
+func (*ListSearch) Uses(has Available) (uses Available, err error) {
+	return has.function()
+}
+
 // InitGlobal initializes the method for optimization. The input dimension
 // must match the number of columns of Locs.
-func (l *ListSearch) Init(dim, tasks int, p *Problem) (int, error) {
+func (l *ListSearch) Init(dim, tasks int) int {
 	if dim <= 0 {
 		panic(nonpositiveDimension)
 	}
@@ -46,7 +50,7 @@ func (l *ListSearch) Init(dim, tasks int, p *Problem) (int, error) {
 	l.rows = r
 	l.bestF = math.Inf(1)
 	l.bestIdx = -1
-	return min(r, tasks), nil
+	return min(r, tasks)
 }
 
 func (l *ListSearch) sendNewLoc(operation chan<- Task, task Task) {

@@ -16,8 +16,8 @@ const (
 )
 
 var (
-	_ Method      = &CG{}
-	_ localMethod = &CG{}
+	_ Method      = (*CG)(nil)
+	_ localMethod = (*CG)(nil)
 )
 
 // CGVariant calculates the scaling parameter, β, used for updating the
@@ -114,13 +114,14 @@ func (cg *CG) Status() (Status, error) {
 	return cg.status, cg.err
 }
 
-func (cg *CG) Init(dim, tasks int, prob *Problem) (int, error) {
+func (*CG) Uses(has Available) (uses Available, err error) {
+	return has.gradient()
+}
+
+func (cg *CG) Init(dim, tasks int) int {
 	cg.status = NotTerminated
 	cg.err = nil
-	if prob.Grad == nil {
-		return 1, ErrMissingGrad
-	}
-	return 1, nil
+	return 1
 }
 
 func (cg *CG) Run(operation chan<- Task, result <-chan Task, tasks []Task) {

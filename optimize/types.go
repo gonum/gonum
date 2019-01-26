@@ -86,8 +86,8 @@ var operationNames = map[Operation]string{
 }
 
 // Result represents the answer of an optimization run. It contains the optimum
-// location as well as the Status at convergence and Statistics taken during the
-// run.
+// function value, X location, and gradient as well as the Status at convergence
+// and Statistics taken during the run.
 type Result struct {
 	Location
 	Stats
@@ -126,7 +126,7 @@ type Problem struct {
 
 	// Grad evaluates the gradient at x and returns the result. Grad may use
 	// (and return) the provided slice if it is non-nil, or must allocate a new
-	// slice otherwise.
+	// slice otherwise. Grad must not modify x.
 	Grad func(grad []float64, x []float64) []float64
 
 	// Hess evaluates the Hessian at x and stores the result in-place in hess.
@@ -141,6 +141,49 @@ type Problem struct {
 	// not able to evaluate itself. The user can use one of the pre-provided Status
 	// constants, or may call NewStatus to create a custom Status value.
 	Status func() (Status, error)
+}
+
+// Available describes the functions available to call in Problem.
+type Available struct {
+	Grad bool
+	Hess bool
+}
+
+func availFromProblem(prob Problem) Available {
+	return Available{Grad: prob.Grad != nil, Hess: prob.Hess != nil}
+}
+
+// function tests if the Problem described by the receiver is suitable for an
+// unconstrained Method that only calls the function, and returns the result.
+func (has Available) function() (uses Available, err error) {
+	// TODO(btracey): This needs to be modified when optimize supports
+	// constrained optimization.
+	return Available{}, nil
+}
+
+// gradient tests if the Problem described by the receiver is suitable for an
+// unconstrained gradient-based Method, and returns the result.
+func (has Available) gradient() (uses Available, err error) {
+	// TODO(btracey): This needs to be modified when optimize supports
+	// constrained optimization.
+	if !has.Grad {
+		return Available{}, ErrMissingGrad
+	}
+	return Available{Grad: true}, nil
+}
+
+// hessian tests if the Problem described by the receiver is suitable for an
+// unconstrained Hessian-based Method, and returns the result.
+func (has Available) hessian() (uses Available, err error) {
+	// TODO(btracey): This needs to be modified when optimize supports
+	// constrained optimization.
+	if !has.Grad {
+		return Available{}, ErrMissingGrad
+	}
+	if !has.Hess {
+		return Available{}, ErrMissingHess
+	}
+	return Available{Grad: true, Hess: true}, nil
 }
 
 // TODO(btracey): Think about making this an exported function when the

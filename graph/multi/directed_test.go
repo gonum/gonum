@@ -8,8 +8,11 @@ import (
 	"math"
 	"testing"
 
+	"golang.org/x/exp/rand"
+
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/set"
+	"gonum.org/v1/gonum/graph/iterator"
 	"gonum.org/v1/gonum/graph/multi"
 	"gonum.org/v1/gonum/graph/testgraph"
 )
@@ -63,6 +66,69 @@ func TestDirected(t *testing.T) {
 	})
 	t.Run("ReturnNodeSlice", func(t *testing.T) {
 		testgraph.ReturnNodeSlice(t, directedBuilder, true)
+	})
+
+	t.Run("AddNodes", func(t *testing.T) {
+		testgraph.AddNodes(t, multi.NewDirectedGraph(), 100)
+	})
+	t.Run("AddArbitraryNodes", func(t *testing.T) {
+		testgraph.AddArbitraryNodes(t,
+			multi.NewDirectedGraph(),
+			testgraph.NewRandomNodes(100, 1, func(id int64) graph.Node { return multi.Node(id) }),
+		)
+	})
+	t.Run("RemoveNodes", func(t *testing.T) {
+		g := multi.NewDirectedGraph()
+		it := testgraph.NewRandomNodes(100, 1, func(id int64) graph.Node { return multi.Node(id) })
+		for it.Next() {
+			g.AddNode(it.Node())
+		}
+		it.Reset()
+		rnd := rand.New(rand.NewSource(1))
+		for it.Next() {
+			u := it.Node()
+			d := rnd.Intn(5)
+			vit := g.Nodes()
+			for d >= 0 && vit.Next() {
+				v := vit.Node()
+				d--
+				g.SetLine(g.NewLine(u, v))
+			}
+		}
+		testgraph.RemoveNodes(t, g)
+	})
+	t.Run("AddLines", func(t *testing.T) {
+		testgraph.AddLines(t, 100,
+			multi.NewDirectedGraph(),
+			func(id int64) graph.Node { return multi.Node(id) },
+			true, // Can update nodes.
+		)
+	})
+	t.Run("RemoveLines", func(t *testing.T) {
+		g := multi.NewDirectedGraph()
+		it := testgraph.NewRandomNodes(100, 1, func(id int64) graph.Node { return multi.Node(id) })
+		for it.Next() {
+			g.AddNode(it.Node())
+		}
+		it.Reset()
+		var lines []graph.Line
+		rnd := rand.New(rand.NewSource(1))
+		for it.Next() {
+			u := it.Node()
+			d := rnd.Intn(5)
+			vit := g.Nodes()
+			for d >= 0 && vit.Next() {
+				v := vit.Node()
+				d--
+				l := g.NewLine(u, v)
+				g.SetLine(l)
+				lines = append(lines, l)
+			}
+		}
+		rnd.Shuffle(len(lines), func(i, j int) {
+			lines[i], lines[j] = lines[j], lines[i]
+		})
+		testgraph.RemoveLines(t, g, iterator.NewOrderedLines(lines))
 	})
 }
 

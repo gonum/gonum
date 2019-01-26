@@ -7,8 +7,11 @@ package multi_test
 import (
 	"testing"
 
+	"golang.org/x/exp/rand"
+
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/set"
+	"gonum.org/v1/gonum/graph/iterator"
 	"gonum.org/v1/gonum/graph/multi"
 	"gonum.org/v1/gonum/graph/testgraph"
 )
@@ -81,6 +84,70 @@ func TestWeightedDirected(t *testing.T) {
 	})
 	t.Run("Weight", func(t *testing.T) {
 		testgraph.Weight(t, weightedDirectedBuilder)
+	})
+
+	t.Run("AddNodes", func(t *testing.T) {
+		testgraph.AddNodes(t, multi.NewWeightedDirectedGraph(), 100)
+	})
+	t.Run("AddArbitraryNodes", func(t *testing.T) {
+		testgraph.AddArbitraryNodes(t,
+			multi.NewWeightedDirectedGraph(),
+			testgraph.NewRandomNodes(100, 1, func(id int64) graph.Node { return multi.Node(id) }),
+		)
+	})
+	t.Run("RemoveNodes", func(t *testing.T) {
+		g := multi.NewWeightedDirectedGraph()
+		it := testgraph.NewRandomNodes(100, 1, func(id int64) graph.Node { return multi.Node(id) })
+		for it.Next() {
+			g.AddNode(it.Node())
+		}
+		it.Reset()
+		rnd := rand.New(rand.NewSource(1))
+		for it.Next() {
+			u := it.Node()
+			d := rnd.Intn(5)
+			vit := g.Nodes()
+			for d >= 0 && vit.Next() {
+				v := vit.Node()
+				d--
+				g.SetWeightedLine(g.NewWeightedLine(u, v, 1))
+			}
+		}
+		testgraph.RemoveNodes(t, g)
+	})
+	t.Run("AddWeightedLines", func(t *testing.T) {
+		testgraph.AddWeightedLines(t, 100,
+			multi.NewWeightedDirectedGraph(),
+			0.5,
+			func(id int64) graph.Node { return multi.Node(id) },
+			true, // Can update nodes.
+		)
+	})
+	t.Run("RemoveLines", func(t *testing.T) {
+		g := multi.NewWeightedDirectedGraph()
+		it := testgraph.NewRandomNodes(100, 1, func(id int64) graph.Node { return multi.Node(id) })
+		for it.Next() {
+			g.AddNode(it.Node())
+		}
+		it.Reset()
+		var lines []graph.Line
+		rnd := rand.New(rand.NewSource(1))
+		for it.Next() {
+			u := it.Node()
+			d := rnd.Intn(5)
+			vit := g.Nodes()
+			for d >= 0 && vit.Next() {
+				v := vit.Node()
+				d--
+				l := g.NewWeightedLine(u, v, 1)
+				g.SetWeightedLine(l)
+				lines = append(lines, l)
+			}
+		}
+		rnd.Shuffle(len(lines), func(i, j int) {
+			lines[i], lines[j] = lines[j], lines[i]
+		})
+		testgraph.RemoveLines(t, g, iterator.NewOrderedLines(lines))
 	})
 }
 

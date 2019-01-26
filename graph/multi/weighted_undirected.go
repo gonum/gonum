@@ -209,8 +209,11 @@ func (g *WeightedUndirectedGraph) RemoveLine(fid, tid, id int64) {
 		return
 	}
 
-	delete(g.lines[fid], tid)
-	delete(g.lines[tid], fid)
+	delete(g.lines[fid][tid], id)
+	if len(g.lines[fid][tid]) == 0 {
+		delete(g.lines[fid], tid)
+	}
+	delete(g.lines[tid][fid], id)
 	if len(g.lines[tid][fid]) == 0 {
 		delete(g.lines[tid], fid)
 	}

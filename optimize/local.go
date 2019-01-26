@@ -82,7 +82,7 @@ func (localOptimizer) initialOperation(task Task, n needser) Operation {
 	if op&FuncEvaluation == 0 {
 		newOp |= FuncEvaluation
 	}
-	needs := n.Needs()
+	needs := n.needs()
 	if needs.Gradient && op&GradEvaluation == 0 {
 		newOp |= GradEvaluation
 	}

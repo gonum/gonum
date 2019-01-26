@@ -167,7 +167,7 @@ func (n *Newton) NextDirection(loc *Location, dir []float64) (stepSize float64) 
 	return 1
 }
 
-func (n *Newton) Needs() struct {
+func (n *Newton) needs() struct {
 	Gradient bool
 	Hessian  bool
 } {

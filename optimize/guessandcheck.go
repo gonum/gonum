@@ -21,10 +21,6 @@ type GuessAndCheck struct {
 	bestX []float64
 }
 
-func (g *GuessAndCheck) Needs() struct{ Gradient, Hessian bool } {
-	return struct{ Gradient, Hessian bool }{false, false}
-}
-
 func (*GuessAndCheck) Uses(has Available) (uses Available, err error) {
 	return has.function()
 }

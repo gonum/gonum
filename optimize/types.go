@@ -5,7 +5,6 @@
 package optimize
 
 import (
-	"errors"
 	"fmt"
 	"time"
 
@@ -184,18 +183,6 @@ func (has Available) hessian() (uses Available, err error) {
 		return Available{}, ErrMissingHess
 	}
 	return Available{Grad: true, Hess: true}, nil
-}
-
-// TODO(btracey): Think about making this an exported function when the
-// constraint interface is designed.
-func (p Problem) satisfies(method needser) error {
-	if method.Needs().Gradient && p.Grad == nil {
-		return errors.New("optimize: problem does not provide needed Grad function")
-	}
-	if method.Needs().Hessian && p.Hess == nil {
-		return errors.New("optimize: problem does not provide needed Hess function")
-	}
-	return nil
 }
 
 // Settings represents settings of the optimization run. It contains initial

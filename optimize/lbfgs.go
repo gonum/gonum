@@ -188,7 +188,7 @@ func (l *LBFGS) NextDirection(loc *Location, dir []float64) (stepSize float64) {
 	return 1
 }
 
-func (*LBFGS) Needs() struct {
+func (*LBFGS) needs() struct {
 	Gradient bool
 	Hessian  bool
 } {

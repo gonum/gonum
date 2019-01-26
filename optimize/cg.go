@@ -243,7 +243,7 @@ func (cg *CG) NextDirection(loc *Location, dir []float64) (stepSize float64) {
 	return stepSize
 }
 
-func (*CG) Needs() struct {
+func (*CG) needs() struct {
 	Gradient bool
 	Hessian  bool
 } {

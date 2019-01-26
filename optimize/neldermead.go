@@ -338,7 +338,7 @@ func (n *NelderMead) replaceWorst(x []float64, f float64) {
 	floats.AddScaled(n.centroid, 1/float64(dim), x)
 }
 
-func (*NelderMead) Needs() struct {
+func (*NelderMead) needs() struct {
 	Gradient bool
 	Hessian  bool
 } {

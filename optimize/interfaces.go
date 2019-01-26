@@ -48,11 +48,11 @@ type localMethod interface {
 }
 
 type needser interface {
-	// Needs specifies information about the objective function needed by the
+	// needs specifies information about the objective function needed by the
 	// optimizer beyond just the function value. The information is used
 	// internally for initialization and must match evaluation types returned
 	// by Init and Iterate during the optimization process.
-	Needs() struct {
+	needs() struct {
 		Gradient bool
 		Hessian  bool
 	}

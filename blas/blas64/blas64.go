@@ -29,8 +29,8 @@ func Implementation() blas.Float64 {
 // Vector represents a vector with an associated element increment.
 type Vector struct {
 	N    int
-	Inc  int
 	Data []float64
+	Inc  int
 }
 
 // General represents a matrix using the conventional storage scheme.

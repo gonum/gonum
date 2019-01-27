@@ -437,6 +437,9 @@ func TestUnmarshal(t *testing.T) {
 		}
 		var got Content
 		err = xml.Unmarshal(data, &got)
+		if err != nil {
+			t.Errorf("failed to unmarshal %q: %v", test.path, err)
+		}
 		if !reflect.DeepEqual(got, test.unmarshaled) {
 			t.Errorf("unexpected result for %q:\ngot:\n%#v\nwant:\n%#v", test.path, got, test.unmarshaled)
 		}

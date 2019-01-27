@@ -178,6 +178,13 @@ func (v *VecDense) Reset() {
 	v.mat.Data = v.mat.Data[:0]
 }
 
+// Zero sets all of the matrix elements to zero.
+func (v *VecDense) Zero() {
+	for i := 0; i < v.mat.N; i++ {
+		v.mat.Data[v.mat.Inc*i] = 0
+	}
+}
+
 // CloneVec makes a copy of a into the receiver, overwriting the previous value
 // of the receiver.
 func (v *VecDense) CloneVec(a Vector) {

@@ -122,6 +122,13 @@ func (m *Dense) reuseAsZeroed(r, c int) {
 	if r != m.mat.Rows || c != m.mat.Cols {
 		panic(ErrShape)
 	}
+	m.Zero()
+}
+
+// Zero sets all of the matrix elements to zero.
+func (m *Dense) Zero() {
+	r := m.mat.Rows
+	c := m.mat.Cols
 	for i := 0; i < r; i++ {
 		zero(m.mat.Data[i*m.mat.Stride : i*m.mat.Stride+c])
 	}

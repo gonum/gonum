@@ -168,6 +168,13 @@ func (d *DiagDense) Reset() {
 	d.mat.Data = d.mat.Data[:0]
 }
 
+// Zero sets all of the matrix elements to zero.
+func (d *DiagDense) Zero() {
+	for i := 0; i < d.mat.N; i++ {
+		d.mat.Data[d.mat.Inc*i] = 0
+	}
+}
+
 // DiagView returns the diagonal as a matrix backed by the original data.
 func (d *DiagDense) DiagView() Diagonal {
 	return d

@@ -333,6 +333,57 @@ func TestTriBandAtSetUpper(t *testing.T) {
 	}
 }
 
+func TestTriBandDenseZero(t *testing.T) {
+	// Elements that equal 1 should be set to zero, elements that equal -1
+	// should remain unchanged.
+	for _, test := range []*TriBandDense{
+		&TriBandDense{
+			mat: blas64.TriangularBand{
+				Uplo:   blas.Upper,
+				N:      6,
+				K:      2,
+				Stride: 5,
+				Data: []float64{
+					1, 1, 1, -1, -1,
+					1, 1, 1, -1, -1,
+					1, 1, 1, -1, -1,
+					1, 1, 1, -1, -1,
+					1, 1, -1, -1, -1,
+					1, -1, -1, -1, -1,
+				},
+			},
+		},
+		&TriBandDense{
+			mat: blas64.TriangularBand{
+				Uplo:   blas.Lower,
+				N:      6,
+				K:      2,
+				Stride: 5,
+				Data: []float64{
+					-1, -1, 1, -1, -1,
+					-1, 1, 1, -1, -1,
+					1, 1, 1, -1, -1,
+					1, 1, 1, -1, -1,
+					1, 1, 1, -1, -1,
+					1, 1, 1, -1, -1,
+				},
+			},
+		},
+	} {
+		dataCopy := make([]float64, len(test.mat.Data))
+		copy(dataCopy, test.mat.Data)
+		test.Zero()
+		for i, v := range test.mat.Data {
+			if dataCopy[i] != -1 && v != 0 {
+				t.Errorf("Matrix not zeroed in bounds")
+			}
+			if dataCopy[i] == -1 && v != -1 {
+				t.Errorf("Matrix zeroed out of bounds")
+			}
+		}
+	}
+}
+
 func TestTriBandDiagView(t *testing.T) {
 	for cas, test := range []*TriBandDense{
 		NewTriBandDense(1, 0, Upper, []float64{1}),

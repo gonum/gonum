@@ -129,6 +129,38 @@ func TestSymAtSet(t *testing.T) {
 	}
 }
 
+func TestSymDenseZero(t *testing.T) {
+	// Elements that equal 1 should be set to zero, elements that equal -1
+	// should remain unchanged.
+	for _, test := range []*SymDense{
+		&SymDense{
+			mat: blas64.Symmetric{
+				Uplo:   blas.Upper,
+				N:      4,
+				Stride: 5,
+				Data: []float64{
+					1, 1, 1, 1, -1,
+					-1, 1, 1, 1, -1,
+					-1, -1, 1, 1, -1,
+					-1, -1, -1, 1, -1,
+				},
+			},
+		},
+	} {
+		dataCopy := make([]float64, len(test.mat.Data))
+		copy(dataCopy, test.mat.Data)
+		test.Zero()
+		for i, v := range test.mat.Data {
+			if dataCopy[i] != -1 && v != 0 {
+				t.Errorf("Matrix not zeroed in bounds")
+			}
+			if dataCopy[i] == -1 && v != -1 {
+				t.Errorf("Matrix zeroed out of bounds")
+			}
+		}
+	}
+}
+
 func TestSymDiagView(t *testing.T) {
 	for cas, test := range []*SymDense{
 		NewSymDense(1, []float64{1}),

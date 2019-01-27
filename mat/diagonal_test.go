@@ -56,6 +56,38 @@ func TestNewDiagDense(t *testing.T) {
 	}
 }
 
+func TestDiagDenseZero(t *testing.T) {
+	// Elements that equal 1 should be set to zero, elements that equal -1
+	// should remain unchanged.
+	for _, test := range []*DiagDense{
+		&DiagDense{
+			mat: blas64.Vector{
+				N:   5,
+				Inc: 2,
+				Data: []float64{
+					1, -1,
+					1, -1,
+					1, -1,
+					1, -1,
+					1,
+				},
+			},
+		},
+	} {
+		dataCopy := make([]float64, len(test.mat.Data))
+		copy(dataCopy, test.mat.Data)
+		test.Zero()
+		for i, v := range test.mat.Data {
+			if dataCopy[i] != -1 && v != 0 {
+				t.Errorf("Matrix not zeroed in bounds")
+			}
+			if dataCopy[i] == -1 && v != -1 {
+				t.Errorf("Matrix zeroed out of bounds")
+			}
+		}
+	}
+}
+
 func TestDiagonalStride(t *testing.T) {
 	for _, test := range []struct {
 		diag  *DiagDense

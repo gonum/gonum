@@ -131,6 +131,13 @@ func (s *SymDense) Reset() {
 	s.mat.Data = s.mat.Data[:0]
 }
 
+// Zero sets all of the matrix elements to zero.
+func (s *SymDense) Zero() {
+	for i := 0; i < s.mat.N; i++ {
+		zero(s.mat.Data[i*s.mat.Stride+i : i*s.mat.Stride+s.mat.N])
+	}
+}
+
 // IsZero returns whether the receiver is zero-sized. Zero-sized matrices can be the
 // receiver for size-restricted operations. SymDense matrices can be zeroed using Reset.
 func (s *SymDense) IsZero() bool {

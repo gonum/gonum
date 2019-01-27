@@ -242,3 +242,15 @@ func (b *BandDense) DoColNonZero(j int, fn func(i, j int, v float64)) {
 		}
 	}
 }
+
+// Zero sets all of the matrix elements to zero.
+func (b *BandDense) Zero() {
+	m := b.mat.Rows
+	kL := b.mat.KL
+	nCol := b.mat.KU + 1 + kL
+	for i := 0; i < m; i++ {
+		l := max(0, kL-i)
+		u := min(nCol, m+kL-i)
+		zero(b.mat.Data[i*b.mat.Stride+l : i*b.mat.Stride+u])
+	}
+}

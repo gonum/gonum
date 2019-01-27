@@ -603,7 +603,6 @@ leftev:
 						rec := 1 / vmax
 						bi.Dscal(n-ki, rec, b[ki*ldb+iv:], ldb)
 						vmax = 1
-						vcrit = bignum
 					}
 					b[j*ldb+iv] -= bi.Ddot(j-ki-1, t[(ki+1)*ldt+j:], ldt, b[(ki+1)*ldb+iv:], ldb)
 					// Solve [ T[j,j] - wr ]^T * X = b.
@@ -626,7 +625,6 @@ leftev:
 					if beta > vcrit {
 						bi.Dscal(n-ki+1, 1/vmax, b[ki*ldb+iv:], 1)
 						vmax = 1
-						vcrit = bignum
 					}
 					b[j*ldb+iv] -= bi.Ddot(j-ki-1, t[(ki+1)*ldt+j:], ldt, b[(ki+1)*ldb+iv:], ldb)
 					b[(j+1)*ldb+iv] -= bi.Ddot(j-ki-1, t[(ki+1)*ldt+j+1:], ldt, b[(ki+1)*ldb+iv:], ldb)
@@ -711,7 +709,6 @@ leftev:
 						bi.Dscal(n-ki, rec, b[ki*ldb+iv:], ldb)
 						bi.Dscal(n-ki, rec, b[ki*ldb+iv+1:], ldb)
 						vmax = 1
-						vcrit = bignum
 					}
 					b[j*ldb+iv] -= bi.Ddot(j-ki-2, t[(ki+2)*ldt+j:], ldt, b[(ki+2)*ldb+iv:], ldb)
 					b[j*ldb+iv+1] -= bi.Ddot(j-ki-2, t[(ki+2)*ldt+j:], ldt, b[(ki+2)*ldb+iv+1:], ldb)
@@ -738,7 +735,6 @@ leftev:
 						bi.Dscal(n-ki, rec, b[ki*ldb+iv:], ldb)
 						bi.Dscal(n-ki, rec, b[ki*ldb+iv+1:], ldb)
 						vmax = 1
-						vcrit = bignum
 					}
 					b[j*ldb+iv] -= bi.Ddot(j-ki-2, t[(ki+2)*ldt+j:], ldt, b[(ki+2)*ldb+iv:], ldb)
 					b[j*ldb+iv+1] -= bi.Ddot(j-ki-2, t[(ki+2)*ldt+j:], ldt, b[(ki+2)*ldb+iv+1:], ldb)

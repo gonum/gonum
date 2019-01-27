@@ -98,7 +98,6 @@ func (impl Implementation) Dlasq2(n int, z []float64) (info int) {
 		panic("lapack: bad z value")
 	}
 	d += z[2*(n-1)]
-	qmax = math.Max(qmax, z[2*(n-1)])
 	// Check for diagonality.
 	if e == 0 {
 		for k := 1; k < n; k++ {
@@ -330,7 +329,6 @@ outer:
 		// This might need to be done for several blocks.
 		info = 2
 		i1 = i0
-		n1 = n0
 		for {
 			tempq = z[4*i0]
 			z[4*i0] += sigma

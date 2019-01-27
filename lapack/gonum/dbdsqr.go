@@ -87,7 +87,6 @@ func (impl Implementation) Dbdsqr(uplo blas.Uplo, n, ncvt, nru, ncc int, d, e, v
 			if info != 2 {
 				return info == 0
 			}
-			info = 0
 		}
 		nm1 := n - 1
 		nm12 := nm1 + nm1

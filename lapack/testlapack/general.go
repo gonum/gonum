@@ -1561,3 +1561,18 @@ func sameUpperTri(n int, a []float64, lda int, b []float64, ldb int) bool {
 	}
 	return true
 }
+
+// svdJobString returns a string representation of job.
+func svdJobString(job lapack.SVDJob) string {
+	switch job {
+	case lapack.SVDAll:
+		return "All"
+	case lapack.SVDStore:
+		return "Store"
+	case lapack.SVDOverwrite:
+		return "Overwrite"
+	case lapack.SVDNone:
+		return "None"
+	}
+	return "unknown SVD job"
+}

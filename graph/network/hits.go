@@ -40,7 +40,6 @@ func HITS(g graph.Directed, tol float64) map[int64]HubAuthority {
 			nodesLinkedFrom[i] = append(nodesLinkedFrom[i], indexOf[v.ID()])
 		}
 	}
-	indexOf = nil
 
 	w := make([]float64, 4*len(nodes))
 	auth := w[:len(nodes)]

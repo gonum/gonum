@@ -1001,7 +1001,7 @@ func TestNearestIdx(t *testing.T) {
 			in:    []float64{math.NaN(), math.Inf(-1)},
 			query: 1,
 			want:  1,
-			desc:  "Wrong index returned when query is a number and single NaN preceeds -Inf",
+			desc:  "Wrong index returned when query is a number and single NaN precedes -Inf",
 		},
 	} {
 		ind := NearestIdx(test.in, test.query)

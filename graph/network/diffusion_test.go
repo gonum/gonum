@@ -375,7 +375,7 @@ var diffuseToEquilibriumTests = []struct {
 		// This does not look like Page Rank because we do not
 		// do the random node hops. An alternative Laplacian
 		// value that does do that would replicate PageRank. This
-		// is left as an excercise for the reader.
+		// is left as an exercise for the reader.
 		want: map[int64]float64{
 			A: 0.227273,
 			B: 0.386364,

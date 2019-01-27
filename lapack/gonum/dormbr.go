@@ -115,7 +115,7 @@ func (impl Implementation) Dormbr(vect lapack.ApplyOrtho, side blas.Side, trans 
 		// matrix to Dgebrd. The size matters due to the storage location of
 		// the off-diagonal elements.
 		if nq >= k {
-			impl.Dormqr(side, trans, m, n, k, a, lda, tau, c, ldc, work, lwork)
+			impl.Dormqr(side, trans, m, n, k, a, lda, tau[:k], c, ldc, work, lwork)
 		} else if nq > 1 {
 			mi := m
 			ni := n - 1

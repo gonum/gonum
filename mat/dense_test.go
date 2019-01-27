@@ -258,6 +258,8 @@ func TestSetRowColumn(t *testing.T) {
 }
 
 func TestDenseZero(t *testing.T) {
+	// Elements that equal 1 should be set to zero, elements that equal -1
+	// should remain unchanged.
 	for _, test := range []*Dense{
 		&Dense{
 			mat: blas64.General{

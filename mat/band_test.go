@@ -249,6 +249,8 @@ func TestNewDiagonalRect(t *testing.T) {
 }
 
 func TestBandDenseZero(t *testing.T) {
+	// Elements that equal 1 should be set to zero, elements that equal -1
+	// should remain unchanged.
 	for _, test := range []*BandDense{
 		&BandDense{
 			mat: blas64.Band{

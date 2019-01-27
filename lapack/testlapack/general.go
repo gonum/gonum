@@ -864,8 +864,9 @@ func isOrthogonal(q blas64.General) bool {
 // hasOrthonormalColumns returns whether the columns of Q are orthonormal.
 func hasOrthonormalColumns(q blas64.General) bool {
 	m, n := q.Rows, q.Cols
-	if m < n {
-		panic("m < n")
+	if n > m {
+		// Wide matrix cannot have all columns orthogonal.
+		return false
 	}
 	ldq := q.Stride
 	const tol = 1e-13
@@ -880,6 +881,38 @@ func hasOrthonormalColumns(q blas64.General) bool {
 		for j := i + 1; j < n; j++ {
 			dot := blas64.Dot(blas64.Vector{N: m, Data: q.Data[i:], Inc: ldq},
 				blas64.Vector{N: m, Data: q.Data[j:], Inc: ldq})
+			if math.IsNaN(dot) {
+				return false
+			}
+			if math.Abs(dot) > tol {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+// hasOrthonormalRows returns whether the rows of Q are orthonormal.
+func hasOrthonormalRows(q blas64.General) bool {
+	m, n := q.Rows, q.Cols
+	if m > n {
+		// Tall matrix cannot have all rows orthogonal.
+		return false
+	}
+	ldq := q.Stride
+	const tol = 1e-13
+	for i1 := 0; i1 < m; i1++ {
+		nrm := blas64.Nrm2(blas64.Vector{N: n, Data: q.Data[i1*ldq:], Inc: 1})
+		if math.IsNaN(nrm) {
+			return false
+		}
+		if math.Abs(nrm-1) > tol {
+			return false
+		}
+		for i2 := i1 + 1; i2 < m; i2++ {
+			dot := blas64.Dot(
+				blas64.Vector{N: n, Data: q.Data[i1*ldq:], Inc: 1},
+				blas64.Vector{N: n, Data: q.Data[i2*ldq:], Inc: 1})
 			if math.IsNaN(dot) {
 				return false
 			}

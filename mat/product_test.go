@@ -115,7 +115,7 @@ func TestProduct(t *testing.T) {
 
 		want := &Dense{}
 		if !test.panics {
-			a := &Dense{}
+			var a *Dense
 			for i, b := range factors {
 				if i == 0 {
 					want.Clone(b)

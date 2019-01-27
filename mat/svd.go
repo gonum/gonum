@@ -44,6 +44,8 @@ func (svd *SVD) Factorize(a Matrix, kind SVDKind) (ok bool) {
 	default:
 		panic("svd: bad input kind")
 	case SVDNone:
+		svd.u.Stride = 1
+		svd.vt.Stride = 1
 		jobU = lapack.SVDNone
 		jobVT = lapack.SVDNone
 	case SVDFull:

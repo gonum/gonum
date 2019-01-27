@@ -38,9 +38,9 @@ func DlapllTest(t *testing.T, impl Dlapller) {
 		// Compute singular values of A independently by Dgesvd.
 		s := make([]float64, min(m, n))
 		work := make([]float64, 1)
-		impl.Dgesvd(lapack.SVDNone, lapack.SVDNone, m, n, aCopy, lda, s, nil, 0, nil, 0, work, -1)
+		impl.Dgesvd(lapack.SVDNone, lapack.SVDNone, m, n, aCopy, lda, s, nil, 1, nil, 1, work, -1)
 		work = make([]float64, int(work[0]))
-		impl.Dgesvd(lapack.SVDNone, lapack.SVDNone, m, n, aCopy, lda, s, nil, 0, nil, 0, work, len(work))
+		impl.Dgesvd(lapack.SVDNone, lapack.SVDNone, m, n, aCopy, lda, s, nil, 1, nil, 1, work, len(work))
 		// Take the smallest singular value.
 		want := s[len(s)-1]
 

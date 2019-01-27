@@ -145,6 +145,14 @@ func (s *SymBandDense) RawSymBand() blas64.SymmetricBand {
 	return s.mat
 }
 
+// Zero sets all of the matrix elements to zero.
+func (s *SymBandDense) Zero() {
+	for i := 0; i < s.mat.N; i++ {
+		u := min(1+s.mat.K, s.mat.N-i)
+		zero(s.mat.Data[i*s.mat.Stride : i*s.mat.Stride+u])
+	}
+}
+
 // DiagView returns the diagonal as a matrix backed by the original data.
 func (s *SymBandDense) DiagView() Diagonal {
 	n := s.mat.N

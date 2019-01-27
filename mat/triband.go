@@ -256,6 +256,21 @@ func (t *TriBandDense) Reset() {
 	t.mat.Data = t.mat.Data[:0]
 }
 
+// Zero sets all of the matrix elements to zero.
+func (t *TriBandDense) Zero() {
+	if t.isUpper() {
+		for i := 0; i < t.mat.N; i++ {
+			u := min(1+t.mat.K, t.mat.N-i)
+			zero(t.mat.Data[i*t.mat.Stride : i*t.mat.Stride+u])
+		}
+		return
+	}
+	for i := 0; i < t.mat.N; i++ {
+		l := max(0, t.mat.K-i)
+		zero(t.mat.Data[i*t.mat.Stride+l : i*t.mat.Stride+t.mat.K+1])
+	}
+}
+
 func (t *TriBandDense) isUpper() bool {
 	return isUpperUplo(t.mat.Uplo)
 }

@@ -257,6 +257,36 @@ func TestSetRowColumn(t *testing.T) {
 	}
 }
 
+func TestDenseZero(t *testing.T) {
+	for _, test := range []*Dense{
+		&Dense{
+			mat: blas64.General{
+				Rows:   4,
+				Cols:   3,
+				Stride: 5,
+				Data: []float64{
+					1, 1, 1, -1, -1,
+					1, 1, 1, -1, -1,
+					1, 1, 1, -1, -1,
+					1, 1, 1, -1, -1,
+				},
+			},
+		},
+	} {
+		dataCopy := make([]float64, len(test.mat.Data))
+		copy(dataCopy, test.mat.Data)
+		test.Zero()
+		for i, v := range test.mat.Data {
+			if dataCopy[i] != -1 && v != 0 {
+				t.Errorf("Matrix not zeroed in bounds")
+			}
+			if dataCopy[i] == -1 && v != -1 {
+				t.Errorf("Matrix zeroed out of bounds")
+			}
+		}
+	}
+}
+
 func TestRowColView(t *testing.T) {
 	for _, test := range []struct {
 		mat [][]float64

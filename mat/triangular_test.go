@@ -139,6 +139,49 @@ func TestTriAtSet(t *testing.T) {
 	}
 }
 
+func TestTriDenseZero(t *testing.T) {
+	for _, test := range []*TriDense{
+		&TriDense{
+			mat: blas64.Triangular{
+				Uplo:   blas.Upper,
+				N:      4,
+				Stride: 5,
+				Data: []float64{
+					1, 1, 1, 1, -1,
+					-1, 1, 1, 1, -1,
+					-1, -1, 1, 1, -1,
+					-1, -1, -1, 1, -1,
+				},
+			},
+		},
+		&TriDense{
+			mat: blas64.Triangular{
+				Uplo:   blas.Lower,
+				N:      4,
+				Stride: 5,
+				Data: []float64{
+					1, -1, -1, -1, -1,
+					1, 1, -1, -1, -1,
+					1, 1, 1, -1, -1,
+					1, 1, 1, 1, -1,
+				},
+			},
+		},
+	} {
+		dataCopy := make([]float64, len(test.mat.Data))
+		copy(dataCopy, test.mat.Data)
+		test.Zero()
+		for i, v := range test.mat.Data {
+			if dataCopy[i] != -1 && v != 0 {
+				t.Errorf("Matrix not zeroed in bounds")
+			}
+			if dataCopy[i] == -1 && v != -1 {
+				t.Errorf("Matrix zeroed out of bounds")
+			}
+		}
+	}
+}
+
 func TestTriDiagView(t *testing.T) {
 	for cas, test := range []*TriDense{
 		NewTriDense(1, Upper, []float64{1}),

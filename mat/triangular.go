@@ -230,6 +230,19 @@ func (t *TriDense) Reset() {
 	t.mat.Data = t.mat.Data[:0]
 }
 
+// Zero sets all of the matrix elements to zero.
+func (t *TriDense) Zero() {
+	if t.isUpper() {
+		for i := 0; i < t.mat.N; i++ {
+			zero(t.mat.Data[i*t.mat.Stride+i : i*t.mat.Stride+t.mat.N])
+		}
+		return
+	}
+	for i := 0; i < t.mat.N; i++ {
+		zero(t.mat.Data[i*t.mat.Stride : i*t.mat.Stride+i+1])
+	}
+}
+
 // IsZero returns whether the receiver is zero-sized. Zero-sized matrices can be the
 // receiver for size-restricted operations. TriDense matrices can be zeroed using Reset.
 func (t *TriDense) IsZero() bool {

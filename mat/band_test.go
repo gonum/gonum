@@ -248,6 +248,57 @@ func TestNewDiagonalRect(t *testing.T) {
 	}
 }
 
+func TestBandDenseZero(t *testing.T) {
+	for _, test := range []*BandDense{
+		&BandDense{
+			mat: blas64.Band{
+				Rows:   6,
+				Cols:   7,
+				Stride: 8,
+				KL:     1,
+				KU:     2,
+				Data: []float64{
+					-1, 1, 1, 1, -1, -1, -1, -1,
+					1, 1, 1, 1, -1, -1, -1, -1,
+					1, 1, 1, 1, -1, -1, -1, -1,
+					1, 1, 1, 1, -1, -1, -1, -1,
+					1, 1, 1, -1, -1, -1, -1, -1,
+					1, 1, -1, -1, -1, -1, -1, -1,
+				},
+			},
+		},
+		&BandDense{
+			mat: blas64.Band{
+				Rows:   6,
+				Cols:   7,
+				Stride: 8,
+				KL:     2,
+				KU:     1,
+				Data: []float64{
+					-1, -1, 1, 1, -1, -1, -1, -1,
+					-1, 1, 1, 1, -1, -1, -1, -1,
+					1, 1, 1, 1, -1, -1, -1, -1,
+					1, 1, 1, 1, -1, -1, -1, -1,
+					1, 1, 1, 1, -1, -1, -1, -1,
+					1, 1, 1, -1, -1, -1, -1, -1,
+				},
+			},
+		},
+	} {
+		dataCopy := make([]float64, len(test.mat.Data))
+		copy(dataCopy, test.mat.Data)
+		test.Zero()
+		for i, v := range test.mat.Data {
+			if dataCopy[i] != -1 && v != 0 {
+				t.Errorf("Matrix not zeroed in bounds")
+			}
+			if dataCopy[i] == -1 && v != -1 {
+				t.Errorf("Matrix zeroed out of bounds")
+			}
+		}
+	}
+}
+
 func TestBandDiagView(t *testing.T) {
 	for cas, test := range []*BandDense{
 		NewBandDense(1, 1, 0, 0, []float64{1}),

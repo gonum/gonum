@@ -195,3 +195,36 @@ func TestSymBandDiagView(t *testing.T) {
 		testDiagView(t, cas, test)
 	}
 }
+
+func TestSymBandDenseZero(t *testing.T) {
+	for _, test := range []*SymBandDense{
+		&SymBandDense{
+			mat: blas64.SymmetricBand{
+				Uplo:   blas.Upper,
+				N:      6,
+				K:      2,
+				Stride: 5,
+				Data: []float64{
+					1, 1, 1, -1, -1,
+					1, 1, 1, -1, -1,
+					1, 1, 1, -1, -1,
+					1, 1, 1, -1, -1,
+					1, 1, -1, -1, -1,
+					1, -1, -1, -1, -1,
+				},
+			},
+		},
+	} {
+		dataCopy := make([]float64, len(test.mat.Data))
+		copy(dataCopy, test.mat.Data)
+		test.Zero()
+		for i, v := range test.mat.Data {
+			if dataCopy[i] != -1 && v != 0 {
+				t.Errorf("Matrix not zeroed in bounds")
+			}
+			if dataCopy[i] == -1 && v != -1 {
+				t.Errorf("Matrix zeroed out of bounds")
+			}
+		}
+	}
+}

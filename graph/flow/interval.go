@@ -1,3 +1,7 @@
+// Copyright ©2019 The Gonum Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 // Find the unique set of intervals of a control flow graph, as described in
 // Allen, Frances E., and John Cocke. "A program data flow analysis procedure."
 // Communications of the ACM 19.3 (1976): 137 [1].
@@ -35,16 +39,12 @@ func (i *Interval) Node(id int64) graph.Node {
 }
 
 // Nodes returns all the nodes of the interval.
-//
-// Nodes must not return nil.
 func (i *Interval) Nodes() graph.Nodes {
 	panic("not yet implemented")
 }
 
 // From returns all nodes that can be reached directly from the node with the
 // given ID within the interval.
-//
-// From must not return nil.
 func (i *Interval) From(id int64) graph.Nodes {
 	panic("not yet implemented")
 }

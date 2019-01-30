@@ -30,6 +30,10 @@ func (e Edge) From() graph.Node { return e.F }
 // To returns the to-node of the edge.
 func (e Edge) To() graph.Node { return e.T }
 
+// Reversed returns a new Edge with the F and T fields
+// swapped.
+func (e Edge) Reversed() graph.Edge { return Edge{F: e.T, T: e.F} }
+
 // Line is a multigraph edge.
 type Line struct {
 	F, T graph.Node
@@ -42,6 +46,12 @@ func (l Line) From() graph.Node { return l.F }
 
 // To returns the to-node of the line.
 func (l Line) To() graph.Node { return l.T }
+
+// Reversed returns a new Line with the F and T fields
+// swapped. The UID of the new Line is the same as the
+// UID of the receiver. The Lines within the Edge are
+// not altered.
+func (l Line) Reversed() graph.Edge { l.F, l.T = l.T, l.F; return l }
 
 // ID returns the ID of the line.
 func (l Line) ID() int64 { return l.UID }
@@ -69,6 +79,11 @@ func (e WeightedEdge) From() graph.Node { return e.F }
 
 // To returns the to-node of the edge.
 func (e WeightedEdge) To() graph.Node { return e.T }
+
+// Reversed returns a new Edge with the F and T fields
+// swapped. The Lines within the WeightedEdge are not
+// altered.
+func (e WeightedEdge) Reversed() graph.Edge { e.F, e.T = e.T, e.F; return e }
 
 // Weight returns the weight of the edge. Weight uses WeightFunc
 // field to calculate the weight, so the WeightedLines field is
@@ -102,6 +117,11 @@ func (l WeightedLine) From() graph.Node { return l.F }
 
 // To returns the to-node of the line.
 func (l WeightedLine) To() graph.Node { return l.T }
+
+// Reversed returns a new Line with the F and T fields
+// swapped. The UID and W of the new Line are the same as the
+// UID and W of the receiver.
+func (l WeightedLine) Reversed() graph.Edge { l.F, l.T = l.T, l.F; return l }
 
 // ID returns the ID of the line.
 func (l WeightedLine) ID() int64 { return l.UID }

@@ -351,6 +351,9 @@ func (g *WeightedUndirectedGraph) WeightedLinesBetween(xid, yid int64) graph.Wei
 			continue
 		}
 		seen[lid] = struct{}{}
+		if l.From().ID() != xid {
+			l = l.Reversed().(graph.WeightedLine)
+		}
 		lines = append(lines, l)
 	}
 	return iterator.NewOrderedWeightedLines(lines)

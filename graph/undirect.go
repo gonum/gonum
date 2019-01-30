@@ -190,6 +190,18 @@ func (e EdgePair) To() Node {
 	return nil
 }
 
+// Reversed returns a new Edge with the end point of the
+// edges in the pair swapped.
+func (e EdgePair) Reversed() Edge {
+	if e[0] != nil {
+		e[0] = e[0].Reversed()
+	}
+	if e[1] != nil {
+		e[1] = e[1].Reversed()
+	}
+	return e
+}
+
 // WeightedEdgePair is an opposed pair of directed edges.
 type WeightedEdgePair struct {
 	EdgePair

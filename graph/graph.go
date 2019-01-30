@@ -13,8 +13,15 @@ type Node interface {
 // edge is given from -> to, otherwise the edge is semantically
 // unordered.
 type Edge interface {
+	// From returns the from node of the edge.
 	From() Node
+
+	// To returns the to node of the edge.
 	To() Node
+
+	// Reversed returns an edge that has the
+	// end points of the edge swapped.
+	Reversed() Edge
 }
 
 // WeightedEdge is a weighted graph edge. In directed graphs, the direction

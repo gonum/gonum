@@ -151,6 +151,39 @@ func TestSVD(t *testing.T) {
 				t.Errorf("Answer mismatch when SVDFull")
 			}
 
+			// Test NoneThin.
+			ok = svd.Factorize(a, SVDNoneThin)
+			if !ok {
+				t.Errorf("SVD factorization failed")
+			}
+			if !Equal(a, aCopy) {
+				t.Errorf("A changed during call to SVD with Thin")
+			}
+			sNoneThin := svd.Values(nil)
+			if !floats.EqualApprox(s, sNoneThin, 1e-8) {
+				t.Errorf("Singular value mismatch between Full and NoneThin decomposition")
+			}
+			vNoneThin := svd.VTo(nil)
+			if !Equal(vNoneThin, v) {
+				t.Errorf("vT mismatch between Thin and NoneThin decomposition")
+			}
+			// Test ThinNone.
+			ok = svd.Factorize(a, SVDThinNone)
+			if !ok {
+				t.Errorf("SVD factorization failed")
+			}
+			if !Equal(a, aCopy) {
+				t.Errorf("A changed during call to SVD with Thin")
+			}
+			sThinNone := svd.Values(nil)
+			if !floats.EqualApprox(s, sThinNone, 1e-8) {
+				t.Errorf("Singular value mismatch between Full and NoneThin decomposition")
+			}
+			uThinNone := svd.UTo(nil)
+			if !Equal(uThinNone, u) {
+				t.Errorf("vT mismatch between Thin and NoneThin decomposition")
+			}
+
 			// Test None decomposition.
 			ok = svd.Factorize(a, SVDNone)
 			if !ok {

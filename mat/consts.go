@@ -31,6 +31,12 @@ const (
 	//  A = U * Σ * V^T
 	// where U is of size m×m, Σ is an m×n diagonal matrix, and V is an n×n matrix.
 	SVDFull
+	// SVDNoneThin computes the thin singular vectors as described above, but
+	// only computes Σ and V~^T, not U.
+	SVDNoneThin
+	// SVDThinNone computes the thin singular vectors as described above, but
+	// only computes U~ and Σ, not V~^T.
+	SVDThinNone
 )
 
 // GSVDKind specifies the treatment of singular vectors during a GSVD

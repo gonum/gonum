@@ -69,7 +69,7 @@ func (svd *SVD) Factorize(a Matrix, kind SVDKind) (ok bool) {
 	case SVDThin:
 		// TODO(btracey): This code should be modified to have the larger
 		// matrix written in-place into aCopy when the lapack/native/dgesvd
-		// implementation is complete.
+		// implementation is complete (and below also).
 		svd.u = blas64.General{
 			Rows:   m,
 			Cols:   min(m, n),
@@ -84,6 +84,26 @@ func (svd *SVD) Factorize(a Matrix, kind SVDKind) (ok bool) {
 		}
 		jobU = lapack.SVDStore
 		jobVT = lapack.SVDStore
+	case SVDNoneThin:
+		svd.u.Stride = 1
+		jobU = lapack.SVDNone
+		svd.vt = blas64.General{
+			Rows:   min(m, n),
+			Cols:   n,
+			Stride: n,
+			Data:   use(svd.vt.Data, min(m, n)*n),
+		}
+		jobVT = lapack.SVDStore
+	case SVDThinNone:
+		svd.u = blas64.General{
+			Rows:   m,
+			Cols:   min(m, n),
+			Stride: min(m, n),
+			Data:   use(svd.u.Data, m*min(m, n)),
+		}
+		jobU = lapack.SVDStore
+		svd.vt.Stride = 1
+		jobVT = lapack.SVDNone
 	}
 
 	// A is destroyed on call, so copy the matrix.
@@ -143,7 +163,7 @@ func (svd *SVD) Values(s []float64) []float64 {
 // of size m×min(m,n) if svd.Kind() == SVDThin, and UTo panics otherwise.
 func (svd *SVD) UTo(dst *Dense) *Dense {
 	kind := svd.kind
-	if kind != SVDFull && kind != SVDThin {
+	if kind != SVDFull && kind != SVDThin && kind != SVDThinNone {
 		panic("mat: improper SVD kind")
 	}
 	r := svd.u.Rows
@@ -169,7 +189,7 @@ func (svd *SVD) UTo(dst *Dense) *Dense {
 // of size n×min(m,n) if svd.Kind() == SVDThin, and VTo panics otherwise.
 func (svd *SVD) VTo(dst *Dense) *Dense {
 	kind := svd.kind
-	if kind != SVDFull && kind != SVDThin {
+	if kind != SVDFull && kind != SVDThin && kind != SVDNoneThin {
 		panic("mat: improper SVD kind")
 	}
 	r := svd.vt.Rows

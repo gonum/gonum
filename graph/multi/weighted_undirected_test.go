@@ -17,9 +17,7 @@ func weightedUndirectedBuilder(nodes []graph.Node, edges []graph.WeightedLine, s
 	seen := make(set.Nodes)
 	ug := multi.NewWeightedUndirectedGraph()
 	ug.EdgeWeightFunc = func(l graph.WeightedLines) float64 {
-		// TODO(kortschak): Remove nil guard if nil iterators
-		// are forbidden, https://github.com/gonum/gonum/issues/614.
-		if l == nil || l.Len() == 0 {
+		if l.Len() == 0 {
 			return absent
 		}
 		var w float64

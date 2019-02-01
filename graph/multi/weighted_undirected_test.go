@@ -62,6 +62,9 @@ func TestWeightedUndirected(t *testing.T) {
 	t.Run("EdgeExistence", func(t *testing.T) {
 		testgraph.EdgeExistence(t, weightedUndirectedBuilder)
 	})
+	t.Run("LineExistence", func(t *testing.T) {
+		testgraph.LineExistence(t, directedBuilder, true)
+	})
 	t.Run("NodeExistence", func(t *testing.T) {
 		testgraph.NodeExistence(t, weightedUndirectedBuilder)
 	})

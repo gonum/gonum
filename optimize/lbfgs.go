@@ -8,6 +8,11 @@ import (
 	"gonum.org/v1/gonum/floats"
 )
 
+var (
+	_ Method      = (*LBFGS)(nil)
+	_ localMethod = (*LBFGS)(nil)
+)
+
 // LBFGS implements the limited-memory BFGS method for gradient-based
 // unconstrained minimization.
 //
@@ -50,6 +55,10 @@ type LBFGS struct {
 
 func (l *LBFGS) Status() (Status, error) {
 	return l.status, l.err
+}
+
+func (*LBFGS) Uses(has Available) (uses Available, err error) {
+	return has.gradient()
 }
 
 func (l *LBFGS) Init(dim, tasks int) int {
@@ -179,7 +188,7 @@ func (l *LBFGS) NextDirection(loc *Location, dir []float64) (stepSize float64) {
 	return 1
 }
 
-func (*LBFGS) Needs() struct {
+func (*LBFGS) needs() struct {
 	Gradient bool
 	Hessian  bool
 } {

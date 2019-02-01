@@ -39,7 +39,6 @@ func (l localOptimizer) run(method localMethod, gradThresh float64, operation ch
 		l.finish(operation, result)
 		return NotTerminated, nil
 	}
-
 	op, err := method.initLocal(task.Location)
 	if err != nil {
 		l.finishMethodDone(operation, result, task)
@@ -77,13 +76,13 @@ Loop:
 
 // initialOperation returns the Operation needed to fill the initial location
 // based on the needs of the method and the values already supplied.
-func (localOptimizer) initialOperation(task Task, needser Needser) Operation {
+func (localOptimizer) initialOperation(task Task, n needser) Operation {
 	var newOp Operation
 	op := task.Op
 	if op&FuncEvaluation == 0 {
 		newOp |= FuncEvaluation
 	}
-	needs := needser.Needs()
+	needs := n.needs()
 	if needs.Gradient && op&GradEvaluation == 0 {
 		newOp |= GradEvaluation
 	}
@@ -95,8 +94,8 @@ func (localOptimizer) initialOperation(task Task, needser Needser) Operation {
 
 // initialLocation fills the initial location based on the needs of the method.
 // The task passed to initialLocation should be the first task sent in RunGlobal.
-func (l localOptimizer) initialLocation(operation chan<- Task, result <-chan Task, task Task, needser Needser) Task {
-	task.Op = l.initialOperation(task, needser)
+func (l localOptimizer) initialLocation(operation chan<- Task, result <-chan Task, task Task, needs needser) Task {
+	task.Op = l.initialOperation(task, needs)
 	operation <- task
 	return <-result
 }

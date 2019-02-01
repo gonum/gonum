@@ -5,7 +5,6 @@
 package optimize
 
 import (
-	"errors"
 	"fmt"
 	"time"
 
@@ -85,17 +84,9 @@ var operationNames = map[Operation]string{
 	signalDone:     "signalDone",
 }
 
-// Location represents a location in the optimization procedure.
-type Location struct {
-	X        []float64
-	F        float64
-	Gradient []float64
-	Hessian  *mat.SymDense
-}
-
 // Result represents the answer of an optimization run. It contains the optimum
-// location as well as the Status at convergence and Statistics taken during the
-// run.
+// function value, X location, and gradient as well as the Status at convergence
+// and Statistics taken during the run.
 type Result struct {
 	Location
 	Stats
@@ -132,13 +123,17 @@ type Problem struct {
 	// must not modify x.
 	Func func(x []float64) float64
 
-	// Grad evaluates the gradient at x and stores the result in-place in grad.
-	// Grad must not modify x.
-	Grad func(grad []float64, x []float64)
+	// Grad evaluates the gradient at x and returns the result. Grad may use
+	// (and return) the provided slice if it is non-nil, or must allocate a new
+	// slice otherwise. Grad must not modify x.
+	Grad func(grad []float64, x []float64) []float64
 
 	// Hess evaluates the Hessian at x and stores the result in-place in hess.
-	// Hess must not modify x.
-	Hess func(hess mat.MutableSymmetric, x []float64)
+	// Hess must not modify x. Hess may use (and return) the provided Symmetric
+	// if it is non-nil, or must allocate a new Symmetric otherwise. Minimize
+	// will 'give back' the returned Symmetric where possible, allowing Hess
+	// to use a type assertion on the provided matrix.
+	Hess func(hess mat.Symmetric, x []float64) mat.Symmetric
 
 	// Status reports the status of the objective function being optimized and any
 	// error. This can be used to terminate early, for example when the function is
@@ -147,16 +142,47 @@ type Problem struct {
 	Status func() (Status, error)
 }
 
-// TODO(btracey): Think about making this an exported function when the
-// constraint interface is designed.
-func (p Problem) satisfies(method Needser) error {
-	if method.Needs().Gradient && p.Grad == nil {
-		return errors.New("optimize: problem does not provide needed Grad function")
+// Available describes the functions available to call in Problem.
+type Available struct {
+	Grad bool
+	Hess bool
+}
+
+func availFromProblem(prob Problem) Available {
+	return Available{Grad: prob.Grad != nil, Hess: prob.Hess != nil}
+}
+
+// function tests if the Problem described by the receiver is suitable for an
+// unconstrained Method that only calls the function, and returns the result.
+func (has Available) function() (uses Available, err error) {
+	// TODO(btracey): This needs to be modified when optimize supports
+	// constrained optimization.
+	return Available{}, nil
+}
+
+// gradient tests if the Problem described by the receiver is suitable for an
+// unconstrained gradient-based Method, and returns the result.
+func (has Available) gradient() (uses Available, err error) {
+	// TODO(btracey): This needs to be modified when optimize supports
+	// constrained optimization.
+	if !has.Grad {
+		return Available{}, ErrMissingGrad
 	}
-	if method.Needs().Hessian && p.Hess == nil {
-		return errors.New("optimize: problem does not provide needed Hess function")
+	return Available{Grad: true}, nil
+}
+
+// hessian tests if the Problem described by the receiver is suitable for an
+// unconstrained Hessian-based Method, and returns the result.
+func (has Available) hessian() (uses Available, err error) {
+	// TODO(btracey): This needs to be modified when optimize supports
+	// constrained optimization.
+	if !has.Grad {
+		return Available{}, ErrMissingGrad
 	}
-	return nil
+	if !has.Hess {
+		return Available{}, ErrMissingHess
+	}
+	return Available{Grad: true, Hess: true}, nil
 }
 
 // Settings represents settings of the optimization run. It contains initial
@@ -167,7 +193,8 @@ type Settings struct {
 	// InitValues specifies properties (function value, gradient, etc.) known
 	// at the initial location passed to Minimize. If InitValues is non-nil, then
 	// the function value F must be provided, the location X must not be specified
-	// and other fields may be specified.
+	// and other fields may be specified. The values in Location may be modified
+	// during the call to Minimize.
 	InitValues *Location
 
 	// GradientThreshold stops optimization with GradientThreshold status if the

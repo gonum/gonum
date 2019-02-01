@@ -33,17 +33,26 @@ type Task struct {
 	*Location
 }
 
+// Location represents a location in the optimization procedure.
+type Location struct {
+	X        []float64
+	F        float64
+	Gradient []float64
+	Hessian  mat.Symmetric
+}
+
 // Method is a type which can search for an optimum of an objective function.
 type Method interface {
-	Needser
-	// Init takes as input the problem dimension and number of available
-	// concurrent tasks, and returns the number of concurrent processes to be used.
-	// The returned value must be less than or equal to tasks.
-	Init(dim, tasks int) int
+	// Init initializes the method for optimization. The inputs are
+	// the problem dimension and number of available concurrent tasks.
+	//
+	// Init returns the number of concurrent processes to use, which must be
+	// less than or equal to tasks.
+	Init(dim, tasks int) (concurrent int)
 	// Run runs an optimization. The method sends Tasks on
 	// the operation channel (for performing function evaluations, major
 	// iterations, etc.). The result of the tasks will be returned on Result.
-	// See the documentation for Operation types for the possible tasks.
+	// See the documentation for Operation types for the possible operations.
 	//
 	// The caller of Run will signal the termination of the optimization
 	// (i.e. convergence from user settings) by sending a task with a PostIteration
@@ -70,6 +79,13 @@ type Method interface {
 	// composed to specify the valid fields. Methods are free to use or
 	// ignore these values.
 	//
+	// Successful execution of an Operation may require the Method to modify
+	// fields a Location. MajorIteration calls will not modify the values in
+	// the Location, but Evaluation operations will. Methods are encouraged to
+	// leave Location fields untouched to allow memory re-use. If data needs to
+	// be stored, the respective field should be set to nil -- Methods should
+	// not allocate Location memory themselves.
+	//
 	// Method may have its own specific convergence criteria, which can
 	// be communicated using a MethodDone operation. This will trigger a
 	// PostIteration to be sent on result, and the MethodDone task will not be
@@ -79,6 +95,11 @@ type Method interface {
 	// The operation and result tasks are guaranteed to have a buffer length
 	// equal to the return from Init.
 	Run(operation chan<- Task, result <-chan Task, tasks []Task)
+	// Uses checks if the Method is suited to the optimization problem. The
+	// input is the available functions in Problem to call, and the returns are
+	// the functions which may be used and an error if there is a mismatch
+	// between the Problem and the Method's capabilities.
+	Uses(has Available) (uses Available, err error)
 }
 
 // Minimize uses an optimizer to search for a minimum of a function. A
@@ -110,7 +131,9 @@ type Method interface {
 //
 // The final argument is the optimization method to use. If method == nil, then
 // an appropriate default is chosen based on the properties of the other arguments
-// (dimension, gradient-free or gradient-based, etc.).
+// (dimension, gradient-free or gradient-based, etc.). If method is not nil,
+// Minimize panics if the Problem is not consistent with the Method (Uses
+// returns an error).
 //
 // Minimize returns a Result struct and any error that occurred. See the
 // documentation of Result for more information.
@@ -131,15 +154,15 @@ func Minimize(p Problem, initX []float64, settings *Settings, method Method) (*R
 	}
 	stats := &Stats{}
 	dim := len(initX)
-	err := checkOptimization(p, dim, method, settings.Recorder)
+	err := checkOptimization(p, dim, settings.Recorder)
 	if err != nil {
 		return nil, err
 	}
 
-	optLoc := newLocation(dim, method)
+	optLoc := newLocation(dim) // This must have an allocated X field.
 	optLoc.F = math.Inf(1)
 
-	initOp, initLoc := getInitLocation(dim, initX, settings.InitValues, method)
+	initOp, initLoc := getInitLocation(dim, initX, settings.InitValues)
 
 	converger := settings.Converger
 	if converger == nil {
@@ -175,7 +198,7 @@ func Minimize(p Problem, initX []float64, settings *Settings, method Method) (*R
 
 func getDefaultMethod(p *Problem) Method {
 	if p.Grad != nil {
-		return &BFGS{}
+		return &LBFGS{}
 	}
 	return &NelderMead{}
 }
@@ -187,6 +210,11 @@ func minimize(prob *Problem, method Method, settings *Settings, converger Conver
 	nTasks := settings.Concurrent
 	if nTasks == 0 {
 		nTasks = 1
+	}
+	has := availFromProblem(*prob)
+	_, initErr := method.Uses(has)
+	if initErr != nil {
+		panic(fmt.Sprintf("optimize: specified method inconsistent with Problem: %v", initErr))
 	}
 	newNTasks := method.Init(dim, nTasks)
 	if newNTasks > nTasks {
@@ -203,7 +231,7 @@ func minimize(prob *Problem, method Method, settings *Settings, converger Conver
 		tasks[0].Location = initLoc
 		tasks[0].Op = initOp
 		for i := 1; i < len(tasks); i++ {
-			tasks[i].Location = newLocation(dim, method)
+			tasks[i].Location = newLocation(dim)
 		}
 		method.Run(operations, results, tasks)
 	}()
@@ -370,44 +398,18 @@ func defaultFunctionConverge() *FunctionConverge {
 	}
 }
 
-// newLocation allocates a new locatian structure of the appropriate size. It
-// allocates memory based on the dimension and the values in Needs.
-func newLocation(dim int, method Needser) *Location {
-	// TODO(btracey): combine this with Local.
-	loc := &Location{
+// newLocation allocates a new locatian structure with an X field of the
+// appropriate size.
+func newLocation(dim int) *Location {
+	return &Location{
 		X: make([]float64, dim),
-	}
-	if method.Needs().Gradient {
-		loc.Gradient = make([]float64, dim)
-	}
-	if method.Needs().Hessian {
-		loc.Hessian = mat.NewSymDense(dim, nil)
-	}
-	return loc
-}
-
-func copyLocation(dst, src *Location) {
-	dst.X = resize(dst.X, len(src.X))
-	copy(dst.X, src.X)
-
-	dst.F = src.F
-
-	dst.Gradient = resize(dst.Gradient, len(src.Gradient))
-	copy(dst.Gradient, src.Gradient)
-
-	if src.Hessian != nil {
-		if dst.Hessian == nil || dst.Hessian.Symmetric() != len(src.X) {
-			dst.Hessian = mat.NewSymDense(len(src.X), nil)
-		}
-		dst.Hessian.CopySym(src.Hessian)
 	}
 }
 
 // getInitLocation checks the validity of initLocation and initOperation and
 // returns the initial values as a *Location.
-func getInitLocation(dim int, initX []float64, initValues *Location, method Needser) (Operation, *Location) {
-	needs := method.Needs()
-	loc := newLocation(dim, method)
+func getInitLocation(dim int, initX []float64, initValues *Location) (Operation, *Location) {
+	loc := newLocation(dim)
 	if initX == nil {
 		if initValues != nil {
 			panic("optimize: initValues is non-nil but no initial location specified")
@@ -428,32 +430,25 @@ func getInitLocation(dim int, initX []float64, initValues *Location, method Need
 		if len(initValues.Gradient) != dim {
 			panic("optimize: initial gradient does not match problem dimension")
 		}
-		if needs.Gradient {
-			copy(loc.Gradient, initValues.Gradient)
-			op |= GradEvaluation
-		}
+		loc.Gradient = initValues.Gradient
+		op |= GradEvaluation
 	}
 	if initValues.Hessian != nil {
 		if initValues.Hessian.Symmetric() != dim {
 			panic("optimize: initial Hessian does not match problem dimension")
 		}
-		if needs.Hessian {
-			loc.Hessian.CopySym(initValues.Hessian)
-			op |= HessEvaluation
-		}
+		loc.Hessian = initValues.Hessian
+		op |= HessEvaluation
 	}
 	return op, loc
 }
 
-func checkOptimization(p Problem, dim int, method Needser, recorder Recorder) error {
+func checkOptimization(p Problem, dim int, recorder Recorder) error {
 	if p.Func == nil {
 		panic(badProblem)
 	}
 	if dim <= 0 {
 		panic("optimize: impossible problem dimension")
-	}
-	if err := p.satisfies(method); err != nil {
-		return err
 	}
 	if p.Status != nil {
 		_, err := p.Status()
@@ -482,10 +477,10 @@ func evaluate(p *Problem, loc *Location, op Operation, x []float64) {
 		loc.F = p.Func(x)
 	}
 	if op&GradEvaluation != 0 {
-		p.Grad(loc.Gradient, x)
+		loc.Gradient = p.Grad(loc.Gradient, x)
 	}
 	if op&HessEvaluation != 0 {
-		p.Hess(loc.Hessian, x)
+		loc.Hessian = p.Hess(loc.Hessian, x)
 	}
 }
 
@@ -559,7 +554,16 @@ func checkIterationLimits(loc *Location, stats *Stats, settings *Settings) Statu
 // It increments the iteration count, updates the optimal location, and checks
 // the necessary convergence criteria.
 func performMajorIteration(optLoc, loc *Location, stats *Stats, converger Converger, startTime time.Time, settings *Settings) Status {
-	copyLocation(optLoc, loc)
+	optLoc.F = loc.F
+	copy(optLoc.X, loc.X)
+	if loc.Gradient == nil {
+		optLoc.Gradient = nil
+	} else {
+		if optLoc.Gradient == nil {
+			optLoc.Gradient = make([]float64, len(loc.Gradient))
+		}
+		copy(optLoc.Gradient, loc.Gradient)
+	}
 	stats.MajorIterations++
 	stats.Runtime = time.Since(startTime)
 	status := checkLocationConvergence(optLoc, settings, converger)

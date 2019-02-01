@@ -116,10 +116,6 @@ var (
 	_ Method   = (*CmaEsChol)(nil)
 )
 
-func (cma *CmaEsChol) Needs() struct{ Gradient, Hessian bool } {
-	return struct{ Gradient, Hessian bool }{false, false}
-}
-
 func (cma *CmaEsChol) methodConverged() Status {
 	sd := cma.StopLogDet
 	switch {
@@ -140,6 +136,10 @@ func (cma *CmaEsChol) Status() (Status, error) {
 		return Failure, cma.updateErr
 	}
 	return cma.methodConverged(), nil
+}
+
+func (*CmaEsChol) Uses(has Available) (uses Available, err error) {
+	return has.function()
 }
 
 func (cma *CmaEsChol) Init(dim, tasks int) int {

@@ -290,7 +290,7 @@ func (g *WeightedDirectedGraph) To(id int64) graph.Nodes {
 // EdgeWeightFunc. Weight returns true if an edge exists between x and y, false otherwise.
 func (g *WeightedDirectedGraph) Weight(uid, vid int64) (w float64, ok bool) {
 	lines := g.WeightedLines(uid, vid)
-	return WeightedEdge{WeightedLines: lines, WeightFunc: g.EdgeWeightFunc}.Weight(), lines != nil
+	return WeightedEdge{WeightedLines: lines, WeightFunc: g.EdgeWeightFunc}.Weight(), lines != graph.Empty
 }
 
 // WeightedEdge returns the weighted edge from u to v if such an edge exists and nil otherwise.
@@ -298,7 +298,7 @@ func (g *WeightedDirectedGraph) Weight(uid, vid int64) (w float64, ok bool) {
 // The returned graph.WeightedEdge is a multi.WeightedEdge if an edge exists.
 func (g *WeightedDirectedGraph) WeightedEdge(uid, vid int64) graph.WeightedEdge {
 	lines := g.WeightedLines(uid, vid)
-	if lines == nil {
+	if lines == graph.Empty {
 		return nil
 	}
 	return WeightedEdge{

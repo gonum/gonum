@@ -32,6 +32,8 @@ func isValidIterator(it graph.Iterator) bool {
 }
 
 func checkEmptyIterator(t *testing.T, it graph.Iterator, useEmpty bool) {
+	t.Helper()
+
 	if it.Len() != 0 {
 		return
 	}
@@ -318,10 +320,20 @@ func ReturnAllLines(t *testing.T, b Builder, useEmpty bool) {
 				// and graph.Edges.
 				switch lit := e.(type) {
 				case graph.Lines:
+					if !isValidIterator(lit) {
+						t.Errorf("invalid iterator for test %q: got:%#v", test.name, lit)
+						continue
+					}
+					checkEmptyIterator(t, lit, useEmpty)
 					for lit.Next() {
 						got = append(got, lit.Line())
 					}
 				case graph.WeightedLines:
+					if !isValidIterator(lit) {
+						t.Errorf("invalid iterator for test %q: got:%#v", test.name, lit)
+						continue
+					}
+					checkEmptyIterator(t, lit, useEmpty)
 					for lit.Next() {
 						got = append(got, lit.WeightedLine())
 					}
@@ -502,10 +514,20 @@ func ReturnAllWeightedLines(t *testing.T, b Builder, useEmpty bool) {
 				// and graph.Edges.
 				switch lit := e.(type) {
 				case graph.Lines:
+					if !isValidIterator(lit) {
+						t.Errorf("invalid iterator for test %q: got:%#v", test.name, lit)
+						continue
+					}
+					checkEmptyIterator(t, lit, useEmpty)
 					for lit.Next() {
 						got = append(got, lit.Line())
 					}
 				case graph.WeightedLines:
+					if !isValidIterator(lit) {
+						t.Errorf("invalid iterator for test %q: got:%#v", test.name, lit)
+						continue
+					}
+					checkEmptyIterator(t, lit, useEmpty)
 					for lit.Next() {
 						got = append(got, lit.WeightedLine())
 					}
@@ -551,7 +573,7 @@ func checkEdges(t *testing.T, name string, g graph.Graph, got, want []graph.Edge
 
 // EdgeExistence tests the constructed graph for the ability to correctly
 // return the existence of edges within the graph. This is a check of the
-// Edge method of graph.Graph, the EdgeBetween method of graph.Undirected
+// Edge methods of graph.Graph, the EdgeBetween method of graph.Undirected
 // and the EdgeFromTo method of graph.Directed. EdgeExistence also checks
 // that the nodes and traversed edges exist within the graph, checking the
 // Node, Edge, EdgeBetween and HasEdgeBetween methods of graph.Graph, the
@@ -623,7 +645,190 @@ func EdgeExistence(t *testing.T, b Builder) {
 						t.Errorf("missing edge for test %q: (%v)--(%v)", test.name, x.ID(), y.ID())
 					}
 				}
+
+				switch g := g.(type) {
+				case graph.WeightedDirected:
+					u := x
+					v := y
+					if has := g.WeightedEdge(u.ID(), v.ID()) != nil; has != want[edge{f: u.ID(), t: v.ID()}] {
+						if has {
+							t.Errorf("unexpected edge for test %q: (%v)->(%v)", test.name, u.ID(), v.ID())
+						} else {
+							t.Errorf("missing edge for test %q: (%v)->(%v)", test.name, u.ID(), v.ID())
+						}
+						continue
+					}
+
+				case graph.WeightedUndirected:
+					// HasEdgeBetween is already tested above.
+					if between && g.WeightedEdge(x.ID(), y.ID()) == nil {
+						t.Errorf("missing edge for test %q: (%v)--(%v)", test.name, x.ID(), y.ID())
+					}
+					if between && g.WeightedEdgeBetween(x.ID(), y.ID()) == nil {
+						t.Errorf("missing edge for test %q: (%v)--(%v)", test.name, x.ID(), y.ID())
+					}
+				}
 			}
+		}
+	}
+}
+
+// LineExistence tests the constructed graph for the ability to correctly
+// return the existence of lines within the graph. This is a check of the
+// Line methods of graph.MultiGraph, the EdgeBetween method of graph.Undirected
+// and the EdgeFromTo method of graph.Directed. LineExistence also checks
+// that the nodes and traversed edges exist within the graph, checking the
+// Node, Edge, EdgeBetween and HasEdgeBetween methods of graph.Graph, the
+// EdgeBetween method of graph.Undirected and the HasEdgeFromTo method of
+// graph.Directed.
+func LineExistence(t *testing.T, b Builder, useEmpty bool) {
+	for _, test := range testCases {
+		g, nodes, edges, _, _, ok := b(test.nodes, test.edges, test.self, test.absent)
+		if !ok {
+			t.Logf("skipping test case: %q", test.name)
+			continue
+		}
+
+		switch mg := g.(type) {
+		case graph.Multigraph:
+			want := make(map[edge]bool)
+			for _, e := range edges {
+				want[edge{f: e.From().ID(), t: e.To().ID()}] = true
+			}
+			for _, x := range nodes {
+				for _, y := range nodes {
+					between := want[edge{f: x.ID(), t: y.ID()}] || want[edge{f: y.ID(), t: x.ID()}]
+
+					if has := g.HasEdgeBetween(x.ID(), y.ID()); has != between {
+						if has {
+							t.Errorf("unexpected edge for test %q: (%v)--(%v)", test.name, x.ID(), y.ID())
+						} else {
+							t.Errorf("missing edge for test %q: (%v)--(%v)", test.name, x.ID(), y.ID())
+						}
+					} else {
+						if want[edge{f: x.ID(), t: y.ID()}] {
+							lit := mg.Lines(x.ID(), y.ID())
+							if !isValidIterator(lit) {
+								t.Errorf("invalid iterator for test %q: got:%#v", test.name, lit)
+								continue
+							}
+							checkEmptyIterator(t, lit, useEmpty)
+							if lit.Len() == 0 {
+								t.Errorf("missing edge for test %q: (%v)--(%v)", test.name, x.ID(), y.ID())
+							}
+						}
+						if between && !g.HasEdgeBetween(x.ID(), y.ID()) {
+							t.Errorf("missing edge for test %q: (%v)--(%v)", test.name, x.ID(), y.ID())
+						}
+						if g.Node(x.ID()) == nil {
+							t.Errorf("missing from node for test %q: %v", test.name, x.ID())
+						}
+						if g.Node(y.ID()) == nil {
+							t.Errorf("missing to node for test %q: %v", test.name, y.ID())
+						}
+					}
+
+					switch g := g.(type) {
+					case graph.DirectedMultigraph:
+						u := x
+						v := y
+						if has := g.HasEdgeFromTo(u.ID(), v.ID()); has != want[edge{f: u.ID(), t: v.ID()}] {
+							if has {
+								t.Errorf("unexpected edge for test %q: (%v)->(%v)", test.name, u.ID(), v.ID())
+							} else {
+								t.Errorf("missing edge for test %q: (%v)->(%v)", test.name, u.ID(), v.ID())
+							}
+							continue
+						}
+						// Edge has already been tested above.
+						if g.Node(u.ID()) == nil {
+							t.Errorf("missing from node for test %q: %v", test.name, u.ID())
+						}
+						if g.Node(v.ID()) == nil {
+							t.Errorf("missing to node for test %q: %v", test.name, v.ID())
+						}
+
+					case graph.UndirectedMultigraph:
+						// HasEdgeBetween is already tested above.
+						lit := g.Lines(x.ID(), y.ID())
+						if !isValidIterator(lit) {
+							t.Errorf("invalid iterator for test %q: got:%#v", test.name, lit)
+							continue
+						}
+						checkEmptyIterator(t, lit, useEmpty)
+						if between && lit.Len() == 0 {
+							t.Errorf("missing edge for test %q: (%v)--(%v)", test.name, x.ID(), y.ID())
+						}
+						lit = g.LinesBetween(x.ID(), y.ID())
+						if !isValidIterator(lit) {
+							t.Errorf("invalid iterator for test %q: got:%#v", test.name, lit)
+							continue
+						}
+						checkEmptyIterator(t, lit, useEmpty)
+						if between && lit.Len() == 0 {
+							t.Errorf("missing edge for test %q: (%v)--(%v)", test.name, x.ID(), y.ID())
+						}
+					}
+
+					switch g := g.(type) {
+					case graph.WeightedDirectedMultigraph:
+						u := x
+						v := y
+						lit := g.WeightedLines(u.ID(), v.ID())
+						if !isValidIterator(lit) {
+							t.Errorf("invalid iterator for test %q: got:%#v", test.name, lit)
+							continue
+						}
+						checkEmptyIterator(t, lit, useEmpty)
+						if has := lit.Len() != 0; has != want[edge{f: u.ID(), t: v.ID()}] {
+							if has {
+								t.Errorf("unexpected edge for test %q: (%v)->(%v)", test.name, u.ID(), v.ID())
+							} else {
+								t.Errorf("missing edge for test %q: (%v)->(%v)", test.name, u.ID(), v.ID())
+							}
+							continue
+						}
+						for lit.Next() {
+							l := lit.WeightedLine()
+							if l.From().ID() != x.ID() || l.To().ID() != y.ID() {
+								t.Errorf("inverted edge for test %q query with F=%d T=%d: got:%#v",
+									test.name, x.ID(), y.ID(), l)
+							}
+						}
+						// Edge has already been tested above.
+						if g.Node(u.ID()) == nil {
+							t.Errorf("missing from node for test %q: %v", test.name, u.ID())
+						}
+						if g.Node(v.ID()) == nil {
+							t.Errorf("missing to node for test %q: %v", test.name, v.ID())
+						}
+
+					case graph.WeightedUndirectedMultigraph:
+						// HasEdgeBetween is already tested above.
+						lit := g.WeightedLines(x.ID(), y.ID())
+						if !isValidIterator(lit) {
+							t.Errorf("invalid iterator for test %q: got:%#v", test.name, lit)
+							continue
+						}
+						checkEmptyIterator(t, lit, useEmpty)
+						if between && lit.Len() == 0 {
+							t.Errorf("missing edge for test %q: (%v)--(%v)", test.name, x.ID(), y.ID())
+						}
+						lit = g.WeightedLinesBetween(x.ID(), y.ID())
+						if !isValidIterator(lit) {
+							t.Errorf("invalid iterator for test %q: got:%#v", test.name, lit)
+							continue
+						}
+						checkEmptyIterator(t, lit, useEmpty)
+						if between && lit.Len() == 0 {
+							t.Errorf("missing edge for test %q: (%v)--(%v)", test.name, x.ID(), y.ID())
+						}
+					}
+				}
+			}
+		default:
+			t.Errorf("invalid type for test: %T not a multigraph", g)
+			continue
 		}
 	}
 }

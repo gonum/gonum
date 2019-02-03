@@ -14,10 +14,7 @@ import (
 
 func ExampleBellmanFordFrom_negativecycles() {
 	// BellmanFordFrom can be used to find a non-exhaustive
-	// set of negative cycles in a graph. Enumerating the
-	// exhaustive list requires iterations of the procedure
-	// here successively omitting links from the new node
-	// to already found negative cycles.
+	// set of negative cycles in a graph.
 
 	// Construct a graph with a negative cycle.
 	edges := []simple.WeightedEdge{
@@ -47,10 +44,10 @@ func ExampleBellmanFordFrom_negativecycles() {
 		fmt.Println("no negative cycle present")
 		return
 	}
-	for _, n := range []simple.Node{'a', 'b', 'c', 'd', 'e', 'f'} {
-		p, w := pt.To(n.ID())
+	for _, id := range []int64{'a', 'b', 'c', 'd', 'e', 'f'} {
+		p, w := pt.To(id)
 		if math.IsNaN(w) {
-			fmt.Printf("negative cycle in path to %c path:%c\n", n, p)
+			fmt.Printf("negative cycle in path to %c path:%c\n", id, p)
 		}
 	}
 
@@ -59,4 +56,76 @@ func ExampleBellmanFordFrom_negativecycles() {
 	// negative cycle in path to b path:[b c a b]
 	// negative cycle in path to c path:[c a b c]
 	// negative cycle in path to f path:[a b c a f]
+}
+
+func ExampleFloydWarshall_negativecycles() {
+	// FloydWarshall can be used to find an exhaustive
+	// set of nodes in negative cycles in a graph.
+
+	// Construct a graph with a negative cycle.
+	edges := []simple.WeightedEdge{
+		{F: simple.Node('a'), T: simple.Node('f'), W: -1},
+		{F: simple.Node('b'), T: simple.Node('a'), W: 1},
+		{F: simple.Node('b'), T: simple.Node('c'), W: -1},
+		{F: simple.Node('b'), T: simple.Node('d'), W: 1},
+		{F: simple.Node('c'), T: simple.Node('b'), W: 0},
+		{F: simple.Node('e'), T: simple.Node('a'), W: 1},
+		{F: simple.Node('f'), T: simple.Node('e'), W: -1},
+	}
+	g := simple.NewWeightedDirectedGraph(0, math.Inf(1))
+	for _, e := range edges {
+		g.SetWeightedEdge(e)
+	}
+
+	// Find the shortest path to each node from Q.
+	pt, ok := path.FloydWarshall(g)
+	if ok {
+		fmt.Println("no negative cycle present")
+		return
+	}
+
+	ids := []int64{'a', 'b', 'c', 'd', 'e', 'f'}
+
+	for _, id := range ids {
+		if math.IsNaN(pt.Weight(id, id)) {
+			fmt.Printf("%c is in a negative cycle\n", id)
+		}
+	}
+
+	for _, uid := range ids {
+		for _, vid := range ids {
+			_, w, unique := pt.Between(uid, vid)
+			if math.IsNaN(w) {
+				fmt.Printf("negative cycle in path from %c to %c unique=%t\n", uid, vid, unique)
+			}
+		}
+	}
+
+	// Output:
+	// a is in a negative cycle
+	// b is in a negative cycle
+	// c is in a negative cycle
+	// e is in a negative cycle
+	// f is in a negative cycle
+	// negative cycle in path from a to a unique=false
+	// negative cycle in path from a to e unique=false
+	// negative cycle in path from a to f unique=false
+	// negative cycle in path from b to a unique=false
+	// negative cycle in path from b to b unique=false
+	// negative cycle in path from b to c unique=false
+	// negative cycle in path from b to d unique=false
+	// negative cycle in path from b to e unique=false
+	// negative cycle in path from b to f unique=false
+	// negative cycle in path from c to a unique=false
+	// negative cycle in path from c to b unique=false
+	// negative cycle in path from c to c unique=false
+	// negative cycle in path from c to d unique=false
+	// negative cycle in path from c to e unique=false
+	// negative cycle in path from c to f unique=false
+	// negative cycle in path from e to a unique=false
+	// negative cycle in path from e to e unique=false
+	// negative cycle in path from e to f unique=false
+	// negative cycle in path from f to a unique=false
+	// negative cycle in path from f to e unique=false
+	// negative cycle in path from f to f unique=false
 }

@@ -4,11 +4,16 @@
 
 package path
 
-import "gonum.org/v1/gonum/graph"
+import (
+	"math"
+
+	"gonum.org/v1/gonum/graph"
+)
 
 // FloydWarshall returns a shortest-path tree for the graph g or false indicating
-// that a negative cycle exists in the graph. If the graph does not implement
-// Weighted, UniformCost is used.
+// that a negative cycle exists in the graph. If a negative cycle exists in the graph
+// the returned paths will be valid and edge weights on the negative cycle will be
+// set to NaN. If the graph does not implement Weighted, UniformCost is used.
 //
 // The time complexity of FloydWarshall is O(|V|^3).
 func FloydWarshall(g graph.Graph) (paths AllShortest, ok bool) {
@@ -55,6 +60,25 @@ func FloydWarshall(g graph.Graph) (paths AllShortest, ok bool) {
 		if paths.dist.At(i, i) < 0 {
 			ok = false
 			break
+		}
+	}
+
+	if !ok {
+		// If we have a negative cycle, mark all
+		// the edges in the cycles with NaN weight.
+		d := paths.dist
+		for i := range nodes {
+			for j := range nodes {
+				for k := range nodes {
+					if math.IsInf(d.At(i, k), 1) || math.IsInf(d.At(k, j), 1) {
+						continue
+					}
+					if d.At(k, k) < 0 || math.IsNaN(d.At(k, k)) {
+						d.Set(k, k, math.NaN())
+						d.Set(i, j, math.NaN())
+					}
+				}
+			}
 		}
 	}
 

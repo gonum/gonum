@@ -252,7 +252,8 @@ func (p AllShortest) Weight(uid, vid int64) float64 {
 // Between returns a shortest path from u to v and the weight of the path. If more than
 // one shortest path exists between u and v, a randomly chosen path will be returned and
 // unique is returned false. If a cycle with zero weight exists in the path, it will not
-// be included, but unique will be returned false.
+// be included, but unique will be returned false. If a negative cycle exists on the path
+// from u to v, path will be returned nil, weight will be NaN and unique will be false.
 func (p AllShortest) Between(uid, vid int64) (path []graph.Node, weight float64, unique bool) {
 	from, fromOK := p.indexOf[uid]
 	to, toOK := p.indexOf[vid]
@@ -261,6 +262,11 @@ func (p AllShortest) Between(uid, vid int64) (path []graph.Node, weight float64,
 			return []graph.Node{p.nodes[from]}, 0, true
 		}
 		return nil, math.Inf(1), false
+	}
+
+	weight = p.dist.At(from, to)
+	if math.IsNaN(weight) {
+		return nil, weight, false
 	}
 
 	seen := make([]int, len(p.nodes))
@@ -277,7 +283,6 @@ func (p AllShortest) Between(uid, vid int64) (path []graph.Node, weight float64,
 	}
 
 	path = []graph.Node{n}
-	weight = p.dist.At(from, to)
 	unique = true
 
 	var next int
@@ -308,7 +313,8 @@ func (p AllShortest) Between(uid, vid int64) (path []graph.Node, weight float64,
 }
 
 // AllBetween returns all shortest paths from u to v and the weight of the paths. Paths
-// containing zero-weight cycles are not returned.
+// containing zero-weight cycles are not returned. If a negative cycle exists between
+// u and v, paths is returned nil and weight is returned as NaN.
 func (p AllShortest) AllBetween(uid, vid int64) (paths [][]graph.Node, weight float64) {
 	from, fromOK := p.indexOf[uid]
 	to, toOK := p.indexOf[vid]
@@ -317,6 +323,11 @@ func (p AllShortest) AllBetween(uid, vid int64) (paths [][]graph.Node, weight fl
 			return [][]graph.Node{{p.nodes[from]}}, 0
 		}
 		return nil, math.Inf(1)
+	}
+
+	weight = p.dist.At(from, to)
+	if math.IsNaN(weight) {
+		return nil, weight
 	}
 
 	var n graph.Node

@@ -11,7 +11,6 @@ import (
 	"go/format"
 	"log"
 	"os"
-	"path/filepath"
 	"strings"
 	"text/template"
 )
@@ -194,18 +193,6 @@ var Units = []Unit{
 	},
 }
 
-var gopath string
-var unitPkgPath string
-
-func init() {
-	gopath = os.Getenv("GOPATH")
-	if gopath == "" {
-		log.Fatal("no gopath")
-	}
-
-	unitPkgPath = filepath.Join(gopath, "src", "gonum.org", "v1", "gonum", "unit")
-}
-
 // Generate generates a file for each of the units
 func main() {
 	for _, unit := range Units {
@@ -307,7 +294,7 @@ var form = template.Must(template.New("format").Parse(formatTemplate))
 
 func generate(unit Unit) {
 	lowerName := strings.ToLower(unit.Name)
-	filename := filepath.Join(unitPkgPath, lowerName+".go")
+	filename := lowerName + ".go"
 	f, err := os.Create(filename)
 	if err != nil {
 		log.Fatal(err)

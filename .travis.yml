@@ -5,9 +5,9 @@ language: go
 # Do not move these lines; they are referred to by README.md.
 # Versions of go that are explicitly supported by gonum plus go tip.
 go:
- - 1.9.x
- - 1.10.x
  - 1.11.x
+ - 1.10.x
+ - 1.9.x
  - master
 
 env:

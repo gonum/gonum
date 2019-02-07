@@ -119,7 +119,7 @@ func (p Shortest) WeightTo(vid int64) float64 {
 
 // To returns a shortest path to v and the weight of the path. If the path
 // to v includes a negative cycle, one pass through the cycle will be included
-// in path and weight will be returned as NaN.
+// in path and weight will be returned as -Inf.
 func (p Shortest) To(vid int64) (path []graph.Node, weight float64) {
 	to, toOK := p.indexOf[vid]
 	if !toOK || math.IsInf(p.dist[to], 1) {
@@ -133,7 +133,7 @@ func (p Shortest) To(vid int64) (path []graph.Node, weight float64) {
 		seen.Add(from)
 		for to != from {
 			if seen.Has(to) {
-				weight = math.NaN()
+				weight = math.Inf(-1)
 				break
 			}
 			seen.Add(to)
@@ -253,7 +253,7 @@ func (p AllShortest) Weight(uid, vid int64) float64 {
 // one shortest path exists between u and v, a randomly chosen path will be returned and
 // unique is returned false. If a cycle with zero weight exists in the path, it will not
 // be included, but unique will be returned false. If a negative cycle exists on the path
-// from u to v, path will be returned nil, weight will be NaN and unique will be false.
+// from u to v, path will be returned nil, weight will be -Inf and unique will be false.
 func (p AllShortest) Between(uid, vid int64) (path []graph.Node, weight float64, unique bool) {
 	from, fromOK := p.indexOf[uid]
 	to, toOK := p.indexOf[vid]
@@ -265,7 +265,7 @@ func (p AllShortest) Between(uid, vid int64) (path []graph.Node, weight float64,
 	}
 
 	weight = p.dist.At(from, to)
-	if math.IsNaN(weight) {
+	if math.IsInf(weight, -1) {
 		return nil, weight, false
 	}
 
@@ -314,7 +314,7 @@ func (p AllShortest) Between(uid, vid int64) (path []graph.Node, weight float64,
 
 // AllBetween returns all shortest paths from u to v and the weight of the paths. Paths
 // containing zero-weight cycles are not returned. If a negative cycle exists between
-// u and v, paths is returned nil and weight is returned as NaN.
+// u and v, paths is returned nil and weight is returned as -Inf.
 func (p AllShortest) AllBetween(uid, vid int64) (paths [][]graph.Node, weight float64) {
 	from, fromOK := p.indexOf[uid]
 	to, toOK := p.indexOf[vid]
@@ -326,7 +326,7 @@ func (p AllShortest) AllBetween(uid, vid int64) (paths [][]graph.Node, weight fl
 	}
 
 	weight = p.dist.At(from, to)
-	if math.IsNaN(weight) {
+	if math.IsInf(weight, -1) {
 		return nil, weight
 	}
 

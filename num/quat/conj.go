@@ -15,6 +15,9 @@ func Conj(q Number) Number {
 
 // Inv returns the quaternion inverse of q.
 func Inv(q Number) Number {
+	if IsInf(q) {
+		return zero
+	}
 	a := Abs(q)
 	return Scale(1/(a*a), Conj(q))
 }

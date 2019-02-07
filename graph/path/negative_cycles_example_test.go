@@ -46,7 +46,7 @@ func ExampleBellmanFordFrom_negativecycles() {
 	}
 	for _, id := range []int64{'a', 'b', 'c', 'd', 'e', 'f'} {
 		p, w := pt.To(id)
-		if math.IsNaN(w) {
+		if math.IsInf(w, -1) {
 			fmt.Printf("negative cycle in path to %c path:%c\n", id, p)
 		}
 	}
@@ -87,7 +87,7 @@ func ExampleFloydWarshall_negativecycles() {
 	ids := []int64{'a', 'b', 'c', 'd', 'e', 'f'}
 
 	for _, id := range ids {
-		if math.IsNaN(pt.Weight(id, id)) {
+		if math.IsInf(pt.Weight(id, id), -1) {
 			fmt.Printf("%c is in a negative cycle\n", id)
 		}
 	}
@@ -95,7 +95,7 @@ func ExampleFloydWarshall_negativecycles() {
 	for _, uid := range ids {
 		for _, vid := range ids {
 			_, w, unique := pt.Between(uid, vid)
-			if math.IsNaN(w) {
+			if math.IsInf(w, -1) {
 				fmt.Printf("negative cycle in path from %c to %c unique=%t\n", uid, vid, unique)
 			}
 		}

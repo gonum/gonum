@@ -65,7 +65,10 @@ func FloydWarshall(g graph.Graph) (paths AllShortest, ok bool) {
 
 	if !ok {
 		// If we have a negative cycle, mark all
-		// the edges in the cycles with -Inf weight.
+		// the edges in the cycles with NaN(0xdefaced)
+		// weight. These weights are internal, being
+		// returned as -Inf in user calls.
+
 		d := paths.dist
 		for i := range nodes {
 			for j := range nodes {
@@ -74,8 +77,10 @@ func FloydWarshall(g graph.Graph) (paths AllShortest, ok bool) {
 						continue
 					}
 					if d.At(k, k) < 0 {
-						d.Set(k, k, math.Inf(-1))
-						d.Set(i, j, math.Inf(-1))
+						d.Set(k, k, defaced)
+						d.Set(i, j, defaced)
+					} else if math.Float64bits(d.At(k, k)) == defacedBits {
+						d.Set(i, j, defaced)
 					}
 				}
 			}

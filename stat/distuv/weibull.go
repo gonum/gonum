@@ -165,7 +165,7 @@ func (w Weibull) Score(deriv []float64, x float64) []float64 {
 		return deriv
 	}
 	deriv[0] = math.NaN()
-	deriv[0] = math.NaN()
+	deriv[1] = math.NaN()
 	return deriv
 }
 

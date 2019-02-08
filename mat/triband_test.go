@@ -337,7 +337,7 @@ func TestTriBandDenseZero(t *testing.T) {
 	// Elements that equal 1 should be set to zero, elements that equal -1
 	// should remain unchanged.
 	for _, test := range []*TriBandDense{
-		&TriBandDense{
+		{
 			mat: blas64.TriangularBand{
 				Uplo:   blas.Upper,
 				N:      6,
@@ -353,7 +353,7 @@ func TestTriBandDenseZero(t *testing.T) {
 				},
 			},
 		},
-		&TriBandDense{
+		{
 			mat: blas64.TriangularBand{
 				Uplo:   blas.Lower,
 				N:      6,

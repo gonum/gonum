@@ -60,7 +60,7 @@ func TestDiagDenseZero(t *testing.T) {
 	// Elements that equal 1 should be set to zero, elements that equal -1
 	// should remain unchanged.
 	for _, test := range []*DiagDense{
-		&DiagDense{
+		{
 			mat: blas64.Vector{
 				N:   5,
 				Inc: 2,

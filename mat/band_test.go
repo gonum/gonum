@@ -252,7 +252,7 @@ func TestBandDenseZero(t *testing.T) {
 	// Elements that equal 1 should be set to zero, elements that equal -1
 	// should remain unchanged.
 	for _, test := range []*BandDense{
-		&BandDense{
+		{
 			mat: blas64.Band{
 				Rows:   6,
 				Cols:   7,
@@ -269,7 +269,7 @@ func TestBandDenseZero(t *testing.T) {
 				},
 			},
 		},
-		&BandDense{
+		{
 			mat: blas64.Band{
 				Rows:   6,
 				Cols:   7,

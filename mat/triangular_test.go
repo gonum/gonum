@@ -143,7 +143,7 @@ func TestTriDenseZero(t *testing.T) {
 	// Elements that equal 1 should be set to zero, elements that equal -1
 	// should remain unchanged.
 	for _, test := range []*TriDense{
-		&TriDense{
+		{
 			mat: blas64.Triangular{
 				Uplo:   blas.Upper,
 				N:      4,
@@ -156,7 +156,7 @@ func TestTriDenseZero(t *testing.T) {
 				},
 			},
 		},
-		&TriDense{
+		{
 			mat: blas64.Triangular{
 				Uplo:   blas.Lower,
 				N:      4,

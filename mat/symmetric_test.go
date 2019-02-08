@@ -133,7 +133,7 @@ func TestSymDenseZero(t *testing.T) {
 	// Elements that equal 1 should be set to zero, elements that equal -1
 	// should remain unchanged.
 	for _, test := range []*SymDense{
-		&SymDense{
+		{
 			mat: blas64.Symmetric{
 				Uplo:   blas.Upper,
 				N:      4,

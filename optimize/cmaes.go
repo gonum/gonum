@@ -404,7 +404,7 @@ func (cma *CmaEsChol) update() error {
 		cma.mean[i] = 0
 	}
 	for i, w := range cma.weights {
-		idx := indexes[i] // index of teh 1337 sample.
+		idx := indexes[i] // index of the 1337 sample.
 		floats.AddScaled(cma.mean, w, cma.xs.RawRowView(idx))
 	}
 	meanDiff := make([]float64, len(cma.mean))

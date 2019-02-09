@@ -20,20 +20,23 @@ type SVD struct {
 	vt blas64.General
 }
 
-// Factorize computes the singular value decomposition (SVD) of the input matrix
-// A. The singular values of A are computed in all cases, while the singular
+// Factorize computes the singular value decomposition (SVD) of the input matrix A.
+// The singular values of A are computed in all cases, while the singular
 // vectors are optionally computed depending on the input kind.
 //
-// The full singular value decomposition (kind == SVDFull) deconstructs A as
+// The full singular value decomposition (kind == SVDFull) is a factorization
+// of an m×n matrix A of the form
 //  A = U * Σ * V^T
-// where Σ is an m×n diagonal matrix of singular values, U is an m×m unitary
-// matrix of left singular vectors, and V is an n×n matrix of right singular vectors.
+// where Σ is an m×n diagonal matrix, U is an m×m orthogonal matrix, and V is an
+// n×n orthogonal matrix. The diagonal elements of Σ are the singular values of A.
+// The first min(m,n) columns of U and V are, respectively, the left and right
+// singular vectors of A.
 //
 // It is frequently not necessary to compute the full SVD. Computation time and
 // storage costs can be reduced using the appropriate kind. Only the singular
 // values can be computed (kind == SVDNone), or a "thin" representation of the
-// singular vectors (kind = SVDThin). The thin representation can save a significant
-// amount of memory if m >> n.
+// orthogonal matrices U and V (kind = SVDThin). The thin representation can
+// save a significant amount of memory if m >> n or m << n.
 //
 // Factorize returns whether the decomposition succeeded. If the decomposition
 // failed, routines that require a successful factorization will panic.
@@ -117,11 +120,12 @@ func (svd *SVD) Cond() float64 {
 	return svd.s[0] / svd.s[len(svd.s)-1]
 }
 
-// Values returns the singular values of the factorized matrix in decreasing order.
-// If the input slice is non-nil, the values will be stored in-place into the slice.
-// In this case, the slice must have length min(m,n), and Values will panic with
-// ErrSliceLengthMismatch otherwise. If the input slice is nil,
-// a new slice of the appropriate length will be allocated and returned.
+// Values returns the singular values of the factorized matrix in descending order.
+//
+// If the input slice is non-nil, the values will be stored in-place into
+// the slice. In this case, the slice must have length min(m,n), and Values will
+// panic with ErrSliceLengthMismatch otherwise. If the input slice is nil, a new
+// slice of the appropriate length will be allocated and returned.
 //
 // Values will panic if the receiver does not contain a successful factorization.
 func (svd *SVD) Values(s []float64) []float64 {
@@ -138,9 +142,14 @@ func (svd *SVD) Values(s []float64) []float64 {
 	return s
 }
 
-// UTo extracts the matrix U from the singular value decomposition, storing
-// the result in-place into dst. U is size m×m if svd.Kind() == SVDFull,
-// of size m×min(m,n) if svd.Kind() == SVDThin, and UTo panics otherwise.
+// UTo extracts the matrix U from the singular value decomposition. The first
+// min(m,n) columns are the left singular vectors and correspond to the singular
+// values as returned from SVD.Values.
+//
+// If dst is not nil, U is stored in-place into dst, and dst must have size
+// m×m if svd.Kind() == SVDFull, size m×min(m,n) if svd.Kind() == SVDThin, and
+// UTo panics otherwise. If dst is nil, a new matrix of the appropriate size is
+// allocated and returned.
 func (svd *SVD) UTo(dst *Dense) *Dense {
 	kind := svd.kind
 	if kind != SVDFull && kind != SVDThin {
@@ -164,9 +173,14 @@ func (svd *SVD) UTo(dst *Dense) *Dense {
 	return dst
 }
 
-// VTo extracts the matrix V from the singular value decomposition, storing
-// the result in-place into dst. V is size n×n if svd.Kind() == SVDFull,
-// of size n×min(m,n) if svd.Kind() == SVDThin, and VTo panics otherwise.
+// VTo extracts the matrix V from the singular value decomposition. The first
+// min(m,n) columns are the right singular vectors and correspond to the singular
+// values as returned from SVD.Values.
+//
+// If dst is not nil, V is stored in-place into dst, and dst must have size
+// n×n if svd.Kind() == SVDFull, size n×min(m,n) if svd.Kind() == SVDThin, and
+// VTo panics otherwise. If dst is nil, a new matrix of the appropriate size is
+// allocated and returned.
 func (svd *SVD) VTo(dst *Dense) *Dense {
 	kind := svd.kind
 	if kind != SVDFull && kind != SVDThin {

@@ -60,6 +60,9 @@ func (c *Cholesky) updateCond(norm float64) {
 
 // Cond returns the condition number of the factorized matrix.
 func (c *Cholesky) Cond() float64 {
+	if !c.valid() {
+		panic(badCholesky)
+	}
 	return c.cond
 }
 

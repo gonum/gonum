@@ -12,7 +12,9 @@ import (
 	"gonum.org/v1/gonum/num/quat"
 )
 
-// Number is a float64 precision dual quaternion.
+// Number is a float64 precision dual quaternion. A dual quaternion
+// is a hypercomplex number composed of two quaternions, q₀+q₂ϵ,
+// where ϵ²=0, but ϵ≠0. Here, q₀ is termed the real and q₂ the dual.
 type Number struct {
 	Real, Dual quat.Number
 }
@@ -104,6 +106,14 @@ func Inv(d Number) Number {
 	return Number{
 		Real: quat.Inv(d.Real),
 		Dual: quat.Scale(-1, quat.Mul(d.Dual, quat.Inv(quat.Mul(d.Real, d.Real)))),
+	}
+}
+
+// Conj returns the dual quaternion conjugate of d₁+d₂ϵ, d̅₁-d̅₂ϵ.
+func Conj(d Number) Number {
+	return Number{
+		Real: quat.Conj(d.Real),
+		Dual: quat.Scale(-1, quat.Conj(d.Dual)),
 	}
 }
 

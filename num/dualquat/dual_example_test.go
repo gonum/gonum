@@ -51,14 +51,14 @@ func transform(p point, by ...dualquat.Number) point {
 	for _, o := range by[1:] {
 		q = dualquat.Mul(o, q)
 	}
-	pp := dualquat.Mul(dualquat.Mul(q, raiseDual(p)), dualquat.ConjDual(dualquat.ConjQuat(q)))
+	pp := dualquat.Mul(dualquat.Mul(q, raiseDual(p)), dualquat.Conj(q))
 
 	// Extract the point.
 	return point{x: pp.Dual.Imag, y: pp.Dual.Jmag, z: pp.Dual.Kmag}
 }
 
 func Example() {
-	// Translate a 1×1×1 cube [3, 4, 5] and rotate it 120° around the
+	// Translate a 1×1×1 cube by [3, 4, 5] and rotate it 120° around the
 	// diagonal vector [1, 1, 1].
 	fmt.Println("cube:")
 
@@ -97,7 +97,7 @@ func Example() {
 		fmt.Printf(" %d %+v -> %+v\n", i, p, pp)
 	}
 
-	// Rotate a line segment from [2, 1, 1] to [2, 1, 2] 120° around
+	// Rotate a line segment from {[2, 1, 1], [2, 1, 2]} 120° around
 	// the diagonal vector [1, 1, 1] at its lower end.
 	fmt.Println("\nline segment:")
 

@@ -11,11 +11,9 @@ import (
 	"gonum.org/v1/gonum/num/quat"
 )
 
-// Example point, displacement and rotation from Euclidean Space Dual Quaternions page:
-// http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/other/dualQuaternion/index.htm
-
 func Example_displace() {
 	// Displace a point [3, 4, 5] by [4, 2, 6].
+	// See http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/other/dualQuaternion/index.htm
 
 	// Point to be transformed in the dual imaginary vector.
 	p := dualquat.Number{Real: quat.Number{Real: 1}, Dual: quat.Number{Imag: 3, Jmag: 4, Kmag: 5}}
@@ -23,7 +21,7 @@ func Example_displace() {
 	// Displacement vector, half [4, 2, 6], in the dual imaginary vector.
 	d := dualquat.Number{Real: quat.Number{Real: 1}, Dual: quat.Number{Imag: 2, Jmag: 1, Kmag: 3}}
 
-	fmt.Println(dualquat.Mul(dualquat.Mul(d, p), dualquat.ConjDual(dualquat.ConjQuat(d))).Dual)
+	fmt.Println(dualquat.Mul(dualquat.Mul(d, p), dualquat.Conj(d)).Dual)
 
 	// Output:
 	//
@@ -32,6 +30,7 @@ func Example_displace() {
 
 func Example_rotate() {
 	// Rotate a point [3, 4, 5] by 180° around the x axis.
+	// See http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/other/dualQuaternion/index.htm
 
 	// Point to be transformed in the dual imaginary vector.
 	p := dualquat.Number{Real: quat.Number{Real: 1}, Dual: quat.Number{Imag: 3, Jmag: 4, Kmag: 5}}
@@ -39,7 +38,7 @@ func Example_rotate() {
 	// Rotation in the real quaternion.
 	r := dualquat.Number{Real: quat.Number{Real: 0, Imag: 1}}
 
-	fmt.Println(dualquat.Mul(dualquat.Mul(r, p), dualquat.ConjDual(dualquat.ConjQuat(r))).Dual)
+	fmt.Println(dualquat.Mul(dualquat.Mul(r, p), dualquat.Conj(r)).Dual)
 
 	// Output:
 	//
@@ -49,6 +48,7 @@ func Example_rotate() {
 func Example_displaceAndRotate() {
 	// Displace a point [3, 4, 5] by [4, 2, 6] and then rotate
 	// by 180° around the x axis.
+	// See http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/other/dualQuaternion/index.htm
 
 	// Point to be transformed in the dual imaginary vector.
 	p := dualquat.Number{Real: quat.Number{Real: 1}, Dual: quat.Number{Imag: 3, Jmag: 4, Kmag: 5}}
@@ -63,7 +63,7 @@ func Example_displaceAndRotate() {
 	// the displacement is performed first.
 	q := dualquat.Mul(r, d)
 
-	fmt.Println(dualquat.Mul(dualquat.Mul(q, p), dualquat.ConjDual(dualquat.ConjQuat(q))).Dual)
+	fmt.Println(dualquat.Mul(dualquat.Mul(q, p), dualquat.Conj(q)).Dual)
 
 	// Output:
 	//
@@ -87,7 +87,7 @@ func Example_rotateAndDisplace() {
 	// the rotations is performed first.
 	q := dualquat.Mul(d, r)
 
-	fmt.Println(dualquat.Mul(dualquat.Mul(q, p), dualquat.ConjDual(dualquat.ConjQuat(q))).Dual)
+	fmt.Println(dualquat.Mul(dualquat.Mul(q, p), dualquat.Conj(q)).Dual)
 
 	// Output:
 	//

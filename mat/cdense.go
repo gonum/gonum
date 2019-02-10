@@ -1,22 +1,27 @@
 // Copyright ©2019 The Gonum Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package mat
 
 import (
 	"gonum.org/v1/gonum/blas/cblas128"
 )
 
+// Dense is a dense matrix representation with complex data.
 type CDense struct {
 	mat cblas128.General
 
 	capRows, capCols int
 }
 
+// Dims returns the number of rows and columns in the matrix.
 func (m *CDense) Dims() (r, c int) {
 	return m.mat.Rows, m.mat.Cols
 }
 
+// H performs an implicit conjugate transpose by returning the receiver inside a
+// Conjugate.
 func (m *CDense) H() CMatrix {
 	return Conjugate{m}
 }

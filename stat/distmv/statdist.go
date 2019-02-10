@@ -7,6 +7,7 @@ package distmv
 import (
 	"math"
 
+	"gonum.org/v1/gonum/bound"
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/mathext"
@@ -75,7 +76,7 @@ func (Bhattacharyya) DistUniform(l, r *Uniform) float64 {
 
 // unifLogVolOverlap computes the log of the volume of the hyper-rectangle where
 // both uniform distributions have positive probability.
-func unifLogVolOverlap(b1, b2 []Bound) float64 {
+func unifLogVolOverlap(b1, b2 []bound.Bound) float64 {
 	var logVolOverlap float64
 	for dim, v1 := range b1 {
 		v2 := b2[dim]

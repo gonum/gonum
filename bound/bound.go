@@ -6,6 +6,5 @@ package bound
 
 // Bound represents [Min, Max] bounds.
 type Bound struct {
-	Min float64
-	Max float64
+	Min, Max float64
 }

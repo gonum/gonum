@@ -101,7 +101,18 @@ func (gsvd *HOGSVD) Factorize(m ...Matrix) (ok bool) {
 		gsvd.err = errors.New("hogsvd: eigen decomposition failed")
 		return false
 	}
-	v := eig.Vectors()
+	vc := eig.VectorsTo(nil)
+	// vc is guaranteed to have real eigenvalues.
+	rc, cc := vc.Dims()
+	v := NewDense(rc, cc, nil)
+	for i := 0; i < rc; i++ {
+		for j := 0; j < cc; j++ {
+			a := vc.At(i, j)
+			v.set(i, j, real(a))
+		}
+	}
+	// Rescale the columns of v by their Frobenius norms.
+	// Work done in cv is reflected in v.
 	var cv VecDense
 	for j := 0; j < c; j++ {
 		cv.ColViewOf(v, j)

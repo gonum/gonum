@@ -4,9 +4,7 @@
 
 package mat
 
-import (
-	"gonum.org/v1/gonum/blas/cblas128"
-)
+import "gonum.org/v1/gonum/blas/cblas128"
 
 // Dense is a dense matrix representation with complex data.
 type CDense struct {

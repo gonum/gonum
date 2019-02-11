@@ -108,7 +108,7 @@ func (Implementation) Strsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 				}
 				for k, va := range a[i*lda : i*lda+i] {
 					if va != 0 {
-						f32.AxpyUnitaryTo(btmp, -va, b[k*ldb:k*ldb+n], btmp)
+						f32.AxpyUnitary(-va, b[k*ldb:k*ldb+n], btmp)
 					}
 				}
 				if nonUnit {
@@ -187,7 +187,7 @@ func (Implementation) Strsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 				if nonUnit {
 					btmp[k] /= a[k*lda+k]
 				}
-				f32.AxpyUnitary(-btmp[k], a[k*lda:k*lda+k], btmp)
+				f32.AxpyUnitary(-btmp[k], a[k*lda:k*lda+k], btmp[:k])
 			}
 		}
 		return
@@ -209,7 +209,7 @@ func (Implementation) Strsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 	for i := 0; i < m; i++ {
 		btmp := b[i*ldb : i*ldb+n]
 		for j := 0; j < n; j++ {
-			tmp := alpha*btmp[j] - f32.DotUnitary(a[j*lda:j*lda+j], btmp)
+			tmp := alpha*btmp[j] - f32.DotUnitary(a[j*lda:j*lda+j], btmp[:j])
 			if nonUnit {
 				tmp /= a[j*lda+j]
 			}
@@ -311,7 +311,7 @@ func (Implementation) Ssymm(s blas.Side, ul blas.Uplo, m, n int, alpha float32, 
 					atmp = a[i*lda+k]
 				}
 				atmp *= alpha
-				f32.AxpyUnitaryTo(ctmp, atmp, b[k*ldb:k*ldb+n], ctmp)
+				f32.AxpyUnitary(atmp, b[k*ldb:k*ldb+n], ctmp)
 			}
 			for k := i + 1; k < m; k++ {
 				var atmp float32
@@ -321,7 +321,7 @@ func (Implementation) Ssymm(s blas.Side, ul blas.Uplo, m, n int, alpha float32, 
 					atmp = a[k*lda+i]
 				}
 				atmp *= alpha
-				f32.AxpyUnitaryTo(ctmp, atmp, b[k*ldb:k*ldb+n], ctmp)
+				f32.AxpyUnitary(atmp, b[k*ldb:k*ldb+n], ctmp)
 			}
 		}
 		return
@@ -491,7 +491,7 @@ func (Implementation) Ssyrk(ul blas.Uplo, tA blas.Transpose, n, k int, alpha flo
 			for l := 0; l < k; l++ {
 				tmp := alpha * a[l*lda+i]
 				if tmp != 0 {
-					f32.AxpyUnitaryTo(ctmp, tmp, a[l*lda+i:l*lda+n], ctmp)
+					f32.AxpyUnitary(tmp, a[l*lda+i:l*lda+n], ctmp)
 				}
 			}
 		}
@@ -507,7 +507,7 @@ func (Implementation) Ssyrk(ul blas.Uplo, tA blas.Transpose, n, k int, alpha flo
 		for l := 0; l < k; l++ {
 			tmp := alpha * a[l*lda+i]
 			if tmp != 0 {
-				f32.AxpyUnitaryTo(ctmp, tmp, a[l*lda:l*lda+i+1], ctmp)
+				f32.AxpyUnitary(tmp, a[l*lda:l*lda+i+1], ctmp)
 			}
 		}
 	}

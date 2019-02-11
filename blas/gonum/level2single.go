@@ -270,8 +270,7 @@ func (Implementation) Strmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 					} else {
 						tmp = x[i]
 					}
-					xtmp := x[i+1:]
-					x[i] = tmp + f32.DotUnitary(a[ilda+i+1:ilda+n], xtmp)
+					x[i] = tmp + f32.DotUnitary(a[ilda+i+1:ilda+n], x[i+1:n])
 				}
 				return
 			}
@@ -298,7 +297,7 @@ func (Implementation) Strmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 				} else {
 					tmp = x[i]
 				}
-				x[i] = tmp + f32.DotUnitary(a[ilda:ilda+i], x)
+				x[i] = tmp + f32.DotUnitary(a[ilda:ilda+i], x[:i])
 			}
 			return
 		}
@@ -345,7 +344,7 @@ func (Implementation) Strmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 		for i := 0; i < n; i++ {
 			ilda := i * lda
 			xi := x[i]
-			f32.AxpyUnitary(xi, a[ilda:ilda+i], x)
+			f32.AxpyUnitary(xi, a[ilda:ilda+i], x[:i])
 			if nonUnit {
 				x[i] *= a[i*lda+i]
 			}

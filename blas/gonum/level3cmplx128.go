@@ -341,20 +341,20 @@ func (Implementation) Zhemm(side blas.Side, uplo blas.Uplo, m, n int, alpha comp
 			if uplo == blas.Upper {
 				for k := 0; k < i; k++ {
 					atmp = alpha * cmplx.Conj(a[k*lda+i])
-					c128.AxpyUnitaryTo(ci, atmp, b[k*ldb:k*ldb+n], ci)
+					c128.AxpyUnitary(atmp, b[k*ldb:k*ldb+n], ci)
 				}
 				for k := i + 1; k < m; k++ {
 					atmp = alpha * a[i*lda+k]
-					c128.AxpyUnitaryTo(ci, atmp, b[k*ldb:k*ldb+n], ci)
+					c128.AxpyUnitary(atmp, b[k*ldb:k*ldb+n], ci)
 				}
 			} else {
 				for k := 0; k < i; k++ {
 					atmp = alpha * a[i*lda+k]
-					c128.AxpyUnitaryTo(ci, atmp, b[k*ldb:k*ldb+n], ci)
+					c128.AxpyUnitary(atmp, b[k*ldb:k*ldb+n], ci)
 				}
 				for k := i + 1; k < m; k++ {
 					atmp = alpha * cmplx.Conj(a[k*lda+i])
-					c128.AxpyUnitaryTo(ci, atmp, b[k*ldb:k*ldb+n], ci)
+					c128.AxpyUnitary(atmp, b[k*ldb:k*ldb+n], ci)
 				}
 			}
 		}
@@ -881,20 +881,20 @@ func (Implementation) Zsymm(side blas.Side, uplo blas.Uplo, m, n int, alpha comp
 			if uplo == blas.Upper {
 				for k := 0; k < i; k++ {
 					atmp = alpha * a[k*lda+i]
-					c128.AxpyUnitaryTo(ci, atmp, b[k*ldb:k*ldb+n], ci)
+					c128.AxpyUnitary(atmp, b[k*ldb:k*ldb+n], ci)
 				}
 				for k := i + 1; k < m; k++ {
 					atmp = alpha * a[i*lda+k]
-					c128.AxpyUnitaryTo(ci, atmp, b[k*ldb:k*ldb+n], ci)
+					c128.AxpyUnitary(atmp, b[k*ldb:k*ldb+n], ci)
 				}
 			} else {
 				for k := 0; k < i; k++ {
 					atmp = alpha * a[i*lda+k]
-					c128.AxpyUnitaryTo(ci, atmp, b[k*ldb:k*ldb+n], ci)
+					c128.AxpyUnitary(atmp, b[k*ldb:k*ldb+n], ci)
 				}
 				for k := i + 1; k < m; k++ {
 					atmp = alpha * a[k*lda+i]
-					c128.AxpyUnitaryTo(ci, atmp, b[k*ldb:k*ldb+n], ci)
+					c128.AxpyUnitary(atmp, b[k*ldb:k*ldb+n], ci)
 				}
 			}
 		}
@@ -1440,7 +1440,7 @@ func (Implementation) Ztrmm(side blas.Side, uplo blas.Uplo, trans blas.Transpose
 						if noUnit {
 							bi[k] *= a[k*lda+k]
 						}
-						c128.AxpyUnitary(abik, a[k*lda:k*lda+k], bi)
+						c128.AxpyUnitary(abik, a[k*lda:k*lda+k], bi[:k])
 					}
 				}
 			}
@@ -1696,12 +1696,12 @@ func (Implementation) Ztrsm(side blas.Side, uplo blas.Uplo, transA blas.Transpos
 					for j, bij := range bi {
 						bij *= alpha
 						if noConj {
-							bij -= c128.DotuUnitary(a[j*lda:j*lda+j], bi)
+							bij -= c128.DotuUnitary(a[j*lda:j*lda+j], bi[:j])
 							if noUnit {
 								bij /= a[j*lda+j]
 							}
 						} else {
-							bij -= c128.DotcUnitary(a[j*lda:j*lda+j], bi)
+							bij -= c128.DotcUnitary(a[j*lda:j*lda+j], bi[:j])
 							if noUnit {
 								bij /= cmplx.Conj(a[j*lda+j])
 							}

@@ -34,7 +34,7 @@ func (Implementation) Sdot(n int, x []float32, incX int, y []float32, incY int) 
 		if len(y) < n {
 			panic(shortY)
 		}
-		return f32.DotUnitary(x[:n], y)
+		return f32.DotUnitary(x[:n], y[:n])
 	}
 	var ix, iy int
 	if incX < 0 {

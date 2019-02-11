@@ -19,9 +19,7 @@ cat level1double.go \
 | gofmt -r 'blas.DrotmParams -> blas.SrotmParams' \
 \
 | gofmt -r 'f64.AxpyInc -> f32.AxpyInc' \
-| gofmt -r 'f64.AxpyIncTo -> f32.AxpyIncTo' \
 | gofmt -r 'f64.AxpyUnitary -> f32.AxpyUnitary' \
-| gofmt -r 'f64.AxpyUnitaryTo -> f32.AxpyUnitaryTo' \
 | gofmt -r 'f64.DotUnitary -> f32.DotUnitary' \
 | gofmt -r 'f64.ScalInc -> f32.ScalInc' \
 | gofmt -r 'f64.ScalUnitary -> f32.ScalUnitary' \
@@ -135,8 +133,7 @@ cat dgemm.go \
 | gofmt -r 'dgemmSerialTransTrans -> sgemmSerialTransTrans' \
 \
 | gofmt -r 'f64.AxpyInc -> f32.AxpyInc' \
-| gofmt -r 'f64.AxpyIncTo -> f32.AxpyIncTo' \
-| gofmt -r 'f64.AxpyUnitaryTo -> f32.AxpyUnitaryTo' \
+| gofmt -r 'f64.AxpyUnitary -> f32.AxpyUnitary' \
 | gofmt -r 'f64.DotUnitary -> f32.DotUnitary' \
 \
 | sed -e "s_^\(func (Implementation) \)D\(.*\)\$_$WARNING\1S\2_" \

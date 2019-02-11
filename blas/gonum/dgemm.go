@@ -259,7 +259,7 @@ func dgemmSerialNotNot(m, n, k int, a []float64, lda int, b []float64, ldb int, 
 		for l, v := range a[i*lda : i*lda+k] {
 			tmp := alpha * v
 			if tmp != 0 {
-				f64.AxpyUnitaryTo(ctmp, tmp, b[l*ldb:l*ldb+n], ctmp)
+				f64.AxpyUnitary(tmp, b[l*ldb:l*ldb+n], ctmp)
 			}
 		}
 	}
@@ -275,7 +275,7 @@ func dgemmSerialTransNot(m, n, k int, a []float64, lda int, b []float64, ldb int
 			tmp := alpha * v
 			if tmp != 0 {
 				ctmp := c[i*ldc : i*ldc+n]
-				f64.AxpyUnitaryTo(ctmp, tmp, btmp, ctmp)
+				f64.AxpyUnitary(tmp, btmp, ctmp)
 			}
 		}
 	}

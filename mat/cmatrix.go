@@ -4,6 +4,8 @@
 
 package mat
 
+import "math/cmplx"
+
 // CMatrix is the basic matrix interface type for complex matrices.
 type CMatrix interface {
 	// Dims returns the dimensions of a Matrix.
@@ -32,11 +34,11 @@ type Conjugate struct {
 	CMatrix CMatrix
 }
 
-// At returns the value of the element at row i and column j of the transposed
-// matrix, that is, row j and column i of the Matrix field.
+// At returns the value of the element at row i and column j of the conjugate
+// transposed matrix, that is, row j and column i of the Matrix field.
 func (t Conjugate) At(i, j int) complex128 {
 	z := t.CMatrix.At(j, i)
-	return complex(real(z), -imag(z))
+	return cmplx.Conj(z)
 }
 
 // Dims returns the dimensions of the transposed matrix. The number of rows returned

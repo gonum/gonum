@@ -38,6 +38,36 @@ func (m *Dense) set(i, j int, v float64) {
 	m.mat.Data[i*m.mat.Stride+j] = v
 }
 
+// At returns the element at row i, column j.
+func (m *CDense) At(i, j int) complex128 {
+	return m.at(i, j)
+}
+
+func (m *CDense) at(i, j int) complex128 {
+	if uint(i) >= uint(m.mat.Rows) {
+		panic(ErrRowAccess)
+	}
+	if uint(j) >= uint(m.mat.Cols) {
+		panic(ErrColAccess)
+	}
+	return m.mat.Data[i*m.mat.Stride+j]
+}
+
+// Set sets the element at row i, column j to the value v.
+func (m *CDense) Set(i, j int, v complex128) {
+	m.set(i, j, v)
+}
+
+func (m *CDense) set(i, j int, v complex128) {
+	if uint(i) >= uint(m.mat.Rows) {
+		panic(ErrRowAccess)
+	}
+	if uint(j) >= uint(m.mat.Cols) {
+		panic(ErrColAccess)
+	}
+	m.mat.Data[i*m.mat.Stride+j] = v
+}
+
 // At returns the element at row i.
 // It panics if i is out of bounds or if j is not zero.
 func (v *VecDense) At(i, j int) float64 {

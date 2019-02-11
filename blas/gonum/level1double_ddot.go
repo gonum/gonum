@@ -30,7 +30,7 @@ func (Implementation) Ddot(n int, x []float64, incX int, y []float64, incY int) 
 		if len(y) < n {
 			panic(shortY)
 		}
-		return f64.DotUnitary(x[:n], y)
+		return f64.DotUnitary(x[:n], y[:n])
 	}
 	var ix, iy int
 	if incX < 0 {

@@ -34,7 +34,7 @@ func (Implementation) Sdsdot(n int, alpha float32, x []float32, incX int, y []fl
 		if len(y) < n {
 			panic(shortY)
 		}
-		return alpha + float32(f32.DdotUnitary(x[:n], y))
+		return alpha + float32(f32.DdotUnitary(x[:n], y[:n]))
 	}
 	var ix, iy int
 	if incX < 0 {

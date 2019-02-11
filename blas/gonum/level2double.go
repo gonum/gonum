@@ -262,8 +262,7 @@ func (Implementation) Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 					} else {
 						tmp = x[i]
 					}
-					xtmp := x[i+1:]
-					x[i] = tmp + f64.DotUnitary(a[ilda+i+1:ilda+n], xtmp)
+					x[i] = tmp + f64.DotUnitary(a[ilda+i+1:ilda+n], x[i+1:n])
 				}
 				return
 			}
@@ -290,7 +289,7 @@ func (Implementation) Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 				} else {
 					tmp = x[i]
 				}
-				x[i] = tmp + f64.DotUnitary(a[ilda:ilda+i], x)
+				x[i] = tmp + f64.DotUnitary(a[ilda:ilda+i], x[:i])
 			}
 			return
 		}
@@ -337,7 +336,7 @@ func (Implementation) Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 		for i := 0; i < n; i++ {
 			ilda := i * lda
 			xi := x[i]
-			f64.AxpyUnitary(xi, a[ilda:ilda+i], x)
+			f64.AxpyUnitary(xi, a[ilda:ilda+i], x[:i])
 			if nonUnit {
 				x[i] *= a[i*lda+i]
 			}

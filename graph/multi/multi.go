@@ -51,7 +51,7 @@ func (l Line) To() graph.Node { return l.T }
 // swapped. The UID of the new Line is the same as the
 // UID of the receiver. The Lines within the Edge are
 // not altered.
-func (l Line) Reversed() graph.Edge { l.F, l.T = l.T, l.F; return l }
+func (l Line) Reversed() graph.Line { l.F, l.T = l.T, l.F; return l }
 
 // ID returns the ID of the line.
 func (l Line) ID() int64 { return l.UID }
@@ -121,7 +121,7 @@ func (l WeightedLine) To() graph.Node { return l.T }
 // Reversed returns a new Line with the F and T fields
 // swapped. The UID and W of the new Line are the same as the
 // UID and W of the receiver.
-func (l WeightedLine) Reversed() graph.Edge { l.F, l.T = l.T, l.F; return l }
+func (l WeightedLine) Reversed() graph.Line { l.F, l.T = l.T, l.F; return l }
 
 // ID returns the ID of the line.
 func (l WeightedLine) ID() int64 { return l.UID }

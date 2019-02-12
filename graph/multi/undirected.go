@@ -143,7 +143,7 @@ func (g *UndirectedGraph) LinesBetween(xid, yid int64) graph.Lines {
 	var lines []graph.Line
 	for _, l := range g.lines[xid][yid] {
 		if l.From().ID() != xid {
-			l = l.Reversed().(graph.Line)
+			l = l.Reversed()
 		}
 		lines = append(lines, l)
 	}

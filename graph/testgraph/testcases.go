@@ -41,7 +41,7 @@ var testCases = []struct {
 
 	// edges is the set of edges that should be used
 	// to construct the graph.
-	edges []graph.WeightedLine
+	edges []WeightedLine
 
 	// nonexist is a set of nodes that should not be
 	// found within the graph.
@@ -87,7 +87,7 @@ var testCases = []struct {
 	{
 		name:     "one - self loop",
 		nodes:    []graph.Node{node(0)},
-		edges:    []graph.WeightedLine{line{F: node(0), T: node(0), UID: 0, W: 0.5}},
+		edges:    []WeightedLine{line{F: node(0), T: node(0), UID: 0, W: 0.5}},
 		nonexist: []graph.Node{node(-1), node(1)},
 		self:     0,
 		absent:   math.Inf(1),
@@ -96,7 +96,7 @@ var testCases = []struct {
 	{
 		name:     "two - positive",
 		nodes:    []graph.Node{node(1), node(2)},
-		edges:    []graph.WeightedLine{line{F: node(1), T: node(2), UID: 0, W: 0.5}},
+		edges:    []WeightedLine{line{F: node(1), T: node(2), UID: 0, W: 0.5}},
 		nonexist: []graph.Node{node(-1), node(0)},
 		self:     0,
 		absent:   math.Inf(1),
@@ -104,7 +104,7 @@ var testCases = []struct {
 	{
 		name:     "two - negative",
 		nodes:    []graph.Node{node(-1), node(-2)},
-		edges:    []graph.WeightedLine{line{F: node(-1), T: node(-2), UID: 0, W: 0.5}},
+		edges:    []WeightedLine{line{F: node(-1), T: node(-2), UID: 0, W: 0.5}},
 		nonexist: []graph.Node{node(0), node(-3)},
 		self:     0,
 		absent:   math.Inf(1),
@@ -112,7 +112,7 @@ var testCases = []struct {
 	{
 		name:     "two - zero spanning",
 		nodes:    []graph.Node{node(-1), node(1)},
-		edges:    []graph.WeightedLine{line{F: node(-1), T: node(1), UID: 0, W: 0.5}},
+		edges:    []WeightedLine{line{F: node(-1), T: node(1), UID: 0, W: 0.5}},
 		nonexist: []graph.Node{node(0), node(2)},
 		self:     0,
 		absent:   math.Inf(1),
@@ -120,7 +120,7 @@ var testCases = []struct {
 	{
 		name:     "two - zero contiguous",
 		nodes:    []graph.Node{node(0), node(1)},
-		edges:    []graph.WeightedLine{line{F: node(0), T: node(1), UID: 0, W: 0.5}},
+		edges:    []WeightedLine{line{F: node(0), T: node(1), UID: 0, W: 0.5}},
 		nonexist: []graph.Node{node(-1), node(2)},
 		self:     0,
 		absent:   math.Inf(1),
@@ -129,7 +129,7 @@ var testCases = []struct {
 	{
 		name:     "three - positive",
 		nodes:    []graph.Node{node(1), node(2), node(3)},
-		edges:    []graph.WeightedLine{line{F: node(1), T: node(2), UID: 0, W: 0.5}},
+		edges:    []WeightedLine{line{F: node(1), T: node(2), UID: 0, W: 0.5}},
 		nonexist: []graph.Node{node(-1), node(0)},
 		self:     0,
 		absent:   math.Inf(1),
@@ -137,7 +137,7 @@ var testCases = []struct {
 	{
 		name:     "three - negative",
 		nodes:    []graph.Node{node(-1), node(-2), node(-3)},
-		edges:    []graph.WeightedLine{line{F: node(-1), T: node(-2), UID: 0, W: 0.5}},
+		edges:    []WeightedLine{line{F: node(-1), T: node(-2), UID: 0, W: 0.5}},
 		nonexist: []graph.Node{node(0), node(1)},
 		self:     0,
 		absent:   math.Inf(1),
@@ -145,7 +145,7 @@ var testCases = []struct {
 	{
 		name:     "three - zero spanning",
 		nodes:    []graph.Node{node(-1), node(0), node(1)},
-		edges:    []graph.WeightedLine{line{F: node(-1), T: node(1), UID: 0, W: 0.5}},
+		edges:    []WeightedLine{line{F: node(-1), T: node(1), UID: 0, W: 0.5}},
 		nonexist: []graph.Node{node(-2), node(2)},
 		self:     0,
 		absent:   math.Inf(1),
@@ -153,7 +153,7 @@ var testCases = []struct {
 	{
 		name:     "three - zero contiguous",
 		nodes:    []graph.Node{node(0), node(1), node(2)},
-		edges:    []graph.WeightedLine{line{F: node(0), T: node(1), UID: 0, W: 0.5}},
+		edges:    []WeightedLine{line{F: node(0), T: node(1), UID: 0, W: 0.5}},
 		nonexist: []graph.Node{node(-1), node(3)},
 		self:     0,
 		absent:   math.Inf(1),
@@ -161,10 +161,10 @@ var testCases = []struct {
 
 	{
 		name: "4-clique - single(non-prepared)",
-		edges: func() []graph.WeightedLine {
+		edges: func() []WeightedLine {
 			const n = 4
 			var uid int64
-			var edges []graph.WeightedLine
+			var edges []WeightedLine
 			for i := 0; i < n; i++ {
 				for j := i + 1; j < 4; j++ {
 					edges = append(edges, line{F: node(i), T: node(j), UID: uid, W: 0.5})
@@ -179,10 +179,10 @@ var testCases = []struct {
 	},
 	{
 		name: "4-clique+ - single(non-prepared)",
-		edges: func() []graph.WeightedLine {
+		edges: func() []WeightedLine {
 			const n = 4
 			var uid int64
-			var edges []graph.WeightedLine
+			var edges []WeightedLine
 			for i := 0; i < n; i++ {
 				for j := i; j < 4; j++ {
 					edges = append(edges, line{F: node(i), T: node(j), UID: uid, W: 0.5})
@@ -205,10 +205,10 @@ var testCases = []struct {
 			}
 			return nodes
 		}(),
-		edges: func() []graph.WeightedLine {
+		edges: func() []WeightedLine {
 			const n = 4
 			var uid int64
-			var edges []graph.WeightedLine
+			var edges []WeightedLine
 			for i := 0; i < n; i++ {
 				for j := i + 1; j < n; j++ {
 					edges = append(edges, line{F: node(i), T: node(j), UID: uid, W: 0.5})
@@ -231,10 +231,10 @@ var testCases = []struct {
 			}
 			return nodes
 		}(),
-		edges: func() []graph.WeightedLine {
+		edges: func() []WeightedLine {
 			const n = 4
 			var uid int64
-			var edges []graph.WeightedLine
+			var edges []WeightedLine
 			for i := 0; i < n; i++ {
 				for j := i; j < n; j++ {
 					edges = append(edges, line{F: node(i), T: node(j), UID: uid, W: 0.5})
@@ -250,10 +250,10 @@ var testCases = []struct {
 
 	{
 		name: "4-clique - double(non-prepared)",
-		edges: func() []graph.WeightedLine {
+		edges: func() []WeightedLine {
 			const n = 4
 			var uid int64
-			var edges []graph.WeightedLine
+			var edges []WeightedLine
 			for i := 0; i < n; i++ {
 				for j := i + 1; j < n; j++ {
 					edges = append(edges, line{F: node(i), T: node(j), UID: uid, W: 0.5})
@@ -270,10 +270,10 @@ var testCases = []struct {
 	},
 	{
 		name: "4-clique+ - double(non-prepared)",
-		edges: func() []graph.WeightedLine {
+		edges: func() []WeightedLine {
 			const n = 4
 			var uid int64
-			var edges []graph.WeightedLine
+			var edges []WeightedLine
 			for i := 0; i < n; i++ {
 				for j := i; j < n; j++ {
 					edges = append(edges, line{F: node(i), T: node(j), UID: uid, W: 0.5})
@@ -298,10 +298,10 @@ var testCases = []struct {
 			}
 			return nodes
 		}(),
-		edges: func() []graph.WeightedLine {
+		edges: func() []WeightedLine {
 			const n = 4
 			var uid int64
-			var edges []graph.WeightedLine
+			var edges []WeightedLine
 			for i := 0; i < n; i++ {
 				for j := i + 1; j < n; j++ {
 					edges = append(edges, line{F: node(i), T: node(j), UID: uid, W: 0.5})
@@ -326,10 +326,10 @@ var testCases = []struct {
 			}
 			return nodes
 		}(),
-		edges: func() []graph.WeightedLine {
+		edges: func() []WeightedLine {
 			const n = 4
 			var uid int64
-			var edges []graph.WeightedLine
+			var edges []WeightedLine
 			for i := 0; i < n; i++ {
 				for j := i; j < n; j++ {
 					edges = append(edges, line{F: node(i), T: node(j), UID: uid, W: 0.5})

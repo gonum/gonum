@@ -240,9 +240,16 @@ func (gen *simpleGraph) addStmt(dst encoding.Builder, stmt ast.Stmt) {
 	}
 }
 
+// basicEdge is an edge without the Reverse method to
+// allow satisfaction by both graph.Edge and graph.Line.
+type basicEdge interface {
+	From() graph.Node
+	To() graph.Node
+}
+
 // applyPortsToEdge applies the available port metadata from an ast.Edge
 // to a graph.Edge
-func applyPortsToEdge(from ast.Vertex, to *ast.Edge, edge graph.Edge) {
+func applyPortsToEdge(from ast.Vertex, to *ast.Edge, edge basicEdge) {
 	if ps, isPortSetter := edge.(PortSetter); isPortSetter {
 		if n, vertexIsNode := from.(*ast.Node); vertexIsNode {
 			if n.Port != nil {
@@ -484,7 +491,7 @@ func (gen *multiGraph) addLine(dst encoding.MultiBuilder, to *ast.Edge, attrs []
 }
 
 // addEdgeAttrs adds the attributes to the given edge.
-func addEdgeAttrs(edge graph.Edge, attrs []*ast.Attr) {
+func addEdgeAttrs(edge basicEdge, attrs []*ast.Attr) {
 	e, ok := edge.(encoding.AttributeSetter)
 	if !ok {
 		return

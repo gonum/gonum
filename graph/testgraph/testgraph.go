@@ -21,10 +21,6 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-// TODO(kortschak): Consider making the Builder edges function use a package
-// type Edges that lacks the Reversed method so that we can change the Line
-// interface to have Reversed() Line.
-
 // BUG(kortschak): Edge equality is tested in part with reflect.DeepEqual and
 // direct equality of weight values. This means that edges returned by graphs
 // must not contain NaN values. Weights returned by the Weight method are
@@ -52,6 +48,27 @@ func checkEmptyIterator(t *testing.T, it graph.Iterator, useEmpty bool) {
 	}
 }
 
+// Edge supports basic edge operations.
+type Edge interface {
+	// From returns the from node of the edge.
+	From() graph.Node
+
+	// To returns the to node of the edge.
+	To() graph.Node
+}
+
+// WeightedLine is a generalized graph edge that supports all graph
+// edge operations except reversal.
+type WeightedLine interface {
+	Edge
+
+	// ID returns the unique ID for the Line.
+	ID() int64
+
+	// Weight returns the weight of the edge.
+	Weight() float64
+}
+
 // A Builder function returns a graph constructed from the nodes, edges and
 // default weights passed in, potentially altering the nodes and edges to
 // conform to the requirements of the graph. The graph is returned along with
@@ -60,7 +77,7 @@ func checkEmptyIterator(t *testing.T, it graph.Iterator, useEmpty bool) {
 // or graph.WeightedLine depending on what the graph requires.
 // The client may skip a test case by returning ok=false when the input is not
 // a valid graph construction.
-type Builder func(nodes []graph.Node, edges []graph.WeightedLine, self, absent float64) (g graph.Graph, n []graph.Node, e []graph.Edge, s, a float64, ok bool)
+type Builder func(nodes []graph.Node, edges []WeightedLine, self, absent float64) (g graph.Graph, n []graph.Node, e []Edge, s, a float64, ok bool)
 
 // edgeLister is a graph that can return all its edges.
 type edgeLister interface {
@@ -199,7 +216,7 @@ func ReturnAllEdges(t *testing.T, b Builder, useEmpty bool) {
 			continue
 		}
 
-		var got []graph.Edge
+		var got []Edge
 		switch eg := g.(type) {
 		case edgeLister:
 			it := eg.Edges()
@@ -250,7 +267,7 @@ func ReturnEdgeSlice(t *testing.T, b Builder, useEmpty bool) {
 			continue
 		}
 
-		var got []graph.Edge
+		var got []Edge
 		switch eg := g.(type) {
 		case edgeLister:
 			it := eg.Edges()
@@ -267,8 +284,13 @@ func ReturnEdgeSlice(t *testing.T, b Builder, useEmpty bool) {
 				t.Errorf("invalid type for test %q: %T cannot return edge slicer", test.name, g)
 				continue
 			}
-			got = s.EdgeSlice()
-			for _, e := range got {
+			gotNative := s.EdgeSlice()
+			if len(gotNative) != 0 {
+				got = make([]Edge, len(gotNative))
+			}
+			for i, e := range gotNative {
+				got[i] = e
+
 				qe := g.Edge(e.From().ID(), e.To().ID())
 				if qe == nil {
 					t.Errorf("missing edge for test %q: %v", test.name, e)
@@ -312,7 +334,7 @@ func ReturnAllLines(t *testing.T, b Builder, useEmpty bool) {
 			continue
 		}
 
-		var got []graph.Edge
+		var got []Edge
 		switch eg := g.(type) {
 		case edgeLister:
 			it := eg.Edges()
@@ -393,7 +415,7 @@ func ReturnAllWeightedEdges(t *testing.T, b Builder, useEmpty bool) {
 			continue
 		}
 
-		var got []graph.Edge
+		var got []Edge
 		switch eg := g.(type) {
 		case weightedEdgeLister:
 			it := eg.WeightedEdges()
@@ -461,7 +483,7 @@ func ReturnWeightedEdgeSlice(t *testing.T, b Builder, useEmpty bool) {
 			continue
 		}
 
-		var got []graph.Edge
+		var got []Edge
 		switch eg := g.(type) {
 		case weightedEdgeLister:
 			it := eg.WeightedEdges()
@@ -522,7 +544,7 @@ func ReturnAllWeightedLines(t *testing.T, b Builder, useEmpty bool) {
 			continue
 		}
 
-		var got []graph.Edge
+		var got []Edge
 		switch eg := g.(type) {
 		case weightedEdgeLister:
 			it := eg.WeightedEdges()
@@ -585,7 +607,7 @@ func ReturnAllWeightedLines(t *testing.T, b Builder, useEmpty bool) {
 }
 
 // checkEdges compares got and want for the given graph type.
-func checkEdges(t *testing.T, name string, g graph.Graph, got, want []graph.Edge) {
+func checkEdges(t *testing.T, name string, g graph.Graph, got, want []Edge) {
 	t.Helper()
 	switch g.(type) {
 	case graph.Undirected:
@@ -1185,7 +1207,7 @@ func AdjacencyMatrix(t *testing.T, b Builder) {
 
 // lexicalEdges sorts a collection of edges lexically on the
 // keys: from.ID > to.ID > [line.ID] > [weight].
-type lexicalEdges []graph.Edge
+type lexicalEdges []Edge
 
 func (e lexicalEdges) Len() int { return len(e) }
 func (e lexicalEdges) Less(i, j int) bool {
@@ -1214,7 +1236,7 @@ func (e lexicalEdges) Swap(i, j int) { e[i], e[j] = e[j], e[i] }
 
 // lexicalUndirectedEdges sorts a collection of edges lexically on the
 // keys: lo.ID > hi.ID > [line.ID] > [weight].
-type lexicalUndirectedEdges []graph.Edge
+type lexicalUndirectedEdges []Edge
 
 func (e lexicalUndirectedEdges) Len() int { return len(e) }
 func (e lexicalUndirectedEdges) Less(i, j int) bool {
@@ -1244,7 +1266,7 @@ func (e lexicalUndirectedEdges) Less(i, j int) bool {
 }
 func (e lexicalUndirectedEdges) Swap(i, j int) { e[i], e[j] = e[j], e[i] }
 
-func lessWeight(ei, ej graph.Edge) bool {
+func lessWeight(ei, ej Edge) bool {
 	wei, oki := ei.(graph.WeightedEdge)
 	wej, okj := ej.(graph.WeightedEdge)
 	if oki != okj {
@@ -1258,7 +1280,7 @@ func lessWeight(ei, ej graph.Edge) bool {
 
 // undirectedEdgeSetEqual returned whether a pair of undirected edge
 // slices sorted by lexicalUndirectedEdges are equal.
-func undirectedEdgeSetEqual(a, b []graph.Edge) bool {
+func undirectedEdgeSetEqual(a, b []Edge) bool {
 	if len(a) == 0 && len(b) == 0 {
 		return true
 	}
@@ -1292,7 +1314,7 @@ func undirectedEdgeSetEqual(a, b []graph.Edge) bool {
 
 // undirectedEdgeEqual returns whether a pair of undirected edges are equal
 // after canonicalising from and to IDs by numerical sort order.
-func undirectedEdgeEqual(a, b graph.Edge) bool {
+func undirectedEdgeEqual(a, b Edge) bool {
 	loa, hia, inva := undirectedIDs(a)
 	lob, hib, invb := undirectedIDs(b)
 	// Use reflect.DeepEqual if the edges are parallel
@@ -1993,7 +2015,7 @@ func RemoveLines(t *testing.T, g LineRemover, remove graph.Lines) {
 
 // undirectedIDs returns a numerical sort ordered canonicalisation of the
 // IDs of e.
-func undirectedIDs(e graph.Edge) (lo, hi int64, inverted bool) {
+func undirectedIDs(e Edge) (lo, hi int64, inverted bool) {
 	lid := e.From().ID()
 	hid := e.To().ID()
 	if hid < lid {

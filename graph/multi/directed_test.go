@@ -17,7 +17,7 @@ import (
 	"gonum.org/v1/gonum/graph/testgraph"
 )
 
-func directedBuilder(nodes []graph.Node, edges []graph.WeightedLine, _, _ float64) (g graph.Graph, n []graph.Node, e []graph.Edge, s, a float64, ok bool) {
+func directedBuilder(nodes []graph.Node, edges []testgraph.WeightedLine, _, _ float64) (g graph.Graph, n []graph.Node, e []testgraph.Edge, s, a float64, ok bool) {
 	seen := make(set.Nodes)
 	dg := multi.NewDirectedGraph()
 	for _, n := range nodes {

@@ -10,7 +10,7 @@ go get -u gonum.org/v1/gonum/...
 
 ## Supported Go versions
 
-Gonum supports and tests on the three most recent major versions of Go on [Linux](https://github.com/gonum/gonum/blob/master/.travis.yml#L6-L11) and [Windows](https://github.com/gonum/gonum/blob/master/appveyor.yml#L13-L18).
+Gonum supports and tests on the three most recent minor versions of Go on [Linux](https://github.com/gonum/gonum/blob/master/.travis.yml#L6-L11) and [Windows](https://github.com/gonum/gonum/blob/master/appveyor.yml#L13-L18).
 
 
 ## Build tags

@@ -142,9 +142,6 @@ func (e *Eigen) succFact() bool {
 // Factorize returns whether the decomposition succeeded. If the decomposition
 // failed, methods that require a successful factorization will panic.
 func (e *Eigen) Factorize(a Matrix, left, right bool) (ok bool) {
-	// TODO(btracey): Change implementation to store VecDenses as a *CMat when
-	// #308 is resolved.
-
 	// Copy a because it is modified during the Lapack call.
 	r, c := a.Dims()
 	if r != c {
@@ -273,8 +270,8 @@ func (e *Eigen) complexEigenTo(dst *CDense, d *Dense) {
 // will panic if the right eigenvectors were not computed during the factorization,
 // or if the factorization was not successful.
 //
-// The computed eigenvectors are normalized to
-// have Euclidean norm equal to 1 and largest component real.
+// The computed eigenvectors are normalized to have Euclidean norm equal to 1
+// and largest component real.
 func (e *Eigen) VectorsTo(dst *CDense) *CDense {
 	if !e.succFact() {
 		panic(badFact)
@@ -291,13 +288,12 @@ func (e *Eigen) VectorsTo(dst *CDense) *CDense {
 	return dst
 }
 
-// LeftVectors returns the left eigenvectors of the decomposition. LeftVectors
-// will panic if the left eigenvectors were not computed during the factorization.
+// LeftVectors returns the left eigenvectors of the decomposition. Vectors
+// will panic if the left eigenvectors were not computed during the factorization,
 // or if the factorization was not successful.
 //
-// See the documentation in lapack64.Geev for the format of the vectors.
-//
-// BUG: This signature and behavior will change when issue #308 is resolved.
+// The computed eigenvectors are normalized to have Euclidean norm equal to 1
+// and largest component real.
 func (e *Eigen) LeftVectorsTo(dst *CDense) *CDense {
 	if !e.succFact() {
 		panic(badFact)

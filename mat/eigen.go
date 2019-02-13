@@ -127,7 +127,7 @@ func (e *Eigen) succFact() bool {
 // A right eigenvalue/eigenvector combination is defined by
 //  A * x_r = λ * x_r
 // where x_r is the column vector called an eigenvector, and λ is the corresponding
-// eigenvector.
+// eigenvalue.
 //
 // Similarly, a left eigenvalue/eigenvector combination is defined by
 //  x_l * A = λ * x_l
@@ -135,7 +135,7 @@ func (e *Eigen) succFact() bool {
 //
 // Typically eigenvectors refer to right eigenvectors.
 //
-// In all cases, Eigen computes the eigenvalues of the matrix. If right and left
+// In all cases, Factorize computes the eigenvalues of the matrix. If right and left
 // are true, then the right and left eigenvectors will be computed, respectively.
 // Eigen panics if the input matrix is not square.
 //
@@ -228,17 +228,17 @@ func (e *Eigen) Values(dst []complex128) []complex128 {
 	return dst
 }
 
-// complexEigenTo extracts the complex eigenvectors from the Dense matrix r and
-// stores them into the complex matrix c.
+// complexEigenTo extracts the complex eigenvectors from the real matrix d
+// and stores them into the complex matrix dst.
 //
-// The returned dense matrix contains the eigenvectors of the decomposition
-// in the columns of the n×n matrix in the same order as their eigenvalues.
+// The columns of the returned n×n dense matrix contain the eigenvectors of the
+// decomposition in the same order as the eigenvalues.
 // If the j-th eigenvalue is real, then
-//  dst_j = d[:,j],
-// and if it is not real, then j and j+1 form a complex conjugate pair and the
-// eigenvectors can be recovered as
-//  dst_j     = d[:,j] + i*d[:,j+1],
-//  dst_{j+1} = d[:,j] - i*d[:,j+1],
+//  dst[:,j] = d[:,j],
+// and if it is not real, then the elements of the j-th and (j+1)-th columns of d
+// form complex conjugate pairs and the eigenvectors are recovered as
+//  dst[:,j]   = d[:,j] + i*d[:,j+1],
+//  dst[:,j+1] = d[:,j] - i*d[:,j+1],
 // where i is the imaginary unit.
 func (e *Eigen) complexEigenTo(dst *CDense, d *Dense) {
 	r, c := d.Dims()
@@ -266,7 +266,7 @@ func (e *Eigen) complexEigenTo(dst *CDense, d *Dense) {
 	}
 }
 
-// Vectors returns the right eigenvectors of the decomposition. Vectors
+// VectorsTo returns the right eigenvectors of the decomposition. VectorsTo
 // will panic if the right eigenvectors were not computed during the factorization,
 // or if the factorization was not successful.
 //
@@ -288,7 +288,7 @@ func (e *Eigen) VectorsTo(dst *CDense) *CDense {
 	return dst
 }
 
-// LeftVectors returns the left eigenvectors of the decomposition. Vectors
+// LeftVectorsTo returns the left eigenvectors of the decomposition. LeftVectorsTo
 // will panic if the left eigenvectors were not computed during the factorization,
 // or if the factorization was not successful.
 //

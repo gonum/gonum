@@ -196,14 +196,17 @@ func (e *Eigen) Factorize(a Matrix, left, right bool) (ok bool) {
 	if left {
 		cvl = *NewCDense(r, r, nil)
 		e.complexEigenTo(&cvl, &vl)
+		e.lVectors = &cvl
+	} else {
+		e.lVectors = nil
 	}
 	if right {
 		cvr = *NewCDense(c, c, nil)
 		e.complexEigenTo(&cvr, &vr)
+		e.rVectors = &cvr
+	} else {
+		e.rVectors = nil
 	}
-
-	e.lVectors = &cvl
-	e.rVectors = &cvr
 	return true
 }
 
@@ -228,24 +231,21 @@ func (e *Eigen) Values(dst []complex128) []complex128 {
 	return dst
 }
 
-// complexEigenTo extracts the complex eigenvalues from the Dense matrix r and
+// complexEigenTo extracts the complex eigenvectors from the Dense matrix r and
 // stores them into the complex matrix c.
 //
 // The returned dense matrix contains the eigenvectors of the decomposition
 // in the columns of the n×n matrix in the same order as their eigenvalues.
 // If the j-th eigenvalue is real, then
-//  u_j = VL[:,j],
-//  v_j = VR[:,j],
+//  dst_j = d[:,j],
 // and if it is not real, then j and j+1 form a complex conjugate pair and the
 // eigenvectors can be recovered as
-//  u_j     = VL[:,j] + i*VL[:,j+1],
-//  u_{j+1} = VL[:,j] - i*VL[:,j+1],
-//  v_j     = VR[:,j] + i*VR[:,j+1],
-//  v_{j+1} = VR[:,j] - i*VR[:,j+1],
+//  dst_j     = d[:,j] + i*d[:,j+1],
+//  dst_{j+1} = d[:,j] - i*d[:,j+1],
 // where i is the imaginary unit.
-func (e *Eigen) complexEigenTo(cd *CDense, d *Dense) {
+func (e *Eigen) complexEigenTo(dst *CDense, d *Dense) {
 	r, c := d.Dims()
-	cr, cc := cd.Dims()
+	cr, cc := dst.Dims()
 	if r != cr {
 		panic("size mismatch")
 	}
@@ -255,15 +255,15 @@ func (e *Eigen) complexEigenTo(cd *CDense, d *Dense) {
 	for j := 0; j < c; j++ {
 		if imag(e.values[j]) == 0 {
 			for i := 0; i < r; i++ {
-				cd.set(i, j, complex(d.at(i, j), 0))
+				dst.set(i, j, complex(d.at(i, j), 0))
 			}
 			continue
 		}
 		for i := 0; i < r; i++ {
 			real := d.at(i, j)
 			imag := d.at(i, j+1)
-			cd.set(i, j, complex(real, imag))
-			cd.set(i, j+1, complex(real, -imag))
+			dst.set(i, j, complex(real, imag))
+			dst.set(i, j+1, complex(real, -imag))
 		}
 		j++
 	}

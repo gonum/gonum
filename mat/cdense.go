@@ -87,7 +87,28 @@ func (m *CDense) reuseAs(r, c int) {
 }
 
 func (m *CDense) reuseAsZeroed(r, c int) {
-	m.reuseAs(r, c)
+	// This must be kept in-sync with reuseAs.
+	if m.mat.Rows > m.capRows || m.mat.Cols > m.capCols {
+		// Panic as a string, not a mat.Error.
+		panic("mat: caps not correctly set")
+	}
+	if r == 0 || c == 0 {
+		panic(ErrZeroLength)
+	}
+	if m.IsZero() {
+		m.mat = cblas128.General{
+			Rows:   r,
+			Cols:   c,
+			Stride: c,
+			Data:   useC(m.mat.Data, r*c),
+		}
+		m.capRows = r
+		m.capCols = c
+		return
+	}
+	if r != m.mat.Rows || c != m.mat.Cols {
+		panic(ErrShape)
+	}
 	m.Zero()
 }
 

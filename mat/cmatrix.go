@@ -5,6 +5,7 @@
 package mat
 
 import (
+	"math"
 	"math/cmplx"
 
 	"gonum.org/v1/gonum/floats"
@@ -123,9 +124,9 @@ func CEqual(a, b CMatrix) bool {
 
 // CEqualApprox returns whether the matrices a and b have the same size and contain all equal
 // elements with tolerance for element-wise equality specified by epsilon. Matrices
-// with non-equal shapes are not equal. Element-wise equality is compared on
-// the real and imaginary parts separately.
+// with non-equal shapes are not equal.
 func CEqualApprox(a, b CMatrix, epsilon float64) bool {
+	// TODO(btracey):
 	ar, ac := a.Dims()
 	br, bc := b.Dims()
 	if ar != br || ac != bc {
@@ -133,15 +134,65 @@ func CEqualApprox(a, b CMatrix, epsilon float64) bool {
 	}
 	for i := 0; i < ar; i++ {
 		for j := 0; j < ac; j++ {
-			ca := a.At(i, j)
-			cb := b.At(i, j)
-			if !floats.EqualWithinAbsOrRel(real(ca), real(cb), epsilon, epsilon) {
-				return false
-			}
-			if !floats.EqualWithinAbsOrRel(imag(ca), imag(cb), epsilon, epsilon) {
+			if !cEqualWithinAbsOrRel(a.At(i, j), b.At(i, j), epsilon, epsilon) {
 				return false
 			}
 		}
 	}
 	return true
+}
+
+// TODO(btracey): Move these into a cmplxs if/when we have one.
+
+func cEqualWithinAbsOrRel(a, b complex128, absTol, relTol float64) bool {
+	if cEqualWithinAbs(a, b, absTol) {
+		return true
+	}
+	return cEqualWithinRel(a, b, relTol)
+}
+
+// cEqualWithinAbs returns true if a and b have an absolute
+// difference of less than tol.
+func cEqualWithinAbs(a, b complex128, tol float64) bool {
+	return a == b || cmplx.Abs(a-b) <= tol
+}
+
+const minNormalFloat64 = 2.2250738585072014e-308
+
+// cEqualWithinRel returns true if the difference between a and b
+// is not greater than tol times the greater value.
+func cEqualWithinRel(a, b complex128, tol float64) bool {
+	if a == b {
+		return true
+	}
+	if cmplx.IsNaN(a) || cmplx.IsNaN(b) {
+		return false
+	}
+	// Cannot play the same trick as in floats because there are multiple
+	// possible infinities.
+	if cmplx.IsInf(a) {
+		if !cmplx.IsInf(b) {
+			return false
+		}
+		ra := real(a)
+		if math.IsInf(ra, 0) {
+			if ra == real(b) {
+				return floats.EqualWithinRel(imag(a), imag(b), tol)
+			}
+			return false
+		}
+		if imag(a) == imag(b) {
+			return floats.EqualWithinRel(ra, real(b), tol)
+		}
+		return false
+	}
+	if cmplx.IsInf(b) {
+		return false
+	}
+
+	delta := cmplx.Abs(a - b)
+	if delta <= minNormalFloat64 {
+		return delta <= tol*minNormalFloat64
+	}
+	return delta/math.Max(cmplx.Abs(a), cmplx.Abs(b)) <= tol
 }

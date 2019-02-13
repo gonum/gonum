@@ -77,19 +77,31 @@ type Unconjugator interface {
 	Unconjugate() CMatrix
 }
 
-// useC returns a complex128 slice with l elements, using f if it
+// useC returns a complex128 slice with l elements, using c if it
 // has the necessary capacity, otherwise creating a new slice.
-func useC(f []complex128, l int) []complex128 {
-	if l <= cap(f) {
-		return f[:l]
+func useC(c []complex128, l int) []complex128 {
+	if l <= cap(c) {
+		return c[:l]
+	}
+	return make([]complex128, l)
+}
+
+// useZeroedC returns a complex128 slice with l elements, using c if it
+// has the necessary capacity, otherwise creating a new slice. The
+// elements of the returned slice are guaranteed to be zero.
+func useZeroedC(c []complex128, l int) []complex128 {
+	if l <= cap(c) {
+		c = c[:l]
+		zeroC(c)
+		return c
 	}
 	return make([]complex128, l)
 }
 
 // zeroC zeros the given slice's elements.
-func zeroC(f []complex128) {
-	for i := range f {
-		f[i] = 0
+func zeroC(c []complex128) {
+	for i := range c {
+		c[i] = 0
 	}
 }
 

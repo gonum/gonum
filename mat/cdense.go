@@ -100,7 +100,7 @@ func (m *CDense) reuseAsZeroed(r, c int) {
 			Rows:   r,
 			Cols:   c,
 			Stride: c,
-			Data:   useC(m.mat.Data, r*c),
+			Data:   useZeroedC(m.mat.Data, r*c),
 		}
 		m.capRows = r
 		m.capCols = c

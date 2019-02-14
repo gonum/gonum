@@ -129,14 +129,17 @@ func (s *Nodes) clear() {
 	}
 }
 
-// Copy performs a perfect copy from src to dst (meaning the sets will
-// be equal).
+// Copy performs a perfect copy from src to dst returning the result.
+// If len(dst) is not 0, a new Nodes is made and returned.
 func (dst Nodes) Copy(src Nodes) Nodes {
+	// FIXME(kortschak): The behaviour is this method is very surprising.
+	// Whether the return is required or not depends on len(dst).
+
 	if same(src, dst) {
 		return dst
 	}
 
-	if len(dst) > 0 {
+	if len(dst) != 0 {
 		dst = make(Nodes, len(src))
 	}
 
@@ -221,31 +224,29 @@ func (dst Nodes) Union(a, b Nodes) Nodes {
 //     {a,b,c} INTERSECT {d,e,f} = {}
 //
 func (dst Nodes) Intersect(a, b Nodes) Nodes {
-	var swap Nodes
-
 	if same(a, b) {
 		return dst.Copy(a)
 	}
-	if same(a, dst) {
-		swap = b
-	} else if same(b, dst) {
-		swap = a
-	} else {
-		dst.clear()
 
+	var swap Nodes
+	switch {
+	default:
+		dst.clear()
 		if len(a) > len(b) {
 			a, b = b, a
 		}
-
 		for e, n := range a {
 			if _, ok := b[e]; ok {
 				dst[e] = n
 			}
 		}
-
 		return dst
-	}
 
+	case same(a, dst):
+		swap = b
+	case same(b, dst):
+		swap = a
+	}
 	for e := range dst {
 		if _, ok := swap[e]; !ok {
 			delete(dst, e)

@@ -55,24 +55,35 @@ import (
 //
 // Dgebal is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dgebal(job lapack.BalanceJob, n int, a []float64, lda int, scale []float64) (ilo, ihi int) {
-	switch job {
-	default:
+	switch {
+	case job != lapack.BalanceNone && job != lapack.Permute && job != lapack.Scale && job != lapack.PermuteScale:
 		panic(badBalanceJob)
-	case lapack.BalanceNone, lapack.Permute, lapack.Scale, lapack.PermuteScale:
-	}
-	checkMatrix(n, n, a, lda)
-	if len(scale) != n {
-		panic("lapack: bad length of scale")
+	case n < 0:
+		panic(nLT0)
+	case lda < max(1, n):
+		panic(badLdA)
 	}
 
 	ilo = 0
 	ihi = n - 1
 
-	if n == 0 || job == lapack.BalanceNone {
+	if n == 0 {
+		return ilo, ihi
+	}
+
+	if len(scale) != n {
+		panic(shortScale)
+	}
+
+	if job == lapack.BalanceNone {
 		for i := range scale {
 			scale[i] = 1
 		}
 		return ilo, ihi
+	}
+
+	if len(a) < (n-1)*lda+n {
+		panic(shortA)
 	}
 
 	bi := blas64.Implementation()

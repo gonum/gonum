@@ -559,11 +559,15 @@ func testDgeev(t *testing.T, impl Dgeever, tc string, test dgeevTest, jobvl lapa
 	var vl blas64.General
 	if jobvl == lapack.LeftEVCompute {
 		vl = nanGeneral(n, n, n)
+	} else {
+		vl.Stride = 1
 	}
 
 	var vr blas64.General
 	if jobvr == lapack.RightEVCompute {
 		vr = nanGeneral(n, n, n)
+	} else {
+		vr.Stride = 1
 	}
 
 	wr := make([]float64, n)

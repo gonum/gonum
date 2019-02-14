@@ -81,6 +81,12 @@ func (impl Implementation) Dgehrd(n, ilo, ihi int, a []float64, lda int, tau, wo
 		panic(shortWork)
 	}
 
+	// Quick return if possible.
+	if n == 0 {
+		work[0] = 1
+		return
+	}
+
 	const (
 		nbmax = 64
 		ldt   = nbmax + 1
@@ -95,9 +101,9 @@ func (impl Implementation) Dgehrd(n, ilo, ihi int, a []float64, lda int, tau, wo
 	}
 
 	if len(a) < (n-1)*lda+n {
-		panic("lapack: insufficient length of a")
+		panic(shortA)
 	}
-	if len(tau) != n-1 && n > 0 {
+	if len(tau) != n-1 {
 		panic(badTau)
 	}
 

@@ -24,20 +24,31 @@ import (
 //
 // iwork is a temporary data slice of length at least n and Dgecon will panic otherwise.
 func (impl Implementation) Dgecon(norm lapack.MatrixNorm, n int, a []float64, lda int, anorm float64, work []float64, iwork []int) float64 {
-	checkMatrix(n, n, a, lda)
-	if norm != lapack.MaxColumnSum && norm != lapack.MaxRowSum {
+	switch {
+	case norm != lapack.MaxColumnSum && norm != lapack.MaxRowSum:
 		panic(badNorm)
+	case n < 0:
+		panic(nLT0)
+	case lda < max(1, n):
+		panic(badLdA)
 	}
-	if len(work) < 4*n {
+
+	// Quick return if possible.
+	if n == 0 {
+		return 1
+	}
+
+	switch {
+	case len(a) < (n-1)*lda+n:
+		panic(shortA)
+	case len(work) < 4*n:
 		panic(badWork)
-	}
-	if len(iwork) < n {
+	case len(iwork) < n:
 		panic(badWork)
 	}
 
-	if n == 0 {
-		return 1
-	} else if anorm == 0 {
+	// Quick return if possible.
+	if anorm == 0 {
 		return 0
 	}
 

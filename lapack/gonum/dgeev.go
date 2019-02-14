@@ -61,50 +61,31 @@ import (
 // computed and wr[first:] and wi[first:] contain those eigenvalues which have
 // converged.
 func (impl Implementation) Dgeev(jobvl lapack.LeftEVJob, jobvr lapack.RightEVJob, n int, a []float64, lda int, wr, wi []float64, vl []float64, ldvl int, vr []float64, ldvr int, work []float64, lwork int) (first int) {
-	var wantvl bool
-	switch jobvl {
-	default:
-		panic("lapack: invalid LeftEVJob")
-	case lapack.LeftEVCompute:
-		wantvl = true
-	case lapack.LeftEVNone:
-	}
-	var wantvr bool
-	switch jobvr {
-	default:
-		panic("lapack: invalid RightEVJob")
-	case lapack.RightEVCompute:
-		wantvr = true
-	case lapack.RightEVNone:
-	}
-	switch {
-	case n < 0:
-		panic(nLT0)
-	case len(work) < lwork:
-		panic(shortWork)
-	}
+	wantvl := jobvl == lapack.LeftEVCompute
+	wantvr := jobvr == lapack.RightEVCompute
 	var minwrk int
 	if wantvl || wantvr {
 		minwrk = max(1, 4*n)
 	} else {
 		minwrk = max(1, 3*n)
 	}
-	if lwork != -1 {
-		checkMatrix(n, n, a, lda)
-		if wantvl {
-			checkMatrix(n, n, vl, ldvl)
-		}
-		if wantvr {
-			checkMatrix(n, n, vr, ldvr)
-		}
-		switch {
-		case len(wr) != n:
-			panic("lapack: bad length of wr")
-		case len(wi) != n:
-			panic("lapack: bad length of wi")
-		case lwork < minwrk:
-			panic(badWork)
-		}
+	switch {
+	case jobvl != lapack.LeftEVCompute && jobvl != lapack.LeftEVNone:
+		panic("lapack: invalid LeftEVJob")
+	case jobvr != lapack.RightEVCompute && jobvr != lapack.RightEVNone:
+		panic("lapack: invalid RightEVJob")
+	case n < 0:
+		panic(nLT0)
+	case lda < max(1, n):
+		panic(badLdA)
+	case ldvl < 1 || (ldvl < n && wantvl):
+		panic(badLdVL)
+	case ldvr < 1 || (ldvr < n && wantvr):
+		panic(badLdVR)
+	case lwork < minwrk && lwork != -1:
+		panic(badWork)
+	case len(work) < lwork:
+		panic(shortWork)
 	}
 
 	// Quick return if possible.
@@ -137,6 +118,19 @@ func (impl Implementation) Dgeev(jobvl lapack.LeftEVJob, jobvr lapack.RightEVJob
 	if lwork == -1 {
 		work[0] = float64(maxwrk)
 		return 0
+	}
+
+	switch {
+	case len(a) < (n-1)*lda+n:
+		panic(shortA)
+	case len(wr) != n:
+		panic("lapack: bad length of wr")
+	case len(wi) != n:
+		panic("lapack: bad length of wi")
+	case len(vl) < (n-1)*ldvl+n && wantvl:
+		panic(shortVL)
+	case len(vr) < (n-1)*ldvr+n && wantvr:
+		panic(shortVR)
 	}
 
 	// Get machine constants.

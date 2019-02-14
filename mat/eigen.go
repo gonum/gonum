@@ -156,10 +156,15 @@ func (e *Eigen) Factorize(a Matrix, left, right bool) (ok bool) {
 	if left {
 		vl = *NewDense(r, r, nil)
 		jobvl = lapack.LeftEVCompute
+	} else {
+		vl.mat.Stride = 1
 	}
+
 	if right {
 		vr = *NewDense(c, c, nil)
 		jobvr = lapack.RightEVCompute
+	} else {
+		vr.mat.Stride = 1
 	}
 
 	wr := getFloats(c, false)

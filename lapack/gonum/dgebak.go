@@ -21,26 +21,37 @@ import (
 //
 // Dgebak is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dgebak(job lapack.BalanceJob, side lapack.EVSide, n, ilo, ihi int, scale []float64, m int, v []float64, ldv int) {
-	switch job {
-	default:
-		panic(badBalanceJob)
-	case lapack.BalanceNone, lapack.Permute, lapack.Scale, lapack.PermuteScale:
-	}
-	switch side {
-	default:
-		panic(badEVSide)
-	case lapack.EVLeft, lapack.EVRight:
-	}
-	checkMatrix(n, m, v, ldv)
 	switch {
+	case job != lapack.BalanceNone && job != lapack.Permute && job != lapack.Scale && job != lapack.PermuteScale:
+		panic(badBalanceJob)
+	case side != lapack.EVLeft && side != lapack.EVRight:
+		panic(badEVSide)
+	case n < 0:
+		panic(nLT0)
 	case ilo < 0 || max(0, n-1) < ilo:
 		panic(badIlo)
 	case ihi < min(ilo, n-1) || n <= ihi:
 		panic(badIhi)
+	case m < 0:
+		panic(mLT0)
+	case ldv < max(1, m):
+		panic(badLdV)
 	}
 
 	// Quick return if possible.
-	if n == 0 || m == 0 || job == lapack.BalanceNone {
+	if n == 0 || m == 0 {
+		return
+	}
+
+	if len(scale) < n {
+		panic(shortScale)
+	}
+	if len(v) < (n-1)*ldv+m {
+		panic(shortV)
+	}
+
+	// Quick return if possible.
+	if job == lapack.BalanceNone {
 		return
 	}
 

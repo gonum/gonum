@@ -30,7 +30,7 @@ func (d Number) Format(fs fmt.State, c rune) {
 	switch c {
 	case 'v':
 		if fs.Flag('#') {
-			fmt.Fprintf(fs, "%T{%#v, %#v}", d, d.Real, d.Emag)
+			fmt.Fprintf(fs, "%T{Real:%#v, Emag:%#v}", d, d.Real, d.Emag)
 			return
 		}
 		c = 'g'

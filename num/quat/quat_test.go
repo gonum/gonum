@@ -94,8 +94,8 @@ var formatTests = []struct {
 	format string
 	want   string
 }{
-	{q: Number{1.1, 2.1, 3.1, 4.1}, format: "%#v", want: "quat.Number{1.1, 2.1, 3.1, 4.1}"},         // Bootstrap test.
-	{q: Number{-1.1, -2.1, -3.1, -4.1}, format: "%#v", want: "quat.Number{-1.1, -2.1, -3.1, -4.1}"}, // Bootstrap test.
+	{q: Number{1.1, 2.1, 3.1, 4.1}, format: "%#v", want: "quat.Number{Real:1.1, Imag:2.1, Jmag:3.1, Kmag:4.1}"},         // Bootstrap test.
+	{q: Number{-1.1, -2.1, -3.1, -4.1}, format: "%#v", want: "quat.Number{Real:-1.1, Imag:-2.1, Jmag:-3.1, Kmag:-4.1}"}, // Bootstrap test.
 	{q: Number{1, 2, 3, 4}, format: "%v", want: "(1+2i+3j+4k)"},
 	{q: Number{-1, -2, -3, -4}, format: "%v", want: "(-1-2i-3j-4k)"},
 	{q: Number{1, 2, 3, 4}, format: "%g", want: "(1+2i+3j+4k)"},

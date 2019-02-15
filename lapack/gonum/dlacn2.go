@@ -28,22 +28,24 @@ import (
 //
 // Dlacn2 is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dlacn2(n int, v, x []float64, isgn []int, est float64, kase int, isave *[3]int) (float64, int) {
-	if n < 1 {
-		panic("lapack: non-positive n")
-	}
-	checkVector(n, x, 1)
-	checkVector(n, v, 1)
-	if len(isgn) < n {
-		panic("lapack: insufficient isgn length")
-	}
-	if isave[0] < 0 || isave[0] > 5 {
+	switch {
+	case n < 1:
+		panic(nLT1)
+	case len(v) < n:
+		panic(shortV)
+	case len(x) < n:
+		panic(shortX)
+	case len(isgn) < n:
+		panic(shortIsgn)
+	case isave[0] < 0 || 5 < isave[0]:
+		panic("lapack: bad isave value")
+	case isave[0] == 0 && kase != 0:
 		panic("lapack: bad isave value")
 	}
-	if isave[0] == 0 && kase != 0 {
-		panic("lapack: bad isave value")
-	}
-	itmax := 5
+
+	const itmax = 5
 	bi := blas64.Implementation()
+
 	if kase == 0 {
 		for i := 0; i < n; i++ {
 			x[i] = 1 / float64(n)

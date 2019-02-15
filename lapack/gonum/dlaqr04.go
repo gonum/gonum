@@ -381,7 +381,7 @@ func (impl Implementation) Dlaqr04(wantt, wantz bool, n, ilo, ihi int, h []float
 						wr[ks:ks+ns], wi[ks:ks+ns], 0, 0, nil, 0, work, lwork, recur-1)
 				} else {
 					ks += impl.Dlahqr(false, false, ns, 0, ns-1, h[kt*ldh:], ldh,
-						wr[ks:ks+ns], wi[ks:ks+ns], 0, 0, nil, 0)
+						wr[ks:ks+ns], wi[ks:ks+ns], 0, 0, nil, 1)
 				}
 				// In case of a rare QR failure use eigenvalues
 				// of the trailing 2×2 principal submatrix.

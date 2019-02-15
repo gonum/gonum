@@ -34,21 +34,37 @@ import (
 //
 // Dlaqp2 is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dlaqp2(m, n, offset int, a []float64, lda int, jpvt []int, tau, vn1, vn2, work []float64) {
-	checkMatrix(m, n, a, lda)
-	if len(jpvt) != n {
-		panic(badIpiv)
+	switch {
+	case m < 0:
+		panic(mLT0)
+	case n < 0:
+		panic(nLT0)
+	case offset < 0:
+		panic(offsetLT0)
+	case m < offset:
+		panic(offsetGTM)
+	case lda < max(1, n):
+		panic(badLdA)
 	}
+
+	// Quick return if possible.
+	if m == 0 || n == 0 {
+		return
+	}
+
 	mn := min(m-offset, n)
-	if len(tau) < mn {
+	switch {
+	case len(a) < (m-1)*lda+n:
+		panic(shortA)
+	case len(jpvt) != n:
+		panic(badIpiv)
+	case len(tau) < mn:
 		panic(badTau)
-	}
-	if len(vn1) < n {
+	case len(vn1) < n:
 		panic(badVn1)
-	}
-	if len(vn2) < n {
+	case len(vn2) < n:
 		panic(badVn2)
-	}
-	if len(work) < n {
+	case len(work) < n:
 		panic(badWork)
 	}
 

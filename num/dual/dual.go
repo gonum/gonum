@@ -33,6 +33,10 @@ func (d Number) Format(fs fmt.State, c rune) {
 			fmt.Fprintf(fs, "%T{Real:%#v, Emag:%#v}", d, d.Real, d.Emag)
 			return
 		}
+		if fs.Flag('+') {
+			fmt.Fprintf(fs, "{Real:%+v, Emag:%+v}", d.Real, d.Emag)
+			return
+		}
 		c = 'g'
 		prec = -1
 		fallthrough

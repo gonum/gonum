@@ -5,12 +5,43 @@
 package dualquat
 
 import (
+	"fmt"
 	"math"
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/num/quat"
 )
+
+var formatTests = []struct {
+	d      Number
+	format string
+	want   string
+}{
+	{d: Number{quat.Number{1.1, 2.1, 3.1, 4.1}, quat.Number{1.2, 2.2, 3.2, 4.2}}, format: "%#v", want: "dualquat.Number{Real:quat.Number{Real:1.1, Imag:2.1, Jmag:3.1, Kmag:4.1}, Dual:quat.Number{Real:1.2, Imag:2.2, Jmag:3.2, Kmag:4.2}}"},                 // Bootstrap test.
+	{d: Number{quat.Number{-1.1, -2.1, -3.1, -4.1}, quat.Number{-1.2, -2.2, -3.2, -4.2}}, format: "%#v", want: "dualquat.Number{Real:quat.Number{Real:-1.1, Imag:-2.1, Jmag:-3.1, Kmag:-4.1}, Dual:quat.Number{Real:-1.2, Imag:-2.2, Jmag:-3.2, Kmag:-4.2}}"}, // Bootstrap test.
+	{d: Number{quat.Number{1.1, 2.1, 3.1, 4.1}, quat.Number{1.2, 2.2, 3.2, 4.2}}, format: "%+v", want: "{Real:{Real:1.1, Imag:2.1, Jmag:3.1, Kmag:4.1}, Dual:{Real:1.2, Imag:2.2, Jmag:3.2, Kmag:4.2}}"},
+	{d: Number{quat.Number{-1.1, -2.1, -3.1, -4.1}, quat.Number{-1.2, -2.2, -3.2, -4.2}}, format: "%+v", want: "{Real:{Real:-1.1, Imag:-2.1, Jmag:-3.1, Kmag:-4.1}, Dual:{Real:-1.2, Imag:-2.2, Jmag:-3.2, Kmag:-4.2}}"},
+	{d: Number{quat.Number{1.1, 2.1, 3.1, 4.1}, quat.Number{1.2, 2.2, 3.2, 4.2}}, format: "%v", want: "((1.1+2.1i+3.1j+4.1k)+(+1.2+2.2i+3.2j+4.2k)ϵ)"},
+	{d: Number{quat.Number{-1.1, -2.1, -3.1, -4.1}, quat.Number{-1.2, -2.2, -3.2, -4.2}}, format: "%v", want: "((-1.1-2.1i-3.1j-4.1k)+(-1.2-2.2i-3.2j-4.2k)ϵ)"},
+	{d: Number{quat.Number{1.1, 2.1, 3.1, 4.1}, quat.Number{1.2, 2.2, 3.2, 4.2}}, format: "%g", want: "((1.1+2.1i+3.1j+4.1k)+(+1.2+2.2i+3.2j+4.2k)ϵ)"},
+	{d: Number{quat.Number{-1.1, -2.1, -3.1, -4.1}, quat.Number{-1.2, -2.2, -3.2, -4.2}}, format: "%g", want: "((-1.1-2.1i-3.1j-4.1k)+(-1.2-2.2i-3.2j-4.2k)ϵ)"},
+	{d: Number{quat.Number{1.1, 2.1, 3.1, 4.1}, quat.Number{1.2, 2.2, 3.2, 4.2}}, format: "%e", want: "((1.100000e+00+2.100000e+00i+3.100000e+00j+4.100000e+00k)+(+1.200000e+00+2.200000e+00i+3.200000e+00j+4.200000e+00k)ϵ)"},
+	{d: Number{quat.Number{-1.1, -2.1, -3.1, -4.1}, quat.Number{-1.2, -2.2, -3.2, -4.2}}, format: "%e", want: "((-1.100000e+00-2.100000e+00i-3.100000e+00j-4.100000e+00k)+(-1.200000e+00-2.200000e+00i-3.200000e+00j-4.200000e+00k)ϵ)"},
+	{d: Number{quat.Number{1.1, 2.1, 3.1, 4.1}, quat.Number{1.2, 2.2, 3.2, 4.2}}, format: "%E", want: "((1.100000E+00+2.100000E+00i+3.100000E+00j+4.100000E+00k)+(+1.200000E+00+2.200000E+00i+3.200000E+00j+4.200000E+00k)ϵ)"},
+	{d: Number{quat.Number{-1.1, -2.1, -3.1, -4.1}, quat.Number{-1.2, -2.2, -3.2, -4.2}}, format: "%E", want: "((-1.100000E+00-2.100000E+00i-3.100000E+00j-4.100000E+00k)+(-1.200000E+00-2.200000E+00i-3.200000E+00j-4.200000E+00k)ϵ)"},
+	{d: Number{quat.Number{1.1, 2.1, 3.1, 4.1}, quat.Number{1.2, 2.2, 3.2, 4.2}}, format: "%f", want: "((1.100000+2.100000i+3.100000j+4.100000k)+(+1.200000+2.200000i+3.200000j+4.200000k)ϵ)"},
+	{d: Number{quat.Number{-1.1, -2.1, -3.1, -4.1}, quat.Number{-1.2, -2.2, -3.2, -4.2}}, format: "%f", want: "((-1.100000-2.100000i-3.100000j-4.100000k)+(-1.200000-2.200000i-3.200000j-4.200000k)ϵ)"},
+}
+
+func TestFormat(t *testing.T) {
+	for _, test := range formatTests {
+		got := fmt.Sprintf(test.format, test.d)
+		if got != test.want {
+			t.Errorf("unexpected result for fmt.Sprintf(%q, %#v): got:%q, want:%q", test.format, test.d, got, test.want)
+		}
+	}
+}
 
 // First derivatives:
 

@@ -362,16 +362,16 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 	}
 
 	if len(a) < (m-1)*lda+n {
-		panic("lapack: insufficient length of a")
+		panic(shortA)
 	}
 	if len(s) < minmn {
 		panic(badS)
 	}
 	if (len(u) < (m-1)*ldu+m && wantua) || (len(u) < (m-1)*ldu+minmn && wantus) {
-		panic("lapack: insufficient length of u")
+		panic(shortU)
 	}
 	if (len(vt) < (n-1)*ldvt+n && wantva) || (len(vt) < (minmn-1)*ldvt+n && wantvs) {
-		panic("lapack: insufficient length of vt")
+		panic(shortVT)
 	}
 
 	// Perform decomposition.

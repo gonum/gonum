@@ -22,12 +22,13 @@ import (
 // by the temporary space available. If lwork == -1, instead of performing Dgetri,
 // the optimal work length will be stored into work[0].
 func (impl Implementation) Dgetri(n int, a []float64, lda int, ipiv []int, work []float64, lwork int) (ok bool) {
+	iws := max(1, n)
 	switch {
 	case n < 0:
-		panic("lapack: has negative number of columns")
+		panic(nLT0)
 	case lda < max(1, n):
-		panic("lapack: stride less than number of columns")
-	case lwork < max(1, n) && lwork != -1:
+		panic(badLdA)
+	case lwork < iws && lwork != -1:
 		panic(badWork)
 	case len(work) < max(1, lwork):
 		panic(shortWork)
@@ -38,18 +39,17 @@ func (impl Implementation) Dgetri(n int, a []float64, lda int, ipiv []int, work 
 		return true
 	}
 
-	switch {
-	case len(a) < (n-1)*lda+n:
-		panic("lapack: insufficient matrix slice length")
-	case len(ipiv) < n:
-		panic(badIpiv)
+	nb := impl.Ilaenv(1, "DGETRI", " ", n, -1, -1, -1)
+	if lwork == -1 {
+		work[0] = float64(n * nb)
+		return true
 	}
 
-	nb := impl.Ilaenv(1, "DGETRI", " ", n, -1, -1, -1)
-	lworkopt := float64(n * nb)
-	if lwork == -1 {
-		work[0] = lworkopt
-		return true
+	switch {
+	case len(a) < (n-1)*lda+n:
+		panic(shortA)
+	case len(ipiv) < n:
+		panic(badIpiv)
 	}
 
 	// Form inv(U).
@@ -60,7 +60,7 @@ func (impl Implementation) Dgetri(n int, a []float64, lda int, ipiv []int, work 
 
 	nbmin := 2
 	if 1 < nb && nb < n {
-		iws := max(n*nb, 1)
+		iws = max(n*nb, 1)
 		if lwork < iws {
 			nb = lwork / n
 			nbmin = max(2, impl.Ilaenv(2, "DGETRI", " ", n, -1, -1, -1))
@@ -111,6 +111,6 @@ func (impl Implementation) Dgetri(n int, a []float64, lda int, ipiv []int, work 
 			bi.Dswap(n, a[j:], lda, a[jp:], lda)
 		}
 	}
-	work[0] = lworkopt
+	work[0] = float64(iws)
 	return true
 }

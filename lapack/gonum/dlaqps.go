@@ -49,28 +49,53 @@ import (
 //
 // Dlaqps is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dlaqps(m, n, offset, nb int, a []float64, lda int, jpvt []int, tau, vn1, vn2, auxv, f []float64, ldf int) (kb int) {
-	checkMatrix(m, n, a, lda)
-	checkMatrix(n, nb, f, ldf)
-	if offset > m {
+	switch {
+	case m < 0:
+		panic(mLT0)
+	case n < 0:
+		panic(nLT0)
+	case offset < 0:
+		panic(offsetLT0)
+	case offset > m:
 		panic(offsetGTM)
-	}
-	if n < 0 || nb > n {
+	case nb < 0 || nb > n:
 		panic(badNb)
+	case lda < max(1, n):
+		panic(badLdA)
+	case ldf < max(1, nb):
+		panic(badLdF)
 	}
-	if len(jpvt) != n {
+
+	if m == 0 || n == 0 {
+		return 0
+	}
+
+	switch {
+	case len(a) < (m-1)*lda+n:
+		panic(shortA)
+	case len(jpvt) != n:
 		panic(badIpiv)
-	}
-	if len(tau) < nb {
-		panic(badTau)
-	}
-	if len(vn1) < n {
+	case len(vn1) < n:
 		panic(badVn1)
-	}
-	if len(vn2) < n {
+	case len(vn2) < n:
 		panic(badVn2)
 	}
-	if len(auxv) < nb {
+
+	if nb == 0 {
+		return 0
+	}
+
+	switch {
+	case len(tau) < nb:
+		panic(badTau)
+	case len(auxv) < nb:
 		panic(badAuxv)
+	case len(f) < (n-1)*ldf+nb:
+		panic(shortF)
+	}
+
+	if offset == m {
+		return 0
 	}
 
 	lastrk := min(m, n+offset)

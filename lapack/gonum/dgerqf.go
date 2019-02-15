@@ -59,7 +59,7 @@ func (impl Implementation) Dgerqf(m, n int, a []float64, lda int, tau, work []fl
 	}
 
 	if len(a) < (m-1)*lda+n {
-		panic("lapack: insufficient length of a")
+		panic(shortA)
 	}
 	if len(tau) != k {
 		panic(badTau)

@@ -324,7 +324,7 @@ func testDlaqr04(t *testing.T, impl Dlaqr04er, test dlaqr04Test, optwork bool, r
 		work = nanSlice(max(1, n))
 	}
 
-	unconverged := impl.Dlaqr04(wantt, wantz, n, ilo, ihi, h.Data, h.Stride, wr, wi, iloz, ihiz, z.Data, z.Stride, work, len(work), recur)
+	unconverged := impl.Dlaqr04(wantt, wantz, n, ilo, ihi, h.Data, h.Stride, wr, wi, iloz, ihiz, z.Data, max(1, z.Stride), work, len(work), recur)
 
 	prefix := fmt.Sprintf("Case wantt=%v, wantz=%v, n=%v, ilo=%v, ihi=%v, iloz=%v, ihiz=%v, extra=%v, opt=%v",
 		wantt, wantz, n, ilo, ihi, iloz, ihiz, extra, optwork)

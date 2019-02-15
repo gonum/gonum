@@ -119,44 +119,52 @@ import (
 //
 // Dhseqr is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dhseqr(job lapack.SchurJob, compz lapack.SchurComp, n, ilo, ihi int, h []float64, ldh int, wr, wi []float64, z []float64, ldz int, work []float64, lwork int) (unconverged int) {
-	var wantt bool
-	switch job {
-	default:
-		panic(badSchurJob)
-	case lapack.EigenvaluesOnly:
-	case lapack.EigenvaluesAndSchur:
-		wantt = true
-	}
-	var wantz bool
-	switch compz {
-	default:
-		panic(badSchurComp)
-	case lapack.SchurNone:
-	case lapack.SchurHess, lapack.SchurOrig:
-		wantz = true
-	}
+	wantt := job == lapack.EigenvaluesAndSchur
+	wantz := compz == lapack.SchurHess || compz == lapack.SchurOrig
+
 	switch {
+	case job != lapack.EigenvaluesOnly && job != lapack.EigenvaluesAndSchur:
+		panic(badSchurJob)
+	case compz != lapack.SchurNone && compz != lapack.SchurHess && compz != lapack.SchurOrig:
+		panic(badSchurComp)
 	case n < 0:
 		panic(nLT0)
 	case ilo < 0 || max(0, n-1) < ilo:
 		panic(badIlo)
 	case ihi < min(ilo, n-1) || n <= ihi:
 		panic(badIhi)
-	case len(work) < lwork:
-		panic(shortWork)
+	case ldh < max(1, n):
+		panic(badLdH)
+	case ldz < 1 || (wantz && ldz < max(1, n)):
+		panic(badLdZ)
 	case lwork < max(1, n) && lwork != -1:
 		panic(badWork)
+	case len(work) < max(1, lwork):
+		panic(shortWork)
 	}
-	if lwork != -1 {
-		checkMatrix(n, n, h, ldh)
-		switch {
-		case wantz:
-			checkMatrix(n, n, z, ldz)
-		case len(wr) < n:
-			panic("lapack: wr has insufficient length")
-		case len(wi) < n:
-			panic("lapack: wi has insufficient length")
-		}
+
+	// Quick return if possible.
+	if n == 0 {
+		work[0] = 1
+		return 0
+	}
+
+	// Quick return in case of a workspace query.
+	if lwork == -1 {
+		impl.Dlaqr04(wantt, wantz, n, ilo, ihi, h, ldh, wr, wi, ilo, ihi, z, ldz, work, -1, 1)
+		work[0] = math.Max(float64(n), work[0])
+		return 0
+	}
+
+	switch {
+	case len(h) < (n-1)*ldh+n:
+		panic(shortH)
+	case wantz && len(z) < (n-1)*ldz+n:
+		panic(shortZ)
+	case len(wr) < n:
+		panic(shortWR)
+	case len(wi) < n:
+		panic(shortWI)
 	}
 
 	const (
@@ -172,19 +180,6 @@ func (impl Implementation) Dhseqr(job lapack.SchurJob, compz lapack.SchurComp, n
 		// simultaneous shifts and a 16×16 deflation window.
 		nl = 49
 	)
-
-	// Quick return if possible.
-	if n == 0 {
-		work[0] = 1
-		return 0
-	}
-
-	// Quick return in case of a workspace query.
-	if lwork == -1 {
-		impl.Dlaqr04(wantt, wantz, n, ilo, ihi, h, ldh, wr, wi, ilo, ihi, z, ldz, work, -1, 1)
-		work[0] = math.Max(float64(n), work[0])
-		return 0
-	}
 
 	// Copy eigenvalues isolated by Dgebal.
 	for i := 0; i < ilo; i++ {

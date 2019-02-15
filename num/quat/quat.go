@@ -34,6 +34,10 @@ func (q Number) Format(fs fmt.State, c rune) {
 			fmt.Fprintf(fs, "%T{Real:%#v, Imag:%#v, Jmag:%#v, Kmag:%#v}", q, q.Real, q.Imag, q.Jmag, q.Kmag)
 			return
 		}
+		if fs.Flag('+') {
+			fmt.Fprintf(fs, "{Real:%+v, Imag:%+v, Jmag:%+v, Kmag:%+v}", q.Real, q.Imag, q.Jmag, q.Kmag)
+			return
+		}
 		c = 'g'
 		prec = -1
 		fallthrough

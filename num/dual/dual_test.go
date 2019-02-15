@@ -5,11 +5,42 @@
 package dual
 
 import (
+	"fmt"
 	"math"
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
 )
+
+var formatTests = []struct {
+	d      Number
+	format string
+	want   string
+}{
+	{d: Number{1.1, 2.1}, format: "%#v", want: "dual.Number{Real:1.1, Emag:2.1}"},     // Bootstrap test.
+	{d: Number{-1.1, -2.1}, format: "%#v", want: "dual.Number{Real:-1.1, Emag:-2.1}"}, // Bootstrap test.
+	{d: Number{1.1, 2.1}, format: "%+v", want: "{Real:1.1, Emag:2.1}"},
+	{d: Number{-1.1, -2.1}, format: "%+v", want: "{Real:-1.1, Emag:-2.1}"},
+	{d: Number{1, 2}, format: "%v", want: "(1+2ϵ)"},
+	{d: Number{-1, -2}, format: "%v", want: "(-1-2ϵ)"},
+	{d: Number{1, 2}, format: "%g", want: "(1+2ϵ)"},
+	{d: Number{-1, -2}, format: "%g", want: "(-1-2ϵ)"},
+	{d: Number{1, 2}, format: "%e", want: "(1.000000e+00+2.000000e+00ϵ)"},
+	{d: Number{-1, -2}, format: "%e", want: "(-1.000000e+00-2.000000e+00ϵ)"},
+	{d: Number{1, 2}, format: "%E", want: "(1.000000E+00+2.000000E+00ϵ)"},
+	{d: Number{-1, -2}, format: "%E", want: "(-1.000000E+00-2.000000E+00ϵ)"},
+	{d: Number{1, 2}, format: "%f", want: "(1.000000+2.000000ϵ)"},
+	{d: Number{-1, -2}, format: "%f", want: "(-1.000000-2.000000ϵ)"},
+}
+
+func TestFormat(t *testing.T) {
+	for _, test := range formatTests {
+		got := fmt.Sprintf(test.format, test.d)
+		if got != test.want {
+			t.Errorf("unexpected result for fmt.Sprintf(%q, %#v): got:%q, want:%q", test.format, test.d, got, test.want)
+		}
+	}
+}
 
 // First derivatives:
 

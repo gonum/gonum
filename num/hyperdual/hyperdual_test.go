@@ -5,11 +5,42 @@
 package hyperdual
 
 import (
+	"fmt"
 	"math"
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
 )
+
+var formatTests = []struct {
+	h      Number
+	format string
+	want   string
+}{
+	{h: Number{1.1, 2.1, 3.1, 4.1}, format: "%#v", want: "hyperdual.Number{Real:1.1, E1mag:2.1, E2mag:3.1, E1E2mag:4.1}"},         // Bootstrap test.
+	{h: Number{-1.1, -2.1, -3.1, -4.1}, format: "%#v", want: "hyperdual.Number{Real:-1.1, E1mag:-2.1, E2mag:-3.1, E1E2mag:-4.1}"}, // Bootstrap test.
+	{h: Number{1.1, 2.1, 3.1, 4.1}, format: "%+v", want: "{Real:1.1, E1mag:2.1, E2mag:3.1, E1E2mag:4.1}"},
+	{h: Number{-1.1, -2.1, -3.1, -4.1}, format: "%+v", want: "{Real:-1.1, E1mag:-2.1, E2mag:-3.1, E1E2mag:-4.1}"},
+	{h: Number{1, 2, 3, 4}, format: "%v", want: "(1+2ϵ₁+3ϵ₂+4ϵ₁ϵ₂)"},
+	{h: Number{-1, -2, -3, -4}, format: "%v", want: "(-1-2ϵ₁-3ϵ₂-4ϵ₁ϵ₂)"},
+	{h: Number{1, 2, 3, 4}, format: "%g", want: "(1+2ϵ₁+3ϵ₂+4ϵ₁ϵ₂)"},
+	{h: Number{-1, -2, -3, -4}, format: "%g", want: "(-1-2ϵ₁-3ϵ₂-4ϵ₁ϵ₂)"},
+	{h: Number{1, 2, 3, 4}, format: "%e", want: "(1.000000e+00+2.000000e+00ϵ₁+3.000000e+00ϵ₂+4.000000e+00ϵ₁ϵ₂)"},
+	{h: Number{-1, -2, -3, -4}, format: "%e", want: "(-1.000000e+00-2.000000e+00ϵ₁-3.000000e+00ϵ₂-4.000000e+00ϵ₁ϵ₂)"},
+	{h: Number{1, 2, 3, 4}, format: "%E", want: "(1.000000E+00+2.000000E+00ϵ₁+3.000000E+00ϵ₂+4.000000E+00ϵ₁ϵ₂)"},
+	{h: Number{-1, -2, -3, -4}, format: "%E", want: "(-1.000000E+00-2.000000E+00ϵ₁-3.000000E+00ϵ₂-4.000000E+00ϵ₁ϵ₂)"},
+	{h: Number{1, 2, 3, 4}, format: "%f", want: "(1.000000+2.000000ϵ₁+3.000000ϵ₂+4.000000ϵ₁ϵ₂)"},
+	{h: Number{-1, -2, -3, -4}, format: "%f", want: "(-1.000000-2.000000ϵ₁-3.000000ϵ₂-4.000000ϵ₁ϵ₂)"},
+}
+
+func TestFormat(t *testing.T) {
+	for _, test := range formatTests {
+		got := fmt.Sprintf(test.format, test.h)
+		if got != test.want {
+			t.Errorf("unexpected result for fmt.Sprintf(%q, %#v): got:%q, want:%q", test.format, test.h, got, test.want)
+		}
+	}
+}
 
 // First derivatives:
 

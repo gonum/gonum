@@ -67,6 +67,13 @@ func max(a, b int) int {
 	return b
 }
 
+func abs(a int) int {
+	if a < 0 {
+		return -a
+	}
+	return a
+}
+
 const (
 	// dlamchE is the machine epsilon. For IEEE this is 2^{-53}.
 	dlamchE = 1.0 / (1 << 53)

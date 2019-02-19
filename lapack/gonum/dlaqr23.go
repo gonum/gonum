@@ -5,6 +5,7 @@
 package gonum
 
 import (
+	"fmt"
 	"math"
 
 	"gonum.org/v1/gonum/blas"
@@ -80,48 +81,39 @@ import (
 //
 func (impl Implementation) Dlaqr23(wantt, wantz bool, n, ktop, kbot, nw int, h []float64, ldh int, iloz, ihiz int, z []float64, ldz int, sr, si []float64, v []float64, ldv int, nh int, t []float64, ldt int, nv int, wv []float64, ldwv int, work []float64, lwork int, recur int) (ns, nd int) {
 	switch {
+	case n < 0:
+		panic(nLT0)
 	case ktop < 0 || max(0, n-1) < ktop:
 		panic("lapack: invalid value of ktop")
 	case kbot < min(ktop, n-1) || n <= kbot:
 		panic("lapack: invalid value of kbot")
-	case (nw < 0 || kbot-ktop+1 < nw) && lwork != -1:
+	case nw < 0 || kbot-ktop+1+1 < nw:
+		fmt.Println(nw, kbot, ktop)
 		panic("lapack: invalid value of nw")
+	case ldh < max(1, n):
+		panic(badLdH)
+	case wantz && (iloz < 0 || ktop < iloz):
+		panic("lapack: invalid value of iloz")
+	case wantz && (ihiz < kbot || n <= ihiz):
+		panic("lapack: invalid value of ihiz")
+	case ldz < 1 || (wantz && ldz < max(1, n)):
+		panic(badLdZ)
+	case ldv < max(1, nw):
+		panic(badLdV)
 	case nh < nw:
 		panic("lapack: invalid value of nh")
+	case ldt < max(1, nh):
+		panic(badLdT)
+	case nv < 0:
+		panic("lapack: nv < 0")
+	case ldwv < max(1, nw):
+		panic(badLdWV)
 	case lwork < max(1, 2*nw) && lwork != -1:
 		panic(badWork)
-	case len(work) < lwork:
+	case len(work) < max(1, lwork):
 		panic(shortWork)
 	case recur < 0:
 		panic("lapack: recur is negative")
-	}
-	if wantz {
-		switch {
-		case iloz < 0 || ktop < iloz:
-			panic("lapack: invalid value of iloz")
-		case ihiz < kbot || n <= ihiz:
-			panic("lapack: invalid value of ihiz")
-		}
-	}
-	if lwork != -1 {
-		// Check input slices only if not doing workspace query.
-		checkMatrix(n, n, h, ldh)
-		checkMatrix(nw, nw, v, ldv)
-		checkMatrix(nw, nh, t, ldt)
-		checkMatrix(nv, nw, wv, ldwv)
-		if wantz {
-			checkMatrix(n, n, z, ldz)
-		}
-		switch {
-		case ktop > 0 && h[ktop*ldh+ktop-1] != 0:
-			panic("lapack: block not isolated")
-		case kbot+1 < n && h[(kbot+1)*ldh+kbot] != 0:
-			panic("lapack: block not isolated")
-		case len(sr) != kbot+1:
-			panic("lapack: bad length of sr")
-		case len(si) != kbot+1:
-			panic("lapack: bad length of si")
-		}
 	}
 
 	// Quick return for zero window size.
@@ -157,6 +149,28 @@ func (impl Implementation) Dlaqr23(wantt, wantz bool, n, ktop, kbot, nw int, h [
 	if lwork == -1 {
 		work[0] = float64(lwkopt)
 		return 0, 0
+	}
+
+	// Check input slices only if not doing workspace query.
+	switch {
+	case len(h) < (n-1)*ldh+n:
+		panic(shortH)
+	case len(v) < (nw-1)*ldv+nw:
+		panic(shortV)
+	case len(t) < (nw-1)*ldt+nh:
+		panic(shortT)
+	case len(wv) < (nv-1)*ldwv+nw:
+		panic(shortWV)
+	case wantz && len(z) < (n-1)*ldz+n:
+		panic(shortZ)
+	case len(sr) != kbot+1:
+		panic("lapack: bad length of sr")
+	case len(si) != kbot+1:
+		panic("lapack: bad length of si")
+	case ktop > 0 && h[ktop*ldh+ktop-1] != 0:
+		panic("lapack: block not isolated")
+	case kbot+1 < n && h[(kbot+1)*ldh+kbot] != 0:
+		panic("lapack: block not isolated")
 	}
 
 	// Machine constants.

@@ -17,16 +17,38 @@ import (
 //
 // Dlascl is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dlascl(kind lapack.MatrixType, kl, ku int, cfrom, cto float64, m, n int, a []float64, lda int) {
-	checkMatrix(m, n, a, lda)
-	if cfrom == 0 {
+	switch kind {
+	default:
+		panic("invalid kind")
+	case 'H', 'B', 'Q', 'Z': // See dlascl.f.
+		panic("not implemented")
+	case lapack.General, lapack.UpperTri, lapack.LowerTri:
+		if lda < max(1, n) {
+			panic(badLdA)
+		}
+	}
+	switch {
+	case cfrom == 0:
 		panic(zeroDiv)
-	}
-	if math.IsNaN(cfrom) || math.IsNaN(cto) {
+	case math.IsNaN(cfrom) || math.IsNaN(cto):
 		panic(nanScale)
+	case m < 0:
+		panic(mLT0)
+	case n < 0:
+		panic(nLT0)
 	}
+
 	if n == 0 || m == 0 {
 		return
 	}
+
+	switch kind {
+	case lapack.General, lapack.UpperTri, lapack.LowerTri:
+		if len(a) < (m-1)*lda+n {
+			panic(shortA)
+		}
+	}
+
 	smlnum := dlamchS
 	bignum := 1 / smlnum
 	cfromc := cfrom

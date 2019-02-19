@@ -280,7 +280,7 @@ func testDlaqr23(t *testing.T, impl Dlaqr23er, test dlaqr23Test, opt bool, recur
 	if opt {
 		// Allocate work slice with optimal length.
 		work = nanSlice(1)
-		impl.Dlaqr23(wantt, wantz, n, ktop, kbot, nw, h.Data, h.Stride, iloz, ihiz, z.Data, z.Stride,
+		impl.Dlaqr23(wantt, wantz, n, ktop, kbot, nw, h.Data, h.Stride, iloz, ihiz, z.Data, max(1, z.Stride),
 			sr, si, v.Data, v.Stride, tmat.Cols, tmat.Data, tmat.Stride, wv.Rows, wv.Data, wv.Stride, work, -1, recur)
 		work = nanSlice(int(work[0]))
 	} else {
@@ -288,7 +288,7 @@ func testDlaqr23(t *testing.T, impl Dlaqr23er, test dlaqr23Test, opt bool, recur
 		work = nanSlice(max(1, 2*nw))
 	}
 
-	ns, nd := impl.Dlaqr23(wantt, wantz, n, ktop, kbot, nw, h.Data, h.Stride, iloz, ihiz, z.Data, z.Stride,
+	ns, nd := impl.Dlaqr23(wantt, wantz, n, ktop, kbot, nw, h.Data, h.Stride, iloz, ihiz, z.Data, max(1, z.Stride),
 		sr, si, v.Data, v.Stride, tmat.Cols, tmat.Data, tmat.Stride, wv.Rows, wv.Data, wv.Stride, work, len(work), recur)
 
 	prefix := fmt.Sprintf("Case wantt=%v, wantz=%v, n=%v, ktop=%v, kbot=%v, nw=%v, iloz=%v, ihiz=%v, extra=%v",

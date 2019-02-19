@@ -23,13 +23,15 @@ func (impl Implementation) Dlauum(uplo blas.Uplo, n int, a []float64, lda int) {
 		panic(nLT0)
 	case lda < max(1, n):
 		panic(badLdA)
-	case len(a) < (n-1)*lda+n:
-		panic("lapack: a has insufficient length")
 	}
 
 	// Quick return if possible.
 	if n == 0 {
 		return
+	}
+
+	if len(a) < (n-1)*lda+n {
+		panic(shortA)
 	}
 
 	// Determine the block size.

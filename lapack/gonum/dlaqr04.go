@@ -123,11 +123,21 @@ func (impl Implementation) Dlaqr04(wantt, wantz bool, n, ilo, ihi int, h []float
 	)
 
 	switch {
+	case n < 0:
+		panic(nLT0)
 	case ilo < 0 || max(0, n-1) < ilo:
 		panic(badIlo)
 	case ihi < min(ilo, n-1) || n <= ihi:
 		panic(badIhi)
-	case lwork < 1 && n <= ntiny && lwork != -1:
+	case ldh < max(1, n):
+		panic(badLdH)
+	case wantz && (iloz < 0 || ilo < iloz):
+		panic("lapack: invalid value of iloz")
+	case wantz && (ihiz < ihi || n <= ihiz):
+		panic("lapack: invalid value of ihiz")
+	case ldz < 1 || (wantz && ldz < max(1, n)):
+		panic(badLdZ)
+	case lwork < 1 && lwork != -1:
 		panic(badWork)
 	// TODO(vladimir-ch): Enable if and when we figure out what the minimum
 	// necessary lwork value is. Dlaqr04 says that the minimum is n which
@@ -135,34 +145,10 @@ func (impl Implementation) Dlaqr04(wantt, wantz bool, n, ilo, ihi int, h []float
 	// (independent of n).
 	// case lwork < n && n > ntiny && lwork != -1:
 	// 	panic(badWork)
-	case len(work) < lwork:
+	case len(work) < max(1, lwork):
 		panic(shortWork)
 	case recur < 0:
 		panic("lapack: recur is negative")
-	}
-	if wantz {
-		if iloz < 0 || ilo < iloz {
-			panic("lapack: invalid value of iloz")
-		}
-		if ihiz < ihi || n <= ihiz {
-			panic("lapack: invalid value of ihiz")
-		}
-	}
-	if lwork != -1 {
-		checkMatrix(n, n, h, ldh)
-		if wantz {
-			checkMatrix(n, n, z, ldz)
-		}
-		switch {
-		case ilo > 0 && h[ilo*ldh+ilo-1] != 0:
-			panic("lapack: block not isolated")
-		case ihi+1 < n && h[(ihi+1)*ldh+ihi] != 0:
-			panic("lapack: block not isolated")
-		case len(wr) != ihi+1:
-			panic("lapack: bad length of wr")
-		case len(wi) != ihi+1:
-			panic("lapack: bad length of wi")
-		}
 	}
 
 	// Quick return.
@@ -171,10 +157,27 @@ func (impl Implementation) Dlaqr04(wantt, wantz bool, n, ilo, ihi int, h []float
 		return 0
 	}
 
+	if lwork != -1 {
+		switch {
+		case len(h) < (n-1)*ldh+n:
+			panic(shortH)
+		case len(wr) != ihi+1:
+			panic("lapack: bad length of wr")
+		case len(wi) != ihi+1:
+			panic("lapack: bad length of wi")
+		case wantz && len(z) < (n-1)*ldz+n:
+			panic(shortZ)
+		case ilo > 0 && h[ilo*ldh+ilo-1] != 0:
+			panic("lapack: block not isolated")
+		case ihi+1 < n && h[(ihi+1)*ldh+ihi] != 0:
+			panic("lapack: block not isolated")
+		}
+	}
+
 	if n <= ntiny {
 		// Tiny matrices must use Dlahqr.
-		work[0] = 1
 		if lwork == -1 {
+			work[0] = 1
 			return 0
 		}
 		return impl.Dlahqr(wantt, wantz, n, ilo, ihi, h, ldh, wr, wi, iloz, ihiz, z, ldz)

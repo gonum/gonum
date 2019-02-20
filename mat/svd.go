@@ -20,6 +20,33 @@ type SVD struct {
 	vt blas64.General
 }
 
+// SVDKind specifies the treatment of singular vectors during an SVD
+// factorization.
+type SVDKind int
+
+const (
+	// SVDNone specifies that no singular vectors should be computed during
+	// the decomposition.
+	SVDNone SVDKind = 0
+
+	SVDRightThin SVDKind = 1 << (iota - 1)
+	SVDRightFull
+	SVDLeftThin
+	SVDLeftFull
+
+	// SVDThin computes the thin singular vectors, that is, it computes
+	//  A = U~ * Σ * V~^T
+	// where U~ is of size m×min(m,n), Σ is a diagonal matrix of size min(m,n)×min(m,n)
+	// and V~ is of size n×min(m,n).
+	// Hack for now to keep PR small.
+	SVDThin = SVDLeftThin | SVDRightThin
+	// SVDFull computes the full singular value decomposition,
+	//  A = U * Σ * V^T
+	// where U is of size m×m, Σ is an m×n diagonal matrix, and V is an n×n matrix.
+	// Hack for now to keep PR small.
+	SVDFull = SVDLeftFull | SVDRightFull
+)
+
 // Factorize computes the singular value decomposition (SVD) of the input matrix A.
 // The singular values of A are computed in all cases, while the singular
 // vectors are optionally computed depending on the input kind.

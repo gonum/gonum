@@ -104,6 +104,14 @@ func (m *Dense) EigenvectorsSym(e *EigenSym) {
 	m.Copy(e.vectors)
 }
 
+type EigenFact int
+
+const (
+	EigenNoVectors    = 0
+	EigenLeftVectors  = 1 << 0
+	EigenRightVectors = 1 << 1
+)
+
 // Eigen is a type for creating and using the eigenvalue decomposition of a dense matrix.
 type Eigen struct {
 	n int // The size of the factorized matrix.
@@ -141,7 +149,7 @@ func (e *Eigen) succFact() bool {
 //
 // Factorize returns whether the decomposition succeeded. If the decomposition
 // failed, methods that require a successful factorization will panic.
-func (e *Eigen) Factorize(a Matrix, left, right bool) (ok bool) {
+func (e *Eigen) Factorize(a Matrix, fact EigenFact) (ok bool) {
 	// Copy a because it is modified during the Lapack call.
 	r, c := a.Dims()
 	if r != c {
@@ -149,6 +157,9 @@ func (e *Eigen) Factorize(a Matrix, left, right bool) (ok bool) {
 	}
 	var sd Dense
 	sd.Clone(a)
+
+	left := fact&EigenLeftVectors != 0
+	right := fact&EigenRightVectors != 0
 
 	var vl, vr Dense
 	jobvl := lapack.LeftEVNone

@@ -13,6 +13,8 @@ import (
 // SVD is a type for creating and using the Singular Value Decomposition (SVD)
 // of a matrix.
 type SVD struct {
+	Kind SVDKind
+
 	kind SVDKind
 
 	s  []float64
@@ -40,7 +42,8 @@ type SVD struct {
 //
 // Factorize returns whether the decomposition succeeded. If the decomposition
 // failed, routines that require a successful factorization will panic.
-func (svd *SVD) Factorize(a Matrix, kind SVDKind) (ok bool) {
+func (svd *SVD) Factorize(a Matrix) (ok bool) {
+	kind := svd.Kind
 	m, n := a.Dims()
 	var jobU, jobVT lapack.SVDJob
 	switch kind {
@@ -103,12 +106,6 @@ func (svd *SVD) Factorize(a Matrix, kind SVDKind) (ok bool) {
 		svd.kind = 0
 	}
 	return ok
-}
-
-// Kind returns the matrix.SVDKind of the decomposition. If no decomposition has been
-// computed, Kind returns 0.
-func (svd *SVD) Kind() SVDKind {
-	return svd.kind
 }
 
 // Cond returns the 2-norm condition number for the factorized matrix. Cond will

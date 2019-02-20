@@ -17,6 +17,8 @@ const (
 // EigenSym is a type for creating and manipulating the Eigen decomposition of
 // symmetric matrices.
 type EigenSym struct {
+	NoVectors bool
+
 	vectorsComputed bool
 
 	values  []float64
@@ -33,13 +35,13 @@ type EigenSym struct {
 //
 // Factorize returns whether the decomposition succeeded. If the decomposition
 // failed, methods that require a successful factorization will panic.
-func (e *EigenSym) Factorize(a Symmetric, vectors bool) (ok bool) {
+func (e *EigenSym) Factorize(a Symmetric) (ok bool) {
 	n := a.Symmetric()
 	sd := NewSymDense(n, nil)
 	sd.CopySym(a)
 
 	jobz := lapack.EVNone
-	if vectors {
+	if e.NoVectors {
 		jobz = lapack.EVCompute
 	}
 	w := make([]float64, n)
@@ -55,7 +57,7 @@ func (e *EigenSym) Factorize(a Symmetric, vectors bool) (ok bool) {
 		e.vectors = nil
 		return false
 	}
-	e.vectorsComputed = vectors
+	e.vectorsComputed = !e.NoVectors
 	e.values = w
 	e.vectors = NewDense(n, n, sd.mat.Data)
 	return true
@@ -106,6 +108,9 @@ func (m *Dense) EigenvectorsSym(e *EigenSym) {
 
 // Eigen is a type for creating and using the eigenvalue decomposition of a dense matrix.
 type Eigen struct {
+	NoLeft  bool
+	NoRight bool
+
 	n int // The size of the factorized matrix.
 
 	right bool // have the right eigenvectors been computed
@@ -141,7 +146,7 @@ func (e *Eigen) succFact() bool {
 //
 // Factorize returns whether the decomposition succeeded. If the decomposition
 // failed, methods that require a successful factorization will panic.
-func (e *Eigen) Factorize(a Matrix, left, right bool) (ok bool) {
+func (e *Eigen) Factorize(a Matrix) (ok bool) {
 	// Copy a because it is modified during the Lapack call.
 	r, c := a.Dims()
 	if r != c {
@@ -153,18 +158,18 @@ func (e *Eigen) Factorize(a Matrix, left, right bool) (ok bool) {
 	var vl, vr Dense
 	jobvl := lapack.LeftEVNone
 	jobvr := lapack.RightEVNone
-	if left {
+	if e.NoLeft {
+		vl.mat.Stride = 1
+	} else {
 		vl = *NewDense(r, r, nil)
 		jobvl = lapack.LeftEVCompute
-	} else {
-		vl.mat.Stride = 1
 	}
 
-	if right {
+	if e.NoRight {
+		vr.mat.Stride = 1
+	} else {
 		vr = *NewDense(c, c, nil)
 		jobvr = lapack.RightEVCompute
-	} else {
-		vr.mat.Stride = 1
 	}
 
 	wr := getFloats(c, false)
@@ -183,8 +188,8 @@ func (e *Eigen) Factorize(a Matrix, left, right bool) (ok bool) {
 		return false
 	}
 	e.n = r
-	e.right = right
-	e.left = left
+	e.right = !e.NoRight
+	e.left = !e.NoLeft
 
 	// Construct complex eigenvalues from float64 data.
 	values := make([]complex128, r)
@@ -195,19 +200,19 @@ func (e *Eigen) Factorize(a Matrix, left, right bool) (ok bool) {
 
 	// Construct complex eigenvectors from float64 data.
 	var cvl, cvr CDense
-	if left {
+	if e.NoLeft {
+		e.lVectors = nil
+	} else {
 		cvl = *NewCDense(r, r, nil)
 		e.complexEigenTo(&cvl, &vl)
 		e.lVectors = &cvl
-	} else {
-		e.lVectors = nil
 	}
-	if right {
+	if e.NoRight {
+		e.rVectors = nil
+	} else {
 		cvr = *NewCDense(c, c, nil)
 		e.complexEigenTo(&cvr, &vr)
 		e.rVectors = &cvr
-	} else {
-		e.rVectors = nil
 	}
 	return true
 }

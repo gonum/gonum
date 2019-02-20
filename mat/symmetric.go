@@ -566,7 +566,7 @@ func (s *SymDense) PowPSD(a Symmetric, pow float64) error {
 	s.reuseAs(dim)
 
 	var eigen EigenSym
-	ok := eigen.Factorize(a, true)
+	ok := eigen.Factorize(a)
 	if !ok {
 		return ErrFailedEigen
 	}

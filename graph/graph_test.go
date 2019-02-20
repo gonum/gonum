@@ -294,5 +294,24 @@ func same(a, b graph.Graph) bool {
 			}
 		}
 	}
-	return true
+	type edger interface {
+		Edges() graph.Edges
+	}
+	type weightedEdger interface {
+		WeightedEdges() graph.WeightedEdges
+	}
+	var sizeA, sizeB int
+	switch a := a.(type) {
+	case edger:
+		sizeA = len(graph.EdgesOf(a.Edges()))
+	case weightedEdger:
+		sizeA = len(graph.WeightedEdgesOf(a.WeightedEdges()))
+	}
+	switch b := b.(type) {
+	case edger:
+		sizeB = len(graph.EdgesOf(b.Edges()))
+	case weightedEdger:
+		sizeB = len(graph.WeightedEdgesOf(b.WeightedEdges()))
+	}
+	return sizeA == sizeB
 }

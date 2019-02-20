@@ -135,7 +135,7 @@ func (impl Implementation) Dlaqr04(wantt, wantz bool, n, ilo, ihi int, h []float
 		panic("lapack: invalid value of iloz")
 	case wantz && (ihiz < ihi || n <= ihiz):
 		panic("lapack: invalid value of ihiz")
-	case ldz < 1 || (wantz && ldz < max(1, n)):
+	case ldz < 1, wantz && ldz < n:
 		panic(badLdZ)
 	case lwork < 1 && lwork != -1:
 		panic(badWork)

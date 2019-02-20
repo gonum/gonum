@@ -55,16 +55,9 @@ import (
 //
 // Dsytrd is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dsytrd(uplo blas.Uplo, n int, a []float64, lda int, d, e, tau, work []float64, lwork int) {
-	var opts string
-	switch uplo {
-	case blas.Upper:
-		opts = "U"
-	case blas.Lower:
-		opts = "L"
-	default:
-		panic(badUplo)
-	}
 	switch {
+	case uplo != blas.Upper && uplo != blas.Lower:
+		panic(badUplo)
 	case n < 0:
 		panic(nLT0)
 	case lda < max(1, n):
@@ -75,12 +68,13 @@ func (impl Implementation) Dsytrd(uplo blas.Uplo, n int, a []float64, lda int, d
 		panic(shortWork)
 	}
 
+	// Quick return if possible.
 	if n == 0 {
 		work[0] = 1
 		return
 	}
 
-	nb := impl.Ilaenv(1, "DSYTRD", opts, n, -1, -1, -1)
+	nb := impl.Ilaenv(1, "DSYTRD", string(uplo), n, -1, -1, -1)
 	lworkopt := n * nb
 	if lwork == -1 {
 		work[0] = float64(lworkopt)
@@ -89,7 +83,7 @@ func (impl Implementation) Dsytrd(uplo blas.Uplo, n int, a []float64, lda int, d
 
 	switch {
 	case len(a) < (n-1)*lda+n:
-		panic("lapack: insufficient length of a")
+		panic(shortA)
 	case len(d) < n:
 		panic(badD)
 	case len(e) < n-1:
@@ -98,14 +92,15 @@ func (impl Implementation) Dsytrd(uplo blas.Uplo, n int, a []float64, lda int, d
 		panic(badTau)
 	}
 
+	bi := blas64.Implementation()
+
 	nx := n
 	iws := 1
-	bi := blas64.Implementation()
 	var ldwork int
 	if 1 < nb && nb < n {
 		// Determine when to cross over from blocked to unblocked code. The last
 		// block is always handled by unblocked code.
-		nx = max(nb, impl.Ilaenv(3, "DSYTRD", opts, n, -1, -1, -1))
+		nx = max(nb, impl.Ilaenv(3, "DSYTRD", string(uplo), n, -1, -1, -1))
 		if nx < n {
 			// Determine if workspace is large enough for blocked code.
 			ldwork = nb
@@ -115,7 +110,7 @@ func (impl Implementation) Dsytrd(uplo blas.Uplo, n int, a []float64, lda int, d
 				// value of nb and reduce nb or force use of unblocked code by
 				// setting nx = n.
 				nb = max(lwork/n, 1)
-				nbmin := impl.Ilaenv(2, "DSYTRD", opts, n, -1, -1, -1)
+				nbmin := impl.Ilaenv(2, "DSYTRD", string(uplo), n, -1, -1, -1)
 				if nb < nbmin {
 					nx = n
 				}

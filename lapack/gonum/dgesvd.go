@@ -95,7 +95,7 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 		panic(nLT0)
 	case lda < max(1, n):
 		panic(badLdA)
-	case ldu < 1 || (wantua && ldu < m) || (wantus && ldu < minmn):
+	case ldu < 1, wantua && ldu < m, wantus && ldu < minmn:
 		panic(badLdU)
 	case ldvt < 1 || (wantvas && ldvt < n):
 		panic(badLdVT)

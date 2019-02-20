@@ -106,86 +106,110 @@ import (
 //
 // Dtrevc3 is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dtrevc3(side lapack.EVSide, howmny lapack.EVHowMany, selected []bool, n int, t []float64, ldt int, vl []float64, ldvl int, vr []float64, ldvr int, mm int, work []float64, lwork int) (m int) {
-	switch side {
-	default:
-		panic(badEVSide)
-	case lapack.EVRight, lapack.EVLeft, lapack.EVBoth:
-	}
-	switch howmny {
-	default:
-		panic(badEVHowMany)
-	case lapack.EVAll, lapack.EVAllMulQ, lapack.EVSelected:
-	}
+	bothv := side == lapack.EVBoth
+	rightv := side == lapack.EVRight || bothv
+	leftv := side == lapack.EVLeft || bothv
 	switch {
+	case !rightv && !leftv:
+		panic(badEVSide)
+	case howmny != lapack.EVAll && howmny != lapack.EVAllMulQ && howmny != lapack.EVSelected:
+		panic(badEVHowMany)
 	case n < 0:
 		panic(nLT0)
-	case len(work) < lwork:
-		panic(shortWork)
+	case ldt < max(1, n):
+		panic(badLdT)
+	case mm < 0:
+		panic(mmLT0)
+	case ldvl < 1:
+		// ldvl and ldvr are also checked below after the computation of
+		// m (number of columns of VL and VR) in case of howmny == EVSelected.
+		panic(badLdVL)
+	case ldvr < 1:
+		panic(badLdVR)
 	case lwork < max(1, 3*n) && lwork != -1:
 		panic(badWork)
-	}
-	if lwork != -1 {
-		if howmny == lapack.EVSelected {
-			if len(selected) != n {
-				panic("lapack: bad selected length")
-			}
-			// Set m to the number of columns required to store the
-			// selected eigenvectors, and standardize the slice
-			// selected.
-			for j := 0; j < n; {
-				if j == n-1 || t[(j+1)*ldt+j] == 0 {
-					// Diagonal 1×1 block corresponding to a
-					// real eigenvalue.
-					if selected[j] {
-						m++
-					}
-					j++
-				} else {
-					// Diagonal 2×2 block corresponding to a
-					// complex eigenvalue.
-					if selected[j] || selected[j+1] {
-						selected[j] = true
-						selected[j+1] = false
-						m += 2
-					}
-					j += 2
-				}
-			}
-		} else {
-			m = n
-		}
-		if m > mm {
-			panic("lapack: insufficient number of columns")
-		}
-		checkMatrix(n, n, t, ldt)
-		if (side == lapack.EVRight || side == lapack.EVBoth) && m > 0 {
-			checkMatrix(n, m, vr, ldvr)
-		}
-		if (side == lapack.EVLeft || side == lapack.EVBoth) && m > 0 {
-			checkMatrix(n, m, vl, ldvl)
-		}
+	case len(work) < max(1, lwork):
+		panic(shortWork)
 	}
 
 	// Quick return if possible.
 	if n == 0 {
 		work[0] = 1
-		return m
+		return 0
 	}
 
-	const (
-		nbmin = 8
-		nbmax = 128
-	)
-	nb := impl.Ilaenv(1, "DTREVC", string(side)+string(howmny), n, -1, -1, -1)
+	// Normally we don't check slice lengths until after the workspace
+	// query. However, even in case of the workspace query we need to
+	// compute and return the value of m, and since the computation accesses t,
+	// we put the length check of t here.
+	if len(t) < (n-1)*ldt+n {
+		panic(shortT)
+	}
+
+	if howmny == lapack.EVSelected {
+		if len(selected) != n {
+			panic(badSelected)
+		}
+		// Set m to the number of columns required to store the selected
+		// eigenvectors, and standardize the slice selected.
+		// Each selected real eigenvector occupies one column and each
+		// selected complex eigenvector occupies two columns.
+		for j := 0; j < n; {
+			if j == n-1 || t[(j+1)*ldt+j] == 0 {
+				// Diagonal 1×1 block corresponding to a
+				// real eigenvalue.
+				if selected[j] {
+					m++
+				}
+				j++
+			} else {
+				// Diagonal 2×2 block corresponding to a
+				// complex eigenvalue.
+				if selected[j] || selected[j+1] {
+					selected[j] = true
+					selected[j+1] = false
+					m += 2
+				}
+				j += 2
+			}
+		}
+	} else {
+		m = n
+	}
+	if mm < m {
+		panic(badMM)
+	}
 
 	// Quick return in case of a workspace query.
+	nb := impl.Ilaenv(1, "DTREVC", string(side)+string(howmny), n, -1, -1, -1)
 	if lwork == -1 {
 		work[0] = float64(n + 2*n*nb)
 		return m
 	}
 
+	// Quick return if no eigenvectors were selected.
+	if m == 0 {
+		return 0
+	}
+
+	switch {
+	case leftv && ldvl < mm:
+		panic(badLdVL)
+	case leftv && len(vl) < (n-1)*ldvl+mm:
+		panic(shortVL)
+
+	case rightv && ldvr < mm:
+		panic(badLdVR)
+	case rightv && len(vr) < (n-1)*ldvr+mm:
+		panic(shortVR)
+	}
+
 	// Use blocked version of back-transformation if sufficient workspace.
 	// Zero-out the workspace to avoid potential NaN propagation.
+	const (
+		nbmin = 8
+		nbmax = 128
+	)
 	if howmny == lapack.EVAllMulQ && lwork >= n+2*n*nbmin {
 		nb = min((lwork-n)/(2*n), nbmax)
 		impl.Dlaset(blas.All, n, 1+2*nb, 0, 0, work[:n+2*nb*n], 1+2*nb)

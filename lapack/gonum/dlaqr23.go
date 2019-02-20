@@ -5,7 +5,6 @@
 package gonum
 
 import (
-	"fmt"
 	"math"
 
 	"gonum.org/v1/gonum/blas"
@@ -88,7 +87,6 @@ func (impl Implementation) Dlaqr23(wantt, wantz bool, n, ktop, kbot, nw int, h [
 	case kbot < min(ktop, n-1) || n <= kbot:
 		panic("lapack: invalid value of kbot")
 	case nw < 0 || kbot-ktop+1+1 < nw:
-		fmt.Println(nw, kbot, ktop)
 		panic("lapack: invalid value of nw")
 	case ldh < max(1, n):
 		panic(badLdH)
@@ -96,7 +94,7 @@ func (impl Implementation) Dlaqr23(wantt, wantz bool, n, ktop, kbot, nw int, h [
 		panic("lapack: invalid value of iloz")
 	case wantz && (ihiz < kbot || n <= ihiz):
 		panic("lapack: invalid value of ihiz")
-	case ldz < 1 || (wantz && ldz < max(1, n)):
+	case ldz < 1, wantz && ldz < n:
 		panic(badLdZ)
 	case ldv < max(1, nw):
 		panic(badLdV)

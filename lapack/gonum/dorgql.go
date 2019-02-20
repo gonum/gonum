@@ -33,10 +33,12 @@ import (
 // Dorgql is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dorgql(m, n, k int, a []float64, lda int, tau, work []float64, lwork int) {
 	switch {
+	case m < 0:
+		panic(mLT0)
 	case n < 0:
 		panic(nLT0)
-	case m < n:
-		panic(mLTN)
+	case n > m:
+		panic(nGTM)
 	case k < 0:
 		panic(kLT0)
 	case k > n:
@@ -61,10 +63,10 @@ func (impl Implementation) Dorgql(m, n, k int, a []float64, lda int, tau, work [
 		return
 	}
 
-	if len(a) < (m-1)*lda+n {
-		panic("lapack: insufficient length of a")
-	}
-	if len(tau) < k {
+	switch {
+	case len(a) < (m-1)*lda+n:
+		panic(shortA)
+	case len(tau) < k:
 		panic(badTau)
 	}
 

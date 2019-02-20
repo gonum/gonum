@@ -109,12 +109,12 @@ func testDtrevc3(t *testing.T, impl Dtrevc3er, side lapack.EVSide, howmny lapack
 	work := make([]float64, max(1, 3*n))
 	if optwork {
 		impl.Dtrevc3(side, howmny, selected, n, tmat.Data, tmat.Stride,
-			vl.Data, vl.Stride, vr.Data, vr.Stride, mWant, work, -1)
+			vl.Data, max(1, vl.Stride), vr.Data, max(1, vr.Stride), mWant, work, -1)
 		work = make([]float64, int(work[0]))
 	}
 
 	m := impl.Dtrevc3(side, howmny, selected, n, tmat.Data, tmat.Stride,
-		vl.Data, vl.Stride, vr.Data, vr.Stride, mWant, work, len(work))
+		vl.Data, max(1, vl.Stride), vr.Data, max(1, vr.Stride), mWant, work, len(work))
 
 	prefix := fmt.Sprintf("Case side=%v, howmny=%v, n=%v, extra=%v, optwk=%v",
 		side, howmny, n, extra, optwork)

@@ -13,46 +13,6 @@ type Implementation struct{}
 
 var _ lapack.Float64 = Implementation{}
 
-// checkMatrix verifies the parameters of a matrix input.
-func checkMatrix(m, n int, a []float64, lda int) {
-	if m < 0 {
-		panic("lapack: has negative number of rows")
-	}
-	if n < 0 {
-		panic("lapack: has negative number of columns")
-	}
-	if lda < n {
-		panic("lapack: stride less than number of columns")
-	}
-	if len(a) < (m-1)*lda+n {
-		panic("lapack: insufficient matrix slice length")
-	}
-}
-
-func checkVector(n int, v []float64, inc int) {
-	if n < 0 {
-		panic("lapack: negative vector length")
-	}
-	if (inc > 0 && (n-1)*inc >= len(v)) || (inc < 0 && (1-n)*inc >= len(v)) {
-		panic("lapack: insufficient vector slice length")
-	}
-}
-
-func checkSymBanded(ab []float64, n, kd, lda int) {
-	if n < 0 {
-		panic("lapack: negative banded length")
-	}
-	if kd < 0 {
-		panic("lapack: negative bandwidth value")
-	}
-	if lda < kd+1 {
-		panic("lapack: stride less than number of bands")
-	}
-	if len(ab) < (n-1)*lda+kd {
-		panic("lapack: insufficient banded vector length")
-	}
-}
-
 func min(a, b int) int {
 	if a < b {
 		return a

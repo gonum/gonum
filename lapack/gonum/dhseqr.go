@@ -135,7 +135,7 @@ func (impl Implementation) Dhseqr(job lapack.SchurJob, compz lapack.SchurComp, n
 		panic(badIhi)
 	case ldh < max(1, n):
 		panic(badLdH)
-	case ldz < 1 || (wantz && ldz < max(1, n)):
+	case ldz < 1, wantz && ldz < n:
 		panic(badLdZ)
 	case lwork < max(1, n) && lwork != -1:
 		panic(badWork)

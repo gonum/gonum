@@ -27,12 +27,14 @@ import (
 // Dorglq is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dorglq(m, n, k int, a []float64, lda int, tau, work []float64, lwork int) {
 	switch {
-	case k < 0:
-		panic(kLT0)
-	case m < k:
-		panic(kGTM)
+	case m < 0:
+		panic(mLT0)
 	case n < m:
 		panic(nLTM)
+	case k < 0:
+		panic(kLT0)
+	case k > m:
+		panic(kGTM)
 	case lda < max(1, n):
 		panic(badLdA)
 	case lwork < max(1, m) && lwork != -1:
@@ -52,10 +54,10 @@ func (impl Implementation) Dorglq(m, n, k int, a []float64, lda int, tau, work [
 		return
 	}
 
-	if len(a) < (m-1)*lda+n {
-		panic("lapack: insufficient length of a")
-	}
-	if len(tau) < k {
+	switch {
+	case len(a) < (m-1)*lda+n:
+		panic(shortA)
+	case len(tau) < k:
 		panic(badTau)
 	}
 

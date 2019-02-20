@@ -75,7 +75,7 @@ func (impl Implementation) Dlahqr(wantt, wantz bool, n, ilo, ihi int, h []float6
 	switch {
 	case n < 0:
 		panic(nLT0)
-	case ilo < 0 || max(0, ihi) < ilo:
+	case ilo < 0, max(0, ihi) < ilo:
 		panic(badIlo)
 	case ihi >= n:
 		panic(badIhi)
@@ -85,7 +85,7 @@ func (impl Implementation) Dlahqr(wantt, wantz bool, n, ilo, ihi int, h []float6
 		panic("lapack: iloz out of range")
 	case wantz && (ihiz < ihi || n <= ihiz):
 		panic("lapack: ihiz out of range")
-	case ldz < 1 || (wantz && ldz < max(1, n)):
+	case ldz < 1, wantz && ldz < n:
 		panic(badLdZ)
 	}
 

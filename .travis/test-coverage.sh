@@ -4,25 +4,6 @@ MODE=set
 PROFILE_OUT="${PWD}/profile.out"
 ACC_OUT="${PWD}/coverage.txt"
 
-# FIXME(kortschak): Remove this; temporarily only doing latest release.
-latestRelease=$(
-	git ls-remote --tags https://github.com/golang/go.git 'go*' \
-	| egrep 'go[1-9]+\.[0-9]+\.[0-9]+$' \
-	| sed -e 's|^.*tags/||g' \
-	| sort -V \
-	| tail -n 1
-)
-echo Latest Go release: $latestRelease
-
-currentVersion=$(go version | cut -d' ' -f3)
-echo Current Go version: $currentVersion
-
-if [[ "${currentVersion%.*}" != "${latestRelease%.*}" ]]; then
-	echo Skipping coverage analysis.
-	exit 0
-fi
-#######################################################################
-
 testCover() {
 	# set the return value to 0 (successful)
 	retval=0

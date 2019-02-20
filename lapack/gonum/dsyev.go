@@ -28,45 +28,55 @@ import (
 // limited by the usable length. If lwork == -1, instead of computing Dsyev the
 // optimal work length is stored into work[0].
 func (impl Implementation) Dsyev(jobz lapack.EVJob, uplo blas.Uplo, n int, a []float64, lda int, w, work []float64, lwork int) (ok bool) {
-	checkMatrix(n, n, a, lda)
-	upper := uplo == blas.Upper
-	var wantz bool
-	switch jobz {
-	default:
+	switch {
+	case jobz != lapack.EVNone && jobz != lapack.EVCompute:
 		panic(badEVJob)
-	case lapack.EVCompute:
-		wantz = true
-	case lapack.EVNone:
+	case uplo != blas.Upper && uplo != blas.Lower:
+		panic(badUplo)
+	case n < 0:
+		panic(nLT0)
+	case lda < max(1, n):
+		panic(badLdA)
+	case lwork < max(1, 3*n-1) && lwork != -1:
+		panic(badWork)
+	case len(work) < max(1, lwork):
+		panic(shortWork)
 	}
+
+	// Quick return if possible.
+	if n == 0 {
+		return true
+	}
+
 	var opts string
-	if upper {
+	if uplo == blas.Upper {
 		opts = "U"
 	} else {
 		opts = "L"
 	}
 	nb := impl.Ilaenv(1, "DSYTRD", opts, n, -1, -1, -1)
 	lworkopt := max(1, (nb+2)*n)
-	work[0] = float64(lworkopt)
 	if lwork == -1 {
+		work[0] = float64(lworkopt)
 		return
 	}
-	if len(work) < lwork {
-		panic(badWork)
+
+	switch {
+	case len(a) < (n-1)*lda+n:
+		panic(shortA)
+	case len(w) < n:
+		panic(shortW)
 	}
-	if lwork < 3*n-1 {
-		panic(badWork)
-	}
-	if n == 0 {
-		return true
-	}
+
 	if n == 1 {
 		w[0] = a[0]
 		work[0] = 2
-		if wantz {
+		if jobz == lapack.EVCompute {
 			a[0] = 1
 		}
 		return true
 	}
+
 	safmin := dlamchS
 	eps := dlamchP
 	smlnum := safmin / eps
@@ -87,7 +97,7 @@ func (impl Implementation) Dsyev(jobz lapack.EVJob, uplo blas.Uplo, n int, a []f
 	}
 	if scaled {
 		kind := lapack.LowerTri
-		if upper {
+		if uplo == blas.Upper {
 			kind = lapack.UpperTri
 		}
 		impl.Dlascl(kind, 0, 0, 1, sigma, n, n, a, lda)
@@ -100,7 +110,7 @@ func (impl Implementation) Dsyev(jobz lapack.EVJob, uplo blas.Uplo, n int, a []f
 
 	// For eigenvalues only, call Dsterf. For eigenvectors, first call Dorgtr
 	// to generate the orthogonal matrix, then call Dsteqr.
-	if !wantz {
+	if jobz == lapack.EVNone {
 		ok = impl.Dsterf(n, w, work[inde:])
 	} else {
 		impl.Dorgtr(uplo, n, a, lda, work[indtau:], work[indwork:], llwork)

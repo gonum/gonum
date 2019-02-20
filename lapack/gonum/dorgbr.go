@@ -20,38 +20,45 @@ import "gonum.org/v1/gonum/lapack"
 //
 // Dorgbr is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dorgbr(vect lapack.GenOrtho, m, n, k int, a []float64, lda int, tau, work []float64, lwork int) {
+	wantq := vect == lapack.GenerateQ
 	mn := min(m, n)
-	var wantq bool
-	switch vect {
-	case lapack.GenerateQ:
-		wantq = true
-	case lapack.GeneratePT:
-	default:
+	switch {
+	case vect != lapack.GenerateQ && vect != lapack.GeneratePT:
 		panic(badGenOrtho)
+	case m < 0:
+		panic(mLT0)
+	case n < 0:
+		panic(nLT0)
+	case k < 0:
+		panic(kLT0)
+	case wantq && n > m:
+		panic(nGTM)
+	case wantq && n < min(m, k):
+		panic("lapack: n < min(m,k)")
+	case !wantq && m > n:
+		panic(mGTN)
+	case !wantq && m < min(n, k):
+		panic("lapack: m < min(n,k)")
+	case lda < max(1, n) && lwork != -1:
+		// Normally, we follow the reference and require the leading
+		// dimension to be always valid, even in case of workspace
+		// queries. However, if a caller provided a placeholder value
+		// for lda (and a) when doing a workspace query that didn't
+		// fulfill the condition here, it would cause a panic. This is
+		// exactly what Dgesvd does.
+		panic(badLdA)
+	case lwork < max(1, mn) && lwork != -1:
+		panic(badWork)
+	case len(work) < max(1, lwork):
+		panic(shortWork)
 	}
-	if wantq {
-		if m < n || n < min(m, k) || m < min(m, k) {
-			panic(badDims)
-		}
-	} else {
-		if n < m || m < min(n, k) || n < min(n, k) {
-			panic(badDims)
-		}
-	}
-	if wantq {
-		if m >= k {
-			checkMatrix(m, k, a, lda)
-		} else {
-			checkMatrix(m, m, a, lda)
-		}
-	} else {
-		if n >= k {
-			checkMatrix(k, n, a, lda)
-		} else {
-			checkMatrix(n, n, a, lda)
-		}
-	}
+
+	// Quick return if possible.
 	work[0] = 1
+	if m == 0 || n == 0 {
+		return
+	}
+
 	if wantq {
 		if m >= k {
 			impl.Dorgqr(m, n, k, a, lda, tau, work, -1)
@@ -71,16 +78,16 @@ func (impl Implementation) Dorgbr(vect lapack.GenOrtho, m, n, k int, a []float64
 		work[0] = float64(lworkopt)
 		return
 	}
-	if len(work) < lwork {
-		panic(badWork)
+
+	switch {
+	case len(a) < (m-1)*lda+n:
+		panic(shortA)
+	case wantq && len(tau) < min(m, k):
+		panic(badTau)
+	case !wantq && len(tau) < min(n, k):
+		panic(badTau)
 	}
-	if lwork < mn {
-		panic(badWork)
-	}
-	if m == 0 || n == 0 {
-		work[0] = 1
-		return
-	}
+
 	if wantq {
 		// Form Q, determined by a call to Dgebrd to reduce an m×k matrix.
 		if m >= k {

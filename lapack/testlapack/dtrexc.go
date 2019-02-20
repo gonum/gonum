@@ -63,7 +63,7 @@ func testDtrexc(t *testing.T, impl Dtrexcer, compq lapack.UpdateSchurComp, tmat 
 
 	work := nanSlice(n)
 
-	ifstGot, ilstGot, ok := impl.Dtrexc(compq, n, tmat.Data, tmat.Stride, q.Data, q.Stride, ifst, ilst, work)
+	ifstGot, ilstGot, ok := impl.Dtrexc(compq, n, tmat.Data, tmat.Stride, q.Data, max(1, q.Stride), ifst, ilst, work)
 
 	prefix := fmt.Sprintf("Case compq=%v, n=%v, ifst=%v, nbf=%v, ilst=%v, nbl=%v, extra=%v",
 		compq, n, ifst, fstSize, ilst, lstSize, extra)

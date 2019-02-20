@@ -17,17 +17,33 @@ import (
 // as computed by Dpotrf. On entry, B contains the right-hand side matrix B, on
 // return it contains the solution matrix X.
 func (Implementation) Dpotrs(uplo blas.Uplo, n, nrhs int, a []float64, lda int, b []float64, ldb int) {
-	if uplo != blas.Upper && uplo != blas.Lower {
+	switch {
+	case uplo != blas.Upper && uplo != blas.Lower:
 		panic(badUplo)
+	case n < 0:
+		panic(nLT0)
+	case nrhs < 0:
+		panic(nrhsLT0)
+	case lda < max(1, n):
+		panic(badLdA)
+	case ldb < max(1, nrhs):
+		panic(badLdB)
 	}
-	checkMatrix(n, n, a, lda)
-	checkMatrix(n, nrhs, b, ldb)
 
+	// Quick return if possible.
 	if n == 0 || nrhs == 0 {
 		return
 	}
 
+	switch {
+	case len(a) < (n-1)*lda+n:
+		panic(shortA)
+	case len(b) < (n-1)*ldb+nrhs:
+		panic(shortB)
+	}
+
 	bi := blas64.Implementation()
+
 	if uplo == blas.Upper {
 		// Solve U^T * U * X = B where U is stored in the upper triangle of A.
 

@@ -91,7 +91,7 @@ func (impl Implementation) Dlaqr5(wantt, wantz bool, kacc22 int, n, ktop, kbot, 
 		panic("lapack: invalid value of ihiz")
 	case wantz && iloz < 0 || ihiz < iloz:
 		panic("lapack: invalid value of iloz")
-	case ldz < 1 || (wantz && ldz < max(1, n)):
+	case ldz < 1, wantz && ldz < n:
 		panic(badLdZ)
 	case wantz && len(z) < (n-1)*ldz+n:
 		panic(shortZ)

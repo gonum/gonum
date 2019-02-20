@@ -49,20 +49,33 @@ import (
 //
 // Dsytd2 is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dsytd2(uplo blas.Uplo, n int, a []float64, lda int, d, e, tau []float64) {
-	checkMatrix(n, n, a, lda)
-	if len(d) < n {
-		panic(badD)
+	switch {
+	case uplo != blas.Upper && uplo != blas.Lower:
+		panic(badUplo)
+	case n < 0:
+		panic(nLT0)
+	case lda < max(1, n):
+		panic(badLdA)
 	}
-	if len(e) < n-1 {
-		panic(badE)
-	}
-	if len(tau) < n-1 {
-		panic(badTau)
-	}
-	if n <= 0 {
+
+	// Quick return if possible.
+	if n == 0 {
 		return
 	}
+
+	switch {
+	case len(a) < (n-1)*lda+n:
+		panic(shortA)
+	case len(d) < n:
+		panic(badD)
+	case len(e) < n-1:
+		panic(badE)
+	case len(tau) < n-1:
+		panic(badTau)
+	}
+
 	bi := blas64.Implementation()
+
 	if uplo == blas.Upper {
 		// Reduce the upper triangle of A.
 		for i := n - 2; i >= 0; i-- {

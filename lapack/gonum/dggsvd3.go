@@ -128,11 +128,11 @@ func (impl Implementation) Dggsvd3(jobU, jobV, jobQ lapack.GSVDJob, m, n, p int,
 		panic(badLdA)
 	case ldb < max(1, n):
 		panic(badLdB)
-	case ldu < 1 || (wantu && ldu < m):
+	case ldu < 1, wantu && ldu < m:
 		panic(badLdU)
-	case ldv < 1 || (wantv && ldv < p):
+	case ldv < 1, wantv && ldv < p:
 		panic(badLdV)
-	case ldq < 1 || (wantq && ldq < n):
+	case ldq < 1, wantq && ldq < n:
 		panic(badLdQ)
 	case len(iwork) < n:
 		panic(shortWork)

@@ -37,23 +37,29 @@ import (
 //
 // Dsteqr is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dsteqr(compz lapack.EVComp, n int, d, e, z []float64, ldz int, work []float64) (ok bool) {
-	if n < 0 {
-		panic(nLT0)
-	}
-	if len(d) < n {
-		panic(badD)
-	}
-	if len(e) < n-1 {
-		panic(badE)
-	}
-	if compz != lapack.EVCompNone && compz != lapack.EVTridiag && compz != lapack.EVOrig {
+	switch {
+	case compz != lapack.EVCompNone && compz != lapack.EVTridiag && compz != lapack.EVOrig:
 		panic(badEVComp)
+	case n < 0:
+		panic(nLT0)
+	case ldz < 1, compz != lapack.EVCompNone && ldz < n:
+		panic(badLdZ)
 	}
-	if compz != lapack.EVCompNone {
-		if len(work) < max(1, 2*n-2) {
-			panic(badWork)
-		}
-		checkMatrix(n, n, z, ldz)
+
+	// Quick return if possible.
+	if n == 0 {
+		return true
+	}
+
+	switch {
+	case len(d) < n:
+		panic(badD)
+	case len(e) < n-1:
+		panic(badE)
+	case compz != lapack.EVCompNone && len(z) < (n-1)*ldz+n:
+		panic(shortZ)
+	case compz != lapack.EVCompNone && len(work) < max(1, 2*n-2):
+		panic(shortWork)
 	}
 
 	var icompz int
@@ -63,9 +69,6 @@ func (impl Implementation) Dsteqr(compz lapack.EVComp, n int, d, e, z []float64,
 		icompz = 2
 	}
 
-	if n == 0 {
-		return true
-	}
 	if n == 1 {
 		if icompz == 2 {
 			z[0] = 1

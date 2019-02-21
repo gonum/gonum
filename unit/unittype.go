@@ -321,22 +321,28 @@ func (u *Unit) Format(fs fmt.State, c rune) {
 	case 'e', 'E', 'f', 'F', 'g', 'G':
 		p, pOk := fs.Precision()
 		w, wOk := fs.Width()
+		if u.formatted == "" && len(u.dimensions) > 0 {
+			u.formatted = u.dimensions.String()
+		}
 		switch {
 		case pOk && wOk:
-			fmt.Fprintf(fs, "%*.*"+string(c), w, p, u.value)
+			fmt.Fprintf(fs, "%*.*"+string(c), pos(w-len(u.formatted)-1), p, u.value)
 		case pOk:
 			fmt.Fprintf(fs, "%.*"+string(c), p, u.value)
 		case wOk:
-			fmt.Fprintf(fs, "%*"+string(c), w, u.value)
+			fmt.Fprintf(fs, "%*"+string(c), pos(w-len(u.formatted)-1), u.value)
 		default:
 			fmt.Fprintf(fs, "%"+string(c), u.value)
 		}
+		fmt.Fprintf(fs, " %s", u.formatted)
 	default:
 		fmt.Fprintf(fs, "%%!%c(*Unit=%g)", c, u)
-		return
 	}
-	if u.formatted == "" && len(u.dimensions) > 0 {
-		u.formatted = u.dimensions.String()
+}
+
+func pos(a int) int {
+	if a < 0 {
+		return 0
 	}
-	fmt.Fprintf(fs, " %s", u.formatted)
+	return a
 }

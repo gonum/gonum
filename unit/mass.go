@@ -73,17 +73,18 @@ func (m Mass) Format(fs fmt.State, c rune) {
 	case 'e', 'E', 'f', 'F', 'g', 'G':
 		p, pOk := fs.Precision()
 		w, wOk := fs.Width()
+		const unit = " kg"
 		switch {
 		case pOk && wOk:
-			fmt.Fprintf(fs, "%*.*"+string(c), w, p, float64(m))
+			fmt.Fprintf(fs, "%*.*"+string(c), pos(w-len(unit)), p, float64(m))
 		case pOk:
 			fmt.Fprintf(fs, "%.*"+string(c), p, float64(m))
 		case wOk:
-			fmt.Fprintf(fs, "%*"+string(c), w, float64(m))
+			fmt.Fprintf(fs, "%*"+string(c), pos(w-len(unit)), float64(m))
 		default:
 			fmt.Fprintf(fs, "%"+string(c), float64(m))
 		}
-		fmt.Fprint(fs, " kg")
+		fmt.Fprint(fs, unit)
 	default:
 		fmt.Fprintf(fs, "%%!%c(%T=%g kg)", c, m, float64(m))
 	}

@@ -273,17 +273,18 @@ func ({{.Receiver}} {{.Name}}) Format(fs fmt.State, c rune) {
 	case 'e', 'E', 'f', 'F', 'g', 'G':
 		p, pOk := fs.Precision()
 		w, wOk := fs.Width()
+		const unit = " {{.PrintString}}"
 		switch {
 		case pOk && wOk:
-			fmt.Fprintf(fs, "%*.*"+string(c), w, p, float64({{.Receiver}}))
+			fmt.Fprintf(fs, "%*.*"+string(c), pos(w-len(unit)), p, float64({{.Receiver}}))
 		case pOk:
 			fmt.Fprintf(fs, "%.*"+string(c), p, float64({{.Receiver}}))
 		case wOk:
-			fmt.Fprintf(fs, "%*"+string(c), w, float64({{.Receiver}}))
+			fmt.Fprintf(fs, "%*"+string(c), pos(w-len(unit)), float64({{.Receiver}}))
 		default:
 			fmt.Fprintf(fs, "%"+string(c), float64({{.Receiver}}))
 		}
-		fmt.Fprint(fs, " {{.PrintString}}")
+		fmt.Fprint(fs, unit)
 	default:
 		fmt.Fprintf(fs, "%%!%c(%T=%g {{.PrintString}})", c, {{.Receiver}}, float64({{.Receiver}}))
 	}

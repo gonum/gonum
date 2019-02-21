@@ -15,9 +15,9 @@ import (
 
 type edge struct{ f, t int }
 
-func (e edge) From() graph.Node     { return simple.Node(e.f) }
-func (e edge) To() graph.Node       { return simple.Node(e.t) }
-func (e edge) Reversed() graph.Edge { return edge{f: e.t, t: e.f} }
+func (e edge) From() graph.Node         { return simple.Node(e.f) }
+func (e edge) To() graph.Node           { return simple.Node(e.t) }
+func (e edge) ReversedEdge() graph.Edge { return edge{f: e.t, t: e.f} }
 
 var orderedEdgesTests = []struct {
 	edges []graph.Edge
@@ -67,10 +67,10 @@ type weightedEdge struct {
 	w    float64
 }
 
-func (e weightedEdge) From() graph.Node     { return simple.Node(e.f) }
-func (e weightedEdge) To() graph.Node       { return simple.Node(e.t) }
-func (e weightedEdge) Reversed() graph.Edge { e.f, e.t = e.t, e.f; return e }
-func (e weightedEdge) Weight() float64      { return e.w }
+func (e weightedEdge) From() graph.Node         { return simple.Node(e.f) }
+func (e weightedEdge) To() graph.Node           { return simple.Node(e.t) }
+func (e weightedEdge) ReversedEdge() graph.Edge { e.f, e.t = e.t, e.f; return e }
+func (e weightedEdge) Weight() float64          { return e.w }
 
 var orderedWeightedEdgesTests = []struct {
 	edges []graph.WeightedEdge

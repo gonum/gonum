@@ -33,9 +33,9 @@ func (e Edge) From() graph.Node { return e.F }
 // To returns the to-node of the edge.
 func (e Edge) To() graph.Node { return e.T }
 
-// Reversed returns a new Edge with the F and T fields
+// ReversedLine returns a new Edge with the F and T fields
 // swapped.
-func (e Edge) Reversed() graph.Edge { return Edge{F: e.T, T: e.F} }
+func (e Edge) ReversedEdge() graph.Edge { return Edge{F: e.T, T: e.F} }
 
 // WeightedEdge is a simple weighted graph edge.
 type WeightedEdge struct {
@@ -49,10 +49,10 @@ func (e WeightedEdge) From() graph.Node { return e.F }
 // To returns the to-node of the edge.
 func (e WeightedEdge) To() graph.Node { return e.T }
 
-// Reversed returns a new Edge with the F and T fields
+// ReversedLine returns a new Edge with the F and T fields
 // swapped. The weight of the new Edge is the same as
 // the weight of the receiver.
-func (e WeightedEdge) Reversed() graph.Edge { return WeightedEdge{F: e.T, T: e.F, W: e.W} }
+func (e WeightedEdge) ReversedEdge() graph.Edge { return WeightedEdge{F: e.T, T: e.F, W: e.W} }
 
 // Weight returns the weight of the edge.
 func (e WeightedEdge) Weight() float64 { return e.W }

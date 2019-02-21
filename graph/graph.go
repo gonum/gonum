@@ -19,9 +19,9 @@ type Edge interface {
 	// To returns the to node of the edge.
 	To() Node
 
-	// Reversed returns an edge that has the
-	// end points of the edge swapped.
-	Reversed() Edge
+	// ReversedEdge returns an edge that has
+	// the end points of the receiver swapped.
+	ReversedEdge() Edge
 }
 
 // WeightedEdge is a weighted graph edge. In directed graphs, the direction

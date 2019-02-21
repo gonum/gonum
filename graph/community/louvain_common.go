@@ -257,10 +257,10 @@ type edge struct {
 	weight   float64
 }
 
-func (e edge) From() graph.Node     { return e.from }
-func (e edge) To() graph.Node       { return e.to }
-func (e edge) Reversed() graph.Edge { e.from, e.to = e.to, e.from; return e }
-func (e edge) Weight() float64      { return e.weight }
+func (e edge) From() graph.Node         { return e.from }
+func (e edge) To() graph.Node           { return e.to }
+func (e edge) ReversedEdge() graph.Edge { e.from, e.to = e.to, e.from; return e }
+func (e edge) Weight() float64          { return e.weight }
 
 // multiplexCommunity is a reduced multiplex graph node describing its membership.
 type multiplexCommunity struct {
@@ -281,10 +281,10 @@ type multiplexEdge struct {
 	weight   float64
 }
 
-func (e multiplexEdge) From() graph.Node     { return e.from }
-func (e multiplexEdge) To() graph.Node       { return e.to }
-func (e multiplexEdge) Reversed() graph.Edge { e.from, e.to = e.to, e.from; return e }
-func (e multiplexEdge) Weight() float64      { return e.weight }
+func (e multiplexEdge) From() graph.Node         { return e.from }
+func (e multiplexEdge) To() graph.Node           { return e.to }
+func (e multiplexEdge) ReversedEdge() graph.Edge { e.from, e.to = e.to, e.from; return e }
+func (e multiplexEdge) Weight() float64          { return e.weight }
 
 // commIdx is an index of a node in a community held by a localMover.
 type commIdx struct {

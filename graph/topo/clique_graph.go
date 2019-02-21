@@ -101,10 +101,10 @@ func (e CliqueGraphEdge) From() graph.Node { return e.from }
 // To returns the to node of the edge.
 func (e CliqueGraphEdge) To() graph.Node { return e.to }
 
-// Reversed returns a new CliqueGraphEdge with
+// ReversedEdge returns a new CliqueGraphEdge with
 // the edge end points swapped. The nodes of the
 // new edge are shared with the receiver.
-func (e CliqueGraphEdge) Reversed() graph.Edge { e.from, e.to = e.to, e.from; return e }
+func (e CliqueGraphEdge) ReversedEdge() graph.Edge { e.from, e.to = e.to, e.from; return e }
 
 // Nodes returns the common nodes in the cliques of the underlying graph
 // corresponding to the from and to nodes in the clique graph.

@@ -219,7 +219,7 @@ type attrEdge struct {
 
 func (e attrEdge) From() graph.Node                 { return e.from }
 func (e attrEdge) To() graph.Node                   { return e.to }
-func (e attrEdge) Reversed() graph.Edge             { e.from, e.to = e.to, e.from; return e }
+func (e attrEdge) ReversedEdge() graph.Edge         { e.from, e.to = e.to, e.from; return e }
 func (e attrEdge) Weight() float64                  { return 0 }
 func (e attrEdge) Attributes() []encoding.Attribute { return e.attr }
 
@@ -258,7 +258,7 @@ type portedEdge struct {
 
 func (e portedEdge) From() graph.Node { return e.from }
 func (e portedEdge) To() graph.Node   { return e.to }
-func (e portedEdge) Reversed() graph.Edge {
+func (e portedEdge) ReversedEdge() graph.Edge {
 	e.from, e.to = e.to, e.from
 	e.fromPort, e.toPort = e.toPort, e.fromPort
 	e.fromCompass, e.toCompass = e.toCompass, e.fromCompass

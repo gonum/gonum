@@ -13,9 +13,9 @@ type Line interface {
 	// To returns the to node of the edge.
 	To() Node
 
-	// Reversed returns an edge that has the
-	// end points of the edge swapped.
-	Reversed() Line
+	// ReversedLine returns a line that has the
+	// end points of the receiver swapped.
+	ReversedLine() Line
 
 	// ID returns the unique ID for the Line.
 	ID() int64

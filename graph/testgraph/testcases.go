@@ -25,11 +25,11 @@ type line struct {
 	W    float64
 }
 
-func (e line) From() graph.Node     { return e.F }
-func (e line) To() graph.Node       { return e.T }
-func (e line) Reversed() graph.Edge { e.F, e.T = e.T, e.F; return e }
-func (e line) ID() int64            { return e.UID }
-func (e line) Weight() float64      { return e.W }
+func (e line) From() graph.Node         { return e.F }
+func (e line) To() graph.Node           { return e.T }
+func (e line) ReversedEdge() graph.Edge { e.F, e.T = e.T, e.F; return e }
+func (e line) ID() int64                { return e.UID }
+func (e line) Weight() float64          { return e.W }
 
 var testCases = []struct {
 	// name is the name of the test.

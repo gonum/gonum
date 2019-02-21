@@ -15,10 +15,10 @@ import (
 
 type line struct{ f, t int }
 
-func (l line) From() graph.Node     { return simple.Node(l.f) }
-func (l line) To() graph.Node       { return simple.Node(l.t) }
-func (l line) Reversed() graph.Line { return line{f: l.t, t: l.f} }
-func (l line) ID() int64            { return 1 }
+func (l line) From() graph.Node         { return simple.Node(l.f) }
+func (l line) To() graph.Node           { return simple.Node(l.t) }
+func (l line) ReversedLine() graph.Line { return line{f: l.t, t: l.f} }
+func (l line) ID() int64                { return 1 }
 
 var orderedLinesTests = []struct {
 	lines []graph.Line
@@ -68,11 +68,11 @@ type weightedLine struct {
 	w    float64
 }
 
-func (l weightedLine) From() graph.Node     { return simple.Node(l.f) }
-func (l weightedLine) To() graph.Node       { return simple.Node(l.t) }
-func (l weightedLine) Reversed() graph.Line { l.f, l.t = l.t, l.f; return l }
-func (l weightedLine) Weight() float64      { return l.w }
-func (l weightedLine) ID() int64            { return 1 }
+func (l weightedLine) From() graph.Node         { return simple.Node(l.f) }
+func (l weightedLine) To() graph.Node           { return simple.Node(l.t) }
+func (l weightedLine) ReversedLine() graph.Line { l.f, l.t = l.t, l.f; return l }
+func (l weightedLine) Weight() float64          { return l.w }
+func (l weightedLine) ID() int64                { return 1 }
 
 var orderedWeightedLinesTests = []struct {
 	lines []graph.WeightedLine

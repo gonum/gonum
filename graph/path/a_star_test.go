@@ -221,10 +221,10 @@ type weightedEdge struct {
 	cost     float64
 }
 
-func (e weightedEdge) From() graph.Node     { return e.from }
-func (e weightedEdge) To() graph.Node       { return e.to }
-func (e weightedEdge) Reversed() graph.Edge { e.from, e.to = e.to, e.from; return e }
-func (e weightedEdge) Weight() float64      { return e.cost }
+func (e weightedEdge) From() graph.Node         { return e.from }
+func (e weightedEdge) To() graph.Node           { return e.to }
+func (e weightedEdge) ReversedEdge() graph.Edge { e.from, e.to = e.to, e.from; return e }
+func (e weightedEdge) Weight() float64          { return e.cost }
 
 func isMonotonic(g UndirectedWeightLister, h Heuristic) (ok bool, at graph.Edge, goal graph.Node) {
 	for _, goal := range graph.NodesOf(g.Nodes()) {

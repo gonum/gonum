@@ -17,7 +17,7 @@ type edgeWithPorts struct {
 	fromPort, toPort string
 }
 
-func (e edgeWithPorts) Reversed() graph.Edge {
+func (e edgeWithPorts) ReversedEdge() graph.Edge {
 	e.F, e.T = e.T, e.F
 	e.fromPort, e.toPort = e.toPort, e.fromPort
 	return e

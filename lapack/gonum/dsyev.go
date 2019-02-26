@@ -38,7 +38,7 @@ func (impl Implementation) Dsyev(jobz lapack.EVJob, uplo blas.Uplo, n int, a []f
 	case lda < max(1, n):
 		panic(badLdA)
 	case lwork < max(1, 3*n-1) && lwork != -1:
-		panic(badWork)
+		panic(badLWork)
 	case len(work) < max(1, lwork):
 		panic(shortWork)
 	}

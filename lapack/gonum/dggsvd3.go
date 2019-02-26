@@ -137,7 +137,7 @@ func (impl Implementation) Dggsvd3(jobU, jobV, jobQ lapack.GSVDJob, m, n, p int,
 	case len(iwork) < n:
 		panic(shortWork)
 	case lwork < 1 && lwork != -1:
-		panic(badWork)
+		panic(badLWork)
 	case len(work) < max(1, lwork):
 		panic(shortWork)
 	}
@@ -173,9 +173,9 @@ func (impl Implementation) Dggsvd3(jobU, jobV, jobQ lapack.GSVDJob, m, n, p int,
 	case wantq && len(q) < (n-1)*ldq+n:
 		panic(shortQ)
 	case len(alpha) != n:
-		panic(badAlpha)
+		panic(badLenAlpha)
 	case len(beta) != n:
-		panic(badBeta)
+		panic(badLenBeta)
 	}
 
 	// Compute the Frobenius norm of matrices A and B.

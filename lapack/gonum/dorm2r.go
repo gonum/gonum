@@ -58,11 +58,11 @@ func (impl Implementation) Dorm2r(side blas.Side, trans blas.Transpose, m, n, k 
 	case len(c) < (m-1)*ldc+n:
 		panic(shortC)
 	case len(tau) < k:
-		panic(badTau)
+		panic(shortTau)
 	case left && len(work) < n:
 		panic(shortWork)
 	case !left && len(work) < m:
-		panic(badWork)
+		panic(shortWork)
 	}
 
 	if left {

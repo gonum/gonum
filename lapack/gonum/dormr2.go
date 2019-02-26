@@ -60,7 +60,7 @@ func (impl Implementation) Dormr2(side blas.Side, trans blas.Transpose, m, n, k 
 	case len(a) < (k-1)*lda+nq:
 		panic(shortA)
 	case len(tau) < k:
-		panic(badTau)
+		panic(shortTau)
 	case len(c) < (m-1)*ldc+n:
 		panic(shortC)
 	case len(work) < nw:

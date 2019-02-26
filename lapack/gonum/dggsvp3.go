@@ -83,7 +83,7 @@ func (impl Implementation) Dggsvp3(jobU, jobV, jobQ lapack.GSVDJob, m, p, n int,
 	case len(iwork) != n:
 		panic(shortWork)
 	case lwork < 1 && lwork != -1:
-		panic(badWork)
+		panic(badLWork)
 	case len(work) < max(1, lwork):
 		panic(shortWork)
 	}
@@ -122,7 +122,7 @@ func (impl Implementation) Dggsvp3(jobU, jobV, jobQ lapack.GSVDJob, m, p, n int,
 		// tau check must come after lwkopt query since
 		// the Dggsvd3 call for lwkopt query may have
 		// lwork == -1, and tau is provided by work.
-		panic(badTau)
+		panic(shortTau)
 	}
 
 	const forward = true

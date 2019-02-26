@@ -20,7 +20,7 @@ import "math"
 func (impl Implementation) Dlaqr1(n int, h []float64, ldh int, sr1, si1, sr2, si2 float64, v []float64) {
 	switch {
 	case n != 2 && n != 3:
-		panic(badDims)
+		panic("lapack: n must be 2 or 3")
 	case ldh < n:
 		panic(badLdH)
 	case len(h) < (n-1)*ldh+n:

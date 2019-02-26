@@ -49,7 +49,7 @@ func (impl Implementation) Dgerq2(m, n int, a []float64, lda int, tau, work []fl
 	case len(a) < (m-1)*lda+n:
 		panic(shortA)
 	case len(tau) < k:
-		panic(badTau)
+		panic(shortTau)
 	}
 
 	for i := k - 1; i >= 0; i-- {

@@ -44,7 +44,7 @@ func (impl Implementation) Dgelq2(m, n int, a []float64, lda int, tau, work []fl
 	case len(a) < (m-1)*lda+n:
 		panic(shortA)
 	case len(tau) < k:
-		panic(badTau)
+		panic(shortTau)
 	case len(work) < m:
 		panic(shortWork)
 	}

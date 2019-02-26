@@ -71,8 +71,10 @@ func (impl Implementation) Dlatrd(uplo blas.Uplo, n, nb int, a []float64, lda in
 		panic(badUplo)
 	case n < 0:
 		panic(nLT0)
-	case nb < 0 || n < nb:
-		panic(badNb)
+	case nb < 0:
+		panic(nbLT0)
+	case nb > n:
+		panic(nbGTN)
 	case lda < max(1, n):
 		panic(badLdA)
 	case ldw < max(1, nb):
@@ -89,9 +91,9 @@ func (impl Implementation) Dlatrd(uplo blas.Uplo, n, nb int, a []float64, lda in
 	case len(w) < (n-1)*ldw+nb:
 		panic(shortW)
 	case len(e) < n-1:
-		panic(badE)
+		panic(shortE)
 	case len(tau) < n-1:
-		panic(badTau)
+		panic(shortTau)
 	}
 
 	bi := blas64.Implementation()

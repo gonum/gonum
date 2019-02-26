@@ -44,8 +44,8 @@ func (impl Implementation) Dgetrs(trans blas.Transpose, n, nrhs int, a []float64
 		panic(shortA)
 	case len(b) < (n-1)*ldb+nrhs:
 		panic(shortB)
-	case len(ipiv) < n:
-		panic(badIpiv)
+	case len(ipiv) != n:
+		panic(badLenIpiv)
 	}
 
 	bi := blas64.Implementation()

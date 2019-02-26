@@ -193,9 +193,9 @@ func (impl Implementation) Dtgsja(jobU, jobV, jobQ lapack.GSVDJob, m, p, n, k, l
 		panic(shortB)
 
 	case len(alpha) != n:
-		panic(badAlpha)
+		panic(badLenAlpha)
 	case len(beta) != n:
-		panic(badBeta)
+		panic(badLenBeta)
 
 	case ldu < 1, wantu && ldu < m:
 		panic(badLdU)

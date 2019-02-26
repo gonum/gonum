@@ -34,9 +34,9 @@ func (impl Implementation) Dsterf(n int, d, e []float64) (ok bool) {
 
 	switch {
 	case len(d) < n:
-		panic(badD)
+		panic(shortD)
 	case len(e) < n-1:
-		panic(badE)
+		panic(shortE)
 	}
 
 	if n == 1 {

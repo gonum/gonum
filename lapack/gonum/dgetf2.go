@@ -46,8 +46,8 @@ func (Implementation) Dgetf2(m, n int, a []float64, lda int, ipiv []int) (ok boo
 	switch {
 	case len(a) < (m-1)*lda+n:
 		panic(shortA)
-	case len(ipiv) < mn:
-		panic(badIpiv)
+	case len(ipiv) != mn:
+		panic(badLenIpiv)
 	}
 
 	bi := blas64.Implementation()

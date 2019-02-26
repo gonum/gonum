@@ -53,9 +53,9 @@ func (impl Implementation) Dsteqr(compz lapack.EVComp, n int, d, e, z []float64,
 
 	switch {
 	case len(d) < n:
-		panic(badD)
+		panic(shortD)
 	case len(e) < n-1:
-		panic(badE)
+		panic(shortE)
 	case compz != lapack.EVCompNone && len(z) < (n-1)*ldz+n:
 		panic(shortZ)
 	case compz != lapack.EVCompNone && len(work) < max(1, 2*n-2):

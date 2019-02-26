@@ -68,7 +68,7 @@ func (Implementation) Dlarfb(side blas.Side, trans blas.Transpose, direct lapack
 	case direct != lapack.Forward && direct != lapack.Backward:
 		panic(badDirect)
 	case store != lapack.ColumnWise && store != lapack.RowWise:
-		panic(badStore)
+		panic(badStoreV)
 	case m < 0:
 		panic(mLT0)
 	case n < 0:

@@ -32,15 +32,15 @@ func (impl Implementation) Dgebd2(m, n int, a []float64, lda int, d, e, tauQ, ta
 
 	switch {
 	case len(d) < minmn:
-		panic(badD)
+		panic(shortD)
 	case len(e) < minmn-1:
-		panic(badE)
+		panic(shortE)
 	case len(tauQ) < minmn:
-		panic(badTauQ)
+		panic(shortTauQ)
 	case len(tauP) < minmn:
-		panic(badTauP)
+		panic(shortTauP)
 	case len(work) < max(m, n):
-		panic(badWork)
+		panic(shortWork)
 	}
 
 	if m >= n {

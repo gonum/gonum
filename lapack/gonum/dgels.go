@@ -55,7 +55,7 @@ func (impl Implementation) Dgels(trans blas.Transpose, m, n, nrhs int, a []float
 	case ldb < max(1, nrhs):
 		panic(badLdB)
 	case lwork < max(1, minwrk) && lwork != -1:
-		panic(badWork)
+		panic(badLWork)
 	case len(work) < max(1, lwork):
 		panic(shortWork)
 	}

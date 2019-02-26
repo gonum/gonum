@@ -42,7 +42,7 @@ func (impl Implementation) Dorghr(n, ilo, ihi int, a []float64, lda int, tau, wo
 	case lda < max(1, n):
 		panic(badLdA)
 	case lwork < max(1, nh) && lwork != -1:
-		panic(badWork)
+		panic(badLWork)
 	case len(work) < max(1, lwork):
 		panic(shortWork)
 	}
@@ -63,7 +63,7 @@ func (impl Implementation) Dorghr(n, ilo, ihi int, a []float64, lda int, tau, wo
 	case len(a) < (n-1)*lda+n:
 		panic(shortA)
 	case len(tau) < n-1:
-		panic(badTau)
+		panic(shortTau)
 	}
 
 	// Shift the vectors which define the elementary reflectors one column

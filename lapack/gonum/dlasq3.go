@@ -21,7 +21,7 @@ func (impl Implementation) Dlasq3(i0, n0 int, z []float64, pp int, dmin, sigma, 
 	case len(z) < 4*n0:
 		panic(shortZ)
 	case pp != 0 && pp != 1 && pp != 2:
-		panic(badPP)
+		panic(badPp)
 	}
 
 	const cbias = 1.5

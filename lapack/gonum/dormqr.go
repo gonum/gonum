@@ -64,7 +64,7 @@ func (impl Implementation) Dormqr(side blas.Side, trans blas.Transpose, m, n, k 
 	case ldc < max(1, n):
 		panic(badLdC)
 	case lwork < max(1, nw) && lwork != -1:
-		panic(badWork)
+		panic(badLWork)
 	case len(work) < max(1, lwork):
 		panic(shortWork)
 	}
@@ -92,7 +92,7 @@ func (impl Implementation) Dormqr(side blas.Side, trans blas.Transpose, m, n, k 
 	case len(a) < (nq-1)*lda+k:
 		panic(shortA)
 	case len(tau) != k:
-		panic(badTau)
+		panic(badLenTau)
 	case len(c) < (m-1)*ldc+n:
 		panic(shortC)
 	}

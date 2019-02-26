@@ -58,8 +58,10 @@ func (impl Implementation) Dlaqps(m, n, offset, nb int, a []float64, lda int, jp
 		panic(offsetLT0)
 	case offset > m:
 		panic(offsetGTM)
-	case nb < 0 || nb > n:
-		panic(badNb)
+	case nb < 0:
+		panic(nbLT0)
+	case nb > n:
+		panic(nbGTN)
 	case lda < max(1, n):
 		panic(badLdA)
 	case ldf < max(1, nb):
@@ -74,11 +76,11 @@ func (impl Implementation) Dlaqps(m, n, offset, nb int, a []float64, lda int, jp
 	case len(a) < (m-1)*lda+n:
 		panic(shortA)
 	case len(jpvt) != n:
-		panic(badIpiv)
+		panic(badLenJpvt)
 	case len(vn1) < n:
-		panic(badVn1)
+		panic(shortVn1)
 	case len(vn2) < n:
-		panic(badVn2)
+		panic(shortVn2)
 	}
 
 	if nb == 0 {
@@ -87,9 +89,9 @@ func (impl Implementation) Dlaqps(m, n, offset, nb int, a []float64, lda int, jp
 
 	switch {
 	case len(tau) < nb:
-		panic(badTau)
+		panic(shortTau)
 	case len(auxv) < nb:
-		panic(badAuxv)
+		panic(shortAuxv)
 	case len(f) < (n-1)*ldf+nb:
 		panic(shortF)
 	}

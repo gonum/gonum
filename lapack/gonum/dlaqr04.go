@@ -132,23 +132,23 @@ func (impl Implementation) Dlaqr04(wantt, wantz bool, n, ilo, ihi int, h []float
 	case ldh < max(1, n):
 		panic(badLdH)
 	case wantz && (iloz < 0 || ilo < iloz):
-		panic("lapack: invalid value of iloz")
+		panic(badIloz)
 	case wantz && (ihiz < ihi || n <= ihiz):
-		panic("lapack: invalid value of ihiz")
+		panic(badIhiz)
 	case ldz < 1, wantz && ldz < n:
 		panic(badLdZ)
 	case lwork < 1 && lwork != -1:
-		panic(badWork)
+		panic(badLWork)
 	// TODO(vladimir-ch): Enable if and when we figure out what the minimum
 	// necessary lwork value is. Dlaqr04 says that the minimum is n which
 	// clashes with Dlaqr23's opinion about optimal work when nw <= 2
 	// (independent of n).
 	// case lwork < n && n > ntiny && lwork != -1:
-	// 	panic(badWork)
+	// 	panic(badLWork)
 	case len(work) < max(1, lwork):
 		panic(shortWork)
 	case recur < 0:
-		panic("lapack: recur is negative")
+		panic(recurLT0)
 	}
 
 	// Quick return.
@@ -162,15 +162,15 @@ func (impl Implementation) Dlaqr04(wantt, wantz bool, n, ilo, ihi int, h []float
 		case len(h) < (n-1)*ldh+n:
 			panic(shortH)
 		case len(wr) != ihi+1:
-			panic("lapack: bad length of wr")
+			panic(badLenWr)
 		case len(wi) != ihi+1:
-			panic("lapack: bad length of wi")
+			panic(badLenWi)
 		case wantz && len(z) < (n-1)*ldz+n:
 			panic(shortZ)
 		case ilo > 0 && h[ilo*ldh+ilo-1] != 0:
-			panic("lapack: block not isolated")
+			panic(notIsolated)
 		case ihi+1 < n && h[(ihi+1)*ldh+ihi] != 0:
-			panic("lapack: block not isolated")
+			panic(notIsolated)
 		}
 	}
 

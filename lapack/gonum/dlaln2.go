@@ -59,9 +59,9 @@ func (impl Implementation) Dlaln2(trans bool, na, nw int, smin, ca float64, a []
 
 	switch {
 	case na != 1 && na != 2:
-		panic("lapack: invalid value of na")
+		panic(badNa)
 	case nw != 1 && nw != 2:
-		panic("lapack: invalid value of nw")
+		panic(badNw)
 	case lda < na:
 		panic(badLdA)
 	case len(a) < (na-1)*lda+na:

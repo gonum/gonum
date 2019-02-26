@@ -61,7 +61,7 @@ func (impl Implementation) Dgebrd(m, n int, a []float64, lda int, d, e, tauQ, ta
 	case lda < max(1, n):
 		panic(badLdA)
 	case lwork < max(1, max(m, n)) && lwork != -1:
-		panic(badWork)
+		panic(badLWork)
 	case len(work) < max(1, lwork):
 		panic(shortWork)
 	}
@@ -82,15 +82,15 @@ func (impl Implementation) Dgebrd(m, n int, a []float64, lda int, d, e, tauQ, ta
 
 	switch {
 	case len(a) < (m-1)*lda+n:
-		panic("lapack: insufficient length of a")
+		panic(shortA)
 	case len(d) < minmn:
-		panic(badD)
+		panic(shortD)
 	case len(e) < minmn-1:
-		panic(badE)
+		panic(shortE)
 	case len(tauQ) < minmn:
-		panic(badTauQ)
+		panic(shortTauQ)
 	case len(tauP) < minmn:
-		panic(badTauP)
+		panic(shortTauP)
 	}
 
 	nx := minmn

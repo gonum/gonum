@@ -38,7 +38,7 @@ func (impl Implementation) Dorgl2(m, n, k int, a []float64, lda int, tau, work [
 	case len(a) < (m-1)*lda+n:
 		panic(shortA)
 	case len(tau) < k:
-		panic(badTau)
+		panic(shortTau)
 	case len(work) < m:
 		panic(shortWork)
 	}

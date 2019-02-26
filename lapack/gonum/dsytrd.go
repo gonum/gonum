@@ -63,7 +63,7 @@ func (impl Implementation) Dsytrd(uplo blas.Uplo, n int, a []float64, lda int, d
 	case lda < max(1, n):
 		panic(badLdA)
 	case lwork < 1 && lwork != -1:
-		panic(badWork)
+		panic(badLWork)
 	case len(work) < max(1, lwork):
 		panic(shortWork)
 	}
@@ -85,11 +85,11 @@ func (impl Implementation) Dsytrd(uplo blas.Uplo, n int, a []float64, lda int, d
 	case len(a) < (n-1)*lda+n:
 		panic(shortA)
 	case len(d) < n:
-		panic(badD)
+		panic(shortD)
 	case len(e) < n-1:
-		panic(badE)
+		panic(shortE)
 	case len(tau) < n-1:
-		panic(badTau)
+		panic(shortTau)
 	}
 
 	bi := blas64.Implementation()

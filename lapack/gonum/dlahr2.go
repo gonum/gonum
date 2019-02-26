@@ -70,8 +70,10 @@ func (impl Implementation) Dlahr2(n, k, nb int, a []float64, lda int, tau, t []f
 		panic(nLT0)
 	case k < 0:
 		panic(kLT0)
-	case nb < 0 || n < nb:
-		panic(badNb)
+	case nb < 0:
+		panic(nbLT0)
+	case nb > n:
+		panic(nbGTN)
 	case lda < max(1, n-k+1):
 		panic(badLdA)
 	case ldt < max(1, nb):
@@ -89,7 +91,7 @@ func (impl Implementation) Dlahr2(n, k, nb int, a []float64, lda int, tau, t []f
 	case len(a) < (n-1)*lda+n-k+1:
 		panic(shortA)
 	case len(tau) < nb:
-		panic(badTau)
+		panic(shortTau)
 	case len(t) < (nb-1)*ldt+nb:
 		panic(shortT)
 	case len(y) < (n-1)*ldy+nb:

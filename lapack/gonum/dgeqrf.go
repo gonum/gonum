@@ -30,7 +30,7 @@ func (impl Implementation) Dgeqrf(m, n int, a []float64, lda int, tau, work []fl
 	case lda < max(1, n):
 		panic(badLdA)
 	case lwork < max(1, n) && lwork != -1:
-		panic(badWork)
+		panic(badLWork)
 	case len(work) < max(1, lwork):
 		panic(shortWork)
 	}
@@ -53,7 +53,7 @@ func (impl Implementation) Dgeqrf(m, n int, a []float64, lda int, tau, work []fl
 		panic(shortA)
 	}
 	if len(tau) < k {
-		panic(badTau)
+		panic(shortTau)
 	}
 
 	nbmin := 2 // Minimal block size.

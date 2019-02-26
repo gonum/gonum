@@ -48,7 +48,7 @@ func (impl Implementation) Dorgbr(vect lapack.GenOrtho, m, n, k int, a []float64
 		// exactly what Dgesvd does.
 		panic(badLdA)
 	case lwork < max(1, mn) && lwork != -1:
-		panic(badWork)
+		panic(badLWork)
 	case len(work) < max(1, lwork):
 		panic(shortWork)
 	}
@@ -83,9 +83,9 @@ func (impl Implementation) Dorgbr(vect lapack.GenOrtho, m, n, k int, a []float64
 	case len(a) < (m-1)*lda+n:
 		panic(shortA)
 	case wantq && len(tau) < min(m, k):
-		panic(badTau)
+		panic(shortTau)
 	case !wantq && len(tau) < min(n, k):
-		panic(badTau)
+		panic(shortTau)
 	}
 
 	if wantq {

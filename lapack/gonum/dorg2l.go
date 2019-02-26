@@ -45,7 +45,7 @@ func (impl Implementation) Dorg2l(m, n, k int, a []float64, lda int, tau, work [
 	case len(a) < (m-1)*lda+n:
 		panic(shortA)
 	case len(tau) < k:
-		panic(badTau)
+		panic(shortTau)
 	case len(work) < n:
 		panic(shortWork)
 	}

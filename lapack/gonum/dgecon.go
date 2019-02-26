@@ -42,9 +42,9 @@ func (impl Implementation) Dgecon(norm lapack.MatrixNorm, n int, a []float64, ld
 	case len(a) < (n-1)*lda+n:
 		panic(shortA)
 	case len(work) < 4*n:
-		panic(badWork)
+		panic(shortWork)
 	case len(iwork) < n:
-		panic(badWork)
+		panic(shortIWork)
 	}
 
 	// Quick return if possible.

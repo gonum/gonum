@@ -33,7 +33,7 @@ func (impl Implementation) Dorgtr(uplo blas.Uplo, n int, a []float64, lda int, t
 	case lda < max(1, n):
 		panic(badLdA)
 	case lwork < max(1, n-1) && lwork != -1:
-		panic(badWork)
+		panic(badLWork)
 	case len(work) < max(1, lwork):
 		panic(shortWork)
 	}
@@ -59,7 +59,7 @@ func (impl Implementation) Dorgtr(uplo blas.Uplo, n int, a []float64, lda int, t
 	case len(a) < (n-1)*lda+n:
 		panic(shortA)
 	case len(tau) < n-1:
-		panic(badTau)
+		panic(shortTau)
 	}
 
 	if uplo == blas.Upper {

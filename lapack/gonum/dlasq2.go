@@ -44,7 +44,7 @@ func (impl Implementation) Dlasq2(n int, z []float64) (info int) {
 	}
 
 	if len(z) < 4*n {
-		panic(badZ)
+		panic(shortZ)
 	}
 
 	if n == 1 {

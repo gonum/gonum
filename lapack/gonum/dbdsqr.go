@@ -84,13 +84,13 @@ func (impl Implementation) Dbdsqr(uplo blas.Uplo, n, ncvt, nru, ncc int, d, e, v
 		panic(shortC)
 	}
 	if len(d) < n {
-		panic(badD)
+		panic(shortD)
 	}
 	if len(e) < n-1 {
-		panic(badE)
+		panic(shortE)
 	}
 	if len(work) < 4*(n-1) {
-		panic(badWork)
+		panic(shortWork)
 	}
 
 	var info int

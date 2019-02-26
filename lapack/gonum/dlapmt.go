@@ -37,7 +37,7 @@ func (impl Implementation) Dlapmt(forward bool, m, n int, x []float64, ldx int, 
 	case len(x) < (m-1)*ldx+n:
 		panic(shortX)
 	case len(k) != n:
-		panic(badKperm)
+		panic(badLenK)
 	}
 
 	// Quick return if possible.

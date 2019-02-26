@@ -76,7 +76,7 @@ func (impl Implementation) Dgehd2(n, ilo, ihi int, a []float64, lda int, tau, wo
 	case len(a) < (n-1)*lda+n:
 		panic(shortA)
 	case len(tau) != n-1:
-		panic(badTau)
+		panic(badLenTau)
 	case len(work) < n:
 		panic(shortWork)
 	}

@@ -67,7 +67,7 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 	wantuo := jobU == lapack.SVDOverwrite
 	wantun := jobU == lapack.SVDNone
 	if !(wantua || wantus || wantuo || wantun) {
-		panic("lapack: bad SVDJob")
+		panic(badSVDJob)
 	}
 
 	wantva := jobVT == lapack.SVDAll
@@ -76,11 +76,11 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 	wantvo := jobVT == lapack.SVDOverwrite
 	wantvn := jobVT == lapack.SVDNone
 	if !(wantva || wantvs || wantvo || wantvn) {
-		panic("lapack: bad SVDJob")
+		panic(badSVDJob)
 	}
 
 	if wantuo && wantvo {
-		panic("lapack: both jobU and jobVT are lapack.SVDOverwrite")
+		panic(bothSVDOver)
 	}
 
 	minmn := min(m, n)
@@ -100,7 +100,7 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 	case ldvt < 1 || (wantvas && ldvt < n):
 		panic(badLdVT)
 	case lwork < minwork && lwork != -1:
-		panic(badWork)
+		panic(badLWork)
 	case len(work) < max(1, lwork):
 		panic(shortWork)
 	}
@@ -365,7 +365,7 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 		panic(shortA)
 	}
 	if len(s) < minmn {
-		panic(badS)
+		panic(shortS)
 	}
 	if (len(u) < (m-1)*ldu+m && wantua) || (len(u) < (m-1)*ldu+minmn && wantus) {
 		panic(shortU)

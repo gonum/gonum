@@ -76,7 +76,7 @@ func (impl Implementation) Dgehrd(n, ilo, ihi int, a []float64, lda int, tau, wo
 	case lda < max(1, n):
 		panic(badLdA)
 	case lwork < max(1, n) && lwork != -1:
-		panic(badWork)
+		panic(badLWork)
 	case len(work) < lwork:
 		panic(shortWork)
 	}
@@ -104,7 +104,7 @@ func (impl Implementation) Dgehrd(n, ilo, ihi int, a []float64, lda int, tau, wo
 		panic(shortA)
 	}
 	if len(tau) != n-1 {
-		panic(badTau)
+		panic(badLenTau)
 	}
 
 	// Set tau[:ilo] and tau[ihi:] to zero.

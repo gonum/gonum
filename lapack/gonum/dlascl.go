@@ -19,7 +19,7 @@ import (
 func (impl Implementation) Dlascl(kind lapack.MatrixType, kl, ku int, cfrom, cto float64, m, n int, a []float64, lda int) {
 	switch kind {
 	default:
-		panic("invalid kind")
+		panic(badMatrixType)
 	case 'H', 'B', 'Q', 'Z': // See dlascl.f.
 		panic("not implemented")
 	case lapack.General, lapack.UpperTri, lapack.LowerTri:
@@ -29,9 +29,11 @@ func (impl Implementation) Dlascl(kind lapack.MatrixType, kl, ku int, cfrom, cto
 	}
 	switch {
 	case cfrom == 0:
-		panic(zeroDiv)
-	case math.IsNaN(cfrom) || math.IsNaN(cto):
-		panic(nanScale)
+		panic(zeroCFrom)
+	case math.IsNaN(cfrom):
+		panic(nanCFrom)
+	case math.IsNaN(cto):
+		panic(nanCTo)
 	case m < 0:
 		panic(mLT0)
 	case n < 0:
@@ -83,8 +85,6 @@ func (impl Implementation) Dlascl(kind lapack.MatrixType, kl, ku int, cfrom, cto
 			}
 		}
 		switch kind {
-		default:
-			panic("lapack: not implemented")
 		case lapack.General:
 			for i := 0; i < m; i++ {
 				for j := 0; j < n; j++ {

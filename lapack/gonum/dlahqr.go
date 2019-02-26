@@ -82,9 +82,9 @@ func (impl Implementation) Dlahqr(wantt, wantz bool, n, ilo, ihi int, h []float6
 	case ldh < max(1, n):
 		panic(badLdH)
 	case wantz && (iloz < 0 || ilo < iloz):
-		panic("lapack: iloz out of range")
+		panic(badIloz)
 	case wantz && (ihiz < ihi || n <= ihiz):
-		panic("lapack: ihiz out of range")
+		panic(badIhiz)
 	case ldz < 1, wantz && ldz < n:
 		panic(badLdZ)
 	}
@@ -98,13 +98,13 @@ func (impl Implementation) Dlahqr(wantt, wantz bool, n, ilo, ihi int, h []float6
 	case len(h) < (n-1)*ldh+n:
 		panic(shortH)
 	case len(wr) != ihi+1:
-		panic(shortWR)
+		panic(shortWr)
 	case len(wi) != ihi+1:
-		panic(shortWI)
+		panic(shortWi)
 	case wantz && len(z) < (n-1)*ldz+n:
 		panic(shortZ)
 	case ilo > 0 && h[ilo*ldh+ilo-1] != 0:
-		panic("lapack: block is not isolated")
+		panic(notIsolated)
 	}
 
 	if ilo == ihi {

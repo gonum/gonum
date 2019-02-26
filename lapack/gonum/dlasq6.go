@@ -21,7 +21,7 @@ func (impl Implementation) Dlasq6(i0, n0 int, z []float64, pp int) (dmin, dmin1,
 	case len(z) < 4*n0:
 		panic(shortZ)
 	case pp != 0 && pp != 1:
-		panic(badPP)
+		panic(badPp)
 	}
 
 	if n0-i0-1 <= 0 {

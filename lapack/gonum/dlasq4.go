@@ -20,7 +20,7 @@ func (impl Implementation) Dlasq4(i0, n0 int, z []float64, pp int, n0in int, dmi
 	case len(z) < 4*n0:
 		panic(shortZ)
 	case pp != 0 && pp != 1:
-		panic(badPP)
+		panic(badPp)
 	}
 
 	const (

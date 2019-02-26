@@ -38,9 +38,9 @@ func (impl Implementation) Dlacn2(n int, v, x []float64, isgn []int, est float64
 	case len(isgn) < n:
 		panic(shortIsgn)
 	case isave[0] < 0 || 5 < isave[0]:
-		panic("lapack: bad isave value")
+		panic(badIsave)
 	case isave[0] == 0 && kase != 0:
-		panic("lapack: bad isave value")
+		panic(badIsave)
 	}
 
 	const itmax = 5
@@ -55,8 +55,6 @@ func (impl Implementation) Dlacn2(n int, v, x []float64, isgn []int, est float64
 		return est, kase
 	}
 	switch isave[0] {
-	default:
-		panic("unreachable")
 	case 1:
 		if n == 1 {
 			v[0] = x[0]

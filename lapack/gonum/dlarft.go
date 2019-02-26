@@ -37,7 +37,7 @@ func (Implementation) Dlarft(direct lapack.Direct, store lapack.StoreV, n, k int
 	case direct != lapack.Forward && direct != lapack.Backward:
 		panic(badDirect)
 	case store != lapack.RowWise && store != lapack.ColumnWise:
-		panic(badStore)
+		panic(badStoreV)
 	case n < 0:
 		panic(nLT0)
 	case k < 1:
@@ -45,7 +45,7 @@ func (Implementation) Dlarft(direct lapack.Direct, store lapack.StoreV, n, k int
 	case ldv < max(1, nv):
 		panic(badLdV)
 	case len(tau) < k:
-		panic(badTau)
+		panic(shortTau)
 	case ldt < max(1, k):
 		panic(shortT)
 	}

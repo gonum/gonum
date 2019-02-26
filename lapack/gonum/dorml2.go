@@ -56,7 +56,7 @@ func (impl Implementation) Dorml2(side blas.Side, trans blas.Transpose, m, n, k 
 	case !left && len(a) < (k-1)*lda+n:
 		panic(shortA)
 	case len(tau) < k:
-		panic(badTau)
+		panic(shortTau)
 	case len(c) < (m-1)*ldc+n:
 		panic(shortC)
 	case left && len(work) < n:

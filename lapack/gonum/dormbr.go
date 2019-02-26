@@ -72,7 +72,7 @@ func (impl Implementation) Dormbr(vect lapack.ApplyOrtho, side blas.Side, trans 
 	case ldc < max(1, n):
 		panic(badLdC)
 	case lwork < max(1, nw) && lwork != -1:
-		panic(badWork)
+		panic(badLWork)
 	case len(work) < max(1, lwork):
 		panic(shortWork)
 	}
@@ -123,7 +123,7 @@ func (impl Implementation) Dormbr(vect lapack.ApplyOrtho, side blas.Side, trans 
 	case !applyQ && len(a) < (minnqk-1)*lda+nq:
 		panic(shortA)
 	case len(tau) < minnqk:
-		panic(badTau)
+		panic(shortTau)
 	case len(c) < (m-1)*ldc+n:
 		panic(shortC)
 	}

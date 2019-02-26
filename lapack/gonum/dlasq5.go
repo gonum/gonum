@@ -22,7 +22,7 @@ func (impl Implementation) Dlasq5(i0, n0 int, z []float64, pp int, tau, sigma fl
 	case len(z) < 4*n0:
 		panic(shortZ)
 	case pp != 0 && pp != 1:
-		panic(badPP)
+		panic(badPp)
 	}
 
 	if n0-i0-1 <= 0 {

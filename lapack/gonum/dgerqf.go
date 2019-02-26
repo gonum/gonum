@@ -40,7 +40,7 @@ func (impl Implementation) Dgerqf(m, n int, a []float64, lda int, tau, work []fl
 	case lda < max(1, n):
 		panic(badLdA)
 	case lwork < max(1, m) && lwork != -1:
-		panic(badWork)
+		panic(badLWork)
 	case len(work) < max(1, lwork):
 		panic(shortWork)
 	}
@@ -62,7 +62,7 @@ func (impl Implementation) Dgerqf(m, n int, a []float64, lda int, tau, work []fl
 		panic(shortA)
 	}
 	if len(tau) != k {
-		panic(badTau)
+		panic(badLenTau)
 	}
 
 	nbmin := 2

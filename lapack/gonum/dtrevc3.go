@@ -127,7 +127,7 @@ func (impl Implementation) Dtrevc3(side lapack.EVSide, howmny lapack.EVHowMany, 
 	case ldvr < 1:
 		panic(badLdVR)
 	case lwork < max(1, 3*n) && lwork != -1:
-		panic(badWork)
+		panic(badLWork)
 	case len(work) < max(1, lwork):
 		panic(shortWork)
 	}
@@ -148,7 +148,7 @@ func (impl Implementation) Dtrevc3(side lapack.EVSide, howmny lapack.EVHowMany, 
 
 	if howmny == lapack.EVSelected {
 		if len(selected) != n {
-			panic(badSelected)
+			panic(badLenSelected)
 		}
 		// Set m to the number of columns required to store the selected
 		// eigenvectors, and standardize the slice selected.
@@ -177,7 +177,7 @@ func (impl Implementation) Dtrevc3(side lapack.EVSide, howmny lapack.EVHowMany, 
 		m = n
 	}
 	if mm < m {
-		panic(badMM)
+		panic(badMm)
 	}
 
 	// Quick return in case of a workspace query.

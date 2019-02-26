@@ -71,9 +71,9 @@ func (impl Implementation) Dgeev(jobvl lapack.LeftEVJob, jobvr lapack.RightEVJob
 	}
 	switch {
 	case jobvl != lapack.LeftEVCompute && jobvl != lapack.LeftEVNone:
-		panic("lapack: invalid LeftEVJob")
+		panic(badLeftEVJob)
 	case jobvr != lapack.RightEVCompute && jobvr != lapack.RightEVNone:
-		panic("lapack: invalid RightEVJob")
+		panic(badRightEVJob)
 	case n < 0:
 		panic(nLT0)
 	case lda < max(1, n):
@@ -83,7 +83,7 @@ func (impl Implementation) Dgeev(jobvl lapack.LeftEVJob, jobvr lapack.RightEVJob
 	case ldvr < 1 || (ldvr < n && wantvr):
 		panic(badLdVR)
 	case lwork < minwrk && lwork != -1:
-		panic(badWork)
+		panic(badLWork)
 	case len(work) < lwork:
 		panic(shortWork)
 	}
@@ -124,9 +124,9 @@ func (impl Implementation) Dgeev(jobvl lapack.LeftEVJob, jobvr lapack.RightEVJob
 	case len(a) < (n-1)*lda+n:
 		panic(shortA)
 	case len(wr) != n:
-		panic("lapack: bad length of wr")
+		panic(badLenWr)
 	case len(wi) != n:
-		panic("lapack: bad length of wi")
+		panic(badLenWi)
 	case len(vl) < (n-1)*ldvl+n && wantvl:
 		panic(shortVL)
 	case len(vr) < (n-1)*ldvr+n && wantvr:

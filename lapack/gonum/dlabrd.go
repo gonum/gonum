@@ -58,8 +58,12 @@ func (impl Implementation) Dlabrd(m, n, nb int, a []float64, lda int, d, e, tauQ
 		panic(mLT0)
 	case n < 0:
 		panic(nLT0)
-	case nb < 0 || nb > m || nb > n:
-		panic(badNb)
+	case nb < 0:
+		panic(nbLT0)
+	case nb > n:
+		panic(nbGTN)
+	case nb > m:
+		panic(nbGTM)
 	case lda < max(1, n):
 		panic(badLdA)
 	case ldx < max(1, nb):
@@ -76,13 +80,13 @@ func (impl Implementation) Dlabrd(m, n, nb int, a []float64, lda int, d, e, tauQ
 	case len(a) < (m-1)*lda+n:
 		panic(shortA)
 	case len(d) < nb:
-		panic(badD)
+		panic(shortD)
 	case len(e) < nb:
-		panic(badE)
+		panic(shortE)
 	case len(tauQ) < nb:
-		panic(badTauQ)
+		panic(shortTauQ)
 	case len(tauP) < nb:
-		panic(badTauP)
+		panic(shortTauP)
 	case len(x) < (m-1)*ldx+nb:
 		panic(shortX)
 	case len(y) < (n-1)*ldy+nb:

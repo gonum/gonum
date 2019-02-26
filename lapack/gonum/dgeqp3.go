@@ -59,7 +59,7 @@ func (impl Implementation) Dgeqp3(m, n int, a []float64, lda int, jpvt []int, ta
 	case lda < max(1, n):
 		panic(badLdA)
 	case lwork < iws && lwork != -1:
-		panic(badWork)
+		panic(badLWork)
 	case len(work) < max(1, lwork):
 		panic(shortWork)
 	}
@@ -80,14 +80,14 @@ func (impl Implementation) Dgeqp3(m, n int, a []float64, lda int, jpvt []int, ta
 	case len(a) < (m-1)*lda+n:
 		panic(shortA)
 	case len(jpvt) != n:
-		panic(badIpiv)
+		panic(badLenJpvt)
 	case len(tau) < minmn:
-		panic(badTau)
+		panic(shortTau)
 	}
 
 	for _, v := range jpvt {
 		if v < -1 || n <= v {
-			panic("lapack: jpvt element out of range")
+			panic(badJpvt)
 		}
 	}
 

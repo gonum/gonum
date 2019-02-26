@@ -29,7 +29,7 @@ func (impl Implementation) Dgetri(n int, a []float64, lda int, ipiv []int, work 
 	case lda < max(1, n):
 		panic(badLdA)
 	case lwork < iws && lwork != -1:
-		panic(badWork)
+		panic(badLWork)
 	case len(work) < max(1, lwork):
 		panic(shortWork)
 	}
@@ -48,8 +48,8 @@ func (impl Implementation) Dgetri(n int, a []float64, lda int, ipiv []int, work 
 	switch {
 	case len(a) < (n-1)*lda+n:
 		panic(shortA)
-	case len(ipiv) < n:
-		panic(badIpiv)
+	case len(ipiv) != n:
+		panic(badLenIpiv)
 	}
 
 	// Form inv(U).

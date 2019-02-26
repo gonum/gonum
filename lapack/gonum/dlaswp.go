@@ -30,7 +30,7 @@ func (impl Implementation) Dlaswp(n int, a []float64, lda int, k1, k2 int, ipiv 
 	case len(a) < (k2-1)*lda+n:
 		panic(shortA)
 	case len(ipiv) != k2+1:
-		panic(badIpiv)
+		panic(badLenIpiv)
 	case incX != 1 && incX != -1:
 		panic(absIncNotOne)
 	}

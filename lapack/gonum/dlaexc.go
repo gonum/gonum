@@ -47,9 +47,9 @@ func (impl Implementation) Dlaexc(wantq bool, n int, t []float64, ldt int, q []f
 	case len(work) < n:
 		panic(shortWork)
 	case n1 < 0 || 2 < n1:
-		panic("lapack: invalid value of n1")
+		panic(badN1)
 	case n2 < 0 || 2 < n2:
-		panic("lapack: invalid value of n2")
+		panic(badN2)
 	}
 
 	if n == 0 || n1 == 0 || n2 == 0 {

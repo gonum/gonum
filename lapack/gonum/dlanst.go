@@ -25,9 +25,9 @@ func (impl Implementation) Dlanst(norm lapack.MatrixNorm, n int, d, e []float64)
 	}
 	switch {
 	case len(d) < n:
-		panic(badD)
+		panic(shortD)
 	case len(e) < n-1:
-		panic(badE)
+		panic(shortE)
 	}
 
 	switch norm {

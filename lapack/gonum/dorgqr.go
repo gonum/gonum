@@ -48,7 +48,7 @@ func (impl Implementation) Dorgqr(m, n, k int, a []float64, lda int, tau, work [
 		// exactly what Dgesvd does.
 		panic(badLdA)
 	case lwork < max(1, n) && lwork != -1:
-		panic(badWork)
+		panic(badLWork)
 	case len(work) < max(1, lwork):
 		panic(shortWork)
 	}
@@ -69,7 +69,7 @@ func (impl Implementation) Dorgqr(m, n, k int, a []float64, lda int, tau, work [
 	case len(a) < (m-1)*lda+n:
 		panic(shortA)
 	case len(tau) < k:
-		panic(badTau)
+		panic(shortTau)
 	}
 
 	nbmin := 2 // Minimum block size

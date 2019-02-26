@@ -72,7 +72,7 @@ func (impl Implementation) Dormhr(side blas.Side, trans blas.Transpose, m, n, il
 	case lda < max(1, nq):
 		panic(badLdA)
 	case lwork < max(1, nw) && lwork != -1:
-		panic(badWork)
+		panic(badLWork)
 	case len(work) < max(1, lwork):
 		panic(shortWork)
 	}
@@ -115,7 +115,7 @@ func (impl Implementation) Dormhr(side blas.Side, trans blas.Transpose, m, n, il
 	case len(c) < (m-1)*ldc+n:
 		panic(shortC)
 	case len(tau) != nq-1:
-		panic(badTau)
+		panic(badLenTau)
 	}
 
 	if side == blas.Left {

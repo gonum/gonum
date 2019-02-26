@@ -41,7 +41,7 @@ func (impl Implementation) Dlaqp2(m, n, offset int, a []float64, lda int, jpvt [
 		panic(nLT0)
 	case offset < 0:
 		panic(offsetLT0)
-	case m < offset:
+	case offset > m:
 		panic(offsetGTM)
 	case lda < max(1, n):
 		panic(badLdA)
@@ -57,15 +57,15 @@ func (impl Implementation) Dlaqp2(m, n, offset int, a []float64, lda int, jpvt [
 	case len(a) < (m-1)*lda+n:
 		panic(shortA)
 	case len(jpvt) != n:
-		panic(badIpiv)
+		panic(badLenJpvt)
 	case len(tau) < mn:
-		panic(badTau)
+		panic(shortTau)
 	case len(vn1) < n:
-		panic(badVn1)
+		panic(shortVn1)
 	case len(vn2) < n:
-		panic(badVn2)
+		panic(shortVn2)
 	case len(work) < n:
-		panic(badWork)
+		panic(shortWork)
 	}
 
 	tol3z := math.Sqrt(dlamchE)

@@ -138,7 +138,7 @@ func (impl Implementation) Dhseqr(job lapack.SchurJob, compz lapack.SchurComp, n
 	case ldz < 1, wantz && ldz < n:
 		panic(badLdZ)
 	case lwork < max(1, n) && lwork != -1:
-		panic(badWork)
+		panic(badLWork)
 	case len(work) < max(1, lwork):
 		panic(shortWork)
 	}
@@ -162,9 +162,9 @@ func (impl Implementation) Dhseqr(job lapack.SchurJob, compz lapack.SchurComp, n
 	case wantz && len(z) < (n-1)*ldz+n:
 		panic(shortZ)
 	case len(wr) < n:
-		panic(shortWR)
+		panic(shortWr)
 	case len(wi) < n:
-		panic(shortWI)
+		panic(shortWi)
 	}
 
 	const (

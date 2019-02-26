@@ -83,35 +83,35 @@ func (impl Implementation) Dlaqr23(wantt, wantz bool, n, ktop, kbot, nw int, h [
 	case n < 0:
 		panic(nLT0)
 	case ktop < 0 || max(0, n-1) < ktop:
-		panic("lapack: invalid value of ktop")
+		panic(badKtop)
 	case kbot < min(ktop, n-1) || n <= kbot:
-		panic("lapack: invalid value of kbot")
+		panic(badKbot)
 	case nw < 0 || kbot-ktop+1+1 < nw:
-		panic("lapack: invalid value of nw")
+		panic(badNw)
 	case ldh < max(1, n):
 		panic(badLdH)
 	case wantz && (iloz < 0 || ktop < iloz):
-		panic("lapack: invalid value of iloz")
+		panic(badIloz)
 	case wantz && (ihiz < kbot || n <= ihiz):
-		panic("lapack: invalid value of ihiz")
+		panic(badIhiz)
 	case ldz < 1, wantz && ldz < n:
 		panic(badLdZ)
 	case ldv < max(1, nw):
 		panic(badLdV)
 	case nh < nw:
-		panic("lapack: invalid value of nh")
+		panic(badNh)
 	case ldt < max(1, nh):
 		panic(badLdT)
 	case nv < 0:
-		panic("lapack: nv < 0")
+		panic(nvLT0)
 	case ldwv < max(1, nw):
 		panic(badLdWV)
 	case lwork < max(1, 2*nw) && lwork != -1:
-		panic(badWork)
+		panic(badLWork)
 	case len(work) < max(1, lwork):
 		panic(shortWork)
 	case recur < 0:
-		panic("lapack: recur is negative")
+		panic(recurLT0)
 	}
 
 	// Quick return for zero window size.
@@ -162,13 +162,13 @@ func (impl Implementation) Dlaqr23(wantt, wantz bool, n, ktop, kbot, nw int, h [
 	case wantz && len(z) < (n-1)*ldz+n:
 		panic(shortZ)
 	case len(sr) != kbot+1:
-		panic("lapack: bad length of sr")
+		panic(badLenSr)
 	case len(si) != kbot+1:
-		panic("lapack: bad length of si")
+		panic(badLenSi)
 	case ktop > 0 && h[ktop*ldh+ktop-1] != 0:
-		panic("lapack: block not isolated")
+		panic(notIsolated)
 	case kbot+1 < n && h[(kbot+1)*ldh+kbot] != 0:
-		panic("lapack: block not isolated")
+		panic(notIsolated)
 	}
 
 	// Machine constants.

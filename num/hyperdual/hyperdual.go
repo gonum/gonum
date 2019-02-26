@@ -5,9 +5,9 @@
 package hyperdual
 
 import (
-	"bytes"
 	"fmt"
 	"math"
+	"strings"
 )
 
 // Number is a float64 precision hyperdual number.
@@ -55,9 +55,7 @@ func (d Number) Format(fs fmt.State, c rune) {
 
 // This is horrible, but it's what we have.
 func fmtString(fs fmt.State, c rune, prec, width int, wantPlus bool) string {
-	// TODO(kortschak) Replace this with strings.Builder
-	// when go1.9 support is dropped from Gonum.
-	var b bytes.Buffer
+	var b strings.Builder
 	b.WriteByte('%')
 	for _, f := range "0+- " {
 		if fs.Flag(int(f)) || (f == '+' && wantPlus) {

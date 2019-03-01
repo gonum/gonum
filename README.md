@@ -34,3 +34,8 @@ If you find any bugs, feel free to file an issue on the github issue tracker. Di
 
 https://groups.google.com/forum/#!forum/gonum-dev
 
+## License
+
+Original code is licensed under the Gonum License found in the LICENSE file. Portions of the code are subject to the additional licenses found in THIRD_PARTY_LICENSES. All third party code is licensed either under a BSD or MIT license.
+
+Code in graph/formats/dot is dual licensed [Public Domain Dedication](https://creativecommons.org/publicdomain/zero/1.0/) and Gonum License, and users are free to choose the license which suits their needs for this code.

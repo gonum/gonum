@@ -2,7 +2,6 @@
 
 The Gonum project welcomes contributions from all. Contributors should foster an open and welcoming environment. When contributing or otherwise participating, please:
 
-<!-- This should always match the text in Working Together in CONTRIBUTING.md -->
 - Be friendly and welcoming
 - Be patient
 - Be thoughtful

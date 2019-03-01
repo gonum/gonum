@@ -51,16 +51,7 @@ Code can be found at [github.com/gonum/](https://github.com/gonum/)\<repo\>, and
 
 ### Working Together
 
-When contributing or otherwise participating, please:
-
-- Be friendly and welcoming
-- Be patient
-- Be thoughtful
-- Be respectful
-- Be charitable
-- Avoid destructive behavior
-
-Excerpted from the [Go conduct document](https://golang.org/conduct).
+When contributing or otherwise participating please follow the [Gonum community's conduct expectations](CONDUCT.md).
 
 ### Reporting Bugs
 

@@ -7,7 +7,6 @@ package dualcmplx_test
 import (
 	"fmt"
 	"math"
-	"math/cmplx"
 
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/num/dualcmplx"
@@ -41,7 +40,7 @@ func transform(p point, by ...dualcmplx.Number) point {
 
 	// Ensure the modulus of by is correctly scaled.
 	for i := range by {
-		if len := cmplx.Abs(by[i].Real); len != 1 {
+		if len := dualcmplx.Abs(by[i]); len != 1 {
 			by[i].Real *= complex(1/len, 0)
 		}
 	}

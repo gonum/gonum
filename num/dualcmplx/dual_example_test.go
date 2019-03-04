@@ -30,9 +30,8 @@ func raiseDual(p point) dualcmplx.Number {
 	}
 }
 
-// transform performs the transformation of p by the given set of dual
-// complex transforms in order. The rotations are normalized to unit
-// vectors.
+// transform performs the transformation of p by the given dual complex numbers.
+// The transformations are normalized to unit vectors.
 func transform(p point, by ...dualcmplx.Number) point {
 	if len(by) == 0 {
 		return p

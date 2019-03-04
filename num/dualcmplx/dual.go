@@ -9,8 +9,6 @@ import (
 	"math"
 	"math/cmplx"
 	"strings"
-
-	"gonum.org/v1/gonum/num/dual"
 )
 
 // Number is a float64 precision anti-commutative dual complex number.
@@ -86,12 +84,12 @@ func Add(x, y Number) Number {
 // Sub returns the difference of x and y, x-y.
 func Sub(x, y Number) Number {
 	return Number{
-		Real: x.Real + y.Real,
-		Dual: x.Dual + y.Dual,
+		Real: x.Real - y.Real,
+		Dual: x.Dual - y.Dual,
 	}
 }
 
-// Mul returns the dual product of x and y.
+// Mul returns the dual product of x and y, x×y.
 func Mul(x, y Number) Number {
 	return Number{
 		Real: x.Real * y.Real,
@@ -121,8 +119,8 @@ func Scale(f float64, d Number) Number {
 }
 
 // Abs returns the absolute value of d.
-func Abs(d Number) dual.Number {
-	return dual.Number{Real: cmplx.Abs(d.Real)}
+func Abs(d Number) float64 {
+	return cmplx.Abs(d.Real)
 }
 
 // PowReal returns d**p, the base-d exponential of p.
@@ -166,7 +164,7 @@ func PowReal(d Number, p float64) Number {
 		if d.Real == -1 {
 			return Number{Real: 1, Dual: cmplx.NaN()}
 		}
-		if Abs(d).Real > 1 {
+		if Abs(d) > 1 {
 			if d.Dual == 0 {
 				return Number{Real: cmplx.Inf(), Dual: cmplx.NaN()}
 			}
@@ -177,7 +175,7 @@ func PowReal(d Number, p float64) Number {
 		if d.Real == -1 {
 			return Number{Real: 1, Dual: cmplx.NaN()}
 		}
-		if Abs(d).Real > 1 {
+		if Abs(d) > 1 {
 			return Number{Real: 0, Dual: cmplx.NaN()}
 		}
 		if d.Dual == 0 {

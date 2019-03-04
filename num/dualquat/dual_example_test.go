@@ -32,7 +32,7 @@ func raiseDual(p point) dualquat.Number {
 }
 
 // transform performs the quaternion rotation of p by the given quaternion
-// and scaling by the scale factor. The rotations are normalized to unit
+// and scaling by the scale factor. The transformations are normalized to unit
 // vectors.
 func transform(p point, by ...dualquat.Number) point {
 	if len(by) == 0 {

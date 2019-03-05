@@ -15,6 +15,13 @@ const root = "gonum.org/v1/gonum"
 
 // Version returns the version of Gonum and its checksum. The returned
 // values are only valid in binaries built with module support.
+//
+// If a replace directive exists in the Gonum go.mod, the replace will
+// be reported in the version in the following format:
+//  "version=>[replace-path] [replace-version]"
+// and the replace sum will be returned in place of the original sum.
+//
+// The exact version format returned by Version may change in future.
 func Version() (version, sum string) {
 	b, ok := debug.ReadBuildInfo()
 	if !ok {
@@ -25,13 +32,13 @@ func Version() (version, sum string) {
 			if m.Replace != nil {
 				switch {
 				case m.Replace.Version != "" && m.Replace.Path != "":
-					return fmt.Sprintf("%s %s", m.Replace.Path, m.Replace.Version), m.Replace.Sum
+					return fmt.Sprintf("%s=>%s %s", m.Version, m.Replace.Path, m.Replace.Version), m.Replace.Sum
 				case m.Replace.Version != "":
-					return m.Replace.Version, m.Replace.Sum
+					return fmt.Sprintf("%s=>%s", m.Version, m.Replace.Version), m.Replace.Sum
 				case m.Replace.Path != "":
-					return m.Replace.Path, m.Replace.Sum
+					return fmt.Sprintf("%s=>%s", m.Version, m.Replace.Path), m.Replace.Sum
 				default:
-					return m.Version + "*", ""
+					return m.Version + "*", m.Sum + "*"
 				}
 			}
 			return m.Version, m.Sum

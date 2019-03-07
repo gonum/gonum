@@ -34,9 +34,14 @@ type Dimension struct {
 }
 
 const (
-	TimeName   string = "TimeDim"
-	LengthName string = "LengthDim"
-	MassName   string = "MassDim"
+	AngleName             string = "AngleDim"
+	CurrentName           string = "CurrentDim"
+	TimeName              string = "TimeDim"
+	LengthName            string = "LengthDim"
+	LuminousIntensityName string = "LuminousIntensityDim"
+	MassName              string = "MassDim"
+	MoleName              string = "MoleDim"
+	TemperatureName       string = "TemperatureDim"
 )
 
 type Constant struct {
@@ -138,6 +143,48 @@ var Prefixes = []Prefix{
 
 var Units = []Unit{
 	{
+		Name:        "Current",
+		Receiver:    "i",
+		PrintString: "A",
+		Suffix:      "Amper",
+		Singular:    "Amper",
+		TypeComment: "Current represents a current in Ampers",
+		Dimensions: []Dimension{
+			{
+				Name:  CurrentName,
+				Power: 1,
+			},
+		},
+	},
+	{
+		Name:        "Angle",
+		Receiver:    "a",
+		PrintString: "rad",
+		Suffix:      "rad",
+		Singular:    "Rad",
+		TypeComment: "Angle represents an angle in radians",
+		Dimensions: []Dimension{
+			{
+				Name:  AngleName,
+				Power: 1,
+			},
+		},
+	},
+	{
+		Name:        "LuminousIntensity",
+		Receiver:    "j",
+		PrintString: "cd",
+		Suffix:      "candela",
+		Singular:    "Candela",
+		TypeComment: "Candela represents a luminous intensity in candela",
+		Dimensions: []Dimension{
+			{
+				Name:  LuminousIntensityName,
+				Power: 1,
+			},
+		},
+	},
+	{
 		Name:        "Mass",
 		Receiver:    "m",
 		Offset:      -3,
@@ -148,6 +195,20 @@ var Units = []Unit{
 		Dimensions: []Dimension{
 			{
 				Name:  MassName,
+				Power: 1,
+			},
+		},
+	},
+	{
+		Name:        "Mole",
+		Receiver:    "n",
+		PrintString: "mol",
+		Suffix:      "mol",
+		Singular:    "mol",
+		TypeComment: "Mole represents an amount in moles",
+		Dimensions: []Dimension{
+			{
+				Name:  MoleName,
 				Power: 1,
 			},
 		},
@@ -165,6 +226,21 @@ var Units = []Unit{
 				Power: 1,
 			},
 		},
+	},
+	{
+		Name:        "Temperature",
+		Receiver:    "t",
+		PrintString: "K",
+		Suffix:      "Kelvin",
+		Singular:    "Kelvin",
+		TypeComment: "Temperature represents a temperature in Kelvin",
+		Dimensions: []Dimension{
+			{
+				Name:  TemperatureName,
+				Power: 1,
+			},
+		},
+		ErForm: "Temperaturer",
 	},
 	{
 		Name:        "Time",
@@ -214,7 +290,7 @@ import (
 	"math"
 )
 
-// {{.TypeComment}}
+// {{.TypeComment}}.
 type {{.Name}} float64
 `
 

@@ -12,7 +12,7 @@ import (
 	"math"
 )
 
-// Length represents a length in meters
+// Length represents a length in meters.
 type Length float64
 
 const (

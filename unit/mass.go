@@ -12,7 +12,7 @@ import (
 	"math"
 )
 
-// Mass represents a mass in kilograms
+// Mass represents a mass in kilograms.
 type Mass float64
 
 const (

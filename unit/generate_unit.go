@@ -36,12 +36,12 @@ type Dimension struct {
 const (
 	AngleName             string = "AngleDim"
 	CurrentName           string = "CurrentDim"
-	TimeName              string = "TimeDim"
 	LengthName            string = "LengthDim"
 	LuminousIntensityName string = "LuminousIntensityDim"
 	MassName              string = "MassDim"
 	MoleName              string = "MoleDim"
 	TemperatureName       string = "TemperatureDim"
+	TimeName              string = "TimeDim"
 )
 
 type Constant struct {
@@ -143,6 +143,20 @@ var Prefixes = []Prefix{
 
 var Units = []Unit{
 	{
+		Name:        "Angle",
+		Receiver:    "a",
+		PrintString: "rad",
+		Suffix:      "rad",
+		Singular:    "Rad",
+		TypeComment: "Angle represents an angle in radians",
+		Dimensions: []Dimension{
+			{
+				Name:  AngleName,
+				Power: 1,
+			},
+		},
+	},
+	{
 		Name:        "Current",
 		Receiver:    "i",
 		PrintString: "A",
@@ -157,15 +171,15 @@ var Units = []Unit{
 		},
 	},
 	{
-		Name:        "Angle",
-		Receiver:    "a",
-		PrintString: "rad",
-		Suffix:      "rad",
-		Singular:    "Rad",
-		TypeComment: "Angle represents an angle in radians",
+		Name:        "Length",
+		Receiver:    "l",
+		PrintString: "m",
+		Suffix:      "meter",
+		Singular:    "Meter",
+		TypeComment: "Length represents a length in meters",
 		Dimensions: []Dimension{
 			{
-				Name:  AngleName,
+				Name:  LengthName,
 				Power: 1,
 			},
 		},
@@ -209,20 +223,6 @@ var Units = []Unit{
 		Dimensions: []Dimension{
 			{
 				Name:  MoleName,
-				Power: 1,
-			},
-		},
-	},
-	{
-		Name:        "Length",
-		Receiver:    "l",
-		PrintString: "m",
-		Suffix:      "meter",
-		Singular:    "Meter",
-		TypeComment: "Length represents a length in meters",
-		Dimensions: []Dimension{
-			{
-				Name:  LengthName,
 				Power: 1,
 			},
 		},

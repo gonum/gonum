@@ -12,7 +12,7 @@ import (
 	"math"
 )
 
-// Time represents a time in seconds
+// Time represents a time in seconds.
 type Time float64
 
 const (

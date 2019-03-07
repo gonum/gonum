@@ -36,6 +36,27 @@ var formatTests = []struct {
 	{Dimless(math.E), "%1v", "2.718281828459045"},
 	{Dimless(math.E), "%#v", "unit.Dimless(2.718281828459045)"},
 	{Dimless(math.E), "%s", "%!s(unit.Dimless=2.718281828459045)"},
+	{Angle(1), "%v", "1 rad"},
+	{Angle(0.45), "%.1v", "0.5 rad"},
+	{Angle(0.45), "%10.1v", "   0.5 rad"},
+	{Angle(0.45), "%10v", "  0.45 rad"},
+	{Angle(0.45), "%1v", "0.45 rad"},
+	{Angle(1), "%#v", "unit.Angle(1)"},
+	{Angle(1), "%s", "%!s(unit.Angle=1 rad)"},
+	{Current(1), "%v", "1 A"},
+	{Current(0.45), "%.1v", "0.5 A"},
+	{Current(0.45), "%10.1v", "     0.5 A"},
+	{Current(0.45), "%10v", "    0.45 A"},
+	{Current(0.45), "%1v", "0.45 A"},
+	{Current(1), "%#v", "unit.Current(1)"},
+	{Current(1), "%s", "%!s(unit.Current=1 A)"},
+	{LuminousIntensity(1), "%v", "1 cd"},
+	{LuminousIntensity(0.45), "%.1v", "0.5 cd"},
+	{LuminousIntensity(0.45), "%10.1v", "    0.5 cd"},
+	{LuminousIntensity(0.45), "%10v", "   0.45 cd"},
+	{LuminousIntensity(0.45), "%1v", "0.45 cd"},
+	{LuminousIntensity(1), "%#v", "unit.LuminousIntensity(1)"},
+	{LuminousIntensity(1), "%s", "%!s(unit.LuminousIntensity=1 cd)"},
 	{Mass(1), "%v", "1 kg"},
 	{Mass(0.45), "%.1v", "0.5 kg"},
 	{Mass(0.45), "%10.1v", "    0.5 kg"},
@@ -43,6 +64,13 @@ var formatTests = []struct {
 	{Mass(0.45), "%1v", "0.45 kg"},
 	{Mass(1), "%#v", "unit.Mass(1)"},
 	{Mass(1), "%s", "%!s(unit.Mass=1 kg)"},
+	{Mole(1), "%v", "1 mol"},
+	{Mole(0.45), "%.1v", "0.5 mol"},
+	{Mole(0.45), "%10.1v", "   0.5 mol"},
+	{Mole(0.45), "%10v", "  0.45 mol"},
+	{Mole(0.45), "%1v", "0.45 mol"},
+	{Mole(1), "%#v", "unit.Mole(1)"},
+	{Mole(1), "%s", "%!s(unit.Mole=1 mol)"},
 	{Length(1.61619926e-35), "%v", "1.61619926e-35 m"},
 	{Length(1.61619926e-35), "%.2v", "1.6e-35 m"},
 	{Length(1.61619926e-35), "%10.2v", " 1.6e-35 m"},
@@ -50,6 +78,13 @@ var formatTests = []struct {
 	{Length(1.61619926e-35), "%1v", "1.61619926e-35 m"},
 	{Length(1.61619926e-35), "%#v", "unit.Length(1.61619926e-35)"},
 	{Length(1.61619926e-35), "%s", "%!s(unit.Length=1.61619926e-35 m)"},
+	{Temperature(15.2), "%v", "15.2 K"},
+	{Temperature(15.2), "%.2v", "15 K"},
+	{Temperature(15.2), "%6.2v", "  15 K"},
+	{Temperature(15.2), "%10v", "    15.2 K"},
+	{Temperature(15.2), "%1v", "15.2 K"},
+	{Temperature(15.2), "%#v", "unit.Temperature(15.2)"},
+	{Temperature(15.2), "%s", "%!s(unit.Temperature=15.2 K)"},
 	{Time(15.2), "%v", "15.2 s"},
 	{Time(15.2), "%.2v", "15 s"},
 	{Time(15.2), "%6.2v", "  15 s"},
@@ -68,8 +103,8 @@ func TestFormat(t *testing.T) {
 }
 
 func TestGoStringFormat(t *testing.T) {
-	expect1 := `&unit.Unit{dimensions:unit.Dimensions{4:2, 6:-1}, formatted:"", value:6.62606957e-34}`
-	expect2 := `&unit.Unit{dimensions:unit.Dimensions{6:-1, 4:2}, formatted:"", value:6.62606957e-34}`
+	expect1 := `&unit.Unit{dimensions:unit.Dimensions{4:2, 7:-1}, formatted:"", value:6.62606957e-34}`
+	expect2 := `&unit.Unit{dimensions:unit.Dimensions{7:-1, 4:2}, formatted:"", value:6.62606957e-34}`
 	if r := fmt.Sprintf("%#v", New(6.62606957e-34, Dimensions{MassDim: 2, TimeDim: -1})); r != expect1 && r != expect2 {
 		t.Errorf("Format %q: got: %q expected: %q", "%#v", r, expect1)
 	}

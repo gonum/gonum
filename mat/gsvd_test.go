@@ -49,15 +49,15 @@ func TestGSVD(t *testing.T) {
 
 			// Test Full decomposition.
 			var gsvd GSVD
-			ok := gsvd.Factorize(a, b, GSVDU|GSVDV|GSVDQ)
+			ok := gsvd.Factorize(a, b)
 			if !ok {
 				t.Errorf("GSVD factorization failed")
 			}
 			if !Equal(a, aCopy) {
-				t.Errorf("A changed during call to GSVD.Factorize with GSVDU|GSVDV|GSVDQ")
+				t.Errorf("A changed during call to GSVD.Factorize with full decomposition")
 			}
 			if !Equal(b, bCopy) {
-				t.Errorf("B changed during call to GSVD.Factorize with GSVDU|GSVDV|GSVDQ")
+				t.Errorf("B changed during call to GSVD.Factorize with full decomposition")
 			}
 			c, s, sigma1, sigma2, zeroR, u, v, q := extractGSVD(&gsvd)
 			var ansU, ansV, d1R, d2R Dense
@@ -66,11 +66,11 @@ func TestGSVD(t *testing.T) {
 			d1R.Mul(sigma1, zeroR)
 			d2R.Mul(sigma2, zeroR)
 			if !EqualApprox(&ansU, &d1R, tol) {
-				t.Errorf("Answer mismatch with GSVDU|GSVDV|GSVDQ\nU^T * A * Q:\n% 0.2f\nΣ₁ * [ 0 R ]:\n% 0.2f",
+				t.Errorf("Answer mismatch with full decomposition\nU^T * A * Q:\n% 0.2f\nΣ₁ * [ 0 R ]:\n% 0.2f",
 					Formatted(&ansU), Formatted(&d1R))
 			}
 			if !EqualApprox(&ansV, &d2R, tol) {
-				t.Errorf("Answer mismatch with GSVDU|GSVDV|GSVDQ\nV^T * B  *Q:\n% 0.2f\nΣ₂ * [ 0 R ]:\n% 0.2f",
+				t.Errorf("Answer mismatch with full decomposition\nV^T * B  *Q:\n% 0.2f\nΣ₂ * [ 0 R ]:\n% 0.2f",
 					Formatted(&d2R), Formatted(&ansV))
 			}
 
@@ -83,23 +83,26 @@ func TestGSVD(t *testing.T) {
 			}
 
 			// Test None decomposition.
-			ok = gsvd.Factorize(a, b, GSVDNone)
+			gsvd.NoU = true
+			gsvd.NoV = true
+			gsvd.NoQ = true
+			ok = gsvd.Factorize(a, b)
 			if !ok {
 				t.Errorf("GSVD factorization failed")
 			}
 			if !Equal(a, aCopy) {
-				t.Errorf("A changed during call to GSVD with GSVDNone")
+				t.Errorf("A changed during call to GSVD with no vectors")
 			}
 			if !Equal(b, bCopy) {
-				t.Errorf("B changed during call to GSVD with GSVDNone")
+				t.Errorf("B changed during call to GSVD with no vectors")
 			}
 			cNone := gsvd.ValuesA(nil)
 			if !floats.EqualApprox(c, cNone, tol) {
-				t.Errorf("Singular value mismatch between GSVDU|GSVDV|GSVDQ and GSVDNone decomposition")
+				t.Errorf("Singular value mismatch between full and no decomposition")
 			}
 			sNone := gsvd.ValuesB(nil)
 			if !floats.EqualApprox(s, sNone, tol) {
-				t.Errorf("Singular value mismatch between GSVDU|GSVDV|GSVDQ and GSVDNone decomposition")
+				t.Errorf("Singular value mismatch between full and no decomposition")
 			}
 		}
 	}

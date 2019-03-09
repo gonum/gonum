@@ -19,7 +19,7 @@ func ExampleGSVD() {
 	// See Lee et al. doi:10.1371/journal.pone.0030098 and
 	// Alter at al. doi:10.1073/pnas.0530258100 for more details.
 	var gsvd mat.GSVD
-	ok := gsvd.Factorize(FAO.Africa, FAO.LatinAmericaCaribbean, mat.GSVDU|mat.GSVDV|mat.GSVDQ)
+	ok := gsvd.Factorize(FAO.Africa, FAO.LatinAmericaCaribbean)
 	if !ok {
 		log.Fatal("GSVD factorization failed")
 	}

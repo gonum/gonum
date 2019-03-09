@@ -63,6 +63,7 @@ type SVD struct {
 // Factorize returns whether the decomposition succeeded. If the decomposition
 // failed, routines that require a successful factorization will panic.
 func (svd *SVD) Factorize(a Matrix) (ok bool) {
+	svd.computed = false
 	m, n := a.Dims()
 	var jobU, jobVT lapack.SVDJob
 	switch svd.U {

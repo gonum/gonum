@@ -19,7 +19,7 @@ func ExampleEigenSym() {
 	fmt.Printf("A = %v\n\n", mat.Formatted(a, mat.Prefix("    ")))
 
 	var eigsym mat.EigenSym
-	ok := eigsym.Factorize(a, true)
+	ok := eigsym.Factorize(a)
 	if !ok {
 		log.Fatal("Symmetric eigendecomposition failed")
 	}
@@ -49,8 +49,10 @@ func ExampleEigen() {
 	})
 	fmt.Printf("A = %v\n\n", mat.Formatted(a, mat.Prefix("    ")))
 
-	var eig mat.Eigen
-	ok := eig.Factorize(a, true, false)
+	// In this example, we only need the eigenvalues and not the eigenvectors.
+	// Turn off eigenvector computation to save space.
+	eig := mat.Eigen{NoLeft: true, NoRight: true}
+	ok := eig.Factorize(a)
 	if !ok {
 		log.Fatal("Eigendecomposition failed")
 	}

@@ -298,7 +298,7 @@ func Cond(a Matrix, norm float64) float64 {
 	case 1:
 		lnorm = lapack.MaxColumnSum
 	case 2:
-		svd := SVD{Kind: SVDNone}
+		svd := SVD{U: SVDNone, V: SVDNone}
 		ok := svd.Factorize(a)
 		if !ok {
 			return math.Inf(1)

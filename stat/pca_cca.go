@@ -193,7 +193,7 @@ func (c *CC) CanonicalCorrelations(x, y mat.Matrix, weights []float64) error {
 	if c.c == nil {
 		c.c = &mat.SVD{}
 	}
-	c.ok = c.c.Factorize(&ccor, mat.SVDThin)
+	c.ok = c.c.Factorize(&ccor)
 	if !c.ok {
 		return errors.New("stat: failed to factorize ccor")
 	}
@@ -293,7 +293,7 @@ func svdFactorizeCentered(work *mat.SVD, m mat.Matrix, weights []float64) (svd *
 	if work == nil {
 		work = &mat.SVD{}
 	}
-	ok = work.Factorize(centered, mat.SVDThin)
+	ok = work.Factorize(centered)
 	return work, ok
 }
 

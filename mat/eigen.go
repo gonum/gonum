@@ -30,8 +30,8 @@ type EigenSym struct {
 //  A = P * D * P^-1
 // where D is a diagonal matrix containing the eigenvalues of the matrix, and
 // P is a matrix of the eigenvectors of A. Factorize computes the eigenvalues
-// in ascending order. If the vectors input argument is false, the eigenvectors
-// are not computed.
+// in ascending order. If the eigenvectors are not needed, the NoVectors argument
+// can be set to true.
 //
 // Factorize returns whether the decomposition succeeded. If the decomposition
 // failed, methods that require a successful factorization will panic.
@@ -40,9 +40,9 @@ func (e *EigenSym) Factorize(a Symmetric) (ok bool) {
 	sd := NewSymDense(n, nil)
 	sd.CopySym(a)
 
-	jobz := lapack.EVNone
+	jobz := lapack.EVCompute
 	if e.NoVectors {
-		jobz = lapack.EVCompute
+		jobz = lapack.EVNone
 	}
 	w := make([]float64, n)
 	work := []float64{0}
@@ -140,8 +140,9 @@ func (e *Eigen) succFact() bool {
 //
 // Typically eigenvectors refer to right eigenvectors.
 //
-// In all cases, Factorize computes the eigenvalues of the matrix. If right and left
-// are true, then the right and left eigenvectors will be computed, respectively.
+// In all cases, Factorize computes the eigenvalues of the matrix. By default
+// the left and right eigenvectors are additionally computed. If the eigenvectors
+// are not needed the appropriate field can be set to true.
 // Eigen panics if the input matrix is not square.
 //
 // Factorize returns whether the decomposition succeeded. If the decomposition

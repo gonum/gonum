@@ -62,8 +62,8 @@ func TestSVD(t *testing.T) {
 			s: []float64{21.259500881097434, 1.5415021616856566, 1.2873979074613628},
 		},
 	} {
-		var svd SVD
-		ok := svd.Factorize(test.a, SVDThin)
+		svd := SVD{U: SVDThin, V: SVDThin}
+		ok := svd.Factorize(test.a)
 		if !ok {
 			t.Errorf("SVD failed")
 		}
@@ -110,8 +110,11 @@ func TestSVD(t *testing.T) {
 			aCopy := DenseCopyOf(a)
 
 			// Test Full decomposition.
-			var svd SVD
-			ok := svd.Factorize(a, SVDFull)
+			svd := SVD{
+				U: SVDFull,
+				V: SVDFull,
+			}
+			ok := svd.Factorize(a)
 			if !ok {
 				t.Errorf("SVD factorization failed")
 			}
@@ -130,7 +133,9 @@ func TestSVD(t *testing.T) {
 			}
 
 			// Test Thin decomposition.
-			ok = svd.Factorize(a, SVDThin)
+			svd.U = SVDThin
+			svd.V = SVDThin
+			ok = svd.Factorize(a)
 			if !ok {
 				t.Errorf("SVD factorization failed")
 			}
@@ -152,7 +157,9 @@ func TestSVD(t *testing.T) {
 			}
 
 			// Test None decomposition.
-			ok = svd.Factorize(a, SVDNone)
+			svd.U = SVDNone
+			svd.V = SVDNone
+			ok = svd.Factorize(a)
 			if !ok {
 				t.Errorf("SVD factorization failed")
 			}

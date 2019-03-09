@@ -62,14 +62,26 @@ func TestEigen(t *testing.T) {
 			}),
 		},
 	} {
-		var e1, e2, e3, e4 Eigen
-		ok := e1.Factorize(test.a, true, true)
+		var e1 Eigen
+		ok := e1.Factorize(test.a)
 		if !ok {
 			panic("bad factorization")
 		}
-		e2.Factorize(test.a, false, true)
-		e3.Factorize(test.a, true, false)
-		e4.Factorize(test.a, false, false)
+		e2 := Eigen{NoLeft: true}
+		ok = e2.Factorize(test.a)
+		if !ok {
+			panic("bad factorization")
+		}
+		e3 := Eigen{NoRight: true}
+		ok = e3.Factorize(test.a)
+		if !ok {
+			panic("bad factorization")
+		}
+		e4 := Eigen{NoLeft: true, NoRight: true}
+		ok = e4.Factorize(test.a)
+		if !ok {
+			panic("bad factorization")
+		}
 
 		v1 := e1.Values(nil)
 		if !cmplxEqualTol(v1, test.values, 1e-14) {
@@ -141,7 +153,7 @@ func TestSymEigen(t *testing.T) {
 		},
 	} {
 		var es EigenSym
-		ok := es.Factorize(test.mat, true)
+		ok := es.Factorize(test.mat)
 		if !ok {
 			t.Errorf("bad factorization")
 		}
@@ -152,8 +164,11 @@ func TestSymEigen(t *testing.T) {
 			t.Errorf("Eigenvector mismatch")
 		}
 
-		var es2 EigenSym
-		es2.Factorize(test.mat, false)
+		es2 := EigenSym{NoVectors: true}
+		ok = es2.Factorize(test.mat)
+		if !ok {
+			t.Errorf("Bad factorization with no vectors")
+		}
 		if !floats.EqualApprox(es2.values, es.values, 1e-14) {
 			t.Errorf("Eigenvalue mismatch when no vectors computed")
 		}
@@ -169,7 +184,7 @@ func TestSymEigen(t *testing.T) {
 			}
 			s := NewSymDense(n, a)
 			var es EigenSym
-			ok := es.Factorize(s, true)
+			ok := es.Factorize(s)
 			if !ok {
 				t.Errorf("Bad test")
 			}

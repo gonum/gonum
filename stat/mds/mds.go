@@ -55,7 +55,7 @@ func TorgersonScaling(dst *mat.Dense, eigdst []float64, dis mat.Symmetric) (k in
 	}
 
 	var ed mat.EigenSym
-	ok := ed.Factorize(b, true)
+	ok := ed.Factorize(b)
 	if !ok {
 		return 0, dst, eigdst
 	}

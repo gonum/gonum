@@ -46,7 +46,7 @@ func (v Voltage) Unit() *Unit {
 		CurrentDim: -1,
 		LengthDim:  2,
 		MassDim:    1,
-		TimeDim:    -2,
+		TimeDim:    -3,
 	})
 }
 
@@ -77,7 +77,7 @@ func (v Voltage) Format(fs fmt.State, c rune) {
 	case 'e', 'E', 'f', 'F', 'g', 'G':
 		p, pOk := fs.Precision()
 		w, wOk := fs.Width()
-		const unit = " Pa"
+		const unit = " V"
 		switch {
 		case pOk && wOk:
 			fmt.Fprintf(fs, "%*.*"+string(c), pos(w-utf8.RuneCount([]byte(unit))), p, float64(v))
@@ -90,6 +90,6 @@ func (v Voltage) Format(fs fmt.State, c rune) {
 		}
 		fmt.Fprint(fs, unit)
 	default:
-		fmt.Fprintf(fs, "%%!%c(%T=%g Pa)", c, v, float64(v))
+		fmt.Fprintf(fs, "%%!%c(%T=%g V)", c, v, float64(v))
 	}
 }

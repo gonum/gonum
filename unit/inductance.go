@@ -43,7 +43,7 @@ const (
 // Unit converts the Inductance to a *Unit
 func (i Inductance) Unit() *Unit {
 	return New(float64(i), Dimensions{
-		CurrentDim: -1,
+		CurrentDim: -2,
 		LengthDim:  2,
 		MassDim:    1,
 		TimeDim:    -2,

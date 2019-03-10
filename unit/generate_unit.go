@@ -404,7 +404,7 @@ var Units = []Unit{
 		Singular:    "Henry",
 		TypeComment: "Inductance represents an electrical inductance in Henry",
 		Dimensions: []Dimension{
-			{Name: CurrentName, Power: -1},
+			{Name: CurrentName, Power: -2},
 			{Name: LengthName, Power: 2},
 			{Name: MassName, Power: 1},
 			{Name: TimeName, Power: -2},
@@ -493,7 +493,7 @@ var Units = []Unit{
 	{
 		Name:        "Voltage",
 		Receiver:    "v",
-		PrintString: "Pa",
+		PrintString: "V",
 		Suffix:      "volt",
 		Singular:    "Volt",
 		TypeComment: "Voltage represents a voltage in Volts",
@@ -501,7 +501,7 @@ var Units = []Unit{
 			{Name: CurrentName, Power: -1},
 			{Name: LengthName, Power: 2},
 			{Name: MassName, Power: 1},
-			{Name: TimeName, Power: -2},
+			{Name: TimeName, Power: -3},
 		},
 		ErForm: "Voltager",
 	},

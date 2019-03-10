@@ -505,6 +505,18 @@ var Units = []Unit{
 		},
 		ErForm: "Voltager",
 	},
+	{
+		Name:        "Volume",
+		Receiver:    "v",
+		Offset:      -3,
+		PrintString: "m^3",
+		Suffix:      "liter",
+		Singular:    "Liter",
+		TypeComment: "Volume represents a volume in cubic meters",
+		Dimensions: []Dimension{
+			{Name: LengthName, Power: 3},
+		},
+	},
 }
 
 // Generate generates a file for each of the units

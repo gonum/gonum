@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"unicode/utf8"
 )
 
 // Mass represents a mass in kilograms.
@@ -76,11 +77,11 @@ func (m Mass) Format(fs fmt.State, c rune) {
 		const unit = " kg"
 		switch {
 		case pOk && wOk:
-			fmt.Fprintf(fs, "%*.*"+string(c), pos(w-len(unit)), p, float64(m))
+			fmt.Fprintf(fs, "%*.*"+string(c), pos(w-utf8.RuneCount([]byte(unit))), p, float64(m))
 		case pOk:
 			fmt.Fprintf(fs, "%.*"+string(c), p, float64(m))
 		case wOk:
-			fmt.Fprintf(fs, "%*"+string(c), pos(w-len(unit)), float64(m))
+			fmt.Fprintf(fs, "%*"+string(c), pos(w-utf8.RuneCount([]byte(unit))), float64(m))
 		default:
 			fmt.Fprintf(fs, "%"+string(c), float64(m))
 		}

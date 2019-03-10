@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"unicode/utf8"
 )
 
 // Length represents a length in meters.
@@ -76,11 +77,11 @@ func (l Length) Format(fs fmt.State, c rune) {
 		const unit = " m"
 		switch {
 		case pOk && wOk:
-			fmt.Fprintf(fs, "%*.*"+string(c), pos(w-len(unit)), p, float64(l))
+			fmt.Fprintf(fs, "%*.*"+string(c), pos(w-utf8.RuneCount([]byte(unit))), p, float64(l))
 		case pOk:
 			fmt.Fprintf(fs, "%.*"+string(c), p, float64(l))
 		case wOk:
-			fmt.Fprintf(fs, "%*"+string(c), pos(w-len(unit)), float64(l))
+			fmt.Fprintf(fs, "%*"+string(c), pos(w-utf8.RuneCount([]byte(unit))), float64(l))
 		default:
 			fmt.Fprintf(fs, "%"+string(c), float64(l))
 		}

@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"unicode/utf8"
 )
 
 // Current represents a current in Ampers.
@@ -76,11 +77,11 @@ func (i Current) Format(fs fmt.State, c rune) {
 		const unit = " A"
 		switch {
 		case pOk && wOk:
-			fmt.Fprintf(fs, "%*.*"+string(c), pos(w-len(unit)), p, float64(i))
+			fmt.Fprintf(fs, "%*.*"+string(c), pos(w-utf8.RuneCount([]byte(unit))), p, float64(i))
 		case pOk:
 			fmt.Fprintf(fs, "%.*"+string(c), p, float64(i))
 		case wOk:
-			fmt.Fprintf(fs, "%*"+string(c), pos(w-len(unit)), float64(i))
+			fmt.Fprintf(fs, "%*"+string(c), pos(w-utf8.RuneCount([]byte(unit))), float64(i))
 		default:
 			fmt.Fprintf(fs, "%"+string(c), float64(i))
 		}

@@ -179,9 +179,9 @@ var Units = []Unit{
 		Name:        "Current",
 		Receiver:    "i",
 		PrintString: "A",
-		Suffix:      "Amper",
-		Singular:    "Amper",
-		TypeComment: "Current represents a current in Ampers",
+		Suffix:      "ampere",
+		Singular:    "Ampere",
+		TypeComment: "Current represents a current in Amperes",
 		Dimensions: []Dimension{
 			{Name: CurrentName, Power: 1},
 		},
@@ -235,7 +235,7 @@ var Units = []Unit{
 		Name:        "Temperature",
 		Receiver:    "t",
 		PrintString: "K",
-		Suffix:      "Kelvin",
+		Suffix:      "kelvin",
 		Singular:    "Kelvin",
 		TypeComment: "Temperature represents a temperature in Kelvin",
 		Dimensions: []Dimension{

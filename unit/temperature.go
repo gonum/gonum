@@ -17,27 +17,27 @@ import (
 type Temperature float64
 
 const (
-	YottaKelvin Temperature = 1e24
-	ZettaKelvin Temperature = 1e21
-	ExaKelvin   Temperature = 1e18
-	PetaKelvin  Temperature = 1e15
-	TeraKelvin  Temperature = 1e12
-	GigaKelvin  Temperature = 1e9
-	MegaKelvin  Temperature = 1e6
-	KiloKelvin  Temperature = 1e3
-	HectoKelvin Temperature = 1e2
-	DecaKelvin  Temperature = 1e1
+	Yottakelvin Temperature = 1e24
+	Zettakelvin Temperature = 1e21
+	Exakelvin   Temperature = 1e18
+	Petakelvin  Temperature = 1e15
+	Terakelvin  Temperature = 1e12
+	Gigakelvin  Temperature = 1e9
+	Megakelvin  Temperature = 1e6
+	Kilokelvin  Temperature = 1e3
+	Hectokelvin Temperature = 1e2
+	Decakelvin  Temperature = 1e1
 	Kelvin      Temperature = 1.0
-	DeciKelvin  Temperature = 1e-1
-	CentiKelvin Temperature = 1e-2
-	MilliKelvin Temperature = 1e-3
-	MicroKelvin Temperature = 1e-6
-	NanoKelvin  Temperature = 1e-9
-	PicoKelvin  Temperature = 1e-12
-	FemtoKelvin Temperature = 1e-15
-	AttoKelvin  Temperature = 1e-18
-	ZeptoKelvin Temperature = 1e-21
-	YoctoKelvin Temperature = 1e-24
+	Decikelvin  Temperature = 1e-1
+	Centikelvin Temperature = 1e-2
+	Millikelvin Temperature = 1e-3
+	Microkelvin Temperature = 1e-6
+	Nanokelvin  Temperature = 1e-9
+	Picokelvin  Temperature = 1e-12
+	Femtokelvin Temperature = 1e-15
+	Attokelvin  Temperature = 1e-18
+	Zeptokelvin Temperature = 1e-21
+	Yoctokelvin Temperature = 1e-24
 )
 
 // Unit converts the Temperature to a *Unit

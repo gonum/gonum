@@ -11,11 +11,11 @@ import (
 )
 
 func ExampleNew() {
-	// Create an acceleration of 3 m/s^2
-	accel := unit.New(3.0, unit.Dimensions{unit.LengthDim: 1, unit.TimeDim: -2})
+	// Create an angular acceleration of 3 rad/s^2
+	accel := unit.New(3.0, unit.Dimensions{unit.AngleDim: 1, unit.TimeDim: -2})
 	fmt.Println(accel)
 
-	// Output: 3 m s^-2
+	// Output: 3 rad s^-2
 }
 
 func ExampleNewDimension() {
@@ -33,13 +33,13 @@ func Example_horsepower() {
 	foot := unit.Length(0.3048)
 	pound := unit.Mass(0.45359237)
 
-	gravity := unit.New(9.80665, unit.Dimensions{unit.LengthDim: 1, unit.TimeDim: -2})
+	gravity := unit.Acceleration(9.80665)
 	poundforce := pound.Unit().Mul(gravity)
 
 	hp := ((33000 * foot).Unit().Mul(poundforce)).Div(unit.Minute)
 	fmt.Println("1 hp =", hp)
 
-	watt := unit.New(1, unit.Dimensions{unit.MassDim: 1, unit.LengthDim: 2, unit.TimeDim: -3})
+	watt := unit.Power(1)
 	fmt.Println("W is equivalent to hp?", unit.DimensionsMatch(hp, watt))
 
 	// Output:

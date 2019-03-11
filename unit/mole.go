@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"unicode/utf8"
 )
 
 // Mole represents an amount in moles.
@@ -76,11 +77,11 @@ func (n Mole) Format(fs fmt.State, c rune) {
 		const unit = " mol"
 		switch {
 		case pOk && wOk:
-			fmt.Fprintf(fs, "%*.*"+string(c), pos(w-len(unit)), p, float64(n))
+			fmt.Fprintf(fs, "%*.*"+string(c), pos(w-utf8.RuneCount([]byte(unit))), p, float64(n))
 		case pOk:
 			fmt.Fprintf(fs, "%.*"+string(c), p, float64(n))
 		case wOk:
-			fmt.Fprintf(fs, "%*"+string(c), pos(w-len(unit)), float64(n))
+			fmt.Fprintf(fs, "%*"+string(c), pos(w-utf8.RuneCount([]byte(unit))), float64(n))
 		default:
 			fmt.Fprintf(fs, "%"+string(c), float64(n))
 		}

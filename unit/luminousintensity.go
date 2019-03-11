@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"unicode/utf8"
 )
 
 // Candela represents a luminous intensity in candela.
@@ -76,11 +77,11 @@ func (j LuminousIntensity) Format(fs fmt.State, c rune) {
 		const unit = " cd"
 		switch {
 		case pOk && wOk:
-			fmt.Fprintf(fs, "%*.*"+string(c), pos(w-len(unit)), p, float64(j))
+			fmt.Fprintf(fs, "%*.*"+string(c), pos(w-utf8.RuneCount([]byte(unit))), p, float64(j))
 		case pOk:
 			fmt.Fprintf(fs, "%.*"+string(c), p, float64(j))
 		case wOk:
-			fmt.Fprintf(fs, "%*"+string(c), pos(w-len(unit)), float64(j))
+			fmt.Fprintf(fs, "%*"+string(c), pos(w-utf8.RuneCount([]byte(unit))), float64(j))
 		default:
 			fmt.Fprintf(fs, "%"+string(c), float64(j))
 		}

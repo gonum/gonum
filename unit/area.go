@@ -13,57 +13,33 @@ import (
 	"unicode/utf8"
 )
 
-// Angle represents an angle in radians.
-type Angle float64
+// Area represents and area in square meters.
+type Area float64
 
-const (
-	Yottarad Angle = 1e24
-	Zettarad Angle = 1e21
-	Exarad   Angle = 1e18
-	Petarad  Angle = 1e15
-	Terarad  Angle = 1e12
-	Gigarad  Angle = 1e9
-	Megarad  Angle = 1e6
-	Kilorad  Angle = 1e3
-	Hectorad Angle = 1e2
-	Decarad  Angle = 1e1
-	Rad      Angle = 1.0
-	Decirad  Angle = 1e-1
-	Centirad Angle = 1e-2
-	Millirad Angle = 1e-3
-	Microrad Angle = 1e-6
-	Nanorad  Angle = 1e-9
-	Picorad  Angle = 1e-12
-	Femtorad Angle = 1e-15
-	Attorad  Angle = 1e-18
-	Zeptorad Angle = 1e-21
-	Yoctorad Angle = 1e-24
-)
-
-// Unit converts the Angle to a *Unit
-func (a Angle) Unit() *Unit {
+// Unit converts the Area to a *Unit
+func (a Area) Unit() *Unit {
 	return New(float64(a), Dimensions{
-		AngleDim: 1,
+		LengthDim: 2,
 	})
 }
 
-// Angle allows Angle to implement a Angleer interface
-func (a Angle) Angle() Angle {
+// Area allows Area to implement a Areaer interface
+func (a Area) Area() Area {
 	return a
 }
 
 // From converts the unit into the receiver. From returns an
 // error if there is a mismatch in dimension
-func (a *Angle) From(u Uniter) error {
-	if !DimensionsMatch(u, Rad) {
-		*a = Angle(math.NaN())
+func (a *Area) From(u Uniter) error {
+	if !DimensionsMatch(u, Area(0)) {
+		*a = Area(math.NaN())
 		return errors.New("Dimension mismatch")
 	}
-	*a = Angle(u.Unit().Value())
+	*a = Area(u.Unit().Value())
 	return nil
 }
 
-func (a Angle) Format(fs fmt.State, c rune) {
+func (a Area) Format(fs fmt.State, c rune) {
 	switch c {
 	case 'v':
 		if fs.Flag('#') {
@@ -74,7 +50,7 @@ func (a Angle) Format(fs fmt.State, c rune) {
 	case 'e', 'E', 'f', 'F', 'g', 'G':
 		p, pOk := fs.Precision()
 		w, wOk := fs.Width()
-		const unit = " rad"
+		const unit = " m^2"
 		switch {
 		case pOk && wOk:
 			fmt.Fprintf(fs, "%*.*"+string(c), pos(w-utf8.RuneCount([]byte(unit))), p, float64(a))
@@ -87,6 +63,6 @@ func (a Angle) Format(fs fmt.State, c rune) {
 		}
 		fmt.Fprint(fs, unit)
 	default:
-		fmt.Fprintf(fs, "%%!%c(%T=%g rad)", c, a, float64(a))
+		fmt.Fprintf(fs, "%%!%c(%T=%g m^2)", c, a, float64(a))
 	}
 }

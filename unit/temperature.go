@@ -10,33 +10,34 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"unicode/utf8"
 )
 
 // Temperature represents a temperature in Kelvin.
 type Temperature float64
 
 const (
-	YottaKelvin Temperature = 1e24
-	ZettaKelvin Temperature = 1e21
-	ExaKelvin   Temperature = 1e18
-	PetaKelvin  Temperature = 1e15
-	TeraKelvin  Temperature = 1e12
-	GigaKelvin  Temperature = 1e9
-	MegaKelvin  Temperature = 1e6
-	KiloKelvin  Temperature = 1e3
-	HectoKelvin Temperature = 1e2
-	DecaKelvin  Temperature = 1e1
+	Yottakelvin Temperature = 1e24
+	Zettakelvin Temperature = 1e21
+	Exakelvin   Temperature = 1e18
+	Petakelvin  Temperature = 1e15
+	Terakelvin  Temperature = 1e12
+	Gigakelvin  Temperature = 1e9
+	Megakelvin  Temperature = 1e6
+	Kilokelvin  Temperature = 1e3
+	Hectokelvin Temperature = 1e2
+	Decakelvin  Temperature = 1e1
 	Kelvin      Temperature = 1.0
-	DeciKelvin  Temperature = 1e-1
-	CentiKelvin Temperature = 1e-2
-	MilliKelvin Temperature = 1e-3
-	MicroKelvin Temperature = 1e-6
-	NanoKelvin  Temperature = 1e-9
-	PicoKelvin  Temperature = 1e-12
-	FemtoKelvin Temperature = 1e-15
-	AttoKelvin  Temperature = 1e-18
-	ZeptoKelvin Temperature = 1e-21
-	YoctoKelvin Temperature = 1e-24
+	Decikelvin  Temperature = 1e-1
+	Centikelvin Temperature = 1e-2
+	Millikelvin Temperature = 1e-3
+	Microkelvin Temperature = 1e-6
+	Nanokelvin  Temperature = 1e-9
+	Picokelvin  Temperature = 1e-12
+	Femtokelvin Temperature = 1e-15
+	Attokelvin  Temperature = 1e-18
+	Zeptokelvin Temperature = 1e-21
+	Yoctokelvin Temperature = 1e-24
 )
 
 // Unit converts the Temperature to a *Unit
@@ -76,11 +77,11 @@ func (t Temperature) Format(fs fmt.State, c rune) {
 		const unit = " K"
 		switch {
 		case pOk && wOk:
-			fmt.Fprintf(fs, "%*.*"+string(c), pos(w-len(unit)), p, float64(t))
+			fmt.Fprintf(fs, "%*.*"+string(c), pos(w-utf8.RuneCount([]byte(unit))), p, float64(t))
 		case pOk:
 			fmt.Fprintf(fs, "%.*"+string(c), p, float64(t))
 		case wOk:
-			fmt.Fprintf(fs, "%*"+string(c), pos(w-len(unit)), float64(t))
+			fmt.Fprintf(fs, "%*"+string(c), pos(w-utf8.RuneCount([]byte(unit))), float64(t))
 		default:
 			fmt.Fprintf(fs, "%"+string(c), float64(t))
 		}

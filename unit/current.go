@@ -10,33 +10,34 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"unicode/utf8"
 )
 
-// Current represents a current in Ampers.
+// Current represents a current in Amperes.
 type Current float64
 
 const (
-	YottaAmper Current = 1e24
-	ZettaAmper Current = 1e21
-	ExaAmper   Current = 1e18
-	PetaAmper  Current = 1e15
-	TeraAmper  Current = 1e12
-	GigaAmper  Current = 1e9
-	MegaAmper  Current = 1e6
-	KiloAmper  Current = 1e3
-	HectoAmper Current = 1e2
-	DecaAmper  Current = 1e1
-	Amper      Current = 1.0
-	DeciAmper  Current = 1e-1
-	CentiAmper Current = 1e-2
-	MilliAmper Current = 1e-3
-	MicroAmper Current = 1e-6
-	NanoAmper  Current = 1e-9
-	PicoAmper  Current = 1e-12
-	FemtoAmper Current = 1e-15
-	AttoAmper  Current = 1e-18
-	ZeptoAmper Current = 1e-21
-	YoctoAmper Current = 1e-24
+	Yottaampere Current = 1e24
+	Zettaampere Current = 1e21
+	Exaampere   Current = 1e18
+	Petaampere  Current = 1e15
+	Teraampere  Current = 1e12
+	Gigaampere  Current = 1e9
+	Megaampere  Current = 1e6
+	Kiloampere  Current = 1e3
+	Hectoampere Current = 1e2
+	Decaampere  Current = 1e1
+	Ampere      Current = 1.0
+	Deciampere  Current = 1e-1
+	Centiampere Current = 1e-2
+	Milliampere Current = 1e-3
+	Microampere Current = 1e-6
+	Nanoampere  Current = 1e-9
+	Picoampere  Current = 1e-12
+	Femtoampere Current = 1e-15
+	Attoampere  Current = 1e-18
+	Zeptoampere Current = 1e-21
+	Yoctoampere Current = 1e-24
 )
 
 // Unit converts the Current to a *Unit
@@ -54,7 +55,7 @@ func (i Current) Current() Current {
 // From converts the unit into the receiver. From returns an
 // error if there is a mismatch in dimension
 func (i *Current) From(u Uniter) error {
-	if !DimensionsMatch(u, Amper) {
+	if !DimensionsMatch(u, Ampere) {
 		*i = Current(math.NaN())
 		return errors.New("Dimension mismatch")
 	}
@@ -76,11 +77,11 @@ func (i Current) Format(fs fmt.State, c rune) {
 		const unit = " A"
 		switch {
 		case pOk && wOk:
-			fmt.Fprintf(fs, "%*.*"+string(c), pos(w-len(unit)), p, float64(i))
+			fmt.Fprintf(fs, "%*.*"+string(c), pos(w-utf8.RuneCount([]byte(unit))), p, float64(i))
 		case pOk:
 			fmt.Fprintf(fs, "%.*"+string(c), p, float64(i))
 		case wOk:
-			fmt.Fprintf(fs, "%*"+string(c), pos(w-len(unit)), float64(i))
+			fmt.Fprintf(fs, "%*"+string(c), pos(w-utf8.RuneCount([]byte(unit))), float64(i))
 		default:
 			fmt.Fprintf(fs, "%"+string(c), float64(i))
 		}

@@ -63,7 +63,10 @@ func (g *UndirectedGraph) EdgeBetween(xid, yid int64) graph.Edge {
 	if !ok {
 		return nil
 	}
-	return edge
+	if edge.From().ID() == xid {
+		return edge
+	}
+	return edge.ReversedEdge()
 }
 
 // Edges returns all the edges in the graph.

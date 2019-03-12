@@ -244,7 +244,10 @@ func (g *WeightedUndirectedGraph) WeightedEdgeBetween(xid, yid int64) graph.Weig
 	if !ok {
 		return nil
 	}
-	return edge
+	if edge.From().ID() == xid {
+		return edge
+	}
+	return edge.ReversedEdge().(graph.WeightedEdge)
 }
 
 // WeightedEdges returns all the weighted edges in the graph.

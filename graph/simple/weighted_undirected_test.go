@@ -16,7 +16,7 @@ import (
 	"gonum.org/v1/gonum/graph/testgraph"
 )
 
-func weightedUndirectedBuilder(nodes []graph.Node, edges []graph.WeightedLine, self, absent float64) (g graph.Graph, n []graph.Node, e []graph.Edge, s, a float64, ok bool) {
+func weightedUndirectedBuilder(nodes []graph.Node, edges []testgraph.WeightedLine, self, absent float64) (g graph.Graph, n []graph.Node, e []testgraph.Edge, s, a float64, ok bool) {
 	seen := make(set.Nodes)
 	ug := simple.NewWeightedUndirectedGraph(self, absent)
 	for _, n := range nodes {

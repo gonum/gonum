@@ -48,6 +48,27 @@ func checkEmptyIterator(t *testing.T, it graph.Iterator, useEmpty bool) {
 	}
 }
 
+// Edge supports basic edge operations.
+type Edge interface {
+	// From returns the from node of the edge.
+	From() graph.Node
+
+	// To returns the to node of the edge.
+	To() graph.Node
+}
+
+// WeightedLine is a generalized graph edge that supports all graph
+// edge operations except reversal.
+type WeightedLine interface {
+	Edge
+
+	// ID returns the unique ID for the Line.
+	ID() int64
+
+	// Weight returns the weight of the edge.
+	Weight() float64
+}
+
 // A Builder function returns a graph constructed from the nodes, edges and
 // default weights passed in, potentially altering the nodes and edges to
 // conform to the requirements of the graph. The graph is returned along with
@@ -56,7 +77,7 @@ func checkEmptyIterator(t *testing.T, it graph.Iterator, useEmpty bool) {
 // or graph.WeightedLine depending on what the graph requires.
 // The client may skip a test case by returning ok=false when the input is not
 // a valid graph construction.
-type Builder func(nodes []graph.Node, edges []graph.WeightedLine, self, absent float64) (g graph.Graph, n []graph.Node, e []graph.Edge, s, a float64, ok bool)
+type Builder func(nodes []graph.Node, edges []WeightedLine, self, absent float64) (g graph.Graph, n []graph.Node, e []Edge, s, a float64, ok bool)
 
 // edgeLister is a graph that can return all its edges.
 type edgeLister interface {
@@ -195,7 +216,7 @@ func ReturnAllEdges(t *testing.T, b Builder, useEmpty bool) {
 			continue
 		}
 
-		var got []graph.Edge
+		var got []Edge
 		switch eg := g.(type) {
 		case edgeLister:
 			it := eg.Edges()
@@ -207,8 +228,12 @@ func ReturnAllEdges(t *testing.T, b Builder, useEmpty bool) {
 			for it.Next() {
 				e := it.Edge()
 				got = append(got, e)
-				if g.Edge(e.From().ID(), e.To().ID()) == nil {
+				qe := g.Edge(e.From().ID(), e.To().ID())
+				if qe == nil {
 					t.Errorf("missing edge for test %q: %v", test.name, e)
+				} else if qe.From().ID() != e.From().ID() || qe.To().ID() != e.To().ID() {
+					t.Errorf("inverted edge for test %q query with F=%d T=%d: got:%#v",
+						test.name, e.From().ID(), e.To().ID(), qe)
 				}
 				if g.Node(e.From().ID()) == nil {
 					t.Errorf("missing from node for test %q: %v", test.name, e.From().ID())
@@ -242,7 +267,7 @@ func ReturnEdgeSlice(t *testing.T, b Builder, useEmpty bool) {
 			continue
 		}
 
-		var got []graph.Edge
+		var got []Edge
 		switch eg := g.(type) {
 		case edgeLister:
 			it := eg.Edges()
@@ -259,10 +284,19 @@ func ReturnEdgeSlice(t *testing.T, b Builder, useEmpty bool) {
 				t.Errorf("invalid type for test %q: %T cannot return edge slicer", test.name, g)
 				continue
 			}
-			got = s.EdgeSlice()
-			for _, e := range got {
-				if g.Edge(e.From().ID(), e.To().ID()) == nil {
+			gotNative := s.EdgeSlice()
+			if len(gotNative) != 0 {
+				got = make([]Edge, len(gotNative))
+			}
+			for i, e := range gotNative {
+				got[i] = e
+
+				qe := g.Edge(e.From().ID(), e.To().ID())
+				if qe == nil {
 					t.Errorf("missing edge for test %q: %v", test.name, e)
+				} else if qe.From().ID() != e.From().ID() || qe.To().ID() != e.To().ID() {
+					t.Errorf("inverted edge for test %q query with F=%d T=%d: got:%#v",
+						test.name, e.From().ID(), e.To().ID(), qe)
 				}
 				if g.Node(e.From().ID()) == nil {
 					t.Errorf("missing from node for test %q: %v", test.name, e.From().ID())
@@ -300,7 +334,7 @@ func ReturnAllLines(t *testing.T, b Builder, useEmpty bool) {
 			continue
 		}
 
-		var got []graph.Edge
+		var got []Edge
 		switch eg := g.(type) {
 		case edgeLister:
 			it := eg.Edges()
@@ -310,8 +344,12 @@ func ReturnAllLines(t *testing.T, b Builder, useEmpty bool) {
 			}
 			checkEmptyIterator(t, it, useEmpty)
 			for _, e := range graph.EdgesOf(it) {
-				if g.Edge(e.From().ID(), e.To().ID()) == nil {
+				qe := g.Edge(e.From().ID(), e.To().ID())
+				if qe == nil {
 					t.Errorf("missing edge for test %q: %v", test.name, e)
+				} else if qe.From().ID() != e.From().ID() || qe.To().ID() != e.To().ID() {
+					t.Errorf("inverted edge for test %q query with F=%d T=%d: got:%#v",
+						test.name, e.From().ID(), e.To().ID(), qe)
 				}
 
 				// FIXME(kortschak): This would not be necessary
@@ -377,7 +415,7 @@ func ReturnAllWeightedEdges(t *testing.T, b Builder, useEmpty bool) {
 			continue
 		}
 
-		var got []graph.Edge
+		var got []Edge
 		switch eg := g.(type) {
 		case weightedEdgeLister:
 			it := eg.WeightedEdges()
@@ -391,13 +429,21 @@ func ReturnAllWeightedEdges(t *testing.T, b Builder, useEmpty bool) {
 				got = append(got, e)
 				switch g := g.(type) {
 				case graph.Weighted:
-					if g.WeightedEdge(e.From().ID(), e.To().ID()) == nil {
+					qe := g.WeightedEdge(e.From().ID(), e.To().ID())
+					if qe == nil {
 						t.Errorf("missing edge for test %q: %v", test.name, e)
+					} else if qe.From().ID() != e.From().ID() || qe.To().ID() != e.To().ID() {
+						t.Errorf("inverted edge for test %q query with F=%d T=%d: got:%#v",
+							test.name, e.From().ID(), e.To().ID(), qe)
 					}
 				default:
 					t.Logf("weighted edge lister is not a weighted graph - are you sure?: %T", g)
-					if g.Edge(e.From().ID(), e.To().ID()) == nil {
+					qe := g.Edge(e.From().ID(), e.To().ID())
+					if qe == nil {
 						t.Errorf("missing edge for test %q: %v", test.name, e)
+					} else if qe.From().ID() != e.From().ID() || qe.To().ID() != e.To().ID() {
+						t.Errorf("inverted edge for test %q query with F=%d T=%d: got:%#v",
+							test.name, e.From().ID(), e.To().ID(), qe)
 					}
 				}
 				if g.Node(e.From().ID()) == nil {
@@ -437,7 +483,7 @@ func ReturnWeightedEdgeSlice(t *testing.T, b Builder, useEmpty bool) {
 			continue
 		}
 
-		var got []graph.Edge
+		var got []Edge
 		switch eg := g.(type) {
 		case weightedEdgeLister:
 			it := eg.WeightedEdges()
@@ -453,8 +499,12 @@ func ReturnWeightedEdgeSlice(t *testing.T, b Builder, useEmpty bool) {
 			}
 			for _, e := range s.WeightedEdgeSlice() {
 				got = append(got, e)
-				if g.Edge(e.From().ID(), e.To().ID()) == nil {
+				qe := g.Edge(e.From().ID(), e.To().ID())
+				if qe == nil {
 					t.Errorf("missing edge for test %q: %v", test.name, e)
+				} else if qe.From().ID() != e.From().ID() || qe.To().ID() != e.To().ID() {
+					t.Errorf("inverted edge for test %q query with F=%d T=%d: got:%#v",
+						test.name, e.From().ID(), e.To().ID(), qe)
 				}
 				if g.Node(e.From().ID()) == nil {
 					t.Errorf("missing from node for test %q: %v", test.name, e.From().ID())
@@ -494,7 +544,7 @@ func ReturnAllWeightedLines(t *testing.T, b Builder, useEmpty bool) {
 			continue
 		}
 
-		var got []graph.Edge
+		var got []Edge
 		switch eg := g.(type) {
 		case weightedEdgeLister:
 			it := eg.WeightedEdges()
@@ -504,8 +554,12 @@ func ReturnAllWeightedLines(t *testing.T, b Builder, useEmpty bool) {
 			}
 			checkEmptyIterator(t, it, useEmpty)
 			for _, e := range graph.WeightedEdgesOf(it) {
-				if g.Edge(e.From().ID(), e.To().ID()) == nil {
+				qe := g.Edge(e.From().ID(), e.To().ID())
+				if qe == nil {
 					t.Errorf("missing edge for test %q: %v", test.name, e)
+				} else if qe.From().ID() != e.From().ID() || qe.To().ID() != e.To().ID() {
+					t.Errorf("inverted edge for test %q query with F=%d T=%d: got:%#v",
+						test.name, e.From().ID(), e.To().ID(), qe)
 				}
 
 				// FIXME(kortschak): This would not be necessary
@@ -553,7 +607,7 @@ func ReturnAllWeightedLines(t *testing.T, b Builder, useEmpty bool) {
 }
 
 // checkEdges compares got and want for the given graph type.
-func checkEdges(t *testing.T, name string, g graph.Graph, got, want []graph.Edge) {
+func checkEdges(t *testing.T, name string, g graph.Graph, got, want []Edge) {
 	t.Helper()
 	switch g.(type) {
 	case graph.Undirected:
@@ -602,8 +656,14 @@ func EdgeExistence(t *testing.T, b Builder) {
 						t.Errorf("missing edge for test %q: (%v)--(%v)", test.name, x.ID(), y.ID())
 					}
 				} else {
-					if want[edge{f: x.ID(), t: y.ID()}] && g.Edge(x.ID(), y.ID()) == nil {
-						t.Errorf("missing edge for test %q: (%v)--(%v)", test.name, x.ID(), y.ID())
+					if want[edge{f: x.ID(), t: y.ID()}] {
+						e := g.Edge(x.ID(), y.ID())
+						if e == nil {
+							t.Errorf("missing edge for test %q: (%v)--(%v)", test.name, x.ID(), y.ID())
+						} else if e.From().ID() != x.ID() || e.To().ID() != y.ID() {
+							t.Errorf("inverted edge for test %q query with F=%d T=%d: got:%#v",
+								test.name, x.ID(), y.ID(), e)
+						}
 					}
 					if between && !g.HasEdgeBetween(x.ID(), y.ID()) {
 						t.Errorf("missing edge for test %q: (%v)--(%v)", test.name, x.ID(), y.ID())
@@ -715,6 +775,14 @@ func LineExistence(t *testing.T, b Builder, useEmpty bool) {
 							checkEmptyIterator(t, lit, useEmpty)
 							if lit.Len() == 0 {
 								t.Errorf("missing edge for test %q: (%v)--(%v)", test.name, x.ID(), y.ID())
+							} else {
+								for lit.Next() {
+									l := lit.Line()
+									if l.From().ID() != x.ID() || l.To().ID() != y.ID() {
+										t.Errorf("inverted edge for test %q query with F=%d T=%d: got:%#v",
+											test.name, x.ID(), y.ID(), l)
+									}
+								}
 							}
 						}
 						if between && !g.HasEdgeBetween(x.ID(), y.ID()) {
@@ -758,6 +826,14 @@ func LineExistence(t *testing.T, b Builder, useEmpty bool) {
 						checkEmptyIterator(t, lit, useEmpty)
 						if between && lit.Len() == 0 {
 							t.Errorf("missing edge for test %q: (%v)--(%v)", test.name, x.ID(), y.ID())
+						} else {
+							for lit.Next() {
+								l := lit.Line()
+								if l.From().ID() != x.ID() || l.To().ID() != y.ID() {
+									t.Errorf("inverted edge for test %q query with F=%d T=%d: got:%#v",
+										test.name, x.ID(), y.ID(), l)
+								}
+							}
 						}
 						lit = g.LinesBetween(x.ID(), y.ID())
 						if !isValidIterator(lit) {
@@ -767,6 +843,14 @@ func LineExistence(t *testing.T, b Builder, useEmpty bool) {
 						checkEmptyIterator(t, lit, useEmpty)
 						if between && lit.Len() == 0 {
 							t.Errorf("missing edge for test %q: (%v)--(%v)", test.name, x.ID(), y.ID())
+						} else {
+							for lit.Next() {
+								l := lit.Line()
+								if l.From().ID() != x.ID() || l.To().ID() != y.ID() {
+									t.Errorf("inverted edge for test %q query with F=%d T=%d: got:%#v",
+										test.name, x.ID(), y.ID(), l)
+								}
+							}
 						}
 					}
 
@@ -780,7 +864,7 @@ func LineExistence(t *testing.T, b Builder, useEmpty bool) {
 							continue
 						}
 						checkEmptyIterator(t, lit, useEmpty)
-						if has := lit.Len() != 0; has != want[edge{f: u.ID(), t: v.ID()}] {
+						if has := lit != graph.Empty; has != want[edge{f: u.ID(), t: v.ID()}] {
 							if has {
 								t.Errorf("unexpected edge for test %q: (%v)->(%v)", test.name, u.ID(), v.ID())
 							} else {
@@ -813,6 +897,14 @@ func LineExistence(t *testing.T, b Builder, useEmpty bool) {
 						checkEmptyIterator(t, lit, useEmpty)
 						if between && lit.Len() == 0 {
 							t.Errorf("missing edge for test %q: (%v)--(%v)", test.name, x.ID(), y.ID())
+						} else {
+							for lit.Next() {
+								l := lit.WeightedLine()
+								if l.From().ID() != x.ID() || l.To().ID() != y.ID() {
+									t.Errorf("inverted edge for test %q query with F=%d T=%d: got:%#v",
+										test.name, x.ID(), y.ID(), l)
+								}
+							}
 						}
 						lit = g.WeightedLinesBetween(x.ID(), y.ID())
 						if !isValidIterator(lit) {
@@ -822,6 +914,14 @@ func LineExistence(t *testing.T, b Builder, useEmpty bool) {
 						checkEmptyIterator(t, lit, useEmpty)
 						if between && lit.Len() == 0 {
 							t.Errorf("missing edge for test %q: (%v)--(%v)", test.name, x.ID(), y.ID())
+						} else {
+							for lit.Next() {
+								l := lit.WeightedLine()
+								if l.From().ID() != x.ID() || l.To().ID() != y.ID() {
+									t.Errorf("inverted edge for test %q query with F=%d T=%d: got:%#v",
+										test.name, x.ID(), y.ID(), l)
+								}
+							}
 						}
 					}
 				}
@@ -873,8 +973,12 @@ func ReturnAdjacentNodes(t *testing.T, b Builder, useEmpty bool) {
 					if g.Node(v.ID()) == nil {
 						t.Errorf("missing to node for test %q: %v", test.name, v.ID())
 					}
-					if g.Edge(u.ID(), v.ID()) == nil {
+					qe := g.Edge(u.ID(), v.ID())
+					if qe == nil {
 						t.Errorf("missing from edge for test %q: (%v)->(%v)", test.name, u.ID(), v.ID())
+					} else if qe.From().ID() != u.ID() || qe.To().ID() != v.ID() {
+						t.Errorf("inverted edge for test %q query with F=%d T=%d: got:%#v",
+							test.name, u.ID(), v.ID(), qe)
 					}
 					if !g.HasEdgeBetween(u.ID(), v.ID()) {
 						t.Errorf("missing from edge for test %q: (%v)--(%v)", test.name, u.ID(), v.ID())
@@ -903,9 +1007,14 @@ func ReturnAdjacentNodes(t *testing.T, b Builder, useEmpty bool) {
 					if g.Node(u.ID()) == nil {
 						t.Errorf("missing from node for test %q: %v", test.name, u.ID())
 					}
-					if g.Edge(u.ID(), v.ID()) == nil {
+					qe := g.Edge(u.ID(), v.ID())
+					if qe == nil {
 						t.Errorf("missing from edge for test %q: (%v)->(%v)", test.name, u.ID(), v.ID())
 						continue
+					}
+					if qe.From().ID() != u.ID() || qe.To().ID() != v.ID() {
+						t.Errorf("inverted edge for test %q query with F=%d T=%d: got:%#v",
+							test.name, u.ID(), v.ID(), qe)
 					}
 					if !g.HasEdgeBetween(u.ID(), v.ID()) {
 						t.Errorf("missing from edge for test %q: (%v)--(%v)", test.name, u.ID(), v.ID())
@@ -933,13 +1042,23 @@ func ReturnAdjacentNodes(t *testing.T, b Builder, useEmpty bool) {
 					if i == 0 && g.Node(u.ID()) == nil {
 						t.Errorf("missing from node for test %q: %v", test.name, u.ID())
 					}
-					if g.Edge(u.ID(), v.ID()) == nil {
+					qe := g.Edge(u.ID(), v.ID())
+					if qe == nil {
 						t.Errorf("missing from edge for test %q: (%v)--(%v)", test.name, u.ID(), v.ID())
 						continue
 					}
-					if g.EdgeBetween(u.ID(), v.ID()) == nil {
+					if qe.From().ID() != u.ID() || qe.To().ID() != v.ID() {
+						t.Errorf("inverted edge for test %q query with F=%d T=%d: got:%#v",
+							test.name, u.ID(), v.ID(), qe)
+					}
+					qe = g.EdgeBetween(u.ID(), v.ID())
+					if qe == nil {
 						t.Errorf("missing from edge for test %q: (%v)--(%v)", test.name, u.ID(), v.ID())
 						continue
+					}
+					if qe.From().ID() != u.ID() || qe.To().ID() != v.ID() {
+						t.Errorf("inverted edge for test %q query with F=%d T=%d: got:%#v",
+							test.name, u.ID(), v.ID(), qe)
 					}
 					if !g.HasEdgeBetween(u.ID(), v.ID()) {
 						t.Errorf("missing from edge for test %q: (%v)--(%v)", test.name, u.ID(), v.ID())
@@ -964,9 +1083,14 @@ func ReturnAdjacentNodes(t *testing.T, b Builder, useEmpty bool) {
 					if i == 0 && g.Node(u.ID()) == nil {
 						t.Errorf("missing from node for test %q: %v", test.name, u.ID())
 					}
-					if g.Edge(u.ID(), v.ID()) == nil {
+					qe := g.Edge(u.ID(), v.ID())
+					if qe == nil {
 						t.Errorf("missing from edge for test %q: (%v)--(%v)", test.name, u.ID(), v.ID())
 						continue
+					}
+					if qe.From().ID() != u.ID() || qe.To().ID() != v.ID() {
+						t.Errorf("inverted edge for test %q query with F=%d T=%d: got:%#v",
+							test.name, u.ID(), v.ID(), qe)
 					}
 					if !g.HasEdgeBetween(u.ID(), v.ID()) {
 						t.Errorf("missing from edge for test %q: (%v)--(%v)", test.name, u.ID(), v.ID())
@@ -1083,7 +1207,7 @@ func AdjacencyMatrix(t *testing.T, b Builder) {
 
 // lexicalEdges sorts a collection of edges lexically on the
 // keys: from.ID > to.ID > [line.ID] > [weight].
-type lexicalEdges []graph.Edge
+type lexicalEdges []Edge
 
 func (e lexicalEdges) Len() int { return len(e) }
 func (e lexicalEdges) Less(i, j int) bool {
@@ -1112,7 +1236,7 @@ func (e lexicalEdges) Swap(i, j int) { e[i], e[j] = e[j], e[i] }
 
 // lexicalUndirectedEdges sorts a collection of edges lexically on the
 // keys: lo.ID > hi.ID > [line.ID] > [weight].
-type lexicalUndirectedEdges []graph.Edge
+type lexicalUndirectedEdges []Edge
 
 func (e lexicalUndirectedEdges) Len() int { return len(e) }
 func (e lexicalUndirectedEdges) Less(i, j int) bool {
@@ -1142,7 +1266,7 @@ func (e lexicalUndirectedEdges) Less(i, j int) bool {
 }
 func (e lexicalUndirectedEdges) Swap(i, j int) { e[i], e[j] = e[j], e[i] }
 
-func lessWeight(ei, ej graph.Edge) bool {
+func lessWeight(ei, ej Edge) bool {
 	wei, oki := ei.(graph.WeightedEdge)
 	wej, okj := ej.(graph.WeightedEdge)
 	if oki != okj {
@@ -1156,7 +1280,7 @@ func lessWeight(ei, ej graph.Edge) bool {
 
 // undirectedEdgeSetEqual returned whether a pair of undirected edge
 // slices sorted by lexicalUndirectedEdges are equal.
-func undirectedEdgeSetEqual(a, b []graph.Edge) bool {
+func undirectedEdgeSetEqual(a, b []Edge) bool {
 	if len(a) == 0 && len(b) == 0 {
 		return true
 	}
@@ -1190,7 +1314,7 @@ func undirectedEdgeSetEqual(a, b []graph.Edge) bool {
 
 // undirectedEdgeEqual returns whether a pair of undirected edges are equal
 // after canonicalising from and to IDs by numerical sort order.
-func undirectedEdgeEqual(a, b graph.Edge) bool {
+func undirectedEdgeEqual(a, b Edge) bool {
 	loa, hia, inva := undirectedIDs(a)
 	lob, hib, invb := undirectedIDs(b)
 	// Use reflect.DeepEqual if the edges are parallel
@@ -1891,7 +2015,7 @@ func RemoveLines(t *testing.T, g LineRemover, remove graph.Lines) {
 
 // undirectedIDs returns a numerical sort ordered canonicalisation of the
 // IDs of e.
-func undirectedIDs(e graph.Edge) (lo, hi int64, inverted bool) {
+func undirectedIDs(e Edge) (lo, hi int64, inverted bool) {
 	lid := e.From().ID()
 	hid := e.To().ID()
 	if hid < lid {

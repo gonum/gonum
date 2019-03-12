@@ -7,7 +7,17 @@ package graph
 // Line is an edge in a multigraph. A Line returns an ID that must
 // distinguish Lines sharing Node end points.
 type Line interface {
-	Edge
+	// From returns the from node of the edge.
+	From() Node
+
+	// To returns the to node of the edge.
+	To() Node
+
+	// ReversedLine returns a line that has the
+	// end points of the receiver swapped.
+	ReversedLine() Line
+
+	// ID returns the unique ID for the Line.
 	ID() int64
 }
 

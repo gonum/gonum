@@ -71,6 +71,9 @@ func (b *Brent) initLocal(loc *Location) (Operation, error) {
 	if b.Max <= b.Min && b.Max == 0 {
 		b.Max = 1
 	}
+	if b.Limit == 0 {
+		b.Limit = limit // FIXME: is that correct?
+	}
 
 	b.a = b.Min
 	b.b = b.Max

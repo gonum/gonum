@@ -4,7 +4,6 @@ set -ex
 
 # TODO(kortschak): Replace this with versioned go get when
 # all our supported versions of Go support it.
-export GO111MODULE=auto
 mkdir -p $GOPATH/src/github.com/goccmack
 git clone https://github.com/goccmack/gocc.git $GOPATH/src/github.com/goccmack/gocc
 cd $GOPATH/src/github.com/goccmack/gocc

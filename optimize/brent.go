@@ -1,17 +1,21 @@
+// Copyright ©2019 The Gonum Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package optimize
 
 import "math"
 
 const (
-	phi           = 1.618043 // phi is the golden ratio
-	tiny          = 1e-21
-	limit float64 = 110
+	phi   = math.Phi
+	tiny  = 1e-21
+	limit = 110.0
 )
 
 type brentIterType int
 
 var (
-	_ Method = &Brent{}
+	_ Method = (*Brent)(nil)
 )
 
 const (
@@ -35,11 +39,34 @@ type Brent struct {
 	fa, fb, fc, fw float64
 	denom, w, wlim float64
 	iter           brentIterType
+
+	status Status
+	err    error
 }
 
-func (b *Brent) Init(loc *Location) (Operation, error) {
+func (b *Brent) Status() (Status, error) {
+	return b.status, b.err
+}
+
+func (*Brent) Uses(has Available) (uses Available, err error) {
+	return has.function()
+}
+
+func (b *Brent) Init(dim, tasks int) int {
+	b.status = NotTerminated
+	b.err = nil
+	return 1
+}
+
+func (b *Brent) Run(operation chan<- Task, result <-chan Task, tasks []Task) {
+	b.status, b.err = localOptimizer{}.run(b, math.NaN(), operation, result, tasks)
+	close(operation)
+	return
+}
+
+func (b *Brent) initLocal(loc *Location) (Operation, error) {
 	if len(loc.X) != 1 {
-		panic("Expect only 1 parameter")
+		panic("optimize: Brent expects only 1 parameter")
 	}
 	if b.Max <= b.Min && b.Max == 0 {
 		b.Max = 1
@@ -54,7 +81,7 @@ func (b *Brent) Init(loc *Location) (Operation, error) {
 	return FuncEvaluation, nil
 }
 
-func (b *Brent) Iterate(loc *Location) (Operation, error) {
+func (b *Brent) iterateLocal(loc *Location) (Operation, error) {
 	switch b.iter {
 	case brentBrakA, brentBrakB, brentBrakC:
 		return b.bracket(b.iter, loc)
@@ -65,7 +92,7 @@ func (b *Brent) Iterate(loc *Location) (Operation, error) {
 	return FuncEvaluation, nil
 }
 
-func (*Brent) Needs() struct {
+func (*Brent) needs() struct {
 	Gradient bool
 	Hessian  bool
 } {

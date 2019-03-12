@@ -90,7 +90,8 @@ func (b *Brent) iterateLocal(loc *Location) (Operation, error) {
 		return b.bracket(b.iter, loc)
 	case brentBrak1, brentBrak2, brentBrak3, brentBrak4, brentBrak5:
 		return b.bracketLoop(loc)
-	default:
+	case brentGo:
+		return MajorIteration, nil
 	}
 	return FuncEvaluation, nil
 }
@@ -125,12 +126,12 @@ func (b *Brent) bracket(iter brentIterType, loc *Location) (Operation, error) {
 		b.fc = loc.F
 		return b.bracketLoop(loc)
 	}
-	panic("HALP")
+	panic("optimize: impossible")
 }
 
 func (b *Brent) bracketLoop(loc *Location) (Operation, error) {
 	if b.fc > b.fb {
-		loc.X[0] = b.x
+		loc.X[0] = b.x // FIXME: shouldn't this be b.w instead?
 		b.iter = brentGo
 		return FuncEvaluation, nil
 	}
@@ -167,130 +168,4 @@ func (b *Brent) bracketLoop(loc *Location) (Operation, error) {
 		return FuncEvaluation, nil
 	}
 
-}
-
-func (b *Brent) doBracketLoop(iter brentIterType, loc *Location) (Operation, error) {
-	switch iter {
-	case brentBrak1:
-		b.fw = loc.F
-		switch {
-		case b.fw < b.fc:
-			b.a = b.b
-			b.b = b.w
-			b.fa = b.fb
-			b.fb = b.fw
-
-			loc.X[0] = b.x
-			b.iter = brentGo
-			return FuncEvaluation, nil
-		case b.fw > b.fb:
-			b.c = b.w
-			b.fc = b.fw
-
-			loc.X[0] = b.x
-			b.iter = brentGo
-			return FuncEvaluation, nil
-		default:
-			b.w = b.c + phi*(b.c-b.b)
-			loc.X[0] = b.w
-			b.iter = brentBrak5
-			return FuncEvaluation, nil
-		}
-	case brentBrak2:
-		b.fw = loc.F
-		loc.X[0] = b.w
-		b.iter = brentBrak5
-		return FuncEvaluation, nil
-	case brentBrak3:
-		b.fw = loc.F
-		if b.fw < b.c {
-			b.b = b.c
-			b.c = b.w
-			b.w = b.c + phi*(b.c-b.b)
-			b.fb = b.fc
-			b.fc = b.fw
-			loc.X[0] = b.w
-			b.iter = brentBrak5
-			return FuncEvaluation, nil
-		}
-	case brentBrak4:
-		b.w = b.c + phi*(b.c-b.b)
-		loc.X[0] = b.w
-		b.iter = brentBrak5
-		return FuncEvaluation, nil
-	case brentBrak5:
-		b.a, b.b, b.c = b.b, b.c, b.w
-		b.fa, b.fb, b.fc = b.fb, b.fc, b.fw
-
-		loc.X[0] = b.x
-		b.iter = brentGo
-		return FuncEvaluation, nil
-	}
-	panic("Unreachable")
-}
-
-// bracket finds a triple of a,b,c such that a < b < c and f(a) > f(b) < f(c).
-func bracket(f func(float64) float64, min, max, limit float64) (a, b, c, fa, fb, fc float64) {
-	fa = f(min)
-	fb = f(max)
-
-	a, b = min, max
-	if fa < fb {
-		a, b = b, a
-		fa, fb = fb, fa
-	}
-
-	c = b + phi*(b-a)
-	fc = f(c)
-
-	for fc < fb {
-		var fw float64
-		tmp1 := (b - a) * (fb - fc)
-		tmp2 := (b - c) * (fb - fa)
-		tmp3 := tmp2 - tmp1
-
-		denom := 2 * tmp3
-		if math.Abs(tmp3) < tiny {
-			denom = 2 * tiny
-		}
-
-		w := b - ((b-c)*tmp2-(b-a)*tmp1)/denom
-		wlim := b + limit*(c-b)
-
-		switch {
-		case (w-c)*(b-w) > 0:
-			fw = f(w)
-
-			switch {
-			case fw < fc:
-				a, b = b, w
-				fa, fb = fb, fw
-				return
-			case fw > fb:
-				c, fc = w, fw
-				return
-			default:
-				w = c + phi*(c-b)
-				fw = f(w)
-			}
-		case (w-wlim)*(wlim-c) >= 0:
-			w = wlim
-			fw = f(w)
-
-		case (w-wlim)*(c-w) > 0:
-			fw = f(w)
-			if fw < fc {
-				b, c = c, w
-				w = c + phi*(c-b)
-				fb, fc = fc, fw
-				fw = f(w)
-			}
-		default:
-			w = c + phi*(c-b)
-			fw = f(w)
-		}
-		a, b, c = b, c, w
-		fa, fb, fc = fb, fc, fw
-	}
-	return
 }

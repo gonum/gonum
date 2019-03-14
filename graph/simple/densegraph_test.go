@@ -38,7 +38,7 @@ func directedMatrixBuilder(nodes []graph.Node, edges []testgraph.WeightedLine, s
 	if !isZeroContiguousSet(nodes) {
 		return
 	}
-	seen := make(set.Nodes)
+	seen := set.NewNodes()
 	dg := simple.NewDirectedMatrix(len(nodes), absent, self, absent)
 	for i := range nodes {
 		seen.Add(simple.Node(i))
@@ -157,7 +157,7 @@ func directedMatrixFromBuilder(nodes []graph.Node, edges []testgraph.WeightedLin
 	if !isZeroContiguousSet(nodes) {
 		return
 	}
-	seen := make(set.Nodes)
+	seen := set.NewNodes()
 	dg := simple.NewDirectedMatrixFrom(nodes, absent, self, absent)
 	for _, n := range nodes {
 		seen.Add(n)
@@ -289,7 +289,7 @@ func undirectedMatrixBuilder(nodes []graph.Node, edges []testgraph.WeightedLine,
 	if !isZeroContiguousSet(nodes) {
 		return
 	}
-	seen := make(set.Nodes)
+	seen := set.NewNodes()
 	dg := simple.NewUndirectedMatrix(len(nodes), absent, self, absent)
 	for i := range nodes {
 		seen.Add(simple.Node(i))
@@ -408,7 +408,7 @@ func undirectedMatrixFromBuilder(nodes []graph.Node, edges []testgraph.WeightedL
 	if !isZeroContiguousSet(nodes) {
 		return
 	}
-	seen := make(set.Nodes)
+	seen := set.NewNodes()
 	dg := simple.NewUndirectedMatrixFrom(nodes, absent, self, absent)
 	for _, n := range nodes {
 		seen.Add(n)

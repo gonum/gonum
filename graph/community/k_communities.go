@@ -39,10 +39,10 @@ func KCliqueCommunities(k int, g graph.Undirected) [][]graph.Node {
 		// cliques smaller than k into separate
 		// single nodes.
 		var kcc [][]graph.Node
-		single := make(set.Nodes)
-		inCommunity := make(set.Nodes)
+		single := set.NewNodes()
+		inCommunity := set.NewNodes()
 		for _, c := range cc {
-			nodes := make(set.Nodes, len(c))
+			nodes := set.NewNodesSize(len(c))
 			for _, cn := range c {
 				for _, n := range cn.(topo.Clique).Nodes() {
 					nodes.Add(n)

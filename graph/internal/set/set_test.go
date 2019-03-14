@@ -300,8 +300,8 @@ func TestEqualInts(t *testing.T) {
 
 func TestSameNodes(t *testing.T) {
 	var (
-		a = make(Nodes)
-		b = make(Nodes)
+		a = NewNodes()
+		b = NewNodes()
 		c = a
 	)
 
@@ -324,7 +324,7 @@ func TestSameNodes(t *testing.T) {
 }
 
 func TestAddNodes(t *testing.T) {
-	s := make(Nodes)
+	s := NewNodes()
 	if s == nil {
 		t.Fatal("Set cannot be created successfully")
 	}
@@ -369,7 +369,7 @@ func TestAddNodes(t *testing.T) {
 }
 
 func TestRemoveNodes(t *testing.T) {
-	s := make(Nodes)
+	s := NewNodes()
 
 	s.Add(node(1))
 	s.Add(node(3))
@@ -403,7 +403,7 @@ func TestRemoveNodes(t *testing.T) {
 }
 
 func TestClearNodes(t *testing.T) {
-	s := make(Nodes)
+	s := NewNodes()
 
 	s.Add(node(8))
 	s.Add(node(9))
@@ -417,7 +417,7 @@ func TestClearNodes(t *testing.T) {
 }
 
 func TestSelfEqualNodes(t *testing.T) {
-	s := make(Nodes)
+	s := NewNodes()
 
 	if !Equal(s, s) {
 		t.Error("Set is not equal to itself")
@@ -431,8 +431,8 @@ func TestSelfEqualNodes(t *testing.T) {
 }
 
 func TestEqualNodes(t *testing.T) {
-	a := make(Nodes)
-	b := make(Nodes)
+	a := NewNodes()
+	b := NewNodes()
 
 	if !Equal(a, b) {
 		t.Error("Two different empty sets not equal")
@@ -456,8 +456,8 @@ func TestEqualNodes(t *testing.T) {
 }
 
 func TestCopyNodes(t *testing.T) {
-	a := make(Nodes)
-	b := make(Nodes)
+	a := NewNodes()
+	b := NewNodes()
 
 	a.Add(node(1))
 	a.Add(node(2))
@@ -483,7 +483,7 @@ func TestCopyNodes(t *testing.T) {
 }
 
 func TestSelfCopyNodes(t *testing.T) {
-	a := make(Nodes)
+	a := NewNodes()
 
 	a.Add(node(1))
 	a.Add(node(2))
@@ -496,9 +496,9 @@ func TestSelfCopyNodes(t *testing.T) {
 }
 
 func TestUnionSameNodes(t *testing.T) {
-	a := make(Nodes)
-	b := make(Nodes)
-	c := make(Nodes)
+	a := NewNodes()
+	b := NewNodes()
+	c := NewNodes()
 
 	a.Add(node(1))
 	a.Add(node(2))
@@ -526,9 +526,9 @@ func TestUnionSameNodes(t *testing.T) {
 }
 
 func TestUnionDiffNodes(t *testing.T) {
-	a := make(Nodes)
-	b := make(Nodes)
-	c := make(Nodes)
+	a := NewNodes()
+	b := NewNodes()
+	c := NewNodes()
 
 	a.Add(node(1))
 	a.Add(node(2))
@@ -568,9 +568,9 @@ func TestUnionDiffNodes(t *testing.T) {
 }
 
 func TestUnionOverlappingNodes(t *testing.T) {
-	a := make(Nodes)
-	b := make(Nodes)
-	c := make(Nodes)
+	a := NewNodes()
+	b := NewNodes()
+	c := NewNodes()
 
 	a.Add(node(1))
 	a.Add(node(2))
@@ -611,9 +611,9 @@ func TestUnionOverlappingNodes(t *testing.T) {
 }
 
 func TestIntersectSameNodes(t *testing.T) {
-	a := make(Nodes)
-	b := make(Nodes)
-	c := make(Nodes)
+	a := NewNodes()
+	b := NewNodes()
+	c := NewNodes()
 
 	a.Add(node(2))
 	a.Add(node(3))
@@ -641,9 +641,9 @@ func TestIntersectSameNodes(t *testing.T) {
 }
 
 func TestIntersectDiffNodes(t *testing.T) {
-	a := make(Nodes)
-	b := make(Nodes)
-	c := make(Nodes)
+	a := NewNodes()
+	b := NewNodes()
+	c := NewNodes()
 
 	a.Add(node(2))
 	a.Add(node(3))
@@ -675,9 +675,9 @@ func TestIntersectDiffNodes(t *testing.T) {
 }
 
 func TestIntersectOverlappingNodes(t *testing.T) {
-	a := make(Nodes)
-	b := make(Nodes)
-	c := make(Nodes)
+	a := NewNodes()
+	b := NewNodes()
+	c := NewNodes()
 
 	a.Add(node(2))
 	a.Add(node(3))

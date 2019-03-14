@@ -17,7 +17,7 @@ import (
 )
 
 func weightedUndirectedBuilder(nodes []graph.Node, edges []testgraph.WeightedLine, self, absent float64) (g graph.Graph, n []graph.Node, e []testgraph.Edge, s, a float64, ok bool) {
-	seen := make(set.Nodes)
+	seen := set.NewNodes()
 	ug := multi.NewWeightedUndirectedGraph()
 	ug.EdgeWeightFunc = func(l graph.WeightedLines) float64 {
 		if l.Len() == 0 {

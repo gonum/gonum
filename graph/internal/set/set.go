@@ -103,6 +103,16 @@ func Int64sEqual(a, b Int64s) bool {
 // Nodes is a set of nodes keyed in their integer identifiers.
 type Nodes map[int64]graph.Node
 
+// NewNodes returns a new Nodes.
+func NewNodes() Nodes {
+	return make(Nodes)
+}
+
+// NewNodes returns a new Nodes with the given size hint, n.
+func NewNodesSize(n int) Nodes {
+	return make(Nodes, n)
+}
+
 // The simple accessor methods for Nodes are provided to allow ease of
 // implementation change should the need arise.
 

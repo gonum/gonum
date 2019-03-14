@@ -180,7 +180,7 @@ func NodeExistence(t *testing.T, b Builder) {
 			continue
 		}
 
-		seen := make(set.Nodes)
+		seen := set.NewNodes()
 		for _, exist := range want {
 			seen.Add(exist)
 			if g.Node(exist.ID()) == nil {

@@ -138,21 +138,21 @@ func BronKerbosch(g graph.Undirected) [][]graph.Node {
 	// The algorithm used here is essentially BronKerbosch3 as described at
 	// http://en.wikipedia.org/w/index.php?title=Bron%E2%80%93Kerbosch_algorithm&oldid=656805858
 
-	p := make(set.Nodes, len(nodes))
+	p := set.NewNodesSize(len(nodes))
 	for _, n := range nodes {
 		p.Add(n)
 	}
-	x := make(set.Nodes)
+	x := set.NewNodes()
 	var bk bronKerbosch
 	order, _ := degeneracyOrdering(g)
 	ordered.Reverse(order)
 	for _, v := range order {
 		neighbours := graph.NodesOf(g.From(v.ID()))
-		nv := make(set.Nodes, len(neighbours))
+		nv := set.NewNodesSize(len(neighbours))
 		for _, n := range neighbours {
 			nv.Add(n)
 		}
-		bk.maximalCliquePivot(g, []graph.Node{v}, make(set.Nodes).Intersect(p, nv), make(set.Nodes).Intersect(x, nv))
+		bk.maximalCliquePivot(g, []graph.Node{v}, set.NewNodes().Intersect(p, nv), set.NewNodes().Intersect(x, nv))
 		p.Remove(v)
 		x.Add(v)
 	}
@@ -168,7 +168,7 @@ func (bk *bronKerbosch) maximalCliquePivot(g graph.Undirected, r []graph.Node, p
 	}
 
 	neighbours := bk.choosePivotFrom(g, p, x)
-	nu := make(set.Nodes, len(neighbours))
+	nu := set.NewNodesSize(len(neighbours))
 	for _, n := range neighbours {
 		nu.Add(n)
 	}
@@ -178,7 +178,7 @@ func (bk *bronKerbosch) maximalCliquePivot(g graph.Undirected, r []graph.Node, p
 		}
 		vid := v.ID()
 		neighbours := graph.NodesOf(g.From(vid))
-		nv := make(set.Nodes, len(neighbours))
+		nv := set.NewNodesSize(len(neighbours))
 		for _, n := range neighbours {
 			nv.Add(n)
 		}
@@ -195,7 +195,7 @@ func (bk *bronKerbosch) maximalCliquePivot(g graph.Undirected, r []graph.Node, p
 			sr = append(r[:len(r):len(r)], v)
 		}
 
-		bk.maximalCliquePivot(g, sr, make(set.Nodes).Intersect(p, nv), make(set.Nodes).Intersect(x, nv))
+		bk.maximalCliquePivot(g, sr, set.NewNodes().Intersect(p, nv), set.NewNodes().Intersect(x, nv))
 		p.Remove(v)
 		x.Add(v)
 	}

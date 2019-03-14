@@ -34,7 +34,7 @@ func CliqueGraph(dst Builder, g graph.Undirected) {
 
 	cliqueNodes := make(cliqueNodeSets, len(cliques))
 	for id, c := range cliques {
-		s := make(set.Nodes, len(c))
+		s := set.NewNodesSize(len(c))
 		for _, n := range c {
 			s.Add(n)
 		}
@@ -58,7 +58,7 @@ func CliqueGraph(dst Builder, g graph.Undirected) {
 				case len(vc.Clique.nodes):
 					edgeNodes = []graph.Node{vc.Clique.nodes[0]}
 				default:
-					for _, n := range make(set.Nodes).Intersect(uc.nodes, vc.nodes) {
+					for _, n := range set.NewNodes().Intersect(uc.nodes, vc.nodes) {
 						edgeNodes = append(edgeNodes, n)
 					}
 					sort.Sort(ordered.ByID(edgeNodes))

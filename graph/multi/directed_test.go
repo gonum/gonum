@@ -18,7 +18,7 @@ import (
 )
 
 func directedBuilder(nodes []graph.Node, edges []testgraph.WeightedLine, _, _ float64) (g graph.Graph, n []graph.Node, e []testgraph.Edge, s, a float64, ok bool) {
-	seen := make(set.Nodes)
+	seen := set.NewNodes()
 	dg := multi.NewDirectedGraph()
 	for _, n := range nodes {
 		seen.Add(n)

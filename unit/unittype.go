@@ -130,6 +130,31 @@ var (
 // dimension is zero. Dimensions is used in conjunction with New.
 type Dimensions map[Dimension]int
 
+func (d Dimensions) clone() Dimensions {
+	if len(d) == 0 {
+		return nil
+	}
+	c := make(Dimensions, len(d))
+	for dim, pow := range d {
+		if pow != 0 {
+			c[dim] = pow
+		}
+	}
+	return c
+}
+
+func (d Dimensions) matches(o Dimensions) bool {
+	if len(d) != len(o) {
+		return false
+	}
+	for dim, pow := range d {
+		if o[dim] != pow {
+			return false
+		}
+	}
+	return true
+}
+
 func (d Dimensions) String() string {
 	// Map iterates randomly, but print should be in a fixed order. Can't use
 	// dimension number, because for user-defined dimension that number may
@@ -220,31 +245,20 @@ type Unit struct {
 // specified by the inputs. The built-in dimensions are always in SI units
 // (meters, kilograms, etc.).
 func New(value float64, d Dimensions) *Unit {
-	u := &Unit{
-		dimensions: make(map[Dimension]int),
+	return &Unit{
+		dimensions: d.clone(),
 		value:      value,
 	}
-	for key, val := range d {
-		if val != 0 {
-			u.dimensions[key] = val
-		}
-	}
-	return u
 }
 
 // DimensionsMatch checks if the dimensions of two Uniters are the same.
 func DimensionsMatch(a, b Uniter) bool {
-	aUnit := a.Unit()
-	bUnit := b.Unit()
-	if len(aUnit.dimensions) != len(bUnit.dimensions) {
-		return false
-	}
-	for key, val := range aUnit.dimensions {
-		if bUnit.dimensions[key] != val {
-			return false
-		}
-	}
-	return true
+	return a.Unit().dimensions.matches(b.Unit().dimensions)
+}
+
+// Dimensions returns a copy of the dimensions of the unit.
+func (u *Unit) Dimensions() Dimensions {
+	return u.dimensions.clone()
 }
 
 // Add adds the function argument to the receiver. Panics if the units of
@@ -297,10 +311,15 @@ func (u *Unit) Div(uniter Uniter) *Unit {
 
 // Value return the raw value of the unit as a float64. Use of this
 // method is, in general, not recommended, though it can be useful
-// for printing. Instead, the From type of a specific dimension
+// for printing. Instead, the From method of a specific dimension
 // should be used to guarantee dimension consistency.
 func (u *Unit) Value() float64 {
 	return u.value
+}
+
+// SetValue sets the value of the unit.
+func (u *Unit) SetValue(v float64) {
+	u.value = v
 }
 
 // Format makes Unit satisfy the fmt.Formatter interface. The unit is formatted

@@ -8,6 +8,8 @@ import (
 	"bytes"
 	"fmt"
 	"sort"
+	"sync"
+	"unicode/utf8"
 )
 
 // Uniter is a type that can be converted to a Unit.
@@ -212,8 +214,10 @@ func SymbolExists(symbol string) bool {
 // mass to get a force. See the package documentation for further explanation.
 type Unit struct {
 	dimensions Dimensions
-	formatted  string
 	value      float64
+
+	mu        sync.RWMutex
+	formatted string
 }
 
 // New creates a new variable of type Unit which has the value and dimensions
@@ -274,7 +278,7 @@ func (u *Unit) Mul(uniter Uniter) *Unit {
 			u.dimensions[key] = d + val
 		}
 	}
-	u.formatted = ""
+	u.setFormattedUnits("")
 	u.value *= a.value
 	return u
 }
@@ -291,7 +295,7 @@ func (u *Unit) Div(uniter Uniter) *Unit {
 			u.dimensions[key] = d - val
 		}
 	}
-	u.formatted = ""
+	u.setFormattedUnits("")
 	return u
 }
 
@@ -322,23 +326,38 @@ func (u *Unit) Format(fs fmt.State, c rune) {
 	case 'e', 'E', 'f', 'F', 'g', 'G':
 		p, pOk := fs.Precision()
 		w, wOk := fs.Width()
-		if u.formatted == "" && len(u.dimensions) > 0 {
-			u.formatted = u.dimensions.String()
+		formatted := u.formattedUnits()
+		if formatted == "" && len(u.dimensions) > 0 {
+			formatted = u.dimensions.String()
+			u.setFormattedUnits(formatted)
 		}
 		switch {
 		case pOk && wOk:
-			fmt.Fprintf(fs, "%*.*"+string(c), pos(w-len(u.formatted)-1), p, u.value)
+			fmt.Fprintf(fs, "%*.*"+string(c), pos(w-utf8.RuneCount([]byte(formatted))-1), p, u.value)
 		case pOk:
 			fmt.Fprintf(fs, "%.*"+string(c), p, u.value)
 		case wOk:
-			fmt.Fprintf(fs, "%*"+string(c), pos(w-len(u.formatted)-1), u.value)
+			fmt.Fprintf(fs, "%*"+string(c), pos(w-utf8.RuneCount([]byte(formatted))-1), u.value)
 		default:
 			fmt.Fprintf(fs, "%"+string(c), u.value)
 		}
-		fmt.Fprintf(fs, " %s", u.formatted)
+		fmt.Fprintf(fs, " %s", formatted)
 	default:
 		fmt.Fprintf(fs, "%%!%c(*Unit=%g)", c, u)
 	}
+}
+
+func (u *Unit) formattedUnits() string {
+	u.mu.RLock()
+	f := u.formatted
+	u.mu.RUnlock()
+	return f
+}
+
+func (u *Unit) setFormattedUnits(f string) {
+	u.mu.Lock()
+	u.formatted = f
+	u.mu.Unlock()
 }
 
 func pos(a int) int {

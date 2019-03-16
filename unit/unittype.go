@@ -143,6 +143,9 @@ func (d Dimensions) clone() Dimensions {
 	return c
 }
 
+// matches reports whether the dimensions of d and o match. Zero power
+// dimensions in d an o must be removed, otherwise matches may incorrectly
+// report a mismatch.
 func (d Dimensions) matches(o Dimensions) bool {
 	if len(d) != len(o) {
 		return false

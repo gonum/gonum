@@ -161,8 +161,8 @@ func BronKerbosch(g graph.Undirected) [][]graph.Node {
 
 type bronKerbosch [][]graph.Node
 
-func (bk *bronKerbosch) maximalCliquePivot(g graph.Undirected, r []graph.Node, p, x set.Nodes) {
-	if len(p) == 0 && len(x) == 0 {
+func (bk *bronKerbosch) maximalCliquePivot(g graph.Undirected, r []graph.Node, p, x *set.Nodes) {
+	if p.Count() == 0 && x.Count() == 0 {
 		*bk = append(*bk, r)
 		return
 	}
@@ -172,7 +172,7 @@ func (bk *bronKerbosch) maximalCliquePivot(g graph.Undirected, r []graph.Node, p
 	for _, n := range neighbours {
 		nu.Add(n)
 	}
-	for _, v := range p {
+	for _, v := range *p {
 		if nu.Has(v) {
 			continue
 		}
@@ -201,15 +201,15 @@ func (bk *bronKerbosch) maximalCliquePivot(g graph.Undirected, r []graph.Node, p
 	}
 }
 
-func (*bronKerbosch) choosePivotFrom(g graph.Undirected, p, x set.Nodes) (neighbors []graph.Node) {
+func (*bronKerbosch) choosePivotFrom(g graph.Undirected, p, x *set.Nodes) (neighbors []graph.Node) {
 	// TODO(kortschak): Investigate the impact of pivot choice that maximises
 	// |p ⋂ neighbours(u)| as a function of input size. Until then, leave as
 	// compile time option.
 	if !tomitaTanakaTakahashi {
-		for _, n := range p {
+		for _, n := range *p {
 			return graph.NodesOf(g.From(n.ID()))
 		}
-		for _, n := range x {
+		for _, n := range *x {
 			return graph.NodesOf(g.From(n.ID()))
 		}
 		panic("bronKerbosch: empty set")
@@ -219,16 +219,16 @@ func (*bronKerbosch) choosePivotFrom(g graph.Undirected, p, x set.Nodes) (neighb
 		max   = -1
 		pivot graph.Node
 	)
-	maxNeighbors := func(s set.Nodes) {
+	maxNeighbors := func(s *set.Nodes) {
 	outer:
-		for _, u := range s {
+		for _, u := range *s {
 			nb := graph.NodesOf(g.From(u.ID()))
 			c := len(nb)
 			if c <= max {
 				continue
 			}
 			for n := range nb {
-				if _, ok := p[int64(n)]; ok {
+				if _, ok := (*p)[int64(n)]; ok {
 					continue
 				}
 				c--

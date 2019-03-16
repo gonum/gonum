@@ -49,10 +49,10 @@ func weightedUndirectedBuilder(nodes []graph.Node, edges []testgraph.WeightedLin
 		e = append(e, cl)
 		ug.SetWeightedLine(cl)
 	}
-	if len(seen) != 0 {
-		n = make([]graph.Node, 0, len(seen))
+	if seen.Count() != 0 {
+		n = make([]graph.Node, 0, seen.Count())
 	}
-	for _, sn := range seen {
+	for _, sn := range *seen {
 		n = append(n, sn)
 	}
 	return ug, n, e, self, absent, true

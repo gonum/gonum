@@ -57,8 +57,8 @@ func directedMatrixBuilder(nodes []graph.Node, edges []testgraph.WeightedLine, s
 	if len(e) == 0 && len(edges) != 0 {
 		return nil, nil, nil, math.NaN(), math.NaN(), false
 	}
-	n = make([]graph.Node, 0, len(seen))
-	for _, sn := range seen {
+	n = make([]graph.Node, 0, seen.Count())
+	for _, sn := range *seen {
 		n = append(n, sn)
 	}
 	return dg, n, e, self, absent, true
@@ -176,8 +176,8 @@ func directedMatrixFromBuilder(nodes []graph.Node, edges []testgraph.WeightedLin
 	if len(e) == 0 && len(edges) != 0 {
 		return nil, nil, nil, math.NaN(), math.NaN(), false
 	}
-	n = make([]graph.Node, 0, len(seen))
-	for _, sn := range seen {
+	n = make([]graph.Node, 0, seen.Count())
+	for _, sn := range *seen {
 		n = append(n, sn)
 	}
 	return dg, n, e, self, absent, true
@@ -308,8 +308,8 @@ func undirectedMatrixBuilder(nodes []graph.Node, edges []testgraph.WeightedLine,
 	if len(e) == 0 && len(edges) != 0 {
 		return nil, nil, nil, math.NaN(), math.NaN(), false
 	}
-	n = make([]graph.Node, 0, len(seen))
-	for _, sn := range seen {
+	n = make([]graph.Node, 0, seen.Count())
+	for _, sn := range *seen {
 		n = append(n, sn)
 	}
 	return dg, n, e, self, absent, true
@@ -427,8 +427,8 @@ func undirectedMatrixFromBuilder(nodes []graph.Node, edges []testgraph.WeightedL
 	if len(e) == 0 && len(edges) != 0 {
 		return nil, nil, nil, math.NaN(), math.NaN(), false
 	}
-	n = make([]graph.Node, 0, len(seen))
-	for _, sn := range seen {
+	n = make([]graph.Node, 0, seen.Count())
+	for _, sn := range *seen {
 		n = append(n, sn)
 	}
 	return dg, n, e, self, absent, true

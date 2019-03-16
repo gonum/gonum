@@ -48,20 +48,20 @@ func KCliqueCommunities(k int, g graph.Undirected) [][]graph.Node {
 					nodes.Add(n)
 				}
 			}
-			if len(nodes) < k {
-				for _, n := range nodes {
+			if nodes.Count() < k {
+				for _, n := range *nodes {
 					single.Add(n)
 				}
 				continue
 			}
 			var kc []graph.Node
-			for _, n := range nodes {
+			for _, n := range *nodes {
 				inCommunity.Add(n)
 				kc = append(kc, n)
 			}
 			kcc = append(kcc, kc)
 		}
-		for _, n := range single {
+		for _, n := range *single {
 			if !inCommunity.Has(n) {
 				kcc = append(kcc, []graph.Node{n})
 			}

@@ -39,10 +39,10 @@ func undirectedBuilder(nodes []graph.Node, edges []testgraph.WeightedLine, _, _ 
 		e = append(e, ce)
 		ug.SetLine(ce)
 	}
-	if len(seen) != 0 {
-		n = make([]graph.Node, 0, len(seen))
+	if seen.Count() != 0 {
+		n = make([]graph.Node, 0, seen.Count())
 	}
-	for _, sn := range seen {
+	for _, sn := range *seen {
 		n = append(n, sn)
 	}
 	return ug, n, e, math.NaN(), math.NaN(), true

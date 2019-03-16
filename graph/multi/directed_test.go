@@ -39,10 +39,10 @@ func directedBuilder(nodes []graph.Node, edges []testgraph.WeightedLine, _, _ fl
 		e = append(e, cl)
 		dg.SetLine(cl)
 	}
-	if len(seen) != 0 {
-		n = make([]graph.Node, 0, len(seen))
+	if seen.Count() != 0 {
+		n = make([]graph.Node, 0, seen.Count())
 	}
-	for _, sn := range seen {
+	for _, sn := range *seen {
 		n = append(n, sn)
 	}
 	return dg, n, e, math.NaN(), math.NaN(), true

@@ -104,31 +104,38 @@ func Int64sEqual(a, b Int64s) bool {
 type Nodes map[int64]graph.Node
 
 // NewNodes returns a new Nodes.
-func NewNodes() Nodes {
-	return make(Nodes)
+func NewNodes() *Nodes {
+	s := make(Nodes)
+	return &s
 }
 
 // NewNodes returns a new Nodes with the given size hint, n.
-func NewNodesSize(n int) Nodes {
-	return make(Nodes, n)
+func NewNodesSize(n int) *Nodes {
+	s := make(Nodes, n)
+	return &s
 }
 
 // The simple accessor methods for Nodes are provided to allow ease of
 // implementation change should the need arise.
 
 // Add inserts an element into the set.
-func (s Nodes) Add(n graph.Node) {
-	s[n.ID()] = n
+func (s *Nodes) Add(n graph.Node) {
+	(*s)[n.ID()] = n
 }
 
 // Remove deletes the specified element from the set.
-func (s Nodes) Remove(e graph.Node) {
-	delete(s, e.ID())
+func (s *Nodes) Remove(e graph.Node) {
+	delete((*s), e.ID())
+}
+
+// Count returns the number of element in the set.
+func (s *Nodes) Count() int {
+	return len(*s)
 }
 
 // Has reports the existence of the element in the set.
-func (s Nodes) Has(n graph.Node) bool {
-	_, ok := s[n.ID()]
+func (s *Nodes) Has(n graph.Node) bool {
+	_, ok := (*s)[n.ID()]
 	return ok
 }
 
@@ -139,40 +146,41 @@ func (s *Nodes) clear() {
 	}
 }
 
-// Copy performs a perfect copy from src to dst returning the result.
-// If len(dst) is not 0, a new Nodes is made and returned.
-func (dst Nodes) Copy(src Nodes) Nodes {
-	// FIXME(kortschak): The behaviour is this method is very surprising.
-	// Whether the return is required or not depends on len(dst).
-
-	if same(src, dst) {
-		return dst
+// Clone performs a perfect Clone from src to s returning the result.
+// If s.Count() is not 0, a new Nodes is made and returned.
+func (s *Nodes) Clone(src *Nodes) *Nodes {
+	if same(src, s) {
+		return s
 	}
 
-	if len(dst) != 0 {
-		dst = make(Nodes, len(src))
+	if len(*s) != 0 {
+		*s = *NewNodesSize(len(*src))
 	}
 
-	for e, n := range src {
+	// Work is reflected into s from dst.
+	dst := *s
+	for e, n := range *src {
 		dst[e] = n
 	}
 
-	return dst
+	return s
 }
 
 // Equal reports set equality between the parameters. Sets are equal if
 // and only if they have the same elements.
-func Equal(a, b Nodes) bool {
+func Equal(a, b *Nodes) bool {
 	if same(a, b) {
 		return true
 	}
 
-	if len(a) != len(b) {
+	_a := *a
+	_b := *b
+	if len(_a) != len(_b) {
 		return false
 	}
 
-	for e := range a {
-		if _, ok := b[e]; !ok {
+	for e := range _a {
+		if _, ok := _b[e]; !ok {
 			return false
 		}
 	}
@@ -180,7 +188,7 @@ func Equal(a, b Nodes) bool {
 	return true
 }
 
-// Union takes the union of a and b, and stores it in dst.
+// Union takes the union of a and b, and stores it in s.
 //
 // The union of two sets, a and b, is the set containing all the
 // elements of each, for instance:
@@ -192,31 +200,33 @@ func Equal(a, b Nodes) bool {
 //
 //     {a,b,c} UNION {b,c,d} = {a,b,c,d}
 //
-func (dst Nodes) Union(a, b Nodes) Nodes {
+func (s *Nodes) Union(a, b *Nodes) *Nodes {
 	if same(a, b) {
-		return dst.Copy(a)
+		return s.Clone(a)
 	}
 
-	if !same(a, dst) && !same(b, dst) {
-		dst.clear()
+	if !same(a, s) && !same(b, s) {
+		s.clear()
 	}
 
-	if !same(dst, a) {
-		for e, n := range a {
+	// Work is reflected into s from dst.
+	dst := *s
+	if !same(s, a) {
+		for e, n := range *a {
 			dst[e] = n
 		}
 	}
 
-	if !same(dst, b) {
-		for e, n := range b {
+	if !same(s, b) {
+		for e, n := range *b {
 			dst[e] = n
 		}
 	}
 
-	return dst
+	return s
 }
 
-// Intersect takes the intersection of a and b, and stores it in dst.
+// Intersect takes the intersection of a and b, and stores it in s.
 //
 // The intersection of two sets, a and b, is the set containing all
 // the elements shared between the two sets, for instance:
@@ -233,35 +243,41 @@ func (dst Nodes) Union(a, b Nodes) Nodes {
 //
 //     {a,b,c} INTERSECT {d,e,f} = {}
 //
-func (dst Nodes) Intersect(a, b Nodes) Nodes {
+func (s *Nodes) Intersect(a, b *Nodes) *Nodes {
 	if same(a, b) {
-		return dst.Copy(a)
+		return s.Clone(a)
 	}
 
-	var swap Nodes
+	var swap *Nodes
 	switch {
 	default:
-		dst.clear()
-		if len(a) > len(b) {
+		s.clear()
+		if len(*a) > len(*b) {
 			a, b = b, a
 		}
-		for e, n := range a {
-			if _, ok := b[e]; ok {
+		// Work is reflected into s from dst.
+		dst := *s
+		_b := *b
+		for e, n := range *a {
+			if _, ok := _b[e]; ok {
 				dst[e] = n
 			}
 		}
-		return dst
+		return s
 
-	case same(a, dst):
+	case same(a, s):
 		swap = b
-	case same(b, dst):
+	case same(b, s):
 		swap = a
 	}
+	// Work is reflected into s from dst.
+	dst := *s
+	_swap := *swap
 	for e := range dst {
-		if _, ok := swap[e]; !ok {
+		if _, ok := _swap[e]; !ok {
 			delete(dst, e)
 		}
 	}
 
-	return dst
+	return s
 }

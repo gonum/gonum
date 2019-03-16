@@ -14,10 +14,10 @@
 // Static SI units
 //
 // This package provides a number of types representing either an SI base
-// unit or a common combination of base units, named for the unit it
-// represents (Length, Mass, Pressure, etc.). Each type has a float64 as the
-// underlying unit, and its value represents the number of that underlying
-// unit (Kilogram, Meter, Pascal, etc.). For example,
+// unit or a common combination of base units, named for the physical quantity
+// it represents (Length, Mass, Pressure, etc.). Each type is defined from
+// float64. The value of the float64 represents the quantity of that unit as
+// expressed in SI base units (Kilogram, Meter, Pascal, etc.). For example,
 //
 // 	height := 1.6 * unit.Meter
 // 	acc := unit.Acceleration(9.8)
@@ -59,7 +59,6 @@
 // 	k := 1 * unit.Milli * unit.Meter
 // 	j := unit.Length(0.001)
 //
-//
 // Additional SI-derived static units can also be defined by adding types that
 // satisfy the Uniter interface described below.
 //
@@ -71,12 +70,12 @@
 // variables of type Unit can be created with the New function and the
 // Dimensions map. For example, the code
 //
-// 	acc := unit.New(9.81, Dimensions{LengthDim: 1, TimeDim: -2})
+// 	rate := unit.New(1 * unit.Milli, Dimensions{MoleDim: 1, TimeDim: -1})
 //
-// creates a variable "acc" which has a value of 9.81 m/s^2. Methods of
+// creates a variable "rate" which has a value of 1e-3 mol/s. Methods of
 // unit can be used to modify this value, for example:
 //
-// 	acc.Mul(1.0 * unit.Kilogram).Mul(1 * unit.Meter)
+// 	rate.Mul(1 * unit.Centimeter).Div(1 * unit.Millivolt)
 //
 // To convert the unit back into a typed float64 value, the From methods
 // of the dimensional types should be used. From will return an error if the
@@ -96,8 +95,8 @@
 // 	wbc := unit.NewDimension("WhiteBloodCell")
 //
 // NewDimension should not be used, however, to create the unit of 'Slide',
-// because in this case slide is just a measurement of volume. Instead, a
-// constant could be defined.
+// because in this case slide is just a measurement of liquid volume. Instead,
+// a constant could be defined.
 //
 // 	const Slide unit.Volume =  0.1 * unit.Microliter
 //
@@ -106,5 +105,19 @@
 // and unit is incapable of catching these mismatches. For example, energy and
 // torque are both expressed as force times distance (Newton-meters in SI),
 // but it is wrong to say that a torque of 10 N-m is the same as 10 J, even
-// though the dimensions agree.
+// though the dimensions agree. Despite this, using the defined types to
+// represent units can help to catch errors at compile-time. For example,
+//
+// 	type Torque float64
+//
+// 	func (t Torque) Unit() *Unit {...
+//
+// allows you to define a statically typed function like so
+//
+// 	func LeverLength(apply unit.Force, want Torque) unit.Length {
+//		return unit.Length(float64(want)/float64(apply))
+// 	}
+//
+// This will prevent an energy value being provided to LeverLength in place
+// of a torque value.
 package unit // import "gonum.org/v1/gonum/unit"

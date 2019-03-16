@@ -222,9 +222,6 @@ func (u unitPrinters) Swap(i, j int) {
 type Unit struct {
 	dimensions Dimensions
 	value      float64
-
-	mu        sync.RWMutex
-	formatted string
 }
 
 // New creates a new variable of type Unit which has the value and dimensions
@@ -285,7 +282,6 @@ func (u *Unit) Mul(uniter Uniter) *Unit {
 			u.dimensions[key] = d + val
 		}
 	}
-	u.setFormattedUnits("")
 	u.value *= a.value
 	return u
 }
@@ -302,7 +298,6 @@ func (u *Unit) Div(uniter Uniter) *Unit {
 			u.dimensions[key] = d - val
 		}
 	}
-	u.setFormattedUnits("")
 	return u
 }
 
@@ -333,38 +328,21 @@ func (u *Unit) Format(fs fmt.State, c rune) {
 	case 'e', 'E', 'f', 'F', 'g', 'G':
 		p, pOk := fs.Precision()
 		w, wOk := fs.Width()
-		formatted := u.formattedUnits()
-		if formatted == "" && len(u.dimensions) > 0 {
-			formatted = u.dimensions.String()
-			u.setFormattedUnits(formatted)
-		}
+		units := u.dimensions.String()
 		switch {
 		case pOk && wOk:
-			fmt.Fprintf(fs, "%*.*"+string(c), pos(w-utf8.RuneCount([]byte(formatted))-1), p, u.value)
+			fmt.Fprintf(fs, "%*.*"+string(c), pos(w-utf8.RuneCount([]byte(units))-1), p, u.value)
 		case pOk:
 			fmt.Fprintf(fs, "%.*"+string(c), p, u.value)
 		case wOk:
-			fmt.Fprintf(fs, "%*"+string(c), pos(w-utf8.RuneCount([]byte(formatted))-1), u.value)
+			fmt.Fprintf(fs, "%*"+string(c), pos(w-utf8.RuneCount([]byte(units))-1), u.value)
 		default:
 			fmt.Fprintf(fs, "%"+string(c), u.value)
 		}
-		fmt.Fprintf(fs, " %s", formatted)
+		fmt.Fprintf(fs, " %s", units)
 	default:
 		fmt.Fprintf(fs, "%%!%c(*Unit=%g)", c, u)
 	}
-}
-
-func (u *Unit) formattedUnits() string {
-	u.mu.RLock()
-	f := u.formatted
-	u.mu.RUnlock()
-	return f
-}
-
-func (u *Unit) setFormattedUnits(f string) {
-	u.mu.Lock()
-	u.formatted = f
-	u.mu.Unlock()
 }
 
 func pos(a int) int {

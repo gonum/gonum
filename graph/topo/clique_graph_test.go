@@ -14,10 +14,12 @@ import (
 )
 
 var cliqueGraphTests = []struct {
+	name string
 	g    []intset
 	want string
 }{
 	{
+		name: "simple",
 		g: []intset{
 			0: linksTo(1, 2, 4, 6),
 			1: linksTo(2, 4, 6),
@@ -45,7 +47,8 @@ var cliqueGraphTests = []struct {
 }`,
 	},
 	{
-		g: batageljZaversnikGraph,
+		name: "Batagelj-Zaversnik Graph",
+		g:    batageljZaversnikGraph,
 		want: `strict graph {
   // Node definitions.
   0 [nodes="[0]"];
@@ -106,7 +109,7 @@ func TestCliqueGraph(t *testing.T) {
 		got := string(b)
 
 		if got != test.want {
-			t.Errorf("unexpected clique graph result: got:\n%s\nwant:\n%s", got, test.want)
+			t.Errorf("unexpected clique graph result for %q: got:\n%s\nwant:\n%s", test.name, got, test.want)
 		}
 	}
 }
@@ -117,4 +120,29 @@ func (n Clique) Attributes() []encoding.Attribute {
 
 func (e CliqueGraphEdge) Attributes() []encoding.Attribute {
 	return []encoding.Attribute{{Key: "nodes", Value: fmt.Sprintf(`"%v"`, e.Nodes())}}
+}
+
+func BenchmarkCliqueGraph(b *testing.B) {
+	for _, test := range cliqueGraphTests {
+		g := simple.NewUndirectedGraph()
+		for u, e := range test.g {
+			// Add nodes that are not defined by an edge.
+			if g.Node(int64(u)) == nil {
+				g.AddNode(simple.Node(u))
+			}
+			for v := range e {
+				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v)})
+			}
+		}
+
+		b.Run(test.name, func(b *testing.B) {
+			var dst *simple.UndirectedGraph
+			for i := 0; i < b.N; i++ {
+				b.StopTimer()
+				dst = simple.NewUndirectedGraph()
+				b.StartTimer()
+				CliqueGraph(dst, g)
+			}
+		})
+	}
 }

@@ -1,5 +1,9 @@
+// Copyright ©2019 The Gonum Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 /*
-Package lm implements optimization routines for non-linear least squares problems
+Package nlls implements optimization routines for non-linear least squares problems
 using the Levenberg-Marquardt method. 
 
 Given function f:Rn -> Rm, where m is the number of non-linear functions and n parameters,
@@ -8,17 +12,15 @@ the Levenberg-Marquardt method is used to seek a point X that minimizes F(x) = 0
 The user supplies a non-linear function. The jacobian may also be supplied by the user or
 approximated by finite differences.
 */
-package lm
+package nlls
 
 import (
 	"math"
 
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/mat"
-
-	"gonum.org/v1/gonum/optimize"
-
 	"gonum.org/v1/gonum/diff/fd"
+	"gonum.org/v1/gonum/optimize"
 )
 
 type Settings struct {
@@ -199,7 +201,7 @@ func LM(problem LMProblem, settings *Settings) (*Result, error) {
 	}, nil
 }
 
-// LMProblem is used for running LM optomization. The objective function is
+// LMProblem is used for running LM optimization. The objective function is
 // F = 0.5 * f.T * f, where f:Rn -> Rm and m >= n.
 type LMProblem struct {
 	// Dim is the dimension of the parameters of the problem (n).

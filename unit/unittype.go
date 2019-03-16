@@ -22,16 +22,48 @@ type Uniter interface {
 // function, typically within an init function.
 type Dimension int
 
+// NewDimension creates a new orthogonal dimension with the given symbol, and
+// returns the value of that dimension. The input symbol must not overlap with
+// any of the any of the SI base units or other symbols of common use in SI ("kg",
+// "J", etc.), and must not overlap with any other dimensions created by calls
+// to NewDimension. The SymbolExists function can check if the symbol exists.
+// NewDimension will panic if the input symbol matches an existing symbol.
+//
+// NewDimension should only be called for unit types that are actually orthogonal
+// to the base dimensions defined in this package. See the package-level
+// documentation for further explanation.
+func NewDimension(symbol string) Dimension {
+	defer mu.Unlock()
+	mu.Lock()
+	_, ok := dimensions[symbol]
+	if ok {
+		panic("unit: dimension string \"" + symbol + "\" already used")
+	}
+	d := Dimension(len(symbols))
+	symbols = append(symbols, symbol)
+	dimensions[symbol] = d
+	return d
+}
+
 // String returns the string for the dimension.
 func (d Dimension) String() string {
-	switch {
-	case d == reserved:
+	if d == reserved {
 		return "reserved"
-	case d < Dimension(len(symbols)):
-		return symbols[d]
-	default:
-		panic("unit: illegal dimension")
 	}
+	defer mu.RUnlock()
+	mu.RLock()
+	if int(d) < len(symbols) {
+		return symbols[d]
+	}
+	panic("unit: illegal dimension")
+}
+
+// SymbolExists returns whether the given symbol is already in use.
+func SymbolExists(symbol string) bool {
+	mu.RLock()
+	_, ok := dimensions[symbol]
+	mu.RUnlock()
+	return ok
 }
 
 const (
@@ -49,6 +81,8 @@ const (
 )
 
 var (
+	// mu protects symbols and dimensions for concurrent use.
+	mu      sync.RWMutex
 	symbols = []string{
 		CurrentDim:           "A",
 		LengthDim:            "m",
@@ -178,33 +212,6 @@ func (u unitPrinters) Less(i, j int) bool {
 
 func (u unitPrinters) Swap(i, j int) {
 	u[i], u[j] = u[j], u[i]
-}
-
-// NewDimension creates a new orthogonal dimension with the given symbol, and
-// returns the value of that dimension. The input symbol must not overlap with
-// any of the any of the SI base units or other symbols of common use in SI ("kg",
-// "J", etc.), and must not overlap with any other dimensions created by calls
-// to NewDimension. The SymbolExists function can check if the symbol exists.
-// NewDimension will panic if the input symbol matches an existing symbol.
-//
-// NewDimension should only be called for unit types that are actually orthogonal
-// to the base dimensions defined in this package. See the package-level
-// documentation for further explanation.
-func NewDimension(symbol string) Dimension {
-	_, ok := dimensions[symbol]
-	if ok {
-		panic("unit: dimension string \"" + symbol + "\" already used")
-	}
-	d := Dimension(len(symbols))
-	symbols = append(symbols, symbol)
-	dimensions[symbol] = d
-	return d
-}
-
-// SymoblExists returns whether the given symbol is already in use.
-func SymbolExists(symbol string) bool {
-	_, ok := dimensions[symbol]
-	return ok
 }
 
 // Unit represents a dimensional value. The dimensions will typically be in SI

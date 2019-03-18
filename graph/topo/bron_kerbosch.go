@@ -152,7 +152,7 @@ func BronKerbosch(g graph.Undirected) [][]graph.Node {
 		for _, n := range neighbours {
 			nv.Add(n)
 		}
-		bk.maximalCliquePivot(g, []graph.Node{v}, set.NewNodes().Intersect(p, nv), set.NewNodes().Intersect(x, nv))
+		bk.maximalCliquePivot(g, []graph.Node{v}, set.IntersectionOfNodes(p, nv), set.IntersectionOfNodes(x, nv))
 		p.Remove(v)
 		x.Add(v)
 	}
@@ -195,7 +195,7 @@ func (bk *bronKerbosch) maximalCliquePivot(g graph.Undirected, r []graph.Node, p
 			sr = append(r[:len(r):len(r)], v)
 		}
 
-		bk.maximalCliquePivot(g, sr, set.NewNodes().Intersect(p, nv), set.NewNodes().Intersect(x, nv))
+		bk.maximalCliquePivot(g, sr, set.IntersectionOfNodes(p, nv), set.IntersectionOfNodes(x, nv))
 		p.Remove(v)
 		x.Add(v)
 	}

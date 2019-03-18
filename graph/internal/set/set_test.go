@@ -329,7 +329,7 @@ func TestAddNodes(t *testing.T) {
 		t.Fatal("Set cannot be created successfully")
 	}
 
-	if s.count() != 0 {
+	if s.Count() != 0 {
 		t.Error("Set somehow contains new elements upon creation")
 	}
 
@@ -337,7 +337,7 @@ func TestAddNodes(t *testing.T) {
 	s.Add(node(3))
 	s.Add(node(5))
 
-	if s.count() != 3 {
+	if s.Count() != 3 {
 		t.Error("Incorrect number of set elements after adding")
 	}
 
@@ -347,9 +347,9 @@ func TestAddNodes(t *testing.T) {
 
 	s.Add(node(1))
 
-	if s.count() > 3 {
+	if s.Count() > 3 {
 		t.Error("Set double-adds element (element not unique)")
-	} else if s.count() < 3 {
+	} else if s.Count() < 3 {
 		t.Error("Set double-add lowered len")
 	}
 
@@ -377,7 +377,7 @@ func TestRemoveNodes(t *testing.T) {
 
 	s.Remove(node(1))
 
-	if s.count() != 2 {
+	if s.Count() != 2 {
 		t.Error("Incorrect number of set elements after removing an element")
 	}
 
@@ -391,28 +391,14 @@ func TestRemoveNodes(t *testing.T) {
 
 	s.Remove(node(1))
 
-	if s.count() != 2 || s.Has(node(1)) {
+	if s.Count() != 2 || s.Has(node(1)) {
 		t.Error("Double set remove does something strange")
 	}
 
 	s.Add(node(1))
 
-	if s.count() != 3 || !s.Has(node(1)) {
+	if s.Count() != 3 || !s.Has(node(1)) {
 		t.Error("Cannot add element after removal")
-	}
-}
-
-func TestClearNodes(t *testing.T) {
-	s := NewNodes()
-
-	s.Add(node(8))
-	s.Add(node(9))
-	s.Add(node(10))
-
-	s.clear()
-
-	if s.count() != 0 {
-		t.Error("clear did not properly reset set to size 0")
 	}
 }
 
@@ -457,13 +443,12 @@ func TestEqualNodes(t *testing.T) {
 
 func TestCopyNodes(t *testing.T) {
 	a := NewNodes()
-	b := NewNodes()
 
 	a.Add(node(1))
 	a.Add(node(2))
 	a.Add(node(3))
 
-	b.Copy(a)
+	b := CloneNodes(a)
 
 	if !Equal(a, b) {
 		t.Fatalf("Two sets not equal after copy: %v != %v", a, b)
@@ -474,31 +459,11 @@ func TestCopyNodes(t *testing.T) {
 	if Equal(a, b) {
 		t.Errorf("Mutating one set mutated another after copy: %v == %v", a, b)
 	}
-
-	b = b.Copy(a) // Assignment is needed because b is not empty.
-
-	if !Equal(a, b) {
-		t.Fatalf("Two sets not equal after second copy: %v != %v", a, b)
-	}
-}
-
-func TestSelfCopyNodes(t *testing.T) {
-	a := NewNodes()
-
-	a.Add(node(1))
-	a.Add(node(2))
-
-	a.Copy(a)
-
-	if a.count() != 2 {
-		t.Error("Something strange happened when copying into self")
-	}
 }
 
 func TestUnionSameNodes(t *testing.T) {
 	a := NewNodes()
 	b := NewNodes()
-	c := NewNodes()
 
 	a.Add(node(1))
 	a.Add(node(2))
@@ -506,9 +471,9 @@ func TestUnionSameNodes(t *testing.T) {
 	b.Add(node(1))
 	b.Add(node(2))
 
-	c.Union(a, b)
+	c := UnionOfNodes(a, b)
 
-	if c.count() != 2 {
+	if c.Count() != 2 {
 		t.Error("Union of same sets yields set with wrong len")
 	}
 
@@ -528,16 +493,15 @@ func TestUnionSameNodes(t *testing.T) {
 func TestUnionDiffNodes(t *testing.T) {
 	a := NewNodes()
 	b := NewNodes()
-	c := NewNodes()
 
 	a.Add(node(1))
 	a.Add(node(2))
 
 	b.Add(node(3))
 
-	c.Union(a, b)
+	c := UnionOfNodes(a, b)
 
-	if c.count() != 3 {
+	if c.Count() != 3 {
 		t.Error("Union of different sets yields set with wrong len")
 	}
 
@@ -545,11 +509,11 @@ func TestUnionDiffNodes(t *testing.T) {
 		t.Error("Union of different sets yields set with wrong elements")
 	}
 
-	if a.Has(node(3)) || !a.Has(node(2)) || !a.Has(node(1)) || a.count() != 2 {
+	if a.Has(node(3)) || !a.Has(node(2)) || !a.Has(node(1)) || a.Count() != 2 {
 		t.Error("Union of sets mutates non-destination set (argument 1)")
 	}
 
-	if !b.Has(node(3)) || b.Has(node(1)) || b.Has(node(2)) || b.count() != 1 {
+	if !b.Has(node(3)) || b.Has(node(1)) || b.Has(node(2)) || b.Count() != 1 {
 		t.Error("Union of sets mutates non-destination set (argument 2)")
 	}
 
@@ -561,7 +525,7 @@ func TestUnionDiffNodes(t *testing.T) {
 		}
 	}
 
-	c = c.Union(a, a) // Assignment is necessary because c is not empty.
+	c = UnionOfNodes(a, a)
 	if !reflect.DeepEqual(c, a) {
 		t.Errorf("Union of equal sets not equal to sets: %v != %v", c, a)
 	}
@@ -570,7 +534,6 @@ func TestUnionDiffNodes(t *testing.T) {
 func TestUnionOverlappingNodes(t *testing.T) {
 	a := NewNodes()
 	b := NewNodes()
-	c := NewNodes()
 
 	a.Add(node(1))
 	a.Add(node(2))
@@ -578,9 +541,9 @@ func TestUnionOverlappingNodes(t *testing.T) {
 	b.Add(node(2))
 	b.Add(node(3))
 
-	c.Union(a, b)
+	c := UnionOfNodes(a, b)
 
-	if c.count() != 3 {
+	if c.Count() != 3 {
 		t.Error("Union of overlapping sets yields set with wrong len")
 	}
 
@@ -588,11 +551,11 @@ func TestUnionOverlappingNodes(t *testing.T) {
 		t.Error("Union of overlapping sets yields set with wrong elements")
 	}
 
-	if a.Has(node(3)) || !a.Has(node(2)) || !a.Has(node(1)) || a.count() != 2 {
+	if a.Has(node(3)) || !a.Has(node(2)) || !a.Has(node(1)) || a.Count() != 2 {
 		t.Error("Union of sets mutates non-destination set (argument 1)")
 	}
 
-	if !b.Has(node(3)) || b.Has(node(1)) || !b.Has(node(2)) || b.count() != 2 {
+	if !b.Has(node(3)) || b.Has(node(1)) || !b.Has(node(2)) || b.Count() != 2 {
 		t.Error("Union of sets mutates non-destination set (argument 2)")
 	}
 
@@ -604,7 +567,7 @@ func TestUnionOverlappingNodes(t *testing.T) {
 		}
 	}
 
-	c = c.Intersect(a, a) // Assignment is necessary because c is not empty.
+	c = IntersectionOfNodes(a, a)
 	if !reflect.DeepEqual(c, a) {
 		t.Errorf("Intersection of equal sets not equal to sets: %v != %v", c, a)
 	}
@@ -613,7 +576,6 @@ func TestUnionOverlappingNodes(t *testing.T) {
 func TestIntersectSameNodes(t *testing.T) {
 	a := NewNodes()
 	b := NewNodes()
-	c := NewNodes()
 
 	a.Add(node(2))
 	a.Add(node(3))
@@ -621,9 +583,9 @@ func TestIntersectSameNodes(t *testing.T) {
 	b.Add(node(2))
 	b.Add(node(3))
 
-	c.Intersect(a, b)
+	c := IntersectionOfNodes(a, b)
 
-	if card := c.count(); card != 2 {
+	if card := c.Count(); card != 2 {
 		t.Errorf("Intersection of identical sets yields set of wrong len %d", card)
 	}
 
@@ -643,7 +605,6 @@ func TestIntersectSameNodes(t *testing.T) {
 func TestIntersectDiffNodes(t *testing.T) {
 	a := NewNodes()
 	b := NewNodes()
-	c := NewNodes()
 
 	a.Add(node(2))
 	a.Add(node(3))
@@ -651,17 +612,17 @@ func TestIntersectDiffNodes(t *testing.T) {
 	b.Add(node(1))
 	b.Add(node(4))
 
-	c.Intersect(a, b)
+	c := IntersectionOfNodes(a, b)
 
-	if card := c.count(); card != 0 {
+	if card := c.Count(); card != 0 {
 		t.Errorf("Intersection of different yields non-empty set %d", card)
 	}
 
-	if !a.Has(node(2)) || !a.Has(node(3)) || a.Has(node(1)) || a.Has(node(4)) || a.count() != 2 {
+	if !a.Has(node(2)) || !a.Has(node(3)) || a.Has(node(1)) || a.Has(node(4)) || a.Count() != 2 {
 		t.Error("Intersection of sets mutates non-destination set (argument 1)")
 	}
 
-	if b.Has(node(2)) || b.Has(node(3)) || !b.Has(node(1)) || !b.Has(node(4)) || b.count() != 2 {
+	if b.Has(node(2)) || b.Has(node(3)) || !b.Has(node(1)) || !b.Has(node(4)) || b.Count() != 2 {
 		t.Error("Intersection of sets mutates non-destination set (argument 1)")
 	}
 
@@ -677,7 +638,6 @@ func TestIntersectDiffNodes(t *testing.T) {
 func TestIntersectOverlappingNodes(t *testing.T) {
 	a := NewNodes()
 	b := NewNodes()
-	c := NewNodes()
 
 	a.Add(node(2))
 	a.Add(node(3))
@@ -685,9 +645,9 @@ func TestIntersectOverlappingNodes(t *testing.T) {
 	b.Add(node(3))
 	b.Add(node(4))
 
-	c.Intersect(a, b)
+	c := IntersectionOfNodes(a, b)
 
-	if card := c.count(); card != 1 {
+	if card := c.Count(); card != 1 {
 		t.Errorf("Intersection of overlapping sets yields set of incorrect len %d", card)
 	}
 
@@ -695,11 +655,11 @@ func TestIntersectOverlappingNodes(t *testing.T) {
 		t.Errorf("Intersection of overlapping sets yields set with wrong element")
 	}
 
-	if !a.Has(node(2)) || !a.Has(node(3)) || a.Has(node(4)) || a.count() != 2 {
+	if !a.Has(node(2)) || !a.Has(node(3)) || a.Has(node(4)) || a.Count() != 2 {
 		t.Error("Intersection of sets mutates non-destination set (argument 1)")
 	}
 
-	if b.Has(node(2)) || !b.Has(node(3)) || !b.Has(node(4)) || b.count() != 2 {
+	if b.Has(node(2)) || !b.Has(node(3)) || !b.Has(node(4)) || b.Count() != 2 {
 		t.Error("Intersection of sets mutates non-destination set (argument 1)")
 	}
 
@@ -711,12 +671,12 @@ func TestIntersectOverlappingNodes(t *testing.T) {
 		}
 	}
 
-	c = c.Intersect(c, a) // Assignment is necessary because c is not empty.
+	c = IntersectionOfNodes(c, a)
 	want := Nodes{3: node(3)}
 	if !reflect.DeepEqual(c, want) {
 		t.Errorf("Intersection of sets with dst equal to a not equal: %v != %v", c, want)
 	}
-	c = c.Intersect(a, c) // Assignment is necessary because c is not empty.
+	c = IntersectionOfNodes(a, c)
 	if !reflect.DeepEqual(c, want) {
 		t.Errorf("Intersection of sets with dst equal to a not equal: %v != %v", c, want)
 	}

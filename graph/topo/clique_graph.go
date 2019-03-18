@@ -58,7 +58,7 @@ func CliqueGraph(dst Builder, g graph.Undirected) {
 				case len(vc.Clique.nodes):
 					edgeNodes = []graph.Node{vc.Clique.nodes[0]}
 				default:
-					for _, n := range set.NewNodes().Intersect(uc.nodes, vc.nodes) {
+					for _, n := range set.IntersectionOfNodes(uc.nodes, vc.nodes) {
 						edgeNodes = append(edgeNodes, n)
 					}
 					sort.Sort(ordered.ByID(edgeNodes))

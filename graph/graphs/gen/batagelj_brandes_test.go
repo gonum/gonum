@@ -293,8 +293,8 @@ func TestBipartitePowerLawUndirected(t *testing.T) {
 			for _, u := range p2 {
 				p2s.Add(u)
 			}
-			o := set.NewNodes()
-			if o.Intersect(p1s, p2s); len(o) != 0 {
+			o := set.IntersectionOfNodes(p1s, p2s)
+			if len(o) != 0 {
 				t.Errorf("unexpected overlap in partition membership: n=%d, d=%d: got:%d", n, d, len(o))
 			}
 
@@ -342,8 +342,8 @@ func TestBipartitePowerLawDirected(t *testing.T) {
 			for _, u := range p2 {
 				p2s.Add(u)
 			}
-			o := set.NewNodes()
-			if o.Intersect(p1s, p2s); len(o) != 0 {
+			o := set.IntersectionOfNodes(p1s, p2s)
+			if len(o) != 0 {
 				t.Errorf("unexpected overlap in partition membership: n=%d, d=%d: got:%d", n, d, len(o))
 			}
 

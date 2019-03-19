@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"math"
 	"reflect"
+	"strings"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -518,7 +519,7 @@ func TestDenseAdd(t *testing.T) {
 		// These probably warrant a better check and failure. They should never happen in the wild though.
 		temp.mat.Data = nil
 		panicked, message := panics(func() { temp.Add(a, b) })
-		if !panicked || message != "runtime error: index out of range" {
+		if !panicked || !strings.HasPrefix(message, "runtime error: index out of range") {
 			t.Error("exected runtime panic for nil data slice")
 		}
 
@@ -605,7 +606,7 @@ func TestDenseSub(t *testing.T) {
 		// These probably warrant a better check and failure. They should never happen in the wild though.
 		temp.mat.Data = nil
 		panicked, message := panics(func() { temp.Sub(a, b) })
-		if !panicked || message != "runtime error: index out of range" {
+		if !panicked || !strings.HasPrefix(message, "runtime error: index out of range") {
 			t.Error("exected runtime panic for nil data slice")
 		}
 
@@ -692,7 +693,7 @@ func TestDenseMulElem(t *testing.T) {
 		// These probably warrant a better check and failure. They should never happen in the wild though.
 		temp.mat.Data = nil
 		panicked, message := panics(func() { temp.MulElem(a, b) })
-		if !panicked || message != "runtime error: index out of range" {
+		if !panicked || !strings.HasPrefix(message, "runtime error: index out of range") {
 			t.Error("exected runtime panic for nil data slice")
 		}
 
@@ -795,7 +796,7 @@ func TestDenseDivElem(t *testing.T) {
 		// These probably warrant a better check and failure. They should never happen in the wild though.
 		temp.mat.Data = nil
 		panicked, message := panics(func() { temp.DivElem(a, b) })
-		if !panicked || message != "runtime error: index out of range" {
+		if !panicked || !strings.HasPrefix(message, "runtime error: index out of range") {
 			t.Error("exected runtime panic for nil data slice")
 		}
 

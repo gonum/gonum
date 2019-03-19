@@ -103,8 +103,8 @@ func TestFormat(t *testing.T) {
 }
 
 func TestGoStringFormat(t *testing.T) {
-	expect1 := `&unit.Unit{dimensions:unit.Dimensions{4:2, 7:-1}, formatted:"", value:6.62606957e-34}`
-	expect2 := `&unit.Unit{dimensions:unit.Dimensions{7:-1, 4:2}, formatted:"", value:6.62606957e-34}`
+	expect1 := `&unit.Unit{dimensions:unit.Dimensions{4:2, 7:-1}, value:6.62606957e-34}`
+	expect2 := `&unit.Unit{dimensions:unit.Dimensions{7:-1, 4:2}, value:6.62606957e-34}`
 	if r := fmt.Sprintf("%#v", New(6.62606957e-34, Dimensions{MassDim: 2, TimeDim: -1})); r != expect1 && r != expect2 {
 		t.Errorf("Format %q: got: %q expected: %q", "%#v", r, expect1)
 	}

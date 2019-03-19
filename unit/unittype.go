@@ -8,6 +8,8 @@ import (
 	"bytes"
 	"fmt"
 	"sort"
+	"sync"
+	"unicode/utf8"
 )
 
 // Uniter is a type that can be converted to a Unit.
@@ -20,16 +22,48 @@ type Uniter interface {
 // function, typically within an init function.
 type Dimension int
 
+// NewDimension creates a new orthogonal dimension with the given symbol, and
+// returns the value of that dimension. The input symbol must not overlap with
+// any of the any of the SI base units or other symbols of common use in SI ("kg",
+// "J", etc.), and must not overlap with any other dimensions created by calls
+// to NewDimension. The SymbolExists function can check if the symbol exists.
+// NewDimension will panic if the input symbol matches an existing symbol.
+//
+// NewDimension should only be called for unit types that are actually orthogonal
+// to the base dimensions defined in this package. See the package-level
+// documentation for further explanation.
+func NewDimension(symbol string) Dimension {
+	defer mu.Unlock()
+	mu.Lock()
+	_, ok := dimensions[symbol]
+	if ok {
+		panic("unit: dimension string \"" + symbol + "\" already used")
+	}
+	d := Dimension(len(symbols))
+	symbols = append(symbols, symbol)
+	dimensions[symbol] = d
+	return d
+}
+
 // String returns the string for the dimension.
 func (d Dimension) String() string {
-	switch {
-	case d == reserved:
+	if d == reserved {
 		return "reserved"
-	case d < Dimension(len(symbols)):
-		return symbols[d]
-	default:
-		panic("unit: illegal dimension")
 	}
+	defer mu.RUnlock()
+	mu.RLock()
+	if int(d) < len(symbols) {
+		return symbols[d]
+	}
+	panic("unit: illegal dimension")
+}
+
+// SymbolExists returns whether the given symbol is already in use.
+func SymbolExists(symbol string) bool {
+	mu.RLock()
+	_, ok := dimensions[symbol]
+	mu.RUnlock()
+	return ok
 }
 
 const (
@@ -47,6 +81,8 @@ const (
 )
 
 var (
+	// mu protects symbols and dimensions for concurrent use.
+	mu      sync.RWMutex
 	symbols = []string{
 		CurrentDim:           "A",
 		LengthDim:            "m",
@@ -178,33 +214,6 @@ func (u unitPrinters) Swap(i, j int) {
 	u[i], u[j] = u[j], u[i]
 }
 
-// NewDimension creates a new orthogonal dimension with the given symbol, and
-// returns the value of that dimension. The input symbol must not overlap with
-// any of the any of the SI base units or other symbols of common use in SI ("kg",
-// "J", etc.), and must not overlap with any other dimensions created by calls
-// to NewDimension. The SymbolExists function can check if the symbol exists.
-// NewDimension will panic if the input symbol matches an existing symbol.
-//
-// NewDimension should only be called for unit types that are actually orthogonal
-// to the base dimensions defined in this package. See the package-level
-// documentation for further explanation.
-func NewDimension(symbol string) Dimension {
-	_, ok := dimensions[symbol]
-	if ok {
-		panic("unit: dimension string \"" + symbol + "\" already used")
-	}
-	d := Dimension(len(symbols))
-	symbols = append(symbols, symbol)
-	dimensions[symbol] = d
-	return d
-}
-
-// SymoblExists returns whether the given symbol is already in use.
-func SymbolExists(symbol string) bool {
-	_, ok := dimensions[symbol]
-	return ok
-}
-
 // Unit represents a dimensional value. The dimensions will typically be in SI
 // units, but can also include dimensions created with NewDimension. The Unit type
 // is most useful for ensuring dimensional consistency when manipulating types
@@ -212,7 +221,6 @@ func SymbolExists(symbol string) bool {
 // mass to get a force. See the package documentation for further explanation.
 type Unit struct {
 	dimensions Dimensions
-	formatted  string
 	value      float64
 }
 
@@ -274,7 +282,6 @@ func (u *Unit) Mul(uniter Uniter) *Unit {
 			u.dimensions[key] = d + val
 		}
 	}
-	u.formatted = ""
 	u.value *= a.value
 	return u
 }
@@ -291,7 +298,6 @@ func (u *Unit) Div(uniter Uniter) *Unit {
 			u.dimensions[key] = d - val
 		}
 	}
-	u.formatted = ""
 	return u
 }
 
@@ -322,20 +328,18 @@ func (u *Unit) Format(fs fmt.State, c rune) {
 	case 'e', 'E', 'f', 'F', 'g', 'G':
 		p, pOk := fs.Precision()
 		w, wOk := fs.Width()
-		if u.formatted == "" && len(u.dimensions) > 0 {
-			u.formatted = u.dimensions.String()
-		}
+		units := u.dimensions.String()
 		switch {
 		case pOk && wOk:
-			fmt.Fprintf(fs, "%*.*"+string(c), pos(w-len(u.formatted)-1), p, u.value)
+			fmt.Fprintf(fs, "%*.*"+string(c), pos(w-utf8.RuneCount([]byte(units))-1), p, u.value)
 		case pOk:
 			fmt.Fprintf(fs, "%.*"+string(c), p, u.value)
 		case wOk:
-			fmt.Fprintf(fs, "%*"+string(c), pos(w-len(u.formatted)-1), u.value)
+			fmt.Fprintf(fs, "%*"+string(c), pos(w-utf8.RuneCount([]byte(units))-1), u.value)
 		default:
 			fmt.Fprintf(fs, "%"+string(c), u.value)
 		}
-		fmt.Fprintf(fs, " %s", u.formatted)
+		fmt.Fprintf(fs, " %s", units)
 	default:
 		fmt.Fprintf(fs, "%%!%c(*Unit=%g)", c, u)
 	}

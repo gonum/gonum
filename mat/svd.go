@@ -29,22 +29,22 @@ const (
 	// the decomposition.
 	SVDNone SVDKind = 0
 
-	SVDRightThin SVDKind = 1 << (iota - 1)
-	SVDRightFull
-	SVDLeftThin
-	SVDLeftFull
+	SVDThinU SVDKind = 1 << (iota - 1)
+	SVDFullU
+	SVDThinV
+	SVDFullV
 
 	// SVDThin computes the thin singular vectors, that is, it computes
 	//  A = U~ * Σ * V~^T
 	// where U~ is of size m×min(m,n), Σ is a diagonal matrix of size min(m,n)×min(m,n)
 	// and V~ is of size n×min(m,n).
 	// Hack for now to keep PR small.
-	SVDThin = SVDLeftThin | SVDRightThin
+	SVDThin = SVDThinU | SVDThinV
 	// SVDFull computes the full singular value decomposition,
 	//  A = U * Σ * V^T
 	// where U is of size m×m, Σ is an m×n diagonal matrix, and V is an n×n matrix.
 	// Hack for now to keep PR small.
-	SVDFull = SVDLeftFull | SVDRightFull
+	SVDFull = SVDFullU | SVDFullV
 )
 
 // Factorize computes the singular value decomposition (SVD) of the input matrix A.
@@ -70,50 +70,51 @@ const (
 func (svd *SVD) Factorize(a Matrix, kind SVDKind) (ok bool) {
 	m, n := a.Dims()
 	var jobU, jobVT lapack.SVDJob
-	switch kind {
-	default:
-		panic("svd: bad input kind")
-	case SVDNone:
-		svd.u.Stride = 1
-		svd.vt.Stride = 1
-		jobU = lapack.SVDNone
-		jobVT = lapack.SVDNone
-	case SVDFull:
-		// TODO(btracey): This code should be modified to have the smaller
-		// matrix written in-place into aCopy when the lapack/native/dgesvd
-		// implementation is complete.
+
+	// TODO(btracey): This code should be modified to have the smaller
+	// matrix written in-place into aCopy when the lapack/native/dgesvd
+	// implementation is complete.
+	switch {
+	case kind&SVDFullU != 0:
+		jobU = lapack.SVDAll
 		svd.u = blas64.General{
 			Rows:   m,
 			Cols:   m,
 			Stride: m,
 			Data:   use(svd.u.Data, m*m),
 		}
-		svd.vt = blas64.General{
-			Rows:   n,
-			Cols:   n,
-			Stride: n,
-			Data:   use(svd.vt.Data, n*n),
-		}
-		jobU = lapack.SVDAll
-		jobVT = lapack.SVDAll
-	case SVDThin:
-		// TODO(btracey): This code should be modified to have the larger
-		// matrix written in-place into aCopy when the lapack/native/dgesvd
-		// implementation is complete.
+	case kind&SVDThinU != 0:
+		jobU = lapack.SVDStore
 		svd.u = blas64.General{
 			Rows:   m,
 			Cols:   min(m, n),
 			Stride: min(m, n),
 			Data:   use(svd.u.Data, m*min(m, n)),
 		}
+	default:
+		svd.u.Stride = 1
+		jobU = lapack.SVDNone
+	}
+	switch {
+	case kind&SVDFullV != 0:
+		svd.vt = blas64.General{
+			Rows:   n,
+			Cols:   n,
+			Stride: n,
+			Data:   use(svd.vt.Data, n*n),
+		}
+		jobVT = lapack.SVDAll
+	case kind&SVDThinV != 0:
 		svd.vt = blas64.General{
 			Rows:   min(m, n),
 			Cols:   n,
 			Stride: n,
 			Data:   use(svd.vt.Data, min(m, n)*n),
 		}
-		jobU = lapack.SVDStore
 		jobVT = lapack.SVDStore
+	default:
+		svd.vt.Stride = 1
+		jobVT = lapack.SVDNone
 	}
 
 	// A is destroyed on call, so copy the matrix.
@@ -141,7 +142,7 @@ func (svd *SVD) Kind() SVDKind {
 // Cond returns the 2-norm condition number for the factorized matrix. Cond will
 // panic if the receiver does not contain a successful factorization.
 func (svd *SVD) Cond() float64 {
-	if svd.kind == 0 {
+	if len(svd.s) == 0 {
 		panic("svd: no decomposition computed")
 	}
 	return svd.s[0] / svd.s[len(svd.s)-1]
@@ -156,7 +157,7 @@ func (svd *SVD) Cond() float64 {
 //
 // Values will panic if the receiver does not contain a successful factorization.
 func (svd *SVD) Values(s []float64) []float64 {
-	if svd.kind == 0 {
+	if len(svd.s) == 0 {
 		panic("svd: no decomposition computed")
 	}
 	if s == nil {
@@ -179,8 +180,8 @@ func (svd *SVD) Values(s []float64) []float64 {
 // allocated and returned.
 func (svd *SVD) UTo(dst *Dense) *Dense {
 	kind := svd.kind
-	if kind != SVDFull && kind != SVDThin {
-		panic("mat: improper SVD kind")
+	if kind&SVDThinU == 0 && kind&SVDFullU == 0 {
+		panic("svd: u not computed during factorization")
 	}
 	r := svd.u.Rows
 	c := svd.u.Cols
@@ -210,8 +211,8 @@ func (svd *SVD) UTo(dst *Dense) *Dense {
 // allocated and returned.
 func (svd *SVD) VTo(dst *Dense) *Dense {
 	kind := svd.kind
-	if kind != SVDFull && kind != SVDThin {
-		panic("mat: improper SVD kind")
+	if kind&SVDThinU == 0 && kind&SVDFullV == 0 {
+		panic("svd: v not computed during factorization")
 	}
 	r := svd.vt.Rows
 	c := svd.vt.Cols

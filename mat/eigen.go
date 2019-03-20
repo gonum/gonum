@@ -107,9 +107,10 @@ func (m *Dense) EigenvectorsSym(e *EigenSym) {
 type EigenFact int
 
 const (
-	EigenNoVectors    = 0
-	EigenLeftVectors  = 1 << 0
-	EigenRightVectors = 1 << 1
+	EigenNone  = 0
+	EigenLeft  = 1 << 0
+	EigenRight = 1 << 1
+	EigenBoth  = EigenLeft | EigenRight
 )
 
 // Eigen is a type for creating and using the eigenvalue decomposition of a dense matrix.
@@ -158,8 +159,8 @@ func (e *Eigen) Factorize(a Matrix, fact EigenFact) (ok bool) {
 	var sd Dense
 	sd.Clone(a)
 
-	left := fact&EigenLeftVectors != 0
-	right := fact&EigenRightVectors != 0
+	left := fact&EigenLeft != 0
+	right := fact&EigenRight != 0
 
 	var vl, vr Dense
 	jobvl := lapack.LeftEVNone

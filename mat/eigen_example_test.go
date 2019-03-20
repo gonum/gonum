@@ -50,7 +50,7 @@ func ExampleEigen() {
 	fmt.Printf("A = %v\n\n", mat.Formatted(a, mat.Prefix("    ")))
 
 	var eig mat.Eigen
-	ok := eig.Factorize(a, true, false)
+	ok := eig.Factorize(a, mat.EigenLeft)
 	if !ok {
 		log.Fatal("Eigendecomposition failed")
 	}

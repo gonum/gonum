@@ -96,7 +96,7 @@ func (gsvd *HOGSVD) Factorize(m ...Matrix) (ok bool) {
 	s.Scale(1/float64(len(m)*(len(m)-1)), s)
 
 	var eig Eigen
-	ok = eig.Factorize(s.T(), EigenRightVectors)
+	ok = eig.Factorize(s.T(), EigenRight)
 	if !ok {
 		gsvd.err = errors.New("hogsvd: eigen decomposition failed")
 		return false

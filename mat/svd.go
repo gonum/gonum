@@ -29,13 +29,13 @@ const (
 	// the decomposition.
 	SVDNone SVDKind = 0
 
-	// SVDThinU specifies the thin decomposition of U should be computed.
+	// SVDThinU specifies the thin decomposition for U should be computed.
 	SVDThinU SVDKind = 1 << (iota - 1)
-	// SVDThinU specifies the full decomposition of U should be computed.
+	// SVDFullU specifies the full decomposition for U should be computed.
 	SVDFullU
-	// SVDThinV specifies the thin decomposition of V should be computed.
+	// SVDThinV specifies the thin decomposition for V should be computed.
 	SVDThinV
-	// SVDFullV specifies the full decomposition of V should be computed.
+	// SVDFullV specifies the full decomposition for V should be computed.
 	SVDFullV
 
 	// SVDThin is a convenience value for computing both thin vectors.

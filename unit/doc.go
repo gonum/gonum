@@ -104,17 +104,12 @@
 // Different physical ideas are sometimes expressed with the same dimensions
 // and unit is incapable of catching these mismatches. For example, energy and
 // torque are both expressed as force times distance (Newton-meters in SI),
-// but it is wrong to say that a torque of 10 N-m is the same as 10 J, even
+// but it is wrong to say that a torque of 10 N·m is the same as 10 J, even
 // though the dimensions agree. Despite this, using the defined types to
 // represent units can help to catch errors at compile-time. For example,
+// using unit.Torque allows you to define a statically typed function like so
 //
-// 	type Torque float64
-//
-// 	func (t Torque) Unit() *Unit {...
-//
-// allows you to define a statically typed function like so
-//
-// 	func LeverLength(apply unit.Force, want Torque) unit.Length {
+// 	func LeverLength(apply unit.Force, want unit.Torque) unit.Length {
 //		return unit.Length(float64(want)/float64(apply))
 // 	}
 //

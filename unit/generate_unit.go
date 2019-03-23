@@ -26,6 +26,7 @@ type Unit struct {
 	Suffix        string
 	Singular      string
 	TypeComment   string // Text to comment the type
+	Bug           string // BUG(gonum): comment
 	Dimensions    []Dimension
 	ErForm        string //For Xxxer interface
 }
@@ -481,6 +482,23 @@ var Units = []Unit{
 		ErForm: "Pressurer",
 	},
 	{
+		Name:        "Torque",
+		Receiver:    "t",
+		PrintString: "N m",
+		Suffix:      "newtonmeter",
+		Singular:    "Newtonmeter",
+		TypeComment: "Torque represents a torque in Newton meters",
+		Bug: `Torque is measured in N·m, which is dimensionally identical to energy.
+Despite this, torque and energy are fundamentally different quantities and care
+should be taken to ensure that the correct unit outputs are generated. This is
+a limitation of standard dimensional analysis.`,
+		Dimensions: []Dimension{
+			{Name: LengthName, Power: 2},
+			{Name: MassName, Power: 1},
+			{Name: TimeName, Power: -2},
+		},
+	},
+	{
 		Name:        "Velocity",
 		Receiver:    "v",
 		PrintString: "m s^-1",
@@ -542,11 +560,17 @@ import (
 	"unicode/utf8"
 )
 
-// {{.TypeComment}}.
+{{with .Bug}} // BUG(gonum): {{. | comment}}
+
+{{end}}// {{.TypeComment}}.
 type {{.Name}} float64
 `
 
-var header = template.Must(template.New("header").Parse(headerTemplate))
+var fm = template.FuncMap{
+	"comment": func(s string) string { return strings.Replace(s, "\n", "\n// ", -1) },
+}
+
+var header = template.Must(template.New("header").Funcs(fm).Parse(headerTemplate))
 
 const constTemplate = `
 const(

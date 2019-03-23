@@ -24,6 +24,11 @@ type HOGSVD struct {
 	err error
 }
 
+// succFact returns whether the receiver contains a successful factorization.
+func (gsvd *HOGSVD) succFact() bool {
+	return gsvd.n != 0
+}
+
 // Factorize computes the higher order generalized singular value decomposition (HOGSVD)
 // of the n input r_i×c column tall matrices in m. HOGSV extends the GSVD case from 2 to n
 // input matrices.
@@ -157,8 +162,8 @@ func (gsvd *HOGSVD) Len() int {
 //
 // UTo will panic if the receiver does not contain a successful factorization.
 func (gsvd *HOGSVD) UTo(dst *Dense, n int) *Dense {
-	if gsvd.n == 0 {
-		panic("hogsvd: unsuccessful factorization")
+	if !gsvd.succFact() {
+		panic(badFact)
 	}
 	if n < 0 || gsvd.n <= n {
 		panic("hogsvd: invalid index")
@@ -187,8 +192,8 @@ func (gsvd *HOGSVD) UTo(dst *Dense, n int) *Dense {
 //
 // Values will panic if the receiver does not contain a successful factorization.
 func (gsvd *HOGSVD) Values(s []float64, n int) []float64 {
-	if gsvd.n == 0 {
-		panic("hogsvd: unsuccessful factorization")
+	if !gsvd.succFact() {
+		panic(badFact)
 	}
 	if n < 0 || gsvd.n <= n {
 		panic("hogsvd: invalid index")
@@ -214,8 +219,8 @@ func (gsvd *HOGSVD) Values(s []float64, n int) []float64 {
 //
 // VTo will panic if the receiver does not contain a successful factorization.
 func (gsvd *HOGSVD) VTo(dst *Dense) *Dense {
-	if gsvd.n == 0 {
-		panic("hogsvd: unsuccessful factorization")
+	if !gsvd.succFact() {
+		panic(badFact)
 	}
 	if dst == nil {
 		r, c := gsvd.v.Dims()

@@ -34,8 +34,8 @@ type BreadthFirst struct {
 	// during the walk. This includes edges that would hop to
 	// an already visited node.
 	//
-	// The value returned by EdgeFulter determines whether an
-	// edge can be traverse during the walk.
+	// The value returned by Traverse determines whether an
+	// edge can be traversed during the walk.
 	Traverse func(graph.Edge) bool
 
 	queue   linear.NodeQueue
@@ -142,8 +142,8 @@ type DepthFirst struct {
 	// during the walk. This includes edges that would hop to
 	// an already visited node.
 	//
-	// The value returned by EdgeFulter determines whether an
-	// edge can be traverse during the walk.
+	// The value returned by Traverse determines whether an
+	// edge can be traversed during the walk.
 	Traverse func(graph.Edge) bool
 
 	stack   linear.NodeStack

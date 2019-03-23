@@ -231,7 +231,7 @@ func (e *Eigen) Factorize(a Matrix, kind EigenKind) (ok bool) {
 	return true
 }
 
-// Kind returns the SVDKind of the decomposition. If no decomposition has been
+// Kind returns the EigenKind of the decomposition. If no decomposition has been
 // computed, Kind returns 0.
 func (e *Eigen) Kind() EigenKind {
 	return e.kind
@@ -328,7 +328,7 @@ func (e *Eigen) LeftVectorsTo(dst *CDense) *CDense {
 	if !e.succFact() {
 		panic(badFact)
 	}
-	if e.kind&EigenRight == 0 {
+	if e.kind&EigenLeft == 0 {
 		panic(badNoVect)
 	}
 	if dst == nil {

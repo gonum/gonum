@@ -104,12 +104,25 @@ func (m *Dense) EigenvectorsSym(e *EigenSym) {
 	m.Copy(e.vectors)
 }
 
+// EigenKind specifies the computation of eigenvectors during factorization.
+type EigenKind int
+
+const (
+	// EigenNone specifies to not compute any eigenvectors.
+	EigenNone EigenKind = 0
+	// EigenLeft specifies to compute the left eigenvectors.
+	EigenLeft EigenKind = 1 << iota
+	// EigenRight specifies to compute the right eigenvectors.
+	EigenRight
+	// EigenBoth is a convenience value for computing both eigenvectors.
+	EigenBoth EigenKind = EigenLeft | EigenRight
+)
+
 // Eigen is a type for creating and using the eigenvalue decomposition of a dense matrix.
 type Eigen struct {
 	n int // The size of the factorized matrix.
 
-	right bool // have the right eigenvectors been computed
-	left  bool // have the left eigenvectors been computed
+	kind EigenKind
 
 	values   []complex128
 	rVectors *CDense
@@ -118,7 +131,7 @@ type Eigen struct {
 
 // succFact returns whether the receiver contains a successful factorization.
 func (e *Eigen) succFact() bool {
-	return len(e.values) != 0
+	return e.n != 0
 }
 
 // Factorize computes the eigenvalues of the square matrix a, and optionally
@@ -135,13 +148,17 @@ func (e *Eigen) succFact() bool {
 //
 // Typically eigenvectors refer to right eigenvectors.
 //
-// In all cases, Factorize computes the eigenvalues of the matrix. If right and left
-// are true, then the right and left eigenvectors will be computed, respectively.
+// In all cases, Factorize computes the eigenvalues of the matrix. kind
+// specifies which of the eigenvectors, if any, to compute. See the EigenKind
+// documentation for more information.
 // Eigen panics if the input matrix is not square.
 //
 // Factorize returns whether the decomposition succeeded. If the decomposition
 // failed, methods that require a successful factorization will panic.
-func (e *Eigen) Factorize(a Matrix, left, right bool) (ok bool) {
+func (e *Eigen) Factorize(a Matrix, kind EigenKind) (ok bool) {
+	// kill previous factorization.
+	e.n = 0
+	e.kind = 0
 	// Copy a because it is modified during the Lapack call.
 	r, c := a.Dims()
 	if r != c {
@@ -149,6 +166,9 @@ func (e *Eigen) Factorize(a Matrix, left, right bool) (ok bool) {
 	}
 	var sd Dense
 	sd.Clone(a)
+
+	left := kind&EigenLeft != 0
+	right := kind&EigenRight != 0
 
 	var vl, vr Dense
 	jobvl := lapack.LeftEVNone
@@ -183,8 +203,7 @@ func (e *Eigen) Factorize(a Matrix, left, right bool) (ok bool) {
 		return false
 	}
 	e.n = r
-	e.right = right
-	e.left = left
+	e.kind = kind
 
 	// Construct complex eigenvalues from float64 data.
 	values := make([]complex128, r)
@@ -210,6 +229,15 @@ func (e *Eigen) Factorize(a Matrix, left, right bool) (ok bool) {
 		e.rVectors = nil
 	}
 	return true
+}
+
+// Kind returns the EigenKind of the decomposition. If no decomposition has been
+// computed, Kind returns -1.
+func (e *Eigen) Kind() EigenKind {
+	if !e.succFact() {
+		return -1
+	}
+	return e.kind
 }
 
 // Values extracts the eigenvalues of the factorized matrix. If dst is
@@ -281,7 +309,7 @@ func (e *Eigen) VectorsTo(dst *CDense) *CDense {
 	if !e.succFact() {
 		panic(badFact)
 	}
-	if !e.right {
+	if e.kind&EigenRight == 0 {
 		panic(badNoVect)
 	}
 	if dst == nil {
@@ -303,7 +331,7 @@ func (e *Eigen) LeftVectorsTo(dst *CDense) *CDense {
 	if !e.succFact() {
 		panic(badFact)
 	}
-	if !e.left {
+	if e.kind&EigenLeft == 0 {
 		panic(badNoVect)
 	}
 	if dst == nil {

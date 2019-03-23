@@ -20,6 +20,35 @@ type SVD struct {
 	vt blas64.General
 }
 
+// SVDKind specifies the treatment of singular vectors during an SVD
+// factorization.
+type SVDKind int
+
+const (
+	// SVDNone specifies that no singular vectors should be computed during
+	// the decomposition.
+	SVDNone SVDKind = 0
+
+	// SVDThinU specifies the thin decomposition for U should be computed.
+	SVDThinU SVDKind = 1 << (iota - 1)
+	// SVDFullU specifies the full decomposition for U should be computed.
+	SVDFullU
+	// SVDThinV specifies the thin decomposition for V should be computed.
+	SVDThinV
+	// SVDFullV specifies the full decomposition for V should be computed.
+	SVDFullV
+
+	// SVDThin is a convenience value for computing both thin vectors.
+	SVDThin SVDKind = SVDThinU | SVDThinV
+	// SVDThin is a convenience value for computing both full vectors.
+	SVDFull SVDKind = SVDFullU | SVDFullV
+)
+
+// succFact returns whether the receiver contains a successful factorization.
+func (svd *SVD) succFact() bool {
+	return len(svd.s) != 0
+}
+
 // Factorize computes the singular value decomposition (SVD) of the input matrix A.
 // The singular values of A are computed in all cases, while the singular
 // vectors are optionally computed depending on the input kind.
@@ -32,61 +61,67 @@ type SVD struct {
 // The first min(m,n) columns of U and V are, respectively, the left and right
 // singular vectors of A.
 //
-// It is frequently not necessary to compute the full SVD. Computation time and
-// storage costs can be reduced using the appropriate kind. Only the singular
-// values can be computed (kind == SVDNone), or a "thin" representation of the
-// orthogonal matrices U and V (kind = SVDThin). The thin representation can
-// save a significant amount of memory if m >> n or m << n.
+// Significant storage space can be saved by using the thin representation of
+// the SVD (kind == SVDThin) instead of the full SVD, especially if
+// m >> n or m << n. The thin SVD finds
+//  A = U~ * Σ * V~^T
+// where U~ is of size m×min(m,n), Σ is a diagonal matrix of size min(m,n)×min(m,n)
+// and V~ is of size n×min(m,n).
 //
 // Factorize returns whether the decomposition succeeded. If the decomposition
 // failed, routines that require a successful factorization will panic.
 func (svd *SVD) Factorize(a Matrix, kind SVDKind) (ok bool) {
+	// kill previous factorization
+	svd.s = svd.s[:0]
+	svd.kind = kind
+
 	m, n := a.Dims()
 	var jobU, jobVT lapack.SVDJob
-	switch kind {
-	default:
-		panic("svd: bad input kind")
-	case SVDNone:
-		svd.u.Stride = 1
-		svd.vt.Stride = 1
-		jobU = lapack.SVDNone
-		jobVT = lapack.SVDNone
-	case SVDFull:
-		// TODO(btracey): This code should be modified to have the smaller
-		// matrix written in-place into aCopy when the lapack/native/dgesvd
-		// implementation is complete.
+
+	// TODO(btracey): This code should be modified to have the smaller
+	// matrix written in-place into aCopy when the lapack/native/dgesvd
+	// implementation is complete.
+	switch {
+	case kind&SVDFullU != 0:
+		jobU = lapack.SVDAll
 		svd.u = blas64.General{
 			Rows:   m,
 			Cols:   m,
 			Stride: m,
 			Data:   use(svd.u.Data, m*m),
 		}
-		svd.vt = blas64.General{
-			Rows:   n,
-			Cols:   n,
-			Stride: n,
-			Data:   use(svd.vt.Data, n*n),
-		}
-		jobU = lapack.SVDAll
-		jobVT = lapack.SVDAll
-	case SVDThin:
-		// TODO(btracey): This code should be modified to have the larger
-		// matrix written in-place into aCopy when the lapack/native/dgesvd
-		// implementation is complete.
+	case kind&SVDThinU != 0:
+		jobU = lapack.SVDStore
 		svd.u = blas64.General{
 			Rows:   m,
 			Cols:   min(m, n),
 			Stride: min(m, n),
 			Data:   use(svd.u.Data, m*min(m, n)),
 		}
+	default:
+		svd.u.Stride = 1
+		jobU = lapack.SVDNone
+	}
+	switch {
+	case kind&SVDFullV != 0:
+		svd.vt = blas64.General{
+			Rows:   n,
+			Cols:   n,
+			Stride: n,
+			Data:   use(svd.vt.Data, n*n),
+		}
+		jobVT = lapack.SVDAll
+	case kind&SVDThinV != 0:
 		svd.vt = blas64.General{
 			Rows:   min(m, n),
 			Cols:   n,
 			Stride: n,
 			Data:   use(svd.vt.Data, min(m, n)*n),
 		}
-		jobU = lapack.SVDStore
 		jobVT = lapack.SVDStore
+	default:
+		svd.vt.Stride = 1
+		jobVT = lapack.SVDNone
 	}
 
 	// A is destroyed on call, so copy the matrix.
@@ -105,17 +140,20 @@ func (svd *SVD) Factorize(a Matrix, kind SVDKind) (ok bool) {
 	return ok
 }
 
-// Kind returns the matrix.SVDKind of the decomposition. If no decomposition has been
-// computed, Kind returns 0.
+// Kind returns the SVDKind of the decomposition. If no decomposition has been
+// computed, Kind returns -1.
 func (svd *SVD) Kind() SVDKind {
+	if !svd.succFact() {
+		return -1
+	}
 	return svd.kind
 }
 
 // Cond returns the 2-norm condition number for the factorized matrix. Cond will
 // panic if the receiver does not contain a successful factorization.
 func (svd *SVD) Cond() float64 {
-	if svd.kind == 0 {
-		panic("svd: no decomposition computed")
+	if !svd.succFact() {
+		panic(badFact)
 	}
 	return svd.s[0] / svd.s[len(svd.s)-1]
 }
@@ -129,8 +167,8 @@ func (svd *SVD) Cond() float64 {
 //
 // Values will panic if the receiver does not contain a successful factorization.
 func (svd *SVD) Values(s []float64) []float64 {
-	if svd.kind == 0 {
-		panic("svd: no decomposition computed")
+	if !svd.succFact() {
+		panic(badFact)
 	}
 	if s == nil {
 		s = make([]float64, len(svd.s))
@@ -147,13 +185,16 @@ func (svd *SVD) Values(s []float64) []float64 {
 // values as returned from SVD.Values.
 //
 // If dst is not nil, U is stored in-place into dst, and dst must have size
-// m×m if svd.Kind() == SVDFull, size m×min(m,n) if svd.Kind() == SVDThin, and
-// UTo panics otherwise. If dst is nil, a new matrix of the appropriate size is
-// allocated and returned.
+// m×m if the full U was computed, size m×min(m,n) if the thin U was computed,
+// and UTo panics otherwise. If dst is nil, a new matrix of the appropriate size
+// is allocated and returned.
 func (svd *SVD) UTo(dst *Dense) *Dense {
+	if !svd.succFact() {
+		panic(badFact)
+	}
 	kind := svd.kind
-	if kind != SVDFull && kind != SVDThin {
-		panic("mat: improper SVD kind")
+	if kind&SVDThinU == 0 && kind&SVDFullU == 0 {
+		panic("svd: u not computed during factorization")
 	}
 	r := svd.u.Rows
 	c := svd.u.Cols
@@ -178,13 +219,16 @@ func (svd *SVD) UTo(dst *Dense) *Dense {
 // values as returned from SVD.Values.
 //
 // If dst is not nil, V is stored in-place into dst, and dst must have size
-// n×n if svd.Kind() == SVDFull, size n×min(m,n) if svd.Kind() == SVDThin, and
-// VTo panics otherwise. If dst is nil, a new matrix of the appropriate size is
-// allocated and returned.
+// n×n if the full V was computed, size n×min(m,n) if the thin V was computed,
+// and VTo panics otherwise. If dst is nil, a new matrix of the appropriate size
+// is allocated and returned.
 func (svd *SVD) VTo(dst *Dense) *Dense {
+	if !svd.succFact() {
+		panic(badFact)
+	}
 	kind := svd.kind
-	if kind != SVDFull && kind != SVDThin {
-		panic("mat: improper SVD kind")
+	if kind&SVDThinU == 0 && kind&SVDFullV == 0 {
+		panic("svd: v not computed during factorization")
 	}
 	r := svd.vt.Rows
 	c := svd.vt.Cols

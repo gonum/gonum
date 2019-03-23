@@ -63,13 +63,13 @@ func TestEigen(t *testing.T) {
 		},
 	} {
 		var e1, e2, e3, e4 Eigen
-		ok := e1.Factorize(test.a, true, true)
+		ok := e1.Factorize(test.a, EigenBoth)
 		if !ok {
 			panic("bad factorization")
 		}
-		e2.Factorize(test.a, false, true)
-		e3.Factorize(test.a, true, false)
-		e4.Factorize(test.a, false, false)
+		e2.Factorize(test.a, EigenRight)
+		e3.Factorize(test.a, EigenLeft)
+		e4.Factorize(test.a, EigenNone)
 
 		v1 := e1.Values(nil)
 		if !cmplxEqualTol(v1, test.values, 1e-14) {

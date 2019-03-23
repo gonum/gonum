@@ -141,8 +141,11 @@ func (svd *SVD) Factorize(a Matrix, kind SVDKind) (ok bool) {
 }
 
 // Kind returns the SVDKind of the decomposition. If no decomposition has been
-// computed, Kind returns 0.
+// computed, Kind returns -1.
 func (svd *SVD) Kind() SVDKind {
+	if !svd.succFact() {
+		return -1
+	}
 	return svd.kind
 }
 

@@ -232,8 +232,11 @@ func (e *Eigen) Factorize(a Matrix, kind EigenKind) (ok bool) {
 }
 
 // Kind returns the EigenKind of the decomposition. If no decomposition has been
-// computed, Kind returns 0.
+// computed, Kind returns -1.
 func (e *Eigen) Kind() EigenKind {
+	if !e.succFact() {
+		return -1
+	}
 	return e.kind
 }
 

@@ -147,9 +147,12 @@ func (gsvd *GSVD) Factorize(a, b Matrix, kind GSVDKind) (ok bool) {
 	return ok
 }
 
-// Kind returns the matrix.GSVDKind of the decomposition. If no decomposition has been
-// computed, Kind returns 0.
+// Kind returns the GSVDKind of the decomposition. If no decomposition has been
+// computed, Kind returns -1.
 func (gsvd *GSVD) Kind() GSVDKind {
+	if !gsvd.succFact() {
+		return -1
+	}
 	return gsvd.kind
 }
 

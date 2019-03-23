@@ -144,7 +144,7 @@ func TestBreadthFirst(t *testing.T) {
 			}
 		}
 		w := BreadthFirst{
-			EdgeFilter: test.edge,
+			Traverse: test.edge,
 		}
 		var got [][]int64
 		final := w.Walk(g, test.from, func(n graph.Node, d int) bool {
@@ -232,7 +232,7 @@ func TestDepthFirst(t *testing.T) {
 			}
 		}
 		w := DepthFirst{
-			EdgeFilter: test.edge,
+			Traverse: test.edge,
 		}
 		var got []int64
 		final := w.Walk(g, test.from, func(n graph.Node) bool {
@@ -308,9 +308,9 @@ func TestWalkAll(t *testing.T) {
 			)
 			switch w := w.(type) {
 			case *BreadthFirst:
-				w.EdgeFilter = test.edge
+				w.Traverse = test.edge
 			case *DepthFirst:
-				w.EdgeFilter = test.edge
+				w.Traverse = test.edge
 			default:
 				panic(fmt.Sprintf("bad walker type: %T", w))
 			}

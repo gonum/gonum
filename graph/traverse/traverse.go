@@ -30,21 +30,21 @@ type BreadthFirst struct {
 	// Visit is called on all nodes on their first visit.
 	Visit func(graph.Node)
 
-	// EdgeFilter is called on all edges that may be traversed
+	// Traverse is called on all edges that may be traversed
 	// during the walk. This includes edges that would hop to
 	// an already visited node.
 	//
 	// The value returned by EdgeFulter determines whether an
 	// edge can be traverse during the walk.
-	EdgeFilter func(graph.Edge) bool
+	Traverse func(graph.Edge) bool
 
 	queue   linear.NodeQueue
 	visited set.Int64s
 }
 
 // Walk performs a breadth-first traversal of the graph g starting from the given node,
-// depending on the the EdgeFilter field and the until parameter if they are non-nil. The
-// traversal follows edges for which EdgeFilter(edge) is true and returns the first node
+// depending on the the Traverse field and the until parameter if they are non-nil. The
+// traversal follows edges for which Traverse(edge) is true and returns the first node
 // for which until(node, depth) is true. During the traversal, if the Visit field is
 // non-nil, it is called with each node the first time it is visited.
 func (b *BreadthFirst) Walk(g Graph, from graph.Node, until func(n graph.Node, d int) bool) graph.Node {
@@ -72,7 +72,7 @@ func (b *BreadthFirst) Walk(g Graph, from graph.Node, until func(n graph.Node, d
 		for to.Next() {
 			n := to.Node()
 			nid := n.ID()
-			if b.EdgeFilter != nil && !b.EdgeFilter(g.Edge(tid, nid)) {
+			if b.Traverse != nil && !b.Traverse(g.Edge(tid, nid)) {
 				continue
 			}
 			if b.visited.Has(nid) {
@@ -138,21 +138,21 @@ type DepthFirst struct {
 	// Visit is called on all nodes on their first visit.
 	Visit func(graph.Node)
 
-	// EdgeFilter is called on all edges that may be traversed
+	// Traverse is called on all edges that may be traversed
 	// during the walk. This includes edges that would hop to
 	// an already visited node.
 	//
 	// The value returned by EdgeFulter determines whether an
 	// edge can be traverse during the walk.
-	EdgeFilter func(graph.Edge) bool
+	Traverse func(graph.Edge) bool
 
 	stack   linear.NodeStack
 	visited set.Int64s
 }
 
 // Walk performs a depth-first traversal of the graph g starting from the given node,
-// depending on the the EdgeFilter field and the until parameter if they are non-nil. The
-// traversal follows edges for which EdgeFilter(edge) is true and returns the first node
+// depending on the the Traverse field and the until parameter if they are non-nil. The
+// traversal follows edges for which Traverse(edge) is true and returns the first node
 // for which until(node) is true. During the traversal, if the Visit field is non-nil, it
 // is called with each node the first time it is visited.
 func (d *DepthFirst) Walk(g Graph, from graph.Node, until func(graph.Node) bool) graph.Node {
@@ -175,7 +175,7 @@ func (d *DepthFirst) Walk(g Graph, from graph.Node, until func(graph.Node) bool)
 		for to.Next() {
 			n := to.Node()
 			nid := n.ID()
-			if d.EdgeFilter != nil && !d.EdgeFilter(g.Edge(tid, nid)) {
+			if d.Traverse != nil && !d.Traverse(g.Edge(tid, nid)) {
 				continue
 			}
 			if d.visited.Has(nid) {

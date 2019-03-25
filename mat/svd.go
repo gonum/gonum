@@ -99,7 +99,6 @@ func (svd *SVD) Factorize(a Matrix, kind SVDKind) (ok bool) {
 			Data:   use(svd.u.Data, m*min(m, n)),
 		}
 	default:
-		svd.u.Stride = 1
 		jobU = lapack.SVDNone
 	}
 	switch {
@@ -120,7 +119,6 @@ func (svd *SVD) Factorize(a Matrix, kind SVDKind) (ok bool) {
 		}
 		jobVT = lapack.SVDStore
 	default:
-		svd.vt.Stride = 1
 		jobVT = lapack.SVDNone
 	}
 

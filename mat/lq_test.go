@@ -78,7 +78,7 @@ func TestSolveLQ(t *testing.T) {
 			var x Dense
 			lq := &LQ{}
 			lq.Factorize(a)
-			lq.Solve(&x, trans, b)
+			lq.SolveTo(&x, trans, b)
 
 			// Test that the normal equations hold.
 			// A^T * A * x = A^T * b if !trans
@@ -167,7 +167,7 @@ func TestSolveLQCond(t *testing.T) {
 		lq.Factorize(test)
 		b := NewDense(m, 2, nil)
 		var x Dense
-		if err := lq.Solve(&x, false, b); err == nil {
+		if err := lq.SolveTo(&x, false, b); err == nil {
 			t.Error("No error for near-singular matrix in matrix solve.")
 		}
 

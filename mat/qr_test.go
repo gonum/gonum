@@ -102,7 +102,7 @@ func TestSolveQR(t *testing.T) {
 			var x Dense
 			var qr QR
 			qr.Factorize(a)
-			qr.Solve(&x, trans, b)
+			qr.SolveTo(&x, trans, b)
 
 			// Test that the normal equations hold.
 			// A^T * A * x = A^T * b if !trans
@@ -155,7 +155,7 @@ func TestSolveQRVec(t *testing.T) {
 			var x VecDense
 			var qr QR
 			qr.Factorize(a)
-			qr.SolveVec(&x, trans, b)
+			qr.SolveVecTo(&x, trans, b)
 
 			// Test that the normal equations hold.
 			// A^T * A * x = A^T * b if !trans
@@ -191,13 +191,13 @@ func TestSolveQRCond(t *testing.T) {
 		qr.Factorize(test)
 		b := NewDense(m, 2, nil)
 		var x Dense
-		if err := qr.Solve(&x, false, b); err == nil {
+		if err := qr.SolveTo(&x, false, b); err == nil {
 			t.Error("No error for near-singular matrix in matrix solve.")
 		}
 
 		bvec := NewVecDense(m, nil)
 		var xvec VecDense
-		if err := qr.SolveVec(&xvec, false, bvec); err == nil {
+		if err := qr.SolveVecTo(&xvec, false, bvec); err == nil {
 			t.Error("No error for near-singular matrix in matrix solve.")
 		}
 	}

@@ -103,7 +103,7 @@ func TestCholeskySolve(t *testing.T) {
 		}
 
 		var x Dense
-		chol.Solve(&x, test.b)
+		chol.SolveTo(&x, test.b)
 		if !EqualApprox(&x, test.ans, 1e-12) {
 			t.Error("incorrect Cholesky solve solution")
 		}
@@ -164,7 +164,7 @@ func TestCholeskySolveChol(t *testing.T) {
 		}
 
 		var x Dense
-		chola.SolveChol(&x, &cholb)
+		chola.SolveCholTo(&x, &cholb)
 
 		var ans Dense
 		ans.Mul(test.a, &x)

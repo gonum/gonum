@@ -13,11 +13,6 @@ import (
 	"unicode/utf8"
 )
 
-// BUG(gonum): Torque is measured in N·m, which is dimensionally identical to energy.
-// Despite this, torque and energy are fundamentally different quantities and care
-// should be taken to ensure that the correct unit outputs are generated. This is
-// a limitation of standard dimensional analysis.
-
 // Torque represents a torque in Newton meters.
 type Torque float64
 

@@ -34,6 +34,10 @@ type EigenSym struct {
 // Factorize returns whether the decomposition succeeded. If the decomposition
 // failed, methods that require a successful factorization will panic.
 func (e *EigenSym) Factorize(a Symmetric, vectors bool) (ok bool) {
+	// kill previous decomposition
+	e.vectorsComputed = false
+	e.values = e.values[:]
+
 	n := a.Symmetric()
 	sd := NewSymDense(n, nil)
 	sd.CopySym(a)
@@ -87,21 +91,28 @@ func (e *EigenSym) Values(dst []float64) []float64 {
 	return dst
 }
 
-// EigenvectorsSym extracts the eigenvectors of the factorized matrix and stores
-// them in the receiver. Each eigenvector is a column corresponding to the
-// respective eigenvalue returned by e.Values.
+// VectorsTo returns the eigenvectors of the decomposition. VectorsTo
+// will panic if the eigenvectors were not computed during the factorization,
+// or if the factorization was not successful.
 //
-// EigenvectorsSym panics if the factorization was not successful or if the
-// decomposition did not compute the eigenvectors.
-func (m *Dense) EigenvectorsSym(e *EigenSym) {
+// If dst is not nil, the eigenvectors are stored in-place into dst, and dst
+// must have size n×n and panics otherwise. If dst is nil, a new matrix
+// is allocated and returned.
+func (e *EigenSym) VectorsTo(dst *Dense) *Dense {
 	if !e.succFact() {
 		panic(badFact)
 	}
 	if !e.vectorsComputed {
 		panic(badNoVect)
 	}
-	m.reuseAs(len(e.values), len(e.values))
-	m.Copy(e.vectors)
+	r, c := e.vectors.Dims()
+	if dst == nil {
+		dst = NewDense(r, c, nil)
+	} else {
+		dst.reuseAs(r, c)
+	}
+	dst.Copy(e.vectors)
+	return dst
 }
 
 // EigenKind specifies the computation of eigenvectors during factorization.

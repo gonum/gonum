@@ -25,9 +25,8 @@ func ExampleEigenSym() {
 	}
 	fmt.Printf("Eigenvalues of A:\n%1.3f\n\n", eigsym.Values(nil))
 
-	var ev mat.Dense
-	ev.EigenvectorsSym(&eigsym)
-	fmt.Printf("Eigenvectors of A:\n%1.3f\n\n", mat.Formatted(&ev))
+	ev := eigsym.VectorsTo(nil)
+	fmt.Printf("Eigenvectors of A:\n%1.3f\n\n", mat.Formatted(ev))
 
 	// Output:
 	// A = ⎡  7  0.5⎤

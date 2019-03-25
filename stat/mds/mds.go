@@ -59,7 +59,7 @@ func TorgersonScaling(dst *mat.Dense, eigdst []float64, dis mat.Symmetric) (k in
 	if !ok {
 		return 0, dst, eigdst
 	}
-	dst.EigenvectorsSym(&ed)
+	ed.VectorsTo(dst)
 	vals := ed.Values(nil)
 	reverse(vals, dst.RawMatrix())
 	copy(eigdst, vals)

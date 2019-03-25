@@ -88,7 +88,7 @@ func kConnectedComponents(k int, cg graph.Undirected) [][]graph.Node {
 		c = c[:0]
 	}
 	w := traverse.DepthFirst{
-		EdgeFilter: func(e graph.Edge) bool {
+		Traverse: func(e graph.Edge) bool {
 			return len(e.(topo.CliqueGraphEdge).Nodes()) >= k-1
 		},
 	}

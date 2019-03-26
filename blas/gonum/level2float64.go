@@ -124,11 +124,31 @@ func (Implementation) Dgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float64, 
 		ky = -(lenY - 1) * incY
 	}
 
-	// First form y = beta * y
-	if incY > 0 {
-		Implementation{}.Dscal(lenY, beta, y, incY)
-	} else {
-		Implementation{}.Dscal(lenY, beta, y, -incY)
+	// Form y = beta * y.
+	if beta != 1 {
+		if incY == 1 {
+			if beta == 0 {
+				for i := range y[:lenY] {
+					y[i] = 0
+				}
+			} else {
+				f64.ScalUnitary(beta, y[:lenY])
+			}
+		} else {
+			iy := ky
+			if beta == 0 {
+				for i := 0; i < lenY; i++ {
+					y[iy] = 0
+					iy += incY
+				}
+			} else {
+				if incY > 0 {
+					f64.ScalInc(beta, y, uintptr(lenY), uintptr(incY))
+				} else {
+					f64.ScalInc(beta, y, uintptr(lenY), uintptr(-incY))
+				}
+			}
+		}
 	}
 
 	if alpha == 0 {
@@ -589,10 +609,28 @@ func (Implementation) Dsymv(ul blas.Uplo, n int, alpha float64, a []float64, lda
 
 	// Form y = beta * y
 	if beta != 1 {
-		if incY > 0 {
-			Implementation{}.Dscal(n, beta, y, incY)
+		if incY == 1 {
+			if beta == 0 {
+				for i := range y[:n] {
+					y[i] = 0
+				}
+			} else {
+				f64.ScalUnitary(beta, y[:n])
+			}
 		} else {
-			Implementation{}.Dscal(n, beta, y, -incY)
+			iy := ky
+			if beta == 0 {
+				for i := 0; i < n; i++ {
+					y[iy] = 0
+					iy += incY
+				}
+			} else {
+				if incY > 0 {
+					f64.ScalInc(beta, y, uintptr(n), uintptr(incY))
+				} else {
+					f64.ScalInc(beta, y, uintptr(n), uintptr(-incY))
+				}
+			}
 		}
 	}
 
@@ -1352,11 +1390,31 @@ func (Implementation) Dsbmv(ul blas.Uplo, n, k int, alpha float64, a []float64, 
 		ky = -(lenY - 1) * incY
 	}
 
-	// First form y = beta * y
-	if incY > 0 {
-		Implementation{}.Dscal(lenY, beta, y, incY)
-	} else {
-		Implementation{}.Dscal(lenY, beta, y, -incY)
+	// Form y = beta * y.
+	if beta != 1 {
+		if incY == 1 {
+			if beta == 0 {
+				for i := range y[:n] {
+					y[i] = 0
+				}
+			} else {
+				f64.ScalUnitary(beta, y[:n])
+			}
+		} else {
+			iy := ky
+			if beta == 0 {
+				for i := 0; i < n; i++ {
+					y[iy] = 0
+					iy += incY
+				}
+			} else {
+				if incY > 0 {
+					f64.ScalInc(beta, y, uintptr(n), uintptr(incY))
+				} else {
+					f64.ScalInc(beta, y, uintptr(n), uintptr(-incY))
+				}
+			}
+		}
 	}
 
 	if alpha == 0 {
@@ -1883,12 +1941,30 @@ func (Implementation) Dspmv(ul blas.Uplo, n int, alpha float64, ap []float64, x 
 		ky = -(n - 1) * incY
 	}
 
-	// Form y = beta * y
+	// Form y = beta * y.
 	if beta != 1 {
-		if incY > 0 {
-			Implementation{}.Dscal(n, beta, y, incY)
+		if incY == 1 {
+			if beta == 0 {
+				for i := range y[:n] {
+					y[i] = 0
+				}
+			} else {
+				f64.ScalUnitary(beta, y[:n])
+			}
 		} else {
-			Implementation{}.Dscal(n, beta, y, -incY)
+			iy := ky
+			if beta == 0 {
+				for i := 0; i < n; i++ {
+					y[iy] = 0
+					iy += incY
+				}
+			} else {
+				if incY > 0 {
+					f64.ScalInc(beta, y, uintptr(n), uintptr(incY))
+				} else {
+					f64.ScalInc(beta, y, uintptr(n), uintptr(-incY))
+				}
+			}
 		}
 	}
 

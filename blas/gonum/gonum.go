@@ -6,7 +6,11 @@
 
 package gonum
 
-import "math"
+import (
+	"math"
+
+	"gonum.org/v1/gonum/internal/math32"
+)
 
 type Implementation struct{}
 
@@ -46,4 +50,9 @@ func blocks(dim, bsize int) int {
 // dcabs1 returns |real(z)|+|imag(z)|.
 func dcabs1(z complex128) float64 {
 	return math.Abs(real(z)) + math.Abs(imag(z))
+}
+
+// scabs1 returns |real(z)|+|imag(z)|.
+func scabs1(z complex64) float32 {
+	return math32.Abs(real(z)) + math32.Abs(imag(z))
 }

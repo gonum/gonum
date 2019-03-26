@@ -213,7 +213,7 @@ func printHeader(f *os.File, name string) error {
 // Generate the benchmark scripts for level1
 func level1(benchPath string, pkgname string) error {
 	// Generate level 1 benchmarks
-	level1Filepath := filepath.Join(benchPath, "level1doubleBench_auto_test.go")
+	level1Filepath := filepath.Join(benchPath, "level1float64_bench_test.go")
 	f, err := os.Create(level1Filepath)
 	if err != nil {
 		return err

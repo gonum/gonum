@@ -24,6 +24,7 @@ var (
 
 // Cholesky is a symmetric positive definite matrix represented by its
 // Cholesky decomposition.
+//
 // The decomposition can be constructed using the Factorize method. The
 // factorization itself can be extracted using the UTo or LTo methods, and the
 // original symmetric matrix can be recovered with ToSym.
@@ -94,7 +95,7 @@ func (c *Cholesky) At(i, j int) float64 {
 
 	var val float64
 	for k := 0; k <= min(i, j); k++ {
-		val += c.chol.At(k, i) * c.chol.At(k, j)
+		val += c.chol.at(k, i) * c.chol.at(k, j)
 	}
 	return val
 }
@@ -106,7 +107,7 @@ func (c *Cholesky) T() Matrix {
 }
 
 // Symmetric implements the Symmetric interface and returns the number of rows
-// and columns in the matrix.
+// in the matrix (this is also the number of columns).
 func (c *Cholesky) Symmetric() int {
 	r, _ := c.chol.Dims()
 	return r

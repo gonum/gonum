@@ -17,8 +17,20 @@ const (
 	badCholesky = "mat: invalid Cholesky factorization"
 )
 
-// Cholesky is a type for creating and using the Cholesky factorization of a
-// symmetric positive definite matrix.
+var (
+	_ Matrix    = (*Cholesky)(nil)
+	_ Symmetric = (*Cholesky)(nil)
+)
+
+// Cholesky is a symmetric positive definite matrix represented by its
+// Cholesky decomposition.
+// The decomposition can be constructed using the Factorize method. The
+// factorization itself can be extracted using the UTo or LTo methods, and the
+// original symmetric matrix can be recovered with ToSym.
+//
+// Note that this matrix representation is useful for certain operations, in
+// particular finding solutions to linear equations. It is very inefficient
+// at other operations, in particular At is slow.
 //
 // Cholesky methods may only be called on a value that has been successfully
 // initialized by a call to Factorize that has returned true. Calls to methods
@@ -56,6 +68,43 @@ func (c *Cholesky) updateCond(norm float64) {
 	v := lapack64.Pocon(sym, norm, work, iwork)
 	putInts(iwork)
 	c.cond = 1 / v
+}
+
+// Dims returns the dimensions of the matrix.
+func (chol *Cholesky) Dims() (r, c int) {
+	if !chol.valid() {
+		panic(badCholesky)
+	}
+	r, c = chol.chol.Dims()
+	return r, c
+}
+
+func (c *Cholesky) At(i, j int) float64 {
+	if !c.valid() {
+		panic(badCholesky)
+	}
+	n := c.Symmetric()
+	if uint(i) >= uint(n) {
+		panic(ErrRowAccess)
+	}
+	if uint(j) >= uint(n) {
+		panic(ErrColAccess)
+	}
+
+	var val float64
+	for k := 0; k <= min(i, j); k++ {
+		val += c.chol.At(k, i) * c.chol.At(k, j)
+	}
+	return val
+}
+
+func (c *Cholesky) T() Matrix {
+	return c
+}
+
+func (c *Cholesky) Symmetric() int {
+	r, _ := c.chol.Dims()
+	return r
 }
 
 // Cond returns the condition number of the factorized matrix.
@@ -124,7 +173,7 @@ func (c *Cholesky) Clone(chol *Cholesky) {
 	if !chol.valid() {
 		panic(badCholesky)
 	}
-	n := chol.Size()
+	n := chol.Symmetric()
 	if c.chol == nil {
 		c.chol = NewTriDense(n, Upper, nil)
 	} else {
@@ -132,14 +181,6 @@ func (c *Cholesky) Clone(chol *Cholesky) {
 	}
 	c.chol.Copy(chol.chol)
 	c.cond = chol.cond
-}
-
-// Size returns the dimension of the factorized matrix.
-func (c *Cholesky) Size() int {
-	if !c.valid() {
-		panic(badCholesky)
-	}
-	return c.chol.mat.N
 }
 
 // Det returns the determinant of the matrix that has been factorized.
@@ -363,7 +404,7 @@ func (c *Cholesky) InverseTo(s *SymDense) error {
 // the updated factorization is
 //  U'^T * U' = f A = A'
 // Scale panics if the constant is non-positive, or if the receiver is non-zero
-// and is of a different Size from the input.
+// and is of a different size from the input.
 func (c *Cholesky) Scale(f float64, orig *Cholesky) {
 	if !orig.valid() {
 		panic(badCholesky)
@@ -371,7 +412,7 @@ func (c *Cholesky) Scale(f float64, orig *Cholesky) {
 	if f <= 0 {
 		panic("cholesky: scaling by a non-positive constant")
 	}
-	n := orig.Size()
+	n := orig.Symmetric()
 	if c.chol == nil {
 		c.chol = NewTriDense(n, Upper, nil)
 	} else if c.chol.mat.N != n {
@@ -390,10 +431,10 @@ func (c *Cholesky) Scale(f float64, orig *Cholesky) {
 // that k > w' A^-1 w. If this condition does not hold then ExtendVecSym will
 // return false and the receiver will not be updated.
 //
-// ExtendVecSym will panic if v.Len() != a.Size()+1 or if a does not contain
+// ExtendVecSym will panic if v.Len() != a.Symmetric()+1 or if a does not contain
 // a valid decomposition.
 func (chol *Cholesky) ExtendVecSym(a *Cholesky, v Vector) (ok bool) {
-	n := a.Size()
+	n := a.Symmetric()
 	if v.Len() != n+1 {
 		panic(badSliceLength)
 	}
@@ -463,7 +504,7 @@ func (c *Cholesky) SymRankOne(orig *Cholesky, alpha float64, x Vector) (ok bool)
 	if !orig.valid() {
 		panic(badCholesky)
 	}
-	n := orig.Size()
+	n := orig.Symmetric()
 	if r, c := x.Dims(); r != n || c != 1 {
 		panic(ErrShape)
 	}

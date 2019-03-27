@@ -72,7 +72,7 @@ func TestCholesky(t *testing.T) {
 	}
 }
 
-func TestCholeskySolve(t *testing.T) {
+func TestCholeskySolveTo(t *testing.T) {
 	for _, test := range []struct {
 		a   *SymDense
 		b   *Dense
@@ -116,7 +116,7 @@ func TestCholeskySolve(t *testing.T) {
 	}
 }
 
-func TestCholeskySolveChol(t *testing.T) {
+func TestCholeskySolveCholTo(t *testing.T) {
 	for _, test := range []struct {
 		a, b *SymDense
 	}{
@@ -177,7 +177,7 @@ func TestCholeskySolveChol(t *testing.T) {
 	}
 }
 
-func TestCholeskySolveVec(t *testing.T) {
+func TestCholeskySolveVecTo(t *testing.T) {
 	for _, test := range []struct {
 		a   *SymDense
 		b   *VecDense
@@ -208,7 +208,7 @@ func TestCholeskySolveVec(t *testing.T) {
 		}
 
 		var x VecDense
-		chol.SolveVec(&x, test.b)
+		chol.SolveVecTo(&x, test.b)
 		if !EqualApprox(&x, test.ans, 1e-12) {
 			t.Error("incorrect Cholesky solve solution")
 		}

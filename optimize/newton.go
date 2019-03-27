@@ -153,7 +153,7 @@ func (n *Newton) NextDirection(loc *Location, dir []float64) (stepSize float64) 
 		pd := n.chol.Factorize(n.hess)
 		if pd {
 			// Store the solution in d's backing array, dir.
-			n.chol.SolveVec(d, grad)
+			n.chol.SolveVecTo(d, grad)
 			d.ScaleVec(-1, d)
 			return 1
 		}

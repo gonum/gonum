@@ -104,7 +104,7 @@ func luReconstruct(lu *LU) *Dense {
 	return &a
 }
 
-func TestSolveLU(t *testing.T) {
+func TestLUSolveTo(t *testing.T) {
 	for _, test := range []struct {
 		n, bc int
 	}{
@@ -135,13 +135,13 @@ func TestSolveLU(t *testing.T) {
 		var got Dense
 		got.Mul(a, &x)
 		if !EqualApprox(&got, b, 1e-12) {
-			t.Errorf("Solve mismatch for non-singular matrix. n = %v, bc = %v.\nWant: %v\nGot: %v", n, bc, b, got)
+			t.Errorf("SolveTo mismatch for non-singular matrix. n = %v, bc = %v.\nWant: %v\nGot: %v", n, bc, b, got)
 		}
 	}
 	// TODO(btracey): Add testOneInput test when such a function exists.
 }
 
-func TestSolveLUCond(t *testing.T) {
+func TestLUSolveToCond(t *testing.T) {
 	for _, test := range []*Dense{
 		NewDense(2, 2, []float64{1, 0, 0, 1e-20}),
 	} {
@@ -162,7 +162,7 @@ func TestSolveLUCond(t *testing.T) {
 	}
 }
 
-func TestSolveLUVec(t *testing.T) {
+func TestLUSolveVecTo(t *testing.T) {
 	for _, n := range []int{5, 10} {
 		a := NewDense(n, n, nil)
 		for i := 0; i < n; i++ {
@@ -183,7 +183,7 @@ func TestSolveLUVec(t *testing.T) {
 		var got VecDense
 		got.MulVec(a, &x)
 		if !EqualApprox(&got, b, 1e-12) {
-			t.Errorf("Solve mismatch n = %v.\nWant: %v\nGot: %v", n, b, got)
+			t.Errorf("SolveTo mismatch n = %v.\nWant: %v\nGot: %v", n, b, got)
 		}
 	}
 	// TODO(btracey): Add testOneInput test when such a function exists.

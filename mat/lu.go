@@ -281,7 +281,7 @@ func (m *Dense) Permutation(r int, swaps []int) {
 	}
 }
 
-// Solve solves a system of linear equations using the LU decomposition of a matrix.
+// SolveTo solves a system of linear equations using the LU decomposition of a matrix.
 // It computes
 //  A * X = B if trans == false
 //  A^T * X = B if trans == true
@@ -324,7 +324,7 @@ func (lu *LU) SolveTo(dst *Dense, trans bool, b Matrix) error {
 	return nil
 }
 
-// SolveVec solves a system of linear equations using the LU decomposition of a matrix.
+// SolveVecTo solves a system of linear equations using the LU decomposition of a matrix.
 // It computes
 //  A * x = b if trans == false
 //  A^T * x = b if trans == true

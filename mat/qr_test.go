@@ -70,7 +70,7 @@ func isOrthonormal(q *Dense, tol float64) bool {
 	return true
 }
 
-func TestSolveQR(t *testing.T) {
+func TestQRSolveTo(t *testing.T) {
 	for _, trans := range []bool{false, true} {
 		for _, test := range []struct {
 			m, n, bc int
@@ -128,7 +128,7 @@ func TestSolveQR(t *testing.T) {
 	// TODO(btracey): Add in testOneInput when it exists.
 }
 
-func TestSolveQRVec(t *testing.T) {
+func TestQRSolveVecTo(t *testing.T) {
 	for _, trans := range []bool{false, true} {
 		for _, test := range []struct {
 			m, n int
@@ -181,7 +181,7 @@ func TestSolveQRVec(t *testing.T) {
 	// TODO(btracey): Add in testOneInput when it exists.
 }
 
-func TestSolveQRCond(t *testing.T) {
+func TestQRSolveCondTo(t *testing.T) {
 	for _, test := range []*Dense{
 		NewDense(2, 2, []float64{1, 0, 0, 1e-20}),
 		NewDense(3, 2, []float64{1, 0, 0, 1e-20, 0, 0}),

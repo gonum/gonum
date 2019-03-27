@@ -162,7 +162,7 @@ func (c *Cholesky) LogDet() float64 {
 	return det
 }
 
-// Solve finds the matrix X that solves A * X = B where A is represented
+// SolveTo finds the matrix X that solves A * X = B where A is represented
 // by the Cholesky decomposition. The result is stored in-place into dst.
 func (c *Cholesky) SolveTo(dst *Dense, b Matrix) error {
 	if !c.valid() {
@@ -185,7 +185,7 @@ func (c *Cholesky) SolveTo(dst *Dense, b Matrix) error {
 	return nil
 }
 
-// SolveChol finds the matrix X that solves A * X = B where A and B are represented
+// SolveCholTo finds the matrix X that solves A * X = B where A and B are represented
 // by their Cholesky decompositions a and b. The result is stored in-place into
 // dst.
 func (a *Cholesky) SolveCholTo(dst *Dense, b *Cholesky) error {
@@ -208,10 +208,10 @@ func (a *Cholesky) SolveCholTo(dst *Dense, b *Cholesky) error {
 	return nil
 }
 
-// SolveVec finds the vector X that solves A * x = b where A is represented
+// SolveVecTo finds the vector X that solves A * x = b where A is represented
 // by the Cholesky decomposition. The result is stored in-place into
 // dst.
-func (c *Cholesky) SolveVec(dst *VecDense, b Vector) error {
+func (c *Cholesky) SolveVecTo(dst *VecDense, b Vector) error {
 	if !c.valid() {
 		panic(badCholesky)
 	}

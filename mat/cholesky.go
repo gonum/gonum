@@ -79,6 +79,7 @@ func (chol *Cholesky) Dims() (r, c int) {
 	return r, c
 }
 
+// At returns the element at row i, column j.
 func (c *Cholesky) At(i, j int) float64 {
 	if !c.valid() {
 		panic(badCholesky)
@@ -98,10 +99,14 @@ func (c *Cholesky) At(i, j int) float64 {
 	return val
 }
 
+// T implements the Matrix interface. Symmetric matrices, by definition, are
+// equal to their transpose, and this is a no-op.
 func (c *Cholesky) T() Matrix {
 	return c
 }
 
+// Symmetric implements the Symmetric interface and returns the number of rows
+// and columns in the matrix.
 func (c *Cholesky) Symmetric() int {
 	r, _ := c.chol.Dims()
 	return r

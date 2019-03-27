@@ -100,6 +100,8 @@ func (s *SymDense) T() Matrix {
 	return s
 }
 
+// Symmetric implements the Symmetric interface and returns the number of rows
+// in the matrix (this is also the number of columns).
 func (s *SymDense) Symmetric() int {
 	return s.mat.N
 }

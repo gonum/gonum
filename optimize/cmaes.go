@@ -204,7 +204,7 @@ func (cma *CmaEsChol) Init(dim, tasks int) int {
 	cma.mean = resize(cma.mean, dim) // mean location initialized at the start of Run
 
 	if cma.InitCholesky != nil {
-		if cma.InitCholesky.Size() != dim {
+		if cma.InitCholesky.Symmetric() != dim {
 			panic("cma-es-chol: incorrect InitCholesky size")
 		}
 		cma.chol.Clone(cma.InitCholesky)

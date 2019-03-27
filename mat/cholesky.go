@@ -394,7 +394,7 @@ func (c *Cholesky) Scale(f float64, orig *Cholesky) {
 //
 // ExtendVecSym will panic if v.Len() != a.Size()+1 or if a does not contain
 // a valid decomposition.
-func (chol *Cholesky) ExtendVecSym(a *Cholesky, v Vector) (ok bool) {
+func (c *Cholesky) ExtendVecSym(a *Cholesky, v Vector) (ok bool) {
 	n := a.Size()
 	if v.Len() != n+1 {
 		panic(badSliceLength)
@@ -427,10 +427,10 @@ func (chol *Cholesky) ExtendVecSym(a *Cholesky, v Vector) (ok bool) {
 	}
 	k := v.At(n, 0)
 
-	c := NewVecDense(n, nil)
-	c.SolveVec(a.chol.T(), w)
+	var t VecDense
+	t.SolveVec(a.chol.T(), w)
 
-	dot := Dot(c, c)
+	dot := Dot(&t, &t)
 	if dot >= k {
 		return false
 	}
@@ -439,11 +439,11 @@ func (chol *Cholesky) ExtendVecSym(a *Cholesky, v Vector) (ok bool) {
 	newU := NewTriDense(n+1, Upper, nil)
 	newU.Copy(a.chol)
 	for i := 0; i < n; i++ {
-		newU.SetTri(i, n, c.At(i, 0))
+		newU.SetTri(i, n, t.At(i, 0))
 	}
 	newU.SetTri(n, n, d)
-	chol.chol = newU
-	chol.updateCond(-1)
+	c.chol = newU
+	c.updateCond(-1)
 	return true
 }
 

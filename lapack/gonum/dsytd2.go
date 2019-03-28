@@ -9,15 +9,15 @@ import (
 	"gonum.org/v1/gonum/blas/blas64"
 )
 
-// Dsytd2 reduces a symmetric n×n matrix A to symmetric tridiagonal form T by an
-// orthogonal similarity transformation
+// Dsytd2 reduces a symmetric n×n matrix A to symmetric tridiagonal form T by
+// an orthogonal similarity transformation
 //  Q^T * A * Q = T
 // On entry, the matrix is contained in the specified triangle of a. On exit,
 // if uplo == blas.Upper, the diagonal and first super-diagonal of a are
 // overwritten with the elements of T. The elements above the first super-diagonal
-// are overwritten with the the elementary reflectors that are used with the
-// elements written to tau in order to construct Q. If uplo == blas.Lower, the
-// elements are written in the lower triangular region.
+// are overwritten with the elementary reflectors that are used with
+// the elements written to tau in order to construct Q. If uplo == blas.Lower,
+// the elements are written in the lower triangular region.
 //
 // d must have length at least n. e and tau must have length at least n-1. Dsytd2
 // will panic if these sizes are not met.

@@ -311,7 +311,7 @@ type dense struct {
 
 // TakeMin mimics intsets.Sparse TakeMin for dense sets. If the dense
 // iterator position is less than the iterator size, TakeMin sets *p
-// to the the iterator position and increments the position and returns
+// to the iterator position and increments the position and returns
 // true.
 // Otherwise, it returns false and *p is undefined.
 func (d *dense) TakeMin(p *int) bool {
@@ -341,7 +341,7 @@ func newSlice(s set.Ints) *slice {
 
 // TakeMin mimics intsets.Sparse TakeMin for a sorted set. If the set
 // iterator position is less than the iterator size, TakeMin sets *p
-// to the the iterator position's element and increments the position
+// to the iterator position's element and increments the position
 // and returns true.
 // Otherwise, it returns false and *p is undefined.
 func (s *slice) TakeMin(p *int) bool {

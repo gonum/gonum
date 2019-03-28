@@ -40,15 +40,15 @@ type Attributers interface {
 
 // Porter defines the behavior of graph.Edge values that can specify
 // connection ports for their end points. The returned port corresponds
-// to the the DOT node port to be used by the edge, compass corresponds
+// to the DOT node port to be used by the edge, compass corresponds
 // to DOT compass point to which the edge will be aimed.
 type Porter interface {
-	// FromPort returns the port and compass for the
-	// From node of a graph.Edge.
+	// FromPort returns the port and compass for
+	// the From node of a graph.Edge.
 	FromPort() (port, compass string)
 
-	// ToPort returns the port and compass for the
-	// To node of a graph.Edge.
+	// ToPort returns the port and compass for
+	// the To node of a graph.Edge.
 	ToPort() (port, compass string)
 }
 

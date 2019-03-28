@@ -98,7 +98,7 @@ func (Beale) Minima() []Minimum {
 	}
 }
 
-// BiggsEXP2 implements the the Biggs' EXP2 function.
+// BiggsEXP2 implements the Biggs' EXP2 function.
 //
 // Standard starting point:
 //  [1, 2]
@@ -160,7 +160,7 @@ func (BiggsEXP2) Minima() []Minimum {
 	}
 }
 
-// BiggsEXP3 implements the the Biggs' EXP3 function.
+// BiggsEXP3 implements the Biggs' EXP3 function.
 //
 // Standard starting point:
 //  [1, 2, 1]
@@ -224,7 +224,7 @@ func (BiggsEXP3) Minima() []Minimum {
 	}
 }
 
-// BiggsEXP4 implements the the Biggs' EXP4 function.
+// BiggsEXP4 implements the Biggs' EXP4 function.
 //
 // Standard starting point:
 //  [1, 2, 1, 1]
@@ -290,7 +290,7 @@ func (BiggsEXP4) Minima() []Minimum {
 	}
 }
 
-// BiggsEXP5 implements the the Biggs' EXP5 function.
+// BiggsEXP5 implements the Biggs' EXP5 function.
 //
 // Standard starting point:
 //  [1, 2, 1, 1, 1]
@@ -358,7 +358,7 @@ func (BiggsEXP5) Minima() []Minimum {
 	}
 }
 
-// BiggsEXP6 implements the the Biggs' EXP6 function.
+// BiggsEXP6 implements the Biggs' EXP6 function.
 //
 // Standard starting point:
 //  [1, 2, 1, 1, 1, 1]

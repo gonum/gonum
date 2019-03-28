@@ -17,13 +17,13 @@
 // unit or a common combination of base units, named for the physical quantity
 // it represents (Length, Mass, Pressure, etc.). Each type is defined from
 // float64. The value of the float64 represents the quantity of that unit as
-// expressed in SI base units (Kilogram, Meter, Pascal, etc.). For example,
+// expressed in SI base units (Kilogram, Metre, Pascal, etc.). For example,
 //
-// 	height := 1.6 * unit.Meter
+// 	height := 1.6 * unit.Metre
 // 	acc := unit.Acceleration(9.8)
 //
-// creates a variable named 'height' with a value of 1.6 meters, and
-// a variable named 'acc' with a value of 9.8 meters per second squared.
+// creates a variable named 'height' with a value of 1.6 metres, and
+// a variable named 'acc' with a value of 9.8 metres per second squared.
 // These types can be used to add compile-time safety to code. For
 // example,
 //
@@ -50,13 +50,13 @@
 // 		v := float64Volume(p, t) // no error
 // 	}
 //
-// Many types have constants defined representing named SI units (Meter,
+// Many types have constants defined representing named SI units (Metre,
 // Kilogram, etc. ) or SI derived units (Pascal, Hz, etc.). The unit package
 // additionally provides untyped constants for SI prefixes, so the following
 // are all equivalent.
 //
-// 	l := 0.001 * unit.Meter
-// 	k := 1 * unit.Milli * unit.Meter
+// 	l := 0.001 * unit.Metre
+// 	k := 1 * unit.Milli * unit.Metre
 // 	j := unit.Length(0.001)
 //
 // Additional SI-derived static units can also be defined by adding types that
@@ -75,7 +75,7 @@
 // creates a variable "rate" which has a value of 1e-3 mol/s. Methods of
 // unit can be used to modify this value, for example:
 //
-// 	rate.Mul(1 * unit.Centimeter).Div(1 * unit.Millivolt)
+// 	rate.Mul(1 * unit.Centimetre).Div(1 * unit.Millivolt)
 //
 // To convert the unit back into a typed float64 value, the From methods
 // of the dimensional types should be used. From will return an error if the
@@ -98,12 +98,12 @@
 // because in this case slide is just a measurement of liquid volume. Instead,
 // a constant could be defined.
 //
-// 	const Slide unit.Volume =  0.1 * unit.Microliter
+// 	const Slide unit.Volume =  0.1 * unit.Microlitre
 //
 // Note that unit cannot catch all errors related to dimensionality.
 // Different physical ideas are sometimes expressed with the same dimensions
 // and unit is incapable of catching these mismatches. For example, energy and
-// torque are both expressed as force times distance (Newton-meters in SI),
+// torque are both expressed as force times distance (Newton-metres in SI),
 // but it is wrong to say that a torque of 10 N·m is the same as 10 J, even
 // though the dimensions agree. Despite this, using the defined types to
 // represent units can help to catch errors at compile-time. For example,

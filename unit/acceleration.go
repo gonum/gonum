@@ -13,7 +13,7 @@ import (
 	"unicode/utf8"
 )
 
-// Acceleration represents an acceleration in meters per second squared.
+// Acceleration represents an acceleration in metres per second squared.
 type Acceleration float64
 
 // Unit converts the Acceleration to a *Unit

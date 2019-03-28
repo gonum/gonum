@@ -162,9 +162,9 @@ func (c *Cholesky) LogDet() float64 {
 	return det
 }
 
-// Solve finds the matrix x that solves A * X = B where A is represented
-// by the Cholesky decomposition, placing the result in x.
-func (c *Cholesky) Solve(x *Dense, b Matrix) error {
+// SolveTo finds the matrix X that solves A * X = B where A is represented
+// by the Cholesky decomposition. The result is stored in-place into dst.
+func (c *Cholesky) SolveTo(dst *Dense, b Matrix) error {
 	if !c.valid() {
 		panic(badCholesky)
 	}
@@ -174,20 +174,21 @@ func (c *Cholesky) Solve(x *Dense, b Matrix) error {
 		panic(ErrShape)
 	}
 
-	x.reuseAs(bm, bn)
-	if b != x {
-		x.Copy(b)
+	dst.reuseAs(bm, bn)
+	if b != dst {
+		dst.Copy(b)
 	}
-	lapack64.Potrs(c.chol.mat, x.mat)
+	lapack64.Potrs(c.chol.mat, dst.mat)
 	if c.cond > ConditionTolerance {
 		return Condition(c.cond)
 	}
 	return nil
 }
 
-// SolveChol finds the matrix x that solves A * X = B where A and B are represented
-// by their Cholesky decompositions a and b, placing the result in x.
-func (a *Cholesky) SolveChol(x *Dense, b *Cholesky) error {
+// SolveCholTo finds the matrix X that solves A * X = B where A and B are represented
+// by their Cholesky decompositions a and b. The result is stored in-place into
+// dst.
+func (a *Cholesky) SolveCholTo(dst *Dense, b *Cholesky) error {
 	if !a.valid() || !b.valid() {
 		panic(badCholesky)
 	}
@@ -196,20 +197,21 @@ func (a *Cholesky) SolveChol(x *Dense, b *Cholesky) error {
 		panic(ErrShape)
 	}
 
-	x.reuseAsZeroed(bn, bn)
-	x.Copy(b.chol.T())
-	blas64.Trsm(blas.Left, blas.Trans, 1, a.chol.mat, x.mat)
-	blas64.Trsm(blas.Left, blas.NoTrans, 1, a.chol.mat, x.mat)
-	blas64.Trmm(blas.Right, blas.NoTrans, 1, b.chol.mat, x.mat)
+	dst.reuseAsZeroed(bn, bn)
+	dst.Copy(b.chol.T())
+	blas64.Trsm(blas.Left, blas.Trans, 1, a.chol.mat, dst.mat)
+	blas64.Trsm(blas.Left, blas.NoTrans, 1, a.chol.mat, dst.mat)
+	blas64.Trmm(blas.Right, blas.NoTrans, 1, b.chol.mat, dst.mat)
 	if a.cond > ConditionTolerance {
 		return Condition(a.cond)
 	}
 	return nil
 }
 
-// SolveVec finds the vector x that solves A * x = b where A is represented
-// by the Cholesky decomposition, placing the result in x.
-func (c *Cholesky) SolveVec(x *VecDense, b Vector) error {
+// SolveVecTo finds the vector X that solves A * x = b where A is represented
+// by the Cholesky decomposition. The result is stored in-place into
+// dst.
+func (c *Cholesky) SolveVecTo(dst *VecDense, b Vector) error {
 	if !c.valid() {
 		panic(badCholesky)
 	}
@@ -219,18 +221,18 @@ func (c *Cholesky) SolveVec(x *VecDense, b Vector) error {
 	}
 	switch rv := b.(type) {
 	default:
-		x.reuseAs(n)
-		return c.Solve(x.asDense(), b)
+		dst.reuseAs(n)
+		return c.SolveTo(dst.asDense(), b)
 	case RawVectorer:
 		bmat := rv.RawVector()
-		if x != b {
-			x.checkOverlap(bmat)
+		if dst != b {
+			dst.checkOverlap(bmat)
 		}
-		x.reuseAs(n)
-		if x != b {
-			x.CopyVec(b)
+		dst.reuseAs(n)
+		if dst != b {
+			dst.CopyVec(b)
 		}
-		lapack64.Potrs(c.chol.mat, x.asGeneral())
+		lapack64.Potrs(c.chol.mat, dst.asGeneral())
 		if c.cond > ConditionTolerance {
 			return Condition(c.cond)
 		}

@@ -136,7 +136,7 @@ func (qr *QR) QTo(dst *Dense) *Dense {
 	return dst
 }
 
-// Solve finds a minimum-norm solution to a system of linear equations defined
+// SolveTo finds a minimum-norm solution to a system of linear equations defined
 // by the matrices A and b, where A is an m×n matrix represented in its QR factorized
 // form. If A is singular or near-singular a Condition error is returned.
 // See the documentation for Condition for more information.
@@ -144,8 +144,8 @@ func (qr *QR) QTo(dst *Dense) *Dense {
 // The minimization problem solved depends on the input parameters.
 //  If trans == false, find X such that ||A*X - B||_2 is minimized.
 //  If trans == true, find the minimum norm solution of A^T * X = B.
-// The solution matrix, X, is stored in place into m.
-func (qr *QR) Solve(x *Dense, trans bool, b Matrix) error {
+// The solution matrix, X, is stored in place into dst.
+func (qr *QR) SolveTo(dst *Dense, trans bool, b Matrix) error {
 	r, c := qr.qr.Dims()
 	br, bc := b.Dims()
 
@@ -157,12 +157,12 @@ func (qr *QR) Solve(x *Dense, trans bool, b Matrix) error {
 		if c != br {
 			panic(ErrShape)
 		}
-		x.reuseAs(r, bc)
+		dst.reuseAs(r, bc)
 	} else {
 		if r != br {
 			panic(ErrShape)
 		}
-		x.reuseAs(c, bc)
+		dst.reuseAs(c, bc)
 	}
 	// Do not need to worry about overlap between m and b because x has its own
 	// independent storage.
@@ -195,7 +195,7 @@ func (qr *QR) Solve(x *Dense, trans bool, b Matrix) error {
 		}
 	}
 	// X was set above to be the correct size for the result.
-	x.Copy(w)
+	dst.Copy(w)
 	putWorkspace(w)
 	if qr.cond > ConditionTolerance {
 		return Condition(qr.cond)
@@ -203,10 +203,10 @@ func (qr *QR) Solve(x *Dense, trans bool, b Matrix) error {
 	return nil
 }
 
-// SolveVec finds a minimum-norm solution to a system of linear equations,
+// SolveVecTo finds a minimum-norm solution to a system of linear equations,
 //  Ax = b.
-// See QR.Solve for the full documentation.
-func (qr *QR) SolveVec(x *VecDense, trans bool, b Vector) error {
+// See QR.SolveTo for the full documentation.
+func (qr *QR) SolveVecTo(dst *VecDense, trans bool, b Vector) error {
 	r, c := qr.qr.Dims()
 	if _, bc := b.Dims(); bc != 1 {
 		panic(ErrShape)
@@ -217,17 +217,17 @@ func (qr *QR) SolveVec(x *VecDense, trans bool, b Vector) error {
 	bm := Matrix(b)
 	if rv, ok := b.(RawVectorer); ok {
 		bmat := rv.RawVector()
-		if x != b {
-			x.checkOverlap(bmat)
+		if dst != b {
+			dst.checkOverlap(bmat)
 		}
 		b := VecDense{mat: bmat}
 		bm = b.asDense()
 	}
 	if trans {
-		x.reuseAs(r)
+		dst.reuseAs(r)
 	} else {
-		x.reuseAs(c)
+		dst.reuseAs(c)
 	}
-	return qr.Solve(x.asDense(), trans, bm)
+	return qr.SolveTo(dst.asDense(), trans, bm)
 
 }

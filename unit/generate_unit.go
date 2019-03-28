@@ -492,6 +492,7 @@ var Units = []Unit{
 			{Name: MassName, Power: 1},
 			{Name: TimeName, Power: -2},
 		},
+		ErForm: "Torquer",
 	},
 	{
 		Name:        "Velocity",

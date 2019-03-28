@@ -49,7 +49,7 @@ func (t Torque) Unit() *Unit {
 	})
 }
 
-// Torque allows Torque to implement a Torqueer interface
+// Torque allows Torque to implement a Torquer interface
 func (t Torque) Torque() Torque {
 	return t
 }

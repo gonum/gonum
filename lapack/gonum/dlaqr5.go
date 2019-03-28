@@ -348,7 +348,7 @@ func (impl Implementation) Dlaqr5(wantt, wantz bool, kacc22 int, n, ktop, kbot, 
 					h[j*ldh+k+3] -= refsum * v[m*ldv+2]
 				}
 				if accum {
-					// Accumulate U. (If necessary, update Z later with with an
+					// Accumulate U. (If necessary, update Z later with an
 					// efficient matrix-matrix multiply.)
 					kms := k - incol
 					for j := max(0, ktop-incol-1); j < kdu; j++ {

@@ -379,7 +379,7 @@ func (r *compressedRow) addTo(j int, v float64) {
 }
 
 // dotUnitary performs a simplified scatter-based Ddot operations on
-// v and the receiver. v must have have a unitary vector increment.
+// v and the receiver. v must have a unitary vector increment.
 func (r compressedRow) dotUnitary(v *mat.VecDense) float64 {
 	var sum float64
 	vec := v.RawVector().Data
@@ -396,8 +396,8 @@ type sparseElement struct {
 }
 
 // onesDotUnitary performs the equivalent of a Ddot of v with
-// a ones vector of equal length. v must have have a unitary
-// vector increment.
+// a ones vector of equal length. v must have a unitary vector
+// increment.
 func onesDotUnitary(alpha float64, v *mat.VecDense) float64 {
 	var sum float64
 	for _, f := range v.RawVector().Data {

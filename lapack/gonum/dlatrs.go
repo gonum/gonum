@@ -18,7 +18,7 @@ import (
 // where the scale s is set for numeric stability.
 //
 // A is an n×n triangular matrix. On entry, the slice x contains the values of
-// of b, and on exit it contains the solution vector x.
+// b, and on exit it contains the solution vector x.
 //
 // If normin == true, cnorm is an input and cnorm[j] contains the norm of the off-diagonal
 // part of the j^th column of A. If trans == blas.NoTrans, cnorm[j] must be greater

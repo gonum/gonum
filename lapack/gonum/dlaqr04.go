@@ -443,7 +443,7 @@ func (impl Implementation) Dlaqr04(wantt, wantz bool, n, ilo, ihi int, h []float
 			}
 		}
 
-		// Use up to ns of the the smallest magnitude shifts. If there
+		// Use up to ns of the smallest magnitude shifts. If there
 		// aren't ns shifts available, then use them all, possibly
 		// dropping one to make the number of shifts even.
 		ns = min(ns, kbot-ks+1) &^ 1

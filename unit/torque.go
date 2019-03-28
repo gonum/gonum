@@ -13,31 +13,31 @@ import (
 	"unicode/utf8"
 )
 
-// Torque represents a torque in Newton meters.
+// Torque represents a torque in Newton metres.
 type Torque float64
 
 const (
-	Yottanewtonmeter Torque = 1e24
-	Zettanewtonmeter Torque = 1e21
-	Exanewtonmeter   Torque = 1e18
-	Petanewtonmeter  Torque = 1e15
-	Teranewtonmeter  Torque = 1e12
-	Giganewtonmeter  Torque = 1e9
-	Meganewtonmeter  Torque = 1e6
-	Kilonewtonmeter  Torque = 1e3
-	Hectonewtonmeter Torque = 1e2
-	Decanewtonmeter  Torque = 1e1
-	Newtonmeter      Torque = 1.0
-	Decinewtonmeter  Torque = 1e-1
-	Centinewtonmeter Torque = 1e-2
-	Millinewtonmeter Torque = 1e-3
-	Micronewtonmeter Torque = 1e-6
-	Nanonewtonmeter  Torque = 1e-9
-	Piconewtonmeter  Torque = 1e-12
-	Femtonewtonmeter Torque = 1e-15
-	Attonewtonmeter  Torque = 1e-18
-	Zeptonewtonmeter Torque = 1e-21
-	Yoctonewtonmeter Torque = 1e-24
+	Yottanewtonmetre Torque = 1e24
+	Zettanewtonmetre Torque = 1e21
+	Exanewtonmetre   Torque = 1e18
+	Petanewtonmetre  Torque = 1e15
+	Teranewtonmetre  Torque = 1e12
+	Giganewtonmetre  Torque = 1e9
+	Meganewtonmetre  Torque = 1e6
+	Kilonewtonmetre  Torque = 1e3
+	Hectonewtonmetre Torque = 1e2
+	Decanewtonmetre  Torque = 1e1
+	Newtonmetre      Torque = 1.0
+	Decinewtonmetre  Torque = 1e-1
+	Centinewtonmetre Torque = 1e-2
+	Millinewtonmetre Torque = 1e-3
+	Micronewtonmetre Torque = 1e-6
+	Nanonewtonmetre  Torque = 1e-9
+	Piconewtonmetre  Torque = 1e-12
+	Femtonewtonmetre Torque = 1e-15
+	Attonewtonmetre  Torque = 1e-18
+	Zeptonewtonmetre Torque = 1e-21
+	Yoctonewtonmetre Torque = 1e-24
 )
 
 // Unit converts the Torque to a *Unit
@@ -57,7 +57,7 @@ func (t Torque) Torque() Torque {
 // From converts the unit into the receiver. From returns an
 // error if there is a mismatch in dimension
 func (t *Torque) From(u Uniter) error {
-	if !DimensionsMatch(u, Newtonmeter) {
+	if !DimensionsMatch(u, Newtonmetre) {
 		*t = Torque(math.NaN())
 		return errors.New("Dimension mismatch")
 	}

@@ -13,7 +13,7 @@ import (
 	"unicode/utf8"
 )
 
-// Area represents and area in square meters.
+// Area represents and area in square metres.
 type Area float64
 
 // Unit converts the Area to a *Unit

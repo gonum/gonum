@@ -254,7 +254,7 @@ type Unit struct {
 
 // New creates a new variable of type Unit which has the value and dimensions
 // specified by the inputs. The built-in dimensions are always in SI units
-// (meters, kilograms, etc.).
+// (metres, kilograms, etc.).
 func New(value float64, d Dimensions) *Unit {
 	return &Unit{
 		dimensions: d.clone(),

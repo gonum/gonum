@@ -188,6 +188,13 @@ func (b *BandDense) RawBand() blas64.Band {
 	return b.mat
 }
 
+// SetRawBand sets the underlying blas64.Band used by the receiver.
+// Changes to elements in the receiver following the call will be reflected
+// in the input.
+func (b *BandDense) SetRawBand(mat blas64.Band) {
+	b.mat = mat
+}
+
 // DiagView returns the diagonal as a matrix backed by the original data.
 func (b *BandDense) DiagView() Diagonal {
 	n := min(b.mat.Rows, b.mat.Cols)

@@ -217,6 +217,18 @@ func (t *TriDense) RawTriangular() blas64.Triangular {
 	return t.mat
 }
 
+// SetRawTriangular sets the underlying blas64.Triangular used by the receiver.
+// Changes to elements in the receiver following the call will be reflected
+// in the input.
+//
+// // The supplied Triangular must not have blas.Diag storage format.
+func (t *TriDense) SetRawTriangular(mat blas64.Triangular) {
+	if mat.Diag == blas.Unit {
+		panic("mat: cannot set TriDense with Unit storage format")
+	}
+	t.mat = mat
+}
+
 // Reset zeros the dimensions of the matrix so that it can be reused as the
 // receiver of a dimensionally restricted operation.
 //
@@ -511,6 +523,16 @@ func (t *TriDense) ScaleTri(f float64, a Triangular) {
 			}
 		}
 	}
+}
+
+// Trace returns the trace of the matrix.
+func (t *TriDense) Trace() float64 {
+	// TODO(btracey): could use internal asm sum routine.
+	var v float64
+	for i := 0; i < t.mat.N; i++ {
+		v += t.mat.Data[i*t.mat.Stride+i]
+	}
+	return v
 }
 
 // copySymIntoTriangle copies a symmetric matrix into a TriDense

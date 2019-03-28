@@ -112,13 +112,14 @@ func (s *SymDense) RawSymmetric() blas64.Symmetric {
 
 // SetRawSymmetric sets the underlying blas64.Symmetric used by the receiver.
 // Changes to elements in the receiver following the call will be reflected
-// in b. SetRawSymmetric will panic if b is not an upper-encoded symmetric
-// matrix.
-func (s *SymDense) SetRawSymmetric(b blas64.Symmetric) {
-	if b.Uplo != blas.Upper {
+// in the input.
+//
+// The supplied Symmetric must have blas.Upper storage format.
+func (s *SymDense) SetRawSymmetric(mat blas64.Symmetric) {
+	if mat.Uplo != blas.Upper {
 		panic(badSymTriangle)
 	}
-	s.mat = b
+	s.mat = mat
 }
 
 // Reset zeros the dimensions of the matrix so that it can be reused as the
@@ -511,6 +512,16 @@ func (s *SymDense) SliceSquare(i, k int) Matrix {
 	v.mat.N = k - i
 	v.cap = s.cap - i
 	return &v
+}
+
+// Trace returns the trace of the matrix.
+func (s *SymDense) Trace() float64 {
+	// TODO(btracey): could use internal asm sum routine.
+	var v float64
+	for i := 0; i < s.mat.N; i++ {
+		v += s.mat.Data[i*s.mat.Stride+i]
+	}
+	return v
 }
 
 // GrowSquare returns the receiver expanded by n rows and n columns. If the

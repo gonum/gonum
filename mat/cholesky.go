@@ -72,11 +72,11 @@ func (c *Cholesky) updateCond(norm float64) {
 }
 
 // Dims returns the dimensions of the matrix.
-func (chol *Cholesky) Dims() (r, c int) {
-	if !chol.valid() {
+func (ch *Cholesky) Dims() (r, c int) {
+	if !ch.valid() {
 		panic(badCholesky)
 	}
-	r, c = chol.chol.Dims()
+	r, c = ch.chol.Dims()
 	return r, c
 }
 
@@ -209,9 +209,9 @@ func (c *Cholesky) LogDet() float64 {
 	return det
 }
 
-// Solve finds the matrix x that solves A * X = B where A is represented
-// by the Cholesky decomposition, placing the result in x.
-func (c *Cholesky) Solve(x *Dense, b Matrix) error {
+// SolveTo finds the matrix X that solves A * X = B where A is represented
+// by the Cholesky decomposition. The result is stored in-place into dst.
+func (c *Cholesky) SolveTo(dst *Dense, b Matrix) error {
 	if !c.valid() {
 		panic(badCholesky)
 	}
@@ -221,20 +221,21 @@ func (c *Cholesky) Solve(x *Dense, b Matrix) error {
 		panic(ErrShape)
 	}
 
-	x.reuseAs(bm, bn)
-	if b != x {
-		x.Copy(b)
+	dst.reuseAs(bm, bn)
+	if b != dst {
+		dst.Copy(b)
 	}
-	lapack64.Potrs(c.chol.mat, x.mat)
+	lapack64.Potrs(c.chol.mat, dst.mat)
 	if c.cond > ConditionTolerance {
 		return Condition(c.cond)
 	}
 	return nil
 }
 
-// SolveChol finds the matrix x that solves A * X = B where A and B are represented
-// by their Cholesky decompositions a and b, placing the result in x.
-func (a *Cholesky) SolveChol(x *Dense, b *Cholesky) error {
+// SolveCholTo finds the matrix X that solves A * X = B where A and B are represented
+// by their Cholesky decompositions a and b. The result is stored in-place into
+// dst.
+func (a *Cholesky) SolveCholTo(dst *Dense, b *Cholesky) error {
 	if !a.valid() || !b.valid() {
 		panic(badCholesky)
 	}
@@ -243,20 +244,21 @@ func (a *Cholesky) SolveChol(x *Dense, b *Cholesky) error {
 		panic(ErrShape)
 	}
 
-	x.reuseAsZeroed(bn, bn)
-	x.Copy(b.chol.T())
-	blas64.Trsm(blas.Left, blas.Trans, 1, a.chol.mat, x.mat)
-	blas64.Trsm(blas.Left, blas.NoTrans, 1, a.chol.mat, x.mat)
-	blas64.Trmm(blas.Right, blas.NoTrans, 1, b.chol.mat, x.mat)
+	dst.reuseAsZeroed(bn, bn)
+	dst.Copy(b.chol.T())
+	blas64.Trsm(blas.Left, blas.Trans, 1, a.chol.mat, dst.mat)
+	blas64.Trsm(blas.Left, blas.NoTrans, 1, a.chol.mat, dst.mat)
+	blas64.Trmm(blas.Right, blas.NoTrans, 1, b.chol.mat, dst.mat)
 	if a.cond > ConditionTolerance {
 		return Condition(a.cond)
 	}
 	return nil
 }
 
-// SolveVec finds the vector x that solves A * x = b where A is represented
-// by the Cholesky decomposition, placing the result in x.
-func (c *Cholesky) SolveVec(x *VecDense, b Vector) error {
+// SolveVecTo finds the vector X that solves A * x = b where A is represented
+// by the Cholesky decomposition. The result is stored in-place into
+// dst.
+func (c *Cholesky) SolveVecTo(dst *VecDense, b Vector) error {
 	if !c.valid() {
 		panic(badCholesky)
 	}
@@ -266,18 +268,18 @@ func (c *Cholesky) SolveVec(x *VecDense, b Vector) error {
 	}
 	switch rv := b.(type) {
 	default:
-		x.reuseAs(n)
-		return c.Solve(x.asDense(), b)
+		dst.reuseAs(n)
+		return c.SolveTo(dst.asDense(), b)
 	case RawVectorer:
 		bmat := rv.RawVector()
-		if x != b {
-			x.checkOverlap(bmat)
+		if dst != b {
+			dst.checkOverlap(bmat)
 		}
-		x.reuseAs(n)
-		if x != b {
-			x.CopyVec(b)
+		dst.reuseAs(n)
+		if dst != b {
+			dst.CopyVec(b)
 		}
-		lapack64.Potrs(c.chol.mat, x.asGeneral())
+		lapack64.Potrs(c.chol.mat, dst.asGeneral())
 		if c.cond > ConditionTolerance {
 			return Condition(c.cond)
 		}
@@ -439,8 +441,9 @@ func (c *Cholesky) Scale(f float64, orig *Cholesky) {
 //
 // ExtendVecSym will panic if v.Len() != a.Symmetric()+1 or if a does not contain
 // a valid decomposition.
-func (chol *Cholesky) ExtendVecSym(a *Cholesky, v Vector) (ok bool) {
+func (c *Cholesky) ExtendVecSym(a *Cholesky, v Vector) (ok bool) {
 	n := a.Symmetric()
+
 	if v.Len() != n+1 {
 		panic(badSliceLength)
 	}
@@ -472,10 +475,10 @@ func (chol *Cholesky) ExtendVecSym(a *Cholesky, v Vector) (ok bool) {
 	}
 	k := v.At(n, 0)
 
-	c := NewVecDense(n, nil)
-	c.SolveVec(a.chol.T(), w)
+	var t VecDense
+	t.SolveVec(a.chol.T(), w)
 
-	dot := Dot(c, c)
+	dot := Dot(&t, &t)
 	if dot >= k {
 		return false
 	}
@@ -484,11 +487,11 @@ func (chol *Cholesky) ExtendVecSym(a *Cholesky, v Vector) (ok bool) {
 	newU := NewTriDense(n+1, Upper, nil)
 	newU.Copy(a.chol)
 	for i := 0; i < n; i++ {
-		newU.SetTri(i, n, c.At(i, 0))
+		newU.SetTri(i, n, t.At(i, 0))
 	}
 	newU.SetTri(n, n, d)
-	chol.chol = newU
-	chol.updateCond(-1)
+	c.chol = newU
+	c.updateCond(-1)
 	return true
 }
 

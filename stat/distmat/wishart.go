@@ -132,7 +132,7 @@ func (w *Wishart) logProbSymChol(cholX *mat.Cholesky) float64 {
 	cholX.UTo(&u)
 
 	var vinvx mat.Dense
-	err := w.cholv.Solve(&vinvx, u.T())
+	err := w.cholv.SolveTo(&vinvx, u.T())
 	if err != nil {
 		return math.Inf(-1)
 	}

@@ -91,15 +91,15 @@ func (m *Dense) Solve(a, b Matrix) error {
 		}
 		var lu LU
 		lu.Factorize(a)
-		return lu.Solve(m, false, b)
+		return lu.SolveTo(m, false, b)
 	case ar > ac:
 		var qr QR
 		qr.Factorize(a)
-		return qr.Solve(m, false, b)
+		return qr.SolveTo(m, false, b)
 	default:
 		var lq LQ
 		lq.Factorize(a)
-		return lq.Solve(m, false, b)
+		return lq.SolveTo(m, false, b)
 	}
 }
 

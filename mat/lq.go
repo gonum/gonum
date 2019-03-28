@@ -140,7 +140,7 @@ func (lq *LQ) QTo(dst *Dense) *Dense {
 	return dst
 }
 
-// Solve finds a minimum-norm solution to a system of linear equations defined
+// SolveTo finds a minimum-norm solution to a system of linear equations defined
 // by the matrices A and b, where A is an m×n matrix represented in its LQ factorized
 // form. If A is singular or near-singular a Condition error is returned.
 // See the documentation for Condition for more information.
@@ -148,8 +148,8 @@ func (lq *LQ) QTo(dst *Dense) *Dense {
 // The minimization problem solved depends on the input parameters.
 //  If trans == false, find the minimum norm solution of A * X = B.
 //  If trans == true, find X such that ||A*X - B||_2 is minimized.
-// The solution matrix, X, is stored in place into x.
-func (lq *LQ) Solve(x *Dense, trans bool, b Matrix) error {
+// The solution matrix, X, is stored in place into dst.
+func (lq *LQ) SolveTo(dst *Dense, trans bool, b Matrix) error {
 	r, c := lq.lq.Dims()
 	br, bc := b.Dims()
 
@@ -161,12 +161,12 @@ func (lq *LQ) Solve(x *Dense, trans bool, b Matrix) error {
 		if c != br {
 			panic(ErrShape)
 		}
-		x.reuseAs(r, bc)
+		dst.reuseAs(r, bc)
 	} else {
 		if r != br {
 			panic(ErrShape)
 		}
-		x.reuseAs(c, bc)
+		dst.reuseAs(c, bc)
 	}
 	// Do not need to worry about overlap between x and b because w has its own
 	// independent storage.
@@ -199,7 +199,7 @@ func (lq *LQ) Solve(x *Dense, trans bool, b Matrix) error {
 		putFloats(work)
 	}
 	// x was set above to be the correct size for the result.
-	x.Copy(w)
+	dst.Copy(w)
 	putWorkspace(w)
 	if lq.cond > ConditionTolerance {
 		return Condition(lq.cond)
@@ -207,9 +207,9 @@ func (lq *LQ) Solve(x *Dense, trans bool, b Matrix) error {
 	return nil
 }
 
-// SolveVec finds a minimum-norm solution to a system of linear equations.
-// See LQ.Solve for the full documentation.
-func (lq *LQ) SolveVec(x *VecDense, trans bool, b Vector) error {
+// SolveVecTo finds a minimum-norm solution to a system of linear equations.
+// See LQ.SolveTo for the full documentation.
+func (lq *LQ) SolveVecTo(dst *VecDense, trans bool, b Vector) error {
 	r, c := lq.lq.Dims()
 	if _, bc := b.Dims(); bc != 1 {
 		panic(ErrShape)
@@ -220,16 +220,16 @@ func (lq *LQ) SolveVec(x *VecDense, trans bool, b Vector) error {
 	bm := Matrix(b)
 	if rv, ok := b.(RawVectorer); ok {
 		bmat := rv.RawVector()
-		if x != b {
-			x.checkOverlap(bmat)
+		if dst != b {
+			dst.checkOverlap(bmat)
 		}
 		b := VecDense{mat: bmat}
 		bm = b.asDense()
 	}
 	if trans {
-		x.reuseAs(r)
+		dst.reuseAs(r)
 	} else {
-		x.reuseAs(c)
+		dst.reuseAs(c)
 	}
-	return lq.Solve(x.asDense(), trans, bm)
+	return lq.SolveTo(dst.asDense(), trans, bm)
 }

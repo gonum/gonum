@@ -94,14 +94,13 @@ func (s *SymDense) Caps() (r, c int) {
 	return s.cap, s.cap
 }
 
-// T implements the Matrix interface. Symmetric matrices, by definition, are
-// equal to their transpose, and this is a no-op.
+// T returns the receiver, the transpose of a symmetric matrix.
 func (s *SymDense) T() Matrix {
 	return s
 }
 
 // Symmetric implements the Symmetric interface and returns the number of rows
-// in the matrix (this is also the number of columns).
+// and columns in the matrix.
 func (s *SymDense) Symmetric() int {
 	return s.mat.N
 }

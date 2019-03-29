@@ -22,11 +22,11 @@ type Dgesvder interface {
 	Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float64, lda int, s, u []float64, ldu int, vt []float64, ldvt int, work []float64, lwork int) (ok bool)
 }
 
-func DgesvdTest(t *testing.T, impl Dgesvder) {
+func DgesvdTest(t *testing.T, impl Dgesvder, tol float64) {
 	for _, m := range []int{0, 1, 2, 3, 4, 5, 10, 150, 300} {
 		for _, n := range []int{0, 1, 2, 3, 4, 5, 10, 150} {
 			for _, mtype := range []int{1, 2, 3, 4, 5} {
-				dgesvdTest(t, impl, m, n, mtype)
+				dgesvdTest(t, impl, m, n, mtype, tol)
 			}
 		}
 	}
@@ -43,9 +43,7 @@ func DgesvdTest(t *testing.T, impl Dgesvder) {
 //  - the singular values are non-negative and sorted in decreasing order.
 // Then all combinations of partial SVD results are computed and checked whether
 // they match the full SVD result.
-func dgesvdTest(t *testing.T, impl Dgesvder, m, n, mtype int) {
-	const tol = 1e-13
-
+func dgesvdTest(t *testing.T, impl Dgesvder, m, n, mtype int, tol float64) {
 	rnd := rand.New(rand.NewSource(1))
 
 	// Use a fixed leading dimension to reduce testing time.

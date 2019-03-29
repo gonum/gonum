@@ -13,6 +13,8 @@ import (
 	"gonum.org/v1/gonum/lapack/lapack64"
 )
 
+const badLQ = "mat: invalid LQ factorization"
+
 // LQ is a type for creating and using the LQ factorization of a matrix.
 type LQ struct {
 	lq   *Dense
@@ -67,11 +69,16 @@ func (lq *LQ) factorize(a Matrix, norm lapack.MatrixNorm) {
 	lq.updateCond(norm)
 }
 
+// isValid returns whether the receiver contains a factorization.
+func (lq *LQ) isValid() bool {
+	return lq.lq != nil && !lq.lq.IsZero()
+}
+
 // Cond returns the condition number for the factorized matrix.
-// Cond will panic if the receiver does not contain a successful factorization.
+// Cond will panic if the receiver does not contain a factorization.
 func (lq *LQ) Cond() float64 {
-	if lq.lq == nil || lq.lq.IsZero() {
-		panic("lq: no decomposition computed")
+	if !lq.isValid() {
+		panic(badLQ)
 	}
 	return lq.cond
 }
@@ -81,7 +88,12 @@ func (lq *LQ) Cond() float64 {
 
 // LTo extracts the m×n lower trapezoidal matrix from a LQ decomposition.
 // If dst is nil, a new matrix is allocated. The resulting L matrix is returned.
+// LTo will panic if the receiver does not contain a factorization.
 func (lq *LQ) LTo(dst *Dense) *Dense {
+	if !lq.isValid() {
+		panic(badLQ)
+	}
+
 	r, c := lq.lq.Dims()
 	if dst == nil {
 		dst = NewDense(r, c, nil)
@@ -115,7 +127,12 @@ func (lq *LQ) LTo(dst *Dense) *Dense {
 
 // QTo extracts the n×n orthonormal matrix Q from an LQ decomposition.
 // If dst is nil, a new matrix is allocated. The resulting Q matrix is returned.
+// QTo will panic if the receiver does not contain a factorization.
 func (lq *LQ) QTo(dst *Dense) *Dense {
+	if !lq.isValid() {
+		panic(badLQ)
+	}
+
 	_, c := lq.lq.Dims()
 	if dst == nil {
 		dst = NewDense(c, c, nil)
@@ -149,7 +166,12 @@ func (lq *LQ) QTo(dst *Dense) *Dense {
 //  If trans == false, find the minimum norm solution of A * X = B.
 //  If trans == true, find X such that ||A*X - B||_2 is minimized.
 // The solution matrix, X, is stored in place into dst.
+// SolveTo will panic if the receiver does not contain a factorization.
 func (lq *LQ) SolveTo(dst *Dense, trans bool, b Matrix) error {
+	if !lq.isValid() {
+		panic(badLQ)
+	}
+
 	r, c := lq.lq.Dims()
 	br, bc := b.Dims()
 
@@ -209,7 +231,12 @@ func (lq *LQ) SolveTo(dst *Dense, trans bool, b Matrix) error {
 
 // SolveVecTo finds a minimum-norm solution to a system of linear equations.
 // See LQ.SolveTo for the full documentation.
+// SolveToVec will panic if the receiver does not contain a factorization.
 func (lq *LQ) SolveVecTo(dst *VecDense, trans bool, b Vector) error {
+	if !lq.isValid() {
+		panic(badLQ)
+	}
+
 	r, c := lq.lq.Dims()
 	if _, bc := b.Dims(); bc != 1 {
 		panic(ErrShape)

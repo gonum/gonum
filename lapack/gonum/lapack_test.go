@@ -89,7 +89,8 @@ func TestDgerqf(t *testing.T) {
 }
 
 func TestDgesvd(t *testing.T) {
-	testlapack.DgesvdTest(t, impl)
+	const tol = 1e-13
+	testlapack.DgesvdTest(t, impl, tol)
 }
 
 func TestDgetri(t *testing.T) {

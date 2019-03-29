@@ -481,6 +481,20 @@ var Units = []Unit{
 		ErForm: "Pressurer",
 	},
 	{
+		Name:        "Torque",
+		Receiver:    "t",
+		PrintString: "N m",
+		Suffix:      "newtonmeter",
+		Singular:    "Newtonmeter",
+		TypeComment: "Torque represents a torque in Newton meters",
+		Dimensions: []Dimension{
+			{Name: LengthName, Power: 2},
+			{Name: MassName, Power: 1},
+			{Name: TimeName, Power: -2},
+		},
+		ErForm: "Torquer",
+	},
+	{
 		Name:        "Velocity",
 		Receiver:    "v",
 		PrintString: "m s^-1",

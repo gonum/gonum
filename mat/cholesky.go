@@ -100,8 +100,7 @@ func (c *Cholesky) At(i, j int) float64 {
 	return val
 }
 
-// T implements the Matrix interface. Symmetric matrices, by definition, are
-// equal to their transpose, and this is a no-op.
+// T returns the the receiver, the transpose of a symmetric matrix.
 func (c *Cholesky) T() Matrix {
 	return c
 }

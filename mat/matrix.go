@@ -219,7 +219,7 @@ func untranspose(a Matrix) (Matrix, bool) {
 
 // untransposeExtract returns an untransposed matrix in a built-in matrix type.
 //
-// The untransposed matrix is return unaltered if it is a built-in matrix type.
+// The untransposed matrix is returned unaltered if it is a built-in matrix type.
 // Otherwise, if it implements a Raw method, an appropriate built-in type value
 // is returned holding the raw matrix value of the input. If neither of these
 // is possible, the untransposed matrix is returned.

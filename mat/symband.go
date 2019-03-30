@@ -149,7 +149,7 @@ func (s *SymBandDense) RawSymBand() blas64.SymmetricBand {
 // Changes to elements in the receiver following the call will be reflected
 // in the input.
 //
-// The supplied SymmetricBand must have blas.Upper storage format.
+// The supplied SymmetricBand must use blas.Upper storage format.
 func (s *SymBandDense) SetRawSymBand(mat blas64.SymmetricBand) {
 	if mat.Uplo != blas.Upper {
 		panic("mat: blas64.SymmetricBand does not have blas.Upper storage")

@@ -221,7 +221,7 @@ func (t *TriDense) RawTriangular() blas64.Triangular {
 // Changes to elements in the receiver following the call will be reflected
 // in the input.
 //
-// // The supplied Triangular must not have blas.Diag storage format.
+// The supplied Triangular must not use blas.Unit storage format.
 func (t *TriDense) SetRawTriangular(mat blas64.Triangular) {
 	if mat.Diag == blas.Unit {
 		panic("mat: cannot set TriDense with Unit storage format")

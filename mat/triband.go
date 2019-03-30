@@ -325,7 +325,7 @@ func (t *TriBandDense) RawTriBand() blas64.TriangularBand {
 // Changes to elements in the receiver following the call will be reflected
 // in the input.
 //
-// // The supplied TriangularBand must not have blas.Unit storage format.
+// The supplied TriangularBand must not use blas.Unit storage format.
 func (t *TriBandDense) SetRawTriBand(mat blas64.TriangularBand) {
 	if mat.Diag == blas.Unit {
 		panic("mat: cannot set TriBand with Unit storage")

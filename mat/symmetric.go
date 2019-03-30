@@ -114,7 +114,7 @@ func (s *SymDense) RawSymmetric() blas64.Symmetric {
 // Changes to elements in the receiver following the call will be reflected
 // in the input.
 //
-// The supplied Symmetric must have blas.Upper storage format.
+// The supplied Symmetric must use blas.Upper storage format.
 func (s *SymDense) SetRawSymmetric(mat blas64.Symmetric) {
 	if mat.Uplo != blas.Upper {
 		panic(badSymTriangle)

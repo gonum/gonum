@@ -94,12 +94,13 @@ func (s *SymDense) Caps() (r, c int) {
 	return s.cap, s.cap
 }
 
-// T implements the Matrix interface. Symmetric matrices, by definition, are
-// equal to their transpose, and this is a no-op.
+// T returns the receiver, the transpose of a symmetric matrix.
 func (s *SymDense) T() Matrix {
 	return s
 }
 
+// Symmetric implements the Symmetric interface and returns the number of rows
+// and columns in the matrix.
 func (s *SymDense) Symmetric() int {
 	return s.mat.N
 }
@@ -497,12 +498,12 @@ func (s *SymDense) SubsetSym(a Symmetric, set []int) {
 	}
 }
 
-// SliceSquare returns a new Matrix that shares backing data with the receiver.
+// SliceSym returns a new Matrix that shares backing data with the receiver.
 // The returned matrix starts at {i,i} of the receiver and extends k-i rows
 // and columns. The final row and column in the resulting matrix is k-1.
-// SliceSquare panics with ErrIndexOutOfRange if the slice is outside the capacity
-// of the receiver.
-func (s *SymDense) SliceSquare(i, k int) Matrix {
+// SliceSym panics with ErrIndexOutOfRange if the slice is outside the
+// capacity of the receiver.
+func (s *SymDense) SliceSym(i, k int) Symmetric {
 	sz := s.cap
 	if i < 0 || sz < i || k < i || sz < k {
 		panic(ErrIndexOutOfRange)
@@ -524,11 +525,11 @@ func (s *SymDense) Trace() float64 {
 	return v
 }
 
-// GrowSquare returns the receiver expanded by n rows and n columns. If the
+// GrowSym returns the receiver expanded by n rows and n columns. If the
 // dimensions of the expanded matrix are outside the capacity of the receiver
 // a new allocation is made, otherwise not. Note that the receiver itself is
 // not modified during the call to GrowSquare.
-func (s *SymDense) GrowSquare(n int) Matrix {
+func (s *SymDense) GrowSym(n int) Symmetric {
 	if n < 0 {
 		panic(ErrIndexOutOfRange)
 	}

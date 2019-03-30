@@ -160,7 +160,7 @@ func studentsTConditional(observed []int, values []float64, nu float64, mu []flo
 	// Compute mu_1 + sigma_{2,1}^T * sigma_{2,2}^-1 (v - mu_2).
 	v := mat.NewVecDense(ob, mu2)
 	var tmp, tmp2 mat.VecDense
-	err := chol.SolveVec(&tmp, v)
+	err := chol.SolveVecTo(&tmp, v)
 	if err != nil {
 		return math.NaN(), nil, nil
 	}
@@ -173,7 +173,7 @@ func studentsTConditional(observed []int, values []float64, nu float64, mu []flo
 	// Compute tmp4 = sigma_{2,1}^T * sigma_{2,2}^-1 * sigma_{2,1}.
 	// TODO(btracey): Should this be a method of SymDense?
 	var tmp3, tmp4 mat.Dense
-	err = chol.Solve(&tmp3, sigma21)
+	err = chol.SolveTo(&tmp3, sigma21)
 	if err != nil {
 		return math.NaN(), nil, nil
 	}

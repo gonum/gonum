@@ -20,8 +20,8 @@ type Graph interface {
 
 	// Edge returns the edge from u to v, with IDs uid and vid,
 	// if such an edge exists and nil otherwise. The node v
-	// must be directly reachable from u as defined by the
-	// From method.
+	// must be directly reachable from u as defined by
+	// the From method.
 	Edge(uid, vid int64) graph.Edge
 }
 
@@ -34,8 +34,8 @@ type BreadthFirst struct {
 	// during the walk. This includes edges that would hop to
 	// an already visited node.
 	//
-	// The value returned by Traverse determines whether an
-	// edge can be traversed during the walk.
+	// The value returned by Traverse determines whether
+	// an edge can be traversed during the walk.
 	Traverse func(graph.Edge) bool
 
 	queue   linear.NodeQueue
@@ -43,8 +43,8 @@ type BreadthFirst struct {
 }
 
 // Walk performs a breadth-first traversal of the graph g starting from the given node,
-// depending on the the Traverse field and the until parameter if they are non-nil. The
-// traversal follows edges for which Traverse(edge) is true and returns the first node
+// depending on the Traverse field and the until parameter if they are non-nil.
+// The traversal follows edges for which Traverse(edge) is true and returns the first node
 // for which until(node, depth) is true. During the traversal, if the Visit field is
 // non-nil, it is called with each node the first time it is visited.
 func (b *BreadthFirst) Walk(g Graph, from graph.Node, until func(n graph.Node, d int) bool) graph.Node {
@@ -151,8 +151,8 @@ type DepthFirst struct {
 }
 
 // Walk performs a depth-first traversal of the graph g starting from the given node,
-// depending on the the Traverse field and the until parameter if they are non-nil. The
-// traversal follows edges for which Traverse(edge) is true and returns the first node
+// depending on the Traverse field and the until parameter if they are non-nil.
+// The traversal follows edges for which Traverse(edge) is true and returns the first node
 // for which until(node) is true. During the traversal, if the Visit field is non-nil, it
 // is called with each node the first time it is visited.
 func (d *DepthFirst) Walk(g Graph, from graph.Node, until func(graph.Node) bool) graph.Node {

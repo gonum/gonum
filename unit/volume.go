@@ -13,31 +13,31 @@ import (
 	"unicode/utf8"
 )
 
-// Volume represents a volume in cubic meters.
+// Volume represents a volume in cubic metres.
 type Volume float64
 
 const (
-	Yottaliter Volume = 1e21
-	Zettaliter Volume = 1e18
-	Exaliter   Volume = 1e15
-	Petaliter  Volume = 1e12
-	Teraliter  Volume = 1e9
-	Gigaliter  Volume = 1e6
-	Megaliter  Volume = 1e3
-	Kiloliter  Volume = 1.0
-	Hectoliter Volume = 1e-1
-	Decaliter  Volume = 1e-2
-	Liter      Volume = 1e-3
-	Deciliter  Volume = 1e-4
-	Centiliter Volume = 1e-5
-	Milliliter Volume = 1e-6
-	Microliter Volume = 1e-9
-	Nanoliter  Volume = 1e-12
-	Picoliter  Volume = 1e-15
-	Femtoliter Volume = 1e-18
-	Attoliter  Volume = 1e-21
-	Zeptoliter Volume = 1e-24
-	Yoctoliter Volume = 1e-27
+	Yottalitre Volume = 1e21
+	Zettalitre Volume = 1e18
+	Exalitre   Volume = 1e15
+	Petalitre  Volume = 1e12
+	Teralitre  Volume = 1e9
+	Gigalitre  Volume = 1e6
+	Megalitre  Volume = 1e3
+	Kilolitre  Volume = 1.0
+	Hectolitre Volume = 1e-1
+	Decalitre  Volume = 1e-2
+	Litre      Volume = 1e-3
+	Decilitre  Volume = 1e-4
+	Centilitre Volume = 1e-5
+	Millilitre Volume = 1e-6
+	Microlitre Volume = 1e-9
+	Nanolitre  Volume = 1e-12
+	Picolitre  Volume = 1e-15
+	Femtolitre Volume = 1e-18
+	Attolitre  Volume = 1e-21
+	Zeptolitre Volume = 1e-24
+	Yoctolitre Volume = 1e-27
 )
 
 // Unit converts the Volume to a *Unit
@@ -55,7 +55,7 @@ func (v Volume) Volume() Volume {
 // From converts the unit into the receiver. From returns an
 // error if there is a mismatch in dimension
 func (v *Volume) From(u Uniter) error {
-	if !DimensionsMatch(u, Liter) {
+	if !DimensionsMatch(u, Litre) {
 		*v = Volume(math.NaN())
 		return errors.New("Dimension mismatch")
 	}

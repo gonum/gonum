@@ -13,7 +13,7 @@ import (
 	"unicode/utf8"
 )
 
-// Velocity represents a velocity in meters per second.
+// Velocity represents a velocity in metres per second.
 type Velocity float64
 
 // Unit converts the Velocity to a *Unit

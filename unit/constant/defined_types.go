@@ -40,6 +40,7 @@ var definedTypes = []struct {
 	{unit: unit.Resistance(1), name: "unit.Resistance"},
 	{unit: unit.Temperature(1), name: "unit.Temperature"},
 	{unit: unit.Time(1), name: "unit.Time"},
+	{unit: unit.Torque(1), name: "unit.Torque"},
 	{unit: unit.Velocity(1), name: "unit.Velocity"},
 	{unit: unit.Voltage(1), name: "unit.Voltage"},
 	{unit: unit.Volume(1), name: "unit.Volume"},

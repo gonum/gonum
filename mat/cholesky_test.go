@@ -72,7 +72,37 @@ func TestCholesky(t *testing.T) {
 	}
 }
 
-func TestCholeskySolve(t *testing.T) {
+func TestCholeskyAt(t *testing.T) {
+	for _, test := range []*SymDense{
+		NewSymDense(3, []float64{
+			53, 59, 37,
+			59, 83, 71,
+			37, 71, 101,
+		}),
+	} {
+		var chol Cholesky
+		ok := chol.Factorize(test)
+		if !ok {
+			t.Fatalf("Matrix not positive definite")
+		}
+		n := test.Symmetric()
+		cn := chol.Symmetric()
+		if cn != n {
+			t.Errorf("Cholesky size does not match. Got %d, want %d", cn, n)
+		}
+		for i := 0; i < n; i++ {
+			for j := 0; j < n; j++ {
+				got := chol.At(i, j)
+				want := test.At(i, j)
+				if math.Abs(got-want) > 1e-12 {
+					t.Errorf("Cholesky at does not match at %d, %d. Got %v, want %v", i, j, got, want)
+				}
+			}
+		}
+	}
+}
+
+func TestCholeskySolveTo(t *testing.T) {
 	for _, test := range []struct {
 		a   *SymDense
 		b   *Dense
@@ -103,7 +133,7 @@ func TestCholeskySolve(t *testing.T) {
 		}
 
 		var x Dense
-		chol.Solve(&x, test.b)
+		chol.SolveTo(&x, test.b)
 		if !EqualApprox(&x, test.ans, 1e-12) {
 			t.Error("incorrect Cholesky solve solution")
 		}
@@ -116,7 +146,7 @@ func TestCholeskySolve(t *testing.T) {
 	}
 }
 
-func TestCholeskySolveChol(t *testing.T) {
+func TestCholeskySolveCholTo(t *testing.T) {
 	for _, test := range []struct {
 		a, b *SymDense
 	}{
@@ -164,7 +194,7 @@ func TestCholeskySolveChol(t *testing.T) {
 		}
 
 		var x Dense
-		chola.SolveChol(&x, &cholb)
+		chola.SolveCholTo(&x, &cholb)
 
 		var ans Dense
 		ans.Mul(test.a, &x)
@@ -177,7 +207,7 @@ func TestCholeskySolveChol(t *testing.T) {
 	}
 }
 
-func TestCholeskySolveVec(t *testing.T) {
+func TestCholeskySolveVecTo(t *testing.T) {
 	for _, test := range []struct {
 		a   *SymDense
 		b   *VecDense
@@ -208,7 +238,7 @@ func TestCholeskySolveVec(t *testing.T) {
 		}
 
 		var x VecDense
-		chol.SolveVec(&x, test.b)
+		chol.SolveVecTo(&x, test.b)
 		if !EqualApprox(&x, test.ans, 1e-12) {
 			t.Error("incorrect Cholesky solve solution")
 		}
@@ -458,7 +488,7 @@ func TestCholeskyExtendVecSym(t *testing.T) {
 		},
 	} {
 		n := test.a.Symmetric()
-		as := test.a.SliceSquare(0, n-1).(*SymDense)
+		as := test.a.SliceSym(0, n-1).(*SymDense)
 
 		// Compute the full factorization to use later (do the full factorization
 		// first to ensure the matrix is positive definite).

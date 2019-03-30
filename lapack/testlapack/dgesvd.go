@@ -164,7 +164,7 @@ func dgesvdTest(t *testing.T, impl Dgesvder, m, n, mtype int, tol float64) {
 
 		// Check that uAll, sAll, and vtAll multiply back to A by computing a residual
 		//  |A - U*S*VT| / (n*aNorm)
-		if resid := svdFullResidual(m, n, aNorm, aCopy, lda, uAll, ldu, sAll, vtAll, ldvt); resid > 1e-13 {
+		if resid := svdFullResidual(m, n, aNorm, aCopy, lda, uAll, ldu, sAll, vtAll, ldvt); resid > tol {
 			t.Errorf("Case %v: original matrix not recovered for full SVD, |A - U*D*VT|=%v", prefix, resid)
 		}
 		if minmn > 0 {
@@ -238,14 +238,14 @@ func dgesvdTest(t *testing.T, impl Dgesvder, m, n, mtype int, tol float64) {
 					if !hasOrthonormalColumns(blas64.General{Rows: m, Cols: minmn, Data: u, Stride: ldu}) {
 						t.Errorf("Case %v: columns of U are not orthogonal", prefix)
 					}
-					if res := svdPartialUResidual(m, minmn, u, uAll, ldu); res > 1e-13 {
+					if res := svdPartialUResidual(m, minmn, u, uAll, ldu); res > tol {
 						t.Errorf("Case %v: columns of U do not match UAll", prefix)
 					}
 				case lapack.SVDAll:
 					if !hasOrthonormalColumns(blas64.General{Rows: m, Cols: m, Data: u, Stride: ldu}) {
 						t.Errorf("Case %v: columns of U are not orthogonal", prefix)
 					}
-					if res := svdPartialUResidual(m, m, u, uAll, ldu); res > 1e-13 {
+					if res := svdPartialUResidual(m, m, u, uAll, ldu); res > tol {
 						t.Errorf("Case %v: columns of U do not match UAll", prefix)
 					}
 				}
@@ -255,14 +255,14 @@ func dgesvdTest(t *testing.T, impl Dgesvder, m, n, mtype int, tol float64) {
 					if !hasOrthonormalRows(blas64.General{Rows: minmn, Cols: n, Data: vtAll, Stride: ldvt}) {
 						t.Errorf("Case %v: rows of VT are not orthogonal", prefix)
 					}
-					if res := svdPartialVTResidual(minmn, n, vt, vtAll, ldvt); res > 1e-13 {
+					if res := svdPartialVTResidual(minmn, n, vt, vtAll, ldvt); res > tol {
 						t.Errorf("Case %v: rows of VT do not match VTAll", prefix)
 					}
 				case lapack.SVDAll:
 					if !hasOrthonormalRows(blas64.General{Rows: n, Cols: n, Data: vtAll, Stride: ldvt}) {
 						t.Errorf("Case %v: rows of VT are not orthogonal", prefix)
 					}
-					if res := svdPartialVTResidual(n, n, vt, vtAll, ldvt); res > 1e-13 {
+					if res := svdPartialVTResidual(n, n, vt, vtAll, ldvt); res > tol {
 						t.Errorf("Case %v: rows of VT do not match VTAll", prefix)
 					}
 				}
@@ -274,7 +274,7 @@ func dgesvdTest(t *testing.T, impl Dgesvder, m, n, mtype int, tol float64) {
 				if floats.Min(s) < 0 {
 					t.Errorf("Case %v: some singular values from full SVD are negative", prefix)
 				}
-				if !floats.EqualApprox(s, sAll, 1e-14) {
+				if !floats.EqualApprox(s, sAll, tol/10) {
 					t.Errorf("Case %v: singular values differ between full and partial SVD\n%v\n%v", prefix, s, sAll)
 				}
 			}

@@ -321,6 +321,18 @@ func (t *TriBandDense) RawTriBand() blas64.TriangularBand {
 	return t.mat
 }
 
+// SetRawTriBand sets the underlying blas64.TriangularBand used by the receiver.
+// Changes to elements in the receiver following the call will be reflected
+// in the input.
+//
+// The supplied TriangularBand must not use blas.Unit storage format.
+func (t *TriBandDense) SetRawTriBand(mat blas64.TriangularBand) {
+	if mat.Diag == blas.Unit {
+		panic("mat: cannot set TriBand with Unit storage")
+	}
+	t.mat = mat
+}
+
 // DiagView returns the diagonal as a matrix backed by the original data.
 func (t *TriBandDense) DiagView() Diagonal {
 	if t.mat.Diag == blas.Unit {

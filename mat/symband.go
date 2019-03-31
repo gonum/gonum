@@ -145,6 +145,18 @@ func (s *SymBandDense) RawSymBand() blas64.SymmetricBand {
 	return s.mat
 }
 
+// SetRawSymBand sets the underlying blas64.SymmetricBand used by the receiver.
+// Changes to elements in the receiver following the call will be reflected
+// in the input.
+//
+// The supplied SymmetricBand must use blas.Upper storage format.
+func (s *SymBandDense) SetRawSymBand(mat blas64.SymmetricBand) {
+	if mat.Uplo != blas.Upper {
+		panic("mat: blas64.SymmetricBand does not have blas.Upper storage")
+	}
+	s.mat = mat
+}
+
 // Zero sets all of the matrix elements to zero.
 func (s *SymBandDense) Zero() {
 	for i := 0; i < s.mat.N; i++ {

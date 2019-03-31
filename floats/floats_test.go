@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	EqTolerance = 1E-14
+	EqTolerance = 1e-14
 	Small       = 10
 	Medium      = 1000
 	Large       = 100000

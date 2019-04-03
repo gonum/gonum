@@ -561,3 +561,15 @@ func randVecDense(size, inc int, rho float64, rnd func() float64) *VecDense {
 		},
 	}
 }
+
+func BenchmarkVectorSum100000(b *testing.B) { vectorSumBench(b, 100000) }
+
+var vectorSumForBench float64
+
+func vectorSumBench(b *testing.B, size int) {
+	a := randVecDense(size, 1, 1.0, rand.NormFloat64)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		vectorSumForBench = Sum(a)
+	}
+}

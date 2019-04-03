@@ -512,3 +512,25 @@ func TestCopySymIntoTriangle(t *testing.T) {
 		}
 	}
 }
+
+func BenchmarkTriSum1000(b *testing.B) { triSumBench(b, 1000) }
+
+var triSumForBench float64
+
+func triSumBench(b *testing.B, size int) {
+	a := randTriDense(size)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		triSumForBench = Sum(a)
+	}
+}
+
+func randTriDense(size int) *TriDense {
+	t := NewTriDense(size, Upper, nil)
+	for i := 0; i < size; i++ {
+		for j := i; j < size; j++ {
+			t.SetTri(i, j, rand.Float64())
+		}
+	}
+	return t
+}

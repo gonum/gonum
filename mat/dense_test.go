@@ -2093,3 +2093,15 @@ func denseMulTransSymBench(b *testing.B, size int, rho float64) {
 		wd = &n
 	}
 }
+
+func BenchmarkDenseSum1000(b *testing.B) { denseSumBench(b, 1000) }
+
+var denseSumForBench float64
+
+func denseSumBench(b *testing.B, size int) {
+	a, _ := randDense(size, 1.0, rand.NormFloat64)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		denseSumForBench = Sum(a)
+	}
+}

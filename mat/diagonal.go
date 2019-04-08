@@ -309,3 +309,14 @@ func (d *DiagDense) IsZero() bool {
 	// zeros in this case. See comment in Reset().
 	return d.mat.Inc == 0
 }
+
+// Trace returns the trace.
+func (d *DiagDense) Trace() float64 {
+	rb := d.RawBand()
+	var tr float64
+	for i := 0; i < rb.Rows; i++ {
+		tr += rb.Data[rb.KL+i*rb.Stride]
+	}
+	return tr
+
+}

@@ -261,3 +261,17 @@ func (b *BandDense) Zero() {
 		zero(b.mat.Data[i*b.mat.Stride+l : i*b.mat.Stride+u])
 	}
 }
+
+// Trace computes the trace of the matrix.
+func (b *BandDense) Trace() float64 {
+	r, c := b.Dims()
+	if r != c {
+		panic(ErrShape)
+	}
+	rb := b.RawBand()
+	var tr float64
+	for i := 0; i < r; i++ {
+		tr += rb.Data[rb.KL+i*rb.Stride]
+	}
+	return tr
+}

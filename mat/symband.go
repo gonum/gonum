@@ -219,3 +219,13 @@ func (s *SymBandDense) DoColNonZero(j int, fn func(i, j int, v float64)) {
 		}
 	}
 }
+
+// Trace returns the trace.
+func (s *SymBandDense) Trace() float64 {
+	rb := s.RawSymBand()
+	var tr float64
+	for i := 0; i < rb.N; i++ {
+		tr += rb.Data[i*rb.Stride]
+	}
+	return tr
+}

@@ -351,3 +351,17 @@ func (t *TriBandDense) DiagView() Diagonal {
 		},
 	}
 }
+
+// Trace returns the trace.
+func (t *TriBandDense) Trace() float64 {
+	rb := t.RawTriBand()
+	var tr float64
+	var offsetIndex int
+	if rb.Uplo == blas.Lower {
+		offsetIndex = rb.K
+	}
+	for i := 0; i < rb.N; i++ {
+		tr += rb.Data[offsetIndex+i*rb.Stride]
+	}
+	return tr
+}

@@ -135,3 +135,11 @@ func Convert(c []float64, g mat.Matrix, h []float64, a mat.Matrix, b []float64) 
 	}
 	return cNew, aNew, bNew
 }
+
+// ConvertSolveSimplex first converts a problem to standard
+// form and then solves with simplex
+func ConvertSolveSimplex(c []float64, g mat.Matrix, h []float64, a mat.Matrix, b []float64, tolerance float64, initialBasic []int) (optF float64, optX []float64, err error) {
+	cNew, aNew, bNew := Convert(c, g, h, a, b)
+	ans, x, err := Simplex(cNew, aNew, bNew, tolerance, initialBasic)
+	return ans, x, err
+}

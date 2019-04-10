@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package lp implements routines for solving linear programs.
+// Package lp implements routines for solving linear programs.
 package lp
 
 import (
@@ -23,6 +23,7 @@ import (
 // TODO(btracey): Better handling on the linear solve errors. If the condition
 // number is not inf and the equation solved "well", should keep moving.
 
+// ErrBland and other error types
 var (
 	ErrBland      = errors.New("lp: bland: all replacements are negative or cause ill-conditioned ab")
 	ErrInfeasible = errors.New("lp: problem is infeasible")
@@ -90,13 +91,13 @@ func Simplex(c []float64, A mat.Matrix, b []float64, tol float64, initialBasic [
 	return ans, x, err
 }
 
-func simplex(initialBasic []int, c []float64, A mat.Matrix, b []float64, tol float64) (float64, []float64, []int, error) {
+func simplexPresolve(initialBasic []int, c []float64, A mat.Matrix, b []float64, tol float64) (float64, []float64, []int, []int, *mat.Dense, []float64, error) {
 	err := verifyInputs(initialBasic, c, A, b)
 	if err != nil {
 		if err == ErrUnbounded {
-			return math.Inf(-1), nil, nil, ErrUnbounded
+			return math.Inf(-1), nil, nil, nil, nil, nil, ErrUnbounded
 		}
-		return math.NaN(), nil, nil, err
+		return math.NaN(), nil, nil, nil, nil, nil, err
 	}
 	m, n := A.Dims()
 
@@ -107,38 +108,16 @@ func simplex(initialBasic []int, c []float64, A mat.Matrix, b []float64, tol flo
 		xVec := mat.NewVecDense(n, x)
 		err := xVec.SolveVec(A, bVec)
 		if err != nil {
-			return math.NaN(), nil, nil, ErrSingular
+			return math.NaN(), nil, nil, nil, nil, nil, ErrSingular
 		}
 		for _, v := range x {
 			if v < 0 {
-				return math.NaN(), nil, nil, ErrInfeasible
+				return math.NaN(), nil, nil, nil, nil, nil, ErrInfeasible
 			}
 		}
 		f := floats.Dot(x, c)
-		return f, x, nil, nil
+		return f, x, nil, nil, nil, nil, nil
 	}
-
-	// There is at least one optimal solution to the LP which is at the intersection
-	// to a set of constraint boundaries. For a standard form LP with m variables
-	// and n equality constraints, at least m-n elements of x must equal zero
-	// at optimality. The Simplex algorithm solves the standard-form LP by starting
-	// at an initial constraint vertex and successively moving to adjacent constraint
-	// vertices. At every vertex, the set of non-zero x values is the "basic
-	// feasible solution". The list of non-zero x's are maintained in basicIdxs,
-	// the respective columns of A are in ab, and the actual non-zero values of
-	// x are in xb.
-	//
-	// The LP is equality constrained such that A * x = b. This can be expanded
-	// to
-	//  ab * xb + an * xn = b
-	// where ab are the columns of a in the basic set, and an are all of the
-	// other columns. Since each element of xn is zero by definition, this means
-	// that for all feasible solutions xb = ab^-1 * b.
-	//
-	// Before the simplex algorithm can start, an initial feasible solution must
-	// be found. If initialBasic is non-nil a feasible solution has been supplied.
-	// Otherwise the "Phase I" problem must be solved to find an initial feasible
-	// solution.
 
 	var basicIdxs []int // The indices of the non-zero x values.
 	var ab *mat.Dense   // The subset of columns of A listed in basicIdxs.
@@ -162,7 +141,7 @@ func simplex(initialBasic []int, c []float64, A mat.Matrix, b []float64, tol flo
 		// No initial basis supplied. Solve the PhaseI problem.
 		basicIdxs, ab, xb, err = findInitialBasic(A, b)
 		if err != nil {
-			return math.NaN(), nil, nil, err
+			return math.NaN(), nil, nil, nil, nil, nil, err
 		}
 	}
 
@@ -182,6 +161,40 @@ func simplex(initialBasic []int, c []float64, A mat.Matrix, b []float64, tol flo
 			nonBasicIdx = append(nonBasicIdx, i)
 		}
 	}
+	return 0, nil, basicIdxs, nonBasicIdx, ab, xb, nil
+}
+
+func simplex(initialBasic []int, c []float64, A mat.Matrix, b []float64, tol float64) (float64, []float64, []int, error) {
+
+	preF, preX, basicIdxs, nonBasicIdx, ab, xb, err := simplexPresolve(initialBasic, c, A, b, tol)
+	if err != nil {
+		return preF, preX, nil, err
+	}
+	if basicIdxs == nil {
+		return preF, preX, nil, nil
+	}
+	m, n := A.Dims()
+	// There is at least one optimal solution to the LP which is at the intersection
+	// to a set of constraint boundaries. For a standard form LP with m variables
+	// and n equality constraints, at least m-n elements of x must equal zero
+	// at optimality. The Simplex algorithm solves the standard-form LP by starting
+	// at an initial constraint vertex and successively moving to adjacent constraint
+	// vertices. At every vertex, the set of non-zero x values is the "basic
+	// feasible solution". The list of non-zero x's are maintained in basicIdxs,
+	// the respective columns of A are in ab, and the actual non-zero values of
+	// x are in xb.
+	//
+	// The LP is equality constrained such that A * x = b. This can be expanded
+	// to
+	//  ab * xb + an * xn = b
+	// where ab are the columns of a in the basic set, and an are all of the
+	// other columns. Since each element of xn is zero by definition, this means
+	// that for all feasible solutions xb = ab^-1 * b.
+	//
+	// Before the simplex algorithm can start, an initial feasible solution must
+	// be found. If initialBasic is non-nil a feasible solution has been supplied.
+	// Otherwise the "Phase I" problem must be solved to find an initial feasible
+	// solution.
 
 	// cb is the subset of c for the basic variables. an and cn
 	// are the equivalents to ab and cb but for the nonbasic variables.

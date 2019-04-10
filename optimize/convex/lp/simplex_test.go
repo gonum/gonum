@@ -219,9 +219,9 @@ func testSimplex(t *testing.T, initialBasic []int, c []float64, a mat.Matrix, b 
 	negAT := &mat.Dense{}
 	negAT.Clone(a.T())
 	negAT.Scale(-1, negAT)
-	cNew, aNew, bNew := Convert(b, negAT, c, nil, nil)
+	_, aNew, bNew := Convert(b, negAT, c, nil, nil)
 
-	dualOpt, dualX, _, errDual := simplex(nil, cNew, aNew, bNew, convergenceTol)
+	dualOpt, dualX, errDual := ConvertSolveSimplex(b, negAT, c, nil, nil, convergenceTol, nil)
 	if errDual == nil {
 		// Check that the dual is feasible
 		var bCheck mat.VecDense

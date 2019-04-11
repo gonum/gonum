@@ -17,7 +17,7 @@ import (
 // This is the method that was famously re-discovered in 1986
 // Dikin 1967
 // Vanderbei, Meketon, and Freedman 1986
-func AffineScaling(c []float64, A mat.Matrix, b []float64, tol float64, initialPoint []float64, maxIterations int, baseBeta float64, fractionRecenter float64) (optF float64, optX []float64, err error) {
+func AffineScaling(c []float64, A mat.Matrix, b []float64, tol float64, initialPoint []float64, maxIterations int, baseBeta float64, fractionRecenter float64, fractionExtendSearch float64) (optF float64, optX []float64, err error) {
 	// set up sizes and vectors
 	var newPoint []float64
 	nVars := len(c)
@@ -82,8 +82,8 @@ func AffineScaling(c []float64, A mat.Matrix, b []float64, tol float64, initialP
 		checkDiff := mat.NewVecDense(rA, nil)
 		checkDiff.SubVec(bVec, fCheck)
 		//fmt.Println("check: ", checkDiff)
-		oldCheckSize := mat.Norm(checkDiff, 2.0)
-		fmt.Println("old check size: ", oldCheckSize)
+		//oldCheckSize := mat.Norm(checkDiff, 2.0)
+		//fmt.Println("old check size: ", oldCheckSize)
 
 		// occasionally recenter
 		if rand.Float64() < fractionRecenter {
@@ -93,8 +93,8 @@ func AffineScaling(c []float64, A mat.Matrix, b []float64, tol float64, initialP
 		// step
 		newPoint, newFValue, newBeta, thisSize, minEle, optCondMin, dSize = affineScalingStep(currentPoint, c, A, betaScale, recenter)
 		_ = newBeta
-		fmt.Println("thisSize: ", thisSize)
-		fmt.Println("minEle: ", minEle)
+		//fmt.Println("thisSize: ", thisSize)
+		//fmt.Println("minEle: ", minEle)
 
 		// compute where we are now
 		fDelta := oldFValue - newFValue
@@ -110,9 +110,9 @@ func AffineScaling(c []float64, A mat.Matrix, b []float64, tol float64, initialP
 		stepSizes = append(stepSizes, stepSize)
 
 		// and check the stopping conditions now
-		fmt.Println("old/new fValue: ", oldFValue, ",", newFValue)
-		fmt.Println("thisSize / minEle: ", thisSize, ",", minEle)
-		fmt.Println("optCondMin: ", optCondMin)
+		fmt.Println(time.Now(), " , old/new fValue: ", oldFValue, ",", newFValue, "  ", i)
+		//fmt.Println("thisSize / minEle: ", thisSize, ",", minEle)
+		//fmt.Println("optCondMin: ", optCondMin)
 
 		// track how many consecutive infeasible entries
 		// so we can cut beta more quickly
@@ -126,7 +126,7 @@ func AffineScaling(c []float64, A mat.Matrix, b []float64, tol float64, initialP
 			// f still dropping and still feasible
 			// just keep chugging
 			// this is the base iterating case
-			fmt.Println("step ", time.Now())
+			//fmt.Println("step ", time.Now())
 		} else if optCondMin > -tol && newCheckSize < tol {
 			// optimal condition: c - AtV >= 0
 			// this looks like the good one
@@ -145,7 +145,7 @@ func AffineScaling(c []float64, A mat.Matrix, b []float64, tol float64, initialP
 			fmt.Println("my optimal")
 			return newFValue, newPoint, nil
 		} else if newCheckSize > tol {
-			fmt.Println("new point infeasible")
+			//fmt.Println("new point infeasible")
 			// infeasible point, reduce step size
 			betaScale = betaScale * math.Pow(10, -(1+infeasCount))
 			continue
@@ -156,10 +156,17 @@ func AffineScaling(c []float64, A mat.Matrix, b []float64, tol float64, initialP
 		infeasCount = 0
 		betaScale = baseBeta
 		currentPoint = newPoint
-		fmt.Println("updating point")
+		//fmt.Println("updating point")
 		curVec = mat.NewVecDense(cA, currentPoint)
 		oldFValue = newFValue
 		recenter = false
+		// if we are making progress do not stop
+		if fDelta > 0 && i > 0 {
+			i -= int(float64(maxIterations) / fractionExtendSearch)
+			if i < 0 {
+				i = 0
+			}
+		}
 	}
 	// FIXME - can be unbounded here too?
 	// it is for sure feasible
@@ -281,7 +288,7 @@ func affineScalingStep(startPoint []float64, cIn []float64, A mat.Matrix, betaSc
 
 // AffineScalingFromInitialBasic solves from an initial basic simplex solution
 // this exists to merge testing with simplex
-func AffineScalingFromInitialBasic(c []float64, A mat.Matrix, b []float64, tol float64, initialBasic []int, maxIterations int, baseBeta float64, fractionRecenter float64) (float64, []float64, error) {
+func AffineScalingFromInitialBasic(c []float64, A mat.Matrix, b []float64, tol float64, initialBasic []int, maxIterations int, baseBeta float64, fractionRecenter float64, fractionExtendSearch float64) (float64, []float64, error) {
 	_, _, basicIdxs, _, ab, xb, err := simplexPresolve(initialBasic, c, A, b, tol)
 
 	if initialBasic != nil {
@@ -296,7 +303,7 @@ func AffineScalingFromInitialBasic(c []float64, A mat.Matrix, b []float64, tol f
 		for i, v := range initialBasic {
 			initialPoint[v] = xb[i]
 		}
-		return AffineScaling(c, A, b, tol, initialPoint, maxIterations, baseBeta, fractionRecenter)
+		return AffineScaling(c, A, b, tol, initialPoint, maxIterations, baseBeta, fractionRecenter, fractionExtendSearch)
 	}
-	return AffineScaling(c, A, b, tol, nil, maxIterations, baseBeta, fractionRecenter)
+	return AffineScaling(c, A, b, tol, nil, maxIterations, baseBeta, fractionRecenter, fractionExtendSearch)
 }

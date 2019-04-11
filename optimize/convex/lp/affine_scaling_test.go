@@ -15,6 +15,7 @@ const maxIterations = 10000
 const tolerance = 1e-12
 const baseBeta = 0.9
 const fractionRecenter = 0.1
+const fractionExtendSearch = 10.0
 
 func TestExampleAffineScaling1(t *testing.T) {
 	c := []float64{-1, -2, 0, 0}
@@ -80,7 +81,7 @@ func TestAffineScalingLoop(t *testing.T) {
 	}
 }
 func testAffineScaling(t *testing.T, A mat.Matrix, b, c, initialPoint []float64) {
-	_, _, err := lp.AffineScaling(c, A, b, tolerance, initialPoint, maxIterations, baseBeta, fractionRecenter)
+	_, _, err := lp.AffineScaling(c, A, b, tolerance, initialPoint, maxIterations, baseBeta, fractionRecenter, fractionExtendSearch)
 	if err != nil {
 		//		fmt.Println(err)
 		t.Error("found an error")

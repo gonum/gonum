@@ -182,7 +182,8 @@ func randomNormal(dim int, src *rand.Rand) (*distmv.Normal, bool) {
 func compareNormal(t *testing.T, want *distmv.Normal, batch *mat.Dense, weights []float64, meanTol, covTol float64) {
 	dim := want.Dim()
 	mu := want.Mean(nil)
-	sigma := want.CovarianceMatrix(nil)
+	var sigma mat.SymDense
+	want.CovarianceMatrix(&sigma)
 	n, _ := batch.Dims()
 	if weights == nil {
 		weights = make([]float64, n)
@@ -198,8 +199,9 @@ func compareNormal(t *testing.T, want *distmv.Normal, batch *mat.Dense, weights 
 		}
 	}
 
-	cov := stat.CovarianceMatrix(nil, batch, weights)
-	if !mat.EqualApprox(cov, sigma, covTol) {
+	var cov mat.SymDense
+	stat.CovarianceMatrix(&cov, batch, weights)
+	if !mat.EqualApprox(&cov, &sigma, covTol) {
 		t.Errorf("Covariance matrix mismatch")
 	}
 }

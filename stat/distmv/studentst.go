@@ -221,23 +221,21 @@ func findUnob(observed []int, dim int) (unobserved []int) {
 	return unobserved
 }
 
-// CovarianceMatrix returns the covariance matrix of the distribution. Upon
-// return, the value at element {i, j} of the covariance matrix is equal to
-// the covariance of the i^th and j^th variables.
+// CovarianceMatrix calculates the covariance matrix of the distribution,
+// storing the result in dst. Upon return, the value at element {i, j} of the
+// covariance matrix is equal to the covariance of the i^th and j^th variables.
 //  covariance(i, j) = E[(x_i - E[x_i])(x_j - E[x_j])]
-// If the input matrix is nil a new matrix is allocated, otherwise the result
-// is stored in-place into the input.
-func (st *StudentsT) CovarianceMatrix(s *mat.SymDense) *mat.SymDense {
-	if s == nil {
-		s = mat.NewSymDense(st.dim, nil)
+// If the dst matrix is zero-sized it will be resized to the correct dimensions,
+// otherwise dst must match the dimension of the receiver or CovarianceMatrix
+// will panic.
+func (st *StudentsT) CovarianceMatrix(dst *mat.SymDense) {
+	if dst.IsZero() {
+		*dst = *(dst.GrowSym(st.dim).(*mat.SymDense))
+	} else if dst.Symmetric() != st.dim {
+		panic("studentst: input matrix size mismatch")
 	}
-	sn := s.Symmetric()
-	if sn != st.dim {
-		panic("normal: input matrix size mismatch")
-	}
-	s.CopySym(&st.sigma)
-	s.ScaleSym(st.nu/(st.nu-2), s)
-	return s
+	dst.CopySym(&st.sigma)
+	dst.ScaleSym(st.nu/(st.nu-2), dst)
 }
 
 // Dim returns the dimension of the distribution.

@@ -157,7 +157,7 @@ func (c *Cholesky) Reset() {
 // SetFromU sets the Cholesky decomposition from the given triangular matrix.
 // SetFromU panics if t is not upper triangular. Note that t is copied into,
 // not stored inside, the receiver.
-func (c *Cholesky) SetFromU(t *TriDense) {
+func (c *Cholesky) SetFromU(t Triangular) {
 	n, kind := t.Triangle()
 	if kind != Upper {
 		panic("cholesky: matrix must be upper triangular")

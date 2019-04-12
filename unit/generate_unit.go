@@ -20,13 +20,13 @@ import (
 type Unit struct {
 	DimensionName string
 	Receiver      string
-	PowerOffset   int    // From normal (for example, mass base unit is kg, not kg)
+	PowerOffset   int    // from normal (for example, mass base unit is kg, not g)
 	PrintString   string // print string for the unit (kg for mass)
 	ExtraConstant []Constant
 	Name          string
-	TypeComment   string // Text to comment the type
+	TypeComment   string // text to comment the type
 	Dimensions    []Dimension
-	ErForm        string // For Xxxer interface
+	ErForm        string // for Xxxer interface
 }
 
 type Dimension struct {
@@ -193,7 +193,7 @@ var Units = []Unit{
 		DimensionName: "Area",
 		Receiver:      "a",
 		PrintString:   "m^2",
-		TypeComment:   "Area represents and area in square metres",
+		TypeComment:   "Area represents an area in square metres",
 		Dimensions: []Dimension{
 			{Name: LengthName, Power: 2},
 		},

@@ -150,22 +150,20 @@ func (n *Normal) ConditionNormal(observed []int, values []float64, src rand.Sour
 	return NewNormal(mu1, sigma11, src)
 }
 
-// CovarianceMatrix returns the covariance matrix of the distribution. Upon
-// return, the value at element {i, j} of the covariance matrix is equal to
-// the covariance of the i^th and j^th variables.
+// CovarianceMatrix stores the covariance matrix of the distribution in dst.
+// Upon return, the value at element {i, j} of the covariance matrix is equal
+// to the covariance of the i^th and j^th variables.
 //  covariance(i, j) = E[(x_i - E[x_i])(x_j - E[x_j])]
-// If the input matrix is nil a new matrix is allocated, otherwise the result
-// is stored in-place into the input.
-func (n *Normal) CovarianceMatrix(s *mat.SymDense) *mat.SymDense {
-	if s == nil {
-		s = mat.NewSymDense(n.Dim(), nil)
-	}
-	sn := s.Symmetric()
-	if sn != n.Dim() {
+// If the dst matrix is zero-sized it will be resized to the correct dimensions,
+// otherwise dst must match the dimension of the receiver or CovarianceMatrix
+// will panic.
+func (n *Normal) CovarianceMatrix(dst *mat.SymDense) {
+	if dst.IsZero() {
+		*dst = *(dst.GrowSym(n.dim).(*mat.SymDense))
+	} else if dst.Symmetric() != n.dim {
 		panic("normal: input matrix size mismatch")
 	}
-	s.CopySym(&n.sigma)
-	return s
+	dst.CopySym(&n.sigma)
 }
 
 // Dim returns the dimension of the distribution.

@@ -129,11 +129,9 @@ type Problem struct {
 	Grad func(grad []float64, x []float64) []float64
 
 	// Hess evaluates the Hessian at x and stores the result in-place in hess.
-	// Hess must not modify x. Hess may use (and return) the provided Symmetric
-	// if it is non-nil, or must allocate a new Symmetric otherwise. Minimize
-	// will 'give back' the returned Symmetric where possible, allowing Hess
-	// to use a type assertion on the provided matrix.
-	Hess func(hess mat.Symmetric, x []float64) mat.Symmetric
+	// Hess must not modify x. Hess must use the provided mat.SymDense, and
+	// must resize it if it is zero-sized.
+	Hess func(hess *mat.SymDense, x []float64)
 
 	// Status reports the status of the objective function being optimized and any
 	// error. This can be used to terminate early, for example when the function is

@@ -60,14 +60,13 @@ func (Beale) Grad(grad, x []float64) []float64 {
 	return grad
 }
 
-func (Beale) Hess(hess mat.Symmetric, x []float64) mat.Symmetric {
+func (Beale) Hess(dst *mat.SymDense, x []float64) {
 	if len(x) != 2 {
 		panic("dimension of the problem must be 2")
 	}
-	if hess == nil {
-		hess = mat.NewSymDense(len(x), nil)
-	}
-	if len(x) != hess.Symmetric() {
+	if dst.IsZero() {
+		*dst = *(dst.GrowSym(len(x)).(*mat.SymDense))
+	} else if len(x) != dst.Symmetric() {
 		panic("incorrect size of the Hessian")
 	}
 
@@ -81,11 +80,9 @@ func (Beale) Hess(hess mat.Symmetric, x []float64) mat.Symmetric {
 	h00 := 2 * (t1*t1 + t2*t2 + t3*t3)
 	h01 := 2 * (f1 + x[1]*(2*f2+3*x[1]*f3) - x[0]*(t1+x[1]*(2*t2+3*x[1]*t3)))
 	h11 := 2 * x[0] * (x[0] + 2*f2 + x[1]*(6*f3+x[0]*x[1]*(4+9*x[1]*x[1])))
-	h := hess.(*mat.SymDense)
-	h.SetSym(0, 0, h00)
-	h.SetSym(0, 1, h01)
-	h.SetSym(1, 1, h11)
-	return h
+	dst.SetSym(0, 0, h00)
+	dst.SetSym(0, 1, h01)
+	dst.SetSym(1, 1, h11)
 }
 
 func (Beale) Minima() []Minimum {
@@ -595,25 +592,22 @@ func (BrownBadlyScaled) Grad(grad, x []float64) []float64 {
 	return grad
 }
 
-func (BrownBadlyScaled) Hess(hess mat.Symmetric, x []float64) mat.Symmetric {
+func (BrownBadlyScaled) Hess(dst *mat.SymDense, x []float64) {
 	if len(x) != 2 {
 		panic("dimension of the problem must be 2")
 	}
-	if hess == nil {
-		hess = mat.NewSymDense(len(x), nil)
-	}
-	if len(x) != hess.Symmetric() {
+	if dst.IsZero() {
+		*dst = *(dst.GrowSym(len(x)).(*mat.SymDense))
+	} else if len(x) != dst.Symmetric() {
 		panic("incorrect size of the Hessian")
 	}
 
 	h00 := 2 + 2*x[1]*x[1]
 	h01 := 4*x[0]*x[1] - 4
 	h11 := 2 + 2*x[0]*x[0]
-	h := hess.(*mat.SymDense)
-	h.SetSym(0, 0, h00)
-	h.SetSym(0, 1, h01)
-	h.SetSym(1, 1, h11)
-	return h
+	dst.SetSym(0, 0, h00)
+	dst.SetSym(0, 1, h01)
+	dst.SetSym(1, 1, h11)
 }
 
 func (BrownBadlyScaled) Minima() []Minimum {
@@ -681,21 +675,19 @@ func (BrownAndDennis) Grad(grad, x []float64) []float64 {
 	return grad
 }
 
-func (BrownAndDennis) Hess(hess mat.Symmetric, x []float64) mat.Symmetric {
+func (BrownAndDennis) Hess(dst *mat.SymDense, x []float64) {
 	if len(x) != 4 {
 		panic("dimension of the problem must be 4")
 	}
-	if hess == nil {
-		hess = mat.NewSymDense(len(x), nil)
-	}
-	if len(x) != hess.Symmetric() {
+	if dst.IsZero() {
+		*dst = *(dst.GrowSym(len(x)).(*mat.SymDense))
+	} else if len(x) != dst.Symmetric() {
 		panic("incorrect size of the Hessian")
 	}
 
-	h := hess.(*mat.SymDense)
 	for i := 0; i < 4; i++ {
 		for j := i; j < 4; j++ {
-			h.SetSym(i, j, 0)
+			dst.SetSym(i, j, 0)
 		}
 	}
 	for i := 1; i <= 20; i++ {
@@ -707,23 +699,22 @@ func (BrownAndDennis) Hess(hess mat.Symmetric, x []float64) mat.Symmetric {
 		s3 := 2 * t1 * t2
 		r1 := t + 2*t1*t1
 		r2 := t + 2*t2*t2
-		h.SetSym(0, 0, h.At(0, 0)+r1)
-		h.SetSym(0, 1, h.At(0, 1)+d1*r1)
-		h.SetSym(1, 1, h.At(1, 1)+d1*d1*r1)
-		h.SetSym(0, 2, h.At(0, 2)+s3)
-		h.SetSym(1, 2, h.At(1, 2)+d1*s3)
-		h.SetSym(2, 2, h.At(2, 2)+r2)
-		h.SetSym(0, 3, h.At(0, 3)+d2*s3)
-		h.SetSym(1, 3, h.At(1, 3)+d1*d2*s3)
-		h.SetSym(2, 3, h.At(2, 3)+d2*r2)
-		h.SetSym(3, 3, h.At(3, 3)+d2*d2*r2)
+		dst.SetSym(0, 0, dst.At(0, 0)+r1)
+		dst.SetSym(0, 1, dst.At(0, 1)+d1*r1)
+		dst.SetSym(1, 1, dst.At(1, 1)+d1*d1*r1)
+		dst.SetSym(0, 2, dst.At(0, 2)+s3)
+		dst.SetSym(1, 2, dst.At(1, 2)+d1*s3)
+		dst.SetSym(2, 2, dst.At(2, 2)+r2)
+		dst.SetSym(0, 3, dst.At(0, 3)+d2*s3)
+		dst.SetSym(1, 3, dst.At(1, 3)+d1*d2*s3)
+		dst.SetSym(2, 3, dst.At(2, 3)+d2*r2)
+		dst.SetSym(3, 3, dst.At(3, 3)+d2*d2*r2)
 	}
 	for i := 0; i < 4; i++ {
 		for j := i; j < 4; j++ {
-			h.SetSym(i, j, 4*h.At(i, j))
+			dst.SetSym(i, j, 4*dst.At(i, j))
 		}
 	}
-	return h
 }
 
 func (BrownAndDennis) Minima() []Minimum {
@@ -1352,14 +1343,13 @@ func (PowellBadlyScaled) Grad(grad, x []float64) []float64 {
 	return grad
 }
 
-func (PowellBadlyScaled) Hess(hess mat.Symmetric, x []float64) mat.Symmetric {
+func (PowellBadlyScaled) Hess(dst *mat.SymDense, x []float64) {
 	if len(x) != 2 {
 		panic("dimension of the problem must be 2")
 	}
-	if hess == nil {
-		hess = mat.NewSymDense(len(x), nil)
-	}
-	if len(x) != hess.Symmetric() {
+	if dst.IsZero() {
+		*dst = *(dst.GrowSym(len(x)).(*mat.SymDense))
+	} else if len(x) != dst.Symmetric() {
 		panic("incorrect size of the Hessian")
 	}
 
@@ -1368,14 +1358,12 @@ func (PowellBadlyScaled) Hess(hess mat.Symmetric, x []float64) mat.Symmetric {
 	s2 := math.Exp(-x[1])
 	t2 := s1 + s2 - 1.0001
 
-	h := hess.(*mat.SymDense)
 	h00 := 2 * (1e8*x[1]*x[1] + s1*(s1+t2))
 	h01 := 2 * (1e4*(1+2*t1) + s1*s2)
 	h11 := 2 * (1e8*x[0]*x[0] + s2*(s2+t2))
-	h.SetSym(0, 0, h00)
-	h.SetSym(0, 1, h01)
-	h.SetSym(1, 1, h11)
-	return h
+	dst.SetSym(0, 0, h00)
+	dst.SetSym(0, 1, h01)
+	dst.SetSym(1, 1, h11)
 }
 
 func (PowellBadlyScaled) Minima() []Minimum {
@@ -1619,18 +1607,17 @@ func (Watson) Grad(grad, x []float64) []float64 {
 	return grad
 }
 
-func (Watson) Hess(hess mat.Symmetric, x []float64) mat.Symmetric {
+func (Watson) Hess(dst *mat.SymDense, x []float64) {
 	dim := len(x)
-	if hess == nil {
-		hess = mat.NewSymDense(len(x), nil)
-	}
-	if dim != hess.Symmetric() {
+	if dst.IsZero() {
+		*dst = *(dst.GrowSym(len(x)).(*mat.SymDense))
+	} else if len(x) != dst.Symmetric() {
 		panic("incorrect size of the Hessian")
 	}
-	h := hess.(*mat.SymDense)
+
 	for j := 0; j < dim; j++ {
 		for k := j; k < dim; k++ {
-			h.SetSym(j, k, 0)
+			dst.SetSym(j, k, 0)
 		}
 	}
 	for i := 1; i <= 29; i++ {
@@ -1657,17 +1644,16 @@ func (Watson) Hess(hess mat.Symmetric, x []float64) mat.Symmetric {
 			v := float64(j) - s3
 			d3 := 1 / d1
 			for k := 0; k <= j; k++ {
-				h.SetSym(k, j, h.At(k, j)+d2*d3*(v*(float64(k)-s3)-th))
+				dst.SetSym(k, j, dst.At(k, j)+d2*d3*(v*(float64(k)-s3)-th))
 				d3 *= d1
 			}
 			d2 *= d1
 		}
 	}
 	t1 := x[1] - x[0]*x[0] - 1
-	h.SetSym(0, 0, h.At(0, 0)+8*x[0]*x[0]+2-4*t1)
-	h.SetSym(0, 1, h.At(0, 1)-4*x[0])
-	h.SetSym(1, 1, h.At(1, 1)+2)
-	return h
+	dst.SetSym(0, 0, dst.At(0, 0)+8*x[0]*x[0]+2-4*t1)
+	dst.SetSym(0, 1, dst.At(0, 1)-4*x[0])
+	dst.SetSym(1, 1, dst.At(1, 1)+2)
 }
 
 func (Watson) Minima() []Minimum {
@@ -1747,29 +1733,26 @@ func (Wood) Grad(grad, x []float64) []float64 {
 	return grad
 }
 
-func (Wood) Hess(hess mat.Symmetric, x []float64) mat.Symmetric {
+func (Wood) Hess(dst *mat.SymDense, x []float64) {
 	if len(x) != 4 {
 		panic("dimension of the problem must be 4")
 	}
-	if hess == nil {
-		hess = mat.NewSymDense(len(x), nil)
-	}
-	if len(x) != hess.Symmetric() {
+	if dst.IsZero() {
+		*dst = *(dst.GrowSym(len(x)).(*mat.SymDense))
+	} else if len(x) != dst.Symmetric() {
 		panic("incorrect size of the Hessian")
 	}
-	h := hess.(*mat.SymDense)
 
-	h.SetSym(0, 0, 400*(3*x[0]*x[0]-x[1])+2)
-	h.SetSym(0, 1, -400*x[0])
-	h.SetSym(1, 1, 220.2)
-	h.SetSym(0, 2, 0)
-	h.SetSym(1, 2, 0)
-	h.SetSym(2, 2, 360*(3*x[2]*x[2]-x[3])+2)
-	h.SetSym(0, 3, 0)
-	h.SetSym(1, 3, 19.8)
-	h.SetSym(2, 3, -360*x[2])
-	h.SetSym(3, 3, 200.2)
-	return h
+	dst.SetSym(0, 0, 400*(3*x[0]*x[0]-x[1])+2)
+	dst.SetSym(0, 1, -400*x[0])
+	dst.SetSym(1, 1, 220.2)
+	dst.SetSym(0, 2, 0)
+	dst.SetSym(1, 2, 0)
+	dst.SetSym(2, 2, 360*(3*x[2]*x[2]-x[3])+2)
+	dst.SetSym(0, 3, 0)
+	dst.SetSym(1, 3, 19.8)
+	dst.SetSym(2, 3, -360*x[2])
+	dst.SetSym(3, 3, 200.2)
 }
 
 func (Wood) Minima() []Minimum {

@@ -38,7 +38,7 @@ type Location struct {
 	X        []float64
 	F        float64
 	Gradient []float64
-	Hessian  mat.Symmetric
+	Hessian  *mat.SymDense
 }
 
 // Method is a type which can search for an optimum of an objective function.
@@ -480,7 +480,11 @@ func evaluate(p *Problem, loc *Location, op Operation, x []float64) {
 		loc.Gradient = p.Grad(loc.Gradient, x)
 	}
 	if op&HessEvaluation != 0 {
-		loc.Hessian = p.Hess(loc.Hessian, x)
+		// Make sure we have a destination in which to place the Hessian.
+		if loc.Hessian == nil {
+			loc.Hessian = &mat.SymDense{}
+		}
+		p.Hess(loc.Hessian, x)
 	}
 }
 

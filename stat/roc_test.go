@@ -5,6 +5,7 @@
 package stat
 
 import (
+	"math"
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
@@ -110,39 +111,39 @@ func TestROC(t *testing.T) {
 			y:       []float64{1, 2},
 			c:       []bool{true, true},
 			wantTPR: []float64{0, 0.5, 1},
-			wantFPR: []float64{0, 0, 0},
+			wantFPR: []float64{math.NaN(), math.NaN(), math.NaN()},
 		},
 		{ // 13
 			y:       []float64{1, 2},
 			c:       []bool{true, true},
 			cutoffs: []float64{-1, 2},
 			wantTPR: []float64{0, 1},
-			wantFPR: []float64{0, 0},
+			wantFPR: []float64{math.NaN(), math.NaN()},
 		},
 		{ // 14
 			y:       []float64{1, 2},
 			c:       []bool{true, true},
 			cutoffs: []float64{0, 1.2, 1.4, 1.6, 1.8, 2},
 			wantTPR: []float64{0, 0.5, 0.5, 0.5, 0.5, 1},
-			wantFPR: []float64{0, 0, 0, 0, 0, 0},
+			wantFPR: []float64{math.NaN(), math.NaN(), math.NaN(), math.NaN(), math.NaN(), math.NaN()},
 		},
 		{ // 15
 			y:       []float64{1},
 			c:       []bool{true},
 			wantTPR: []float64{0, 1},
-			wantFPR: []float64{0, 0},
+			wantFPR: []float64{math.NaN(), math.NaN()},
 		},
 		{ // 16
 			y:       []float64{1},
 			c:       []bool{true},
 			cutoffs: []float64{-1, 1},
 			wantTPR: []float64{0, 1},
-			wantFPR: []float64{0, 0},
+			wantFPR: []float64{math.NaN(), math.NaN()},
 		},
 		{ // 17
 			y:       []float64{1},
 			c:       []bool{false},
-			wantTPR: []float64{0, 0},
+			wantTPR: []float64{math.NaN(), math.NaN()},
 			wantFPR: []float64{0, 1},
 		},
 		{ // 18

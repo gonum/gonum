@@ -99,13 +99,8 @@ func ROC(cutoffs, y []float64, classes []bool, weights []float64) (tpr, fpr []fl
 		}
 	}
 
-	var invNeg, invPos float64
-	if nNeg != 0 {
-		invNeg = 1 / nNeg
-	}
-	if nPos != 0 {
-		invPos = 1 / nPos
-	}
+	invNeg := 1 / nNeg
+	invPos := 1 / nPos
 	for i := range tpr {
 		tpr[i] *= invPos
 		fpr[i] *= invNeg

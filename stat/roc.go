@@ -12,7 +12,9 @@ import (
 // ROC returns paired false positive rate (FPR) and true positive rate
 // (TPR) values corresponding to cutoff points on the receiver operator
 // characteristic (ROC) curve obtained when y is treated as a binary
-// classifier for classes with weights.
+// classifier for classes with weights. The cutoff thresholds used to
+// calculate the ROC are returned in thresh such that tpr[i] and fpr[i]
+// are the true and false positive rates for y >= thresh[i].
 //
 // The input y and cutoffs must be sorted, and values in y must correspond
 // to values in classes and weights. SortWeightedLabeled can be used to
@@ -34,7 +36,7 @@ import (
 //
 // More details about ROC curves are available at
 // https://en.wikipedia.org/wiki/Receiver_operating_characteristic
-func ROC(cutoffs, y []float64, classes []bool, weights []float64) (tpr, fpr []float64) {
+func ROC(cutoffs, y []float64, classes []bool, weights []float64) (tpr, fpr, thresh []float64) {
 	if len(y) != len(classes) {
 		panic("stat: slice length mismatch")
 	}
@@ -48,47 +50,50 @@ func ROC(cutoffs, y []float64, classes []bool, weights []float64) (tpr, fpr []fl
 		panic("stat: cutoff values must be sorted ascending")
 	}
 	if len(y) == 0 {
-		return nil, nil
+		return nil, nil, nil
 	}
-	var bin int
 	if len(cutoffs) == 0 {
 		if cutoffs == nil || cap(cutoffs) < len(y)+1 {
 			cutoffs = make([]float64, len(y)+1)
 		} else {
 			cutoffs = cutoffs[:len(y)+1]
 		}
-		cutoffs[0] = math.Nextafter(y[0], y[0]-1)
-		// Choose all possible cutoffs but remove duplicate values
-		// in y.
-		for i, u := range y {
-			if i != 0 && u != y[i-1] {
-				bin++
+		cutoffs[0] = math.Inf(-1)
+		// Choose all possible cutoffs for unique values in y.
+		bin := 1
+		cutoffs[bin] = y[0]
+		for i, u := range y[1:] {
+			if u == y[i] {
+				continue
 			}
-			cutoffs[bin+1] = u
+			bin++
+			cutoffs[bin] = u
 		}
-		cutoffs = cutoffs[0 : bin+2]
+		cutoffs = cutoffs[:bin+1]
+	} else {
+		// Don't mutate the provided cutoffs.
+		tmp := cutoffs
+		cutoffs = make([]float64, len(cutoffs))
+		copy(cutoffs, tmp)
 	}
 
 	tpr = make([]float64, len(cutoffs))
 	fpr = make([]float64, len(cutoffs))
-	bin = 0
+	var bin int
 	var nPos, nNeg float64
 	for i, u := range classes {
 		// Update the bin until it matches the next y value
 		// skipping empty bins.
-		for bin < len(cutoffs) && y[i] > cutoffs[bin] {
-			if bin == len(cutoffs)-1 {
-				break
-			}
+		for bin < len(cutoffs)-1 && y[i] > cutoffs[bin] {
 			bin++
 			tpr[bin] = tpr[bin-1]
 			fpr[bin] = fpr[bin-1]
 		}
-		var posWeight, negWeight float64 = 0, 1
+		posWeight, negWeight := 1.0, 0.0
 		if weights != nil {
-			negWeight = weights[i]
+			posWeight = weights[i]
 		}
-		if u {
+		if !u {
 			posWeight, negWeight = negWeight, posWeight
 		}
 		nPos += posWeight
@@ -103,8 +108,18 @@ func ROC(cutoffs, y []float64, classes []bool, weights []float64) (tpr, fpr []fl
 	invPos := 1 / nPos
 	for i := range tpr {
 		tpr[i] *= invPos
+		tpr[i] = 1 - tpr[i]
 		fpr[i] *= invNeg
+		fpr[i] = 1 - fpr[i]
 	}
+	for i, j := 0, len(tpr)-1; i < j; i, j = i+1, j-1 {
+		tpr[i], tpr[j] = tpr[j], tpr[i]
+		fpr[i], fpr[j] = fpr[j], fpr[i]
+	}
+	for i, j := 1, len(cutoffs)-1; i < j; i, j = i+1, j-1 {
+		cutoffs[i], cutoffs[j] = cutoffs[j], cutoffs[i]
+	}
+	cutoffs[0] = math.Inf(1)
 
-	return tpr, fpr
+	return tpr, fpr, cutoffs
 }

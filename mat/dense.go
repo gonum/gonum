@@ -305,6 +305,7 @@ func (m *Dense) Slice(i, k, j, l int) Matrix {
 	t.mat.Data = t.mat.Data[i*t.mat.Stride+j : (k-1)*t.mat.Stride+l]
 	t.mat.Rows = k - i
 	t.mat.Cols = l - j
+	t.mat.Stride = m.mat.Stride
 	t.capRows -= i
 	t.capCols -= j
 	return &t

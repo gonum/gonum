@@ -5,6 +5,7 @@
 package mat
 
 import (
+	"fmt"
 	"math"
 	"reflect"
 	"testing"
@@ -513,23 +514,69 @@ func TestCopySymIntoTriangle(t *testing.T) {
 	}
 }
 
-func BenchmarkTriSum1000(b *testing.B) { triSumBench(b, 1000) }
-
 var triSumForBench float64
 
-func triSumBench(b *testing.B, size int) {
-	a := randTriDense(size)
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		triSumForBench = Sum(a)
+func BenchmarkTriSum(b *testing.B) {
+	rnd := rand.New(rand.NewSource(1))
+	for n := 100; n <= 1600; n *= 2 {
+		a := randTriDense(n, rnd)
+		b.Run(fmt.Sprintf("BenchmarkTriSum%d", n), func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				triSumForBench = Sum(a)
+			}
+		})
 	}
 }
 
-func randTriDense(size int) *TriDense {
+var triProductForBench *TriDense
+
+func BenchmarkTriMul(b *testing.B) {
+	rnd := rand.New(rand.NewSource(1))
+	for n := 100; n <= 1600; n *= 2 {
+		triProductForBench = NewTriDense(n, Upper, nil)
+		a := randTriDense(n, rnd)
+		c := randTriDense(n, rnd)
+		b.Run(fmt.Sprintf("BenchmarkTriMul%d", n), func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				triProductForBench.MulTri(a, c)
+			}
+		})
+	}
+}
+
+func BenchmarkTriMulDiag(b *testing.B) {
+	rnd := rand.New(rand.NewSource(1))
+	for n := 100; n <= 1600; n *= 2 {
+		triProductForBench = NewTriDense(n, Upper, nil)
+		a := randTriDense(n, rnd)
+		c := randDiagDense(n, rnd)
+		b.Run(fmt.Sprintf("BenchmarkTriMulDiag%d", n), func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				triProductForBench.MulTri(a, c)
+			}
+		})
+	}
+}
+
+func BenchmarkTriMul2Diag(b *testing.B) {
+	rnd := rand.New(rand.NewSource(1))
+	for n := 100; n <= 1600; n *= 2 {
+		triProductForBench = NewTriDense(n, Upper, nil)
+		a := randDiagDense(n, rnd)
+		c := randDiagDense(n, rnd)
+		b.Run(fmt.Sprintf("BenchmarkTriMul2Diag%d", n), func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				triProductForBench.MulTri(a, c)
+			}
+		})
+	}
+}
+
+func randTriDense(size int, rnd *rand.Rand) *TriDense {
 	t := NewTriDense(size, Upper, nil)
 	for i := 0; i < size; i++ {
 		for j := i; j < size; j++ {
-			t.SetTri(i, j, rand.Float64())
+			t.SetTri(i, j, rnd.Float64())
 		}
 	}
 	return t

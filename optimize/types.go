@@ -124,13 +124,13 @@ type Problem struct {
 	Func func(x []float64) float64
 
 	// Grad evaluates the gradient at x and returns the result. Grad may use
-	// (and return) the provided slice if it is non-nil, or must allocate a new
-	// slice otherwise. Grad must not modify x.
-	Grad func(grad []float64, x []float64) []float64
+	// the provided slice which will be the same length as x. Grad must not
+	// modify x.
+	Grad func(grad, x []float64)
 
 	// Hess evaluates the Hessian at x and stores the result in-place in hess.
-	// Hess must not modify x. Hess must use the provided mat.SymDense, and
-	// must resize it if it is zero-sized.
+	// Hess must not modify x. Hess may use the provided mat.SymDense which
+	// will have dimensions matching the length of x.
 	Hess func(hess *mat.SymDense, x []float64)
 
 	// Status reports the status of the objective function being optimized and any

@@ -36,12 +36,9 @@ func (Beale) Func(x []float64) float64 {
 	return f1*f1 + f2*f2 + f3*f3
 }
 
-func (Beale) Grad(grad, x []float64) []float64 {
+func (Beale) Grad(grad, x []float64) {
 	if len(x) != 2 {
 		panic("dimension of the problem must be 2")
-	}
-	if grad == nil {
-		grad = make([]float64, len(x))
 	}
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
@@ -57,16 +54,13 @@ func (Beale) Grad(grad, x []float64) []float64 {
 
 	grad[0] = -2 * (f1*t1 + f2*t2 + f3*t3)
 	grad[1] = 2 * x[0] * (f1 + 2*f2*x[1] + 3*f3*x[1]*x[1])
-	return grad
 }
 
 func (Beale) Hess(dst *mat.SymDense, x []float64) {
 	if len(x) != 2 {
 		panic("dimension of the problem must be 2")
 	}
-	if dst.IsZero() {
-		*dst = *(dst.GrowSym(len(x)).(*mat.SymDense))
-	} else if len(x) != dst.Symmetric() {
+	if len(x) != dst.Symmetric() {
 		panic("incorrect size of the Hessian")
 	}
 
@@ -119,12 +113,9 @@ func (BiggsEXP2) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (BiggsEXP2) Grad(grad, x []float64) []float64 {
+func (BiggsEXP2) Grad(grad, x []float64) {
 	if len(x) != 2 {
 		panic("dimension of the problem must be 2")
-	}
-	if grad == nil {
-		grad = make([]float64, len(x))
 	}
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
@@ -144,7 +135,6 @@ func (BiggsEXP2) Grad(grad, x []float64) []float64 {
 		grad[0] += 2 * f * dfdx0
 		grad[1] += 2 * f * dfdx1
 	}
-	return grad
 }
 
 func (BiggsEXP2) Minima() []Minimum {
@@ -181,12 +171,9 @@ func (BiggsEXP3) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (BiggsEXP3) Grad(grad, x []float64) []float64 {
+func (BiggsEXP3) Grad(grad, x []float64) {
 	if len(x) != 3 {
 		panic("dimension of the problem must be 3")
-	}
-	if grad == nil {
-		grad = make([]float64, len(x))
 	}
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
@@ -208,7 +195,6 @@ func (BiggsEXP3) Grad(grad, x []float64) []float64 {
 		grad[1] += 2 * f * dfdx1
 		grad[2] += 2 * f * dfdx2
 	}
-	return grad
 }
 
 func (BiggsEXP3) Minima() []Minimum {
@@ -245,12 +231,9 @@ func (BiggsEXP4) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (BiggsEXP4) Grad(grad, x []float64) []float64 {
+func (BiggsEXP4) Grad(grad, x []float64) {
 	if len(x) != 4 {
 		panic("dimension of the problem must be 4")
-	}
-	if grad == nil {
-		grad = make([]float64, len(x))
 	}
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
@@ -274,7 +257,6 @@ func (BiggsEXP4) Grad(grad, x []float64) []float64 {
 		grad[2] += 2 * f * dfdx2
 		grad[3] += 2 * f * dfdx3
 	}
-	return grad
 }
 
 func (BiggsEXP4) Minima() []Minimum {
@@ -311,12 +293,9 @@ func (BiggsEXP5) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (BiggsEXP5) Grad(grad, x []float64) []float64 {
+func (BiggsEXP5) Grad(grad, x []float64) {
 	if len(x) != 5 {
 		panic("dimension of the problem must be 5")
-	}
-	if grad == nil {
-		grad = make([]float64, len(x))
 	}
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
@@ -342,7 +321,6 @@ func (BiggsEXP5) Grad(grad, x []float64) []float64 {
 		grad[3] += 2 * f * dfdx3
 		grad[4] += 2 * f * dfdx4
 	}
-	return grad
 }
 
 func (BiggsEXP5) Minima() []Minimum {
@@ -382,12 +360,9 @@ func (BiggsEXP6) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (BiggsEXP6) Grad(grad, x []float64) []float64 {
+func (BiggsEXP6) Grad(grad, x []float64) {
 	if len(x) != 6 {
 		panic("dimension of the problem must be 6")
-	}
-	if grad == nil {
-		grad = make([]float64, len(x))
 	}
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
@@ -415,7 +390,6 @@ func (BiggsEXP6) Grad(grad, x []float64) []float64 {
 		grad[4] += 2 * f * dfdx4
 		grad[5] += 2 * f * dfdx5
 	}
-	return grad
 }
 
 func (BiggsEXP6) Minima() []Minimum {
@@ -466,12 +440,9 @@ func (Box3D) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (Box3D) Grad(grad, x []float64) []float64 {
+func (Box3D) Grad(grad, x []float64) {
 	if len(x) != 3 {
 		panic("dimension of the problem must be 3")
-	}
-	if grad == nil {
-		grad = make([]float64, len(x))
 	}
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
@@ -488,7 +459,6 @@ func (Box3D) Grad(grad, x []float64) []float64 {
 		grad[1] += -2 * f * c * math.Exp(c*x[1])
 		grad[2] += -2 * f * y
 	}
-	return grad
 }
 
 func (Box3D) Minima() []Minimum {
@@ -573,12 +543,9 @@ func (BrownBadlyScaled) Func(x []float64) float64 {
 	return f1*f1 + f2*f2 + f3*f3
 }
 
-func (BrownBadlyScaled) Grad(grad, x []float64) []float64 {
+func (BrownBadlyScaled) Grad(grad, x []float64) {
 	if len(x) != 2 {
 		panic("dimension of the problem must be 2")
-	}
-	if grad == nil {
-		grad = make([]float64, len(x))
 	}
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
@@ -589,16 +556,13 @@ func (BrownBadlyScaled) Grad(grad, x []float64) []float64 {
 	f3 := x[0]*x[1] - 2
 	grad[0] = 2*f1 + 2*f3*x[1]
 	grad[1] = 2*f2 + 2*f3*x[0]
-	return grad
 }
 
 func (BrownBadlyScaled) Hess(dst *mat.SymDense, x []float64) {
 	if len(x) != 2 {
 		panic("dimension of the problem must be 2")
 	}
-	if dst.IsZero() {
-		*dst = *(dst.GrowSym(len(x)).(*mat.SymDense))
-	} else if len(x) != dst.Symmetric() {
+	if len(x) != dst.Symmetric() {
 		panic("incorrect size of the Hessian")
 	}
 
@@ -648,12 +612,9 @@ func (BrownAndDennis) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (BrownAndDennis) Grad(grad, x []float64) []float64 {
+func (BrownAndDennis) Grad(grad, x []float64) {
 	if len(x) != 4 {
 		panic("dimension of the problem must be 4")
-	}
-	if grad == nil {
-		grad = make([]float64, len(x))
 	}
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
@@ -672,16 +633,13 @@ func (BrownAndDennis) Grad(grad, x []float64) []float64 {
 		grad[2] += 4 * f * f2
 		grad[3] += 4 * f * f2 * math.Sin(c)
 	}
-	return grad
 }
 
 func (BrownAndDennis) Hess(dst *mat.SymDense, x []float64) {
 	if len(x) != 4 {
 		panic("dimension of the problem must be 4")
 	}
-	if dst.IsZero() {
-		*dst = *(dst.GrowSym(len(x)).(*mat.SymDense))
-	} else if len(x) != dst.Symmetric() {
+	if len(x) != dst.Symmetric() {
 		panic("incorrect size of the Hessian")
 	}
 
@@ -758,12 +716,9 @@ func (ExtendedPowellSingular) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (ExtendedPowellSingular) Grad(grad, x []float64) []float64 {
+func (ExtendedPowellSingular) Grad(grad, x []float64) {
 	if len(x)%4 != 0 {
 		panic("dimension of the problem must be a multiple of 4")
-	}
-	if grad == nil {
-		grad = make([]float64, len(x))
 	}
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
@@ -781,7 +736,6 @@ func (ExtendedPowellSingular) Grad(grad, x []float64) []float64 {
 		grad[i+2] = 10*f2 - 8*f3*t1
 		grad[i+3] = -10*f2 - 40*f4*t2
 	}
-	return grad
 }
 
 func (ExtendedPowellSingular) Minima() []Minimum {
@@ -826,10 +780,7 @@ func (ExtendedRosenbrock) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (ExtendedRosenbrock) Grad(grad, x []float64) []float64 {
-	if grad == nil {
-		grad = make([]float64, len(x))
-	}
+func (ExtendedRosenbrock) Grad(grad, x []float64) {
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
 	}
@@ -845,7 +796,6 @@ func (ExtendedRosenbrock) Grad(grad, x []float64) []float64 {
 	for i := 1; i < dim; i++ {
 		grad[i] += 200 * (x[i] - x[i-1]*x[i-1])
 	}
-	return grad
 }
 
 func (ExtendedRosenbrock) Minima() []Minimum {
@@ -952,12 +902,9 @@ func (g Gaussian) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (g Gaussian) Grad(grad, x []float64) []float64 {
+func (g Gaussian) Grad(grad, x []float64) {
 	if len(x) != 3 {
 		panic("dimension of the problem must be 3")
-	}
-	if grad == nil {
-		grad = make([]float64, len(x))
 	}
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
@@ -976,7 +923,6 @@ func (g Gaussian) Grad(grad, x []float64) []float64 {
 		grad[1] -= f * e * d * x[0]
 		grad[2] += 2 * f * e * x[0] * x[1] * b
 	}
-	return grad
 }
 
 func (Gaussian) Minima() []Minimum {
@@ -1018,12 +964,9 @@ func (GulfResearchAndDevelopment) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (GulfResearchAndDevelopment) Grad(grad, x []float64) []float64 {
+func (GulfResearchAndDevelopment) Grad(grad, x []float64) {
 	if len(x) != 3 {
 		panic("dimension of the problem must be 3")
-	}
-	if grad == nil {
-		grad = make([]float64, len(x))
 	}
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
@@ -1046,7 +989,6 @@ func (GulfResearchAndDevelopment) Grad(grad, x []float64) []float64 {
 	grad[0] *= 2 / x[0]
 	grad[1] *= 2 * x[2]
 	grad[2] *= 2
-	return grad
 }
 
 func (GulfResearchAndDevelopment) Minima() []Minimum {
@@ -1100,12 +1042,9 @@ func (HelicalValley) Func(x []float64) float64 {
 	return f1*f1 + f2*f2 + f3*f3
 }
 
-func (HelicalValley) Grad(grad, x []float64) []float64 {
+func (HelicalValley) Grad(grad, x []float64) {
 	if len(x) != 3 {
 		panic("dimension of the problem must be 3")
-	}
-	if grad == nil {
-		grad = make([]float64, len(x))
 	}
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
@@ -1125,7 +1064,6 @@ func (HelicalValley) Grad(grad, x []float64) []float64 {
 	grad[0] = 200 * (5*s*q*x[1] + (h-1)*r*x[0])
 	grad[1] = 200 * (-5*s*q*x[0] + (h-1)*r*x[1])
 	grad[2] = 2 * (100*s + x[2])
-	return grad
 }
 
 func (HelicalValley) Minima() []Minimum {
@@ -1183,10 +1121,7 @@ func (PenaltyI) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (PenaltyI) Grad(grad, x []float64) []float64 {
-	if grad == nil {
-		grad = make([]float64, len(x))
-	}
+func (PenaltyI) Grad(grad, x []float64) {
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
 	}
@@ -1198,7 +1133,6 @@ func (PenaltyI) Grad(grad, x []float64) []float64 {
 	for i, v := range x {
 		grad[i] = 2 * (2*s*v + 1e-5*(v-1))
 	}
-	return grad
 }
 
 func (PenaltyI) Minima() []Minimum {
@@ -1252,10 +1186,7 @@ func (PenaltyII) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (PenaltyII) Grad(grad, x []float64) []float64 {
-	if grad == nil {
-		grad = make([]float64, len(x))
-	}
+func (PenaltyII) Grad(grad, x []float64) {
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
 	}
@@ -1279,7 +1210,6 @@ func (PenaltyII) Grad(grad, x []float64) []float64 {
 		grad[i] += 1e-5 * f * math.Exp(x[i]/10) / 5
 	}
 	grad[0] += 2 * (x[0] - 0.2)
-	return grad
 }
 
 func (PenaltyII) Minima() []Minimum {
@@ -1325,12 +1255,9 @@ func (PowellBadlyScaled) Func(x []float64) float64 {
 	return f1*f1 + f2*f2
 }
 
-func (PowellBadlyScaled) Grad(grad, x []float64) []float64 {
+func (PowellBadlyScaled) Grad(grad, x []float64) {
 	if len(x) != 2 {
 		panic("dimension of the problem must be 2")
-	}
-	if grad == nil {
-		grad = make([]float64, len(x))
 	}
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
@@ -1340,16 +1267,13 @@ func (PowellBadlyScaled) Grad(grad, x []float64) []float64 {
 	f2 := math.Exp(-x[0]) + math.Exp(-x[1]) - 1.0001
 	grad[0] = 2 * (1e4*f1*x[1] - f2*math.Exp(-x[0]))
 	grad[1] = 2 * (1e4*f1*x[0] - f2*math.Exp(-x[1]))
-	return grad
 }
 
 func (PowellBadlyScaled) Hess(dst *mat.SymDense, x []float64) {
 	if len(x) != 2 {
 		panic("dimension of the problem must be 2")
 	}
-	if dst.IsZero() {
-		*dst = *(dst.GrowSym(len(x)).(*mat.SymDense))
-	} else if len(x) != dst.Symmetric() {
+	if len(x) != dst.Symmetric() {
 		panic("incorrect size of the Hessian")
 	}
 
@@ -1401,10 +1325,7 @@ func (Trigonometric) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (Trigonometric) Grad(grad, x []float64) []float64 {
-	if grad == nil {
-		grad = make([]float64, len(x))
-	}
+func (Trigonometric) Grad(grad, x []float64) {
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
 	}
@@ -1424,7 +1345,6 @@ func (Trigonometric) Grad(grad, x []float64) []float64 {
 	for i, v := range x {
 		grad[i] += 2 * s2 * math.Sin(v)
 	}
-	return grad
 }
 
 func (Trigonometric) Minima() []Minimum {
@@ -1477,10 +1397,7 @@ func (VariablyDimensioned) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (VariablyDimensioned) Grad(grad, x []float64) []float64 {
-	if grad == nil {
-		grad = make([]float64, len(x))
-	}
+func (VariablyDimensioned) Grad(grad, x []float64) {
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
 	}
@@ -1492,7 +1409,6 @@ func (VariablyDimensioned) Grad(grad, x []float64) []float64 {
 	for i, v := range x {
 		grad[i] = 2 * (v - 1 + s*float64(i+1)*(1+2*s*s))
 	}
-	return grad
 }
 
 func (VariablyDimensioned) Minima() []Minimum {
@@ -1565,10 +1481,7 @@ func (Watson) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (Watson) Grad(grad, x []float64) []float64 {
-	if grad == nil {
-		grad = make([]float64, len(x))
-	}
+func (Watson) Grad(grad, x []float64) {
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
 	}
@@ -1604,14 +1517,11 @@ func (Watson) Grad(grad, x []float64) []float64 {
 	t := x[1] - x[0]*x[0] - 1
 	grad[0] += x[0] * (2 - 4*t)
 	grad[1] += 2 * t
-	return grad
 }
 
 func (Watson) Hess(dst *mat.SymDense, x []float64) {
 	dim := len(x)
-	if dst.IsZero() {
-		*dst = *(dst.GrowSym(len(x)).(*mat.SymDense))
-	} else if len(x) != dst.Symmetric() {
+	if len(x) != dst.Symmetric() {
 		panic("incorrect size of the Hessian")
 	}
 
@@ -1709,12 +1619,9 @@ func (Wood) Func(x []float64) (sum float64) {
 	return 100*f1*f1 + f2*f2 + 90*f3*f3 + f4*f4 + 10*f5*f5 + 0.1*f6*f6
 }
 
-func (Wood) Grad(grad, x []float64) []float64 {
+func (Wood) Grad(grad, x []float64) {
 	if len(x) != 4 {
 		panic("dimension of the problem must be 4")
-	}
-	if grad == nil {
-		grad = make([]float64, len(x))
 	}
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
@@ -1730,16 +1637,13 @@ func (Wood) Grad(grad, x []float64) []float64 {
 	grad[1] = 2 * (100*f1 + 10*f5 + 0.1*f6)
 	grad[2] = -2 * (180*f3*x[2] + f4)
 	grad[3] = 2 * (90*f3 + 10*f5 - 0.1*f6)
-	return grad
 }
 
 func (Wood) Hess(dst *mat.SymDense, x []float64) {
 	if len(x) != 4 {
 		panic("dimension of the problem must be 4")
 	}
-	if dst.IsZero() {
-		*dst = *(dst.GrowSym(len(x)).(*mat.SymDense))
-	} else if len(x) != dst.Symmetric() {
+	if len(x) != dst.Symmetric() {
 		panic("incorrect size of the Hessian")
 	}
 
@@ -1780,7 +1684,7 @@ func (ConcaveRight) Func(x []float64) float64 {
 	return -x[0] / (x[0]*x[0] + 2)
 }
 
-func (ConcaveRight) Grad(grad, x []float64) []float64 {
+func (ConcaveRight) Grad(grad, x []float64) {
 	if len(x) != 1 {
 		panic("dimension of the problem must be 1")
 	}
@@ -1789,7 +1693,6 @@ func (ConcaveRight) Grad(grad, x []float64) []float64 {
 	}
 	xSqr := x[0] * x[0]
 	grad[0] = (xSqr - 2) / (xSqr + 2) / (xSqr + 2)
-	return grad
 }
 
 // ConcaveLeft implements an univariate function that is concave to the left of
@@ -1807,18 +1710,14 @@ func (ConcaveLeft) Func(x []float64) float64 {
 	return math.Pow(x[0]+0.004, 4) * (x[0] - 1.996)
 }
 
-func (ConcaveLeft) Grad(grad, x []float64) []float64 {
+func (ConcaveLeft) Grad(grad, x []float64) {
 	if len(x) != 1 {
 		panic("dimension of the problem must be 1")
-	}
-	if grad == nil {
-		grad = make([]float64, len(x))
 	}
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
 	}
 	grad[0] = math.Pow(x[0]+0.004, 3) * (5*x[0] - 7.98)
-	return grad
 }
 
 // Plassmann implements an univariate oscillatory function where the value of L
@@ -1855,12 +1754,9 @@ func (f Plassmann) Func(x []float64) float64 {
 	return r
 }
 
-func (f Plassmann) Grad(grad, x []float64) []float64 {
+func (f Plassmann) Grad(grad, x []float64) {
 	if len(x) != 1 {
 		panic("dimension of the problem must be 1")
-	}
-	if grad == nil {
-		grad = make([]float64, len(x))
 	}
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
@@ -1877,7 +1773,6 @@ func (f Plassmann) Grad(grad, x []float64) []float64 {
 	default: // a > 1+b
 		grad[0]++
 	}
-	return grad
 }
 
 // YanaiOzawaKaneko is an univariate convex function where the values of Beta1
@@ -1908,12 +1803,9 @@ func (f YanaiOzawaKaneko) Func(x []float64) float64 {
 	return g1*math.Sqrt((a-1)*(a-1)+b2*b2) + g2*math.Sqrt(a*a+b1*b1)
 }
 
-func (f YanaiOzawaKaneko) Grad(grad, x []float64) []float64 {
+func (f YanaiOzawaKaneko) Grad(grad, x []float64) {
 	if len(x) != 1 {
 		panic("dimension of the problem must be 1")
-	}
-	if grad == nil {
-		grad = make([]float64, len(x))
 	}
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
@@ -1924,5 +1816,4 @@ func (f YanaiOzawaKaneko) Grad(grad, x []float64) []float64 {
 	g1 := math.Sqrt(1+b1*b1) - b1
 	g2 := math.Sqrt(1+b2*b2) - b2
 	grad[0] = g1*(a-1)/math.Sqrt(b2*b2+(a-1)*(a-1)) + g2*a/math.Sqrt(b1*b1+a*a)
-	return grad
 }

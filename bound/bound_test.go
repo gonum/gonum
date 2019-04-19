@@ -126,3 +126,56 @@ func TestUnion(t *testing.T) {
 func same(a, b Bound) bool {
 	return floats.Same([]float64{a.Min, a.Max}, []float64{b.Min, b.Max})
 }
+
+var jaccardTests = []struct {
+	bounds []Bound
+	want   float64
+}{
+	{
+		bounds: []Bound{{Min: 0, Max: 5}},
+		want:   1,
+	},
+	{
+		bounds: []Bound{{Min: 0, Max: 5}, {Min: 3, Max: 4}},
+		want:   0.2,
+	},
+	{
+		bounds: []Bound{{Min: 0, Max: 5}, {Min: -1, Max: 1}},
+		want:   0.16666666666666666,
+	},
+	{
+		bounds: []Bound{{Min: -1, Max: 1}, {Min: 1, Max: 2}},
+		want:   0.0,
+	},
+	{
+		bounds: []Bound{{Min: -1, Max: 1}, {Min: 1.1, Max: 2}},
+		want:   math.NaN(),
+	},
+	{
+		bounds: []Bound{{Min: 0, Max: 1}, {Min: 2, Max: 3}, {Min: 0.5, Max: 2.5}},
+		want:   math.NaN(),
+	},
+	{
+		bounds: []Bound{{Min: 0, Max: 1}, {Min: 1, Max: 1}},
+		want:   0.0,
+	},
+	{
+		bounds: []Bound{},
+		want:   math.NaN(),
+	},
+	{
+		bounds: nil,
+		want:   math.NaN(),
+	},
+}
+
+func TestJaccardIndex(t *testing.T) {
+	for _, test := range jaccardTests {
+		got := JaccardIndex(test.bounds...)
+		if got != test.want {
+			if !math.IsNaN(test.want) || !math.IsNaN(got) {
+				t.Errorf("unexpected result from Jaccard(%#v...): got:%+v want:%+v", test.bounds, got, test.want)
+			}
+		}
+	}
+}

@@ -20,6 +20,37 @@ func (b Bound) IsValid() bool {
 	return b.Min <= b.Max
 }
 
+// JaccardIndex returns a jaccard index between bounds. The result is only valid for
+// sets of bounds that have a contiguous union.
+// If all sets of inputs bounds are empty, the result is 1.
+func JaccardIndex(bounds ...Bound) float64 {
+	if len(bounds) == 0 {
+		return math.NaN()
+	}
+	u := Union(bounds...)
+	if !u.IsValid() {
+		return math.NaN()
+	}
+	i := Intersection(bounds...)
+	di := i.Max - i.Min
+	du := u.Max - u.Min
+
+	if di == 0 {
+		// If the union is empty, the intersection must
+		// also be empty. J(Ø, Ø) is 1 by definition.
+		if du == 0 {
+			return 1
+		}
+
+		if !math.IsNaN(du) {
+			return 0
+		}
+		return math.NaN()
+	}
+
+	return di / du
+}
+
 // Intersection returns the intersection of the input bounds. If the
 // intersection is empty an invalid Bound is returned.
 func Intersection(bounds ...Bound) Bound {

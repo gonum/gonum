@@ -10,6 +10,11 @@ go:
  - 1.10.x
  - master
 
+os:
+ - linux
+ - osx
+ - windows
+
 env:
  global:
   - GO111MODULE=on
@@ -21,29 +26,53 @@ env:
 
 cache:
  directories:
-   - $HOME/.cache/go-build
-   - $HOME/gopath/pkg/mod
+  - $HOME/.cache/go-build
+  - $HOME/gopath/pkg/mod
 
 git:
  depth: 1
 
 matrix:
  fast_finish: true
+ exclude:
+  - os: osx
+    go: 1.12.x
+    env: TAGS="-tags bounds"
+  - os: osx
+    go: 1.12.x
+    env: TAGS="-tags noasm"
+  - os: osx
+    go: 1.12.x
+    env: TAGS="-tags appengine"
+
+  - os: osx
+    go: 1.11.x
+  - os: osx
+    go: 1.10.x
+  - os: osx
+    go: master
+
+  - os: windows
+    go: 1.12.x
+    env: TAGS="-tags bounds"
+  - os: windows
+    go: 1.12.x
+    env: TAGS="-tags noasm"
+  - os: windows
+    go: 1.12.x
+    env: TAGS="-tags appengine"
+
+  - os: windows
+    go: 1.11.x
+  - os: windows
+    go: 1.10.x
+  - os: windows
+    go: master
  allow_failures:
-   - go: master
+  - go: master
 
 before_install:
- # Required for format check.
- - go get golang.org/x/tools/cmd/goimports
- # Required for imports check.
- - go get gonum.org/v1/tools/cmd/check-imports
- # Required for copyright header check.
- - go get gonum.org/v1/tools/cmd/check-copyright
- # Required for coverage.
- - go get golang.org/x/tools/cmd/cover
- - go get github.com/mattn/goveralls
- # Required for dot parser checks.
- - ./.travis/install-gocc.sh 66c61e91b3657c517a6f89d2837d370e61fb9430
+ - ${TRAVIS_BUILD_DIR}/.travis/run-parts ${TRAVIS_BUILD_DIR}/.travis/deps.d/${TRAVIS_OS_NAME}
 
 addons:
   apt:
@@ -55,14 +84,4 @@ go_import_path: gonum.org/v1/gonum
 # Get deps, build, test, and ensure the code is gofmt'ed.
 # If we are building as gonum, then we have access to the coveralls api key, so we can run coverage as well.
 script:
- - ${TRAVIS_BUILD_DIR}/.travis/check-copyright.sh
- - ${TRAVIS_BUILD_DIR}/.travis/check-imports.sh
- - ${TRAVIS_BUILD_DIR}/.travis/check-formatting.sh
- - go get -d -t -v ./...
- - go build -v ./...
- - go test $TAGS -v ./...
- # Only run test coverage analysis if we are secure and even with origin master.
- - if [[ "${TRAVIS_SECURE_ENV_VARS}" == true && "$(git ls-remote origin master | cut -f1)" == "$(git rev-parse HEAD)" ]]; then bash ./.travis/test-coverage.sh; fi
- # This is run last since it alters the tree.
- - ${TRAVIS_BUILD_DIR}/.travis/check-generate.sh
-
+ - ${TRAVIS_BUILD_DIR}/.travis/run-parts ${TRAVIS_BUILD_DIR}/.travis/run.d/${TRAVIS_OS_NAME}

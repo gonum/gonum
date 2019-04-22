@@ -25,4 +25,4 @@ build_script:
   - "%GOROOT%\\bin\\go get -v -t ./..."
 
 test_script:
-  - "%GOROOT%\\bin\\go test ./..."
+  - "%GOROOT%\\bin\\go test -v ./..."

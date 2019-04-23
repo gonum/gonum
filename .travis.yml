@@ -72,6 +72,23 @@ matrix:
   - go: master
 
 before_install:
+ # This garbage is necessary because on windows, Travis 
+ # helpfully sets core.autocrlf to true.
+ #
+ # The block here repeats the clone after having unset
+ # core.autcrlf. There is no simple way to do this
+ # conditionally on OS because windows will not allow
+ # a file to be removed or moved while the file is open,
+ # and we use constructed paths to scripts to get
+ # conditional execution.
+ #
+ # Happy windowsing!
+ - pushd ../../..
+ - mv gonum.org/v1/gonum .
+ - git config --global core.autocrlf false
+ - git clone gonum gonum.org/v1/gonum
+ - popd
+
  - ${TRAVIS_BUILD_DIR}/.travis/run-parts ${TRAVIS_BUILD_DIR}/.travis/deps.d/${TRAVIS_OS_NAME}
 
 addons:

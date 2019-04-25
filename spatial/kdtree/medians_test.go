@@ -128,6 +128,8 @@ func TestMedianOfRandoms(t *testing.T) {
 	}
 }
 
+var benchSink int
+
 func BenchmarkMedianOfMedians(b *testing.B) {
 	rnd := rand.New(rand.NewSource(1))
 
@@ -138,7 +140,7 @@ func BenchmarkMedianOfMedians(b *testing.B) {
 			list[i] = rnd.Int()
 		}
 		b.StartTimer()
-		_ = MedianOfMedians(list)
+		benchSink = MedianOfMedians(list)
 	}
 }
 
@@ -152,8 +154,7 @@ func BenchmarkPartitionMedianOfMedians(b *testing.B) {
 			list[i] = rnd.Int()
 		}
 		b.StartTimer()
-		p := MedianOfMedians(list)
-		p = Partition(list, p)
+		benchSink = Partition(list, MedianOfMedians(list))
 	}
 }
 
@@ -167,7 +168,7 @@ func BenchmarkMedianOfRandoms(b *testing.B) {
 	}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		_ = MedianOfRandoms(list, list.Len()/1e3)
+		benchSink = MedianOfRandoms(list, list.Len()/1e3)
 	}
 }
 
@@ -181,7 +182,6 @@ func BenchmarkPartitionMedianOfRandoms(b *testing.B) {
 	}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		p := MedianOfRandoms(list, list.Len()/1e3)
-		p = Partition(list, p)
+		benchSink = Partition(list, MedianOfRandoms(list, list.Len()/1e3))
 	}
 }

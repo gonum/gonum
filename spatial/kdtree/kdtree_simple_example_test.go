@@ -12,7 +12,7 @@ import (
 )
 
 func ExampleTree() {
-	// Example data from https://en.wikipedia.org/w/index.php?title=K-d_tree
+	// Example data from https://en.wikipedia.org/wiki/K-d_tree
 	points := kdtree.Points{{2, 3}, {5, 4}, {9, 6}, {4, 7}, {8, 1}, {7, 2}}
 
 	t := kdtree.New(points, false)
@@ -24,7 +24,7 @@ func ExampleTree() {
 }
 
 func ExampleTree_bounds() {
-	// Example data from https://en.wikipedia.org/w/index.php?title=K-d_tree
+	// Example data from https://en.wikipedia.org/wiki/K-d_tree
 	points := kdtree.Points{{2, 3}, {5, 4}, {9, 6}, {4, 7}, {8, 1}, {7, 2}}
 
 	t := kdtree.New(points, true)
@@ -33,8 +33,8 @@ func ExampleTree_bounds() {
 	// Bounding box of points is &{Min:[2 1] Max:[9 7]}
 }
 
-func ExampleTreeDo() {
-	// Example data from https://en.wikipedia.org/w/index.php?title=K-d_tree
+func ExampleTree_Do() {
+	// Example data from https://en.wikipedia.org/wiki/K-d_tree
 	points := kdtree.Points{{2, 3}, {5, 4}, {9, 6}, {4, 7}, {8, 1}, {7, 2}}
 
 	// Print all points in the data set within 3 of (3, 5).
@@ -56,8 +56,8 @@ func ExampleTreeDo() {
 	// [5 4]
 }
 
-func ExampleTreeDoBounded() {
-	// Example data from https://en.wikipedia.org/w/index.php?title=K-d_tree
+func ExampleTree_DoBounded() {
+	// Example data from https://en.wikipedia.org/wiki/K-d_tree
 	points := kdtree.Points{{2, 3}, {5, 4}, {9, 6}, {4, 7}, {8, 1}, {7, 2}}
 
 	// Find all points within the bounding box ((3, 3), (6, 8))

@@ -148,10 +148,7 @@ func buildBounded(p bounder, plane Dim, bounding bool) *Node {
 	d := p.Index(piv)
 	np := (plane + 1) % Dim(d.Dims())
 
-	var b *Bounding
-	if bounding {
-		b = p.Bounds()
-	}
+	b := p.Bounds()
 	return &Node{
 		Point:    d,
 		Plane:    plane,

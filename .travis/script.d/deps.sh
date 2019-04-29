@@ -3,7 +3,8 @@
 set -ex
 
 # Avoid contaminating the go.mod/go.sum files.
-pushd ~
+WORK=$(mktemp -d)
+pushd $WORK
 
 # Work around go1.11 issue where go get will not work outside a module.
 # TODO(kortschak): Remove when go1.11 is no longer supported.
@@ -23,6 +24,5 @@ ${TRAVIS_BUILD_DIR}/.travis/script.d/install-gocc.sh 66c61e91b3657c517a6f89d2837
 
 # Clean up.
 # TODO(kortschak): Remove when go1.11 is no longer supported.
-rm go.{mod,sum} || true
-
 popd
+rm -rf $WORK

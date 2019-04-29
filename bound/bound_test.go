@@ -145,7 +145,7 @@ var jaccardTests = []struct {
 	},
 	{
 		bounds: []Bound{{Min: -1, Max: 1}, {Min: 1, Max: 2}},
-		want:   0.0,
+		want:   0,
 	},
 	{
 		bounds: []Bound{{Min: -1, Max: 1}, {Min: 1.1, Max: 2}},
@@ -153,11 +153,11 @@ var jaccardTests = []struct {
 	},
 	{
 		bounds: []Bound{{Min: 0, Max: 1}, {Min: 2, Max: 3}, {Min: 0.5, Max: 2.5}},
-		want:   math.NaN(),
+		want:   0,
 	},
 	{
 		bounds: []Bound{{Min: 0, Max: 1}, {Min: 1, Max: 1}},
-		want:   0.0,
+		want:   0,
 	},
 	{
 		bounds: []Bound{},

@@ -14,6 +14,14 @@ type Bound struct {
 	Min, Max float64
 }
 
+// Len returns the length of the bound
+func (b Bound) Len() float64 {
+	if math.IsNaN(b.Min) && math.IsNaN(b.Max) {
+		return 0
+	}
+	return b.Max - b.Min
+}
+
 // IsValid returns whether the bound is valid. A valid bound will have
 // the minimum less than or equal to the maximum.
 func (b Bound) IsValid() bool {
@@ -32,8 +40,8 @@ func JaccardIndex(bounds ...Bound) float64 {
 		return math.NaN()
 	}
 	i := Intersection(bounds...)
-	di := i.Max - i.Min
-	du := u.Max - u.Min
+	di := i.Len()
+	du := u.Len()
 
 	if di == 0 {
 		// If the union is empty, the intersection must

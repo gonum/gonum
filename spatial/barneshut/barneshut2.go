@@ -7,6 +7,8 @@ package barneshut
 import (
 	"fmt"
 	"math"
+
+	"gonum.org/v1/gonum/spatial/r2"
 )
 
 const (
@@ -16,40 +18,9 @@ const (
 	nw
 )
 
-// Vector2 is a 2D vector.
-type Vector2 struct {
-	X, Y float64
-}
-
-// Add returns the vector sum of p and q.
-func (p Vector2) Add(q Vector2) Vector2 {
-	p.X += q.X
-	p.Y += q.Y
-	return p
-}
-
-// Sub returns the vector sum of p and -q.
-func (p Vector2) Sub(q Vector2) Vector2 {
-	p.X -= q.X
-	p.Y -= q.Y
-	return p
-}
-
-// Scale returns the vector p scaled by f.
-func (p Vector2) Scale(f float64) Vector2 {
-	p.X *= f
-	p.Y *= f
-	return p
-}
-
-// Box2 is a 2D bounding box.
-type Box2 struct {
-	Min, Max Vector2
-}
-
-// quadrant returns which quadrant of b that p should be placed in.
-func (b Box2) quadrant(p Particle2) int {
-	center := Vector2{
+// quadrantOf returns which quadrant of b that p should be placed in.
+func quadrantOf(b r2.Box, p Particle2) int {
+	center := r2.Vec{
 		X: (b.Min.X + b.Max.X) / 2,
 		Y: (b.Min.Y + b.Max.Y) / 2,
 	}
@@ -72,8 +43,8 @@ func (b Box2) quadrant(p Particle2) int {
 	}
 }
 
-// split returns a quadrant subdivision of b in the given direction.
-func (b Box2) split(dir int) Box2 {
+// splitPlane returns a quadrant subdivision of b in the given direction.
+func splitPlane(b r2.Box, dir int) r2.Box {
 	halfX := (b.Max.X - b.Min.X) / 2
 	halfY := (b.Max.Y - b.Min.Y) / 2
 	switch dir {
@@ -95,7 +66,7 @@ func (b Box2) split(dir int) Box2 {
 
 // Particle2 is a particle in a plane.
 type Particle2 interface {
-	Coord2() Vector2
+	Coord2() r2.Vec
 	Mass() float64
 }
 
@@ -107,16 +78,16 @@ type Particle2 interface {
 // compared. Force2 may be passed nil for p2 when the Barnes-Hut approximation
 // is being used. A nil p2 indicates that the second mass center is an
 // aggregate.
-type Force2 func(p1, p2 Particle2, m1, m2 float64, v Vector2) Vector2
+type Force2 func(p1, p2 Particle2, m1, m2 float64, v r2.Vec) r2.Vec
 
 // Gravity2 returns a vector force on m1 by m2, equal to (m1⋅m2)/‖v‖²
 // in the directions of v. Gravity2 ignores the identity of the interacting
 // particles and returns a zero vector when the two particles are
 // coincident, but performs no other sanity checks.
-func Gravity2(_, _ Particle2, m1, m2 float64, v Vector2) Vector2 {
+func Gravity2(_, _ Particle2, m1, m2 float64, v r2.Vec) r2.Vec {
 	d2 := v.X*v.X + v.Y*v.Y
 	if d2 == 0 {
-		return Vector2{}
+		return r2.Vec{}
 	}
 	return v.Scale((m1 * m2) / (d2 * math.Sqrt(d2)))
 }
@@ -184,7 +155,7 @@ func (q *Plane) Reset() {
 // interaction is with a non-aggregate mass center, otherwise p2 will be nil.
 //
 // It is safe to call ForceOn concurrently.
-func (q *Plane) ForceOn(p Particle2, theta float64, f Force2) (force Vector2) {
+func (q *Plane) ForceOn(p Particle2, theta float64, f Force2) (force r2.Vec) {
 	var empty tile
 	if theta > 0 && q.root != empty {
 		return q.root.forceOn(p, p.Coord2(), p.Mass(), theta, f)
@@ -192,7 +163,7 @@ func (q *Plane) ForceOn(p Particle2, theta float64, f Force2) (force Vector2) {
 
 	// For the degenerate case, just iterate over the
 	// slice of particles rather than walking the tree.
-	var v Vector2
+	var v r2.Vec
 	m := p.Mass()
 	pv := p.Coord2()
 	for _, e := range q.Particles {
@@ -205,11 +176,11 @@ func (q *Plane) ForceOn(p Particle2, theta float64, f Force2) (force Vector2) {
 type tile struct {
 	particle Particle2
 
-	bounds Box2
+	bounds r2.Box
 
 	nodes [4]*tile
 
-	center Vector2
+	center r2.Vec
 	mass   float64
 }
 
@@ -230,20 +201,20 @@ func (t *tile) insert(p Particle2) {
 	t.passDown(p)
 	t.passDown(t.particle)
 	t.particle = nil
-	t.center = Vector2{}
+	t.center = r2.Vec{}
 	t.mass = 0
 }
 
 func (t *tile) passDown(p Particle2) {
-	dir := t.bounds.quadrant(p)
+	dir := quadrantOf(t.bounds, p)
 	if t.nodes[dir] == nil {
-		t.nodes[dir] = &tile{bounds: t.bounds.split(dir)}
+		t.nodes[dir] = &tile{bounds: splitPlane(t.bounds, dir)}
 	}
 	t.nodes[dir].insert(p)
 }
 
 // summarize updates node masses and centers of mass.
-func (t *tile) summarize() (center Vector2, mass float64) {
+func (t *tile) summarize() (center r2.Vec, mass float64) {
 	for _, d := range &t.nodes {
 		if d == nil {
 			continue
@@ -260,14 +231,14 @@ func (t *tile) summarize() (center Vector2, mass float64) {
 
 // forceOn returns a force vector on p given p's mass m and the force
 // calculation function, using the Barnes-Hut theta approximation parameter.
-func (t *tile) forceOn(p Particle2, pt Vector2, m, theta float64, f Force2) (vector Vector2) {
+func (t *tile) forceOn(p Particle2, pt r2.Vec, m, theta float64, f Force2) (vector r2.Vec) {
 	s := ((t.bounds.Max.X - t.bounds.Min.X) + (t.bounds.Max.Y - t.bounds.Min.Y)) / 2
 	d := math.Hypot(pt.X-t.center.X, pt.Y-t.center.Y)
 	if s/d < theta || t.particle != nil {
 		return f(p, t.particle, m, t.mass, t.center.Sub(pt))
 	}
 
-	var v Vector2
+	var v r2.Vec
 	for _, d := range &t.nodes {
 		if d == nil {
 			continue

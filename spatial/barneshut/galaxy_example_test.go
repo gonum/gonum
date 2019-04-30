@@ -8,17 +8,18 @@ import (
 	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/spatial/barneshut"
+	"gonum.org/v1/gonum/spatial/r2"
 )
 
 type mass struct {
-	d barneshut.Vector2
-	v barneshut.Vector2
+	d r2.Vec
+	v r2.Vec
 	m float64
 }
 
-func (m *mass) Coord2() barneshut.Vector2 { return m.d }
-func (m *mass) Mass() float64             { return m.m }
-func (m *mass) move(f barneshut.Vector2) {
+func (m *mass) Coord2() r2.Vec { return m.d }
+func (m *mass) Mass() float64  { return m.m }
+func (m *mass) move(f r2.Vec) {
 	m.v = m.v.Add(f.Scale(1 / m.m))
 	m.d = m.d.Add(m.v)
 }
@@ -31,11 +32,11 @@ func Example_galaxy() {
 	p := make([]barneshut.Particle2, len(stars))
 	for i := range stars {
 		s := &mass{
-			d: barneshut.Vector2{
+			d: r2.Vec{
 				X: 100 * rnd.Float64(),
 				Y: 100 * rnd.Float64(),
 			},
-			v: barneshut.Vector2{
+			v: r2.Vec{
 				X: rnd.NormFloat64(),
 				Y: rnd.NormFloat64(),
 			},
@@ -44,7 +45,7 @@ func Example_galaxy() {
 		stars[i] = s
 		p[i] = s
 	}
-	vectors := make([]barneshut.Vector2, len(stars))
+	vectors := make([]r2.Vec, len(stars))
 
 	// Make a plane to calculate approximate forces
 	plane := barneshut.Plane{Particles: p}

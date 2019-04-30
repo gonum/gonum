@@ -11,59 +11,6 @@ import (
 	"gonum.org/v1/gonum/spatial/r2"
 )
 
-const (
-	ne = iota
-	se
-	sw
-	nw
-)
-
-// quadrantOf returns which quadrant of b that p should be placed in.
-func quadrantOf(b r2.Box, p Particle2) int {
-	center := r2.Vec{
-		X: (b.Min.X + b.Max.X) / 2,
-		Y: (b.Min.Y + b.Max.Y) / 2,
-	}
-	c := p.Coord2()
-	if checkBounds && (c.X < b.Min.X || b.Max.X < c.X || c.Y < b.Min.Y || b.Max.Y < c.Y) {
-		panic(fmt.Sprintf("p out of range %+v: %#v", b, p))
-	}
-	if c.X < center.X {
-		if c.Y < center.Y {
-			return nw
-		} else {
-			return sw
-		}
-	} else {
-		if c.Y < center.Y {
-			return ne
-		} else {
-			return se
-		}
-	}
-}
-
-// splitPlane returns a quadrant subdivision of b in the given direction.
-func splitPlane(b r2.Box, dir int) r2.Box {
-	halfX := (b.Max.X - b.Min.X) / 2
-	halfY := (b.Max.Y - b.Min.Y) / 2
-	switch dir {
-	case ne:
-		b.Min.X += halfX
-		b.Max.Y -= halfY
-	case se:
-		b.Min.X += halfX
-		b.Min.Y += halfY
-	case sw:
-		b.Max.X -= halfX
-		b.Min.Y += halfY
-	case nw:
-		b.Max.X -= halfX
-		b.Max.Y -= halfY
-	}
-	return b
-}
-
 // Particle2 is a particle in a plane.
 type Particle2 interface {
 	Coord2() r2.Vec
@@ -211,6 +158,59 @@ func (t *tile) passDown(p Particle2) {
 		t.nodes[dir] = &tile{bounds: splitPlane(t.bounds, dir)}
 	}
 	t.nodes[dir].insert(p)
+}
+
+const (
+	ne = iota
+	se
+	sw
+	nw
+)
+
+// quadrantOf returns which quadrant of b that p should be placed in.
+func quadrantOf(b r2.Box, p Particle2) int {
+	center := r2.Vec{
+		X: (b.Min.X + b.Max.X) / 2,
+		Y: (b.Min.Y + b.Max.Y) / 2,
+	}
+	c := p.Coord2()
+	if checkBounds && (c.X < b.Min.X || b.Max.X < c.X || c.Y < b.Min.Y || b.Max.Y < c.Y) {
+		panic(fmt.Sprintf("p out of range %+v: %#v", b, p))
+	}
+	if c.X < center.X {
+		if c.Y < center.Y {
+			return nw
+		} else {
+			return sw
+		}
+	} else {
+		if c.Y < center.Y {
+			return ne
+		} else {
+			return se
+		}
+	}
+}
+
+// splitPlane returns a quadrant subdivision of b in the given direction.
+func splitPlane(b r2.Box, dir int) r2.Box {
+	halfX := (b.Max.X - b.Min.X) / 2
+	halfY := (b.Max.Y - b.Min.Y) / 2
+	switch dir {
+	case ne:
+		b.Min.X += halfX
+		b.Max.Y -= halfY
+	case se:
+		b.Min.X += halfX
+		b.Min.Y += halfY
+	case sw:
+		b.Max.X -= halfX
+		b.Min.Y += halfY
+	case nw:
+		b.Max.X -= halfX
+		b.Max.Y -= halfY
+	}
+	return b
 }
 
 // summarize updates node masses and centers of mass.

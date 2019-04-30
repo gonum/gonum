@@ -11,101 +11,6 @@ import (
 	"gonum.org/v1/gonum/spatial/r3"
 )
 
-const (
-	lne = iota
-	lse
-	lsw
-	lnw
-	une
-	use
-	usw
-	unw
-)
-
-// octantOf returns which octant of b that p should be placed in.
-func octantOf(b r3.Box, p Particle3) int {
-	center := r3.Vec{
-		X: (b.Min.X + b.Max.X) / 2,
-		Y: (b.Min.Y + b.Max.Y) / 2,
-		Z: (b.Min.Z + b.Max.Z) / 2,
-	}
-	c := p.Coord3()
-	if checkBounds && (c.X < b.Min.X || b.Max.X < c.X || c.Y < b.Min.Y || b.Max.Y < c.Y || c.Z < b.Min.Z || b.Max.Z < c.Z) {
-		panic(fmt.Sprintf("p out of range %+v: %#v", b, p))
-	}
-	if c.X < center.X {
-		if c.Y < center.Y {
-			if c.Z < center.Z {
-				return lnw
-			} else {
-				return unw
-			}
-		} else {
-			if c.Z < center.Z {
-				return lsw
-			} else {
-				return usw
-			}
-		}
-	} else {
-		if c.Y < center.Y {
-			if c.Z < center.Z {
-				return lne
-			} else {
-				return une
-			}
-		} else {
-			if c.Z < center.Z {
-				return lse
-			} else {
-				return use
-			}
-		}
-	}
-}
-
-// splitVolume returns an octant subdivision of b in the given direction.
-func splitVolume(b r3.Box, dir int) r3.Box {
-	halfX := (b.Max.X - b.Min.X) / 2
-	halfY := (b.Max.Y - b.Min.Y) / 2
-	halfZ := (b.Max.Z - b.Min.Z) / 2
-	switch dir {
-	case lne:
-		b.Min.X += halfX
-		b.Max.Y -= halfY
-		b.Max.Z -= halfZ
-	case lse:
-		b.Min.X += halfX
-		b.Min.Y += halfY
-		b.Max.Z -= halfZ
-	case lsw:
-		b.Max.X -= halfX
-		b.Min.Y += halfY
-		b.Max.Z -= halfZ
-	case lnw:
-		b.Max.X -= halfX
-		b.Max.Y -= halfY
-		b.Max.Z -= halfZ
-	case une:
-		b.Min.X += halfX
-		b.Max.Y -= halfY
-		b.Min.Z += halfZ
-	case use:
-		b.Min.X += halfX
-		b.Min.Y += halfY
-		b.Min.Z += halfZ
-	case usw:
-		b.Max.X -= halfX
-		b.Min.Y += halfY
-		b.Min.Z += halfZ
-	case unw:
-		b.Max.X -= halfX
-		b.Max.Y -= halfY
-		b.Min.Z += halfZ
-	}
-	return b
-}
-
 // Particle3 is a particle in a volume.
 type Particle3 interface {
 	Coord3() r3.Vec
@@ -260,6 +165,101 @@ func (b *bucket) passDown(p Particle3) {
 		b.nodes[dir] = &bucket{bounds: splitVolume(b.bounds, dir)}
 	}
 	b.nodes[dir].insert(p)
+}
+
+const (
+	lne = iota
+	lse
+	lsw
+	lnw
+	une
+	use
+	usw
+	unw
+)
+
+// octantOf returns which octant of b that p should be placed in.
+func octantOf(b r3.Box, p Particle3) int {
+	center := r3.Vec{
+		X: (b.Min.X + b.Max.X) / 2,
+		Y: (b.Min.Y + b.Max.Y) / 2,
+		Z: (b.Min.Z + b.Max.Z) / 2,
+	}
+	c := p.Coord3()
+	if checkBounds && (c.X < b.Min.X || b.Max.X < c.X || c.Y < b.Min.Y || b.Max.Y < c.Y || c.Z < b.Min.Z || b.Max.Z < c.Z) {
+		panic(fmt.Sprintf("p out of range %+v: %#v", b, p))
+	}
+	if c.X < center.X {
+		if c.Y < center.Y {
+			if c.Z < center.Z {
+				return lnw
+			} else {
+				return unw
+			}
+		} else {
+			if c.Z < center.Z {
+				return lsw
+			} else {
+				return usw
+			}
+		}
+	} else {
+		if c.Y < center.Y {
+			if c.Z < center.Z {
+				return lne
+			} else {
+				return une
+			}
+		} else {
+			if c.Z < center.Z {
+				return lse
+			} else {
+				return use
+			}
+		}
+	}
+}
+
+// splitVolume returns an octant subdivision of b in the given direction.
+func splitVolume(b r3.Box, dir int) r3.Box {
+	halfX := (b.Max.X - b.Min.X) / 2
+	halfY := (b.Max.Y - b.Min.Y) / 2
+	halfZ := (b.Max.Z - b.Min.Z) / 2
+	switch dir {
+	case lne:
+		b.Min.X += halfX
+		b.Max.Y -= halfY
+		b.Max.Z -= halfZ
+	case lse:
+		b.Min.X += halfX
+		b.Min.Y += halfY
+		b.Max.Z -= halfZ
+	case lsw:
+		b.Max.X -= halfX
+		b.Min.Y += halfY
+		b.Max.Z -= halfZ
+	case lnw:
+		b.Max.X -= halfX
+		b.Max.Y -= halfY
+		b.Max.Z -= halfZ
+	case une:
+		b.Min.X += halfX
+		b.Max.Y -= halfY
+		b.Min.Z += halfZ
+	case use:
+		b.Min.X += halfX
+		b.Min.Y += halfY
+		b.Min.Z += halfZ
+	case usw:
+		b.Max.X -= halfX
+		b.Min.Y += halfY
+		b.Min.Z += halfZ
+	case unw:
+		b.Max.X -= halfX
+		b.Max.Y -= halfY
+		b.Min.Z += halfZ
+	}
+	return b
 }
 
 // summarize updates node masses and centers of mass.

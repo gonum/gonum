@@ -396,7 +396,6 @@ func (n *Node) searchSet(q Comparable, k Keeper) {
 	if c*c <= k.Max().Dist {
 		n.Left.searchSet(q, k)
 	}
-	return
 }
 
 // Operation is a function that operates on a Comparable. The bounding volume and tree depth

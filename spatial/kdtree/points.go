@@ -14,8 +14,15 @@ var (
 // Point represents a point in a k-d space that satisfies the Comparable interface.
 type Point []float64
 
+// Compare returns the signed distance of p from the plane passing through c and
+// perpendicular to the dimension d. The concrete type of c must be Point.
 func (p Point) Compare(c Comparable, d Dim) float64 { q := c.(Point); return p[d] - q[d] }
+
+// Dims returns the number of dimensions described by the receiver.
 func (p Point) Dims() int                           { return len(p) }
+
+// Distance returns the squared Euclidean distance between c and the receiver. The
+// concrete type of c must be Point.
 func (p Point) Distance(c Comparable) float64 {
 	q := c.(Point)
 	var sum float64
@@ -25,6 +32,8 @@ func (p Point) Distance(c Comparable) float64 {
 	}
 	return sum
 }
+
+// Extend returns a bounding box that has been extended to include the receiver.
 func (p Point) Extend(b *Bounding) *Bounding {
 	if b == nil {
 		b = &Bounding{append(Point(nil), p...), append(Point(nil), p...)}

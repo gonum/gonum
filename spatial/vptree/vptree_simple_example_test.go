@@ -45,8 +45,8 @@ func ExampleTree_Do() {
 	q := vptree.Point{3, 5}
 	t.Do(func(c vptree.Comparable, _ int) (done bool) {
 		// Compare each distance and output points
-		// with a Euclidean distance less than 3.
-		// Distance returns the square of the
+		// with a Euclidean distance less than or
+		// equal to 3. Distance returns the
 		// Euclidean distance between points.
 		if q.Distance(c) <= 3 {
 			fmt.Println(c)

@@ -14,14 +14,22 @@ import (
 	"gonum.org/v1/gonum/stat"
 )
 
-// Comparable is the element interface for values stored in a vp tree.
+// Comparable is the element interface for values stored in a vp-tree.
 type Comparable interface {
-	// Distance returns the Euclidean distance between the receiver and
-	// the parameter.
+	// Distance returns the distance between the receiver and the
+	// parameter. The returned distance must satisfy the properties
+	// of distances in a metric space.
+	//
+	// - a.Distance(a) == 0
+	// - a.Distance(b) >= 0
+	// - a.Distance(b) == b.Distance(a)
+	// - a.Distance(b) <= a.Distance(c)+c.Distance(b)
+	//
 	Distance(Comparable) float64
 }
 
-// Point represents a point in a k-d space that satisfies the Comparable interface.
+// Point represents a point in a Euclidean k-d space that satisfies the Comparable
+// interface.
 type Point []float64
 
 // Distance returns the Euclidean distance between c and the receiver. The concrete
@@ -55,7 +63,7 @@ type Tree struct {
 // vantage point. If effort is one or less, random vantage points are chosen.
 // The order of elements in p will be altered after New returns.
 func New(p []Comparable, effort int) *Tree {
-	b := builder{work: make([]float64, max(len(p), effort*effort))}
+	b := builder{work: make([]float64, max(len(p), effort))}
 	return &Tree{
 		Root:  b.build(p, effort),
 		Count: len(p),
@@ -92,10 +100,10 @@ func (b *builder) selectVantage(s []Comparable, effort int) Comparable {
 	}
 	var best Comparable
 	var bestVar float64
-	b.work = b.work[:effort*effort]
-	for i, p := range random(effort, s) {
-		for j, q := range random(effort, s) {
-			b.work[i*effort+j] = p.Distance(q)
+	b.work = b.work[:effort]
+	for _, p := range random(effort, s) {
+		for i, q := range random(effort, s) {
+			b.work[i] = p.Distance(q)
 		}
 		variance := stat.Variance(b.work, nil)
 		if variance > bestVar {
@@ -185,12 +193,10 @@ func (n *Node) search(q Comparable, dist float64) (*Node, float64) {
 
 	bn := n
 	if d < n.Radius {
-		if d-dist <= n.Radius {
-			cn, cd := n.Closer.search(q, dist)
-			if cd < dist {
-				dist = cd
-				bn = cn
-			}
+		cn, cd := n.Closer.search(q, dist)
+		if cd < dist {
+			dist = cd
+			bn = cn
 		}
 		if d+dist >= n.Radius {
 			fn, fd := n.Further.search(q, dist)
@@ -200,12 +206,10 @@ func (n *Node) search(q Comparable, dist float64) (*Node, float64) {
 			}
 		}
 	} else {
-		if d+dist >= n.Radius {
-			fn, fd := n.Further.search(q, dist)
-			if fd < dist {
-				dist = fd
-				bn = fn
-			}
+		fn, fd := n.Further.search(q, dist)
+		if fd < dist {
+			dist = fd
+			bn = fn
 		}
 		if d-dist <= n.Radius {
 			cn, cd := n.Closer.search(q, dist)
@@ -279,7 +283,7 @@ func (k *DistKeeper) Keep(c ComparableDist) {
 }
 
 // Keeper implements a conditional max heap sorted on the Dist field of the ComparableDist type.
-// kd search is guided by the distance stored in the max value of the heap.
+// vantage point search is guided by the distance stored in the max value of the heap.
 type Keeper interface {
 	Keep(ComparableDist) // Keep conditionally pushes the provided ComparableDist onto the heap.
 	Max() ComparableDist // Max returns the maximum element of the Keeper.
@@ -323,16 +327,12 @@ func (n *Node) searchSet(q Comparable, k Keeper) {
 	d := q.Distance(n.Point)
 	dist := k.Max().Dist
 	if d < n.Radius {
-		if d-dist <= n.Radius {
-			n.Closer.searchSet(q, k)
-		}
+		n.Closer.searchSet(q, k)
 		if d+dist >= n.Radius {
 			n.Further.searchSet(q, k)
 		}
 	} else {
-		if d+dist >= n.Radius {
-			n.Further.searchSet(q, k)
-		}
+		n.Further.searchSet(q, k)
 		if d-dist <= n.Radius {
 			n.Closer.searchSet(q, k)
 		}

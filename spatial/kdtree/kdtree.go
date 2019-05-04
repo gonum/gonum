@@ -112,6 +112,7 @@ type Tree struct {
 
 // New returns a k-d tree constructed from the values in p. If p is a Bounder and
 // bounding is true, bounds are determined for each node.
+// The ordering of elements in p may be altered after New returns.
 func New(p Interface, bounding bool) *Tree {
 	if p, ok := p.(bounder); ok && bounding {
 		return &Tree{

@@ -89,7 +89,7 @@ type place struct {
 	lat, lon float64
 }
 
-// Compare satisfies the axis comparions method of the kdtree.Comparable interface.
+// Compare satisfies the axis comparisons method of the kdtree.Comparable interface.
 // The dimensions are:
 //  0 = lat
 //  1 = lon

@@ -11,6 +11,9 @@ import (
 	"sort"
 )
 
+// Interface is the set of methods required for construction of efficiently
+// searchable k-d trees. A k-d tree may be constructed without using the
+// Interface type, but it is likely to have reduced search performance.
 type Interface interface {
 	// Index returns the ith element of the list of points.
 	Index(i int) Comparable
@@ -21,7 +24,8 @@ type Interface interface {
 	// Pivot partitions the list based on the dimension specified.
 	Pivot(Dim) int
 
-	// Slice returns a slice of the list.
+	// Slice returns a slice of the list using zero-based half
+	// open indexing equivalent to built-in slice indexing.
 	Slice(start, end int) Interface
 }
 
@@ -40,8 +44,8 @@ type Dim int
 
 // Comparable is the element interface for values stored in a k-d tree.
 type Comparable interface {
-	// Compare returns the shortest translation of the plane through b with
-	// normal vector along dimension d to the parallel plane through a.
+	// Compare returns the signed distance of a from the plane passing through
+	// b and perpendicular to the dimension d.
 	//
 	// Given c = a.Compare(b, d):
 	//  c = a_d - b_d
@@ -302,7 +306,7 @@ func (h *Heap) Swap(i, j int)        { (*h)[i], (*h)[j] = (*h)[j], (*h)[i] }
 func (h *Heap) Push(x interface{})   { (*h) = append(*h, x.(ComparableDist)) }
 func (h *Heap) Pop() (i interface{}) { i, *h = (*h)[len(*h)-1], (*h)[:len(*h)-1]; return i }
 
-// NKeeper is a Keeper that retains the n best ComparableDists that it is called to Keep.
+// NKeeper is a Keeper that retains the n best ComparableDists that have been passed to Keep.
 type NKeeper struct {
 	Heap
 }
@@ -315,7 +319,7 @@ func NewNKeeper(n int) *NKeeper {
 	return &k
 }
 
-// Keep add c to the heap if its distance is less than the maximum value of the heap. If adding
+// Keep adds c to the heap if its distance is less than the maximum value of the heap. If adding
 // c would increase the size of the heap beyond the initial maximum length, the maximum value of
 // the heap is dropped.
 func (k *NKeeper) Keep(c ComparableDist) {

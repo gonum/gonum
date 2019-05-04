@@ -42,10 +42,10 @@ func ExampleTree_Do() {
 	q := kdtree.Point{3, 5}
 	t.Do(func(c kdtree.Comparable, _ *kdtree.Bounding, _ int) (done bool) {
 		// Compare each distance and output points
-		// with a distance less than 9. Distance
-		// returns the square of the Euclidean
-		// distance between points.
-		if q.Distance(c) <= 9 {
+		// with a Euclidean distance less than 3.
+		// Distance returns the square of the
+		// Euclidean distance between points.
+		if q.Distance(c) <= 3*3 {
 			fmt.Println(c)
 		}
 		return

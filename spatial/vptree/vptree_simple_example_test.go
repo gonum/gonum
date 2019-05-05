@@ -21,7 +21,7 @@ func ExampleTree() {
 		vptree.Point{7, 2},
 	}
 
-	t := vptree.New(points, 3)
+	t := vptree.New(points, 3, nil)
 	q := vptree.Point{8, 7}
 	p, d := t.Nearest(q)
 	fmt.Printf("%v is closest point to %v, d=%f\n", p, q, d)
@@ -41,7 +41,7 @@ func ExampleTree_Do() {
 	}
 
 	// Print all points in the data set within 3 of (3, 5).
-	t := vptree.New(points, 0)
+	t := vptree.New(points, 0, nil)
 	q := vptree.Point{3, 5}
 	t.Do(func(c vptree.Comparable, _ int) (done bool) {
 		// Compare each distance and output points

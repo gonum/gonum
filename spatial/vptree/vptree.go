@@ -61,9 +61,21 @@ type Tree struct {
 // New returns a vantage point tree constructed from the values in p. The effort
 // parameter specifies how much work should be put into optimizing the choice of
 // vantage point. If effort is one or less, random vantage points are chosen.
-// The order of elements in p will be altered after New returns.
-func New(p []Comparable, effort int) *Tree {
-	b := builder{work: make([]float64, max(len(p), effort))}
+// The order of elements in p will be altered after New returns. The src parameter
+// provides the source of randomness for vantage point selection. If src is nil
+// global rand package functions are used.
+func New(p []Comparable, effort int, src rand.Source) *Tree {
+	var intn func(int) int
+	var shuf func(n int, swap func(i, j int))
+	if src == nil {
+		intn = rand.Intn
+		shuf = rand.Shuffle
+	} else {
+		rnd := rand.New(src)
+		intn = rnd.Intn
+		shuf = rnd.Shuffle
+	}
+	b := builder{work: make([]float64, max(len(p), effort)), intn: intn, shuf: shuf}
 	return &Tree{
 		Root:  b.build(p, effort),
 		Count: len(p),
@@ -74,6 +86,8 @@ func New(p []Comparable, effort int) *Tree {
 // algorithm in http://pnylab.com/papers/vptree/vptree.pdf.
 type builder struct {
 	work []float64
+	intn func(n int) int
+	shuf func(n int, swap func(i, j int))
 }
 
 func (b *builder) build(s []Comparable, effort int) *Node {
@@ -93,7 +107,7 @@ func (b *builder) build(s []Comparable, effort int) *Node {
 
 func (b *builder) selectVantage(s []Comparable, effort int) Comparable {
 	if effort <= 1 {
-		return s[rand.Intn(len(s))]
+		return s[b.intn(len(s))]
 	}
 	if effort > len(s) {
 		effort = len(s)
@@ -101,8 +115,8 @@ func (b *builder) selectVantage(s []Comparable, effort int) Comparable {
 	var best Comparable
 	var bestVar float64
 	b.work = b.work[:effort]
-	for _, p := range random(effort, s) {
-		for i, q := range random(effort, s) {
+	for _, p := range b.random(effort, s) {
+		for i, q := range b.random(effort, s) {
 			b.work[i] = p.Distance(q)
 		}
 		variance := stat.Variance(b.work, nil)
@@ -114,11 +128,11 @@ func (b *builder) selectVantage(s []Comparable, effort int) Comparable {
 	return best
 }
 
-func random(n int, s []Comparable) []Comparable {
+func (b *builder) random(n int, s []Comparable) []Comparable {
 	if n >= len(s) {
 		return s
 	}
-	rand.Shuffle(len(s), func(i, j int) { s[i], s[j] = s[j], s[i] })
+	b.shuf(len(s), func(i, j int) { s[i], s[j] = s[j], s[i] })
 	return s[:n]
 }
 

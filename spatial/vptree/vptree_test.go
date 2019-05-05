@@ -8,13 +8,14 @@ import (
 	"flag"
 	"fmt"
 	"math"
-	"math/rand"
 	"os"
 	"reflect"
 	"sort"
 	"strings"
 	"testing"
 	"unsafe"
+
+	"golang.org/x/exp/rand"
 )
 
 var (
@@ -55,7 +56,7 @@ func TestNew(t *testing.T) {
 					panicked = true
 				}
 			}()
-			tree = New(test.data, test.effort)
+			tree = New(test.data, test.effort, rand.NewSource(1))
 		}()
 		if panicked {
 			t.Errorf("unexpected panic for test %d", i)
@@ -138,7 +139,7 @@ func TestNearestRandom(t *testing.T) {
 		}
 		randData = append(randData, p)
 	}
-	tree := New(randData, 10)
+	tree := New(randData, 10, rand.NewSource(1))
 
 	for i := 0; i < setSize; i++ {
 		q := make(Point, dims)
@@ -155,7 +156,7 @@ func TestNearestRandom(t *testing.T) {
 }
 
 func TestNearest(t *testing.T) {
-	tree := New(wpData, 3)
+	tree := New(wpData, 3, rand.NewSource(1))
 	for _, q := range append([]Comparable{
 		Point{4, 6},
 		// Point{7, 5}, // Omitted because it is ambiguously finds [9 6] or [5 4].
@@ -212,7 +213,7 @@ func TestNearestSetN(t *testing.T) {
 		Point{-1e5, 0}},
 		wpData[:len(wpData)-1]...)
 
-	tree := New(wpData, 3)
+	tree := New(wpData, 3, rand.NewSource(1))
 	for k := 1; k <= len(wpData); k++ {
 		for _, q := range data {
 			wantP := nearestN(k, q, wpData)
@@ -272,7 +273,7 @@ var nearestSetDistTests = []Point{
 }
 
 func TestNearestSetDist(t *testing.T) {
-	tree := New(wpData, 3)
+	tree := New(wpData, 3, rand.NewSource(1))
 	for i, q := range nearestSetDistTests {
 		for d := 1.0; d < 100; d += 0.1 {
 			dk := NewDistKeeper(d)
@@ -310,7 +311,7 @@ func TestNearestSetDist(t *testing.T) {
 }
 
 func TestDo(t *testing.T) {
-	tree := New(wpData, 3)
+	tree := New(wpData, 3, rand.NewSource(1))
 	var got []Point
 	fn := func(c Comparable, _ int) (done bool) {
 		got = append(got, c.(Point))
@@ -364,7 +365,7 @@ func BenchmarkNew(b *testing.B) {
 			}
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
-				_ = New(p, effort)
+				_ = New(p, effort, rand.NewSource(1))
 			}
 		})
 	}
@@ -441,7 +442,7 @@ func Benchmark(b *testing.B) {
 		for i := range data {
 			data[i] = Point{rnd.Float64(), rnd.Float64(), rnd.Float64()}
 		}
-		tree := New(data, effort)
+		tree := New(data, effort, rand.NewSource(1))
 
 		if !tree.Root.isVPTree() {
 			b.Fatal("tree is not vantage point tree")

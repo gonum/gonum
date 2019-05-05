@@ -15,7 +15,7 @@ func Example_accessiblePublicTransport() {
 	// Construct a vp tree of train station locations
 	// to identify accessible public transport for the
 	// elderly.
-	t := vptree.New(stations, 5)
+	t := vptree.New(stations, 5, nil)
 
 	// Residence.
 	q := place{lat: 51.501476, lon: -0.140634}

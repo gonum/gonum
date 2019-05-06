@@ -264,8 +264,7 @@ func (n *Node) search(q Comparable, dist float64) (*Node, float64) {
 	if c <= 0 {
 		ln, ld := n.Left.search(q, dist)
 		if ld < dist {
-			dist = ld
-			bn = ln
+			bn, dist = ln, ld
 		}
 		if c*c < dist {
 			rn, rd := n.Right.search(q, dist)
@@ -277,8 +276,7 @@ func (n *Node) search(q Comparable, dist float64) (*Node, float64) {
 	}
 	rn, rd := n.Right.search(q, dist)
 	if rd < dist {
-		dist = rd
-		bn = rn
+		bn, dist = rn, rd
 	}
 	if c*c < dist {
 		ln, ld := n.Left.search(q, dist)

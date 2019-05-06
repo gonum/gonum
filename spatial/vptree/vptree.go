@@ -339,15 +339,14 @@ func (n *Node) searchSet(q Comparable, k Keeper) {
 	k.Keep(ComparableDist{Comparable: n.Point, Dist: q.Distance(n.Point)})
 
 	d := q.Distance(n.Point)
-	dist := k.Max().Dist
 	if d < n.Radius {
 		n.Closer.searchSet(q, k)
-		if d+dist >= n.Radius {
+		if d+k.Max().Dist >= n.Radius {
 			n.Further.searchSet(q, k)
 		}
 	} else {
 		n.Further.searchSet(q, k)
-		if d-dist <= n.Radius {
+		if d-k.Max().Dist <= n.Radius {
 			n.Closer.searchSet(q, k)
 		}
 	}

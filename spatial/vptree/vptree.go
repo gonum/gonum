@@ -209,27 +209,23 @@ func (n *Node) search(q Comparable, dist float64) (*Node, float64) {
 	if d < n.Radius {
 		cn, cd := n.Closer.search(q, dist)
 		if cd < dist {
-			dist = cd
-			bn = cn
+			bn, dist = cn, cd
 		}
 		if d+dist >= n.Radius {
 			fn, fd := n.Further.search(q, dist)
 			if fd < dist {
-				dist = fd
-				bn = fn
+				bn, dist = fn, fd
 			}
 		}
 	} else {
 		fn, fd := n.Further.search(q, dist)
 		if fd < dist {
-			dist = fd
-			bn = fn
+			bn, dist = fn, fd
 		}
 		if d-dist <= n.Radius {
 			cn, cd := n.Closer.search(q, dist)
 			if cd < dist {
-				dist = cd
-				bn = cn
+				bn, dist = cn, cd
 			}
 		}
 	}

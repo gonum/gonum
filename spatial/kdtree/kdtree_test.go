@@ -592,9 +592,11 @@ func Benchmark(b *testing.B) {
 				nk := NewNKeeper(10)
 				for i := 0; i < b.N; i++ {
 					tree.NearestSet(nk, Point{rnd.Float64(), rnd.Float64(), rnd.Float64()})
-				}
-				if nk.Len() != 10 {
-					b.Error("unexpected result length")
+					if nk.Len() != 10 {
+						b.Error("unexpected result length")
+					}
+					nk.Heap = nk.Heap[:1]
+					nk.Heap[0] = ComparableDist{Dist: inf}
 				}
 			},
 		},

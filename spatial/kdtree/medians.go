@@ -73,10 +73,10 @@ func Select(list SortSlicer, k int) int {
 }
 
 func min(a, b int) int {
-	if a > b {
-		return b
+	if a < b {
+		return a
 	}
-	return a
+	return b
 }
 
 // MedianOfMedians returns the index to the median value of the medians

@@ -56,7 +56,7 @@ func transform(p point, by ...dualcmplx.Number) point {
 }
 
 func Example() {
-	// Translate a 1×1 square [3, 4] and rotate it 90° around the
+	// Translate a 1×1 square by [3, 4] and rotate it 90° around the
 	// origin.
 	fmt.Println("square:")
 
@@ -66,7 +66,7 @@ func Example() {
 		Dual: 0.5 * raise(point{3, 4}),
 	}
 
-	// Construct a rotations.
+	// Construct a rotation.
 	alpha := math.Pi / 2
 	rotate := dualcmplx.Number{Real: complex(math.Cos(alpha/2), math.Sin(alpha/2))}
 
@@ -90,7 +90,7 @@ func Example() {
 	// Rotate a line segment 90° around its lower end [2, 2].
 	fmt.Println("\nline segment:")
 
-	// Construct an displacement to the origin from the lower end...
+	// Construct a displacement to the origin from the lower end...
 	origin := dualcmplx.Number{
 		Real: 1,
 		Dual: 0.5 * raise(point{-2, -2}),

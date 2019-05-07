@@ -43,7 +43,7 @@ func TestFormat(t *testing.T) {
 	}
 }
 
-// FIXME(kortschka): See golang/go#29320.
+// FIXME(kortschak): See golang/go#29320.
 
 func sqrt(x complex128) complex128 {
 	switch {

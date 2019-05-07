@@ -379,19 +379,6 @@ func Benchmark(b *testing.B) {
 		fn   func(data []Comparable, tree *Tree, rnd *rand.Rand) func(*testing.B)
 	}{
 		{
-			name: "NearestBruteN10", fn: func(data []Comparable, _ *Tree, rnd *rand.Rand) func(b *testing.B) {
-				return func(b *testing.B) {
-					var r []ComparableDist
-					for i := 0; i < b.N; i++ {
-						r = nearestN(10, Point{rnd.Float64(), rnd.Float64(), rnd.Float64()}, data)
-					}
-					if len(r) != 10 {
-						b.Error("unexpected result length", len(r))
-					}
-				}
-			},
-		},
-		{
 			name: "NearestBrute", fn: func(data []Comparable, _ *Tree, rnd *rand.Rand) func(b *testing.B) {
 				return func(b *testing.B) {
 					for i := 0; i < b.N; i++ {
@@ -402,6 +389,19 @@ func Benchmark(b *testing.B) {
 					}
 					if math.IsNaN(d) {
 						b.Error("unexpected NaN result")
+					}
+				}
+			},
+		},
+		{
+			name: "NearestBruteN10", fn: func(data []Comparable, _ *Tree, rnd *rand.Rand) func(b *testing.B) {
+				return func(b *testing.B) {
+					var r []ComparableDist
+					for i := 0; i < b.N; i++ {
+						r = nearestN(10, Point{rnd.Float64(), rnd.Float64(), rnd.Float64()}, data)
+					}
+					if len(r) != 10 {
+						b.Error("unexpected result length", len(r))
 					}
 				}
 			},
@@ -427,9 +427,11 @@ func Benchmark(b *testing.B) {
 					nk := NewNKeeper(10)
 					for i := 0; i < b.N; i++ {
 						tree.NearestSet(nk, Point{rnd.Float64(), rnd.Float64(), rnd.Float64()})
-					}
-					if nk.Len() != 10 {
-						b.Error("unexpected result length")
+						if nk.Len() != 10 {
+							b.Error("unexpected result length")
+						}
+						nk.Heap = nk.Heap[:1]
+						nk.Heap[0] = ComparableDist{Dist: inf}
 					}
 				}
 			},
@@ -456,7 +458,7 @@ func Benchmark(b *testing.B) {
 				b.Errorf("unexpected result for query %.3f: got:%.3f want:%.3f", q, gotP, wantP)
 			}
 			if gotD != wantD {
-				b.Errorf("unexpected distance for query %.3f : got:%v want:%v", q, gotD, wantD)
+				b.Errorf("unexpected distance for query %.3f: got:%v want:%v", q, gotD, wantD)
 			}
 		}
 

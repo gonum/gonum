@@ -10,9 +10,10 @@ import (
 	"golang.org/x/exp/rand"
 )
 
-// Partition partitions list such that all elements less than the value at pivot prior to the
-// call are placed before that element and all elements greater than that value are placed after it.
-// The final location of the element at pivot prior to the call is returned.
+// Partition partitions list such that all elements less than the value at
+// pivot prior to the call are placed before that element and all elements
+// greater than that value are placed after it. The final location of the
+// element at pivot prior to the call is returned.
 func Partition(list sort.Interface, pivot int) int {
 	var index, last int
 	if last = list.Len() - 1; last < 0 {
@@ -35,9 +36,9 @@ type SortSlicer interface {
 	Slice(start, end int) SortSlicer
 }
 
-// Select partitions list such that all elements less than the kth largest element are
-// placed placed before k in the resulting list and all elements greater than it are placed
-// after the position k.
+// Select partitions list such that all elements less than the kth element
+// are placed before k in the resulting list and all elements greater than
+// it are placed after the position k.
 func Select(list SortSlicer, k int) int {
 	var (
 		start int
@@ -78,7 +79,8 @@ func min(a, b int) int {
 	return a
 }
 
-// MedianOfMedians returns the index to the median value of the medians of groups of 5 consecutive elements.
+// MedianOfMedians returns the index to the median value of the medians
+// of groups of 5 consecutive elements.
 func MedianOfMedians(list SortSlicer) int {
 	n := list.Len() / 5
 	for i := 0; i < n; i++ {
@@ -91,7 +93,8 @@ func MedianOfMedians(list SortSlicer) int {
 	return n / 2
 }
 
-// MedianOfRandoms returns the index to the median value of up to n randomly chosen elements in list.
+// MedianOfRandoms returns the index to the median value of up to n randomly
+// chosen elements in list.
 func MedianOfRandoms(list SortSlicer, n int) int {
 	if l := list.Len(); n <= l {
 		for i := 0; i < n; i++ {

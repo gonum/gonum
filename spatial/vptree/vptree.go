@@ -115,14 +115,14 @@ func (b *builder) selectVantage(s []Comparable, effort int) Comparable {
 	var best Comparable
 	var bestVar float64
 	b.work = b.work[:effort]
-	for _, p := range b.random(effort, s) {
-		for i, q := range b.random(effort, s) {
+	choices := b.random(effort, s)
+	for _, p := range choices {
+		for i, q := range choices {
 			b.work[i] = p.Distance(q)
 		}
 		variance := stat.Variance(b.work, nil)
 		if variance > bestVar {
-			bestVar = variance
-			best = p
+			best, bestVar = p, variance
 		}
 	}
 	return best

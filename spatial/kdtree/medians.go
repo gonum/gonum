@@ -96,12 +96,10 @@ func MedianOfMedians(list SortSlicer) int {
 // MedianOfRandoms returns the index to the median value of up to n randomly
 // chosen elements in list.
 func MedianOfRandoms(list SortSlicer, n int) int {
-	if l := list.Len(); n <= l {
-		for i := 0; i < n; i++ {
-			list.Swap(i, rand.Intn(n))
-		}
-	} else {
+	if l := list.Len(); l < n {
 		n = l
+	} else {
+		rand.Shuffle(n, func(i, j int) { list.Swap(i, j) })
 	}
 	Select(list.Slice(0, n), n/2)
 	return n / 2

@@ -75,7 +75,7 @@ func New(p []Comparable, effort int, src rand.Source) *Tree {
 		intn = rnd.Intn
 		shuf = rnd.Shuffle
 	}
-	b := builder{work: make([]float64, max(len(p), effort)), intn: intn, shuf: shuf}
+	b := builder{work: make([]float64, len(p)), intn: intn, shuf: shuf}
 	return &Tree{
 		Root:  b.build(p, effort),
 		Count: len(p),
@@ -171,13 +171,6 @@ func (c byDist) Less(i, j int) bool { return c.dists[i] < c.dists[j] }
 func (c byDist) Swap(i, j int) {
 	c.dists[i], c.dists[j] = c.dists[j], c.dists[i]
 	c.points[i], c.points[j] = c.points[j], c.points[i]
-}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
 }
 
 // Len returns the number of elements in the tree.

@@ -528,6 +528,31 @@ func TestNormZero(t *testing.T) {
 	}
 }
 
+func TestRank(t *testing.T) {
+	m := NewDense(5, 4, []float64{
+		1, 1, 1, 1,
+		0, 1, 1, 1,
+		0, 0, 1, 1,
+		0, 0, 0, 1,
+		0, 0, 0, 0,
+	})
+	if Rank(m, 1e-10) != 4 {
+		t.Errorf("Rank mismatch. expected: 4, actual: %d", Rank(m, 1e-10))
+	}
+	m = NewDense(7, 5, []float64{
+		1, 1, 1, 1, 1,
+		0, 0.5, 0.5, 0.5, 0.5,
+		0, 1, 1, 1, 1,
+		0, 2, 2, 2, 2,
+		0, 3, 3, 3, 3,
+		0, 4, 4, 4, 4,
+		0, 0, 0, 0, 0,
+	})
+	if Rank(m, 1e-10) != 2 {
+		t.Errorf("Rank mismatch. expected: 2, actual: %d", Rank(m, 1e-10))
+	}
+}
+
 func TestSum(t *testing.T) {
 	f := func(a Matrix) interface{} {
 		return Sum(a)

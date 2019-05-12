@@ -846,6 +846,21 @@ func normLapack(norm float64, aTrans bool) lapack.MatrixNorm {
 	}
 }
 
+// Rank returns rank of input matrix using singular value decomposition.
+// Give epsilon to determine singular values as zero.
+func Rank(a Matrix, epsilon float64) int {
+	var svd SVD
+	svd.Factorize(a, SVDNone)
+	sv := svd.Values(nil)
+	for i, v := range sv {
+		if v < epsilon {
+			return i
+		}
+	}
+	_, c := a.Dims()
+	return c
+}
+
 // Sum returns the sum of the elements of the matrix.
 func Sum(a Matrix) float64 {
 

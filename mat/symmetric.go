@@ -262,12 +262,12 @@ func (s *SymDense) CopySym(a Symmetric) int {
 	return n
 }
 
-// SymRankOne performs a symetric rank-one update to the matrix a and stores
-// the result in the receiver
+// SymRankOne performs a symetric rank-one update to the matrix a with x,
+// which is treated as a column vector, and stores the result in the receiver
 //  s = a + alpha * x * x'
 func (s *SymDense) SymRankOne(a Symmetric, alpha float64, x Vector) {
-	n, c := x.Dims()
-	if a.Symmetric() != n || c != 1 {
+	n := x.Len()
+	if a.Symmetric() != n {
 		panic(ErrShape)
 	}
 	s.reuseAs(n)
@@ -371,17 +371,16 @@ func (s *SymDense) SymOuterK(alpha float64, x Matrix) {
 	}
 }
 
-// RankTwo performs a symmmetric rank-two update to the matrix a and stores
-// the result in the receiver
+// RankTwo performs a symmmetric rank-two update to the matrix a with the
+// vectors x and y, which are treated as column vectors, and stores the
+// result in the receiver
 //  m = a + alpha * (x * y' + y * x')
 func (s *SymDense) RankTwo(a Symmetric, alpha float64, x, y Vector) {
 	n := s.mat.N
-	xr, xc := x.Dims()
-	if xr != n || xc != 1 {
+	if x.Len() != n {
 		panic(ErrShape)
 	}
-	yr, yc := y.Dims()
-	if yr != n || yc != 1 {
+	if y.Len() != n {
 		panic(ErrShape)
 	}
 

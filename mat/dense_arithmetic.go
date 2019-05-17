@@ -347,29 +347,6 @@ func (m *Dense) Mul(a, b Matrix) {
 			blas64.Trmm(blas.Right, bT, 1, bmat, m.mat)
 			return
 
-		case *VecDense:
-			// We know aU is a column vector.
-			m.checkOverlap(bUrm.asGeneral())
-			bvec := bUrm.RawVector()
-			if bTrans {
-				// {ar,1} x {1,bc}, which is not a vector.
-				// Instead, construct B as a General.
-				bmat := blas64.General{
-					Rows:   bc,
-					Cols:   1,
-					Stride: bvec.Inc,
-					Data:   bvec.Data,
-				}
-				blas64.Gemm(aT, bT, 1, amat, bmat, 0, m.mat)
-				return
-			}
-			cvec := blas64.Vector{
-				Inc:  m.mat.Stride,
-				Data: m.mat.Data,
-			}
-			blas64.Gemv(aT, 1, amat, bvec, 0, cvec)
-			return
-
 		case RawVectorer:
 			bvec := bUrm.RawVector()
 			r, c := bU.Dims()
@@ -432,35 +409,6 @@ func (m *Dense) Mul(a, b Matrix) {
 			}
 			m.Copy(b)
 			blas64.Trmm(blas.Left, aT, 1, amat, m.mat)
-			return
-
-		case *VecDense:
-			// We know aU is a column vector.
-			m.checkOverlap(aUrm.asGeneral())
-			avec := aUrm.RawVector()
-			if aTrans {
-				// {1,ac} x {ac, bc}
-				// Transpose B so that the vector is on the right.
-				cvec := blas64.Vector{
-					Inc:  1,
-					Data: m.mat.Data,
-				}
-				bT := blas.Trans
-				if bTrans {
-					bT = blas.NoTrans
-				}
-				blas64.Gemv(bT, 1, bmat, avec, 0, cvec)
-				return
-			}
-			// {ar,1} x {1,bc} which is not a vector result.
-			// Instead, construct A as a General.
-			amat := blas64.General{
-				Rows:   ar,
-				Cols:   1,
-				Stride: avec.Inc,
-				Data:   avec.Data,
-			}
-			blas64.Gemm(aT, bT, 1, amat, bmat, 0, m.mat)
 			return
 
 		case RawVectorer:

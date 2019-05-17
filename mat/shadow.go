@@ -51,8 +51,9 @@ func checkOverlap(a, b blas64.General) bool {
 		return false
 	}
 
-	if a.Stride != b.Stride {
-		// Too hard, so assume the worst.
+	if a.Stride != b.Stride && a.Stride != 1 && b.Stride != 1 {
+		// Too hard, so assume the worst; if either stride
+		// is one it will be caught in rectanglesOverlap.
 		panic(mismatchedStrides)
 	}
 
@@ -60,7 +61,7 @@ func checkOverlap(a, b blas64.General) bool {
 		off = -off
 		a.Cols, b.Cols = b.Cols, a.Cols
 	}
-	if rectanglesOverlap(off, a.Cols, b.Cols, a.Stride) {
+	if rectanglesOverlap(off, a.Cols, b.Cols, min(a.Stride, b.Stride)) {
 		panic(regionOverlap)
 	}
 	return false
@@ -75,15 +76,18 @@ func (m *Dense) checkOverlapMatrix(a Matrix) bool {
 		return false
 	}
 	var amat blas64.General
-	switch a := a.(type) {
+	switch ar := a.(type) {
 	default:
 		return false
 	case RawMatrixer:
-		amat = a.RawMatrix()
+		amat = ar.RawMatrix()
 	case RawSymmetricer:
-		amat = generalFromSymmetric(a.RawSymmetric())
+		amat = generalFromSymmetric(ar.RawSymmetric())
 	case RawTriangular:
-		amat = generalFromTriangular(a.RawTriangular())
+		amat = generalFromTriangular(ar.RawTriangular())
+	case RawVectorer:
+		r, c := a.Dims()
+		amat = generalFromVector(ar.RawVector(), r, c)
 	}
 	return m.checkOverlap(amat)
 }
@@ -97,15 +101,18 @@ func (s *SymDense) checkOverlapMatrix(a Matrix) bool {
 		return false
 	}
 	var amat blas64.General
-	switch a := a.(type) {
+	switch ar := a.(type) {
 	default:
 		return false
 	case RawMatrixer:
-		amat = a.RawMatrix()
+		amat = ar.RawMatrix()
 	case RawSymmetricer:
-		amat = generalFromSymmetric(a.RawSymmetric())
+		amat = generalFromSymmetric(ar.RawSymmetric())
 	case RawTriangular:
-		amat = generalFromTriangular(a.RawTriangular())
+		amat = generalFromTriangular(ar.RawTriangular())
+	case RawVectorer:
+		r, c := a.Dims()
+		amat = generalFromVector(ar.RawVector(), r, c)
 	}
 	return s.checkOverlap(amat)
 }
@@ -130,15 +137,18 @@ func (t *TriDense) checkOverlapMatrix(a Matrix) bool {
 		return false
 	}
 	var amat blas64.General
-	switch a := a.(type) {
+	switch ar := a.(type) {
 	default:
 		return false
 	case RawMatrixer:
-		amat = a.RawMatrix()
+		amat = ar.RawMatrix()
 	case RawSymmetricer:
-		amat = generalFromSymmetric(a.RawSymmetric())
+		amat = generalFromSymmetric(ar.RawSymmetric())
 	case RawTriangular:
-		amat = generalFromTriangular(a.RawTriangular())
+		amat = generalFromTriangular(ar.RawTriangular())
+	case RawVectorer:
+		r, c := a.Dims()
+		amat = generalFromVector(ar.RawVector(), r, c)
 	}
 	return t.checkOverlap(amat)
 }
@@ -179,15 +189,28 @@ func (v *VecDense) checkOverlap(a blas64.Vector) bool {
 		return false
 	}
 
-	if mat.Inc != a.Inc {
-		// Too hard, so assume the worst.
+	if mat.Inc != a.Inc && mat.Inc != 1 && a.Inc != 1 {
+		// Too hard, so assume the worst; if either
+		// increment is one it will be caught below.
 		panic(mismatchedStrides)
 	}
+	inc := min(mat.Inc, a.Inc)
 
-	if mat.Inc == 1 || off&mat.Inc == 0 {
+	if inc == 1 || off&inc == 0 {
 		panic(regionOverlap)
 	}
 	return false
+}
+
+// generalFromVector returns a blas64.General with the backing
+// data and dimensions of a.
+func generalFromVector(a blas64.Vector, r, c int) blas64.General {
+	return blas64.General{
+		Rows:   r,
+		Cols:   c,
+		Stride: a.Inc,
+		Data:   a.Data,
+	}
 }
 
 // rectanglesOverlap returns whether the strided rectangles a and b overlap

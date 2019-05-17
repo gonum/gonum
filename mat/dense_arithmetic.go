@@ -305,9 +305,9 @@ func (m *Dense) Mul(a, b Matrix) {
 		if restore == nil {
 			m.checkOverlap(amat)
 		}
-		switch bU := bU.(type) {
+		switch bUrm := bU.(type) {
 		case RawMatrixer:
-			bmat := bU.RawMatrix()
+			bmat := bUrm.RawMatrix()
 			if restore == nil {
 				m.checkOverlap(bmat)
 			}
@@ -315,7 +315,7 @@ func (m *Dense) Mul(a, b Matrix) {
 			return
 
 		case RawSymmetricer:
-			bmat := bU.RawSymmetric()
+			bmat := bUrm.RawSymmetric()
 			if aTrans {
 				c := getWorkspace(ac, ar, false)
 				blas64.Symm(blas.Left, 1, bmat, amat, 0, c.mat)
@@ -328,7 +328,7 @@ func (m *Dense) Mul(a, b Matrix) {
 
 		case RawTriangular:
 			// Trmm updates in place, so copy aU first.
-			bmat := bU.RawTriangular()
+			bmat := bUrm.RawTriangular()
 			if aTrans {
 				c := getWorkspace(ac, ar, false)
 				var tmp Dense
@@ -348,9 +348,34 @@ func (m *Dense) Mul(a, b Matrix) {
 			return
 
 		case *VecDense:
-			m.checkOverlap(bU.asGeneral())
-			bvec := bU.RawVector()
+			// We know aU is a column vector.
+			m.checkOverlap(bUrm.asGeneral())
+			bvec := bUrm.RawVector()
 			if bTrans {
+				// {ar,1} x {1,bc}, which is not a vector.
+				// Instead, construct B as a General.
+				bmat := blas64.General{
+					Rows:   bc,
+					Cols:   1,
+					Stride: bvec.Inc,
+					Data:   bvec.Data,
+				}
+				blas64.Gemm(aT, bT, 1, amat, bmat, 0, m.mat)
+				return
+			}
+			cvec := blas64.Vector{
+				Inc:  m.mat.Stride,
+				Data: m.mat.Data,
+			}
+			blas64.Gemv(aT, 1, amat, bvec, 0, cvec)
+			return
+
+		case RawVectorer:
+			bvec := bUrm.RawVector()
+			r, c := bU.Dims()
+			m.checkOverlap(generalFromVector(bvec, r, c))
+			bIsRow := (r == 1 && !bTrans) || (c == 1 && bTrans)
+			if bIsRow {
 				// {ar,1} x {1,bc}, which is not a vector.
 				// Instead, construct B as a General.
 				bmat := blas64.General{
@@ -375,9 +400,9 @@ func (m *Dense) Mul(a, b Matrix) {
 		if restore == nil {
 			m.checkOverlap(bmat)
 		}
-		switch aU := aU.(type) {
+		switch aUrm := aU.(type) {
 		case RawSymmetricer:
-			amat := aU.RawSymmetric()
+			amat := aUrm.RawSymmetric()
 			if bTrans {
 				c := getWorkspace(bc, br, false)
 				blas64.Symm(blas.Right, 1, amat, bmat, 0, c.mat)
@@ -390,7 +415,7 @@ func (m *Dense) Mul(a, b Matrix) {
 
 		case RawTriangular:
 			// Trmm updates in place, so copy bU first.
-			amat := aU.RawTriangular()
+			amat := aUrm.RawTriangular()
 			if bTrans {
 				c := getWorkspace(bc, br, false)
 				var tmp Dense
@@ -410,9 +435,40 @@ func (m *Dense) Mul(a, b Matrix) {
 			return
 
 		case *VecDense:
-			m.checkOverlap(aU.asGeneral())
-			avec := aU.RawVector()
+			// We know aU is a column vector.
+			m.checkOverlap(aUrm.asGeneral())
+			avec := aUrm.RawVector()
 			if aTrans {
+				// {1,ac} x {ac, bc}
+				// Transpose B so that the vector is on the right.
+				cvec := blas64.Vector{
+					Inc:  1,
+					Data: m.mat.Data,
+				}
+				bT := blas.Trans
+				if bTrans {
+					bT = blas.NoTrans
+				}
+				blas64.Gemv(bT, 1, bmat, avec, 0, cvec)
+				return
+			}
+			// {ar,1} x {1,bc} which is not a vector result.
+			// Instead, construct A as a General.
+			amat := blas64.General{
+				Rows:   ar,
+				Cols:   1,
+				Stride: avec.Inc,
+				Data:   avec.Data,
+			}
+			blas64.Gemm(aT, bT, 1, amat, bmat, 0, m.mat)
+			return
+
+		case RawVectorer:
+			avec := aUrm.RawVector()
+			r, c := aU.Dims()
+			m.checkOverlap(generalFromVector(avec, r, c))
+			aIsRow := (r == 1 && !aTrans) || (c == 1 && aTrans)
+			if aIsRow {
 				// {1,ac} x {ac, bc}
 				// Transpose B so that the vector is on the right.
 				cvec := blas64.Vector{

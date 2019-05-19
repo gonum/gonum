@@ -529,27 +529,48 @@ func TestNormZero(t *testing.T) {
 }
 
 func TestRank(t *testing.T) {
-	m := NewDense(5, 4, []float64{
-		1, 1, 1, 1,
-		0, 1, 1, 1,
-		0, 0, 1, 1,
-		0, 0, 0, 1,
-		0, 0, 0, 0,
-	})
-	if Rank(m, 1e-10) != 4 {
-		t.Errorf("Rank mismatch. expected: 4, actual: %d", Rank(m, 1e-10))
+	tests := []struct {
+		name    string
+		a       Matrix
+		epsilon float64
+		want    int
+	}{
+		{
+			name: "case1",
+			a: NewDense(7, 5, []float64{
+				1, 1, 1, 1, 1,
+				0, 0.5, 0.5, 0.5, 0.5,
+				0, 1, 1, 1, 1,
+				0, 2, 2, 2, 2,
+				0, 3, 3, 3, 3,
+				0, 4, 4, 4, 4,
+				0, 0, 0, 0, 0,
+			}),
+			epsilon: 1e-10,
+			want:    2,
+		},
+		{
+			name: "case2",
+			a: NewDense(5, 4, []float64{
+				1, 1, 1, 1,
+				0, 1, 1, 1,
+				0, 0, 1, 1,
+				0, 0, 0, 1,
+				0, 0, 0, 0,
+			}),
+			epsilon: 1e-10,
+			want:    4,
+		},
 	}
-	m = NewDense(7, 5, []float64{
-		1, 1, 1, 1, 1,
-		0, 0.5, 0.5, 0.5, 0.5,
-		0, 1, 1, 1, 1,
-		0, 2, 2, 2, 2,
-		0, 3, 3, 3, 3,
-		0, 4, 4, 4, 4,
-		0, 0, 0, 0, 0,
-	})
-	if Rank(m, 1e-10) != 2 {
-		t.Errorf("Rank mismatch. expected: 2, actual: %d", Rank(m, 1e-10))
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := Rank(tt.a, tt.epsilon); got != tt.want {
+				t.Errorf("Rank() = %v, want %v", got, tt.want)
+			}
+			if got := Rank(tt.a.T(), tt.epsilon); got != tt.want {
+				t.Errorf("Rank() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }
 

@@ -853,12 +853,11 @@ func Rank(a Matrix, epsilon float64) int {
 	svd.Factorize(a, SVDNone)
 	sv := svd.Values(nil)
 	for i, v := range sv {
-		if v < epsilon {
+		if v <= epsilon {
 			return i
 		}
 	}
-	_, c := a.Dims()
-	return c
+	return min(a.Dims())
 }
 
 // Sum returns the sum of the elements of the matrix.

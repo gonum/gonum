@@ -861,7 +861,7 @@ func Rank(a Matrix, epsilon float64) int {
 	svd.Factorize(a, SVDNone)
 	sv := svd.Values(nil)
 	for i, v := range sv {
-		if v <= epsilon {
+		if v < epsilon {
 			return i
 		}
 	}

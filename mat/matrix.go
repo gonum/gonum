@@ -856,6 +856,7 @@ func Rank(a Matrix, epsilon float64) int {
 	if epsilon == 0 {
 		epsilon = 1e-10
 	}
+	// TODO: https://github.com/gonum/gonum/pull/981#issuecomment-491631010
 	var svd SVD
 	svd.Factorize(a, SVDNone)
 	sv := svd.Values(nil)

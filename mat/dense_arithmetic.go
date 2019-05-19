@@ -760,10 +760,10 @@ func (m *Dense) Apply(fn func(i, j int, v float64) float64, a Matrix) {
 	}
 }
 
-// RankOne performs a rank-one update to the matrix a with the vectors x
-// and y, where x is treated as a column vector and y is treated as a row
-// vector. The result is stored in the receiver. If a is zero, see Outer.
-//  m = a + alpha * x * y
+// RankOne performs a rank-one update to the matrix a with the vectors x and
+// y, where x and y are treated as column vectors. The result is stored in the
+// receiver. If a is zero, see Outer.
+//  m = a + alpha * x * y^T
 func (m *Dense) RankOne(a Matrix, alpha float64, x, y Vector) {
 	ar, ac := a.Dims()
 	if x.Len() != ar {
@@ -814,10 +814,9 @@ func (m *Dense) RankOne(a Matrix, alpha float64, x, y Vector) {
 	}
 }
 
-// Outer calculates the outer product of the vectors x and y,
-// where x is treated as a column vector and y is treated as
-// a row vector, and stores the result in the receiver.
-//  m = alpha * x * y
+// Outer calculates the outer product of the vectors x and y, where x and y
+// are treated as column vectors, and stores the result in the receiver.
+//  m = alpha * x * y^T
 // In order to update an existing matrix, see RankOne.
 func (m *Dense) Outer(alpha float64, x, y Vector) {
 	r, c := x.Len(), y.Len()

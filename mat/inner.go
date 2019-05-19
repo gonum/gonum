@@ -11,9 +11,9 @@ import (
 )
 
 // Inner computes the generalized inner product
-//  x A y
-// between the vectors x and y with matrix A, where x is treated as a row vector
-// and y is treated as a column vector.
+//  x^T A y
+// between the vectors x and y with matrix A, where x and y are treated as
+// column vectors.
 //
 // This is only a true inner product if A is symmetric positive definite, though
 // the operation works for any matrix A.

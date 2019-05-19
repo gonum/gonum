@@ -784,15 +784,17 @@ func (m *Dense) RankOne(a Matrix, alpha float64, x, y Vector) {
 	fast := true
 	xU, _ := untranspose(x)
 	if rv, ok := xU.(RawVectorer); ok {
+		r, c := xU.Dims()
 		xmat = rv.RawVector()
-		m.checkOverlap((&VecDense{mat: xmat}).asGeneral())
+		m.checkOverlap(generalFromVector(xmat, r, c))
 	} else {
 		fast = false
 	}
 	yU, _ := untranspose(y)
 	if rv, ok := yU.(RawVectorer); ok {
+		r, c := yU.Dims()
 		ymat = rv.RawVector()
-		m.checkOverlap((&VecDense{mat: ymat}).asGeneral())
+		m.checkOverlap(generalFromVector(ymat, r, c))
 	} else {
 		fast = false
 	}
@@ -847,16 +849,17 @@ func (m *Dense) Outer(alpha float64, x, y Vector) {
 	fast := true
 	xU, _ := untranspose(x)
 	if rv, ok := xU.(RawVectorer); ok {
+		r, c := xU.Dims()
 		xmat = rv.RawVector()
-		m.checkOverlap((&VecDense{mat: xmat}).asGeneral())
-
+		m.checkOverlap(generalFromVector(xmat, r, c))
 	} else {
 		fast = false
 	}
 	yU, _ := untranspose(y)
 	if rv, ok := yU.(RawVectorer); ok {
+		r, c := yU.Dims()
 		ymat = rv.RawVector()
-		m.checkOverlap((&VecDense{mat: ymat}).asGeneral())
+		m.checkOverlap(generalFromVector(ymat, r, c))
 	} else {
 		fast = false
 	}

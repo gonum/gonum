@@ -281,8 +281,9 @@ func (s *SymDense) SymRankOne(a Symmetric, alpha float64, x Vector) {
 
 	xU, _ := untranspose(x)
 	if rv, ok := xU.(RawVectorer); ok {
+		r, c := xU.Dims()
 		xmat := rv.RawVector()
-		s.checkOverlap((&VecDense{mat: xmat}).asGeneral())
+		s.checkOverlap(generalFromVector(xmat, r, c))
 		blas64.Syr(alpha, xmat, s.mat)
 		return
 	}
@@ -394,15 +395,17 @@ func (s *SymDense) RankTwo(a Symmetric, alpha float64, x, y Vector) {
 	fast := true
 	xU, _ := untranspose(x)
 	if rv, ok := xU.(RawVectorer); ok {
+		r, c := xU.Dims()
 		xmat = rv.RawVector()
-		s.checkOverlap((&VecDense{mat: xmat}).asGeneral())
+		s.checkOverlap(generalFromVector(xmat, r, c))
 	} else {
 		fast = false
 	}
 	yU, _ := untranspose(y)
 	if rv, ok := yU.(RawVectorer); ok {
+		r, c := yU.Dims()
 		ymat = rv.RawVector()
-		s.checkOverlap((&VecDense{mat: ymat}).asGeneral())
+		s.checkOverlap(generalFromVector(ymat, r, c))
 	} else {
 		fast = false
 	}

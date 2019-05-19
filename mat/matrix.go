@@ -847,8 +847,15 @@ func normLapack(norm float64, aTrans bool) lapack.MatrixNorm {
 }
 
 // Rank returns rank of input matrix using singular value decomposition.
-// Give epsilon to determine singular values as zero.
+// Give non-negative epsilon to determine singular values as zero.
+// If input epsilon is exactly 0, it is replaced with 1e-10, the default value.
 func Rank(a Matrix, epsilon float64) int {
+	if epsilon < 0 {
+		panic(ErrNegativeEpsilon)
+	}
+	if epsilon == 0 {
+		epsilon = 1e-10
+	}
 	var svd SVD
 	svd.Factorize(a, SVDNone)
 	sv := svd.Values(nil)

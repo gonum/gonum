@@ -624,10 +624,10 @@ func TestRank(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := Rank(tt.a, tt.epsilon); got != tt.want {
-				t.Errorf("Rank() = %v, want %v", got, tt.want)
+				t.Errorf("Rank mismatch. Got %v, want %v", got, tt.want)
 			}
 			if got := Rank(tt.a.T(), tt.epsilon); got != tt.want {
-				t.Errorf("Rank() = %v, want %v", got, tt.want)
+				t.Errorf("Rank of transpose mismatch. Got %v, want %v", got, tt.want)
 			}
 		})
 	}

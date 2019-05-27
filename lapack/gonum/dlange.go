@@ -49,9 +49,6 @@ func (impl Implementation) Dlange(norm lapack.MatrixNorm, m, n int, a []float64,
 		return value
 	}
 	if norm == lapack.MaxColumnSum {
-		if len(work) < n {
-			panic(shortWork)
-		}
 		for i := 0; i < n; i++ {
 			work[i] = 0
 		}

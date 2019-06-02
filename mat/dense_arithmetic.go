@@ -760,17 +760,16 @@ func (m *Dense) Apply(fn func(i, j int, v float64) float64, a Matrix) {
 	}
 }
 
-// RankOne performs a rank-one update to the matrix a and stores the result
-// in the receiver. If a is zero, see Outer.
-//  m = a + alpha * x * y'
+// RankOne performs a rank-one update to the matrix a with the vectors x and
+// y, where x and y are treated as column vectors. The result is stored in the
+// receiver. If a is zero, see Outer.
+//  m = a + alpha * x * y^T
 func (m *Dense) RankOne(a Matrix, alpha float64, x, y Vector) {
 	ar, ac := a.Dims()
-	xr, xc := x.Dims()
-	if xr != ar || xc != 1 {
+	if x.Len() != ar {
 		panic(ErrShape)
 	}
-	yr, yc := y.Dims()
-	if yr != ac || yc != 1 {
+	if y.Len() != ac {
 		panic(ErrShape)
 	}
 
@@ -785,15 +784,17 @@ func (m *Dense) RankOne(a Matrix, alpha float64, x, y Vector) {
 	fast := true
 	xU, _ := untranspose(x)
 	if rv, ok := xU.(RawVectorer); ok {
+		r, c := xU.Dims()
 		xmat = rv.RawVector()
-		m.checkOverlap((&VecDense{mat: xmat}).asGeneral())
+		m.checkOverlap(generalFromVector(xmat, r, c))
 	} else {
 		fast = false
 	}
 	yU, _ := untranspose(y)
 	if rv, ok := yU.(RawVectorer); ok {
+		r, c := yU.Dims()
 		ymat = rv.RawVector()
-		m.checkOverlap((&VecDense{mat: ymat}).asGeneral())
+		m.checkOverlap(generalFromVector(ymat, r, c))
 	} else {
 		fast = false
 	}
@@ -815,22 +816,12 @@ func (m *Dense) RankOne(a Matrix, alpha float64, x, y Vector) {
 	}
 }
 
-// Outer calculates the outer product of the column vectors x and y,
-// and stores the result in the receiver.
-//  m = alpha * x * y'
+// Outer calculates the outer product of the vectors x and y, where x and y
+// are treated as column vectors, and stores the result in the receiver.
+//  m = alpha * x * y^T
 // In order to update an existing matrix, see RankOne.
 func (m *Dense) Outer(alpha float64, x, y Vector) {
-	xr, xc := x.Dims()
-	if xc != 1 {
-		panic(ErrShape)
-	}
-	yr, yc := y.Dims()
-	if yc != 1 {
-		panic(ErrShape)
-	}
-
-	r := xr
-	c := yr
+	r, c := x.Len(), y.Len()
 
 	// Copied from reuseAs with use replaced by useZeroed
 	// and a final zero of the matrix elements if we pass
@@ -858,16 +849,17 @@ func (m *Dense) Outer(alpha float64, x, y Vector) {
 	fast := true
 	xU, _ := untranspose(x)
 	if rv, ok := xU.(RawVectorer); ok {
+		r, c := xU.Dims()
 		xmat = rv.RawVector()
-		m.checkOverlap((&VecDense{mat: xmat}).asGeneral())
-
+		m.checkOverlap(generalFromVector(xmat, r, c))
 	} else {
 		fast = false
 	}
 	yU, _ := untranspose(y)
 	if rv, ok := yU.(RawVectorer); ok {
+		r, c := yU.Dims()
 		ymat = rv.RawVector()
-		m.checkOverlap((&VecDense{mat: ymat}).asGeneral())
+		m.checkOverlap(generalFromVector(ymat, r, c))
 	} else {
 		fast = false
 	}

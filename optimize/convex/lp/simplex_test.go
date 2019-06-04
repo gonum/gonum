@@ -217,7 +217,7 @@ func testSimplex(t *testing.T, initialBasic []int, c []float64, a mat.Matrix, b 
 	//   subject to -A^T * nu <= c
 
 	negAT := &mat.Dense{}
-	negAT.Clone(a.T())
+	negAT.CloneFrom(a.T())
 	negAT.Scale(-1, negAT)
 	cNew, aNew, bNew := Convert(b, negAT, c, nil, nil)
 

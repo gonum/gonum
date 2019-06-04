@@ -129,11 +129,11 @@ type RawColViewer interface {
 	RawColView(j int) []float64
 }
 
-// A Cloner can make a copy of a into the receiver, overwriting the previous value of the
+// A ClonerFrom can make a copy of a into the receiver, overwriting the previous value of the
 // receiver. The clone operation does not make any restriction on shape and will not cause
 // shadowing.
-type Cloner interface {
-	Clone(a Matrix)
+type ClonerFrom interface {
+	CloneFrom(a Matrix)
 }
 
 // A Reseter can reset the matrix so that it can be reused as the receiver of a dimensionally

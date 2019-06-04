@@ -94,7 +94,7 @@ func ExampleCC() {
 	// Canonical Correlation Matrix, or the correlations between the sphered
 	// data.
 	var corSph mat.Dense
-	corSph.Clone(pVecs)
+	corSph.CloneFrom(pVecs)
 	col := make([]float64, xd)
 	for j := 0; j < yd; j++ {
 		mat.Col(col, j, &corSph)

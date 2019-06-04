@@ -26,7 +26,7 @@ func TestLQ(t *testing.T) {
 			}
 		}
 		var want Dense
-		want.Clone(a)
+		want.CloneFrom(a)
 
 		var lq LQ
 		lq.Factorize(a)

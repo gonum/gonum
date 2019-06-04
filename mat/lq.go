@@ -59,7 +59,7 @@ func (lq *LQ) factorize(a Matrix, norm lapack.MatrixNorm) {
 	if lq.lq == nil {
 		lq.lq = &Dense{}
 	}
-	lq.lq.Clone(a)
+	lq.lq.CloneFrom(a)
 	work := []float64{0}
 	lq.tau = make([]float64, k)
 	lapack64.Gelqf(lq.lq.mat, lq.tau, work, -1)

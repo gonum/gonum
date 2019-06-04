@@ -29,7 +29,7 @@ func TestQR(t *testing.T) {
 			}
 		}
 		var want Dense
-		want.Clone(a)
+		want.CloneFrom(a)
 
 		var qr QR
 		qr.Factorize(a)

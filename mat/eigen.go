@@ -176,7 +176,7 @@ func (e *Eigen) Factorize(a Matrix, kind EigenKind) (ok bool) {
 		panic(ErrShape)
 	}
 	var sd Dense
-	sd.Clone(a)
+	sd.CloneFrom(a)
 
 	left := kind&EigenLeft != 0
 	right := kind&EigenRight != 0

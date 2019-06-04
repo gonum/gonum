@@ -19,7 +19,7 @@ func TestLUD(t *testing.T) {
 			}
 		}
 		var want Dense
-		want.Clone(a)
+		want.CloneFrom(a)
 
 		var lu LU
 		lu.Factorize(a)

@@ -229,7 +229,7 @@ func TestDenseSetRowColumn(t *testing.T) {
 		for ri, row := range as {
 			a := NewDense(flatten(as))
 			m := &Dense{}
-			m.Clone(a)
+			m.CloneFrom(a)
 			a.SetRow(ri, make([]float64, a.mat.Cols))
 			m.Sub(m, a)
 			nt := Norm(m, 2)
@@ -242,7 +242,7 @@ func TestDenseSetRowColumn(t *testing.T) {
 		for ci := range as[0] {
 			a := NewDense(flatten(as))
 			m := &Dense{}
-			m.Clone(a)
+			m.CloneFrom(a)
 			a.SetCol(ci, make([]float64, a.mat.Rows))
 			col := make([]float64, a.mat.Rows)
 			for j := range col {
@@ -1137,7 +1137,7 @@ func TestDensePowN(t *testing.T) {
 }
 
 func (m *Dense) iterativePow(a Matrix, n int) {
-	m.Clone(a)
+	m.CloneFrom(a)
 	for i := 1; i < n; i++ {
 		m.Mul(m, a)
 	}
@@ -1174,12 +1174,12 @@ func TestDenseCloneT(t *testing.T) {
 		var got, gotT Dense
 
 		for j := 0; j < 2; j++ {
-			got.Clone(a.T())
+			got.CloneFrom(a.T())
 			if !Equal(&got, want) {
 				t.Errorf("expected transpose for test %d iteration %d: %v transpose = %v",
 					i, j, test.a, test.want)
 			}
-			gotT.Clone(got.T())
+			gotT.CloneFrom(got.T())
 			if !Equal(&gotT, a) {
 				t.Errorf("expected transpose for test %d iteration %d: %v transpose = %v",
 					i, j, test.a, test.want)
@@ -1438,7 +1438,7 @@ func TestDenseClone(t *testing.T) {
 	} {
 		a := NewDense(flatten(test.a))
 		b := *a
-		a.Clone(a)
+		a.CloneFrom(a)
 		a.Set(test.i, test.j, test.v)
 
 		if Equal(&b, a) {
@@ -1925,7 +1925,7 @@ func TestDenseInverse(t *testing.T) {
 		}
 
 		var tmp Dense
-		tmp.Clone(test.a)
+		tmp.CloneFrom(test.a)
 		aU, transposed := untranspose(test.a)
 		if transposed {
 			switch aU := aU.(type) {

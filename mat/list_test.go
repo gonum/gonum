@@ -547,7 +547,7 @@ func makeCopyOf(a Matrix) Matrix {
 		return retranspose(a, makeCopyOf(t.Untranspose()))
 	case *Dense, *basicMatrix:
 		var m Dense
-		m.Clone(a)
+		m.CloneFrom(a)
 		return returnAs(&m, t)
 	case *SymDense, *basicSymmetric:
 		n := t.(Symmetric).Symmetric()
@@ -925,7 +925,7 @@ func testOneInputFunc(t *testing.T,
 			var want interface{}
 			if dimsOK {
 				var aDense Dense
-				aDense.Clone(a)
+				aDense.CloneFrom(a)
 				want = denseComparison(&aDense)
 			}
 			aCopy := makeCopyOf(a)
@@ -1095,8 +1095,8 @@ func testTwoInputFunc(t *testing.T,
 				var want interface{}
 				if dimsOK {
 					var aDense, bDense Dense
-					aDense.Clone(a)
-					bDense.Clone(b)
+					aDense.CloneFrom(a)
+					bDense.CloneFrom(b)
 					want = denseComparison(&aDense, &bDense)
 				}
 				aCopy := makeCopyOf(a)
@@ -1175,7 +1175,7 @@ func testOneInput(t *testing.T,
 			var want Dense
 			if dimsOK {
 				var aDense Dense
-				aDense.Clone(a)
+				aDense.CloneFrom(a)
 				denseComparison(&want, &aDense)
 			}
 			aCopy := makeCopyOf(a)
@@ -1327,8 +1327,8 @@ func testTwoInput(t *testing.T,
 				var want Dense
 				if dimsOK {
 					var aDense, bDense Dense
-					aDense.Clone(a)
-					bDense.Clone(b)
+					aDense.CloneFrom(a)
+					bDense.CloneFrom(b)
 					denseComparison(&want, &aDense, &bDense)
 				}
 				aCopy := makeCopyOf(a)

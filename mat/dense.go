@@ -15,7 +15,7 @@ var (
 	_ Matrix  = dense
 	_ Mutable = dense
 
-	_ Cloner       = dense
+	_ ClonerFrom   = dense
 	_ RowViewer    = dense
 	_ ColViewer    = dense
 	_ RawRowViewer = dense
@@ -186,7 +186,7 @@ func (m *Dense) asTriDense(n int, diag blas.Diag, uplo blas.Uplo) *TriDense {
 // DenseCopyOf returns a newly allocated copy of the elements of a.
 func DenseCopyOf(a Matrix) *Dense {
 	d := &Dense{}
-	d.Clone(a)
+	d.CloneFrom(a)
 	return d
 }
 
@@ -375,12 +375,12 @@ func (m *Dense) Grow(r, c int) Matrix {
 	return &t
 }
 
-// Clone makes a copy of a into the receiver, overwriting the previous value of
-// the receiver. The clone operation does not make any restriction on shape and
+// CloneFrom makes a copy of a into the receiver, overwriting the previous value of
+// the receiver. The clone from operation does not make any restriction on shape and
 // will not cause shadowing.
 //
-// See the Cloner interface for more information.
-func (m *Dense) Clone(a Matrix) {
+// See the ClonerFrom interface for more information.
+func (m *Dense) CloneFrom(a Matrix) {
 	r, c := a.Dims()
 	mat := blas64.General{
 		Rows:   r,

@@ -136,7 +136,7 @@ func (gsvd *HOGSVD) Factorize(m ...Matrix) (ok bool) {
 		if gsvd.err != nil {
 			return false
 		}
-		b[i].Clone(biT.T())
+		b[i].CloneFrom(biT.T())
 	}
 
 	gsvd.n = len(m)

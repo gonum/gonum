@@ -43,13 +43,13 @@ type Eades struct {
 }
 
 // Update is the Eades spatial graph update function.
-func (u *Eades) Update(g graph.Graph, loc map[int64]r2.Vec) bool {
+func (u *Eades) Update(g graph.Graph, layout Layout) bool {
 	if u.M <= 0 {
 		return false
 	}
 	u.M--
 
-	if len(loc) == 0 {
+	if !layout.IsInitialized() {
 		var rnd func() float64
 		if u.Src == nil {
 			rnd = rand.Float64
@@ -99,7 +99,7 @@ func (u *Eades) Update(g graph.Graph, loc map[int64]r2.Vec) bool {
 		n := u.particles[i].(eadesNode)
 		n.pos = n.pos.Add(f.Scale(u.C4))
 		u.particles[i] = n
-		loc[n.id] = n.pos
+		layout.SetLocation(n.id, n.pos)
 	}
 
 	return true

@@ -11,15 +11,13 @@ import (
 
 // TODO(kortschak): Consider whether 3D layouts are an important thing and what to do about them.
 // TODO(kortschak): Consider whether Optimizer should be a graph.Graph, renamed layout.Graph.
-// TODO(kortschak): Consider whether Optimizer.update should be exported to allow re-optimisation
-// with a different algorithm.
 
 // NewOptimizer returns a new layout optimizer.
 func NewOptimizer(g graph.Graph, update func(graph.Graph, map[int64]r2.Vec) bool) Optimizer {
 	return Optimizer{
 		g:         g,
 		locations: make(map[int64]r2.Vec),
-		update:    update,
+		Updater:   update,
 	}
 }
 
@@ -28,7 +26,11 @@ func NewOptimizer(g graph.Graph, update func(graph.Graph, map[int64]r2.Vec) bool
 type Optimizer struct {
 	g         graph.Graph
 	locations map[int64]r2.Vec
-	update    func(graph.Graph, map[int64]r2.Vec) bool
+
+	// Updater is the function called for each call to Update.
+	// It updates the Optimizer's spatial distribution of the
+	// nodes in the backing graph.
+	Updater func(graph.Graph, map[int64]r2.Vec) bool
 }
 
 // Location returns the location of the node with the given
@@ -43,5 +45,8 @@ func (g Optimizer) Location(id int64) r2.Vec {
 // the update function is able to further refine the graph's
 // node locations.
 func (g Optimizer) Update() bool {
-	return g.update(g.g, g.locations)
+	if g.Updater == nil {
+		return false
+	}
+	return g.Updater(g.g, g.locations)
 }

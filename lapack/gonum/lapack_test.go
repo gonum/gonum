@@ -373,6 +373,10 @@ func TestDpbtf2(t *testing.T) {
 	testlapack.Dpbtf2Test(t, impl)
 }
 
+func TestDpbtrf(t *testing.T) {
+	testlapack.DpbtrfTest(t, impl)
+}
+
 func TestDpocon(t *testing.T) {
 	testlapack.DpoconTest(t, impl)
 }

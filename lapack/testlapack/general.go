@@ -1030,20 +1030,23 @@ func equalApproxSymmetric(a, b blas64.Symmetric, tol float64) bool {
 	return true
 }
 
-// randSymBand creates a random symmetric banded matrix, and returns both the
-// random matrix and the equivalent Symmetric matrix for testing. rnder
-// specifies the random number
-func randSymBand(ul blas.Uplo, n, ldab, kb int, rnd *rand.Rand) (blas64.Symmetric, blas64.SymmetricBand) {
+// randSymBand returns an n×n random symmetric positive definite band matrix
+// with kd diagonals, and the equivalent symmetric dense matrix.
+func randSymBand(ul blas.Uplo, n, kd, ldab int, rnd *rand.Rand) (blas64.SymmetricBand, blas64.Symmetric) {
+	if n == 0 {
+		return blas64.SymmetricBand{Uplo: ul, Stride: 1}, blas64.Symmetric{Uplo: ul, Stride: 1}
+	}
 	// A matrix is positive definite if and only if it has a Cholesky
-	// decomposition. Generate a random banded lower triangular matrix
-	// to construct the random symmetric matrix.
+	// decomposition. Generate a random lower triangular band matrix L with
+	// strictly positive diagonal, and construct the random symmetric band
+	// matrix as L*L^T.
 	a := make([]float64, n*n)
 	for i := 0; i < n; i++ {
-		for j := max(0, i-kb); j <= i; j++ {
+		for j := max(0, i-kd); j <= i; j++ {
 			a[i*n+j] = rnd.NormFloat64()
 		}
 		a[i*n+i] = math.Abs(a[i*n+i])
-		// Add an extra amound to the diagonal in order to improve the condition number.
+		// Add an extra amount to the diagonal in order to improve the condition number.
 		a[i*n+i] += 1.5 * rnd.Float64()
 	}
 	agen := blas64.General{
@@ -1069,16 +1072,16 @@ func randSymBand(ul blas.Uplo, n, ldab, kb int, rnd *rand.Rand) (blas64.Symmetri
 		Uplo:   ul,
 	}
 
-	b := symToSymBand(ul, c, n, n, kb, ldab)
+	b := symToSymBand(ul, c, n, n, kd, ldab)
 	band := blas64.SymmetricBand{
 		N:      n,
-		K:      kb,
+		K:      kd,
 		Stride: ldab,
 		Data:   b,
 		Uplo:   ul,
 	}
 
-	return sym, band
+	return band, sym
 }
 
 // symToSymBand takes the data in a Symmetric matrix and returns a

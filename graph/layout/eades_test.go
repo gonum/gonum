@@ -19,10 +19,10 @@ import (
 	"gonum.org/v1/gonum/spatial/r2"
 )
 
-var eadesTests = []struct {
+var eadesR2Tests = []struct {
 	name  string
 	g     graph.Graph
-	param Eades
+	param EadesR2
 	want  map[int64]r2.Vec
 }{
 	{
@@ -40,7 +40,7 @@ var eadesTests = []struct {
 			}
 			return orderedGraph{g}
 		}(),
-		param: Eades{C1: 2, C2: 1, C3: 1, C4: 0.1, M: 100, Theta: 0.1, Src: rand.NewSource(1)},
+		param: EadesR2{C1: 2, C2: 1, C3: 1, C4: 0.1, M: 100, Theta: 0.1, Src: rand.NewSource(1)},
 		want: map[int64]r2.Vec{
 			0: r2.Vec{X: 2.15059197551694, Y: -10.220981772158567},
 			1: r2.Vec{X: 3.2862425589944833, Y: -11.008330556318482},
@@ -65,7 +65,7 @@ var eadesTests = []struct {
 			}
 			return orderedGraph{g}
 		}(),
-		param: Eades{C1: 2, C2: 1, C3: 1, C4: 0.1, M: 100, Theta: 0.1, Src: rand.NewSource(1)},
+		param: EadesR2{C1: 2, C2: 1, C3: 1, C4: 0.1, M: 100, Theta: 0.1, Src: rand.NewSource(1)},
 		want: map[int64]r2.Vec{
 			0: r2.Vec{X: 7.7334883284703375, Y: -11.484406140819413},
 			1: r2.Vec{X: 8.425306545865576, Y: -11.140480488404148},
@@ -96,7 +96,7 @@ var eadesTests = []struct {
 			}
 			return orderedGraph{g}
 		}(),
-		param: Eades{C1: 2, C2: 1, C3: 1, C4: 0.1, M: 100, Theta: 0.1, Src: rand.NewSource(1)},
+		param: EadesR2{C1: 2, C2: 1, C3: 1, C4: 0.1, M: 100, Theta: 0.1, Src: rand.NewSource(1)},
 		want: map[int64]r2.Vec{
 
 			0: r2.Vec{X: 14.475884753952018, Y: 11.87254908676763},
@@ -136,7 +136,7 @@ var eadesTests = []struct {
 			}
 			return orderedGraph{g}
 		}(),
-		param: Eades{C1: 2, C2: 1, C3: 1, C4: 0.1, M: 100, Theta: 0.1, Src: rand.NewSource(1)},
+		param: EadesR2{C1: 2, C2: 1, C3: 1, C4: 0.1, M: 100, Theta: 0.1, Src: rand.NewSource(1)},
 		want: map[int64]r2.Vec{
 			0: r2.Vec{X: 20.81592592580858, Y: 7.093353250039021},
 			1: r2.Vec{X: 21.726993818602256, Y: 7.055585705916057},
@@ -151,13 +151,13 @@ var eadesTests = []struct {
 	},
 }
 
-func TestEades(t *testing.T) {
+func TestEadesR2(t *testing.T) {
 	// Factor to dilate positions so graphviz separates nodes.
 	const scaling = 100
 
-	for _, test := range eadesTests {
+	for _, test := range eadesR2Tests {
 		eades := test.param
-		o := NewOptimizer(test.g, eades.Update)
+		o := NewOptimizerR2(test.g, eades.Update)
 		var n int
 		for o.Update() {
 			n++
@@ -169,7 +169,7 @@ func TestEades(t *testing.T) {
 		nodes := test.g.Nodes()
 		for nodes.Next() {
 			id := nodes.Node().ID()
-			got[id] = o.Location(id)
+			got[id] = o.Coord2(id)
 		}
 		if !reflect.DeepEqual(got, test.want) {
 			t.Errorf("unexpected result:\ngot: %#v\nwant:%#v", got, test.want)

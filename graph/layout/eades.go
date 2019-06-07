@@ -14,11 +14,12 @@ import (
 	"gonum.org/v1/gonum/spatial/r2"
 )
 
-// Eades implements the graph layout algorithm described in "A
+// EadesR2 implements the graph layout algorithm described in "A
 // heuristic for graph drawing", Congressus numerantium 42:149-160.
 // The implementation here uses the Barnes-Hut approximation for
-// global repulsion calculation
-type Eades struct {
+// global repulsion calculation and edge weights are considered
+// when calculating adjacent node attraction.
+type EadesR2 struct {
 	// M is the number of updates to perform.
 	M int
 
@@ -42,8 +43,8 @@ type Eades struct {
 	forces    []r2.Vec
 }
 
-// Update is the Eades spatial graph update function.
-func (u *Eades) Update(g graph.Graph, layout Layout) bool {
+// Update is the EadesR2 spatial graph update function.
+func (u *EadesR2) Update(g graph.Graph, layout LayoutR2) bool {
 	if u.M <= 0 {
 		return false
 	}
@@ -63,7 +64,7 @@ func (u *Eades) Update(g graph.Graph, layout Layout) bool {
 		for u.nodes.Next() {
 			id := u.nodes.Node().ID()
 			u.indexOf[id] = len(u.particles)
-			u.particles = append(u.particles, eadesNode{id: id, pos: r2.Vec{X: rnd(), Y: rnd()}})
+			u.particles = append(u.particles, eadesR2Node{id: id, pos: r2.Vec{X: rnd(), Y: rnd()}})
 		}
 	} else {
 		u.nodes.Reset()
@@ -96,19 +97,19 @@ func (u *Eades) Update(g graph.Graph, layout Layout) bool {
 	}
 
 	for i, f := range u.forces {
-		n := u.particles[i].(eadesNode)
+		n := u.particles[i].(eadesR2Node)
 		n.pos = n.pos.Add(f.Scale(u.C4))
 		u.particles[i] = n
-		layout.SetLocation(n.id, n.pos)
+		layout.SetCoord2(n.id, n.pos)
 	}
 
 	return true
 }
 
-type eadesNode struct {
+type eadesR2Node struct {
 	id  int64
 	pos r2.Vec
 }
 
-func (p eadesNode) Coord2() r2.Vec { return p.pos }
-func (p eadesNode) Mass() float64  { return 1 }
+func (p eadesR2Node) Coord2() r2.Vec { return p.pos }
+func (p eadesR2Node) Mass() float64  { return 1 }

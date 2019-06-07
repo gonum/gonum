@@ -75,6 +75,36 @@ func (u *EadesR2) Update(g graph.Graph, layout LayoutR2) bool {
 		u.forces[i] = plane.ForceOn(p, u.Theta, barneshut.Gravity2).Scale(-u.C3)
 	}
 
+	// Handle edge weighting for attraction.
+	var weight func(uid, vid int64) float64
+	if wg, ok := g.(graph.Weighted); ok {
+		if _, ok := g.(graph.Directed); ok {
+			weight = func(xid, yid int64) float64 {
+				var w float64
+				f, ok := wg.Weight(xid, yid)
+				if ok {
+					w += f
+				}
+				r, ok := wg.Weight(yid, xid)
+				if ok {
+					w += r
+				}
+				return w
+			}
+		} else {
+			weight = func(xid, yid int64) float64 {
+				w, ok := wg.Weight(xid, yid)
+				if ok {
+					return w
+				}
+				return 0
+			}
+		}
+	} else {
+		// This is only called when the adjacency is known so just return unit.
+		weight = func(_, _ int64) float64 { return 1 }
+	}
+
 	for u.nodes.Next() {
 		xid := u.nodes.Node().ID()
 		to := g.From(xid)
@@ -91,7 +121,7 @@ func (u *EadesR2) Update(g graph.Graph, layout LayoutR2) bool {
 				f := u.forces[idx].Add(barneshut.Gravity2(nil, nil, 1, 1, v).Scale(u.C3))
 
 				// Apply adjacent node attraction.
-				u.forces[idx] = f.Add(v.Scale(u.C1 * math.Log(math.Hypot(v.X, v.Y))))
+				u.forces[idx] = f.Add(v.Scale(weight(xid, yid) * u.C1 * math.Log(math.Hypot(v.X, v.Y))))
 			}
 		}
 	}

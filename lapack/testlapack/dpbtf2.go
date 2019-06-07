@@ -26,7 +26,7 @@ func Dpbtf2Test(t *testing.T, impl Dpbtf2er) {
 			for _, ldoff := range []int{0, 4} {
 				for _, ul := range []blas.Uplo{blas.Upper, blas.Lower} {
 					ldab := kb + 1 + ldoff
-					sym, band := randSymBand(ul, n, ldab, kb, rnd)
+					band, sym := randSymBand(ul, n, kb, ldab, rnd)
 
 					// Compute the Cholesky decomposition of the symmetric matrix.
 					ok := impl.Dpotrf(ul, sym.N, sym.Data, sym.Stride)

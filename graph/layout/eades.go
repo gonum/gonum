@@ -66,13 +66,23 @@ func (u *EadesR2) Update(g graph.Graph, layout LayoutR2) bool {
 			u.indexOf[id] = len(u.particles)
 			u.particles = append(u.particles, eadesR2Node{id: id, pos: r2.Vec{X: rnd(), Y: rnd()}})
 		}
-	} else {
-		u.nodes.Reset()
 	}
+	u.nodes.Reset()
 
+	// Apply global repulsion.
 	plane := barneshut.NewPlane(u.particles)
+	var updated bool
 	for i, p := range u.particles {
-		u.forces[i] = plane.ForceOn(p, u.Theta, barneshut.Gravity2).Scale(-u.C3)
+		f := plane.ForceOn(p, u.Theta, barneshut.Gravity2).Scale(-u.C3)
+		// Prevent marginal updates that can be caused by
+		// floating point error when nodes are very far apart.
+		if math.Hypot(f.X, f.Y) > 1e-12 {
+			updated = true
+		}
+		u.forces[i] = f
+	}
+	if !updated {
+		return false
 	}
 
 	// Handle edge weighting for attraction.
@@ -105,24 +115,24 @@ func (u *EadesR2) Update(g graph.Graph, layout LayoutR2) bool {
 		weight = func(_, _ int64) float64 { return 1 }
 	}
 
+	seen := make(map[[2]int64]bool)
 	for u.nodes.Next() {
 		xid := u.nodes.Node().ID()
+		xidx := u.indexOf[xid]
 		to := g.From(xid)
 		for to.Next() {
 			yid := to.Node().ID()
-
-			// Treat all edges as undirected for the purposes of force,
-			// so only do this work once for each edge that exists.
-			if xid < yid && g.HasEdgeBetween(xid, yid) {
-				idx := u.indexOf[xid]
-
-				// Undo repulsion of adjacent node.
-				v := u.particles[u.indexOf[yid]].Coord2().Sub(u.particles[idx].Coord2())
-				f := u.forces[idx].Add(barneshut.Gravity2(nil, nil, 1, 1, v).Scale(u.C3))
-
-				// Apply adjacent node attraction.
-				u.forces[idx] = f.Add(v.Scale(weight(xid, yid) * u.C1 * math.Log(math.Hypot(v.X, v.Y))))
+			if seen[[2]int64{xid, yid}] {
+				continue
 			}
+			seen[[2]int64{yid, xid}] = true
+			yidx := u.indexOf[yid]
+
+			// Apply adjacent node attraction.
+			v := u.particles[yidx].Coord2().Sub(u.particles[xidx].Coord2())
+			f := v.Scale(weight(xid, yid) / 2 * u.C1 * math.Log(math.Hypot(v.X, v.Y)))
+			u.forces[xidx] = u.forces[xidx].Add(f)
+			u.forces[yidx] = u.forces[yidx].Sub(f)
 		}
 	}
 

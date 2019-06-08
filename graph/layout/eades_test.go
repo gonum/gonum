@@ -5,8 +5,6 @@
 package layout
 
 import (
-	"bytes"
-	"os/exec"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -14,9 +12,10 @@ import (
 	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/graph"
-	"gonum.org/v1/gonum/graph/encoding/dot"
 	"gonum.org/v1/gonum/graph/simple"
 	"gonum.org/v1/gonum/spatial/r2"
+	"gonum.org/v1/plot"
+	"gonum.org/v1/plot/vg"
 )
 
 var eadesR2Tests = []struct {
@@ -169,9 +168,6 @@ var eadesR2Tests = []struct {
 }
 
 func TestEadesR2(t *testing.T) {
-	// Factor to dilate positions so graphviz separates nodes.
-	const scaling = 100
-
 	for _, test := range eadesR2Tests {
 		eades := test.param
 		o := NewOptimizerR2(test.g, eades.Update)
@@ -192,29 +188,17 @@ func TestEadesR2(t *testing.T) {
 			t.Errorf("unexpected result for %q:\ngot: %#v\nwant:%#v", test.name, got, test.want)
 		}
 
-		// TODO(kortschak): Replace this with Go rendering code.
-		if _, err := exec.LookPath("neato"); err != nil {
+		p, err := plot.New()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
 			continue
 		}
-		layout := simple.NewUndirectedGraph()
-		for _, u := range graph.NodesOf(test.g.Nodes()) {
-			for _, v := range graph.NodesOf(test.g.From(u.ID())) {
-				if v.ID() < u.ID() {
-					continue
-				}
-				layout.SetEdge(simple.Edge{
-					F: positionNode{id: u.ID(), pos: got[u.ID()].Scale(scaling)},
-					T: positionNode{id: v.ID(), pos: got[v.ID()].Scale(scaling)},
-				})
-			}
-		}
-		b, _ := dot.Marshal(layout, test.name, "", "  ")
+		p.Add(render{o})
+		p.HideAxes()
 		path := filepath.Join("testdata", test.name+".png")
-		cmd := exec.Command("neato", "-n", "-Tpng", "-o", path)
-		cmd.Stdin = bytes.NewReader(b)
-		out, err := cmd.CombinedOutput()
+		err = p.Save(10*vg.Centimeter, 10*vg.Centimeter, path)
 		if err != nil {
-			t.Errorf("unexpected error: %v\n%s", err, out)
+			t.Errorf("unexpected error: %v", err)
 			continue
 		}
 		checkRenderedLayout(t, path)

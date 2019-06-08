@@ -67,9 +67,39 @@ func (g OptimizerR2) Update() bool {
 	return g.Updater(g.g, g.layout)
 }
 
+// LayoutNodeR2 implements the GraphR2 interface.
+func (g OptimizerR2) LayoutNodeR2(id int64) NodeR2 {
+	n := g.g.Node(id)
+	if n == nil {
+		return NodeR2{}
+	}
+	return NodeR2{Node: n, Coord2: g.Coord2(id)}
+}
+
 // coordinates is the default layout store.
 type coordinates map[int64]r2.Vec
 
 func (c coordinates) IsInitialized() bool            { return len(c) != 0 }
 func (c coordinates) SetCoord2(id int64, pos r2.Vec) { c[id] = pos }
 func (c coordinates) Coord2(id int64) r2.Vec         { return c[id] }
+
+// Node returns the node with the given ID if it exists
+// in the graph, and nil otherwise.
+func (g OptimizerR2) Node(id int64) graph.Node { return g.g.Node(id) }
+
+// Nodes returns all the nodes in the graph.
+func (g OptimizerR2) Nodes() graph.Nodes { return g.g.Nodes() }
+
+// From returns all nodes that can be reached directly
+// from the node with the given ID.
+func (g OptimizerR2) From(id int64) graph.Nodes { return g.g.From(id) }
+
+// HasEdgeBetween returns whether an edge exists between
+// nodes with IDs xid and yid without considering direction.
+func (g OptimizerR2) HasEdgeBetween(xid, yid int64) bool { return g.g.HasEdgeBetween(xid, yid) }
+
+// Edge returns the edge from u to v, with IDs uid and vid,
+// if such an edge exists and nil otherwise. The node v
+// must be directly reachable from u as defined by the
+// From method.
+func (g OptimizerR2) Edge(uid, vid int64) graph.Edge { return g.g.Edge(uid, vid) }

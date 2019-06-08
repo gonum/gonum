@@ -61,7 +61,7 @@ func goldenPath(path string) string {
 	return noext + "_golden" + ext
 }
 
-func checkRenderedLayout(t *testing.T, path string) {
+func checkRenderedLayout(t *testing.T, path string) (ok bool) {
 	if *cmpimg.GenerateTestData {
 		// Recreate Golden image and exit.
 		golden := goldenPath(path)
@@ -69,39 +69,39 @@ func checkRenderedLayout(t *testing.T, path string) {
 		if err := os.Rename(path, golden); err != nil {
 			t.Fatal(err)
 		}
-		return
+		return true
 	}
 
 	// Read the images we've just generated and check them against the
 	// Golden Images.
 	got, err := ioutil.ReadFile(path)
 	if err != nil {
-		t.Errorf("Failed to read %s: %v", path, err)
-		return
+		t.Errorf("failed to read %s: %v", path, err)
+		return true
 	}
 	golden := goldenPath(path)
 	want, err := ioutil.ReadFile(golden)
 	if err != nil {
-		t.Errorf("Failed to read golden file %s: %v", golden, err)
-		return
+		t.Errorf("failed to read golden file %s: %v", golden, err)
+		return true
 	}
-	typ := filepath.Ext(path)[1:] // remove the dot in e.g. ".pdf"
-	ok, err := cmpimg.Equal(typ, got, want)
+	typ := filepath.Ext(path)[1:] // remove the dot in ".png"
+	ok, err = cmpimg.Equal(typ, got, want)
 	if err != nil {
 		t.Errorf("failed to compare image for %s: %v", path, err)
-		return
+		return true
 	}
 	if !ok {
 		t.Errorf("image mismatch for %s\n", path)
 		v1, _, err := image.Decode(bytes.NewReader(got))
 		if err != nil {
 			t.Errorf("failed to decode %s: %v", path, err)
-			return
+			return false
 		}
 		v2, _, err := image.Decode(bytes.NewReader(want))
 		if err != nil {
 			t.Errorf("failed to decode %s: %v", golden, err)
-			return
+			return false
 		}
 
 		dst := image.NewRGBA64(v1.Bounds().Union(v2.Bounds()))
@@ -112,8 +112,9 @@ func checkRenderedLayout(t *testing.T, path string) {
 		err = png.Encode(&buf, dst)
 		if err != nil {
 			t.Errorf("failed to encode difference png: %v", err)
-			return
+			return false
 		}
 		t.Log("IMAGE:" + base64.StdEncoding.EncodeToString(buf.Bytes()))
 	}
+	return ok
 }

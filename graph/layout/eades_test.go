@@ -125,6 +125,35 @@ var eadesR2Tests = []struct {
 		}(),
 		param: EadesR2{C1: 2, C2: 1, C3: 1, C4: 0.1, M: 100, Theta: 0.1, Src: rand.NewSource(1)},
 	},
+
+	{
+		name: "wp_page", // https://en.wikipedia.org/wiki/PageRank#/media/File:PageRanks-Example.jpg
+		g: func() graph.Graph {
+			edges := []simple.Edge{
+				{simple.Node(0), simple.Node(3)},
+				{simple.Node(1), simple.Node(2)},
+				{simple.Node(1), simple.Node(3)},
+				{simple.Node(1), simple.Node(4)},
+				{simple.Node(1), simple.Node(5)},
+				{simple.Node(1), simple.Node(6)},
+				{simple.Node(1), simple.Node(7)},
+				{simple.Node(1), simple.Node(8)},
+				{simple.Node(3), simple.Node(4)},
+				{simple.Node(4), simple.Node(5)},
+				{simple.Node(4), simple.Node(6)},
+				{simple.Node(4), simple.Node(7)},
+				{simple.Node(4), simple.Node(8)},
+				{simple.Node(4), simple.Node(9)},
+				{simple.Node(4), simple.Node(10)},
+			}
+			g := simple.NewUndirectedGraph()
+			for _, e := range edges {
+				g.SetEdge(e)
+			}
+			return orderedGraph{g}
+		}(),
+		param: EadesR2{C1: 2, C2: 1, C3: 1, C4: 0.1, M: 100, Theta: 0.1, Src: rand.NewSource(1)},
+	},
 }
 
 func TestEadesR2(t *testing.T) {

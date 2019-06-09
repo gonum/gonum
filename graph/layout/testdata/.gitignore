@@ -1,2 +1,2 @@
-**/*.png
-!**/testdata/*_golden.png
+*.png
+!*_golden.png

@@ -22,101 +22,113 @@ type Dpbtrfer interface {
 // DpbtrfTest tests a band Cholesky factorization on random symmetric positive definite
 // band matrices by checking that the Cholesky factors multiply back to the original matrix.
 func DpbtrfTest(t *testing.T, impl Dpbtrfer) {
+	// TODO(vladimir-ch): include expected-failure test case.
+
+	// With the current implementation of Ilaenv the blocked code path is taken if kd > 64.
+	// Unfortunately, with the block size nb=32 this also means that in Dpbtrf
+	// it never happens that i2 <= 0 and the state coverage (unlike code coverage) is not complete.
+	rnd := rand.New(rand.NewSource(1))
+	for _, n := range []int{0, 1, 2, 3, 4, 5, 64, 65, 66, 91, 96, 97, 101, 128, 130} {
+		for _, kd := range []int{0, (n + 1) / 4, (3*n - 1) / 4, (5*n + 1) / 4} {
+			for _, uplo := range []blas.Uplo{blas.Upper, blas.Lower} {
+				for _, ldab := range []int{kd + 1, kd + 1 + 7} {
+					dpbtrfTest(t, impl, uplo, n, kd, ldab, rnd)
+				}
+			}
+		}
+	}
+}
+
+func dpbtrfTest(t *testing.T, impl Dpbtrfer, uplo blas.Uplo, n, kd int, ldab int, rnd *rand.Rand) {
 	const tol = 1e-12
 
-	rnd := rand.New(rand.NewSource(1))
+	name := fmt.Sprintf("uplo=%v,n=%v,kd=%v,ldab=%v", string(uplo), n, kd, ldab)
 
-	// The values of n and kd are chosen to assure that the blocked code path is taken.
-	// With the current implementation of Ilaenv this happens if kd > 64.
-	// Unfortunately, with the block size nb=32 this also means that in Dpbtrf
-	// it never happens that i2<=0.
-	for _, n := range []int{0, 1, 2, 3, 4, 5, 64, 65, 66, 91, 96, 97, 101, 128, 130} {
-		for _, kd := range []int{0, (5*n + 1) / 4, (3*n - 1) / 4, (n + 1) / 4} {
-			if kd+1 > n && n != 0 && kd != 0 {
-				continue
+	// Allocate a band matrix and fill it with random numbers.
+	ab := make([]float64, n*ldab)
+	for i := range ab {
+		ab[i] = rnd.NormFloat64()
+	}
+	// Make sure that the matrix U or L has a sufficiently positive diagonal.
+	switch uplo {
+	case blas.Upper:
+		for i := 0; i < n; i++ {
+			ab[i*ldab] = 2 + rnd.Float64()
+		}
+	case blas.Lower:
+		for i := 0; i < n; i++ {
+			ab[i*ldab+kd] = 2 + rnd.Float64()
+		}
+	}
+	// Compute U^T*U or L*L^T. The resulting (symmetric) matrix A will be positive definite.
+	dsbmm(uplo, n, kd, ab, ldab)
+
+	// Compute the Cholesky decomposition of A.
+	abFac := make([]float64, len(ab))
+	copy(abFac, ab)
+	ok := impl.Dpbtrf(uplo, n, kd, abFac, ldab)
+	if !ok {
+		t.Fatalf("%v: bad test matrix, Dpbtrf failed", name)
+	}
+
+	if n == 0 {
+		return
+	}
+
+	// Reconstruct an symmetric band matrix from the U^T*U or L*L^T factorization, overwriting abFac.
+	dsbmm(uplo, n, kd, abFac, ldab)
+
+	// Compute and check the max-norm distance between the reconstructed and original matrix A.
+	var diff float64
+	switch uplo {
+	case blas.Upper:
+		for i := 0; i < n; i++ {
+			for j := 0; j < min(kd+1, n-i); j++ {
+				diff = math.Max(diff, math.Abs(abFac[i*ldab+j]-ab[i*ldab+j]))
 			}
-			for _, uplo := range []blas.Uplo{blas.Upper} {
-				for _, ldextra := range []int{0, 7} {
-					ldab := kd + 1 + ldextra
-					name := fmt.Sprintf("uplo=%v,n=%v,kd=%v,ldab=%v", uplo, n, kd, ldab)
+		}
+	case blas.Lower:
+		for i := 0; i < n; i++ {
+			for j := max(0, kd-i); j < kd+1; j++ {
+				diff = math.Max(diff, math.Abs(abFac[i*ldab+j]-ab[i*ldab+j]))
+			}
+		}
+	}
+	if diff > tol {
+		t.Errorf("%v: unexpected result, diff=%v", name, diff)
+	}
+}
 
-					// Allocate a band symmetric matrix A and fill it with random
-					// numbers.
-					ab := make([]float64, n*ldab)
-					for i := range ab {
-						ab[i] = rnd.Float64()
-					}
-					// Make sure that the matrix is diagonally dominant, this guarantees
-					// positive definiteness.
-					switch uplo {
-					case blas.Upper:
-						for i := 0; i < n; i++ {
-							ab[i*ldab] = float64(2*kd) + rnd.Float64()
-						}
-					case blas.Lower:
-						for i := 0; i < n; i++ {
-							ab[i*ldab+kd] = float64(2*kd) + rnd.Float64()
-						}
-					}
-
-					abFac := make([]float64, len(ab))
-					copy(abFac, ab)
-
-					// Compute the Cholesky decomposition of the symmetric band matrix A.
-					ok := impl.Dpbtrf(uplo, n, kd, abFac, ldab)
-					if !ok {
-						t.Fatalf("%v: Dpbtrf failed", name)
-					}
-
-					if n == 0 {
-						continue
-					}
-
-					bi := blas64.Implementation()
-					switch uplo {
-					case blas.Upper:
-						// Compute the product U^T * U.
-						for k := n - 1; k >= 0; k-- {
-							kc := min(k, kd)
-							// Compute the diagonal [k,k] element.
-							abFac[k*ldab] = bi.Ddot(kc+1, abFac[(k-kc)*ldab+kc:], ldab-1, abFac[(k-kc)*ldab+kc:], ldab-1)
-							// Compute the rest of column k.
-							if kc > 0 {
-								bi.Dtrmv(blas.Upper, blas.Trans, blas.NonUnit, kc,
-									abFac[(k-kc)*ldab:], ldab-1, abFac[(k-kc)*ldab+kc:], ldab-1)
-							}
-							//              0 1 2 3 4   n=5 kd=2
-							// a - - - - )( a|a|a|0|0 0  1
-							// a a - - - )( - a|a|a|0 1  2
-							// a a t - - )( - - a|a|a 2  3   kc=1
-							// 0 a t t - )( - - - a|a 3  4   klen=2
-							// 0 0 a a a )( - - - - a 4  5
-							//              1 2 3 4 5
-						}
-					case blas.Lower:
-						// Compute the product L * L^T.
-					}
-
-					// Compute and check the max-norm distance between got and A.
-					var diff float64
-					switch uplo {
-					case blas.Upper:
-						for i := 0; i < n; i++ {
-							for j := 0; j < min(kd+1, n-i); j++ {
-								diff = math.Max(diff, math.Abs(abFac[i*ldab+j]-ab[i*ldab+j]))
-							}
-						}
-					case blas.Lower:
-						for i := 0; i < n; i++ {
-							for j := max(0, i-kd); j <= i; j++ {
-								// diff = math.Max(diff, math.Abs(got[i*n+j]-abCopy[i*ldab+kd-i+j]))
-							}
-						}
-					}
-					if diff > tol {
-						t.Errorf("%v: unexpected result, diff=%v", name, diff)
-					}
-				}
+// dsbmm computes a symmetric band matrix A
+//  A = U^T*U  if uplo == blas.Upper,
+//  A = L*L^T  if uplo == blas.Lower,
+// where U and L is an upper, respectively lower, triangular band matrix
+// stored on entry in ab. The result is stored in-place into ab.
+func dsbmm(uplo blas.Uplo, n, kd int, ab []float64, ldab int) {
+	bi := blas64.Implementation()
+	switch uplo {
+	case blas.Upper:
+		// Compute the product U^T * U.
+		for k := n - 1; k >= 0; k-- {
+			klen := min(kd, n-k-1) // Number of stored off-diagonal elements in the row
+			// Add a multiple of row k of the factor U to each of rows k+1 through n.
+			if klen > 0 {
+				bi.Dsyr(blas.Upper, klen, 1, ab[k*ldab+1:], 1, ab[(k+1)*ldab:], ldab-1)
+			}
+			// Scale row k by the diagonal element.
+			bi.Dscal(klen+1, ab[k*ldab], ab[k*ldab:], 1)
+		}
+	case blas.Lower:
+		// Compute the product L * L^T.
+		for k := n - 1; k >= 0; k-- {
+			kc := max(0, kd-k) // Index of the first valid element in the row
+			klen := kd - kc    // Number of stored off-diagonal elements in the row
+			// Compute the diagonal [k,k] element.
+			ab[k*ldab+kd] = bi.Ddot(klen+1, ab[k*ldab+kc:], 1, ab[k*ldab+kc:], 1)
+			// Compute the rest of column k.
+			if klen > 0 {
+				bi.Dtrmv(blas.Lower, blas.NoTrans, blas.NonUnit, klen,
+					ab[(k-klen)*ldab+kd:], ldab-1, ab[k*ldab+kc:], 1)
 			}
 		}
 	}

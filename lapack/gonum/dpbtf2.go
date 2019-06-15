@@ -61,7 +61,7 @@ func (Implementation) Dpbtf2(uplo blas.Uplo, n, kd int, ab []float64, ldab int) 
 
 	// Quick return if possible.
 	if n == 0 {
-		return
+		return true
 	}
 
 	if len(ab) < (n-1)*ldab+kd {

@@ -1076,52 +1076,6 @@ func distSymBand(uplo blas.Uplo, n, kd int, a []float64, lda int, b []float64, l
 	return dist
 }
 
-// symToSymBand takes the data in a Symmetric matrix and returns a
-// SymmetricBanded matrix.
-func symToSymBand(ul blas.Uplo, a []float64, n, lda, kb, ldab int) []float64 {
-	if ul == blas.Upper {
-		band := make([]float64, (n-1)*ldab+kb+1)
-		for i := 0; i < n; i++ {
-			for j := i; j < min(i+kb+1, n); j++ {
-				band[i*ldab+j-i] = a[i*lda+j]
-			}
-		}
-		return band
-	}
-	band := make([]float64, (n-1)*ldab+kb+1)
-	for i := 0; i < n; i++ {
-		for j := max(0, i-kb); j <= i; j++ {
-			band[i*ldab+j-i+kb] = a[i*lda+j]
-		}
-	}
-	return band
-}
-
-// symBandToSym takes a banded symmetric matrix and returns the same data as
-// a Symmetric matrix.
-func symBandToSym(ul blas.Uplo, band []float64, n, kb, ldab int) blas64.Symmetric {
-	sym := make([]float64, n*n)
-	if ul == blas.Upper {
-		for i := 0; i < n; i++ {
-			for j := 0; j < min(kb+1+i, n)-i; j++ {
-				sym[i*n+i+j] = band[i*ldab+j]
-			}
-		}
-	} else {
-		for i := 0; i < n; i++ {
-			for j := kb - min(i, kb); j < kb+1; j++ {
-				sym[i*n+i-kb+j] = band[i*ldab+j]
-			}
-		}
-	}
-	return blas64.Symmetric{
-		N:      n,
-		Stride: n,
-		Data:   sym,
-		Uplo:   ul,
-	}
-}
-
 // eye returns an identity matrix of given order and stride.
 func eye(n, stride int) blas64.General {
 	ans := nanGeneral(n, n, stride)

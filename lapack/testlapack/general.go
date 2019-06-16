@@ -1031,57 +1031,49 @@ func equalApproxSymmetric(a, b blas64.Symmetric, tol float64) bool {
 }
 
 // randSymBand returns an n×n random symmetric positive definite band matrix
-// with kd diagonals, and the equivalent symmetric dense matrix.
-func randSymBand(ul blas.Uplo, n, kd, ldab int, rnd *rand.Rand) (blas64.SymmetricBand, blas64.Symmetric) {
-	if n == 0 {
-		return blas64.SymmetricBand{Uplo: ul, Stride: 1}, blas64.Symmetric{Uplo: ul, Stride: 1}
+// with kd diagonals.
+func randSymBand(uplo blas.Uplo, n, kd, ldab int, rnd *rand.Rand) []float64 {
+	// Allocate a triangular band matrix U or L and fill it with random numbers.
+	ab := make([]float64, n*ldab)
+	for i := range ab {
+		ab[i] = rnd.NormFloat64()
 	}
-	// A matrix is positive definite if and only if it has a Cholesky
-	// decomposition. Generate a random lower triangular band matrix L with
-	// strictly positive diagonal, and construct the random symmetric band
-	// matrix as L*L^T.
-	a := make([]float64, n*n)
-	for i := 0; i < n; i++ {
-		for j := max(0, i-kd); j <= i; j++ {
-			a[i*n+j] = rnd.NormFloat64()
+	// Make sure that the matrix U or L has a sufficiently positive diagonal.
+	switch uplo {
+	case blas.Upper:
+		for i := 0; i < n; i++ {
+			ab[i*ldab] = float64(n) + rnd.Float64()
 		}
-		a[i*n+i] = math.Abs(a[i*n+i])
-		// Add an extra amount to the diagonal in order to improve the condition number.
-		a[i*n+i] += 1.5 * rnd.Float64()
+	case blas.Lower:
+		for i := 0; i < n; i++ {
+			ab[i*ldab+kd] = float64(n) + rnd.Float64()
+		}
 	}
-	agen := blas64.General{
-		Rows:   n,
-		Cols:   n,
-		Stride: n,
-		Data:   a,
-	}
+	// Compute U^T*U or L*L^T. The resulting (symmetric) matrix A will be
+	// positive definite and well-conditioned.
+	dsbmm(uplo, n, kd, ab, ldab)
+	return ab
+}
 
-	// Construct the SymDense from a*a^T
-	c := make([]float64, n*n)
-	cgen := blas64.General{
-		Rows:   n,
-		Cols:   n,
-		Stride: n,
-		Data:   c,
+// distSymBand returns the max-norm distance between the symmetric band matrices
+// A and B.
+func distSymBand(uplo blas.Uplo, n, kd int, a []float64, lda int, b []float64, ldb int) float64 {
+	var dist float64
+	switch uplo {
+	case blas.Upper:
+		for i := 0; i < n; i++ {
+			for j := 0; j < min(kd+1, n-i); j++ {
+				dist = math.Max(dist, math.Abs(a[i*lda+j]-b[i*ldb+j]))
+			}
+		}
+	case blas.Lower:
+		for i := 0; i < n; i++ {
+			for j := max(0, kd-i); j < kd+1; j++ {
+				dist = math.Max(dist, math.Abs(a[i*lda+j]-b[i*ldb+j]))
+			}
+		}
 	}
-	blas64.Gemm(blas.NoTrans, blas.Trans, 1, agen, agen, 0, cgen)
-	sym := blas64.Symmetric{
-		N:      n,
-		Stride: n,
-		Data:   c,
-		Uplo:   ul,
-	}
-
-	b := symToSymBand(ul, c, n, n, kd, ldab)
-	band := blas64.SymmetricBand{
-		N:      n,
-		K:      kd,
-		Stride: ldab,
-		Data:   b,
-		Uplo:   ul,
-	}
-
-	return band, sym
+	return dist
 }
 
 // symToSymBand takes the data in a Symmetric matrix and returns a

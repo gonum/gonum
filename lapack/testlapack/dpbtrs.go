@@ -46,25 +46,8 @@ func dpbtrsTest(t *testing.T, impl Dpbtrser, rnd *rand.Rand, uplo blas.Uplo, n, 
 
 	name := fmt.Sprintf("uplo=%v,n=%v,kd=%v,nrhs=%v,ldab=%v,ldb=%v", string(uplo), n, kd, nrhs, ldab, ldb)
 
-	// Allocate a band matrix and fill it with random numbers.
-	ab := make([]float64, n*ldab)
-	for i := range ab {
-		ab[i] = rnd.NormFloat64()
-	}
-	// Make sure that the matrix U or L has a sufficiently positive diagonal.
-	switch uplo {
-	case blas.Upper:
-		for i := 0; i < n; i++ {
-			ab[i*ldab] = float64(n) + rnd.Float64()
-		}
-	case blas.Lower:
-		for i := 0; i < n; i++ {
-			ab[i*ldab+kd] = float64(n) + rnd.Float64()
-		}
-	}
-	// Compute U^T*U or L*L^T. The resulting (symmetric) matrix A will be
-	// positive definite and well-conditioned.
-	dsbmm(uplo, n, kd, ab, ldab)
+	// Generate a random symmetric positive definite band matrix.
+	ab := randSymBand(uplo, n, kd, ldab, rnd)
 
 	// Compute the Cholesky decomposition of A.
 	abFac := make([]float64, len(ab))

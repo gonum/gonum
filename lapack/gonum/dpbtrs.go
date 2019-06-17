@@ -9,9 +9,15 @@ import (
 	"gonum.org/v1/gonum/blas/blas64"
 )
 
-// Dpbtrs solves a system of linear equations A*X = B with a symmetric positive
-// definite band matrix A using the Cholesky factorization A = U^T * U or
-// A = L * L^T  computed by Dpbtrf.
+// Dpbtrs solves a system of linear equations A*X = B with an n×n symmetric
+// positive definite band matrix A using the Cholesky factorization
+//  A = U^T * U  if uplo == blas.Upper
+//  A = L * L^T  if uplo == blas.Lower
+// computed by Dpbtrf. kd is the number of super- or sub-diagonals of A. See the
+// documentation for Dpbtrf for a description of the band storage format of A.
+//
+// On entry, b contains the n×nrhs right hand side matrix B. On return, it is
+// overwritten with the solution matrix X.
 func (Implementation) Dpbtrs(uplo blas.Uplo, n, kd, nrhs int, ab []float64, ldab int, b []float64, ldb int) {
 	switch {
 	case uplo != blas.Upper && uplo != blas.Lower:

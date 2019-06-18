@@ -37,6 +37,13 @@ func NewOptimizerR2(g graph.Graph, update func(graph.Graph, LayoutR2) bool) Opti
 	}
 }
 
+// coordinatesR2 is the default layout store for R2.
+type coordinatesR2 map[int64]r2.Vec
+
+func (c coordinatesR2) IsInitialized() bool            { return len(c) != 0 }
+func (c coordinatesR2) SetCoord2(id int64, pos r2.Vec) { c[id] = pos }
+func (c coordinatesR2) Coord2(id int64) r2.Vec         { return c[id] }
+
 // OptimizerR2 is a helper type that holds a graph and layout
 // optimization state.
 type OptimizerR2 struct {
@@ -75,13 +82,6 @@ func (g OptimizerR2) LayoutNodeR2(id int64) NodeR2 {
 	}
 	return NodeR2{Node: n, Coord2: g.Coord2(id)}
 }
-
-// coordinatesR2 is the default layout store for R2.
-type coordinatesR2 map[int64]r2.Vec
-
-func (c coordinatesR2) IsInitialized() bool            { return len(c) != 0 }
-func (c coordinatesR2) SetCoord2(id int64, pos r2.Vec) { c[id] = pos }
-func (c coordinatesR2) Coord2(id int64) r2.Vec         { return c[id] }
 
 // Node returns the node with the given ID if it exists
 // in the graph, and nil otherwise.

@@ -13,13 +13,13 @@ import (
 
 // Uniform represents a multivariate uniform distribution.
 type Uniform struct {
-	bounds []r1.Bound
+	bounds []r1.Interval
 	dim    int
 	rnd    *rand.Rand
 }
 
 // NewUniform creates a new uniform distribution with the given bounds.
-func NewUniform(bnds []r1.Bound, src rand.Source) *Uniform {
+func NewUniform(bnds []r1.Interval, src rand.Source) *Uniform {
 	dim := len(bnds)
 	if dim == 0 {
 		panic(badZeroDimension)
@@ -30,7 +30,7 @@ func NewUniform(bnds []r1.Bound, src rand.Source) *Uniform {
 		}
 	}
 	u := &Uniform{
-		bounds: make([]r1.Bound, dim),
+		bounds: make([]r1.Interval, dim),
 		dim:    dim,
 	}
 	if src != nil {
@@ -50,7 +50,7 @@ func NewUnitUniform(dim int, src rand.Source) *Uniform {
 	if dim <= 0 {
 		panic(nonPosDimension)
 	}
-	bounds := make([]r1.Bound, dim)
+	bounds := make([]r1.Interval, dim)
 	for i := range bounds {
 		bounds[i].Min = 0
 		bounds[i].Max = 1
@@ -69,9 +69,9 @@ func NewUnitUniform(dim int, src rand.Source) *Uniform {
 // is nil, a new slice is allocated and returned. If the input is non-nil, then
 // the bounds are stored in-place into the input argument, and Bounds will panic
 // if len(bounds) != u.Dim().
-func (u *Uniform) Bounds(bounds []r1.Bound) []r1.Bound {
+func (u *Uniform) Bounds(bounds []r1.Interval) []r1.Interval {
 	if bounds == nil {
-		bounds = make([]r1.Bound, u.Dim())
+		bounds = make([]r1.Interval, u.Dim())
 	}
 	if len(bounds) != u.Dim() {
 		panic(badInputLength)

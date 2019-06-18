@@ -17,11 +17,11 @@ func TestUniformEntropy(t *testing.T) {
 		Entropy float64
 	}{
 		{
-			NewUniform([]r1.Bound{{0, 1}, {0, 1}}, nil),
+			NewUniform([]r1.Interval{{0, 1}, {0, 1}}, nil),
 			0,
 		},
 		{
-			NewUniform([]r1.Bound{{-1, 3}, {2, 8}, {-5, -3}}, nil),
+			NewUniform([]r1.Interval{{-1, 3}, {2, 8}, {-5, -3}}, nil),
 			math.Log(48),
 		},
 	} {

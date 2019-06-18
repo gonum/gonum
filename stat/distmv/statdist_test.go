@@ -62,14 +62,14 @@ func TestBhattacharyyaUniform(t *testing.T) {
 		tol     float64
 	}{
 		{
-			a:       NewUniform([]r1.Bound{{-3, 2}, {-5, 8}}, rnd),
-			b:       NewUniform([]r1.Bound{{-4, 1}, {-7, 10}}, rnd),
+			a:       NewUniform([]r1.Interval{{-3, 2}, {-5, 8}}, rnd),
+			b:       NewUniform([]r1.Interval{{-4, 1}, {-7, 10}}, rnd),
 			samples: 100000,
 			tol:     1e-2,
 		},
 		{
-			a:       NewUniform([]r1.Bound{{-3, 2}, {-5, 8}}, rnd),
-			b:       NewUniform([]r1.Bound{{-5, -4}, {-7, 10}}, rnd),
+			a:       NewUniform([]r1.Interval{{-3, 2}, {-5, 8}}, rnd),
+			b:       NewUniform([]r1.Interval{{-5, -4}, {-7, 10}}, rnd),
 			samples: 100000,
 			tol:     1e-2,
 		},
@@ -257,14 +257,14 @@ func TestKullbackLeiblerUniform(t *testing.T) {
 		tol     float64
 	}{
 		{
-			a:       NewUniform([]r1.Bound{{-5, 2}, {-7, 12}}, rnd),
-			b:       NewUniform([]r1.Bound{{-4, 1}, {-7, 10}}, rnd),
+			a:       NewUniform([]r1.Interval{{-5, 2}, {-7, 12}}, rnd),
+			b:       NewUniform([]r1.Interval{{-4, 1}, {-7, 10}}, rnd),
 			samples: 100000,
 			tol:     1e-2,
 		},
 		{
-			a:       NewUniform([]r1.Bound{{-5, 2}, {-7, 12}}, rnd),
-			b:       NewUniform([]r1.Bound{{-9, -6}, {-7, 10}}, rnd),
+			a:       NewUniform([]r1.Interval{{-5, 2}, {-7, 12}}, rnd),
+			b:       NewUniform([]r1.Interval{{-9, -6}, {-7, 10}}, rnd),
 			samples: 100000,
 			tol:     1e-2,
 		},

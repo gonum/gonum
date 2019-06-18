@@ -4,7 +4,7 @@
 
 package r1
 
-// Bound represents [Min, Max] bounds.
-type Bound struct {
+// Interval represents [Min, Max] bounds.
+type Interval struct {
 	Min, Max float64
 }

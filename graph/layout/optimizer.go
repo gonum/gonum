@@ -28,7 +28,7 @@ type LayoutR2 interface {
 func NewOptimizerR2(g graph.Graph, update func(graph.Graph, LayoutR2) bool) OptimizerR2 {
 	l, ok := g.(LayoutR2)
 	if !ok {
-		l = make(coordinates)
+		l = make(coordinatesR2)
 	}
 	return OptimizerR2{
 		g:       g,
@@ -76,12 +76,12 @@ func (g OptimizerR2) LayoutNodeR2(id int64) NodeR2 {
 	return NodeR2{Node: n, Coord2: g.Coord2(id)}
 }
 
-// coordinates is the default layout store.
-type coordinates map[int64]r2.Vec
+// coordinatesR2 is the default layout store for R2.
+type coordinatesR2 map[int64]r2.Vec
 
-func (c coordinates) IsInitialized() bool            { return len(c) != 0 }
-func (c coordinates) SetCoord2(id int64, pos r2.Vec) { c[id] = pos }
-func (c coordinates) Coord2(id int64) r2.Vec         { return c[id] }
+func (c coordinatesR2) IsInitialized() bool            { return len(c) != 0 }
+func (c coordinatesR2) SetCoord2(id int64, pos r2.Vec) { c[id] = pos }
+func (c coordinatesR2) Coord2(id int64) r2.Vec         { return c[id] }
 
 // Node returns the node with the given ID if it exists
 // in the graph, and nil otherwise.

@@ -2,9 +2,5 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package bound
-
-// Bound represents [Min, Max] bounds.
-type Bound struct {
-	Min, Max float64
-}
+// Package r1 provides 1D vectors and boxes and operations on them.
+package r1 // import "gonum.org/v1/gonum/spatial/r1"

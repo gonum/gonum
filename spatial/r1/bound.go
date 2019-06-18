@@ -2,5 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package bound provides types for bounded data.
-package bound // import "gonum.org/v1/gonum/bound"
+package r1
+
+// Bound represents [Min, Max] bounds.
+type Bound struct {
+	Min, Max float64
+}

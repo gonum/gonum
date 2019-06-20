@@ -47,10 +47,21 @@ type Plane struct {
 }
 
 // NewPlane returns a new Plane.
+//
+// Points in p must not be infinitely distant, otherwise NewPlane will panic.
 func NewPlane(p []Particle2) *Plane {
+	for _, l := range p {
+		if isInfR2(l.Coord2()) {
+			panic("barneshut: point at infinity")
+		}
+	}
 	q := Plane{Particles: p}
 	q.Reset()
 	return &q
+}
+
+func isInfR2(v r2.Vec) bool {
+	return math.IsInf(v.X, 0) || math.IsInf(v.Y, 0)
 }
 
 // Reset reconstructs the Barnes-Hut tree. Reset must be called if the

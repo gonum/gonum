@@ -64,6 +64,8 @@ type Tree struct {
 // The order of elements in p will be altered after New returns. The src parameter
 // provides the source of randomness for vantage point selection. If src is nil
 // global rand package functions are used.
+//
+// Points in p must not be infinitely distant, otherwise New will panic.
 func New(p []Comparable, effort int, src rand.Source) *Tree {
 	var intn func(int) int
 	var shuf func(n int, swap func(i, j int))
@@ -118,12 +120,20 @@ func (b *builder) selectVantage(s []Comparable, effort int) Comparable {
 	choices := b.random(effort, s)
 	for _, p := range choices {
 		for i, q := range choices {
-			b.work[i] = p.Distance(q)
+			d := p.Distance(q)
+			if math.IsInf(d, 0) {
+				panic("vptree: point at infinity")
+			}
+			b.work[i] = d
 		}
 		variance := stat.Variance(b.work, nil)
 		if variance > bestVar {
 			best, bestVar = p, variance
 		}
+	}
+	if best == nil {
+		// This should never be reached.
+		panic("vptree: could not find vantage point")
 	}
 	return best
 }
@@ -139,7 +149,11 @@ func (b *builder) random(n int, s []Comparable) []Comparable {
 func (b *builder) partition(v Comparable, s []Comparable) (radius float64, closer, further []Comparable) {
 	b.work = b.work[:len(s)]
 	for i, p := range s {
-		b.work[i] = v.Distance(p)
+		d := v.Distance(p)
+		if math.IsInf(d, 0) {
+			panic("vptree: point at infinity")
+		}
+		b.work[i] = d
 	}
 	sort.Sort(byDist{dists: b.work, points: s})
 

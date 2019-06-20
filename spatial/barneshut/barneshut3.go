@@ -47,10 +47,21 @@ type Volume struct {
 }
 
 // NewVolume returns a new Volume.
+//
+// Points in p must not be infinitely distant, otherwise NewVolume will panic.
 func NewVolume(p []Particle3) *Volume {
+	for _, l := range p {
+		if isInfR3(l.Coord3()) {
+			panic("barneshut: point at infinity")
+		}
+	}
 	q := Volume{Particles: p}
 	q.Reset()
 	return &q
+}
+
+func isInfR3(v r3.Vec) bool {
+	return math.IsInf(v.X, 0) || math.IsInf(v.Y, 0) || math.IsInf(v.Z, 0)
 }
 
 // Reset reconstructs the Barnes-Hut tree. Reset must be called if the

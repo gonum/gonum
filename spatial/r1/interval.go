@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package bound
+package r1
 
-// Bound represents [Min, Max] bounds.
-type Bound struct {
+// Interval represents an interval.
+type Interval struct {
 	Min, Max float64
 }

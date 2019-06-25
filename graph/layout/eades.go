@@ -81,9 +81,6 @@ func (u *EadesR2) Update(g graph.Graph, layout LayoutR2) bool {
 		}
 		u.forces[i] = f
 	}
-	if !updated {
-		return false
-	}
 
 	// Handle edge weighting for attraction.
 	var weight func(uid, vid int64) float64
@@ -130,10 +127,17 @@ func (u *EadesR2) Update(g graph.Graph, layout LayoutR2) bool {
 
 			// Apply adjacent node attraction.
 			v := u.particles[yidx].Coord2().Sub(u.particles[xidx].Coord2())
-			f := v.Scale(weight(xid, yid) / 2 * u.C1 * math.Log(math.Hypot(v.X, v.Y)))
+			f := v.Scale(weight(xid, yid) / 2 * u.C1 * math.Log(math.Hypot(v.X, v.Y)/u.C2))
+			if math.Hypot(f.X, f.Y) > 1e-12 {
+				updated = true
+			}
 			u.forces[xidx] = u.forces[xidx].Add(f)
 			u.forces[yidx] = u.forces[yidx].Sub(f)
 		}
+	}
+
+	if !updated {
+		return false
 	}
 
 	for i, f := range u.forces {
@@ -142,7 +146,6 @@ func (u *EadesR2) Update(g graph.Graph, layout LayoutR2) bool {
 		u.particles[i] = n
 		layout.SetCoord2(n.id, n.pos)
 	}
-
 	return true
 }
 

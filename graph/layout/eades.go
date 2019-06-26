@@ -17,7 +17,7 @@ import (
 // EadesR2 implements the graph layout algorithm described in "A
 // heuristic for graph drawing", Congressus numerantium 42:149-160.
 // The implementation here uses the Barnes-Hut approximation for
-// global repulsion calculation and edge weights are considered
+// global repulsion calculation, and edge weights are considered
 // when calculating adjacent node attraction.
 type EadesR2 struct {
 	// M is the number of updates to perform.

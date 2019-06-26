@@ -1237,7 +1237,7 @@ func StdErr(std, sampleSize float64) float64 {
 }
 
 // StdScore returns the standard score (a.k.a. z-score, z-value) for the value x
-// with the givem mean and standard deviation, i.e.
+// with the given mean and standard deviation, i.e.
 //  (x - mean) / std
 func StdScore(x, mean, std float64) float64 {
 	return (x - mean) / std

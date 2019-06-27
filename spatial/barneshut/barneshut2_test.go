@@ -353,7 +353,11 @@ func TestPlane(t *testing.T) {
 			particles[i] = p
 		}
 
-		got := NewPlane(particles)
+		got, err := NewPlane(particles)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+			continue
+		}
 
 		if test.want != nil && !reflect.DeepEqual(got, test.want) {
 			t.Errorf("unexpected result for %q: got:%v want:%v", test.name, got, test.want)
@@ -426,7 +430,11 @@ func TestPlaneForceOn(t *testing.T) {
 			moved[i] = p.Coord2().Add(v)
 		}
 
-		plane := NewPlane(particles)
+		plane, err := NewPlane(particles)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+			continue
+		}
 		for _, theta := range []float64{0, 0.3, 0.6, 0.9} {
 			t.Run(fmt.Sprintf("%d-body/theta=%v", len(particles), theta), func(t *testing.T) {
 				var ssd, sd float64
@@ -465,9 +473,13 @@ func BenchmarkNewPlane(b *testing.B) {
 			particles[i] = particle2{x: rnd.Float64(), y: rnd.Float64(), m: 1}
 		}
 		b.ResetTimer()
+		var err error
 		b.Run(fmt.Sprintf("%d-body", len(particles)), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
-				planeSink = NewPlane(particles)
+				planeSink, err = NewPlane(particles)
+				if err != nil {
+					b.Fatalf("unexpected error: %v", err)
+				}
 			}
 		})
 	}
@@ -485,7 +497,10 @@ func BenchmarkPlaneForceOn(b *testing.B) {
 			for i := range particles {
 				particles[i] = particle2{x: rnd.Float64(), y: rnd.Float64(), m: 1}
 			}
-			plane := NewPlane(particles)
+			plane, err := NewPlane(particles)
+			if err != nil {
+				b.Fatalf("unexpected error: %v", err)
+			}
 			b.ResetTimer()
 			b.Run(fmt.Sprintf("%d-body/theta=%v", len(particles), theta), func(b *testing.B) {
 				for i := 0; i < b.N; i++ {
@@ -513,7 +528,10 @@ func BenchmarkPlaneFull(b *testing.B) {
 			b.ResetTimer()
 			b.Run(fmt.Sprintf("%d-body/theta=%v", len(particles), theta), func(b *testing.B) {
 				for i := 0; i < b.N; i++ {
-					plane := NewPlane(particles)
+					plane, err := NewPlane(particles)
+					if err != nil {
+						b.Fatalf("unexpected error: %v", err)
+					}
 					for _, p := range particles {
 						fv2sink = plane.ForceOn(p, theta, Gravity2)
 					}

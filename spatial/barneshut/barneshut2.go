@@ -5,6 +5,7 @@
 package barneshut
 
 import (
+	"errors"
 	"fmt"
 	"math"
 
@@ -46,32 +47,28 @@ type Plane struct {
 	Particles []Particle2
 }
 
-// NewPlane returns a new Plane.
-//
-// Points in p must not be infinitely distant, otherwise NewPlane will panic.
-func NewPlane(p []Particle2) *Plane {
-	for _, l := range p {
-		if isInfR2(l.Coord2()) {
-			panic("barneshut: point at infinity")
-		}
-	}
+// NewPlane returns a new Plane. If the plane is too large to allow
+// particle coordinates to be distinguished due to floating point
+// precision limits, NewPlane will return a non-nil error.
+func NewPlane(p []Particle2) (*Plane, error) {
 	q := Plane{Particles: p}
-	q.Reset()
-	return &q
-}
-
-func isInfR2(v r2.Vec) bool {
-	return math.IsInf(v.X, 0) || math.IsInf(v.Y, 0)
+	err := q.Reset()
+	if err != nil {
+		return nil, err
+	}
+	return &q, nil
 }
 
 // Reset reconstructs the Barnes-Hut tree. Reset must be called if the
 // Particles field or elements of Particles have been altered, unless
 // ForceOn is called with theta=0 or no data structures have been
-// previously built.
-func (q *Plane) Reset() {
+// previously built. If the plane is too large to allow particle
+// coordinates to be distinguished due to floating point precision
+// limits, Reset will return a non-nil error.
+func (q *Plane) Reset() (err error) {
 	if len(q.Particles) == 0 {
 		q.root = tile{}
-		return
+		return nil
 	}
 
 	q.root = tile{
@@ -97,6 +94,16 @@ func (q *Plane) Reset() {
 		}
 	}
 
+	defer func() {
+		switch r := recover(); r {
+		case nil:
+		case volumeTooBig:
+			err = volumeTooBig
+		default:
+			panic(r)
+		}
+	}()
+
 	// TODO(kortschak): Partially parallelise this by
 	// choosing the direction and using one of four
 	// goroutines to work on each root quadrant.
@@ -104,7 +111,10 @@ func (q *Plane) Reset() {
 		q.root.insert(e)
 	}
 	q.root.summarize()
+	return nil
 }
+
+var planeTooBig = errors.New("barneshut: plane too big")
 
 // ForceOn returns a force vector on p given p's mass and the force function, f,
 // using the Barnes-Hut theta approximation parameter.
@@ -205,6 +215,7 @@ func quadrantOf(b r2.Box, p Particle2) int {
 
 // splitPlane returns a quadrant subdivision of b in the given direction.
 func splitPlane(b r2.Box, dir int) r2.Box {
+	old := b
 	halfX := (b.Max.X - b.Min.X) / 2
 	halfY := (b.Max.Y - b.Min.Y) / 2
 	switch dir {
@@ -220,6 +231,9 @@ func splitPlane(b r2.Box, dir int) r2.Box {
 	case nw:
 		b.Max.X -= halfX
 		b.Max.Y -= halfY
+	}
+	if b == old {
+		panic(planeTooBig)
 	}
 	return b
 }

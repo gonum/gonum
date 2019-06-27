@@ -34,7 +34,7 @@ var eadesR2Tests = []struct {
 			}
 			return orderedGraph{g}
 		}(),
-		param: EadesR2{C1: 2, C2: 1, C3: 1, C4: 0.1, M: 100, Theta: 0.1, Src: rand.NewSource(1)},
+		param: EadesR2{Repulsion: 1, Rate: 0.1, Updates: 100, Theta: 0.1, Src: rand.NewSource(1)},
 	},
 	{
 		name: "square",
@@ -51,7 +51,7 @@ var eadesR2Tests = []struct {
 			}
 			return orderedGraph{g}
 		}(),
-		param: EadesR2{C1: 2, C2: 1, C3: 1, C4: 0.1, M: 100, Theta: 0.1, Src: rand.NewSource(1)},
+		param: EadesR2{Repulsion: 1, Rate: 0.1, Updates: 100, Theta: 0.1, Src: rand.NewSource(1)},
 	},
 	{
 		name: "tetrahedron",
@@ -70,7 +70,7 @@ var eadesR2Tests = []struct {
 			}
 			return orderedGraph{g}
 		}(),
-		param: EadesR2{C1: 2, C2: 1, C3: 1, C4: 0.1, M: 100, Theta: 0.1, Src: rand.NewSource(1)},
+		param: EadesR2{Repulsion: 1, Rate: 0.1, Updates: 100, Theta: 0.1, Src: rand.NewSource(1)},
 	},
 	{
 		name: "sheet",
@@ -95,7 +95,7 @@ var eadesR2Tests = []struct {
 			}
 			return orderedGraph{g}
 		}(),
-		param: EadesR2{C1: 2, C2: 1, C3: 1, C4: 0.1, M: 100, Theta: 0.1, Src: rand.NewSource(1)},
+		param: EadesR2{Repulsion: 1, Rate: 0.1, Updates: 100, Theta: 0.1, Src: rand.NewSource(1)},
 	},
 	{
 		name: "tube",
@@ -123,7 +123,7 @@ var eadesR2Tests = []struct {
 			}
 			return orderedGraph{g}
 		}(),
-		param: EadesR2{C1: 2, C2: 1, C3: 1, C4: 0.1, M: 100, Theta: 0.1, Src: rand.NewSource(1)},
+		param: EadesR2{Repulsion: 1, Rate: 0.1, Updates: 100, Theta: 0.1, Src: rand.NewSource(1)},
 	},
 
 	{
@@ -152,7 +152,7 @@ var eadesR2Tests = []struct {
 			}
 			return orderedGraph{g}
 		}(),
-		param: EadesR2{C1: 2, C2: 1, C3: 1, C4: 0.1, M: 100, Theta: 0.1, Src: rand.NewSource(1)},
+		param: EadesR2{Repulsion: 1, Rate: 0.1, Updates: 100, Theta: 0.1, Src: rand.NewSource(1)},
 	},
 }
 
@@ -164,8 +164,8 @@ func TestEadesR2(t *testing.T) {
 		for o.Update() {
 			n++
 		}
-		if n != test.param.M {
-			t.Errorf("unexpected number of iterations for %q: got:%d want:%d", test.name, n, test.param.M)
+		if n != test.param.Updates {
+			t.Errorf("unexpected number of iterations for %q: got:%d want:%d", test.name, n, test.param.Updates)
 		}
 
 		p, err := plot.New()

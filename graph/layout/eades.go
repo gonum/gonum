@@ -14,18 +14,24 @@ import (
 	"gonum.org/v1/gonum/spatial/r2"
 )
 
-// EadesR2 implements the graph layout algorithm described in "A
-// heuristic for graph drawing", Congressus numerantium 42:149-160.
+// EadesR2 implements the graph layout algorithm essentially as
+// described in "A heuristic for graph drawing", Congressus
+// numerantium 42:149-160.
 // The implementation here uses the Barnes-Hut approximation for
 // global repulsion calculation, and edge weights are considered
 // when calculating adjacent node attraction.
 type EadesR2 struct {
-	// M is the number of updates to perform.
-	M int
+	// Updates is the number of updates to perform.
+	Updates int
 
-	// C1, C2, C3 and C4 are the constants
-	// described in the paper.
-	C1, C2, C3, C4 float64
+	// Repulsion is the strength of the global
+	// repulsive force between nodes in the
+	// layout. It corresponds to C3 in the paper.
+	Repulsion float64
+
+	// Rate is the gradient descent rate. It
+	// corresponds to C4 in the paper.
+	Rate float64
 
 	// Theta is the Barnes-Hut theta constant.
 	Theta float64
@@ -45,10 +51,10 @@ type EadesR2 struct {
 
 // Update is the EadesR2 spatial graph update function.
 func (u *EadesR2) Update(g graph.Graph, layout LayoutR2) bool {
-	if u.M <= 0 {
+	if u.Updates <= 0 {
 		return false
 	}
-	u.M--
+	u.Updates--
 
 	if !layout.IsInitialized() {
 		var rnd func() float64
@@ -73,7 +79,7 @@ func (u *EadesR2) Update(g graph.Graph, layout LayoutR2) bool {
 	plane := barneshut.NewPlane(u.particles)
 	var updated bool
 	for i, p := range u.particles {
-		f := plane.ForceOn(p, u.Theta, barneshut.Gravity2).Scale(-u.C3)
+		f := plane.ForceOn(p, u.Theta, barneshut.Gravity2).Scale(-u.Repulsion)
 		// Prevent marginal updates that can be caused by
 		// floating point error when nodes are very far apart.
 		if math.Hypot(f.X, f.Y) > 1e-12 {
@@ -127,7 +133,7 @@ func (u *EadesR2) Update(g graph.Graph, layout LayoutR2) bool {
 
 			// Apply adjacent node attraction.
 			v := u.particles[yidx].Coord2().Sub(u.particles[xidx].Coord2())
-			f := v.Scale(weight(xid, yid) / 2 * u.C1 * math.Log(math.Hypot(v.X, v.Y)/u.C2))
+			f := v.Scale(weight(xid, yid) * math.Log(math.Hypot(v.X, v.Y)))
 			if math.Hypot(f.X, f.Y) > 1e-12 {
 				updated = true
 			}
@@ -140,9 +146,13 @@ func (u *EadesR2) Update(g graph.Graph, layout LayoutR2) bool {
 		return false
 	}
 
+	rate := u.Rate
+	if rate == 0 {
+		rate = 0.1
+	}
 	for i, f := range u.forces {
 		n := u.particles[i].(eadesR2Node)
-		n.pos = n.pos.Add(f.Scale(u.C4))
+		n.pos = n.pos.Add(f.Scale(rate))
 		u.particles[i] = n
 		layout.SetCoord2(n.id, n.pos)
 	}

@@ -5,6 +5,7 @@
 package barneshut
 
 import (
+	"errors"
 	"fmt"
 	"math"
 
@@ -46,32 +47,28 @@ type Volume struct {
 	Particles []Particle3
 }
 
-// NewVolume returns a new Volume.
-//
-// Points in p must not be infinitely distant, otherwise NewVolume will panic.
-func NewVolume(p []Particle3) *Volume {
-	for _, l := range p {
-		if isInfR3(l.Coord3()) {
-			panic("barneshut: point at infinity")
-		}
-	}
+// NewVolume returns a new Volume. If the volume is too large to allow
+// particle coordinates to be distinguished due to floating point
+// precision limits, NewVolume will return a non-nil error.
+func NewVolume(p []Particle3) (*Volume, error) {
 	q := Volume{Particles: p}
-	q.Reset()
-	return &q
-}
-
-func isInfR3(v r3.Vec) bool {
-	return math.IsInf(v.X, 0) || math.IsInf(v.Y, 0) || math.IsInf(v.Z, 0)
+	err := q.Reset()
+	if err != nil {
+		return nil, err
+	}
+	return &q, nil
 }
 
 // Reset reconstructs the Barnes-Hut tree. Reset must be called if the
 // Particles field or elements of Particles have been altered, unless
 // ForceOn is called with theta=0 or no data structures have been
-// previously built.
-func (q *Volume) Reset() {
+// previously built. If the volume is too large to allow particle
+// coordinates to be distinguished due to floating point precision
+// limits, Reset will return a non-nil error.
+func (q *Volume) Reset() (err error) {
 	if len(q.Particles) == 0 {
 		q.root = bucket{}
-		return
+		return nil
 	}
 
 	q.root = bucket{
@@ -103,6 +100,16 @@ func (q *Volume) Reset() {
 		}
 	}
 
+	defer func() {
+		switch r := recover(); r {
+		case nil:
+		case volumeTooBig:
+			err = volumeTooBig
+		default:
+			panic(r)
+		}
+	}()
+
 	// TODO(kortschak): Partially parallelise this by
 	// choosing the direction and using one of eight
 	// goroutines to work on each root octant.
@@ -110,7 +117,10 @@ func (q *Volume) Reset() {
 		q.root.insert(e)
 	}
 	q.root.summarize()
+	return nil
 }
+
+var volumeTooBig = errors.New("barneshut: volume too big")
 
 // ForceOn returns a force vector on p given p's mass and the force function, f,
 // using the Barnes-Hut theta approximation parameter.
@@ -233,6 +243,7 @@ func octantOf(b r3.Box, p Particle3) int {
 
 // splitVolume returns an octant subdivision of b in the given direction.
 func splitVolume(b r3.Box, dir int) r3.Box {
+	old := b
 	halfX := (b.Max.X - b.Min.X) / 2
 	halfY := (b.Max.Y - b.Min.Y) / 2
 	halfZ := (b.Max.Z - b.Min.Z) / 2
@@ -269,6 +280,9 @@ func splitVolume(b r3.Box, dir int) r3.Box {
 		b.Max.X -= halfX
 		b.Max.Y -= halfY
 		b.Min.Z += halfZ
+	}
+	if b == old {
+		panic(volumeTooBig)
 	}
 	return b
 }

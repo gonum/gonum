@@ -6,6 +6,7 @@ package vptree_test
 
 import (
 	"fmt"
+	"log"
 	"math"
 
 	"gonum.org/v1/gonum/spatial/vptree"
@@ -15,7 +16,10 @@ func Example_accessiblePublicTransport() {
 	// Construct a vp tree of train station locations
 	// to identify accessible public transport for the
 	// elderly.
-	t := vptree.New(stations, 5, nil)
+	t, err := vptree.New(stations, 5, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Residence.
 	q := place{lat: 51.501476, lon: -0.140634}

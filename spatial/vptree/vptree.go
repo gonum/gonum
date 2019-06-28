@@ -6,6 +6,7 @@ package vptree
 
 import (
 	"container/heap"
+	"errors"
 	"math"
 	"sort"
 
@@ -63,10 +64,9 @@ type Tree struct {
 // vantage point. If effort is one or less, random vantage points are chosen.
 // The order of elements in p will be altered after New returns. The src parameter
 // provides the source of randomness for vantage point selection. If src is nil
-// global rand package functions are used.
-//
-// Points in p must not be infinitely distant, otherwise New will panic.
-func New(p []Comparable, effort int, src rand.Source) *Tree {
+// global rand package functions are used. Points in p must not be infinitely
+// distant.
+func New(p []Comparable, effort int, src rand.Source) (t *Tree, err error) {
 	var intn func(int) int
 	var shuf func(n int, swap func(i, j int))
 	if src == nil {
@@ -78,11 +78,26 @@ func New(p []Comparable, effort int, src rand.Source) *Tree {
 		shuf = rnd.Shuffle
 	}
 	b := builder{work: make([]float64, len(p)), intn: intn, shuf: shuf}
-	return &Tree{
+
+	defer func() {
+		switch r := recover(); r {
+		case nil:
+		case pointAtInfinity:
+			t = nil
+			err = pointAtInfinity
+		default:
+			panic(r)
+		}
+	}()
+
+	t = &Tree{
 		Root:  b.build(p, effort),
 		Count: len(p),
 	}
+	return t, nil
 }
+
+var pointAtInfinity = errors.New("vptree: point at infinity")
 
 // builder performs vp-tree construction as described for the simple vp-tree
 // algorithm in http://pnylab.com/papers/vptree/vptree.pdf.
@@ -122,7 +137,7 @@ func (b *builder) selectVantage(s []Comparable, effort int) Comparable {
 		for i, q := range choices {
 			d := p.Distance(q)
 			if math.IsInf(d, 0) {
-				panic("vptree: point at infinity")
+				panic(pointAtInfinity)
 			}
 			b.work[i] = d
 		}
@@ -151,7 +166,7 @@ func (b *builder) partition(v Comparable, s []Comparable) (radius float64, close
 	for i, p := range s {
 		d := v.Distance(p)
 		if math.IsInf(d, 0) {
-			panic("vptree: point at infinity")
+			panic(pointAtInfinity)
 		}
 		b.work[i] = d
 	}

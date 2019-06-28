@@ -76,7 +76,10 @@ func (u *EadesR2) Update(g graph.Graph, layout LayoutR2) bool {
 	u.nodes.Reset()
 
 	// Apply global repulsion.
-	plane := barneshut.NewPlane(u.particles)
+	plane, err := barneshut.NewPlane(u.particles)
+	if err != nil {
+		return false
+	}
 	var updated bool
 	for i, p := range u.particles {
 		f := plane.ForceOn(p, u.Theta, barneshut.Gravity2).Scale(-u.Repulsion)

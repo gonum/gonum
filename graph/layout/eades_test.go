@@ -18,9 +18,10 @@ import (
 )
 
 var eadesR2Tests = []struct {
-	name  string
-	g     graph.Graph
-	param EadesR2
+	name      string
+	g         graph.Graph
+	param     EadesR2
+	wantIters int
 }{
 	{
 		name: "line",
@@ -34,7 +35,8 @@ var eadesR2Tests = []struct {
 			}
 			return orderedGraph{g}
 		}(),
-		param: EadesR2{Repulsion: 1, Rate: 0.1, Updates: 100, Theta: 0.1, Src: rand.NewSource(1)},
+		param:     EadesR2{Repulsion: 1, Rate: 0.1, Updates: 100, Theta: 0.1, Src: rand.NewSource(1)},
+		wantIters: 100,
 	},
 	{
 		name: "square",
@@ -51,7 +53,8 @@ var eadesR2Tests = []struct {
 			}
 			return orderedGraph{g}
 		}(),
-		param: EadesR2{Repulsion: 1, Rate: 0.1, Updates: 100, Theta: 0.1, Src: rand.NewSource(1)},
+		param:     EadesR2{Repulsion: 1, Rate: 0.1, Updates: 100, Theta: 0.1, Src: rand.NewSource(1)},
+		wantIters: 100,
 	},
 	{
 		name: "tetrahedron",
@@ -70,7 +73,8 @@ var eadesR2Tests = []struct {
 			}
 			return orderedGraph{g}
 		}(),
-		param: EadesR2{Repulsion: 1, Rate: 0.1, Updates: 100, Theta: 0.1, Src: rand.NewSource(1)},
+		param:     EadesR2{Repulsion: 1, Rate: 0.1, Updates: 100, Theta: 0.1, Src: rand.NewSource(1)},
+		wantIters: 100,
 	},
 	{
 		name: "sheet",
@@ -95,7 +99,8 @@ var eadesR2Tests = []struct {
 			}
 			return orderedGraph{g}
 		}(),
-		param: EadesR2{Repulsion: 1, Rate: 0.1, Updates: 100, Theta: 0.1, Src: rand.NewSource(1)},
+		param:     EadesR2{Repulsion: 1, Rate: 0.1, Updates: 100, Theta: 0.1, Src: rand.NewSource(1)},
+		wantIters: 100,
 	},
 	{
 		name: "tube",
@@ -123,7 +128,39 @@ var eadesR2Tests = []struct {
 			}
 			return orderedGraph{g}
 		}(),
-		param: EadesR2{Repulsion: 1, Rate: 0.1, Updates: 100, Theta: 0.1, Src: rand.NewSource(1)},
+		param:     EadesR2{Repulsion: 1, Rate: 0.1, Updates: 100, Theta: 0.1, Src: rand.NewSource(1)},
+		wantIters: 100,
+	},
+	{
+		// This test does not produce a good layout, but is here to
+		// ensure that Update does not panic with steep decent rates.
+		name: "tube-steep",
+		g: func() graph.Graph {
+			edges := []simple.Edge{
+				{simple.Node(0), simple.Node(1)},
+				{simple.Node(0), simple.Node(2)},
+				{simple.Node(0), simple.Node(3)},
+				{simple.Node(1), simple.Node(2)},
+				{simple.Node(1), simple.Node(4)},
+				{simple.Node(2), simple.Node(5)},
+				{simple.Node(3), simple.Node(4)},
+				{simple.Node(3), simple.Node(5)},
+				{simple.Node(3), simple.Node(6)},
+				{simple.Node(4), simple.Node(5)},
+				{simple.Node(4), simple.Node(7)},
+				{simple.Node(5), simple.Node(8)},
+				{simple.Node(6), simple.Node(7)},
+				{simple.Node(6), simple.Node(8)},
+				{simple.Node(7), simple.Node(8)},
+			}
+			g := simple.NewUndirectedGraph()
+			for _, e := range edges {
+				g.SetEdge(e)
+			}
+			return orderedGraph{g}
+		}(),
+		param:     EadesR2{Repulsion: 1, Rate: 1, Updates: 100, Theta: 0.1, Src: rand.NewSource(1)},
+		wantIters: 99,
 	},
 
 	{
@@ -152,7 +189,8 @@ var eadesR2Tests = []struct {
 			}
 			return orderedGraph{g}
 		}(),
-		param: EadesR2{Repulsion: 1, Rate: 0.1, Updates: 100, Theta: 0.1, Src: rand.NewSource(1)},
+		param:     EadesR2{Repulsion: 1, Rate: 0.1, Updates: 100, Theta: 0.1, Src: rand.NewSource(1)},
+		wantIters: 100,
 	},
 }
 
@@ -164,8 +202,8 @@ func TestEadesR2(t *testing.T) {
 		for o.Update() {
 			n++
 		}
-		if n != test.param.Updates {
-			t.Errorf("unexpected number of iterations for %q: got:%d want:%d", test.name, n, test.param.Updates)
+		if n != test.wantIters {
+			t.Errorf("unexpected number of iterations for %q: got:%d want:%d", test.name, n, test.wantIters)
 		}
 
 		p, err := plot.New()

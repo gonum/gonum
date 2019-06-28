@@ -97,8 +97,8 @@ func (q *Plane) Reset() (err error) {
 	defer func() {
 		switch r := recover(); r {
 		case nil:
-		case volumeTooBig:
-			err = volumeTooBig
+		case planeTooBig:
+			err = planeTooBig
 		default:
 			panic(r)
 		}

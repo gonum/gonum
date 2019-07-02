@@ -24,7 +24,8 @@ type LayoutR2 interface {
 }
 
 // NewOptimizerR2 returns a new layout optimizer. If g implements LayoutR2 the layout
-// will be updated into g, otherwise the OptimizerR2 will hold the graph layout.
+// will be updated into g, otherwise the OptimizerR2 will hold the graph layout. A nil
+// value for update is a valid no-op layout update function.
 func NewOptimizerR2(g graph.Graph, update func(graph.Graph, LayoutR2) bool) OptimizerR2 {
 	l, ok := g.(LayoutR2)
 	if !ok {

@@ -120,6 +120,7 @@ func (s *SymDense) SetRawSymmetric(mat blas64.Symmetric) {
 	if mat.Uplo != blas.Upper {
 		panic(badSymTriangle)
 	}
+	s.cap = mat.N
 	s.mat = mat
 }
 

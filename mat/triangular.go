@@ -226,6 +226,7 @@ func (t *TriDense) SetRawTriangular(mat blas64.Triangular) {
 	if mat.Diag == blas.Unit {
 		panic("mat: cannot set TriDense with Unit storage format")
 	}
+	t.cap = mat.N
 	t.mat = mat
 }
 

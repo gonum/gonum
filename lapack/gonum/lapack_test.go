@@ -289,6 +289,10 @@ func TestDlasv2(t *testing.T) {
 	testlapack.Dlasv2Test(t, impl)
 }
 
+func TestDlatbs(t *testing.T) {
+	testlapack.DlatbsTest(t, impl)
+}
+
 func TestDlatrd(t *testing.T) {
 	testlapack.DlatrdTest(t, impl)
 }

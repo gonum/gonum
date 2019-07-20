@@ -24,8 +24,8 @@ var orderedNodesTests = []struct {
 
 func TestOrderedNodesIterate(t *testing.T) {
 	for _, test := range orderedNodesTests {
+		it := iterator.NewOrderedNodes(test.nodes)
 		for i := 0; i < 2; i++ {
-			it := iterator.NewOrderedNodes(test.nodes)
 			if it.Len() != len(test.nodes) {
 				t.Errorf("unexpected iterator length for round %d: got:%d want:%d", i, it.Len(), len(test.nodes))
 			}
@@ -44,8 +44,8 @@ func TestOrderedNodesIterate(t *testing.T) {
 
 func TestOrderedNodesSlice(t *testing.T) {
 	for _, test := range orderedNodesTests {
+		it := iterator.NewOrderedNodes(test.nodes)
 		for i := 0; i < 2; i++ {
-			it := iterator.NewOrderedNodes(test.nodes)
 			got := it.NodeSlice()
 			want := test.nodes
 			if !reflect.DeepEqual(got, want) {
@@ -81,8 +81,8 @@ func newSimpleNode(id int) graph.Node { return simple.Node(id) }
 
 func TestImplicitNodesIterate(t *testing.T) {
 	for _, test := range implicitNodesTests {
+		it := iterator.NewImplicitNodes(test.beg, test.end, test.new)
 		for i := 0; i < 2; i++ {
-			it := iterator.NewImplicitNodes(test.beg, test.end, test.new)
 			if it.Len() != len(test.want) {
 				t.Errorf("unexpected iterator length for round %d: got:%d want:%d", i, it.Len(), len(test.want))
 			}

@@ -41,6 +41,9 @@ func (n *Nodes) Len() int {
 
 // Next returns whether the next call of Node will return a valid node.
 func (n *Nodes) Next() bool {
+	if n.pos >= n.nodes.Len() {
+		return false
+	}
 	ok := n.iter.Next()
 	if ok {
 		n.pos++

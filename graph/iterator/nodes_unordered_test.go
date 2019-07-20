@@ -49,6 +49,15 @@ func TestNodesIterate(t *testing.T) {
 			if !reflect.DeepEqual(got, want) {
 				t.Errorf("unexpected iterator output for round %d: got:%#v want:%#v", i, got, want)
 			}
+			func() {
+				defer func() {
+					r := recover()
+					if r != nil {
+						t.Errorf("unexpected panic: %v", r)
+					}
+				}()
+				it.Next()
+			}()
 			it.Reset()
 		}
 	}

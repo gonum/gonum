@@ -73,6 +73,13 @@ matrix:
   - go: master
 
 before_install:
+ # Make sure we have the origin master to compare HEADs and
+ # save the sha for comparison in test-coverage.sh.
+ # It is necessary to do this here since the rigmarole for
+ # Windows loses the link to the real origin master.
+ - git fetch --depth=1 origin master
+ - export ORIGIN_MASTER=$(git ls-remote origin master | cut -f1)
+
  # This garbage is necessary because on windows, Travis 
  # helpfully sets core.autocrlf to true.
  #

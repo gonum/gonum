@@ -1,5 +1,17 @@
 #!/bin/bash
 
+if [[ "${TRAVIS_SECURE_ENV_VARS}" != true ]]; then
+	echo "skipping coverage - no secure environment"
+	exit 0
+fi
+
+ORIGIN_MASTER="$(git ls-remote origin master | cut -f1)"
+CURRENT="$(git rev-parse HEAD)"
+if [[ ${ORIGIN_MASTER} != ${CURRENT} ]]; then
+	echo "skipping coverage - not merged into master"
+	exit 0
+fi
+
 MODE=set
 PROFILE_OUT="${PWD}/profile.out"
 ACC_OUT="${PWD}/coverage.txt"

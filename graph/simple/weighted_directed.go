@@ -222,7 +222,7 @@ func (g *WeightedDirectedGraph) SetWeightedEdge(e graph.WeightedEdge) {
 
 // To returns all nodes in g that can reach directly to n.
 func (g *WeightedDirectedGraph) To(id int64) graph.Nodes {
-	if _, ok := g.from[id]; !ok {
+	if _, ok := g.to[id]; !ok {
 		return graph.Empty
 	}
 

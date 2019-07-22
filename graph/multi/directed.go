@@ -261,7 +261,7 @@ func (g *DirectedGraph) SetLine(l graph.Line) {
 
 // To returns all nodes in g that can reach directly to n.
 func (g *DirectedGraph) To(id int64) graph.Nodes {
-	if _, ok := g.from[id]; !ok {
+	if _, ok := g.to[id]; !ok {
 		return graph.Empty
 	}
 

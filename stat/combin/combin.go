@@ -119,7 +119,7 @@ func (c *CombinationGenerator) Next() bool {
 	return true
 }
 
-// Combination generates the next combination. If next is non-nil, it must have
+// Combination generates the current combination. If next is non-nil, it must have
 // length k and the result will be stored in-place into combination. If combination
 // is nil a new slice will be allocated and returned. If all of the combinations
 // have already been constructed (Next() returns false), Combination will panic.

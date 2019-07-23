@@ -542,7 +542,7 @@ func (v *VecDense) MulVec(a Matrix, b Vector) {
 	fast := true
 	bU, _ := untransposeExtract(b)
 	if rv, ok := bU.(*VecDense); ok {
-		bmat = rv.RawVector()
+		bmat = rv.mat
 		if v != b {
 			v.checkOverlap(bmat)
 		}

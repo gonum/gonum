@@ -397,7 +397,7 @@ func (s *SymDense) RankTwo(a Symmetric, alpha float64, x, y Vector) {
 	xU, _ := untransposeExtract(x)
 	if rv, ok := xU.(*VecDense); ok {
 		r, c := xU.Dims()
-		xmat = rv.RawVector()
+		xmat = rv.mat
 		s.checkOverlap(generalFromVector(xmat, r, c))
 	} else {
 		fast = false
@@ -405,7 +405,7 @@ func (s *SymDense) RankTwo(a Symmetric, alpha float64, x, y Vector) {
 	yU, _ := untransposeExtract(y)
 	if rv, ok := yU.(*VecDense); ok {
 		r, c := yU.Dims()
-		ymat = rv.RawVector()
+		ymat = rv.mat
 		s.checkOverlap(generalFromVector(ymat, r, c))
 	} else {
 		fast = false

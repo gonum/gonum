@@ -31,7 +31,7 @@ import (
 // non-trivial solution to A*x = 0 is returned.
 //
 // Dlatbs is an internal routine. It is exported for testing purposes.
-func (Implementation) Dlatbs(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag, normin bool, n, kd int, ab []float64, ldab int, x []float64, cnorm []float64) (scale float64) {
+func (Implementation) Dlatbs(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag, normin bool, n, kd int, ab []float64, ldab int, x, cnorm []float64) (scale float64) {
 	noTran := trans == blas.NoTrans
 	switch {
 	case uplo != blas.Upper && uplo != blas.Lower:
@@ -298,7 +298,8 @@ skipComputeGrow:
 
 			// Scale x if necessary to avoid overflow when adding a multiple of
 			// column j of A.
-			if xj > 1 {
+			switch {
+			case xj > 1:
 				rec := 1 / xj
 				if cnorm[j] > (bignum-xMax)*rec {
 					// Scale x by 1/(2*abs(x[j])).
@@ -306,7 +307,7 @@ skipComputeGrow:
 					bi.Dscal(n, rec, x, 1)
 					scale *= rec
 				}
-			} else if xj*cnorm[j] > bignum-xMax {
+			case xj*cnorm[j] > bignum-xMax:
 				// Scale x by 1/2.
 				bi.Dscal(n, 0.5, x, 1)
 				scale *= 0.5

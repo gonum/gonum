@@ -280,10 +280,10 @@ func (s *SymDense) SymRankOne(a Symmetric, alpha float64, x Vector) {
 		s.CopySym(a)
 	}
 
-	xU, _ := untranspose(x)
-	if rv, ok := xU.(RawVectorer); ok {
+	xU, _ := untransposeExtract(x)
+	if rv, ok := xU.(*VecDense); ok {
 		r, c := xU.Dims()
-		xmat := rv.RawVector()
+		xmat := rv.mat
 		s.checkOverlap(generalFromVector(xmat, r, c))
 		blas64.Syr(alpha, xmat, s.mat)
 		return
@@ -305,10 +305,10 @@ func (s *SymDense) SymRankK(a Symmetric, alpha float64, x Matrix) {
 	if r != n {
 		panic(ErrShape)
 	}
-	xMat, aTrans := untranspose(x)
+	xMat, aTrans := untransposeExtract(x)
 	var g blas64.General
-	if rm, ok := xMat.(RawMatrixer); ok {
-		g = rm.RawMatrix()
+	if rm, ok := xMat.(*Dense); ok {
+		g = rm.mat
 	} else {
 		g = DenseCopyOf(x).mat
 		aTrans = false
@@ -394,18 +394,18 @@ func (s *SymDense) RankTwo(a Symmetric, alpha float64, x, y Vector) {
 
 	var xmat, ymat blas64.Vector
 	fast := true
-	xU, _ := untranspose(x)
-	if rv, ok := xU.(RawVectorer); ok {
+	xU, _ := untransposeExtract(x)
+	if rv, ok := xU.(*VecDense); ok {
 		r, c := xU.Dims()
-		xmat = rv.RawVector()
+		xmat = rv.mat
 		s.checkOverlap(generalFromVector(xmat, r, c))
 	} else {
 		fast = false
 	}
-	yU, _ := untranspose(y)
-	if rv, ok := yU.(RawVectorer); ok {
+	yU, _ := untransposeExtract(y)
+	if rv, ok := yU.(*VecDense); ok {
 		r, c := yU.Dims()
-		ymat = rv.RawVector()
+		ymat = rv.mat
 		s.checkOverlap(generalFromVector(ymat, r, c))
 	} else {
 		fast = false

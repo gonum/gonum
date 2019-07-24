@@ -389,10 +389,10 @@ func (m *Dense) CloneFrom(a Matrix) {
 	}
 	m.capRows, m.capCols = r, c
 
-	aU, trans := untranspose(a)
+	aU, trans := untransposeExtract(a)
 	switch aU := aU.(type) {
-	case RawMatrixer:
-		amat := aU.RawMatrix()
+	case *Dense:
+		amat := aU.mat
 		mat.Data = make([]float64, r*c)
 		if trans {
 			for i := 0; i < r; i++ {
@@ -442,10 +442,10 @@ func (m *Dense) Copy(a Matrix) (r, c int) {
 		return 0, 0
 	}
 
-	aU, trans := untranspose(a)
+	aU, trans := untransposeExtract(a)
 	switch aU := aU.(type) {
-	case RawMatrixer:
-		amat := aU.RawMatrix()
+	case *Dense:
+		amat := aU.mat
 		if trans {
 			if amat.Stride != 1 {
 				m.checkOverlap(amat)

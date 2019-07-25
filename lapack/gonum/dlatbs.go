@@ -398,39 +398,41 @@ skipComputeGrow:
 				// if 1/A[j,j] was not used to scale the dot product.
 				x[j] -= sumj
 				xj = math.Abs(x[j])
-				if diag == blas.NonUnit {
-					// Compute x[j] = x[j] / A[j,j], scaling if necessary.
-					switch {
-					case tjj > smlnum:
-						// smlnum < abs(A[j,j]):
-						if tjj < 1 && xj > tjj*bignum {
-							// Scale x by 1/abs(x[j]).
-							rec := 1 / xj
-							bi.Dscal(n, rec, x, 1)
-							scale *= rec
-							xMax *= rec
-						}
-						x[j] /= tjjs
-					case tjj > 0:
-						// 0 < abs(A[j,j]) <= smlnum:
-						if xj > tjj*bignum {
-							// Scale x by (1/abs(x[j]))*abs(A[j,j])*bignum.
-							rec := (tjj * bignum) / xj
-							bi.Dscal(n, rec, x, 1)
-							scale *= rec
-							xMax *= rec
-						}
-						x[j] /= tjjs
-					default:
-						// A[j,j] == 0: Set x[0:n] = 0, x[j] = 1, and scale = 0, and
-						// compute a solution A^T * x = 0.
-						for i := range x[:n] {
-							x[i] = 0
-						}
-						x[j] = 1
-						scale = 0
-						xMax = 0
+				// Compute x[j] = x[j] / A[j,j], scaling if necessary.
+				// Note: the reference implementation skips this step for blas.Unit matrices
+				// when tscal is equal to 1 but it complicates the logic and only saves
+				// the comparison and division in the first switch-case. Not skipping it
+				// is also consistent with the NoTrans case above.
+				switch {
+				case tjj > smlnum:
+					// smlnum < abs(A[j,j]):
+					if tjj < 1 && xj > tjj*bignum {
+						// Scale x by 1/abs(x[j]).
+						rec := 1 / xj
+						bi.Dscal(n, rec, x, 1)
+						scale *= rec
+						xMax *= rec
 					}
+					x[j] /= tjjs
+				case tjj > 0:
+					// 0 < abs(A[j,j]) <= smlnum:
+					if xj > tjj*bignum {
+						// Scale x by (1/abs(x[j]))*abs(A[j,j])*bignum.
+						rec := (tjj * bignum) / xj
+						bi.Dscal(n, rec, x, 1)
+						scale *= rec
+						xMax *= rec
+					}
+					x[j] /= tjjs
+				default:
+					// A[j,j] == 0: Set x[0:n] = 0, x[j] = 1, and scale = 0, and
+					// compute a solution A^T * x = 0.
+					for i := range x[:n] {
+						x[i] = 0
+					}
+					x[j] = 1
+					scale = 0
+					xMax = 0
 				}
 			} else {
 				// Compute x[j] := x[j] / A[j,j] - sumj

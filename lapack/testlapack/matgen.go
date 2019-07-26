@@ -832,8 +832,8 @@ func dlattb(kind int, uplo blas.Uplo, trans blas.Transpose, n, kd int, ab []floa
 		// Matrix is the identity.
 		if uplo == blas.Upper {
 			for i := 0; i < n; i++ {
-				// Fill the diagonal with random numbers.
-				ab[i*ldab] = rnd.NormFloat64()
+				// Fill the diagonal with non-unit numbers.
+				ab[i*ldab] = float64(i + 2)
 				for j := 1; j < min(n-i, kd+1); j++ {
 					ab[i*ldab+j] = 0
 				}
@@ -843,8 +843,8 @@ func dlattb(kind int, uplo blas.Uplo, trans blas.Transpose, n, kd int, ab []floa
 				for j := max(0, kd-i); j < kd; j++ {
 					ab[i*ldab+j] = 0
 				}
-				// Fill the diagonal with random numbers.
-				ab[i*ldab+kd] = rnd.NormFloat64()
+				// Fill the diagonal with non-unit numbers.
+				ab[i*ldab+kd] = float64(i + 2)
 			}
 		}
 
@@ -860,8 +860,8 @@ func dlattb(kind int, uplo blas.Uplo, trans blas.Transpose, n, kd int, ab []floa
 		// Initialize AB to zero.
 		if uplo == blas.Upper {
 			for i := 0; i < n; i++ {
-				// Fill the diagonal with random numbers.
-				ab[i*ldab] = rnd.NormFloat64()
+				// Fill the diagonal with non-unit numbers.
+				ab[i*ldab] = float64(i + 2)
 				for j := 1; j < min(n-i, kd+1); j++ {
 					ab[i*ldab+j] = 0
 				}
@@ -871,8 +871,8 @@ func dlattb(kind int, uplo blas.Uplo, trans blas.Transpose, n, kd int, ab []floa
 				for j := max(0, kd-i); j < kd; j++ {
 					ab[i*ldab+j] = 0
 				}
-				// Fill the diagonal with random numbers.
-				ab[i*ldab+kd] = rnd.NormFloat64()
+				// Fill the diagonal with non-unit numbers.
+				ab[i*ldab+kd] = float64(i + 2)
 			}
 		}
 
@@ -1133,6 +1133,7 @@ func dlattb(kind int, uplo blas.Uplo, trans blas.Transpose, n, kd int, ab []floa
 		bi.Dscal(n, 2, b, 1)
 
 		// case 16:
+		// TODO(vladimir-ch)
 		// Make the off-diagonal elements large to cause overflow when adding a
 		// column of T. In the non-transposed case, the matrix is constructed to
 		// cause overflow when adding a column in every other step.

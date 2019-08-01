@@ -19,7 +19,7 @@ import (
 // The all pair shortest path distances are calculated using the
 // Floyd-Warshall algorithm and so IsomapR2 will not scale to large
 // graphs. Graphs with more than one connected component cannot be
-// layed out by IsomapR2.
+// laid out by IsomapR2.
 type IsomapR2 struct{}
 
 // Update is the IsomapR2 spatial graph update function.

@@ -54,7 +54,7 @@ func (Implementation) Dlatbs(uplo blas.Uplo, trans blas.Transpose, diag blas.Dia
 	}
 
 	switch {
-	case len(ab) < (n-1)*ldab+kd:
+	case len(ab) < (n-1)*ldab+kd+1:
 		panic(shortAB)
 	case len(x) < n:
 		panic(shortX)

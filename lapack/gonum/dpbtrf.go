@@ -55,7 +55,7 @@ func (impl Implementation) Dpbtrf(uplo blas.Uplo, n, kd int, ab []float64, ldab 
 		return true
 	}
 
-	if len(ab) < (n-1)*ldab+kd {
+	if len(ab) < (n-1)*ldab+kd+1 {
 		panic(shortAB)
 	}
 

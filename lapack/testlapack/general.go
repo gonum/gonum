@@ -1034,7 +1034,10 @@ func equalApproxSymmetric(a, b blas64.Symmetric, tol float64) bool {
 // with kd diagonals.
 func randSymBand(uplo blas.Uplo, n, kd, ldab int, rnd *rand.Rand) []float64 {
 	// Allocate a triangular band matrix U or L and fill it with random numbers.
-	ab := make([]float64, n*ldab)
+	var ab []float64
+	if n > 0 {
+		ab = make([]float64, (n-1)*ldab+kd+1)
+	}
 	for i := range ab {
 		ab[i] = rnd.NormFloat64()
 	}

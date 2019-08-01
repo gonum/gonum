@@ -39,7 +39,7 @@ func (Implementation) Dpbtrs(uplo blas.Uplo, n, kd, nrhs int, ab []float64, ldab
 		return
 	}
 
-	if len(ab) < (n-1)*ldab+kd {
+	if len(ab) < (n-1)*ldab+kd+1 {
 		panic(shortAB)
 	}
 	if len(b) < (n-1)*ldb+nrhs {

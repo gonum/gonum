@@ -42,7 +42,10 @@ func dlatbsTest(t *testing.T, impl Dlatbser, rnd *rand.Rand, kind int, uplo blas
 	const eps = 1e-15
 
 	// Allocate a triangular band matrix.
-	ab := make([]float64, n*ldab)
+	var ab []float64
+	if n > 0 {
+		ab = make([]float64, (n-1)*ldab+kd+1)
+	}
 	for i := range ab {
 		ab[i] = rnd.NormFloat64()
 	}

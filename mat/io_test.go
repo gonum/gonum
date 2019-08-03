@@ -7,6 +7,7 @@ package mat
 import (
 	"bytes"
 	"encoding"
+	"encoding/binary"
 	"io"
 	"io/ioutil"
 	"math"
@@ -21,6 +22,8 @@ var (
 	_ encoding.BinaryMarshaler   = (*VecDense)(nil)
 	_ encoding.BinaryUnmarshaler = (*VecDense)(nil)
 )
+
+var sizeInt64 = binary.Size(int64(0))
 
 var denseData = []struct {
 	raw  []byte

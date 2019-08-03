@@ -21,7 +21,6 @@ const maxLen = int64(int(^uint(0) >> 1))
 
 var (
 	headerSize  = binary.Size(storage{})
-	sizeInt64   = binary.Size(int64(0))
 	sizeFloat64 = binary.Size(float64(0))
 
 	errWrongType = errors.New("mat: wrong data type")

@@ -2061,7 +2061,7 @@ func powDenseBench(b *testing.B, size, n int) {
 
 func BenchmarkDenseMulTransDense100Half(b *testing.B)        { denseMulTransBench(b, 100, 0.5) }
 func BenchmarkDenseMulTransDense100Tenth(b *testing.B)       { denseMulTransBench(b, 100, 0.1) }
-func BenchmarDensekMulTransDense1000Half(b *testing.B)       { denseMulTransBench(b, 1000, 0.5) }
+func BenchmarkDenseMulTransDense1000Half(b *testing.B)       { denseMulTransBench(b, 1000, 0.5) }
 func BenchmarkDenseMulTransDense1000Tenth(b *testing.B)      { denseMulTransBench(b, 1000, 0.1) }
 func BenchmarkDenseMulTransDense1000Hundredth(b *testing.B)  { denseMulTransBench(b, 1000, 0.01) }
 func BenchmarkDenseMulTransDense1000Thousandth(b *testing.B) { denseMulTransBench(b, 1000, 0.001) }

@@ -61,9 +61,7 @@ func (impl Implementation) Dpbcon(uplo blas.Uplo, n, kd int, ab []float64, ldab 
 		ainvnm float64
 		kase   int
 		isave  [3]int
-
-		normin         bool
-		scaleL, scaleU float64
+		normin bool
 
 		// Denote work slices.
 		x     = work[:n]
@@ -77,19 +75,21 @@ func (impl Implementation) Dpbcon(uplo blas.Uplo, n, kd int, ab []float64, ldab 
 		if kase == 0 {
 			break
 		}
+		var op1, op2 blas.Transpose
 		if uplo == blas.Upper {
-			// Multiply x by inv(U^T).
-			scaleL = impl.Dlatbs(uplo, blas.Trans, blas.NonUnit, normin, n, kd, ab, ldab, x, cnorm)
-			normin = true
-			// Multiply x by inv(U).
-			scaleU = impl.Dlatbs(uplo, blas.NoTrans, blas.NonUnit, normin, n, kd, ab, ldab, x, cnorm)
+			// Multiply x by inv(U^T),
+			op1 = blas.Trans
+			// then by inv(U^T).
+			op2 = blas.NoTrans
 		} else {
-			// Multiply x by inv(L).
-			scaleL = impl.Dlatbs(uplo, blas.NoTrans, blas.NonUnit, normin, n, kd, ab, ldab, x, cnorm)
-			normin = true
-			// Multiply x by inv(L^T).
-			scaleU = impl.Dlatbs(uplo, blas.Trans, blas.NonUnit, normin, n, kd, ab, ldab, x, cnorm)
+			// Multiply x by inv(L),
+			op1 = blas.NoTrans
+			// then by inv(L^T).
+			op2 = blas.Trans
 		}
+		scaleL := impl.Dlatbs(uplo, op1, blas.NonUnit, normin, n, kd, ab, ldab, x, cnorm)
+		normin = true
+		scaleU := impl.Dlatbs(uplo, op2, blas.NonUnit, normin, n, kd, ab, ldab, x, cnorm)
 		// Multiply x by 1/scale if doing so will not cause overflow.
 		scale := scaleL * scaleU
 		if scale != 1 {

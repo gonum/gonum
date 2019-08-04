@@ -40,12 +40,12 @@ func (lq *LQ) updateCond(norm lapack.MatrixNorm) {
 	putInts(iwork)
 }
 
-// Factorize computes the LQ factorization of an m×n matrix a where n <= m. The LQ
+// Factorize computes the LQ factorization of an m×n matrix a where m <= n. The LQ
 // factorization always exists even if A is singular.
 //
 // The LQ decomposition is a factorization of the matrix A such that A = L * Q.
-// The matrix Q is an orthonormal n×n matrix, and L is an m×n upper triangular matrix.
-// L and Q can be extracted from the LTo and QTo methods.
+// The matrix Q is an orthonormal n×n matrix, and L is an m×n lower triangular matrix.
+// L and Q can be extracted using the LTo and QTo methods.
 func (lq *LQ) Factorize(a Matrix) {
 	lq.factorize(a, CondNorm)
 }

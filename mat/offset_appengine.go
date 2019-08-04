@@ -22,3 +22,16 @@ func offset(a, b []float64) int {
 	// move. See https://golang.org/issue/12445.
 	return int(vb0.UnsafeAddr()-va0.UnsafeAddr()) / sizeOfFloat64
 }
+
+// offsetComplex returns the number of complex128 values b[0] is after a[0].
+func offsetComplex(a, b []complex128) int {
+	va0 := reflect.ValueOf(a).Index(0)
+	vb0 := reflect.ValueOf(b).Index(0)
+	if va0.Addr() == vb0.Addr() {
+		return 0
+	}
+	// This expression must be atomic with respect to GC moves.
+	// At this stage this is true, because the GC does not
+	// move. See https://golang.org/issue/12445.
+	return int(vb0.UnsafeAddr()-va0.UnsafeAddr()) / sizeOfFloat64
+}

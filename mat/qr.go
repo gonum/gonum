@@ -63,7 +63,6 @@ func (qr *QR) factorize(a Matrix, norm lapack.MatrixNorm) {
 	work := []float64{0}
 	qr.tau = make([]float64, k)
 	lapack64.Geqrf(qr.qr.mat, qr.tau, work, -1)
-
 	work = getFloats(int(work[0]), false)
 	lapack64.Geqrf(qr.qr.mat, qr.tau, work, len(work))
 	putFloats(work)

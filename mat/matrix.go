@@ -768,7 +768,7 @@ func Norm(a Matrix, norm float64) float64 {
 		rv := rma.RawVector()
 		switch norm {
 		default:
-			panic("unreachable")
+			panic(ErrNormOrder)
 		case 1:
 			if aTrans {
 				imax := blas64.Iamax(rv)
@@ -787,7 +787,7 @@ func Norm(a Matrix, norm float64) float64 {
 	}
 	switch norm {
 	default:
-		panic("unreachable")
+		panic(ErrNormOrder)
 	case 1:
 		var max float64
 		for j := 0; j < c; j++ {

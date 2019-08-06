@@ -17,6 +17,15 @@ func (p Vec) Add(q Vec) Vec {
 	return p
 }
 
+// Cross returns the vector cross product of p and q.
+func (p Vec) Cross(q Vec) Vec {
+	return Vec{
+		X: p.Y*q.Z - p.Z*q.Y,
+		Y: p.Z*q.X - p.X*q.Z,
+		Z: p.X*q.Y - p.Y*q.X,
+	}
+}
+
 // Sub returns the vector sum of p and -q.
 func (p Vec) Sub(q Vec) Vec {
 	p.X -= q.X

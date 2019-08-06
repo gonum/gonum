@@ -27,5 +27,5 @@ func offsetComplex(a, b []complex128) int {
 	// This expression must be atomic with respect to GC moves.
 	// At this stage this is true, because the GC does not
 	// move. See https://golang.org/issue/12445.
-	return int(uintptr(unsafe.Pointer(&b[0]))-uintptr(unsafe.Pointer(&a[0]))) / int(unsafe.Sizeof(float64(0)))
+	return int(uintptr(unsafe.Pointer(&b[0]))-uintptr(unsafe.Pointer(&a[0]))) / int(unsafe.Sizeof(complex128(0)))
 }

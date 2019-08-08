@@ -166,3 +166,8 @@ func (m *CDense) Copy(a CMatrix) (r, c int) {
 	}
 	return r, c
 }
+
+// RawCMatrix returns the underlying cblas128.General used by the receiver.
+// Changes to elements in the receiver following the call will be reflected
+// in returned cblas128.General.
+func (m *CDense) RawCMatrix() cblas128.General { return m.mat }

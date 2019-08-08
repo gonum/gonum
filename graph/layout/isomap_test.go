@@ -15,6 +15,10 @@ import (
 	"gonum.org/v1/plot/vg"
 )
 
+// tag is modified in isomap_noasm_test.go to "_noasm" when any
+// build tag prevents use of the assembly numerical kernels.
+var tag string
+
 var isomapR2Tests = []struct {
 	name string
 	g    graph.Graph
@@ -160,7 +164,7 @@ func TestIsomapR2(t *testing.T) {
 		}
 		p.Add(render{o})
 		p.HideAxes()
-		path := filepath.Join("testdata", test.name+".png")
+		path := filepath.Join("testdata", test.name+tag+".png")
 		err = p.Save(10*vg.Centimeter, 10*vg.Centimeter, path)
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)

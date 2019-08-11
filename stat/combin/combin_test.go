@@ -5,6 +5,7 @@
 package combin
 
 import (
+	"fmt"
 	"math/big"
 	"reflect"
 	"strconv"
@@ -188,9 +189,9 @@ func TestCombinationIndex(t *testing.T) {
 		n, k int
 	}{
 		{6, 3},
-		{4, 4},
-		{10, 1},
-		{8, 2},
+		// {4, 4},
+		// {10, 1},
+		// {8, 2},
 	} {
 		n := s.n
 		k := s.k
@@ -198,6 +199,7 @@ func TestCombinationIndex(t *testing.T) {
 		for i := 0; i < Binomial(n, k); i++ {
 			comb := IndexToCombination(nil, i, n, k)
 			idx := CombinationIndex(comb, n, k)
+			fmt.Println(i, comb)
 			if idx != i {
 				t.Errorf("Cas %d: combination mismatch. Want %d, got %d", cas, i, idx)
 			}

@@ -213,6 +213,9 @@ func CombinationIndex(comb []int, n, k int) int {
 	}
 	sorted := make([]int, k)
 	copy(sorted, comb)
+	for i, v := range sorted {
+		sorted[i] = n - v - 1
+	}
 	sort.Ints(sorted)
 	idx := 0
 	for i, v := range sorted {
@@ -220,7 +223,7 @@ func CombinationIndex(comb []int, n, k int) int {
 			idx += Binomial(v, i+1)
 		}
 	}
-	return idx
+	return Binomial(n, k) - 1 - idx
 }
 
 // IndexToCombination returns the combination corresponding to the given index.
@@ -247,6 +250,7 @@ func IndexToCombination(dst []int, idx, n, k int) []int {
 			panic(badInput)
 		}
 	}
+	idx = Binomial(n, k) - 1 - idx
 	for i := range dst {
 		// Find the largest number m such that Binomial(m, k-i) <= idx.
 		// This is one less than the first number such that it is larger.
@@ -262,6 +266,10 @@ func IndexToCombination(dst []int, idx, n, k int) []int {
 			idx -= Binomial(m, k-i)
 		}
 	}
+	for i, v := range dst {
+		dst[i] = n - v - 1
+	}
+	sort.Ints(dst)
 	return dst
 }
 

@@ -6,6 +6,7 @@ package combin
 
 import (
 	"math"
+	"sort"
 
 	"gonum.org/v1/gonum/mat"
 )
@@ -183,6 +184,85 @@ func nextCombination(s []int, n, k int) {
 		}
 		break
 	}
+}
+
+// CombinationIndex returns the index of the given combination.
+//
+// The functions CombinationIndex and IndexToCombination define a bijection
+// between the integers and the Binomial(n, k) number of possible combinations.
+// CombinationIndex returns the inverse of IndexToCombination.
+//
+// CombinationIndex panics if comb is not a possible combination  of the first
+// [0,n) integers, if n or k are non-negative, or if k is greater than n.
+func CombinationIndex(comb []int, n, k int) int {
+	if n < 0 || k < 0 {
+		panic(badNegInput)
+	}
+	if n < k {
+		panic(badSetSize)
+	}
+	if len(comb) != k {
+		panic("combin: bad length combination")
+	}
+	contains := make(map[int]struct{}, k)
+	for _, v := range comb {
+		contains[v] = struct{}{}
+	}
+	if len(contains) != k {
+		panic("combin: comb contains non-unique elements")
+	}
+	sorted := make([]int, k)
+	copy(sorted, comb)
+	sort.Ints(sorted)
+	idx := 0
+	for i, v := range sorted {
+		if v >= i+1 {
+			idx += Binomial(v, i+1)
+		}
+	}
+	return idx
+}
+
+// IndexToCombination returns the combination corresponding to the given index.
+//
+// The functions CombinationIndex and IndexToCombination define a bijection
+// between the integers and the Binomial(n, k) number of possible combinations.
+// IndexToCombination returns the inverse of CombinationIndex (up to the order
+// of the elements).
+//
+// The combination is stored in-place into dst if dst is non-nil, otherwise
+// a new slice is allocated and returned.
+//
+// IndexToCombination panics if n or k are non-negative, if k is greater than n,
+// or if idx is not in [0, Binomial(n,k)-1]. IndexToCombination will also panic
+// if dst is non-nil and len(dst) is not k.
+func IndexToCombination(dst []int, idx, n, k int) []int {
+	if idx < 0 || idx >= Binomial(n, k) {
+		panic("combin: invalid index")
+	}
+	if dst == nil {
+		dst = make([]int, k)
+	} else {
+		if len(dst) != k {
+			panic(badInput)
+		}
+	}
+	for i := range dst {
+		// Find the largest number m such that Binomial(m, k-i) <= idx.
+		// This is one less than the first number such that it is larger.
+		m := sort.Search(n, func(m int) bool {
+			if m < k-i {
+				return false
+			}
+			return Binomial(m, k-i) > idx
+		})
+		m--
+		dst[len(dst)-i-1] = m
+		if m >= k-i {
+			idx -= Binomial(m, k-i)
+		}
+	}
+	return dst
 }
 
 // Cartesian returns the cartesian product of the slices in data. The Cartesian

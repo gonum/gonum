@@ -7,6 +7,7 @@ package combin
 import (
 	"math/big"
 	"reflect"
+	"strconv"
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
@@ -180,6 +181,40 @@ func TestCombinationGenerator(t *testing.T) {
 			}
 		}
 	}
+}
+
+func TestCombinationIndex(t *testing.T) {
+	for cas, s := range []struct {
+		n, k int
+	}{
+		{6, 3},
+		{4, 4},
+		{10, 1},
+		{8, 2},
+	} {
+		n := s.n
+		k := s.k
+		combs := make(map[string]struct{})
+		for i := 0; i < Binomial(n, k); i++ {
+			comb := IndexToCombination(nil, i, n, k)
+			idx := CombinationIndex(comb, n, k)
+			if idx != i {
+				t.Errorf("Cas %d: combination mismatch. Want %d, got %d", cas, i, idx)
+			}
+			combs[intSliceToKey(comb)] = struct{}{}
+		}
+		if len(combs) != Binomial(n, k) {
+			t.Errorf("Case %d: not all generated combinations were unique", cas)
+		}
+	}
+}
+
+func intSliceToKey(s []int) string {
+	var str string
+	for _, v := range s {
+		str += strconv.Itoa(v) + "_"
+	}
+	return str
 }
 
 func TestCartesian(t *testing.T) {

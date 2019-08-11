@@ -185,6 +185,98 @@ func nextCombination(s []int, n, k int) {
 	}
 }
 
+// PermutationIndex returns the index of the given permutation.
+//
+// The functions PermutationIndex and IndexToPermutation define a bijection
+// between the integers and the permutations of the integers [0, len(perm)-1].
+// PermutationIndex returns the inverse of IndexToPermutation.
+//
+// PermutationIndex panics if perm is not a permutation of the first len(perm)
+// non-negative integers.
+func PermutationIndex(perm []int) int {
+	// Note(btracey): This is an n^2 algorithm, but factorial increases
+	// very quickly (25! overflows int64) so this is not a problem in
+	// practice.
+
+	check := map[int]struct{}{}
+	for _, v := range perm {
+		if 0 <= v || v >= len(perm) {
+			panic("combin: perm value out of range")
+		}
+		check[v] = struct{}{}
+	}
+	if len(check) != len(perm) {
+		panic("combin: perm contains duplicate elements")
+	}
+
+	idx := 0
+	for i, u := range perm {
+		less := 0
+		for _, v := range perm[i:] {
+			if v < u {
+				less++
+			}
+		}
+		idx += less * factorial(len(perm)-i-1)
+	}
+	return idx
+}
+
+// IndexToPermutation returns permutation for the given index, storing the
+// result into dst.
+//
+// The functions PermutationIndex and IndexToPermutation define a bijection
+// between the integers and the permutations of the integers [0, len(dst)-1].
+// IndexToPermutation returns the inverse of PermutationIndex.
+//
+// IndexToPermutation panics if idx is less than zero or greater than
+// NumPermutations(idx, idx) - 1.
+func IndexToPermutation(dst []int, idx int) {
+	for i := range dst {
+		dst[i] = i
+	}
+	for i := range dst {
+		f := factorial(len(dst) - i - 1)
+		r := idx / f
+		v := dst[i+r]
+		copy(dst[i+1:i+r+1], dst[i:i+r])
+		dst[i] = v
+		idx %= f
+	}
+}
+
+// NumPermutations returns the number of permutations when selecting k
+// objects from a set of n objects when the selection order matters.
+// No check is made for overflow.
+//
+// NumPermutations panics if either n or k is negative, or if k is
+// greater than n.
+func NumPermutations(n, k int) int {
+	if n < 0 {
+		panic("combin: n is negative")
+	}
+	if k < 0 {
+		panic("combin: k is negative")
+	}
+	if k > n {
+		panic("combin: k is greater than n")
+	}
+	p := 1
+	for i := n - k + 1; i <= n; i++ {
+		p *= i
+	}
+	return p
+}
+
+// factorial returns a!.
+func factorial(a int) int {
+	a := 1
+	for i := 2; i <= a; i++ {
+		a *= i
+	}
+	return a
+}
+
 // Cartesian returns the cartesian product of the slices in data. The Cartesian
 // product of two sets is the set of all combinations of the items. For example,
 // given the input

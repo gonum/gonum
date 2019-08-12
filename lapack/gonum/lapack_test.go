@@ -205,6 +205,10 @@ func TestDlasy2(t *testing.T) {
 	testlapack.Dlasy2Test(t, impl)
 }
 
+func TestDlansb(t *testing.T) {
+	testlapack.DlansbTest(t, impl)
+}
+
 func TestDlanst(t *testing.T) {
 	testlapack.DlanstTest(t, impl)
 }

@@ -20,6 +20,7 @@ type Dpbconer interface {
 
 	Dpbtrser
 	Dlanger
+	Dlansber
 }
 
 // DpbconTest tests Dpbcon by generating a random symmetric band matrix A and
@@ -56,7 +57,7 @@ func dpbconTest(t *testing.T, impl Dpbconer, uplo blas.Uplo, n, kd, ldab int, rn
 
 	// Compute the norm of A.
 	work := make([]float64, 3*n)
-	aNorm := dlansb(lapack.MaxColumnSum, uplo, n, kd, ab, ldab, work)
+	aNorm := impl.Dlansb(lapack.MaxColumnSum, uplo, n, kd, ab, ldab, work)
 
 	// Compute an estimate of rCond.
 	iwork := make([]int, n)
@@ -86,78 +87,6 @@ func dpbconTest(t *testing.T, impl Dpbconer, uplo blas.Uplo, n, kd, ldab int, rn
 	if ratio >= ratioThresh {
 		t.Errorf("%v: unexpected value of rcond. got=%v, want=%v (ratio=%v)", name, rCondGot, rCondWant, ratio)
 	}
-}
-
-// dlansb returns the given norm of an n×n symmetric band matrix.
-func dlansb(norm lapack.MatrixNorm, uplo blas.Uplo, n, kd int, ab []float64, ldab int, work []float64) float64 {
-	// TODO(vladimir-ch): implement the Frobenius norm, add tests and move this
-	// function to 'lapack/gonum'.
-
-	if n == 0 {
-		return 0
-	}
-
-	var value float64
-	switch norm {
-	case lapack.MaxAbs:
-		if uplo == blas.Upper {
-			for i := 0; i < n; i++ {
-				for j := 0; j < min(n-i, kd+1); j++ {
-					aij := math.Abs(ab[i*ldab+j])
-					if aij > value || math.IsNaN(aij) {
-						value = aij
-					}
-				}
-			}
-		} else {
-			for i := 0; i < n; i++ {
-				for j := max(0, kd-i); j < kd+1; j++ {
-					aij := math.Abs(ab[i*ldab+j])
-					if aij > value || math.IsNaN(aij) {
-						value = aij
-					}
-				}
-			}
-		}
-	case lapack.MaxColumnSum, lapack.MaxRowSum:
-		work = work[:n]
-		var sum float64
-		if uplo == blas.Upper {
-			for i := range work {
-				work[i] = 0
-			}
-			for i := 0; i < n; i++ {
-				sum := work[i] + math.Abs(ab[i*ldab])
-				for j := i + 1; j < min(i+kd+1, n); j++ {
-					aij := math.Abs(ab[i*ldab+j-i])
-					sum += aij
-					work[j] += aij
-				}
-				if sum > value || math.IsNaN(sum) {
-					value = sum
-				}
-			}
-		} else {
-			for i := 0; i < n; i++ {
-				sum = 0
-				for j := max(0, i-kd); j < i; j++ {
-					aij := math.Abs(ab[i*ldab+kd+j-i])
-					sum += aij
-					work[j] += aij
-				}
-				work[i] = sum + math.Abs(ab[i*ldab+kd])
-			}
-			for _, sum := range work {
-				if sum > value || math.IsNaN(sum) {
-					value = sum
-				}
-			}
-		}
-	case lapack.Frobenius:
-		panic("not implemented")
-	}
-
-	return value
 }
 
 // rCondTestRatio returns a test ratio to compare two values of the reciprocal

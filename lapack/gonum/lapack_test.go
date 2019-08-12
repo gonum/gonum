@@ -189,6 +189,10 @@ func TestDlasrt(t *testing.T) {
 	testlapack.DlasrtTest(t, impl)
 }
 
+func TestDlassq(t *testing.T) {
+	testlapack.DlassqTest(t, impl)
+}
+
 func TestDlaswp(t *testing.T) {
 	testlapack.DlaswpTest(t, impl)
 }

@@ -192,7 +192,7 @@ func nextCombination(s []int, n, k int) {
 // between the integers and the Binomial(n, k) number of possible combinations.
 // CombinationIndex returns the inverse of IndexToCombination.
 //
-// CombinationIndex panics if comb is not a possible combination  of the first
+// CombinationIndex panics if comb is not a sorted combination of the first
 // [0,n) integers, if n or k are non-negative, or if k is greater than n.
 func CombinationIndex(comb []int, n, k int) int {
 	if n < 0 || k < 0 {
@@ -204,6 +204,9 @@ func CombinationIndex(comb []int, n, k int) int {
 	if len(comb) != k {
 		panic("combin: bad length combination")
 	}
+	if !sort.IntsAreSorted(comb) {
+		panic("comb: input combination is not sorted")
+	}
 	contains := make(map[int]struct{}, k)
 	for _, v := range comb {
 		contains[v] = struct{}{}
@@ -211,14 +214,14 @@ func CombinationIndex(comb []int, n, k int) int {
 	if len(contains) != k {
 		panic("combin: comb contains non-unique elements")
 	}
-	sorted := make([]int, k)
-	copy(sorted, comb)
-	for i, v := range sorted {
-		sorted[i] = n - v - 1
+	// This algorithm iterates in reverse lexicograhpic order.
+	// Flip the index and values to swap the order.
+	rev := make([]int, k)
+	for i, v := range comb {
+		rev[len(comb)-i-1] = n - v - 1
 	}
-	sort.Ints(sorted)
 	idx := 0
-	for i, v := range sorted {
+	for i, v := range rev {
 		if v >= i+1 {
 			idx += Binomial(v, i+1)
 		}
@@ -250,6 +253,8 @@ func IndexToCombination(dst []int, idx, n, k int) []int {
 			panic(badInput)
 		}
 	}
+	// The base algorithm indexes in reverse lexicographic order
+	// flip the values and the index.
 	idx = Binomial(n, k) - 1 - idx
 	for i := range dst {
 		// Find the largest number m such that Binomial(m, k-i) <= idx.
@@ -261,15 +266,13 @@ func IndexToCombination(dst []int, idx, n, k int) []int {
 			return Binomial(m, k-i) > idx
 		})
 		m--
-		dst[len(dst)-i-1] = m
+		// Normally this is put m into the last free spot, but we
+		// reverse the index and the value.
+		dst[i] = n - m - 1
 		if m >= k-i {
 			idx -= Binomial(m, k-i)
 		}
 	}
-	for i, v := range dst {
-		dst[i] = n - v - 1
-	}
-	sort.Ints(dst)
 	return dst
 }
 

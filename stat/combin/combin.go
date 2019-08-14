@@ -6,8 +6,6 @@ package combin
 
 import (
 	"math"
-
-	"gonum.org/v1/gonum/mat"
 )
 
 const (
@@ -185,49 +183,34 @@ func nextCombination(s []int, n, k int) {
 	}
 }
 
-// Cartesian returns the cartesian product of the slices in data. The Cartesian
+// Cartesian returns indices into the cartesian product for sets of the given lengths. The Cartesian
 // product of two sets is the set of all combinations of the items. For example,
 // given the input
-//  [][]float64{{1,2},{3,4},{5,6}}
+//  []int{2, 3, 1}
 // the returned matrix will be
-//  [ 1 3 5 ]
-//  [ 1 3 6 ]
-//  [ 1 4 5 ]
-//  [ 1 4 6 ]
-//  [ 2 3 5 ]
-//  [ 2 3 6 ]
-//  [ 2 4 5 ]
-//  [ 2 4 6 ]
-// If dst is nil, a new matrix will be allocated and returned, otherwise the number
-// of rows of dst must equal \prod_i len(data[i]), and the number of columns in
-// dst must equal len(data). Cartesian also panics if len(data) = 0.
-func Cartesian(dst *mat.Dense, data [][]float64) *mat.Dense {
-	if len(data) == 0 {
-		panic("combin: empty data input")
+//  [ 0 0 0 ]
+//  [ 0 1 0 ]
+//  [ 0 2 0 ]
+//  [ 1 0 0 ]
+//  [ 1 1 0 ]
+//  [ 1 2 0 ]
+// Cartesian panics if any of the provided lengths are less than 1.
+func Cartesian(lens []int) [][]int {
+	if len(lens) == 0 {
+		panic("combin: empty lengths")
 	}
-	cols := len(data)
 	rows := 1
-	lens := make([]int, cols)
-	for i, d := range data {
-		v := len(d)
-		lens[i] = v
+	for _, v := range lens {
+		if v < 1 {
+			panic("combin: length less than zero")
+		}
 		rows *= v
 	}
-	if dst == nil {
-		dst = mat.NewDense(rows, cols, nil)
-	}
-	r, c := dst.Dims()
-	if r != rows || c != cols {
-		panic("combin: destination matrix size mismatch")
-	}
-	idxs := make([]int, cols)
+	out := make([][]int, rows)
 	for i := 0; i < rows; i++ {
-		SubFor(idxs, i, lens)
-		for j := 0; j < len(data); j++ {
-			dst.Set(i, j, data[j][idxs[j]])
-		}
+		out[i] = SubFor(nil, i, lens)
 	}
-	return dst
+	return out
 }
 
 // IdxFor converts a multi-dimensional index into a linear index for a

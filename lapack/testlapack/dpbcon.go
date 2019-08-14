@@ -45,8 +45,6 @@ func dpbconTest(t *testing.T, impl Dpbconer, uplo blas.Uplo, n, kd, ldab int, rn
 
 	// Generate a random symmetric positive definite band matrix.
 	ab := randSymBand(uplo, n, kd, ldab, rnd)
-	abCopy := make([]float64, len(ab))
-	copy(abCopy, ab)
 
 	// Compute the Cholesky decomposition of A.
 	abFac := make([]float64, len(ab))
@@ -62,9 +60,11 @@ func dpbconTest(t *testing.T, impl Dpbconer, uplo blas.Uplo, n, kd, ldab int, rn
 
 	// Compute an estimate of rCond.
 	iwork := make([]int, n)
-	rCondGot := impl.Dpbcon(uplo, n, kd, ab, ldab, aNorm, work, iwork)
+	abFacCopy := make([]float64, len(abFac))
+	copy(abFacCopy, abFac)
+	rCondGot := impl.Dpbcon(uplo, n, kd, abFac, ldab, aNorm, work, iwork)
 
-	if !floats.Equal(ab, abCopy) {
+	if !floats.Equal(abFac, abFacCopy) {
 		t.Errorf("%v: unexpected modification of ab", name)
 	}
 
@@ -75,7 +75,7 @@ func dpbconTest(t *testing.T, impl Dpbconer, uplo blas.Uplo, n, kd, ldab int, rn
 	for i := 0; i < n; i++ {
 		aInv[i*lda+i] = 1
 	}
-	impl.Dpbtrs(uplo, n, kd, n, ab, ldab, aInv, lda)
+	impl.Dpbtrs(uplo, n, kd, n, abFac, ldab, aInv, lda)
 	aInvNorm := impl.Dlange(lapack.MaxColumnSum, n, n, aInv, lda, work)
 	rCondWant := 1.0
 	if aNorm > 0 && aInvNorm > 0 {

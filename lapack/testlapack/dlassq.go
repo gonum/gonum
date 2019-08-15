@@ -34,7 +34,7 @@ func DlassqTest(t *testing.T, impl Dlassqer) {
 			}
 
 			// Fill the referenced elements of x and compute the
-			// expected result in a non-sofisticated way.
+			// expected result in a non-sophisticated way.
 			scale := rnd.Float64()
 			ssq := rnd.Float64()
 			want := scale * scale * ssq

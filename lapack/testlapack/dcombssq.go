@@ -38,7 +38,7 @@ func DcombssqTest(t *testing.T, impl Dcombssqer) {
 		//  scale^2 * ssq := scale1^2 * ssq1 + scale2^2 * ssq2
 		scale, ssq := impl.Dcombssq(scale1, ssq1, scale2, ssq2)
 
-		// Compute the expected result in a non-sofisticated way and
+		// Compute the expected result in a non-sophisticated way and
 		// compare against the result we got.
 		want := scale1*scale1*ssq1 + scale2*scale2*ssq2
 		got := scale * scale * ssq

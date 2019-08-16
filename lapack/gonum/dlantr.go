@@ -171,7 +171,7 @@ func (impl Implementation) Dlantr(norm lapack.MatrixNorm, uplo blas.Uplo, diag b
 				}
 				return maxsum
 			} else {
-				for i := 1; i < m; i++ {
+				for i := 0; i < m; i++ {
 					var sum float64
 					if i < minmn {
 						sum = 1

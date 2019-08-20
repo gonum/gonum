@@ -231,6 +231,38 @@ func TestCombinationOrder(t *testing.T) {
 	}
 }
 
+func TestIdxSubFor(t *testing.T) {
+	for cas, dims := range [][]int{
+		{2, 2},
+		{3, 1, 6},
+		{2, 4, 6, 7},
+	} {
+		// Loop over all of the indexes. Confirm that the subscripts make sense
+		// and that IdxFor is the converse of SubFor.
+		maxIdx := 1
+		for _, v := range dims {
+			maxIdx *= v
+		}
+		into := make([]int, len(dims))
+		for idx := 0; idx < maxIdx; idx++ {
+			sub := SubFor(nil, idx, dims)
+			for i := range sub {
+				if sub[i] < 0 || sub[i] >= dims[i] {
+					t.Errorf("cas %v: bad subscript. dims: %v, sub: %v", cas, dims, sub)
+				}
+			}
+			SubFor(into, idx, dims)
+			if !reflect.DeepEqual(sub, into) {
+				t.Errorf("cas %v: subscript mismatch with supplied slice. Got %v, want %v", cas, into, sub)
+			}
+			idxOut := IdxFor(sub, dims)
+			if idxOut != idx {
+				t.Errorf("cas %v: returned index mismatch. Got %v, want %v", cas, idxOut, idx)
+			}
+		}
+	}
+}
+
 func TestCartesian(t *testing.T) {
 	// First, test with a known return.
 	lens := []int{2, 3, 4}
@@ -263,37 +295,5 @@ func TestCartesian(t *testing.T) {
 	got := Cartesian(lens)
 	if !intSosMatch(want, got) {
 		t.Errorf("cartesian data mismatch.\nwant:\n%v\ngot:\n%v", want, got)
-	}
-}
-
-func TestIdxSubFor(t *testing.T) {
-	for cas, dims := range [][]int{
-		{2, 2},
-		{3, 1, 6},
-		{2, 4, 6, 7},
-	} {
-		// Loop over all of the indexes. Confirm that the subscripts make sense
-		// and that IdxFor is the converse of SubFor.
-		maxIdx := 1
-		for _, v := range dims {
-			maxIdx *= v
-		}
-		into := make([]int, len(dims))
-		for idx := 0; idx < maxIdx; idx++ {
-			sub := SubFor(nil, idx, dims)
-			for i := range sub {
-				if sub[i] < 0 || sub[i] >= dims[i] {
-					t.Errorf("cas %v: bad subscript. dims: %v, sub: %v", cas, dims, sub)
-				}
-			}
-			SubFor(into, idx, dims)
-			if !reflect.DeepEqual(sub, into) {
-				t.Errorf("cas %v: subscript mismatch with supplied slice. Got %v, want %v", cas, into, sub)
-			}
-			idxOut := IdxFor(sub, dims)
-			if idxOut != idx {
-				t.Errorf("cas %v: returned index mismatch. Got %v, want %v", cas, idxOut, idx)
-			}
-		}
 	}
 }

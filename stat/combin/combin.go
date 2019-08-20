@@ -205,7 +205,7 @@ func CombinationIndex(comb []int, n, k int) int {
 		panic("combin: bad length combination")
 	}
 	if !sort.IntsAreSorted(comb) {
-		panic("comb: input combination is not sorted")
+		panic("combin: input combination is not sorted")
 	}
 	contains := make(map[int]struct{}, k)
 	for _, v := range comb {
@@ -248,10 +248,8 @@ func IndexToCombination(dst []int, idx, n, k int) []int {
 	}
 	if dst == nil {
 		dst = make([]int, k)
-	} else {
-		if len(dst) != k {
-			panic(badInput)
-		}
+	} else if len(dst) != k {
+		panic(badInput)
 	}
 	// The base algorithm indexes in reverse lexicographic order
 	// flip the values and the index.

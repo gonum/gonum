@@ -7,6 +7,7 @@ package combin
 import (
 	"math/big"
 	"reflect"
+	"strconv"
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
@@ -181,38 +182,52 @@ func TestCombinationGenerator(t *testing.T) {
 	}
 }
 
-func TestCartesian(t *testing.T) {
-	// First, test with a known return.
-	lens := []int{2, 3, 4}
-	want := [][]int{
-		{0, 0, 0},
-		{0, 0, 1},
-		{0, 0, 2},
-		{0, 0, 3},
-		{0, 1, 0},
-		{0, 1, 1},
-		{0, 1, 2},
-		{0, 1, 3},
-		{0, 2, 0},
-		{0, 2, 1},
-		{0, 2, 2},
-		{0, 2, 3},
-		{1, 0, 0},
-		{1, 0, 1},
-		{1, 0, 2},
-		{1, 0, 3},
-		{1, 1, 0},
-		{1, 1, 1},
-		{1, 1, 2},
-		{1, 1, 3},
-		{1, 2, 0},
-		{1, 2, 1},
-		{1, 2, 2},
-		{1, 2, 3},
+func TestCombinationIndex(t *testing.T) {
+	for cas, s := range []struct {
+		n, k int
+	}{
+		{6, 3},
+		{4, 4},
+		{10, 1},
+		{8, 2},
+	} {
+		n := s.n
+		k := s.k
+		combs := make(map[string]struct{})
+		for i := 0; i < Binomial(n, k); i++ {
+			comb := IndexToCombination(nil, i, n, k)
+			idx := CombinationIndex(comb, n, k)
+			if idx != i {
+				t.Errorf("Cas %d: combination mismatch. Want %d, got %d", cas, i, idx)
+			}
+			combs[intSliceToKey(comb)] = struct{}{}
+		}
+		if len(combs) != Binomial(n, k) {
+			t.Errorf("Case %d: not all generated combinations were unique", cas)
+		}
 	}
-	got := Cartesian(lens)
-	if !intSosMatch(want, got) {
-		t.Errorf("cartesian data mismatch.\nwant:\n%v\ngot:\n%v", want, got)
+}
+
+func intSliceToKey(s []int) string {
+	var str string
+	for _, v := range s {
+		str += strconv.Itoa(v) + "_"
+	}
+	return str
+}
+
+// TestCombinationOrder tests that the different Combinations methods
+// agree on the iteration order.
+func TestCombinationOrder(t *testing.T) {
+	n := 7
+	k := 3
+	list := Combinations(n, k)
+	for i, v := range list {
+		idx := CombinationIndex(v, n, k)
+		if idx != i {
+			t.Errorf("Combinations and CombinationIndex mismatch")
+			break
+		}
 	}
 }
 
@@ -245,5 +260,40 @@ func TestIdxSubFor(t *testing.T) {
 				t.Errorf("cas %v: returned index mismatch. Got %v, want %v", cas, idxOut, idx)
 			}
 		}
+	}
+}
+
+func TestCartesian(t *testing.T) {
+	// First, test with a known return.
+	lens := []int{2, 3, 4}
+	want := [][]int{
+		{0, 0, 0},
+		{0, 0, 1},
+		{0, 0, 2},
+		{0, 0, 3},
+		{0, 1, 0},
+		{0, 1, 1},
+		{0, 1, 2},
+		{0, 1, 3},
+		{0, 2, 0},
+		{0, 2, 1},
+		{0, 2, 2},
+		{0, 2, 3},
+		{1, 0, 0},
+		{1, 0, 1},
+		{1, 0, 2},
+		{1, 0, 3},
+		{1, 1, 0},
+		{1, 1, 1},
+		{1, 1, 2},
+		{1, 1, 3},
+		{1, 2, 0},
+		{1, 2, 1},
+		{1, 2, 2},
+		{1, 2, 3},
+	}
+	got := Cartesian(lens)
+	if !intSosMatch(want, got) {
+		t.Errorf("cartesian data mismatch.\nwant:\n%v\ngot:\n%v", want, got)
 	}
 }

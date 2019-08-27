@@ -5,7 +5,6 @@
 package stat
 
 import (
-	"fmt"
 	"math"
 	"sort"
 
@@ -1293,77 +1292,4 @@ func MeanVariance(x, weights []float64) (mean, variance float64) {
 	}
 	variance = (ss - compensation*compensation/sumWeights) / (sumWeights - 1)
 	return mean, variance
-}
-
-// NormalSkewTest test whether the skew is different from the normal distribution.
-// This function tests the null hypothesis that the skewness of population that the
-// sample was drawn from is the same as that of a corresponding normal distribution.
-// Implementation based on scipy's: https://github.com/scipy/scipy/blob/v1.3.0/scipy/stats/stats.py#L1481-L1549
-func NormalSkewTest(a []float64) float64 {
-	b2 := Skew(a, nil)
-	n := float64(len(a))
-	if n < 8 {
-		panic(fmt.Sprintf("skewtest is not valid with less than 8 samples, %d samples were given", int(n)))
-	}
-	y := b2 * math.Sqrt(((n+1)*(n+3))/(6.0*(n-2)))
-	beta2 := (3.0 * (math.Pow(n, 2) + 27*n - 70) * (n + 1) * (n + 3) / ((n - 2.0) * (n + 5) * (n + 7) * (n + 9)))
-	W2 := -1 + math.Sqrt(2*(beta2-1))
-	delta := 1 / math.Sqrt(0.5*math.Log(W2))
-	alpha := math.Sqrt(2.0 / (W2 - 1))
-	if y == 0 {
-		y = 1
-	}
-	return delta * math.Log(y/alpha+math.Sqrt(math.Pow(y/alpha, 2)+1))
-}
-
-func sign(v float64) float64 {
-	if v < 0 {
-		return -1
-	}
-	if v > 0 {
-		return 1
-	}
-	return 0
-}
-
-// NormalKurtosisTest test whether a dataset has normal kurtosis.
-// This function tests the null hypothesis that the kurtosis of the population from
-// which the sample was drawn is that of the normal distribution:
-// `kurtosis = 3(n-1)/(n+1)`.
-// Implementation based on scipy's: https://github.com/scipy/scipy/blob/v1.3.0/scipy/stats/stats.py#L1481-L1549
-func NormalKurtosisTest(a []float64) float64 {
-	n := float64(len(a))
-	if n < 5 {
-		panic(fmt.Sprintf("kurtosistest requires at least 5 observations; %d observations were given", int(n)))
-	}
-	b2 := ExKurtosis(a, nil) + 3
-	E := 3.0 * (n - 1) / (n + 1)
-	varb2 := 24.0 * n * (n - 2) * (n - 3) / ((n + 1) * (n + 1.) * (n + 3) * (n + 5))
-	x := (b2 - E) / math.Sqrt(varb2)
-	sqrtbeta1 := 6.0 * (n*n - 5*n + 2) / ((n + 7) * (n + 9)) * math.Sqrt((6.0*(n+3)*(n+5))/(n*(n-2)*(n-3)))
-	A := 6.0 + 8.0/sqrtbeta1*(2.0/sqrtbeta1+math.Sqrt(1+4.0/math.Pow(sqrtbeta1, 2)))
-	term1 := 1 - 2/(9.0*A)
-	denom := 1 + x*math.Sqrt(2/(A-4.0))
-	if denom == 0 {
-		return math.NaN()
-	}
-	term2 := sign(denom) * math.Pow((1-2.0/A)/math.Abs(denom), 1/3.0)
-	return (term1 - term2) / math.Sqrt(2/(9.0*A))
-}
-
-// NormalTest test whether a sample differs from a normal distribution.
-// This function tests the null hypothesis that a sample comes from a normal distribution.
-// It is based on D'Agostino and Pearson's [1]_, [2]_ test that combines skew and kurtosis to
-// produce an omnibus test of normality.
-// Implementation based on scipy's: https://github.com/scipy/scipy/blob/v1.3.0/scipy/stats/stats.py#L1481-L1549
-// References
-// ----------
-// .. [1] D'Agostino, R. B. (1971), "An omnibus test of normality for
-//        moderate and large sample size", Biometrika, 58, 341-348
-// .. [2] D'Agostino, R. and Pearson, E. S. (1973), "Tests for departure from
-//        normality", Biometrika, 60, 613-622
-func NormalTest(a []float64) float64 {
-	s := NormalSkewTest(a)
-	k := NormalKurtosisTest(a)
-	return s*s + k*k
 }

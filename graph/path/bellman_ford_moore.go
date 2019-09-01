@@ -84,20 +84,20 @@ func BellmanFordFrom(u graph.Node, g graph.Graph) (path Shortest, ok bool) {
 	return path, true
 }
 
-// bellmanFordQueue is a queue for the Queue-based Bellman ford algorithm
+// bellmanFordQueue is a queue for the Queue-based Bellman ford algorithm.
 type bellmanFordQueue struct {
 
-	// queue holds the nodes which need to be relaxed
+	// queue holds the nodes which need to be relaxed.
 	queue linear.NodeQueue
 
-	// onQueue keeps track whether a node is on the queue or not
+	// onQueue keeps track whether a node is on the queue or not.
 	onQueue []bool
 
-	// indexOf contains a mapping holding the id of a node with its index in the onQueue array
+	// indexOf contains a mapping holding the id of a node with its index in the onQueue array.
 	indexOf map[int64]int
 }
 
-// enqueue adds a node to the bellmanFordQueue
+// enqueue adds a node to the bellmanFordQueue.
 func (q *bellmanFordQueue) enqueue(n graph.Node) {
 	i := q.indexOf[n.ID()]
 	if q.onQueue[i] {
@@ -107,20 +107,20 @@ func (q *bellmanFordQueue) enqueue(n graph.Node) {
 	q.queue.Enqueue(n)
 }
 
-// dequeue returns the first value of the bellmanFordQueue
+// dequeue returns the first value of the bellmanFordQueue.
 func (q *bellmanFordQueue) dequeue() graph.Node {
 	n := q.queue.Dequeue()
 	q.onQueue[q.indexOf[n.ID()]] = false
 	return n
 }
 
-// len returns the amount of nodes in the bellmanFordQueue
+// len returns the amount of nodes in the bellmanFordQueue.
 func (q *bellmanFordQueue) len() int { return q.queue.Len() }
 
-// has returns true if a node with the given id is already on the queue
+// has returns true if a node with the given id is already on the queue.
 func (q bellmanFordQueue) has(id int64) bool { return q.onQueue[q.indexOf[id]] }
 
-// newBellmanFordQueue creates a new bellmanFordQueue
+// newBellmanFordQueue creates a new bellmanFordQueue.
 func newBellmanFordQueue(indexOf map[int64]int) bellmanFordQueue {
 	return bellmanFordQueue{
 		onQueue: make([]bool, len(indexOf)),

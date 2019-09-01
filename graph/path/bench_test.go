@@ -139,3 +139,46 @@ func BenchmarkAStarUndirectedmallWorld_100_5_20_2_Heur(b *testing.B) {
 	}
 	benchmarkAStarHeuristic(b, nswUndirected_100_5_20_2, h)
 }
+
+var (
+	gnpDirected_500_tenth  = gnpDirected(500, 0.1)
+	gnpDirected_1000_tenth = gnpDirected(1000, 0.1)
+	gnpDirected_2000_tenth = gnpDirected(2000, 0.1)
+	gnpDirected_500_half   = gnpDirected(500, 0.5)
+	gnpDirected_1000_half  = gnpDirected(1000, 0.5)
+	gnpDirected_2000_half  = gnpDirected(2000, 0.5)
+	gnpDirected_500_full   = gnpDirected(500, 1)
+	gnpDirected_1000_full  = gnpDirected(1000, 1)
+	gnpDirected_2000_full  = gnpDirected(2000, 1)
+)
+
+func gnpDirected(n int, p float64) graph.Directed {
+	g := simple.NewDirectedGraph()
+	gen.Gnp(g, n, p, nil)
+	return g
+}
+
+func BenchmarkBellmanFordFrom(b *testing.B) {
+	benchmarks := []struct {
+		name  string
+		graph graph.Directed
+	}{
+		{"500 tenth", gnpDirected_500_tenth},
+		{"1000 tenth", gnpDirected_1000_tenth},
+		{"2000 tenth", gnpDirected_2000_tenth},
+		{"500 half", gnpDirected_500_half},
+		{"1000 half", gnpDirected_1000_half},
+		{"2000 half", gnpDirected_2000_half},
+		{"500 full", gnpDirected_500_full},
+		{"1000 full", gnpDirected_1000_full},
+		{"2000 full", gnpDirected_2000_full},
+	}
+
+	for _, bm := range benchmarks {
+		b.Run(bm.name, func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				BellmanFordFrom(bm.graph.Node(0), bm.graph)
+			}
+		})
+	}
+}

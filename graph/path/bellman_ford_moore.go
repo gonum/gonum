@@ -35,14 +35,11 @@ func BellmanFordFrom(u graph.Node, g graph.Graph) (path Shortest, ok bool) {
 	queue := newBellmanFordQueue(path.indexOf)
 	queue.enqueue(u)
 
-	n := len(nodes)
-	// The maximum of edges in a graph is |V| * (|V| -1) which is also the worst case complexity.
+	// The maximum of edges in a graph is |V| * (|V|-1) which is also the worst case complexity.
 	// If the queue-loop has more iterations than the amount of maximum edges
 	// it indicates that we have a negative cycle.
-	maxEdges := n * (n - 1)
-	negativeCycle := false
-
-	loops := 0
+	maxEdges := len(nodes) * (len(nodes) - 1)
+	var loops int
 
 	// TODO(kortschak): Consider adding further optimisations
 	// from http://arxiv.org/abs/1111.5414.
@@ -70,23 +67,17 @@ func BellmanFordFrom(u graph.Node, g graph.Graph) (path Shortest, ok bool) {
 		}
 
 		if loops > maxEdges {
-			negativeCycle = true
-			break
+			path.hasNegativeCycle = true
+			return path, false
 		}
 		loops++
-	}
-
-	if negativeCycle {
-		path.hasNegativeCycle = true
-		return path, false
 	}
 
 	return path, true
 }
 
-// bellmanFordQueue is a queue for the Queue-based Bellman ford algorithm.
+// bellmanFordQueue is a queue for the Queue-based Bellman-Ford algorithm.
 type bellmanFordQueue struct {
-
 	// queue holds the nodes which need to be relaxed.
 	queue linear.NodeQueue
 
@@ -114,10 +105,10 @@ func (q *bellmanFordQueue) dequeue() graph.Node {
 	return n
 }
 
-// len returns the amount of nodes in the bellmanFordQueue.
+// len returns the number of nodes in the bellmanFordQueue.
 func (q *bellmanFordQueue) len() int { return q.queue.Len() }
 
-// has returns true if a node with the given id is already on the queue.
+// has returns whether a node with the given id is in the queue.
 func (q bellmanFordQueue) has(id int64) bool { return q.onQueue[q.indexOf[id]] }
 
 // newBellmanFordQueue creates a new bellmanFordQueue.

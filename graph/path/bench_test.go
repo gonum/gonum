@@ -141,15 +141,15 @@ func BenchmarkAStarUndirectedmallWorld_100_5_20_2_Heur(b *testing.B) {
 }
 
 var (
-	gnpDirected_500_tenth   = gnpDirected(500, 0.1)
-	gnpDirected_1000_tenth  = gnpDirected(1000, 0.1)
-	gnpDirected_2000_tenth 	= gnpDirected(2000, 0.1)
-	gnpDirected_500_half    = gnpDirected(500, 0.5)
-	gnpDirected_1000_half   = gnpDirected(1000, 0.5)
-	gnpDirected_2000_half  	= gnpDirected(2000, 0.5)
-	gnpDirected_500_full    = gnpDirected(500, 1)
-	gnpDirected_1000_full   = gnpDirected(1000, 1)
-	gnpDirected_2000_full  	= gnpDirected(2000, 1)
+	gnpDirected_500_tenth  = gnpDirected(500, 0.1)
+	gnpDirected_1000_tenth = gnpDirected(1000, 0.1)
+	gnpDirected_2000_tenth = gnpDirected(2000, 0.1)
+	gnpDirected_500_half   = gnpDirected(500, 0.5)
+	gnpDirected_1000_half  = gnpDirected(1000, 0.5)
+	gnpDirected_2000_half  = gnpDirected(2000, 0.5)
+	gnpDirected_500_full   = gnpDirected(500, 1)
+	gnpDirected_1000_full  = gnpDirected(1000, 1)
+	gnpDirected_2000_full  = gnpDirected(2000, 1)
 )
 
 func gnpDirected(n int, p float64) graph.Directed {
@@ -158,16 +158,27 @@ func gnpDirected(n int, p float64) graph.Directed {
 	return g
 }
 
-func benchmarkBellmanFord(b *testing.B, n int, p float64, g graph.Directed) {
-	BellmanFordFrom(g.Node(0), g)
-}
+func BenchmarkBellmanFordFrom(b *testing.B) {
+	benchmarks := []struct {
+		name  string
+		graph graph.Directed
+	}{
+		{"500 tenth", gnpDirected_500_tenth},
+		{"1000 tenth", gnpDirected_1000_tenth},
+		{"2000 tenth", gnpDirected_2000_tenth},
+		{"500 half", gnpDirected_500_half},
+		{"1000 half", gnpDirected_1000_half},
+		{"2000 half", gnpDirected_2000_half},
+		{"500 full", gnpDirected_500_full},
+		{"1000 full", gnpDirected_1000_full},
+		{"2000 full", gnpDirected_2000_full},
+	}
 
-func BenchmarkBellmanFordFrom_500_tenth(b *testing.B) { benchmarkBellmanFord(b, 500, 0.5, gnpDirected_500_tenth) }
-func BenchmarkBellmanFordFrom_1000_tenth(b *testing.B) {benchmarkBellmanFord(b, 1000, 0.5, gnpDirected_1000_tenth) }
-func BenchmarkBellmanFordFrom_2000_tenth(b *testing.B) { benchmarkBellmanFord(b, 2000, 0.5, gnpDirected_2000_tenth) }
-func BenchmarkBellmanFordFrom_500_half(b *testing.B) { benchmarkBellmanFord(b, 500, 0.5, gnpDirected_500_half) }
-func BenchmarkBellmanFordFrom_1000_half(b *testing.B) {benchmarkBellmanFord(b, 1000, 0.5, gnpDirected_1000_half) }
-func BenchmarkBellmanFordFrom_2000_half(b *testing.B) { benchmarkBellmanFord(b, 2000, 0.5, gnpDirected_2000_half) }
-func BenchmarkBellmanFordFrom_500_full(b *testing.B) { benchmarkBellmanFord(b, 500, 1, gnpDirected_500_full) }
-func BenchmarkBellmanFordFrom_1000_full(b *testing.B) {benchmarkBellmanFord(b, 1000, 1, gnpDirected_1000_full) }
-func BenchmarkBellmanFordFrom_2000_full(b *testing.B) { benchmarkBellmanFord(b, 2000, 1, gnpDirected_2000_full) }
+	for _, bm := range benchmarks {
+		b.Run(bm.name, func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				BellmanFordFrom(bm.graph.Node(0), bm.graph)
+			}
+		})
+	}
+}

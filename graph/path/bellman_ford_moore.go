@@ -5,8 +5,8 @@
 package path
 
 import (
-	"errors"
 	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/internal/linear"
 )
 
 // BellmanFordFrom returns a shortest-path tree for a shortest path from u to all nodes in
@@ -30,31 +30,26 @@ func BellmanFordFrom(u graph.Node, g graph.Graph) (path Shortest, ok bool) {
 	path = newShortestFrom(u, nodes)
 	path.dist[path.indexOf[u.ID()]] = 0
 
-	// queue to keep track which nodes need to be relaxed
-	// only nodes whose vertex distance changed in the previous iterations need to be relaxed again
-	queue := newBellmanFordQueue()
+	// Queue to keep track which nodes need to be relaxed.
+	// Only nodes whose vertex distance changed in the previous iterations need to be relaxed again.
+	queue := newBellmanFordQueue(path.indexOf)
 	queue.enqueue(u)
 
-	// bool array to keep track whether a node is on the queue or not
-	onQueue := make([]bool, len(nodes))
-	onQueue[path.indexOf[u.ID()]] = true
-
 	n := len(nodes)
-	// the maximum of edges in a graph is |V| * (|V| -1)
-	// which is also the worst case complexity
-	// íf the queue-loop has more iterations than the amount of maximum edges
-	// it indicates that we have a negative cycle
+	// The maximum of edges in a graph is |V| * (|V| -1) which is also the worst case complexity.
+	// If the queue-loop has more iterations than the amount of maximum edges
+	// it indicates that we have a negative cycle.
 	maxEdges := n * (n - 1)
 	negativeCycle := false
 
 	loops := 0
+
+	// TODO(kortschak): Consider adding further optimisations
+	// from http://arxiv.org/abs/1111.5414.
 	for queue.len() != 0 {
-		u, err := queue.dequeue()
-		if err != nil {
-			panic(err)
-		}
+		u := queue.dequeue()
 		uid := u.ID()
-		onQueue[path.indexOf[uid]] = false
+		j := path.indexOf[uid]
 
 		for _, v := range graph.NodesOf(g.From(uid)) {
 			vid := v.ID()
@@ -64,44 +59,26 @@ func BellmanFordFrom(u graph.Node, g graph.Graph) (path Shortest, ok bool) {
 				panic("bellman-ford: unexpected invalid weight")
 			}
 
-			j := path.indexOf[uid]
 			joint := path.dist[j] + w
 			if joint < path.dist[k] {
 				path.set(k, joint, j)
-				index := path.indexOf[vid]
 
-				// check if node is already in the queue
-				// we do not want any duplicates in the queue
-				if !onQueue[index] {
-					onQueue[index] = true
+				if !queue.has(vid) {
 					queue.enqueue(v)
 				}
 			}
 		}
 
-		loops++
 		if loops > maxEdges {
 			negativeCycle = true
 			break
 		}
+		loops++
 	}
 
 	if negativeCycle {
-		for j, u := range nodes {
-			uid := u.ID()
-			for _, v := range graph.NodesOf(g.From(uid)) {
-				vid := v.ID()
-				k := path.indexOf[vid]
-				w, ok := weight(uid, vid)
-				if !ok {
-					panic("bellman-ford: unexpected invalid weight")
-				}
-				if path.dist[j]+w < path.dist[k] {
-					path.hasNegativeCycle = true
-					return path, false
-				}
-			}
-		}
+		path.hasNegativeCycle = true
+		return path, false
 	}
 
 	return path, true
@@ -109,33 +86,44 @@ func BellmanFordFrom(u graph.Node, g graph.Graph) (path Shortest, ok bool) {
 
 // bellmanFordQueue is a queue for the Queue-based Bellman ford algorithm
 type bellmanFordQueue struct {
-	nodes []graph.Node
+
+	// queue holds the nodes which need to be relaxed
+	queue linear.NodeQueue
+
+	// onQueue keeps track whether a node is on the queue or not
+	onQueue []bool
+
+	// indexOf contains a mapping holding the id of a node with its index in the onQueue array
+	indexOf map[int64]int
 }
 
 // enqueue adds a node to the bellmanFordQueue
-func (b *bellmanFordQueue) enqueue(n graph.Node) {
-	b.nodes = append(b.nodes, n)
+func (q *bellmanFordQueue) enqueue(n graph.Node) {
+	i := q.indexOf[n.ID()]
+	if q.onQueue[i] {
+		panic("bellman-ford: already queued")
+	}
+	q.onQueue[i] = true
+	q.queue.Enqueue(n)
 }
 
 // dequeue returns the first value of the bellmanFordQueue
-func (b *bellmanFordQueue) dequeue() (graph.Node, error) {
-	if len(b.nodes) == 0 {
-		return nil, errors.New("queue is empty!")
-	}
-
-	u := b.nodes[0]
-	b.nodes = b.nodes[1:]
-	return u, nil
+func (q *bellmanFordQueue) dequeue() graph.Node {
+	n := q.queue.Dequeue()
+	q.onQueue[q.indexOf[n.ID()]] = false
+	return n
 }
 
 // len returns the amount of nodes in the bellmanFordQueue
-func (b *bellmanFordQueue) len() int {
-	return len(b.nodes)
-}
+func (q *bellmanFordQueue) len() int { return q.queue.Len() }
+
+// has returns true if a node with the given id is already on the queue
+func (q bellmanFordQueue) has(id int64) bool { return q.onQueue[q.indexOf[id]] }
 
 // newBellmanFordQueue creates a new bellmanFordQueue
-func newBellmanFordQueue() bellmanFordQueue {
+func newBellmanFordQueue(indexOf map[int64]int) bellmanFordQueue {
 	return bellmanFordQueue{
-		nodes: make([]graph.Node, 0),
+		onQueue: make([]bool, len(indexOf)),
+		indexOf: indexOf,
 	}
 }

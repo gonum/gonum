@@ -5,9 +5,9 @@ language: go
 # Do not move these lines; they are referred to by README.md.
 # Versions of go that are explicitly supported by gonum plus go tip.
 go:
+ - 1.13.x
  - 1.12.x
  - 1.11.x
- - 1.10.x
  - master
 
 os:
@@ -37,36 +37,36 @@ matrix:
  fast_finish: true
  exclude:
   - os: osx
-    go: 1.12.x
+    go: 1.13.x
     env: TAGS="-tags bounds"
   - os: osx
-    go: 1.12.x
+    go: 1.13.x
     env: TAGS="-tags noasm"
   - os: osx
-    go: 1.12.x
+    go: 1.13.x
     env: TAGS="-tags appengine"
 
   - os: osx
-    go: 1.11.x
+    go: 1.12.x
   - os: osx
-    go: 1.10.x
+    go: 1.11.x
   - os: osx
     go: master
 
   - os: windows
-    go: 1.12.x
+    go: 1.13.x
     env: TAGS="-tags bounds"
   - os: windows
-    go: 1.12.x
+    go: 1.13.x
     env: TAGS="-tags noasm"
   - os: windows
-    go: 1.12.x
+    go: 1.13.x
     env: TAGS="-tags appengine"
 
   - os: windows
-    go: 1.11.x
+    go: 1.12.x
   - os: windows
-    go: 1.10.x
+    go: 1.11.x
   - os: windows
     go: master
  allow_failures:

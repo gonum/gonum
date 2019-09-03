@@ -179,7 +179,7 @@ func (lu *LU) Pivot(swaps []int) []int {
 // RankOne updates an LU factorization as if a rank-one update had been applied to
 // the original matrix A, storing the result into the receiver. That is, if in
 // the original LU decomposition P * L * U = A, in the updated decomposition
-// P * L * U = A + alpha * x * y^T.
+// P * L * U = A + alpha * x * yᵀ.
 // RankOne will panic if orig does not contain a factorization.
 func (lu *LU) RankOne(orig *LU, alpha float64, x, y Vector) {
 	if !orig.isValid() {
@@ -318,7 +318,7 @@ func (m *Dense) Permutation(r int, swaps []int) {
 // SolveTo solves a system of linear equations using the LU decomposition of a matrix.
 // It computes
 //  A * X = B if trans == false
-//  A^T * X = B if trans == true
+//  Aᵀ * X = B if trans == true
 // In both cases, A is represented in LU factorized form, and the matrix X is
 // stored into dst.
 //
@@ -366,7 +366,7 @@ func (lu *LU) SolveTo(dst *Dense, trans bool, b Matrix) error {
 // SolveVecTo solves a system of linear equations using the LU decomposition of a matrix.
 // It computes
 //  A * x = b if trans == false
-//  A^T * x = b if trans == true
+//  Aᵀ * x = b if trans == true
 // In both cases, A is represented in LU factorized form, and the vector x is
 // stored into dst.
 //

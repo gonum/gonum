@@ -21,7 +21,7 @@ func TestHOGSVD(t *testing.T) {
 		{150, 150},
 		{200, 150},
 
-		// Calculating A_i*A_j^T and A_j*A_i^T fails for wide matrices.
+		// Calculating A_i*A_jᵀ and A_j*A_iᵀ fails for wide matrices.
 		{3, 5},
 	} {
 		r := test.r
@@ -67,7 +67,7 @@ func TestHOGSVD(t *testing.T) {
 
 					got.Product(u[i], sigma, v.T())
 					if !EqualApprox(&got, want, tol) {
-						t.Errorf("test %d n=%d trial %d: unexpected answer\nU_%[4]d * S_%[4]d * V^T:\n% 0.2f\nD_%d:\n% 0.2f",
+						t.Errorf("test %d n=%d trial %d: unexpected answer\nU_%[4]d * S_%[4]d * Vᵀ:\n% 0.2f\nD_%d:\n% 0.2f",
 							cas, n, trial, i, Formatted(&got, Excerpt(5)), i, Formatted(want, Excerpt(5)))
 					}
 				}

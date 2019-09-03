@@ -14,8 +14,8 @@ import (
 // Dpbtf2 computes the Cholesky factorization of a symmetric positive banded
 // matrix ab. The matrix ab is n×n with kd diagonal bands. The Cholesky
 // factorization computed is
-//  A = U^T * U if ul == blas.Upper
-//  A = L * L^T if ul == blas.Lower
+//  A = Uᵀ * U  if ul == blas.Upper
+//  A = L * Lᵀ  if ul == blas.Lower
 // ul also specifies the storage of ab. If ul == blas.Upper, then
 // ab is stored as an upper-triangular banded matrix with kd super-diagonals,
 // and if ul == blas.Lower, ab is stored as a lower-triangular banded matrix
@@ -72,7 +72,7 @@ func (Implementation) Dpbtf2(uplo blas.Uplo, n, kd int, ab []float64, ldab int) 
 
 	kld := max(1, ldab-1)
 	if uplo == blas.Upper {
-		// Compute the Cholesky factorization A = U^T * U.
+		// Compute the Cholesky factorization A = Uᵀ * U.
 		for j := 0; j < n; j++ {
 			// Compute U(j,j) and test for non-positive-definiteness.
 			ajj := ab[j*ldab]
@@ -91,7 +91,7 @@ func (Implementation) Dpbtf2(uplo blas.Uplo, n, kd int, ab []float64, ldab int) 
 		}
 		return true
 	}
-	// Compute the Cholesky factorization A = L * L^T.
+	// Compute the Cholesky factorization A = L * Lᵀ.
 	for j := 0; j < n; j++ {
 		// Compute L(j,j) and test for non-positive-definiteness.
 		ajj := ab[j*ldab+kd]

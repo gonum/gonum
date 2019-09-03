@@ -580,7 +580,7 @@ func Max(a Matrix) float64 {
 	if r == 0 || c == 0 {
 		panic(ErrShape)
 	}
-	// Max(A) = Max(A^T)
+	// Max(A) = Max(Aᵀ)
 	aU, _ := untranspose(a)
 	switch m := aU.(type) {
 	case RawMatrixer:
@@ -655,7 +655,7 @@ func Min(a Matrix) float64 {
 	if r == 0 || c == 0 {
 		panic(ErrShape)
 	}
-	// Min(A) = Min(A^T)
+	// Min(A) = Min(Aᵀ)
 	aU, _ := untranspose(a)
 	switch m := aU.(type) {
 	case RawMatrixer:

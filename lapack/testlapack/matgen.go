@@ -124,7 +124,7 @@ func Dlatm1(dst []float64, mode int, cond float64, rsign bool, dist int, rnd *ra
 
 // Dlagsy generates an n×n symmetric matrix A, by pre- and post- multiplying a
 // real diagonal matrix D with a random orthogonal matrix:
-//  A = U * D * U^T.
+//  A = U * D * Uᵀ.
 //
 // work must have length at least 2*n, otherwise Dlagsy will panic.
 //
@@ -317,7 +317,7 @@ func dlarnv(dst []float64, dist int, rnd *rand.Rand) {
 // trans specifies whether the matrix A or its transpose will be used.
 //
 // If imat is greater than 10, dlattr also generates the right hand side of the
-// linear system A*x=b, or A^T*x=b. Valid values of imat are 7, and all between 11
+// linear system A*x=b, or Aᵀ*x=b. Valid values of imat are 7, and all between 11
 // and 19, inclusive.
 //
 // b mush have length n, and work must have length 3*n, and dlattr will panic

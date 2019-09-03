@@ -49,7 +49,7 @@ func dpbtf2Test(t *testing.T, impl Dpbtf2er, rnd *rand.Rand, uplo blas.Uplo, n, 
 		t.Fatalf("%v: bad test matrix, Dpbtf2 failed", name)
 	}
 
-	// Reconstruct an symmetric band matrix from the U^T*U or L*L^T factorization, overwriting abFac.
+	// Reconstruct an symmetric band matrix from the Uᵀ*U or L*Lᵀ factorization, overwriting abFac.
 	dsbmm(uplo, n, kd, abFac, ldab)
 
 	// Compute and check the max-norm distance between the reconstructed and original matrix A.

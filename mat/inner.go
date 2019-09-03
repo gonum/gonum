@@ -11,7 +11,7 @@ import (
 )
 
 // Inner computes the generalized inner product
-//  x^T A y
+//  xᵀ A y
 // between the vectors x and y with matrix A, where x and y are treated as
 // column vectors.
 //

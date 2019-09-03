@@ -14,8 +14,8 @@ import (
 // Dpbcon returns an estimate of the reciprocal of the condition number (in the
 // 1-norm) of an n×n symmetric positive definite band matrix using the Cholesky
 // factorization
-//  A = U^T*U  if uplo == blas.Upper
-//  A = L*L^T  if uplo == blas.Lower
+//  A = Uᵀ*U  if uplo == blas.Upper
+//  A = L*Lᵀ  if uplo == blas.Lower
 // computed by Dpbtrf. The estimate is obtained for norm(inv(A)), and the
 // reciprocal of the condition number is computed as
 //  rcond = 1 / (anorm * norm(inv(A))).
@@ -77,14 +77,14 @@ func (impl Implementation) Dpbcon(uplo blas.Uplo, n, kd int, ab []float64, ldab 
 		}
 		var op1, op2 blas.Transpose
 		if uplo == blas.Upper {
-			// Multiply x by inv(U^T),
+			// Multiply x by inv(Uᵀ),
 			op1 = blas.Trans
-			// then by inv(U^T).
+			// then by inv(Uᵀ).
 			op2 = blas.NoTrans
 		} else {
 			// Multiply x by inv(L),
 			op1 = blas.NoTrans
-			// then by inv(L^T).
+			// then by inv(Lᵀ).
 			op2 = blas.Trans
 		}
 		scaleL := impl.Dlatbs(uplo, op1, blas.NonUnit, normin, n, kd, ab, ldab, x, cnorm)

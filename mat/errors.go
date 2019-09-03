@@ -37,7 +37,7 @@ const (
 	// in the matrix packages.
 	CondNorm = lapack.MaxRowSum
 
-	// CondNormTrans is the norm used to compute on A^T to get the same result as
+	// CondNormTrans is the norm used to compute on Aᵀ to get the same result as
 	// computing CondNorm on A.
 	CondNormTrans = lapack.MaxColumnSum
 )

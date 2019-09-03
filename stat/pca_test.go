@@ -182,7 +182,7 @@ tests:
 			}
 
 			// Check that the set of principal vectors is
-			// orthonormal by comparing V^T*V to the identity matrix.
+			// orthonormal by comparing Vᵀ*V to the identity matrix.
 			I := mat.NewDiagDense(c, nil)
 			for k := 0; k < c; k++ {
 				I.SetDiag(k, 1)

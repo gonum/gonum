@@ -31,7 +31,7 @@ func ExampleHOGSVD() {
 	}
 
 	v := gsvd.VTo(nil)
-	fmt.Printf("\nCommon basis vectors\n\n\tV^T = %.4f",
+	fmt.Printf("\nCommon basis vectors\n\n\tVᵀ =  %.4f",
 		mat.Formatted(v.T(), mat.Prefix("\t      ")))
 
 	// Output:
@@ -128,7 +128,7 @@ func ExampleHOGSVD() {
 	//
 	// Common basis vectors
 	//
-	// 	V^T = ⎡-0.0897  -0.4460  -0.8905⎤
+	// 	Vᵀ =  ⎡-0.0897  -0.4460  -0.8905⎤
 	// 	      ⎢-0.4911  -0.5432  -0.6810⎥
 	// 	      ⎣ 0.0644   0.2841   0.9566⎦
 }

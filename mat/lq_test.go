@@ -81,8 +81,8 @@ func TestLQSolveTo(t *testing.T) {
 			lq.SolveTo(&x, trans, b)
 
 			// Test that the normal equations hold.
-			// A^T * A * x = A^T * b if !trans
-			// A * A^T * x = A * b if trans
+			// Aᵀ * A * x = Aᵀ * b if !trans
+			// A * Aᵀ * x = A * b if trans
 			var lhs Dense
 			var rhs Dense
 			if trans {
@@ -134,8 +134,8 @@ func TestLQSolveToVec(t *testing.T) {
 			lq.SolveVecTo(&x, trans, b)
 
 			// Test that the normal equations hold.
-			// A^T * A * x = A^T * b if !trans
-			// A * A^T * x = A * b if trans
+			// Aᵀ * A * x = Aᵀ * b if !trans
+			// A * Aᵀ * x = A * b if trans
 			var lhs Dense
 			var rhs Dense
 			if trans {

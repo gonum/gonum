@@ -37,8 +37,8 @@ func ExampleGSVD() {
 
 	var q mat.Dense
 	q.Mul(gsvd.ZeroRTo(nil), gsvd.QTo(nil))
-	fmt.Printf("\nCommon basis vectors\n\n\tQ^T = %.4f\n",
-		mat.Formatted(q.T(), mat.Prefix("\t      ")))
+	fmt.Printf("\nCommon basis vectors\n\n\tQᵀ = %.4f\n",
+		mat.Formatted(q.T(), mat.Prefix("\t     ")))
 
 	// Calculate the antisymmetric angular distances for each eigenvariable.
 	fmt.Println("\nSignificance:")
@@ -74,9 +74,9 @@ func ExampleGSVD() {
 	//
 	// Common basis vectors
 	//
-	// 	Q^T = ⎡ -8172.4084   -4524.2933    4813.9616⎤
-	// 	      ⎢ 22581.8020   12397.1070  -16364.8933⎥
-	// 	      ⎣ -8910.8462  -10902.1488   15762.8719⎦
+	// 	Qᵀ = ⎡ -8172.4084   -4524.2933    4813.9616⎤
+	// 	     ⎢ 22581.8020   12397.1070  -16364.8933⎥
+	// 	     ⎣ -8910.8462  -10902.1488   15762.8719⎦
 	//
 	// Significance:
 	// 	eigenvar_0: +0.7807

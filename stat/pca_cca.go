@@ -130,8 +130,8 @@ type CC struct {
 // as Xc * Sx^{-1/2} and Yc * Sy^{-1/2} respectively, and the correlation matrix
 // between the sphered data is called the canonical correlation matrix,
 // Sx^{-1/2} * Sxy * Sy^{-1/2}. In cases where S^{-1/2} is ambiguous for some
-// covariance matrix S, S^{-1/2} is taken to be E * D^{-1/2} * E^T where S can
-// be eigendecomposed as S = E * D * E^T.
+// covariance matrix S, S^{-1/2} is taken to be E * D^{-1/2} * Eᵀ where S can
+// be eigendecomposed as S = E * D * Eᵀ.
 //
 // The canonical correlations are the correlations between the corresponding
 // pairs of canonical variables and can be obtained with c.Corrs(). Canonical

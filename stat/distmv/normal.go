@@ -118,8 +118,8 @@ func NewNormalPrecision(mu []float64, prec *mat.SymDense, src rand.Source) (norm
 // on the input evidence. The returned multivariate normal has dimension
 // n - len(observed), where n is the dimension of the original receiver. The updated
 // mean and covariance are
-//  mu = mu_un + sigma_{ob,un}^T * sigma_{ob,ob}^-1 (v - mu_ob)
-//  sigma = sigma_{un,un} - sigma_{ob,un}^T * sigma_{ob,ob}^-1 * sigma_{ob,un}
+//  mu = mu_un + sigma_{ob,un}ᵀ * sigma_{ob,ob}^-1 (v - mu_ob)
+//  sigma = sigma_{un,un} - sigma_{ob,un}ᵀ * sigma_{ob,ob}^-1 * sigma_{ob,un}
 // where mu_un and mu_ob are the original means of the unobserved and observed
 // variables respectively, sigma_{un,un} is the unobserved subset of the covariance
 // matrix, sigma_{ob,ob} is the observed subset of the covariance matrix, and

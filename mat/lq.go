@@ -24,9 +24,9 @@ type LQ struct {
 
 func (lq *LQ) updateCond(norm lapack.MatrixNorm) {
 	// Since A = L*Q, and Q is orthogonal, we get for the condition number κ
-	//  κ(A) := |A| |A^-1| = |L*Q| |(L*Q)^-1| = |L| |Q^T * L^-1|
+	//  κ(A) := |A| |A^-1| = |L*Q| |(L*Q)^-1| = |L| |Qᵀ * L^-1|
 	//        = |L| |L^-1| = κ(L),
-	// where we used that fact that Q^-1 = Q^T. However, this assumes that
+	// where we used that fact that Q^-1 = Qᵀ. However, this assumes that
 	// the matrix norm is invariant under orthogonal transformations which
 	// is not the case for CondNorm. Hopefully the error is negligible: κ
 	// is only a qualitative measure anyway.

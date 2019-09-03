@@ -62,12 +62,12 @@ func (gsvd *GSVD) succFact() bool {
 // input kind.
 //
 // The full singular value decomposition (kind == GSVDAll) deconstructs A and B as
-//  A = U * Σ₁ * [ 0 R ] * Q^T
+//  A = U * Σ₁ * [ 0 R ] * Qᵀ
 //
-//  B = V * Σ₂ * [ 0 R ] * Q^T
+//  B = V * Σ₂ * [ 0 R ] * Qᵀ
 // where Σ₁ and Σ₂ are r×(k+l) and p×(k+l) diagonal matrices of singular values, and
 // U, V and Q are r×r, p×p and c×c orthogonal matrices of singular vectors. k+l is the
-// effective numerical rank of the matrix [ A^T B^T ]^T.
+// effective numerical rank of the matrix [ Aᵀ Bᵀ ]ᵀ.
 //
 // It is frequently not necessary to compute the full GSVD. Computation time and
 // storage costs can be reduced using the appropriate kind. Either only the singular
@@ -156,7 +156,7 @@ func (gsvd *GSVD) Kind() GSVDKind {
 	return gsvd.kind
 }
 
-// Rank returns the k and l terms of the rank of [ A^T B^T ]^T.
+// Rank returns the k and l terms of the rank of [ Aᵀ Bᵀ ]ᵀ.
 func (gsvd *GSVD) Rank() (k, l int) {
 	return gsvd.k, gsvd.l
 }

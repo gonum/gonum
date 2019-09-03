@@ -77,7 +77,7 @@
 //
 // The T method is used for transposition on real matrices, and H is used for
 // conjugate transposition on complex matrices. For example, c.Mul(a.T(), b) computes
-// c = a^T * b. The mat types implement this method implicitly —
+// c = aᵀ * b. The mat types implement this method implicitly —
 // see the Transpose and Conjugate types for more details. Note that some
 // operations have a transpose as part of their definition, as in *SymDense.SymOuterK.
 //

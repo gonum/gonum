@@ -13,7 +13,7 @@ import (
 
 // Dlatbs solves a triangular banded system of equations
 //  A * x = s*b    if trans == blas.NoTrans
-//  A^T * x = s*b  if trans == blas.Trans or blas.ConjTrans
+//  Aᵀ * x = s*b  if trans == blas.Trans or blas.ConjTrans
 // where A is an upper or lower triangular band matrix, x and b are n-element
 // vectors, and s is a scaling factor chosen so that the components of x will be
 // less than the overflow threshold.
@@ -183,7 +183,7 @@ func (Implementation) Dlatbs(uplo blas.Uplo, trans blas.Transpose, diag blas.Dia
 			}
 		}
 	} else {
-		// Compute the growth in A^T * x = b.
+		// Compute the growth in Aᵀ * x = b.
 		if diag == blas.NonUnit {
 			// A is non-unit triangular.
 			//
@@ -336,7 +336,7 @@ skipComputeGrow:
 			}
 		}
 	} else {
-		// Solve A^T * x = b.
+		// Solve Aᵀ * x = b.
 		for j := jFirst; j != jLast; j += jInc {
 			// Compute x[j] = b[j] - sum A[k,j]*x[k].
 			//                       k!=j
@@ -426,7 +426,7 @@ skipComputeGrow:
 					x[j] /= tjjs
 				default:
 					// A[j,j] == 0: Set x[0:n] = 0, x[j] = 1, and scale = 0, and
-					// compute a solution A^T * x = 0.
+					// compute a solution Aᵀ * x = 0.
 					for i := range x[:n] {
 						x[i] = 0
 					}

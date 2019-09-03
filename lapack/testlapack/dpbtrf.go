@@ -54,7 +54,7 @@ func dpbtrfTest(t *testing.T, impl Dpbtrfer, uplo blas.Uplo, n, kd int, ldab int
 		t.Fatalf("%v: bad test matrix, Dpbtrf failed", name)
 	}
 
-	// Reconstruct an symmetric band matrix from the U^T*U or L*L^T factorization, overwriting abFac.
+	// Reconstruct an symmetric band matrix from the Uᵀ*U or L*Lᵀ factorization, overwriting abFac.
 	dsbmm(uplo, n, kd, abFac, ldab)
 
 	// Compute and check the max-norm distance between the reconstructed and original matrix A.
@@ -65,15 +65,15 @@ func dpbtrfTest(t *testing.T, impl Dpbtrfer, uplo blas.Uplo, n, kd int, ldab int
 }
 
 // dsbmm computes a symmetric band matrix A
-//  A = U^T*U  if uplo == blas.Upper,
-//  A = L*L^T  if uplo == blas.Lower,
+//  A = Uᵀ*U  if uplo == blas.Upper,
+//  A = L*Lᵀ  if uplo == blas.Lower,
 // where U and L is an upper, respectively lower, triangular band matrix
 // stored on entry in ab. The result is stored in-place into ab.
 func dsbmm(uplo blas.Uplo, n, kd int, ab []float64, ldab int) {
 	bi := blas64.Implementation()
 	switch uplo {
 	case blas.Upper:
-		// Compute the product U^T * U.
+		// Compute the product Uᵀ * U.
 		for k := n - 1; k >= 0; k-- {
 			klen := min(kd, n-k-1) // Number of stored off-diagonal elements in the row
 			// Add a multiple of row k of the factor U to each of rows k+1 through n.
@@ -84,7 +84,7 @@ func dsbmm(uplo blas.Uplo, n, kd int, ab []float64, ldab int) {
 			bi.Dscal(klen+1, ab[k*ldab], ab[k*ldab:], 1)
 		}
 	case blas.Lower:
-		// Compute the product L * L^T.
+		// Compute the product L * Lᵀ.
 		for k := n - 1; k >= 0; k-- {
 			kc := max(0, kd-k) // Index of the first valid element in the row
 			klen := kd - kc    // Number of stored off-diagonal elements in the row

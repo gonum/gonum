@@ -74,7 +74,7 @@ func dpbtrsTest(t *testing.T, impl Dpbtrser, rnd *rand.Rand, uplo blas.Uplo, n, 
 		}
 	}
 
-	// Solve  U^T * U * X = B  or  L * L^T * X = B.
+	// Solve  Uᵀ * U * X = B  or  L * Lᵀ * X = B.
 	impl.Dpbtrs(uplo, n, kd, nrhs, abFac, ldab, b, ldb)
 	xGot := b
 

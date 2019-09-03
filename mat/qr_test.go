@@ -105,8 +105,8 @@ func TestQRSolveTo(t *testing.T) {
 			qr.SolveTo(&x, trans, b)
 
 			// Test that the normal equations hold.
-			// A^T * A * x = A^T * b if !trans
-			// A * A^T * x = A * b if trans
+			// Aᵀ * A * x = Aᵀ * b if !trans
+			// A * Aᵀ * x = A * b if trans
 			var lhs Dense
 			var rhs Dense
 			if trans {
@@ -158,8 +158,8 @@ func TestQRSolveVecTo(t *testing.T) {
 			qr.SolveVecTo(&x, trans, b)
 
 			// Test that the normal equations hold.
-			// A^T * A * x = A^T * b if !trans
-			// A * A^T * x = A * b if trans
+			// Aᵀ * A * x = Aᵀ * b if !trans
+			// A * Aᵀ * x = A * b if trans
 			var lhs Dense
 			var rhs Dense
 			if trans {

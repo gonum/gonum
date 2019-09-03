@@ -55,8 +55,8 @@ func (c *Cholesky) updateCond(norm float64) {
 	if norm < 0 {
 		// This is an approximation. By the definition of a norm,
 		//  |AB| <= |A| |B|.
-		// Since A = U^T*U, we get for the condition number κ that
-		//  κ(A) := |A| |A^-1| = |U^T*U| |A^-1| <= |U^T| |U| |A^-1|,
+		// Since A = Uᵀ*U, we get for the condition number κ that
+		//  κ(A) := |A| |A^-1| = |Uᵀ*U| |A^-1| <= |Uᵀ| |U| |A^-1|,
 		// so this will overestimate the condition number somewhat.
 		// The norm of the original factorized matrix cannot be stored
 		// because of update possibilities.
@@ -296,7 +296,7 @@ func (c *Cholesky) RawU() Triangular {
 // UTo extracts the n×n upper triangular matrix U from a Cholesky
 // decomposition into dst and returns the result. If dst is nil a new
 // TriDense is allocated.
-//  A = U^T * U.
+//  A = Uᵀ * U.
 func (c *Cholesky) UTo(dst *TriDense) *TriDense {
 	if !c.valid() {
 		panic(badCholesky)
@@ -314,7 +314,7 @@ func (c *Cholesky) UTo(dst *TriDense) *TriDense {
 // LTo extracts the n×n lower triangular matrix L from a Cholesky
 // decomposition into dst and returns the result. If dst is nil a new
 // TriDense is allocated.
-//  A = L * L^T.
+//  A = L * Lᵀ.
 func (c *Cholesky) LTo(dst *TriDense) *TriDense {
 	if !c.valid() {
 		panic(badCholesky)
@@ -356,7 +356,7 @@ func (c *Cholesky) ToSym(dst *SymDense) *SymDense {
 		cap: n,
 	}
 	u.Copy(c.chol)
-	// Compute the product U^T*U using the algorithm from LAPACK/TESTING/LIN/dpot01.f
+	// Compute the product Uᵀ*U using the algorithm from LAPACK/TESTING/LIN/dpot01.f
 	a := u.mat.Data
 	lda := u.mat.Stride
 	bi := blas64.Implementation()
@@ -407,9 +407,9 @@ func (c *Cholesky) InverseTo(s *SymDense) error {
 // Scale multiplies the original matrix A by a positive constant using
 // its Cholesky decomposition, storing the result in-place into the receiver.
 // That is, if the original Cholesky factorization is
-//  U^T * U = A
+//  Uᵀ * U = A
 // the updated factorization is
-//  U'^T * U' = f A = A'
+//  U'ᵀ * U' = f A = A'
 // Scale panics if the constant is non-positive, or if the receiver is non-zero
 // and is of a different size from the input.
 func (c *Cholesky) Scale(f float64, orig *Cholesky) {
@@ -497,9 +497,9 @@ func (c *Cholesky) ExtendVecSym(a *Cholesky, v Vector) (ok bool) {
 // SymRankOne performs a rank-1 update of the original matrix A and refactorizes
 // its Cholesky factorization, storing the result into the receiver. That is, if
 // in the original Cholesky factorization
-//  U^T * U = A,
+//  Uᵀ * U = A,
 // in the updated factorization
-//  U'^T * U' = A + alpha * x * x^T = A'.
+//  U'ᵀ * U' = A + alpha * x * xᵀ = A'.
 //
 // Note that when alpha is negative, the updating problem may be ill-conditioned
 // and the results may be inaccurate, or the updated matrix A' may not be
@@ -605,7 +605,7 @@ func (c *Cholesky) SymRankOne(orig *Cholesky, alpha float64, x Vector) (ok bool)
 	if alpha != 1 {
 		blas64.Scal(alpha, blas64.Vector{N: n, Data: work, Inc: 1})
 	}
-	// Solve U^T * p = x storing the result into work.
+	// Solve Uᵀ * p = x storing the result into work.
 	ok = lapack64.Trtrs(blas.Trans, c.chol.RawTriangular(), blas64.General{
 		Rows:   n,
 		Cols:   1,

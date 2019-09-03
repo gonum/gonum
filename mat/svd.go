@@ -55,7 +55,7 @@ func (svd *SVD) succFact() bool {
 //
 // The full singular value decomposition (kind == SVDFull) is a factorization
 // of an m×n matrix A of the form
-//  A = U * Σ * V^T
+//  A = U * Σ * Vᵀ
 // where Σ is an m×n diagonal matrix, U is an m×m orthogonal matrix, and V is an
 // n×n orthogonal matrix. The diagonal elements of Σ are the singular values of A.
 // The first min(m,n) columns of U and V are, respectively, the left and right
@@ -64,7 +64,7 @@ func (svd *SVD) succFact() bool {
 // Significant storage space can be saved by using the thin representation of
 // the SVD (kind == SVDThin) instead of the full SVD, especially if
 // m >> n or m << n. The thin SVD finds
-//  A = U~ * Σ * V~^T
+//  A = U~ * Σ * V~ᵀ
 // where U~ is of size m×min(m,n), Σ is a diagonal matrix of size min(m,n)×min(m,n)
 // and V~ is of size n×min(m,n).
 //

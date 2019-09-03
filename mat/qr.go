@@ -24,9 +24,9 @@ type QR struct {
 
 func (qr *QR) updateCond(norm lapack.MatrixNorm) {
 	// Since A = Q*R, and Q is orthogonal, we get for the condition number κ
-	//  κ(A) := |A| |A^-1| = |Q*R| |(Q*R)^-1| = |R| |R^-1 * Q^T|
+	//  κ(A) := |A| |A^-1| = |Q*R| |(Q*R)^-1| = |R| |R^-1 * Qᵀ|
 	//        = |R| |R^-1| = κ(R),
-	// where we used that fact that Q^-1 = Q^T. However, this assumes that
+	// where we used that fact that Q^-1 = Qᵀ. However, this assumes that
 	// the matrix norm is invariant under orthogonal transformations which
 	// is not the case for CondNorm. Hopefully the error is negligible: κ
 	// is only a qualitative measure anyway.
@@ -159,7 +159,7 @@ func (qr *QR) QTo(dst *Dense) *Dense {
 //
 // The minimization problem solved depends on the input parameters.
 //  If trans == false, find X such that ||A*X - B||_2 is minimized.
-//  If trans == true, find the minimum norm solution of A^T * X = B.
+//  If trans == true, find the minimum norm solution of Aᵀ * X = B.
 // The solution matrix, X, is stored in place into dst.
 // SolveTo will panic if the receiver does not contain a factorization.
 func (qr *QR) SolveTo(dst *Dense, trans bool, b Matrix) error {

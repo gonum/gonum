@@ -298,8 +298,8 @@ func (m *Dense) Mul(a, b Matrix) {
 
 	// Some of the cases do not have a transpose option, so create
 	// temporary memory.
-	// C = A^T * B = (B^T * A)^T
-	// C^T = B^T * A.
+	// C = Aᵀ * B = (Bᵀ * A)ᵀ
+	// Cᵀ = Bᵀ * A.
 	if aU, ok := aU.(*Dense); ok {
 		if restore == nil {
 			m.checkOverlap(aU.mat)
@@ -756,7 +756,7 @@ func (m *Dense) Apply(fn func(i, j int, v float64) float64, a Matrix) {
 // RankOne performs a rank-one update to the matrix a with the vectors x and
 // y, where x and y are treated as column vectors. The result is stored in the
 // receiver. If a is zero, see Outer.
-//  m = a + alpha * x * y^T
+//  m = a + alpha * x * yᵀ
 func (m *Dense) RankOne(a Matrix, alpha float64, x, y Vector) {
 	ar, ac := a.Dims()
 	if x.Len() != ar {
@@ -811,7 +811,7 @@ func (m *Dense) RankOne(a Matrix, alpha float64, x, y Vector) {
 
 // Outer calculates the outer product of the vectors x and y, where x and y
 // are treated as column vectors, and stores the result in the receiver.
-//  m = alpha * x * y^T
+//  m = alpha * x * yᵀ
 // In order to update an existing matrix, see RankOne.
 func (m *Dense) Outer(alpha float64, x, y Vector) {
 	r, c := x.Len(), y.Len()

@@ -127,7 +127,7 @@ func (w *Wishart) logProbSymChol(cholX *mat.Cholesky) float64 {
 	//  (ν-d-1)/2 * log(|X|) - tr(V^-1 * X)/2  - (ν*d/2)*log(2) - ν/2 * log(|V|) - log(Γ_d(ν/2))
 	logdetx := cholX.LogDet()
 
-	// Compute tr(V^-1 * X), using the fact that X = U^T * U.
+	// Compute tr(V^-1 * X), using the fact that X = Uᵀ * U.
 	var u mat.TriDense
 	cholX.UTo(&u)
 
@@ -162,7 +162,7 @@ func (w *Wishart) RandChol(c *mat.Cholesky) *mat.Cholesky {
 	// to avoid the dim^2 allocation here.
 
 	// Use the Bartlett Decomposition, which says that
-	//  X ~ L A A^T L^T
+	//  X ~ L A Aᵀ Lᵀ
 	// Where A is a lower triangular matrix in which the diagonal of A is
 	// generated from the square roots of χ^2 random variables, and the
 	// off-diagonals are generated from standard normal variables.
@@ -170,8 +170,8 @@ func (w *Wishart) RandChol(c *mat.Cholesky) *mat.Cholesky {
 	//
 	// mat64 works with the upper triagular decomposition, so we would like to do
 	// the same. We can instead say that
-	//  U_x = L_x^T = (L * A)^T = A^T * L^T = A^T * U
-	// Instead, generate A^T, by using the procedure above, except as an upper
+	//  U_x = L_xᵀ = (L * A)ᵀ = Aᵀ * Lᵀ = Aᵀ * U
+	// Instead, generate Aᵀ, by using the procedure above, except as an upper
 	// triangular matrix.
 	norm := distuv.Normal{
 		Mu:    0,

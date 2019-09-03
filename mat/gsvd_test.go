@@ -66,11 +66,11 @@ func TestGSVD(t *testing.T) {
 			d1R.Mul(sigma1, zeroR)
 			d2R.Mul(sigma2, zeroR)
 			if !EqualApprox(&ansU, &d1R, tol) {
-				t.Errorf("Answer mismatch with GSVDU|GSVDV|GSVDQ\nU^T * A * Q:\n% 0.2f\nΣ₁ * [ 0 R ]:\n% 0.2f",
+				t.Errorf("Answer mismatch with GSVDU|GSVDV|GSVDQ\nUᵀ * A * Q:\n% 0.2f\nΣ₁ * [ 0 R ]:\n% 0.2f",
 					Formatted(&ansU), Formatted(&d1R))
 			}
 			if !EqualApprox(&ansV, &d2R, tol) {
-				t.Errorf("Answer mismatch with GSVDU|GSVDV|GSVDQ\nV^T * B  *Q:\n% 0.2f\nΣ₂ * [ 0 R ]:\n% 0.2f",
+				t.Errorf("Answer mismatch with GSVDU|GSVDV|GSVDQ\nVᵀ * B  *Q:\n% 0.2f\nΣ₂ * [ 0 R ]:\n% 0.2f",
 					Formatted(&d2R), Formatted(&ansV))
 			}
 

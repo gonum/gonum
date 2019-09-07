@@ -490,7 +490,7 @@ func PermutationIndex(perm []int, n, k int) int {
 		panic(badSetSize)
 	}
 	if len(perm) != k {
-		panic("combin: bad length combination")
+		panic("combin: bad length permutation")
 	}
 	contains := make(map[int]struct{}, k)
 	for _, v := range perm {
@@ -544,11 +544,11 @@ func (s sortInts) Swap(i, j int) {
 // between the integers and the NumPermutations(n, k) number of possible permutations.
 // IndexToPermutation returns the inverse of PermutationIndex.
 //
-// The combination is stored in-place into dst if dst is non-nil, otherwise
+// The permutation is stored in-place into dst if dst is non-nil, otherwise
 // a new slice is allocated and returned.
 //
 // IndexToPermutation panics if n or k are non-negative, if k is greater than n,
-// or if idx is not in [0, NumCombinations(n,k)-1]. IndexToPermutation will also panic
+// or if idx is not in [0, NumPermutations(n,k)-1]. IndexToPermutation will also panic
 // if dst is non-nil and len(dst) is not k.
 func IndexToPermutation(dst []int, idx, n, k int) []int {
 	nPerm := NumPermutations(n, k)

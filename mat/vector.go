@@ -595,35 +595,26 @@ func (v *VecDense) MulVec(a Matrix, b Vector) {
 		return
 	case *SymDense:
 		if fast {
-			amat := aU.mat
-			// We don't know that a is a *SymDense, so make
-			// a temporary SymDense to check overlap.
-			(&SymDense{mat: amat}).checkOverlap(v.asGeneral())
-			blas64.Symv(1, amat, bmat, 0, v.mat)
+			aU.checkOverlap(v.asGeneral())
+			blas64.Symv(1, aU.mat, bmat, 0, v.mat)
 			return
 		}
 	case *TriDense:
 		v.CopyVec(b)
-		amat := aU.mat
-		// We don't know that a is a *TriDense, so make
-		// a temporary TriDense to check overlap.
-		(&TriDense{mat: amat}).checkOverlap(v.asGeneral())
+		aU.checkOverlap(v.asGeneral())
 		ta := blas.NoTrans
 		if trans {
 			ta = blas.Trans
 		}
-		blas64.Trmv(ta, amat, v.mat)
+		blas64.Trmv(ta, aU.mat, v.mat)
 	case *Dense:
 		if fast {
-			amat := aU.mat
-			// We don't know that a is a *Dense, so make
-			// a temporary Dense to check overlap.
-			(&Dense{mat: amat}).checkOverlap(v.asGeneral())
+			aU.checkOverlap(v.asGeneral())
 			t := blas.NoTrans
 			if trans {
 				t = blas.Trans
 			}
-			blas64.Gemv(t, 1, amat, bmat, 0, v.mat)
+			blas64.Gemv(t, 1, aU.mat, bmat, 0, v.mat)
 			return
 		}
 	default:

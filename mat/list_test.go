@@ -1467,7 +1467,7 @@ func testTwoInput(t *testing.T,
 					// Ensure that b is the correct transpose type if applicable.
 					// The receiver is always a concrete type so use it.
 					bSame := receiver
-					u, ok = b.(Untransposer)
+					_, ok = b.(Untransposer)
 					if ok {
 						bSame = retranspose(b, receiver)
 					}

@@ -517,7 +517,7 @@ func PermutationIndex(perm []int, n, k int) int {
 	for i := range idx {
 		idx[i] = i
 	}
-	s := sortInts{sort.IntSlice(tmp), idx}
+	s := sortInts{tmp, idx}
 	sort.Sort(s)
 	order := make([]int, len(perm))
 	for i, v := range idx {
@@ -529,12 +529,20 @@ func PermutationIndex(perm []int, n, k int) int {
 }
 
 type sortInts struct {
-	sort.IntSlice
-	idx []int
+	data []int
+	idx  []int
+}
+
+func (s sortInts) Len() int {
+	return len(s.data)
+}
+
+func (s sortInts) Less(i, j int) bool {
+	return s.data[i] < s.data[j]
 }
 
 func (s sortInts) Swap(i, j int) {
-	s.IntSlice.Swap(i, j)
+	s.data[i], s.data[j] = s.data[j], s.data[i]
 	s.idx[i], s.idx[j] = s.idx[j], s.idx[i]
 }
 

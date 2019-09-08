@@ -20,13 +20,6 @@ func ExampleCombinations() {
 	for i, v := range list {
 		fmt.Println(i, v)
 	}
-	// The returned values can be used to index into a data structure.
-	data := []string{"a", "b", "c", "d", "e"}
-	cs := combin.Combinations(len(data), 2)
-	fmt.Println("\nString combinations:")
-	for _, c := range cs {
-		fmt.Printf("%s%s\n", data[c[0]], data[c[1]])
-	}
 	// This is easy, but the number of combinations  can be very large,
 	// and generating all at once can use a lot of memory.
 
@@ -42,8 +35,18 @@ func ExampleCombinations() {
 	// 7 [1 2 4]
 	// 8 [1 3 4]
 	// 9 [2 3 4]
-	//
-	// String combinations:
+}
+
+func ExampleCombinations_Index() {
+	// The integer slices returned from Combinations can be used to index
+	// into a data structure.
+	data := []string{"a", "b", "c", "d", "e"}
+	cs := combin.Combinations(len(data), 2)
+	for _, c := range cs {
+		fmt.Printf("%s%s\n", data[c[0]], data[c[1]])
+	}
+
+	// Output:
 	// ab
 	// ac
 	// ad
@@ -54,7 +57,6 @@ func ExampleCombinations() {
 	// cd
 	// ce
 	// de
-
 }
 
 func ExampleCombinationGenerator() {
@@ -119,14 +121,7 @@ func ExamplePermutations() {
 	for i, v := range list {
 		fmt.Println(i, v)
 	}
-	// The returned values can be used to index into a data structure.
-	data := []string{"a", "b", "c", "d"}
-	ps := combin.Permutations(len(data), 2)
-	fmt.Println("\nString permutations:")
-	for _, p := range ps {
-		fmt.Printf("%s%s\n", data[p[0]], data[p[1]])
-	}
-	// This is easy, but the number of permutations  can be very large,
+	// This is easy, but the number of permutations can be very large,
 	// and generating all at once can use a lot of memory.
 
 	// Output:
@@ -155,8 +150,18 @@ func ExamplePermutations() {
 	// 21 [2 3 1]
 	// 22 [3 1 2]
 	// 23 [3 2 1]
-	//
-	// String permutations:
+}
+
+func ExamplePermutations_Index() {
+	// The integer slices returned from Permutations can be used to index
+	// into a data structure.
+	data := []string{"a", "b", "c", "d"}
+	cs := combin.Permutations(len(data), 2)
+	for _, c := range cs {
+		fmt.Printf("%s%s\n", data[c[0]], data[c[1]])
+	}
+
+	// Output:
 	// ab
 	// ba
 	// ac
@@ -183,6 +188,7 @@ func ExamplePermutationGenerator() {
 		fmt.Println(idx, gen.Permutation(nil)) // can also store in-place.
 		idx++
 	}
+
 	// Output:
 	// 0 [0 1 2]
 	// 1 [0 2 1]

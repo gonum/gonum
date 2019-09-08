@@ -248,7 +248,7 @@ func (g *DirectedGraph) SetLine(l graph.Line) {
 
 	switch {
 	case g.from[fid] == nil:
-		g.from[fid] = map[int64]map[int64]graph.Line{tid: map[int64]graph.Line{lid: l}}
+		g.from[fid] = map[int64]map[int64]graph.Line{tid: {lid: l}}
 	case g.from[fid][tid] == nil:
 		g.from[fid][tid] = map[int64]graph.Line{lid: l}
 	default:
@@ -256,7 +256,7 @@ func (g *DirectedGraph) SetLine(l graph.Line) {
 	}
 	switch {
 	case g.to[tid] == nil:
-		g.to[tid] = map[int64]map[int64]graph.Line{fid: map[int64]graph.Line{lid: l}}
+		g.to[tid] = map[int64]map[int64]graph.Line{fid: {lid: l}}
 	case g.to[tid][fid] == nil:
 		g.to[tid][fid] = map[int64]graph.Line{lid: l}
 	default:

@@ -134,8 +134,8 @@ func TestDenseMarshalTo(t *testing.T) {
 		if !bytes.Equal(buf.Bytes(), test.raw) {
 			t.Errorf("error encoding test-%d: bytes mismatch.\n got=%q\nwant=%q\n",
 				i,
-				string(buf.Bytes()),
-				string(test.raw),
+				buf.Bytes(),
+				test.raw,
 			)
 			continue
 		}
@@ -415,8 +415,8 @@ func TestVecDenseMarshalTo(t *testing.T) {
 		if !bytes.Equal(buf.Bytes(), test.raw) {
 			t.Errorf("error encoding test-%d: bytes mismatch.\n got=%q\nwant=%q\n",
 				i,
-				string(buf.Bytes()),
-				string(test.raw),
+				buf.Bytes(),
+				test.raw,
 			)
 			continue
 		}

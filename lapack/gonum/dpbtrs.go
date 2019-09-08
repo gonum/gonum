@@ -64,5 +64,4 @@ func (Implementation) Dpbtrs(uplo blas.Uplo, n, kd, nrhs int, ab []float64, ldab
 			bi.Dtbsv(blas.Lower, blas.Trans, blas.NonUnit, n, kd, ab, ldab, b[j:], ldb)
 		}
 	}
-	return
 }

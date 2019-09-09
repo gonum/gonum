@@ -47,7 +47,7 @@ func NewDense(r, c int, data []float64) *Dense {
 		if r == 0 || c == 0 {
 			panic(ErrZeroLength)
 		}
-		panic("mat: negative dimension")
+		panic(ErrNegativeDimension)
 	}
 	if data != nil && r*c != len(data) {
 		panic(ErrShape)
@@ -65,6 +65,27 @@ func NewDense(r, c int, data []float64) *Dense {
 		capRows: r,
 		capCols: c,
 	}
+}
+
+// ReuseAs changes the receiver if it IsZero() to be of size r×c.
+//
+// ReuseAs re-uses the backing data slice if it has sufficient capacity,
+// otherwise a new slice is allocated. The data is then zeroed.
+//
+// ReuseAs panics if the receiver is not zero-sized, and panics if
+// the input sizes are less than one. To zero a matrix for re-use,
+// Reset should be used.
+func (m *Dense) ReuseAs(r, c int) {
+	if r <= 0 || c <= 0 {
+		if r == 0 || c == 0 {
+			panic(ErrZeroLength)
+		}
+		panic(ErrNegativeDimension)
+	}
+	if !m.IsZero() {
+		panic("mat: ReuseAs called on non-zero matrix")
+	}
+	m.reuseAsZeroed(r, c)
 }
 
 // reuseAs resizes an empty matrix to a r×c matrix,

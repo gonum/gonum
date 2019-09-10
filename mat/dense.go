@@ -88,11 +88,12 @@ func (m *Dense) ReuseAs(r, c int) {
 	m.reuseAsZeroed(r, c)
 }
 
-// reuseAs resizes an empty matrix to a r×c matrix,
-// or checks that a non-empty matrix is r×c.
+// reuseAsNonZeroed resizes an empty matrix to a r×c matrix,
+// or checks that a non-empty matrix is r×c. It does not zero
+// the data in the receiver.
 //
 // reuseAs must be kept in sync with reuseAsZeroed.
-func (m *Dense) reuseAs(r, c int) {
+func (m *Dense) reuseAsNonZeroed(r, c int) {
 	if m.mat.Rows > m.capRows || m.mat.Cols > m.capCols {
 		// Panic as a string, not a mat.Error.
 		panic("mat: caps not correctly set")
@@ -539,7 +540,7 @@ func (m *Dense) Stack(a, b Matrix) {
 		panic(ErrShape)
 	}
 
-	m.reuseAs(ar+br, ac)
+	m.reuseAsNonZeroed(ar+br, ac)
 
 	m.Copy(a)
 	w := m.Slice(ar, ar+br, 0, bc).(*Dense)
@@ -557,7 +558,7 @@ func (m *Dense) Augment(a, b Matrix) {
 		panic(ErrShape)
 	}
 
-	m.reuseAs(ar, ac+bc)
+	m.reuseAsNonZeroed(ar, ac+bc)
 
 	m.Copy(a)
 	w := m.Slice(0, br, ac, ac+bc).(*Dense)

@@ -173,7 +173,7 @@ func (gsvd *HOGSVD) UTo(dst *Dense, n int) *Dense {
 		r, c := gsvd.b[n].Dims()
 		dst = NewDense(r, c, nil)
 	} else {
-		dst.reuseAs(gsvd.b[n].Dims())
+		dst.reuseAsNonZeroed(gsvd.b[n].Dims())
 	}
 	dst.Copy(&gsvd.b[n])
 	var v VecDense
@@ -226,7 +226,7 @@ func (gsvd *HOGSVD) VTo(dst *Dense) *Dense {
 		r, c := gsvd.v.Dims()
 		dst = NewDense(r, c, nil)
 	} else {
-		dst.reuseAs(gsvd.v.Dims())
+		dst.reuseAsNonZeroed(gsvd.v.Dims())
 	}
 	dst.Copy(gsvd.v)
 	return dst

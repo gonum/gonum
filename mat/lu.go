@@ -72,7 +72,7 @@ func (lu *LU) factorize(a Matrix, norm lapack.MatrixNorm) {
 		lu.lu = NewDense(r, r, nil)
 	} else {
 		lu.lu.Reset()
-		lu.lu.reuseAs(r, r)
+		lu.lu.reuseAsNonZeroed(r, r)
 	}
 	lu.lu.Copy(a)
 	if cap(lu.pivot) < r {
@@ -205,7 +205,7 @@ func (lu *LU) RankOne(orig *LU, alpha float64, x, y Vector) {
 			if lu.lu == nil {
 				lu.lu = NewDense(n, n, nil)
 			} else {
-				lu.lu.reuseAs(n, n)
+				lu.lu.reuseAsNonZeroed(n, n)
 			}
 		} else if len(lu.pivot) != n {
 			panic(ErrShape)
@@ -304,7 +304,7 @@ func (lu *LU) UTo(dst *TriDense) *TriDense {
 // and all other elements equal to zero. swaps[i] specifies the row with which
 // i will be swapped, which is equivalent to the non-zero column of row i.
 func (m *Dense) Permutation(r int, swaps []int) {
-	m.reuseAs(r, r)
+	m.reuseAsNonZeroed(r, r)
 	for i := 0; i < r; i++ {
 		zero(m.mat.Data[i*m.mat.Stride : i*m.mat.Stride+r])
 		v := swaps[i]
@@ -341,7 +341,7 @@ func (lu *LU) SolveTo(dst *Dense, trans bool, b Matrix) error {
 		return Condition(math.Inf(1))
 	}
 
-	dst.reuseAs(n, bc)
+	dst.reuseAsNonZeroed(n, bc)
 	bU, _ := untranspose(b)
 	var restore func()
 	if dst == bU {

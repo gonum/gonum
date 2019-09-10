@@ -109,7 +109,7 @@ func (e *EigenSym) VectorsTo(dst *Dense) *Dense {
 	if dst == nil {
 		dst = NewDense(r, c, nil)
 	} else {
-		dst.reuseAs(r, c)
+		dst.reuseAsNonZeroed(r, c)
 	}
 	dst.Copy(e.vectors)
 	return dst

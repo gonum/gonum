@@ -24,7 +24,7 @@ func (m *Dense) Solve(a, b Matrix) error {
 	if ar != br {
 		panic(ErrShape)
 	}
-	m.reuseAs(ac, bc)
+	m.reuseAsNonZeroed(ac, bc)
 
 	// TODO(btracey): Add special cases for SymDense, etc.
 	aU, aTrans := untranspose(a)

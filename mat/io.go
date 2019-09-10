@@ -175,7 +175,7 @@ func (m *Dense) UnmarshalBinary(data []byte) error {
 	}
 
 	p := headerSize
-	m.reuseAs(int(rows), int(cols))
+	m.reuseAsNonZeroed(int(rows), int(cols))
 	for i := range m.mat.Data {
 		m.mat.Data[i] = math.Float64frombits(binary.LittleEndian.Uint64(data[p : p+sizeFloat64]))
 		p += sizeFloat64
@@ -226,7 +226,7 @@ func (m *Dense) UnmarshalBinaryFrom(r io.Reader) (int, error) {
 		return n, errTooBig
 	}
 
-	m.reuseAs(int(rows), int(cols))
+	m.reuseAsNonZeroed(int(rows), int(cols))
 	var b [8]byte
 	for i := range m.mat.Data {
 		nn, err := readFull(r, b[:])

@@ -23,7 +23,7 @@ func (m *Dense) Add(a, b Matrix) {
 
 	aU, _ := untransposeExtract(a)
 	bU, _ := untransposeExtract(b)
-	m.reuseAs(ar, ac)
+	m.reuseAsNonZeroed(ar, ac)
 
 	if arm, ok := a.(*Dense); ok {
 		if brm, ok := b.(*Dense); ok {
@@ -72,7 +72,7 @@ func (m *Dense) Sub(a, b Matrix) {
 
 	aU, _ := untransposeExtract(a)
 	bU, _ := untransposeExtract(b)
-	m.reuseAs(ar, ac)
+	m.reuseAsNonZeroed(ar, ac)
 
 	if arm, ok := a.(*Dense); ok {
 		if brm, ok := b.(*Dense); ok {
@@ -122,7 +122,7 @@ func (m *Dense) MulElem(a, b Matrix) {
 
 	aU, _ := untransposeExtract(a)
 	bU, _ := untransposeExtract(b)
-	m.reuseAs(ar, ac)
+	m.reuseAsNonZeroed(ar, ac)
 
 	if arm, ok := a.(*Dense); ok {
 		if brm, ok := b.(*Dense); ok {
@@ -172,7 +172,7 @@ func (m *Dense) DivElem(a, b Matrix) {
 
 	aU, _ := untransposeExtract(a)
 	bU, _ := untransposeExtract(b)
-	m.reuseAs(ar, ac)
+	m.reuseAsNonZeroed(ar, ac)
 
 	if arm, ok := a.(*Dense); ok {
 		if brm, ok := b.(*Dense); ok {
@@ -220,7 +220,7 @@ func (m *Dense) Inverse(a Matrix) error {
 	if r != c {
 		panic(ErrSquare)
 	}
-	m.reuseAs(a.Dims())
+	m.reuseAsNonZeroed(a.Dims())
 	aU, aTrans := untransposeExtract(a)
 	switch rm := aU.(type) {
 	case *Dense:
@@ -278,7 +278,7 @@ func (m *Dense) Mul(a, b Matrix) {
 
 	aU, aTrans := untransposeExtract(a)
 	bU, bTrans := untransposeExtract(b)
-	m.reuseAs(ar, bc)
+	m.reuseAsNonZeroed(ar, bc)
 	var restore func()
 	if m == aU {
 		m, restore = m.isolatedWorkspace(aU)
@@ -471,7 +471,7 @@ func (m *Dense) Exp(a Matrix) {
 		panic(ErrShape)
 	}
 
-	m.reuseAs(r, r)
+	m.reuseAsNonZeroed(r, r)
 	if r == 1 {
 		m.mat.Data[0] = math.Exp(a.At(0, 0))
 		return
@@ -633,7 +633,7 @@ func (m *Dense) Pow(a Matrix, n int) {
 		panic(ErrShape)
 	}
 
-	m.reuseAs(r, c)
+	m.reuseAsNonZeroed(r, c)
 
 	// Take possible fast paths.
 	switch n {
@@ -679,7 +679,7 @@ func (m *Dense) Pow(a Matrix, n int) {
 func (m *Dense) Scale(f float64, a Matrix) {
 	ar, ac := a.Dims()
 
-	m.reuseAs(ar, ac)
+	m.reuseAsNonZeroed(ar, ac)
 
 	aU, aTrans := untransposeExtract(a)
 	if rm, ok := aU.(*Dense); ok {
@@ -719,7 +719,7 @@ func (m *Dense) Scale(f float64, a Matrix) {
 func (m *Dense) Apply(fn func(i, j int, v float64) float64, a Matrix) {
 	ar, ac := a.Dims()
 
-	m.reuseAs(ar, ac)
+	m.reuseAsNonZeroed(ar, ac)
 
 	aU, aTrans := untransposeExtract(a)
 	if rm, ok := aU.(*Dense); ok {
@@ -794,14 +794,14 @@ func (m *Dense) RankOne(a Matrix, alpha float64, x, y Vector) {
 
 	if fast {
 		if m != a {
-			m.reuseAs(ar, ac)
+			m.reuseAsNonZeroed(ar, ac)
 			m.Copy(a)
 		}
 		blas64.Ger(alpha, xmat, ymat, m.mat)
 		return
 	}
 
-	m.reuseAs(ar, ac)
+	m.reuseAsNonZeroed(ar, ac)
 	for i := 0; i < ar; i++ {
 		for j := 0; j < ac; j++ {
 			m.set(i, j, a.At(i, j)+alpha*x.AtVec(i)*y.AtVec(j))

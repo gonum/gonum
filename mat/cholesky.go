@@ -220,7 +220,7 @@ func (c *Cholesky) SolveTo(dst *Dense, b Matrix) error {
 		panic(ErrShape)
 	}
 
-	dst.reuseAs(bm, bn)
+	dst.reuseAsNonZeroed(bm, bn)
 	if b != dst {
 		dst.Copy(b)
 	}

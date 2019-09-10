@@ -83,7 +83,7 @@ func (m *Dense) ReuseAs(r, c int) {
 		panic(ErrNegativeDimension)
 	}
 	if !m.IsZero() {
-		panic("mat: ReuseAs called on non-zero matrix")
+		panic(ErrReuseNonZero)
 	}
 	m.reuseAsZeroed(r, c)
 }

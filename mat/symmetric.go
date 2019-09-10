@@ -134,6 +134,27 @@ func (s *SymDense) Reset() {
 	s.mat.Data = s.mat.Data[:0]
 }
 
+// ReuseAsSym changes the receiver if it IsZero() to be of size n×n.
+//
+// ReuseAsSym re-uses the backing data slice if it has sufficient capacity,
+// otherwise a new slice is allocated. The data is then zeroed.
+//
+// ReuseAsSym panics if the receiver is not zero-sized, and panics if
+// the input size is less than one. To zero a matrix for re-use,
+// Reset should be used.
+func (s *SymDense) ReuseAsSym(n int) {
+	if n <= 0 {
+		if n == 0 {
+			panic(ErrZeroLength)
+		}
+		panic(ErrNegativeDimension)
+	}
+	if !s.IsZero() {
+		panic(ErrReuseNonZero)
+	}
+	s.reuseAsZeroed(n)
+}
+
 // Zero sets all of the matrix elements to zero.
 func (s *SymDense) Zero() {
 	for i := 0; i < s.mat.N; i++ {
@@ -174,6 +195,11 @@ func (s *SymDense) reuseAs(n int) {
 	if s.mat.N != n {
 		panic(ErrShape)
 	}
+}
+
+func (s *SymDense) reuseAsZeroed(n int) {
+	s.reuseAs(n)
+	s.Zero()
 }
 
 func (s *SymDense) isolatedWorkspace(a Symmetric) (w *SymDense, restore func()) {

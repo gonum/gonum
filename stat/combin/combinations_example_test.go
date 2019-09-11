@@ -37,7 +37,7 @@ func ExampleCombinations() {
 	// 9 [2 3 4]
 }
 
-func ExampleCombinations_Index() {
+func ExampleCombinations_index() {
 	// The integer slices returned from Combinations can be used to index
 	// into a data structure.
 	data := []string{"a", "b", "c", "d", "e"}
@@ -152,7 +152,7 @@ func ExamplePermutations() {
 	// 23 [3 2 1]
 }
 
-func ExamplePermutations_Index() {
+func ExamplePermutations_index() {
 	// The integer slices returned from Permutations can be used to index
 	// into a data structure.
 	data := []string{"a", "b", "c", "d"}

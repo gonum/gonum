@@ -297,3 +297,45 @@ func TestCartesian(t *testing.T) {
 		t.Errorf("cartesian data mismatch.\nwant:\n%v\ngot:\n%v", want, got)
 	}
 }
+
+func TestPermutationIndex(t *testing.T) {
+	for cas, s := range []struct {
+		n, k int
+	}{
+		{6, 3},
+		{4, 4},
+		{10, 1},
+		{8, 2},
+	} {
+		n := s.n
+		k := s.k
+		perms := make(map[string]struct{})
+		for i := 0; i < NumPermutations(n, k); i++ {
+			perm := IndexToPermutation(nil, i, n, k)
+			idx := PermutationIndex(perm, n, k)
+			if idx != i {
+				t.Errorf("Cas %d: permutation mismatch. Want %d, got %d", cas, i, idx)
+			}
+			perms[intSliceToKey(perm)] = struct{}{}
+		}
+		if len(perms) != NumPermutations(n, k) {
+			t.Errorf("Case %d: not all generated combinations were unique", cas)
+		}
+	}
+}
+
+func TestPermutationGenerator(t *testing.T) {
+	for n := 0; n <= 7; n++ {
+		for k := 1; k <= n; k++ {
+			permutations := Permutations(n, k)
+			pg := NewPermutationGenerator(n, k)
+			genPerms := make([][]int, 0, len(permutations))
+			for pg.Next() {
+				genPerms = append(genPerms, pg.Permutation(nil))
+			}
+			if !intSosMatch(permutations, genPerms) {
+				t.Errorf("Permutations and generated permutations do not match. n = %v, k = %v", n, k)
+			}
+		}
+	}
+}

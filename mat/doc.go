@@ -51,6 +51,8 @@
 //  - var a mat.Dense
 //  - a := NewDense(0, 0, make([]float64, 0, 100))
 //  - a.Reset()
+// Reset should not be used when multiple different matrices share the same backing
+// data slice. This can cause unexpected data modifications after being resized.
 // A zero-value matrix can not be sliced even if it does have an adequately sized
 // backing data slice, but can be expanded using its Grow method if it exists.
 //

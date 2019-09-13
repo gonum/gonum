@@ -12,6 +12,8 @@ import (
 var (
 	symBandDense *SymBandDense
 	_            Matrix           = symBandDense
+	_            allMatrix        = symBandDense
+	_            denseMatrix      = symBandDense
 	_            Symmetric        = symBandDense
 	_            Banded           = symBandDense
 	_            SymBanded        = symBandDense
@@ -155,6 +157,25 @@ func (s *SymBandDense) SetRawSymBand(mat blas64.SymmetricBand) {
 		panic("mat: blas64.SymmetricBand does not have blas.Upper storage")
 	}
 	s.mat = mat
+}
+
+// IsZero returns whether the receiver is zero-sized. Zero-sized matrices can be the
+// receiver for size-restricted operations. Dense matrices can be zeroed using Reset.
+func (s *SymBandDense) IsZero() bool {
+	return s.mat.Stride == 0
+}
+
+// Reset zeros the dimensions of the matrix so that it can be reused as the
+// receiver of a dimensionally restricted operation.
+//
+// Reset should not be used when the matrix shares backing data.
+// See the Reseter interface for more information.
+func (s *SymBandDense) Reset() {
+	s.mat.N = 0
+	s.mat.K = 0
+	s.mat.Stride = 0
+	s.mat.Uplo = 0
+	s.mat.Data = s.mat.Data[:0:0]
 }
 
 // Zero sets all of the matrix elements to zero.

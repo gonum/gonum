@@ -261,7 +261,7 @@ func (lu *LU) LTo(dst *TriDense) *TriDense {
 	if dst == nil {
 		dst = NewTriDense(n, Lower, nil)
 	} else {
-		dst.reuseAs(n, Lower)
+		dst.reuseAsNonZeroed(n, Lower)
 	}
 	// Extract the lower triangular elements.
 	for i := 0; i < n; i++ {
@@ -288,7 +288,7 @@ func (lu *LU) UTo(dst *TriDense) *TriDense {
 	if dst == nil {
 		dst = NewTriDense(n, Upper, nil)
 	} else {
-		dst.reuseAs(n, Upper)
+		dst.reuseAsNonZeroed(n, Upper)
 	}
 	// Extract the upper triangular elements.
 	for i := 0; i < n; i++ {
@@ -384,7 +384,7 @@ func (lu *LU) SolveVecTo(dst *VecDense, trans bool, b Vector) error {
 	}
 	switch rv := b.(type) {
 	default:
-		dst.reuseAs(n)
+		dst.reuseAsNonZeroed(n)
 		return lu.SolveTo(dst.asDense(), trans, b)
 	case RawVectorer:
 		if dst != b {
@@ -396,7 +396,7 @@ func (lu *LU) SolveVecTo(dst *VecDense, trans bool, b Vector) error {
 			return Condition(math.Inf(1))
 		}
 
-		dst.reuseAs(n)
+		dst.reuseAsNonZeroed(n)
 		var restore func()
 		if dst == b {
 			dst, restore = dst.isolatedWorkspace(b)

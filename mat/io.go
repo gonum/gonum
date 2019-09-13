@@ -362,7 +362,7 @@ func (v *VecDense) UnmarshalBinary(data []byte) error {
 	}
 
 	p := headerSize
-	v.reuseAs(int(n))
+	v.reuseAsNonZeroed(int(n))
 	for i := range v.mat.Data {
 		v.mat.Data[i] = math.Float64frombits(binary.LittleEndian.Uint64(data[p : p+sizeFloat64]))
 		p += sizeFloat64
@@ -407,7 +407,7 @@ func (v *VecDense) UnmarshalBinaryFrom(r io.Reader) (int, error) {
 		return n, errTooBig
 	}
 
-	v.reuseAs(int(l))
+	v.reuseAsNonZeroed(int(l))
 	var b [8]byte
 	for i := range v.mat.Data {
 		nn, err := readFull(r, b[:])

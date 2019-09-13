@@ -254,9 +254,9 @@ func (lq *LQ) SolveVecTo(dst *VecDense, trans bool, b Vector) error {
 		bm = b.asDense()
 	}
 	if trans {
-		dst.reuseAs(r)
+		dst.reuseAsNonZeroed(r)
 	} else {
-		dst.reuseAs(c)
+		dst.reuseAsNonZeroed(c)
 	}
 	return lq.SolveTo(dst.asDense(), trans, bm)
 }

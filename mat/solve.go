@@ -121,7 +121,7 @@ func (v *VecDense) SolveVec(a Matrix, b Vector) error {
 		if v != b {
 			v.checkOverlap(bmat)
 		}
-		v.reuseAs(c)
+		v.reuseAsNonZeroed(c)
 		m := v.asDense()
 		// We conditionally create bm as m when b and v are identical
 		// to prevent the overlap detection code from identifying m
@@ -134,7 +134,7 @@ func (v *VecDense) SolveVec(a Matrix, b Vector) error {
 		return m.Solve(a, bm)
 	}
 
-	v.reuseAs(c)
+	v.reuseAsNonZeroed(c)
 	m := v.asDense()
 	return m.Solve(a, b)
 }

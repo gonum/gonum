@@ -528,6 +528,111 @@ func TestNormZero(t *testing.T) {
 	}
 }
 
+func TestRank(t *testing.T) {
+	tests := []struct {
+		name    string
+		a       Matrix
+		epsilon float64
+		want    int
+	}{
+		{
+			name:    "1x1",
+			a:       NewDense(1, 1, []float64{1}),
+			epsilon: 0,
+			want:    1,
+		},
+		{
+			name:    "1x2",
+			a:       NewDense(1, 2, []float64{1, 1}),
+			epsilon: 0,
+			want:    1,
+		},
+		{
+			name: "zero",
+			a: NewDense(3, 3, []float64{
+				0, 0, 0,
+				0, 0, 0,
+				0, 0, 0,
+			}),
+			epsilon: 0,
+			want:    0,
+		},
+		{
+			name: "tall",
+			a: NewDense(10, 5, []float64{
+				1, 2, 3, 4, 5,
+				1, 2, 3, 4, 5,
+				0, 1, 2, 3, 4,
+				0, 1, 2, 3, 4,
+				0, 0, 1, 2, 3,
+				0, 0, 1, 2, 3,
+				0, 0, 0, 1, 2,
+				0, 0, 0, 1, 2,
+				0, 0, 0, 0, 1,
+				0, 0, 0, 0, 1,
+			}),
+			epsilon: 0,
+			want:    5,
+		},
+		{
+			name: "square-full",
+			a: NewDense(5, 5, []float64{
+				1, 2, 3, 4, 5,
+				0, 1, 2, 3, 4,
+				0, 0, 1, 2, 3,
+				0, 0, 0, 1, 2,
+				0, 0, 0, 0, 1,
+			}),
+			epsilon: 0,
+			want:    5,
+		},
+		{
+			name: "square-deficient",
+			a: NewDense(5, 5, []float64{
+				0, 1, 2, 3, 4,
+				0, 2, 4, 6, 8,
+				0, 0, 1, 2, 3,
+				0, 0, 0, 0, 1,
+				0, 0, 0, 0, 2,
+			}),
+			epsilon: 0,
+			want:    3,
+		},
+		{
+			name: "float-point-error",
+			a: NewDense(4, 4, []float64{
+				1e-11, 0, 0, 0,
+				0, 2e-11, 0, 0,
+				0, 0, 3e-11, 0,
+				0, 0, 0, 4e-11,
+			}),
+			epsilon: 1e-10,
+			want:    0,
+		},
+		{
+			name: "float-point-correct",
+			a: NewDense(4, 4, []float64{
+				1e-11, 0, 0, 0,
+				0, 2e-11, 0, 0,
+				0, 0, 3e-11, 0,
+				0, 0, 0, 4e-11,
+			}),
+			epsilon: 1e-11,
+			want:    4,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := Rank(tt.a, tt.epsilon); got != tt.want {
+				t.Errorf("Rank mismatch. Got %v, want %v", got, tt.want)
+			}
+			if got := Rank(tt.a.T(), tt.epsilon); got != tt.want {
+				t.Errorf("Rank of transpose mismatch. Got %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestSum(t *testing.T) {
 	f := func(a Matrix) interface{} {
 		return Sum(a)

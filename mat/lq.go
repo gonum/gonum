@@ -98,7 +98,7 @@ func (lq *LQ) LTo(dst *Dense) *Dense {
 	if dst == nil {
 		dst = NewDense(r, c, nil)
 	} else {
-		dst.reuseAs(r, c)
+		dst.reuseAsNonZeroed(r, c)
 	}
 
 	// Disguise the LQ as a lower triangular.
@@ -183,12 +183,12 @@ func (lq *LQ) SolveTo(dst *Dense, trans bool, b Matrix) error {
 		if c != br {
 			panic(ErrShape)
 		}
-		dst.reuseAs(r, bc)
+		dst.reuseAsNonZeroed(r, bc)
 	} else {
 		if r != br {
 			panic(ErrShape)
 		}
-		dst.reuseAs(c, bc)
+		dst.reuseAsNonZeroed(c, bc)
 	}
 	// Do not need to worry about overlap between x and b because w has its own
 	// independent storage.
@@ -254,9 +254,9 @@ func (lq *LQ) SolveVecTo(dst *VecDense, trans bool, b Vector) error {
 		bm = b.asDense()
 	}
 	if trans {
-		dst.reuseAs(r)
+		dst.reuseAsNonZeroed(r)
 	} else {
-		dst.reuseAs(c)
+		dst.reuseAsNonZeroed(c)
 	}
 	return lq.SolveTo(dst.asDense(), trans, bm)
 }

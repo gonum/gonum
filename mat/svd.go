@@ -199,7 +199,7 @@ func (svd *SVD) UTo(dst *Dense) *Dense {
 	if dst == nil {
 		dst = NewDense(r, c, nil)
 	} else {
-		dst.reuseAs(r, c)
+		dst.reuseAsNonZeroed(r, c)
 	}
 
 	tmp := &Dense{
@@ -233,7 +233,7 @@ func (svd *SVD) VTo(dst *Dense) *Dense {
 	if dst == nil {
 		dst = NewDense(c, r, nil)
 	} else {
-		dst.reuseAs(c, r)
+		dst.reuseAsNonZeroed(c, r)
 	}
 
 	tmp := &Dense{

@@ -344,7 +344,7 @@ func (gsvd *GSVD) UTo(dst *Dense) *Dense {
 	if dst == nil {
 		dst = NewDense(r, c, nil)
 	} else {
-		dst.reuseAs(r, c)
+		dst.reuseAsNonZeroed(r, c)
 	}
 
 	tmp := &Dense{
@@ -373,7 +373,7 @@ func (gsvd *GSVD) VTo(dst *Dense) *Dense {
 	if dst == nil {
 		dst = NewDense(r, c, nil)
 	} else {
-		dst.reuseAs(r, c)
+		dst.reuseAsNonZeroed(r, c)
 	}
 
 	tmp := &Dense{
@@ -402,7 +402,7 @@ func (gsvd *GSVD) QTo(dst *Dense) *Dense {
 	if dst == nil {
 		dst = NewDense(r, c, nil)
 	} else {
-		dst.reuseAs(r, c)
+		dst.reuseAsNonZeroed(r, c)
 	}
 
 	tmp := &Dense{

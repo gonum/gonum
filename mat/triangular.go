@@ -15,6 +15,8 @@ import (
 var (
 	triDense *TriDense
 	_        Matrix            = triDense
+	_        allMatrix         = triDense
+	_        denseMatrix       = triDense
 	_        Triangular        = triDense
 	_        RawTriangular     = triDense
 	_        MutableTriangular = triDense
@@ -233,6 +235,7 @@ func (t *TriDense) SetRawTriangular(mat blas64.Triangular) {
 // Reset zeros the dimensions of the matrix so that it can be reused as the
 // receiver of a dimensionally restricted operation.
 //
+// Reset should not be used when the matrix shares backing data.
 // See the Reseter interface for more information.
 func (t *TriDense) Reset() {
 	// N and Stride must be zeroed in unison.
@@ -274,10 +277,32 @@ func untransposeTri(a Triangular) (Triangular, bool) {
 	return a, false
 }
 
-// reuseAs resizes a zero receiver to an n×n triangular matrix with the given
-// orientation. If the receiver is non-zero, reuseAs checks that the receiver
+// ReuseAsTri changes the receiver if it IsZero() to be of size n×n.
+//
+// ReuseAsTri re-uses the backing data slice if it has sufficient capacity,
+// otherwise a new slice is allocated. The data is then zeroed.
+//
+// ReuseAsTri panics if the receiver is not zero-sized, and panics if
+// the input size is less than one. To zero the receiver for re-use,
+// Reset should be used.
+func (t *TriDense) ReuseAsTri(n int, kind TriKind) {
+	if n <= 0 {
+		if n == 0 {
+			panic(ErrZeroLength)
+		}
+		panic(ErrNegativeDimension)
+	}
+	if !t.IsZero() {
+		panic(ErrReuseNonZero)
+	}
+	t.reuseAsZeroed(n, kind)
+}
+
+// reuseAsNonZeroed resizes a zero receiver to an n×n triangular matrix with the given
+// orientation. If the receiver is non-zero, reuseAsNonZeroed checks that the receiver
 // is the correct size and orientation.
-func (t *TriDense) reuseAs(n int, kind TriKind) {
+func (t *TriDense) reuseAsNonZeroed(n int, kind TriKind) {
+	// reuseAsNonZeroed must be kept in sync with reuseAsZeroed.
 	if n == 0 {
 		panic(ErrZeroLength)
 	}
@@ -305,6 +330,41 @@ func (t *TriDense) reuseAs(n int, kind TriKind) {
 	if t.mat.Uplo != ul {
 		panic(ErrTriangle)
 	}
+}
+
+// reuseAsZeroed resizes a zero receiver to an n×n triangular matrix with the given
+// orientation. If the receiver is non-zero, reuseAsZeroed checks that the receiver
+// is the correct size and orientation. It then zeros out the matrix data.
+func (t *TriDense) reuseAsZeroed(n int, kind TriKind) {
+	// reuseAsZeroed must be kept in sync with reuseAsNonZeroed.
+	if n == 0 {
+		panic(ErrZeroLength)
+	}
+	ul := blas.Lower
+	if kind == Upper {
+		ul = blas.Upper
+	}
+	if t.mat.N > t.cap {
+		panic(badTriCap)
+	}
+	if t.IsZero() {
+		t.mat = blas64.Triangular{
+			N:      n,
+			Stride: n,
+			Diag:   blas.NonUnit,
+			Data:   useZeroed(t.mat.Data, n*n),
+			Uplo:   ul,
+		}
+		t.cap = n
+		return
+	}
+	if t.mat.N != n {
+		panic(ErrShape)
+	}
+	if t.mat.Uplo != ul {
+		panic(ErrTriangle)
+	}
+	t.Zero()
 }
 
 // isolatedWorkspace returns a new TriDense matrix w with the size of a and
@@ -406,7 +466,7 @@ func (t *TriDense) Copy(a Matrix) (r, c int) {
 func (t *TriDense) InverseTri(a Triangular) error {
 	t.checkOverlapMatrix(a)
 	n, _ := a.Triangle()
-	t.reuseAs(a.Triangle())
+	t.reuseAsNonZeroed(a.Triangle())
 	t.Copy(a)
 	work := getFloats(3*n, false)
 	iwork := getInts(n, false)
@@ -443,7 +503,7 @@ func (t *TriDense) MulTri(a, b Triangular) {
 	bU, _ := untransposeTri(b)
 	t.checkOverlapMatrix(bU)
 	t.checkOverlapMatrix(aU)
-	t.reuseAs(n, kind)
+	t.reuseAsNonZeroed(n, kind)
 	var restore func()
 	if t == aU {
 		t, restore = t.isolatedWorkspace(aU)
@@ -506,7 +566,7 @@ func (t *TriDense) MulTri(a, b Triangular) {
 // the input, or ScaleTri will panic.
 func (t *TriDense) ScaleTri(f float64, a Triangular) {
 	n, kind := a.Triangle()
-	t.reuseAs(n, kind)
+	t.reuseAsNonZeroed(n, kind)
 
 	// TODO(btracey): Improve the set of fast-paths.
 	switch a := a.(type) {

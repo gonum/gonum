@@ -16,6 +16,8 @@ var (
 
 	triBandDense *TriBandDense
 	_            Matrix           = triBandDense
+	_            allMatrix        = triBandDense
+	_            denseMatrix      = triBandDense
 	_            Triangular       = triBandDense
 	_            Banded           = triBandDense
 	_            TriBanded        = triBandDense

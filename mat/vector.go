@@ -13,9 +13,10 @@ import (
 var (
 	vector *VecDense
 
-	_ Matrix  = vector
-	_ Vector  = vector
-	_ Reseter = vector
+	_ Matrix    = vector
+	_ allMatrix = vector
+	_ Vector    = vector
+	_ Reseter   = vector
 )
 
 // Vector is a vector.
@@ -252,7 +253,7 @@ func (v *VecDense) ScaleVec(alpha float64, a Vector) {
 		return
 	}
 
-	v.reuseAs(n)
+	v.reuseAsNonZeroed(n)
 
 	if rv, ok := a.(RawVectorer); ok {
 		mat := rv.RawVector()
@@ -310,7 +311,7 @@ func (v *VecDense) AddScaledVec(a Vector, alpha float64, b Vector) {
 		fast = false
 	}
 
-	v.reuseAs(ar)
+	v.reuseAsNonZeroed(ar)
 
 	switch {
 	case alpha == 0: // v <- a
@@ -353,7 +354,7 @@ func (v *VecDense) AddVec(a, b Vector) {
 		panic(ErrShape)
 	}
 
-	v.reuseAs(ar)
+	v.reuseAsNonZeroed(ar)
 
 	aU, _ := untransposeExtract(a)
 	bU, _ := untransposeExtract(b)
@@ -396,7 +397,7 @@ func (v *VecDense) SubVec(a, b Vector) {
 		panic(ErrShape)
 	}
 
-	v.reuseAs(ar)
+	v.reuseAsNonZeroed(ar)
 
 	aU, _ := untransposeExtract(a)
 	bU, _ := untransposeExtract(b)
@@ -440,7 +441,7 @@ func (v *VecDense) MulElemVec(a, b Vector) {
 		panic(ErrShape)
 	}
 
-	v.reuseAs(ar)
+	v.reuseAsNonZeroed(ar)
 
 	aU, _ := untransposeExtract(a)
 	bU, _ := untransposeExtract(b)
@@ -489,7 +490,7 @@ func (v *VecDense) DivElemVec(a, b Vector) {
 		panic(ErrShape)
 	}
 
-	v.reuseAs(ar)
+	v.reuseAsNonZeroed(ar)
 
 	aU, _ := untransposeExtract(a)
 	bU, _ := untransposeExtract(b)
@@ -550,7 +551,7 @@ func (v *VecDense) MulVec(a Matrix, b Vector) {
 		fast = false
 	}
 
-	v.reuseAs(r)
+	v.reuseAsNonZeroed(r)
 	var restore func()
 	if v == aU {
 		v, restore = v.isolatedWorkspace(aU.(*VecDense))
@@ -639,9 +640,31 @@ func (v *VecDense) MulVec(a Matrix, b Vector) {
 	}
 }
 
-// reuseAs resizes an empty vector to a r×1 vector,
+// ReuseAsVec changes the receiver if it IsZero() to be of size n×1.
+//
+// ReuseAsVec re-uses the backing data slice if it has sufficient capacity,
+// otherwise a new slice is allocated. The data is then zeroed.
+//
+// ReuseAsVec panics if the receiver is not zero-sized, and panics if
+// the input size is less than one. To zero the receiver for re-use,
+// Reset should be used.
+func (v *VecDense) ReuseAsVec(n int) {
+	if n <= 0 {
+		if n == 0 {
+			panic(ErrZeroLength)
+		}
+		panic(ErrNegativeDimension)
+	}
+	if !v.IsZero() {
+		panic(ErrReuseNonZero)
+	}
+	v.reuseAsZeroed(n)
+}
+
+// reuseAsNonZeroed resizes an empty vector to a r×1 vector,
 // or checks that a non-empty matrix is r×1.
-func (v *VecDense) reuseAs(r int) {
+func (v *VecDense) reuseAsNonZeroed(r int) {
+	// reuseAsNonZeroed must be kept in sync with reuseAsZeroed.
 	if r == 0 {
 		panic(ErrZeroLength)
 	}
@@ -656,6 +679,27 @@ func (v *VecDense) reuseAs(r int) {
 	if r != v.mat.N {
 		panic(ErrShape)
 	}
+}
+
+// reuseAsZeroed resizes an empty vector to a r×1 vector,
+// or checks that a non-empty matrix is r×1.
+func (v *VecDense) reuseAsZeroed(r int) {
+	// reuseAsZeroed must be kept in sync with reuseAsNonZeroed.
+	if r == 0 {
+		panic(ErrZeroLength)
+	}
+	if v.IsZero() {
+		v.mat = blas64.Vector{
+			N:    r,
+			Inc:  1,
+			Data: useZeroed(v.mat.Data, r),
+		}
+		return
+	}
+	if r != v.mat.N {
+		panic(ErrShape)
+	}
+	v.Zero()
 }
 
 // IsZero returns whether the receiver is zero-sized. Zero-sized vectors can be the

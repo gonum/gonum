@@ -114,7 +114,9 @@ type Error struct{ string }
 func (err Error) Error() string { return err.string }
 
 var (
+	ErrNegativeDimension   = Error{"matrix: negative dimension"}
 	ErrIndexOutOfRange     = Error{"matrix: index out of range"}
+	ErrReuseNonZero        = Error{"mat: reuse of non-zero matrix"}
 	ErrRowAccess           = Error{"matrix: row index out of range"}
 	ErrColAccess           = Error{"matrix: column index out of range"}
 	ErrVectorAccess        = Error{"matrix: vector index out of range"}

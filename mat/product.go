@@ -31,7 +31,7 @@ func (m *Dense) Product(factors ...Matrix) {
 		}
 		return
 	case 1:
-		m.reuseAs(factors[0].Dims())
+		m.reuseAsNonZeroed(factors[0].Dims())
 		m.Copy(factors[0])
 		return
 	case 2:
@@ -43,7 +43,7 @@ func (m *Dense) Product(factors ...Matrix) {
 	p := newMultiplier(m, factors)
 	p.optimize()
 	result := p.multiply()
-	m.reuseAs(result.Dims())
+	m.reuseAsNonZeroed(result.Dims())
 	m.Copy(result)
 	putWorkspace(result)
 }

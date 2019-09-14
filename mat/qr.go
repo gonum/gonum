@@ -98,7 +98,7 @@ func (qr *QR) RTo(dst *Dense) *Dense {
 	if dst == nil {
 		dst = NewDense(r, c, nil)
 	} else {
-		dst.reuseAs(r, c)
+		dst.reuseAsNonZeroed(r, c)
 	}
 
 	// Disguise the QR as an upper triangular
@@ -178,12 +178,12 @@ func (qr *QR) SolveTo(dst *Dense, trans bool, b Matrix) error {
 		if c != br {
 			panic(ErrShape)
 		}
-		dst.reuseAs(r, bc)
+		dst.reuseAsNonZeroed(r, bc)
 	} else {
 		if r != br {
 			panic(ErrShape)
 		}
-		dst.reuseAs(c, bc)
+		dst.reuseAsNonZeroed(c, bc)
 	}
 	// Do not need to worry about overlap between m and b because x has its own
 	// independent storage.
@@ -250,9 +250,9 @@ func (qr *QR) SolveVecTo(dst *VecDense, trans bool, b Vector) error {
 		bm = b.asDense()
 	}
 	if trans {
-		dst.reuseAs(r)
+		dst.reuseAsNonZeroed(r)
 	} else {
-		dst.reuseAs(c)
+		dst.reuseAsNonZeroed(c)
 	}
 	return qr.SolveTo(dst.asDense(), trans, bm)
 

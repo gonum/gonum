@@ -6,7 +6,14 @@ package mat
 
 import "gonum.org/v1/gonum/blas/cblas128"
 
-// Dense is a dense matrix representation with complex data.
+var (
+	cDense *CDense
+
+	_ CMatrix   = cDense
+	_ allMatrix = cDense
+)
+
+// CDense is a dense matrix representation with complex data.
 type CDense struct {
 	mat cblas128.General
 
@@ -62,7 +69,7 @@ func NewCDense(r, c int, data []complex128) *CDense {
 // or checks that a non-empty matrix is r×c.
 //
 // reuseAs must be kept in sync with reuseAsZeroed.
-func (m *CDense) reuseAs(r, c int) {
+func (m *CDense) reuseAsNonZeroed(r, c int) {
 	if m.mat.Rows > m.capRows || m.mat.Cols > m.capCols {
 		// Panic as a string, not a mat.Error.
 		panic("mat: caps not correctly set")
@@ -115,6 +122,7 @@ func (m *CDense) reuseAsZeroed(r, c int) {
 // Reset zeros the dimensions of the matrix so that it can be reused as the
 // receiver of a dimensionally restricted operation.
 //
+// Reset should not be used when the matrix shares backing data.
 // See the Reseter interface for more information.
 func (m *CDense) Reset() {
 	// Row, Cols and Stride must be zeroed in unison.

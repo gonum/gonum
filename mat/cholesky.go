@@ -220,7 +220,7 @@ func (c *Cholesky) SolveTo(dst *Dense, b Matrix) error {
 		panic(ErrShape)
 	}
 
-	dst.reuseAs(bm, bn)
+	dst.reuseAsNonZeroed(bm, bn)
 	if b != dst {
 		dst.Copy(b)
 	}
@@ -267,14 +267,14 @@ func (c *Cholesky) SolveVecTo(dst *VecDense, b Vector) error {
 	}
 	switch rv := b.(type) {
 	default:
-		dst.reuseAs(n)
+		dst.reuseAsNonZeroed(n)
 		return c.SolveTo(dst.asDense(), b)
 	case RawVectorer:
 		bmat := rv.RawVector()
 		if dst != b {
 			dst.checkOverlap(bmat)
 		}
-		dst.reuseAs(n)
+		dst.reuseAsNonZeroed(n)
 		if dst != b {
 			dst.CopyVec(b)
 		}
@@ -305,7 +305,7 @@ func (c *Cholesky) UTo(dst *TriDense) *TriDense {
 	if dst == nil {
 		dst = NewTriDense(n, Upper, make([]float64, n*n))
 	} else {
-		dst.reuseAs(n, Upper)
+		dst.reuseAsNonZeroed(n, Upper)
 	}
 	dst.Copy(c.chol)
 	return dst
@@ -323,7 +323,7 @@ func (c *Cholesky) LTo(dst *TriDense) *TriDense {
 	if dst == nil {
 		dst = NewTriDense(n, Lower, make([]float64, n*n))
 	} else {
-		dst.reuseAs(n, Lower)
+		dst.reuseAsNonZeroed(n, Lower)
 	}
 	dst.Copy(c.chol.TTri())
 	return dst
@@ -340,7 +340,7 @@ func (c *Cholesky) ToSym(dst *SymDense) *SymDense {
 	if dst == nil {
 		dst = NewSymDense(n, nil)
 	} else {
-		dst.reuseAs(n)
+		dst.reuseAsNonZeroed(n)
 	}
 	// Create a TriDense representing the Cholesky factor U with dst's
 	// backing slice.
@@ -378,7 +378,7 @@ func (c *Cholesky) InverseTo(s *SymDense) error {
 	if !c.valid() {
 		panic(badCholesky)
 	}
-	s.reuseAs(c.chol.mat.N)
+	s.reuseAsNonZeroed(c.chol.mat.N)
 	// Create a TriDense representing the Cholesky factor U with the backing
 	// slice from s.
 	// Operations on u are reflected in s.

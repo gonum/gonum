@@ -109,7 +109,7 @@ func (e *EigenSym) VectorsTo(dst *Dense) *Dense {
 	if dst == nil {
 		dst = NewDense(r, c, nil)
 	} else {
-		dst.reuseAs(r, c)
+		dst.reuseAsNonZeroed(r, c)
 	}
 	dst.Copy(e.vectors)
 	return dst
@@ -321,7 +321,7 @@ func (e *Eigen) VectorsTo(dst *CDense) *CDense {
 	if dst == nil {
 		dst = NewCDense(e.n, e.n, nil)
 	} else {
-		dst.reuseAs(e.n, e.n)
+		dst.reuseAsNonZeroed(e.n, e.n)
 	}
 	dst.Copy(e.rVectors)
 	return dst
@@ -343,7 +343,7 @@ func (e *Eigen) LeftVectorsTo(dst *CDense) *CDense {
 	if dst == nil {
 		dst = NewCDense(e.n, e.n, nil)
 	} else {
-		dst.reuseAs(e.n, e.n)
+		dst.reuseAsNonZeroed(e.n, e.n)
 	}
 	dst.Copy(e.lVectors)
 	return dst

@@ -626,7 +626,7 @@ func (m *Dense) Exp(a Matrix) {
 // in the receiver. Pow will panic if n is negative or if a is not square.
 func (m *Dense) Pow(a Matrix, n int) {
 	if n < 0 {
-		panic("matrix: illegal power")
+		panic("mat: illegal power")
 	}
 	r, c := a.Dims()
 	if r != c {

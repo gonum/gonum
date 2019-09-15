@@ -35,7 +35,8 @@ type Matrix interface {
 // Dense types, especially helpful when adding new features.
 type allMatrix interface {
 	Reseter
-	IsZero() bool
+	IsEmpty() bool
+	Zero()
 }
 
 // denseMatrix represents the extra set of methods that all Dense Matrix types

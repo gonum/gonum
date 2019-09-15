@@ -77,7 +77,7 @@ func (m *CDense) reuseAsNonZeroed(r, c int) {
 	if r == 0 || c == 0 {
 		panic(ErrZeroLength)
 	}
-	if m.IsZero() {
+	if m.IsEmpty() {
 		m.mat = cblas128.General{
 			Rows:   r,
 			Cols:   c,
@@ -102,7 +102,7 @@ func (m *CDense) reuseAsZeroed(r, c int) {
 	if r == 0 || c == 0 {
 		panic(ErrZeroLength)
 	}
-	if m.IsZero() {
+	if m.IsEmpty() {
 		m.mat = cblas128.General{
 			Rows:   r,
 			Cols:   c,
@@ -131,9 +131,9 @@ func (m *CDense) Reset() {
 	m.mat.Data = m.mat.Data[:0]
 }
 
-// IsZero returns whether the receiver is zero-sized. Zero-sized matrices can be the
-// receiver for size-restricted operations. CDense matrices can be zeroed using Reset.
-func (m *CDense) IsZero() bool {
+// IsEmpty returns whether the receiver is empty. Empty matrices can be the
+// receiver for size-restricted operations. The receiver can be zeroed using Reset.
+func (m *CDense) IsEmpty() bool {
 	// It must be the case that m.Dims() returns
 	// zeros in this case. See comment in Reset().
 	return m.mat.Stride == 0

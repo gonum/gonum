@@ -410,7 +410,7 @@ func (c *Cholesky) InverseTo(s *SymDense) error {
 //  Uᵀ * U = A
 // the updated factorization is
 //  U'ᵀ * U' = f A = A'
-// Scale panics if the constant is non-positive, or if the receiver is non-zero
+// Scale panics if the constant is non-positive, or if the receiver is non-empty
 // and is of a different size from the input.
 func (c *Cholesky) Scale(f float64, orig *Cholesky) {
 	if !orig.valid() {
@@ -669,5 +669,5 @@ func (c *Cholesky) SymRankOne(orig *Cholesky, alpha float64, x Vector) (ok bool)
 }
 
 func (c *Cholesky) valid() bool {
-	return c.chol != nil && !c.chol.IsZero()
+	return c.chol != nil && !c.chol.IsEmpty()
 }

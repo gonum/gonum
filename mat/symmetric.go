@@ -126,7 +126,7 @@ func (s *SymDense) SetRawSymmetric(mat blas64.Symmetric) {
 	s.mat = mat
 }
 
-// Reset zeros the dimensions of the matrix so that it can be reused as the
+// Reset empties the matrix so that it can be reused as the
 // receiver of a dimensionally restricted operation.
 //
 // Reset should not be used when the matrix shares backing data.
@@ -137,13 +137,13 @@ func (s *SymDense) Reset() {
 	s.mat.Data = s.mat.Data[:0]
 }
 
-// ReuseAsSym changes the receiver if it IsZero() to be of size n×n.
+// ReuseAsSym changes the receiver if it IsEmpty() to be of size n×n.
 //
 // ReuseAsSym re-uses the backing data slice if it has sufficient capacity,
 // otherwise a new slice is allocated. The data is then zeroed.
 //
-// ReuseAsSym panics if the receiver is not zero-sized, and panics if
-// the input size is less than one. To zero the receiver for re-use,
+// ReuseAsSym panics if the receiver is not empty, and panics if
+// the input size is less than one. To empty the receiver for re-use,
 // Reset should be used.
 func (s *SymDense) ReuseAsSym(n int) {
 	if n <= 0 {
@@ -152,8 +152,8 @@ func (s *SymDense) ReuseAsSym(n int) {
 		}
 		panic(ErrNegativeDimension)
 	}
-	if !s.IsZero() {
-		panic(ErrReuseNonZero)
+	if !s.IsEmpty() {
+		panic(ErrReuseNonEmpty)
 	}
 	s.reuseAsZeroed(n)
 }
@@ -165,9 +165,10 @@ func (s *SymDense) Zero() {
 	}
 }
 
-// IsZero returns whether the receiver is zero-sized. Zero-sized matrices can be the
-// receiver for size-restricted operations. SymDense matrices can be zeroed using Reset.
-func (s *SymDense) IsZero() bool {
+// IsEmpty returns whether the receiver is empty. Empty matrices can be the
+// receiver for size-restricted operations. The receiver can be emptied using
+// Reset.
+func (s *SymDense) IsEmpty() bool {
 	// It must be the case that m.Dims() returns
 	// zeros in this case. See comment in Reset().
 	return s.mat.N == 0
@@ -183,7 +184,7 @@ func (s *SymDense) reuseAsNonZeroed(n int) {
 	if s.mat.N > s.cap {
 		panic(badSymCap)
 	}
-	if s.IsZero() {
+	if s.IsEmpty() {
 		s.mat = blas64.Symmetric{
 			N:      n,
 			Stride: n,
@@ -212,7 +213,7 @@ func (s *SymDense) reuseAsZeroed(n int) {
 	if s.mat.N > s.cap {
 		panic(badSymCap)
 	}
-	if s.IsZero() {
+	if s.IsEmpty() {
 		s.mat = blas64.Symmetric{
 			N:      n,
 			Stride: n,
@@ -390,7 +391,7 @@ func (s *SymDense) SymRankK(a Symmetric, alpha float64, x Matrix) {
 func (s *SymDense) SymOuterK(alpha float64, x Matrix) {
 	n, _ := x.Dims()
 	switch {
-	case s.IsZero():
+	case s.IsEmpty():
 		s.mat = blas64.Symmetric{
 			N:      n,
 			Stride: n,

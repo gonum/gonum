@@ -69,13 +69,13 @@ func NewDense(r, c int, data []float64) *Dense {
 	}
 }
 
-// ReuseAs changes the receiver if it IsZero() to be of size r×c.
+// ReuseAs changes the receiver if it IsEmpty() to be of size r×c.
 //
 // ReuseAs re-uses the backing data slice if it has sufficient capacity,
 // otherwise a new slice is allocated. The data is then zeroed.
 //
-// ReuseAs panics if the receiver is not zero-sized, and panics if
-// the input sizes are less than one. To zero the receiver for re-use,
+// ReuseAs panics if the receiver is not empty, and panics if
+// the input sizes are less than one. To empty the receiver for re-use,
 // Reset should be used.
 func (m *Dense) ReuseAs(r, c int) {
 	if r <= 0 || c <= 0 {
@@ -84,8 +84,8 @@ func (m *Dense) ReuseAs(r, c int) {
 		}
 		panic(ErrNegativeDimension)
 	}
-	if !m.IsZero() {
-		panic(ErrReuseNonZero)
+	if !m.IsEmpty() {
+		panic(ErrReuseNonEmpty)
 	}
 	m.reuseAsZeroed(r, c)
 }
@@ -102,7 +102,7 @@ func (m *Dense) reuseAsNonZeroed(r, c int) {
 	if r == 0 || c == 0 {
 		panic(ErrZeroLength)
 	}
-	if m.IsZero() {
+	if m.IsEmpty() {
 		m.mat = blas64.General{
 			Rows:   r,
 			Cols:   c,
@@ -130,7 +130,7 @@ func (m *Dense) reuseAsZeroed(r, c int) {
 	if r == 0 || c == 0 {
 		panic(ErrZeroLength)
 	}
-	if m.IsZero() {
+	if m.IsEmpty() {
 		m.mat = blas64.General{
 			Rows:   r,
 			Cols:   c,
@@ -171,7 +171,7 @@ func (m *Dense) isolatedWorkspace(a Matrix) (w *Dense, restore func()) {
 	}
 }
 
-// Reset zeros the dimensions of the matrix so that it can be reused as the
+// Reset empties the matrix so that it can be reused as the
 // receiver of a dimensionally restricted operation.
 //
 // Reset should not be used when the matrix shares backing data.
@@ -183,9 +183,10 @@ func (m *Dense) Reset() {
 	m.mat.Data = m.mat.Data[:0]
 }
 
-// IsZero returns whether the receiver is zero-sized. Zero-sized matrices can be the
-// receiver for size-restricted operations. Dense matrices can be zeroed using Reset.
-func (m *Dense) IsZero() bool {
+// IsEmpty returns whether the receiver is empty. Empty matrices can be the
+// receiver for size-restricted operations. The receiver can be emptied using
+// Reset.
+func (m *Dense) IsEmpty() bool {
 	// It must be the case that m.Dims() returns
 	// zeros in this case. See comment in Reset().
 	return m.mat.Stride == 0

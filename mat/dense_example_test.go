@@ -23,7 +23,7 @@ func ExampleDense_Add() {
 
 	// Add a and b, placing the result into c.
 	// Notice that the size is automatically adjusted
-	// when the receiver has zero size.
+	// when the receiver is empty (has zero size).
 	var c mat.Dense
 	c.Add(a, b)
 

@@ -129,7 +129,7 @@ func (v *VecDense) SliceVec(i, k int) Vector {
 // Dims returns the number of rows and columns in the matrix. Columns is always 1
 // for a non-Reset vector.
 func (v *VecDense) Dims() (r, c int) {
-	if v.IsZero() {
+	if v.IsEmpty() {
 		return 0, 0
 	}
 	return v.mat.N, 1
@@ -138,7 +138,7 @@ func (v *VecDense) Dims() (r, c int) {
 // Caps returns the number of rows and columns in the backing matrix. Columns is always 1
 // for a non-Reset vector.
 func (v *VecDense) Caps() (r, c int) {
-	if v.IsZero() {
+	if v.IsEmpty() {
 		return 0, 0
 	}
 	return v.Cap(), 1
@@ -151,7 +151,7 @@ func (v *VecDense) Len() int {
 
 // Cap returns the capacity of the vector.
 func (v *VecDense) Cap() int {
-	if v.IsZero() {
+	if v.IsEmpty() {
 		return 0
 	}
 	return (cap(v.mat.Data)-1)/v.mat.Inc + 1
@@ -167,9 +167,10 @@ func (v *VecDense) TVec() Vector {
 	return TransposeVec{v}
 }
 
-// Reset zeros the length of the vector so that it can be reused as the
+// Reset empties the matrix so that it can be reused as the
 // receiver of a dimensionally restricted operation.
 //
+// Reset should not be used when the matrix shares backing data.
 // See the Reseter interface for more information.
 func (v *VecDense) Reset() {
 	// No change of Inc or N to 0 may be
@@ -640,13 +641,13 @@ func (v *VecDense) MulVec(a Matrix, b Vector) {
 	}
 }
 
-// ReuseAsVec changes the receiver if it IsZero() to be of size n×1.
+// ReuseAsVec changes the receiver if it IsEmpty() to be of size n×1.
 //
 // ReuseAsVec re-uses the backing data slice if it has sufficient capacity,
 // otherwise a new slice is allocated. The data is then zeroed.
 //
-// ReuseAsVec panics if the receiver is not zero-sized, and panics if
-// the input size is less than one. To zero the receiver for re-use,
+// ReuseAsVec panics if the receiver is not empty, and panics if
+// the input size is less than one. To empty the receiver for re-use,
 // Reset should be used.
 func (v *VecDense) ReuseAsVec(n int) {
 	if n <= 0 {
@@ -655,8 +656,8 @@ func (v *VecDense) ReuseAsVec(n int) {
 		}
 		panic(ErrNegativeDimension)
 	}
-	if !v.IsZero() {
-		panic(ErrReuseNonZero)
+	if !v.IsEmpty() {
+		panic(ErrReuseNonEmpty)
 	}
 	v.reuseAsZeroed(n)
 }
@@ -668,7 +669,7 @@ func (v *VecDense) reuseAsNonZeroed(r int) {
 	if r == 0 {
 		panic(ErrZeroLength)
 	}
-	if v.IsZero() {
+	if v.IsEmpty() {
 		v.mat = blas64.Vector{
 			N:    r,
 			Inc:  1,
@@ -688,7 +689,7 @@ func (v *VecDense) reuseAsZeroed(r int) {
 	if r == 0 {
 		panic(ErrZeroLength)
 	}
-	if v.IsZero() {
+	if v.IsEmpty() {
 		v.mat = blas64.Vector{
 			N:    r,
 			Inc:  1,
@@ -702,9 +703,10 @@ func (v *VecDense) reuseAsZeroed(r int) {
 	v.Zero()
 }
 
-// IsZero returns whether the receiver is zero-sized. Zero-sized vectors can be the
-// receiver for size-restricted operations. VecDenses can be zeroed using Reset.
-func (v *VecDense) IsZero() bool {
+// IsEmpty returns whether the receiver is empty. Empty matrices can be the
+// receiver for size-restricted operations. The receiver can be emptied using
+// Reset.
+func (v *VecDense) IsEmpty() bool {
 	// It must be the case that v.Dims() returns
 	// zeros in this case. See comment in Reset().
 	return v.mat.Inc == 0
@@ -744,15 +746,15 @@ func (v *VecDense) asGeneral() blas64.General {
 }
 
 // ColViewOf reflects the column j of the RawMatrixer m, into the receiver
-// backed by the same underlying data. The length of the receiver must either be
-// zero or match the number of rows in m.
+// backed by the same underlying data. The receiver must either be empty
+// have length equal to the number of rows of m.
 func (v *VecDense) ColViewOf(m RawMatrixer, j int) {
 	rm := m.RawMatrix()
 
 	if j >= rm.Cols || j < 0 {
 		panic(ErrColAccess)
 	}
-	if !v.IsZero() && v.mat.N != rm.Rows {
+	if !v.IsEmpty() && v.mat.N != rm.Rows {
 		panic(ErrShape)
 	}
 
@@ -762,15 +764,15 @@ func (v *VecDense) ColViewOf(m RawMatrixer, j int) {
 }
 
 // RowViewOf reflects the row i of the RawMatrixer m, into the receiver
-// backed by the same underlying data. The length of the receiver must either be
-// zero or match the number of columns in m.
+// backed by the same underlying data. The receiver must either be
+// empty or have length equal to the number of columns of m.
 func (v *VecDense) RowViewOf(m RawMatrixer, i int) {
 	rm := m.RawMatrix()
 
 	if i >= rm.Rows || i < 0 {
 		panic(ErrRowAccess)
 	}
-	if !v.IsZero() && v.mat.N != rm.Cols {
+	if !v.IsEmpty() && v.mat.N != rm.Cols {
 		panic(ErrShape)
 	}
 

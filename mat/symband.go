@@ -159,13 +159,14 @@ func (s *SymBandDense) SetRawSymBand(mat blas64.SymmetricBand) {
 	s.mat = mat
 }
 
-// IsZero returns whether the receiver is zero-sized. Zero-sized matrices can be the
-// receiver for size-restricted operations. Dense matrices can be zeroed using Reset.
-func (s *SymBandDense) IsZero() bool {
+// IsEmpty returns whether the receiver is empty. Empty matrices can be the
+// receiver for size-restricted operations. The receiver can be emptied using
+// Reset.
+func (s *SymBandDense) IsEmpty() bool {
 	return s.mat.Stride == 0
 }
 
-// Reset zeros the dimensions of the matrix so that it can be reused as the
+// Reset empties the matrix so that it can be reused as the
 // receiver of a dimensionally restricted operation.
 //
 // Reset should not be used when the matrix shares backing data.

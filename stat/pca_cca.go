@@ -48,7 +48,7 @@ func (c *PC) PrincipalComponents(a mat.Matrix, weights []float64) (ok bool) {
 
 // VectorsTo returns the component direction vectors of a principal components
 // analysis. The vectors are returned in the columns of a d×min(n, d) matrix.
-// If dst is not nil it must either be zero-sized or be a d×min(n, d) matrix.
+// If dst is not nil it must either be empty or be a d×min(n, d) matrix.
 // dst will  be used as the destination for the direction vector data. If dst
 // is nil, a new mat.Dense is allocated for the destination.
 func (c *PC) VectorsTo(dst *mat.Dense) *mat.Dense {
@@ -57,7 +57,7 @@ func (c *PC) VectorsTo(dst *mat.Dense) *mat.Dense {
 	}
 
 	if dst != nil {
-		if d, n := dst.Dims(); !dst.IsZero() && (d != c.d || n != min(c.n, c.d)) {
+		if d, n := dst.Dims(); !dst.IsEmpty() && (d != c.d || n != min(c.n, c.d)) {
 			panic(mat.ErrShape)
 		}
 	}
@@ -217,7 +217,7 @@ func (c *CC) CorrsTo(dst []float64) []float64 {
 // LeftTo returns the left eigenvectors of the canonical correlation matrix if
 // spheredSpace is true. If spheredSpace is false it returns these eigenvectors
 // back-transformed to the original data space.
-// If dst is not nil it must either be zero-sized or be an xd×yd matrix where xd
+// If dst is not nil it must either be empty or be an xd×yd matrix where xd
 // and yd are the number of variables in the input x and y matrices. dst will
 // be used as the destination for the vector data. If dst is nil, a new
 // mat.Dense is allocated for the destination.
@@ -227,7 +227,7 @@ func (c *CC) LeftTo(dst *mat.Dense, spheredSpace bool) *mat.Dense {
 	}
 
 	if dst != nil {
-		if d, n := dst.Dims(); !dst.IsZero() && (n != c.yd || d != c.xd) {
+		if d, n := dst.Dims(); !dst.IsEmpty() && (n != c.yd || d != c.xd) {
 			panic(mat.ErrShape)
 		}
 	}

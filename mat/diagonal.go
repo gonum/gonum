@@ -158,7 +158,7 @@ func (d *DiagDense) TriBand() (n, k int, kind TriKind) {
 	return d.mat.N, 0, Upper
 }
 
-// Reset zeros the dimensions of the matrix so that it can be reused as the
+// Reset empties the matrix so that it can be reused as the
 // receiver of a dimensionally restricted operation.
 //
 // Reset should not be used when the matrix shares backing data.
@@ -184,7 +184,7 @@ func (d *DiagDense) DiagView() Diagonal {
 }
 
 // DiagFrom copies the diagonal of m into the receiver. The receiver must
-// be min(r, c) long or zero. Otherwise DiagFrom will panic.
+// be min(r, c) long or empty, otherwise DiagFrom will panic.
 func (d *DiagDense) DiagFrom(m Matrix) {
 	n := min(m.Dims())
 	d.reuseAsNonZeroed(n)
@@ -292,7 +292,7 @@ func (d *DiagDense) reuseAsNonZeroed(r int) {
 	if r == 0 {
 		panic(ErrZeroLength)
 	}
-	if d.IsZero() {
+	if d.IsEmpty() {
 		d.mat = blas64.Vector{
 			Inc:  1,
 			Data: use(d.mat.Data, r),
@@ -305,9 +305,10 @@ func (d *DiagDense) reuseAsNonZeroed(r int) {
 	}
 }
 
-// IsZero returns whether the receiver is zero-sized. Zero-sized vectors can be the
-// receiver for size-restricted operations. DiagDenses can be zeroed using Reset.
-func (d *DiagDense) IsZero() bool {
+// IsEmpty returns whether the receiver is empty. Empty matrices can be the
+// receiver for size-restricted operations. The receiver can be emptied using
+// Reset.
+func (d *DiagDense) IsEmpty() bool {
 	// It must be the case that d.Dims() returns
 	// zeros in this case. See comment in Reset().
 	return d.mat.Inc == 0

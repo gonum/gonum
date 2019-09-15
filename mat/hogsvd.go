@@ -128,7 +128,7 @@ func (gsvd *HOGSVD) Factorize(m ...Matrix) (ok bool) {
 	biT := getWorkspace(c, r, false)
 	defer putWorkspace(biT)
 	for i, d := range m {
-		// All calls to reset will leave a zeroed
+		// All calls to reset will leave an emptied
 		// matrix with capacity to store the result
 		// without additional allocation.
 		biT.Reset()

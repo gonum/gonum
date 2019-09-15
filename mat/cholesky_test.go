@@ -289,10 +289,10 @@ func TestCloneCholesky(t *testing.T) {
 		chol2.Clone(&chol)
 
 		if chol.cond != chol2.cond {
-			t.Errorf("condition number mismatch from zero")
+			t.Errorf("condition number mismatch from empty")
 		}
 		if !Equal(chol.chol, chol2.chol) {
-			t.Errorf("chol mismatch from zero")
+			t.Errorf("chol mismatch from empty")
 		}
 
 		// Corrupt chol2 and try again
@@ -300,10 +300,10 @@ func TestCloneCholesky(t *testing.T) {
 		chol2.chol = NewTriDense(2, Upper, nil)
 		chol2.Clone(&chol)
 		if chol.cond != chol2.cond {
-			t.Errorf("condition number mismatch from non-zero")
+			t.Errorf("condition number mismatch from non-empty")
 		}
 		if !Equal(chol.chol, chol2.chol) {
-			t.Errorf("chol mismatch from non-zero")
+			t.Errorf("chol mismatch from non-empty")
 		}
 	}
 }

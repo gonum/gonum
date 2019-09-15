@@ -785,7 +785,7 @@ func underlyingData(a Matrix) []float64 {
 
 // testMatrices is a list of matrix types to test.
 // This test relies on the fact that the implementations of Triangle do not
-// corrupt the value of Uplo when they are zero-valued. This test will fail
+// corrupt the value of Uplo when they are empty. This test will fail
 // if that changes (and some mechanism will need to be used to force the
 // correct TriKind to be read).
 var testMatrices = []Matrix{

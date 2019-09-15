@@ -18,12 +18,12 @@ import (
 // options are specified by settings. If settings is nil, the Hessian will be
 // estimated using the Forward formula and a default step size.
 //
-// If the dst matrix is zero-sized it will be resized to the correct dimensions,
+// If the dst matrix is empty it will be resized to the correct dimensions,
 // otherwise the dimensions of dst must match the length of x or Hessian will panic.
 // Hessian will panic if the derivative order of the formula is not 1.
 func Hessian(dst *mat.SymDense, f func(x []float64) float64, x []float64, settings *Settings) {
 	n := len(x)
-	if dst.IsZero() {
+	if dst.IsEmpty() {
 		*dst = *(dst.GrowSym(n).(*mat.SymDense))
 	} else if dst.Symmetric() != n {
 		panic("hessian: dst size mismatch")

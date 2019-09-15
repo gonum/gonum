@@ -88,7 +88,7 @@ func (lu *LU) factorize(a Matrix, norm lapack.MatrixNorm) {
 
 // isValid returns whether the receiver contains a factorization.
 func (lu *LU) isValid() bool {
-	return lu.lu != nil && !lu.lu.IsZero()
+	return lu.lu != nil && !lu.lu.IsEmpty()
 }
 
 // Cond returns the condition number for the factorized matrix.

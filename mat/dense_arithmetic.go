@@ -755,7 +755,7 @@ func (m *Dense) Apply(fn func(i, j int, v float64) float64, a Matrix) {
 
 // RankOne performs a rank-one update to the matrix a with the vectors x and
 // y, where x and y are treated as column vectors. The result is stored in the
-// receiver. If a is zero, see Outer.
+// receiver. The Outer method can be used instead of RankOne if a is not needed.
 //  m = a + alpha * x * yᵀ
 func (m *Dense) RankOne(a Matrix, alpha float64, x, y Vector) {
 	ar, ac := a.Dims()
@@ -816,27 +816,7 @@ func (m *Dense) RankOne(a Matrix, alpha float64, x, y Vector) {
 func (m *Dense) Outer(alpha float64, x, y Vector) {
 	r, c := x.Len(), y.Len()
 
-	// Copied from reuseAs with use replaced by useZeroed
-	// and a final zero of the matrix elements if we pass
-	// the shape checks.
-	// TODO(kortschak): Factor out into reuseZeroedAs if
-	// we find another case that needs it.
-	if m.mat.Rows > m.capRows || m.mat.Cols > m.capCols {
-		// Panic as a string, not a mat.Error.
-		panic("mat: caps not correctly set")
-	}
-	if m.IsZero() {
-		m.mat = blas64.General{
-			Rows:   r,
-			Cols:   c,
-			Stride: c,
-			Data:   useZeroed(m.mat.Data, r*c),
-		}
-		m.capRows = r
-		m.capCols = c
-	} else if r != m.mat.Rows || c != m.mat.Cols {
-		panic(ErrShape)
-	}
+	m.reuseAsZeroed(r, c)
 
 	var xmat, ymat blas64.Vector
 	fast := true

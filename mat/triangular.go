@@ -154,7 +154,7 @@ func (t *TriDense) Dims() (r, c int) {
 }
 
 // Triangle returns the dimension of t and its orientation. The returned
-// orientation is only valid when n is not zero.
+// orientation is only valid when n is not empty.
 func (t *TriDense) Triangle() (n int, kind TriKind) {
 	return t.mat.N, t.triKind()
 }
@@ -232,7 +232,7 @@ func (t *TriDense) SetRawTriangular(mat blas64.Triangular) {
 	t.mat = mat
 }
 
-// Reset zeros the dimensions of the matrix so that it can be reused as the
+// Reset empties the matrix so that it can be reused as the
 // receiver of a dimensionally restricted operation.
 //
 // Reset should not be used when the matrix shares backing data.
@@ -259,9 +259,10 @@ func (t *TriDense) Zero() {
 	}
 }
 
-// IsZero returns whether the receiver is zero-sized. Zero-sized matrices can be the
-// receiver for size-restricted operations. TriDense matrices can be zeroed using Reset.
-func (t *TriDense) IsZero() bool {
+// IsEmpty returns whether the receiver is empty. Empty matrices can be the
+// receiver for size-restricted operations. The receiver can be emptied using
+// Reset.
+func (t *TriDense) IsEmpty() bool {
 	// It must be the case that t.Dims() returns
 	// zeros in this case. See comment in Reset().
 	return t.mat.Stride == 0
@@ -277,13 +278,13 @@ func untransposeTri(a Triangular) (Triangular, bool) {
 	return a, false
 }
 
-// ReuseAsTri changes the receiver if it IsZero() to be of size n×n.
+// ReuseAsTri changes the receiver if it IsEmpty() to be of size n×n.
 //
 // ReuseAsTri re-uses the backing data slice if it has sufficient capacity,
 // otherwise a new slice is allocated. The data is then zeroed.
 //
-// ReuseAsTri panics if the receiver is not zero-sized, and panics if
-// the input size is less than one. To zero the receiver for re-use,
+// ReuseAsTri panics if the receiver is not empty, and panics if
+// the input size is less than one. To empty the receiver for re-use,
 // Reset should be used.
 func (t *TriDense) ReuseAsTri(n int, kind TriKind) {
 	if n <= 0 {
@@ -292,8 +293,8 @@ func (t *TriDense) ReuseAsTri(n int, kind TriKind) {
 		}
 		panic(ErrNegativeDimension)
 	}
-	if !t.IsZero() {
-		panic(ErrReuseNonZero)
+	if !t.IsEmpty() {
+		panic(ErrReuseNonEmpty)
 	}
 	t.reuseAsZeroed(n, kind)
 }
@@ -313,7 +314,7 @@ func (t *TriDense) reuseAsNonZeroed(n int, kind TriKind) {
 	if t.mat.N > t.cap {
 		panic(badTriCap)
 	}
-	if t.IsZero() {
+	if t.IsEmpty() {
 		t.mat = blas64.Triangular{
 			N:      n,
 			Stride: n,
@@ -347,7 +348,7 @@ func (t *TriDense) reuseAsZeroed(n int, kind TriKind) {
 	if t.mat.N > t.cap {
 		panic(badTriCap)
 	}
-	if t.IsZero() {
+	if t.IsEmpty() {
 		t.mat = blas64.Triangular{
 			N:      n,
 			Stride: n,

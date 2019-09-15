@@ -154,11 +154,11 @@ func (n *Normal) ConditionNormal(observed []int, values []float64, src rand.Sour
 // Upon return, the value at element {i, j} of the covariance matrix is equal
 // to the covariance of the i^th and j^th variables.
 //  covariance(i, j) = E[(x_i - E[x_i])(x_j - E[x_j])]
-// If the dst matrix is zero-sized it will be resized to the correct dimensions,
+// If the dst matrix is empty it will be resized to the correct dimensions,
 // otherwise dst must match the dimension of the receiver or CovarianceMatrix
 // will panic.
 func (n *Normal) CovarianceMatrix(dst *mat.SymDense) {
-	if dst.IsZero() {
+	if dst.IsEmpty() {
 		*dst = *(dst.GrowSym(n.dim).(*mat.SymDense))
 	} else if dst.Symmetric() != n.dim {
 		panic("normal: input matrix size mismatch")

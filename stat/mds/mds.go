@@ -18,7 +18,7 @@ import (
 // When the scaling is successful, mds will be resized to k columns wide.
 // Eigenvalues will be copied into eigdst and returned as eig if it is provided.
 //
-// If dst is nil, a new mat.Dense is allocated. If dst is not a zero matrix,
+// If dst is nil, a new mat.Dense is allocated. If dst is not empty,
 // the dimensions of dst and dis must match otherwise TorgersonScaling will panic.
 // The dis matrix must be square or TorgersonScaling will panic.
 func TorgersonScaling(dst *mat.Dense, eigdst []float64, dis mat.Symmetric) (k int, mds *mat.Dense, eig []float64) {
@@ -27,7 +27,7 @@ func TorgersonScaling(dst *mat.Dense, eigdst []float64, dis mat.Symmetric) (k in
 	n := dis.Symmetric()
 	if dst == nil {
 		dst = mat.NewDense(n, n, nil)
-	} else if r, c := dst.Dims(); !dst.IsZero() && (r != n || c != n) {
+	} else if r, c := dst.Dims(); !dst.IsEmpty() && (r != n || c != n) {
 		panic(mat.ErrShape)
 	}
 

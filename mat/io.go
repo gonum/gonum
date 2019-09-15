@@ -127,7 +127,7 @@ func (m Dense) MarshalBinaryTo(w io.Writer) (int, error) {
 }
 
 // UnmarshalBinary decodes the binary form into the receiver.
-// It panics if the receiver is a non-zero Dense matrix.
+// It panics if the receiver is a non-empty Dense matrix.
 //
 // See MarshalBinary for the on-disk layout.
 //
@@ -139,8 +139,8 @@ func (m Dense) MarshalBinaryTo(w io.Writer) (int, error) {
 // UnmarshalBinary does not limit the size of the unmarshaled matrix, and so
 // it should not be used on untrusted data.
 func (m *Dense) UnmarshalBinary(data []byte) error {
-	if !m.IsZero() {
-		panic("mat: unmarshal into non-zero matrix")
+	if !m.IsEmpty() {
+		panic("mat: unmarshal into non-empty matrix")
 	}
 
 	if len(data) < headerSize {
@@ -186,7 +186,7 @@ func (m *Dense) UnmarshalBinary(data []byte) error {
 
 // UnmarshalBinaryFrom decodes the binary form into the receiver and returns
 // the number of bytes read and an error if any.
-// It panics if the receiver is a non-zero Dense matrix.
+// It panics if the receiver is a non-empty Dense matrix.
 //
 // See MarshalBinary for the on-disk layout.
 //
@@ -198,8 +198,8 @@ func (m *Dense) UnmarshalBinary(data []byte) error {
 // UnmarshalBinary does not limit the size of the unmarshaled matrix, and so
 // it should not be used on untrusted data.
 func (m *Dense) UnmarshalBinaryFrom(r io.Reader) (int, error) {
-	if !m.IsZero() {
-		panic("mat: unmarshal into non-zero matrix")
+	if !m.IsEmpty() {
+		panic("mat: unmarshal into non-empty matrix")
 	}
 
 	var header storage
@@ -313,7 +313,7 @@ func (v VecDense) MarshalBinaryTo(w io.Writer) (int, error) {
 }
 
 // UnmarshalBinary decodes the binary form into the receiver.
-// It panics if the receiver is a non-zero VecDense.
+// It panics if the receiver is a non-empty VecDense.
 //
 // See MarshalBinary for the on-disk layout.
 //
@@ -325,8 +325,8 @@ func (v VecDense) MarshalBinaryTo(w io.Writer) (int, error) {
 // UnmarshalBinary does not limit the size of the unmarshaled vector, and so
 // it should not be used on untrusted data.
 func (v *VecDense) UnmarshalBinary(data []byte) error {
-	if !v.IsZero() {
-		panic("mat: unmarshal into non-zero vector")
+	if !v.IsEmpty() {
+		panic("mat: unmarshal into non-empty vector")
 	}
 
 	if len(data) < headerSize {
@@ -373,13 +373,13 @@ func (v *VecDense) UnmarshalBinary(data []byte) error {
 
 // UnmarshalBinaryFrom decodes the binary form into the receiver, from the
 // io.Reader and returns the number of bytes read and an error if any.
-// It panics if the receiver is a non-zero VecDense.
+// It panics if the receiver is a non-empty VecDense.
 //
 // See MarshalBinary for the on-disk layout.
 // See UnmarshalBinary for the list of sanity checks performed on the input.
 func (v *VecDense) UnmarshalBinaryFrom(r io.Reader) (int, error) {
-	if !v.IsZero() {
-		panic("mat: unmarshal into non-zero vector")
+	if !v.IsEmpty() {
+		panic("mat: unmarshal into non-empty vector")
 	}
 
 	var header storage

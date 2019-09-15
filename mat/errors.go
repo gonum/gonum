@@ -116,7 +116,7 @@ func (err Error) Error() string { return err.string }
 var (
 	ErrNegativeDimension   = Error{"mat: negative dimension"}
 	ErrIndexOutOfRange     = Error{"mat: index out of range"}
-	ErrReuseNonZero        = Error{"mat: reuse of non-zero matrix"}
+	ErrReuseNonEmpty       = Error{"mat: reuse of non-empty matrix"}
 	ErrRowAccess           = Error{"mat: row index out of range"}
 	ErrColAccess           = Error{"mat: column index out of range"}
 	ErrVectorAccess        = Error{"mat: vector index out of range"}

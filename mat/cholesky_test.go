@@ -55,16 +55,17 @@ func TestCholesky(t *testing.T) {
 			if math.Abs(test.cond-chol.cond) > 1e-13 {
 				t.Errorf("Condition number mismatch: Want %v, got %v", test.cond, chol.cond)
 			}
-			U := chol.UTo(nil)
+			var U TriDense
+			chol.UTo(&U)
 			aCopy := DenseCopyOf(test.a)
 			var a Dense
-			a.Mul(U.TTri(), U)
+			a.Mul(U.TTri(), &U)
 			if !EqualApprox(&a, aCopy, 1e-14) {
 				t.Error("unexpected Cholesky factor product")
 			}
-
-			L := chol.LTo(nil)
-			a.Mul(L, L.TTri())
+			var L TriDense
+			chol.LTo(&L)
+			a.Mul(&L, L.TTri())
 			if !EqualApprox(&a, aCopy, 1e-14) {
 				t.Error("unexpected Cholesky factor product")
 			}
@@ -264,10 +265,11 @@ func TestCholeskyToSym(t *testing.T) {
 		if !ok {
 			t.Fatal("unexpected Cholesky factorization failure: not positive definite")
 		}
-		s := chol.ToSym(nil)
+		var s SymDense
+		chol.ToSym(&s)
 
-		if !EqualApprox(s, test, 1e-12) {
-			t.Errorf("Cholesky reconstruction not equal to original matrix.\nWant:\n% v\nGot:\n% v\n", Formatted(test), Formatted(s))
+		if !EqualApprox(&s, test, 1e-12) {
+			t.Errorf("Cholesky reconstruction not equal to original matrix.\nWant:\n% v\nGot:\n% v\n", Formatted(test), Formatted(&s))
 		}
 	}
 }
@@ -513,8 +515,9 @@ func TestCholeskyExtendVecSym(t *testing.T) {
 		if !ok {
 			t.Errorf("cas %v: update not positive definite", cas)
 		}
-		a := cholNew.ToSym(nil)
-		if !EqualApprox(a, test.a, 1e-12) {
+		var a SymDense
+		cholNew.ToSym(&a)
+		if !EqualApprox(&a, test.a, 1e-12) {
 			t.Errorf("cas %v: mismatch", cas)
 		}
 

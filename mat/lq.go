@@ -87,18 +87,23 @@ func (lq *LQ) Cond() float64 {
 // and upper triangular matrices.
 
 // LTo extracts the m×n lower trapezoidal matrix from a LQ decomposition.
-// If dst is nil, a new matrix is allocated. The resulting L matrix is returned.
-// LTo will panic if the receiver does not contain a factorization.
-func (lq *LQ) LTo(dst *Dense) *Dense {
+//
+// If dst is empty, LTo will resize dst to be r×c. If dst is
+// non-empty, LTo will panic if dst is not r×c. LTo will also panic
+// if the receiver does not contain a successful factorization.
+func (lq *LQ) LTo(dst *Dense) {
 	if !lq.isValid() {
 		panic(badLQ)
 	}
 
 	r, c := lq.lq.Dims()
-	if dst == nil {
-		dst = NewDense(r, c, nil)
+	if dst.IsEmpty() {
+		dst.ReuseAs(r, c)
 	} else {
-		dst.reuseAsNonZeroed(r, c)
+		r2, c2 := dst.Dims()
+		if r != r2 || c != c2 {
+			panic(ErrShape)
+		}
 	}
 
 	// Disguise the LQ as a lower triangular.
@@ -115,29 +120,33 @@ func (lq *LQ) LTo(dst *Dense) *Dense {
 	dst.Copy(t)
 
 	if r == c {
-		return dst
+		return
 	}
 	// Zero right of the triangular.
 	for i := 0; i < r; i++ {
 		zero(dst.mat.Data[i*dst.mat.Stride+r : i*dst.mat.Stride+c])
 	}
-
-	return dst
 }
 
 // QTo extracts the n×n orthonormal matrix Q from an LQ decomposition.
-// If dst is nil, a new matrix is allocated. The resulting Q matrix is returned.
-// QTo will panic if the receiver does not contain a factorization.
-func (lq *LQ) QTo(dst *Dense) *Dense {
+//
+// If dst is empty, QTo will resize dst to be c×c. If dst is
+// non-empty, QTo will panic if dst is not c×c. QTo will also panic
+// if the receiver does not contain a successful factorization.
+func (lq *LQ) QTo(dst *Dense) {
 	if !lq.isValid() {
 		panic(badLQ)
 	}
 
 	_, c := lq.lq.Dims()
-	if dst == nil {
-		dst = NewDense(c, c, nil)
+	if dst.IsEmpty() {
+		dst.ReuseAs(c, c)
 	} else {
-		dst.reuseAsZeroed(c, c)
+		r2, c2 := dst.Dims()
+		if c != r2 || c != c2 {
+			panic(ErrShape)
+		}
+		dst.Zero()
 	}
 	q := dst.mat
 
@@ -153,8 +162,6 @@ func (lq *LQ) QTo(dst *Dense) *Dense {
 	work = getFloats(int(work[0]), false)
 	lapack64.Ormlq(blas.Left, blas.NoTrans, lq.lq.mat, lq.tau, q, work, len(work))
 	putFloats(work)
-
-	return dst
 }
 
 // SolveTo finds a minimum-norm solution to a system of linear equations defined

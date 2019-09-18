@@ -65,6 +65,27 @@ func NewCDense(r, c int, data []complex128) *CDense {
 	}
 }
 
+// ReuseAs changes the receiver if it IsEmpty() to be of size r×c.
+//
+// ReuseAs re-uses the backing data slice if it has sufficient capacity,
+// otherwise a new slice is allocated. The data is then zeroed.
+//
+// ReuseAs panics if the receiver is not empty, and panics if
+// the input sizes are less than one. To empty the receiver for re-use,
+// Reset should be used.
+func (m *CDense) ReuseAs(r, c int) {
+	if r <= 0 || c <= 0 {
+		if r == 0 || c == 0 {
+			panic(ErrZeroLength)
+		}
+		panic(ErrNegativeDimension)
+	}
+	if !m.IsEmpty() {
+		panic(ErrReuseNonEmpty)
+	}
+	m.reuseAsZeroed(r, c)
+}
+
 // reuseAs resizes an empty matrix to a r×c matrix,
 // or checks that a non-empty matrix is r×c.
 //

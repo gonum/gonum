@@ -87,18 +87,23 @@ func (qr *QR) Cond() float64 {
 // and upper triangular matrices.
 
 // RTo extracts the m×n upper trapezoidal matrix from a QR decomposition.
-// If dst is nil, a new matrix is allocated. The resulting dst matrix is returned.
-// RTo will panic if the receiver does not contain a factorization.
-func (qr *QR) RTo(dst *Dense) *Dense {
+//
+// If dst is empty, RTo will resize dst to be r×c. If dst is non-empty,
+// RTo will panic if dst is not r×c. RTo will also panic if the receiver
+// does not contain a successful factorization.
+func (qr *QR) RTo(dst *Dense) {
 	if !qr.isValid() {
 		panic(badQR)
 	}
 
 	r, c := qr.qr.Dims()
-	if dst == nil {
-		dst = NewDense(r, c, nil)
+	if dst.IsEmpty() {
+		dst.ReuseAs(r, c)
 	} else {
-		dst.reuseAsNonZeroed(r, c)
+		r2, c2 := dst.Dims()
+		if c != r2 || c != c2 {
+			panic(ErrShape)
+		}
 	}
 
 	// Disguise the QR as an upper triangular
@@ -118,23 +123,27 @@ func (qr *QR) RTo(dst *Dense) *Dense {
 	for i := r; i < c; i++ {
 		zero(dst.mat.Data[i*dst.mat.Stride : i*dst.mat.Stride+c])
 	}
-
-	return dst
 }
 
-// QTo extracts the m×m orthonormal matrix Q from a QR decomposition.
-// If dst is nil, a new matrix is allocated. The resulting Q matrix is returned.
-// QTo will panic if the receiver does not contain a factorization.
-func (qr *QR) QTo(dst *Dense) *Dense {
+// QTo extracts the r×r orthonormal matrix Q from a QR decomposition.
+//
+// If dst is empty, QTo will resize dst to be r×r. If dst is non-empty,
+// QTo will panic if dst is not r×r. QTo will also panic if the receiver
+// does not contain a successful factorization.
+func (qr *QR) QTo(dst *Dense) {
 	if !qr.isValid() {
 		panic(badQR)
 	}
 
 	r, _ := qr.qr.Dims()
-	if dst == nil {
-		dst = NewDense(r, r, nil)
+	if dst.IsEmpty() {
+		dst.ReuseAs(r, r)
 	} else {
-		dst.reuseAsZeroed(r, r)
+		r2, c2 := dst.Dims()
+		if r != r2 || r != c2 {
+			panic(ErrShape)
+		}
+		dst.Zero()
 	}
 
 	// Set Q = I.
@@ -148,8 +157,6 @@ func (qr *QR) QTo(dst *Dense) *Dense {
 	work = getFloats(int(work[0]), false)
 	lapack64.Ormqr(blas.Left, blas.NoTrans, qr.qr.mat, qr.tau, dst.mat, work, len(work))
 	putFloats(work)
-
-	return dst
 }
 
 // SolveTo finds a minimum-norm solution to a system of linear equations defined

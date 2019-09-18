@@ -30,16 +30,17 @@ func TestLQ(t *testing.T) {
 
 		var lq LQ
 		lq.Factorize(a)
-		q := lq.QTo(nil)
+		var l, q Dense
+		lq.QTo(&q)
 
-		if !isOrthonormal(q, 1e-10) {
+		if !isOrthonormal(&q, 1e-10) {
 			t.Errorf("Q is not orthonormal: m = %v, n = %v", m, n)
 		}
 
-		l := lq.LTo(nil)
+		lq.LTo(&l)
 
 		var got Dense
-		got.Mul(l, q)
+		got.Mul(&l, &q)
 		if !EqualApprox(&got, &want, 1e-12) {
 			t.Errorf("LQ does not equal original matrix. \nWant: %v\nGot: %v", want, got)
 		}

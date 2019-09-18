@@ -33,16 +33,17 @@ func TestQR(t *testing.T) {
 
 		var qr QR
 		qr.Factorize(a)
-		q := qr.QTo(nil)
+		var q, r Dense
+		qr.QTo(&q)
 
-		if !isOrthonormal(q, 1e-10) {
+		if !isOrthonormal(&q, 1e-10) {
 			t.Errorf("Q is not orthonormal: m = %v, n = %v", m, n)
 		}
 
-		r := qr.RTo(nil)
+		qr.RTo(&r)
 
 		var got Dense
-		got.Mul(q, r)
+		got.Mul(&q, &r)
 		if !EqualApprox(&got, &want, 1e-12) {
 			t.Errorf("QR does not equal original matrix. \nWant: %v\nGot: %v", want, got)
 		}

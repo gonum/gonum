@@ -648,13 +648,14 @@ func (s *SymDense) PowPSD(a Symmetric, pow float64) error {
 		}
 		values[i] = math.Pow(v, pow)
 	}
-	u := eigen.VectorsTo(nil)
+	var u Dense
+	eigen.VectorsTo(&u)
 
 	s.SymOuterK(values[0], u.ColView(0))
 
 	var v VecDense
 	for i := 1; i < dim; i++ {
-		v.ColViewOf(u, i)
+		v.ColViewOf(&u, i)
 		s.SymRankOne(s, values[i], &v)
 	}
 	return nil

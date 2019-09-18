@@ -294,53 +294,74 @@ func (c *Cholesky) RawU() Triangular {
 }
 
 // UTo extracts the n×n upper triangular matrix U from a Cholesky
-// decomposition into dst and returns the result. If dst is nil a new
-// TriDense is allocated.
-//  A = Uᵀ * U.
-func (c *Cholesky) UTo(dst *TriDense) *TriDense {
+// decomposition into dst and returns the result. If dst is empty
+// it is resized to be a upper-triangular n×n matrix. If dst is
+// non-empty, UTo panics if dst is not n×n or is not Upper.
+// UTo will also panic if the receiver does not contain a
+// successful factorization
+//  A = L * Lᵀ.
+func (c *Cholesky) UTo(dst *TriDense) {
 	if !c.valid() {
 		panic(badCholesky)
 	}
 	n := c.chol.mat.N
-	if dst == nil {
-		dst = NewTriDense(n, Upper, make([]float64, n*n))
+	if dst.IsEmpty() {
+		dst.ReuseAsTri(n, Upper)
 	} else {
-		dst.reuseAsNonZeroed(n, Upper)
+		n2, kind := dst.Triangle()
+		if n != n2 {
+			panic(ErrShape)
+		}
+		if kind != Upper {
+			panic(ErrTriangle)
+		}
 	}
 	dst.Copy(c.chol)
-	return dst
 }
 
 // LTo extracts the n×n lower triangular matrix L from a Cholesky
-// decomposition into dst and returns the result. If dst is nil a new
-// TriDense is allocated.
+// decomposition into dst and returns the result. If dst is empty
+// it is resized to be a lower-triangular n×n matrix. If dst is
+// non-empty, LTo panics if dst is not n×n or is not Lower.
+// LTo will also panic if the receiver does not contain a
+// successful factorization
 //  A = L * Lᵀ.
-func (c *Cholesky) LTo(dst *TriDense) *TriDense {
+func (c *Cholesky) LTo(dst *TriDense) {
 	if !c.valid() {
 		panic(badCholesky)
 	}
 	n := c.chol.mat.N
-	if dst == nil {
-		dst = NewTriDense(n, Lower, make([]float64, n*n))
+	if dst.IsEmpty() {
+		dst.ReuseAsTri(n, Lower)
 	} else {
-		dst.reuseAsNonZeroed(n, Lower)
+		n2, kind := dst.Triangle()
+		if n != n2 {
+			panic(ErrShape)
+		}
+		if kind != Lower {
+			panic(ErrTriangle)
+		}
 	}
 	dst.Copy(c.chol.TTri())
-	return dst
 }
 
-// ToSym reconstructs the original positive definite matrix given its
-// Cholesky decomposition into dst and returns the result. If dst is nil
-// a new SymDense is allocated.
-func (c *Cholesky) ToSym(dst *SymDense) *SymDense {
+// ToSym reconstructs the original positive definite matrix from its
+// Cholesky decomposition, storing the result into dst. If dst is
+// empty it is resized to be n×n. If dst is non-empty, ToSym panics
+// if dst is not of size n×n. ToSym will also panic if the receiver
+// does not contain a successful factorization
+func (c *Cholesky) ToSym(dst *SymDense) {
 	if !c.valid() {
 		panic(badCholesky)
 	}
 	n := c.chol.mat.N
-	if dst == nil {
-		dst = NewSymDense(n, nil)
+	if dst.IsEmpty() {
+		dst.ReuseAsSym(n)
 	} else {
-		dst.reuseAsNonZeroed(n)
+		n2 := dst.Symmetric()
+		if n != n2 {
+			panic(ErrShape)
+		}
 	}
 	// Create a TriDense representing the Cholesky factor U with dst's
 	// backing slice.
@@ -366,7 +387,6 @@ func (c *Cholesky) ToSym(dst *SymDense) *SymDense {
 			bi.Dtrmv(blas.Upper, blas.Trans, blas.NonUnit, k, a, lda, a[k:], lda)
 		}
 	}
-	return dst
 }
 
 // InverseTo computes the inverse of the matrix represented by its Cholesky

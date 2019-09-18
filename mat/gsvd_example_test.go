@@ -23,20 +23,22 @@ func ExampleGSVD() {
 	if !ok {
 		log.Fatal("GSVD factorization failed")
 	}
-
-	u := gsvd.UTo(nil)
-	v := gsvd.VTo(nil)
+	var u, v mat.Dense
+	gsvd.UTo(&u)
+	gsvd.VTo(&v)
 
 	s1 := gsvd.ValuesA(nil)
 	s2 := gsvd.ValuesB(nil)
 
 	fmt.Printf("Africa\n\ts1 = %.4f\n\n\tU = %.4f\n\n",
-		s1, mat.Formatted(u, mat.Prefix("\t    "), mat.Excerpt(2)))
+		s1, mat.Formatted(&u, mat.Prefix("\t    "), mat.Excerpt(2)))
 	fmt.Printf("Latin America/Caribbean\n\ts2 = %.4f\n\n\tV = %.4f\n",
-		s2, mat.Formatted(v, mat.Prefix("\t    "), mat.Excerpt(2)))
+		s2, mat.Formatted(&v, mat.Prefix("\t    "), mat.Excerpt(2)))
 
-	var q mat.Dense
-	q.Mul(gsvd.ZeroRTo(nil), gsvd.QTo(nil))
+	var q, zR mat.Dense
+	gsvd.QTo(&q)
+	gsvd.ZeroRTo(&zR)
+	q.Mul(&zR, &q)
 	fmt.Printf("\nCommon basis vectors\n\n\tQᵀ = %.4f\n",
 		mat.Formatted(q.T(), mat.Prefix("\t     ")))
 

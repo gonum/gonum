@@ -42,10 +42,10 @@ func ExampleCholesky() {
 	fmt.Printf("x = %0.4v\n", mat.Formatted(&x, mat.Prefix("    ")))
 
 	// Extract the factorization and check that it equals the original matrix.
-	t := &mat.TriDense{}
-	chol.LTo(t)
+	var t mat.TriDense
+	chol.LTo(&t)
 	var test mat.Dense
-	test.Mul(t, t.T())
+	test.Mul(&t, t.T())
 	fmt.Println()
 	fmt.Printf("L * Lᵀ = %0.4v\n", mat.Formatted(&a, mat.Prefix("         ")))
 

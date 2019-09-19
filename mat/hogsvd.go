@@ -160,7 +160,7 @@ func (gsvd *HOGSVD) Len() int {
 // UTo extracts the matrix U_n from the singular value decomposition, storing
 // the result in-place into dst. U_n is size r×c.
 //
-// If dst is empty, UTo will resize dst to be r×c. If dst is
+// If dst is empty, UTo will resize dst to be r×c. When dst is
 // non-empty, UTo will panic if dst is not r×c. UTo will also
 // panic if the receiver does not contain a successful factorization.
 func (gsvd *HOGSVD) UTo(dst *Dense, n int) {
@@ -219,7 +219,7 @@ func (gsvd *HOGSVD) Values(s []float64, n int) []float64 {
 // VTo extracts the matrix V from the singular value decomposition, storing
 // the result in-place into dst. V is size c×c.
 //
-// If dst is empty, VTo will resize dst to be c×c. If dst is
+// If dst is empty, VTo will resize dst to be c×c. When dst is
 // non-empty, VTo will panic if dst is not c×c. VTo will also
 // panic if the receiver does not contain a successful factorization.
 func (gsvd *HOGSVD) VTo(dst *Dense) {

@@ -252,8 +252,8 @@ func (lu *LU) RankOne(orig *LU, alpha float64, x, y Vector) {
 // LTo extracts the lower triangular matrix from an LU factorization.
 //
 // If dst is empty, LTo will resize dst to be a lower-triangular c×c matrix.
-// If dst is non-empty, LTo will panic if dst is not c×c or if dst is not
-// Lower. LTo will also panic if the receiver does not contain a successful
+// When dst is non-empty, LTo will panic if dst is not c×c not Lower.
+// LTo will also panic if the receiver does not contain a successful
 // factorization.
 func (lu *LU) LTo(dst *TriDense) *TriDense {
 	if !lu.isValid() {
@@ -288,8 +288,8 @@ func (lu *LU) LTo(dst *TriDense) *TriDense {
 // UTo extracts the upper triangular matrix from an LU factorization.
 //
 // If dst is empty, UTo will resize dst to be an upper-triangular n×n matrix.
-// If dst is non-empty, UTo will panic if dst is not n×n or if dst is not
-// Upper. UTo will also panic if the receiver does not contain a successful
+// When dst is non-empty, UTo will panic if dst is not n×n or not Upper.
+// UTo will also panic if the receiver does not contain a successful
 // factorization.
 func (lu *LU) UTo(dst *TriDense) {
 	if !lu.isValid() {

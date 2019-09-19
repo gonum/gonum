@@ -280,7 +280,7 @@ func (gsvd *GSVD) ZeroRTo(dst *Dense) {
 // SigmaATo extracts the matrix Σ₁ from the singular value decomposition, storing
 // the result in-place into dst. Σ₁ is size r×(k+l).
 //
-// If dst is empty, SigmaATo will resize dst to be r×(k+l). If dst is
+// If dst is empty, SigmaATo will resize dst to be r×(k+l). When dst is
 // non-empty, SigmATo will panic if dst is not r×(k+l). SigmaATo will also
 // panic if the receiver does not contain a successful factorization.
 func (gsvd *GSVD) SigmaATo(dst *Dense) {
@@ -310,7 +310,7 @@ func (gsvd *GSVD) SigmaATo(dst *Dense) {
 // SigmaBTo extracts the matrix Σ₂ from the singular value decomposition, storing
 // the result in-place into dst. Σ₂ is size p×(k+l).
 //
-// If dst is empty, SigmaBTo will resize dst to be p×(k+l). If dst is
+// If dst is empty, SigmaBTo will resize dst to be p×(k+l). When dst is
 // non-empty, SigmBTo will panic if dst is not p×(k+l). SigmaBTo will also
 // panic if the receiver does not contain a successful factorization.
 func (gsvd *GSVD) SigmaBTo(dst *Dense) {
@@ -341,7 +341,7 @@ func (gsvd *GSVD) SigmaBTo(dst *Dense) {
 // UTo extracts the matrix U from the singular value decomposition, storing
 // the result in-place into dst. U is size r×r.
 //
-// If dst is empty, UTo will resize dst to be r×r. If dst is
+// If dst is empty, UTo will resize dst to be r×r. When dst is
 // non-empty, UTo will panic if dst is not r×r. UTo will also
 // panic if the receiver does not contain a successful factorization.
 func (gsvd *GSVD) UTo(dst *Dense) {
@@ -373,7 +373,7 @@ func (gsvd *GSVD) UTo(dst *Dense) {
 // VTo extracts the matrix V from the singular value decomposition, storing
 // the result in-place into dst. V is size p×p.
 //
-// If dst is empty, VTo will resize dst to be p×p. If dst is
+// If dst is empty, VTo will resize dst to be p×p. When dst is
 // non-empty, VTo will panic if dst is not p×p. VTo will also
 // panic if the receiver does not contain a successful factorization.
 func (gsvd *GSVD) VTo(dst *Dense) {
@@ -405,7 +405,7 @@ func (gsvd *GSVD) VTo(dst *Dense) {
 // QTo extracts the matrix Q from the singular value decomposition, storing
 // the result in-place into dst. Q is size c×c.
 //
-// If dst is empty, QTo will resize dst to be c×c. If dst is
+// If dst is empty, QTo will resize dst to be c×c. When dst is
 // non-empty, QTo will panic if dst is not c×c. QTo will also
 // panic if the receiver does not contain a successful factorization.
 func (gsvd *GSVD) QTo(dst *Dense) {

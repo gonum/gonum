@@ -68,7 +68,7 @@ func NewCDense(r, c int, data []complex128) *CDense {
 // ReuseAs changes the receiver if it IsEmpty() to be of size r×c.
 //
 // ReuseAs re-uses the backing data slice if it has sufficient capacity,
-// otherwise a new slice is allocated. The data is then zeroed.
+// otherwise a new slice is allocated. The backing data is zero on return.
 //
 // ReuseAs panics if the receiver is not empty, and panics if
 // the input sizes are less than one. To empty the receiver for re-use,

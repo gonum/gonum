@@ -295,8 +295,8 @@ func (c *Cholesky) RawU() Triangular {
 
 // UTo extracts the n×n upper triangular matrix U from a Cholesky
 // decomposition into dst and returns the result. If dst is empty
-// it is resized to be a upper-triangular n×n matrix. If dst is
-// non-empty, UTo panics if dst is not n×n or is not Upper.
+// it is resized to be a upper-triangular n×n matrix. When dst is
+// non-empty, UTo panics if dst is not n×n or not Upper.
 // UTo will also panic if the receiver does not contain a
 // successful factorization
 //  A = L * Lᵀ.
@@ -321,8 +321,8 @@ func (c *Cholesky) UTo(dst *TriDense) {
 
 // LTo extracts the n×n lower triangular matrix L from a Cholesky
 // decomposition into dst and returns the result. If dst is empty
-// it is resized to be a lower-triangular n×n matrix. If dst is
-// non-empty, LTo panics if dst is not n×n or is not Lower.
+// it is resized to be a lower-triangular n×n matrix. When dst is
+// non-empty, LTo panics if dst is not n×n or not Lower.
 // LTo will also panic if the receiver does not contain a
 // successful factorization
 //  A = L * Lᵀ.

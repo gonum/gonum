@@ -88,7 +88,7 @@ func (qr *QR) Cond() float64 {
 
 // RTo extracts the m×n upper trapezoidal matrix from a QR decomposition.
 //
-// If dst is empty, RTo will resize dst to be r×c. If dst is non-empty,
+// If dst is empty, RTo will resize dst to be r×c. When dst is non-empty,
 // RTo will panic if dst is not r×c. RTo will also panic if the receiver
 // does not contain a successful factorization.
 func (qr *QR) RTo(dst *Dense) {
@@ -127,7 +127,7 @@ func (qr *QR) RTo(dst *Dense) {
 
 // QTo extracts the r×r orthonormal matrix Q from a QR decomposition.
 //
-// If dst is empty, QTo will resize dst to be r×r. If dst is non-empty,
+// If dst is empty, QTo will resize dst to be r×r. When dst is non-empty,
 // QTo will panic if dst is not r×r. QTo will also panic if the receiver
 // does not contain a successful factorization.
 func (qr *QR) QTo(dst *Dense) {

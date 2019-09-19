@@ -94,7 +94,7 @@ func (e *EigenSym) Values(dst []float64) []float64 {
 // VectorsTo returns the eigenvectors of the decomposition, stored in-place
 // into dst.
 //
-// If dst is empty, VectorsTo will resize dst to be n×n. If dst is
+// If dst is empty, VectorsTo will resize dst to be n×n. When dst is
 // non-empty, VectorsTo will panic if dst is not n×n. VectorsTo will also
 // panic if the eigenvectors were not computed during the factorization,
 // or if the receiver does not contain a successful factorization.
@@ -311,7 +311,7 @@ func (e *Eigen) complexEigenTo(dst *CDense, d *Dense) {
 // into dst. The computed eigenvectors are normalized to have Euclidean norm equal to 1
 // and largest component real.
 //
-// If dst is empty, VectorsTo will resize dst to be n×n. If dst is
+// If dst is empty, VectorsTo will resize dst to be n×n. When dst is
 // non-empty, VectorsTo will panic if dst is not n×n. VectorsTo will also
 // panic if the eigenvectors were not computed during the factorization,
 // or if the receiver does not contain a successful factorization.
@@ -337,7 +337,7 @@ func (e *Eigen) VectorsTo(dst *CDense) {
 // into dst. The computed eigenvectors are normalized to have Euclidean norm equal to 1
 // and largest component real.
 //
-// If dst is empty, LeftVectorsTo will resize dst to be n×n. If dst is
+// If dst is empty, LeftVectorsTo will resize dst to be n×n. When dst is
 // non-empty, LeftVectorsTo will panic if dst is not n×n. LeftVectorsTo will also
 // panic if the left eigenvectors were not computed during the factorization,
 // or if the receiver does not contain a successful factorization

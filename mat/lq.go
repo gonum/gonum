@@ -88,7 +88,7 @@ func (lq *LQ) Cond() float64 {
 
 // LTo extracts the m×n lower trapezoidal matrix from a LQ decomposition.
 //
-// If dst is empty, LTo will resize dst to be r×c. If dst is
+// If dst is empty, LTo will resize dst to be r×c. When dst is
 // non-empty, LTo will panic if dst is not r×c. LTo will also panic
 // if the receiver does not contain a successful factorization.
 func (lq *LQ) LTo(dst *Dense) {
@@ -130,7 +130,7 @@ func (lq *LQ) LTo(dst *Dense) {
 
 // QTo extracts the n×n orthonormal matrix Q from an LQ decomposition.
 //
-// If dst is empty, QTo will resize dst to be c×c. If dst is
+// If dst is empty, QTo will resize dst to be c×c. When dst is
 // non-empty, QTo will panic if dst is not c×c. QTo will also panic
 // if the receiver does not contain a successful factorization.
 func (lq *LQ) QTo(dst *Dense) {

@@ -183,7 +183,7 @@ func (svd *SVD) Values(s []float64) []float64 {
 // values as returned from SVD.Values.
 //
 // If dst is empty, UTo will resize dst to be m×m if the full U was computed
-// and size m×min(m,n) if the thin U was computed. If dst is non-empty, then
+// and size m×min(m,n) if the thin U was computed. When dst is non-empty, then
 // UTo will panic if dst is not the appropriate size. UTo will also panic if
 // the receiver does not contain a successful factorization, or if U was
 // not computed during factorization.
@@ -219,7 +219,7 @@ func (svd *SVD) UTo(dst *Dense) {
 // values as returned from SVD.Values.
 //
 // If dst is empty, VTo will resize dst to be n×n if the full V was computed
-// and size n×min(m,n) if the thin V was computed. If dst is non-empty, then
+// and size n×min(m,n) if the thin V was computed. When dst is non-empty, then
 // VTo will panic if dst is not the appropriate size. VTo will also panic if
 // the receiver does not contain a successful factorization, or if V was
 // not computed during factorization.

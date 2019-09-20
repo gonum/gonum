@@ -60,8 +60,12 @@ func (c *PC) VectorsTo(dst *mat.Dense) *mat.Dense {
 		if d, n := dst.Dims(); !dst.IsEmpty() && (d != c.d || n != min(c.n, c.d)) {
 			panic(mat.ErrShape)
 		}
+	} else {
+		// TODO(btracey): Fix this with #1081.
+		dst = &mat.Dense{}
 	}
-	return c.svd.VTo(dst)
+	c.svd.VTo(dst)
+	return dst
 }
 
 // VarsTo returns the column variances of the principal component scores,
@@ -182,14 +186,15 @@ func (c *CC) CanonicalCorrelations(x, y mat.Matrix, weights []float64) error {
 	if !c.ok {
 		return errors.New("stat: failed to factorize y")
 	}
-	xu := c.x.UTo(nil)
-	xv := c.x.VTo(nil)
-	yu := c.y.UTo(nil)
-	yv := c.y.VTo(nil)
+	var xu, xv, yu, yv mat.Dense
+	c.x.UTo(&xu)
+	c.x.VTo(&xv)
+	c.y.UTo(&yu)
+	c.y.VTo(&yv)
 
 	// Calculate and factorise the canonical correlation matrix.
 	var ccor mat.Dense
-	ccor.Product(xv, xu.T(), yu, yv.T())
+	ccor.Product(&xv, xu.T(), &yu, yv.T())
 	if c.c == nil {
 		c.c = &mat.SVD{}
 	}
@@ -230,14 +235,18 @@ func (c *CC) LeftTo(dst *mat.Dense, spheredSpace bool) *mat.Dense {
 		if d, n := dst.Dims(); !dst.IsEmpty() && (n != c.yd || d != c.xd) {
 			panic(mat.ErrShape)
 		}
+	} else {
+		// TODO(btracey): Fix this with #1081.
+		dst = &mat.Dense{}
 	}
-	dst = c.c.UTo(dst)
+	c.c.UTo(dst)
 	if spheredSpace {
 		return dst
 	}
 
 	xs := c.x.Values(nil)
-	xv := c.x.VTo(nil)
+	xv := &mat.Dense{}
+	c.x.VTo(xv)
 
 	scaleColsReciSqrt(xv, xs)
 
@@ -262,14 +271,18 @@ func (c *CC) RightTo(dst *mat.Dense, spheredSpace bool) *mat.Dense {
 		if d, n := dst.Dims(); (n != 0 || d != 0) && (n != c.yd || d != c.yd) {
 			panic(mat.ErrShape)
 		}
+	} else {
+		// TODO(btracey): Fix this with #1081.
+		dst = &mat.Dense{}
 	}
-	dst = c.c.VTo(dst)
+	c.c.VTo(dst)
 	if spheredSpace {
 		return dst
 	}
 
 	ys := c.y.Values(nil)
-	yv := c.y.VTo(nil)
+	yv := &mat.Dense{}
+	c.y.VTo(yv)
 
 	scaleColsReciSqrt(yv, ys)
 

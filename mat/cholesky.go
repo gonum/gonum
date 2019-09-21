@@ -293,13 +293,12 @@ func (c *Cholesky) RawU() Triangular {
 	return c.chol
 }
 
-// UTo extracts the n×n upper triangular matrix U from a Cholesky
-// decomposition into dst and returns the result. If dst is empty
-// it is resized to be a upper-triangular n×n matrix. When dst is
-// non-empty, UTo panics if dst is not n×n or not Upper.
-// UTo will also panic if the receiver does not contain a
-// successful factorization
-//  A = L * Lᵀ.
+// UTo stores into dst the n×n upper triangular matrix U from a Cholesky
+// decomposition
+//  A = Uᵀ * U.
+// If dst is empty, it is resized to be an n×n upper triangular matrix. When dst
+// is non-empty, UTo panics if dst is not n×n or not Upper. UTo will also panic
+// if the receiver does not contain a successful factorization.
 func (c *Cholesky) UTo(dst *TriDense) {
 	if !c.valid() {
 		panic(badCholesky)
@@ -319,13 +318,12 @@ func (c *Cholesky) UTo(dst *TriDense) {
 	dst.Copy(c.chol)
 }
 
-// LTo extracts the n×n lower triangular matrix L from a Cholesky
-// decomposition into dst and returns the result. If dst is empty
-// it is resized to be a lower-triangular n×n matrix. When dst is
-// non-empty, LTo panics if dst is not n×n or not Lower.
-// LTo will also panic if the receiver does not contain a
-// successful factorization
+// LTo stores into dst the n×n lower triangular matrix L from a Cholesky
+// decomposition
 //  A = L * Lᵀ.
+// If dst is empty, it is resized to be an n×n lower triangular matrix. When dst
+// is non-empty, LTo panics if dst is not n×n or not Lower. LTo will also panic
+// if the receiver does not contain a successful factorization.
 func (c *Cholesky) LTo(dst *TriDense) {
 	if !c.valid() {
 		panic(badCholesky)
@@ -349,7 +347,7 @@ func (c *Cholesky) LTo(dst *TriDense) {
 // Cholesky decomposition, storing the result into dst. If dst is
 // empty it is resized to be n×n. If dst is non-empty, ToSym panics
 // if dst is not of size n×n. ToSym will also panic if the receiver
-// does not contain a successful factorization
+// does not contain a successful factorization.
 func (c *Cholesky) ToSym(dst *SymDense) {
 	if !c.valid() {
 		panic(badCholesky)

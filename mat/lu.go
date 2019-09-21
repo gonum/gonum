@@ -58,7 +58,7 @@ func (lu *LU) updateCond(anorm float64, norm lapack.MatrixNorm) {
 // The LU factorization is computed with pivoting, and so really the decomposition
 // is a PLU decomposition where P is a permutation matrix. The individual matrix
 // factors can be extracted from the factorization using the Permutation method
-// on Dense, and the LU LTo and UTo methods.
+// on Dense, and the LU.LTo and LU.UTo methods.
 func (lu *LU) Factorize(a Matrix) {
 	lu.factorize(a, CondNorm)
 }
@@ -251,8 +251,8 @@ func (lu *LU) RankOne(orig *LU, alpha float64, x, y Vector) {
 
 // LTo extracts the lower triangular matrix from an LU factorization.
 //
-// If dst is empty, LTo will resize dst to be a lower-triangular c×c matrix.
-// When dst is non-empty, LTo will panic if dst is not c×c not Lower.
+// If dst is empty, LTo will resize dst to be a lower-triangular n×n matrix.
+// When dst is non-empty, LTo will panic if dst is not n×n or not Lower.
 // LTo will also panic if the receiver does not contain a successful
 // factorization.
 func (lu *LU) LTo(dst *TriDense) *TriDense {

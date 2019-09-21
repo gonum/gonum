@@ -106,8 +106,8 @@ func (gsvd *HOGSVD) Factorize(m ...Matrix) (ok bool) {
 		gsvd.err = errors.New("hogsvd: eigen decomposition failed")
 		return false
 	}
-	vc := &CDense{}
-	eig.VectorsTo(vc)
+	var vc CDense
+	eig.VectorsTo(&vc)
 	// vc is guaranteed to have real eigenvalues.
 	rc, cc := vc.Dims()
 	v := NewDense(rc, cc, nil)

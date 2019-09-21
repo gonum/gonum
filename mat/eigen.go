@@ -91,8 +91,8 @@ func (e *EigenSym) Values(dst []float64) []float64 {
 	return dst
 }
 
-// VectorsTo returns the eigenvectors of the decomposition, stored in-place
-// into dst.
+// VectorsTo stores the eigenvectors of the decomposition into the columns of
+// dst.
 //
 // If dst is empty, VectorsTo will resize dst to be n×n. When dst is
 // non-empty, VectorsTo will panic if dst is not n×n. VectorsTo will also
@@ -307,9 +307,9 @@ func (e *Eigen) complexEigenTo(dst *CDense, d *Dense) {
 	}
 }
 
-// VectorsTo returns the right eigenvectors of the decomposition, stored in-place
-// into dst. The computed eigenvectors are normalized to have Euclidean norm equal to 1
-// and largest component real.
+// VectorsTo stores the right eigenvectors of the decomposition into the columns
+// of dst. The computed eigenvectors are normalized to have Euclidean norm equal
+// to 1 and largest component real.
 //
 // If dst is empty, VectorsTo will resize dst to be n×n. When dst is
 // non-empty, VectorsTo will panic if dst is not n×n. VectorsTo will also
@@ -333,9 +333,9 @@ func (e *Eigen) VectorsTo(dst *CDense) {
 	dst.Copy(e.rVectors)
 }
 
-// LeftVectorsTo returns the left eigenvectors of the decomposition, stored in-place
-// into dst. The computed eigenvectors are normalized to have Euclidean norm equal to 1
-// and largest component real.
+// LeftVectorsTo stores the left eigenvectors of the decomposition into the
+// columns of dst. The computed eigenvectors are normalized to have Euclidean
+// norm equal to 1 and largest component real.
 //
 // If dst is empty, LeftVectorsTo will resize dst to be n×n. When dst is
 // non-empty, LeftVectorsTo will panic if dst is not n×n. LeftVectorsTo will also

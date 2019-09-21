@@ -40,7 +40,7 @@ const (
 
 	// SVDThin is a convenience value for computing both thin vectors.
 	SVDThin SVDKind = SVDThinU | SVDThinV
-	// SVDThin is a convenience value for computing both full vectors.
+	// SVDFull is a convenience value for computing both full vectors.
 	SVDFull SVDKind = SVDFullU | SVDFullV
 )
 

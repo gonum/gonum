@@ -152,9 +152,7 @@ func (w *Wishart) RandSymTo(dst *mat.SymDense) {
 
 // RandCholTo generates the Cholesky decomposition of a random matrix from the distribution.
 func (w *Wishart) RandCholTo(dst *mat.Cholesky) {
-	// TODO(kortschak): Make RandCholTo care about the size of dst.
-
-	// TODO(btracey): Modify the code if the underlying data from c is exposed
+	// TODO(btracey): Modify the code if the underlying data from dst is exposed
 	// to avoid the dim^2 allocation here.
 
 	// Use the Bartlett Decomposition, which says that

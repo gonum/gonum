@@ -119,8 +119,11 @@ func Scale(f float64, d Number) Number {
 }
 
 // Abs returns the absolute value of d.
-func Abs(d Number) float64 {
-	return cmplx.Abs(d.Real)
+func Abs(d Number) Number { 
+	return Number{
+		Real: complex(cmplx.Abs(d.Real), 0),
+		Dual: d.Dual,
+	}
 }
 
 // PowReal returns d**p, the base-d exponential of p.
@@ -164,7 +167,7 @@ func PowReal(d Number, p float64) Number {
 		if d.Real == -1 {
 			return Number{Real: 1, Dual: cmplx.NaN()}
 		}
-		if Abs(d) > 1 {
+		if real(Abs(d).Real) > 1 {
 			if d.Dual == 0 {
 				return Number{Real: cmplx.Inf(), Dual: cmplx.NaN()}
 			}
@@ -175,7 +178,7 @@ func PowReal(d Number, p float64) Number {
 		if d.Real == -1 {
 			return Number{Real: 1, Dual: cmplx.NaN()}
 		}
-		if Abs(d) > 1 {
+		if real(Abs(d).Real) > 1 {
 			return Number{Real: 0, Dual: cmplx.NaN()}
 		}
 		if d.Dual == 0 {

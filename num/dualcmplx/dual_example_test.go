@@ -39,8 +39,8 @@ func transform(p point, by ...dualcmplx.Number) point {
 
 	// Ensure the modulus of by is correctly scaled.
 	for i := range by {
-		if len := dualcmplx.Abs(by[i]); len != 1 {
-			by[i].Real *= complex(1/len, 0)
+		if len := dualcmplx.Abs(by[i]).Real; len != 1 {
+			by[i].Real *= complex(1/real(len), 0)
 		}
 	}
 

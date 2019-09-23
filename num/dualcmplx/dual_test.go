@@ -441,6 +441,82 @@ func TestPowReal(t *testing.T) {
 	}
 }
 
+
+
+var absCmplxTests = []struct {
+	d    Number
+	want Number
+}{
+	// Abs(NaN+NaNϵ) = NaN+NaNϵ
+	{d: Number{Real: cmplx.NaN(), Dual: cmplx.NaN()}, want: Number{Real: complex(math.NaN(),0), Dual: cmplx.NaN()}},
+
+	// Abs(NaN+xϵ) = NaN+(0+xi)ϵ for any x != 0
+	{d: Number{Real: cmplx.NaN(), Dual: 0+3i}, want: Number{Real: complex(math.NaN(),0), Dual: 0+3i}},
+	{d: Number{Real: cmplx.NaN(), Dual: 0+1i}, want: Number{Real: complex(math.NaN(),0), Dual: 0+1i}},
+	{d: Number{Real: cmplx.NaN(), Dual: cmplx.Inf()}, want: Number{Real: complex(math.NaN(),0), Dual: cmplx.Inf()}},
+
+	// Abs(x+xϵ) = 0+0ϵ for any x = ±0
+	{d: Number{Real: negZeroCmplx, Dual: negZeroCmplx}, want: Number{Real: 0, Dual: negZeroCmplx}},
+	{d: Number{Real: negZeroCmplx, Dual: 0+0i}, want: Number{Real: 0+0i, Dual: 0+0i}},
+	{d: Number{Real: 0+0i, Dual: negZeroCmplx}, want: Number{Real: 0+0i, Dual: 0+0i}},
+	{d: Number{Real: 0+0i, Dual: 0+0i}, want: Number{Real: 0+0i, Dual: 0+0i}},
+
+	// Abs((x+yi)+NaNϵ) = |x|+NaNϵ for any x and y
+	{d: Number{Real: -1+-1i, Dual: cmplx.NaN()}, want: Number{Real: complex(math.Sqrt(2),0), Dual: cmplx.NaN()}},
+	{d: Number{Real: -1+1i, Dual: cmplx.NaN()}, want: Number{Real: complex(math.Sqrt(2),0), Dual: cmplx.NaN()}},
+	{d: Number{Real: 1+-1i, Dual: cmplx.NaN()}, want: Number{Real: complex(math.Sqrt(2),0), Dual: cmplx.NaN()}},
+	{d: Number{Real: -1+0i, Dual: cmplx.NaN()}, want: Number{Real: 1, Dual: cmplx.NaN()}},
+	{d: Number{Real: 0+-1i, Dual: cmplx.NaN()}, want: Number{Real: 1, Dual: cmplx.NaN()}},
+	{d: Number{Real: 1+1i, Dual: cmplx.NaN()}, want: Number{Real: complex(math.Sqrt(2),0), Dual: cmplx.NaN()}},
+	{d: Number{Real: -1+-1i, Dual: cmplx.NaN()}, want: Number{Real: complex(math.Sqrt(2),0), Dual: cmplx.NaN()}},
+	{d: Number{Real: 1+1i, Dual: cmplx.NaN()}, want: Number{Real: complex(math.Sqrt(2),0), Dual: cmplx.NaN()}},
+	{d: Number{Real: -1+-1i, Dual: cmplx.NaN()}, want: Number{Real: complex(math.Sqrt(2),0), Dual: cmplx.NaN()}},
+	{d: Number{Real: 1+1i, Dual: cmplx.NaN()}, want: Number{Real: complex(math.Sqrt(2),0), Dual: cmplx.NaN()}},
+	{d: Number{Real: 10+10i, Dual: cmplx.NaN()}, want: Number{Real: complex(math.Sqrt(200),0), Dual: cmplx.NaN()}},
+	{d: Number{Real: 10-10i, Dual: cmplx.NaN()}, want: Number{Real: complex(math.Sqrt(200),0), Dual: cmplx.NaN()}},
+	{d: Number{Real: 10+10i, Dual: cmplx.NaN()}, want: Number{Real: complex(math.Sqrt(200),0), Dual: cmplx.NaN()}},
+	// Abs(±Infinity+NaNϵ) = (Infinity+NaNϵ)
+	{d: Number{Real: cmplx.Inf(), Dual: 0}, want: Number{Real: complex(math.Inf(1),0), Dual: 0}},
+	{d: Number{Real: cmplx.Inf(), Dual: 0}, want: Number{Real: complex(math.Inf(1),0), Dual: 0}},
+
+	// Abs(1 + yϵ) = (1 + yϵ) for any y
+	{d: Number{Real: 1i, Dual: -3i}, want: Number{Real: complex(1, 0), Dual: -3i}},
+	{d: Number{Real: 1i, Dual: -2i}, want: Number{Real: complex(1, 0), Dual: -2i}},
+	{d: Number{Real: 1i, Dual: -1i}, want: Number{Real: complex(1, 0), Dual: -1i}},
+	{d: Number{Real: 1i, Dual: 0i}, want: Number{Real: complex(1, 0), Dual: 0i}},
+	{d: Number{Real: 1, Dual: 1i}, want: Number{Real: complex(1, 0), Dual: 1i}},
+	{d: Number{Real: 1, Dual: 2i}, want: Number{Real: complex(1,0), Dual: 2i}},
+	{d: Number{Real: 1, Dual: 3i}, want: Number{Real: complex(1,0), Dual: 3i}},
+	{d: Number{Real: 1i, Dual: cmplx.NaN()}, want: Number{Real: complex(1,0), Dual: cmplx.NaN()}},
+	{d: Number{Real: 1i, Dual: cmplx.Inf()}, want: Number{Real: complex(1,0), Dual: cmplx.Inf()}},
+	{d: Number{Real: 1i, Dual: cmplx.Inf()}, want: Number{Real: complex(1,0), Dual: cmplx.Inf()}},
+
+	// AbsReal(Infinity+xϵ) = 0+NaNϵ for |x| < 1
+	{d: Number{Real: cmplx.Inf(), Dual: 0}, want: Number{Real: complex(math.Inf(1),0), Dual: 0+0i}},
+	{d: Number{Real: cmplx.Inf(), Dual: 0.1}, want: Number{Real: complex(math.Inf(1),0), Dual: 0.1}},
+	{d: Number{Real: cmplx.Inf(), Dual: 0.2}, want: Number{Real: complex(math.Inf(1),0), Dual: 0.2}},
+	{d: Number{Real: cmplx.Inf(), Dual: 0.5}, want: Number{Real: complex(math.Inf(1),0), Dual: 0.5}},
+
+	// AbsReal(±x+yϵ) = |x|+NaNϵ for 0 < |x| < 1
+	{d: Number{Real: 1.175495e-38i, Dual: cmplx.NaN()}, want: Number{Real:1.175495e-38i, Dual:cmplx.NaN()}},
+	{d: Number{Real: -1.175495e-38i, Dual: cmplx.NaN()}, want: Number{Real:1.175495e-38i, Dual:cmplx.NaN()}},
+	{d: Number{Real: -0.2i, Dual: cmplx.NaN()}, want: Number{Real: 0.2, Dual: cmplx.NaN()}},
+	{d: Number{Real: -0.1i, Dual: cmplx.NaN()}, want: Number{Real: 0.1, Dual: cmplx.NaN()}},
+
+}
+
+func TestAbsCmplx(t *testing.T) {
+	const tol = 1e-15
+	for _, test := range absCmplxTests {
+		got := Abs(test.d)
+		fmt.Println(got)
+		if !sameDual(got, test.want, tol) {
+			t.Errorf("unexpected AbsReal(%v): got:%v want:%v", test.d, got, test.want)
+		}
+	}
+}
+
+
 func sameDual(a, b Number, tol float64) bool {
 	return same(a.Real, b.Real, tol) && same(a.Dual, b.Dual, tol)
 }

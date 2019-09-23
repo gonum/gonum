@@ -69,7 +69,7 @@ func NewWishart(v mat.Symmetric, nu float64, src rand.Source) (*Wishart, bool) {
 	return w, true
 }
 
-// MeanSymTo calculates the mean matrix of the distribution in and stored it in dst.
+// MeanSymTo calculates the mean matrix of the distribution in and stores it in dst.
 // If dst is empty, it is resized to be an d×d symmetric matrix where d is the order
 // of the receiver. When dst is non-empty, MeanSymTo panics if dst is not d×d.
 func (w *Wishart) MeanSymTo(dst *mat.SymDense) {
@@ -150,8 +150,10 @@ func (w *Wishart) RandSymTo(dst *mat.SymDense) {
 	c.ToSym(dst)
 }
 
-// RandChol generates the Cholesky decomposition of a random matrix from the distribution.
+// RandCholTo generates the Cholesky decomposition of a random matrix from the distribution.
 func (w *Wishart) RandCholTo(dst *mat.Cholesky) {
+	// TODO(kortschak): Make RandCholTo care about the size of dst.
+
 	// TODO(btracey): Modify the code if the underlying data from c is exposed
 	// to avoid the dim^2 allocation here.
 
@@ -162,7 +164,7 @@ func (w *Wishart) RandCholTo(dst *mat.Cholesky) {
 	// off-diagonals are generated from standard normal variables.
 	// The above gives the cholesky decomposition of X, where L_x = L A.
 	//
-	// mat64 works with the upper triagular decomposition, so we would like to do
+	// mat works with the upper triagular decomposition, so we would like to do
 	// the same. We can instead say that
 	//  U_x = L_xᵀ = (L * A)ᵀ = Aᵀ * Lᵀ = Aᵀ * U
 	// Instead, generate Aᵀ, by using the procedure above, except as an upper

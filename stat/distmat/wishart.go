@@ -151,6 +151,8 @@ func (w *Wishart) RandSymTo(dst *mat.SymDense) {
 }
 
 // RandCholTo generates the Cholesky decomposition of a random matrix from the distribution.
+// If dst is empty, it is resized to be an d×d symmetric matrix where d is the order
+// of the receiver. When dst is non-empty, RandCholTo panics if dst is not d×d.
 func (w *Wishart) RandCholTo(dst *mat.Cholesky) {
 	// TODO(btracey): Modify the code if the underlying data from dst is exposed
 	// to avoid the dim^2 allocation here.

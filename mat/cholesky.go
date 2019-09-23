@@ -154,9 +154,18 @@ func (c *Cholesky) Reset() {
 	c.cond = math.Inf(1)
 }
 
+// IsEmpty returns whether the receiver is empty. Empty matrices can be the
+// receiver for size-restricted operations. The receiver can be emptied using
+// Reset.
+func (c *Cholesky) IsEmpty() bool {
+	return c.chol == nil || c.chol.IsEmpty()
+}
+
 // SetFromU sets the Cholesky decomposition from the given triangular matrix.
-// SetFromU panics if t is not upper triangular. Note that t is copied into,
-// not stored inside, the receiver.
+// SetFromU panics if t is not upper triangular. If the receiver is empty it
+// is resized to be n×n, the size of t. If dst is non-empty, SetFromU panics
+// if c is not of size n×n. Note that t is copied into, not stored inside, the
+// receiver.
 func (c *Cholesky) SetFromU(t Triangular) {
 	n, kind := t.Triangle()
 	if kind != Upper {
@@ -165,7 +174,7 @@ func (c *Cholesky) SetFromU(t Triangular) {
 	if c.chol == nil {
 		c.chol = NewTriDense(n, Upper, nil)
 	} else {
-		c.chol = NewTriDense(n, Upper, use(c.chol.mat.Data, n*n))
+		c.chol.reuseAsNonZeroed(n, Upper)
 	}
 	c.chol.Copy(t)
 	c.updateCond(-1)

@@ -69,22 +69,18 @@ func NewWishart(v mat.Symmetric, nu float64, src rand.Source) (*Wishart, bool) {
 	return w, true
 }
 
-// MeanSym returns the mean matrix of the distribution as a symmetric matrix.
-// If x is nil, a new matrix is allocated and returned. If x is not nil, the
-// result is stored in-place into x and MeanSym will panic if the order of x
-// is not equal to the order of the receiver.
-func (w *Wishart) MeanSym(x *mat.SymDense) *mat.SymDense {
-	if x == nil {
-		x = mat.NewSymDense(w.dim, nil)
-	}
-	d := x.Symmetric()
-	if d != w.dim {
+// MeanSymTo calculates the mean matrix of the distribution in and stored it in dst.
+// If dst is empty, it is resized to be an d×d symmetric matrix where d is the order
+// of the receiver. When dst is non-empty, MeanSymTo panics if dst is not d×d.
+func (w *Wishart) MeanSymTo(dst *mat.SymDense) {
+	if dst.IsEmpty() {
+		dst.ReuseAsSym(w.dim)
+	} else if dst.Symmetric() != w.dim {
 		panic(badDim)
 	}
 	w.setV()
-	x.CopySym(w.v)
-	x.ScaleSym(w.nu, x)
-	return x
+	dst.CopySym(w.v)
+	dst.ScaleSym(w.nu, dst)
 }
 
 // ProbSym returns the probability of the symmetric matrix x. If x is not positive
@@ -145,19 +141,17 @@ func (w *Wishart) logProbSymChol(cholX *mat.Cholesky) float64 {
 	return 0.5*((fnu-fdim-1)*logdetx-tr-fnu*fdim*math.Ln2-fnu*w.logdetv) - mathext.MvLgamma(0.5*fnu, w.dim)
 }
 
-// RandSym generates a random symmetric matrix from the distribution.
-func (w *Wishart) RandSym(x *mat.SymDense) *mat.SymDense {
-	if x == nil {
-		x = &mat.SymDense{}
-	}
+// RandSymTo generates a random symmetric matrix from the distribution.
+// If dst is empty, it is resized to be an d×d symmetric matrix where d is the order
+// of the receiver. When dst is non-empty, RandSymTo panics if dst is not d×d.
+func (w *Wishart) RandSymTo(dst *mat.SymDense) {
 	var c mat.Cholesky
-	w.RandChol(&c)
-	c.ToSym(x)
-	return x
+	w.RandCholTo(&c)
+	c.ToSym(dst)
 }
 
 // RandChol generates the Cholesky decomposition of a random matrix from the distribution.
-func (w *Wishart) RandChol(c *mat.Cholesky) *mat.Cholesky {
+func (w *Wishart) RandCholTo(dst *mat.Cholesky) {
 	// TODO(btracey): Modify the code if the underlying data from c is exposed
 	// to avoid the dim^2 allocation here.
 
@@ -194,11 +188,7 @@ func (w *Wishart) RandChol(c *mat.Cholesky) *mat.Cholesky {
 	}
 
 	t.MulTri(t, &w.upper)
-	if c == nil {
-		c = &mat.Cholesky{}
-	}
-	c.SetFromU(t)
-	return c
+	dst.SetFromU(t)
 }
 
 // setV computes and stores the covariance matrix of the distribution.

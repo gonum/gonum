@@ -58,7 +58,7 @@ func (lu *LU) updateCond(anorm float64, norm lapack.MatrixNorm) {
 // The LU factorization is computed with pivoting, and so really the decomposition
 // is a PLU decomposition where P is a permutation matrix. The individual matrix
 // factors can be extracted from the factorization using the Permutation method
-// on Dense, and the LU LTo and UTo methods.
+// on Dense, and the LU.LTo and LU.UTo methods.
 func (lu *LU) Factorize(a Matrix) {
 	lu.factorize(a, CondNorm)
 }
@@ -250,18 +250,27 @@ func (lu *LU) RankOne(orig *LU, alpha float64, x, y Vector) {
 }
 
 // LTo extracts the lower triangular matrix from an LU factorization.
-// If dst is nil, a new matrix is allocated. The resulting L matrix is returned.
-// LTo will panic if the receiver does not contain a factorization.
+//
+// If dst is empty, LTo will resize dst to be a lower-triangular n×n matrix.
+// When dst is non-empty, LTo will panic if dst is not n×n or not Lower.
+// LTo will also panic if the receiver does not contain a successful
+// factorization.
 func (lu *LU) LTo(dst *TriDense) *TriDense {
 	if !lu.isValid() {
 		panic(badLU)
 	}
 
 	_, n := lu.lu.Dims()
-	if dst == nil {
-		dst = NewTriDense(n, Lower, nil)
+	if dst.IsEmpty() {
+		dst.ReuseAsTri(n, Lower)
 	} else {
-		dst.reuseAsNonZeroed(n, Lower)
+		n2, kind := dst.Triangle()
+		if n != n2 {
+			panic(ErrShape)
+		}
+		if kind != Lower {
+			panic(ErrTriangle)
+		}
 	}
 	// Extract the lower triangular elements.
 	for i := 0; i < n; i++ {
@@ -277,18 +286,27 @@ func (lu *LU) LTo(dst *TriDense) *TriDense {
 }
 
 // UTo extracts the upper triangular matrix from an LU factorization.
-// If dst is nil, a new matrix is allocated. The resulting U matrix is returned.
-// UTo will panic if the receiver does not contain a factorization.
-func (lu *LU) UTo(dst *TriDense) *TriDense {
+//
+// If dst is empty, UTo will resize dst to be an upper-triangular n×n matrix.
+// When dst is non-empty, UTo will panic if dst is not n×n or not Upper.
+// UTo will also panic if the receiver does not contain a successful
+// factorization.
+func (lu *LU) UTo(dst *TriDense) {
 	if !lu.isValid() {
 		panic(badLU)
 	}
 
 	_, n := lu.lu.Dims()
-	if dst == nil {
-		dst = NewTriDense(n, Upper, nil)
+	if dst.IsEmpty() {
+		dst.ReuseAsTri(n, Upper)
 	} else {
-		dst.reuseAsNonZeroed(n, Upper)
+		n2, kind := dst.Triangle()
+		if n != n2 {
+			panic(ErrShape)
+		}
+		if kind != Upper {
+			panic(ErrTriangle)
+		}
 	}
 	// Extract the upper triangular elements.
 	for i := 0; i < n; i++ {
@@ -296,7 +314,6 @@ func (lu *LU) UTo(dst *TriDense) *TriDense {
 			dst.mat.Data[i*dst.mat.Stride+j] = lu.lu.mat.Data[i*lu.lu.mat.Stride+j]
 		}
 	}
-	return dst
 }
 
 // Permutation constructs an r×r permutation matrix with the given row swaps.

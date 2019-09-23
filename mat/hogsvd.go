@@ -106,7 +106,8 @@ func (gsvd *HOGSVD) Factorize(m ...Matrix) (ok bool) {
 		gsvd.err = errors.New("hogsvd: eigen decomposition failed")
 		return false
 	}
-	vc := eig.VectorsTo(nil)
+	var vc CDense
+	eig.VectorsTo(&vc)
 	// vc is guaranteed to have real eigenvalues.
 	rc, cc := vc.Dims()
 	v := NewDense(rc, cc, nil)
@@ -158,22 +159,25 @@ func (gsvd *HOGSVD) Len() int {
 
 // UTo extracts the matrix U_n from the singular value decomposition, storing
 // the result in-place into dst. U_n is size r×c.
-// If dst is nil, a new matrix is allocated. The resulting U matrix is returned.
 //
-// UTo will panic if the receiver does not contain a successful factorization.
-func (gsvd *HOGSVD) UTo(dst *Dense, n int) *Dense {
+// If dst is empty, UTo will resize dst to be r×c. When dst is
+// non-empty, UTo will panic if dst is not r×c. UTo will also
+// panic if the receiver does not contain a successful factorization.
+func (gsvd *HOGSVD) UTo(dst *Dense, n int) {
 	if !gsvd.succFact() {
 		panic(badFact)
 	}
 	if n < 0 || gsvd.n <= n {
 		panic("hogsvd: invalid index")
 	}
-
-	if dst == nil {
-		r, c := gsvd.b[n].Dims()
-		dst = NewDense(r, c, nil)
+	r, c := gsvd.b[n].Dims()
+	if dst.IsEmpty() {
+		dst.ReuseAs(r, c)
 	} else {
-		dst.reuseAsNonZeroed(gsvd.b[n].Dims())
+		r2, c2 := dst.Dims()
+		if r != r2 || c != c2 {
+			panic(ErrShape)
+		}
 	}
 	dst.Copy(&gsvd.b[n])
 	var v VecDense
@@ -181,7 +185,6 @@ func (gsvd *HOGSVD) UTo(dst *Dense, n int) *Dense {
 		v.ColViewOf(dst, j)
 		v.ScaleVec(1/f, &v)
 	}
-	return dst
 }
 
 // Values returns the nth set of singular values of the factorized system.
@@ -215,19 +218,22 @@ func (gsvd *HOGSVD) Values(s []float64, n int) []float64 {
 
 // VTo extracts the matrix V from the singular value decomposition, storing
 // the result in-place into dst. V is size c×c.
-// If dst is nil, a new matrix is allocated. The resulting V matrix is returned.
 //
-// VTo will panic if the receiver does not contain a successful factorization.
-func (gsvd *HOGSVD) VTo(dst *Dense) *Dense {
+// If dst is empty, VTo will resize dst to be c×c. When dst is
+// non-empty, VTo will panic if dst is not c×c. VTo will also
+// panic if the receiver does not contain a successful factorization.
+func (gsvd *HOGSVD) VTo(dst *Dense) {
 	if !gsvd.succFact() {
 		panic(badFact)
 	}
-	if dst == nil {
-		r, c := gsvd.v.Dims()
-		dst = NewDense(r, c, nil)
+	r, c := gsvd.v.Dims()
+	if dst.IsEmpty() {
+		dst.ReuseAs(r, c)
 	} else {
-		dst.reuseAsNonZeroed(gsvd.v.Dims())
+		r2, c2 := dst.Dims()
+		if r != r2 || c != c2 {
+			panic(ErrShape)
+		}
 	}
 	dst.Copy(gsvd.v)
-	return dst
 }

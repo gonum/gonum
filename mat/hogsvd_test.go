@@ -80,9 +80,11 @@ func extractHOGSVD(gsvd *HOGSVD) (u []*Dense, s [][]float64, v *Dense) {
 	u = make([]*Dense, gsvd.Len())
 	s = make([][]float64, gsvd.Len())
 	for i := 0; i < gsvd.Len(); i++ {
-		u[i] = gsvd.UTo(nil, i)
+		u[i] = &Dense{}
+		gsvd.UTo(u[i], i)
 		s[i] = gsvd.Values(nil, i)
 	}
-	v = gsvd.VTo(nil)
+	v = &Dense{}
+	gsvd.VTo(v)
 	return u, s, v
 }

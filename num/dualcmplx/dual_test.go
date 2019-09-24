@@ -441,6 +441,72 @@ func TestPowReal(t *testing.T) {
 	}
 }
 
+// Test ensures Abs() supplies a float64 type.
+var absCmplxTests = []struct {
+	d    Number
+	want float64
+}{
+	// Abs(NaN+NaNϵ) = NaN
+	{d: Number{Real: cmplx.NaN(), Dual: cmplx.NaN()}, want: math.NaN()},
+
+	// Abs(NaN+yϵ) = NaN for any finite y
+	{d: Number{Real: complex(math.NaN(), 10), Dual: 0 + 3i}, want: math.NaN()},
+	{d: Number{Real: complex(0, math.NaN()), Dual: 0 + 1i}, want: math.NaN()},
+
+	// Abs(Inf+NaNϵ) = +Inf
+	{d: Number{Real: cmplx.Inf(), Dual: 0}, want: math.Inf(1)},
+	{d: Number{Real: cmplx.Inf(), Dual: 0}, want: math.Inf(1)},
+
+	// Abs(x+xϵ) = 0 where x is ±0
+	{d: Number{Real: negZeroCmplx, Dual: negZeroCmplx}, want: 0},
+	{d: Number{Real: negZeroCmplx, Dual: 0 + 0i}, want: 0},
+	{d: Number{Real: 0 + -0i, Dual: negZeroCmplx}, want: 0},
+	{d: Number{Real: -0 + 0i, Dual: 0 + 0i}, want: 0},
+
+	// Abs(x+NaNϵ) = Sqrt( Sqrt(real(x)) + Sqrt(imaginary(x)) for any complex number x
+	{d: Number{Real: -1 + -1i, Dual: cmplx.NaN()}, want: math.Sqrt(2)},
+	{d: Number{Real: -1 + 1i, Dual: cmplx.NaN()}, want: math.Sqrt(2)},
+	{d: Number{Real: 1 + -1i, Dual: cmplx.NaN()}, want: math.Sqrt(2)},
+	{d: Number{Real: -1 + 0i, Dual: cmplx.NaN()}, want: math.Sqrt(1)},
+	{d: Number{Real: 0 + -1i, Dual: cmplx.NaN()}, want: math.Sqrt(1)},
+	{d: Number{Real: -1, Dual: cmplx.NaN()}, want: math.Sqrt(1)},
+	{d: Number{Real: 1 + 1i, Dual: cmplx.NaN()}, want: math.Sqrt(2)},
+	{d: Number{Real: -1 + -1i, Dual: cmplx.NaN()}, want: math.Sqrt(2)},
+	{d: Number{Real: 1 + 1i, Dual: cmplx.NaN()}, want: math.Sqrt(2)},
+	{d: Number{Real: -1 + -1i, Dual: cmplx.NaN()}, want: math.Sqrt(2)},
+	{d: Number{Real: 1 + 1i, Dual: cmplx.NaN()}, want: math.Sqrt(2)},
+	{d: Number{Real: 10 + 10i, Dual: cmplx.NaN()}, want: math.Sqrt(200)},
+	{d: Number{Real: 10 - 10i, Dual: cmplx.NaN()}, want: math.Sqrt(200)},
+	{d: Number{Real: 10 + 10i, Dual: cmplx.NaN()}, want: math.Sqrt(200)},
+	{d: Number{Real: complex(0, -1.175495e-38), Dual: cmplx.NaN()}, want: 1.175495e-38},
+	{d: Number{Real: complex(-1.175495e-38, 0), Dual: cmplx.NaN()}, want: 1.175495e-38},
+	{d: Number{Real: -0.2i, Dual: cmplx.NaN()}, want: 0.2},
+	{d: Number{Real: -0.1i, Dual: cmplx.NaN()}, want: .1},
+
+	// Abs(x) =  Sqrt( Sqrt(real(x)) + Sqrt(imaginary(x)) for any complex number x
+	{d: Number{Real: 1i, Dual: -3i}, want: 1},
+	{d: Number{Real: -1i, Dual: 2i}, want: 1},
+	{d: Number{Real: 1, Dual: 3i}, want: 1},
+}
+
+func Float64ToNumber(val float64) Number {
+	return Number{Real: complex(val, 0), Dual: 0}
+}
+
+func TestAbsCmplx(t *testing.T) {
+	const tol = 1e-15
+	for _, test := range absCmplxTests {
+		got := Abs(test.d)
+		// Abs() supplies a float64
+		// The result and expected value should be provided as a Number
+		result := Float64ToNumber(got)
+		expected := Float64ToNumber(test.want)
+		if !sameDual(result, expected, tol) {
+			t.Errorf("unexpected AbsCmplx(%v): got:%v want:%v", test.d, got, test.want)
+		}
+	}
+}
+
 func sameDual(a, b Number, tol float64) bool {
 	return same(a.Real, b.Real, tol) && same(a.Dual, b.Dual, tol)
 }

@@ -387,6 +387,77 @@ func TestPowReal(t *testing.T) {
 	}
 }
 
+var absRealTests = []struct {
+	d    Number
+	p    float64
+	want Number
+}{
+	// Abs(NaN+NaNϵ) = NaN+NaNϵ
+	{d: Number{Real: math.NaN(), Emag: math.NaN()}, want: Number{Real: math.NaN(), Emag: math.NaN()}},
+
+	// Abs(NaN+xϵ) = NaN+xϵ for any finite x
+	{d: Number{Real: math.NaN(), Emag: 3}, want: Number{Real: math.NaN(), Emag: 3}},
+	{d: Number{Real: math.NaN(), Emag: 1}, want: Number{Real: math.NaN(), Emag: 1}},
+
+	// Abs(NaN+yϵ) = NaN+yϵ where y = ±Inf
+	{d: Number{Real: math.NaN(), Emag: math.Inf(1)}, want: Number{Real: math.NaN(), Emag: math.Inf(1)}},
+	{d: Number{Real: math.NaN(), Emag: math.Inf(-1)}, want: Number{Real: math.NaN(), Emag: math.Inf(-1)}},
+
+	// Abs(±0+-0ϵ) = 0+-0ϵ
+	{d: Number{Real: negZero, Emag: negZero}, want: Number{Real: 0, Emag: negZero}},
+	{d: Number{Real: 0, Emag: negZero}, want: Number{Real: 0, Emag: negZero}},
+
+	// Abs(±0+0ϵ) = 0+0ϵ
+	{d: Number{Real: negZero, Emag: 0}, want: Number{Real: 0, Emag: 0}},
+	{d: Number{Real: 0, Emag: 0}, want: Number{Real: 0, Emag: 0}},
+
+	// Abs(x+NaNϵ) = |x|+NaNϵ for any finite x
+	{d: Number{Real: -1, Emag: math.NaN()}, want: Number{Real: 1, Emag: math.NaN()}},
+	{d: Number{Real: 1, Emag: math.NaN()}, want: Number{Real: 1, Emag: math.NaN()}},
+	{d: Number{Real: 10, Emag: math.NaN()}, want: Number{Real: 10, Emag: math.NaN()}},
+
+	// Abs(±Inf+NaNϵ) = (+Inf+NaNϵ)
+	{d: Number{Real: math.Inf(-1), Emag: math.NaN()}, want: Number{Real: math.Inf(1), Emag: math.NaN()}},
+
+	// Abs(1+yϵ) = (1 + yϵ) for any finite y
+	{d: Number{Real: 1, Emag: -3}, want: Number{Real: 1, Emag: -3}},
+	{d: Number{Real: 1, Emag: -2}, want: Number{Real: 1, Emag: -2}},
+	{d: Number{Real: 1, Emag: -1}, want: Number{Real: 1, Emag: -1}},
+	{d: Number{Real: 1, Emag: 0}, want: Number{Real: 1, Emag: 0}},
+	{d: Number{Real: 1, Emag: 1}, want: Number{Real: 1, Emag: 1}},
+	{d: Number{Real: 1, Emag: 2}, want: Number{Real: 1, Emag: 2}},
+	{d: Number{Real: 1, Emag: 3}, want: Number{Real: 1, Emag: 3}},
+
+	// Abs(1+yϵ) = +Inf+yϵ where y = ±Inf
+	{d: Number{Real: 1, Emag: math.Inf(-1)}, want: Number{Real: 1, Emag: math.Inf(-1)}},
+	{d: Number{Real: 1, Emag: math.Inf(1)}, want: Number{Real: 1, Emag: math.Inf(1)}},
+
+	// Abs(+Inf+yϵ) = +Inf+yϵ for -1 ≤ y ≤ 1
+	{d: Number{Real: math.Inf(1), Emag: 0}, want: Number{Real: math.Inf(1), Emag: 0}},
+	{d: Number{Real: math.Inf(1), Emag: 0.1}, want: Number{Real: math.Inf(1), Emag: 0.1}},
+	{d: Number{Real: math.Inf(1), Emag: 0.2}, want: Number{Real: math.Inf(1), Emag: 0.2}},
+	{d: Number{Real: math.Inf(1), Emag: 0.5}, want: Number{Real: math.Inf(1), Emag: 0.5}},
+
+	// Abs(x+NaNϵ) = |x|+NaNϵ for -1 ≤ x ≤ 1
+	{d: Number{Real: 1.175495e-38, Emag: math.NaN()}, want: Number{Real: 1.175495e-38, Emag: math.NaN()}},
+	{d: Number{Real: -1.175495e-38, Emag: math.NaN()}, want: Number{Real: 1.175495e-38, Emag: math.NaN()}},
+	{d: Number{Real: -0.2, Emag: math.NaN()}, want: Number{Real: 0.2, Emag: math.NaN()}},
+	{d: Number{Real: -2.1, Emag: math.NaN()}, want: Number{Real: 2.1, Emag: math.NaN()}},
+	{d: Number{Real: 0.1, Emag: math.NaN()}, want: Number{Real: 0.1, Emag: math.NaN()}},
+	{d: Number{Real: 0.2, Emag: math.NaN()}, want: Number{Real: 0.2, Emag: math.NaN()}},
+	{d: Number{Real: 1, Emag: math.NaN()}, want: Number{Real: 1, Emag: math.NaN()}},
+}
+
+func TestAbsReal(t *testing.T) {
+	const tol = 1e-15
+	for _, test := range absRealTests {
+		got := Abs(test.d)
+		if !sameDual(got, test.want, tol) {
+			t.Errorf("unexpected AbsReal(%v): got:%v want:%v", test.d, got, test.want)
+		}
+	}
+}
+
 func sameDual(a, b Number, tol float64) bool {
 	return same(a.Real, b.Real, tol) && same(a.Emag, b.Emag, tol)
 }

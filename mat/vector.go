@@ -597,6 +597,7 @@ func (v *VecDense) MulVec(a Matrix, b Vector) {
 		return
 	case *SymBandDense:
 		if fast {
+			aU.checkOverlap(v.asGeneral())
 			blas64.Sbmv(1, aU.mat, bmat, 0, v.mat)
 			return
 		}

@@ -18,16 +18,17 @@ import (
 // When the scaling is successful, mds will be resized to k columns wide.
 // Eigenvalues will be copied into eigdst and returned as eig if it is provided.
 //
-// If dst is nil, a new mat.Dense is allocated. If dst is not empty,
-// the dimensions of dst and dis must match otherwise TorgersonScaling will panic.
+// If dst is empty, TorgersonScaling will resize dst to be n×n, where
+// n is the dimension of the Symmetric matrix. When dst is non-empty,
+// this will panic if the dimensions of dst and dis do not match.
 // The dis matrix must be square or TorgersonScaling will panic.
-func TorgersonScaling(dst *mat.Dense, eigdst []float64, dis mat.Symmetric) (k int, mds *mat.Dense, eig []float64) {
+func TorgersonScaling(dst *mat.Dense, eigdst []float64, dis mat.Symmetric) (k int, eig []float64) {
 	// https://doi.org/10.1007/0-387-28981-X_12
 
 	n := dis.Symmetric()
-	if dst == nil {
-		dst = mat.NewDense(n, n, nil)
-	} else if r, c := dst.Dims(); !dst.IsEmpty() && (r != n || c != n) {
+	if dst.IsEmpty() {
+		dst.ReuseAs(n, n)
+	} else if r, c := dst.Dims(); r != n || c != n {
 		panic(mat.ErrShape)
 	}
 
@@ -57,7 +58,7 @@ func TorgersonScaling(dst *mat.Dense, eigdst []float64, dis mat.Symmetric) (k in
 	var ed mat.EigenSym
 	ok := ed.Factorize(b, true)
 	if !ok {
-		return 0, dst, eigdst
+		return 0, eigdst
 	}
 	ed.VectorsTo(dst)
 	vals := ed.Values(nil)
@@ -78,7 +79,7 @@ func TorgersonScaling(dst *mat.Dense, eigdst []float64, dis mat.Symmetric) (k in
 	dst = dst.Slice(0, n, 0, k).(*mat.Dense)
 	dst.Copy(&tmp)
 
-	return k, dst, eigdst
+	return k, eigdst
 }
 
 func reverse(values []float64, vectors blas64.General) {

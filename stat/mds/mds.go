@@ -14,22 +14,19 @@ import (
 // TorgersonScaling converts a dissimilarity matrix to a matrix containing
 // Euclidean coordinates. TorgersonScaling places the coordinates in dst and
 // returns it and the number of positive Eigenvalues if successful.
-// If the scaling is not successful, dst is returned, but will not be a valid scaling.
-// When the scaling is successful, mds will be resized to k columns wide.
+// If the scaling is not successful, dst will be empty upon return.
+// When the scaling is successful, dst will be resized to k columns wide.
 // Eigenvalues will be copied into eigdst and returned as eig if it is provided.
 //
-// If dst is empty, TorgersonScaling will resize dst to be n×n, where
-// n is the dimension of the Symmetric matrix. When dst is non-empty,
-// this will panic if the dimensions of dst and dis do not match.
-// The dis matrix must be square or TorgersonScaling will panic.
+// TorgersonScaling will panic if dst is not empty.
 func TorgersonScaling(dst *mat.Dense, eigdst []float64, dis mat.Symmetric) (k int, eig []float64) {
 	// https://doi.org/10.1007/0-387-28981-X_12
 
 	n := dis.Symmetric()
 	if dst.IsEmpty() {
 		dst.ReuseAs(n, n)
-	} else if r, c := dst.Dims(); r != n || c != n {
-		panic(mat.ErrShape)
+	} else {
+		panic("mds: receiver matrix not empty")
 	}
 
 	b := mat.NewSymDense(n, nil)
@@ -76,7 +73,8 @@ func TorgersonScaling(dst *mat.Dense, eigdst []float64, dis mat.Symmetric) (k in
 
 	var tmp mat.Dense
 	tmp.Mul(dst, mat.NewDiagonalRect(n, k, vals[:k]))
-	dst = dst.Slice(0, n, 0, k).(*mat.Dense)
+	tmp2 := dst.Slice(0, n, 0, k).(*mat.Dense)
+	*dst = *tmp2
 	dst.Copy(&tmp)
 
 	return k, eigdst

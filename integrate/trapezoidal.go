@@ -18,9 +18,9 @@ import "sort"
 // More details on the trapezoidal rule can be found at:
 // https://en.wikipedia.org/wiki/Trapezoidal_rule
 //
-// The (x,f) input data points must be sorted along x.
-// One can use github.com/gonum/stat.SortWeighted to do that.
-// The x and f slices must be of equal length and have length > 1.
+// The (x,f) input data points must be sorted along x. stat.SortWeighted can
+// be used to do this. The x and f slices must be of equal length and have
+// length greater than one.
 func Trapezoidal(x, f []float64) float64 {
 	switch {
 	case len(x) != len(f):

@@ -1043,7 +1043,7 @@ func Quantile(p float64, c CumulantKind, x, weights []float64) float64 {
 		return math.NaN() // This is needed because the algorithm breaks otherwise.
 	}
 	if !sort.Float64sAreSorted(x) {
-		panic("x data are not sorted")
+		sort.Float64s(x)
 	}
 
 	var sumWeights float64

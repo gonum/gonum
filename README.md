@@ -2,7 +2,7 @@
 
 ## Installation
 
-The core packages of the gonum suite are written in pure Go with some assembly.
+The core packages of the Gonum suite are written in pure Go with some assembly.
 Installation is done using `go get`.
 ```
 go get -u gonum.org/v1/gonum/...
@@ -28,8 +28,8 @@ The release schedule, based on the current Go release schedule is thus:
 
 ## Build tags
 
-The gonum packages use a variety of build tags to set non-standard build conditions.
-Building gonum applications will work without knowing how to use these tags, but they can be used during testing and to control the use of assembly and CGO code.
+The Gonum packages use a variety of build tags to set non-standard build conditions.
+Building Gonum applications will work without knowing how to use these tags, but they can be used during testing and to control the use of assembly and CGO code.
 
 The current list of non-internal tags is as follows:
 

@@ -14,17 +14,14 @@ Gonum supports and tests on the three most recent minor versions of Go on [Linux
 
 ## Release schedule
 
-The Gonum modules are released on a quaterly-based time schedule, aligned with the Go releases.
+The Gonum modules are released on a six-month release schedule, aligned with the Go releases.
 _i.e.:_ when `Go-1.x` is released, `Gonum-v0.n.0` is released around the same time.
-Three months later, `Gonum-v0.n+1.0` is released.
-Three months after, `Go-1.x+1` is released, and `Gonum-v0.n+2.0` as well.
+Six months after, `Go-1.x+1` is released, and `Gonum-v0.n+1.0` as well.
 
 The release schedule, based on the current Go release schedule is thus:
 
 - `Gonum-v0.n.0`: February
-- `Gonum-v0.n+1.0`: May
-- `Gonum-v0.n+2.0`: August
-- `Gonum-v0.n+3.0`: November
+- `Gonum-v0.n+1.0`: August
 
 ## Build tags
 

@@ -293,6 +293,7 @@ func Cartesian(lens []int) [][]int {
 }
 
 // NumCartesianProducts calculates the number of products of a cartesian product set for the given lengths.
+// At least one length must be provided and all length values must be positive, otherwise this will panic.
 func NumCartesianProducts(lens []int) int {
 	if len(lens) == 0 {
 		panic("combin: empty lengths")
@@ -308,6 +309,7 @@ func NumCartesianProducts(lens []int) int {
 }
 
 // NewCartesianGenerator returns a CartesianGenerator for iterating over cartesian products which are generated on the fly.
+// At least one length must be provided and all length values must be positive, otherwise this will panic.
 func NewCartesianGenerator(lens []int) *CartesianGenerator {
 	return &CartesianGenerator{
 		lens: lens,
@@ -324,10 +326,14 @@ type CartesianGenerator struct {
 }
 
 // Next moves to the next product of the cartesian set.
-// It returns true if a product can be generated and false if the generator reached the cartesian sets end.
+// It returns false if the generator reached the end of the cartesian set end.
 func (g *CartesianGenerator) Next() bool {
-	g.idx++
-	return g.idx < g.rows
+	if g.idx+1 < g.rows {
+		g.idx++
+		return true
+	}
+	g.idx = g.rows
+	return false
 }
 
 // Product generates one product of the cartesian set according to the current index which is increased by Next().

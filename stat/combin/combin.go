@@ -327,11 +327,7 @@ type CartesianGenerator struct {
 // It returns true if a product can be generated and false if the generator reached the cartesian sets end.
 func (g *CartesianGenerator) Next() bool {
 	g.idx++
-	if g.idx == g.rows {
-		return false
-	}
-
-	return true
+	return g.idx < g.rows
 }
 
 // Product generates one product of the cartesian set according to the current index which is increased by Next().

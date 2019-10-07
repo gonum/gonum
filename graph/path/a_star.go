@@ -64,7 +64,10 @@ func AStar(s, t graph.Node, g graph.Graph, h Heuristic) (path Shortest, expanded
 			if visited.Has(vid) {
 				continue
 			}
-			j := path.indexOf[vid]
+			j, ok := path.indexOf[vid]
+			if !ok {
+				j = path.add(v)
+			}
 
 			w, ok := weight(u.node.ID(), vid)
 			if !ok {

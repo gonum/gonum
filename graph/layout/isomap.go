@@ -53,11 +53,11 @@ func isomap(g graph.Graph, nodes []graph.Node, dims int) *mat.Dense {
 			dist.SetSym(i, j, p.Weight(u.ID(), v.ID()))
 		}
 	}
-
-	k, v, _ := mds.TorgersonScaling(nil, nil, dist)
+	var v mat.Dense
+	k, _ := mds.TorgersonScaling(&v, nil, dist)
 	if k < dims {
 		return nil
 	}
 
-	return v
+	return &v
 }

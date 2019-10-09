@@ -151,11 +151,11 @@ tests:
 		},
 	} {
 		var pc PC
-		var vecs *mat.Dense
+		vecs := &mat.Dense{}
 		var vars []float64
 		for j := 0; j < 2; j++ {
 			ok := pc.PrincipalComponents(test.data, test.weights)
-			vecs = pc.VectorsTo(vecs)
+			pc.VectorsTo(vecs)
 			vars = pc.VarsTo(vars)
 			if !ok {
 				t.Errorf("unexpected SVD failure for test %d use %d", i, j)

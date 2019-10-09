@@ -5,7 +5,6 @@
 package mds
 
 import (
-	"fmt"
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
@@ -119,8 +118,6 @@ func TestTorgersonScaling(t *testing.T) {
 			t.Error("unexpected scaling failure")
 			continue
 		}
-		r, c := got.Dims()
-		fmt.Println("got dims", r, c)
 		if gotK != test.wantK {
 			t.Errorf("unexpected k for test %d: got:%d want:%d", i, gotK, test.wantK)
 		}

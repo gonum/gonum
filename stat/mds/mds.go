@@ -73,8 +73,7 @@ func TorgersonScaling(dst *mat.Dense, eigdst []float64, dis mat.Symmetric) (k in
 
 	var tmp mat.Dense
 	tmp.Mul(dst, mat.NewDiagonalRect(n, k, vals[:k]))
-	tmp2 := dst.Slice(0, n, 0, k).(*mat.Dense)
-	*dst = *tmp2
+	*dst = *dst.Slice(0, n, 0, k).(*mat.Dense)
 	dst.Copy(&tmp)
 
 	return k, eigdst

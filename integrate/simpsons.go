@@ -4,9 +4,7 @@
 
 package integrate
 
-import (
-	"sort"
-)
+import "sort"
 
 // Simpson's method approximates the integral of a function f(x)
 // by means of subdividing the interval of integration into segments

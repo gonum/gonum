@@ -284,7 +284,7 @@ func IndexToCombination(dst []int, idx, n, k int) []int {
 //  [ 1 2 0 ]
 // Cartesian panics if any of the provided lengths are less than 1.
 func Cartesian(lens []int) [][]int {
-	rows := NumCartesianProducts(lens)
+	rows := Card(lens)
 	out := make([][]int, rows)
 	for i := 0; i < rows; i++ {
 		out[i] = SubFor(nil, i, lens)
@@ -292,20 +292,20 @@ func Cartesian(lens []int) [][]int {
 	return out
 }
 
-// NumCartesianProducts calculates the number of products of a cartesian product set for the given lengths.
+// Card computes the cardinality of the multi-dimensional space whose dimensions have size specified by dims
 // At least one length must be provided and all length values must be positive, otherwise this will panic.
-func NumCartesianProducts(lens []int) int {
-	if len(lens) == 0 {
+func Card(dims []int) int {
+	if len(dims) == 0 {
 		panic("combin: empty lengths")
 	}
-	rows := 1
-	for _, v := range lens {
+	card := 1
+	for _, v := range dims {
 		if v < 1 {
 			panic("combin: length less than zero")
 		}
-		rows *= v
+		card *= v
 	}
-	return rows
+	return card
 }
 
 // NewCartesianGenerator returns a CartesianGenerator for iterating over cartesian products which are generated on the fly.
@@ -313,7 +313,7 @@ func NumCartesianProducts(lens []int) int {
 func NewCartesianGenerator(lens []int) *CartesianGenerator {
 	return &CartesianGenerator{
 		lens: lens,
-		rows: NumCartesianProducts(lens),
+		rows: Card(lens),
 		idx:  -1,
 	}
 }

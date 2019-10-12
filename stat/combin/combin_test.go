@@ -300,7 +300,7 @@ func TestCartesian(t *testing.T) {
 
 func TestNumCartesianProducts(t *testing.T) {
 	want := 6
-	got := NumCartesianProducts([]int{1, 2, 3})
+	got := Card([]int{1, 2, 3})
 	if want != got {
 		t.Errorf("number of cartesian products mismatch.\nwant:\n%v\ngot:\n%v", want, got)
 	}

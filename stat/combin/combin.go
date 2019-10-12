@@ -285,6 +285,9 @@ func IndexToCombination(dst []int, idx, n, k int) []int {
 // Cartesian panics if any of the provided lengths are less than 1.
 func Cartesian(lens []int) [][]int {
 	rows := Card(lens)
+	if rows == 0 {
+		panic("combin: empty lengths")
+	}
 	out := make([][]int, rows)
 	for i := 0; i < rows; i++ {
 		out[i] = SubFor(nil, i, lens)

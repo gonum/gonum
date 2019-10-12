@@ -420,7 +420,7 @@ OneHundred:
 	if ZI < 0.0e0 {
 		MR = -1
 	}
-	ZTAR, ZTAI, FNU, KODE, MR, _, CYR, CYI, NN, RL, TOL, ELIM, ALIM = Zacai(ZTAR, ZTAI, FNU, KODE, MR, 1, CYR, CYI, NN, RL, TOL, ELIM, ALIM)
+	_, _, _, _, _, _, CYR, CYI, NN, _, _, _, _ = Zacai(ZTAR, ZTAI, FNU, KODE, MR, 1, CYR, CYI, NN, RL, TOL, ELIM, ALIM)
 	if NN < 0 {
 		goto TwoEighty
 	}
@@ -443,7 +443,7 @@ OneTen:
 		goto TwoTen
 	}
 OneTwenty:
-	ZTAR, ZTAI, FNU, KODE, _, CYR, CYI, NZ, TOL, ELIM, ALIM = Zbknu(ZTAR, ZTAI, FNU, KODE, 1, CYR, CYI, NZ, TOL, ELIM, ALIM)
+	_, _, _, _, _, CYR, CYI, NZ, _, _, _ = Zbknu(ZTAR, ZTAI, FNU, KODE, 1, CYR, CYI, NZ, TOL, ELIM, ALIM)
 
 OneThirty:
 	S1R = CYR[1] * COEF
@@ -1183,7 +1183,7 @@ TwoSeventy:
 	YI[2] = S2I
 TwoEighty:
 	ASCLE = BRY[1]
-	ZDR, ZDI, FNU, N, YR, YI, NZ, RZR, RZI, ASCLE, TOL, ELIM = Zkscl(ZDR, ZDI, FNU, N, YR, YI, NZ, RZR, RZI, ASCLE, TOL, ELIM)
+	_, _, FNU, N, YR, YI, NZ, RZR, RZI, _, TOL, ELIM = Zkscl(ZDR, ZDI, FNU, N, YR, YI, NZ, RZR, RZI, ASCLE, TOL, ELIM)
 	INU = N - NZ
 	if INU <= 0 {
 		return ZR, ZI, FNU, KODE, N, YR, YI, NZ, TOL, ELIM, ALIM
@@ -1213,7 +1213,6 @@ TwoNinety:
 
 	// SCALE BY math.Exp(Z), IFLAG = 1 CASES.
 
-	KODED = 2
 	IFLAG = 1
 	KFLAG = 2
 	goto OneTwenty
@@ -1457,14 +1456,14 @@ Twenty:
 		goto Thirty
 	}
 	// ASYMPTOTIC EXPANSION FOR LARGE Z FOR THE I FUNCTION.
-	ZNR, ZNI, FNU, KODE, NN, YR, YI, NW, RL, TOL, ELIM, ALIM = Zasyi(ZNR, ZNI, FNU, KODE, NN, YR, YI, NW, RL, TOL, ELIM, ALIM)
+	ZNR, ZNI, FNU, KODE, _, YR, YI, NW, RL, TOL, ELIM, ALIM = Zasyi(ZNR, ZNI, FNU, KODE, NN, YR, YI, NW, RL, TOL, ELIM, ALIM)
 	if NW < 0 {
 		goto Eighty
 	}
 	goto Forty
 Thirty:
 	// MILLER ALGORITHM NORMALIZED BY THE SERIES FOR THE I FUNCTION
-	ZNR, ZNI, FNU, KODE, NN, YR, YI, NW, TOL = Zmlri(ZNR, ZNI, FNU, KODE, NN, YR, YI, NW, TOL)
+	ZNR, ZNI, FNU, KODE, _, YR, YI, NW, TOL = Zmlri(ZNR, ZNI, FNU, KODE, NN, YR, YI, NW, TOL)
 	if NW < 0 {
 		goto Eighty
 	}
@@ -1511,7 +1510,7 @@ Sixty:
 	zn = complex(ZNR, ZNI)
 	c1 = complex(C1R, C1I)
 	c2 = complex(C2R, C2I)
-	c1, c2, NW, IUF = Zs1s2(zn, c1, c2, ASCLE, ALIM, IUF)
+	c1, c2, NW, _ = Zs1s2(zn, c1, c2, ASCLE, ALIM, IUF)
 	C1R = real(c1)
 	C1I = imag(c1)
 	C2R = real(c2)

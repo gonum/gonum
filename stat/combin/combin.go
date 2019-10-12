@@ -312,7 +312,7 @@ func Card(dims []int) int {
 }
 
 // NewCartesianGenerator returns a CartesianGenerator for iterating over cartesian products which are generated on the fly.
-// At least one length must be provided and all length values must be positive, otherwise this will panic.
+// All values in lens must be positive, otherwise this will panic.
 func NewCartesianGenerator(lens []int) *CartesianGenerator {
 	return &CartesianGenerator{
 		lens: lens,

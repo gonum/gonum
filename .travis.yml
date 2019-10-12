@@ -7,7 +7,6 @@ language: go
 go:
  - 1.13.x
  - 1.12.x
- - 1.11.x
  - master
 
 os:
@@ -49,8 +48,6 @@ matrix:
   - os: osx
     go: 1.12.x
   - os: osx
-    go: 1.11.x
-  - os: osx
     go: master
 
   - os: windows
@@ -65,8 +62,6 @@ matrix:
 
   - os: windows
     go: 1.12.x
-  - os: windows
-    go: 1.11.x
   - os: windows
     go: master
  allow_failures:

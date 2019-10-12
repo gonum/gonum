@@ -418,12 +418,13 @@ func zairytest(t *testing.T, x []float64, kode, id int) {
 	KODE := kode
 	ID := id
 
-	AIRfort, AIIfort, NZfort := zairyOrig(ZR, ZI, ID, KODE)
-	AIRamos, AIIamos, NZamos := Zairy(ZR, ZI, ID, KODE)
+	AIRfort, AIIfort, NZfort, IERRfort := zairyOrig(ZR, ZI, ID, KODE)
+	AIRamos, AIIamos, NZamos, IERRamos := Zairy(ZR, ZI, ID, KODE)
 
 	sameF64Approx(t, "zairy air", AIRfort, AIRamos, 1e-12)
 	sameF64Approx(t, "zairy aii", AIIfort, AIIamos, 1e-12)
 	sameInt(t, "zairy nz", NZfort, NZamos)
+	sameInt(t, "zairy ierr", IERRfort, IERRamos)
 }
 
 func zacaitest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi []float64, kode int) {

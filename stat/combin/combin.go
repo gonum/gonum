@@ -293,10 +293,10 @@ func Cartesian(lens []int) [][]int {
 }
 
 // Card computes the cardinality of the multi-dimensional space whose dimensions have size specified by dims
-// At least one length must be provided and all length values must be positive, otherwise this will panic.
+// All length values must be positive, otherwise this will panic.
 func Card(dims []int) int {
 	if len(dims) == 0 {
-		panic("combin: empty lengths")
+		return 0
 	}
 	card := 1
 	for _, v := range dims {

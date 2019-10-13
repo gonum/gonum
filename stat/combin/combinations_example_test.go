@@ -10,6 +10,49 @@ import (
 	"gonum.org/v1/gonum/stat/combin"
 )
 
+func ExampleCartesian() {
+	fmt.Println("Generate cartesian products for given lengths:")
+	lens := []int{1, 2, 3}
+	list := combin.Cartesian(lens)
+	for i, v := range list {
+		fmt.Println(i, v)
+	}
+	// This is easy, but the number of combinations  can be very large,
+	// and generating all at once can use a lot of memory.
+	// For big data sets, consider using CartesianGenerator instead.
+
+	// Output:
+	// Generate cartesian products for given lengths:
+	// 0 [0 0 0]
+	// 1 [0 0 1]
+	// 2 [0 0 2]
+	// 3 [0 1 0]
+	// 4 [0 1 1]
+	// 5 [0 1 2]
+}
+
+func ExampleCartesianGenerator() {
+	fmt.Println("Generate products for given lengths:")
+	lens := []int{1, 2, 3}
+	gen := combin.NewCartesianGenerator(lens)
+
+	// Now loop over all products.
+	var i int
+	for gen.Next() {
+		fmt.Println(i, gen.Product())
+		i++
+	}
+
+	// Output:
+	// Generate products for given lengths:
+	// 0 [0 0 0]
+	// 1 [0 0 1]
+	// 2 [0 0 2]
+	// 3 [0 1 0]
+	// 4 [0 1 1]
+	// 5 [0 1 2]
+}
+
 func ExampleCombinations() {
 	// combin provides several ways to work with the combinations of
 	// different objects. Combinations generates them directly.

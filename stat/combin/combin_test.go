@@ -298,6 +298,38 @@ func TestCartesian(t *testing.T) {
 	}
 }
 
+func TestNumCartesianProducts(t *testing.T) {
+	want := 6
+	got := Card([]int{1, 2, 3})
+	if want != got {
+		t.Errorf("number of cartesian products mismatch.\nwant:\n%v\ngot:\n%v", want, got)
+	}
+}
+
+func TestCartesianGenerator(t *testing.T) {
+	want := [][]int{
+		{0, 0, 0},
+		{0, 0, 1},
+		{0, 0, 2},
+		{0, 1, 0},
+		{0, 1, 1},
+		{0, 1, 2},
+	}
+	gen := NewCartesianGenerator([]int{1, 2, 3})
+	iterations := 0
+	for gen.Next() {
+		got := gen.Product()
+		if !reflect.DeepEqual(got, want[iterations]) {
+			t.Errorf("Cartesian product does not match. want: %v got: %v", want[iterations], got)
+		}
+		iterations++
+	}
+
+	if iterations != len(want) {
+		t.Errorf("Number of products does not match. want: %v got: %v", len(want), iterations)
+	}
+}
+
 func TestPermutationIndex(t *testing.T) {
 	for cas, s := range []struct {
 		n, k int

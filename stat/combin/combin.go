@@ -284,21 +284,65 @@ func IndexToCombination(dst []int, idx, n, k int) []int {
 //  [ 1 2 0 ]
 // Cartesian panics if any of the provided lengths are less than 1.
 func Cartesian(lens []int) [][]int {
-	if len(lens) == 0 {
+	rows := Card(lens)
+	if rows == 0 {
 		panic("combin: empty lengths")
-	}
-	rows := 1
-	for _, v := range lens {
-		if v < 1 {
-			panic("combin: length less than zero")
-		}
-		rows *= v
 	}
 	out := make([][]int, rows)
 	for i := 0; i < rows; i++ {
 		out[i] = SubFor(nil, i, lens)
 	}
 	return out
+}
+
+// Card computes the cardinality of the multi-dimensional space whose dimensions have size specified by dims
+// All length values must be positive, otherwise this will panic.
+func Card(dims []int) int {
+	if len(dims) == 0 {
+		return 0
+	}
+	card := 1
+	for _, v := range dims {
+		if v < 1 {
+			panic("combin: length less than zero")
+		}
+		card *= v
+	}
+	return card
+}
+
+// NewCartesianGenerator returns a CartesianGenerator for iterating over cartesian products which are generated on the fly.
+// All values in lens must be positive, otherwise this will panic.
+func NewCartesianGenerator(lens []int) *CartesianGenerator {
+	return &CartesianGenerator{
+		lens: lens,
+		rows: Card(lens),
+		idx:  -1,
+	}
+}
+
+// CartesianGenerator iterates over a cartesian product set.
+type CartesianGenerator struct {
+	lens []int
+	rows int
+	idx  int
+}
+
+// Next moves to the next product of the cartesian set.
+// It returns false if the generator reached the end of the cartesian set end.
+func (g *CartesianGenerator) Next() bool {
+	if g.idx+1 < g.rows {
+		g.idx++
+		return true
+	}
+	g.idx = g.rows
+	return false
+}
+
+// Product generates one product of the cartesian set according to the current index which is increased by Next().
+// Next needs to be called at least one time before this method, otherwise it will panic.
+func (g *CartesianGenerator) Product() []int {
+	return SubFor(nil, g.idx, g.lens)
 }
 
 // IdxFor converts a multi-dimensional index into a linear index for a

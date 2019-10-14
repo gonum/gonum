@@ -6,6 +6,7 @@ package mat_test
 
 import (
 	"fmt"
+	"log"
 
 	"gonum.org/v1/gonum/mat"
 )
@@ -118,7 +119,10 @@ func ExampleDense_Inverse() {
 	var ia mat.Dense
 
 	// Take the inverse of a and place the result in ia.
-	ia.Inverse(a)
+	err := ia.Inverse(a)
+	if err != nil {
+		log.Fatalf("a is not invertible: %v", err)
+	}
 
 	// Print the result using the formatter.
 	fa := mat.Formatted(&ia, mat.Prefix("     "), mat.Squeeze())
@@ -141,7 +145,10 @@ func ExampleDense_Inverse() {
 		0, 2,
 	})
 	var x mat.Dense
-	x.Solve(a, b)
+	err = x.Solve(a, b)
+	if err != nil {
+		log.Fatalf("no solution: %v", err)
+	}
 
 	// Print the result using the formatter.
 	fx := mat.Formatted(&x, mat.Prefix("    "), mat.Squeeze())

@@ -154,11 +154,31 @@ func Distance(s, t []float64, L float64) float64 {
 	}
 	var norm float64
 	if L == 2 {
-		for i, v := range s {
-			diff := t[i] - v
-			norm = math.Hypot(norm, diff)
+		n := len(s)
+		if n == 1 {
+			return math.Abs(s[0] - t[0])
 		}
-		return norm
+		var (
+			scale      float64 = 0
+			sumSquares float64 = 1
+		)
+		for i, sv := range s {
+			tv := t[i]
+			if sv == tv {
+				continue
+			}
+			absxi := math.Abs(sv - tv)
+			if scale < absxi {
+				sumSquares = 1 + sumSquares*(scale/absxi)*(scale/absxi)
+				scale = absxi
+			} else {
+				sumSquares = sumSquares + (absxi/scale)*(absxi/scale)
+			}
+		}
+		if math.IsInf(scale, 1) {
+			return math.Inf(1)
+		}
+		return scale * math.Sqrt(sumSquares)
 	}
 	if L == 1 {
 		for i, v := range s {

@@ -154,8 +154,7 @@ func Distance(s, t []float64, L float64) float64 {
 	}
 	var norm float64
 	if L == 2 {
-		n := len(s)
-		if n == 1 {
+		if len(s) == 1 {
 			return math.Abs(s[0] - t[0])
 		}
 		var (

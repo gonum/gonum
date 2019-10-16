@@ -143,6 +143,50 @@ func CumSum(dst, s []float64) []float64 {
 	return f64.CumSum(dst, s)
 }
 
+// Norm2 retruns the 2 norm of the slice S, defined as 
+// sqrt(s[0]^2 + s[1]^2 + ... s[i]^2)
+//
+// refered to the approach in math.Hypot() to avoid unnecessary overflow
+// and underflow
+func Norm2(s []float64) float64 {
+	items := len(s)
+
+	if items == 0 {
+		return math.NaN()
+	}
+
+	s0 := s[0]
+
+	switch {
+	case math.IsInf(s0, 0):
+		return math.Inf(1)
+	case math.IsNaN(s0):
+		return math.NaN()
+	}
+
+	twoNorm := math.Abs(s0)
+
+	for i := 1; i < len(s); i++ {
+		switch {
+		case math.IsInf(twoNorm, 0):
+			return math.Inf(1)
+		case math.IsNaN(twoNorm):
+			return math.NaN()
+		}
+		q := math.Abs(s[i])
+
+		if twoNorm < q {
+			twoNorm, q = q, twoNorm
+		}
+		if twoNorm == 0 {
+			continue
+		}
+		q = q / twoNorm
+		twoNorm *= math.Sqrt(1+q*q)
+	}
+	return twoNorm
+}
+
 // Distance computes the L-norm of s - t. See Norm for special cases.
 // A panic will occur if the lengths of s and t do not match.
 func Distance(s, t []float64, L float64) float64 {
@@ -648,11 +692,7 @@ func Norm(s []float64, L float64) float64 {
 		return 0
 	}
 	if L == 2 {
-		twoNorm := math.Abs(s[0])
-		for i := 1; i < len(s); i++ {
-			twoNorm = math.Hypot(twoNorm, s[i])
-		}
-		return twoNorm
+		return Norm2(s)
 	}
 	var norm float64
 	if L == 1 {

@@ -20,7 +20,7 @@ import (
 // and dx must be positive.
 //
 // See https://en.wikipedia.org/wiki/Romberg%27s_method for a description of
-// the algorithm
+// the algorithm.
 func Romberg(f []float64, dx float64) float64 {
 	if len(f) < 3 {
 		panic("integral: invalid slice length: must be at least 3")
@@ -42,7 +42,7 @@ func Romberg(f []float64, dx float64) float64 {
 	curr := work[k+1:]
 
 	h := dx * float64(n)
-	prev[0] = (f[0] + f[len(f)-1]) * 0.5 * h
+	prev[0] = (f[0] + f[n]) * 0.5 * h
 
 	step := n
 	for i := 1; i <= k; i++ {

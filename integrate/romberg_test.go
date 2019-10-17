@@ -9,78 +9,57 @@ import (
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/integrate/testquad"
 )
 
 func TestRomberg(t *testing.T) {
-	const n = 1<<8 + 1
-	x := floats.Span(make([]float64, n), 0, 1)
-
 	for i, test := range []struct {
-		x    []float64
-		f    func(x float64) float64
-		want float64
-		tol  float64
+		integral testquad.Integral
+		n        int
+		tol      float64
 	}{
-		{
-			x:    x,
-			f:    func(x float64) float64 { return x },
-			want: 0.5,
-			tol:  1e-12,
-		},
-		{
-			x:    x,
-			f:    func(x float64) float64 { return x * x },
-			want: 1.0 / 3.0,
-			tol:  1e-12,
-		},
-		{
-			x:    x,
-			f:    func(x float64) float64 { return x * x * x },
-			want: 1.0 / 4.0,
-			tol:  1e-12,
-		},
-		{
-			x:    x,
-			f:    func(x float64) float64 { return math.Sqrt(x) },
-			want: 2.0 / 3.0,
-			tol:  1e-4,
-		},
-		{
-			x:    x,
-			f:    func(x float64) float64 { return math.Sin(math.Pi * x) },
-			want: 2.0 / math.Pi,
-			tol:  1e-12,
-		},
-		{
-			x:    floats.Span(make([]float64, 3), 0, 1),
-			f:    func(x float64) float64 { return x * x },
-			want: 1.0 / 3.0,
-			tol:  1e-12,
-		},
-		{
-			x:    floats.Span(make([]float64, 3), 0, 1),
-			f:    func(x float64) float64 { return x * x * x },
-			want: 1.0 / 4.0,
-			tol:  1e-12,
-		},
-		{
-			x:    x,
-			f:    func(x float64) float64 { return x * math.Exp(-x) },
-			want: (math.Exp(1) - 2) / math.Exp(1),
-			tol:  1e-12,
-		},
+		{integral: testquad.Constant(0), n: 3, tol: 0},
+		{integral: testquad.Constant(0), n: 1<<5 + 1, tol: 0},
+		{integral: testquad.Poly(0), n: 3, tol: 1e-14},
+		{integral: testquad.Poly(0), n: 1<<5 + 1, tol: 1e-14},
+		{integral: testquad.Poly(1), n: 3, tol: 1e-14},
+		{integral: testquad.Poly(1), n: 1<<5 + 1, tol: 1e-14},
+		{integral: testquad.Poly(2), n: 3, tol: 1e-14},
+		{integral: testquad.Poly(2), n: 1<<5 + 1, tol: 1e-14},
+		{integral: testquad.Poly(3), n: 3, tol: 1e-14},
+		{integral: testquad.Poly(3), n: 1<<5 + 1, tol: 1e-14},
+		{integral: testquad.Poly(4), n: 5, tol: 1e-14},
+		{integral: testquad.Poly(4), n: 1<<5 + 1, tol: 1e-14},
+		{integral: testquad.Poly(5), n: 5, tol: 1e-14},
+		{integral: testquad.Poly(5), n: 1<<5 + 1, tol: 1e-14},
+		{integral: testquad.Sin(), n: 1<<3 + 1, tol: 1e-10},
+		{integral: testquad.Sin(), n: 1<<5 + 1, tol: 1e-14},
+		{integral: testquad.XExpMinusX(), n: 1<<3 + 1, tol: 1e-9},
+		{integral: testquad.XExpMinusX(), n: 1<<5 + 1, tol: 1e-14},
+		{integral: testquad.Sqrt(), n: 1<<10 + 1, tol: 1e-5},
+		{integral: testquad.ExpOverX2Plus1(), n: 1<<4 + 1, tol: 1e-7},
+		{integral: testquad.ExpOverX2Plus1(), n: 1<<6 + 1, tol: 1e-14},
 	} {
-		n := len(test.x)
+		n := test.n
+		a := test.integral.A
+		b := test.integral.B
+
+		x := make([]float64, n)
+		floats.Span(x, a, b)
+
 		y := make([]float64, n)
-		for i, v := range test.x {
-			y[i] = test.f(v)
+		for i, xi := range x {
+			y[i] = test.integral.F(xi)
 		}
 
-		dx := (test.x[n-1] - test.x[0]) / float64(n-1)
-		v := Romberg(y, dx)
-		diff := math.Abs(v - test.want)
+		dx := (b - a) / float64(n-1)
+		got := Romberg(y, dx)
+
+		want := test.integral.Value
+		diff := math.Abs(got - want)
 		if diff > test.tol {
-			t.Errorf("test #%d: got=%v want=%v diff=%v\n", i, v, test.want, diff)
+			t.Errorf("Test #%d: %v, n=%v: unexpected result; got=%v want=%v diff=%v",
+				i, test.integral.Name, n, got, want, diff)
 		}
 	}
 }

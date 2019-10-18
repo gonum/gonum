@@ -39,52 +39,10 @@ func (Implementation) Snrm2(n int, x []float32, incX int) float32 {
 		}
 		panic(nLT0)
 	}
-	var (
-		scale      float32 = 0
-		sumSquares float32 = 1
-	)
 	if incX == 1 {
-		x = x[:n]
-		for _, v := range x {
-			if v == 0 {
-				continue
-			}
-			absxi := math.Abs(v)
-			if math.IsNaN(absxi) {
-				return math.NaN()
-			}
-			if scale < absxi {
-				sumSquares = 1 + sumSquares*(scale/absxi)*(scale/absxi)
-				scale = absxi
-			} else {
-				sumSquares = sumSquares + (absxi/scale)*(absxi/scale)
-			}
-		}
-		if math.IsInf(scale, 1) {
-			return math.Inf(1)
-		}
-		return scale * math.Sqrt(sumSquares)
+		return f32.L2NormUnitary(x[:n])
 	}
-	for ix := 0; ix < n*incX; ix += incX {
-		val := x[ix]
-		if val == 0 {
-			continue
-		}
-		absxi := math.Abs(val)
-		if math.IsNaN(absxi) {
-			return math.NaN()
-		}
-		if scale < absxi {
-			sumSquares = 1 + sumSquares*(scale/absxi)*(scale/absxi)
-			scale = absxi
-		} else {
-			sumSquares = sumSquares + (absxi/scale)*(absxi/scale)
-		}
-	}
-	if math.IsInf(scale, 1) {
-		return math.Inf(1)
-	}
-	return scale * math.Sqrt(sumSquares)
+	return f32.L2NormInc(x, uintptr(n), uintptr(incX))
 }
 
 // Sasum computes the sum of the absolute values of the elements of x.

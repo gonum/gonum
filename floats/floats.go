@@ -648,11 +648,7 @@ func Norm(s []float64, L float64) float64 {
 		return 0
 	}
 	if L == 2 {
-		twoNorm := math.Abs(s[0])
-		for i := 1; i < len(s); i++ {
-			twoNorm = math.Hypot(twoNorm, s[i])
-		}
-		return twoNorm
+		return f64.L2NormUnitary(s)
 	}
 	var norm float64
 	if L == 1 {

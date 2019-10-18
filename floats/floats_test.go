@@ -261,7 +261,7 @@ func TestDistance(t *testing.T) {
 			copy(tmp, test.s)
 			Sub(tmp, test.t)
 			norm := Norm(tmp, L)
-			if dist != norm { // Use equality because they should be identical
+			if !EqualWithinAbsOrRel(dist, norm, 1e-15, 1e-15) {
 				t.Errorf("Distance does not match norm for case %v, %v. Expected %v, Found %v.", i, j, norm, dist)
 			}
 		}
@@ -1753,3 +1753,15 @@ func BenchmarkScaleSmall(b *testing.B)  { benchmarkScale(b, Small) }
 func BenchmarkScaleMedium(b *testing.B) { benchmarkScale(b, Medium) }
 func BenchmarkScaleLarge(b *testing.B)  { benchmarkScale(b, Large) }
 func BenchmarkScaleHuge(b *testing.B)   { benchmarkScale(b, Huge) }
+
+func benchmarkNorm2(b *testing.B, size int) {
+	s := randomSlice(size)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		Norm(s, 2)
+	}
+}
+func BenchmarkNorm2Small(b *testing.B)  { benchmarkNorm2(b, Small) }
+func BenchmarkNorm2Medium(b *testing.B) { benchmarkNorm2(b, Medium) }
+func BenchmarkNorm2Large(b *testing.B)  { benchmarkNorm2(b, Large) }
+func BenchmarkNorm2Huge(b *testing.B)   { benchmarkNorm2(b, Huge) }

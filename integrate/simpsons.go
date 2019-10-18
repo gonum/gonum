@@ -27,31 +27,6 @@ func Simpsons(x, f []float64) float64 {
 		panic("integrate: must be sorted")
 	}
 
-	// Simpson's method approximates the integral of a function f by subdividing
-	// the interval of integration into segments and applying a method that fits
-	// a polynomial to each subinterval.
-	//
-	// This implementation makes use of the following composite Simpson's method
-	// to estimate \int_a^b f(x) dx where a, b are x at x[0] and x[len(x)-1]
-	// respectively:
-	//  \sum_{i=1}^{N} {a_0}_i * f_{i-1} + {a_1}_i * f_{i} + {a_2}_i * f_{i+1}
-	// where N is the count of subintervals and {a_0}_i, {a_1}_i, and {a_2}_i
-	// are constants at index i given by:
-	//  {a_0}_i = 2 * h^3_i - h^3_{i+1} + 3 * h_{i+1} * h^2_i / 6 * h_i * (h_i + h_{i+1})
-	//  {a_1}_i = h^3_i + h^3_{i+1} + 3 * h_i * h_{i+1} * (h_i + h_{i+1}) / 6 * h_i * h_{i+1}
-	//  {a_2}_i = -h^3_i + 2 * h^3_{i+1} + 3 * h_i * h^2_{i+1} / 6 * h_{i+1} * (h_i + h_{i+1})
-	// where h_k is the difference x[k] - x[k-1].
-	//
-	// The formula above approximates the integral of f when N is even. If the
-	// number of subintervals is odd, the subintervals i=0,...,n-2 are given by
-	// the above formula and the approximation over the remaining subintervals
-	// is given by:
-	//  {a_0}_i * f_{N-2} + {a_1}_i * f_{N-1} + {a_2}_i * f_N
-	// where the coefficients are:
-	//  {a_0}_i = -1 * h^3_{N-1} / 6 * h_{N-2} * (h_{N-2} + h_{N-1})
-	//  {a_1}_i = h^2_{N-1} + 3 * h^3_{N-1} * h_{N-2} / 6 * h_{N-2}
-	//  {a_2}_i = 2 * h^2_{N-1} + 3 * h^2_{N-1} * h_{N-2} / 6 * (h_{N-2} + h_{N-1})
-
 	var integral float64
 	for i := 1; i < n-1; i += 2 {
 		h0 := x[i] - x[i-1]

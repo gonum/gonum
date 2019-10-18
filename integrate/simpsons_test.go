@@ -21,20 +21,24 @@ func TestSimpsons(t *testing.T) {
 		tol      float64
 	}{
 		{integral: testquad.Constant(0), n: 3, tol: 0},
+		{integral: testquad.Constant(0), n: 4, tol: 0},
 		{integral: testquad.Constant(0), n: 10, tol: 0},
 		{integral: testquad.Poly(0), n: 3, tol: 1e-14},
+		{integral: testquad.Poly(0), n: 4, tol: 1e-14},
 		{integral: testquad.Poly(0), n: 10, tol: 1e-14},
 		{integral: testquad.Poly(1), n: 3, tol: 1e-14},
+		{integral: testquad.Poly(1), n: 4, tol: 1e-14},
 		{integral: testquad.Poly(1), n: 10, tol: 1e-14},
 		{integral: testquad.Poly(2), n: 3, tol: 1e-14},
+		{integral: testquad.Poly(2), n: 4, tol: 1e-14},
 		{integral: testquad.Poly(2), n: 10, tol: 1e-14},
-		{integral: testquad.Poly(3), n: 1e3, tol: 1e-8},
-		{integral: testquad.Poly(4), n: 1e3, tol: 1e-8},
-		{integral: testquad.Poly(5), n: 1e3, tol: 1e-7},
-		{integral: testquad.Sin(), n: 1e2, tol: 1e-8},
-		{integral: testquad.XExpMinusX(), n: 1e2, tol: 1e-8},
+		{integral: testquad.Poly(3), n: 1000, tol: 1e-8},
+		{integral: testquad.Poly(4), n: 1000, tol: 1e-8},
+		{integral: testquad.Poly(5), n: 1000, tol: 1e-7},
+		{integral: testquad.Sin(), n: 100, tol: 1e-8},
+		{integral: testquad.XExpMinusX(), n: 201, tol: 1e-8},
 		{integral: testquad.Sqrt(), n: 1e4, tol: 1e-6},
-		{integral: testquad.ExpOverX2Plus1(), n: 1e2, tol: 1e-7},
+		{integral: testquad.ExpOverX2Plus1(), n: 100, tol: 1e-7},
 	} {
 		n := test.n
 		a := test.integral.A

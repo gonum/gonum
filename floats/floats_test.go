@@ -261,7 +261,7 @@ func TestDistance(t *testing.T) {
 			copy(tmp, test.s)
 			Sub(tmp, test.t)
 			norm := Norm(tmp, L)
-			if !EqualWithinAbsOrRel(dist, norm, 1e-15, 1e-15) {
+			if dist != norm { // Use equality because they should be identical.
 				t.Errorf("Distance does not match norm for case %v, %v. Expected %v, Found %v.", i, j, norm, dist)
 			}
 		}

@@ -167,7 +167,7 @@ var (
 type Dimensions map[Dimension]int
 
 func (d Dimensions) clone() Dimensions {
-	if len(d) == 0 {
+	if d == nil {
 		return nil
 	}
 	c := make(Dimensions, len(d))

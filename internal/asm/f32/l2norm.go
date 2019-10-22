@@ -60,3 +60,31 @@ func L2NormInc(x []float32, n, incX uintptr) (sum float32) {
 	}
 	return scale * math32.Sqrt(sumSquares)
 }
+
+// L2DistanceUnitary is the L2 norm of x-y.
+func L2DistanceUnitary(x, y []float32) (sum float32) {
+	var scale float32
+	var sumSquares float32 = 1
+	for i, v := range x {
+		v -= y[i]
+		if v == 0 {
+			continue
+		}
+		absxi := math32.Abs(v)
+		if math32.IsNaN(absxi) {
+			return math32.NaN()
+		}
+		if scale < absxi {
+			s := scale / absxi
+			sumSquares = 1 + sumSquares*s*s
+			scale = absxi
+		} else {
+			s := absxi / scale
+			sumSquares += s * s
+		}
+	}
+	if math32.IsInf(scale, 1) {
+		return math32.Inf(1)
+	}
+	return scale * math32.Sqrt(sumSquares)
+}

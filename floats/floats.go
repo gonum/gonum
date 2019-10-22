@@ -152,14 +152,10 @@ func Distance(s, t []float64, L float64) float64 {
 	if len(s) == 0 {
 		return 0
 	}
-	var norm float64
 	if L == 2 {
-		for i, v := range s {
-			diff := t[i] - v
-			norm = math.Hypot(norm, diff)
-		}
-		return norm
+		return f64.L2DistanceUnitary(s, t)
 	}
+	var norm float64
 	if L == 1 {
 		for i, v := range s {
 			norm += math.Abs(t[i] - v)

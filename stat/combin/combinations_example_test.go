@@ -11,7 +11,7 @@ import (
 )
 
 func ExampleCartesian() {
-	fmt.Println("Generate cartesian products for given lengths:")
+	fmt.Println("Generate Cartesian products for given lengths:")
 	lens := []int{1, 2, 3}
 	list := combin.Cartesian(lens)
 	for i, v := range list {
@@ -22,7 +22,7 @@ func ExampleCartesian() {
 	// For big data sets, consider using CartesianGenerator instead.
 
 	// Output:
-	// Generate cartesian products for given lengths:
+	// Generate Cartesian products for given lengths:
 	// 0 [0 0 0]
 	// 1 [0 0 1]
 	// 2 [0 0 2]
@@ -155,7 +155,7 @@ func ExampleIndexToCombination() {
 }
 
 func ExamplePermutations() {
-	// combin provides several ways to work with the permutationss of
+	// combin provides several ways to work with the permutations of
 	// different objects. Permutations generates them directly.
 	fmt.Println("Generate list:")
 	n := 4

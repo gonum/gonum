@@ -271,7 +271,7 @@ func IndexToCombination(dst []int, idx, n, k int) []int {
 	return dst
 }
 
-// Cartesian returns the cartesian product of the slices in data. The Cartesian
+// Cartesian returns the Cartesian product of the slices in data. The Cartesian
 // product of two sets is the set of all combinations of the items. For example,
 // given the input
 //  []int{2, 3, 1}
@@ -311,7 +311,7 @@ func Card(dims []int) int {
 	return card
 }
 
-// NewCartesianGenerator returns a CartesianGenerator for iterating over cartesian products which are generated on the fly.
+// NewCartesianGenerator returns a CartesianGenerator for iterating over Cartesian products which are generated on the fly.
 // All values in lens must be positive, otherwise this will panic.
 func NewCartesianGenerator(lens []int) *CartesianGenerator {
 	return &CartesianGenerator{
@@ -321,15 +321,15 @@ func NewCartesianGenerator(lens []int) *CartesianGenerator {
 	}
 }
 
-// CartesianGenerator iterates over a cartesian product set.
+// CartesianGenerator iterates over a Cartesian product set.
 type CartesianGenerator struct {
 	lens []int
 	rows int
 	idx  int
 }
 
-// Next moves to the next product of the cartesian set.
-// It returns false if the generator reached the end of the cartesian set end.
+// Next moves to the next product of the Cartesian set.
+// It returns false if the generator reached the end of the Cartesian set end.
 func (g *CartesianGenerator) Next() bool {
 	if g.idx+1 < g.rows {
 		g.idx++
@@ -339,7 +339,7 @@ func (g *CartesianGenerator) Next() bool {
 	return false
 }
 
-// Product generates one product of the cartesian set according to the current index which is increased by Next().
+// Product generates one product of the Cartesian set according to the current index which is increased by Next().
 // Next needs to be called at least one time before this method, otherwise it will panic.
 func (g *CartesianGenerator) Product(dst []int) []int {
 	return SubFor(dst, g.idx, g.lens)

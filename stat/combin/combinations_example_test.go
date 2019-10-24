@@ -39,7 +39,7 @@ func ExampleCartesianGenerator() {
 	// Now loop over all products.
 	var i int
 	for gen.Next() {
-		fmt.Println(i, gen.Product())
+		fmt.Println(i, gen.Product(nil))
 		i++
 	}
 

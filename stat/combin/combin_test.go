@@ -294,7 +294,7 @@ func TestCartesian(t *testing.T) {
 	}
 	got := Cartesian(lens)
 	if !intSosMatch(want, got) {
-		t.Errorf("cartesian data mismatch.\nwant:\n%v\ngot:\n%v", want, got)
+		t.Errorf("Cartesian data mismatch.\nwant:\n%v\ngot:\n%v", want, got)
 	}
 }
 
@@ -302,7 +302,7 @@ func TestNumCartesianProducts(t *testing.T) {
 	want := 6
 	got := Card([]int{1, 2, 3})
 	if want != got {
-		t.Errorf("number of cartesian products mismatch.\nwant:\n%v\ngot:\n%v", want, got)
+		t.Errorf("number of Cartesian products mismatch.\nwant:\n%v\ngot:\n%v", want, got)
 	}
 }
 

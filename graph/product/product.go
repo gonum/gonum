@@ -9,6 +9,7 @@ import (
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/ordered"
+	"gonum.org/v1/gonum/graph/iterator"
 	"gonum.org/v1/gonum/stat/combin"
 )
 
@@ -229,30 +230,43 @@ func CoNormal(dst graph.Builder, a, b graph.Graph) {
 // The Modular product of G₁ and G₂ has edges (u₁, u₂)~(v₁, v₂) when
 // (u₁~v₁ and u₂~v₂) or (u₁≁v₁ and u₂≁v₂), and (u₁≠v₁ and u₂≠v₂).
 func Modular(dst graph.Builder, a, b graph.Graph) {
-	_, _, product := cartesianNodes(a, b)
+	aNodes, bNodes, product := cartesianNodes(a, b)
+
+	indexOfA := indexOf(aNodes)
+	indexOfB := indexOf(bNodes)
 
 	for _, p := range product {
 		dst.AddNode(p)
 	}
 
-	// FIXME(kortschak): This is O(n^2) in the order of the
-	// Cartesian product of the two graphs, so approximately
-	// quartic.
-	//
-	// I think we can probably do better than this by first
-	// doing the Tensor product and then doing the same on
-	// the complements of a and b. This will work if we have
-	// an efficient way to generate or imply these.
-	for i, u := range product[:len(product)-1] {
-		for _, v := range product[i+1:] {
-			if u.A.ID() == v.A.ID() || u.B.ID() == v.B.ID() {
-				// No self-loops.
-				continue
+	dims := []int{len(aNodes), len(bNodes)}
+	for i, uA := range aNodes {
+		toA := a.From(uA.ID())
+		for toA.Next() {
+			j := indexOfA[toA.Node().ID()]
+			for k, uB := range bNodes {
+				toB := b.From(uB.ID())
+				for toB.Next() {
+					dst.SetEdge(dst.NewEdge(
+						product[combin.IdxFor([]int{i, k}, dims)],
+						product[combin.IdxFor([]int{j, indexOfB[toB.Node().ID()]}, dims)],
+					))
+				}
 			}
-			inA := a.Edge(u.A.ID(), v.A.ID()) != nil
-			inB := b.Edge(u.B.ID(), v.B.ID()) != nil
-			if inA == inB {
-				dst.SetEdge(dst.NewEdge(u, v))
+		}
+	}
+	for i, uA := range aNodes {
+		toA := complement{a}.From(uA.ID())
+		for toA.Next() {
+			j := indexOfA[toA.Node().ID()]
+			for k, uB := range bNodes {
+				toB := complement{b}.From(uB.ID())
+				for toB.Next() {
+					dst.SetEdge(dst.NewEdge(
+						product[combin.IdxFor([]int{i, k}, dims)],
+						product[combin.IdxFor([]int{j, indexOfB[toB.Node().ID()]}, dims)],
+					))
+				}
 			}
 		}
 	}
@@ -287,3 +301,45 @@ func indexOf(nodes []graph.Node) map[int64]int {
 	}
 	return idx
 }
+
+// complement provides the complement of a graph.
+type complement struct {
+	graph.Graph
+}
+
+func (g complement) From(id int64) graph.Nodes {
+	var cmpl []graph.Node
+	nodes := g.Nodes()
+	for nodes.Next() {
+		v := nodes.Node()
+		vid := v.ID()
+		if g.Graph.Edge(id, vid) == nil && id != vid {
+			cmpl = append(cmpl, v)
+		}
+	}
+	return iterator.NewOrderedNodes(cmpl)
+}
+
+func (g complement) Edge(uid, vid int64) graph.Edge {
+	if g.Graph.Edge(uid, vid) != nil || uid == vid {
+		return nil
+	}
+	u := g.Node(uid)
+	v := g.Node(vid)
+	if u == nil || v == nil {
+		return nil
+	}
+	return shadow{F: u, T: v}
+}
+
+func (g complement) HasEdgeBetween(xid, yid int64) bool {
+	return xid != yid &&
+		g.Node(xid) != nil && g.Node(yid) != nil &&
+		!g.Graph.HasEdgeBetween(xid, yid)
+}
+
+type shadow struct{ F, T graph.Node }
+
+func (e shadow) From() graph.Node         { return e.F }
+func (e shadow) To() graph.Node           { return e.T }
+func (e shadow) ReversedEdge() graph.Edge { return shadow{F: e.T, T: e.F} }

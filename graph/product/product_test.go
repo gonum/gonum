@@ -47,33 +47,33 @@ func right() *simple.UndirectedGraph {
 	return g
 }
 
-func vertical() *simple.UndirectedGraph {
-	edges := []simple.Edge{
-		{F: simple.Node(-1), T: simple.Node(-2)},
+func path(m int) *simple.UndirectedGraph {
+	sign := 1
+	if m < 0 {
+		sign = -1
+		m = -m
 	}
 	g := simple.NewUndirectedGraph()
-	for _, e := range edges {
-		g.SetEdge(e)
+	if m == 0 {
+		g.AddNode(simple.Node(0))
 	}
-	return g
-}
-
-func horizontal() *simple.UndirectedGraph {
-	edges := []simple.Edge{
-		{F: simple.Node(1), T: simple.Node(2)},
-	}
-	g := simple.NewUndirectedGraph()
-	for _, e := range edges {
-		g.SetEdge(e)
+	for i := 1; i <= m; i++ {
+		g.SetEdge(simple.Edge{F: simple.Node(sign * i), T: simple.Node(sign * (i + 1))})
 	}
 	return g
 }
 
 var productTests = []struct {
+	name string
 	a, b *simple.UndirectedGraph
 }{
-	{a: vertical(), b: horizontal()},
-	{a: left(), b: right()},
+	{name: "paths", a: path(-1), b: path(1)},
+	{name: "wp_mp", a: path(-2), b: path(2)},
+	{name: "wp_gp", a: left(), b: right()},
+	{name: "gnp_2×2", a: gnp(2, 0.5, rand.NewSource(1)), b: gnp(2, 0.5, rand.NewSource(2))},
+	{name: "gnp_2×3", a: gnp(2, 0.5, rand.NewSource(1)), b: gnp(3, 0.5, rand.NewSource(2))},
+	{name: "gnp_3×3", a: gnp(3, 0.5, rand.NewSource(1)), b: gnp(3, 0.5, rand.NewSource(2))},
+	{name: "gnp_4×4", a: gnp(4, 0.5, rand.NewSource(1)), b: gnp(4, 0.5, rand.NewSource(2))},
 }
 
 func TestCartesian(t *testing.T) {
@@ -93,11 +93,13 @@ func TestCartesian(t *testing.T) {
 		mB := test.b.Edges().Len()
 		wantEdgesLen := mB*nA + mA*nB
 		if gotEdgesLen != wantEdgesLen {
-			t.Errorf("unexpected number of edges for Cartesian product: got:%d want:%d", gotEdgesLen, wantEdgesLen)
+			t.Errorf("unexpected number of edges for Cartesian product of %s: got:%d want:%d",
+				test.name, gotEdgesLen, wantEdgesLen)
 		}
 
 		if !bytes.Equal(gotBytes, wantBytes) {
-			t.Errorf("unexpected Cartesian product result: got:\n%s\nwant:\n%s", gotBytes, wantBytes)
+			t.Errorf("unexpected Cartesian product result for %s:\ngot:\n%s\nwant:\n%s",
+				test.name, gotBytes, wantBytes)
 		}
 	}
 }
@@ -136,11 +138,13 @@ func TestTensor(t *testing.T) {
 		mB := test.b.Edges().Len()
 		wantEdgesLen := 2 * mA * mB
 		if gotEdgesLen != wantEdgesLen {
-			t.Errorf("unexpected number of edges for Tensor product: got:%d want:%d", gotEdgesLen, wantEdgesLen)
+			t.Errorf("unexpected number of edges for Tensor product of %s: got:%d want:%d",
+				test.name, gotEdgesLen, wantEdgesLen)
 		}
 
 		if !bytes.Equal(gotBytes, wantBytes) {
-			t.Errorf("unexpected Tensor product result: got:\n%s\nwant:\n%s", gotBytes, wantBytes)
+			t.Errorf("unexpected Tensor product result for %s:\ngot:\n%s\nwant:\n%s",
+				test.name, gotBytes, wantBytes)
 		}
 	}
 }
@@ -181,11 +185,13 @@ func TestLexicographical(t *testing.T) {
 		mB := test.b.Edges().Len()
 		wantEdgesLen := mB*nA + mA*nB*nB
 		if gotEdgesLen != wantEdgesLen {
-			t.Errorf("unexpected number of edges for Lexicographical product: got:%d want:%d", gotEdgesLen, wantEdgesLen)
+			t.Errorf("unexpected number of edges for Lexicographical product of %s: got:%d want:%d",
+				test.name, gotEdgesLen, wantEdgesLen)
 		}
 
 		if !bytes.Equal(gotBytes, wantBytes) {
-			t.Errorf("unexpected Lexicographical product result: got:\n%s\nwant:\n%s", gotBytes, wantBytes)
+			t.Errorf("unexpected Lexicographical product result for %s:\ngot:\n%s\nwant:\n%s",
+				test.name, gotBytes, wantBytes)
 		}
 	}
 }
@@ -226,11 +232,13 @@ func TestStrong(t *testing.T) {
 		mB := test.b.Edges().Len()
 		wantEdgesLen := nA*mB + nB*mA + 2*mA*mB
 		if gotEdgesLen != wantEdgesLen {
-			t.Errorf("unexpected number of edges for Strong product: got:%d want:%d", gotEdgesLen, wantEdgesLen)
+			t.Errorf("unexpected number of edges for Strong product of %s: got:%d want:%d",
+				test.name, gotEdgesLen, wantEdgesLen)
 		}
 
 		if !bytes.Equal(gotBytes, wantBytes) {
-			t.Errorf("unexpected Strong product result: got:\n%s\nwant:\n%s", gotBytes, wantBytes)
+			t.Errorf("unexpected Strong product result for %s:\ngot:\n%s\nwant:\n%s",
+				test.name, gotBytes, wantBytes)
 		}
 	}
 }
@@ -265,7 +273,8 @@ func TestCoNormal(t *testing.T) {
 		wantBytes, _ := dot.Marshal(want, "", "", "  ")
 
 		if !bytes.Equal(gotBytes, wantBytes) {
-			t.Errorf("unexpected Co-normal product result: got:\n%s\nwant:\n%s", gotBytes, wantBytes)
+			t.Errorf("unexpected Co-normal product result for %s:\ngot:\n%s\nwant:\n%s",
+				test.name, gotBytes, wantBytes)
 		}
 	}
 }
@@ -300,7 +309,7 @@ func TestModular(t *testing.T) {
 		wantBytes, _ := dot.Marshal(want, "", "", "  ")
 
 		if !bytes.Equal(gotBytes, wantBytes) {
-			t.Errorf("unexpected Modular product result: got:\n%s\nwant:\n%s", gotBytes, wantBytes)
+			t.Errorf("unexpected Modular product result for %s:\ngot:\n%s\nwant:\n%s", test.name, gotBytes, wantBytes)
 		}
 	}
 }
@@ -324,6 +333,45 @@ func naiveModular(dst graph.Builder, a, b graph.Graph) {
 			if (edgeInA && edgeInB) || (!edgeInA && !edgeInB) {
 				dst.SetEdge(dst.NewEdge(u, v))
 			}
+		}
+	}
+}
+
+var complementTests = []struct {
+	g graph.Graph
+}{
+	{g: path(1)},
+	{g: path(2)},
+	{g: path(10)},
+	{g: left()},
+	{g: right()},
+	{g: gnp(100, 0, rand.NewSource(1))},
+	{g: gnp(100, 0.05, rand.NewSource(1))},
+	{g: gnp(100, 0.5, rand.NewSource(1))},
+	{g: gnp(100, 0.95, rand.NewSource(1))},
+	{g: gnp(100, 1, rand.NewSource(1))},
+}
+
+func TestComplement(t *testing.T) {
+	for _, test := range complementTests {
+		n := test.g.Nodes().Len()
+		wantM := n * (n - 1) // Double counting edges, but no self-loops.
+
+		var gotM int
+		iter := test.g.Nodes()
+		for iter.Next() {
+			id := iter.Node().ID()
+			to := test.g.From(id)
+			for to.Next() {
+				gotM++
+			}
+			toC := complement{test.g}.From(id)
+			for toC.Next() {
+				gotM++
+			}
+		}
+		if gotM != wantM {
+			t.Errorf("unexpected number of edges in sum of input and complement: got:%d want:%d", gotM, wantM)
 		}
 	}
 }

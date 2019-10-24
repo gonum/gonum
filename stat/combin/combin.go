@@ -341,8 +341,8 @@ func (g *CartesianGenerator) Next() bool {
 
 // Product generates one product of the cartesian set according to the current index which is increased by Next().
 // Next needs to be called at least one time before this method, otherwise it will panic.
-func (g *CartesianGenerator) Product() []int {
-	return SubFor(nil, g.idx, g.lens)
+func (g *CartesianGenerator) Product(dst []int) []int {
+	return SubFor(dst, g.idx, g.lens)
 }
 
 // IdxFor converts a multi-dimensional index into a linear index for a

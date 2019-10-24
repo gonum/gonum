@@ -318,7 +318,7 @@ func TestCartesianGenerator(t *testing.T) {
 	gen := NewCartesianGenerator([]int{1, 2, 3})
 	iterations := 0
 	for gen.Next() {
-		got := gen.Product()
+		got := gen.Product(nil)
 		if !reflect.DeepEqual(got, want[iterations]) {
 			t.Errorf("Cartesian product does not match. want: %v got: %v", want[iterations], got)
 		}

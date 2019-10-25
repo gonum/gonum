@@ -238,8 +238,20 @@ func Modular(dst graph.Builder, a, b graph.Graph) {
 		dst.AddNode(p)
 	}
 
-	for i, u := range product[:len(product)-1] {
-		for _, v := range product[i+1:] {
+	_, aUndirected := a.(graph.Undirected)
+	_, bUndirected := b.(graph.Undirected)
+	undirected := aUndirected && bUndirected
+
+	n := len(product)
+	if undirected {
+		n--
+	}
+	for i, u := range product[:n] {
+		var m int
+		if undirected {
+			m = i + 1
+		}
+		for _, v := range product[m:] {
 			if u.A.ID() == v.A.ID() || u.B.ID() == v.B.ID() {
 				// No self-loops.
 				continue

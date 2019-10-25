@@ -173,3 +173,165 @@ func TestConnectedComponents(t *testing.T) {
 		}
 	}
 }
+
+var equalTests = []struct {
+	name string
+	a, b graph.Graph
+	want bool
+}{
+	{name: "empty g=g", a: simple.NewUndirectedGraph(), b: simple.NewUndirectedGraph(), want: true},
+	{name: "empty dg=dg", a: simple.NewDirectedGraph(), b: simple.NewDirectedGraph(), want: true},
+	{name: "empty g=dg", a: simple.NewUndirectedGraph(), b: simple.NewDirectedGraph(), want: true},
+
+	{
+		name: "1 g=g", want: true,
+		a: addNodes(simple.NewUndirectedGraph(), simple.Node(1)),
+		b: addNodes(simple.NewUndirectedGraph(), simple.Node(1)),
+	},
+	{
+		name: "1 dg=dg", want: true,
+		a: addNodes(simple.NewDirectedGraph(), simple.Node(1)),
+		b: addNodes(simple.NewDirectedGraph(), simple.Node(1)),
+	},
+	{
+		name: "1 g=dg", want: true,
+		a: addNodes(simple.NewUndirectedGraph(), simple.Node(1)),
+		b: addNodes(simple.NewDirectedGraph(), simple.Node(1)),
+	},
+
+	{
+		name: "0/1 g≠g", want: false,
+		a: simple.NewUndirectedGraph(),
+		b: addNodes(simple.NewUndirectedGraph(), simple.Node(1)),
+	},
+	{
+		name: "0/1 dg≠dg", want: false,
+		a: simple.NewDirectedGraph(),
+		b: addNodes(simple.NewDirectedGraph(), simple.Node(1)),
+	},
+	{
+		name: "0/1 g≠dg", want: false,
+		a: simple.NewUndirectedGraph(),
+		b: addNodes(simple.NewDirectedGraph(), simple.Node(1)),
+	},
+	{
+		name: "0/1 g≠dg", want: false,
+		a: addNodes(simple.NewUndirectedGraph(), simple.Node(1)),
+		b: simple.NewDirectedGraph(),
+	},
+
+	{
+		name: "1 g≠g", want: false,
+		a: addNodes(simple.NewUndirectedGraph(), simple.Node(0)),
+		b: addNodes(simple.NewUndirectedGraph(), simple.Node(1)),
+	},
+	{
+		name: "1 dg≠dg", want: false,
+		a: addNodes(simple.NewDirectedGraph(), simple.Node(0)),
+		b: addNodes(simple.NewDirectedGraph(), simple.Node(1)),
+	},
+	{
+		name: "1 g≠dg", want: false,
+		a: addNodes(simple.NewUndirectedGraph(), simple.Node(0)),
+		b: addNodes(simple.NewDirectedGraph(), simple.Node(1)),
+	},
+
+	{
+		name: "box g=g", want: true,
+		a: setEdges(simple.NewUndirectedGraph(),
+			simple.Edge{F: simple.Node(0), T: simple.Node(1)},
+			simple.Edge{F: simple.Node(1), T: simple.Node(2)},
+			simple.Edge{F: simple.Node(2), T: simple.Node(3)},
+			simple.Edge{F: simple.Node(3), T: simple.Node(0)},
+		),
+		b: setEdges(simple.NewUndirectedGraph(),
+			simple.Edge{F: simple.Node(3), T: simple.Node(0)},
+			simple.Edge{F: simple.Node(0), T: simple.Node(1)},
+			simple.Edge{F: simple.Node(1), T: simple.Node(2)},
+			simple.Edge{F: simple.Node(2), T: simple.Node(3)},
+		),
+	},
+	{
+		name: "box dg=dg", want: true,
+		a: setEdges(simple.NewDirectedGraph(),
+			simple.Edge{F: simple.Node(0), T: simple.Node(1)},
+			simple.Edge{F: simple.Node(1), T: simple.Node(2)},
+			simple.Edge{F: simple.Node(2), T: simple.Node(3)},
+			simple.Edge{F: simple.Node(3), T: simple.Node(0)},
+		),
+		b: setEdges(simple.NewDirectedGraph(),
+			simple.Edge{F: simple.Node(3), T: simple.Node(0)},
+			simple.Edge{F: simple.Node(0), T: simple.Node(1)},
+			simple.Edge{F: simple.Node(1), T: simple.Node(2)},
+			simple.Edge{F: simple.Node(2), T: simple.Node(3)},
+		),
+	},
+	{
+		name: "box reversed dg≠dg", want: false,
+		a: setEdges(simple.NewDirectedGraph(),
+			simple.Edge{F: simple.Node(0), T: simple.Node(1)},
+			simple.Edge{F: simple.Node(1), T: simple.Node(2)},
+			simple.Edge{F: simple.Node(2), T: simple.Node(3)},
+			simple.Edge{F: simple.Node(3), T: simple.Node(0)},
+		),
+		b: setEdges(simple.NewDirectedGraph(),
+			simple.Edge{F: simple.Node(1), T: simple.Node(0)},
+			simple.Edge{F: simple.Node(2), T: simple.Node(1)},
+			simple.Edge{F: simple.Node(3), T: simple.Node(2)},
+			simple.Edge{F: simple.Node(0), T: simple.Node(3)},
+		),
+	},
+	{
+		name: "box g=dg", want: true,
+		a: setEdges(simple.NewUndirectedGraph(),
+			simple.Edge{F: simple.Node(0), T: simple.Node(1)},
+			simple.Edge{F: simple.Node(1), T: simple.Node(2)},
+			simple.Edge{F: simple.Node(2), T: simple.Node(3)},
+			simple.Edge{F: simple.Node(3), T: simple.Node(0)},
+		),
+		b: setEdges(simple.NewDirectedGraph(),
+			simple.Edge{F: simple.Node(0), T: simple.Node(1)},
+			simple.Edge{F: simple.Node(1), T: simple.Node(0)},
+			simple.Edge{F: simple.Node(1), T: simple.Node(2)},
+			simple.Edge{F: simple.Node(2), T: simple.Node(3)},
+			simple.Edge{F: simple.Node(2), T: simple.Node(1)},
+			simple.Edge{F: simple.Node(3), T: simple.Node(2)},
+			simple.Edge{F: simple.Node(3), T: simple.Node(0)},
+			simple.Edge{F: simple.Node(0), T: simple.Node(3)},
+		),
+	},
+}
+
+func TestEqual(t *testing.T) {
+	for _, test := range equalTests {
+		if got := Equal(test.a, test.b); got != test.want {
+			t.Errorf("unexpected result for %q equality test: got:%t want:%t", test.name, got, test.want)
+		}
+		if got := Equal(plainGraph{test.a}, plainGraph{test.b}); got != test.want {
+			t.Errorf("unexpected result for %q equality test with filtered method set: got:%t want:%t", test.name, got, test.want)
+		}
+	}
+}
+
+type plainGraph struct {
+	graph.Graph
+}
+
+type builder interface {
+	graph.Graph
+	graph.Builder
+}
+
+func addNodes(dst builder, nodes ...graph.Node) builder {
+	for _, n := range nodes {
+		dst.AddNode(n)
+	}
+	return dst
+}
+
+func setEdges(dst builder, edges ...graph.Edge) builder {
+	for _, e := range edges {
+		dst.SetEdge(e)
+	}
+	return dst
+}

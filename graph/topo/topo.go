@@ -5,7 +5,10 @@
 package topo
 
 import (
+	"sort"
+
 	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/traverse"
 )
 
@@ -65,4 +68,45 @@ func ConnectedComponents(g graph.Undirected) [][]graph.Node {
 	w.WalkAll(g, nil, after, during)
 
 	return cc
+}
+
+// Equal returns whether two graphs are topologically equal. To be
+// considered topologically equal, a and b must have identical sets
+// of nodes and be identically traversable.
+func Equal(a, b graph.Graph) bool {
+	aNodes := a.Nodes()
+	bNodes := b.Nodes()
+	if aNodes.Len() != bNodes.Len() {
+		return false
+	}
+
+	aNodeSlice := graph.NodesOf(aNodes)
+	bNodeSlice := graph.NodesOf(bNodes)
+	sort.Sort(ordered.ByID(aNodeSlice))
+	sort.Sort(ordered.ByID(bNodeSlice))
+	for i, aU := range aNodeSlice {
+		id := aU.ID()
+		if id != bNodeSlice[i].ID() {
+			return false
+		}
+
+		toA := a.From(id)
+		toB := b.From(id)
+		if toA.Len() != toB.Len() {
+			return false
+		}
+
+		aAdjacent := graph.NodesOf(toA)
+		bAdjacent := graph.NodesOf(toB)
+		sort.Sort(ordered.ByID(aAdjacent))
+		sort.Sort(ordered.ByID(bAdjacent))
+		for i, aV := range aAdjacent {
+			id := aV.ID()
+			if id != bAdjacent[i].ID() {
+				return false
+			}
+		}
+	}
+
+	return true
 }

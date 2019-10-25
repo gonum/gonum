@@ -228,6 +228,9 @@ func CoNormal(dst graph.Builder, a, b graph.Graph) {
 //
 // The Modular product of G₁ and G₂ has edges (u₁, u₂)~(v₁, v₂) when
 // (u₁~v₁ and u₂~v₂) or (u₁≁v₁ and u₂≁v₂), and (u₁≠v₁ and u₂≠v₂).
+//
+// Modular is O(n^2) where n is the order of the Cartesian product
+// of a and b.
 func Modular(dst graph.Builder, a, b graph.Graph) {
 	_, _, product := cartesianNodes(a, b)
 
@@ -235,14 +238,6 @@ func Modular(dst graph.Builder, a, b graph.Graph) {
 		dst.AddNode(p)
 	}
 
-	// FIXME(kortschak): This is O(n^2) in the order of the
-	// Cartesian product of the two graphs, so approximately
-	// quartic.
-	//
-	// I think we can probably do better than this by first
-	// doing the Tensor product and then doing the same on
-	// the complements of a and b. This will work if we have
-	// an efficient way to generate or imply these.
 	for i, u := range product[:len(product)-1] {
 		for _, v := range product[i+1:] {
 			if u.A.ID() == v.A.ID() || u.B.ID() == v.B.ID() {

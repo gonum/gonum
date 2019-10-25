@@ -337,45 +337,6 @@ func naiveModular(dst graph.Builder, a, b graph.Graph) {
 	}
 }
 
-var complementTests = []struct {
-	g graph.Graph
-}{
-	{g: path(1)},
-	{g: path(2)},
-	{g: path(10)},
-	{g: left()},
-	{g: right()},
-	{g: gnp(100, 0, rand.NewSource(1))},
-	{g: gnp(100, 0.05, rand.NewSource(1))},
-	{g: gnp(100, 0.5, rand.NewSource(1))},
-	{g: gnp(100, 0.95, rand.NewSource(1))},
-	{g: gnp(100, 1, rand.NewSource(1))},
-}
-
-func TestComplement(t *testing.T) {
-	for _, test := range complementTests {
-		n := test.g.Nodes().Len()
-		wantM := n * (n - 1) // Double counting edges, but no self-loops.
-
-		var gotM int
-		iter := test.g.Nodes()
-		for iter.Next() {
-			id := iter.Node().ID()
-			to := test.g.From(id)
-			for to.Next() {
-				gotM++
-			}
-			toC := complement{test.g}.From(id)
-			for toC.Next() {
-				gotM++
-			}
-		}
-		if gotM != wantM {
-			t.Errorf("unexpected number of edges in sum of input and complement: got:%d want:%d", gotM, wantM)
-		}
-	}
-}
-
 func BenchmarkModular(b *testing.B) {
 	g1 := gnp(50, 0.5, nil)
 	g2 := gnp(50, 0.5, nil)

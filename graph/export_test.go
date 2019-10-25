@@ -5,5 +5,6 @@
 package graph
 
 var (
-	NewNodeIteratorPair = newNodeIteratorPair
+	NewNodeFilterIterator = newNodeFilterIterator
+	NewNodeIteratorPair   = newNodeIteratorPair
 )

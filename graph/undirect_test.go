@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/iterator"
 	"gonum.org/v1/gonum/graph/simple"
 	"gonum.org/v1/gonum/mat"
 )
@@ -174,4 +175,37 @@ func (m unit) At(i, j int) float64 {
 		return 0
 	}
 	return 1
+}
+
+var nodeIteratorPairTests = []struct {
+	a, b graph.Nodes
+	len  int
+}{
+	{a: graph.Empty, b: graph.Empty, len: 0},
+	{a: iterator.NewOrderedNodes(nil), b: iterator.NewOrderedNodes(nil), len: 0},
+	{a: iterator.NewOrderedNodes([]graph.Node{simple.Node(0)}), b: graph.Empty, len: 1},
+	{a: graph.Empty, b: iterator.NewOrderedNodes([]graph.Node{simple.Node(0)}), len: 1},
+	{a: iterator.NewOrderedNodes([]graph.Node{simple.Node(0)}), b: iterator.NewOrderedNodes([]graph.Node{simple.Node(0)}), len: 1},
+	{a: iterator.NewOrderedNodes([]graph.Node{simple.Node(0)}), b: iterator.NewOrderedNodes([]graph.Node{simple.Node(1)}), len: 2},
+	{a: iterator.NewOrderedNodes([]graph.Node{simple.Node(0), simple.Node(1)}), b: iterator.NewOrderedNodes([]graph.Node{simple.Node(1)}), len: 2},
+	{a: iterator.NewOrderedNodes([]graph.Node{simple.Node(1)}), b: iterator.NewOrderedNodes([]graph.Node{simple.Node(0), simple.Node(1)}), len: 2},
+}
+
+func TestNodeIteratorPair(t *testing.T) {
+	for _, test := range nodeIteratorPairTests {
+		it := graph.NewNodeIteratorPair(test.a, test.b)
+		for i := 0; i < 2; i++ {
+			n := it.Len()
+			if n != test.len {
+				t.Errorf("unexpected length of iterator construction/reset: got:%d want:%d", n, test.len)
+			}
+			for it.Next() {
+				n--
+			}
+			if n != 0 {
+				t.Errorf("unexpected remaining nodes after iterator completion: got:%d want:0", n)
+			}
+			it.Reset()
+		}
+	}
 }

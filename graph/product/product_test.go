@@ -337,13 +337,39 @@ func naiveModular(dst graph.Builder, a, b graph.Graph) {
 	}
 }
 
-func BenchmarkModular(b *testing.B) {
-	g1 := gnp(50, 0.5, nil)
-	g2 := gnp(50, 0.5, nil)
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		dst := simple.NewDirectedGraph()
-		Modular(dst, g1, g2)
+func BenchmarkProduct(b *testing.B) {
+	for seed, bench := range []struct {
+		name    string
+		product func(dst graph.Builder, a, b graph.Graph)
+		len     []int
+	}{
+		{"Cartesian", Cartesian, []int{50, 100}},
+		{"Cartesian naive", naiveCartesian, []int{50, 100}},
+		{"CoNormal", CoNormal, []int{50}},
+		{"CoNormal naive", naiveCoNormal, []int{50}},
+		{"Lexicographical", Lexicographical, []int{50}},
+		{"Lexicographical naive", naiveLexicographical, []int{50}},
+		{"Modular", Modular, []int{50}},
+		{"Modular naive", naiveModular, []int{50}},
+		{"Strong", Strong, []int{50}},
+		{"Strong naive", naiveStrong, []int{50}},
+		{"Tensor", Tensor, []int{50}},
+		{"Tensor naive", naiveTensor, []int{50}},
+	} {
+		for _, p := range []float64{0.05, 0.25, 0.5, 0.75, 0.95} {
+			for _, n := range bench.len {
+				src := rand.NewSource(uint64(seed))
+				b.Run(fmt.Sprintf("%s %d-%.2f", bench.name, n, p), func(b *testing.B) {
+					g1 := gnp(n, p, src)
+					g2 := gnp(n, p, src)
+					b.ResetTimer()
+					for i := 0; i < b.N; i++ {
+						dst := simple.NewDirectedGraph()
+						bench.product(dst, g1, g2)
+					}
+				})
+			}
+		}
 	}
 }
 

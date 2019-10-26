@@ -104,13 +104,14 @@ func Lexicographical(dst graph.Builder, a, b graph.Graph) {
 	}
 
 	dims := []int{len(aNodes), len(bNodes)}
+	p := make([]int, 2)
 	for i, uA := range aNodes {
 		toA := a.From(uA.ID())
 		for toA.Next() {
 			j := indexOfA[toA.Node().ID()]
 			gen := combin.NewCartesianGenerator([]int{len(bNodes), len(bNodes)})
 			for gen.Next() {
-				p := gen.Product()
+				p = gen.Product(p)
 				dst.SetEdge(dst.NewEdge(
 					product[combin.IdxFor([]int{i, p[0]}, dims)],
 					product[combin.IdxFor([]int{j, p[1]}, dims)],
@@ -194,13 +195,14 @@ func CoNormal(dst graph.Builder, a, b graph.Graph) {
 	}
 
 	dims := []int{len(aNodes), len(bNodes)}
+	p := make([]int, 2)
 	for i, u := range aNodes {
 		to := a.From(u.ID())
 		for to.Next() {
 			j := indexOfA[to.Node().ID()]
 			gen := combin.NewCartesianGenerator([]int{len(bNodes), len(bNodes)})
 			for gen.Next() {
-				p := gen.Product()
+				p = gen.Product(p)
 				dst.SetEdge(dst.NewEdge(
 					product[combin.IdxFor([]int{i, p[0]}, dims)],
 					product[combin.IdxFor([]int{j, p[1]}, dims)],
@@ -214,7 +216,7 @@ func CoNormal(dst graph.Builder, a, b graph.Graph) {
 			j := indexOfB[to.Node().ID()]
 			gen := combin.NewCartesianGenerator([]int{len(aNodes), len(aNodes)})
 			for gen.Next() {
-				p := gen.Product()
+				p = gen.Product(p)
 				dst.SetEdge(dst.NewEdge(
 					product[combin.IdxFor([]int{p[0], i}, dims)],
 					product[combin.IdxFor([]int{p[1], j}, dims)],
@@ -273,8 +275,9 @@ func cartesianNodes(a, b graph.Graph) (aNodes, bNodes []graph.Node, product []No
 	lens := []int{len(aNodes), len(bNodes)}
 	product = make([]Node, combin.Card(lens))
 	gen := combin.NewCartesianGenerator(lens)
+	p := make([]int, 2)
 	for id := int64(0); gen.Next(); id++ {
-		p := gen.Product()
+		p = gen.Product(p)
 		product[id] = Node{UID: id, A: aNodes[p[0]], B: bNodes[p[1]]}
 	}
 	return aNodes, bNodes, product

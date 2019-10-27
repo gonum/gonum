@@ -613,7 +613,7 @@ func testMoveLocalUndirected(t *testing.T, test localUndirectedMoveTest, g graph
 				after := Q(r, l.communities, structure.resolution)
 				want := after - before
 				if !floats.EqualWithinAbsOrRel(dQ, want, structure.tol, structure.tol) {
-					t.Errorf("unexpected deltaQ: got: %v want: %v", dQ, want)
+					t.Errorf("unexpected deltaQ for %q: got: %v want: %v", test.name, dQ, want)
 				}
 			}
 		}

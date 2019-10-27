@@ -303,7 +303,7 @@ func Card(dims []int) int {
 	}
 	card := 1
 	for _, v := range dims {
-		if v < 1 {
+		if v < 0 {
 			panic("combin: length less than zero")
 		}
 		card *= v

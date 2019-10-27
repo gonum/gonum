@@ -27,6 +27,9 @@ func (n Node) ID() int64 { return n.UID }
 // (u₁=v₁ and u₂~v₂) or (u₁~v₁ and u₂=v₂).
 func Cartesian(dst graph.Builder, a, b graph.Graph) {
 	aNodes, bNodes, product := cartesianNodes(a, b)
+	if len(product) == 0 {
+		return
+	}
 
 	indexOfA := indexOf(aNodes)
 	indexOfB := indexOf(bNodes)
@@ -63,6 +66,9 @@ func Cartesian(dst graph.Builder, a, b graph.Graph) {
 // u₁~v₁ and u₂~v₂.
 func Tensor(dst graph.Builder, a, b graph.Graph) {
 	aNodes, bNodes, product := cartesianNodes(a, b)
+	if len(product) == 0 {
+		return
+	}
 
 	indexOfA := indexOf(aNodes)
 	indexOfB := indexOf(bNodes)
@@ -95,6 +101,9 @@ func Tensor(dst graph.Builder, a, b graph.Graph) {
 // u₁~v₁ or (u₁=v₁ and u₂~v₂).
 func Lexicographical(dst graph.Builder, a, b graph.Graph) {
 	aNodes, bNodes, product := cartesianNodes(a, b)
+	if len(product) == 0 {
+		return
+	}
 
 	indexOfA := indexOf(aNodes)
 	indexOfB := indexOf(bNodes)
@@ -137,6 +146,9 @@ func Lexicographical(dst graph.Builder, a, b graph.Graph) {
 // (u₁=v₁ and u₂~v₂) or (u₁~v₁ and u₂=v₂) or (u₁~v₁ and u₂~v₂).
 func Strong(dst graph.Builder, a, b graph.Graph) {
 	aNodes, bNodes, product := cartesianNodes(a, b)
+	if len(product) == 0 {
+		return
+	}
 
 	indexOfA := indexOf(aNodes)
 	indexOfB := indexOf(bNodes)
@@ -186,6 +198,9 @@ func Strong(dst graph.Builder, a, b graph.Graph) {
 // u₁~v₁ or u₂~v₂.
 func CoNormal(dst graph.Builder, a, b graph.Graph) {
 	aNodes, bNodes, product := cartesianNodes(a, b)
+	if len(product) == 0 {
+		return
+	}
 
 	indexOfA := indexOf(aNodes)
 	indexOfB := indexOf(bNodes)
@@ -235,6 +250,9 @@ func CoNormal(dst graph.Builder, a, b graph.Graph) {
 // of a and b.
 func Modular(dst graph.Builder, a, b graph.Graph) {
 	_, _, product := cartesianNodes(a, b)
+	if len(product) == 0 {
+		return
+	}
 
 	for _, p := range product {
 		dst.AddNode(p)

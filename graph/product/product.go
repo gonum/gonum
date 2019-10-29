@@ -13,8 +13,13 @@ import (
 )
 
 // Node is a product of two graph nodes.
+// All graph products return this type directly via relevant graph.Graph method
+// call, or indirectly via calls to graph.Edge methods from returned edges.
 type Node struct {
-	UID  int64
+	UID int64
+
+	// A and B hold the nodes from graph a and b in a
+	// graph product constructed by a product function.
 	A, B graph.Node
 }
 
@@ -24,7 +29,8 @@ func (n Node) ID() int64 { return n.UID }
 // Cartesian constructs the Cartesian product of a and b in dst.
 //
 // The Cartesian product of G₁ and G₂, G₁□G₂ has edges (u₁, u₂)~(v₁, v₂) when
-// (u₁=v₁ and u₂~v₂) or (u₁~v₁ and u₂=v₂).
+// (u₁=v₁ and u₂~v₂) or (u₁~v₁ and u₂=v₂). The Cartesian product has size m₂n₁+m₁n₂
+// where m is the size of the input graphs and n is their order.
 func Cartesian(dst graph.Builder, a, b graph.Graph) {
 	aNodes, bNodes, product := cartesianNodes(a, b)
 	if len(product) == 0 {
@@ -63,7 +69,8 @@ func Cartesian(dst graph.Builder, a, b graph.Graph) {
 // Tensor constructs the Tensor product of a and b in dst.
 //
 // The Tensor product of G₁ and G₂, G₁⨯G₂ has edges (u₁, u₂)~(v₁, v₂) when
-// u₁~v₁ and u₂~v₂.
+// u₁~v₁ and u₂~v₂. The Tensor product has size 2m₁m₂ where m is the size
+// of the input graphs.
 func Tensor(dst graph.Builder, a, b graph.Graph) {
 	aNodes, bNodes, product := cartesianNodes(a, b)
 	if len(product) == 0 {
@@ -98,7 +105,8 @@ func Tensor(dst graph.Builder, a, b graph.Graph) {
 // Lexicographical constructs the Lexicographical product of a and b in dst.
 //
 // The Lexicographical product of G₁ and G₂, G₁·G₂ has edges (u₁, u₂)~(v₁, v₂) when
-// u₁~v₁ or (u₁=v₁ and u₂~v₂).
+// u₁~v₁ or (u₁=v₁ and u₂~v₂). The Lexicographical product has size m₂n₁+m₁n₂²
+// where m is the size of the input graphs and n is their order.
 func Lexicographical(dst graph.Builder, a, b graph.Graph) {
 	aNodes, bNodes, product := cartesianNodes(a, b)
 	if len(product) == 0 {
@@ -143,7 +151,9 @@ func Lexicographical(dst graph.Builder, a, b graph.Graph) {
 // Strong constructs the Strong product of a and b in dst.
 //
 // The Strong product of G₁ and G₂, G₁⊠G₂ has edges (u₁, u₂)~(v₁, v₂) when
-// (u₁=v₁ and u₂~v₂) or (u₁~v₁ and u₂=v₂) or (u₁~v₁ and u₂~v₂).
+// (u₁=v₁ and u₂~v₂) or (u₁~v₁ and u₂=v₂) or (u₁~v₁ and u₂~v₂). The Strong
+// product has size n₁m₂+n₂m₁+2m₁m₂ where m is the size of the input graphs
+// and n is their order.
 func Strong(dst graph.Builder, a, b graph.Graph) {
 	aNodes, bNodes, product := cartesianNodes(a, b)
 	if len(product) == 0 {
@@ -194,8 +204,8 @@ func Strong(dst graph.Builder, a, b graph.Graph) {
 
 // CoNormal constructs the Co-normal product of a and b in dst.
 //
-// The Co-normal product of G₁ and G₂, G₁*G₂ has edges (u₁, u₂)~(v₁, v₂) when
-// u₁~v₁ or u₂~v₂.
+// The Co-normal product of G₁ and G₂, G₁*G₂ (or G₁[G₂]) has edges (u₁, u₂)~(v₁, v₂)
+// when u₁~v₁ or u₂~v₂. The Co-normal product is non-commutative.
 func CoNormal(dst graph.Builder, a, b graph.Graph) {
 	aNodes, bNodes, product := cartesianNodes(a, b)
 	if len(product) == 0 {
@@ -243,10 +253,10 @@ func CoNormal(dst graph.Builder, a, b graph.Graph) {
 
 // Modular constructs the Modular product of a and b in dst.
 //
-// The Modular product of G₁ and G₂ has edges (u₁, u₂)~(v₁, v₂) when
-// (u₁~v₁ and u₂~v₂) or (u₁≁v₁ and u₂≁v₂), and (u₁≠v₁ and u₂≠v₂).
+// The Modular product of G₁ and G₂, G₁◊G₂ has edges (u₁, u₂)~(v₁, v₂)
+// when (u₁~v₁ and u₂~v₂) or (u₁≁v₁ and u₂≁v₂), and (u₁≠v₁ and u₂≠v₂).
 //
-// Modular is O(n^2) where n is the order of the Cartesian product
+// Modular is O(n^2) time where n is the order of the Cartesian product
 // of a and b.
 func Modular(dst graph.Builder, a, b graph.Graph) {
 	_, _, product := cartesianNodes(a, b)

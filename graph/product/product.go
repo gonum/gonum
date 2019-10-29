@@ -270,7 +270,8 @@ func Modular(dst graph.Builder, a, b graph.Graph) {
 
 	_, aUndirected := a.(graph.Undirected)
 	_, bUndirected := b.(graph.Undirected)
-	undirected := aUndirected && bUndirected
+	_, dstUndirected := dst.(graph.Undirected)
+	undirected := aUndirected && bUndirected && dstUndirected
 
 	n := len(product)
 	if undirected {

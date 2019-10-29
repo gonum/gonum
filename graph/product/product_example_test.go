@@ -28,7 +28,8 @@ func (n atom) ID() int64 { return n.id }
 
 func ExampleModular_subgraphIsomorphism() {
 	// The modular product can be used to find subgraph isomorphisms.
-	// See https://doi.org/10.1016/0020-0190(76)90049-1.
+	// See https://doi.org/10.1016/0020-0190(76)90049-1 and for a
+	// theoretical perspective, https://doi.org/10.1145/990524.990529.
 
 	// We can find the common structure between two organic molecules.
 	// For example the purines adenine and guanine from nucleic acids.

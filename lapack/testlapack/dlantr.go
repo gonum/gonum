@@ -102,10 +102,13 @@ func dlantrTest(t *testing.T, impl Dlantrer, rnd *rand.Rand, uplo blas.Uplo, dia
 	aCopy := make([]float64, len(a))
 	copy(aCopy, a)
 
-	work := make([]float64, n)
 	for _, norm := range []lapack.MatrixNorm{lapack.MaxAbs, lapack.MaxColumnSum, lapack.MaxRowSum, lapack.Frobenius} {
 		name := fmt.Sprintf("norm=%v,uplo=%v,diag=%v,m=%v,n=%v,lda=%v", string(norm), string(uplo), string(diag), m, n, lda)
 
+		var work []float64
+		if norm == lapack.MaxColumnSum {
+			work = make([]float64, n)
+		}
 		normGot := impl.Dlantr(norm, uplo, diag, m, n, a, lda, work)
 
 		if !floats.Equal(a, aCopy) {

@@ -296,6 +296,60 @@ func Modular(dst graph.Builder, a, b graph.Graph) {
 	}
 }
 
+// ModularExt constructs the Modular product of a and b in dst with
+// additional control over assessing edge agreement.
+//
+// In addition to the modular product conditions, agree(u₁v₁, u₂v₂) must
+// return true when (u₁~v₁ and u₂~v₂) for an edge to be added between
+// (u₁, u₂) and (v₁, v₂) in dst. If agree is nil, Modular is called.
+//
+// ModularExt is O(n^2) time where n is the order of the Cartesian product
+// of a and b.
+func ModularExt(dst graph.Builder, a, b graph.Graph, agree func(eA, eB graph.Edge) bool) {
+	if agree == nil {
+		Modular(dst, a, b)
+		return
+	}
+
+	_, _, product := cartesianNodes(a, b)
+	if len(product) == 0 {
+		return
+	}
+
+	for _, p := range product {
+		dst.AddNode(p)
+	}
+
+	_, aUndirected := a.(graph.Undirected)
+	_, bUndirected := b.(graph.Undirected)
+	_, dstUndirected := dst.(graph.Undirected)
+	undirected := aUndirected && bUndirected && dstUndirected
+
+	n := len(product)
+	if undirected {
+		n--
+	}
+	for i, u := range product[:n] {
+		var m int
+		if undirected {
+			m = i + 1
+		}
+		for _, v := range product[m:] {
+			if u.A.ID() == v.A.ID() || u.B.ID() == v.B.ID() {
+				// No self-loops.
+				continue
+			}
+			eA := a.Edge(u.A.ID(), v.A.ID())
+			eB := b.Edge(u.B.ID(), v.B.ID())
+			inA := eA != nil
+			inB := eB != nil
+			if (inA && inB && agree(eA, eB)) || (!inA && !inB) {
+				dst.SetEdge(dst.NewEdge(u, v))
+			}
+		}
+	}
+}
+
 // cartesianNodes returns the Cartesian product of the nodes in a and b.
 func cartesianNodes(a, b graph.Graph) (aNodes, bNodes []graph.Node, product []Node) {
 	aNodes = lexicalNodes(a)

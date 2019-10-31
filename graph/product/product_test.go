@@ -314,6 +314,22 @@ func TestModular(t *testing.T) {
 	}
 }
 
+func TestModularExt(t *testing.T) {
+	for _, test := range productTests {
+		got := simple.NewUndirectedGraph()
+		ModularExt(got, test.a, test.b, func(a, b graph.Edge) bool { return true })
+		gotBytes, _ := dot.Marshal(got, "", "", "  ")
+
+		want := simple.NewUndirectedGraph()
+		naiveModular(want, test.a, test.b)
+		wantBytes, _ := dot.Marshal(want, "", "", "  ")
+
+		if !bytes.Equal(gotBytes, wantBytes) {
+			t.Errorf("unexpected ModularExt product result for %s:\ngot:\n%s\nwant:\n%s", test.name, gotBytes, wantBytes)
+		}
+	}
+}
+
 // (u₁~v₁ and u₂~v₂) or (u₁≁v₁ and u₂≁v₂).
 func naiveModular(dst graph.Builder, a, b graph.Graph) {
 	_, _, product := cartesianNodes(a, b)

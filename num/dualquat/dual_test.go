@@ -18,20 +18,20 @@ var formatTests = []struct {
 	format string
 	want   string
 }{
-	{d: Number{quat.Number{1.1, 2.1, 3.1, 4.1}, quat.Number{1.2, 2.2, 3.2, 4.2}}, format: "%#v", want: "dualquat.Number{Real:quat.Number{Real:1.1, Imag:2.1, Jmag:3.1, Kmag:4.1}, Dual:quat.Number{Real:1.2, Imag:2.2, Jmag:3.2, Kmag:4.2}}"},                 // Bootstrap test.
-	{d: Number{quat.Number{-1.1, -2.1, -3.1, -4.1}, quat.Number{-1.2, -2.2, -3.2, -4.2}}, format: "%#v", want: "dualquat.Number{Real:quat.Number{Real:-1.1, Imag:-2.1, Jmag:-3.1, Kmag:-4.1}, Dual:quat.Number{Real:-1.2, Imag:-2.2, Jmag:-3.2, Kmag:-4.2}}"}, // Bootstrap test.
-	{d: Number{quat.Number{1.1, 2.1, 3.1, 4.1}, quat.Number{1.2, 2.2, 3.2, 4.2}}, format: "%+v", want: "{Real:{Real:1.1, Imag:2.1, Jmag:3.1, Kmag:4.1}, Dual:{Real:1.2, Imag:2.2, Jmag:3.2, Kmag:4.2}}"},
-	{d: Number{quat.Number{-1.1, -2.1, -3.1, -4.1}, quat.Number{-1.2, -2.2, -3.2, -4.2}}, format: "%+v", want: "{Real:{Real:-1.1, Imag:-2.1, Jmag:-3.1, Kmag:-4.1}, Dual:{Real:-1.2, Imag:-2.2, Jmag:-3.2, Kmag:-4.2}}"},
-	{d: Number{quat.Number{1.1, 2.1, 3.1, 4.1}, quat.Number{1.2, 2.2, 3.2, 4.2}}, format: "%v", want: "((1.1+2.1i+3.1j+4.1k)+(+1.2+2.2i+3.2j+4.2k)ϵ)"},
-	{d: Number{quat.Number{-1.1, -2.1, -3.1, -4.1}, quat.Number{-1.2, -2.2, -3.2, -4.2}}, format: "%v", want: "((-1.1-2.1i-3.1j-4.1k)+(-1.2-2.2i-3.2j-4.2k)ϵ)"},
-	{d: Number{quat.Number{1.1, 2.1, 3.1, 4.1}, quat.Number{1.2, 2.2, 3.2, 4.2}}, format: "%g", want: "((1.1+2.1i+3.1j+4.1k)+(+1.2+2.2i+3.2j+4.2k)ϵ)"},
-	{d: Number{quat.Number{-1.1, -2.1, -3.1, -4.1}, quat.Number{-1.2, -2.2, -3.2, -4.2}}, format: "%g", want: "((-1.1-2.1i-3.1j-4.1k)+(-1.2-2.2i-3.2j-4.2k)ϵ)"},
-	{d: Number{quat.Number{1.1, 2.1, 3.1, 4.1}, quat.Number{1.2, 2.2, 3.2, 4.2}}, format: "%e", want: "((1.100000e+00+2.100000e+00i+3.100000e+00j+4.100000e+00k)+(+1.200000e+00+2.200000e+00i+3.200000e+00j+4.200000e+00k)ϵ)"},
-	{d: Number{quat.Number{-1.1, -2.1, -3.1, -4.1}, quat.Number{-1.2, -2.2, -3.2, -4.2}}, format: "%e", want: "((-1.100000e+00-2.100000e+00i-3.100000e+00j-4.100000e+00k)+(-1.200000e+00-2.200000e+00i-3.200000e+00j-4.200000e+00k)ϵ)"},
-	{d: Number{quat.Number{1.1, 2.1, 3.1, 4.1}, quat.Number{1.2, 2.2, 3.2, 4.2}}, format: "%E", want: "((1.100000E+00+2.100000E+00i+3.100000E+00j+4.100000E+00k)+(+1.200000E+00+2.200000E+00i+3.200000E+00j+4.200000E+00k)ϵ)"},
-	{d: Number{quat.Number{-1.1, -2.1, -3.1, -4.1}, quat.Number{-1.2, -2.2, -3.2, -4.2}}, format: "%E", want: "((-1.100000E+00-2.100000E+00i-3.100000E+00j-4.100000E+00k)+(-1.200000E+00-2.200000E+00i-3.200000E+00j-4.200000E+00k)ϵ)"},
-	{d: Number{quat.Number{1.1, 2.1, 3.1, 4.1}, quat.Number{1.2, 2.2, 3.2, 4.2}}, format: "%f", want: "((1.100000+2.100000i+3.100000j+4.100000k)+(+1.200000+2.200000i+3.200000j+4.200000k)ϵ)"},
-	{d: Number{quat.Number{-1.1, -2.1, -3.1, -4.1}, quat.Number{-1.2, -2.2, -3.2, -4.2}}, format: "%f", want: "((-1.100000-2.100000i-3.100000j-4.100000k)+(-1.200000-2.200000i-3.200000j-4.200000k)ϵ)"},
+	{d: Number{quat.Number{Real: 1.1, Imag: 2.1, Jmag: 3.1, Kmag: 4.1}, quat.Number{Real: 1.2, Imag: 2.2, Jmag: 3.2, Kmag: 4.2}}, format: "%#v", want: "dualquat.Number{Real:quat.Number{Real:1.1, Imag:2.1, Jmag:3.1, Kmag:4.1}, Dual:quat.Number{Real:1.2, Imag:2.2, Jmag:3.2, Kmag:4.2}}"},                 // Bootstrap test.
+	{d: Number{quat.Number{Real: -1.1, Imag: -2.1, Jmag: -3.1, Kmag: -4.1}, quat.Number{Real: -1.2, Imag: -2.2, Jmag: -3.2, Kmag: -4.2}}, format: "%#v", want: "dualquat.Number{Real:quat.Number{Real:-1.1, Imag:-2.1, Jmag:-3.1, Kmag:-4.1}, Dual:quat.Number{Real:-1.2, Imag:-2.2, Jmag:-3.2, Kmag:-4.2}}"}, // Bootstrap test.
+	{d: Number{quat.Number{Real: 1.1, Imag: 2.1, Jmag: 3.1, Kmag: 4.1}, quat.Number{Real: 1.2, Imag: 2.2, Jmag: 3.2, Kmag: 4.2}}, format: "%+v", want: "{Real:{Real:1.1, Imag:2.1, Jmag:3.1, Kmag:4.1}, Dual:{Real:1.2, Imag:2.2, Jmag:3.2, Kmag:4.2}}"},
+	{d: Number{quat.Number{Real: -1.1, Imag: -2.1, Jmag: -3.1, Kmag: -4.1}, quat.Number{Real: -1.2, Imag: -2.2, Jmag: -3.2, Kmag: -4.2}}, format: "%+v", want: "{Real:{Real:-1.1, Imag:-2.1, Jmag:-3.1, Kmag:-4.1}, Dual:{Real:-1.2, Imag:-2.2, Jmag:-3.2, Kmag:-4.2}}"},
+	{d: Number{quat.Number{Real: 1.1, Imag: 2.1, Jmag: 3.1, Kmag: 4.1}, quat.Number{Real: 1.2, Imag: 2.2, Jmag: 3.2, Kmag: 4.2}}, format: "%v", want: "((1.1+2.1i+3.1j+4.1k)+(+1.2+2.2i+3.2j+4.2k)ϵ)"},
+	{d: Number{quat.Number{Real: -1.1, Imag: -2.1, Jmag: -3.1, Kmag: -4.1}, quat.Number{Real: -1.2, Imag: -2.2, Jmag: -3.2, Kmag: -4.2}}, format: "%v", want: "((-1.1-2.1i-3.1j-4.1k)+(-1.2-2.2i-3.2j-4.2k)ϵ)"},
+	{d: Number{quat.Number{Real: 1.1, Imag: 2.1, Jmag: 3.1, Kmag: 4.1}, quat.Number{Real: 1.2, Imag: 2.2, Jmag: 3.2, Kmag: 4.2}}, format: "%g", want: "((1.1+2.1i+3.1j+4.1k)+(+1.2+2.2i+3.2j+4.2k)ϵ)"},
+	{d: Number{quat.Number{Real: -1.1, Imag: -2.1, Jmag: -3.1, Kmag: -4.1}, quat.Number{Real: -1.2, Imag: -2.2, Jmag: -3.2, Kmag: -4.2}}, format: "%g", want: "((-1.1-2.1i-3.1j-4.1k)+(-1.2-2.2i-3.2j-4.2k)ϵ)"},
+	{d: Number{quat.Number{Real: 1.1, Imag: 2.1, Jmag: 3.1, Kmag: 4.1}, quat.Number{Real: 1.2, Imag: 2.2, Jmag: 3.2, Kmag: 4.2}}, format: "%e", want: "((1.100000e+00+2.100000e+00i+3.100000e+00j+4.100000e+00k)+(+1.200000e+00+2.200000e+00i+3.200000e+00j+4.200000e+00k)ϵ)"},
+	{d: Number{quat.Number{Real: -1.1, Imag: -2.1, Jmag: -3.1, Kmag: -4.1}, quat.Number{Real: -1.2, Imag: -2.2, Jmag: -3.2, Kmag: -4.2}}, format: "%e", want: "((-1.100000e+00-2.100000e+00i-3.100000e+00j-4.100000e+00k)+(-1.200000e+00-2.200000e+00i-3.200000e+00j-4.200000e+00k)ϵ)"},
+	{d: Number{quat.Number{Real: 1.1, Imag: 2.1, Jmag: 3.1, Kmag: 4.1}, quat.Number{Real: 1.2, Imag: 2.2, Jmag: 3.2, Kmag: 4.2}}, format: "%E", want: "((1.100000E+00+2.100000E+00i+3.100000E+00j+4.100000E+00k)+(+1.200000E+00+2.200000E+00i+3.200000E+00j+4.200000E+00k)ϵ)"},
+	{d: Number{quat.Number{Real: -1.1, Imag: -2.1, Jmag: -3.1, Kmag: -4.1}, quat.Number{Real: -1.2, Imag: -2.2, Jmag: -3.2, Kmag: -4.2}}, format: "%E", want: "((-1.100000E+00-2.100000E+00i-3.100000E+00j-4.100000E+00k)+(-1.200000E+00-2.200000E+00i-3.200000E+00j-4.200000E+00k)ϵ)"},
+	{d: Number{quat.Number{Real: 1.1, Imag: 2.1, Jmag: 3.1, Kmag: 4.1}, quat.Number{Real: 1.2, Imag: 2.2, Jmag: 3.2, Kmag: 4.2}}, format: "%f", want: "((1.100000+2.100000i+3.100000j+4.100000k)+(+1.200000+2.200000i+3.200000j+4.200000k)ϵ)"},
+	{d: Number{quat.Number{Real: -1.1, Imag: -2.1, Jmag: -3.1, Kmag: -4.1}, quat.Number{Real: -1.2, Imag: -2.2, Jmag: -3.2, Kmag: -4.2}}, format: "%f", want: "((-1.100000-2.100000i-3.100000j-4.100000k)+(-1.200000-2.200000i-3.200000j-4.200000k)ϵ)"},
 }
 
 func TestFormat(t *testing.T) {
@@ -45,9 +45,6 @@ func TestFormat(t *testing.T) {
 
 // First derivatives:
 
-func dPowReal(x quat.Number, y float64) quat.Number {
-	return quat.Mul(quat.Number{Real: y}, quat.Pow(x, quat.Number{Real: y - 1}))
-}
 func dExp(x quat.Number) quat.Number { return quat.Exp(x) }
 func dLog(x quat.Number) quat.Number {
 	switch {
@@ -58,15 +55,14 @@ func dLog(x quat.Number) quat.Number {
 	}
 	return quat.Inv(x)
 }
-func dPow(x, y quat.Number) quat.Number { return quat.Mul(y, quat.Pow(x, subQuatReal(y, 1))) }
-func dSqrt(x quat.Number) quat.Number   { return quat.Scale(0.5, quat.Inv(quat.Sqrt(x))) }
-func dInv(x quat.Number) quat.Number    { return quat.Scale(-1, quat.Inv(quat.Mul(x, x))) }
+func dSqrt(x quat.Number) quat.Number { return quat.Scale(0.5, quat.Inv(quat.Sqrt(x))) }
+func dInv(x quat.Number) quat.Number  { return quat.Scale(-1, quat.Inv(quat.Mul(x, x))) }
 
 var (
 	negZero     = math.Copysign(0, -1)
 	oneReal     = quat.Number{Real: 1}
 	negZeroQuat = quat.Scale(-1, zeroQuat)
-	one         = quat.Number{1, 1, 1, 1}
+	one         = quat.Number{Real: 1, Imag: 1, Jmag: 1, Kmag: 1}
 	negOne      = quat.Scale(-1, one)
 	half        = quat.Scale(0.5, one)
 	negHalf     = quat.Scale(-1, half)

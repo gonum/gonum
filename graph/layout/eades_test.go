@@ -27,7 +27,7 @@ var eadesR2Tests = []struct {
 		name: "line",
 		g: func() graph.Graph {
 			edges := []simple.Edge{
-				{simple.Node(0), simple.Node(1)},
+				{F: simple.Node(0), T: simple.Node(1)},
 			}
 			g := simple.NewUndirectedGraph()
 			for _, e := range edges {
@@ -42,10 +42,10 @@ var eadesR2Tests = []struct {
 		name: "square",
 		g: func() graph.Graph {
 			edges := []simple.Edge{
-				{simple.Node(0), simple.Node(1)},
-				{simple.Node(0), simple.Node(2)},
-				{simple.Node(1), simple.Node(3)},
-				{simple.Node(2), simple.Node(3)},
+				{F: simple.Node(0), T: simple.Node(1)},
+				{F: simple.Node(0), T: simple.Node(2)},
+				{F: simple.Node(1), T: simple.Node(3)},
+				{F: simple.Node(2), T: simple.Node(3)},
 			}
 			g := simple.NewUndirectedGraph()
 			for _, e := range edges {
@@ -60,12 +60,12 @@ var eadesR2Tests = []struct {
 		name: "tetrahedron",
 		g: func() graph.Graph {
 			edges := []simple.Edge{
-				{simple.Node(0), simple.Node(1)},
-				{simple.Node(0), simple.Node(2)},
-				{simple.Node(0), simple.Node(3)},
-				{simple.Node(1), simple.Node(2)},
-				{simple.Node(1), simple.Node(3)},
-				{simple.Node(2), simple.Node(3)},
+				{F: simple.Node(0), T: simple.Node(1)},
+				{F: simple.Node(0), T: simple.Node(2)},
+				{F: simple.Node(0), T: simple.Node(3)},
+				{F: simple.Node(1), T: simple.Node(2)},
+				{F: simple.Node(1), T: simple.Node(3)},
+				{F: simple.Node(2), T: simple.Node(3)},
 			}
 			g := simple.NewUndirectedGraph()
 			for _, e := range edges {
@@ -80,18 +80,18 @@ var eadesR2Tests = []struct {
 		name: "sheet",
 		g: func() graph.Graph {
 			edges := []simple.Edge{
-				{simple.Node(0), simple.Node(1)},
-				{simple.Node(0), simple.Node(3)},
-				{simple.Node(1), simple.Node(2)},
-				{simple.Node(1), simple.Node(4)},
-				{simple.Node(2), simple.Node(5)},
-				{simple.Node(3), simple.Node(4)},
-				{simple.Node(3), simple.Node(6)},
-				{simple.Node(4), simple.Node(5)},
-				{simple.Node(4), simple.Node(7)},
-				{simple.Node(5), simple.Node(8)},
-				{simple.Node(6), simple.Node(7)},
-				{simple.Node(7), simple.Node(8)},
+				{F: simple.Node(0), T: simple.Node(1)},
+				{F: simple.Node(0), T: simple.Node(3)},
+				{F: simple.Node(1), T: simple.Node(2)},
+				{F: simple.Node(1), T: simple.Node(4)},
+				{F: simple.Node(2), T: simple.Node(5)},
+				{F: simple.Node(3), T: simple.Node(4)},
+				{F: simple.Node(3), T: simple.Node(6)},
+				{F: simple.Node(4), T: simple.Node(5)},
+				{F: simple.Node(4), T: simple.Node(7)},
+				{F: simple.Node(5), T: simple.Node(8)},
+				{F: simple.Node(6), T: simple.Node(7)},
+				{F: simple.Node(7), T: simple.Node(8)},
 			}
 			g := simple.NewUndirectedGraph()
 			for _, e := range edges {
@@ -106,21 +106,21 @@ var eadesR2Tests = []struct {
 		name: "tube",
 		g: func() graph.Graph {
 			edges := []simple.Edge{
-				{simple.Node(0), simple.Node(1)},
-				{simple.Node(0), simple.Node(2)},
-				{simple.Node(0), simple.Node(3)},
-				{simple.Node(1), simple.Node(2)},
-				{simple.Node(1), simple.Node(4)},
-				{simple.Node(2), simple.Node(5)},
-				{simple.Node(3), simple.Node(4)},
-				{simple.Node(3), simple.Node(5)},
-				{simple.Node(3), simple.Node(6)},
-				{simple.Node(4), simple.Node(5)},
-				{simple.Node(4), simple.Node(7)},
-				{simple.Node(5), simple.Node(8)},
-				{simple.Node(6), simple.Node(7)},
-				{simple.Node(6), simple.Node(8)},
-				{simple.Node(7), simple.Node(8)},
+				{F: simple.Node(0), T: simple.Node(1)},
+				{F: simple.Node(0), T: simple.Node(2)},
+				{F: simple.Node(0), T: simple.Node(3)},
+				{F: simple.Node(1), T: simple.Node(2)},
+				{F: simple.Node(1), T: simple.Node(4)},
+				{F: simple.Node(2), T: simple.Node(5)},
+				{F: simple.Node(3), T: simple.Node(4)},
+				{F: simple.Node(3), T: simple.Node(5)},
+				{F: simple.Node(3), T: simple.Node(6)},
+				{F: simple.Node(4), T: simple.Node(5)},
+				{F: simple.Node(4), T: simple.Node(7)},
+				{F: simple.Node(5), T: simple.Node(8)},
+				{F: simple.Node(6), T: simple.Node(7)},
+				{F: simple.Node(6), T: simple.Node(8)},
+				{F: simple.Node(7), T: simple.Node(8)},
 			}
 			g := simple.NewUndirectedGraph()
 			for _, e := range edges {
@@ -137,21 +137,21 @@ var eadesR2Tests = []struct {
 		name: "tube-steep",
 		g: func() graph.Graph {
 			edges := []simple.Edge{
-				{simple.Node(0), simple.Node(1)},
-				{simple.Node(0), simple.Node(2)},
-				{simple.Node(0), simple.Node(3)},
-				{simple.Node(1), simple.Node(2)},
-				{simple.Node(1), simple.Node(4)},
-				{simple.Node(2), simple.Node(5)},
-				{simple.Node(3), simple.Node(4)},
-				{simple.Node(3), simple.Node(5)},
-				{simple.Node(3), simple.Node(6)},
-				{simple.Node(4), simple.Node(5)},
-				{simple.Node(4), simple.Node(7)},
-				{simple.Node(5), simple.Node(8)},
-				{simple.Node(6), simple.Node(7)},
-				{simple.Node(6), simple.Node(8)},
-				{simple.Node(7), simple.Node(8)},
+				{F: simple.Node(0), T: simple.Node(1)},
+				{F: simple.Node(0), T: simple.Node(2)},
+				{F: simple.Node(0), T: simple.Node(3)},
+				{F: simple.Node(1), T: simple.Node(2)},
+				{F: simple.Node(1), T: simple.Node(4)},
+				{F: simple.Node(2), T: simple.Node(5)},
+				{F: simple.Node(3), T: simple.Node(4)},
+				{F: simple.Node(3), T: simple.Node(5)},
+				{F: simple.Node(3), T: simple.Node(6)},
+				{F: simple.Node(4), T: simple.Node(5)},
+				{F: simple.Node(4), T: simple.Node(7)},
+				{F: simple.Node(5), T: simple.Node(8)},
+				{F: simple.Node(6), T: simple.Node(7)},
+				{F: simple.Node(6), T: simple.Node(8)},
+				{F: simple.Node(7), T: simple.Node(8)},
 			}
 			g := simple.NewUndirectedGraph()
 			for _, e := range edges {
@@ -167,21 +167,21 @@ var eadesR2Tests = []struct {
 		name: "wp_page", // https://en.wikipedia.org/wiki/PageRank#/media/File:PageRanks-Example.jpg
 		g: func() graph.Graph {
 			edges := []simple.Edge{
-				{simple.Node(0), simple.Node(3)},
-				{simple.Node(1), simple.Node(2)},
-				{simple.Node(1), simple.Node(3)},
-				{simple.Node(1), simple.Node(4)},
-				{simple.Node(1), simple.Node(5)},
-				{simple.Node(1), simple.Node(6)},
-				{simple.Node(1), simple.Node(7)},
-				{simple.Node(1), simple.Node(8)},
-				{simple.Node(3), simple.Node(4)},
-				{simple.Node(4), simple.Node(5)},
-				{simple.Node(4), simple.Node(6)},
-				{simple.Node(4), simple.Node(7)},
-				{simple.Node(4), simple.Node(8)},
-				{simple.Node(4), simple.Node(9)},
-				{simple.Node(4), simple.Node(10)},
+				{F: simple.Node(0), T: simple.Node(3)},
+				{F: simple.Node(1), T: simple.Node(2)},
+				{F: simple.Node(1), T: simple.Node(3)},
+				{F: simple.Node(1), T: simple.Node(4)},
+				{F: simple.Node(1), T: simple.Node(5)},
+				{F: simple.Node(1), T: simple.Node(6)},
+				{F: simple.Node(1), T: simple.Node(7)},
+				{F: simple.Node(1), T: simple.Node(8)},
+				{F: simple.Node(3), T: simple.Node(4)},
+				{F: simple.Node(4), T: simple.Node(5)},
+				{F: simple.Node(4), T: simple.Node(6)},
+				{F: simple.Node(4), T: simple.Node(7)},
+				{F: simple.Node(4), T: simple.Node(8)},
+				{F: simple.Node(4), T: simple.Node(9)},
+				{F: simple.Node(4), T: simple.Node(10)},
 			}
 			g := simple.NewUndirectedGraph()
 			for _, e := range edges {

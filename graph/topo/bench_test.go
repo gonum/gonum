@@ -5,6 +5,7 @@
 package topo
 
 import (
+	"fmt"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
@@ -23,7 +24,10 @@ var (
 
 func gnpDirected(n int, p float64) graph.Directed {
 	g := simple.NewDirectedGraph()
-	gen.Gnp(g, n, p, nil)
+	err := gen.Gnp(g, n, p, nil)
+	if err != nil {
+		panic(fmt.Sprintf("topo: bad test: %v", err))
+	}
 	return g
 }
 

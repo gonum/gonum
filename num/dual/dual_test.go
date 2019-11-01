@@ -73,7 +73,6 @@ func dLog(x float64) float64 {
 	}
 	return 1 / x
 }
-func dPow(x, y float64) float64 { return y * math.Pow(x, y-1) }
 func dSqrt(x float64) float64 {
 	// For whatever reason, math.Sqrt(-0) returns -0.
 	// In this case, that is clearly a wrong approach.

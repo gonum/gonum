@@ -15,8 +15,6 @@ type Number struct {
 	Real, Emag float64
 }
 
-var zero = Number{}
-
 // Format implements fmt.Formatter.
 func (d Number) Format(fs fmt.State, c rune) {
 	prec, pOk := fs.Precision()

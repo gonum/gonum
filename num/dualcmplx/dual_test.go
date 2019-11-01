@@ -449,8 +449,3 @@ func same(a, b complex128, tol float64) bool {
 	return ((math.IsNaN(real(a)) && (math.IsNaN(real(b)))) || floats.EqualWithinAbsOrRel(real(a), real(b), tol, tol)) &&
 		((math.IsNaN(imag(a)) && (math.IsNaN(imag(b)))) || floats.EqualWithinAbsOrRel(imag(a), imag(b), tol, tol))
 }
-
-func equalApprox(a, b complex128, tol float64) bool {
-	return floats.EqualWithinAbsOrRel(real(a), real(b), tol, tol) &&
-		floats.EqualWithinAbsOrRel(imag(a), imag(b), tol, tol)
-}

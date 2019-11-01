@@ -19,10 +19,7 @@ type Number struct {
 	Real, Dual quat.Number
 }
 
-var (
-	zero     Number
-	zeroQuat quat.Number
-)
+var zeroQuat quat.Number
 
 // Format implements fmt.Formatter.
 func (d Number) Format(fs fmt.State, c rune) {
@@ -146,24 +143,4 @@ func Abs(d Number) dual.Number {
 		Real: quat.Abs(d.Real),
 		Emag: quat.Abs(d.Dual),
 	}
-}
-
-func addRealQuat(r float64, q quat.Number) quat.Number {
-	q.Real += r
-	return q
-}
-
-func addQuatReal(q quat.Number, r float64) quat.Number {
-	q.Real += r
-	return q
-}
-
-func subRealQuat(r float64, q quat.Number) quat.Number {
-	q.Real = r - q.Real
-	return q
-}
-
-func subQuatReal(q quat.Number, r float64) quat.Number {
-	q.Real -= r
-	return q
 }

@@ -269,8 +269,6 @@ func (u *UnitStruct) Mul(aU UnitStructer) *UnitStruct {
 	return u
 }
 
-var u3 *UnitStruct
-
 func BenchmarkAddStruct(b *testing.B) {
 	u1 := &UnitStruct{current: 1, chemamt: 5, value: 10}
 	u2 := &UnitStruct{current: 1, chemamt: 5, value: 100}

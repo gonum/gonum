@@ -113,7 +113,7 @@ func (g Graph) Edge(uid, vid int64) graph.Edge {
 	if !g.HasEdgeBetween(uid, vid) {
 		return nil
 	}
-	return simple.Edge{simple.Node(uid), simple.Node(vid)}
+	return simple.Edge{F: simple.Node(uid), T: simple.Node(vid)}
 }
 
 // EdgeBetween returns the edge between nodes x and y with IDs xid and yid.

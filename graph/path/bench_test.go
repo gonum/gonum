@@ -5,6 +5,7 @@
 package path
 
 import (
+	"fmt"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
@@ -28,13 +29,19 @@ var (
 
 func gnpUndirected(n int, p float64) graph.Undirected {
 	g := simple.NewUndirectedGraph()
-	gen.Gnp(g, n, p, nil)
+	err := gen.Gnp(g, n, p, nil)
+	if err != nil {
+		panic(fmt.Sprintf("path: bad test: %v", err))
+	}
 	return g
 }
 
 func navigableSmallWorldUndirected(n, p, q int, r float64) graph.Undirected {
 	g := simple.NewUndirectedGraph()
-	gen.NavigableSmallWorld(g, []int{n, n}, p, q, r, nil)
+	err := gen.NavigableSmallWorld(g, []int{n, n}, p, q, r, nil)
+	if err != nil {
+		panic(fmt.Sprintf("path: bad test: %v", err))
+	}
 	return g
 }
 
@@ -118,7 +125,10 @@ var (
 
 func gnpDirected(n int, p float64) graph.Directed {
 	g := simple.NewDirectedGraph()
-	gen.Gnp(g, n, p, nil)
+	err := gen.Gnp(g, n, p, nil)
+	if err != nil {
+		panic(fmt.Sprintf("path: bad test: %v", err))
+	}
 	return g
 }
 

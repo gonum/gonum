@@ -113,7 +113,7 @@ func (g Graph) Edge(uid, vid int64) graph.Edge {
 	if !g.HasEdgeFromTo(uid, vid) {
 		return nil
 	}
-	return simple.Edge{simple.Node(uid), simple.Node(vid)}
+	return simple.Edge{F: simple.Node(uid), T: simple.Node(vid)}
 }
 
 // From returns all nodes that can be reached directly from the node with the

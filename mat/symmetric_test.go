@@ -724,7 +724,10 @@ func TestPowPSD(t *testing.T) {
 			mat.SymOuterK(1, a)
 
 			var sym SymDense
-			sym.PowPSD(&mat, float64(pow))
+			err := sym.PowPSD(&mat, float64(pow))
+			if err != nil {
+				t.Errorf("unexpected error: %v", err)
+			}
 
 			var dense Dense
 			dense.Pow(&mat, pow)

@@ -79,7 +79,10 @@ func TestLQSolveTo(t *testing.T) {
 			var x Dense
 			lq := &LQ{}
 			lq.Factorize(a)
-			lq.SolveTo(&x, trans, b)
+			err := lq.SolveTo(&x, trans, b)
+			if err != nil {
+				t.Errorf("unexpected error from LQ solve: %v", err)
+			}
 
 			// Test that the normal equations hold.
 			// Aᵀ * A * x = Aᵀ * b if !trans
@@ -132,7 +135,10 @@ func TestLQSolveToVec(t *testing.T) {
 			var x VecDense
 			lq := &LQ{}
 			lq.Factorize(a)
-			lq.SolveVecTo(&x, trans, b)
+			err := lq.SolveVecTo(&x, trans, b)
+			if err != nil {
+				t.Errorf("unexpected error from LQ solve: %v", err)
+			}
 
 			// Test that the normal equations hold.
 			// Aᵀ * A * x = Aᵀ * b if !trans

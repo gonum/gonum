@@ -630,8 +630,8 @@ func (s *SymDense) GrowSym(n int) Symmetric {
 
 // PowPSD computes a^pow where a is a positive symmetric definite matrix.
 //
-// PowPSD returns an error if the matrix is not  not positive symmetric definite
-// or the Eigendecomposition is not successful.
+// PowPSD returns an error if the matrix is not not positive symmetric definite
+// or the Eigen decomposition is not successful.
 func (s *SymDense) PowPSD(a Symmetric, pow float64) error {
 	dim := a.Symmetric()
 	s.reuseAsNonZeroed(dim)

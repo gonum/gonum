@@ -103,7 +103,10 @@ func TestQRSolveTo(t *testing.T) {
 			var x Dense
 			var qr QR
 			qr.Factorize(a)
-			qr.SolveTo(&x, trans, b)
+			err := qr.SolveTo(&x, trans, b)
+			if err != nil {
+				t.Errorf("unexpected error from QR solve: %v", err)
+			}
 
 			// Test that the normal equations hold.
 			// Aᵀ * A * x = Aᵀ * b if !trans
@@ -156,7 +159,10 @@ func TestQRSolveVecTo(t *testing.T) {
 			var x VecDense
 			var qr QR
 			qr.Factorize(a)
-			qr.SolveVecTo(&x, trans, b)
+			err := qr.SolveVecTo(&x, trans, b)
+			if err != nil {
+				t.Errorf("unexpected error from QR solve: %v", err)
+			}
 
 			// Test that the normal equations hold.
 			// Aᵀ * A * x = Aᵀ * b if !trans

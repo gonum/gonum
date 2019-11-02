@@ -178,17 +178,6 @@ func isUpperUplo(u blas.Uplo) bool {
 	}
 }
 
-func uploToTriKind(u blas.Uplo) TriKind {
-	switch u {
-	case blas.Upper:
-		return Upper
-	case blas.Lower:
-		return Lower
-	default:
-		panic(badTriangle)
-	}
-}
-
 // asSymBlas returns the receiver restructured as a blas64.Symmetric with the
 // same backing memory. Panics if the receiver is unit.
 // This returns a blas64.Symmetric and not a *SymDense because SymDense can only

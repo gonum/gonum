@@ -545,7 +545,7 @@ func (m *Dense) Exp(a Matrix) {
 		vpu.Add(v, u)
 		vmu.Sub(v, u)
 
-		m.Solve(vmu, vpu)
+		_ = m.Solve(vmu, vpu)
 		return
 	}
 
@@ -615,7 +615,7 @@ func (m *Dense) Exp(a Matrix) {
 	vpu.Add(v, u)
 	vmu.Sub(v, u)
 
-	m.Solve(vmu, vpu)
+	_ = m.Solve(vmu, vpu)
 
 	for ; s > 0; s-- {
 		m.Mul(m, m)

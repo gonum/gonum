@@ -134,7 +134,10 @@ func TestCholeskySolveTo(t *testing.T) {
 		}
 
 		var x Dense
-		chol.SolveTo(&x, test.b)
+		err := chol.SolveTo(&x, test.b)
+		if err != nil {
+			t.Errorf("unexpected error from Cholesky solve: %v", err)
+		}
 		if !EqualApprox(&x, test.ans, 1e-12) {
 			t.Error("incorrect Cholesky solve solution")
 		}
@@ -195,13 +198,19 @@ func TestCholeskySolveCholTo(t *testing.T) {
 		}
 
 		var x Dense
-		chola.SolveCholTo(&x, &cholb)
+		err := chola.SolveCholTo(&x, &cholb)
+		if err != nil {
+			t.Errorf("unexpected error from Cholesky solve: %v", err)
+		}
 
 		var ans Dense
 		ans.Mul(test.a, &x)
 		if !EqualApprox(&ans, test.b, 1e-12) {
 			var y Dense
-			y.Solve(test.a, test.b)
+			err := y.Solve(test.a, test.b)
+			if err != nil {
+				t.Errorf("unexpected error from dense solve: %v", err)
+			}
 			t.Errorf("incorrect Cholesky solve solution product\ngot solution:\n%.4v\nwant solution\n%.4v",
 				Formatted(&x), Formatted(&y))
 		}
@@ -239,7 +248,10 @@ func TestCholeskySolveVecTo(t *testing.T) {
 		}
 
 		var x VecDense
-		chol.SolveVecTo(&x, test.b)
+		err := chol.SolveVecTo(&x, test.b)
+		if err != nil {
+			t.Errorf("unexpected error from Cholesky solve: %v", err)
+		}
 		if !EqualApprox(&x, test.ans, 1e-12) {
 			t.Error("incorrect Cholesky solve solution")
 		}
@@ -326,7 +338,10 @@ func TestCholeskyInverseTo(t *testing.T) {
 		}
 
 		var sInv SymDense
-		chol.InverseTo(&sInv)
+		err := chol.InverseTo(&sInv)
+		if err != nil {
+			t.Errorf("unexpected error from Cholesky inverse: %v", err)
+		}
 
 		var ans Dense
 		ans.Mul(&sInv, &s)
@@ -672,7 +687,10 @@ func BenchmarkCholeskyInverseTo(b *testing.B) {
 
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
-				chol.InverseTo(dst)
+				err := chol.InverseTo(dst)
+				if err != nil {
+					b.Fatalf("unexpected error from Cholesky inverse: %v", err)
+				}
 			}
 		})
 	}

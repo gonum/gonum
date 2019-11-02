@@ -502,7 +502,7 @@ func (c *Cholesky) ExtendVecSym(a *Cholesky, v Vector) (ok bool) {
 	k := v.At(n, 0)
 
 	var t VecDense
-	t.SolveVec(a.chol.T(), w)
+	_ = t.SolveVec(a.chol.T(), w)
 
 	dot := Dot(&t, &t)
 	if dot >= k {

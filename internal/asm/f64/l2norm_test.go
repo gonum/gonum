@@ -4,7 +4,20 @@
 
 package f64
 
-import "testing"
+import (
+	"fmt"
+	"math"
+	"testing"
+)
+
+// nanwith copied from floats package
+func nanwith(payload uint64) float64 {
+	const (
+		nanBits = 0x7ff8000000000000
+		nanMask = 0xfff8000000000000
+	)
+	return math.Float64frombits(nanBits | (payload &^ nanMask))
+}
 
 func TestL2NormUnitary(t *testing.T) {
 	var src_gd float64 = 1
@@ -17,6 +30,7 @@ func TestL2NormUnitary(t *testing.T) {
 		{want: 3.7416573867739413, x: []float64{1, 2, 3}},
 		{want: 3.7416573867739413, x: []float64{-1, -2, -3}},
 		{want: nan, x: []float64{nan}},
+		{want: nan, x: []float64{1, inf, 3, nanwith(25), 5}},
 		{want: 17.88854381999832, x: []float64{8, -8, 8, -8, 8}},
 		{want: 2.23606797749979, x: []float64{0, 1, 0, -1, 0, 1, 0, -1, 0, 1}},
 	} {
@@ -84,6 +98,55 @@ func TestL2DistanceUnitary(t *testing.T) {
 		}
 		if !isValidGuard(v.x, src_gd, g_ln) {
 			t.Errorf("Test %d Guard violated in src vector %v %v", j, v.x[:g_ln], v.x[len(v.x)-g_ln:])
+		}
+	}
+}
+
+func BenchmarkL2NormNetlib(b *testing.B) {
+	netlib := func(x []float64) (sum float64) {
+		var scale float64
+		sumSquares := 1.0
+		for _, v := range x {
+			if v == 0 {
+				continue
+			}
+			absxi := math.Abs(v)
+			if math.IsNaN(absxi) {
+				return math.NaN()
+			}
+			if scale < absxi {
+				s := scale / absxi
+				sumSquares = 1 + sumSquares*s*s
+				scale = absxi
+			} else {
+				s := absxi / scale
+				sumSquares += s * s
+			}
+		}
+		if math.IsInf(scale, 1) {
+			return math.Inf(1)
+		}
+		return scale * math.Sqrt(sumSquares)
+	}
+
+	tests := []struct {
+		name string
+		f    func(x []float64) float64
+	}{
+		{"L2NormUnitaryNetlib", netlib},
+		{"L2NormUnitary", L2NormUnitary},
+	}
+	x[0] = randomSlice(1, 1)[0] // replace the leading zero (edge case)
+	for _, test := range tests {
+		for _, ln := range []uintptr{1, 3, 10, 30, 1e2, 3e2, 1e3, 3e3, 1e4, 3e4, 1e5} {
+			b.Run(fmt.Sprintf("%s-%d", test.name, ln), func(b *testing.B) {
+				b.SetBytes(int64(64 * ln))
+				x := x[:ln]
+				b.ResetTimer()
+				for i := 0; i < b.N; i++ {
+					test.f(x)
+				}
+			})
 		}
 	}
 }

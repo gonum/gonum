@@ -6,33 +6,6 @@ package f64
 
 import "math"
 
-// L2NormUnitary is the level 2 norm of x.
-func L2NormUnitary(x []float64) (sum float64) {
-	var scale float64
-	sumSquares := 1.0
-	for _, v := range x {
-		if v == 0 {
-			continue
-		}
-		absxi := math.Abs(v)
-		if math.IsNaN(absxi) {
-			return math.NaN()
-		}
-		if scale < absxi {
-			s := scale / absxi
-			sumSquares = 1 + sumSquares*s*s
-			scale = absxi
-		} else {
-			s := absxi / scale
-			sumSquares += s * s
-		}
-	}
-	if math.IsInf(scale, 1) {
-		return math.Inf(1)
-	}
-	return scale * math.Sqrt(sumSquares)
-}
-
 // L2NormInc is the level 2 norm of x.
 func L2NormInc(x []float64, n, incX uintptr) (sum float64) {
 	var scale float64

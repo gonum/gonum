@@ -36,7 +36,6 @@ func areSlicesSame(t *testing.T, truth, comp []float64, str string) {
 				break
 			}
 		}
-
 	}
 	if !ok {
 		t.Errorf(str+". Expected %v, returned %v", truth, comp)
@@ -96,7 +95,6 @@ func TestAddTo(t *testing.T) {
 	if !Panics(func() { AddTo(make([]float64, 3), make([]float64, 3), make([]float64, 2)) }) {
 		t.Errorf("Did not panic with length mismatch")
 	}
-
 }
 
 func TestAddConst(t *testing.T) {
@@ -208,7 +206,6 @@ func TestCumProd(t *testing.T) {
 	truth = []float64{}
 	CumProd(emptyReceiver, emptyReceiver)
 	areSlicesEqual(t, truth, emptyReceiver, "Wrong cumprod returned with empty receiver")
-
 }
 
 func TestCumSum(t *testing.T) {
@@ -231,7 +228,6 @@ func TestCumSum(t *testing.T) {
 	truth = []float64{}
 	CumSum(emptyReceiver, emptyReceiver)
 	areSlicesEqual(t, truth, emptyReceiver, "Wrong cumsum returned with empty receiver")
-
 }
 
 func TestDistance(t *testing.T) {
@@ -270,7 +266,6 @@ func TestDistance(t *testing.T) {
 	if !Panics(func() { Distance([]float64{}, norms, 1) }) {
 		t.Errorf("Did not panic with unequal lengths")
 	}
-
 }
 
 func TestDiv(t *testing.T) {
@@ -398,7 +393,7 @@ func TestEqualFunc(t *testing.T) {
 }
 
 func TestEqualsRelative(t *testing.T) {
-	var equalityTests = []struct {
+	equalityTests := []struct {
 		a, b  float64
 		tol   float64
 		equal bool
@@ -518,7 +513,6 @@ func TestEqualsULP(t *testing.T) {
 	if EqualWithinULP(1, math.NaN(), 10) {
 		t.Errorf("NaN returned as equal")
 	}
-
 }
 
 func TestEqualLengths(t *testing.T) {
@@ -699,7 +693,6 @@ func TestLogSumExp(t *testing.T) {
 	if math.Abs(val-truth) > EqTolerance {
 		t.Errorf("Wrong logsumexp for values with negative infinity")
 	}
-
 }
 
 func TestMaxAndIdx(t *testing.T) {
@@ -1572,7 +1565,6 @@ func TestWithin(t *testing.T) {
 			t.Errorf("Case %v: Idx mismatch. Want: %v, got: %v", i, test.idx, idx)
 		}
 	}
-
 }
 
 func randomSlice(l int) []float64 {

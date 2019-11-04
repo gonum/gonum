@@ -16,14 +16,6 @@ import (
 	"gonum.org/v1/gonum/stat"
 )
 
-type mvTest struct {
-	Mu      []float64
-	Sigma   *mat.SymDense
-	Loc     []float64
-	Logprob float64
-	Prob    float64
-}
-
 func TestNormProbs(t *testing.T) {
 	dist1, ok := NewNormal([]float64{0, 0}, mat.NewSymDense(2, []float64{1, 0, 0, 1}), nil)
 	if !ok {

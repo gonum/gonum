@@ -31,7 +31,7 @@ func (e Euclid) At(i, j int) float64 {
 	y := float64(j/e.x - i/e.x)
 	return 1 / math.Hypot(x, y)
 }
-func (e Euclid) T() mat.Matrix { return mat.Transpose{e} }
+func (e Euclid) T() mat.Matrix { return mat.Transpose{Matrix: e} }
 
 func ExampleGlobalMoransI_areal() {
 	locality := Euclid{10, 10}

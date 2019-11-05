@@ -5,6 +5,7 @@ if [[ "${TRAVIS_SECURE_ENV_VARS}" != true ]]; then
 	exit 0
 fi
 
+ORIGIN_MASTER="$(git ls-remote origin master | cut -f1)"
 CURRENT="$(git rev-parse HEAD)"
 if [[ ${ORIGIN_MASTER} != ${CURRENT} ]]; then
 	echo "skipping coverage - not merged into master"

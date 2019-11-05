@@ -59,10 +59,6 @@ matrix:
   - go: master
 
 before_install:
- # Make sure we have the origin master to compare HEADs and
- # save the sha for comparison in test-coverage.sh.
- - export ORIGIN_MASTER=$(git ls-remote origin master | cut -f1)
-
  - ${TRAVIS_BUILD_DIR}/.travis/run-parts ${TRAVIS_BUILD_DIR}/.travis/deps.d/${TRAVIS_OS_NAME}
 
 addons:

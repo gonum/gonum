@@ -28,6 +28,7 @@ func Implementation() blas.Complex64 {
 
 // Vector represents a vector with an associated element increment.
 type Vector struct {
+	N    int
 	Inc  int
 	Data []complex64
 }
@@ -112,26 +113,26 @@ const negInc = "cblas64: negative vector increment"
 // Dotu computes the dot product of the two vectors without
 // complex conjugation:
 //  xᵀ * y
-func Dotu(n int, x, y Vector) complex64 {
-	return cblas64.Cdotu(n, x.Data, x.Inc, y.Data, y.Inc)
+func Dotu(x, y Vector) complex64 {
+	return cblas64.Cdotu(x.N, x.Data, x.Inc, y.Data, y.Inc)
 }
 
 // Dotc computes the dot product of the two vectors with
 // complex conjugation:
 //  xᴴ * y.
-func Dotc(n int, x, y Vector) complex64 {
-	return cblas64.Cdotc(n, x.Data, x.Inc, y.Data, y.Inc)
+func Dotc(x, y Vector) complex64 {
+	return cblas64.Cdotc(x.N, x.Data, x.Inc, y.Data, y.Inc)
 }
 
 // Nrm2 computes the Euclidean norm of the vector x:
 //  sqrt(\sum_i x[i] * x[i]).
 //
 // Nrm2 will panic if the vector increment is negative.
-func Nrm2(n int, x Vector) float32 {
+func Nrm2(x Vector) float32 {
 	if x.Inc < 0 {
 		panic(negInc)
 	}
-	return cblas64.Scnrm2(n, x.Data, x.Inc)
+	return cblas64.Scnrm2(x.N, x.Data, x.Inc)
 }
 
 // Asum computes the sum of magnitudes of the real and imaginary parts of
@@ -139,11 +140,11 @@ func Nrm2(n int, x Vector) float32 {
 //  \sum_i (|Re x[i]| + |Im x[i]|).
 //
 // Asum will panic if the vector increment is negative.
-func Asum(n int, x Vector) float32 {
+func Asum(x Vector) float32 {
 	if x.Inc < 0 {
 		panic(negInc)
 	}
-	return cblas64.Scasum(n, x.Data, x.Inc)
+	return cblas64.Scasum(x.N, x.Data, x.Inc)
 }
 
 // Iamax returns the index of an element of x with the largest sum of
@@ -153,30 +154,30 @@ func Asum(n int, x Vector) float32 {
 // Iamax returns -1 if n == 0.
 //
 // Iamax will panic if the vector increment is negative.
-func Iamax(n int, x Vector) int {
+func Iamax(x Vector) int {
 	if x.Inc < 0 {
 		panic(negInc)
 	}
-	return cblas64.Icamax(n, x.Data, x.Inc)
+	return cblas64.Icamax(x.N, x.Data, x.Inc)
 }
 
 // Swap exchanges the elements of two vectors:
 //  x[i], y[i] = y[i], x[i] for all i.
-func Swap(n int, x, y Vector) {
-	cblas64.Cswap(n, x.Data, x.Inc, y.Data, y.Inc)
+func Swap(x, y Vector) {
+	cblas64.Cswap(x.N, x.Data, x.Inc, y.Data, y.Inc)
 }
 
 // Copy copies the elements of x into the elements of y:
 //  y[i] = x[i] for all i.
-func Copy(n int, x, y Vector) {
-	cblas64.Ccopy(n, x.Data, x.Inc, y.Data, y.Inc)
+func Copy(x, y Vector) {
+	cblas64.Ccopy(x.N, x.Data, x.Inc, y.Data, y.Inc)
 }
 
 // Axpy computes
 //  y = alpha * x + y,
 // where x and y are vectors, and alpha is a scalar.
-func Axpy(n int, alpha complex64, x, y Vector) {
-	cblas64.Caxpy(n, alpha, x.Data, x.Inc, y.Data, y.Inc)
+func Axpy(alpha complex64, x, y Vector) {
+	cblas64.Caxpy(x.N, alpha, x.Data, x.Inc, y.Data, y.Inc)
 }
 
 // Scal computes
@@ -184,11 +185,11 @@ func Axpy(n int, alpha complex64, x, y Vector) {
 // where x is a vector, and alpha is a scalar.
 //
 // Scal will panic if the vector increment is negative.
-func Scal(n int, alpha complex64, x Vector) {
+func Scal(alpha complex64, x Vector) {
 	if x.Inc < 0 {
 		panic(negInc)
 	}
-	cblas64.Cscal(n, alpha, x.Data, x.Inc)
+	cblas64.Cscal(x.N, alpha, x.Data, x.Inc)
 }
 
 // Dscal computes
@@ -196,11 +197,11 @@ func Scal(n int, alpha complex64, x Vector) {
 // where x is a vector, and alpha is a real scalar.
 //
 // Dscal will panic if the vector increment is negative.
-func Dscal(n int, alpha float32, x Vector) {
+func Dscal(alpha float32, x Vector) {
 	if x.Inc < 0 {
 		panic(negInc)
 	}
-	cblas64.Csscal(n, alpha, x.Data, x.Inc)
+	cblas64.Csscal(x.N, alpha, x.Data, x.Inc)
 }
 
 // Level 2

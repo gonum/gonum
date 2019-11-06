@@ -173,7 +173,7 @@ func testRandomSimplex(t *testing.T, nTest int, pZero float64, maxN int, rnd *ra
 	}
 }
 
-func testSimplex(t *testing.T, initialBasic []int, c []float64, a mat.Matrix, b []float64, convergenceTol float64) error {
+func testSimplex(t *testing.T, initialBasic []int, c []float64, a mat.Matrix, b []float64, convergenceTol float64) {
 	primalOpt, primalX, _, errPrimal := simplex(initialBasic, c, a, b, convergenceTol)
 	if errPrimal == nil {
 		// No error solving the simplex, check that the solution is feasible.
@@ -200,7 +200,7 @@ func testSimplex(t *testing.T, initialBasic []int, c []float64, a mat.Matrix, b 
 		if primalBad {
 			t.Errorf("non-known error returned: %s", errPrimal)
 		}
-		return errPrimal
+		return
 	}
 
 	// Compare the result to the answer found from solving the dual LP.
@@ -233,7 +233,7 @@ func testSimplex(t *testing.T, initialBasic []int, c []float64, a mat.Matrix, b 
 
 	// Check about the zero status.
 	if errPrimal == ErrZeroRow || errPrimal == ErrZeroColumn {
-		return errPrimal
+		return
 	}
 
 	// If the primal problem is feasible, then the primal and the dual should
@@ -265,6 +265,4 @@ func testSimplex(t *testing.T, initialBasic []int, c []float64, a mat.Matrix, b 
 			t.Errorf("Primal infeasible but dual not infeasible or unbounded: %s", errDual)
 		}
 	}
-
-	return errPrimal
 }

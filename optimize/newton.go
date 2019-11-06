@@ -152,9 +152,11 @@ func (n *Newton) NextDirection(loc *Location, dir []float64) (stepSize float64) 
 		pd := n.chol.Factorize(n.hess)
 		if pd {
 			// Store the solution in d's backing array, dir.
-			_ = n.chol.SolveVecTo(d, grad)
-			d.ScaleVec(-1, d)
-			return 1
+			err := n.chol.SolveVecTo(d, grad)
+			if err == nil {
+				d.ScaleVec(-1, d)
+				return 1
+			}
 		}
 		// Modified Hessian is not PD, so increase tau.
 		n.tau = math.Max(n.Increase*n.tau, 0.001)

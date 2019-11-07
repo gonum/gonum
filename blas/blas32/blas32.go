@@ -99,23 +99,38 @@ type SymmetricPacked struct {
 
 // Level 1
 
-const negInc = "blas32: negative vector increment"
+const (
+	negInc    = "blas32: negative vector increment"
+	badLength = "blas32: vector length mismatch"
+)
 
 // Dot computes the dot product of the two vectors:
 //  \sum_i x[i]*y[i].
+// Dot will panic if the lengths of x and y do not match.
 func Dot(x, y Vector) float32 {
+	if x.N != y.N {
+		panic(badLength)
+	}
 	return blas32.Sdot(x.N, x.Data, x.Inc, y.Data, y.Inc)
 }
 
 // DDot computes the dot product of the two vectors:
 //  \sum_i x[i]*y[i].
+// DDot will panic if the lengths of x and y do not match.
 func DDot(x, y Vector) float64 {
+	if x.N != y.N {
+		panic(badLength)
+	}
 	return blas32.Dsdot(x.N, x.Data, x.Inc, y.Data, y.Inc)
 }
 
 // SDDot computes the dot product of the two vectors adding a constant:
 //  alpha + \sum_i x[i]*y[i].
+// SDDot will panic if the lengths of x and y do not match.
 func SDDot(alpha float32, x, y Vector) float32 {
+	if x.N != y.N {
+		panic(badLength)
+	}
 	return blas32.Sdsdot(x.N, alpha, x.Data, x.Inc, y.Data, y.Inc)
 }
 
@@ -155,19 +170,31 @@ func Iamax(x Vector) int {
 
 // Swap exchanges the elements of the two vectors:
 //  x[i], y[i] = y[i], x[i] for all i.
+// Swap will panic if the lengths of x and y do not match.
 func Swap(x, y Vector) {
+	if x.N != y.N {
+		panic(badLength)
+	}
 	blas32.Sswap(x.N, x.Data, x.Inc, y.Data, y.Inc)
 }
 
 // Copy copies the elements of x into the elements of y:
 //  y[i] = x[i] for all i.
+// Copy will panic if the lengths of x and y do not match.
 func Copy(x, y Vector) {
+	if x.N != y.N {
+		panic(badLength)
+	}
 	blas32.Scopy(x.N, x.Data, x.Inc, y.Data, y.Inc)
 }
 
 // Axpy adds x scaled by alpha to y:
 //  y[i] += alpha*x[i] for all i.
+// Axpy will panic if the lengths of x and y do not match.
 func Axpy(alpha float32, x, y Vector) {
+	if x.N != y.N {
+		panic(badLength)
+	}
 	blas32.Saxpy(x.N, alpha, x.Data, x.Inc, y.Data, y.Inc)
 }
 

@@ -63,7 +63,10 @@ func Dlaqr5Test(t *testing.T, impl Dlaqr5er) {
 	defer r.Close()
 
 	var tests []Dlaqr5test
-	json.NewDecoder(r).Decode(&tests)
+	err = json.NewDecoder(r).Decode(&tests)
+	if err != nil {
+		log.Fatal(err)
+	}
 	for _, test := range tests {
 		wantt := test.WantT
 		n := test.N

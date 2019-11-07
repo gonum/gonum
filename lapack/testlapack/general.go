@@ -820,6 +820,7 @@ func constructQPBidiagonal(vect lapack.ApplyOrtho, m, n, nb int, a []float64, ld
 // printRowise prints the matrix with one row per line. This is useful for debugging.
 // If beyond is true, it prints beyond the final column to lda. If false, only
 // the columns are printed.
+//nolint:deadcode,unused
 func printRowise(a []float64, m, n, lda int, beyond bool) {
 	for i := 0; i < m; i++ {
 		end := n
@@ -1003,6 +1004,7 @@ func equalApproxTriangular(upper bool, n int, a []float64, lda int, b []float64,
 	return true
 }
 
+//nolint:deadcode,unused
 func equalApproxSymmetric(a, b blas64.Symmetric, tol float64) bool {
 	if a.Uplo != b.Uplo {
 		return false

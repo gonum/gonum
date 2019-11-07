@@ -203,7 +203,10 @@ func Dlahr2Test(t *testing.T, impl Dlahr2er) {
 	defer r.Close()
 
 	var tests []Dlahr2test
-	json.NewDecoder(r).Decode(&tests)
+	err = json.NewDecoder(r).Decode(&tests)
+	if err != nil {
+		log.Fatal(err)
+	}
 	for _, test := range tests {
 		tau := make([]float64, len(test.TauWant))
 		for _, ldex := range []int{0, 1, 20} {

@@ -108,19 +108,30 @@ type HermitianPacked SymmetricPacked
 
 // Level 1
 
-const negInc = "cblas128: negative vector increment"
+const (
+	negInc    = "cblas128: negative vector increment"
+	badLength = "cblas128: vector length mismatch"
+)
 
 // Dotu computes the dot product of the two vectors without
 // complex conjugation:
 //  xᵀ * y.
+// Dotu will panic if the lengths of x and y do not match.
 func Dotu(x, y Vector) complex128 {
+	if x.N != y.N {
+		panic(badLength)
+	}
 	return cblas128.Zdotu(x.N, x.Data, x.Inc, y.Data, y.Inc)
 }
 
 // Dotc computes the dot product of the two vectors with
 // complex conjugation:
 //  xᴴ * y.
+// Dotc will panic if the lengths of x and y do not match.
 func Dotc(x, y Vector) complex128 {
+	if x.N != y.N {
+		panic(badLength)
+	}
 	return cblas128.Zdotc(x.N, x.Data, x.Inc, y.Data, y.Inc)
 }
 
@@ -163,20 +174,32 @@ func Iamax(x Vector) int {
 
 // Swap exchanges the elements of two vectors:
 //  x[i], y[i] = y[i], x[i] for all i.
+// Swap will panic if the lengths of x and y do not match.
 func Swap(x, y Vector) {
+	if x.N != y.N {
+		panic(badLength)
+	}
 	cblas128.Zswap(x.N, x.Data, x.Inc, y.Data, y.Inc)
 }
 
 // Copy copies the elements of x into the elements of y:
 //  y[i] = x[i] for all i.
+// Copy will panic if the lengths of x and y do not match.
 func Copy(x, y Vector) {
+	if x.N != y.N {
+		panic(badLength)
+	}
 	cblas128.Zcopy(x.N, x.Data, x.Inc, y.Data, y.Inc)
 }
 
 // Axpy computes
 //  y = alpha * x + y,
 // where x and y are vectors, and alpha is a scalar.
+// Axpy will panic if the lengths of x and y do not match.
 func Axpy(alpha complex128, x, y Vector) {
+	if x.N != y.N {
+		panic(badLength)
+	}
 	cblas128.Zaxpy(x.N, alpha, x.Data, x.Inc, y.Data, y.Inc)
 }
 

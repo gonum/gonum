@@ -106,6 +106,7 @@ const (
 
 // Dot computes the dot product of the two vectors:
 //  \sum_i x[i]*y[i].
+// Dot will panic if the lengths of x and y do not match.
 func Dot(x, y Vector) float64 {
 	if x.N != y.N {
 		panic(badLength)
@@ -149,6 +150,7 @@ func Iamax(x Vector) int {
 
 // Swap exchanges the elements of the two vectors:
 //  x[i], y[i] = y[i], x[i] for all i.
+// Swap will panic if the lengths of x and y do not match.
 func Swap(x, y Vector) {
 	if x.N != y.N {
 		panic(badLength)
@@ -158,7 +160,7 @@ func Swap(x, y Vector) {
 
 // Copy copies the elements of x into the elements of y:
 //  y[i] = x[i] for all i.
-// Copy requires that the lengths of x and y match and will panic otherwise.
+// Copy will panic if the lengths of x and y do not match.
 func Copy(x, y Vector) {
 	if x.N != y.N {
 		panic(badLength)
@@ -168,6 +170,7 @@ func Copy(x, y Vector) {
 
 // Axpy adds x scaled by alpha to y:
 //  y[i] += alpha*x[i] for all i.
+// Axpy will panic if the lengths of x and y do not match.
 func Axpy(alpha float64, x, y Vector) {
 	if x.N != y.N {
 		panic(badLength)

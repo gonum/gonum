@@ -196,3 +196,32 @@ func Sum(x []float64) float64
 //   }
 //   return scale * math.Sqrt(sumSquares)
 func L2NormUnitary(x []float64) (sum float64)
+
+// L2NormInc returns the L2-norm of x.
+// func L2NormInc(x []float64, n, incX uintptr) (sum float64) {
+// 	var scale float64
+// 	sumSquares := 1.0
+// 	for ix := uintptr(0); ix < n*incX; ix += incX {
+// 		val := x[ix]
+// 		if val == 0 {
+// 			continue
+// 		}
+// 		absxi := math.Abs(val)
+// 		if math.IsNaN(absxi) {
+// 			return math.NaN()
+// 		}
+// 		if scale < absxi {
+// 			s := scale / absxi
+// 			sumSquares = 1 + sumSquares*s*s
+// 			scale = absxi
+// 		} else {
+// 			s := absxi / scale
+// 			sumSquares += s * s
+// 		}
+// 	}
+// 	if math.IsInf(scale, 1) {
+// 		return math.Inf(1)
+// 	}
+// 	return scale * math.Sqrt(sumSquares)
+// }
+func L2NormInc(x []float64, n, incX uintptr) (sum float64)

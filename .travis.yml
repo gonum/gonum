@@ -3,7 +3,7 @@ sudo: false
 language: go
 
 # Do not move these lines; they are referred to by README.md.
-# Versions of go that are explicitly supported by gonum plus go tip.
+# Versions of go that are explicitly supported by Gonum, plus Go tip.
 go:
  - 1.13.x
  - 1.12.x

@@ -34,7 +34,7 @@ Where possible, the source of algorithms should be referenced in the comments.
 
 ## The Gonum Repositories
 
-Here are the current repositories for the gonum project.
+Here are the current repositories for the Gonum project.
 If code you want to contribute doesn't quite fit in any of them, then please start a discussion on the [mailing list](https://groups.google.com/forum/#!forum/gonum-dev).
 Code can be found at [github.com/gonum/](https://github.com/gonum/)\<repo\>, and documentation at godoc.org/github.com/gonum/\<repo\>.
 
@@ -68,7 +68,7 @@ If it is large, such as suggesting a new repository, sub-repository, or interfac
 
 ### Your First Code Contribution
 
-If you are a new contributor, thank you!  Before your first merge, you will need to be added to the [CONTRIBUTORS](https://github.com/gonum/license/blob/master/CONTRIBUTORS) and [AUTHORS](https://github.com/gonum/license/blob/master/AUTHORS) file.
+If you are a new contributor, thank you! Before your first merge, you will need to be added to the [CONTRIBUTORS](https://github.com/gonum/license/blob/master/CONTRIBUTORS) and [AUTHORS](https://github.com/gonum/license/blob/master/AUTHORS) file.
 Open a pull request adding yourself to them.
 All Gonum code follows the BSD license in the [license document](https://github.com/gonum/license/blob/master/LICENSE).
 We prefer that code contributions do not come with additional licensing.

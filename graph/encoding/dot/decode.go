@@ -135,12 +135,12 @@ func copyMultigraph(dst encoding.MultiBuilder, src *ast.Graph) (err error) {
 	return err
 }
 
-// A generator keeps track of the information required for generating a gonum
+// A generator keeps track of the information required for generating a Gonum
 // graph from a dot AST graph.
 type generator struct {
 	// Directed graph.
 	directed bool
-	// Map from dot AST node ID to gonum node.
+	// Map from dot AST node ID to Gonum node.
 	ids map[string]graph.Node
 	// Nodes processed within the context of a subgraph, that is to be used as a
 	// vertex of an edge.
@@ -152,7 +152,7 @@ type generator struct {
 	graphAttr, nodeAttr, edgeAttr encoding.AttributeSetter
 }
 
-// node returns the gonum node corresponding to the given dot AST node ID,
+// node returns the Gonum node corresponding to the given dot AST node ID,
 // generating a new such node if none exist.
 func (gen *generator) node(dst graph.NodeAdder, id string) graph.Node {
 	if n, ok := gen.ids[id]; ok {

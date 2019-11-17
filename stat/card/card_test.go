@@ -21,7 +21,7 @@ import (
 type exact map[string]struct{}
 
 func (e exact) Write(b []byte) (int, error) {
-	if _, exists := e[tmpString(b)]; exists {
+	if _, exists := e[string(b)]; exists {
 		return len(b), nil
 	}
 	e[string(b)] = struct{}{}

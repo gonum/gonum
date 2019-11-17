@@ -23,7 +23,8 @@ type HyperLogLog32 struct {
 	register []uint8
 }
 
-// NewHyperLogLog32 returns a new HyperLogLog32 sketch.
+// NewHyperLogLog32 returns a new HyperLogLog32 sketch. The value of prec
+// must be in the range [4, 32].
 func NewHyperLogLog32(prec int, h hash.Hash32) (*HyperLogLog32, error) {
 	// The implementation here is based on the pseudo-code in
 	// "HyperLogLog: the analysis of a near-optimal cardinality
@@ -63,7 +64,8 @@ func (h *HyperLogLog32) Write(b []byte) (int, error) {
 // Union places the union of the sketches in a and b into the receiver.
 // Union will return an error if the precisions or hash functions of a
 // and b do not match or if the receiver has a hash function that is set
-// and does not match those of a and b.
+// and does not match those of a and b. Hash functions provided by hash.Hash32
+// implementations x and y match when reflect.TypeOf(x) == reflect.TypeOf(y).
 //
 // If the receiver does not have a set hash function, it can be set after
 // a call to Union with the SetHash method.

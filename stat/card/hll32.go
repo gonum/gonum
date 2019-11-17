@@ -24,7 +24,8 @@ type HyperLogLog32 struct {
 }
 
 // NewHyperLogLog32 returns a new HyperLogLog32 sketch. The value of prec
-// must be in the range [4, 32].
+// must be in the range [4, 32]. NewHyperLogLog32 will allocate a byte slice
+// that is 2^prec long.
 func NewHyperLogLog32(prec int, h hash.Hash32) (*HyperLogLog32, error) {
 	// The implementation here is based on the pseudo-code in
 	// "HyperLogLog: the analysis of a near-optimal cardinality

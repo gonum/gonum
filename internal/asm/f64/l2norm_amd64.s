@@ -31,21 +31,21 @@ DATA l2nrodata<>+16(SB)/8, $0xFFF8000000000000
 GLOBL l2nrodata<>+0(SB), RODATA, $24
 
 // L2NormUnitary returns the L2-norm of x.
-// func L2NormUnitary(x []float64) (sum float64)
+// func L2NormUnitary(x []float64) (norm float64)
 TEXT ·L2NormUnitary(SB), NOSPLIT, $0
-	MOVQ x_len+8(FP), LEN
+	MOVQ x_len+8(FP), LEN // LEN = len(x)
 	MOVQ x_base+0(FP), X_
 	PXOR ZERO, ZERO
-	CMPQ LEN, $0          // if len== 0 {return 0}
+	CMPQ LEN, $0          // if LEN == 0 { return 0 }
 	JZ   retZero
 
 	PXOR  INFMASK, INFMASK
 	PXOR  NANMASK, NANMASK
-	MOVSD $1.0, SUMSQ                // ssq = 1
+	MOVSD $1.0, SUMSQ           // ssq = 1
 	XORPS SCALE, SCALE
-	MOVSD l2nrodata<>+0(SB), ABSMASK
-	MOVSD l2nrodata<>+8(SB), INF
-	XORQ  IDX, IDX                   // idx == 0
+	MOVSD ABSMASK_DATA, ABSMASK
+	MOVSD INF_DATA, INF
+	XORQ  IDX, IDX              // idx == 0
 
 initZero:  // for ;x[i]==0; i++ {}
 	// Skip all leading zeros, to avoid divide by zero NaN
@@ -53,9 +53,9 @@ initZero:  // for ;x[i]==0; i++ {}
 	UCOMISD ABSX, ZERO
 	JP      retNaN            // if isNaN(x[i]) { return NaN }
 	JNE     loop              // if x[i] != 0 { goto loop }
-	INCQ    IDX
+	INCQ    IDX               // i++
 	CMPQ    IDX, LEN
-	JE      retZero           // if ++i == len(x) { return 0 }
+	JE      retZero           // if i == LEN { return 0 }
 	JMP     initZero
 
 loop:
@@ -73,10 +73,10 @@ loop:
 	DIVSD SCALE, ABSX // absxi = scale / absxi
 	MULSD ABSX, ABSX  // absxi *= absxi
 	ADDSD ABSX, SUMSQ // sumsq += absxi
-	INCQ  IDX         // ++i
+	INCQ  IDX         // i++
 	CMPQ  IDX, LEN
-	JNE   loop        // if i < len(x) { continue }
-	JMP   retSum      // if i == len(x) { goto retSum }
+	JNE   loop        // if i < LEN { continue }
+	JMP   retSum      // if i == LEN { goto retSum }
 
 adjScale:  // Scale > Absxi
 	DIVSD  ABSX, SCALE  // tmp = absxi / scale
@@ -84,26 +84,26 @@ adjScale:  // Scale > Absxi
 	MULSD  SCALE, SUMSQ // sumsq *= tmp
 	ADDSD  $1.0, SUMSQ  // sumsq += 1
 	MOVUPS ABSX, SCALE  // scale = absxi
-	INCQ   IDX          // ++i
+	INCQ   IDX          // i++
 	CMPQ   IDX, LEN
-	JNE    loop         // if i < len(x) { continue }
+	JNE    loop         // if i < LEN { continue }
 
 retSum:  // Calculate return value
-	SQRTSD  SUMSQ, SUMSQ    // sumsq = sqrt(sumsq)
-	MULSD   SCALE, SUMSQ    // sumsq += scale
-	MOVQ    SUMSQ, R10      // tmp = sumsq
+	SQRTSD  SUMSQ, SUMSQ     // sumsq = sqrt(sumsq)
+	MULSD   SCALE, SUMSQ     // sumsq += scale
+	MOVQ    SUMSQ, R10       // tmp = sumsq
 	UCOMISD ZERO, INFMASK
-	CMOVQPS INF_DATA, R10   // if INFMASK { tmp = INF }
+	CMOVQPS INF_DATA, R10    // if INFMASK { tmp = INF }
 	UCOMISD ZERO, NANMASK
-	CMOVQPS NAN_DATA, R10   // if NANMASK { tmp = NaN }
-	MOVQ    R10, sum+24(FP) // return tmp
+	CMOVQPS NAN_DATA, R10    // if NANMASK { tmp = NaN }
+	MOVQ    R10, norm+24(FP) // return tmp
 	RET
 
 retZero:
-	MOVSD ZERO, sum+24(FP) // return 0
+	MOVSD ZERO, norm+24(FP) // return 0
 	RET
 
 retNaN:
-	MOVSD NAN_DATA, TMP   // return NaN
-	MOVSD TMP, sum+24(FP)
+	MOVSD NAN_DATA, TMP    // return NaN
+	MOVSD TMP, norm+24(FP)
 	RET

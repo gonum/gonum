@@ -16,9 +16,9 @@
 #define INFMASK X11
 #define NANMASK X12
 #define IDX AX
-#define LEN SI
-#define INC BX
 #define X_ DI
+#define Y_ BX
+#define LEN SI
 
 #define ABSMASK_DATA l2nrodata<>+0(SB)
 #define INF_DATA l2nrodata<>+8(SB)
@@ -31,53 +31,58 @@ DATA l2nrodata<>+8(SB)/8, $0x7FF0000000000000
 DATA l2nrodata<>+16(SB)/8, $0xFFF8000000000000
 GLOBL l2nrodata<>+0(SB), RODATA, $24
 
-// func L2NormInc(x []float64, n, incX uintptr) (norm float64)
-TEXT ·L2NormInc(SB), NOSPLIT, $0
-	MOVQ n+24(FP), LEN    // LEN = len(x)
-	MOVQ incX+32(FP), INC
-	MOVQ x_base+0(FP), X_
-	CMPQ LEN, $0          // if LEN == 0 { return 0 }
-	JZ   retZero
+// L2DistanceUnitary returns the L2-norm of x-y.
+// func L2DistanceUnitary(x,y []float64) (norm float64)
+TEXT ·L2DistanceUnitary(SB), NOSPLIT, $0
+	MOVQ    x_base+0(FP), X_
+	MOVQ    y_base+24(FP), Y_
+	PXOR    ZERO, ZERO
+	MOVQ    x_len+8(FP), LEN  // LEN = min( len(x), len(y) )
+	CMPQ    y_len+32(FP), LEN
+	CMOVQLE y_len+32(FP), LEN
+	CMPQ    LEN, $0           // if LEN == 0 { return 0 }
+	JZ      retZero
 
-	XORPS ZERO, ZERO
-	XORPS INFMASK, INFMASK
-	XORPS NANMASK, NANMASK
+	PXOR  INFMASK, INFMASK
+	PXOR  NANMASK, NANMASK
 	MOVSD $1.0, SUMSQ           // ssq = 1
 	XORPS SCALE, SCALE
 	MOVSD ABSMASK_DATA, ABSMASK
 	MOVSD INF_DATA, INF
-	SHLQ  $3, INC               // INC *= sizeof(float64)
+	XORQ  IDX, IDX              // idx == 0
 
 initZero:  // for ;x[i]==0; i++ {}
 	// Skip all leading zeros, to avoid divide by zero NaN
-	MOVSD   (X_), ABSX // absxi = x[i]
+	MOVSD   (X_)(IDX*8), ABSX // absxi = x[i]
+	SUBSD   (Y_)(IDX*8), ABSX // absxi = x[i]-y[i]
 	UCOMISD ABSX, ZERO
-	JP      retNaN     // if isNaN(x[i]) { return NaN }
-	JNZ     loop       // if x[i] != 0 { goto loop }
-	ADDQ    INC, X_    // i += INC
-	DECQ    LEN        // LEN--
-	JZ      retZero    // if LEN == 0 { return 0 }
+	JP      retNaN            // if isNaN(absxi) { return NaN }
+	JNE     loop              // if absxi != 0 { goto loop }
+	INCQ    IDX               // i++
+	CMPQ    IDX, LEN
+	JE      retZero           // if i == LEN { return 0 }
 	JMP     initZero
 
 loop:
-	MOVSD   (X_), ABSX    // absxi = x[i]
+	MOVSD   (X_)(IDX*8), ABSX // absxi = x[i]
+	SUBSD   (Y_)(IDX*8), ABSX // absxi = x[i]-y[i]
 	MOVUPS  ABSX, TMP
 	CMPSD   ABSX, TMP, $3
-	ORPD    TMP, NANMASK  // NANMASK = NANMASK | IsNaN(absxi)
+	ORPD    TMP, NANMASK      // NANMASK = NANMASK | IsNaN(absxi)
 	MOVSD   INF, TMP
-	ANDPD   ABSMASK, ABSX // absxi == Abs(absxi)
+	ANDPD   ABSMASK, ABSX     // absxi == Abs(absxi)
 	CMPSD   ABSX, TMP, $0
-	ORPD    TMP, INFMASK  // INFMASK =  INFMASK | IsInf(absxi)
+	ORPD    TMP, INFMASK      // INFMASK =  INFMASK | IsInf(absxi)
 	UCOMISD SCALE, ABSX
-	JA      adjScale      // IF SCALE > ABSXI { goto adjScale }
+	JA      adjScale          // IF SCALE > ABSXI { goto adjScale }
 
 	DIVSD SCALE, ABSX // absxi = scale / absxi
 	MULSD ABSX, ABSX  // absxi *= absxi
 	ADDSD ABSX, SUMSQ // sumsq += absxi
-	ADDQ  INC, X_     // i += INC
-	DECQ  LEN         // LEN--
-	JNZ   loop        // if LEN > 0 { continue }
-	JMP   retSum      // if LEN == 0 { goto retSum }
+	INCQ  IDX         // i++
+	CMPQ  IDX, LEN
+	JNE   loop        // if i < LEN { continue }
+	JMP   retSum      // if i == LEN { goto retSum }
 
 adjScale:  // Scale > Absxi
 	DIVSD  ABSX, SCALE  // tmp = absxi / scale
@@ -85,9 +90,9 @@ adjScale:  // Scale > Absxi
 	MULSD  SCALE, SUMSQ // sumsq *= tmp
 	ADDSD  $1.0, SUMSQ  // sumsq += 1
 	MOVUPS ABSX, SCALE  // scale = absxi
-	ADDQ   INC, X_      // i += INC
-	DECQ   LEN          // LEN--
-	JNZ    loop         // if LEN > 0 { continue }
+	INCQ   IDX          // i++
+	CMPQ   IDX, LEN
+	JNE    loop         // if i < LEN { continue }
 
 retSum:  // Calculate return value
 	SQRTSD  SUMSQ, SUMSQ     // sumsq = sqrt(sumsq)
@@ -97,14 +102,14 @@ retSum:  // Calculate return value
 	CMOVQPS INF_DATA, R10    // if INFMASK { tmp = INF }
 	UCOMISD ZERO, NANMASK
 	CMOVQPS NAN_DATA, R10    // if NANMASK { tmp = NaN }
-	MOVQ    R10, norm+40(FP) // return tmp
+	MOVQ    R10, norm+48(FP) // return tmp
 	RET
 
 retZero:
-	MOVSD ZERO, norm+40(FP) // return 0
+	MOVSD ZERO, norm+48(FP) // return 0
 	RET
 
 retNaN:
 	MOVSD NAN_DATA, TMP    // return NaN
-	MOVSD TMP, norm+40(FP)
+	MOVSD TMP, norm+48(FP)
 	RET

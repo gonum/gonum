@@ -27,7 +27,7 @@ var alphaValues = [...]float64{
 }
 
 func linearCounting(m, v float64) float64 {
-	return m * math.Log(m/v)
+	return m * (math.Log(m) - math.Log(v))
 }
 
 func max(a, b uint8) uint8 {

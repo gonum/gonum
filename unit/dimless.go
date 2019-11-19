@@ -15,18 +15,18 @@ import (
 // Dimless represents a dimensionless constant.
 type Dimless float64
 
-// Unit converts the Dimless to a *Unit
+// Unit converts the Dimless to a *Unit.
 func (d Dimless) Unit() *Unit {
 	return New(float64(d), Dimensions{})
 }
 
-// Dimless allows Dimless to implement a Dimlesser interface
+// Dimless allows Dimless to implement a Dimlesser interface.
 func (d Dimless) Dimless() Dimless {
 	return d
 }
 
 // From converts the unit into the receiver. From returns an
-// error if there is a mismatch in dimension
+// error if there is a mismatch in dimension.
 func (d *Dimless) From(u Uniter) error {
 	if !DimensionsMatch(u, Dimless(0)) {
 		*d = Dimless(math.NaN())

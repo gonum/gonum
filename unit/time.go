@@ -23,20 +23,20 @@ const (
 	Hour   = 60 * Minute
 )
 
-// Unit converts the Time to a *Unit
+// Unit converts the Time to a *Unit.
 func (t Time) Unit() *Unit {
 	return New(float64(t), Dimensions{
 		TimeDim: 1,
 	})
 }
 
-// Time allows Time to implement a Timer interface
+// Time allows Time to implement a Timer interface.
 func (t Time) Time() Time {
 	return t
 }
 
 // From converts the unit into the receiver. From returns an
-// error if there is a mismatch in dimension
+// error if there is a mismatch in dimension.
 func (t *Time) From(u Uniter) error {
 	if !DimensionsMatch(u, Second) {
 		*t = Time(math.NaN())

@@ -11,6 +11,19 @@ import (
 	"testing"
 )
 
+func TestTime(t *testing.T) {
+	for _, value := range []float64{-1, 0, 1} {
+		var got Time
+		err := got.From(Time(value).Unit())
+		if err != nil {
+			t.Errorf("unexpected error for %T conversion: %v", got, err)
+		}
+		if got != Time(value) {
+			t.Errorf("unexpected result from round trip of %T(%v): got: %v want: %v", got, float64(value), got, value)
+		}
+	}
+}
+
 func TestTimeFormat(t *testing.T) {
 	for _, test := range []struct {
 		value  Time

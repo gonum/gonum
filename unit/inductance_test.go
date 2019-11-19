@@ -11,6 +11,19 @@ import (
 	"testing"
 )
 
+func TestInductance(t *testing.T) {
+	for _, value := range []float64{-1, 0, 1} {
+		var got Inductance
+		err := got.From(Inductance(value).Unit())
+		if err != nil {
+			t.Errorf("unexpected error for %T conversion: %v", got, err)
+		}
+		if got != Inductance(value) {
+			t.Errorf("unexpected result from round trip of %T(%v): got: %v want: %v", got, float64(value), got, value)
+		}
+	}
+}
+
 func TestInductanceFormat(t *testing.T) {
 	for _, test := range []struct {
 		value  Inductance

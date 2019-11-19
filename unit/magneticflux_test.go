@@ -11,6 +11,19 @@ import (
 	"testing"
 )
 
+func TestMagneticFlux(t *testing.T) {
+	for _, value := range []float64{-1, 0, 1} {
+		var got MagneticFlux
+		err := got.From(MagneticFlux(value).Unit())
+		if err != nil {
+			t.Errorf("unexpected error for %T conversion: %v", got, err)
+		}
+		if got != MagneticFlux(value) {
+			t.Errorf("unexpected result from round trip of %T(%v): got: %v want: %v", got, float64(value), got, value)
+		}
+	}
+}
+
 func TestMagneticFluxFormat(t *testing.T) {
 	for _, test := range []struct {
 		value  MagneticFlux

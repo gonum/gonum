@@ -37,7 +37,7 @@ func (f Force) Force() Force {
 func (f *Force) From(u Uniter) error {
 	if !DimensionsMatch(u, Newton) {
 		*f = Force(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*f = Force(u.Unit().Value())
 	return nil

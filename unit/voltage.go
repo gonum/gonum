@@ -38,7 +38,7 @@ func (v Voltage) Voltage() Voltage {
 func (v *Voltage) From(u Uniter) error {
 	if !DimensionsMatch(u, Volt) {
 		*v = Voltage(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*v = Voltage(u.Unit().Value())
 	return nil

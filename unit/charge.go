@@ -36,7 +36,7 @@ func (ch Charge) Charge() Charge {
 func (ch *Charge) From(u Uniter) error {
 	if !DimensionsMatch(u, Coulomb) {
 		*ch = Charge(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*ch = Charge(u.Unit().Value())
 	return nil

@@ -37,7 +37,7 @@ func (t Torque) Torque() Torque {
 func (t *Torque) From(u Uniter) error {
 	if !DimensionsMatch(u, Newtonmetre) {
 		*t = Torque(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*t = Torque(u.Unit().Value())
 	return nil

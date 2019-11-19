@@ -35,7 +35,7 @@ func (i Current) Current() Current {
 func (i *Current) From(u Uniter) error {
 	if !DimensionsMatch(u, Ampere) {
 		*i = Current(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*i = Current(u.Unit().Value())
 	return nil

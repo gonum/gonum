@@ -37,7 +37,7 @@ func (pw Power) Power() Power {
 func (pw *Power) From(u Uniter) error {
 	if !DimensionsMatch(u, Watt) {
 		*pw = Power(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*pw = Power(u.Unit().Value())
 	return nil

@@ -487,7 +487,7 @@ func ({{.Receiver}} {{.DimensionName}}) {{.DimensionName}}() {{.DimensionName}} 
 func ({{.Receiver}} *{{.DimensionName}}) From(u Uniter) error {
 	if !DimensionsMatch(u, {{if .Name}}{{.Name}}{{else}}{{.DimensionName}}(0){{end}}){
 		*{{.Receiver}} = {{.DimensionName}}(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*{{.Receiver}} = {{.DimensionName}}(u.Unit().Value())
 	return nil
@@ -603,6 +603,13 @@ func Test{{.DimensionName}}(t *testing.T) {
 		}
 		if got != {{.DimensionName}}(value) {
 			t.Errorf("unexpected result from round trip of %T(%v): got: %v want: %v", got, float64(value), got, value)
+		}
+		if got != got.{{.DimensionName}}() {
+			t.Errorf("unexpected result from self interface method call: got: %#v want: %#v", got, value)
+		}
+		err = got.From(ether(1))
+		if err == nil {
+			t.Errorf("expected error for ether to %T conversion", got)
 		}
 	}
 }

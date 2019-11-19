@@ -21,6 +21,13 @@ func TestAcceleration(t *testing.T) {
 		if got != Acceleration(value) {
 			t.Errorf("unexpected result from round trip of %T(%v): got: %v want: %v", got, float64(value), got, value)
 		}
+		if got != got.Acceleration() {
+			t.Errorf("unexpected result from self interface method call: got: %#v want: %#v", got, value)
+		}
+		err = got.From(ether(1))
+		if err == nil {
+			t.Errorf("expected error for ether to %T conversion", got)
+		}
 	}
 }
 

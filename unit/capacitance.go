@@ -38,7 +38,7 @@ func (cp Capacitance) Capacitance() Capacitance {
 func (cp *Capacitance) From(u Uniter) error {
 	if !DimensionsMatch(u, Farad) {
 		*cp = Capacitance(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*cp = Capacitance(u.Unit().Value())
 	return nil

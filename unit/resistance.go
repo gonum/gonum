@@ -38,7 +38,7 @@ func (r Resistance) Resistance() Resistance {
 func (r *Resistance) From(u Uniter) error {
 	if !DimensionsMatch(u, Ohm) {
 		*r = Resistance(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*r = Resistance(u.Unit().Value())
 	return nil

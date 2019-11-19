@@ -38,7 +38,7 @@ func (co Conductance) Conductance() Conductance {
 func (co *Conductance) From(u Uniter) error {
 	if !DimensionsMatch(u, Siemens) {
 		*co = Conductance(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*co = Conductance(u.Unit().Value())
 	return nil

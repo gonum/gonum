@@ -36,7 +36,7 @@ func (a AbsorbedRadioactiveDose) AbsorbedRadioactiveDose() AbsorbedRadioactiveDo
 func (a *AbsorbedRadioactiveDose) From(u Uniter) error {
 	if !DimensionsMatch(u, Gray) {
 		*a = AbsorbedRadioactiveDose(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*a = AbsorbedRadioactiveDose(u.Unit().Value())
 	return nil

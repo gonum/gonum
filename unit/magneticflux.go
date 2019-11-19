@@ -38,7 +38,7 @@ func (m MagneticFlux) MagneticFlux() MagneticFlux {
 func (m *MagneticFlux) From(u Uniter) error {
 	if !DimensionsMatch(u, Weber) {
 		*m = MagneticFlux(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*m = MagneticFlux(u.Unit().Value())
 	return nil

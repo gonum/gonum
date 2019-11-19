@@ -35,7 +35,7 @@ func (j LuminousIntensity) LuminousIntensity() LuminousIntensity {
 func (j *LuminousIntensity) From(u Uniter) error {
 	if !DimensionsMatch(u, Candela) {
 		*j = LuminousIntensity(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*j = LuminousIntensity(u.Unit().Value())
 	return nil

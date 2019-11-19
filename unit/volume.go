@@ -35,7 +35,7 @@ func (v Volume) Volume() Volume {
 func (v *Volume) From(u Uniter) error {
 	if !DimensionsMatch(u, Litre) {
 		*v = Volume(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*v = Volume(u.Unit().Value())
 	return nil

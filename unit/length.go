@@ -35,7 +35,7 @@ func (l Length) Length() Length {
 func (l *Length) From(u Uniter) error {
 	if !DimensionsMatch(u, Metre) {
 		*l = Length(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*l = Length(u.Unit().Value())
 	return nil

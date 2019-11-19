@@ -39,7 +39,7 @@ func (m Mass) Mass() Mass {
 func (m *Mass) From(u Uniter) error {
 	if !DimensionsMatch(u, Gram) {
 		*m = Mass(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*m = Mass(u.Unit().Value())
 	return nil

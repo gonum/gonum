@@ -37,7 +37,7 @@ func (e Energy) Energy() Energy {
 func (e *Energy) From(u Uniter) error {
 	if !DimensionsMatch(u, Joule) {
 		*e = Energy(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*e = Energy(u.Unit().Value())
 	return nil

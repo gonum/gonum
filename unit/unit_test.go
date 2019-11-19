@@ -10,6 +10,13 @@ import (
 	"testing"
 )
 
+// ether is a non-existant unit used for testing.
+type ether float64
+
+func (e ether) Unit() *Unit {
+	return New(float64(e), Dimensions{reserved: 1})
+}
+
 var formatTests = []struct {
 	unit   Uniter
 	format string

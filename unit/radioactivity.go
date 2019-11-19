@@ -35,7 +35,7 @@ func (r Radioactivity) Radioactivity() Radioactivity {
 func (r *Radioactivity) From(u Uniter) error {
 	if !DimensionsMatch(u, Becquerel) {
 		*r = Radioactivity(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*r = Radioactivity(u.Unit().Value())
 	return nil

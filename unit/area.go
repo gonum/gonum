@@ -33,7 +33,7 @@ func (a Area) Area() Area {
 func (a *Area) From(u Uniter) error {
 	if !DimensionsMatch(u, Area(0)) {
 		*a = Area(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*a = Area(u.Unit().Value())
 	return nil

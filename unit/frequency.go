@@ -35,7 +35,7 @@ func (f Frequency) Frequency() Frequency {
 func (f *Frequency) From(u Uniter) error {
 	if !DimensionsMatch(u, Hertz) {
 		*f = Frequency(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*f = Frequency(u.Unit().Value())
 	return nil

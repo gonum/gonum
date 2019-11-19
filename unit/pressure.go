@@ -37,7 +37,7 @@ func (pr Pressure) Pressure() Pressure {
 func (pr *Pressure) From(u Uniter) error {
 	if !DimensionsMatch(u, Pascal) {
 		*pr = Pressure(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*pr = Pressure(u.Unit().Value())
 	return nil

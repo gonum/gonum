@@ -30,7 +30,7 @@ func (d Dimless) Dimless() Dimless {
 func (d *Dimless) From(u Uniter) error {
 	if !DimensionsMatch(u, Dimless(0)) {
 		*d = Dimless(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*d = Dimless(u.Unit().Value())
 	return nil

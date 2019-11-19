@@ -38,7 +38,7 @@ func (i Inductance) Inductance() Inductance {
 func (i *Inductance) From(u Uniter) error {
 	if !DimensionsMatch(u, Henry) {
 		*i = Inductance(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*i = Inductance(u.Unit().Value())
 	return nil

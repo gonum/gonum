@@ -34,7 +34,7 @@ func (a Acceleration) Acceleration() Acceleration {
 func (a *Acceleration) From(u Uniter) error {
 	if !DimensionsMatch(u, Acceleration(0)) {
 		*a = Acceleration(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*a = Acceleration(u.Unit().Value())
 	return nil

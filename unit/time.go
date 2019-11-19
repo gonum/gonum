@@ -40,7 +40,7 @@ func (t Time) Time() Time {
 func (t *Time) From(u Uniter) error {
 	if !DimensionsMatch(u, Second) {
 		*t = Time(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*t = Time(u.Unit().Value())
 	return nil

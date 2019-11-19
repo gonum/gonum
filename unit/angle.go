@@ -35,7 +35,7 @@ func (a Angle) Angle() Angle {
 func (a *Angle) From(u Uniter) error {
 	if !DimensionsMatch(u, Rad) {
 		*a = Angle(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*a = Angle(u.Unit().Value())
 	return nil

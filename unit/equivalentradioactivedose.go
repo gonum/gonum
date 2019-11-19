@@ -36,7 +36,7 @@ func (a EquivalentRadioactiveDose) EquivalentRadioactiveDose() EquivalentRadioac
 func (a *EquivalentRadioactiveDose) From(u Uniter) error {
 	if !DimensionsMatch(u, Sievert) {
 		*a = EquivalentRadioactiveDose(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*a = EquivalentRadioactiveDose(u.Unit().Value())
 	return nil

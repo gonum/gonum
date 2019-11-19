@@ -37,7 +37,7 @@ func (m MagneticFluxDensity) MagneticFluxDensity() MagneticFluxDensity {
 func (m *MagneticFluxDensity) From(u Uniter) error {
 	if !DimensionsMatch(u, Tesla) {
 		*m = MagneticFluxDensity(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*m = MagneticFluxDensity(u.Unit().Value())
 	return nil

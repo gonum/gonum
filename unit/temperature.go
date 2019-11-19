@@ -35,7 +35,7 @@ func (t Temperature) Temperature() Temperature {
 func (t *Temperature) From(u Uniter) error {
 	if !DimensionsMatch(u, Kelvin) {
 		*t = Temperature(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*t = Temperature(u.Unit().Value())
 	return nil

@@ -18,20 +18,20 @@ type Length float64
 
 const Metre Length = 1
 
-// Unit converts the Length to a *Unit
+// Unit converts the Length to a *Unit.
 func (l Length) Unit() *Unit {
 	return New(float64(l), Dimensions{
 		LengthDim: 1,
 	})
 }
 
-// Length allows Length to implement a Lengther interface
+// Length allows Length to implement a Lengther interface.
 func (l Length) Length() Length {
 	return l
 }
 
 // From converts the unit into the receiver. From returns an
-// error if there is a mismatch in dimension
+// error if there is a mismatch in dimension.
 func (l *Length) From(u Uniter) error {
 	if !DimensionsMatch(u, Metre) {
 		*l = Length(math.NaN())

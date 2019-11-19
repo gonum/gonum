@@ -22,20 +22,20 @@ const (
 	Kilogram = Kilo * Gram
 )
 
-// Unit converts the Mass to a *Unit
+// Unit converts the Mass to a *Unit.
 func (m Mass) Unit() *Unit {
 	return New(float64(m), Dimensions{
 		MassDim: 1,
 	})
 }
 
-// Mass allows Mass to implement a Masser interface
+// Mass allows Mass to implement a Masser interface.
 func (m Mass) Mass() Mass {
 	return m
 }
 
 // From converts the unit into the receiver. From returns an
-// error if there is a mismatch in dimension
+// error if there is a mismatch in dimension.
 func (m *Mass) From(u Uniter) error {
 	if !DimensionsMatch(u, Gram) {
 		*m = Mass(math.NaN())

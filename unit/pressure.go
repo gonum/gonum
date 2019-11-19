@@ -18,7 +18,7 @@ type Pressure float64
 
 const Pascal Pressure = 1
 
-// Unit converts the Pressure to a *Unit
+// Unit converts the Pressure to a *Unit.
 func (pr Pressure) Unit() *Unit {
 	return New(float64(pr), Dimensions{
 		LengthDim: -1,
@@ -27,13 +27,13 @@ func (pr Pressure) Unit() *Unit {
 	})
 }
 
-// Pressure allows Pressure to implement a Pressurer interface
+// Pressure allows Pressure to implement a Pressurer interface.
 func (pr Pressure) Pressure() Pressure {
 	return pr
 }
 
 // From converts the unit into the receiver. From returns an
-// error if there is a mismatch in dimension
+// error if there is a mismatch in dimension.
 func (pr *Pressure) From(u Uniter) error {
 	if !DimensionsMatch(u, Pascal) {
 		*pr = Pressure(math.NaN())

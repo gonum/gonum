@@ -469,7 +469,7 @@ const {{if .ExtraConstant}}({{end}}
 var prefix = template.Must(template.New("prefix").Parse(constTemplate))
 
 const methodTemplate = `
-// Unit converts the {{.DimensionName}} to a *Unit
+// Unit converts the {{.DimensionName}} to a *Unit.
 func ({{.Receiver}} {{.DimensionName}}) Unit() *Unit {
 	return New(float64({{.Receiver}}), Dimensions{
 		{{range .Dimensions}} {{.Name}}: {{.Power}},
@@ -477,13 +477,13 @@ func ({{.Receiver}} {{.DimensionName}}) Unit() *Unit {
 		})
 }
 
-// {{.DimensionName}} allows {{.DimensionName}} to implement a {{if .ErForm}}{{.ErForm}}{{else}}{{.DimensionName}}er{{end}} interface
+// {{.DimensionName}} allows {{.DimensionName}} to implement a {{if .ErForm}}{{.ErForm}}{{else}}{{.DimensionName}}er{{end}} interface.
 func ({{.Receiver}} {{.DimensionName}}) {{.DimensionName}}() {{.DimensionName}} {
 	return {{.Receiver}}
 }
 
 // From converts the unit into the receiver. From returns an
-// error if there is a mismatch in dimension
+// error if there is a mismatch in dimension.
 func ({{.Receiver}} *{{.DimensionName}}) From(u Uniter) error {
 	if !DimensionsMatch(u, {{if .Name}}{{.Name}}{{else}}{{.DimensionName}}(0){{end}}){
 		*{{.Receiver}} = {{.DimensionName}}(math.NaN())

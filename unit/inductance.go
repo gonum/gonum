@@ -18,7 +18,7 @@ type Inductance float64
 
 const Henry Inductance = 1
 
-// Unit converts the Inductance to a *Unit
+// Unit converts the Inductance to a *Unit.
 func (i Inductance) Unit() *Unit {
 	return New(float64(i), Dimensions{
 		CurrentDim: -2,
@@ -28,13 +28,13 @@ func (i Inductance) Unit() *Unit {
 	})
 }
 
-// Inductance allows Inductance to implement a Inductancer interface
+// Inductance allows Inductance to implement a Inductancer interface.
 func (i Inductance) Inductance() Inductance {
 	return i
 }
 
 // From converts the unit into the receiver. From returns an
-// error if there is a mismatch in dimension
+// error if there is a mismatch in dimension.
 func (i *Inductance) From(u Uniter) error {
 	if !DimensionsMatch(u, Henry) {
 		*i = Inductance(math.NaN())

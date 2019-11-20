@@ -45,24 +45,24 @@ var counterTests = []struct {
 }{
 	{name: "exact-1e5", count: 1e5, counter: func() counter { return make(exact) }, tol: 0},
 
-	{name: "HyperLogLog32-0-10-FNV-1a", count: 0, counter: func() counter { return must(NewHyperLogLog32(10, fnv.New32a())) }, tol: 0.02},
-	{name: "HyperLogLog64-0-10-FNV-1a", count: 0, counter: func() counter { return must(NewHyperLogLog64(10, fnv.New64a())) }, tol: 0.1},
-	{name: "HyperLogLog32-10-14-FNV-1a", count: 10, counter: func() counter { return must(NewHyperLogLog32(14, fnv.New32a())) }, tol: 0.02},
-	{name: "HyperLogLog32-1e3-4-FNV-1a", count: 1e3, counter: func() counter { return must(NewHyperLogLog32(4, fnv.New32a())) }, tol: 0.1},
-	{name: "HyperLogLog32-1e5-6-FNV-1a", count: 1e4, counter: func() counter { return must(NewHyperLogLog32(6, fnv.New32a())) }, tol: 0.1},
-	{name: "HyperLogLog32-1e7-8-FNV-1a", count: 1e7, counter: func() counter { return must(NewHyperLogLog32(8, fnv.New32a())) }, tol: 0.05},
-	{name: "HyperLogLog64-1e7-8-FNV-1a", count: 1e7, counter: func() counter { return must(NewHyperLogLog64(8, fnv.New64a())) }, tol: 0.1},
-	{name: "HyperLogLog32-1e7-10-FNV-1a", count: 1e7, counter: func() counter { return must(NewHyperLogLog32(10, fnv.New32a())) }, tol: 0.06},
-	{name: "HyperLogLog64-1e7-10-FNV-1a", count: 1e7, counter: func() counter { return must(NewHyperLogLog64(10, fnv.New64a())) }, tol: 0.05},
-	{name: "HyperLogLog32-1e7-14-FNV-1a", count: 1e7, counter: func() counter { return must(NewHyperLogLog32(14, fnv.New32a())) }, tol: 0.02},
-	{name: "HyperLogLog64-1e7-14-FNV-1a", count: 1e7, counter: func() counter { return must(NewHyperLogLog64(14, fnv.New64a())) }, tol: 0.005},
-	{name: "HyperLogLog32-1e7-16-FNV-1a", count: 1e7, counter: func() counter { return must(NewHyperLogLog32(16, fnv.New32a())) }, tol: 0.01},
-	{name: "HyperLogLog64-1e7-16-FNV-1a", count: 1e7, counter: func() counter { return must(NewHyperLogLog64(16, fnv.New64a())) }, tol: 0.01},
-	{name: "HyperLogLog64-1e7-20-FNV-1a", count: 1e7, counter: func() counter { return must(NewHyperLogLog64(20, fnv.New64a())) }, tol: 0.001},
-	{name: "HyperLogLog64-1e3-20-FNV-1a", count: 1e3, counter: func() counter { return must(NewHyperLogLog64(20, fnv.New64a())) }, tol: 0.001},
+	{name: "HyperLogLog32-0-10-FNV-1a", count: 0, counter: func() counter { return mustCounter(NewHyperLogLog32(10, fnv.New32a())) }, tol: 0.02},
+	{name: "HyperLogLog64-0-10-FNV-1a", count: 0, counter: func() counter { return mustCounter(NewHyperLogLog64(10, fnv.New64a())) }, tol: 0.1},
+	{name: "HyperLogLog32-10-14-FNV-1a", count: 10, counter: func() counter { return mustCounter(NewHyperLogLog32(14, fnv.New32a())) }, tol: 0.02},
+	{name: "HyperLogLog32-1e3-4-FNV-1a", count: 1e3, counter: func() counter { return mustCounter(NewHyperLogLog32(4, fnv.New32a())) }, tol: 0.1},
+	{name: "HyperLogLog32-1e5-6-FNV-1a", count: 1e4, counter: func() counter { return mustCounter(NewHyperLogLog32(6, fnv.New32a())) }, tol: 0.1},
+	{name: "HyperLogLog32-1e7-8-FNV-1a", count: 1e7, counter: func() counter { return mustCounter(NewHyperLogLog32(8, fnv.New32a())) }, tol: 0.05},
+	{name: "HyperLogLog64-1e7-8-FNV-1a", count: 1e7, counter: func() counter { return mustCounter(NewHyperLogLog64(8, fnv.New64a())) }, tol: 0.1},
+	{name: "HyperLogLog32-1e7-10-FNV-1a", count: 1e7, counter: func() counter { return mustCounter(NewHyperLogLog32(10, fnv.New32a())) }, tol: 0.06},
+	{name: "HyperLogLog64-1e7-10-FNV-1a", count: 1e7, counter: func() counter { return mustCounter(NewHyperLogLog64(10, fnv.New64a())) }, tol: 0.05},
+	{name: "HyperLogLog32-1e7-14-FNV-1a", count: 1e7, counter: func() counter { return mustCounter(NewHyperLogLog32(14, fnv.New32a())) }, tol: 0.02},
+	{name: "HyperLogLog64-1e7-14-FNV-1a", count: 1e7, counter: func() counter { return mustCounter(NewHyperLogLog64(14, fnv.New64a())) }, tol: 0.005},
+	{name: "HyperLogLog32-1e7-16-FNV-1a", count: 1e7, counter: func() counter { return mustCounter(NewHyperLogLog32(16, fnv.New32a())) }, tol: 0.01},
+	{name: "HyperLogLog64-1e7-16-FNV-1a", count: 1e7, counter: func() counter { return mustCounter(NewHyperLogLog64(16, fnv.New64a())) }, tol: 0.01},
+	{name: "HyperLogLog64-1e7-20-FNV-1a", count: 1e7, counter: func() counter { return mustCounter(NewHyperLogLog64(20, fnv.New64a())) }, tol: 0.001},
+	{name: "HyperLogLog64-1e3-20-FNV-1a", count: 1e3, counter: func() counter { return mustCounter(NewHyperLogLog64(20, fnv.New64a())) }, tol: 0.001},
 }
 
-func must(c counter, err error) counter {
+func mustCounter(c counter, err error) counter {
 	if err != nil {
 		panic(fmt.Sprintf("bad test: %v", err))
 	}
@@ -140,16 +140,71 @@ func TestUnion(t *testing.T) {
 	}
 }
 
+type resetCounter interface {
+	counter
+	Reset()
+}
+
+var counterResetTests = []struct {
+	name         string
+	count        int
+	resetCounter func() resetCounter
+}{
+	{name: "HyperLogLog32-1e3-4-FNV-1a", count: 1e3, resetCounter: func() resetCounter { return mustResetCounter(NewHyperLogLog32(4, fnv.New32a())) }},
+	{name: "HyperLogLog64-1e3-4-FNV-1a", count: 1e3, resetCounter: func() resetCounter { return mustResetCounter(NewHyperLogLog64(4, fnv.New64a())) }},
+	{name: "HyperLogLog32-1e5-6-FNV-1a", count: 1e4, resetCounter: func() resetCounter { return mustResetCounter(NewHyperLogLog32(6, fnv.New32a())) }},
+	{name: "HyperLogLog64-1e5-6-FNV-1a", count: 1e4, resetCounter: func() resetCounter { return mustResetCounter(NewHyperLogLog64(6, fnv.New64a())) }},
+}
+
+func mustResetCounter(c resetCounter, err error) resetCounter {
+	if err != nil {
+		panic(fmt.Sprintf("bad test: %v", err))
+	}
+	return c
+}
+
+func TestResetCounters(t *testing.T) {
+	var dst []byte
+	for _, test := range counterResetTests {
+		c := test.resetCounter()
+		var counts [2]float64
+		for k := range counts {
+			rnd := rand.New(rand.NewSource(1))
+			for i := 0; i < int(test.count); i++ {
+				dst = strconv.AppendUint(dst[:0], rnd.Uint64(), 16)
+				dst = append(dst, '-')
+				dst = strconv.AppendUint(dst, uint64(i), 16)
+				n, err := c.Write(dst)
+				if n != len(dst) {
+					t.Errorf("unexpected number of bytes written for %s: got:%d want:%d",
+						test.name, n, len(dst))
+					break
+				}
+				if err != nil {
+					t.Errorf("unexpected error for %s: %v", test.name, err)
+					break
+				}
+			}
+			counts[k] = c.Count()
+			c.Reset()
+		}
+
+		if counts[0] != counts[1] {
+			t.Errorf("unexpected counts for %s after reset: got:%.0f", test.name, counts)
+		}
+	}
+}
+
 var counterBenchmarks = []struct {
 	name    string
 	count   int
 	counter func() counter
 }{
 	{name: "exact-1e6", count: 1e6, counter: func() counter { return make(exact) }},
-	{name: "HyperLogLog32-1e6-8-FNV-1a", count: 1e6, counter: func() counter { return must(NewHyperLogLog32(8, fnv.New32a())) }},
-	{name: "HyperLogLog64-1e6-8-FNV-1a", count: 1e6, counter: func() counter { return must(NewHyperLogLog64(8, fnv.New64a())) }},
-	{name: "HyperLogLog32-1e6-16-FNV-1a", count: 1e6, counter: func() counter { return must(NewHyperLogLog32(16, fnv.New32a())) }},
-	{name: "HyperLogLog64-1e6-16-FNV-1a", count: 1e6, counter: func() counter { return must(NewHyperLogLog64(16, fnv.New64a())) }},
+	{name: "HyperLogLog32-1e6-8-FNV-1a", count: 1e6, counter: func() counter { return mustCounter(NewHyperLogLog32(8, fnv.New32a())) }},
+	{name: "HyperLogLog64-1e6-8-FNV-1a", count: 1e6, counter: func() counter { return mustCounter(NewHyperLogLog64(8, fnv.New64a())) }},
+	{name: "HyperLogLog32-1e6-16-FNV-1a", count: 1e6, counter: func() counter { return mustCounter(NewHyperLogLog32(16, fnv.New32a())) }},
+	{name: "HyperLogLog64-1e6-16-FNV-1a", count: 1e6, counter: func() counter { return mustCounter(NewHyperLogLog64(16, fnv.New64a())) }},
 }
 
 func BenchmarkCounters(b *testing.B) {

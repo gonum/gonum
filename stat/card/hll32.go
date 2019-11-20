@@ -133,3 +133,12 @@ func (h *HyperLogLog32) Count() float64 {
 func rho32(x uint32) uint8 {
 	return uint8(bits.LeadingZeros32(x) + 1)
 }
+
+// Reset clears the receiver's registers allowing it to be reused.
+// Reset does not alter the precision of the receiver or the hash
+// function that is used.
+func (h *HyperLogLog32) Reset() {
+	for i := range h.register {
+		h.register[i] = 0
+	}
+}

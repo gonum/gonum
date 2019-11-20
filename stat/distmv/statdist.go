@@ -335,7 +335,10 @@ func (Wasserstein) DistNormal(l, r *Normal) float64 {
 
 	// Compute Σ_l^(1/2)
 	var ssl mat.SymDense
-	_ = ssl.PowPSD(&l.sigma, 0.5)
+	err := ssl.PowPSD(&l.sigma, 0.5)
+	if err != nil {
+		panic(err)
+	}
 	// Compute Σ_l^(1/2)*Σ_r*Σ_l^(1/2)
 	var mean mat.Dense
 	mean.Mul(&ssl, &r.sigma)
@@ -343,7 +346,10 @@ func (Wasserstein) DistNormal(l, r *Normal) float64 {
 
 	// Reinterpret as symdense, and take Σ^(1/2)
 	meanSym := mat.NewSymDense(dim, mean.RawMatrix().Data)
-	_ = ssl.PowPSD(meanSym, 0.5)
+	err = ssl.PowPSD(meanSym, 0.5)
+	if err != nil {
+		panic(err)
+	}
 
 	tr := mat.Trace(&r.sigma)
 	tl := mat.Trace(&l.sigma)

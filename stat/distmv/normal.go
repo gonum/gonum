@@ -344,7 +344,10 @@ func (n *Normal) ScoreInput(score, x []float64) []float64 {
 	copy(tmp, x)
 	floats.Sub(tmp, n.mu)
 
-	_ = n.chol.SolveVecTo(mat.NewVecDense(len(score), score), mat.NewVecDense(len(tmp), tmp))
+	err := n.chol.SolveVecTo(mat.NewVecDense(len(score), score), mat.NewVecDense(len(tmp), tmp))
+	if err != nil {
+		panic(err)
+	}
 	floats.Scale(-1, score)
 	return score
 }

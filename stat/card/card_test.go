@@ -195,6 +195,31 @@ func TestResetCounters(t *testing.T) {
 	}
 }
 
+var rhoQTests = []struct {
+	bits uint
+	q    uint8
+	want uint8
+}{
+	{bits: 0xff, q: 8, want: 1},
+	{bits: 0xfe, q: 8, want: 1},
+	{bits: 0x0f, q: 8, want: 5},
+	{bits: 0x1f, q: 8, want: 4},
+	{bits: 0x00, q: 8, want: 9},
+}
+
+func TestRhoQ(t *testing.T) {
+	for _, test := range rhoQTests {
+		got := rho32q(uint32(test.bits), test.q)
+		if got != test.want {
+			t.Errorf("unexpected rho32q for %0*b: got:%d want:%d", test.q, test.bits, got, test.want)
+		}
+		got = rho64q(uint64(test.bits), test.q)
+		if got != test.want {
+			t.Errorf("unexpected rho64q for %0*b: got:%d want:%d", test.q, test.bits, got, test.want)
+		}
+	}
+}
+
 var counterBenchmarks = []struct {
 	name    string
 	count   int

@@ -53,9 +53,9 @@ func (h *HyperLogLog32) Write(b []byte) (int, error) {
 	n, err := h.hash.Write(b)
 	x := h.hash.Sum32()
 	h.hash.Reset()
-	idx := x >> (w32 - h.p)
-	w := x << h.p
-	r := rho32(w)
+	q := w32 - h.p
+	idx := x >> q
+	r := rho32q(x, q)
 	if r > h.register[idx] {
 		h.register[idx] = r
 	}
@@ -129,9 +129,9 @@ func (h *HyperLogLog32) Count() float64 {
 	return -(1 << w32) * math.Log1p(-e/(1<<w32))
 }
 
-// rho32 (ϱ) is the number of leading zeros in x, plus 1.
-func rho32(x uint32) uint8 {
-	return uint8(bits.LeadingZeros32(x) + 1)
+// rho32q (ϱ) is the number of leading zeros in q-wide low bits of x, plus 1.
+func rho32q(x uint32, q uint8) uint8 {
+	return min(uint8(bits.LeadingZeros32(x<<(w32-q))), q) + 1
 }
 
 // Reset clears the receiver's registers allowing it to be reused.

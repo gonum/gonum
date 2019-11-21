@@ -1,0 +1,227 @@
+// Copyright ©2019 The Gonum Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+package card
+
+import (
+	"fmt"
+	"hash/fnv"
+	"io"
+	"strconv"
+	"strings"
+	"testing"
+
+	"golang.org/x/exp/rand"
+
+	"gonum.org/v1/gonum/floats"
+)
+
+// exact is an exact cardinality accumulator.
+type exact map[string]struct{}
+
+func (e exact) Write(b []byte) (int, error) {
+	if _, exists := e[string(b)]; exists {
+		return len(b), nil
+	}
+	e[string(b)] = struct{}{}
+	return len(b), nil
+}
+
+func (e exact) Count() float64 {
+	return float64(len(e))
+}
+
+type counter interface {
+	io.Writer
+	Count() float64
+}
+
+var counterTests = []struct {
+	name    string
+	count   float64
+	counter func() counter
+	tol     float64
+}{
+	{name: "exact-1e5", count: 1e5, counter: func() counter { return make(exact) }, tol: 0},
+
+	{name: "HyperLogLog32-0-10-FNV-1a", count: 0, counter: func() counter { return mustCounter(NewHyperLogLog32(10, fnv.New32a())) }, tol: 0.02},
+	{name: "HyperLogLog64-0-10-FNV-1a", count: 0, counter: func() counter { return mustCounter(NewHyperLogLog64(10, fnv.New64a())) }, tol: 0.1},
+	{name: "HyperLogLog32-10-14-FNV-1a", count: 10, counter: func() counter { return mustCounter(NewHyperLogLog32(14, fnv.New32a())) }, tol: 0.02},
+	{name: "HyperLogLog32-1e3-4-FNV-1a", count: 1e3, counter: func() counter { return mustCounter(NewHyperLogLog32(4, fnv.New32a())) }, tol: 0.1},
+	{name: "HyperLogLog32-1e5-6-FNV-1a", count: 1e4, counter: func() counter { return mustCounter(NewHyperLogLog32(6, fnv.New32a())) }, tol: 0.1},
+	{name: "HyperLogLog32-1e7-8-FNV-1a", count: 1e7, counter: func() counter { return mustCounter(NewHyperLogLog32(8, fnv.New32a())) }, tol: 0.05},
+	{name: "HyperLogLog64-1e7-8-FNV-1a", count: 1e7, counter: func() counter { return mustCounter(NewHyperLogLog64(8, fnv.New64a())) }, tol: 0.1},
+	{name: "HyperLogLog32-1e7-10-FNV-1a", count: 1e7, counter: func() counter { return mustCounter(NewHyperLogLog32(10, fnv.New32a())) }, tol: 0.06},
+	{name: "HyperLogLog64-1e7-10-FNV-1a", count: 1e7, counter: func() counter { return mustCounter(NewHyperLogLog64(10, fnv.New64a())) }, tol: 0.05},
+	{name: "HyperLogLog32-1e7-14-FNV-1a", count: 1e7, counter: func() counter { return mustCounter(NewHyperLogLog32(14, fnv.New32a())) }, tol: 0.02},
+	{name: "HyperLogLog64-1e7-14-FNV-1a", count: 1e7, counter: func() counter { return mustCounter(NewHyperLogLog64(14, fnv.New64a())) }, tol: 0.005},
+	{name: "HyperLogLog32-1e7-16-FNV-1a", count: 1e7, counter: func() counter { return mustCounter(NewHyperLogLog32(16, fnv.New32a())) }, tol: 0.01},
+	{name: "HyperLogLog64-1e7-16-FNV-1a", count: 1e7, counter: func() counter { return mustCounter(NewHyperLogLog64(16, fnv.New64a())) }, tol: 0.01},
+	{name: "HyperLogLog64-1e7-20-FNV-1a", count: 1e7, counter: func() counter { return mustCounter(NewHyperLogLog64(20, fnv.New64a())) }, tol: 0.001},
+	{name: "HyperLogLog64-1e3-20-FNV-1a", count: 1e3, counter: func() counter { return mustCounter(NewHyperLogLog64(20, fnv.New64a())) }, tol: 0.001},
+}
+
+func mustCounter(c counter, err error) counter {
+	if err != nil {
+		panic(fmt.Sprintf("bad test: %v", err))
+	}
+	return c
+}
+
+func TestCounters(t *testing.T) {
+	var dst []byte
+	for _, test := range counterTests {
+		rnd := rand.New(rand.NewSource(1))
+		c := test.counter()
+		for i := 0; i < int(test.count); i++ {
+			dst = strconv.AppendUint(dst[:0], rnd.Uint64(), 16)
+			dst = append(dst, '-')
+			dst = strconv.AppendUint(dst, uint64(i), 16)
+			n, err := c.Write(dst)
+			if n != len(dst) {
+				t.Errorf("unexpected number of bytes written for %s: got:%d want:%d",
+					test.name, n, len(dst))
+				break
+			}
+			if err != nil {
+				t.Errorf("unexpected error for %s: %v", test.name, err)
+				break
+			}
+		}
+
+		if got := c.Count(); !floats.EqualWithinRel(got, test.count, test.tol) {
+			t.Errorf("unexpected count for %s: got:%.0f want:%.0f", test.name, got, test.count)
+		}
+	}
+}
+
+func TestUnion(t *testing.T) {
+	var dst []byte
+	for _, test := range counterTests {
+		if strings.HasPrefix(test.name, "exact") {
+			continue
+		}
+		rnd := rand.New(rand.NewSource(1))
+		var cs [2]counter
+		for j := range cs {
+			cs[j] = test.counter()
+			for i := 0; i < int(test.count); i++ {
+				dst = strconv.AppendUint(dst[:0], rnd.Uint64(), 16)
+				dst = append(dst, '-')
+				dst = strconv.AppendUint(dst, uint64(i), 16)
+				n, err := cs[j].Write(dst)
+				if n != len(dst) {
+					t.Errorf("unexpected number of bytes written for %s: got:%d want:%d",
+						test.name, n, len(dst))
+					break
+				}
+				if err != nil {
+					t.Errorf("unexpected error for %s: %v", test.name, err)
+					break
+				}
+			}
+		}
+
+		u := test.counter()
+		var err error
+		switch u := u.(type) {
+		case *HyperLogLog32:
+			err = u.Union(cs[0].(*HyperLogLog32), cs[1].(*HyperLogLog32))
+		case *HyperLogLog64:
+			err = u.Union(cs[0].(*HyperLogLog64), cs[1].(*HyperLogLog64))
+		}
+		if err != nil {
+			t.Errorf("unexpected error from Union call: %v", err)
+		}
+		if got := u.Count(); !floats.EqualWithinRel(got, 2*test.count, 2*test.tol) {
+			t.Errorf("unexpected count for %s: got:%.0f want:%.0f", test.name, got, test.count)
+		}
+	}
+}
+
+type resetCounter interface {
+	counter
+	Reset()
+}
+
+var counterResetTests = []struct {
+	name         string
+	count        int
+	resetCounter func() resetCounter
+}{
+	{name: "HyperLogLog32-1e3-4-FNV-1a", count: 1e3, resetCounter: func() resetCounter { return mustResetCounter(NewHyperLogLog32(4, fnv.New32a())) }},
+	{name: "HyperLogLog64-1e3-4-FNV-1a", count: 1e3, resetCounter: func() resetCounter { return mustResetCounter(NewHyperLogLog64(4, fnv.New64a())) }},
+	{name: "HyperLogLog32-1e5-6-FNV-1a", count: 1e4, resetCounter: func() resetCounter { return mustResetCounter(NewHyperLogLog32(6, fnv.New32a())) }},
+	{name: "HyperLogLog64-1e5-6-FNV-1a", count: 1e4, resetCounter: func() resetCounter { return mustResetCounter(NewHyperLogLog64(6, fnv.New64a())) }},
+}
+
+func mustResetCounter(c resetCounter, err error) resetCounter {
+	if err != nil {
+		panic(fmt.Sprintf("bad test: %v", err))
+	}
+	return c
+}
+
+func TestResetCounters(t *testing.T) {
+	var dst []byte
+	for _, test := range counterResetTests {
+		c := test.resetCounter()
+		var counts [2]float64
+		for k := range counts {
+			rnd := rand.New(rand.NewSource(1))
+			for i := 0; i < int(test.count); i++ {
+				dst = strconv.AppendUint(dst[:0], rnd.Uint64(), 16)
+				dst = append(dst, '-')
+				dst = strconv.AppendUint(dst, uint64(i), 16)
+				n, err := c.Write(dst)
+				if n != len(dst) {
+					t.Errorf("unexpected number of bytes written for %s: got:%d want:%d",
+						test.name, n, len(dst))
+					break
+				}
+				if err != nil {
+					t.Errorf("unexpected error for %s: %v", test.name, err)
+					break
+				}
+			}
+			counts[k] = c.Count()
+			c.Reset()
+		}
+
+		if counts[0] != counts[1] {
+			t.Errorf("unexpected counts for %s after reset: got:%.0f", test.name, counts)
+		}
+	}
+}
+
+var counterBenchmarks = []struct {
+	name    string
+	count   int
+	counter func() counter
+}{
+	{name: "exact-1e6", count: 1e6, counter: func() counter { return make(exact) }},
+	{name: "HyperLogLog32-1e6-8-FNV-1a", count: 1e6, counter: func() counter { return mustCounter(NewHyperLogLog32(8, fnv.New32a())) }},
+	{name: "HyperLogLog64-1e6-8-FNV-1a", count: 1e6, counter: func() counter { return mustCounter(NewHyperLogLog64(8, fnv.New64a())) }},
+	{name: "HyperLogLog32-1e6-16-FNV-1a", count: 1e6, counter: func() counter { return mustCounter(NewHyperLogLog32(16, fnv.New32a())) }},
+	{name: "HyperLogLog64-1e6-16-FNV-1a", count: 1e6, counter: func() counter { return mustCounter(NewHyperLogLog64(16, fnv.New64a())) }},
+}
+
+func BenchmarkCounters(b *testing.B) {
+	for _, bench := range counterBenchmarks {
+		c := bench.counter()
+		rnd := rand.New(rand.NewSource(1))
+		var dst []byte
+		b.Run(bench.name, func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				for j := 0; j < int(bench.count); j++ {
+					dst = strconv.AppendUint(dst[:0], rnd.Uint64(), 16)
+					dst = append(dst, '-')
+					dst = strconv.AppendUint(dst, uint64(j), 16)
+					_, _ = c.Write(dst)
+				}
+			}
+			_ = c.Count()
+		})
+	}
+}

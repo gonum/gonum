@@ -110,7 +110,10 @@ func NewNormalPrecision(mu []float64, prec *mat.SymDense, src rand.Source) (norm
 		return nil, false
 	}
 	var sigma mat.SymDense
-	chol.InverseTo(&sigma)
+	err := chol.InverseTo(&sigma)
+	if err != nil {
+		return nil, false
+	}
 	return NewNormal(mu, &sigma, src)
 }
 
@@ -341,7 +344,10 @@ func (n *Normal) ScoreInput(score, x []float64) []float64 {
 	copy(tmp, x)
 	floats.Sub(tmp, n.mu)
 
-	n.chol.SolveVecTo(mat.NewVecDense(len(score), score), mat.NewVecDense(len(tmp), tmp))
+	err := n.chol.SolveVecTo(mat.NewVecDense(len(score), score), mat.NewVecDense(len(tmp), tmp))
+	if err != nil {
+		panic(err)
+	}
 	floats.Scale(-1, score)
 	return score
 }

@@ -6,13 +6,6 @@ package sampleuv
 
 import "gonum.org/v1/gonum/stat/distuv"
 
-func max(a, b int) int {
-	if a < b {
-		return b
-	}
-	return a
-}
-
 func ExampleMetropolisHastings_samplingRate() {
 	// See Burnin example for a description of these quantities.
 	n := 1000

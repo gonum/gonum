@@ -36,3 +36,10 @@ func max(a, b uint8) uint8 {
 	}
 	return b
 }
+
+func min(a, b uint8) uint8 {
+	if a < b {
+		return a
+	}
+	return b
+}

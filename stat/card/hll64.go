@@ -7,10 +7,14 @@
 package card
 
 import (
+	"bytes"
+	"encoding/gob"
 	"errors"
+	"fmt"
 	"hash"
 	"math"
 	"math/bits"
+	"path"
 	"reflect"
 )
 
@@ -143,4 +147,83 @@ func (h *HyperLogLog64) Reset() {
 	for i := range h.register {
 		h.register[i] = 0
 	}
+}
+
+// MarshalBinary marshals the sketch in the receiver. It encodes the
+// name of the hash function, the precision of the sketch and the
+// sketch data. The receiver must have a non-nil hash function.
+func (h *HyperLogLog64) MarshalBinary() ([]byte, error) {
+	if h.hash == nil {
+		return nil, errors.New("card: hash function not set")
+	}
+	t := reflect.TypeOf(h.hash)
+	var prefix string
+	if t.Kind() == reflect.Ptr {
+		t = t.Elem()
+		prefix = "*"
+	}
+	var buf bytes.Buffer
+	enc := gob.NewEncoder(&buf)
+	err := enc.Encode(uint8(w64))
+	if err != nil {
+		return nil, err
+	}
+	err = enc.Encode(prefix + path.Join(t.PkgPath(), t.Name()))
+	if err != nil {
+		return nil, err
+	}
+	err = enc.Encode(h.p)
+	if err != nil {
+		return nil, err
+	}
+	err = enc.Encode(h.register)
+	if err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
+// UnmarshalBinary unmarshals the binary representation of a sketch
+// into the receiver. The precision of the receiver will be set after
+// return. The receiver must have a non-nil hash function value that is
+// the same type as the one that was stored in the binary data.
+func (h *HyperLogLog64) UnmarshalBinary(b []byte) error {
+	if h.hash == nil {
+		return errors.New("card: hash function not set")
+	}
+	t := reflect.TypeOf(h.hash)
+	var prefix string
+	if t.Kind() == reflect.Ptr {
+		t = t.Elem()
+		prefix = "*"
+	}
+	dec := gob.NewDecoder(bytes.NewReader(b))
+	var size uint8
+	err := dec.Decode(&size)
+	if err != nil {
+		return err
+	}
+	if size != w64 {
+		return fmt.Errorf("card: mismatched hash function size: dst=%d src=%d", w64, size)
+	}
+	var srcHash string
+	err = dec.Decode(&srcHash)
+	if err != nil {
+		return err
+	}
+	dstHash := prefix + path.Join(t.PkgPath(), t.Name())
+	if dstHash != srcHash {
+		return fmt.Errorf("card: mismatched hash function: dst=%s src=%s", dstHash, srcHash)
+	}
+	err = dec.Decode(&h.p)
+	if err != nil {
+		return err
+	}
+	h.m = uint64(1) << h.p
+	h.register = h.register[:0]
+	err = dec.Decode(&h.register)
+	if err != nil {
+		return err
+	}
+	return nil
 }

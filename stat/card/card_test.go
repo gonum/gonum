@@ -5,6 +5,7 @@
 package card
 
 import (
+	"encoding"
 	"fmt"
 	"hash/fnv"
 	"io"
@@ -191,6 +192,96 @@ func TestResetCounters(t *testing.T) {
 
 		if counts[0] != counts[1] {
 			t.Errorf("unexpected counts for %s after reset: got:%.0f", test.name, counts)
+		}
+	}
+}
+
+type counterEncoder interface {
+	counter
+	encoding.BinaryMarshaler
+	encoding.BinaryUnmarshaler
+}
+
+var counterEncoderTests = []struct {
+	name     string
+	count    int
+	src, dst func() counterEncoder
+}{
+	{
+		name: "HyperLogLog32-4-4-FNV-1a", count: 1e3,
+		src: func() counterEncoder { return mustCounterEncoder(NewHyperLogLog32(4, fnv.New32a())) },
+		dst: func() counterEncoder { return mustCounterEncoder(NewHyperLogLog32(4, fnv.New32a())) },
+	},
+	{
+		name: "HyperLogLog32-4-8-FNV-1a", count: 1e3,
+		src: func() counterEncoder { return mustCounterEncoder(NewHyperLogLog32(4, fnv.New32a())) },
+		dst: func() counterEncoder { return mustCounterEncoder(NewHyperLogLog32(8, fnv.New32a())) },
+	},
+	{
+		name: "HyperLogLog32-8-4-FNV-1a", count: 1e3,
+		src: func() counterEncoder { return mustCounterEncoder(NewHyperLogLog32(8, fnv.New32a())) },
+		dst: func() counterEncoder { return mustCounterEncoder(NewHyperLogLog32(4, fnv.New32a())) },
+	},
+	{
+		name: "HyperLogLog64-4-4-FNV-1a", count: 1e3,
+		src: func() counterEncoder { return mustCounterEncoder(NewHyperLogLog64(4, fnv.New64a())) },
+		dst: func() counterEncoder { return mustCounterEncoder(NewHyperLogLog64(4, fnv.New64a())) },
+	},
+	{
+		name: "HyperLogLog64-4-8-FNV-1a", count: 1e3,
+		src: func() counterEncoder { return mustCounterEncoder(NewHyperLogLog64(4, fnv.New64a())) },
+		dst: func() counterEncoder { return mustCounterEncoder(NewHyperLogLog64(8, fnv.New64a())) },
+	},
+	{
+		name: "HyperLogLog64-8-4-FNV-1a", count: 1e3,
+		src: func() counterEncoder { return mustCounterEncoder(NewHyperLogLog64(8, fnv.New64a())) },
+		dst: func() counterEncoder { return mustCounterEncoder(NewHyperLogLog64(4, fnv.New64a())) },
+	},
+}
+
+func mustCounterEncoder(c counterEncoder, err error) counterEncoder {
+	if err != nil {
+		panic(fmt.Sprintf("bad test: %v", err))
+	}
+	return c
+}
+
+func TestBinaryEncoding(t *testing.T) {
+	for _, test := range counterEncoderTests {
+		rnd := rand.New(rand.NewSource(1))
+		src := test.src()
+		for i := 0; i < int(test.count); i++ {
+			buf := strconv.AppendUint(nil, rnd.Uint64(), 16)
+			buf = append(buf, '-')
+			buf = strconv.AppendUint(buf, uint64(i), 16)
+			n, err := src.Write(buf)
+			if n != len(buf) {
+				t.Errorf("unexpected number of bytes written for %s: got:%d want:%d",
+					test.name, n, len(buf))
+				break
+			}
+			if err != nil {
+				t.Errorf("unexpected error for %s: %v", test.name, err)
+				break
+			}
+		}
+
+		buf, err := src.MarshalBinary()
+		if err != nil {
+			t.Errorf("unexpected error marshaling binary for %s: %v", test.name, err)
+			continue
+		}
+		dst := test.dst()
+		err = dst.UnmarshalBinary(buf)
+		if err != nil {
+			t.Errorf("unexpected error unmarshaling binary for %s: %v", test.name, err)
+			continue
+		}
+		gotSrc := src.Count()
+		gotDst := dst.Count()
+
+		if gotSrc != gotDst {
+			t.Errorf("unexpected count for %s: got:%.0f want:%.0f", test.name, gotDst, gotSrc)
 		}
 	}
 }

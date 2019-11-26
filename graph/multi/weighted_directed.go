@@ -167,7 +167,7 @@ func (g *WeightedDirectedGraph) NewNode() graph.Node {
 // The returned WeightedLine will have a graph-unique ID.
 // The Line's ID does not become valid in g until the Line is added to g.
 func (g *WeightedDirectedGraph) NewWeightedLine(from, to graph.Node, weight float64) graph.WeightedLine {
-	return &WeightedLine{F: from, T: to, W: weight, UID: g.lineIDs.NewID()}
+	return WeightedLine{F: from, T: to, W: weight, UID: g.lineIDs.NewID()}
 }
 
 // Node returns the node with the given ID if it exists in the graph,

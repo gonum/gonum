@@ -132,7 +132,7 @@ func (g *WeightedUndirectedGraph) NewNode() graph.Node {
 
 // NewWeightedEdge returns a new weighted edge from the source to the destination node.
 func (g *WeightedUndirectedGraph) NewWeightedEdge(from, to graph.Node, weight float64) graph.WeightedEdge {
-	return &WeightedEdge{F: from, T: to, W: weight}
+	return WeightedEdge{F: from, T: to, W: weight}
 }
 
 // Node returns the node with the given ID if it exists in the graph,

@@ -114,7 +114,7 @@ func (g *DirectedGraph) HasEdgeFromTo(uid, vid int64) bool {
 
 // NewEdge returns a new Edge from the source to the destination node.
 func (g *DirectedGraph) NewEdge(from, to graph.Node) graph.Edge {
-	return &Edge{F: from, T: to}
+	return Edge{F: from, T: to}
 }
 
 // NewNode returns a new unique Node to be added to g. The Node's ID does

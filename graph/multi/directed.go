@@ -147,7 +147,7 @@ func (g *DirectedGraph) Lines(uid, vid int64) graph.Lines {
 // The returned Line will have a graph-unique ID.
 // The Line's ID does not become valid in g until the Line is added to g.
 func (g *DirectedGraph) NewLine(from, to graph.Node) graph.Line {
-	return &Line{F: from, T: to, UID: g.lineIDs.NewID()}
+	return Line{F: from, T: to, UID: g.lineIDs.NewID()}
 }
 
 // NewNode returns a new unique Node to be added to g. The Node's ID does

@@ -36,10 +36,10 @@ TEXT ·L2NormInc(SB), NOSPLIT, $0
 	MOVQ n+24(FP), LEN    // LEN = len(x)
 	MOVQ incX+32(FP), INC
 	MOVQ x_base+0(FP), X_
+	XORPS ZERO, ZERO
 	CMPQ LEN, $0          // if LEN == 0 { return 0 }
 	JZ   retZero
 
-	XORPS ZERO, ZERO
 	XORPS INFMASK, INFMASK
 	XORPS NANMASK, NANMASK
 	MOVSD $1.0, SUMSQ           // ssq = 1

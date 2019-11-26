@@ -219,6 +219,10 @@ func (v *VecDense) RawVector() blas64.Vector {
 	return v.mat
 }
 
+func (v *VecDense) SetRawVector(a blas64.Vector) {
+	v.mat = a
+}
+
 // CopyVec makes a copy of elements of a into the receiver. It is similar to the
 // built-in copy; it copies as much as the overlap between the two vectors and
 // returns the number of elements it copied.

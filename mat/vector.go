@@ -215,8 +215,18 @@ func VecDenseCopyOf(a Vector) *VecDense {
 	return v
 }
 
+// RawVector returns the underlying blas64.Vector used by the receiver.
+// Changes to elements in the receiver following the call will be reflected
+// in returned blas64.Vector.
 func (v *VecDense) RawVector() blas64.Vector {
 	return v.mat
+}
+
+// SetRawVector sets the underlying blas64.Vector used by the receiver.
+// Changes to elements in the receiver following the call will be reflected
+// in the input.
+func (v *VecDense) SetRawVector(a blas64.Vector) {
+	v.mat = a
 }
 
 // CopyVec makes a copy of elements of a into the receiver. It is similar to the

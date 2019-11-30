@@ -225,6 +225,65 @@ type ColNonZeroDoer interface {
 	DoColNonZero(j int, fn func(i, j int, v float64))
 }
 
+// IndexView is a type for implicitly extracting a matrix holding arbitrary rows and columns.
+// It implements the Matrix interface
+type IndexedView struct {
+	Matrix     Matrix
+	RowIndices []int
+	ColIndices []int
+}
+
+// At returns the value of the element at row i and column j of the indexed
+// matrix, that is, RowIndices[i] and ColumnIndices[j] of the Matrix field.
+func (v *IndexedView) At(i, j int) float64 {
+	return v.Matrix.At(v.RowIndices[i], v.ColIndices[j])
+}
+
+// Dims returns the dimensions of the indexed matrix and the number of columns.
+func (v *IndexedView) Dims() (int, int) {
+	return len(v.RowIndices), len(v.ColIndices)
+}
+
+// T returns an implicit transpose of the matrix field
+func (v *IndexedView) T() Matrix {
+	return Transpose{v}
+}
+
+// GetIndexedView returns a view of the matrix containing only the rows specified
+// by rowInd and columns given by colInd. If rowInd/colInd is nil, all rows/columns
+// are included. Thus, GetIndexedView(m, nil, nil) is the same as the original matrix
+func GetIndexedView(m Matrix, rowInd, colInd []int) IndexedView {
+	nr, nc := m.Dims()
+
+	if rowInd == nil {
+		rowInd = make([]int, nr)
+		for i := 0; i < nr; i++ {
+			rowInd[i] = i
+		}
+	} else {
+		for _, v := range rowInd {
+			if v < 0 || v >= nr {
+				panic("Row index out of bounds")
+			}
+		}
+	}
+
+	if colInd == nil {
+		colInd = make([]int, nc)
+		for i := 0; i < nc; i++ {
+			colInd[i] = i
+		}
+	} else {
+		for _, v := range colInd {
+			if v < 0 || v >= nc {
+				panic("Column index out of bounds")
+			}
+		}
+	}
+
+	return IndexedView{m, rowInd, colInd}
+}
+
 // untranspose untransposes a matrix if applicable. If a is an Untransposer, then
 // untranspose returns the underlying matrix and true. If it is not, then it returns
 // the input matrix and false.

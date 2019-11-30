@@ -20,7 +20,7 @@ type Dsterfer interface {
 }
 
 func DsterfTest(t *testing.T, impl Dsterfer) {
-	// Hand coded tests.
+	// Tests with precomputed eigenvalues.
 	for cas, test := range []struct {
 		d []float64
 		e []float64
@@ -28,11 +28,11 @@ func DsterfTest(t *testing.T, impl Dsterfer) {
 
 		ans []float64
 	}{
-		// Computed from Fortran code.
 		{
-			d:   []float64{1, 3, 4, 6},
-			e:   []float64{2, 4, 5},
-			n:   4,
+			d: []float64{1, 3, 4, 6},
+			e: []float64{2, 4, 5},
+			n: 4,
+			// Computed from original Fortran code.
 			ans: []float64{11.046227528488854, 4.795922173417400, -2.546379458290125, 0.704229756383872},
 		},
 	} {

@@ -695,70 +695,72 @@ func TestDoer(t *testing.T) {
 }
 
 func TestGetIndexedView(t *testing.T) {
-	for testnum, test := range []struct {
-		a             Matrix
-		rows          []int
-		cols          []int
-		accessRows    []int
-		accessCols    []int
-		expectValues  []float64
-		expectNumRows int
-		expectNumCols int
+	a := NewDense(3, 3, []float64{1., 2., 3., 4., 5., 6., 7., 8., 9.})
+
+	for i, test := range []struct {
+		rows   []int
+		cols   []int
+		access []struct {
+			r, c int
+			want float64
+		}
+		wantRows int
+		wantCols int
 	}{
 		{
-			a:             NewDense(3, 3, []float64{1., 2., 3., 4., 5., 6., 7., 8., 9.}),
-			rows:          []int{1, 2},
-			cols:          []int{1},
-			accessRows:    []int{0, 1},
-			accessCols:    []int{0, 0},
-			expectValues:  []float64{5., 8.},
-			expectNumRows: 2,
-			expectNumCols: 1,
+			rows: []int{1, 2},
+			cols: []int{1},
+			access: []struct {
+				r, c int
+				want float64
+			}{{0, 0, 5.}, {1, 0, 8.}},
+			wantRows: 2,
+			wantCols: 1,
 		},
 		{
-			a:             NewDense(3, 3, []float64{1., 2., 3., 4., 5., 6., 7., 8., 9.}),
-			rows:          nil,
-			cols:          []int{1},
-			accessRows:    []int{0, 1, 2},
-			accessCols:    []int{0, 0, 0},
-			expectValues:  []float64{2., 5., 8.},
-			expectNumRows: 3,
-			expectNumCols: 1,
+			rows: nil,
+			cols: []int{1},
+			access: []struct {
+				r, c int
+				want float64
+			}{{0, 0, 2.}, {1, 0, 5.}, {2, 0, 8.}},
+			wantRows: 3,
+			wantCols: 1,
 		},
 		{
-			a:             NewDense(3, 3, []float64{1., 2., 3., 4., 5., 6., 7., 8., 9.}),
-			rows:          []int{1},
-			cols:          nil,
-			accessRows:    []int{0, 0, 0},
-			accessCols:    []int{0, 1, 2},
-			expectValues:  []float64{4., 5., 6.},
-			expectNumRows: 1,
-			expectNumCols: 3,
+			rows: []int{1},
+			cols: nil,
+			access: []struct {
+				r, c int
+				want float64
+			}{{0, 0, 4.}, {0, 1, 5.}, {0, 2, 6.}},
+			wantRows: 1,
+			wantCols: 3,
 		},
 		{
-			a:             NewDense(3, 3, []float64{1., 2., 3., 4., 5., 6., 7., 8., 9.}),
-			rows:          nil,
-			cols:          nil,
-			accessRows:    []int{0, 0, 0, 1, 1, 1, 2, 2, 2},
-			accessCols:    []int{0, 1, 2, 0, 1, 2, 0, 1, 2},
-			expectValues:  []float64{1., 2., 3., 4., 5., 6., 7., 8., 9.},
-			expectNumRows: 3,
-			expectNumCols: 3,
+			rows: nil,
+			cols: nil,
+			access: []struct {
+				r, c int
+				want float64
+			}{{0, 0, 1.}, {0, 1, 2.}, {0, 2, 3.}, {1, 0, 4.}, {1, 1, 5.}, {1, 2, 6.}, {2, 0, 7.}, {2, 1, 8.}, {2, 2, 9.}},
+			wantRows: 3,
+			wantCols: 3,
 		},
 	} {
-		v := GetIndexedView(test.a, test.rows, test.cols)
+		v := GetIndexedView(a, test.rows, test.cols)
 
 		nr, nc := v.Dims()
 
-		if nr != test.expectNumRows || nc != test.expectNumCols {
-			t.Errorf("Test #%v failed. Expected dims: (%v, %v). Got dims: (%v, %v)", testnum, test.expectNumRows, test.expectNumCols, nr, nc)
+		if nr != test.wantRows || nc != test.wantCols {
+			t.Errorf("unexpected result for test %d dims. got: (%d, %d) want:(%d, %d)", i, nr, nc, test.wantRows, test.wantCols)
 		}
 
-		for i := 0; i < len(test.accessRows); i++ {
-			res := v.At(test.accessRows[i], test.accessCols[i])
+		for k, access := range test.access {
+			got := v.At(access.r, access.c)
 
-			if math.Abs(res-test.expectValues[i]) > 1e-10 {
-				t.Errorf("Test #%v failed. Expected: %v. Got: %v", testnum, test.expectValues[i], res)
+			if math.Abs(got-access.want) > 1e-10 {
+				t.Errorf("unexpected result for test %d access (%d, %d): got: %f want: %f", k, access.r, access.c, got, access.want)
 			}
 		}
 	}

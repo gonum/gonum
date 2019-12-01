@@ -226,22 +226,21 @@ type ColNonZeroDoer interface {
 }
 
 // IndexView is a type for implicitly extracting a matrix holding arbitrary rows and columns.
-// It implements the Matrix interface
 type IndexedView struct {
-	Matrix     Matrix
-	RowIndices []int
-	ColIndices []int
+	Matrix Matrix
+	Rows   []int
+	Cols   []int
 }
 
 // At returns the value of the element at row i and column j of the indexed
-// matrix, that is, RowIndices[i] and ColumnIndices[j] of the Matrix field.
+// matrix, that is, Rows[i] and ColumnIndices[j] of the Matrix field.
 func (v *IndexedView) At(i, j int) float64 {
-	return v.Matrix.At(v.RowIndices[i], v.ColIndices[j])
+	return v.Matrix.At(v.Rows[i], v.Cols[j])
 }
 
 // Dims returns the dimensions of the indexed matrix and the number of columns.
 func (v *IndexedView) Dims() (int, int) {
-	return len(v.RowIndices), len(v.ColIndices)
+	return len(v.Rows), len(v.Cols)
 }
 
 // T returns an implicit transpose of the matrix field
@@ -263,7 +262,7 @@ func GetIndexedView(m Matrix, rowInd, colInd []int) IndexedView {
 	} else {
 		for _, v := range rowInd {
 			if v < 0 || v >= nr {
-				panic("Row index out of bounds")
+				panic(ErrRowAccess)
 			}
 		}
 	}
@@ -276,7 +275,7 @@ func GetIndexedView(m Matrix, rowInd, colInd []int) IndexedView {
 	} else {
 		for _, v := range colInd {
 			if v < 0 || v >= nc {
-				panic("Column index out of bounds")
+				panic(ErrColAccess)
 			}
 		}
 	}

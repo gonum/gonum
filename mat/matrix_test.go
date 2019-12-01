@@ -696,54 +696,43 @@ func TestDoer(t *testing.T) {
 
 func TestGetIndexedView(t *testing.T) {
 	a := NewDense(3, 3, []float64{1., 2., 3., 4., 5., 6., 7., 8., 9.})
+	type AccessCheck struct {
+		r, c int
+		want float64
+	}
 
 	for i, test := range []struct {
-		rows   []int
-		cols   []int
-		access []struct {
-			r, c int
-			want float64
-		}
+		rows     []int
+		cols     []int
+		access   []AccessCheck
 		wantRows int
 		wantCols int
 	}{
 		{
-			rows: []int{1, 2},
-			cols: []int{1},
-			access: []struct {
-				r, c int
-				want float64
-			}{{0, 0, 5.}, {1, 0, 8.}},
+			rows:     []int{1, 2},
+			cols:     []int{1},
+			access:   []AccessCheck{{0, 0, 5.}, {1, 0, 8.}},
 			wantRows: 2,
 			wantCols: 1,
 		},
 		{
 			rows: nil,
 			cols: []int{1},
-			access: []struct {
-				r, c int
-				want float64
-			}{{0, 0, 2.}, {1, 0, 5.}, {2, 0, 8.}},
+			access: []AccessCheck{{0, 0, 2.}, {1, 0, 5.}, {2, 0, 8.}},
 			wantRows: 3,
 			wantCols: 1,
 		},
 		{
 			rows: []int{1},
 			cols: nil,
-			access: []struct {
-				r, c int
-				want float64
-			}{{0, 0, 4.}, {0, 1, 5.}, {0, 2, 6.}},
+			access: []AccessCheck{{0, 0, 4.}, {0, 1, 5.}, {0, 2, 6.}},
 			wantRows: 1,
 			wantCols: 3,
 		},
 		{
 			rows: nil,
 			cols: nil,
-			access: []struct {
-				r, c int
-				want float64
-			}{{0, 0, 1.}, {0, 1, 2.}, {0, 2, 3.}, {1, 0, 4.}, {1, 1, 5.}, {1, 2, 6.}, {2, 0, 7.}, {2, 1, 8.}, {2, 2, 9.}},
+			access: []AccessCheck{{0, 0, 1.}, {0, 1, 2.}, {0, 2, 3.}, {1, 0, 4.}, {1, 1, 5.}, {1, 2, 6.}, {2, 0, 7.}, {2, 1, 8.}, {2, 2, 9.}},
 			wantRows: 3,
 			wantCols: 3,
 		},

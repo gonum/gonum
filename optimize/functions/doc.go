@@ -10,6 +10,4 @@
 // significance due to prior use as benchmark cases.
 package functions // import "gonum.org/v1/gonum/optimize/functions"
 
-const (
-	badInputDim = "functions: wrong input dimension"
-)
+const badInputDim = "functions: wrong input dimension"

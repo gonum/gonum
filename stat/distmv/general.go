@@ -4,7 +4,7 @@
 
 package distmv
 
-var (
+const (
 	badQuantile      = "distmv: quantile not between 0 and 1"
 	badReceiver      = "distmv: input slice is not nil or the correct length"
 	badSizeMismatch  = "distmv: size mismatch"

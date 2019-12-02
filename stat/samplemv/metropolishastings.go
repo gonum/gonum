@@ -205,7 +205,7 @@ func (p *ProposalNormal) ConditionalRand(x, y []float64) []float64 {
 		x = make([]float64, p.normal.Dim())
 	}
 	if len(x) != len(y) {
-		panic(badLengthMismatch)
+		panic(errLengthMismatch)
 	}
 	p.normal.SetMean(y)
 	p.normal.Rand(x)

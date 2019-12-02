@@ -69,7 +69,7 @@ func Igam(a, x float64) float64 {
 	}
 
 	if x < 0 || a <= 0 {
-		panic(badParamOutOfBounds)
+		panic(paramOutOfBounds)
 	}
 
 	// Asymptotic regime where a ~ x; see [2].
@@ -101,7 +101,7 @@ func IgamC(a, x float64) float64 {
 
 	switch {
 	case x < 0, a <= 0:
-		panic(badParamOutOfBounds)
+		panic(paramOutOfBounds)
 	case x == 0:
 		return 1
 	case math.IsInf(x, 0):

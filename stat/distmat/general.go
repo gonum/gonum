@@ -4,4 +4,4 @@
 
 package distmat
 
-var badDim = "distmat: dimension mismatch"
+const badDim = "distmat: dimension mismatch"

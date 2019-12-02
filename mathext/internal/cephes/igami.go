@@ -26,7 +26,7 @@ func IgamI(a, p float64) float64 {
 	dithresh := 5.0 * machEp
 
 	if p < 0 || p > 1 || a <= 0 {
-		panic(badParamOutOfBounds)
+		panic(paramOutOfBounds)
 	}
 
 	if p == 0 {

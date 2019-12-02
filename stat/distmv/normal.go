@@ -15,9 +15,7 @@ import (
 	"gonum.org/v1/gonum/stat/distuv"
 )
 
-var (
-	badInputLength = "distmv: input slice length mismatch"
-)
+const badInputLength = "distmv: input slice length mismatch"
 
 // Normal is a multivariate normal distribution (also known as the multivariate
 // Gaussian distribution). Its pdf in k dimensions is given by

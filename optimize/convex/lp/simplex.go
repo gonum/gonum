@@ -33,9 +33,7 @@ var (
 	ErrZeroRow    = errors.New("lp: A has a row of all zeros")
 )
 
-var (
-	badShape = "lp: size mismatch"
-)
+const badShape = "lp: size mismatch"
 
 // TODO(btracey): Should these tolerances be part of a settings struct?
 

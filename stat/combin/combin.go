@@ -10,10 +10,10 @@ import (
 )
 
 const (
-	badNegInput          = "combin: negative input"
-	badSetSize           = "combin: n < k"
-	badInput             = "combin: wrong input slice length"
-	nonpositiveDimension = "combin: non-positive dimension"
+	errNegInput             = "combin: negative input"
+	badSetSize              = "combin: n < k"
+	badInput                = "combin: wrong input slice length"
+	errNonpositiveDimension = "combin: non-positive dimension"
 )
 
 // Binomial returns the binomial coefficient of (n,k), also commonly referred to
@@ -28,7 +28,7 @@ const (
 // No check is made for overflow.
 func Binomial(n, k int) int {
 	if n < 0 || k < 0 {
-		panic(badNegInput)
+		panic(errNegInput)
 	}
 	if n < k {
 		panic(badSetSize)
@@ -61,7 +61,7 @@ func GeneralizedBinomial(n, k float64) float64 {
 // See GeneralizedBinomial for more information.
 func LogGeneralizedBinomial(n, k float64) float64 {
 	if n < 0 || k < 0 {
-		panic(badNegInput)
+		panic(errNegInput)
 	}
 	if n < k {
 		panic(badSetSize)
@@ -193,7 +193,7 @@ func nextCombination(s []int, n, k int) {
 // [0,n) integers, if n or k are non-negative, or if k is greater than n.
 func CombinationIndex(comb []int, n, k int) int {
 	if n < 0 || k < 0 {
-		panic(badNegInput)
+		panic(errNegInput)
 	}
 	if n < k {
 		panic(badSetSize)
@@ -359,7 +359,7 @@ func IdxFor(sub, dims []int) int {
 		v := sub[i]
 		d := dims[i]
 		if d <= 0 {
-			panic(nonpositiveDimension)
+			panic(errNonpositiveDimension)
 		}
 		if v < 0 || v >= d {
 			panic("combin: invalid subscript")
@@ -386,7 +386,7 @@ func SubFor(sub []int, idx int, dims []int) []int {
 		panic(badInput)
 	}
 	if idx < 0 {
-		panic(badNegInput)
+		panic(errNegInput)
 	}
 	stride := 1
 	for i := len(dims) - 1; i >= 1; i-- {
@@ -396,7 +396,7 @@ func SubFor(sub []int, idx int, dims []int) []int {
 		v := idx / stride
 		d := dims[i]
 		if d < 0 {
-			panic(nonpositiveDimension)
+			panic(errNonpositiveDimension)
 		}
 		if v >= dims[i] {
 			panic("combin: index too large")
@@ -528,7 +528,7 @@ func (p *PermutationGenerator) Permutation(dst []int) []int {
 // [0,n) integers, if n or k are non-negative, or if k is greater than n.
 func PermutationIndex(perm []int, n, k int) int {
 	if n < 0 || k < 0 {
-		panic(badNegInput)
+		panic(errNegInput)
 	}
 	if n < k {
 		panic(badSetSize)

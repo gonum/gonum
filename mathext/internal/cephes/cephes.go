@@ -15,9 +15,9 @@ See https://github.com/deepmind/torch-cephes/blob/master/LICENSE.txt and
 https://lists.debian.org/debian-legal/2004/12/msg00295.html
 */
 
-var (
-	badParamOutOfBounds         = "cephes: parameter out of bounds"
-	badParamFunctionSingularity = "cephes: function singularity"
+const (
+	paramOutOfBounds            = "cephes: parameter out of bounds"
+	errParamFunctionSingularity = "cephes: function singularity"
 )
 
 const (

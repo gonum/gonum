@@ -13,9 +13,7 @@ import (
 	"gonum.org/v1/gonum/stat/distuv"
 )
 
-var (
-	badLengthMismatch = "sample: slice length mismatch"
-)
+const badLengthMismatch = "sample: slice length mismatch"
 
 var (
 	_ Sampler = LatinHypercube{}

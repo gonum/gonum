@@ -10,11 +10,11 @@ type Parameter struct {
 	Value float64
 }
 
-var (
+const (
 	badPercentile = "distuv: percentile out of bounds"
 	badLength     = "distuv: slice length mismatch"
 	badSuffStat   = "distuv: wrong suffStat length"
-	badNoSamples  = "distuv: must have at least one sample"
+	errNoSamples  = "distuv: must have at least one sample"
 )
 
 const (

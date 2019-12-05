@@ -287,6 +287,9 @@ func (p AllShortest) Between(uid, vid int64) (path []graph.Node, weight float64,
 	to, toOK := p.indexOf[vid]
 	if !fromOK || !toOK || len(p.at(from, to)) == 0 {
 		if uid == vid {
+			if !fromOK {
+				return []graph.Node{node(uid)}, 0, true
+			}
 			return []graph.Node{p.nodes[from]}, 0, true
 		}
 		return nil, math.Inf(1), false
@@ -348,6 +351,9 @@ func (p AllShortest) AllBetween(uid, vid int64) (paths [][]graph.Node, weight fl
 	to, toOK := p.indexOf[vid]
 	if !fromOK || !toOK || len(p.at(from, to)) == 0 {
 		if uid == vid {
+			if !fromOK {
+				return [][]graph.Node{{node(uid)}}, 0
+			}
 			return [][]graph.Node{{p.nodes[from]}}, 0
 		}
 		return nil, math.Inf(1)
@@ -403,3 +409,7 @@ func (p AllShortest) allBetween(from, to int, seen []bool, path []graph.Node, pa
 	}
 	return paths
 }
+
+type node int64
+
+func (n node) ID() int64 { return int64(n) }

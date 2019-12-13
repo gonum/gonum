@@ -84,7 +84,11 @@ func DsterfTest(t *testing.T, impl Dsterfer) {
 				// A diagonal matrix with evenly spaced entries
 				// 1, ..., eps  and random signs.
 				for i := 0; i < n; i++ {
-					d[i] = 1 - (1-dlamchE)*float64(i)/float64(n-1)
+					if i == 0 {
+						d[i] = 1
+					} else {
+						d[i] = 1 - (1-dlamchE)*float64(i)/float64(n-1)
+					}
 					if rnd.Float64() < 0.5 {
 						d[i] *= -1
 					}
@@ -93,7 +97,11 @@ func DsterfTest(t *testing.T, impl Dsterfer) {
 				// A diagonal matrix with geometrically spaced entries
 				// 1, ..., eps  and random signs.
 				for i := 0; i < n; i++ {
-					d[i] = math.Pow(dlamchE, float64(i)/float64(n-1))
+					if i == 0 {
+						d[i] = 1
+					} else {
+						d[i] = math.Pow(dlamchE, float64(i)/float64(n-1))
+					}
 					if rnd.Float64() < 0.5 {
 						d[i] *= -1
 					}

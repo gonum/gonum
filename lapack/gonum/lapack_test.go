@@ -348,21 +348,6 @@ func TestDlasq2(t *testing.T) {
 	testlapack.Dlasq2Test(t, impl)
 }
 
-func TestDlasq3(t *testing.T) {
-	t.Parallel()
-	testlapack.Dlasq3Test(t, impl)
-}
-
-func TestDlasq4(t *testing.T) {
-	t.Parallel()
-	testlapack.Dlasq4Test(t, impl)
-}
-
-func TestDlasq5(t *testing.T) {
-	t.Parallel()
-	testlapack.Dlasq5Test(t, impl)
-}
-
 func TestDlasr(t *testing.T) {
 	t.Parallel()
 	testlapack.DlasrTest(t, impl)

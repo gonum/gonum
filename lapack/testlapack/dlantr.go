@@ -26,6 +26,12 @@ func DlantrTest(t *testing.T, impl Dlantrer) {
 	for _, m := range []int{0, 1, 2, 3, 4, 5, 10} {
 		for _, n := range []int{0, 1, 2, 3, 4, 5, 10} {
 			for _, uplo := range []blas.Uplo{blas.Lower, blas.Upper} {
+				if uplo == blas.Upper && m > n {
+					continue
+				}
+				if uplo == blas.Lower && n > m {
+					continue
+				}
 				for _, diag := range []blas.Diag{blas.NonUnit, blas.Unit} {
 					for _, lda := range []int{max(1, n), n + 3} {
 						dlantrTest(t, impl, rnd, uplo, diag, m, n, lda)

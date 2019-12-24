@@ -673,6 +673,20 @@ func (m *Dense) Pow(a Matrix, n int) {
 	putWorkspace(x)
 }
 
+// Kronecker calculates the Kronecker product of a and b, placing the result in
+// the receiver.
+func (m *Dense) Kronecker(a, b Matrix) {
+	ra, ca := a.Dims()
+	rb, cb := b.Dims()
+
+	m.reuseAsNonZeroed(ra*rb, ca*cb)
+	for i := 0; i < ra; i++ {
+		for j := 0; j < ca; j++ {
+			m.Slice(i*rb, (i+1)*rb, j*cb, (j+1)*cb).(*Dense).Scale(a.At(i, j), b)
+		}
+	}
+}
+
 // Scale multiplies the elements of a by f, placing the result in the receiver.
 //
 // See the Scaler interface for more information.

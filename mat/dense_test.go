@@ -1087,6 +1087,106 @@ func TestDensePow(t *testing.T) {
 	}
 }
 
+func TestDenseKronecker(t *testing.T) {
+	for i, test := range []struct {
+		a, b Matrix
+		want *Dense
+	}{
+		{
+			a: NewDense(1, 3, []float64{1, 2, 3}),
+			b: NewDense(3, 1, []float64{1, 2, 3}),
+			want: NewDense(3, 3, []float64{
+				1, 2, 3,
+				2, 4, 6,
+				3, 6, 9,
+			}),
+		},
+		{
+			a: NewDense(3, 1, []float64{1, 2, 3}),
+			b: NewDense(1, 3, []float64{1, 2, 3}),
+			want: NewDense(3, 3, []float64{
+				1, 2, 3,
+				2, 4, 6,
+				3, 6, 9,
+			}),
+		},
+		{
+			a: NewDense(1, 3, []float64{1, 2, 3}),
+			b: NewDense(2, 1, []float64{1, 2}),
+			want: NewDense(2, 3, []float64{
+				1, 2, 3,
+				2, 4, 6,
+			}),
+		},
+		{
+			a: NewDense(2, 1, []float64{1, 2}),
+			b: NewDense(1, 3, []float64{1, 2, 3}),
+			want: NewDense(2, 3, []float64{
+				1, 2, 3,
+				2, 4, 6,
+			}),
+		},
+		{
+			a: NewDense(1, 2, []float64{1, 2}),
+			b: NewDense(3, 1, []float64{1, 2, 3}),
+			want: NewDense(3, 2, []float64{
+				1, 2,
+				2, 4,
+				3, 6,
+			}),
+		},
+		{
+			a: NewDense(3, 1, []float64{1, 2, 3}),
+			b: NewDense(1, 2, []float64{1, 2}),
+			want: NewDense(3, 2, []float64{
+				1, 2,
+				2, 4,
+				3, 6,
+			}),
+		},
+
+		// Examples from https://en.wikipedia.org/wiki/Kronecker_product.
+		{
+			a: NewDense(2, 2, []float64{1, 2, 3, 4}),
+			b: NewDense(2, 2, []float64{0, 5, 6, 7}),
+			want: NewDense(4, 4, []float64{
+				0, 5, 0, 10,
+				6, 7, 12, 14,
+				0, 15, 0, 20,
+				18, 21, 24, 28,
+			}),
+		},
+		{
+			a: NewDense(2, 3, []float64{
+				1, -4, 7,
+				-2, 3, 3,
+			}),
+			b: NewDense(4, 4, []float64{
+				8, -9, -6, 5,
+				1, -3, -4, 7,
+				2, 8, -8, -3,
+				1, 2, -5, -1,
+			}),
+			want: NewDense(8, 12, []float64{
+				8, -9, -6, 5, -32, 36, 24, -20, 56, -63, -42, 35,
+				1, -3, -4, 7, -4, 12, 16, -28, 7, -21, -28, 49,
+				2, 8, -8, -3, -8, -32, 32, 12, 14, 56, -56, -21,
+				1, 2, -5, -1, -4, -8, 20, 4, 7, 14, -35, -7,
+				-16, 18, 12, -10, 24, -27, -18, 15, 24, -27, -18, 15,
+				-2, 6, 8, -14, 3, -9, -12, 21, 3, -9, -12, 21,
+				-4, -16, 16, 6, 6, 24, -24, -9, 6, 24, -24, -9,
+				-2, -4, 10, 2, 3, 6, -15, -3, 3, 6, -15, -3,
+			}),
+		},
+	} {
+		var got Dense
+		got.Kronecker(test.a, test.b)
+		if !Equal(&got, test.want) {
+			t.Errorf("unexpected result for test %d\ngot:%#v want:%#v", i, &got, test.want)
+		}
+	}
+}
+
 func TestDenseScale(t *testing.T) {
 	for _, f := range []float64{0.5, 1, 3} {
 		method := func(receiver, a Matrix) {

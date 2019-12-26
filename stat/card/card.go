@@ -6,7 +6,10 @@
 
 package card
 
-import "math"
+import (
+	"math"
+	"reflect"
+)
 
 const (
 	w32 = 32
@@ -42,4 +45,17 @@ func min(a, b uint8) uint8 {
 		return a
 	}
 	return b
+}
+
+func typeNameOf(v interface{}) string {
+	t := reflect.TypeOf(v)
+	var prefix string
+	if t.Kind() == reflect.Ptr {
+		t = t.Elem()
+		prefix = "*"
+	}
+	if t.PkgPath() == "" {
+		return prefix + t.Name()
+	}
+	return prefix + t.PkgPath() + "." + t.Name()
 }

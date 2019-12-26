@@ -179,9 +179,6 @@ func (h *HyperLogLog32) MarshalBinary() ([]byte, error) {
 // return. The receiver must have a non-nil hash function value that is
 // the same type as the one that was stored in the binary data.
 func (h *HyperLogLog32) UnmarshalBinary(b []byte) error {
-	if h.hash == nil {
-		return errors.New("card: hash function not set")
-	}
 	dec := gob.NewDecoder(bytes.NewReader(b))
 	var size uint8
 	err := dec.Decode(&size)
@@ -196,9 +193,16 @@ func (h *HyperLogLog32) UnmarshalBinary(b []byte) error {
 	if err != nil {
 		return err
 	}
-	dstHash := typeNameOf(h.hash)
-	if dstHash != srcHash {
-		return fmt.Errorf("card: mismatched hash function: dst=%s src=%s", dstHash, srcHash)
+	if h.hash == nil {
+		h.hash = hash32For(srcHash)
+		if h.hash == nil {
+			return fmt.Errorf("card: hash function not set and no hash registered for %q", srcHash)
+		}
+	} else {
+		dstHash := typeNameOf(h.hash)
+		if dstHash != srcHash {
+			return fmt.Errorf("card: mismatched hash function: dst=%s src=%s", dstHash, srcHash)
+		}
 	}
 	err = dec.Decode(&h.p)
 	if err != nil {
@@ -211,4 +215,13 @@ func (h *HyperLogLog32) UnmarshalBinary(b []byte) error {
 		return err
 	}
 	return nil
+}
+
+func hash32For(name string) hash.Hash32 {
+	fn, ok := hashes.Load(name)
+	if !ok {
+		return nil
+	}
+	h, _ := fn.(userType).fn.Call(nil)[0].Interface().(hash.Hash32)
+	return h
 }

@@ -7,8 +7,11 @@
 package card
 
 import (
+	"fmt"
+	"hash"
 	"math"
 	"reflect"
+	"sync"
 )
 
 const (
@@ -58,4 +61,49 @@ func typeNameOf(v interface{}) string {
 		return prefix + t.Name()
 	}
 	return prefix + t.PkgPath() + "." + t.Name()
+}
+
+// hashes holds registered hashes.
+var hashes sync.Map // map[string]userType
+
+type userType struct {
+	fn  reflect.Value // Holds a func() hash.Hash{32,64}.
+	typ reflect.Type  // Type of the returned hash implementation.
+}
+
+// RegisterHash registers a function that returns a new hash.Hash32 or hash.Hash64
+// to the name of the type implementing the interface. The value of fn must be a
+// func() hash.Hash32 or func() hash.Hash64, otherwise RegisterHash will panic.
+// RegisterHash will panic if there is not a unique mapping from the name to the
+// returned type.
+func RegisterHash(fn interface{}) {
+	const invalidType = "card: must register func() hash.Hash32 or func() hash.Hash64"
+
+	rf := reflect.ValueOf(fn)
+	rt := rf.Type()
+	if rf.Kind() != reflect.Func {
+		panic(invalidType)
+	}
+	if rt.NumIn() != 0 {
+		panic(invalidType)
+	}
+	if rt.NumOut() != 1 {
+		panic(invalidType)
+	}
+	h := rf.Call(nil)[0].Interface()
+	var name string
+	var h32 hash.Hash32
+	var h64 hash.Hash64
+	switch rf.Type().Out(0) {
+	case reflect.TypeOf(&h32).Elem(), reflect.TypeOf(&h64).Elem():
+		name = typeNameOf(h)
+	default:
+		panic(invalidType)
+	}
+	user := userType{fn: rf, typ: reflect.TypeOf(h)}
+	ut, dup := hashes.LoadOrStore(name, user)
+	stored := ut.(userType)
+	if dup && stored.typ != user.typ {
+		panic(fmt.Sprintf("card: registering duplicate types for %q: %s != %s", name, stored.typ, user.typ))
+	}
 }

@@ -7,10 +7,12 @@ package card
 import (
 	"encoding"
 	"fmt"
+	"hash"
 	"hash/fnv"
 	"io"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -203,39 +205,45 @@ type counterEncoder interface {
 }
 
 var counterEncoderTests = []struct {
-	name     string
-	count    int
-	src, dst func() counterEncoder
+	name           string
+	count          int
+	src, dst, zdst func() counterEncoder
 }{
 	{
 		name: "HyperLogLog32-4-4-FNV-1a", count: 1e3,
-		src: func() counterEncoder { return mustCounterEncoder(NewHyperLogLog32(4, fnv.New32a())) },
-		dst: func() counterEncoder { return mustCounterEncoder(NewHyperLogLog32(4, fnv.New32a())) },
+		src:  func() counterEncoder { return mustCounterEncoder(NewHyperLogLog32(4, fnv.New32a())) },
+		dst:  func() counterEncoder { return mustCounterEncoder(NewHyperLogLog32(4, fnv.New32a())) },
+		zdst: func() counterEncoder { return &HyperLogLog32{} },
 	},
 	{
 		name: "HyperLogLog32-4-8-FNV-1a", count: 1e3,
-		src: func() counterEncoder { return mustCounterEncoder(NewHyperLogLog32(4, fnv.New32a())) },
-		dst: func() counterEncoder { return mustCounterEncoder(NewHyperLogLog32(8, fnv.New32a())) },
+		src:  func() counterEncoder { return mustCounterEncoder(NewHyperLogLog32(4, fnv.New32a())) },
+		dst:  func() counterEncoder { return mustCounterEncoder(NewHyperLogLog32(8, fnv.New32a())) },
+		zdst: func() counterEncoder { return &HyperLogLog32{} },
 	},
 	{
 		name: "HyperLogLog32-8-4-FNV-1a", count: 1e3,
-		src: func() counterEncoder { return mustCounterEncoder(NewHyperLogLog32(8, fnv.New32a())) },
-		dst: func() counterEncoder { return mustCounterEncoder(NewHyperLogLog32(4, fnv.New32a())) },
+		src:  func() counterEncoder { return mustCounterEncoder(NewHyperLogLog32(8, fnv.New32a())) },
+		dst:  func() counterEncoder { return mustCounterEncoder(NewHyperLogLog32(4, fnv.New32a())) },
+		zdst: func() counterEncoder { return &HyperLogLog32{} },
 	},
 	{
 		name: "HyperLogLog64-4-4-FNV-1a", count: 1e3,
-		src: func() counterEncoder { return mustCounterEncoder(NewHyperLogLog64(4, fnv.New64a())) },
-		dst: func() counterEncoder { return mustCounterEncoder(NewHyperLogLog64(4, fnv.New64a())) },
+		src:  func() counterEncoder { return mustCounterEncoder(NewHyperLogLog64(4, fnv.New64a())) },
+		dst:  func() counterEncoder { return mustCounterEncoder(NewHyperLogLog64(4, fnv.New64a())) },
+		zdst: func() counterEncoder { return &HyperLogLog64{} },
 	},
 	{
 		name: "HyperLogLog64-4-8-FNV-1a", count: 1e3,
-		src: func() counterEncoder { return mustCounterEncoder(NewHyperLogLog64(4, fnv.New64a())) },
-		dst: func() counterEncoder { return mustCounterEncoder(NewHyperLogLog64(8, fnv.New64a())) },
+		src:  func() counterEncoder { return mustCounterEncoder(NewHyperLogLog64(4, fnv.New64a())) },
+		dst:  func() counterEncoder { return mustCounterEncoder(NewHyperLogLog64(8, fnv.New64a())) },
+		zdst: func() counterEncoder { return &HyperLogLog64{} },
 	},
 	{
 		name: "HyperLogLog64-8-4-FNV-1a", count: 1e3,
-		src: func() counterEncoder { return mustCounterEncoder(NewHyperLogLog64(8, fnv.New64a())) },
-		dst: func() counterEncoder { return mustCounterEncoder(NewHyperLogLog64(4, fnv.New64a())) },
+		src:  func() counterEncoder { return mustCounterEncoder(NewHyperLogLog64(8, fnv.New64a())) },
+		dst:  func() counterEncoder { return mustCounterEncoder(NewHyperLogLog64(4, fnv.New64a())) },
+		zdst: func() counterEncoder { return &HyperLogLog64{} },
 	},
 }
 
@@ -247,6 +255,11 @@ func mustCounterEncoder(c counterEncoder, err error) counterEncoder {
 }
 
 func TestBinaryEncoding(t *testing.T) {
+	RegisterHash(fnv.New32a)
+	RegisterHash(fnv.New64a)
+	defer func() {
+		hashes = sync.Map{}
+	}()
 	for _, test := range counterEncoderTests {
 		rnd := rand.New(rand.NewSource(1))
 		src := test.src()
@@ -277,11 +290,55 @@ func TestBinaryEncoding(t *testing.T) {
 			t.Errorf("unexpected error unmarshaling binary for %s: %v", test.name, err)
 			continue
 		}
+		zdst := test.zdst()
+		err = zdst.UnmarshalBinary(buf)
+		if err != nil {
+			t.Errorf("unexpected error unmarshaling binary into zero receiver for %s: %v", test.name, err)
+			continue
+		}
 		gotSrc := src.Count()
 		gotDst := dst.Count()
+		gotZdst := zdst.Count()
 
 		if gotSrc != gotDst {
 			t.Errorf("unexpected count for %s: got:%.0f want:%.0f", test.name, gotDst, gotSrc)
+		}
+		if gotSrc != gotZdst {
+			t.Errorf("unexpected count for %s into zero receiver: got:%.0f want:%.0f", test.name, gotZdst, gotSrc)
+		}
+	}
+}
+
+var invalidRegisterTests = []struct {
+	fn     interface{}
+	panics bool
+}{
+	{fn: int(0), panics: true},
+	{fn: func() {}, panics: true},
+	{fn: func(int) {}, panics: true},
+	{fn: func() int { return 0 }, panics: true},
+	{fn: func() hash.Hash { return fnv.New32a() }, panics: true},
+	{fn: func() hash.Hash32 { return fnv.New32a() }, panics: false},
+	{fn: func() hash.Hash { return fnv.New64a() }, panics: true},
+	{fn: func() hash.Hash64 { return fnv.New64a() }, panics: false},
+}
+
+func TestRegisterInvalid(t *testing.T) {
+	for _, test := range invalidRegisterTests {
+		var r interface{}
+		func() {
+			defer func() {
+				r = recover()
+			}()
+			RegisterHash(test.fn)
+		}()
+		panicked := r != nil
+		if panicked != test.panics {
+			if panicked {
+				t.Errorf("unexpected panic for %T", test.fn)
+			} else {
+				t.Errorf("expected panic for %T", test.fn)
+			}
 		}
 	}
 }

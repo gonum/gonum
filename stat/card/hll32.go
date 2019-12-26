@@ -12,7 +12,6 @@ import (
 	"hash"
 	"math"
 	"math/bits"
-	"path"
 	"reflect"
 )
 
@@ -154,19 +153,13 @@ func (h *HyperLogLog32) MarshalBinary() ([]byte, error) {
 	if h.hash == nil {
 		return nil, errors.New("card: hash function not set")
 	}
-	t := reflect.TypeOf(h.hash)
-	var prefix string
-	if t.Kind() == reflect.Ptr {
-		t = t.Elem()
-		prefix = "*"
-	}
 	var buf bytes.Buffer
 	enc := gob.NewEncoder(&buf)
 	err := enc.Encode(uint8(w32))
 	if err != nil {
 		return nil, err
 	}
-	err = enc.Encode(prefix + path.Join(t.PkgPath(), t.Name()))
+	err = enc.Encode(typeNameOf(h.hash))
 	if err != nil {
 		return nil, err
 	}
@@ -189,12 +182,6 @@ func (h *HyperLogLog32) UnmarshalBinary(b []byte) error {
 	if h.hash == nil {
 		return errors.New("card: hash function not set")
 	}
-	t := reflect.TypeOf(h.hash)
-	var prefix string
-	if t.Kind() == reflect.Ptr {
-		t = t.Elem()
-		prefix = "*"
-	}
 	dec := gob.NewDecoder(bytes.NewReader(b))
 	var size uint8
 	err := dec.Decode(&size)
@@ -209,7 +196,7 @@ func (h *HyperLogLog32) UnmarshalBinary(b []byte) error {
 	if err != nil {
 		return err
 	}
-	dstHash := prefix + path.Join(t.PkgPath(), t.Name())
+	dstHash := typeNameOf(h.hash)
 	if dstHash != srcHash {
 		return fmt.Errorf("card: mismatched hash function: dst=%s src=%s", dstHash, srcHash)
 	}

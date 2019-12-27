@@ -608,7 +608,7 @@ func TestViewGrowSquare(t *testing.T) {
 		// Take a subset and check the view matches.
 		start1 := test.start1
 		span1 := test.span1
-		v := s.SliceSym(start1, start1+span1).(*SymDense)
+		v := s.sliceSym(start1, start1+span1)
 		for i := 0; i < span1; i++ {
 			for j := i; j < span1; j++ {
 				if v.At(i, j) != s.At(start1+i, start1+j) {

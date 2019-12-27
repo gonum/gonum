@@ -505,7 +505,7 @@ func TestCholeskyExtendVecSym(t *testing.T) {
 		},
 	} {
 		n := test.a.Symmetric()
-		as := test.a.SliceSym(0, n-1).(*SymDense)
+		as := test.a.sliceSym(0, n-1)
 
 		// Compute the full factorization to use later (do the full factorization
 		// first to ensure the matrix is positive definite).

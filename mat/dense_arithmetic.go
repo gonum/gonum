@@ -682,7 +682,7 @@ func (m *Dense) Kronecker(a, b Matrix) {
 	m.reuseAsNonZeroed(ra*rb, ca*cb)
 	for i := 0; i < ra; i++ {
 		for j := 0; j < ca; j++ {
-			m.Slice(i*rb, (i+1)*rb, j*cb, (j+1)*cb).(*Dense).Scale(a.At(i, j), b)
+			m.slice(i*rb, (i+1)*rb, j*cb, (j+1)*cb).Scale(a.At(i, j), b)
 		}
 	}
 }

@@ -563,6 +563,10 @@ func (s *SymDense) SubsetSym(a Symmetric, set []int) {
 // SliceSym panics with ErrIndexOutOfRange if the slice is outside the
 // capacity of the receiver.
 func (s *SymDense) SliceSym(i, k int) Symmetric {
+	return s.sliceSym(i, k)
+}
+
+func (s *SymDense) sliceSym(i, k int) *SymDense {
 	sz := s.cap
 	if i < 0 || sz < i || k < i || sz < k {
 		panic(ErrIndexOutOfRange)

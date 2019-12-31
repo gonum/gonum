@@ -67,7 +67,7 @@ type Xoshiro256plus struct {
 	state [4]uint64
 }
 
-// NewXoshiro256plusplus returns a new pseudo-random xoshiro256+ source
+// NewXoshiro256plus returns a new pseudo-random xoshiro256+ source
 // seeded with the given value.
 func NewXoshiro256plus(seed uint64) *Xoshiro256plus {
 	var src Xoshiro256plus

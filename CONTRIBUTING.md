@@ -68,9 +68,9 @@ If it is large, such as suggesting a new repository, sub-repository, or interfac
 
 ### Your First Code Contribution
 
-If you are a new contributor, thank you! Before your first merge, you will need to be added to the [CONTRIBUTORS](https://github.com/gonum/license/blob/master/CONTRIBUTORS) and [AUTHORS](https://github.com/gonum/license/blob/master/AUTHORS) file.
+If you are a new contributor, thank you! Before your first merge, you will need to be added to the [CONTRIBUTORS](https://github.com/gonum/gonum/blob/master/CONTRIBUTORS) and [AUTHORS](https://github.com/gonum/gonum/blob/master/AUTHORS) file.
 Open a pull request adding yourself to them.
-All Gonum code follows the BSD license in the [license document](https://github.com/gonum/license/blob/master/LICENSE).
+All Gonum code follows the BSD license in the [license document](https://github.com/gonum/gonum/blob/master/LICENSE).
 We prefer that code contributions do not come with additional licensing.
 For exceptions, added code must also follow a BSD license.
 

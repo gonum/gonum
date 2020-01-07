@@ -102,7 +102,7 @@ func TestSignbit(t *testing.T) {
 func TestSqrt(t *testing.T) {
 	f := func(x float32) bool {
 		y := Sqrt(x)
-		if IsNaN(y) && IsNaN(sqrt(x)) {
+		if IsNaN(y) && IsNaN(sqrt_test(x)) {
 			return true
 		}
 		return floats.EqualWithinRel(float64(y), float64(sqrt(x)), tol)
@@ -190,7 +190,7 @@ func TestSqrt(t *testing.T) {
 //      huge + tiny is equal to huge, and whether huge - tiny is
 //      equal to huge for some floating point number "huge" and "tiny".
 //
-func sqrt(x float32) float32 {
+func sqrt_test(x float32) float32 {
 	// special cases
 	switch {
 	case x == 0 || IsNaN(x) || IsInf(x, 1):

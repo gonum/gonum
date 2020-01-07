@@ -17,7 +17,9 @@ import (
 //	Sqrt(±0) = ±0
 //	Sqrt(x < 0) = NaN
 //	Sqrt(NaN) = NaN
-func Sqrt(x float32) float32 {
+func Sqrt(x float32) float32
+
+func sqrt(x float32) float32 {
 	// FIXME(kortschak): Direct translation of the math package
 	// asm code for 386 fails to build. No test hardware is available
 	// for arm, so using conversion instead.

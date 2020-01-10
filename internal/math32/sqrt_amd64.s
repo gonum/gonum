@@ -8,10 +8,7 @@
 
 //+build !noasm,!appengine,!safe
 
-// TODO(kortschak): use textflag.h after we drop Go 1.3 support
-//#include "textflag.h"
-// Don't insert stack check preamble.
-#define NOSPLIT	4
+#include "textflag.h"
 
 // func Sqrt(x float32) float32
 TEXT ·Sqrt(SB),NOSPLIT,$0

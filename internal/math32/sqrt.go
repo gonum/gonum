@@ -19,7 +19,6 @@ import (
 //	Sqrt(NaN) = NaN
 func Sqrt(x float32) float32 {
 	// FIXME(kortschak): Direct translation of the math package
-	// asm code for 386 fails to build. No test hardware is available
-	// for arm, so using conversion instead.
+	// asm code for 386 fails to build.
 	return float32(math.Sqrt(float64(x)))
 }

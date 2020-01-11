@@ -15,9 +15,15 @@ import (
 	"gonum.org/v1/plot/vg"
 )
 
-// tag is modified in isomap_noasm_test.go to "_noasm" when any
-// build tag prevents use of the assembly numerical kernels.
-var tag string
+var (
+	// tag is modified in isomap_noasm_test.go to "_noasm" when any
+	// build tag prevents use of the assembly numerical kernels.
+	tag string
+
+	// arch is modified in isomap_arm64_test.go to "_arm64" on arm64
+	// to allow differences in numerical precision to be allowed for.
+	arch string
+)
 
 var isomapR2Tests = []struct {
 	name string
@@ -164,7 +170,7 @@ func TestIsomapR2(t *testing.T) {
 		}
 		p.Add(render{o})
 		p.HideAxes()
-		path := filepath.Join("testdata", test.name+tag+".png")
+		path := filepath.Join("testdata", test.name+tag+arch+".png")
 		err = p.Save(10*vg.Centimeter, 10*vg.Centimeter, path)
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)

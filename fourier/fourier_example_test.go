@@ -60,11 +60,11 @@ func ExampleFFT_Coefficients_tone() {
 			maxFreq = fft.Freq(i) * samples
 		}
 	}
-	fmt.Printf("freq=%v Hz, magnitude=%v, mean=%v\n", maxFreq, magnitude, mean/samples)
+	fmt.Printf("freq=%v Hz, magnitude=%.0f, mean=%.4f\n", maxFreq, magnitude, mean/samples)
 
 	// Output:
 	//
-	// freq=262 Hz, magnitude=17296.195519181776, mean=2.783457755654771
+	// freq=262 Hz, magnitude=17296, mean=2.7835
 }
 
 func ExampleCmplxFFT_Coefficients() {

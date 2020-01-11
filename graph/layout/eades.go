@@ -137,6 +137,9 @@ func (u *EadesR2) Update(g graph.Graph, layout LayoutR2) bool {
 			// Apply adjacent node attraction.
 			v := u.particles[yidx].Coord2().Sub(u.particles[xidx].Coord2())
 			f := v.Scale(weight(xid, yid) * math.Log(math.Hypot(v.X, v.Y)))
+			if math.IsInf(f.X, 0) || math.IsInf(f.Y, 0) {
+				return false
+			}
 			if math.Hypot(f.X, f.Y) > 1e-12 {
 				updated = true
 			}

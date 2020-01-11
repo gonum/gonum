@@ -279,6 +279,8 @@ func TestSymCopyPanic(t *testing.T) {
 }
 
 func TestSymRankOne(t *testing.T) {
+	const tol = 1e-15
+
 	for _, test := range []struct {
 		n int
 	}{
@@ -312,7 +314,7 @@ func TestSymRankOne(t *testing.T) {
 		for i := 0; i < n; i++ {
 			for j := i; j < n; j++ {
 				want := m.At(i, j)
-				if got := s.At(i, j); got != want {
+				if got := s.At(i, j); !floats.EqualWithinAbsOrRel(got, want, tol, tol) {
 					t.Errorf("unexpected value for At(%d, %d): got: %v want: %v", i, j, got, want)
 				}
 			}
@@ -324,7 +326,7 @@ func TestSymRankOne(t *testing.T) {
 		for i := 0; i < n; i++ {
 			for j := i; j < n; j++ {
 				want := m.At(i, j)
-				if got := s.At(i, j); got != want {
+				if got := s.At(i, j); !floats.EqualWithinAbsOrRel(got, want, tol, tol) {
 					t.Errorf("unexpected value for At(%d, %d): got: %v want: %v", i, j, got, want)
 				}
 			}

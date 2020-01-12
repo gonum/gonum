@@ -168,7 +168,7 @@ func cTolerance(a, b complex64, e float32) bool {
 	}
 	return d < e
 }
-func cVeryclose(a, b complex64) bool { return cTolerance(a, b, 1e-7) }
+func cVeryclose(a, b complex64) bool { return cTolerance(a, b, 1e-6) }
 func cAlike(a, b complex64) bool {
 	switch {
 	case IsNaN(a) && IsNaN(b):

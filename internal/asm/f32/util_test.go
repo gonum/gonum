@@ -14,7 +14,7 @@ const (
 	msgVal      = "%v: unexpected value at %v Got: %v Expected: %v"
 	msgGuard    = "%v: guard violated in %s vector %v %v"
 	msgReadOnly = "%v: modified read-only %v argument"
-	epsilon     = 1e-4
+	epsilon     = 5e-3
 )
 
 var (

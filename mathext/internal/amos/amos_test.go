@@ -6,6 +6,7 @@ package amos
 
 import (
 	"math"
+	"runtime"
 	"strconv"
 	"testing"
 
@@ -69,6 +70,10 @@ func TestAiry(t *testing.T) {
 }
 
 func TestZacai(t *testing.T) {
+	switch runtime.GOARCH {
+	case "arm64":
+		t.Skipf("skipping on GOARCH=%s", runtime.GOARCH)
+	}
 	rnd := rand.New(rand.NewSource(1))
 	for i := 0; i < nInputs; i++ {
 		in := randInput(rnd)
@@ -93,6 +98,10 @@ func TestZasyi(t *testing.T) {
 }
 
 func TestZseri(t *testing.T) {
+	switch runtime.GOARCH {
+	case "arm64":
+		t.Skipf("skipping on GOARCH=%s", runtime.GOARCH)
+	}
 	rnd := rand.New(rand.NewSource(1))
 	for i := 0; i < nInputs; i++ {
 		in := randInput(rnd)
@@ -332,7 +341,7 @@ func zseritest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi [
 	sameF64(t, "zseri elim", ELIMfort, ELIMamos)
 	sameF64(t, "zseri elim", ALIMfort, ALIMamos)
 
-	sameF64SApprox(t, "zseri yr", YRfort, YRamos, 1e-10)
+	sameF64SApprox(t, "zseri yr", YRfort, YRamos, 1e-9)
 	sameF64SApprox(t, "zseri yi", YIfort, YIamos, 1e-10)
 }
 
@@ -469,6 +478,7 @@ func zacaitest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi [
 }
 
 func sameF64(t *testing.T, str string, c, native float64) {
+	t.Helper()
 	if math.IsNaN(c) && math.IsNaN(native) {
 		return
 	}
@@ -481,6 +491,7 @@ func sameF64(t *testing.T, str string, c, native float64) {
 }
 
 func sameF64Approx(t *testing.T, str string, c, native, tol float64) {
+	t.Helper()
 	if math.IsNaN(c) && math.IsNaN(native) {
 		return
 	}
@@ -499,12 +510,14 @@ func sameF64Approx(t *testing.T, str string, c, native, tol float64) {
 }
 
 func sameInt(t *testing.T, str string, c, native int) {
+	t.Helper()
 	if c != native {
 		t.Errorf("Case %s: Int mismatch. c = %v, native = %v.", str, c, native)
 	}
 }
 
 func sameF64S(t *testing.T, str string, c, native []float64) {
+	t.Helper()
 	if len(c) != len(native) {
 		panic(str)
 	}
@@ -514,6 +527,7 @@ func sameF64S(t *testing.T, str string, c, native []float64) {
 }
 
 func sameF64SApprox(t *testing.T, str string, c, native []float64, tol float64) {
+	t.Helper()
 	if len(c) != len(native) {
 		panic(str)
 	}

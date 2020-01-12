@@ -5,6 +5,7 @@
 package mds
 
 import (
+	"math"
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
@@ -16,6 +17,7 @@ var torgersonScalingTests = []struct {
 	wantK    int
 	want     *mat.Dense
 	wantVals []float64
+	tol      float64
 }{
 	// All expected values obtained from running R cmdscale with the input here.
 	{
@@ -45,6 +47,7 @@ var torgersonScalingTests = []struct {
 			1.172027697614e+07, 5.686036184502e+06, 2.474981412369e+04, 1.238300279584e+03,
 			-5.444455825182e-10, -2.471028925712e+02, -2.412961483429e+03, -8.452858567111e+04,
 		},
+		tol: 1e-9,
 	},
 	{
 		// R eurodist dataset.
@@ -106,12 +109,13 @@ var torgersonScalingTests = []struct {
 			-3.326719007160e+05, -5.162522542344e+05, -9.191490984121e+05, -1.006503960172e+06,
 			-2.251844331736e+06,
 		},
+		tol: 1e-9,
 	},
 }
 
 func TestTorgersonScaling(t *testing.T) {
 	for i, test := range torgersonScalingTests {
-		_, c := test.dis.Dims()
+		r, c := test.dis.Dims()
 		var got mat.Dense
 		gotK, gotVals := TorgersonScaling(&got, make([]float64, c), test.dis)
 		if gotK == 0 {
@@ -119,13 +123,24 @@ func TestTorgersonScaling(t *testing.T) {
 			continue
 		}
 		if gotK != test.wantK {
-			t.Errorf("unexpected k for test %d: got:%d want:%d", i, gotK, test.wantK)
+			var derivedK int
+			for derivedK = range gotVals {
+				if math.Abs(gotVals[derivedK]) < test.tol {
+					got = *got.Slice(0, r, 0, derivedK).(*mat.Dense)
+					break
+				}
+			}
+			if derivedK != test.wantK {
+				t.Errorf("unexpected k for test %d: got:%d want:%d", i, gotK, test.wantK)
+			} else {
+				t.Logf("low precision (tol=%.0e) k for test %d: gotK:%d derived=want:%d", test.tol, i, gotK, test.wantK)
+			}
 		}
-		if !mat.EqualApprox(colAbs{&got}, colAbs{test.want}, 1e-5) {
+		if !mat.EqualApprox(colAbs{&got}, colAbs{test.want}, math.Sqrt(test.tol)) {
 			t.Errorf("unexpected result for test %d:\ngot:\n%.5f\nwant:\n%.5f",
 				i, mat.Formatted(&got), mat.Formatted(test.want))
 		}
-		if !floats.EqualApprox(gotVals, test.wantVals, 1e-10) {
+		if !floats.EqualApprox(gotVals, test.wantVals, test.tol) {
 			t.Errorf("unexpected Eigenvalues for test %d:\ngot: %.12e\nwant:%.12e", i, gotVals, test.wantVals)
 		}
 	}

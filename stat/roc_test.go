@@ -12,6 +12,8 @@ import (
 )
 
 func TestROC(t *testing.T) {
+	const tol = 1e-14
+
 	cases := []struct {
 		y          []float64
 		c          []bool
@@ -211,10 +213,10 @@ func TestROC(t *testing.T) {
 	}
 	for i, test := range cases {
 		gotTPR, gotFPR, gotThresh := ROC(test.cutoffs, test.y, test.c, test.w)
-		if !floats.Same(gotTPR, test.wantTPR) {
+		if !floats.Same(gotTPR, test.wantTPR) && !floats.EqualApprox(gotTPR, test.wantTPR, tol) {
 			t.Errorf("%d: unexpected TPR got:%v want:%v", i, gotTPR, test.wantTPR)
 		}
-		if !floats.Same(gotFPR, test.wantFPR) {
+		if !floats.Same(gotFPR, test.wantFPR) && !floats.EqualApprox(gotFPR, test.wantFPR, tol) {
 			t.Errorf("%d: unexpected FPR got:%v want:%v", i, gotFPR, test.wantFPR)
 		}
 		if !floats.Same(gotThresh, test.wantThresh) {

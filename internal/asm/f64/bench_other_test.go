@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package f64
+package f64_test
 
 import (
 	"math"
 	"testing"
+
+	. "gonum.org/v1/gonum/internal/asm/f64"
 )
 
 func benchL1Norm(f func(x []float64) float64, sz int, t *testing.B) {

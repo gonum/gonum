@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package f64
+package f64_test
 
 import (
 	"fmt"
 	"math"
 	"testing"
+
+	. "gonum.org/v1/gonum/internal/asm/f64"
 )
 
 // nanwith copied from floats package
@@ -20,6 +22,8 @@ func nanwith(payload uint64) float64 {
 }
 
 func TestL2NormUnitary(t *testing.T) {
+	const tol = 1e-15
+
 	var src_gd float64 = 1
 	for j, v := range []struct {
 		want float64
@@ -38,7 +42,7 @@ func TestL2NormUnitary(t *testing.T) {
 		v.x = guardVector(v.x, src_gd, g_ln)
 		src := v.x[g_ln : len(v.x)-g_ln]
 		ret := L2NormUnitary(src)
-		if !within(ret, v.want) {
+		if !sameApprox(ret, v.want, tol) {
 			t.Errorf("Test %d L2Norm error Got: %f Expected: %f", j, ret, v.want)
 		}
 		if !isValidGuard(v.x, src_gd, g_ln) {
@@ -48,6 +52,8 @@ func TestL2NormUnitary(t *testing.T) {
 }
 
 func TestL2NormInc(t *testing.T) {
+	const tol = 1e-15
+
 	var src_gd float64 = 1
 	for j, v := range []struct {
 		inc  int
@@ -66,7 +72,7 @@ func TestL2NormInc(t *testing.T) {
 		v.x = guardIncVector(v.x, src_gd, v.inc, g_ln)
 		src := v.x[g_ln : len(v.x)-g_ln]
 		ret := L2NormInc(src, uintptr(ln), uintptr(v.inc))
-		if !within(ret, v.want) {
+		if !sameApprox(ret, v.want, tol) {
 			t.Errorf("Test %d L2NormInc error Got: %f Expected: %f", j, ret, v.want)
 		}
 		checkValidIncGuard(t, v.x, src_gd, v.inc, g_ln)
@@ -74,6 +80,8 @@ func TestL2NormInc(t *testing.T) {
 }
 
 func TestL2DistanceUnitary(t *testing.T) {
+	const tol = 1e-15
+
 	var src_gd float64 = 1
 	for j, v := range []struct {
 		want float64
@@ -93,7 +101,7 @@ func TestL2DistanceUnitary(t *testing.T) {
 		srcX := v.x[g_ln : len(v.x)-g_ln]
 		srcY := v.y[g_ln : len(v.y)-g_ln]
 		ret := L2DistanceUnitary(srcX, srcY)
-		if !within(ret, v.want) {
+		if !sameApprox(ret, v.want, tol) {
 			t.Errorf("Test %d L2Distance error Got: %f Expected: %f", j, ret, v.want)
 		}
 		if !isValidGuard(v.x, src_gd, g_ln) {

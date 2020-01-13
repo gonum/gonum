@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package f64
+package f64_test
 
 import (
 	"fmt"
 	"testing"
+
+	. "gonum.org/v1/gonum/internal/asm/f64"
 )
 
 var uniScal = []int64{1, 3, 10, 30, 1e2, 3e2, 1e3, 3e3, 1e4, 3e4}

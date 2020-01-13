@@ -107,10 +107,10 @@ func ROC(cutoffs, y []float64, classes []bool, weights []float64) (tpr, fpr, thr
 	invNeg := 1 / nNeg
 	invPos := 1 / nPos
 	for i := range tpr {
-		tpr[i] *= invPos
-		tpr[i] = 1 - tpr[i]
-		fpr[i] *= invNeg
-		fpr[i] = 1 - fpr[i]
+		// Prevent fused float operations by
+		// making explicit float64 conversions.
+		tpr[i] = 1 - float64(tpr[i]*invPos)
+		fpr[i] = 1 - float64(fpr[i]*invNeg)
 	}
 	for i, j := 0, len(tpr)-1; i < j; i, j = i+1, j-1 {
 		tpr[i], tpr[j] = tpr[j], tpr[i]

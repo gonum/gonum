@@ -285,6 +285,7 @@ func DgeevTest(t *testing.T, impl Dgeever) {
 			a:      Gear(4).Matrix(),
 			evWant: Gear(4).Eigenvalues(),
 			valTol: 1e-7,
+			vecTol: 1e-11,
 		},
 		{
 			a:      Gear(5).Matrix(),
@@ -294,6 +295,7 @@ func DgeevTest(t *testing.T, impl Dgeever) {
 			a:      Gear(10).Matrix(),
 			evWant: Gear(10).Eigenvalues(),
 			valTol: 1e-8,
+			vecTol: 1e-11,
 		},
 		{
 			a:      Gear(15).Matrix(),
@@ -303,11 +305,13 @@ func DgeevTest(t *testing.T, impl Dgeever) {
 			a:      Gear(30).Matrix(),
 			evWant: Gear(30).Eigenvalues(),
 			valTol: 1e-8,
+			vecTol: 1e-11,
 		},
 		{
 			a:      Gear(50).Matrix(),
 			evWant: Gear(50).Eigenvalues(),
 			valTol: 1e-8,
+			vecTol: 1e-11,
 		},
 		{
 			a:      Gear(101).Matrix(),
@@ -317,6 +321,7 @@ func DgeevTest(t *testing.T, impl Dgeever) {
 			a:      Gear(150).Matrix(),
 			evWant: Gear(150).Eigenvalues(),
 			valTol: 1e-8,
+			vecTol: 1e-11,
 		},
 
 		{

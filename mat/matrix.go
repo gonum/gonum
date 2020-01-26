@@ -30,6 +30,23 @@ type Matrix interface {
 	T() Matrix
 }
 
+// allMatrix represents the extra set of methods that all mat Matrix types
+// should satisfy. This is used to enforce compile-time consistency between the
+// Dense types, especially helpful when adding new features.
+type allMatrix interface {
+	Reseter
+	IsEmpty() bool
+	Zero()
+}
+
+// denseMatrix represents the extra set of methods that all Dense Matrix types
+// should satisfy. This is used to enforce compile-time consistency between the
+// Dense types, especially helpful when adding new features.
+type denseMatrix interface {
+	DiagView() Diagonal
+	Tracer
+}
+
 var (
 	_ Matrix       = Transpose{}
 	_ Untransposer = Transpose{}
@@ -140,8 +157,9 @@ type ClonerFrom interface {
 // restricted operation. This is commonly used when the matrix is being used as a workspace
 // or temporary matrix.
 //
-// If the matrix is a view, using the reset matrix may result in data corruption in elements
-// outside the view.
+// If the matrix is a view, using Reset may result in data corruption in elements outside
+// the view. Similarly, if the matrix shares backing data with another variable, using
+// Reset may lead to unexpected changes in data values.
 type Reseter interface {
 	Reset()
 }
@@ -226,7 +244,7 @@ func untranspose(a Matrix) (Matrix, bool) {
 func untransposeExtract(a Matrix) (Matrix, bool) {
 	ut, trans := untranspose(a)
 	switch m := ut.(type) {
-	case *DiagDense, *SymBandDense, *TriBandDense, *BandDense, *TriDense, *SymDense, *Dense:
+	case *DiagDense, *SymBandDense, *TriBandDense, *BandDense, *TriDense, *SymDense, *Dense, *VecDense:
 		return m, trans
 	// TODO(btracey): Add here if we ever have an equivalent of RawDiagDense.
 	case RawSymBander:
@@ -269,6 +287,10 @@ func untransposeExtract(a Matrix) (Matrix, bool) {
 		var d Dense
 		d.SetRawMatrix(m.RawMatrix())
 		return &d, trans
+	case RawVectorer:
+		var v VecDense
+		v.SetRawVector(m.RawVector())
+		return &v, trans
 	default:
 		return ut, trans
 	}
@@ -580,7 +602,7 @@ func Max(a Matrix) float64 {
 	if r == 0 || c == 0 {
 		panic(ErrShape)
 	}
-	// Max(A) = Max(A^T)
+	// Max(A) = Max(Aᵀ)
 	aU, _ := untranspose(a)
 	switch m := aU.(type) {
 	case RawMatrixer:
@@ -655,7 +677,7 @@ func Min(a Matrix) float64 {
 	if r == 0 || c == 0 {
 		panic(ErrShape)
 	}
-	// Min(A) = Min(A^T)
+	// Min(A) = Min(Aᵀ)
 	aU, _ := untranspose(a)
 	switch m := aU.(type) {
 	case RawMatrixer:

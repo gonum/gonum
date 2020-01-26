@@ -147,7 +147,7 @@ func (g *DirectedGraph) Lines(uid, vid int64) graph.Lines {
 // The returned Line will have a graph-unique ID.
 // The Line's ID does not become valid in g until the Line is added to g.
 func (g *DirectedGraph) NewLine(from, to graph.Node) graph.Line {
-	return &Line{F: from, T: to, UID: g.lineIDs.NewID()}
+	return Line{F: from, T: to, UID: g.lineIDs.NewID()}
 }
 
 // NewNode returns a new unique Node to be added to g. The Node's ID does
@@ -248,7 +248,7 @@ func (g *DirectedGraph) SetLine(l graph.Line) {
 
 	switch {
 	case g.from[fid] == nil:
-		g.from[fid] = map[int64]map[int64]graph.Line{tid: map[int64]graph.Line{lid: l}}
+		g.from[fid] = map[int64]map[int64]graph.Line{tid: {lid: l}}
 	case g.from[fid][tid] == nil:
 		g.from[fid][tid] = map[int64]graph.Line{lid: l}
 	default:
@@ -256,7 +256,7 @@ func (g *DirectedGraph) SetLine(l graph.Line) {
 	}
 	switch {
 	case g.to[tid] == nil:
-		g.to[tid] = map[int64]map[int64]graph.Line{fid: map[int64]graph.Line{lid: l}}
+		g.to[tid] = map[int64]map[int64]graph.Line{fid: {lid: l}}
 	case g.to[tid][fid] == nil:
 		g.to[tid][fid] = map[int64]graph.Line{lid: l}
 	default:

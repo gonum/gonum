@@ -13,9 +13,10 @@ import (
 var (
 	vector *VecDense
 
-	_ Matrix  = vector
-	_ Vector  = vector
-	_ Reseter = vector
+	_ Matrix    = vector
+	_ allMatrix = vector
+	_ Vector    = vector
+	_ Reseter   = vector
 )
 
 // Vector is a vector.
@@ -128,7 +129,7 @@ func (v *VecDense) SliceVec(i, k int) Vector {
 // Dims returns the number of rows and columns in the matrix. Columns is always 1
 // for a non-Reset vector.
 func (v *VecDense) Dims() (r, c int) {
-	if v.IsZero() {
+	if v.IsEmpty() {
 		return 0, 0
 	}
 	return v.mat.N, 1
@@ -137,7 +138,7 @@ func (v *VecDense) Dims() (r, c int) {
 // Caps returns the number of rows and columns in the backing matrix. Columns is always 1
 // for a non-Reset vector.
 func (v *VecDense) Caps() (r, c int) {
-	if v.IsZero() {
+	if v.IsEmpty() {
 		return 0, 0
 	}
 	return v.Cap(), 1
@@ -150,7 +151,7 @@ func (v *VecDense) Len() int {
 
 // Cap returns the capacity of the vector.
 func (v *VecDense) Cap() int {
-	if v.IsZero() {
+	if v.IsEmpty() {
 		return 0
 	}
 	return (cap(v.mat.Data)-1)/v.mat.Inc + 1
@@ -166,9 +167,10 @@ func (v *VecDense) TVec() Vector {
 	return TransposeVec{v}
 }
 
-// Reset zeros the length of the vector so that it can be reused as the
+// Reset empties the matrix so that it can be reused as the
 // receiver of a dimensionally restricted operation.
 //
+// Reset should not be used when the matrix shares backing data.
 // See the Reseter interface for more information.
 func (v *VecDense) Reset() {
 	// No change of Inc or N to 0 may be
@@ -213,8 +215,18 @@ func VecDenseCopyOf(a Vector) *VecDense {
 	return v
 }
 
+// RawVector returns the underlying blas64.Vector used by the receiver.
+// Changes to elements in the receiver following the call will be reflected
+// in returned blas64.Vector.
 func (v *VecDense) RawVector() blas64.Vector {
 	return v.mat
+}
+
+// SetRawVector sets the underlying blas64.Vector used by the receiver.
+// Changes to elements in the receiver following the call will be reflected
+// in the input.
+func (v *VecDense) SetRawVector(a blas64.Vector) {
+	v.mat = a
 }
 
 // CopyVec makes a copy of elements of a into the receiver. It is similar to the
@@ -252,7 +264,7 @@ func (v *VecDense) ScaleVec(alpha float64, a Vector) {
 		return
 	}
 
-	v.reuseAs(n)
+	v.reuseAsNonZeroed(n)
 
 	if rv, ok := a.(RawVectorer); ok {
 		mat := rv.RawVector()
@@ -310,7 +322,7 @@ func (v *VecDense) AddScaledVec(a Vector, alpha float64, b Vector) {
 		fast = false
 	}
 
-	v.reuseAs(ar)
+	v.reuseAsNonZeroed(ar)
 
 	switch {
 	case alpha == 0: // v <- a
@@ -353,7 +365,7 @@ func (v *VecDense) AddVec(a, b Vector) {
 		panic(ErrShape)
 	}
 
-	v.reuseAs(ar)
+	v.reuseAsNonZeroed(ar)
 
 	aU, _ := untransposeExtract(a)
 	bU, _ := untransposeExtract(b)
@@ -396,7 +408,7 @@ func (v *VecDense) SubVec(a, b Vector) {
 		panic(ErrShape)
 	}
 
-	v.reuseAs(ar)
+	v.reuseAsNonZeroed(ar)
 
 	aU, _ := untransposeExtract(a)
 	bU, _ := untransposeExtract(b)
@@ -440,7 +452,7 @@ func (v *VecDense) MulElemVec(a, b Vector) {
 		panic(ErrShape)
 	}
 
-	v.reuseAs(ar)
+	v.reuseAsNonZeroed(ar)
 
 	aU, _ := untransposeExtract(a)
 	bU, _ := untransposeExtract(b)
@@ -489,7 +501,7 @@ func (v *VecDense) DivElemVec(a, b Vector) {
 		panic(ErrShape)
 	}
 
-	v.reuseAs(ar)
+	v.reuseAsNonZeroed(ar)
 
 	aU, _ := untransposeExtract(a)
 	bU, _ := untransposeExtract(b)
@@ -550,7 +562,7 @@ func (v *VecDense) MulVec(a Matrix, b Vector) {
 		fast = false
 	}
 
-	v.reuseAs(r)
+	v.reuseAsNonZeroed(r)
 	var restore func()
 	if v == aU {
 		v, restore = v.isolatedWorkspace(aU.(*VecDense))
@@ -593,37 +605,34 @@ func (v *VecDense) MulVec(a Matrix, b Vector) {
 		}
 		v.setVec(0, sum)
 		return
+	case *SymBandDense:
+		if fast {
+			aU.checkOverlap(v.asGeneral())
+			blas64.Sbmv(1, aU.mat, bmat, 0, v.mat)
+			return
+		}
 	case *SymDense:
 		if fast {
-			amat := aU.mat
-			// We don't know that a is a *SymDense, so make
-			// a temporary SymDense to check overlap.
-			(&SymDense{mat: amat}).checkOverlap(v.asGeneral())
-			blas64.Symv(1, amat, bmat, 0, v.mat)
+			aU.checkOverlap(v.asGeneral())
+			blas64.Symv(1, aU.mat, bmat, 0, v.mat)
 			return
 		}
 	case *TriDense:
 		v.CopyVec(b)
-		amat := aU.mat
-		// We don't know that a is a *TriDense, so make
-		// a temporary TriDense to check overlap.
-		(&TriDense{mat: amat}).checkOverlap(v.asGeneral())
+		aU.checkOverlap(v.asGeneral())
 		ta := blas.NoTrans
 		if trans {
 			ta = blas.Trans
 		}
-		blas64.Trmv(ta, amat, v.mat)
+		blas64.Trmv(ta, aU.mat, v.mat)
 	case *Dense:
 		if fast {
-			amat := aU.mat
-			// We don't know that a is a *Dense, so make
-			// a temporary Dense to check overlap.
-			(&Dense{mat: amat}).checkOverlap(v.asGeneral())
+			aU.checkOverlap(v.asGeneral())
 			t := blas.NoTrans
 			if trans {
 				t = blas.Trans
 			}
-			blas64.Gemv(t, 1, amat, bmat, 0, v.mat)
+			blas64.Gemv(t, 1, aU.mat, bmat, 0, v.mat)
 			return
 		}
 	default:
@@ -648,13 +657,35 @@ func (v *VecDense) MulVec(a Matrix, b Vector) {
 	}
 }
 
-// reuseAs resizes an empty vector to a r×1 vector,
+// ReuseAsVec changes the receiver if it IsEmpty() to be of size n×1.
+//
+// ReuseAsVec re-uses the backing data slice if it has sufficient capacity,
+// otherwise a new slice is allocated. The backing data is zero on return.
+//
+// ReuseAsVec panics if the receiver is not empty, and panics if
+// the input size is less than one. To empty the receiver for re-use,
+// Reset should be used.
+func (v *VecDense) ReuseAsVec(n int) {
+	if n <= 0 {
+		if n == 0 {
+			panic(ErrZeroLength)
+		}
+		panic(ErrNegativeDimension)
+	}
+	if !v.IsEmpty() {
+		panic(ErrReuseNonEmpty)
+	}
+	v.reuseAsZeroed(n)
+}
+
+// reuseAsNonZeroed resizes an empty vector to a r×1 vector,
 // or checks that a non-empty matrix is r×1.
-func (v *VecDense) reuseAs(r int) {
+func (v *VecDense) reuseAsNonZeroed(r int) {
+	// reuseAsNonZeroed must be kept in sync with reuseAsZeroed.
 	if r == 0 {
 		panic(ErrZeroLength)
 	}
-	if v.IsZero() {
+	if v.IsEmpty() {
 		v.mat = blas64.Vector{
 			N:    r,
 			Inc:  1,
@@ -667,9 +698,31 @@ func (v *VecDense) reuseAs(r int) {
 	}
 }
 
-// IsZero returns whether the receiver is zero-sized. Zero-sized vectors can be the
-// receiver for size-restricted operations. VecDenses can be zeroed using Reset.
-func (v *VecDense) IsZero() bool {
+// reuseAsZeroed resizes an empty vector to a r×1 vector,
+// or checks that a non-empty matrix is r×1.
+func (v *VecDense) reuseAsZeroed(r int) {
+	// reuseAsZeroed must be kept in sync with reuseAsNonZeroed.
+	if r == 0 {
+		panic(ErrZeroLength)
+	}
+	if v.IsEmpty() {
+		v.mat = blas64.Vector{
+			N:    r,
+			Inc:  1,
+			Data: useZeroed(v.mat.Data, r),
+		}
+		return
+	}
+	if r != v.mat.N {
+		panic(ErrShape)
+	}
+	v.Zero()
+}
+
+// IsEmpty returns whether the receiver is empty. Empty matrices can be the
+// receiver for size-restricted operations. The receiver can be emptied using
+// Reset.
+func (v *VecDense) IsEmpty() bool {
 	// It must be the case that v.Dims() returns
 	// zeros in this case. See comment in Reset().
 	return v.mat.Inc == 0
@@ -709,15 +762,15 @@ func (v *VecDense) asGeneral() blas64.General {
 }
 
 // ColViewOf reflects the column j of the RawMatrixer m, into the receiver
-// backed by the same underlying data. The length of the receiver must either be
-// zero or match the number of rows in m.
+// backed by the same underlying data. The receiver must either be empty
+// have length equal to the number of rows of m.
 func (v *VecDense) ColViewOf(m RawMatrixer, j int) {
 	rm := m.RawMatrix()
 
 	if j >= rm.Cols || j < 0 {
 		panic(ErrColAccess)
 	}
-	if !v.IsZero() && v.mat.N != rm.Rows {
+	if !v.IsEmpty() && v.mat.N != rm.Rows {
 		panic(ErrShape)
 	}
 
@@ -727,15 +780,15 @@ func (v *VecDense) ColViewOf(m RawMatrixer, j int) {
 }
 
 // RowViewOf reflects the row i of the RawMatrixer m, into the receiver
-// backed by the same underlying data. The length of the receiver must either be
-// zero or match the number of columns in m.
+// backed by the same underlying data. The receiver must either be
+// empty or have length equal to the number of columns of m.
 func (v *VecDense) RowViewOf(m RawMatrixer, i int) {
 	rm := m.RawMatrix()
 
 	if i >= rm.Rows || i < 0 {
 		panic(ErrRowAccess)
 	}
-	if !v.IsZero() && v.mat.N != rm.Cols {
+	if !v.IsEmpty() && v.mat.N != rm.Cols {
 		panic(ErrShape)
 	}
 

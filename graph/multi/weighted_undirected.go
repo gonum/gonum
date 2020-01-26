@@ -175,7 +175,7 @@ func (g *WeightedUndirectedGraph) NewNode() graph.Node {
 // The returned WeightedLine will have a graph-unique ID.
 // The Line's ID does not become valid in g until the Line is added to g.
 func (g *WeightedUndirectedGraph) NewWeightedLine(from, to graph.Node, weight float64) graph.WeightedLine {
-	return &WeightedLine{F: from, T: to, W: weight, UID: g.lineIDs.NewID()}
+	return WeightedLine{F: from, T: to, W: weight, UID: g.lineIDs.NewID()}
 }
 
 // Node returns the node with the given ID if it exists in the graph,
@@ -259,7 +259,7 @@ func (g *WeightedUndirectedGraph) SetWeightedLine(l graph.WeightedLine) {
 
 	switch {
 	case g.lines[fid] == nil:
-		g.lines[fid] = map[int64]map[int64]graph.WeightedLine{tid: map[int64]graph.WeightedLine{lid: l}}
+		g.lines[fid] = map[int64]map[int64]graph.WeightedLine{tid: {lid: l}}
 	case g.lines[fid][tid] == nil:
 		g.lines[fid][tid] = map[int64]graph.WeightedLine{lid: l}
 	default:
@@ -267,7 +267,7 @@ func (g *WeightedUndirectedGraph) SetWeightedLine(l graph.WeightedLine) {
 	}
 	switch {
 	case g.lines[tid] == nil:
-		g.lines[tid] = map[int64]map[int64]graph.WeightedLine{fid: map[int64]graph.WeightedLine{lid: l}}
+		g.lines[tid] = map[int64]map[int64]graph.WeightedLine{fid: {lid: l}}
 	case g.lines[tid][fid] == nil:
 		g.lines[tid][fid] = map[int64]graph.WeightedLine{lid: l}
 	default:

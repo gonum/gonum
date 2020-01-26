@@ -549,9 +549,9 @@ func dotFile(t *Tree, label, dotString string) (err error) {
 	}
 	defer f.Close()
 	if dotString == "" {
-		fmt.Fprintf(f, dot(t, label))
+		fmt.Fprint(f, dot(t, label))
 	} else {
-		fmt.Fprintf(f, dotString)
+		fmt.Fprint(f, dotString)
 	}
 	return
 }

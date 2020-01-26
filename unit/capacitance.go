@@ -18,7 +18,7 @@ type Capacitance float64
 
 const Farad Capacitance = 1
 
-// Unit converts the Capacitance to a *Unit
+// Unit converts the Capacitance to a *Unit.
 func (cp Capacitance) Unit() *Unit {
 	return New(float64(cp), Dimensions{
 		CurrentDim: 2,
@@ -28,17 +28,17 @@ func (cp Capacitance) Unit() *Unit {
 	})
 }
 
-// Capacitance allows Capacitance to implement a Capacitancer interface
+// Capacitance allows Capacitance to implement a Capacitancer interface.
 func (cp Capacitance) Capacitance() Capacitance {
 	return cp
 }
 
 // From converts the unit into the receiver. From returns an
-// error if there is a mismatch in dimension
+// error if there is a mismatch in dimension.
 func (cp *Capacitance) From(u Uniter) error {
 	if !DimensionsMatch(u, Farad) {
 		*cp = Capacitance(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*cp = Capacitance(u.Unit().Value())
 	return nil

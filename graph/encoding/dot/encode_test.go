@@ -114,7 +114,6 @@ func undirectedNamedIDGraphFrom(g []intset) graph.Graph {
 
 type attrNode struct {
 	id   int64
-	name string
 	attr []encoding.Attribute
 }
 
@@ -247,8 +246,6 @@ func undirectedEdgeAttrGraphFrom(g []intset, attr map[edge][]encoding.Attribute)
 
 type portedEdge struct {
 	from, to graph.Node
-
-	directed bool
 
 	fromPort    string
 	fromCompass string

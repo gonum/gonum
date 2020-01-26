@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package testgraph provides a set of testing helper functions
-// that test gonum graph interface implementations.
+// that test Gonum graph interface implementations.
 package testgraph // import "gonum.org/v1/gonum/graph/testgraph"
 
 import (

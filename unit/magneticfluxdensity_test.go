@@ -11,6 +11,26 @@ import (
 	"testing"
 )
 
+func TestMagneticFluxDensity(t *testing.T) {
+	for _, value := range []float64{-1, 0, 1} {
+		var got MagneticFluxDensity
+		err := got.From(MagneticFluxDensity(value).Unit())
+		if err != nil {
+			t.Errorf("unexpected error for %T conversion: %v", got, err)
+		}
+		if got != MagneticFluxDensity(value) {
+			t.Errorf("unexpected result from round trip of %T(%v): got: %v want: %v", got, float64(value), got, value)
+		}
+		if got != got.MagneticFluxDensity() {
+			t.Errorf("unexpected result from self interface method call: got: %#v want: %#v", got, value)
+		}
+		err = got.From(ether(1))
+		if err == nil {
+			t.Errorf("expected error for ether to %T conversion", got)
+		}
+	}
+}
+
 func TestMagneticFluxDensityFormat(t *testing.T) {
 	for _, test := range []struct {
 		value  MagneticFluxDensity

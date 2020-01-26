@@ -279,6 +279,8 @@ func TestSymCopyPanic(t *testing.T) {
 }
 
 func TestSymRankOne(t *testing.T) {
+	const tol = 1e-15
+
 	for _, test := range []struct {
 		n int
 	}{
@@ -312,7 +314,7 @@ func TestSymRankOne(t *testing.T) {
 		for i := 0; i < n; i++ {
 			for j := i; j < n; j++ {
 				want := m.At(i, j)
-				if got := s.At(i, j); got != want {
+				if got := s.At(i, j); !floats.EqualWithinAbsOrRel(got, want, tol, tol) {
 					t.Errorf("unexpected value for At(%d, %d): got: %v want: %v", i, j, got, want)
 				}
 			}
@@ -324,7 +326,7 @@ func TestSymRankOne(t *testing.T) {
 		for i := 0; i < n; i++ {
 			for j := i; j < n; j++ {
 				want := m.At(i, j)
-				if got := s.At(i, j); got != want {
+				if got := s.At(i, j); !floats.EqualWithinAbsOrRel(got, want, tol, tol) {
 					t.Errorf("unexpected value for At(%d, %d): got: %v want: %v", i, j, got, want)
 				}
 			}
@@ -608,7 +610,7 @@ func TestViewGrowSquare(t *testing.T) {
 		// Take a subset and check the view matches.
 		start1 := test.start1
 		span1 := test.span1
-		v := s.SliceSym(start1, start1+span1).(*SymDense)
+		v := s.sliceSym(start1, start1+span1)
 		for i := 0; i < span1; i++ {
 			for j := i; j < span1; j++ {
 				if v.At(i, j) != s.At(start1+i, start1+j) {
@@ -724,7 +726,10 @@ func TestPowPSD(t *testing.T) {
 			mat.SymOuterK(1, a)
 
 			var sym SymDense
-			sym.PowPSD(&mat, float64(pow))
+			err := sym.PowPSD(&mat, float64(pow))
+			if err != nil {
+				t.Errorf("unexpected error: %v", err)
+			}
 
 			var dense Dense
 			dense.Pow(&mat, pow)

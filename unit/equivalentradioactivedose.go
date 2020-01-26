@@ -18,7 +18,7 @@ type EquivalentRadioactiveDose float64
 
 const Sievert EquivalentRadioactiveDose = 1
 
-// Unit converts the EquivalentRadioactiveDose to a *Unit
+// Unit converts the EquivalentRadioactiveDose to a *Unit.
 func (a EquivalentRadioactiveDose) Unit() *Unit {
 	return New(float64(a), Dimensions{
 		LengthDim: 2,
@@ -26,17 +26,17 @@ func (a EquivalentRadioactiveDose) Unit() *Unit {
 	})
 }
 
-// EquivalentRadioactiveDose allows EquivalentRadioactiveDose to implement a EquivalentRadioactiveDoseer interface
+// EquivalentRadioactiveDose allows EquivalentRadioactiveDose to implement a EquivalentRadioactiveDoseer interface.
 func (a EquivalentRadioactiveDose) EquivalentRadioactiveDose() EquivalentRadioactiveDose {
 	return a
 }
 
 // From converts the unit into the receiver. From returns an
-// error if there is a mismatch in dimension
+// error if there is a mismatch in dimension.
 func (a *EquivalentRadioactiveDose) From(u Uniter) error {
 	if !DimensionsMatch(u, Sievert) {
 		*a = EquivalentRadioactiveDose(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*a = EquivalentRadioactiveDose(u.Unit().Value())
 	return nil

@@ -18,24 +18,24 @@ type LuminousIntensity float64
 
 const Candela LuminousIntensity = 1
 
-// Unit converts the LuminousIntensity to a *Unit
+// Unit converts the LuminousIntensity to a *Unit.
 func (j LuminousIntensity) Unit() *Unit {
 	return New(float64(j), Dimensions{
 		LuminousIntensityDim: 1,
 	})
 }
 
-// LuminousIntensity allows LuminousIntensity to implement a LuminousIntensityer interface
+// LuminousIntensity allows LuminousIntensity to implement a LuminousIntensityer interface.
 func (j LuminousIntensity) LuminousIntensity() LuminousIntensity {
 	return j
 }
 
 // From converts the unit into the receiver. From returns an
-// error if there is a mismatch in dimension
+// error if there is a mismatch in dimension.
 func (j *LuminousIntensity) From(u Uniter) error {
 	if !DimensionsMatch(u, Candela) {
 		*j = LuminousIntensity(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*j = LuminousIntensity(u.Unit().Value())
 	return nil

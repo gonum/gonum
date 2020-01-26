@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package f32
+package f32_test
 
 import (
 	"math"
 	"testing"
+
+	"gonum.org/v1/gonum/floats"
 )
 
 const (
@@ -14,7 +16,6 @@ const (
 	msgVal      = "%v: unexpected value at %v Got: %v Expected: %v"
 	msgGuard    = "%v: guard violated in %s vector %v %v"
 	msgReadOnly = "%v: modified read-only %v argument"
-	epsilon     = 1e-4
 )
 
 var (
@@ -22,10 +23,10 @@ var (
 	inf = float32(math.Inf(1))
 )
 
-// within tests for nan-aware equality within epsilon.
-func within(x, y float32) bool {
+// sameApprox tests for nan-aware equality within tolerance.
+func sameApprox(x, y, tol float32) bool {
 	a, b := float64(x), float64(y)
-	return same(x, y) || math.Abs(a-b) <= epsilon
+	return same(x, y) || floats.EqualWithinAbsOrRel(a, b, float64(tol), float64(tol))
 }
 
 func same(x, y float32) bool {

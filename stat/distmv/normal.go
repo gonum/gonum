@@ -15,9 +15,7 @@ import (
 	"gonum.org/v1/gonum/stat/distuv"
 )
 
-var (
-	badInputLength = "distmv: input slice length mismatch"
-)
+const badInputLength = "distmv: input slice length mismatch"
 
 // Normal is a multivariate normal distribution (also known as the multivariate
 // Gaussian distribution). Its pdf in k dimensions is given by
@@ -110,7 +108,10 @@ func NewNormalPrecision(mu []float64, prec *mat.SymDense, src rand.Source) (norm
 		return nil, false
 	}
 	var sigma mat.SymDense
-	chol.InverseTo(&sigma)
+	err := chol.InverseTo(&sigma)
+	if err != nil {
+		return nil, false
+	}
 	return NewNormal(mu, &sigma, src)
 }
 
@@ -118,8 +119,8 @@ func NewNormalPrecision(mu []float64, prec *mat.SymDense, src rand.Source) (norm
 // on the input evidence. The returned multivariate normal has dimension
 // n - len(observed), where n is the dimension of the original receiver. The updated
 // mean and covariance are
-//  mu = mu_un + sigma_{ob,un}^T * sigma_{ob,ob}^-1 (v - mu_ob)
-//  sigma = sigma_{un,un} - sigma_{ob,un}^T * sigma_{ob,ob}^-1 * sigma_{ob,un}
+//  mu = mu_un + sigma_{ob,un}ᵀ * sigma_{ob,ob}^-1 (v - mu_ob)
+//  sigma = sigma_{un,un} - sigma_{ob,un}ᵀ * sigma_{ob,ob}^-1 * sigma_{ob,un}
 // where mu_un and mu_ob are the original means of the unobserved and observed
 // variables respectively, sigma_{un,un} is the unobserved subset of the covariance
 // matrix, sigma_{ob,ob} is the observed subset of the covariance matrix, and
@@ -154,11 +155,11 @@ func (n *Normal) ConditionNormal(observed []int, values []float64, src rand.Sour
 // Upon return, the value at element {i, j} of the covariance matrix is equal
 // to the covariance of the i^th and j^th variables.
 //  covariance(i, j) = E[(x_i - E[x_i])(x_j - E[x_j])]
-// If the dst matrix is zero-sized it will be resized to the correct dimensions,
+// If the dst matrix is empty it will be resized to the correct dimensions,
 // otherwise dst must match the dimension of the receiver or CovarianceMatrix
 // will panic.
 func (n *Normal) CovarianceMatrix(dst *mat.SymDense) {
-	if dst.IsZero() {
+	if dst.IsEmpty() {
 		*dst = *(dst.GrowSym(n.dim).(*mat.SymDense))
 	} else if dst.Symmetric() != n.dim {
 		panic("normal: input matrix size mismatch")
@@ -341,7 +342,10 @@ func (n *Normal) ScoreInput(score, x []float64) []float64 {
 	copy(tmp, x)
 	floats.Sub(tmp, n.mu)
 
-	n.chol.SolveVecTo(mat.NewVecDense(len(score), score), mat.NewVecDense(len(tmp), tmp))
+	err := n.chol.SolveVecTo(mat.NewVecDense(len(score), score), mat.NewVecDense(len(tmp), tmp))
+	if err != nil {
+		panic(err)
+	}
 	floats.Scale(-1, score)
 	return score
 }

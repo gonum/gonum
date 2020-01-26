@@ -11,6 +11,26 @@ import (
 	"testing"
 )
 
+func TestAbsorbedRadioactiveDose(t *testing.T) {
+	for _, value := range []float64{-1, 0, 1} {
+		var got AbsorbedRadioactiveDose
+		err := got.From(AbsorbedRadioactiveDose(value).Unit())
+		if err != nil {
+			t.Errorf("unexpected error for %T conversion: %v", got, err)
+		}
+		if got != AbsorbedRadioactiveDose(value) {
+			t.Errorf("unexpected result from round trip of %T(%v): got: %v want: %v", got, float64(value), got, value)
+		}
+		if got != got.AbsorbedRadioactiveDose() {
+			t.Errorf("unexpected result from self interface method call: got: %#v want: %#v", got, value)
+		}
+		err = got.From(ether(1))
+		if err == nil {
+			t.Errorf("expected error for ether to %T conversion", got)
+		}
+	}
+}
+
 func TestAbsorbedRadioactiveDoseFormat(t *testing.T) {
 	for _, test := range []struct {
 		value  AbsorbedRadioactiveDose

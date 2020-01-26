@@ -18,7 +18,7 @@ type Charge float64
 
 const Coulomb Charge = 1
 
-// Unit converts the Charge to a *Unit
+// Unit converts the Charge to a *Unit.
 func (ch Charge) Unit() *Unit {
 	return New(float64(ch), Dimensions{
 		CurrentDim: 1,
@@ -26,17 +26,17 @@ func (ch Charge) Unit() *Unit {
 	})
 }
 
-// Charge allows Charge to implement a Charger interface
+// Charge allows Charge to implement a Charger interface.
 func (ch Charge) Charge() Charge {
 	return ch
 }
 
 // From converts the unit into the receiver. From returns an
-// error if there is a mismatch in dimension
+// error if there is a mismatch in dimension.
 func (ch *Charge) From(u Uniter) error {
 	if !DimensionsMatch(u, Coulomb) {
 		*ch = Charge(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*ch = Charge(u.Unit().Value())
 	return nil

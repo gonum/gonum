@@ -18,7 +18,7 @@ type Resistance float64
 
 const Ohm Resistance = 1
 
-// Unit converts the Resistance to a *Unit
+// Unit converts the Resistance to a *Unit.
 func (r Resistance) Unit() *Unit {
 	return New(float64(r), Dimensions{
 		CurrentDim: -2,
@@ -28,17 +28,17 @@ func (r Resistance) Unit() *Unit {
 	})
 }
 
-// Resistance allows Resistance to implement a Resistancer interface
+// Resistance allows Resistance to implement a Resistancer interface.
 func (r Resistance) Resistance() Resistance {
 	return r
 }
 
 // From converts the unit into the receiver. From returns an
-// error if there is a mismatch in dimension
+// error if there is a mismatch in dimension.
 func (r *Resistance) From(u Uniter) error {
 	if !DimensionsMatch(u, Ohm) {
 		*r = Resistance(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*r = Resistance(u.Unit().Value())
 	return nil

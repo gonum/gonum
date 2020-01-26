@@ -18,7 +18,7 @@ type Torque float64
 
 const Newtonmetre Torque = 1
 
-// Unit converts the Torque to a *Unit
+// Unit converts the Torque to a *Unit.
 func (t Torque) Unit() *Unit {
 	return New(float64(t), Dimensions{
 		LengthDim: 2,
@@ -27,17 +27,17 @@ func (t Torque) Unit() *Unit {
 	})
 }
 
-// Torque allows Torque to implement a Torquer interface
+// Torque allows Torque to implement a Torquer interface.
 func (t Torque) Torque() Torque {
 	return t
 }
 
 // From converts the unit into the receiver. From returns an
-// error if there is a mismatch in dimension
+// error if there is a mismatch in dimension.
 func (t *Torque) From(u Uniter) error {
 	if !DimensionsMatch(u, Newtonmetre) {
 		*t = Torque(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*t = Torque(u.Unit().Value())
 	return nil

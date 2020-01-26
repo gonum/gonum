@@ -153,7 +153,7 @@ func (g *UndirectedGraph) LinesBetween(xid, yid int64) graph.Lines {
 // The returned Line will have a graph-unique ID.
 // The Line's ID does not become valid in g until the Line is added to g.
 func (g *UndirectedGraph) NewLine(from, to graph.Node) graph.Line {
-	return &Line{F: from, T: to, UID: g.lineIDs.NewID()}
+	return Line{F: from, T: to, UID: g.lineIDs.NewID()}
 }
 
 // NewNode returns a new unique Node to be added to g. The Node's ID does
@@ -249,7 +249,7 @@ func (g *UndirectedGraph) SetLine(l graph.Line) {
 
 	switch {
 	case g.lines[fid] == nil:
-		g.lines[fid] = map[int64]map[int64]graph.Line{tid: map[int64]graph.Line{lid: l}}
+		g.lines[fid] = map[int64]map[int64]graph.Line{tid: {lid: l}}
 	case g.lines[fid][tid] == nil:
 		g.lines[fid][tid] = map[int64]graph.Line{lid: l}
 	default:
@@ -257,7 +257,7 @@ func (g *UndirectedGraph) SetLine(l graph.Line) {
 	}
 	switch {
 	case g.lines[tid] == nil:
-		g.lines[tid] = map[int64]map[int64]graph.Line{fid: map[int64]graph.Line{lid: l}}
+		g.lines[tid] = map[int64]map[int64]graph.Line{fid: {lid: l}}
 	case g.lines[tid][fid] == nil:
 		g.lines[tid][fid] = map[int64]graph.Line{lid: l}
 	default:

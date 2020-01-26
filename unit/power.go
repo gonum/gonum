@@ -18,7 +18,7 @@ type Power float64
 
 const Watt Power = 1
 
-// Unit converts the Power to a *Unit
+// Unit converts the Power to a *Unit.
 func (pw Power) Unit() *Unit {
 	return New(float64(pw), Dimensions{
 		LengthDim: 2,
@@ -27,17 +27,17 @@ func (pw Power) Unit() *Unit {
 	})
 }
 
-// Power allows Power to implement a Powerer interface
+// Power allows Power to implement a Powerer interface.
 func (pw Power) Power() Power {
 	return pw
 }
 
 // From converts the unit into the receiver. From returns an
-// error if there is a mismatch in dimension
+// error if there is a mismatch in dimension.
 func (pw *Power) From(u Uniter) error {
 	if !DimensionsMatch(u, Watt) {
 		*pw = Power(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*pw = Power(u.Unit().Value())
 	return nil

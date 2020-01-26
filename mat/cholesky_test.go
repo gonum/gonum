@@ -55,16 +55,17 @@ func TestCholesky(t *testing.T) {
 			if math.Abs(test.cond-chol.cond) > 1e-13 {
 				t.Errorf("Condition number mismatch: Want %v, got %v", test.cond, chol.cond)
 			}
-			U := chol.UTo(nil)
+			var U TriDense
+			chol.UTo(&U)
 			aCopy := DenseCopyOf(test.a)
 			var a Dense
-			a.Mul(U.TTri(), U)
+			a.Mul(U.TTri(), &U)
 			if !EqualApprox(&a, aCopy, 1e-14) {
 				t.Error("unexpected Cholesky factor product")
 			}
-
-			L := chol.LTo(nil)
-			a.Mul(L, L.TTri())
+			var L TriDense
+			chol.LTo(&L)
+			a.Mul(&L, L.TTri())
 			if !EqualApprox(&a, aCopy, 1e-14) {
 				t.Error("unexpected Cholesky factor product")
 			}
@@ -133,7 +134,10 @@ func TestCholeskySolveTo(t *testing.T) {
 		}
 
 		var x Dense
-		chol.SolveTo(&x, test.b)
+		err := chol.SolveTo(&x, test.b)
+		if err != nil {
+			t.Errorf("unexpected error from Cholesky solve: %v", err)
+		}
 		if !EqualApprox(&x, test.ans, 1e-12) {
 			t.Error("incorrect Cholesky solve solution")
 		}
@@ -194,13 +198,19 @@ func TestCholeskySolveCholTo(t *testing.T) {
 		}
 
 		var x Dense
-		chola.SolveCholTo(&x, &cholb)
+		err := chola.SolveCholTo(&x, &cholb)
+		if err != nil {
+			t.Errorf("unexpected error from Cholesky solve: %v", err)
+		}
 
 		var ans Dense
 		ans.Mul(test.a, &x)
 		if !EqualApprox(&ans, test.b, 1e-12) {
 			var y Dense
-			y.Solve(test.a, test.b)
+			err := y.Solve(test.a, test.b)
+			if err != nil {
+				t.Errorf("unexpected error from dense solve: %v", err)
+			}
 			t.Errorf("incorrect Cholesky solve solution product\ngot solution:\n%.4v\nwant solution\n%.4v",
 				Formatted(&x), Formatted(&y))
 		}
@@ -238,7 +248,10 @@ func TestCholeskySolveVecTo(t *testing.T) {
 		}
 
 		var x VecDense
-		chol.SolveVecTo(&x, test.b)
+		err := chol.SolveVecTo(&x, test.b)
+		if err != nil {
+			t.Errorf("unexpected error from Cholesky solve: %v", err)
+		}
 		if !EqualApprox(&x, test.ans, 1e-12) {
 			t.Error("incorrect Cholesky solve solution")
 		}
@@ -264,10 +277,11 @@ func TestCholeskyToSym(t *testing.T) {
 		if !ok {
 			t.Fatal("unexpected Cholesky factorization failure: not positive definite")
 		}
-		s := chol.ToSym(nil)
+		var s SymDense
+		chol.ToSym(&s)
 
-		if !EqualApprox(s, test, 1e-12) {
-			t.Errorf("Cholesky reconstruction not equal to original matrix.\nWant:\n% v\nGot:\n% v\n", Formatted(test), Formatted(s))
+		if !EqualApprox(&s, test, 1e-12) {
+			t.Errorf("Cholesky reconstruction not equal to original matrix.\nWant:\n% v\nGot:\n% v\n", Formatted(test), Formatted(&s))
 		}
 	}
 }
@@ -289,10 +303,10 @@ func TestCloneCholesky(t *testing.T) {
 		chol2.Clone(&chol)
 
 		if chol.cond != chol2.cond {
-			t.Errorf("condition number mismatch from zero")
+			t.Errorf("condition number mismatch from empty")
 		}
 		if !Equal(chol.chol, chol2.chol) {
-			t.Errorf("chol mismatch from zero")
+			t.Errorf("chol mismatch from empty")
 		}
 
 		// Corrupt chol2 and try again
@@ -300,10 +314,10 @@ func TestCloneCholesky(t *testing.T) {
 		chol2.chol = NewTriDense(2, Upper, nil)
 		chol2.Clone(&chol)
 		if chol.cond != chol2.cond {
-			t.Errorf("condition number mismatch from non-zero")
+			t.Errorf("condition number mismatch from non-empty")
 		}
 		if !Equal(chol.chol, chol2.chol) {
-			t.Errorf("chol mismatch from non-zero")
+			t.Errorf("chol mismatch from non-empty")
 		}
 	}
 }
@@ -324,7 +338,10 @@ func TestCholeskyInverseTo(t *testing.T) {
 		}
 
 		var sInv SymDense
-		chol.InverseTo(&sInv)
+		err := chol.InverseTo(&sInv)
+		if err != nil {
+			t.Errorf("unexpected error from Cholesky inverse: %v", err)
+		}
 
 		var ans Dense
 		ans.Mul(&sInv, &s)
@@ -488,7 +505,7 @@ func TestCholeskyExtendVecSym(t *testing.T) {
 		},
 	} {
 		n := test.a.Symmetric()
-		as := test.a.SliceSym(0, n-1).(*SymDense)
+		as := test.a.sliceSym(0, n-1)
 
 		// Compute the full factorization to use later (do the full factorization
 		// first to ensure the matrix is positive definite).
@@ -513,8 +530,9 @@ func TestCholeskyExtendVecSym(t *testing.T) {
 		if !ok {
 			t.Errorf("cas %v: update not positive definite", cas)
 		}
-		a := cholNew.ToSym(nil)
-		if !EqualApprox(a, test.a, 1e-12) {
+		var a SymDense
+		cholNew.ToSym(&a)
+		if !EqualApprox(&a, test.a, 1e-12) {
 			t.Errorf("cas %v: mismatch", cas)
 		}
 
@@ -669,7 +687,10 @@ func BenchmarkCholeskyInverseTo(b *testing.B) {
 
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
-				chol.InverseTo(dst)
+				err := chol.InverseTo(dst)
+				if err != nil {
+					b.Fatalf("unexpected error from Cholesky inverse: %v", err)
+				}
 			}
 		})
 	}

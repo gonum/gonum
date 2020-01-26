@@ -18,7 +18,7 @@ type AbsorbedRadioactiveDose float64
 
 const Gray AbsorbedRadioactiveDose = 1
 
-// Unit converts the AbsorbedRadioactiveDose to a *Unit
+// Unit converts the AbsorbedRadioactiveDose to a *Unit.
 func (a AbsorbedRadioactiveDose) Unit() *Unit {
 	return New(float64(a), Dimensions{
 		LengthDim: 2,
@@ -26,17 +26,17 @@ func (a AbsorbedRadioactiveDose) Unit() *Unit {
 	})
 }
 
-// AbsorbedRadioactiveDose allows AbsorbedRadioactiveDose to implement a AbsorbedRadioactiveDoseer interface
+// AbsorbedRadioactiveDose allows AbsorbedRadioactiveDose to implement a AbsorbedRadioactiveDoseer interface.
 func (a AbsorbedRadioactiveDose) AbsorbedRadioactiveDose() AbsorbedRadioactiveDose {
 	return a
 }
 
 // From converts the unit into the receiver. From returns an
-// error if there is a mismatch in dimension
+// error if there is a mismatch in dimension.
 func (a *AbsorbedRadioactiveDose) From(u Uniter) error {
 	if !DimensionsMatch(u, Gray) {
 		*a = AbsorbedRadioactiveDose(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*a = AbsorbedRadioactiveDose(u.Unit().Value())
 	return nil

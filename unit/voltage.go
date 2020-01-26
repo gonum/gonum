@@ -18,7 +18,7 @@ type Voltage float64
 
 const Volt Voltage = 1
 
-// Unit converts the Voltage to a *Unit
+// Unit converts the Voltage to a *Unit.
 func (v Voltage) Unit() *Unit {
 	return New(float64(v), Dimensions{
 		CurrentDim: -1,
@@ -28,17 +28,17 @@ func (v Voltage) Unit() *Unit {
 	})
 }
 
-// Voltage allows Voltage to implement a Voltager interface
+// Voltage allows Voltage to implement a Voltager interface.
 func (v Voltage) Voltage() Voltage {
 	return v
 }
 
 // From converts the unit into the receiver. From returns an
-// error if there is a mismatch in dimension
+// error if there is a mismatch in dimension.
 func (v *Voltage) From(u Uniter) error {
 	if !DimensionsMatch(u, Volt) {
 		*v = Voltage(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*v = Voltage(u.Unit().Value())
 	return nil

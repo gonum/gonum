@@ -18,7 +18,7 @@ type Conductance float64
 
 const Siemens Conductance = 1
 
-// Unit converts the Conductance to a *Unit
+// Unit converts the Conductance to a *Unit.
 func (co Conductance) Unit() *Unit {
 	return New(float64(co), Dimensions{
 		CurrentDim: 2,
@@ -28,17 +28,17 @@ func (co Conductance) Unit() *Unit {
 	})
 }
 
-// Conductance allows Conductance to implement a Conductancer interface
+// Conductance allows Conductance to implement a Conductancer interface.
 func (co Conductance) Conductance() Conductance {
 	return co
 }
 
 // From converts the unit into the receiver. From returns an
-// error if there is a mismatch in dimension
+// error if there is a mismatch in dimension.
 func (co *Conductance) From(u Uniter) error {
 	if !DimensionsMatch(u, Siemens) {
 		*co = Conductance(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*co = Conductance(u.Unit().Value())
 	return nil

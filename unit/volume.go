@@ -18,24 +18,24 @@ type Volume float64
 
 const Litre Volume = 1e-3
 
-// Unit converts the Volume to a *Unit
+// Unit converts the Volume to a *Unit.
 func (v Volume) Unit() *Unit {
 	return New(float64(v), Dimensions{
 		LengthDim: 3,
 	})
 }
 
-// Volume allows Volume to implement a Volumeer interface
+// Volume allows Volume to implement a Volumeer interface.
 func (v Volume) Volume() Volume {
 	return v
 }
 
 // From converts the unit into the receiver. From returns an
-// error if there is a mismatch in dimension
+// error if there is a mismatch in dimension.
 func (v *Volume) From(u Uniter) error {
 	if !DimensionsMatch(u, Litre) {
 		*v = Volume(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*v = Volume(u.Unit().Value())
 	return nil

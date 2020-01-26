@@ -16,8 +16,6 @@ type Number struct {
 	Real, Dual complex128
 }
 
-var zero Number
-
 // Format implements fmt.Formatter.
 func (d Number) Format(fs fmt.State, c rune) {
 	prec, pOk := fs.Precision()

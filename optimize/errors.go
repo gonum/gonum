@@ -75,6 +75,4 @@ func (err ErrGrad) Error() string {
 }
 
 // List of shared panic strings
-var (
-	badProblem = "optimize: objective function is undefined"
-)
+const badProblem = "optimize: objective function is undefined"

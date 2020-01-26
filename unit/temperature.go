@@ -18,24 +18,24 @@ type Temperature float64
 
 const Kelvin Temperature = 1
 
-// Unit converts the Temperature to a *Unit
+// Unit converts the Temperature to a *Unit.
 func (t Temperature) Unit() *Unit {
 	return New(float64(t), Dimensions{
 		TemperatureDim: 1,
 	})
 }
 
-// Temperature allows Temperature to implement a Temperaturer interface
+// Temperature allows Temperature to implement a Temperaturer interface.
 func (t Temperature) Temperature() Temperature {
 	return t
 }
 
 // From converts the unit into the receiver. From returns an
-// error if there is a mismatch in dimension
+// error if there is a mismatch in dimension.
 func (t *Temperature) From(u Uniter) error {
 	if !DimensionsMatch(u, Kelvin) {
 		*t = Temperature(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*t = Temperature(u.Unit().Value())
 	return nil

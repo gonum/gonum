@@ -18,24 +18,24 @@ type Angle float64
 
 const Rad Angle = 1
 
-// Unit converts the Angle to a *Unit
+// Unit converts the Angle to a *Unit.
 func (a Angle) Unit() *Unit {
 	return New(float64(a), Dimensions{
 		AngleDim: 1,
 	})
 }
 
-// Angle allows Angle to implement a Angleer interface
+// Angle allows Angle to implement a Angleer interface.
 func (a Angle) Angle() Angle {
 	return a
 }
 
 // From converts the unit into the receiver. From returns an
-// error if there is a mismatch in dimension
+// error if there is a mismatch in dimension.
 func (a *Angle) From(u Uniter) error {
 	if !DimensionsMatch(u, Rad) {
 		*a = Angle(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*a = Angle(u.Unit().Value())
 	return nil

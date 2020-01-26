@@ -48,15 +48,15 @@ func Zeta(x, q float64) float64 {
 	}
 
 	if x < 1 {
-		panic(badParamOutOfBounds)
+		panic(paramOutOfBounds)
 	}
 
 	if q <= 0 {
 		if q == math.Floor(q) {
-			panic(badParamFunctionSingularity)
+			panic(errParamFunctionSingularity)
 		}
 		if x != math.Floor(x) {
-			panic(badParamOutOfBounds) // Because q^-x not defined
+			panic(paramOutOfBounds) // Because q^-x not defined
 		}
 	}
 

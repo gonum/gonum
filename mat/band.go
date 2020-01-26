@@ -10,9 +10,11 @@ import (
 
 var (
 	bandDense *BandDense
-	_         Matrix    = bandDense
-	_         Banded    = bandDense
-	_         RawBander = bandDense
+	_         Matrix      = bandDense
+	_         allMatrix   = bandDense
+	_         denseMatrix = bandDense
+	_         Banded      = bandDense
+	_         RawBander   = bandDense
 
 	_ NonZeroDoer    = bandDense
 	_ RowNonZeroDoer = bandDense
@@ -193,6 +195,26 @@ func (b *BandDense) RawBand() blas64.Band {
 // in the input.
 func (b *BandDense) SetRawBand(mat blas64.Band) {
 	b.mat = mat
+}
+
+// IsEmpty returns whether the receiver is empty. Empty matrices can be the
+// receiver for size-restricted operations. The receiver can be zeroed using Reset.
+func (b *BandDense) IsEmpty() bool {
+	return b.mat.Stride == 0
+}
+
+// Reset empties the matrix so that it can be reused as the
+// receiver of a dimensionally restricted operation.
+//
+// Reset should not be used when the matrix shares backing data.
+// See the Reseter interface for more information.
+func (b *BandDense) Reset() {
+	b.mat.Rows = 0
+	b.mat.Cols = 0
+	b.mat.KL = 0
+	b.mat.KU = 0
+	b.mat.Stride = 0
+	b.mat.Data = b.mat.Data[:0:0]
 }
 
 // DiagView returns the diagonal as a matrix backed by the original data.

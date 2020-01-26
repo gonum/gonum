@@ -14,9 +14,7 @@ import (
 	"gonum.org/v1/gonum/stat/distmv"
 )
 
-var (
-	badLengthMismatch = "samplemv: slice length mismatch"
-)
+const errLengthMismatch = "samplemv: slice length mismatch"
 
 var (
 	_ Sampler = LatinHypercube{}
@@ -62,7 +60,7 @@ type SampleUniformWeighted struct {
 func (w SampleUniformWeighted) SampleWeighted(batch *mat.Dense, weights []float64) {
 	r, _ := batch.Dims()
 	if r != len(weights) {
-		panic(badLengthMismatch)
+		panic(errLengthMismatch)
 	}
 	w.Sample(batch)
 	for i := range weights {
@@ -143,7 +141,7 @@ func (l Importance) SampleWeighted(batch *mat.Dense, weights []float64) {
 func importance(batch *mat.Dense, weights []float64, target distmv.LogProber, proposal distmv.RandLogProber) {
 	r, _ := batch.Dims()
 	if r != len(weights) {
-		panic(badLengthMismatch)
+		panic(errLengthMismatch)
 	}
 	for i := 0; i < r; i++ {
 		v := batch.RawRowView(i)

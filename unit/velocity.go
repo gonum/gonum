@@ -16,7 +16,7 @@ import (
 // Velocity represents a velocity in metres per second.
 type Velocity float64
 
-// Unit converts the Velocity to a *Unit
+// Unit converts the Velocity to a *Unit.
 func (v Velocity) Unit() *Unit {
 	return New(float64(v), Dimensions{
 		LengthDim: 1,
@@ -24,17 +24,17 @@ func (v Velocity) Unit() *Unit {
 	})
 }
 
-// Velocity allows Velocity to implement a Velocityer interface
+// Velocity allows Velocity to implement a Velocityer interface.
 func (v Velocity) Velocity() Velocity {
 	return v
 }
 
 // From converts the unit into the receiver. From returns an
-// error if there is a mismatch in dimension
+// error if there is a mismatch in dimension.
 func (v *Velocity) From(u Uniter) error {
 	if !DimensionsMatch(u, Velocity(0)) {
 		*v = Velocity(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*v = Velocity(u.Unit().Value())
 	return nil

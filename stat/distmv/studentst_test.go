@@ -206,7 +206,10 @@ func TestStudentsTConditional(t *testing.T) {
 		newMuVec := mat.NewVecDense(len(muUnob), newMu)
 		shiftVec := mat.NewVecDense(len(shift), shift)
 		var tmp mat.VecDense
-		tmp.SolveVec(&sig22, shiftVec)
+		err := tmp.SolveVec(&sig22, shiftVec)
+		if err != nil {
+			t.Errorf("unexpected error from vector solve: %v", err)
+		}
 		newMuVec.MulVec(sig12, &tmp)
 		floats.Add(newMu, muUnob)
 
@@ -215,7 +218,10 @@ func TestStudentsTConditional(t *testing.T) {
 		}
 
 		var tmp2 mat.Dense
-		tmp2.Solve(&sig22, sig12.T())
+		err = tmp2.Solve(&sig22, sig12.T())
+		if err != nil {
+			t.Errorf("unexpected error from dense solve: %v", err)
+		}
 
 		var tmp3 mat.Dense
 		tmp3.Mul(sig12, &tmp2)

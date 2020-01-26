@@ -2,20 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package f64
+package f64_test
 
 import (
 	"math"
 	"testing"
 
 	"golang.org/x/exp/rand"
+
+	"gonum.org/v1/gonum/floats"
 )
 
 const (
 	msgVal      = "%v: unexpected value at %v Got: %v Expected: %v"
 	msgGuard    = "%v: Guard violated in %s vector %v %v"
 	msgReadOnly = "%v: modified read-only %v argument"
-	epsilon     = 1e-12
 )
 
 var (
@@ -147,9 +148,9 @@ func same(a, b float64) bool {
 	return a == b || (math.IsNaN(a) && math.IsNaN(b))
 }
 
-// within tests for nan-aware equality within epsilon.
-func within(a, b float64) bool {
-	return same(a, b) || math.Abs(a-b) <= epsilon
+// sameApprox tests for nan-aware equality within tolerance.
+func sameApprox(a, b, tol float64) bool {
+	return same(a, b) || floats.EqualWithinAbsOrRel(a, b, tol, tol)
 }
 
 var ( // Offset sets for testing alignment handling in Unitary assembly functions.

@@ -18,24 +18,24 @@ type Radioactivity float64
 
 const Becquerel Radioactivity = 1
 
-// Unit converts the Radioactivity to a *Unit
+// Unit converts the Radioactivity to a *Unit.
 func (r Radioactivity) Unit() *Unit {
 	return New(float64(r), Dimensions{
 		TimeDim: -1,
 	})
 }
 
-// Radioactivity allows Radioactivity to implement a Radioactivityer interface
+// Radioactivity allows Radioactivity to implement a Radioactivityer interface.
 func (r Radioactivity) Radioactivity() Radioactivity {
 	return r
 }
 
 // From converts the unit into the receiver. From returns an
-// error if there is a mismatch in dimension
+// error if there is a mismatch in dimension.
 func (r *Radioactivity) From(u Uniter) error {
 	if !DimensionsMatch(u, Becquerel) {
 		*r = Radioactivity(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*r = Radioactivity(u.Unit().Value())
 	return nil

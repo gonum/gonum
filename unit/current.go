@@ -18,24 +18,24 @@ type Current float64
 
 const Ampere Current = 1
 
-// Unit converts the Current to a *Unit
+// Unit converts the Current to a *Unit.
 func (i Current) Unit() *Unit {
 	return New(float64(i), Dimensions{
 		CurrentDim: 1,
 	})
 }
 
-// Current allows Current to implement a Currenter interface
+// Current allows Current to implement a Currenter interface.
 func (i Current) Current() Current {
 	return i
 }
 
 // From converts the unit into the receiver. From returns an
-// error if there is a mismatch in dimension
+// error if there is a mismatch in dimension.
 func (i *Current) From(u Uniter) error {
 	if !DimensionsMatch(u, Ampere) {
 		*i = Current(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*i = Current(u.Unit().Value())
 	return nil

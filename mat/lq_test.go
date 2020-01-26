@@ -30,16 +30,17 @@ func TestLQ(t *testing.T) {
 
 		var lq LQ
 		lq.Factorize(a)
-		q := lq.QTo(nil)
+		var l, q Dense
+		lq.QTo(&q)
 
-		if !isOrthonormal(q, 1e-10) {
+		if !isOrthonormal(&q, 1e-10) {
 			t.Errorf("Q is not orthonormal: m = %v, n = %v", m, n)
 		}
 
-		l := lq.LTo(nil)
+		lq.LTo(&l)
 
 		var got Dense
-		got.Mul(l, q)
+		got.Mul(&l, &q)
 		if !EqualApprox(&got, &want, 1e-12) {
 			t.Errorf("LQ does not equal original matrix. \nWant: %v\nGot: %v", want, got)
 		}
@@ -78,11 +79,14 @@ func TestLQSolveTo(t *testing.T) {
 			var x Dense
 			lq := &LQ{}
 			lq.Factorize(a)
-			lq.SolveTo(&x, trans, b)
+			err := lq.SolveTo(&x, trans, b)
+			if err != nil {
+				t.Errorf("unexpected error from LQ solve: %v", err)
+			}
 
 			// Test that the normal equations hold.
-			// A^T * A * x = A^T * b if !trans
-			// A * A^T * x = A * b if trans
+			// Aᵀ * A * x = Aᵀ * b if !trans
+			// A * Aᵀ * x = A * b if trans
 			var lhs Dense
 			var rhs Dense
 			if trans {
@@ -131,11 +135,14 @@ func TestLQSolveToVec(t *testing.T) {
 			var x VecDense
 			lq := &LQ{}
 			lq.Factorize(a)
-			lq.SolveVecTo(&x, trans, b)
+			err := lq.SolveVecTo(&x, trans, b)
+			if err != nil {
+				t.Errorf("unexpected error from LQ solve: %v", err)
+			}
 
 			// Test that the normal equations hold.
-			// A^T * A * x = A^T * b if !trans
-			// A * A^T * x = A * b if trans
+			// Aᵀ * A * x = Aᵀ * b if !trans
+			// A * Aᵀ * x = A * b if trans
 			var lhs Dense
 			var rhs Dense
 			if trans {

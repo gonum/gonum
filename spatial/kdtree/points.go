@@ -19,7 +19,7 @@ type Point []float64
 func (p Point) Compare(c Comparable, d Dim) float64 { q := c.(Point); return p[d] - q[d] }
 
 // Dims returns the number of dimensions described by the receiver.
-func (p Point) Dims() int                           { return len(p) }
+func (p Point) Dims() int { return len(p) }
 
 // Distance returns the squared Euclidean distance between c and the receiver. The
 // concrete type of c must be Point.

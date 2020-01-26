@@ -18,24 +18,24 @@ type Frequency float64
 
 const Hertz Frequency = 1
 
-// Unit converts the Frequency to a *Unit
+// Unit converts the Frequency to a *Unit.
 func (f Frequency) Unit() *Unit {
 	return New(float64(f), Dimensions{
 		TimeDim: -1,
 	})
 }
 
-// Frequency allows Frequency to implement a Frequencyer interface
+// Frequency allows Frequency to implement a Frequencyer interface.
 func (f Frequency) Frequency() Frequency {
 	return f
 }
 
 // From converts the unit into the receiver. From returns an
-// error if there is a mismatch in dimension
+// error if there is a mismatch in dimension.
 func (f *Frequency) From(u Uniter) error {
 	if !DimensionsMatch(u, Hertz) {
 		*f = Frequency(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*f = Frequency(u.Unit().Value())
 	return nil

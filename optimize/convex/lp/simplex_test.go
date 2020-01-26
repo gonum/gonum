@@ -173,7 +173,7 @@ func testRandomSimplex(t *testing.T, nTest int, pZero float64, maxN int, rnd *ra
 	}
 }
 
-func testSimplex(t *testing.T, initialBasic []int, c []float64, a mat.Matrix, b []float64, convergenceTol float64) error {
+func testSimplex(t *testing.T, initialBasic []int, c []float64, a mat.Matrix, b []float64, convergenceTol float64) {
 	primalOpt, primalX, _, errPrimal := simplex(initialBasic, c, a, b, convergenceTol)
 	if errPrimal == nil {
 		// No error solving the simplex, check that the solution is feasible.
@@ -200,21 +200,21 @@ func testSimplex(t *testing.T, initialBasic []int, c []float64, a mat.Matrix, b 
 		if primalBad {
 			t.Errorf("non-known error returned: %s", errPrimal)
 		}
-		return errPrimal
+		return
 	}
 
 	// Compare the result to the answer found from solving the dual LP.
 
 	// Construct and solve the dual LP.
 	// Standard Form:
-	//  minimize c^T * x
+	//  minimize cᵀ * x
 	//    subject to  A * x = b, x >= 0
 	// The dual of this problem is
-	//  maximize -b^T * nu
-	//   subject to A^T * nu + c >= 0
+	//  maximize -bᵀ * nu
+	//   subject to Aᵀ * nu + c >= 0
 	// Which is
-	//   minimize b^T * nu
-	//   subject to -A^T * nu <= c
+	//   minimize bᵀ * nu
+	//   subject to -Aᵀ * nu <= c
 
 	negAT := &mat.Dense{}
 	negAT.CloneFrom(a.T())
@@ -233,12 +233,12 @@ func testSimplex(t *testing.T, initialBasic []int, c []float64, a mat.Matrix, b 
 
 	// Check about the zero status.
 	if errPrimal == ErrZeroRow || errPrimal == ErrZeroColumn {
-		return errPrimal
+		return
 	}
 
 	// If the primal problem is feasible, then the primal and the dual should
 	// be the same answer. We have flopped the sign in the dual (minimizing
-	// b^T *nu instead of maximizing -b^T*nu), so flip it back.
+	// bᵀ * nu instead of maximizing -bᵀ * nu), so flip it back.
 	if errPrimal == nil {
 		if errDual != nil {
 			t.Errorf("Primal feasible but dual errored: %s", errDual)
@@ -265,6 +265,4 @@ func testSimplex(t *testing.T, initialBasic []int, c []float64, a mat.Matrix, b 
 			t.Errorf("Primal infeasible but dual not infeasible or unbounded: %s", errDual)
 		}
 	}
-
-	return errPrimal
 }

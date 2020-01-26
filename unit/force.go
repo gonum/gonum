@@ -18,7 +18,7 @@ type Force float64
 
 const Newton Force = 1
 
-// Unit converts the Force to a *Unit
+// Unit converts the Force to a *Unit.
 func (f Force) Unit() *Unit {
 	return New(float64(f), Dimensions{
 		LengthDim: 1,
@@ -27,17 +27,17 @@ func (f Force) Unit() *Unit {
 	})
 }
 
-// Force allows Force to implement a Forcer interface
+// Force allows Force to implement a Forcer interface.
 func (f Force) Force() Force {
 	return f
 }
 
 // From converts the unit into the receiver. From returns an
-// error if there is a mismatch in dimension
+// error if there is a mismatch in dimension.
 func (f *Force) From(u Uniter) error {
 	if !DimensionsMatch(u, Newton) {
 		*f = Force(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*f = Force(u.Unit().Value())
 	return nil

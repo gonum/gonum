@@ -16,24 +16,24 @@ import (
 // Area represents an area in square metres.
 type Area float64
 
-// Unit converts the Area to a *Unit
+// Unit converts the Area to a *Unit.
 func (a Area) Unit() *Unit {
 	return New(float64(a), Dimensions{
 		LengthDim: 2,
 	})
 }
 
-// Area allows Area to implement a Areaer interface
+// Area allows Area to implement a Areaer interface.
 func (a Area) Area() Area {
 	return a
 }
 
 // From converts the unit into the receiver. From returns an
-// error if there is a mismatch in dimension
+// error if there is a mismatch in dimension.
 func (a *Area) From(u Uniter) error {
 	if !DimensionsMatch(u, Area(0)) {
 		*a = Area(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*a = Area(u.Unit().Value())
 	return nil

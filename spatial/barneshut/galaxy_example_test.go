@@ -5,6 +5,8 @@
 package barneshut_test
 
 import (
+	"log"
+
 	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/spatial/barneshut"
@@ -56,7 +58,10 @@ func Example_galaxy() {
 		// this step may be omitted and ForceOn will
 		// perform the naive quadratic calculation
 		// without building the data structure.
-		plane.Reset()
+		err := plane.Reset()
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		// Calculate the force vectors using the theta
 		// parameter...

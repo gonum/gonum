@@ -32,7 +32,7 @@ type Bhattacharyya struct{}
 //
 // For Normal distributions, the Bhattacharyya distance is
 //  Σ = (Σ_l + Σ_r)/2
-//  D_B = (1/8)*(μ_l - μ_r)^T*Σ^-1*(μ_l - μ_r) + (1/2)*ln(det(Σ)/(det(Σ_l)*det(Σ_r))^(1/2))
+//  D_B = (1/8)*(μ_l - μ_r)ᵀ*Σ^-1*(μ_l - μ_r) + (1/2)*ln(det(Σ)/(det(Σ_l)*det(Σ_r))^(1/2))
 func (Bhattacharyya) DistNormal(l, r *Normal) float64 {
 	dim := l.Dim()
 	if dim != r.Dim() {
@@ -179,7 +179,7 @@ func (KullbackLeibler) DistDirichlet(l, r *Dirichlet) float64 {
 // The dimensions of the input distributions must match or DistNormal will panic.
 //
 // For two normal distributions, the KL divergence is computed as
-//   D_KL(l || r) = 0.5*[ln(|Σ_r|) - ln(|Σ_l|) + (μ_l - μ_r)^T*Σ_r^-1*(μ_l - μ_r) + tr(Σ_r^-1*Σ_l)-d]
+//   D_KL(l || r) = 0.5*[ln(|Σ_r|) - ln(|Σ_l|) + (μ_l - μ_r)ᵀ*Σ_r^-1*(μ_l - μ_r) + tr(Σ_r^-1*Σ_l)-d]
 func (KullbackLeibler) DistNormal(l, r *Normal) float64 {
 	dim := l.Dim()
 	if dim != r.Dim() {
@@ -191,7 +191,7 @@ func (KullbackLeibler) DistNormal(l, r *Normal) float64 {
 
 	// TODO(btracey): Optimize where there is a SolveCholeskySym
 	// TODO(btracey): There may be a more efficient way to just compute the trace
-	// Compute tr(Σ_r^-1*Σ_l) using the fact that Σ_l = U^T * U
+	// Compute tr(Σ_r^-1*Σ_l) using the fact that Σ_l = Uᵀ * U
 	var u mat.TriDense
 	l.chol.UTo(&u)
 	var m mat.Dense
@@ -335,7 +335,10 @@ func (Wasserstein) DistNormal(l, r *Normal) float64 {
 
 	// Compute Σ_l^(1/2)
 	var ssl mat.SymDense
-	ssl.PowPSD(&l.sigma, 0.5)
+	err := ssl.PowPSD(&l.sigma, 0.5)
+	if err != nil {
+		panic(err)
+	}
 	// Compute Σ_l^(1/2)*Σ_r*Σ_l^(1/2)
 	var mean mat.Dense
 	mean.Mul(&ssl, &r.sigma)
@@ -343,7 +346,10 @@ func (Wasserstein) DistNormal(l, r *Normal) float64 {
 
 	// Reinterpret as symdense, and take Σ^(1/2)
 	meanSym := mat.NewSymDense(dim, mean.RawMatrix().Data)
-	ssl.PowPSD(meanSym, 0.5)
+	err = ssl.PowPSD(meanSym, 0.5)
+	if err != nil {
+		panic(err)
+	}
 
 	tr := mat.Trace(&r.sigma)
 	tl := mat.Trace(&l.sigma)

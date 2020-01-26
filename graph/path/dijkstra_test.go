@@ -13,6 +13,7 @@ import (
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/path/internal/testgraphs"
+	"gonum.org/v1/gonum/graph/simple"
 	"gonum.org/v1/gonum/graph/traverse"
 )
 
@@ -192,5 +193,36 @@ func TestDijkstraAllPaths(t *testing.T) {
 			t.Errorf("%q: unexpected path:\ngot: paths=%v weight=%f\nwant:path=<nil> weight=+Inf",
 				test.Name, nps, weight)
 		}
+	}
+}
+
+func TestAllShortestAbsentNode(t *testing.T) {
+	g := simple.NewUndirectedGraph()
+	g.SetEdge(simple.Edge{F: simple.Node(1), T: simple.Node(2)})
+	paths := DijkstraAllPaths(g)
+	// Confirm we have a good paths tree.
+	if _, cost := paths.AllBetween(1, 2); cost != 1 {
+		t.Errorf("unexpected cost between existing nodes: got:%v want:1", cost)
+	}
+
+	gotPath, cost, unique := paths.Between(0, 0)
+	if cost != 0 {
+		t.Errorf("unexpected cost from absent node to itself: got:%v want:0", cost)
+	}
+	if !unique {
+		t.Error("unexpected non-unique path from absent node to itself")
+	}
+	wantPath := []graph.Node{node(0)}
+	if !reflect.DeepEqual(gotPath, wantPath) {
+		t.Errorf("unexpected path from absent node to itself: got:%#v want:%#v", gotPath, wantPath)
+	}
+
+	gotPaths, cost := paths.AllBetween(0, 0)
+	if cost != 0 {
+		t.Errorf("unexpected cost from absent node to itself: got:%v want:0", cost)
+	}
+	wantPaths := [][]graph.Node{{node(0)}}
+	if !reflect.DeepEqual(gotPaths, wantPaths) {
+		t.Errorf("unexpected paths from absent node to itself: got:%#v want:%#v", gotPaths, wantPaths)
 	}
 }

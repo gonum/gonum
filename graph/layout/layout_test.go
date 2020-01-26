@@ -7,7 +7,6 @@ package layout
 import (
 	"bytes"
 	"encoding/base64"
-	"fmt"
 	"image"
 	"image/png"
 	"io/ioutil"
@@ -18,10 +17,8 @@ import (
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
-	"gonum.org/v1/gonum/graph/encoding"
 	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/iterator"
-	"gonum.org/v1/gonum/spatial/r2"
 	"gonum.org/v1/plot/cmpimg"
 )
 
@@ -42,17 +39,6 @@ func (g orderedGraph) From(id int64) graph.Nodes {
 	n := graph.NodesOf(g.Graph.From(id))
 	sort.Sort(ordered.ByID(n))
 	return iterator.NewOrderedNodes(n)
-}
-
-// positionNode is a graph.Node with an XY position.
-type positionNode struct {
-	id  int64
-	pos r2.Vec
-}
-
-func (n positionNode) ID() int64 { return n.id }
-func (n positionNode) Attributes() []encoding.Attribute {
-	return []encoding.Attribute{{Key: "pos", Value: fmt.Sprintf(`"%f,%f"`, n.pos.X, n.pos.Y)}}
 }
 
 func goldenPath(path string) string {

@@ -82,7 +82,6 @@ func (n *Newton) Init(dim, tasks int) int {
 func (n *Newton) Run(operation chan<- Task, result <-chan Task, tasks []Task) {
 	n.status, n.err = localOptimizer{}.run(n, n.GradStopThreshold, operation, result, tasks)
 	close(operation)
-	return
 }
 
 func (n *Newton) initLocal(loc *Location) (Operation, error) {
@@ -153,9 +152,11 @@ func (n *Newton) NextDirection(loc *Location, dir []float64) (stepSize float64) 
 		pd := n.chol.Factorize(n.hess)
 		if pd {
 			// Store the solution in d's backing array, dir.
-			n.chol.SolveVecTo(d, grad)
-			d.ScaleVec(-1, d)
-			return 1
+			err := n.chol.SolveVecTo(d, grad)
+			if err == nil {
+				d.ScaleVec(-1, d)
+				return 1
+			}
 		}
 		// Modified Hessian is not PD, so increase tau.
 		n.tau = math.Max(n.Increase*n.tau, 0.001)

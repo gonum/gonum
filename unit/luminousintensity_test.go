@@ -11,6 +11,26 @@ import (
 	"testing"
 )
 
+func TestLuminousIntensity(t *testing.T) {
+	for _, value := range []float64{-1, 0, 1} {
+		var got LuminousIntensity
+		err := got.From(LuminousIntensity(value).Unit())
+		if err != nil {
+			t.Errorf("unexpected error for %T conversion: %v", got, err)
+		}
+		if got != LuminousIntensity(value) {
+			t.Errorf("unexpected result from round trip of %T(%v): got: %v want: %v", got, float64(value), got, value)
+		}
+		if got != got.LuminousIntensity() {
+			t.Errorf("unexpected result from self interface method call: got: %#v want: %#v", got, value)
+		}
+		err = got.From(ether(1))
+		if err == nil {
+			t.Errorf("expected error for ether to %T conversion", got)
+		}
+	}
+}
+
 func TestLuminousIntensityFormat(t *testing.T) {
 	for _, test := range []struct {
 		value  LuminousIntensity

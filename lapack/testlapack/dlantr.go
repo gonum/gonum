@@ -26,6 +26,12 @@ func DlantrTest(t *testing.T, impl Dlantrer) {
 	for _, m := range []int{0, 1, 2, 3, 4, 5, 10} {
 		for _, n := range []int{0, 1, 2, 3, 4, 5, 10} {
 			for _, uplo := range []blas.Uplo{blas.Lower, blas.Upper} {
+				if uplo == blas.Upper && m > n {
+					continue
+				}
+				if uplo == blas.Lower && n > m {
+					continue
+				}
 				for _, diag := range []blas.Diag{blas.NonUnit, blas.Unit} {
 					for _, lda := range []int{max(1, n), n + 3} {
 						dlantrTest(t, impl, rnd, uplo, diag, m, n, lda)
@@ -102,10 +108,13 @@ func dlantrTest(t *testing.T, impl Dlantrer, rnd *rand.Rand, uplo blas.Uplo, dia
 	aCopy := make([]float64, len(a))
 	copy(aCopy, a)
 
-	work := make([]float64, n)
 	for _, norm := range []lapack.MatrixNorm{lapack.MaxAbs, lapack.MaxColumnSum, lapack.MaxRowSum, lapack.Frobenius} {
 		name := fmt.Sprintf("norm=%v,uplo=%v,diag=%v,m=%v,n=%v,lda=%v", string(norm), string(uplo), string(diag), m, n, lda)
 
+		var work []float64
+		if norm == lapack.MaxColumnSum {
+			work = make([]float64, n)
+		}
 		normGot := impl.Dlantr(norm, uplo, diag, m, n, a, lda, work)
 
 		if !floats.Equal(a, aCopy) {

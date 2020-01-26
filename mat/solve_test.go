@@ -214,10 +214,13 @@ func TestSolve(t *testing.T) {
 			}
 		}
 		var x Dense
-		x.Solve(a, b)
+		err := x.Solve(a, b)
+		if err != nil {
+			t.Errorf("unexpected error from dense solve: %v", err)
+		}
 
 		// Test that the normal equations hold.
-		// A^T * A * x = A^T * b
+		// Aᵀ * A * x = Aᵀ * b
 		var tmp, lhs, rhs Dense
 		tmp.Mul(a.T(), a)
 		lhs.Mul(&tmp, &x)
@@ -233,10 +236,10 @@ func TestSolve(t *testing.T) {
 			Solve(a, b Matrix) error
 		}
 		rd := receiver.(Solver)
-		rd.Solve(a, b)
+		_ = rd.Solve(a, b)
 	}
 	denseComparison := func(receiver, a, b *Dense) {
-		receiver.Solve(a, b)
+		_ = receiver.Solve(a, b)
 	}
 	testTwoInput(t, "Solve", &Dense{}, method, denseComparison, legalTypesAll, legalSizeSolve, 1e-7)
 }
@@ -269,10 +272,13 @@ func TestSolveVec(t *testing.T) {
 			b.SetVec(i, rand.Float64())
 		}
 		var x VecDense
-		x.SolveVec(a, b)
+		err := x.SolveVec(a, b)
+		if err != nil {
+			t.Errorf("unexpected error from dense vector solve: %v", err)
+		}
 
 		// Test that the normal equations hold.
-		// A^T * A * x = A^T * b
+		// Aᵀ * A * x = Aᵀ * b
 		var tmp, lhs, rhs Dense
 		tmp.Mul(a.T(), a)
 		lhs.Mul(&tmp, &x)
@@ -288,10 +294,10 @@ func TestSolveVec(t *testing.T) {
 			SolveVec(a Matrix, b Vector) error
 		}
 		rd := receiver.(SolveVecer)
-		rd.SolveVec(a, b.(Vector))
+		_ = rd.SolveVec(a, b.(Vector))
 	}
 	denseComparison := func(receiver, a, b *Dense) {
-		receiver.Solve(a, b)
+		_ = receiver.Solve(a, b)
 	}
 	testTwoInput(t, "SolveVec", &VecDense{}, method, denseComparison, legalTypesMatrixVector, legalSizeSolve, 1e-12)
 }

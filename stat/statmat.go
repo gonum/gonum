@@ -18,7 +18,7 @@ import (
 // If weights is not nil the weighted covariance of x is calculated. weights
 // must have length equal to the number of rows in input data matrix and
 // must not contain negative elements.
-// The dst matrix must either be zero-sized or have the same number of
+// The dst matrix must either be empty or have the same number of
 // columns as the input data matrix.
 func CovarianceMatrix(dst *mat.SymDense, x mat.Matrix, weights []float64) {
 	// This is the matrix version of the two-pass algorithm. It doesn't use the
@@ -27,7 +27,7 @@ func CovarianceMatrix(dst *mat.SymDense, x mat.Matrix, weights []float64) {
 
 	r, c := x.Dims()
 
-	if dst.IsZero() {
+	if dst.IsEmpty() {
 		*dst = *(dst.GrowSym(c).(*mat.SymDense))
 	} else if n := dst.Symmetric(); n != c {
 		panic(mat.ErrShape)
@@ -76,7 +76,7 @@ func CovarianceMatrix(dst *mat.SymDense, x mat.Matrix, weights []float64) {
 // If weights is not nil the weighted correlation of x is calculated. weights
 // must have length equal to the number of rows in input data matrix and
 // must not contain negative elements.
-// The dst matrix must either be zero-sized or have the same number of
+// The dst matrix must either be empty or have the same number of
 // columns as the input data matrix.
 func CorrelationMatrix(dst *mat.SymDense, x mat.Matrix, weights []float64) {
 	// This will panic if the sizes don't match, or if weights is the wrong size.
@@ -123,7 +123,7 @@ func corrToCov(c *mat.SymDense, sigma []float64) {
 }
 
 // Mahalanobis computes the Mahalanobis distance
-//  D = sqrt((x-y)^T * Σ^-1 * (x-y))
+//  D = sqrt((x-y)ᵀ * Σ^-1 * (x-y))
 // between the column vectors x and y given the cholesky decomposition of Σ.
 // Mahalanobis returns NaN if the linear solve fails.
 //

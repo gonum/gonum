@@ -11,8 +11,8 @@ import (
 
 // Dpbtrf computes the Cholesky factorization of an n×n symmetric positive
 // definite band matrix
-//  A = U^T * U  if uplo == blas.Upper
-//  A = L * L^T  if uplo == blas.Lower
+//  A = Uᵀ * U  if uplo == blas.Upper
+//  A = L * Lᵀ  if uplo == blas.Lower
 // where U is an upper triangular band matrix and L is lower triangular. kd is
 // the number of super- or sub-diagonals of A.
 //

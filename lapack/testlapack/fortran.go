@@ -13,7 +13,7 @@ import (
 
 // fortran64 is a float64 type that prints as a double precision constant in
 // Fortran format.
-type fortran64 float64
+type fortran64 float64 //nolint:unused
 
 func (f fortran64) String() string {
 	// Replace exponent with D
@@ -24,6 +24,7 @@ func (f fortran64) String() string {
 
 // printFortranArray prints a Go slice as an array that can be copied into a
 // fortran script.
+//nolint:deadcode,unused
 func printFortranArray(z []float64, name string) {
 	fmt.Printf("%s(1:%d) = (/%v, &\n", name, len(z), fortran64(z[0]))
 	for i := 1; i < len(z)-1; i++ {

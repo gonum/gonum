@@ -96,5 +96,5 @@ sum_tail1:
 	ADDSD (SI)(IDX*8), SUM
 
 sum_end: // return sum
-	MOVSD SUM, sum+24(FP)
+	MOVSD SUM, ret+24(FP)
 	RET

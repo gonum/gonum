@@ -50,7 +50,7 @@ func (l *Laplace) Fit(samples, weights []float64) {
 	}
 
 	if len(samples) == 0 {
-		panic(badNoSamples)
+		panic(errNoSamples)
 	}
 	if len(samples) == 1 {
 		l.Mu = samples[0]

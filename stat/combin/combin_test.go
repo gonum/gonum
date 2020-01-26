@@ -7,6 +7,7 @@ package combin
 import (
 	"math/big"
 	"reflect"
+	"strconv"
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
@@ -181,6 +182,87 @@ func TestCombinationGenerator(t *testing.T) {
 	}
 }
 
+func TestCombinationIndex(t *testing.T) {
+	for cas, s := range []struct {
+		n, k int
+	}{
+		{6, 3},
+		{4, 4},
+		{10, 1},
+		{8, 2},
+	} {
+		n := s.n
+		k := s.k
+		combs := make(map[string]struct{})
+		for i := 0; i < Binomial(n, k); i++ {
+			comb := IndexToCombination(nil, i, n, k)
+			idx := CombinationIndex(comb, n, k)
+			if idx != i {
+				t.Errorf("Cas %d: combination mismatch. Want %d, got %d", cas, i, idx)
+			}
+			combs[intSliceToKey(comb)] = struct{}{}
+		}
+		if len(combs) != Binomial(n, k) {
+			t.Errorf("Case %d: not all generated combinations were unique", cas)
+		}
+	}
+}
+
+func intSliceToKey(s []int) string {
+	var str string
+	for _, v := range s {
+		str += strconv.Itoa(v) + "_"
+	}
+	return str
+}
+
+// TestCombinationOrder tests that the different Combinations methods
+// agree on the iteration order.
+func TestCombinationOrder(t *testing.T) {
+	n := 7
+	k := 3
+	list := Combinations(n, k)
+	for i, v := range list {
+		idx := CombinationIndex(v, n, k)
+		if idx != i {
+			t.Errorf("Combinations and CombinationIndex mismatch")
+			break
+		}
+	}
+}
+
+func TestIdxSubFor(t *testing.T) {
+	for cas, dims := range [][]int{
+		{2, 2},
+		{3, 1, 6},
+		{2, 4, 6, 7},
+	} {
+		// Loop over all of the indexes. Confirm that the subscripts make sense
+		// and that IdxFor is the converse of SubFor.
+		maxIdx := 1
+		for _, v := range dims {
+			maxIdx *= v
+		}
+		into := make([]int, len(dims))
+		for idx := 0; idx < maxIdx; idx++ {
+			sub := SubFor(nil, idx, dims)
+			for i := range sub {
+				if sub[i] < 0 || sub[i] >= dims[i] {
+					t.Errorf("cas %v: bad subscript. dims: %v, sub: %v", cas, dims, sub)
+				}
+			}
+			SubFor(into, idx, dims)
+			if !reflect.DeepEqual(sub, into) {
+				t.Errorf("cas %v: subscript mismatch with supplied slice. Got %v, want %v", cas, into, sub)
+			}
+			idxOut := IdxFor(sub, dims)
+			if idxOut != idx {
+				t.Errorf("cas %v: returned index mismatch. Got %v, want %v", cas, idxOut, idx)
+			}
+		}
+	}
+}
+
 func TestCartesian(t *testing.T) {
 	// First, test with a known return.
 	lens := []int{2, 3, 4}
@@ -212,37 +294,79 @@ func TestCartesian(t *testing.T) {
 	}
 	got := Cartesian(lens)
 	if !intSosMatch(want, got) {
-		t.Errorf("cartesian data mismatch.\nwant:\n%v\ngot:\n%v", want, got)
+		t.Errorf("Cartesian data mismatch.\nwant:\n%v\ngot:\n%v", want, got)
 	}
 }
 
-func TestIdxSubFor(t *testing.T) {
-	for cas, dims := range [][]int{
-		{2, 2},
-		{3, 1, 6},
-		{2, 4, 6, 7},
-	} {
-		// Loop over all of the indexes. Confirm that the subscripts make sense
-		// and that IdxFor is the converse of SubFor.
-		maxIdx := 1
-		for _, v := range dims {
-			maxIdx *= v
+func TestNumCartesianProducts(t *testing.T) {
+	want := 6
+	got := Card([]int{1, 2, 3})
+	if want != got {
+		t.Errorf("number of Cartesian products mismatch.\nwant:\n%v\ngot:\n%v", want, got)
+	}
+}
+
+func TestCartesianGenerator(t *testing.T) {
+	want := [][]int{
+		{0, 0, 0},
+		{0, 0, 1},
+		{0, 0, 2},
+		{0, 1, 0},
+		{0, 1, 1},
+		{0, 1, 2},
+	}
+	gen := NewCartesianGenerator([]int{1, 2, 3})
+	iterations := 0
+	for gen.Next() {
+		got := gen.Product(nil)
+		if !reflect.DeepEqual(got, want[iterations]) {
+			t.Errorf("Cartesian product does not match. want: %v got: %v", want[iterations], got)
 		}
-		into := make([]int, len(dims))
-		for idx := 0; idx < maxIdx; idx++ {
-			sub := SubFor(nil, idx, dims)
-			for i := range sub {
-				if sub[i] < 0 || sub[i] >= dims[i] {
-					t.Errorf("cas %v: bad subscript. dims: %v, sub: %v", cas, dims, sub)
-				}
+		iterations++
+	}
+
+	if iterations != len(want) {
+		t.Errorf("Number of products does not match. want: %v got: %v", len(want), iterations)
+	}
+}
+
+func TestPermutationIndex(t *testing.T) {
+	for cas, s := range []struct {
+		n, k int
+	}{
+		{6, 3},
+		{4, 4},
+		{10, 1},
+		{8, 2},
+	} {
+		n := s.n
+		k := s.k
+		perms := make(map[string]struct{})
+		for i := 0; i < NumPermutations(n, k); i++ {
+			perm := IndexToPermutation(nil, i, n, k)
+			idx := PermutationIndex(perm, n, k)
+			if idx != i {
+				t.Errorf("Cas %d: permutation mismatch. Want %d, got %d", cas, i, idx)
 			}
-			SubFor(into, idx, dims)
-			if !reflect.DeepEqual(sub, into) {
-				t.Errorf("cas %v: subscript mismatch with supplied slice. Got %v, want %v", cas, into, sub)
+			perms[intSliceToKey(perm)] = struct{}{}
+		}
+		if len(perms) != NumPermutations(n, k) {
+			t.Errorf("Case %d: not all generated combinations were unique", cas)
+		}
+	}
+}
+
+func TestPermutationGenerator(t *testing.T) {
+	for n := 0; n <= 7; n++ {
+		for k := 1; k <= n; k++ {
+			permutations := Permutations(n, k)
+			pg := NewPermutationGenerator(n, k)
+			genPerms := make([][]int, 0, len(permutations))
+			for pg.Next() {
+				genPerms = append(genPerms, pg.Permutation(nil))
 			}
-			idxOut := IdxFor(sub, dims)
-			if idxOut != idx {
-				t.Errorf("cas %v: returned index mismatch. Got %v, want %v", cas, idxOut, idx)
+			if !intSosMatch(permutations, genPerms) {
+				t.Errorf("Permutations and generated permutations do not match. n = %v, k = %v", n, k)
 			}
 		}
 	}

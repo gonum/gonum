@@ -6,6 +6,7 @@ package amos
 
 import (
 	"math"
+	"runtime"
 	"strconv"
 	"testing"
 
@@ -69,6 +70,10 @@ func TestAiry(t *testing.T) {
 }
 
 func TestZacai(t *testing.T) {
+	switch runtime.GOARCH {
+	case "arm64":
+		t.Skipf("skipping on GOARCH=%s", runtime.GOARCH)
+	}
 	rnd := rand.New(rand.NewSource(1))
 	for i := 0; i < nInputs; i++ {
 		in := randInput(rnd)
@@ -93,6 +98,10 @@ func TestZasyi(t *testing.T) {
 }
 
 func TestZseri(t *testing.T) {
+	switch runtime.GOARCH {
+	case "arm64":
+		t.Skipf("skipping on GOARCH=%s", runtime.GOARCH)
+	}
 	rnd := rand.New(rand.NewSource(1))
 	for i := 0; i < nInputs; i++ {
 		in := randInput(rnd)
@@ -229,7 +238,7 @@ func zkscltest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi [
 	yiamos := make([]float64, len(yi))
 	copy(yiamos, yi)
 	ZRRamos, ZRIamos, FNUamos, Namos, YRamos, YIamos, NZamos, RZRamos, RZIamos, ASCLEamos, TOLamos, ELIMamos :=
-		Zkscl(ZRR, ZRI, FNU, n, yramos, yiamos, NZ, RZR, RZI, ASCLE, tol, ELIM)
+		Zkscl(ZRR, ZRI, FNU, n, yramos, yiamos, RZR, RZI, ASCLE, tol, ELIM)
 
 	sameF64(t, "zkscl zrr", ZRRfort, ZRRamos)
 	sameF64(t, "zkscl zri", ZRIfort, ZRIamos)
@@ -265,7 +274,7 @@ func zmlritest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi [
 	yiamos := make([]float64, len(yi))
 	copy(yiamos, yi)
 	ZRamos, ZIamos, FNUamos, KODEamos, Namos, YRamos, YIamos, NZamos, TOLamos :=
-		Zmlri(ZR, ZI, FNU, KODE, n, yramos, yiamos, NZ, tol)
+		Zmlri(ZR, ZI, FNU, KODE, n, yramos, yiamos, tol)
 
 	sameF64(t, "zmlri zr", ZRfort, ZRamos)
 	sameF64(t, "zmlri zi", ZIfort, ZIamos)
@@ -332,7 +341,7 @@ func zseritest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi [
 	sameF64(t, "zseri elim", ELIMfort, ELIMamos)
 	sameF64(t, "zseri elim", ALIMfort, ALIMamos)
 
-	sameF64SApprox(t, "zseri yr", YRfort, YRamos, 1e-10)
+	sameF64SApprox(t, "zseri yr", YRfort, YRamos, 1e-9)
 	sameF64SApprox(t, "zseri yi", YIfort, YIamos, 1e-10)
 }
 
@@ -358,7 +367,7 @@ func zasyitest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi [
 	yiamos := make([]float64, len(yi))
 	copy(yiamos, yi)
 	ZRamos, ZIamos, FNUamos, KODEamos, Namos, YRamos, YIamos, NZamos, RLamos, TOLamos, ELIMamos, ALIMamos :=
-		Zasyi(ZR, ZI, FNU, KODE, n, yramos, yiamos, NZ, RL, tol, ELIM, ALIM)
+		Zasyi(ZR, ZI, FNU, KODE, n, yramos, yiamos, RL, tol, ELIM, ALIM)
 
 	sameF64(t, "zasyi zr", ZRfort, ZRamos)
 	sameF64(t, "zasyi zr", ZIfort, ZIamos)
@@ -396,7 +405,7 @@ func zbknutest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi [
 	yiamos := make([]float64, len(yi))
 	copy(yiamos, yi)
 	ZRamos, ZIamos, FNUamos, KODEamos, Namos, YRamos, YIamos, NZamos, TOLamos, ELIMamos, ALIMamos :=
-		Zbknu(ZR, ZI, FNU, KODE, n, yramos, yiamos, NZ, tol, ELIM, ALIM)
+		Zbknu(ZR, ZI, FNU, KODE, n, yramos, yiamos, tol, ELIM, ALIM)
 
 	sameF64(t, "zbknu zr", ZRfort, ZRamos)
 	sameF64(t, "zbknu zr", ZIfort, ZIamos)
@@ -418,12 +427,13 @@ func zairytest(t *testing.T, x []float64, kode, id int) {
 	KODE := kode
 	ID := id
 
-	AIRfort, AIIfort, NZfort := zairyOrig(ZR, ZI, ID, KODE)
-	AIRamos, AIIamos, NZamos := Zairy(ZR, ZI, ID, KODE)
+	AIRfort, AIIfort, NZfort, IERRfort := zairyOrig(ZR, ZI, ID, KODE)
+	AIRamos, AIIamos, NZamos, IERRamos := Zairy(ZR, ZI, ID, KODE)
 
 	sameF64Approx(t, "zairy air", AIRfort, AIRamos, 1e-12)
 	sameF64Approx(t, "zairy aii", AIIfort, AIIamos, 1e-12)
 	sameInt(t, "zairy nz", NZfort, NZamos)
+	sameInt(t, "zairy ierr", IERRfort, IERRamos)
 }
 
 func zacaitest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi []float64, kode int) {
@@ -449,7 +459,7 @@ func zacaitest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi [
 	yiamos := make([]float64, len(yi))
 	copy(yiamos, yi)
 	ZRamos, ZIamos, FNUamos, KODEamos, MRamos, Namos, YRamos, YIamos, NZamos, RLamos, TOLamos, ELIMamos, ALIMamos :=
-		Zacai(ZR, ZI, FNU, KODE, MR, n, yramos, yiamos, NZ, RL, tol, ELIM, ALIM)
+		Zacai(ZR, ZI, FNU, KODE, MR, n, yramos, yiamos, RL, tol, ELIM, ALIM)
 
 	sameF64(t, "zacai zr", ZRfort, ZRamos)
 	sameF64(t, "zacai zi", ZIfort, ZIamos)
@@ -468,6 +478,7 @@ func zacaitest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi [
 }
 
 func sameF64(t *testing.T, str string, c, native float64) {
+	t.Helper()
 	if math.IsNaN(c) && math.IsNaN(native) {
 		return
 	}
@@ -480,6 +491,7 @@ func sameF64(t *testing.T, str string, c, native float64) {
 }
 
 func sameF64Approx(t *testing.T, str string, c, native, tol float64) {
+	t.Helper()
 	if math.IsNaN(c) && math.IsNaN(native) {
 		return
 	}
@@ -498,12 +510,14 @@ func sameF64Approx(t *testing.T, str string, c, native, tol float64) {
 }
 
 func sameInt(t *testing.T, str string, c, native int) {
+	t.Helper()
 	if c != native {
 		t.Errorf("Case %s: Int mismatch. c = %v, native = %v.", str, c, native)
 	}
 }
 
 func sameF64S(t *testing.T, str string, c, native []float64) {
+	t.Helper()
 	if len(c) != len(native) {
 		panic(str)
 	}
@@ -513,6 +527,7 @@ func sameF64S(t *testing.T, str string, c, native []float64) {
 }
 
 func sameF64SApprox(t *testing.T, str string, c, native []float64, tol float64) {
+	t.Helper()
 	if len(c) != len(native) {
 		panic(str)
 	}

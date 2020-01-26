@@ -18,7 +18,7 @@ type MagneticFlux float64
 
 const Weber MagneticFlux = 1
 
-// Unit converts the MagneticFlux to a *Unit
+// Unit converts the MagneticFlux to a *Unit.
 func (m MagneticFlux) Unit() *Unit {
 	return New(float64(m), Dimensions{
 		CurrentDim: -1,
@@ -28,17 +28,17 @@ func (m MagneticFlux) Unit() *Unit {
 	})
 }
 
-// MagneticFlux allows MagneticFlux to implement a MagneticFluxer interface
+// MagneticFlux allows MagneticFlux to implement a MagneticFluxer interface.
 func (m MagneticFlux) MagneticFlux() MagneticFlux {
 	return m
 }
 
 // From converts the unit into the receiver. From returns an
-// error if there is a mismatch in dimension
+// error if there is a mismatch in dimension.
 func (m *MagneticFlux) From(u Uniter) error {
 	if !DimensionsMatch(u, Weber) {
 		*m = MagneticFlux(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*m = MagneticFlux(u.Unit().Value())
 	return nil

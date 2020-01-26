@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package f64
+package f64_test
 
 import (
 	"fmt"
 	"testing"
+
+	. "gonum.org/v1/gonum/internal/asm/f64"
 )
 
 type DgemvCase struct {
@@ -521,6 +523,8 @@ func TestGemv(t *testing.T) {
 
 func dgemvcomp(t *testing.T, test DgemvCase, trans bool, cas DgemvSubcase, i int) {
 	const (
+		tol = 1e-15
+
 		xGdVal, yGdVal, aGdVal = 0.5, 1.5, 10
 		gdLn                   = 4
 	)
@@ -540,7 +544,7 @@ func dgemvcomp(t *testing.T, test DgemvCase, trans bool, cas DgemvSubcase, i int
 		GemvN(uintptr(test.m), uintptr(test.n), cas.alpha, a, lda, x, 1, cas.beta, y, 1)
 	}
 	for i := range cas.want {
-		if !within(y[i], cas.want[i]) {
+		if !sameApprox(y[i], cas.want[i], tol) {
 			t.Errorf(msgVal, prefix, i, y[i], cas.want[i])
 		}
 	}
@@ -589,7 +593,7 @@ func dgemvcomp(t *testing.T, test DgemvCase, trans bool, cas DgemvSubcase, i int
 				cas.beta, y, uintptr(inc.y))
 		}
 		for i := range want {
-			if !within(y[i*incY], want[i]) {
+			if !sameApprox(y[i*incY], want[i], tol) {
 				t.Errorf(msgVal, incPrefix, i, y[i*incY], want[i])
 				t.Error(y[i*incY] - want[i])
 			}

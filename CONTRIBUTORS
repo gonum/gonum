@@ -1,6 +1,6 @@
 # This is the official list of people who can contribute
-# (and typically have contributed) code to the gonum
-# repository.
+# (and typically have contributed) code to the Gonum
+# project.
 #
 # The AUTHORS file lists the copyright holders; this file
 # lists people.  For example, Google employees would be listed here
@@ -28,6 +28,8 @@ Christophe Meessen <christophe.meessen@gmail.com>
 Clayton Northey <clayton.northey@gmail.com>
 Dan Kortschak <dan.kortschak@adelaide.edu.au> <dan@kortschak.io>
 Daniel Fireman <danielfireman@gmail.com>
+Dario Heinisch <dario.heinisch@gmail.com>
+David Kleiven <davidkleiven446@gmail.com>
 David Samborski <bloggingarrow@gmail.com>
 Davor Kapsa <davor.kapsa@gmail.com>
 Delaney Gillilan <delaneygillilan@gmail.com>
@@ -70,7 +72,9 @@ Martin Diz <github@martindiz.com.ar>
 Matthieu Di Mercurio <matthieu.dimercurio@gmail.com>
 Max Halford <maxhalford25@gmail.com>
 MinJae Kwon <k239507@gmail.com>
+Nathan Edwards <etaoinshrdluwho@gmail.com>
 Nick Potts <nick@the-potts.com>
+Nils Wogatzky <odog@netcologne.de>
 Olivier Wulveryck <olivier.wulveryck@gmail.com>
 Or Rikon <rikonor@gmail.com>
 Pontus Melke <pontusmelke@gmail.com>
@@ -92,3 +96,4 @@ Tobin Harding <me@tobin.cc>
 Vincent Thiery <vjmthiery@gmail.com>
 Vladimír Chalupecký <vladimir.chalupecky@gmail.com>
 Yevgeniy Vahlis <evahlis@gmail.com>
+Yucheng Zhu <zyctc000@gmail.com>

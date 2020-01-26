@@ -5,83 +5,122 @@
 package testlapack
 
 import (
+	"fmt"
 	"math"
+	"sort"
 	"testing"
 
 	"golang.org/x/exp/rand"
 
-	"gonum.org/v1/gonum/blas"
-	"gonum.org/v1/gonum/blas/blas64"
+	"gonum.org/v1/gonum/floats"
 )
 
 type Dlasq1er interface {
 	Dlasq1(n int, d, e, work []float64) int
-	Dgetrfer
+
+	Dgebrd(m, n int, a []float64, lda int, d, e, tauQ, tauP, work []float64, lwork int)
 }
 
 func Dlasq1Test(t *testing.T, impl Dlasq1er) {
+	const tol = 1e-14
 	rnd := rand.New(rand.NewSource(1))
-	bi := blas64.Implementation()
-	// TODO(btracey): Increase the size of this test when we have a more numerically
-	// stable way to test the singular values.
-	for _, n := range []int{1, 2, 5, 8} {
-		work := make([]float64, 4*n)
-		d := make([]float64, n)
-		e := make([]float64, n-1)
-		for cas := 0; cas < 1; cas++ {
+	for _, n := range []int{0, 1, 2, 3, 4, 5, 8, 10, 30, 50} {
+		for typ := 0; typ <= 7; typ++ {
+			name := fmt.Sprintf("n=%v,typ=%v", n, typ)
+
+			// Generate a diagonal matrix D with positive entries.
+			d := make([]float64, n)
+			switch typ {
+			case 0:
+				// The zero matrix.
+			case 1:
+				// The identity matrix.
+				for i := range d {
+					d[i] = 1
+				}
+			case 2:
+				// A diagonal matrix with evenly spaced entries 1, ..., eps.
+				for i := 0; i < n; i++ {
+					if i == 0 {
+						d[0] = 1
+					} else {
+						d[i] = 1 - (1-dlamchE)*float64(i)/float64(n-1)
+					}
+				}
+			case 3, 4, 5:
+				// A diagonal matrix with geometrically spaced entries 1, ..., eps.
+				for i := 0; i < n; i++ {
+					if i == 0 {
+						d[0] = 1
+					} else {
+						d[i] = math.Pow(dlamchE, float64(i)/float64(n-1))
+					}
+				}
+				switch typ {
+				case 4:
+					// Multiply by SQRT(overflow threshold).
+					floats.Scale(math.Sqrt(1/dlamchS), d)
+				case 5:
+					// Multiply by SQRT(underflow threshold).
+					floats.Scale(math.Sqrt(dlamchS), d)
+				}
+			case 6:
+				// A diagonal matrix with "clustered" entries 1, eps, ..., eps.
+				for i := range d {
+					if i == 0 {
+						d[i] = 1
+					} else {
+						d[i] = dlamchE
+					}
+				}
+			case 7:
+				// Diagonal matrix with random entries.
+				for i := range d {
+					d[i] = math.Abs(rnd.NormFloat64())
+				}
+			}
+
+			dWant := make([]float64, n)
+			copy(dWant, d)
+			sort.Sort(sort.Reverse(sort.Float64Slice(dWant)))
+
+			// Allocate work slice to the maximum length needed below.
+			work := make([]float64, max(1, 4*n))
+
+			// Generate an n×n matrix A by pre- and post-multiplying D with
+			// random orthogonal matrices:
+			//  A = U*D*V.
+			lda := max(1, n)
+			a := make([]float64, n*lda)
+			Dlagge(n, n, 0, 0, d, a, lda, rnd, work)
+
+			// Reduce A to bidiagonal form B represented by the diagonal d and
+			// off-diagonal e.
+			tauQ := make([]float64, n)
+			tauP := make([]float64, n)
+			e := make([]float64, max(0, n-1))
+			impl.Dgebrd(n, n, a, lda, d, e, tauQ, tauP, work, len(work))
+
+			// Compute the singular values of B.
 			for i := range work {
-				work[i] = rnd.Float64()
+				work[i] = math.NaN()
 			}
-			for i := range d {
-				d[i] = rnd.NormFloat64() + 10
-			}
-			for i := range e {
-				e[i] = rnd.NormFloat64()
-			}
-			ldm := n
-			m := make([]float64, n*ldm)
-			// Set up the matrix
-			for i := 0; i < n; i++ {
-				m[i*ldm+i] = d[i]
-				if i != n-1 {
-					m[(i+1)*ldm+i] = e[i]
-				}
+			info := impl.Dlasq1(n, d, e, work)
+			if info != 0 {
+				t.Fatalf("%v: Dlasq1 returned non-zero info=%v", name, info)
 			}
 
-			ldmm := n
-			mm := make([]float64, n*ldmm)
-			bi.Dgemm(blas.Trans, blas.NoTrans, n, n, n, 1, m, ldm, m, ldm, 0, mm, ldmm)
+			if n == 0 {
+				continue
+			}
 
-			impl.Dlasq1(n, d, e, work)
+			if !sort.IsSorted(sort.Reverse(sort.Float64Slice(d))) {
+				t.Errorf("%v: singular values not sorted", name)
+			}
 
-			// Check that they are singular values. The
-			// singular values are the square roots of the
-			// eigenvalues of X^T * X
-			mmCopy := make([]float64, len(mm))
-			copy(mmCopy, mm)
-			ipiv := make([]int, n)
-			for elem, sv := range d[0:n] {
-				copy(mm, mmCopy)
-				lambda := sv * sv
-				for i := 0; i < n; i++ {
-					mm[i*ldm+i] -= lambda
-				}
-
-				// Compute LU.
-				ok := impl.Dgetrf(n, n, mm, ldmm, ipiv)
-				if !ok {
-					// Definitely singular.
-					continue
-				}
-				// Compute determinant
-				var logdet float64
-				for i := 0; i < n; i++ {
-					v := mm[i*ldm+i]
-					logdet += math.Log(math.Abs(v))
-				}
-				if math.Exp(logdet) > 2 {
-					t.Errorf("Incorrect singular value. n = %d, cas = %d, elem = %d, det = %v", n, cas, elem, math.Exp(logdet))
-				}
+			diff := floats.Distance(d, dWant, math.Inf(1))
+			if diff > tol*floats.Max(dWant) {
+				t.Errorf("%v: unexpected result; diff=%v", name, diff)
 			}
 		}
 	}

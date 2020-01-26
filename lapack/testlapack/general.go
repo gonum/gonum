@@ -510,7 +510,7 @@ func constructH(tau []float64, v blas64.General, store lapack.StoreV, direct lap
 		for i := 0; i < m; i++ {
 			hi.Data[i*m+i] = 1
 		}
-		// hi = I - tau * v * v^T
+		// hi = I - tau * v * vᵀ
 		blas64.Ger(-tau[i], vec, vec, hi)
 
 		hcopy := blas64.General{
@@ -613,7 +613,7 @@ func constructQK(kind string, m, n, k int, a []float64, lda int, tau []float64) 
 // decomposition) is input in aCopy.
 //
 // checkBidiagonal constructs the V and U matrices, and from them constructs Q
-// and P. Using these constructions, it checks that Q^T * A * P and checks that
+// and P. Using these constructions, it checks that Qᵀ * A * P and checks that
 // the result is bidiagonal.
 func checkBidiagonal(t *testing.T, m, n, nb int, a []float64, lda int, d, e, tauP, tauQ, aCopy []float64) {
 	// Check the answer.
@@ -621,7 +621,7 @@ func checkBidiagonal(t *testing.T, m, n, nb int, a []float64, lda int, d, e, tau
 	qMat := constructQPBidiagonal(lapack.ApplyQ, m, n, nb, a, lda, tauQ)
 	pMat := constructQPBidiagonal(lapack.ApplyP, m, n, nb, a, lda, tauP)
 
-	// Compute Q^T * A * P.
+	// Compute Qᵀ * A * P.
 	aMat := blas64.General{
 		Rows:   m,
 		Cols:   n,
@@ -820,6 +820,7 @@ func constructQPBidiagonal(vect lapack.ApplyOrtho, m, n, nb int, a []float64, ld
 // printRowise prints the matrix with one row per line. This is useful for debugging.
 // If beyond is true, it prints beyond the final column to lda. If false, only
 // the columns are printed.
+//nolint:deadcode,unused
 func printRowise(a []float64, m, n, lda int, beyond bool) {
 	for i := 0; i < m; i++ {
 		end := n
@@ -1003,6 +1004,7 @@ func equalApproxTriangular(upper bool, n int, a []float64, lda int, b []float64,
 	return true
 }
 
+//nolint:deadcode,unused
 func equalApproxSymmetric(a, b blas64.Symmetric, tol float64) bool {
 	if a.Uplo != b.Uplo {
 		return false
@@ -1052,7 +1054,7 @@ func randSymBand(uplo blas.Uplo, n, kd, ldab int, rnd *rand.Rand) []float64 {
 			ab[i*ldab+kd] = float64(n) + rnd.Float64()
 		}
 	}
-	// Compute U^T*U or L*L^T. The resulting (symmetric) matrix A will be
+	// Compute Uᵀ*U or L*Lᵀ. The resulting (symmetric) matrix A will be
 	// positive definite and well-conditioned.
 	dsbmm(uplo, n, kd, ab, ldab)
 	return ab
@@ -1324,9 +1326,9 @@ func isRightEigenvectorOf(a blas64.General, xRe, xIm []float64, lambda complex12
 //
 // A left eigenvector corresponding to a complex eigenvalue λ is a complex
 // non-zero vector y such that
-//  y^H A = λ y^H,
+//  yᴴ A = λ yᴴ,
 // which is equivalent for real A to
-//  A^T y = conj(λ) y,
+//  Aᵀ y = conj(λ) y,
 func isLeftEigenvectorOf(a blas64.General, yRe, yIm []float64, lambda complex128, tol float64) bool {
 	if a.Rows != a.Cols {
 		panic("matrix not square")
@@ -1340,7 +1342,7 @@ func isLeftEigenvectorOf(a blas64.General, yRe, yIm []float64, lambda complex128
 
 	n := a.Rows
 
-	// Compute A^T real(y) and store the result into yReAns.
+	// Compute Aᵀ real(y) and store the result into yReAns.
 	yReAns := make([]float64, n)
 	blas64.Gemv(blas.Trans, 1, a, blas64.Vector{Data: yRe, Inc: 1}, 0, blas64.Vector{Data: yReAns, Inc: 1})
 
@@ -1358,7 +1360,7 @@ func isLeftEigenvectorOf(a blas64.General, yRe, yIm []float64, lambda complex128
 
 	// Complex eigenvector, and real or complex eigenvalue.
 
-	// Compute A^T imag(y) and store the result into yImAns.
+	// Compute Aᵀ imag(y) and store the result into yImAns.
 	yImAns := make([]float64, n)
 	blas64.Gemv(blas.Trans, 1, a, blas64.Vector{Data: yIm, Inc: 1}, 0, blas64.Vector{Data: yImAns, Inc: 1})
 

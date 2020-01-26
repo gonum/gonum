@@ -18,7 +18,7 @@ type MagneticFluxDensity float64
 
 const Tesla MagneticFluxDensity = 1
 
-// Unit converts the MagneticFluxDensity to a *Unit
+// Unit converts the MagneticFluxDensity to a *Unit.
 func (m MagneticFluxDensity) Unit() *Unit {
 	return New(float64(m), Dimensions{
 		CurrentDim: -1,
@@ -27,17 +27,17 @@ func (m MagneticFluxDensity) Unit() *Unit {
 	})
 }
 
-// MagneticFluxDensity allows MagneticFluxDensity to implement a MagneticFluxDensityer interface
+// MagneticFluxDensity allows MagneticFluxDensity to implement a MagneticFluxDensityer interface.
 func (m MagneticFluxDensity) MagneticFluxDensity() MagneticFluxDensity {
 	return m
 }
 
 // From converts the unit into the receiver. From returns an
-// error if there is a mismatch in dimension
+// error if there is a mismatch in dimension.
 func (m *MagneticFluxDensity) From(u Uniter) error {
 	if !DimensionsMatch(u, Tesla) {
 		*m = MagneticFluxDensity(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*m = MagneticFluxDensity(u.Unit().Value())
 	return nil

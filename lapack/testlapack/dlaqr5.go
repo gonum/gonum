@@ -5,13 +5,8 @@
 package testlapack
 
 import (
-	"compress/gzip"
-	"encoding/json"
 	"fmt"
-	"log"
 	"math"
-	"os"
-	"path/filepath"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -24,86 +19,13 @@ type Dlaqr5er interface {
 	Dlaqr5(wantt, wantz bool, kacc22 int, n, ktop, kbot, nshfts int, sr, si []float64, h []float64, ldh int, iloz, ihiz int, z []float64, ldz int, v []float64, ldv int, u []float64, ldu int, nh int, wh []float64, ldwh int, nv int, wv []float64, ldwv int)
 }
 
-type Dlaqr5test struct {
-	WantT          bool
-	N              int
-	NShifts        int
-	KTop, KBot     int
-	ShiftR, ShiftI []float64
-	H              []float64
-
-	HWant []float64
-	ZWant []float64
-}
-
 func Dlaqr5Test(t *testing.T, impl Dlaqr5er) {
-	// Test without using reference data.
 	rnd := rand.New(rand.NewSource(1))
 	for _, n := range []int{1, 2, 3, 4, 5, 6, 10, 30} {
 		for _, extra := range []int{0, 1, 20} {
 			for _, kacc22 := range []int{0, 1, 2} {
 				for cas := 0; cas < 100; cas++ {
 					testDlaqr5(t, impl, n, extra, kacc22, rnd)
-				}
-			}
-		}
-	}
-
-	// Test using reference data computed by the reference netlib
-	// implementation.
-	file, err := os.Open(filepath.FromSlash("../testlapack/testdata/dlaqr5data.json.gz"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-	r, err := gzip.NewReader(file)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer r.Close()
-
-	var tests []Dlaqr5test
-	json.NewDecoder(r).Decode(&tests)
-	for _, test := range tests {
-		wantt := test.WantT
-		n := test.N
-		nshfts := test.NShifts
-		ktop := test.KTop
-		kbot := test.KBot
-		sr := test.ShiftR
-		si := test.ShiftI
-
-		for _, extra := range []int{0, 1, 10} {
-			v := randomGeneral(nshfts/2, 3, 3+extra, rnd)
-			u := randomGeneral(3*nshfts-3, 3*nshfts-3, 3*nshfts-3+extra, rnd)
-			nh := n
-			wh := randomGeneral(3*nshfts-3, n, n+extra, rnd)
-			nv := n
-			wv := randomGeneral(n, 3*nshfts-3, 3*nshfts-3+extra, rnd)
-
-			h := nanGeneral(n, n, n+extra)
-
-			for _, kacc22 := range []int{0, 1, 2} {
-				copyMatrix(n, n, h.Data, h.Stride, test.H)
-				z := eye(n, n+extra)
-
-				impl.Dlaqr5(wantt, true, kacc22,
-					n, ktop, kbot,
-					nshfts, sr, si,
-					h.Data, h.Stride,
-					0, n-1, z.Data, z.Stride,
-					v.Data, v.Stride,
-					u.Data, u.Stride,
-					nv, wv.Data, wv.Stride,
-					nh, wh.Data, wh.Stride)
-
-				prefix := fmt.Sprintf("wantt=%v, n=%v, nshfts=%v, ktop=%v, kbot=%v, extra=%v, kacc22=%v",
-					wantt, n, nshfts, ktop, kbot, extra, kacc22)
-				if !equalApprox(n, n, h.Data, h.Stride, test.HWant, 1e-13) {
-					t.Errorf("Case %v: unexpected matrix H\nh    =%v\nhwant=%v", prefix, h.Data, test.HWant)
-				}
-				if !equalApprox(n, n, z.Data, z.Stride, test.ZWant, 1e-13) {
-					t.Errorf("Case %v: unexpected matrix Z\nz    =%v\nzwant=%v", prefix, z.Data, test.ZWant)
 				}
 			}
 		}
@@ -189,7 +111,7 @@ func testDlaqr5(t *testing.T, impl Dlaqr5er, n, extra, kacc22 int, rnd *rand.Ran
 	if !isOrthogonal(z) {
 		t.Errorf("%v: Z is not orthogonal", prefix)
 	}
-	// Construct Z^T * HOrig * Z and check that it is equal to H from Dlaqr5.
+	// Construct Zᵀ * HOrig * Z and check that it is equal to H from Dlaqr5.
 	hz := blas64.General{
 		Rows:   n,
 		Cols:   n,
@@ -208,7 +130,7 @@ func testDlaqr5(t *testing.T, impl Dlaqr5er, n, extra, kacc22 int, rnd *rand.Ran
 		for j := 0; j < n; j++ {
 			diff := zhz.Data[i*zhz.Stride+j] - h.Data[i*h.Stride+j]
 			if math.Abs(diff) > 1e-13 {
-				t.Errorf("%v: Z^T*HOrig*Z and H are not equal, diff at [%v,%v]=%v", prefix, i, j, diff)
+				t.Errorf("%v: Zᵀ*HOrig*Z and H are not equal, diff at [%v,%v]=%v", prefix, i, j, diff)
 			}
 		}
 	}

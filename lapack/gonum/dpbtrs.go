@@ -11,8 +11,8 @@ import (
 
 // Dpbtrs solves a system of linear equations A*X = B with an n×n symmetric
 // positive definite band matrix A using the Cholesky factorization
-//  A = U^T * U  if uplo == blas.Upper
-//  A = L * L^T  if uplo == blas.Lower
+//  A = Uᵀ * U  if uplo == blas.Upper
+//  A = L * Lᵀ  if uplo == blas.Lower
 // computed by Dpbtrf. kd is the number of super- or sub-diagonals of A. See the
 // documentation for Dpbtrf for a description of the band storage format of A.
 //
@@ -48,21 +48,20 @@ func (Implementation) Dpbtrs(uplo blas.Uplo, n, kd, nrhs int, ab []float64, ldab
 
 	bi := blas64.Implementation()
 	if uplo == blas.Upper {
-		// Solve A*X = B where A = U^T*U.
+		// Solve A*X = B where A = Uᵀ*U.
 		for j := 0; j < nrhs; j++ {
-			// Solve U^T*Y = B, overwriting B with Y.
+			// Solve Uᵀ*Y = B, overwriting B with Y.
 			bi.Dtbsv(blas.Upper, blas.Trans, blas.NonUnit, n, kd, ab, ldab, b[j:], ldb)
 			// Solve U*X = Y, overwriting Y with X.
 			bi.Dtbsv(blas.Upper, blas.NoTrans, blas.NonUnit, n, kd, ab, ldab, b[j:], ldb)
 		}
 	} else {
-		// Solve A*X = B where A = L*L^T.
+		// Solve A*X = B where A = L*Lᵀ.
 		for j := 0; j < nrhs; j++ {
 			// Solve L*Y = B, overwriting B with Y.
 			bi.Dtbsv(blas.Lower, blas.NoTrans, blas.NonUnit, n, kd, ab, ldab, b[j:], ldb)
-			// Solve L^T*X = Y, overwriting Y with X.
+			// Solve Lᵀ*X = Y, overwriting Y with X.
 			bi.Dtbsv(blas.Lower, blas.Trans, blas.NonUnit, n, kd, ab, ldab, b[j:], ldb)
 		}
 	}
-	return
 }

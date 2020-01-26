@@ -366,7 +366,10 @@ var (
 
 func gnpUndirected(n int, p float64) graph.Undirected {
 	g := simple.NewUndirectedGraph()
-	gen.Gnp(g, n, p, nil)
+	err := gen.Gnp(g, n, p, nil)
+	if err != nil {
+		panic(fmt.Sprintf("traverse: bad test: %v", err))
+	}
 	return g
 }
 

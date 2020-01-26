@@ -27,10 +27,16 @@ func TestGuessAndCheck(t *testing.T) {
 		panic("bad test")
 	}
 	initX := make([]float64, dim)
-	Minimize(problem, initX, nil, &GuessAndCheck{Rander: d})
+	_, err := Minimize(problem, initX, nil, &GuessAndCheck{Rander: d})
+	if err != nil {
+		t.Errorf("unexpected error running Minimize with nil settings: %v", err)
+	}
 
 	settings := &Settings{}
 	settings.Concurrent = 5
 	settings.MajorIterations = 15
-	Minimize(problem, initX, settings, &GuessAndCheck{Rander: d})
+	_, err = Minimize(problem, initX, settings, &GuessAndCheck{Rander: d})
+	if err != nil {
+		t.Errorf("unexpected error running Minimize with settings %+v: %v", settings, err)
+	}
 }

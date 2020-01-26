@@ -16,7 +16,7 @@ import (
 // Acceleration represents an acceleration in metres per second squared.
 type Acceleration float64
 
-// Unit converts the Acceleration to a *Unit
+// Unit converts the Acceleration to a *Unit.
 func (a Acceleration) Unit() *Unit {
 	return New(float64(a), Dimensions{
 		LengthDim: 1,
@@ -24,17 +24,17 @@ func (a Acceleration) Unit() *Unit {
 	})
 }
 
-// Acceleration allows Acceleration to implement a Accelerationer interface
+// Acceleration allows Acceleration to implement a Accelerationer interface.
 func (a Acceleration) Acceleration() Acceleration {
 	return a
 }
 
 // From converts the unit into the receiver. From returns an
-// error if there is a mismatch in dimension
+// error if there is a mismatch in dimension.
 func (a *Acceleration) From(u Uniter) error {
 	if !DimensionsMatch(u, Acceleration(0)) {
 		*a = Acceleration(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*a = Acceleration(u.Unit().Value())
 	return nil

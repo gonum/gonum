@@ -18,7 +18,7 @@ type Energy float64
 
 const Joule Energy = 1
 
-// Unit converts the Energy to a *Unit
+// Unit converts the Energy to a *Unit.
 func (e Energy) Unit() *Unit {
 	return New(float64(e), Dimensions{
 		LengthDim: 2,
@@ -27,17 +27,17 @@ func (e Energy) Unit() *Unit {
 	})
 }
 
-// Energy allows Energy to implement a Energyer interface
+// Energy allows Energy to implement a Energyer interface.
 func (e Energy) Energy() Energy {
 	return e
 }
 
 // From converts the unit into the receiver. From returns an
-// error if there is a mismatch in dimension
+// error if there is a mismatch in dimension.
 func (e *Energy) From(u Uniter) error {
 	if !DimensionsMatch(u, Joule) {
 		*e = Energy(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*e = Energy(u.Unit().Value())
 	return nil

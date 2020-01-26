@@ -11,7 +11,7 @@ func leaksPanic(fn func()) (panicked bool) {
 		r := recover()
 		panicked = r != nil
 	}()
-	Maybe(fn)
+	_ = Maybe(fn)
 	return
 }
 

@@ -18,24 +18,24 @@ type Mole float64
 
 const Mol Mole = 1
 
-// Unit converts the Mole to a *Unit
+// Unit converts the Mole to a *Unit.
 func (n Mole) Unit() *Unit {
 	return New(float64(n), Dimensions{
 		MoleDim: 1,
 	})
 }
 
-// Mole allows Mole to implement a Moleer interface
+// Mole allows Mole to implement a Moleer interface.
 func (n Mole) Mole() Mole {
 	return n
 }
 
 // From converts the unit into the receiver. From returns an
-// error if there is a mismatch in dimension
+// error if there is a mismatch in dimension.
 func (n *Mole) From(u Uniter) error {
 	if !DimensionsMatch(u, Mol) {
 		*n = Mole(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*n = Mole(u.Unit().Value())
 	return nil

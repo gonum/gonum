@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//nolint:deadcode,unused
 package mat
 
 import (
@@ -785,7 +786,7 @@ func underlyingData(a Matrix) []float64 {
 
 // testMatrices is a list of matrix types to test.
 // This test relies on the fact that the implementations of Triangle do not
-// corrupt the value of Uplo when they are zero-valued. This test will fail
+// corrupt the value of Uplo when they are empty. This test will fail
 // if that changes (and some mechanism will need to be used to force the
 // correct TriKind to be read).
 var testMatrices = []Matrix{
@@ -1467,7 +1468,7 @@ func testTwoInput(t *testing.T,
 					// Ensure that b is the correct transpose type if applicable.
 					// The receiver is always a concrete type so use it.
 					bSame := receiver
-					u, ok = b.(Untransposer)
+					_, ok = b.(Untransposer)
 					if ok {
 						bSame = retranspose(b, receiver)
 					}

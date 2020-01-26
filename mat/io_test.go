@@ -134,8 +134,8 @@ func TestDenseMarshalTo(t *testing.T) {
 		if !bytes.Equal(buf.Bytes(), test.raw) {
 			t.Errorf("error encoding test-%d: bytes mismatch.\n got=%q\nwant=%q\n",
 				i,
-				string(buf.Bytes()),
-				string(test.raw),
+				buf.Bytes(),
+				test.raw,
 			)
 			continue
 		}
@@ -415,8 +415,8 @@ func TestVecDenseMarshalTo(t *testing.T) {
 		if !bytes.Equal(buf.Bytes(), test.raw) {
 			t.Errorf("error encoding test-%d: bytes mismatch.\n got=%q\nwant=%q\n",
 				i,
-				string(buf.Bytes()),
-				string(test.raw),
+				buf.Bytes(),
+				test.raw,
 			)
 			continue
 		}
@@ -584,7 +584,10 @@ func marshalBinaryBenchDense(b *testing.B, size int) {
 	b.ResetTimer()
 
 	for n := 0; n < b.N; n++ {
-		m.MarshalBinary()
+		_, err := m.MarshalBinary()
+		if err != nil {
+			b.Fatalf("unexpected error: %v", err)
+		}
 	}
 }
 
@@ -606,7 +609,10 @@ func unmarshalBinaryBenchDense(b *testing.B, size int) {
 
 	for n := 0; n < b.N; n++ {
 		var m Dense
-		m.UnmarshalBinary(buf)
+		err := m.UnmarshalBinary(buf)
+		if err != nil {
+			b.Fatalf("unexpected error: %v", err)
+		}
 	}
 }
 
@@ -625,7 +631,10 @@ func marshalBinaryToBenchDense(b *testing.B, size int) {
 	b.ResetTimer()
 
 	for n := 0; n < b.N; n++ {
-		m.MarshalBinaryTo(w)
+		_, err := m.MarshalBinaryTo(w)
+		if err != nil {
+			b.Fatalf("unexpected error: %v", err)
+		}
 	}
 }
 
@@ -663,7 +672,10 @@ func unmarshalBinaryFromBenchDense(b *testing.B, size int) {
 
 	for n := 0; n < b.N; n++ {
 		var m Dense
-		m.UnmarshalBinaryFrom(r)
+		_, err := m.UnmarshalBinaryFrom(r)
+		if err != nil {
+			b.Fatalf("unexpected error: %v", err)
+		}
 		r.reset()
 	}
 }
@@ -682,7 +694,10 @@ func marshalBinaryBenchVecDense(b *testing.B, size int) {
 	b.ResetTimer()
 
 	for n := 0; n < b.N; n++ {
-		vec.MarshalBinary()
+		_, err := vec.MarshalBinary()
+		if err != nil {
+			b.Fatalf("unexpected error: %v", err)
+		}
 	}
 }
 
@@ -704,7 +719,10 @@ func unmarshalBinaryBenchVecDense(b *testing.B, size int) {
 
 	for n := 0; n < b.N; n++ {
 		var vec VecDense
-		vec.UnmarshalBinary(buf)
+		err := vec.UnmarshalBinary(buf)
+		if err != nil {
+			b.Fatalf("unexpected error: %v", err)
+		}
 	}
 }
 
@@ -723,7 +741,10 @@ func marshalBinaryToBenchVecDense(b *testing.B, size int) {
 	b.ResetTimer()
 
 	for n := 0; n < b.N; n++ {
-		vec.MarshalBinaryTo(w)
+		_, err := vec.MarshalBinaryTo(w)
+		if err != nil {
+			b.Fatalf("unexpected error: %v", err)
+		}
 	}
 }
 
@@ -746,7 +767,10 @@ func unmarshalBinaryFromBenchVecDense(b *testing.B, size int) {
 
 	for n := 0; n < b.N; n++ {
 		var vec VecDense
-		vec.UnmarshalBinaryFrom(r)
+		_, err := vec.UnmarshalBinaryFrom(r)
+		if err != nil {
+			b.Fatalf("unexpected error: %v", err)
+		}
 		r.reset()
 	}
 }

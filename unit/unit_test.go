@@ -10,6 +10,13 @@ import (
 	"testing"
 )
 
+// ether is a non-existant unit used for testing.
+type ether float64
+
+func (e ether) Unit() *Unit {
+	return New(float64(e), Dimensions{reserved: 1})
+}
+
 var formatTests = []struct {
 	unit   Uniter
 	format string
@@ -159,6 +166,47 @@ func TestDimensionEquality(t *testing.T) {
 	}
 }
 
+var operationTests = []struct {
+	recvOp func(Uniter) *Unit
+	param  Uniter
+	want   Uniter
+}{
+	{Dimless(1).Unit().Add, Dimless(2), Dimless(3)},
+	{Dimless(1).Unit().Mul, Dimless(2), Dimless(2)},
+	{Dimless(1).Unit().Mul, Length(2), Length(2)},
+	{Length(1).Unit().Mul, Dimless(2), Length(2)},
+	{Dimless(1).Unit().Div, Length(2), New(0.5, Dimensions{LengthDim: -1})},
+	{Length(1).Unit().Div, Dimless(2), Length(0.5)},
+}
+
+func TestOperations(t *testing.T) {
+	for i, test := range operationTests {
+		var got Uniter
+		if panics(func() { got = test.recvOp(test.param) }) {
+			t.Errorf("unexpected panic for test %d", i)
+			continue
+		}
+		if !DimensionsMatch(got, test.want) {
+			t.Errorf("dimension mismatch for test %d: got=%v want=%v", i, got.Unit(), test.want.Unit())
+		}
+		if got.Unit().Value() != test.want.Unit().Value() {
+			t.Errorf("value mismatch for test %d: got=%v want=%v", i, got.Unit().Value(), test.want.Unit().Value())
+		}
+	}
+}
+
+// panics returns true if the function panics.
+func panics(f func()) (b bool) {
+	defer func() {
+		err := recover()
+		if err != nil {
+			b = true
+		}
+	}()
+	f()
+	return
+}
+
 type UnitStructer interface {
 	UnitStruct() *UnitStruct
 }
@@ -227,8 +275,6 @@ func (u *UnitStruct) Mul(aU UnitStructer) *UnitStruct {
 	u.value *= a.value
 	return u
 }
-
-var u3 *UnitStruct
 
 func BenchmarkAddStruct(b *testing.B) {
 	u1 := &UnitStruct{current: 1, chemamt: 5, value: 10}

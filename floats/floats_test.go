@@ -36,7 +36,6 @@ func areSlicesSame(t *testing.T, truth, comp []float64, str string) {
 				break
 			}
 		}
-
 	}
 	if !ok {
 		t.Errorf(str+". Expected %v, returned %v", truth, comp)
@@ -96,7 +95,6 @@ func TestAddTo(t *testing.T) {
 	if !Panics(func() { AddTo(make([]float64, 3), make([]float64, 3), make([]float64, 2)) }) {
 		t.Errorf("Did not panic with length mismatch")
 	}
-
 }
 
 func TestAddConst(t *testing.T) {
@@ -208,7 +206,6 @@ func TestCumProd(t *testing.T) {
 	truth = []float64{}
 	CumProd(emptyReceiver, emptyReceiver)
 	areSlicesEqual(t, truth, emptyReceiver, "Wrong cumprod returned with empty receiver")
-
 }
 
 func TestCumSum(t *testing.T) {
@@ -231,7 +228,6 @@ func TestCumSum(t *testing.T) {
 	truth = []float64{}
 	CumSum(emptyReceiver, emptyReceiver)
 	areSlicesEqual(t, truth, emptyReceiver, "Wrong cumsum returned with empty receiver")
-
 }
 
 func TestDistance(t *testing.T) {
@@ -261,7 +257,7 @@ func TestDistance(t *testing.T) {
 			copy(tmp, test.s)
 			Sub(tmp, test.t)
 			norm := Norm(tmp, L)
-			if dist != norm { // Use equality because they should be identical
+			if dist != norm { // Use equality because they should be identical.
 				t.Errorf("Distance does not match norm for case %v, %v. Expected %v, Found %v.", i, j, norm, dist)
 			}
 		}
@@ -270,7 +266,6 @@ func TestDistance(t *testing.T) {
 	if !Panics(func() { Distance([]float64{}, norms, 1) }) {
 		t.Errorf("Did not panic with unequal lengths")
 	}
-
 }
 
 func TestDiv(t *testing.T) {
@@ -398,7 +393,7 @@ func TestEqualFunc(t *testing.T) {
 }
 
 func TestEqualsRelative(t *testing.T) {
-	var equalityTests = []struct {
+	equalityTests := []struct {
 		a, b  float64
 		tol   float64
 		equal bool
@@ -518,7 +513,6 @@ func TestEqualsULP(t *testing.T) {
 	if EqualWithinULP(1, math.NaN(), 10) {
 		t.Errorf("NaN returned as equal")
 	}
-
 }
 
 func TestEqualLengths(t *testing.T) {
@@ -699,7 +693,6 @@ func TestLogSumExp(t *testing.T) {
 	if math.Abs(val-truth) > EqTolerance {
 		t.Errorf("Wrong logsumexp for values with negative infinity")
 	}
-
 }
 
 func TestMaxAndIdx(t *testing.T) {
@@ -1572,7 +1565,6 @@ func TestWithin(t *testing.T) {
 			t.Errorf("Case %v: Idx mismatch. Want: %v, got: %v", i, test.idx, idx)
 		}
 	}
-
 }
 
 func randomSlice(l int) []float64 {
@@ -1753,3 +1745,15 @@ func BenchmarkScaleSmall(b *testing.B)  { benchmarkScale(b, Small) }
 func BenchmarkScaleMedium(b *testing.B) { benchmarkScale(b, Medium) }
 func BenchmarkScaleLarge(b *testing.B)  { benchmarkScale(b, Large) }
 func BenchmarkScaleHuge(b *testing.B)   { benchmarkScale(b, Huge) }
+
+func benchmarkNorm2(b *testing.B, size int) {
+	s := randomSlice(size)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		Norm(s, 2)
+	}
+}
+func BenchmarkNorm2Small(b *testing.B)  { benchmarkNorm2(b, Small) }
+func BenchmarkNorm2Medium(b *testing.B) { benchmarkNorm2(b, Medium) }
+func BenchmarkNorm2Large(b *testing.B)  { benchmarkNorm2(b, Large) }
+func BenchmarkNorm2Huge(b *testing.B)   { benchmarkNorm2(b, Huge) }

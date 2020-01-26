@@ -77,6 +77,12 @@ type Prefix struct {
 var Units = []Unit{
 	// Base units.
 	{
+		DimensionName: "Dimless",
+		Receiver:      "d",
+		TypeComment:   "Dimless represents a dimensionless constant",
+		Dimensions:    []Dimension{},
+	},
+	{
 		DimensionName: "Angle",
 		Receiver:      "a",
 		PrintString:   "rad",
@@ -442,7 +448,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"unicode/utf8"
+	{{if .PrintString}}"unicode/utf8"{{end}}
 )
 
 // {{.TypeComment}}.
@@ -463,7 +469,7 @@ const {{if .ExtraConstant}}({{end}}
 var prefix = template.Must(template.New("prefix").Parse(constTemplate))
 
 const methodTemplate = `
-// Unit converts the {{.DimensionName}} to a *Unit
+// Unit converts the {{.DimensionName}} to a *Unit.
 func ({{.Receiver}} {{.DimensionName}}) Unit() *Unit {
 	return New(float64({{.Receiver}}), Dimensions{
 		{{range .Dimensions}} {{.Name}}: {{.Power}},
@@ -471,17 +477,17 @@ func ({{.Receiver}} {{.DimensionName}}) Unit() *Unit {
 		})
 }
 
-// {{.DimensionName}} allows {{.DimensionName}} to implement a {{if .ErForm}}{{.ErForm}}{{else}}{{.DimensionName}}er{{end}} interface
+// {{.DimensionName}} allows {{.DimensionName}} to implement a {{if .ErForm}}{{.ErForm}}{{else}}{{.DimensionName}}er{{end}} interface.
 func ({{.Receiver}} {{.DimensionName}}) {{.DimensionName}}() {{.DimensionName}} {
 	return {{.Receiver}}
 }
 
 // From converts the unit into the receiver. From returns an
-// error if there is a mismatch in dimension
+// error if there is a mismatch in dimension.
 func ({{.Receiver}} *{{.DimensionName}}) From(u Uniter) error {
 	if !DimensionsMatch(u, {{if .Name}}{{.Name}}{{else}}{{.DimensionName}}(0){{end}}){
 		*{{.Receiver}} = {{.DimensionName}}(math.NaN())
-		return errors.New("Dimension mismatch")
+		return errors.New("unit: dimension mismatch")
 	}
 	*{{.Receiver}} = {{.DimensionName}}(u.Unit().Value())
 	return nil
@@ -502,7 +508,7 @@ func ({{.Receiver}} {{.DimensionName}}) Format(fs fmt.State, c rune) {
 	case 'e', 'E', 'f', 'F', 'g', 'G':
 		p, pOk := fs.Precision()
 		w, wOk := fs.Width()
-		const unit = " {{.PrintString}}"
+		{{if .PrintString}}const unit = " {{.PrintString}}"
 		switch {
 		case pOk && wOk:
 			fmt.Fprintf(fs, "%*.*"+string(c), pos(w-utf8.RuneCount([]byte(unit))), p, float64({{.Receiver}}))
@@ -515,7 +521,18 @@ func ({{.Receiver}} {{.DimensionName}}) Format(fs fmt.State, c rune) {
 		}
 		fmt.Fprint(fs, unit)
 	default:
-		fmt.Fprintf(fs, "%%!%c(%T=%g {{.PrintString}})", c, {{.Receiver}}, float64({{.Receiver}}))
+		fmt.Fprintf(fs, "%%!%c(%T=%g {{.PrintString}})", c, {{.Receiver}}, float64({{.Receiver}})) {{else}} switch {
+		case pOk && wOk:
+			fmt.Fprintf(fs, "%*.*"+string(c), w, p, float64({{.Receiver}}))
+		case pOk:
+			fmt.Fprintf(fs, "%.*"+string(c), p, float64({{.Receiver}}))
+		case wOk:
+			fmt.Fprintf(fs, "%*"+string(c), w, float64({{.Receiver}}))
+		default:
+			fmt.Fprintf(fs, "%"+string(c), float64({{.Receiver}}))
+		}
+	default:
+		fmt.Fprintf(fs, "%%!%c(%T=%g)", c, {{.Receiver}}, float64({{.Receiver}})) {{end}}
 	}
 }
 `
@@ -577,19 +594,39 @@ import (
 	"testing"
 )
 
+func Test{{.DimensionName}}(t *testing.T) {
+	for _, value := range []float64{-1, 0, 1} {
+		var got {{.DimensionName}}
+		err := got.From({{.DimensionName}}(value).Unit())
+		if err != nil {
+			t.Errorf("unexpected error for %T conversion: %v", got, err)
+		}
+		if got != {{.DimensionName}}(value) {
+			t.Errorf("unexpected result from round trip of %T(%v): got: %v want: %v", got, float64(value), got, value)
+		}
+		if got != got.{{.DimensionName}}() {
+			t.Errorf("unexpected result from self interface method call: got: %#v want: %#v", got, value)
+		}
+		err = got.From(ether(1))
+		if err == nil {
+			t.Errorf("expected error for ether to %T conversion", got)
+		}
+	}
+}
+
 func Test{{.DimensionName}}Format(t *testing.T) {
 	for _, test := range []struct{
 		value  {{.DimensionName}}
 		format string
 		want   string
 	}{
-		{1.23456789, "%v", "1.23456789 {{.PrintString}}"},
-		{1.23456789, "%.1v", "1 {{.PrintString}}"},
-		{1.23456789, "%20.1v", "{{$s := printf "1 %s" .PrintString}}{{printf "%20s" $s}}"},
-		{1.23456789, "%20v", "{{$s := printf "1.23456789 %s" .PrintString}}{{printf "%20s" $s}}"},
-		{1.23456789, "%1v", "1.23456789 {{.PrintString}}"},
+		{1.23456789, "%v", "1.23456789{{with .PrintString}} {{.}}{{end}}"},
+		{1.23456789, "%.1v", "1{{with .PrintString}} {{.}}{{end}}"},
+		{1.23456789, "%20.1v", "{{if .PrintString}}{{$s := printf "1 %s" .PrintString}}{{printf "%20s" $s}}{{else}}{{printf "%20s" "1"}}{{end}}"},
+		{1.23456789, "%20v", "{{if .PrintString}}{{$s := printf "1.23456789 %s" .PrintString}}{{printf "%20s" $s}}{{else}}{{printf "%20s" "1.23456789"}}{{end}}"},
+		{1.23456789, "%1v", "1.23456789{{with .PrintString}} {{.}}{{end}}"},
 		{1.23456789, "%#v", "unit.{{.DimensionName}}(1.23456789)"},
-		{1.23456789, "%s", "%!s(unit.{{.DimensionName}}=1.23456789 {{.PrintString}})"},
+		{1.23456789, "%s", "%!s(unit.{{.DimensionName}}=1.23456789{{with .PrintString}} {{.}}{{end}})"},
 	} {
 		got := fmt.Sprintf(test.format, test.value)
 		if got != test.want {

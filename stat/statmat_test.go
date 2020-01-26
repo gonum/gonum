@@ -15,6 +15,8 @@ import (
 )
 
 func TestCovarianceMatrix(t *testing.T) {
+	const tol = 1e-15
+
 	// An alternative way to test this is to call the Variance and
 	// Covariance functions and ensure that the results are identical.
 	for i, test := range []struct {
@@ -47,7 +49,7 @@ func TestCovarianceMatrix(t *testing.T) {
 				1,
 			},
 			ans: mat.NewDense(2, 2, []float64{
-				.8, 3.2,
+				0.8, 3.2,
 				3.2, 13.142857142857146,
 			}),
 		},
@@ -64,7 +66,7 @@ func TestCovarianceMatrix(t *testing.T) {
 
 		var cov mat.SymDense
 		CovarianceMatrix(&cov, test.data, test.weights)
-		if !mat.Equal(&cov, test.ans) {
+		if !mat.EqualApprox(&cov, test.ans, tol) {
 			t.Errorf("%d: expected cov %v, found %v", i, test.ans, &cov)
 		}
 		if !floats.Equal(d, r.Data) {

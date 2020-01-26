@@ -19,7 +19,7 @@ type Dlascler interface {
 }
 
 func DlasclTest(t *testing.T, impl Dlascler) {
-	const tol = 1e-16
+	const tol = 1e-15
 
 	rnd := rand.New(rand.NewSource(1))
 	for ti, test := range []struct {
@@ -114,7 +114,7 @@ func DlasclTest(t *testing.T, impl Dlascler) {
 					}
 				}
 				if resid > tol*float64(max(m, n)) {
-					t.Errorf("%v: unexpected result; residual=%v, want<=%v", prefix, resid, tol)
+					t.Errorf("%v: unexpected result; residual=%v, want<=%v", prefix, resid, tol*float64(max(m, n)))
 				}
 			}
 		}

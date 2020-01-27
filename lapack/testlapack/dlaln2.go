@@ -33,7 +33,7 @@ func Dlaln2Test(t *testing.T, impl Dlaln2er) {
 }
 
 func testDlaln2(t *testing.T, impl Dlaln2er, trans bool, na, nw, extra int, rnd *rand.Rand) {
-	const tol = 1e-12
+	const tol = 1e-11
 
 	// Generate random input scalars.
 	ca := rnd.NormFloat64()

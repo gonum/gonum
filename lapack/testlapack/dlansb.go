@@ -121,7 +121,7 @@ func dlansbTest(t *testing.T, impl Dlansber, rnd *rand.Rand, uplo blas.Uplo, n, 
 		case lapack.Frobenius:
 			normWant = frobWant
 		}
-		if math.Abs(normGot-normWant) >= tol {
+		if math.Abs(normGot-normWant) > tol*float64(n) {
 			t.Errorf("%v: unexpected result; got %v, want %v", name, normGot, normWant)
 		}
 	}

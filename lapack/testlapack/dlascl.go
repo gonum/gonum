@@ -19,7 +19,7 @@ type Dlascler interface {
 }
 
 func DlasclTest(t *testing.T, impl Dlascler) {
-	const tol = 1e-16
+	const tol = 1e-15
 
 	rnd := rand.New(rand.NewSource(1))
 	for ti, test := range []struct {
@@ -56,14 +56,44 @@ func DlasclTest(t *testing.T, impl Dlascler) {
 					t.Errorf("%v: out-of-range write to A", prefix)
 				}
 				switch kind {
+				case lapack.UpperTri:
+					var mod bool
+				loopLower:
+					for i := 0; i < m; i++ {
+						for j := 0; j < min(i, n); j++ {
+							if a.Data[i*a.Stride+j] != aCopy.Data[i*aCopy.Stride+j] {
+								mod = true
+								break loopLower
+							}
+						}
+					}
+					if mod {
+						t.Errorf("%v: unexpected modification in lower triangle of A", prefix)
+					}
+				case lapack.LowerTri:
+					var mod bool
+				loopUpper:
+					for i := 0; i < m; i++ {
+						for j := i + 1; j < n; j++ {
+							if a.Data[i*a.Stride+j] != aCopy.Data[i*aCopy.Stride+j] {
+								mod = true
+								break loopUpper
+							}
+						}
+					}
+					if mod {
+						t.Errorf("%v: unexpected modification in upper triangle of A", prefix)
+					}
+				}
+
+				var resid float64
+				switch kind {
 				case lapack.General:
 					for i := 0; i < m; i++ {
 						for j := 0; j < n; j++ {
 							want := scale * aCopy.Data[i*aCopy.Stride+j]
 							got := a.Data[i*a.Stride+j]
-							if math.Abs(want-got) > tol {
-								t.Errorf("%v: unexpected A[%v,%v]=%v, want %v", prefix, i, j, got, want)
-							}
+							resid = math.Max(resid, math.Abs(want-got))
 						}
 					}
 				case lapack.UpperTri:
@@ -71,16 +101,7 @@ func DlasclTest(t *testing.T, impl Dlascler) {
 						for j := i; j < n; j++ {
 							want := scale * aCopy.Data[i*aCopy.Stride+j]
 							got := a.Data[i*a.Stride+j]
-							if math.Abs(want-got) > tol {
-								t.Errorf("%v: unexpected A[%v,%v]=%v, want %v", prefix, i, j, got, want)
-							}
-						}
-					}
-					for i := 0; i < m; i++ {
-						for j := 0; j < min(i, n); j++ {
-							if a.Data[i*a.Stride+j] != aCopy.Data[i*aCopy.Stride+j] {
-								t.Errorf("%v: unexpected modification in lower triangle of A", prefix)
-							}
+							resid = math.Max(resid, math.Abs(want-got))
 						}
 					}
 				case lapack.LowerTri:
@@ -88,18 +109,12 @@ func DlasclTest(t *testing.T, impl Dlascler) {
 						for j := 0; j <= min(i, n-1); j++ {
 							want := scale * aCopy.Data[i*aCopy.Stride+j]
 							got := a.Data[i*a.Stride+j]
-							if math.Abs(want-got) > tol {
-								t.Errorf("%v: unexpected A[%v,%v]=%v, want %v", prefix, i, j, got, want)
-							}
+							resid = math.Max(resid, math.Abs(want-got))
 						}
 					}
-					for i := 0; i < m; i++ {
-						for j := i + 1; j < n; j++ {
-							if a.Data[i*a.Stride+j] != aCopy.Data[i*aCopy.Stride+j] {
-								t.Errorf("%v: unexpected modification in upper triangle of A", prefix)
-							}
-						}
-					}
+				}
+				if resid > tol*float64(max(m, n)) {
+					t.Errorf("%v: unexpected result; residual=%v, want<=%v", prefix, resid, tol*float64(max(m, n)))
 				}
 			}
 		}

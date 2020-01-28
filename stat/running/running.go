@@ -8,44 +8,41 @@ import "math"
 
 // Mean is a running mean accumulator.
 type Mean struct {
-	// Decay sets the decay rate. A value of 0.99 means that the effective count
-	// is multiplied by 0.99 for every added value. If Decay is zero, a default
-	// value of 1 is used (the count is not decayed).
-	Decay float64
-	// InitCount sets the initial count before accumulating.
-	InitCount float64
-	// InitMean sets the initial value for the mean before accumulating.
-	// Note that InitMean has no effect if the InitCount is zero.
-	InitMean float64
-
-	set   bool
+	decay float64
 	count float64
 	mean  float64
 }
 
-// Reset resets the counter. The next accumulate will use the
-// initial mean and count.
-func (m *Mean) Reset() {
-	m.count = m.InitMean
-	m.mean = m.InitCount
-	m.set = true
+// NewMean returns a new accumulator for computing the running mean,
+// with the internal mean and count initialized to zero.
+// decay sets the decay rate for the internal sample counter. The count
+// is multiplied by the decay value for each sample added.
+func NewMean(decay float64) *Mean {
+	return &Mean{decay: decay}
+}
+
+// NewMeanInitialized returns a new Mean accumulator with initialized
+// values. decay sets the decay rate for the internal sample counter. The count
+// is multiplied by the decay value for each sample added. mean and count
+// specify the initial values for internal running mean and running count
+// respectively.
+func NewMeanInitialized(decay, mean, count float64) *Mean {
+	return &Mean{
+		decay: decay,
+		mean:  mean,
+		count: count,
+	}
 }
 
 // Mean returns the current estimate of the running mean.
 // Note that if the count is zero this returns the value
 // of the initial mean.
 func (m *Mean) Mean() float64 {
-	if !m.set {
-		m.Reset()
-	}
 	return m.mean
 }
 
 // Count returns the current count of values.
 func (m *Mean) Count() float64 {
-	if !m.set {
-		m.Reset()
-	}
 	return m.count
 }
 
@@ -60,23 +57,13 @@ func (m *Mean) AccumWeighted(v, weight float64) {
 	if weight < 0 {
 		panic("running: negative weight")
 	}
-	if !m.set {
-		m.Reset()
-	}
 	if m.count == 0 && weight == 0 {
 		// Avoid NaN.
 		return
 	}
-	decay := m.decay()
+	decay := m.decay
 	decay = math.Pow(decay, weight)
 	m.count *= decay
 	m.mean = (m.mean*m.count + v*weight) / (m.count + weight)
 	m.count += weight
-}
-
-func (m *Mean) decay() float64 {
-	if m.Decay == 0 {
-		return 1
-	}
-	return m.Decay
 }

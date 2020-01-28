@@ -70,8 +70,7 @@ func (m *Mean) AccumWeighted(v, weight float64) {
 	decay := m.decay()
 	decay = math.Pow(decay, weight)
 	m.count *= decay
-	//m.mean = (m.mean*m.count + v*weight) / (m.count + weight)
-	m.mean = updateMean(m.mean, m.count, v, weight)
+	m.mean = (m.mean*m.count + v*weight) / (m.count + weight)
 	m.count += weight
 }
 
@@ -80,12 +79,4 @@ func (m *Mean) decay() float64 {
 		return 1
 	}
 	return m.Decay
-}
-
-func updateMean(mean, count, v, weight float64) float64 {
-	return (mean*count + v*weight) / (count + weight)
-}
-
-// Stats is an accumulator for running statistics.
-type Stats struct {
 }

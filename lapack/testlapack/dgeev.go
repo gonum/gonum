@@ -15,7 +15,6 @@ import (
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/lapack"
 )
 
@@ -76,25 +75,21 @@ func DgeevTest(t *testing.T, impl Dgeever) {
 			a:      Circulant(30).Matrix(),
 			evWant: Circulant(30).Eigenvalues(),
 			valTol: 1e-11,
-			vecTol: 1e-12,
 		},
 		{
 			a:      Circulant(50).Matrix(),
 			evWant: Circulant(50).Eigenvalues(),
 			valTol: 1e-11,
-			vecTol: 1e-12,
 		},
 		{
 			a:      Circulant(101).Matrix(),
 			evWant: Circulant(101).Eigenvalues(),
 			valTol: 1e-10,
-			vecTol: 1e-11,
 		},
 		{
 			a:      Circulant(150).Matrix(),
 			evWant: Circulant(150).Eigenvalues(),
 			valTol: 1e-9,
-			vecTol: 1e-10,
 		},
 
 		{
@@ -129,8 +124,7 @@ func DgeevTest(t *testing.T, impl Dgeever) {
 		{
 			a:      Clement(50).Matrix(),
 			evWant: Clement(50).Eigenvalues(),
-			valTol: 1e-7,
-			vecTol: 1e-11,
+			valTol: 1e-8,
 		},
 
 		{
@@ -285,7 +279,7 @@ func DgeevTest(t *testing.T, impl Dgeever) {
 			a:      Gear(4).Matrix(),
 			evWant: Gear(4).Eigenvalues(),
 			valTol: 1e-7,
-			vecTol: 1e-11,
+			vecTol: 1e-8,
 		},
 		{
 			a:      Gear(5).Matrix(),
@@ -295,7 +289,6 @@ func DgeevTest(t *testing.T, impl Dgeever) {
 			a:      Gear(10).Matrix(),
 			evWant: Gear(10).Eigenvalues(),
 			valTol: 1e-8,
-			vecTol: 1e-11,
 		},
 		{
 			a:      Gear(15).Matrix(),
@@ -305,13 +298,11 @@ func DgeevTest(t *testing.T, impl Dgeever) {
 			a:      Gear(30).Matrix(),
 			evWant: Gear(30).Eigenvalues(),
 			valTol: 1e-8,
-			vecTol: 1e-11,
 		},
 		{
 			a:      Gear(50).Matrix(),
 			evWant: Gear(50).Eigenvalues(),
 			valTol: 1e-8,
-			vecTol: 1e-11,
 		},
 		{
 			a:      Gear(101).Matrix(),
@@ -321,7 +312,6 @@ func DgeevTest(t *testing.T, impl Dgeever) {
 			a:      Gear(150).Matrix(),
 			evWant: Gear(150).Eigenvalues(),
 			valTol: 1e-8,
-			vecTol: 1e-11,
 		},
 
 		{
@@ -410,19 +400,16 @@ func DgeevTest(t *testing.T, impl Dgeever) {
 			a:      Lesp(50).Matrix(),
 			evWant: Lesp(50).Eigenvalues(),
 			valTol: 1e-12,
-			vecTol: 1e-12,
 		},
 		{
 			a:      Lesp(101).Matrix(),
 			evWant: Lesp(101).Eigenvalues(),
 			valTol: 1e-12,
-			vecTol: 1e-12,
 		},
 		{
 			a:      Lesp(150).Matrix(),
 			evWant: Lesp(150).Eigenvalues(),
 			valTol: 1e-12,
-			vecTol: 1e-12,
 		},
 
 		{
@@ -460,7 +447,6 @@ func DgeevTest(t *testing.T, impl Dgeever) {
 			a:      Wilk20(1e-10).Matrix(),
 			evWant: Wilk20(1e-10).Eigenvalues(),
 			valTol: 1e-12,
-			vecTol: 1e-12,
 		},
 
 		{
@@ -537,7 +523,6 @@ func DgeevTest(t *testing.T, impl Dgeever) {
 					test := dgeevTest{
 						a:      a,
 						evWant: ev,
-						valTol: 1e-12,
 						vecTol: 1e-7,
 					}
 					testDgeev(t, impl, "random", test, jobvl, jobvr, 0, optimumWork)
@@ -548,7 +533,7 @@ func DgeevTest(t *testing.T, impl Dgeever) {
 }
 
 func testDgeev(t *testing.T, impl Dgeever, tc string, test dgeevTest, jobvl lapack.LeftEVJob, jobvr lapack.RightEVJob, extra int, wl worklen) {
-	const defaultTol = 1e-12
+	const defaultTol = 1e-13
 	valTol := test.valTol
 	if valTol == 0 {
 		valTol = defaultTol
@@ -619,7 +604,7 @@ func testDgeev(t *testing.T, impl Dgeever, tc string, test dgeevTest, jobvl lapa
 		t.Logf("%v: all eigenvalues haven't been computed, first=%v", prefix, first)
 	}
 
-	// Check that conjugate pair eigevalues are ordered correctly.
+	// Check that conjugate pair eigenvalues are ordered correctly.
 	for i := first; i < n; {
 		if wi[i] == 0 {
 			i++
@@ -628,7 +613,7 @@ func testDgeev(t *testing.T, impl Dgeever, tc string, test dgeevTest, jobvl lapa
 		if wr[i] != wr[i+1] {
 			t.Errorf("%v: real parts of %vth conjugate pair not equal", prefix, i)
 		}
-		if wi[i] < 0 || wi[i+1] > 0 {
+		if wi[i] < 0 || wi[i+1] >= 0 {
 			t.Errorf("%v: unexpected ordering of %vth conjugate pair", prefix, i)
 		}
 		i += 2
@@ -658,80 +643,79 @@ func testDgeev(t *testing.T, impl Dgeever, tc string, test dgeevTest, jobvl lapa
 		return
 	}
 
-	// Check that the columns of VL and VR are eigenvectors that correspond
-	// to the computed eigenvalues.
-	for k := 0; k < n; {
-		if wi[k] == 0 {
-			if jobvl == lapack.LeftEVCompute {
-				ev := columnOf(vl, k)
-				if !isLeftEigenvectorOf(test.a, ev, nil, complex(wr[k], 0), vecTol) {
-					t.Errorf("%v: VL[:,%v] is not left real eigenvector",
-						prefix, k)
-				}
+	// Check that the columns of VL and VR are eigenvectors that:
+	//  - correspond to the computed eigenvalues
+	//  - have Euclidean norm equal to 1
+	//  - have the largest component real
+	bi := blas64.Implementation()
+	if jobvr == lapack.RightEVCompute {
+		resid := residualRightEV(test.a, vr, wr, wi)
+		if resid > vecTol {
+			t.Errorf("%v: unexpected right eigenvectors; residual=%v, want<=%v", prefix, resid, vecTol)
+		}
 
-				norm := floats.Norm(ev, 2)
-				if math.Abs(norm-1) >= defaultTol {
-					t.Errorf("%v: norm of left real eigenvector %v not equal to 1: got %v",
-						prefix, k, norm)
+		for j := 0; j < n; j++ {
+			nrm := 1.0
+			if wi[j] == 0 {
+				nrm = bi.Dnrm2(n, vr.Data[j:], vr.Stride)
+			} else if wi[j] > 0 {
+				nrm = math.Hypot(bi.Dnrm2(n, vr.Data[j:], vr.Stride), bi.Dnrm2(n, vr.Data[j+1:], vr.Stride))
+			}
+			diff := math.Abs(nrm - 1)
+			if diff > defaultTol {
+				t.Errorf("%v: unexpected Euclidean norm of right eigenvector; |VR[%v]-1|=%v, want<=%v",
+					prefix, j, diff, defaultTol)
+			}
+
+			if wi[j] > 0 {
+				var vmax float64  // Largest component in the column
+				var vrmax float64 // Largest real component in the column
+				for i := 0; i < n; i++ {
+					vtest := math.Hypot(vr.Data[i*vr.Stride+j], vr.Data[i*vr.Stride+j+1])
+					vmax = math.Max(vmax, vtest)
+					if vr.Data[i*vr.Stride+j+1] == 0 {
+						vrmax = math.Max(vrmax, math.Abs(vr.Data[i*vr.Stride+j]))
+					}
+				}
+				if vrmax/vmax < 1-defaultTol {
+					t.Errorf("%v: largest component of %vth right eigenvector is not real", prefix, j)
 				}
 			}
-			if jobvr == lapack.RightEVCompute {
-				ev := columnOf(vr, k)
-				if !isRightEigenvectorOf(test.a, ev, nil, complex(wr[k], 0), vecTol) {
-					t.Errorf("%v: VR[:,%v] is not right real eigenvector",
-						prefix, k)
-				}
+		}
+	}
+	if jobvl == lapack.LeftEVCompute {
+		resid := residualLeftEV(test.a, vl, wr, wi)
+		if resid > vecTol {
+			t.Errorf("%v: unexpected left eigenvectors; residual=%v, want<=%v", prefix, resid, vecTol)
+		}
 
-				norm := floats.Norm(ev, 2)
-				if math.Abs(norm-1) >= defaultTol {
-					t.Errorf("%v: norm of right real eigenvector %v not equal to 1: got %v",
-						prefix, k, norm)
+		for j := 0; j < n; j++ {
+			nrm := 1.0
+			if wi[j] == 0 {
+				nrm = bi.Dnrm2(n, vl.Data[j:], vl.Stride)
+			} else if wi[j] > 0 {
+				nrm = math.Hypot(bi.Dnrm2(n, vl.Data[j:], vl.Stride), bi.Dnrm2(n, vl.Data[j+1:], vl.Stride))
+			}
+			diff := math.Abs(nrm - 1)
+			if diff > defaultTol {
+				t.Errorf("%v: unexpected Euclidean norm of left eigenvector; |VL[%v]-1|=%v, want<=%v",
+					prefix, j, diff, defaultTol)
+			}
+
+			if wi[j] > 0 {
+				var vmax float64  // Largest component in the column
+				var vrmax float64 // Largest real component in the column
+				for i := 0; i < n; i++ {
+					vtest := math.Hypot(vl.Data[i*vl.Stride+j], vl.Data[i*vl.Stride+j+1])
+					vmax = math.Max(vmax, vtest)
+					if vl.Data[i*vl.Stride+j+1] == 0 {
+						vrmax = math.Max(vrmax, math.Abs(vl.Data[i*vl.Stride+j]))
+					}
+				}
+				if vrmax/vmax < 1-defaultTol {
+					t.Errorf("%v: largest component of %vth left eigenvector is not real", prefix, j)
 				}
 			}
-			k++
-		} else {
-			if jobvl == lapack.LeftEVCompute {
-				evre := columnOf(vl, k)
-				evim := columnOf(vl, k+1)
-				if !isLeftEigenvectorOf(test.a, evre, evim, complex(wr[k], wi[k]), vecTol) {
-					t.Errorf("%v: VL[:,%v:%v] is not left complex eigenvector",
-						prefix, k, k+1)
-				}
-				floats.Scale(-1, evim)
-				if !isLeftEigenvectorOf(test.a, evre, evim, complex(wr[k+1], wi[k+1]), vecTol) {
-					t.Errorf("%v: VL[:,%v:%v] is not left complex eigenvector",
-						prefix, k, k+1)
-				}
-
-				norm := math.Hypot(floats.Norm(evre, 2), floats.Norm(evim, 2))
-				if math.Abs(norm-1) > defaultTol {
-					t.Errorf("%v: norm of left complex eigenvector %v not equal to 1: got %v",
-						prefix, k, norm)
-				}
-			}
-			if jobvr == lapack.RightEVCompute {
-				evre := columnOf(vr, k)
-				evim := columnOf(vr, k+1)
-				if !isRightEigenvectorOf(test.a, evre, evim, complex(wr[k], wi[k]), vecTol) {
-					t.Errorf("%v: VR[:,%v:%v] is not right complex eigenvector",
-						prefix, k, k+1)
-				}
-				floats.Scale(-1, evim)
-				if !isRightEigenvectorOf(test.a, evre, evim, complex(wr[k+1], wi[k+1]), vecTol) {
-					t.Errorf("%v: VR[:,%v:%v] is not right complex eigenvector",
-						prefix, k, k+1)
-				}
-
-				norm := math.Hypot(floats.Norm(evre, 2), floats.Norm(evim, 2))
-				if math.Abs(norm-1) > defaultTol {
-					t.Errorf("%v: norm of right complex eigenvector %v not equal to 1: got %v",
-						prefix, k, norm)
-				}
-			}
-			// We don't test whether the largest component is real
-			// because checking it is flaky due to rounding errors.
-
-			k += 2
 		}
 	}
 }
@@ -741,5 +725,157 @@ func dgeevTestForAntisymRandom(n int, rnd *rand.Rand) dgeevTest {
 	return dgeevTest{
 		a:      a.Matrix(),
 		evWant: a.Eigenvalues(),
+	}
+}
+
+// residualRightEV returns the residual
+//  | A E - E W|_1 / ( |A|_1 |E|_1 )
+// where the columns of E contain the right eigenvectors of A and W is a block diagonal matrix with
+// a 1×1 block for each real eigenvalue and a 2×2 block for each complex conjugate pair.
+func residualRightEV(a, e blas64.General, wr, wi []float64) float64 {
+	// The implementation follows DGET22 routine from the Reference LAPACK's
+	// testing suite.
+
+	n := a.Rows
+	if n == 0 {
+		return 0
+	}
+
+	bi := blas64.Implementation()
+	ldr := n
+	r := make([]float64, n*ldr)
+	var (
+		wmat  [4]float64
+		ipair int
+	)
+	for j := 0; j < n; j++ {
+		if ipair == 0 && wi[j] != 0 {
+			ipair = 1
+		}
+		switch ipair {
+		case 0:
+			// Real eigenvalue, multiply j-th column of E with it.
+			bi.Daxpy(n, wr[j], e.Data[j:], e.Stride, r[j:], ldr)
+		case 1:
+			// First of complex conjugate pair of eigenvalues
+			wmat[0], wmat[1] = wr[j], wi[j]
+			wmat[2], wmat[3] = -wi[j], wr[j]
+			bi.Dgemm(blas.NoTrans, blas.NoTrans, n, 2, 2, 1, e.Data[j:], e.Stride, wmat[:], 2, 0, r[j:], ldr)
+			ipair = 2
+		case 2:
+			// Second of complex conjugate pair of eigenvalues
+			ipair = 0
+		}
+	}
+	bi.Dgemm(blas.NoTrans, blas.NoTrans, n, n, n, 1, a.Data, a.Stride, e.Data, e.Stride, -1, r, ldr)
+
+	unfl := dlamchS
+	ulp := dlamchE
+	anorm := math.Max(dlange(lapack.MaxColumnSum, n, n, a.Data, a.Stride), unfl)
+	enorm := math.Max(dlange(lapack.MaxColumnSum, n, n, e.Data, e.Stride), ulp)
+	errnorm := dlange(lapack.MaxColumnSum, n, n, r, ldr) / enorm
+	if anorm > errnorm {
+		return errnorm / anorm
+	}
+	if anorm < 1 {
+		return math.Min(errnorm, anorm) / anorm
+	}
+	return math.Min(errnorm/anorm, 1)
+}
+
+// residualRightEV returns the residual
+//  | Aᵀ E - E Wᵀ|_1 / ( |Aᵀ|_1 |E|_1 )
+// where the columns of E contain the right eigenvectors of A and W is a block diagonal matrix with
+// a 1×1 block for each real eigenvalue and a 2×2 block for each complex conjugate pair.
+func residualLeftEV(a, e blas64.General, wr, wi []float64) float64 {
+	// The implementation follows DGET22 routine from the Reference LAPACK's
+	// testing suite.
+
+	n := a.Rows
+	if n == 0 {
+		return 0
+	}
+
+	bi := blas64.Implementation()
+	ldr := n
+	r := make([]float64, n*ldr)
+	var (
+		wmat  [4]float64
+		ipair int
+	)
+	for j := 0; j < n; j++ {
+		if ipair == 0 && wi[j] != 0 {
+			ipair = 1
+		}
+		switch ipair {
+		case 0:
+			// Real eigenvalue, multiply j-th column of E with it.
+			bi.Daxpy(n, wr[j], e.Data[j:], e.Stride, r[j:], ldr)
+		case 1:
+			// First of complex conjugate pair of eigenvalues
+			wmat[0], wmat[1] = wr[j], wi[j]
+			wmat[2], wmat[3] = -wi[j], wr[j]
+			bi.Dgemm(blas.NoTrans, blas.Trans, n, 2, 2, 1, e.Data[j:], e.Stride, wmat[:], 2, 0, r[j:], ldr)
+			ipair = 2
+		case 2:
+			// Second of complex conjugate pair of eigenvalues
+			ipair = 0
+		}
+	}
+	bi.Dgemm(blas.Trans, blas.NoTrans, n, n, n, 1, a.Data, a.Stride, e.Data, e.Stride, -1, r, ldr)
+
+	unfl := dlamchS
+	ulp := dlamchE
+	anorm := math.Max(dlange(lapack.MaxRowSum, n, n, a.Data, a.Stride), unfl)
+	enorm := math.Max(dlange(lapack.MaxColumnSum, n, n, e.Data, e.Stride), ulp)
+	errnorm := dlange(lapack.MaxColumnSum, n, n, r, ldr) / enorm
+	if anorm > errnorm {
+		return errnorm / anorm
+	}
+	if anorm < 1 {
+		return math.Min(errnorm, anorm) / anorm
+	}
+	return math.Min(errnorm/anorm, 1)
+}
+
+func dlange(norm lapack.MatrixNorm, m, n int, a []float64, lda int) float64 {
+	if m == 0 || n == 0 {
+		return 0
+	}
+	switch norm {
+	case lapack.MaxAbs:
+		var value float64
+		for i := 0; i < m; i++ {
+			for j := 0; j < n; j++ {
+				value = math.Max(value, math.Abs(a[i*lda+j]))
+			}
+		}
+		return value
+	case lapack.MaxColumnSum:
+		work := make([]float64, n)
+		for i := 0; i < m; i++ {
+			for j := 0; j < n; j++ {
+				work[j] += math.Abs(a[i*lda+j])
+			}
+		}
+		var value float64
+		for i := 0; i < n; i++ {
+			value = math.Max(value, work[i])
+		}
+		return value
+	case lapack.MaxRowSum:
+		var value float64
+		for i := 0; i < m; i++ {
+			var sum float64
+			for j := 0; j < n; j++ {
+				sum += math.Abs(a[i*lda+j])
+			}
+			value = math.Max(value, sum)
+		}
+		return value
+	case lapack.Frobenius:
+		panic("not implemented")
+	default:
+		panic("bad MatrixNorm")
 	}
 }

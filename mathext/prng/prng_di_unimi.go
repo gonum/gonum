@@ -11,6 +11,7 @@ package prng
 import (
 	"encoding/binary"
 	"io"
+	"math/bits"
 )
 
 // SplitMix64 is the splitmix64 PRNG from http://prng.di.unimi.it/splitmix64.c.
@@ -98,7 +99,7 @@ func (src *Xoshiro256plus) Uint64() uint64 {
 
 	src.state[2] ^= t
 
-	src.state[3] = rotl(src.state[3], 45)
+	src.state[3] = bits.RotateLeft64(src.state[3], 45)
 
 	return result
 }
@@ -151,7 +152,7 @@ func (src *Xoshiro256plusplus) Seed(seed uint64) {
 
 // Uint64 returns a pseudo-random 64-bit unsigned integer as a uint64.
 func (src *Xoshiro256plusplus) Uint64() uint64 {
-	result := rotl(src.state[0]+src.state[3], 23) + src.state[0]
+	result := bits.RotateLeft64(src.state[0]+src.state[3], 23) + src.state[0]
 
 	t := src.state[1] << 17
 
@@ -162,7 +163,7 @@ func (src *Xoshiro256plusplus) Uint64() uint64 {
 
 	src.state[2] ^= t
 
-	src.state[3] = rotl(src.state[3], 45)
+	src.state[3] = bits.RotateLeft64(src.state[3], 45)
 
 	return result
 }
@@ -215,7 +216,7 @@ func (src *Xoshiro256starstar) Seed(seed uint64) {
 
 // Uint64 returns a pseudo-random 64-bit unsigned integer as a uint64.
 func (src *Xoshiro256starstar) Uint64() uint64 {
-	result := rotl(src.state[1]*5, 7) * 9
+	result := bits.RotateLeft64(src.state[1]*5, 7) * 9
 
 	t := src.state[1] << 17
 
@@ -226,7 +227,7 @@ func (src *Xoshiro256starstar) Uint64() uint64 {
 
 	src.state[2] ^= t
 
-	src.state[3] = rotl(src.state[3], 45)
+	src.state[3] = bits.RotateLeft64(src.state[3], 45)
 
 	return result
 }
@@ -249,8 +250,4 @@ func (src *Xoshiro256starstar) UnmarshalBinary(data []byte) error {
 		src.state[i] = binary.BigEndian.Uint64(data[i*8 : (i+1)*8])
 	}
 	return nil
-}
-
-func rotl(x uint64, k uint) uint64 {
-	return (x << k) | (x >> (64 - k))
 }

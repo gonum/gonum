@@ -10,9 +10,9 @@ import (
 
 // Rectangle - modifies the seq in place by Rectangle window and returns the seq.
 //
-// Rectangle window is a base high-resolution window, 
-// which result is correspond to a selection of limited length sequence of values without any modification 
-// (so, it doesn't modifies the seq at all). 
+// Rectangle window is a base high-resolution window,
+// which result is correspond to a selection of limited length sequence of values without any modification
+// (so, it doesn't modifies the seq at all).
 // Rectangle window has the lowest width of the main lobe and largest level of the side lobes.
 //
 // Indicators of quality:
@@ -37,7 +37,7 @@ func Rectangle(seq []float64) []float64 {
 //  β	= -3.93
 func Sin(seq []float64) []float64 {
 	N := len(seq)
-	
+
 	for n := range seq {
 		seq[n] = seq[n] * (math.Sin(math.Pi * float64(n) / float64(N-1)))
 	}
@@ -56,7 +56,7 @@ func Sin(seq []float64) []float64 {
 //  β	= -4.6
 func Lanczos(seq []float64) []float64 {
 	N := len(seq)
-	
+
 	var x float64
 	for n := range seq {
 		x = 2.0*float64(n)/float64(N-1) - 1.0
@@ -77,7 +77,7 @@ func Lanczos(seq []float64) []float64 {
 //  β	= -6
 func Bartlett(seq []float64) []float64 {
 	N := len(seq)
-	
+
 	A := float64(N-1) / 2.0
 	for n := range seq {
 		seq[n] = seq[n] * (1.0 - math.Abs(float64(n)/A-1.0))
@@ -95,7 +95,7 @@ func Bartlett(seq []float64) []float64 {
 //  β	= -6
 func Hann(seq []float64) []float64 {
 	N := len(seq)
-	
+
 	for n := range seq {
 		seq[n] = seq[n] * (0.5 - 0.5*math.Cos(2.0*math.Pi*float64(n)/float64(N-1)))
 	}
@@ -114,7 +114,7 @@ func Hann(seq []float64) []float64 {
 //  β	= -6
 func BartlettHann(seq []float64) []float64 {
 	N := len(seq)
-	
+
 	a0, a1, a2 := 0.62, 0.48, 0.38
 	for n := range seq {
 		seq[n] = seq[n] * (a0 - a1*math.Abs(float64(n)/float64(N-1)-0.5) - a2*math.Cos(2.0*math.Pi*float64(n)/float64(N-1)))
@@ -134,7 +134,7 @@ func BartlettHann(seq []float64) []float64 {
 //  β	= -5.37
 func Hamming(seq []float64) []float64 {
 	N := len(seq)
-	
+
 	a0, a1 := 0.54, 0.46
 	for n := range seq {
 		seq[n] = seq[n] * (a0 - a1*math.Cos(2.0*math.Pi*float64(n)/float64(N-1)))
@@ -154,7 +154,7 @@ func Hamming(seq []float64) []float64 {
 //  β	= -7.54
 func Blackman(seq []float64) []float64 {
 	N := len(seq)
-	
+
 	a0, a1, a2 := 0.42, 0.5, 0.08
 	var x float64
 	for n := range seq {
@@ -176,7 +176,7 @@ func Blackman(seq []float64) []float64 {
 //  β	= -8.91
 func BlackmanHarris(seq []float64) []float64 {
 	N := len(seq)
-	
+
 	a0, a1, a2, a3 := 0.35875, 0.48829, 0.14128, 0.01168
 	var x float64
 	for n := range seq {
@@ -198,7 +198,7 @@ func BlackmanHarris(seq []float64) []float64 {
 //  β	= -9
 func Nuttall(seq []float64) []float64 {
 	N := len(seq)
-	
+
 	a0, a1, a2, a3 := 0.355768, 0.487396, 0.144232, 0.012604
 	var x float64
 	for n := range seq {
@@ -220,7 +220,7 @@ func Nuttall(seq []float64) []float64 {
 //  β	= -8.8
 func BlackmanNuttall(seq []float64) []float64 {
 	N := len(seq)
-	
+
 	a0, a1, a2, a3 := 0.3635819, 0.4891775, 0.1365995, 0.0106411
 	var x float64
 	for n := range seq {
@@ -242,7 +242,7 @@ func BlackmanNuttall(seq []float64) []float64 {
 //  β	=  0
 func FlatTop(seq []float64) []float64 {
 	N := len(seq)
-	
+
 	a0, a1, a2, a3, a4 := 1.0, 1.93, 1.29, 0.388, 0.032
 	var x float64
 	for n := range seq {
@@ -265,7 +265,7 @@ func FlatTop(seq []float64) []float64 {
 //  β	= -8.52		-4.48		-0.96
 func Gauss(seq []float64, sigma float64) []float64 {
 	N := len(seq)
-	
+
 	var x float64
 	A := float64(N-1) / 2.0
 	for n := range seq {

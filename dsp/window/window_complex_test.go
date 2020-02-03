@@ -41,7 +41,7 @@ func TestWindowComplex(t *testing.T) {
 	//test precission
 	const tol = 1e-6
 	//Input data
-	src := make([]complex128, 20, 20)
+	src := make([]complex128, 20)
 	for i := range src {
 		src[i] = complex(1.0, 1.0)
 	}

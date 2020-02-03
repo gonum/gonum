@@ -15,7 +15,7 @@ import (
 
 func Example() {
 	// The input sequence is a Sin function with 2.5 pereod per all sequence length
-	src := make([]float64, 20, 20)
+	src := make([]float64, 20)
 	k := 5.0 * math.Pi / float64(len(src)-1)
 	for i := range src {
 		src[i] = math.Sin(k * float64(i))

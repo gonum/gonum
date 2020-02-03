@@ -27,7 +27,7 @@ func TestWindow(t *testing.T) {
 	//test precission
 	const tol = 1e-6
 	//Input data
-	src := make([]float64, 20, 20)
+	src := make([]float64, 20)
 	for i := range src {
 		src[i] = 1.0
 	}

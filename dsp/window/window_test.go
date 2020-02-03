@@ -5,9 +5,10 @@
 package window
 
 import (
-	"gonum.org/v1/gonum/floats"
 	"testing"
 	"unsafe"
+
+	"gonum.org/v1/gonum/floats"
 )
 
 type testingCase struct {

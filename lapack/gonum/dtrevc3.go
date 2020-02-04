@@ -62,7 +62,7 @@ import (
 //
 // On entry, if howmny is lapack.EVAllMulQ, it is assumed that VL (if side
 // is lapack.EVLeft or lapack.EVBoth) contains an n×n matrix QL,
-// and that VR (if side is lapack.EVLeft or lapack.EVBoth) contains
+// and that VR (if side is lapack.EVRight or lapack.EVBoth) contains
 // an n×n matrix QR. QL and QR are typically the orthogonal matrix Q of Schur
 // vectors returned by Dhseqr.
 //

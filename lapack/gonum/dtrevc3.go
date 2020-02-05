@@ -647,7 +647,7 @@ leftev:
 					// when forming the right-hand side.
 					beta := math.Max(norms[j], norms[j+1])
 					if beta > vcrit {
-						bi.Dscal(n-ki+1, 1/vmax, b[ki*ldb+iv:], 1)
+						bi.Dscal(n-ki, 1/vmax, b[ki*ldb+iv:], ldb)
 						vmax = 1
 					}
 					b[j*ldb+iv] -= bi.Ddot(j-ki-1, t[(ki+1)*ldt+j:], ldt, b[(ki+1)*ldb+iv:], ldb)

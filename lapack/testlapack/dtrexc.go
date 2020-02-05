@@ -27,7 +27,7 @@ func DtrexcTest(t *testing.T, impl Dtrexcer) {
 		for _, n := range []int{1, 2, 3, 4, 5, 6, 10, 18, 31, 53} {
 			for _, extra := range []int{0, 1, 11} {
 				for cas := 0; cas < 100; cas++ {
-					tmat := randomSchurCanonical(n, n+extra, rnd)
+					tmat, _, _ := randomSchurCanonical(n, n+extra, rnd)
 					ifst := rnd.Intn(n)
 					ilst := rnd.Intn(n)
 					testDtrexc(t, impl, compq, tmat, ifst, ilst, extra, rnd)
@@ -38,7 +38,7 @@ func DtrexcTest(t *testing.T, impl Dtrexcer) {
 
 	for _, compq := range []lapack.UpdateSchurComp{lapack.UpdateSchurNone, lapack.UpdateSchur} {
 		for _, extra := range []int{0, 1, 11} {
-			tmat := randomSchurCanonical(0, extra, rnd)
+			tmat, _, _ := randomSchurCanonical(0, extra, rnd)
 			testDtrexc(t, impl, compq, tmat, 0, 0, extra, rnd)
 		}
 	}

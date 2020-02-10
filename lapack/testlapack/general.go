@@ -988,6 +988,21 @@ func equalApprox(m, n int, a []float64, lda int, b []float64, tol float64) bool 
 	return true
 }
 
+// equalGeneral returns whether the general matrices a and b are equal.
+func equalGeneral(a, b blas64.General) bool {
+	if a.Rows != b.Rows || a.Cols != b.Cols {
+		panic("bad input")
+	}
+	for i := 0; i < a.Rows; i++ {
+		for j := 0; j < a.Cols; j++ {
+			if a.Data[i*a.Stride+j] != b.Data[i*b.Stride+j] {
+				return false
+			}
+		}
+	}
+	return true
+}
+
 // equalApproxGeneral returns whether the general matrices a and b are
 // approximately equal within given tolerance.
 func equalApproxGeneral(a, b blas64.General, tol float64) bool {

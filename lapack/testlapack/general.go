@@ -1158,7 +1158,13 @@ func extract2x2Block(t []float64, ldt int) (a, b, c, d float64) {
 // isSchurCanonical returns whether the 2×2 matrix [a b; c d] is in Schur
 // canonical form.
 func isSchurCanonical(a, b, c, d float64) bool {
-	return c == 0 || (a == d && math.Signbit(b) != math.Signbit(c))
+	if c == 0 {
+		return true
+	}
+	if b == 0 || a != d || math.Signbit(b) == math.Signbit(c) {
+		return false
+	}
+	return true
 }
 
 // isSchurCanonicalGeneral returns whether T is block upper triangular with 1×1
@@ -1166,21 +1172,37 @@ func isSchurCanonical(a, b, c, d float64) bool {
 // checks only along the diagonal and the first subdiagonal, otherwise the lower
 // triangle is not accessed.
 func isSchurCanonicalGeneral(t blas64.General) bool {
-	if t.Rows != t.Cols {
+	n := t.Cols
+	if t.Rows != n {
 		panic("invalid matrix")
 	}
-	for i := 0; i < t.Rows-1; {
-		if t.Data[(i+1)*t.Stride+i] == 0 {
+	for j := 0; j < n-1; {
+		if t.Data[(j+1)*t.Stride+j] == 0 {
 			// 1×1 block.
-			i++
+			for i := j + 1; i < n; i++ {
+				if t.Data[i*t.Stride+j] != 0 {
+					return false
+				}
+			}
+			j++
 			continue
 		}
 		// 2×2 block.
-		a, b, c, d := extract2x2Block(t.Data[i*t.Stride+i:], t.Stride)
+		a, b, c, d := extract2x2Block(t.Data[j*t.Stride+j:], t.Stride)
 		if !isSchurCanonical(a, b, c, d) {
 			return false
 		}
-		i += 2
+		for i := j + 2; i < n; i++ {
+			if t.Data[i*t.Stride+j] != 0 {
+				return false
+			}
+		}
+		for i := j + 2; i < n; i++ {
+			if t.Data[i*t.Stride+j+1] != 0 {
+				return false
+			}
+		}
+		j += 2
 	}
 	return true
 }
@@ -1194,7 +1216,7 @@ func schurBlockEigenvalues(a, b, c, d float64) (ev1, ev2 complex128) {
 	if c == 0 {
 		return complex(a, 0), complex(d, 0)
 	}
-	im := math.Sqrt(-b * c)
+	im := math.Sqrt(math.Abs(b)) * math.Sqrt(math.Abs(c))
 	return complex(a, im), complex(a, -im)
 }
 

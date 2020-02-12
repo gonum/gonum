@@ -70,7 +70,7 @@ func dtrevc3Test(t *testing.T, impl Dtrevc3er, side lapack.EVSide, n, extra int,
 
 	// Generate a random matrix in Schur canonical form possibly with tiny or zero eigenvalues.
 	// Zero elements of wi signify a real eigenvalue.
-	tmat, wr, wi := randomSchurCanonical(n, n+extra, rnd)
+	tmat, wr, wi := randomSchurCanonical(n, n+extra, true, rnd)
 	tmatCopy := cloneGeneral(tmat)
 
 	//  1. Compute all eigenvectors of T and check that they are indeed correctly

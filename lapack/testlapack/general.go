@@ -130,57 +130,62 @@ func randomHessenberg(n, stride int, rnd *rand.Rand) blas64.General {
 // randomSchurCanonical returns a random, general matrix in Schur canonical
 // form, that is, block upper triangular with 1×1 and 2×2 diagonal blocks where
 // each 2×2 diagonal block has its diagonal elements equal and its off-diagonal
-// elements of opposite sign.
-func randomSchurCanonical(n, stride int, rnd *rand.Rand) (t blas64.General, wr, wi []float64) {
+// elements of opposite sign. bad controls whether the returned matrix will have
+// zero or tiny eigenvalues.
+func randomSchurCanonical(n, stride int, bad bool, rnd *rand.Rand) (t blas64.General, wr, wi []float64) {
 	t = randomGeneral(n, n, stride, rnd)
-	// Zero out the lower triangle.
+	// Zero out the lower triangle including the diagonal which will be set later.
 	for i := 0; i < t.Rows; i++ {
-		for j := 0; j < i; j++ {
+		for j := 0; j <= i; j++ {
 			t.Data[i*t.Stride+j] = 0
 		}
 	}
 	// Randomly create 2×2 diagonal blocks.
 	for i := 0; i < t.Rows; {
-		p := rnd.Float64()
-		var r float64
-		switch {
-		case p < 0.5:
-			// A half of real parts of eigenvalues will be "normal".
-			r = t.Data[i*t.Stride+i]
-		case p < 0.75:
-			// A quarter will be very small.
-			r = dlamchS
-		default:
-			// A quarter will be zero.
+		a := rnd.NormFloat64()
+		if bad && rnd.Float64() < 0.5 {
+			if rnd.Float64() < 0.5 {
+				// A quarter of real parts of eigenvalues will be tiny.
+				a = dlamchS
+			} else {
+				// A quarter of them will be zero.
+				a = 0
+			}
 		}
-		// Store the actual value back at the diagonal of T.
-		t.Data[i*t.Stride+i] = r
 
 		// A half of eigenvalues will be real.
 		if rnd.Float64() < 0.5 || i == t.Rows-1 {
-			// 1×1 block.
-			wr = append(wr, r)
+			// Store 1×1 block at the diagonal of T.
+			t.Data[i*t.Stride+i] = a
+			wr = append(wr, a)
 			wi = append(wi, 0)
 			i++
 			continue
 		}
 
-		// 2×2 block.
-		// Diagonal elements equal.
-		t.Data[(i+1)*t.Stride+i+1] = r
-		// Element under diagonal very small or "normal".
-		c := dlamchS
-		if rnd.Float64() < 0.5 {
-			c = rnd.NormFloat64()
+		// Diagonal elements are equal.
+		d := a
+		// Element under the diagonal is "normal".
+		c := rnd.NormFloat64()
+		// Element above the diagonal cannot be zero.
+		var b float64
+		if bad && rnd.Float64() < 0.5 {
+			b = dlamchS
+		} else {
+			b = rnd.NormFloat64()
 		}
-		// Off-diagonal elements of opposite sign.
-		if math.Signbit(c) == math.Signbit(t.Data[i*t.Stride+i+1]) {
+		// Make sure off-diagonal elements are of opposite sign.
+		if math.Signbit(b) == math.Signbit(c) {
 			c *= -1
 		}
-		t.Data[(i+1)*t.Stride+i] = c
-		wr = append(wr, r, r)
-		c = math.Sqrt(math.Abs(t.Data[i*t.Stride+i+1])) * math.Sqrt(math.Abs(c))
-		wi = append(wi, c, -c)
+
+		// Store 2×2 block at the diagonal of T.
+		t.Data[i*t.Stride+i], t.Data[i*t.Stride+i+1] = a, b
+		t.Data[(i+1)*t.Stride+i], t.Data[(i+1)*t.Stride+i+1] = c, d
+
+		wr = append(wr, a, a)
+		im := math.Sqrt(math.Abs(b)) * math.Sqrt(math.Abs(c))
+		wi = append(wi, im, -im)
 		i += 2
 	}
 	return t, wr, wi

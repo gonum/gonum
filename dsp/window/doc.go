@@ -18,7 +18,7 @@
 // Normalized width of the main AFC lobe at zero amplitude level.
 //
 // ΔF_0.5 -
-// Normalized width of the main AFC lobe at 0.5 amplitude level (-6 dB).
+// Normalized width of the main AFC lobe at 0.5 amplitude level (-3 dB).
 //
 // K -
 // For a rectangular window, ΔF_0 has the smallest value and is equal to 2.

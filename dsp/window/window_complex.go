@@ -53,7 +53,11 @@ func LanczosComplex(seq []complex128) []complex128 {
 	k := 2.0 / float64(len(seq)-1)
 	for i := range seq {
 		x := math.Pi * (k*float64(i) - 1.0)
-		seq[i] *= complex(math.Sin(x)/(x), 0.0)
+		// x=0 - may cause the division by zero, but sinc function should give 1 as result.
+		if x == 0.0 {
+			break
+		}
+		seq[i] *= complex(math.Sin(x)/x, 0.0)
 	}
 	return seq
 }
@@ -253,11 +257,11 @@ func BlackmanNuttallComplex(seq []complex128) []complex128 {
 // Spectral leakage parameters: ΔF_0 = 10, ΔF_0.5 = 3.72, K = 5, ɣ_max = -93.0, β = -13.34.
 func FlatTopComplex(seq []complex128) []complex128 {
 	const (
-		a0 = 1.0
-		a1 = 1.93
-		a2 = 1.29
-		a3 = 0.388
-		a4 = 0.032
+		a0 = 0.21557895
+		a1 = 0.41663158
+		a2 = 0.277263158
+		a3 = 0.083578947
+		a4 = 0.006947368
 	)
 
 	k := 2.0 * math.Pi / float64(len(seq)-1)

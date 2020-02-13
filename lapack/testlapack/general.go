@@ -1158,13 +1158,7 @@ func extract2x2Block(t []float64, ldt int) (a, b, c, d float64) {
 // isSchurCanonical returns whether the 2×2 matrix [a b; c d] is in Schur
 // canonical form.
 func isSchurCanonical(a, b, c, d float64) bool {
-	if c == 0 {
-		return true
-	}
-	if b == 0 || a != d || math.Signbit(b) == math.Signbit(c) {
-		return false
-	}
-	return true
+	return c == 0 || (b != 0 && a == d && math.Signbit(b) != math.Signbit(c))
 }
 
 // isSchurCanonicalGeneral returns whether T is block upper triangular with 1×1

@@ -110,8 +110,7 @@ func TestWindowsComplex(t *testing.T) {
 			dst := test.fn(srcCpy)
 
 			if !equalApprox(dst, test.want, tol) {
-				t.Errorf("unexpected result for window function %q: result \n%f\n is different from expectation \n%f\n more then it is allowed by test tolerance %e",
-					test.name, dst, test.want, tol)
+				t.Errorf("unexpected result for window function %q:\ngot:%v\nwant:%v", test.name, dst, test.want)
 			}
 		})
 	}
@@ -134,8 +133,7 @@ func TestGausWindowComplex(t *testing.T) {
 			dst := GaussComplex(srcCpy, test.sigma)
 
 			if !equalApprox(dst, test.want, tol) {
-				t.Errorf("unexpected result for window function %q: result \n%f\n is different from expectation \n%f\n more then it is allowed by test tolerance %e",
-					test.name, dst, test.want, tol)
+				t.Errorf("unexpected result for window function %q:\ngot:%v\nwant:%v", test.name, dst, test.want)
 			}
 		})
 	}

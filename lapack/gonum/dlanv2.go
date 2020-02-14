@@ -110,7 +110,7 @@ func (impl Implementation) Dlanv2(a, b, c, d float64) (aa, bb, cc, dd float64, r
 						dd = temp - p
 						cs1 := sab * tau
 						sn1 := sac * tau
-						cs, sn = cs*cs1-sn*sn1, cs*sn1+sn+cs1
+						cs, sn = cs*cs1-sn*sn1, cs*sn1+sn*cs1
 					}
 				} else {
 					bb = -cc

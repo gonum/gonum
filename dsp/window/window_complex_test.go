@@ -18,7 +18,7 @@ var complexWindowTests = []struct {
 	want []float64
 }{
 	{
-		name: "RectangleComplex", fn: RectangleComplex,
+		name: "RectangularComplex", fn: RectangularComplex,
 		want: []float64{1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
 			1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000},
 	},

@@ -28,7 +28,7 @@ func Example() {
 	// The result shows, that width of the main lobe with center
 	// between frequencies 0.1 and 0.15 is small,
 	// but height of the side lobes is pretty big.
-	fmt.Println("Rectangle window (or no window):")
+	fmt.Println("Rectangular window (or no window):")
 	for i, c := range coeff {
 		fmt.Printf("freq=%.4f\tcycles/period, magnitude=%.4f,\tphase=%.4f\n",
 			fft.Freq(i), cmplx.Abs(c), cmplx.Phase(c))
@@ -54,7 +54,7 @@ func Example() {
 	}
 	// Output:
 	//
-	// Rectangle window (or no window):
+	// Rectangular window (or no window):
 	// freq=0.0000	cycles/period, magnitude=2.2798,	phase=0.0000
 	// freq=0.0500	cycles/period, magnitude=2.6542,	phase=0.1571
 	// freq=0.1000	cycles/period, magnitude=5.3115,	phase=0.3142

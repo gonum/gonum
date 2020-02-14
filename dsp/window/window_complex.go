@@ -6,9 +6,9 @@ package window
 
 import "math"
 
-// RectangleComplex modifies the seq in place by Rectangle window and returns the seq.
+// RectangularComplex modifies the seq in place by Rectangular window and returns the seq.
 //
-// Rectangle window is a base high-resolution window
+// Rectangular window is a base high-resolution window
 // (https://www.recordingblogs.com/wiki/rectangular-window):
 //
 // w[k] = 1,
@@ -16,10 +16,10 @@ import "math"
 //
 // The result is correspond to a selection of limited length sequence of values
 // without any modification (so, it doesn't modifies the seq at all).
-// Rectangle window has the lowest width of the main lobe and largest level of the side lobes.
+// Rectangular window has the lowest width of the main lobe and largest level of the side lobes.
 //
 // Spectral leakage parameters: ΔF_0 = 2, ΔF_0.5 = 0.89, K = 1, ɣ_max = -13, β =  0.
-func RectangleComplex(seq []complex128) []complex128 {
+func RectangularComplex(seq []complex128) []complex128 {
 	return seq
 }
 

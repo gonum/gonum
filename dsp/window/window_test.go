@@ -18,50 +18,61 @@ var windowTests = []struct {
 }{
 	{
 		name: "Rectangular", fn: Rectangular,
-		want: []float64{1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
-			1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000},
+		want: []float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+			1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 	},
-	{name: "Sine", fn: Sine,
+	{
+		name: "Sine", fn: Sine,
 		want: []float64{0.000000, 0.164595, 0.324699, 0.475947, 0.614213, 0.735724, 0.837166, 0.915773, 0.969400, 0.996584,
 			0.996584, 0.969400, 0.915773, 0.837166, 0.735724, 0.614213, 0.475947, 0.324699, 0.164595, 0.000000},
 	},
-	{name: "Lanczos", fn: Lanczos,
+	{
+		name: "Lanczos", fn: Lanczos,
 		want: []float64{0.000000, 0.115514, 0.247646, 0.389468, 0.532984, 0.669692, 0.791213, 0.889915, 0.959492, 0.995450,
 			0.995450, 0.959492, 0.889915, 0.791213, 0.669692, 0.532984, 0.389468, 0.247646, 0.115514, 0.000000},
 	},
-	{name: "Triangular", fn: Triangular,
+	{
+		name: "Triangular", fn: Triangular,
 		want: []float64{0.000000, 0.105263, 0.210526, 0.315789, 0.421053, 0.526316, 0.631579, 0.736842, 0.842105, 0.947368,
 			0.947368, 0.842105, 0.736842, 0.631579, 0.526316, 0.421053, 0.315789, 0.210526, 0.105263, 0.000000},
 	},
-	{name: "Hann", fn: Hann,
+	{
+		name: "Hann", fn: Hann,
 		want: []float64{0.000000, 0.027091, 0.105430, 0.226526, 0.377257, 0.541290, 0.700848, 0.838641, 0.939737, 0.993181,
 			0.993181, 0.939737, 0.838641, 0.700848, 0.541290, 0.377257, 0.226526, 0.105430, 0.027091, 0.000000},
 	},
-	{name: "BartlettHann", fn: BartlettHann,
+	{
+		name: "BartlettHann", fn: BartlettHann,
 		want: []float64{0.000000, 0.045853, 0.130653, 0.247949, 0.387768, 0.537696, 0.684223, 0.814209, 0.916305, 0.982186,
 			0.982186, 0.916305, 0.814209, 0.684223, 0.537696, 0.387768, 0.247949, 0.130653, 0.045853, 0.000000},
 	},
-	{name: "Hamming", fn: Hamming,
+	{
+		name: "Hamming", fn: Hamming,
 		want: []float64{0.086957, 0.111692, 0.183218, 0.293785, 0.431408, 0.581178, 0.726861, 0.852672, 0.944977, 0.993774,
 			0.993774, 0.944977, 0.852672, 0.726861, 0.581178, 0.431409, 0.293785, 0.183218, 0.111692, 0.086957},
 	},
-	{name: "Blackman", fn: Blackman,
+	{
+		name: "Blackman", fn: Blackman,
 		want: []float64{0.000000, 0.010223, 0.045069, 0.114390, 0.226899, 0.382381, 0.566665, 0.752034, 0.903493, 0.988846,
 			0.988846, 0.903493, 0.752034, 0.566665, 0.382381, 0.226899, 0.114390, 0.045069, 0.010223, 0.000000},
 	},
-	{name: "BlackmanHarris", fn: BlackmanHarris,
+	{
+		name: "BlackmanHarris", fn: BlackmanHarris,
 		want: []float64{0.000060, 0.002018, 0.012795, 0.046450, 0.122540, 0.256852, 0.448160, 0.668576, 0.866426, 0.984278,
 			0.984278, 0.866426, 0.668576, 0.448160, 0.256852, 0.122540, 0.046450, 0.012795, 0.002018, 0.000060},
 	},
-	{name: "Nuttall", fn: Nuttall,
+	{
+		name: "Nuttall", fn: Nuttall,
 		want: []float64{0.000000, 0.001706, 0.011614, 0.043682, 0.117808, 0.250658, 0.441946, 0.664015, 0.864348, 0.984019,
 			0.984019, 0.864348, 0.664015, 0.441946, 0.250658, 0.117808, 0.043682, 0.011614, 0.001706, 0.000000},
 	},
-	{name: "BlackmanNuttall", fn: BlackmanNuttall,
+	{
+		name: "BlackmanNuttall", fn: BlackmanNuttall,
 		want: []float64{0.000363, 0.002885, 0.015360, 0.051652, 0.130567, 0.266629, 0.457501, 0.675215, 0.869392, 0.984644,
 			0.984644, 0.869392, 0.675215, 0.457501, 0.266629, 0.130567, 0.051652, 0.015360, 0.002885, 0.000363},
 	},
-	{name: "FlatTop", fn: FlatTop,
+	{
+		name: "FlatTop", fn: FlatTop,
 		want: []float64{-0.000421, -0.003687, -0.017675, -0.045939, -0.070137, -0.037444, 0.115529, 0.402051, 0.737755, 0.967756,
 			0.967756, 0.737755, 0.402051, 0.115529, -0.037444, -0.070137, -0.045939, -0.017675, -0.003687, -0.000421},
 	},
@@ -91,18 +102,17 @@ var gausWindowTests = []struct {
 }
 
 func TestWindows(t *testing.T) {
-	//test precission
 	const tol = 1e-6
+
 	//Input data
 	src := make([]float64, 20)
 	for i := range src {
-		src[i] = 1.0
+		src[i] = 1
 	}
 
-	// run tests on testing tables
 	for _, test := range windowTests {
 		t.Run(test.name, func(t *testing.T) {
-			//copy src, because window functions change data inplace
+			// Copy the input since we are mutating it.
 			srcCpy := make([]float64, len(src))
 			copy(srcCpy, src)
 			dst := test.fn(srcCpy)
@@ -115,17 +125,17 @@ func TestWindows(t *testing.T) {
 }
 
 func TestGausWindows(t *testing.T) {
-	//test precission
 	const tol = 1e-6
+
 	//Input data
 	src := make([]float64, 20)
 	for i := range src {
-		src[i] = 1.0
+		src[i] = 1
 	}
 
 	for _, test := range gausWindowTests {
 		t.Run(test.name, func(t *testing.T) {
-			//copy src, because window functions change data inplace
+			// Copy the input since we are mutating it.
 			srcCpy := make([]float64, len(src))
 			copy(srcCpy, src)
 			dst := Gaussian(srcCpy, test.sigma)

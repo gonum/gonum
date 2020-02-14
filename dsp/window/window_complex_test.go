@@ -10,7 +10,7 @@ import (
 	"gonum.org/v1/gonum/floats"
 )
 
-// testing table (except gauss window)
+// testing table (except gaussian window)
 // want the same value in imag part as in real part, so use one float64 for both
 var complexWindowTests = []struct {
 	name string
@@ -30,7 +30,7 @@ var complexWindowTests = []struct {
 		want: []float64{0.000000, 0.115514, 0.247646, 0.389468, 0.532984, 0.669692, 0.791213, 0.889915, 0.959492, 0.995450,
 			0.995450, 0.959492, 0.889915, 0.791213, 0.669692, 0.532984, 0.389468, 0.247646, 0.115514, 0.000000},
 	},
-	{name: "BartlettComplex", fn: BartlettComplex,
+	{name: "TriangularComplex", fn: TriangularComplex,
 		want: []float64{0.000000, 0.105263, 0.210526, 0.315789, 0.421053, 0.526316, 0.631579, 0.736842, 0.842105, 0.947368,
 			0.947368, 0.842105, 0.736842, 0.631579, 0.526316, 0.421053, 0.315789, 0.210526, 0.105263, 0.000000},
 	},
@@ -68,7 +68,7 @@ var complexWindowTests = []struct {
 	},
 }
 
-//testing table (gauss window)
+//testing table (gaussian window)
 // want the same value in imag part as in real part, so use one float64 for both
 var complexGausWindowTests = []struct {
 	name  string
@@ -76,17 +76,17 @@ var complexGausWindowTests = []struct {
 	want  []float64
 }{
 	{
-		name: "GaussComplex (sigma=0.3)", sigma: 0.3,
+		name: "GaussianComplex (sigma=0.3)", sigma: 0.3,
 		want: []float64{0.003866, 0.011708, 0.031348, 0.074214, 0.155344, 0.287499, 0.470444, 0.680632, 0.870660, 0.984728,
 			0.984728, 0.870660, 0.680632, 0.470444, 0.287499, 0.155344, 0.074214, 0.031348, 0.011708, 0.003866},
 	},
 	{
-		name: "GaussComplex (sigma=0.5)", sigma: 0.5,
+		name: "GaussianComplex (sigma=0.5)", sigma: 0.5,
 		want: []float64{0.135335, 0.201673, 0.287499, 0.392081, 0.511524, 0.638423, 0.762260, 0.870660, 0.951361, 0.994475,
 			0.994475, 0.951361, 0.870660, 0.762260, 0.638423, 0.511524, 0.392081, 0.287499, 0.201673, 0.135335},
 	},
 	{
-		name: "GaussComplex (sigma=1.2)", sigma: 1.2,
+		name: "GaussianComplex (sigma=1.2)", sigma: 1.2,
 		want: []float64{0.706648, 0.757319, 0.805403, 0.849974, 0.890135, 0.925049, 0.953963, 0.976241, 0.991381, 0.999039,
 			0.999039, 0.991381, 0.976241, 0.953963, 0.925049, 0.890135, 0.849974, 0.805403, 0.757319, 0.706648},
 	},
@@ -130,7 +130,7 @@ func TestGausWindowComplex(t *testing.T) {
 			//copy src, because window functions change data inplace
 			srcCpy := make([]complex128, len(src))
 			copy(srcCpy, src)
-			dst := GaussComplex(srcCpy, test.sigma)
+			dst := GaussianComplex(srcCpy, test.sigma)
 
 			if !equalApprox(dst, test.want, tol) {
 				t.Errorf("unexpected result for window function %q:\ngot:%v\nwant:%v", test.name, dst, test.want)

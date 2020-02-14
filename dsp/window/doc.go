@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package window provides a set of functions
-// to perform the transformation of sequence by different window functions.
+// Package window provides a set of functions to perform the transformation
+// of sequence by different window functions.
 //
 // Window functions can be used to control spectral leakage parameters
-// when performing a Fourier transform on a signal of limit length.
+// when performing a Fourier transform on a signal of limited length.
+// See https://en.wikipedia.org/wiki/Window_function for more details.
 //
 // Spectral leakage parameters
 //

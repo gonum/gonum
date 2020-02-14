@@ -54,11 +54,11 @@ func Sine(seq []float64) []float64 {
 //
 // Spectral leakage parameters: ΔF_0 = 3.24, ΔF_0.5 = 1.3, K = 1.62, ɣ_max = -26.4, β = -4.6.
 func Lanczos(seq []float64) []float64 {
-	k := 2.0 / float64(len(seq)-1)
+	k := 2 / float64(len(seq)-1)
 	for i := range seq {
-		x := math.Pi * (k*float64(i) - 1.0)
-		// x=0 - may cause the division by zero, but sinc function should give 1 as result.
-		if x == 0.0 {
+		x := math.Pi * (k*float64(i) - 1)
+		if x == 0 {
+			// Avoid NaN.
 			break
 		}
 		seq[i] *= math.Sin(x) / x
@@ -78,9 +78,9 @@ func Lanczos(seq []float64) []float64 {
 //
 // Spectral leakage parameters: ΔF_0 = 4, ΔF_0.5 = 1.33, K = 2, ɣ_max = -26.5, β = -6.
 func Triangular(seq []float64) []float64 {
-	a := float64(len(seq)-1) / 2.0
+	a := float64(len(seq)-1) / 2
 	for i := range seq {
-		seq[i] *= 1.0 - math.Abs(float64(i)/a-1.0)
+		seq[i] *= 1 - math.Abs(float64(i)/a-1)
 	}
 	return seq
 }
@@ -97,7 +97,7 @@ func Triangular(seq []float64) []float64 {
 //
 // Spectral leakage parameters: ΔF_0 = 4, ΔF_0.5 = 1.5, K = 2, ɣ_max = -31.5, β = -6.
 func Hann(seq []float64) []float64 {
-	k := 2.0 * math.Pi / float64(len(seq)-1)
+	k := 2 * math.Pi / float64(len(seq)-1)
 	for i := range seq {
 		seq[i] *= 0.5 * (1 - math.Cos(k*float64(i)))
 	}
@@ -122,7 +122,7 @@ func BartlettHann(seq []float64) []float64 {
 		a2 = 0.38
 	)
 
-	k := 2.0 * math.Pi / float64(len(seq)-1)
+	k := 2 * math.Pi / float64(len(seq)-1)
 	for i := range seq {
 		seq[i] *= a0 - a1*math.Abs(float64(i)/float64(len(seq)-1)-0.5) - a2*math.Cos(k*float64(i))
 	}
@@ -143,11 +143,11 @@ func BartlettHann(seq []float64) []float64 {
 // Spectral leakage parameters: ΔF_0 = 4, ΔF_0.5 = 1.33, K = 2, ɣ_max = -42, β = -5.37.
 func Hamming(seq []float64) []float64 {
 	const (
-		a0 = 0.54
-		a1 = 0.46
+		a0 = 25.0 / 46.0
+		a1 = 1 - a0
 	)
 
-	k := 2.0 * math.Pi / float64(len(seq)-1)
+	k := 2 * math.Pi / float64(len(seq)-1)
 	for i := range seq {
 		seq[i] *= a0 - a1*math.Cos(k*float64(i))
 	}
@@ -172,10 +172,10 @@ func Blackman(seq []float64) []float64 {
 		a2 = 0.08
 	)
 
-	k := 2.0 * math.Pi / float64(len(seq)-1)
+	k := 2 * math.Pi / float64(len(seq)-1)
 	for i := range seq {
 		x := k * float64(i)
-		seq[i] *= a0 - a1*math.Cos(x) + a2*math.Cos(2.0*x)
+		seq[i] *= a0 - a1*math.Cos(x) + a2*math.Cos(2*x)
 	}
 	return seq
 }
@@ -200,10 +200,10 @@ func BlackmanHarris(seq []float64) []float64 {
 		a3 = 0.01168
 	)
 
-	k := 2.0 * math.Pi / float64(len(seq)-1)
+	k := 2 * math.Pi / float64(len(seq)-1)
 	for i := range seq {
 		x := k * float64(i)
-		seq[i] *= a0 - a1*math.Cos(x) + a2*math.Cos(2.0*x) - a3*math.Cos(3.0*x)
+		seq[i] *= a0 - a1*math.Cos(x) + a2*math.Cos(2*x) - a3*math.Cos(3*x)
 	}
 	return seq
 }
@@ -228,10 +228,10 @@ func Nuttall(seq []float64) []float64 {
 		a3 = 0.012604
 	)
 
-	k := 2.0 * math.Pi / float64(len(seq)-1)
+	k := 2 * math.Pi / float64(len(seq)-1)
 	for i := range seq {
 		x := k * float64(i)
-		seq[i] *= a0 - a1*math.Cos(x) + a2*math.Cos(2.0*x) - a3*math.Cos(3.0*x)
+		seq[i] *= a0 - a1*math.Cos(x) + a2*math.Cos(2*x) - a3*math.Cos(3*x)
 	}
 	return seq
 }
@@ -256,10 +256,10 @@ func BlackmanNuttall(seq []float64) []float64 {
 		a3 = 0.0106411
 	)
 
-	k := 2.0 * math.Pi / float64(len(seq)-1)
+	k := 2 * math.Pi / float64(len(seq)-1)
 	for i := range seq {
 		x := k * float64(i)
-		seq[i] *= a0 - a1*math.Cos(x) + a2*math.Cos(2.0*x) - a3*math.Cos(3.0*x)
+		seq[i] *= a0 - a1*math.Cos(x) + a2*math.Cos(2*x) - a3*math.Cos(3*x)
 	}
 	return seq
 }
@@ -286,10 +286,10 @@ func FlatTop(seq []float64) []float64 {
 		a4 = 0.006947368
 	)
 
-	k := 2.0 * math.Pi / float64(len(seq)-1)
+	k := 2 * math.Pi / float64(len(seq)-1)
 	for i := range seq {
 		x := k * float64(i)
-		seq[i] *= a0 - a1*math.Cos(x) + a2*math.Cos(2.0*x) - a3*math.Cos(3.0*x) + a4*math.Cos(4.0*x)
+		seq[i] *= a0 - a1*math.Cos(x) + a2*math.Cos(2*x) - a3*math.Cos(3*x) + a4*math.Cos(4*x)
 	}
 	return seq
 }
@@ -316,7 +316,7 @@ func FlatTop(seq []float64) []float64 {
 //  ɣ_max  | -65     | -31.5  | -15.5  |
 //  β      |  -8.52  |  -4.48 |  -0.96 |
 func Gaussian(seq []float64, sigma float64) []float64 {
-	a := float64(len(seq)-1) / 2.0
+	a := float64(len(seq)-1) / 2
 	for i := range seq {
 		x := -0.5 * math.Pow((float64(i)-a)/(sigma*a), 2)
 		seq[i] *= math.Exp(x)

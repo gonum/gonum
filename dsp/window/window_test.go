@@ -146,3 +146,19 @@ func TestGausWindows(t *testing.T) {
 		})
 	}
 }
+
+// TestLanczosNan tests Lanczos on NaN condition
+// Lanczos NaN condition is k=(N-1)/2.
+// N=2k+1 which is odd number.
+func TestLanczosNaN(t *testing.T) {
+	//Input data of odd size
+	src := make([]float64, 21)
+	for i := range src {
+		src[i] = 1
+	}
+
+	Lanczos(src)
+	if floats.HasNaN(src) {
+		t.Errorf("unexpected NaN in Lanczos result:\ngot:%v", src)
+	}
+}

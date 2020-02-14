@@ -150,6 +150,22 @@ func TestGausWindowComplex(t *testing.T) {
 	}
 }
 
+// TestLanczosNan tests Lanczos on NaN condition
+// Lanczos NaN condition is k=(N-1)/2.
+// N=2k+1 which is odd number.
+func TestLanczosComplexNaN(t *testing.T) {
+	//Input data
+	src := make([]complex128, 21)
+	for i := range src {
+		src[i] = complex(1, 1)
+	}
+
+	LanczosComplex(src)
+	if hasNaN(src) {
+		t.Errorf("unexpected NaN in LanczosComplex result:\ngot:%v", src)
+	}
+}
+
 func equalApprox(seq1 []complex128, seq2 []float64, tol float64) bool {
 	if len(seq1) != len(seq2) {
 		return false
@@ -159,6 +175,15 @@ func equalApprox(seq1 []complex128, seq2 []float64, tol float64) bool {
 			return true
 		}
 		if floats.EqualWithinAbsOrRel(imag(seq1[i]), seq2[i], tol, tol) {
+			return true
+		}
+	}
+	return false
+}
+
+func hasNaN(seq []complex128) bool {
+	for _, v := range seq {
+		if math.IsNaN(real(v)) || math.IsNaN(imag(v)) {
 			return true
 		}
 	}

@@ -9,8 +9,8 @@ import (
 	"math"
 	"math/cmplx"
 
+	"gonum.org/v1/gonum/dsp/fourier"
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/fourier"
 	"gonum.org/v1/gonum/mat"
 )
 

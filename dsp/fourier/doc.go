@@ -3,4 +3,4 @@
 // license that can be found in the LICENSE file.
 
 // Package fourier provides functions to perform Discrete Fourier Transforms.
-package fourier // import "gonum.org/v1/gonum/fourier"
+package fourier // import "gonum.org/v1/gonum/dsp/fourier"

@@ -6,8 +6,6 @@ package testlapack
 
 import (
 	"fmt"
-	"math"
-	"math/cmplx"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -37,7 +35,7 @@ func testDlaexc(t *testing.T, impl Dlaexcer, rnd *rand.Rand, n, extra int) {
 	const tol = 1e-14
 
 	// Generate random T in Schur canonical form.
-	tmat, wr, _ := randomSchurCanonical(n, n+extra, false, rnd)
+	tmat, _, _ := randomSchurCanonical(n, n+extra, true, rnd)
 	tmatCopy := cloneGeneral(tmat)
 
 	// Randomly pick the index of the first block.
@@ -160,55 +158,6 @@ func testDlaexc(t *testing.T, impl Dlaexcer, rnd *rand.Rand, n, extra int) {
 		t.Errorf("%v: T is not in Schur canonical form", name)
 	}
 
-	if n1 == 1 {
-		// 1×1 blocks are swapped exactly.
-		got := tmat.Data[(j1+n2)*tmat.Stride+j1+n2]
-		want := wr[j1]
-		if want != got {
-			t.Errorf("%v: unexpected value of T[%v,%v]; got %v, want %v", name, j1+n2, j1+n2, got, want)
-		}
-	} else {
-		// Compute eigenvalues of the n1×n1 block which is now located at T[j1+n2,j1+n2].
-		a, b, c, d := extract2x2Block(tmat.Data[(j1+n2)*tmat.Stride+j1+n2:], tmat.Stride)
-		ev1Got, ev2Got := schurBlockEigenvalues(a, b, c, d)
-
-		// Check that the swapped 2×2 block has the same eigenvalues.
-		// The n1×n1 block was originally located at T[j1,j1].
-		a, b, c, d = extract2x2Block(tmatCopy.Data[j1*tmatCopy.Stride+j1:], tmatCopy.Stride)
-		ev1Want, ev2Want := schurBlockEigenvalues(a, b, c, d)
-
-		diff1 := math.Min(cmplx.Abs(ev1Got-ev1Want), cmplx.Abs(ev1Got-ev2Want))
-		diff2 := math.Min(cmplx.Abs(ev2Got-ev1Want), cmplx.Abs(ev2Got-ev2Want))
-		diff := math.Min(diff1, diff2)
-		if diff > tol {
-			t.Errorf("%v: unexpected eigenvalues of 2×2 block; diff=%v, want<=%v", name, diff, tol)
-		}
-	}
-	if n2 == 1 {
-		// 1×1 blocks are swapped exactly.
-		got := tmat.Data[j1*tmat.Stride+j1]
-		want := wr[j1+n1]
-		if want != got {
-			t.Errorf("%v: unexpected value of T[%v,%v];got %v, want %v", name, j1, j1, got, want)
-		}
-	} else {
-		// Compute eigenvalues of the n2×n2 block which is now located at T[j1,j1].
-		a, b, c, d := extract2x2Block(tmat.Data[j1*tmat.Stride+j1:], tmat.Stride)
-		ev1Got, ev2Got := schurBlockEigenvalues(a, b, c, d)
-
-		// Check that the swapped 2×2 block has the same eigenvalues.
-		// The n2×n2 block was originally located at T[j1+n1,j1+n1].
-		a, b, c, d = extract2x2Block(tmatCopy.Data[(j1+n1)*tmatCopy.Stride+j1+n1:], tmatCopy.Stride)
-		ev1Want, ev2Want := schurBlockEigenvalues(a, b, c, d)
-
-		diff1 := math.Min(cmplx.Abs(ev1Got-ev1Want), cmplx.Abs(ev1Got-ev2Want))
-		diff2 := math.Min(cmplx.Abs(ev2Got-ev1Want), cmplx.Abs(ev2Got-ev2Want))
-		diff := math.Min(diff1, diff2)
-		if diff > tol {
-			t.Errorf("%v: unexpected eigenvalues of 2×2 block; diff=%v, want<=%v", name, diff, tol)
-		}
-	}
-
 	// Check that Q is orthogonal.
 	resid := residualOrthogonal(q, false)
 	if resid > tol {
@@ -234,8 +183,8 @@ func testDlaexc(t *testing.T, impl Dlaexcer, rnd *rand.Rand, n, extra int) {
 	qtq := cloneGeneral(tmat)
 	blas64.Gemm(blas.NoTrans, blas.NoTrans, -1, qt, q, 1, qtq)
 	resid = dlange(lapack.MaxColumnSum, n, n, qtq.Data, qtq.Stride)
-	if resid > tol {
+	if resid > float64(n)*tol {
 		t.Errorf("%v: mismatch between Qᵀ*(initial T)*Q and (final T); resid=%v, want<=%v",
-			name, resid, tol)
+			name, resid, float64(n)*tol)
 	}
 }

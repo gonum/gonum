@@ -7,7 +7,6 @@ package testlapack
 import (
 	"fmt"
 	"math"
-	"math/cmplx"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -41,7 +40,7 @@ func DtrexcTest(t *testing.T, impl Dtrexcer) {
 func dtrexcTest(t *testing.T, impl Dtrexcer, rnd *rand.Rand, n, ifst, ilst, extra int) {
 	const tol = 1e-13
 
-	tmat, wr, wi := randomSchurCanonical(n, n+extra, false, rnd)
+	tmat, _, _ := randomSchurCanonical(n, n+extra, true, rnd)
 	tmatCopy := cloneGeneral(tmat)
 
 	fstSize, fstFirst := schurBlockSize(tmat, ifst)
@@ -162,36 +161,6 @@ func dtrexcTest(t *testing.T, impl Dtrexcer, rnd *rand.Rand, n, ifst, ilst, extr
 			if diff != 0 {
 				t.Errorf("%v: unexpected modification at T[%v,%v]", name, i, j)
 			}
-		}
-	}
-
-	// Check that the block at ifstGot was delivered to ilstGot correctly.
-	if fstSize == 1 {
-		// 1×1 blocks are swapped exactly.
-		got := tmat.Data[ilstGot*tmat.Stride+ilstGot]
-		want := wr[ifstGot]
-		if want != got {
-			t.Errorf("%v: unexpected 1×1 block at T[%v,%v]; got %v, want %v",
-				name, ilstGot, ilstGot, got, want)
-		}
-	} else {
-		// Check that the swapped 2×2 block has the same eigenvalues.
-		a, b, c, d := extract2x2Block(tmat.Data[ilstGot*tmat.Stride+ilstGot:], tmat.Stride)
-		ev1Got, ev2Got := schurBlockEigenvalues(a, b, c, d)
-
-		// The block was originally located at T[ifstGot,ifstGot].
-		ev1Want := complex(wr[ifstGot], wi[ifstGot])
-		ev2Want := complex(wr[ifstGot+1], wi[ifstGot+1])
-
-		diff := cmplx.Abs(ev1Got - ev1Want)
-		if diff > tol {
-			t.Errorf("%v: unexpected first eigenvalue of 2×2 block at T[%v,%v]; diff=%v, want<=%v",
-				name, ilstGot, ilstGot, diff, tol)
-		}
-		diff = cmplx.Abs(ev2Got - ev2Want)
-		if diff > tol {
-			t.Errorf("%v: unexpected second eigenvalue of 2×2 block at T[%v,%v]; diff=%v, want<=%v",
-				name, ilstGot, ilstGot, diff, tol)
 		}
 	}
 

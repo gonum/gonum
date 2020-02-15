@@ -398,7 +398,7 @@ func defaultFunctionConverge() *FunctionConverge {
 	}
 }
 
-// newLocation allocates a new locatian structure with an X field of the
+// newLocation allocates a new location structure with an X field of the
 // appropriate size.
 func newLocation(dim int) *Location {
 	return &Location{

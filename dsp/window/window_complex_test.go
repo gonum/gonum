@@ -107,7 +107,6 @@ var complexGausWindowTests = []struct {
 func TestWindowsComplex(t *testing.T) {
 	const tol = 1e-6
 
-	//Input data
 	src := make([]complex128, 20)
 	for i := range src {
 		src[i] = complex(1, 1)
@@ -130,7 +129,6 @@ func TestWindowsComplex(t *testing.T) {
 func TestGausWindowComplex(t *testing.T) {
 	const tol = 1e-6
 
-	//Input data
 	src := make([]complex128, 20)
 	for i := range src {
 		src[i] = complex(1, 1)

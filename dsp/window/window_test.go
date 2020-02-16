@@ -104,7 +104,6 @@ var gausWindowTests = []struct {
 func TestWindows(t *testing.T) {
 	const tol = 1e-6
 
-	//Input data
 	src := make([]float64, 20)
 	for i := range src {
 		src[i] = 1
@@ -127,7 +126,6 @@ func TestWindows(t *testing.T) {
 func TestGausWindows(t *testing.T) {
 	const tol = 1e-6
 
-	//Input data
 	src := make([]float64, 20)
 	for i := range src {
 		src[i] = 1

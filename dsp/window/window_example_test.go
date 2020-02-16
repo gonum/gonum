@@ -16,7 +16,7 @@ import (
 func Example() {
 	// The input sequence is a 2.5 period of the Sin function.
 	src := make([]float64, 20)
-	k := 5.0 * math.Pi / float64(len(src)-1)
+	k := 5 * math.Pi / float64(len(src)-1)
 	for i := range src {
 		src[i] = math.Sin(k * float64(i))
 	}
@@ -47,7 +47,7 @@ func Example() {
 	// but to make a comparable data, result should be amplified.
 	// result should be amplified on -β value of the Hamming window function,
 	// which is +5.37 dB. -β = 20 log_10(amplifier), so...
-	amplifier := math.Pow(10.0, 5.37/20.0)
+	amplifier := math.Pow(10, 5.37/20)
 	for i, c := range coeff {
 		fmt.Printf("freq=%.4f\tcycles/period, magnitude=%.4f,\tphase=%.4f\n",
 			fft.Freq(i), amplifier*cmplx.Abs(c), cmplx.Phase(c))
@@ -81,19 +81,19 @@ func Example() {
 }
 
 func ExampleHamming() {
-	src := []float64{1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
-		1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000}
+	src := []float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 
 	// Window function change data in place. So, if input data need to stay unchanged, it should be copied.
 	srcCpy := append([]float64(nil), src...)
-	// Applay Window function to srcCpy.
+	// Apply window function to srcCpy.
 	dst := window.Hamming(srcCpy)
 
-	//src data has not changed, because it has been copied.
+	// src is unchanged.
 	fmt.Printf("src:    %f\n", src)
-	//srcCpy data has been changed by window function.
+	// srcCpy is altered.
 	fmt.Printf("srcCpy: %f\n", srcCpy)
-	//dst contains the slice with the same data as srcDst with underlying array at the same address.
+	// dst mirrors the srcCpy slice.
 	fmt.Printf("dst:    %f\n", dst)
 
 	// Output:

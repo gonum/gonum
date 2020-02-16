@@ -478,19 +478,22 @@ func evaluate(p *Problem, loc *Location, op Operation, x []float64) {
 	}
 	if op&GradEvaluation != 0 {
 		// Make sure we have a destination in which to place the gradient.
-		// TODO(kortschak): Consider making this a check of len(loc.Gradient) != 0
-		// to allow reuse of the slice.
-		if loc.Gradient == nil {
-			loc.Gradient = make([]float64, len(x))
+		if len(loc.Gradient) == 0 {
+			if cap(loc.Gradient) < len(x) {
+				loc.Gradient = make([]float64, len(x))
+			} else {
+				loc.Gradient = loc.Gradient[:len(x)]
+			}
 		}
 		p.Grad(loc.Gradient, x)
 	}
 	if op&HessEvaluation != 0 {
 		// Make sure we have a destination in which to place the Hessian.
-		// TODO(kortschak): Consider making this a check of loc.Hessian.IsZero()
-		// to allow reuse of the matrix.
-		if loc.Hessian == nil {
+		switch {
+		case loc.Hessian == nil:
 			loc.Hessian = mat.NewSymDense(len(x), nil)
+		case loc.Hessian.IsEmpty():
+			loc.Hessian.ReuseAsSym(len(x))
 		}
 		p.Hess(loc.Hessian, x)
 	}

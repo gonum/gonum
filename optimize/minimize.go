@@ -35,10 +35,14 @@ type Task struct {
 
 // Location represents a location in the optimization procedure.
 type Location struct {
-	X        []float64
-	F        float64
+	// X is the function input for the location.
+	X []float64
+	// F is the result of evaluating the function at X.
+	F float64
+	// Gradient holds the gradient of the function at X.
 	Gradient []float64
-	Hessian  *mat.SymDense
+	// Hessian holds the curvature of the function at X.
+	Hessian *mat.SymDense
 }
 
 // Method is a type which can search for an optimum of an objective function.

@@ -11,8 +11,8 @@ import (
 	"gonum.org/v1/gonum/floats"
 )
 
-// testing table (except gaussian window)
-// want the same value in imag part as in real part, so use one float64 for both
+// want the same value in imag part as in real part,
+// so use one float64 for both
 var complexWindowTests = []struct {
 	name string
 	fn   func([]complex128) []complex128
@@ -80,8 +80,8 @@ var complexWindowTests = []struct {
 	},
 }
 
-//testing table (gaussian window)
-// want the same value in imag part as in real part, so use one float64 for both
+// want the same value in imag part as in real part,
+// so use one float64 for both
 var complexGausWindowTests = []struct {
 	name  string
 	sigma float64
@@ -152,7 +152,6 @@ func TestGausWindowComplex(t *testing.T) {
 // Lanczos NaN condition is k=(N-1)/2.
 // N=2k+1 which is odd number.
 func TestLanczosComplexNaN(t *testing.T) {
-	//Input data
 	src := make([]complex128, 21)
 	for i := range src {
 		src[i] = complex(1, 1)

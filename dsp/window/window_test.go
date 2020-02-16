@@ -10,7 +10,6 @@ import (
 	"gonum.org/v1/gonum/floats"
 )
 
-// testing table (except gaussian window)
 var windowTests = []struct {
 	name string
 	fn   func([]float64) []float64
@@ -78,7 +77,6 @@ var windowTests = []struct {
 	},
 }
 
-//testing table (gaussian window)
 var gausWindowTests = []struct {
 	name  string
 	sigma float64
@@ -149,7 +147,6 @@ func TestGausWindows(t *testing.T) {
 // Lanczos NaN condition is k=(N-1)/2.
 // N=2k+1 which is odd number.
 func TestLanczosNaN(t *testing.T) {
-	//Input data of odd size
 	src := make([]float64, 21)
 	for i := range src {
 		src[i] = 1

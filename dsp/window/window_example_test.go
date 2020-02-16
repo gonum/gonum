@@ -25,29 +25,29 @@ func Example() {
 	fft := fourier.NewFFT(len(src))
 	coeff := fft.Coefficients(nil, src)
 
-	// The result shows, that width of the main lobe with center
-	// between frequencies 0.1 and 0.15 is small,
-	// but height of the side lobes is pretty big.
+	// The result shows that width of the main lobe with center
+	// between frequencies 0.1 and 0.15 is small, but that the
+	// height of the side lobes is large.
 	fmt.Println("Rectangular window (or no window):")
 	for i, c := range coeff {
 		fmt.Printf("freq=%.4f\tcycles/period, magnitude=%.4f,\tphase=%.4f\n",
 			fft.Freq(i), cmplx.Abs(c), cmplx.Phase(c))
 	}
 
-	// Initialize an FFT and perform the analysis on sequence
+	// Initialize an FFT and perform the analysis on a sequence
 	// transformed by the Hamming window function.
 	fft = fourier.NewFFT(len(src))
 	coeff = fft.Coefficients(nil, window.Hamming(src))
 
-	// The result shows, that width of the main lobe is wider,
-	// but height of the side lobes is less.
+	// The result shows that width of the main lobe is wider,
+	// but height of the side lobes is lower.
 	fmt.Println("Hamming window:")
-	// The magnitude of all bins has been decreased on the β, [dB] value.
-	// Generally, to perform analysis,  amplification could be omitted,
-	// but to make a comparable data, result should be amplified.
-	// result should be amplified on -β value of the Hamming window function,
-	// which is +5.37 dB. -β = 20 log_10(amplifier), so...
-	amplifier := math.Pow(10, 5.37/20)
+	// The magnitude of all bins has been decreased by β.
+	// Generally in an analysis amplification may be omitted, but to
+	// make a comparable data, the result should be amplified by -β
+	// of the window function — +5.37 dB for the Hamming window.
+	//  -β = 20 log_10(amplifier).
+	amplifier := math.Pow(10, 5.37/20.0)
 	for i, c := range coeff {
 		fmt.Printf("freq=%.4f\tcycles/period, magnitude=%.4f,\tphase=%.4f\n",
 			fft.Freq(i), amplifier*cmplx.Abs(c), cmplx.Phase(c))
@@ -84,7 +84,8 @@ func ExampleHamming() {
 	src := []float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 		1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 
-	// Window function change data in place. So, if input data need to stay unchanged, it should be copied.
+	// Window functions change data in place. So, if input data
+	// needs to stay unchanged, it must be copied.
 	srcCpy := append([]float64(nil), src...)
 	// Apply window function to srcCpy.
 	dst := window.Hamming(srcCpy)

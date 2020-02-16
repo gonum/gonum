@@ -40,8 +40,15 @@ type Location struct {
 	// F is the result of evaluating the function at X.
 	F float64
 	// Gradient holds the gradient of the function at X.
+	// The length of Gradient must match the length of X
+	// or be zero. If the capacity of Gradient is less
+	// than the length of X, a new slice will be allocated.
 	Gradient []float64
 	// Hessian holds the curvature of the function at X.
+	// The dimensions of Hessian must match the length of X
+	// or Hessian must be nil or empty. If Hessian is nil
+	// a new mat.SymDense will be allocated, if it is empty
+	// it will be resized to match the length of X.
 	Hessian *mat.SymDense
 }
 

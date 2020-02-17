@@ -59,7 +59,7 @@ func LanczosComplex(seq []complex128) []complex128 {
 		x := math.Pi * (k*float64(i) - 1)
 		if x == 0 {
 			// Avoid NaN.
-			break
+			continue
 		}
 		seq[i] *= complex(math.Sin(x)/x, 0)
 	}

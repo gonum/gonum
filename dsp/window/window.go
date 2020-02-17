@@ -59,7 +59,7 @@ func Lanczos(seq []float64) []float64 {
 		x := math.Pi * (k*float64(i) - 1)
 		if x == 0 {
 			// Avoid NaN.
-			break
+			continue
 		}
 		seq[i] *= math.Sin(x) / x
 	}

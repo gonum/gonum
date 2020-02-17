@@ -11,35 +11,33 @@
 //
 // Spectral leakage parameters
 //
-// To ensure the selection criteria for a window function,
-// each function is documented by a set of spectral leakage parameters.
-// Here is a description.
+// Application of window functions to an input will result in changes
+// to the frequency content of the signal in an effect called spectral
+// leakage. See https://en.wikipedia.org/wiki/Spectral_leakage.
 //
-// ΔF_0 -
-// Normalized width of the main AFC lobe at zero amplitude level.
+// The characteristic changes associated with each window function may
+// be described using a set of spectral leakage parameters; β, ΔF_0, ΔF_0.5,
+// K and ɣ_max.
 //
-// ΔF_0.5 -
-// Normalized width of the main AFC lobe at 0.5 amplitude level (-3 dB).
+// The β, attenuation, coefficient of a window is the ratio of the
+// constant component of the spectrum resulting from use of the window
+// compared to that produced using the rectangular window, expressed in
+// a logarithmic scale.
+//  β_w = 20 log10(A_w / A_rect) dB
 //
-// K -
-// For a rectangular window, ΔF_0 has the smallest value and is equal to 2.
-// K Shows how many times the normalized width ΔF_0
-// of the main lobe by the zero level of the specified window
-// is wider than the rectangular window.
-// Depending on the parameter, the windows are divided into
-// high resolution windows (K≤3) and low resolution windows (K>3).
+// The ΔF_0 parameter describes the normalized width of the main lobe of
+// the frequency spectrum at zero amplitude.
 //
-// ɣ_max -
-// The maximum level of side lobes.
-// If the maximum level of side lobes divided by maximum level of main lobe
-// is a g, the ɣ_max is a g expressed in logarithmic scale:
-// ɣ_max=20*log_10(g), [dB].
+// The ΔF_0.5 parameter describes the normalized width of the main lobe of
+// the frequency spectrum at -3 dB (half maximum amplitude).
 //
-// β -
-// The reduction coefficient.
-// The meaning of the reduction coefficient
-// is that the amplitudes of all spectral components
-// after multiplying by the window function are reduced by b times
-// compared to the rectangular window. The reduction coefficient β
-// is a b expressed in logarithmic scale:  β=20*log_10(b), [dB].
+// The K parameter describes the relative width of the main lobe of the
+// frequency spectrum produced by the window compared with the rectangular
+// window. The rectangular window has the lowest ΔF_0 at a value of 2.
+//  K_w = ΔF_0_w/ΔF_0_rect.
+// The value of K divides windows into high resolution windows (K≤3) and
+// low resolution windows (K>3).
+//
+// The ɣ_max parameter is the maximum level of the side lobes of the
+// normalized spectrum, in decibels.
 package window // import "gonum.org/v1/gonum/dsp/window"

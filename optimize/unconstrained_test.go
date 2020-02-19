@@ -593,7 +593,8 @@ var quasiNewtonTests = []unconstrainedTest{
 			Func: functions.BrownBadlyScaled{}.Func,
 			Grad: functions.BrownBadlyScaled{}.Grad,
 		},
-		x: []float64{1, 1},
+		x:       []float64{1, 1},
+		gradTol: 1e-9,
 	},
 	{
 		name: "BrownBadlyScaled",
@@ -761,7 +762,8 @@ var quasiNewtonTests = []unconstrainedTest{
 			Func: functions.PowellBadlyScaled{}.Func,
 			Grad: functions.PowellBadlyScaled{}.Grad,
 		},
-		x: []float64{0, 1},
+		x:       []float64{0, 1},
+		gradTol: 1e-10,
 	},
 	{
 		name: "PowellBadlyScaled",

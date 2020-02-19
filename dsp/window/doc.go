@@ -43,6 +43,6 @@
 //
 // Window interval
 //
-// The window intervals used in the window function are offset by a half
+// The window intervals used in the window functions are offset by a half
 // to ensure that the window extends to exclude the flanking zeros.
 package window // import "gonum.org/v1/gonum/dsp/window"

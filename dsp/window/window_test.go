@@ -15,25 +15,24 @@ var windowTests = []struct {
 	name    string
 	fn      func([]float64) []float64
 	fnCmplx func([]complex128) []complex128
-	winLen  int
 	want    []float64
 }{
 	{
-		name: "Rectangular", fn: Rectangular, fnCmplx: RectangularComplex, winLen: 20,
+		name: "Rectangular", fn: Rectangular, fnCmplx: RectangularComplex,
 		want: []float64{
 			1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 			1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 		},
 	},
 	{
-		name: "Sine", fn: Sine, fnCmplx: SineComplex, winLen: 20,
+		name: "Sine", fn: Sine, fnCmplx: SineComplex,
 		want: []float64{
 			0.078459, 0.233445, 0.382683, 0.522499, 0.649448, 0.760406, 0.852640, 0.923880, 0.972370, 0.996917,
 			0.996917, 0.972370, 0.923880, 0.852640, 0.760406, 0.649448, 0.522499, 0.382683, 0.233445, 0.078459,
 		},
 	},
 	{
-		name: "Lanczos", fn: Lanczos, fnCmplx: LanczosComplex, winLen: 20,
+		name: "Lanczos", fn: Lanczos, fnCmplx: LanczosComplex,
 		want: []float64{
 			0.052415, 0.170011, 0.300105, 0.436333, 0.57162, 0.698647, 0.810332, 0.900316, 0.963398, 0.995893,
 			0.995893, 0.963398, 0.900316, 0.810332, 0.698647, 0.57162, 0.436333, 0.300105, 0.170011, 0.052415,
@@ -41,7 +40,7 @@ var windowTests = []struct {
 	},
 	// This case tests Lanczos for a NaN condition. The Lanczos NaN condition is k=(N-1)/2, that is when N is odd.
 	{
-		name: "LanczosOdd", fn: Lanczos, fnCmplx: LanczosComplex, winLen: 21,
+		name: "LanczosOdd", fn: Lanczos, fnCmplx: LanczosComplex,
 		want: []float64{
 			0.049813, 0.161128, 0.284164, 0.413497, 0.543076, 0.666582, 0.777804, 0.871026, 0.941379, 0.985147,
 			1,
@@ -49,63 +48,63 @@ var windowTests = []struct {
 		},
 	},
 	{
-		name: "Triangular", fn: Triangular, fnCmplx: TriangularComplex, winLen: 20,
+		name: "Triangular", fn: Triangular, fnCmplx: TriangularComplex,
 		want: []float64{
 			0.05, 0.15, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85, 0.95,
 			0.95, 0.85, 0.75, 0.65, 0.55, 0.45, 0.35, 0.25, 0.15, 0.05,
 		},
 	},
 	{
-		name: "Hann", fn: Hann, fnCmplx: HannComplex, winLen: 20,
+		name: "Hann", fn: Hann, fnCmplx: HannComplex,
 		want: []float64{
 			0.006155, 0.054496, 0.146447, 0.273005, 0.421783, 0.578217, 0.726995, 0.853553, 0.945503, 0.993844,
 			0.993844, 0.945503, 0.853553, 0.726995, 0.578217, 0.421783, 0.273005, 0.146447, 0.054496, 0.006155,
 		},
 	},
 	{
-		name: "BartlettHann", fn: BartlettHann, fnCmplx: BartlettHannComplex, winLen: 20,
+		name: "BartlettHann", fn: BartlettHann, fnCmplx: BartlettHannComplex,
 		want: []float64{
 			0.016678, 0.077417, 0.171299, 0.291484, 0.428555, 0.571445, 0.708516, 0.828701, 0.922582, 0.983322,
 			0.983322, 0.922582, 0.828701, 0.708516, 0.571445, 0.428555, 0.291484, 0.171299, 0.077417, 0.016678,
 		},
 	},
 	{
-		name: "Hamming", fn: Hamming, fnCmplx: HammingComplex, winLen: 20,
+		name: "Hamming", fn: Hamming, fnCmplx: HammingComplex,
 		want: []float64{
 			0.092577, 0.136714, 0.220669, 0.336222, 0.472063, 0.614894, 0.750735, 0.866288, 0.950242, 0.994379,
 			0.994379, 0.950242, 0.866288, 0.750735, 0.614894, 0.472063, 0.336222, 0.220669, 0.136714, 0.092577,
 		},
 	},
 	{
-		name: "Blackman", fn: Blackman, fnCmplx: BlackmanComplex, winLen: 20,
+		name: "Blackman", fn: Blackman, fnCmplx: BlackmanComplex,
 		want: []float64{
 			0.002240, 0.021519, 0.066446, 0.145982, 0.265698, 0.422133, 0.599972, 0.773553, 0.912526, 0.989929,
 			0.989929, 0.912526, 0.773553, 0.599972, 0.422133, 0.265698, 0.145982, 0.066446, 0.021519, 0.002240,
 		},
 	},
 	{
-		name: "BlackmanHarris", fn: BlackmanHarris, fnCmplx: BlackmanHarrisComplex, winLen: 20,
+		name: "BlackmanHarris", fn: BlackmanHarris, fnCmplx: BlackmanHarrisComplex,
 		want: []float64{
 			0.000429, 0.004895, 0.021735, 0.065564, 0.153302, 0.295468, 0.485851, 0.695764, 0.878689, 0.985801,
 			0.985801, 0.878689, 0.695764, 0.485851, 0.295468, 0.153302, 0.065564, 0.021735, 0.004895, 0.000429,
 		},
 	},
 	{
-		name: "Nuttall", fn: Nuttall, fnCmplx: NuttallComplex, winLen: 20,
+		name: "Nuttall", fn: Nuttall, fnCmplx: NuttallComplex,
 		want: []float64{
 			0.000315, 0.004300, 0.020039, 0.062166, 0.148072, 0.289119, 0.479815, 0.691497, 0.876790, 0.985566,
 			0.985566, 0.876790, 0.691497, 0.479815, 0.289119, 0.148072, 0.062166, 0.020039, 0.004300, 0.000315,
 		},
 	},
 	{
-		name: "BlackmanNuttall", fn: BlackmanNuttall, fnCmplx: BlackmanNuttallComplex, winLen: 20,
+		name: "BlackmanNuttall", fn: BlackmanNuttall, fnCmplx: BlackmanNuttallComplex,
 		want: []float64{
 			0.000859, 0.006348, 0.025205, 0.071718, 0.161975, 0.305361, 0.494863, 0.701958, 0.881398, 0.986132,
 			0.986132, 0.881398, 0.701958, 0.494863, 0.305361, 0.161975, 0.071718, 0.025205, 0.006348, 0.000859,
 		},
 	},
 	{
-		name: "FlatTop", fn: FlatTop, fnCmplx: FlatTopComplex, winLen: 20,
+		name: "FlatTop", fn: FlatTop, fnCmplx: FlatTopComplex,
 		want: []float64{
 			-0.001079, -0.007892, -0.026872, -0.056135, -0.069724, -0.015262, 0.157058, 0.444135, 0.760699, 0.970864,
 			0.970864, 0.760699, 0.444135, 0.157058, -0.015262, -0.069724, -0.056135, -0.026872, -0.007892, -0.001079,
@@ -145,8 +144,7 @@ func TestWindows(t *testing.T) {
 
 	for _, test := range windowTests {
 		t.Run(test.name, func(t *testing.T) {
-			// Copy the input since we are mutating it.
-			src := make([]float64, test.winLen)
+			src := make([]float64, len(test.want))
 			for i := range src {
 				src[i] = 1
 			}
@@ -170,7 +168,6 @@ func TestGausWindows(t *testing.T) {
 
 	for _, test := range gausWindowTests {
 		t.Run(fmt.Sprintf("%s (sigma=%.1f)", test.name, test.sigma), func(t *testing.T) {
-			// Copy the input since we are mutating it.
 			srcCpy := make([]float64, len(src))
 			copy(srcCpy, src)
 			dst := Gaussian(srcCpy, test.sigma)
@@ -187,8 +184,7 @@ func TestWindowsComplex(t *testing.T) {
 
 	for _, test := range windowTests {
 		t.Run(test.name+"Complex", func(t *testing.T) {
-			// Copy the input since we are mutating it.
-			src := make([]complex128, test.winLen)
+			src := make([]complex128, len(test.want))
 			for i := range src {
 				src[i] = complex(1, 1)
 			}
@@ -212,7 +208,6 @@ func TestGausWindowComplex(t *testing.T) {
 
 	for _, test := range gausWindowTests {
 		t.Run(fmt.Sprintf("%sComplex (sigma=%.1f)", test.name, test.sigma), func(t *testing.T) {
-			// Copy the input since we are mutating it.
 			srcCpy := make([]complex128, len(src))
 			copy(srcCpy, src)
 			dst := GaussianComplex(srcCpy, test.sigma)

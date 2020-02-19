@@ -30,14 +30,14 @@ func Rectangular(seq []float64) []float64 {
 // Sine window is a high-resolution window.
 //
 // The sequence weights are
-//  w[k] = sin(π*k/(N-1)),
+//  w[k] = sin(π*k/N),
 // for k=0,1,...,N-1 where N is the length of the window.
 //
 // Spectral leakage parameters: ΔF_0 = 3, ΔF_0.5 = 1.23, K = 1.5, ɣ_max = -23, β = -3.93.
 func Sine(seq []float64) []float64 {
-	k := math.Pi / float64(len(seq)-1)
+	k := math.Pi / float64(len(seq))
 	for i := range seq {
-		seq[i] *= math.Sin(k * float64(i))
+		seq[i] *= math.Sin(k * (float64(i) + 0.5))
 	}
 	return seq
 }
@@ -49,14 +49,14 @@ func Sine(seq []float64) []float64 {
 // The Lanczos window is a high-resolution window.
 //
 // The sequence weights are
-//  w[k] = sinc(2*k/(N-1) - 1),
+//  w[k] = sinc(2*k/N - 1),
 // for k=0,1,...,N-1 where N is the length of the window.
 //
 // Spectral leakage parameters: ΔF_0 = 3.24, ΔF_0.5 = 1.3, K = 1.62, ɣ_max = -26.4, β = -4.6.
 func Lanczos(seq []float64) []float64 {
-	k := 2 / float64(len(seq)-1)
+	k := 2 / float64(len(seq))
 	for i := range seq {
-		x := math.Pi * (k*float64(i) - 1)
+		x := math.Pi * (k*(float64(i)+0.5) - 1)
 		if x == 0 {
 			// Avoid NaN.
 			continue
@@ -73,14 +73,14 @@ func Lanczos(seq []float64) []float64 {
 // The Triangular window is a high-resolution window.
 //
 // The sequence weights are
-//  w[k] = 1 - |k/A -1|, A=(N-1)/2,
+//  w[k] = 1 - |(k - N/2)/(N/2)|,
 // for k=0,1,...,N-1 where N is the length of the window.
 //
 // Spectral leakage parameters: ΔF_0 = 4, ΔF_0.5 = 1.33, K = 2, ɣ_max = -26.5, β = -6.
 func Triangular(seq []float64) []float64 {
-	a := float64(len(seq)-1) / 2
+	a := float64(len(seq)) / 2
 	for i := range seq {
-		seq[i] *= 1 - math.Abs(float64(i)/a-1)
+		seq[i] *= 1 - math.Abs((float64(i)+0.5-a)/a)
 	}
 	return seq
 }
@@ -92,14 +92,14 @@ func Triangular(seq []float64) []float64 {
 // The Hann window is a high-resolution window.
 //
 // The sequence weights are
-//  w[k] = 0.5*(1 - cos(2*π*k/(N-1))),
+//  w[k] = 0.5*(1 - cos(2*π*k/N)),
 // for k=0,1,...,N-1 where N is the length of the window.
 //
 // Spectral leakage parameters: ΔF_0 = 4, ΔF_0.5 = 1.5, K = 2, ɣ_max = -31.5, β = -6.
 func Hann(seq []float64) []float64 {
-	k := 2 * math.Pi / float64(len(seq)-1)
+	k := 2 * math.Pi / float64(len(seq))
 	for i := range seq {
-		seq[i] *= 0.5 * (1 - math.Cos(k*float64(i)))
+		seq[i] *= 0.5 * (1 - math.Cos(k*(float64(i)+0.5)))
 	}
 	return seq
 }
@@ -111,7 +111,7 @@ func Hann(seq []float64) []float64 {
 // The Bartlett-Hann window is a high-resolution window.
 //
 // The sequence weights are
-//  w[k] = 0.62 - 0.48*|k/(N-1)-0.5| - 0.38*cos(2*π*k/(N-1)),
+//  w[k] = 0.62 - 0.48*|k/N-0.5| - 0.38*cos(2*π*k/N),
 // for k=0,1,...,N-1 where N is the length of the window.
 //
 // Spectral leakage parameters: ΔF_0 = 4, ΔF_0.5 = 1.45, K = 2, ɣ_max = -35.9, β = -6.
@@ -122,9 +122,9 @@ func BartlettHann(seq []float64) []float64 {
 		a2 = 0.38
 	)
 
-	k := 2 * math.Pi / float64(len(seq)-1)
+	k := 2 * math.Pi / float64(len(seq))
 	for i := range seq {
-		seq[i] *= a0 - a1*math.Abs(float64(i)/float64(len(seq)-1)-0.5) - a2*math.Cos(k*float64(i))
+		seq[i] *= a0 - a1*math.Abs((float64(i)+0.5)/float64(len(seq))-0.5) - a2*math.Cos(k*(float64(i)+0.5))
 	}
 	return seq
 }
@@ -137,7 +137,7 @@ func BartlettHann(seq []float64) []float64 {
 // the highest ɣ_max.
 //
 // The sequence weights are
-//  w[k] = 25/46 - 21/46 * cos(2*π*k/(N-1)),
+//  w[k] = 25/46 - 21/46 * cos(2*π*k/N),
 // for k=0,1,...,N-1 where N is the length of the window.
 //
 // Spectral leakage parameters: ΔF_0 = 4, ΔF_0.5 = 1.33, K = 2, ɣ_max = -42, β = -5.37.
@@ -147,9 +147,9 @@ func Hamming(seq []float64) []float64 {
 		a1 = 1 - a0
 	)
 
-	k := 2 * math.Pi / float64(len(seq)-1)
+	k := 2 * math.Pi / float64(len(seq))
 	for i := range seq {
-		seq[i] *= a0 - a1*math.Cos(k*float64(i))
+		seq[i] *= a0 - a1*math.Cos(k*(float64(i)+0.5))
 	}
 	return seq
 }
@@ -161,7 +161,7 @@ func Hamming(seq []float64) []float64 {
 // The Blackman window is a high-resolution window.
 //
 // The sequence weights are
-//  w[k] = 0.42 - 0.5*cos(2*π*k/(N-1)) + 0.08*cos(4*π*k/(N-1)),
+//  w[k] = 0.42 - 0.5*cos(2*π*k/N) + 0.08*cos(4*π*k/N),
 // for k=0,1,...,N-1 where N is the length of the window.
 //
 // Spectral leakage parameters: ΔF_0 = 6, ΔF_0.5 = 1.7, K = 3, ɣ_max = -58, β = -7.54.
@@ -172,9 +172,9 @@ func Blackman(seq []float64) []float64 {
 		a2 = 0.08
 	)
 
-	k := 2 * math.Pi / float64(len(seq)-1)
+	k := 2 * math.Pi / float64(len(seq))
 	for i := range seq {
-		x := k * float64(i)
+		x := k * (float64(i) + 0.5)
 		seq[i] *= a0 - a1*math.Cos(x) + a2*math.Cos(2*x)
 	}
 	return seq
@@ -187,8 +187,8 @@ func Blackman(seq []float64) []float64 {
 // The Blackman-Harris window is a low-resolution window.
 //
 // The sequence weights are
-//  w[k] = 0.35875 - 0.48829*cos(2*π*k/(N-1)) +
-//         0.14128*cos(4*π*k/(N-1)) - 0.01168*cos(6*π*k/(N-1)),
+//  w[k] = 0.35875 - 0.48829*cos(2*π*k/N) +
+//         0.14128*cos(4*π*k/N) - 0.01168*cos(6*π*k/N),
 // for k=0,1,...,N-1 where N is the length of the window.
 //
 // Spectral leakage parameters:  ΔF_0 = 8, ΔF_0.5 = 1.97, K = 4, ɣ_max = -92, β = -8.91.
@@ -200,9 +200,9 @@ func BlackmanHarris(seq []float64) []float64 {
 		a3 = 0.01168
 	)
 
-	k := 2 * math.Pi / float64(len(seq)-1)
+	k := 2 * math.Pi / float64(len(seq))
 	for i := range seq {
-		x := k * float64(i)
+		x := k * (float64(i) + 0.5)
 		seq[i] *= a0 - a1*math.Cos(x) + a2*math.Cos(2*x) - a3*math.Cos(3*x)
 	}
 	return seq
@@ -215,8 +215,8 @@ func BlackmanHarris(seq []float64) []float64 {
 // The Nuttall window is a low-resolution window.
 //
 // The sequence weights are
-//  w[k] = 0.355768 - 0.487396*cos(2*π*k/(N-1)) + 0.144232*cos(4*π*k/(N-1)) -
-//         0.012604*cos(6*π*k/(N-1)),
+//  w[k] = 0.355768 - 0.487396*cos(2*π*k/N) + 0.144232*cos(4*π*k/N) -
+//         0.012604*cos(6*π*k/N),
 // for k=0,1,...,N-1 where N is the length of the window.
 //
 // Spectral leakage parameters: ΔF_0 = 8, ΔF_0.5 = 1.98, K = 4, ɣ_max = -93, β = -9.
@@ -228,9 +228,9 @@ func Nuttall(seq []float64) []float64 {
 		a3 = 0.012604
 	)
 
-	k := 2 * math.Pi / float64(len(seq)-1)
+	k := 2 * math.Pi / float64(len(seq))
 	for i := range seq {
-		x := k * float64(i)
+		x := k * (float64(i) + 0.5)
 		seq[i] *= a0 - a1*math.Cos(x) + a2*math.Cos(2*x) - a3*math.Cos(3*x)
 	}
 	return seq
@@ -243,8 +243,8 @@ func Nuttall(seq []float64) []float64 {
 // The Blackman-Nuttall window is a low-resolution window.
 //
 // The sequence weights are
-//  w[k] = 0.3635819 - 0.4891775*cos(2*π*k/(N-1)) + 0.1365995*cos(4*π*k/(N-1)) -
-//         0.0106411*cos(6*π*k/(N-1)),
+//  w[k] = 0.3635819 - 0.4891775*cos(2*π*k/N) + 0.1365995*cos(4*π*k/N) -
+//         0.0106411*cos(6*π*k/N),
 // for k=0,1,...,N-1 where N is the length of the window.
 //
 // Spectral leakage parameters: ΔF_0 = 8, ΔF_0.5 = 1.94, K = 4, ɣ_max = -98, β = -8.8.
@@ -256,9 +256,9 @@ func BlackmanNuttall(seq []float64) []float64 {
 		a3 = 0.0106411
 	)
 
-	k := 2 * math.Pi / float64(len(seq)-1)
+	k := 2 * math.Pi / float64(len(seq))
 	for i := range seq {
-		x := k * float64(i)
+		x := k * (float64(i) + 0.5)
 		seq[i] *= a0 - a1*math.Cos(x) + a2*math.Cos(2*x) - a3*math.Cos(3*x)
 	}
 	return seq
@@ -272,8 +272,8 @@ func BlackmanNuttall(seq []float64) []float64 {
 //
 // The sequence weights are
 //  w[k] = 0.21557895 - 0.41663158*cos(2*π*k/(N-1)) +
-//         0.277263158*cos(4*π*k/(N-1)) - 0.083578947*cos(6*π*k/(N-1)) +
-//         0.006947368*cos(4*π*k/(N-1)),
+//         0.277263158*cos(4*π*k/N) - 0.083578947*cos(6*π*k/N) +
+//         0.006947368*cos(4*π*k/N),
 // for k=0,1,...,N-1 where N is the length of the window.
 //
 // Spectral leakage parameters: ΔF_0 = 10, ΔF_0.5 = 3.72, K = 5, ɣ_max = -93.0, β = -13.34.
@@ -286,9 +286,9 @@ func FlatTop(seq []float64) []float64 {
 		a4 = 0.006947368
 	)
 
-	k := 2 * math.Pi / float64(len(seq)-1)
+	k := 2 * math.Pi / float64(len(seq))
 	for i := range seq {
-		x := k * float64(i)
+		x := k * (float64(i) + 0.5)
 		seq[i] *= a0 - a1*math.Cos(x) + a2*math.Cos(2*x) - a3*math.Cos(3*x) + a4*math.Cos(4*x)
 	}
 	return seq
@@ -301,7 +301,7 @@ func FlatTop(seq []float64) []float64 {
 // The Gaussian window is an adjustable window.
 //
 // The sequence weights are
-//  w[k] = exp(-0.5 * ((k-M)/(σ*M))² ), M = (N-1)/2,
+//  w[k] = exp(-0.5 * ((k-M)/(σ*M))² ), M = N/2,
 // for k=0,1,...,N-1 where N is the length of the window.
 //
 // The properties of window depends on the σ (sigma) argument.
@@ -316,9 +316,9 @@ func FlatTop(seq []float64) []float64 {
 //  ɣ_max  | -65     | -31.5  | -15.5  |
 //  β      |  -8.52  |  -4.48 |  -0.96 |
 func Gaussian(seq []float64, sigma float64) []float64 {
-	a := float64(len(seq)-1) / 2
+	a := float64(len(seq)) / 2
 	for i := range seq {
-		x := -0.5 * math.Pow((float64(i)-a)/(sigma*a), 2)
+		x := -0.5 * math.Pow(((float64(i)+0.5)-a)/(sigma*a), 2)
 		seq[i] *= math.Exp(x)
 	}
 	return seq

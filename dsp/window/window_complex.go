@@ -294,7 +294,7 @@ func FlatTopComplex(seq []complex128) []complex128 {
 	return seq
 }
 
-// GaussianComplex modifies seq in place by the Gaussian window and returns the result.
+// GaussianComplex can modify a sequence by the Gaussian window and return the result.
 // See https://en.wikipedia.org/wiki/Window_function#Gaussian_window
 // and https://www.recordingblogs.com/wiki/gaussian-window for details.
 //
@@ -304,7 +304,7 @@ func FlatTopComplex(seq []complex128) []complex128 {
 //  w[k] = exp(-0.5 * ((k + 1/2 - M)/(σ*M))² ), M = N/2,
 // for k=0,1,...,N-1 where N is the length of the window.
 //
-// The properties of the window depend on the σ (sigma) argument.
+// The properties of the window depend on the value of σ (sigma).
 // It can be used as high or low resolution window, depending of the σ value.
 //
 // Spectral leakage parameters are summarized in the table:
@@ -315,10 +315,16 @@ func FlatTopComplex(seq []complex128) []complex128 {
 //  K      |   4     |   1.7  |   1.1  |
 //  ɣ_max  | -65     | -31.5  | -15.5  |
 //  β      |  -8.52  |  -4.48 |  -0.96 |
-func GaussianComplex(seq []complex128, sigma float64) []complex128 {
+type GaussianComplex struct {
+	Sigma float64
+}
+
+// Transform applies the Gaussian transformation to seq in place, using the value
+// of the receiver as the sigma parameter, and returning the result.
+func (g GaussianComplex) Transform(seq []complex128) []complex128 {
 	a := float64(len(seq)) / 2
 	for i := range seq {
-		x := -0.5 * math.Pow(((float64(i)+0.5)-a)/(sigma*a), 2)
+		x := -0.5 * math.Pow(((float64(i)+0.5)-a)/(g.Sigma*a), 2)
 		seq[i] *= complex(math.Exp(x), 0)
 	}
 	return seq

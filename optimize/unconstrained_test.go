@@ -938,7 +938,8 @@ var newtonTests = []unconstrainedTest{
 			Grad: functions.BrownBadlyScaled{}.Grad,
 			Hess: functions.BrownBadlyScaled{}.Hess,
 		},
-		x: []float64{1, 1},
+		x:       []float64{1, 1},
+		gradTol: 1e-9,
 	},
 	{
 		name: "PowellBadlyScaled",

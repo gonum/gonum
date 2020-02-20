@@ -150,9 +150,17 @@ func TestWindows(t *testing.T) {
 			}
 
 			dst := test.fn(src)
-
 			if !floats.EqualApprox(dst, test.want, tol) {
 				t.Errorf("unexpected result for window function %q:\ngot:%#.6v\nwant:%#v", test.name, dst, test.want)
+			}
+
+			for i := range src {
+				src[i] = 1
+			}
+
+			dst = NewValues(test.fn, len(src)).Transform(src)
+			if !floats.EqualApprox(dst, test.want, tol) {
+				t.Errorf("unexpected result for lookup window function %q:\ngot:%#.6v\nwant:%#.6v", test.name, dst, test.want)
 			}
 		})
 	}
@@ -161,19 +169,28 @@ func TestWindows(t *testing.T) {
 func TestGausWindows(t *testing.T) {
 	const tol = 1e-6
 
-	src := make([]float64, 20)
-	for i := range src {
-		src[i] = 1
-	}
-
 	for _, test := range gausWindowTests {
 		t.Run(fmt.Sprintf("%s (sigma=%.1f)", test.name, test.sigma), func(t *testing.T) {
-			srcCpy := make([]float64, len(src))
-			copy(srcCpy, src)
-			dst := Gaussian(srcCpy, test.sigma)
+			src := make([]float64, 20)
+			for i := range src {
+				src[i] = 1
+			}
 
+			dst := Gaussian(src, test.sigma)
 			if !floats.EqualApprox(dst, test.want, tol) {
 				t.Errorf("unexpected result for window function %q:\ngot:%#.6v\nwant:%#v", test.name, dst, test.want)
+			}
+
+			for i := range src {
+				src[i] = 1
+			}
+
+			sigma := test.sigma
+			dst = NewValues(func(seq []float64) []float64 {
+				return Gaussian(seq, sigma)
+			}, len(src)).Transform(src)
+			if !floats.EqualApprox(dst, test.want, tol) {
+				t.Errorf("unexpected result for lookup window function %q:\ngot:%#.6v\nwant:%#.6v", test.name, dst, test.want)
 			}
 		})
 	}
@@ -190,9 +207,17 @@ func TestWindowsComplex(t *testing.T) {
 			}
 
 			dst := test.fnCmplx(src)
-
 			if !equalApprox(dst, test.want, tol) {
 				t.Errorf("unexpected result for window function %q:\ngot:%#.6v\nwant:%#.6v", test.name, dst, test.want)
+			}
+
+			for i := range src {
+				src[i] = complex(1, 1)
+			}
+
+			dst = NewValuesComplex(test.fnCmplx, len(src)).Transform(src)
+			if !equalApprox(dst, test.want, tol) {
+				t.Errorf("unexpected result for lookup window function %q:\ngot:%#.6v\nwant:%#.6v", test.name, dst, test.want)
 			}
 		})
 	}
@@ -201,19 +226,28 @@ func TestWindowsComplex(t *testing.T) {
 func TestGausWindowComplex(t *testing.T) {
 	const tol = 1e-6
 
-	src := make([]complex128, 20)
-	for i := range src {
-		src[i] = complex(1, 1)
-	}
-
 	for _, test := range gausWindowTests {
 		t.Run(fmt.Sprintf("%sComplex (sigma=%.1f)", test.name, test.sigma), func(t *testing.T) {
-			srcCpy := make([]complex128, len(src))
-			copy(srcCpy, src)
-			dst := GaussianComplex(srcCpy, test.sigma)
+			src := make([]complex128, 20)
+			for i := range src {
+				src[i] = complex(1, 1)
+			}
 
+			dst := GaussianComplex(src, test.sigma)
 			if !equalApprox(dst, test.want, tol) {
 				t.Errorf("unexpected result for window function %q:\ngot:%#.6v\nwant:%#.6v", test.name, dst, test.want)
+			}
+
+			for i := range src {
+				src[i] = complex(1, 1)
+			}
+
+			sigma := test.sigma
+			dst = NewValuesComplex(func(seq []complex128) []complex128 {
+				return GaussianComplex(seq, sigma)
+			}, len(src)).Transform(src)
+			if !equalApprox(dst, test.want, tol) {
+				t.Errorf("unexpected result for lookup window function %q:\ngot:%#.6v\nwant:%#.6v", test.name, dst, test.want)
 			}
 		})
 	}

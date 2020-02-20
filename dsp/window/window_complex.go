@@ -323,3 +323,32 @@ func GaussianComplex(seq []complex128, sigma float64) []complex128 {
 	}
 	return seq
 }
+
+// ValuesComplex is an arbitrary complex window function.
+type ValuesComplex []complex128
+
+// NewValuesComplex returns a ValuesComplex of length n with weights corresponding
+// to the provided window function.
+func NewValuesComplex(window func([]complex128) []complex128, n int) ValuesComplex {
+	v := make(ValuesComplex, n)
+	for i := range v {
+		v[i] = 1
+	}
+	return window(v)
+}
+
+// Transform applies the weights in the receiver to seq in place, returning the
+// result. If v is nil, Transform is a no-op, otherwise the length of v must
+// match the length of seq.
+func (v ValuesComplex) Transform(seq []complex128) []complex128 {
+	if v == nil {
+		return seq
+	}
+	if len(v) != len(seq) {
+		panic("window: length mismatch")
+	}
+	for i, w := range v {
+		seq[i] *= w
+	}
+	return seq
+}

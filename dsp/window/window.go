@@ -323,3 +323,32 @@ func Gaussian(seq []float64, sigma float64) []float64 {
 	}
 	return seq
 }
+
+// Values is an arbitrary real window function.
+type Values []float64
+
+// NewValues returns a Values of length n with weights corresponding to the
+// provided window function.
+func NewValues(window func([]float64) []float64, n int) Values {
+	v := make(Values, n)
+	for i := range v {
+		v[i] = 1
+	}
+	return window(v)
+}
+
+// Transform applies the weights in the receiver to seq in place, returning the
+// result. If v is nil, Transform is a no-op, otherwise the length of v must
+// match the length of seq.
+func (v Values) Transform(seq []float64) []float64 {
+	if v == nil {
+		return seq
+	}
+	if len(v) != len(seq) {
+		panic("window: length mismatch")
+	}
+	for i, w := range v {
+		seq[i] *= w
+	}
+	return seq
+}

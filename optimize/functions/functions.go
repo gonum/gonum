@@ -553,7 +553,7 @@ func (BrownBadlyScaled) Grad(grad, x []float64) {
 
 	f1 := x[0] - 1e6
 	f2 := x[1] - 2e-6
-	f3 := x[0]*x[1] - 2
+	f3 := float64(x[0]*x[1]) - 2 // Prevent fused multiply subtract.
 	grad[0] = 2*f1 + 2*f3*x[1]
 	grad[1] = 2*f2 + 2*f3*x[0]
 }

@@ -304,7 +304,7 @@ func FlatTopComplex(seq []complex128) []complex128 {
 //  w[k] = exp(-0.5 * ((k + 1/2 - M)/(σ*M))² ), M = N/2,
 // for k=0,1,...,N-1 where N is the length of the window.
 //
-// The properties of window depends on the σ (sigma) argument.
+// The properties of the window depend on the σ (sigma) argument.
 // It can be used as high or low resolution window, depending of the σ value.
 //
 // Spectral leakage parameters are summarized in the table:

@@ -5,82 +5,110 @@
 package window
 
 import (
+	"fmt"
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
 )
 
 var windowTests = []struct {
-	name   string
-	fn     func([]float64) []float64
-	want   []float64
-	winLen int
+	name    string
+	fn      func([]float64) []float64
+	fnCmplx func([]complex128) []complex128
+	want    []float64
 }{
 	{
-		name: "Rectangular", fn: Rectangular, winLen: 20,
-		want: []float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-			1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+		name: "Rectangular", fn: Rectangular, fnCmplx: RectangularComplex,
+		want: []float64{
+			1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+			1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		},
 	},
 	{
-		name: "Sine", fn: Sine, winLen: 20,
-		want: []float64{0.000000, 0.164595, 0.324699, 0.475947, 0.614213, 0.735724, 0.837166, 0.915773, 0.969400, 0.996584,
-			0.996584, 0.969400, 0.915773, 0.837166, 0.735724, 0.614213, 0.475947, 0.324699, 0.164595, 0.000000},
+		name: "Sine", fn: Sine, fnCmplx: SineComplex,
+		want: []float64{
+			0.078459, 0.233445, 0.382683, 0.522499, 0.649448, 0.760406, 0.852640, 0.923880, 0.972370, 0.996917,
+			0.996917, 0.972370, 0.923880, 0.852640, 0.760406, 0.649448, 0.522499, 0.382683, 0.233445, 0.078459,
+		},
 	},
 	{
-		name: "Lanczos", fn: Lanczos, winLen: 20,
-		want: []float64{0.000000, 0.115514, 0.247646, 0.389468, 0.532984, 0.669692, 0.791213, 0.889915, 0.959492, 0.995450,
-			0.995450, 0.959492, 0.889915, 0.791213, 0.669692, 0.532984, 0.389468, 0.247646, 0.115514, 0.000000},
+		name: "Lanczos", fn: Lanczos, fnCmplx: LanczosComplex,
+		want: []float64{
+			0.052415, 0.170011, 0.300105, 0.436333, 0.57162, 0.698647, 0.810332, 0.900316, 0.963398, 0.995893,
+			0.995893, 0.963398, 0.900316, 0.810332, 0.698647, 0.57162, 0.436333, 0.300105, 0.170011, 0.052415,
+		},
 	},
 	// This case tests Lanczos for a NaN condition. The Lanczos NaN condition is k=(N-1)/2, that is when N is odd.
 	{
-		name: "LanczosOdd", fn: Lanczos, winLen: 21,
-		want: []float64{0.000000, 0.109292, 0.233872, 0.367883, 0.504551, 0.636620, 0.756827, 0.858394, 0.935489, 0.983632,
-			1.000000, 0.983632, 0.935489, 0.858394, 0.756827, 0.636620, 0.504551, 0.367883, 0.233872, 0.109292, 0.000000},
+		name: "LanczosOdd", fn: Lanczos, fnCmplx: LanczosComplex,
+		want: []float64{
+			0.049813, 0.161128, 0.284164, 0.413497, 0.543076, 0.666582, 0.777804, 0.871026, 0.941379, 0.985147,
+			1,
+			0.985147, 0.941379, 0.871026, 0.777804, 0.666582, 0.543076, 0.413497, 0.284164, 0.161128, 0.049813,
+		},
 	},
 	{
-		name: "Triangular", fn: Triangular, winLen: 20,
-		want: []float64{0.000000, 0.105263, 0.210526, 0.315789, 0.421053, 0.526316, 0.631579, 0.736842, 0.842105, 0.947368,
-			0.947368, 0.842105, 0.736842, 0.631579, 0.526316, 0.421053, 0.315789, 0.210526, 0.105263, 0.000000},
+		name: "Triangular", fn: Triangular, fnCmplx: TriangularComplex,
+		want: []float64{
+			0.05, 0.15, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85, 0.95,
+			0.95, 0.85, 0.75, 0.65, 0.55, 0.45, 0.35, 0.25, 0.15, 0.05,
+		},
 	},
 	{
-		name: "Hann", fn: Hann, winLen: 20,
-		want: []float64{0.000000, 0.027091, 0.105430, 0.226526, 0.377257, 0.541290, 0.700848, 0.838641, 0.939737, 0.993181,
-			0.993181, 0.939737, 0.838641, 0.700848, 0.541290, 0.377257, 0.226526, 0.105430, 0.027091, 0.000000},
+		name: "Hann", fn: Hann, fnCmplx: HannComplex,
+		want: []float64{
+			0.006155, 0.054496, 0.146447, 0.273005, 0.421783, 0.578217, 0.726995, 0.853553, 0.945503, 0.993844,
+			0.993844, 0.945503, 0.853553, 0.726995, 0.578217, 0.421783, 0.273005, 0.146447, 0.054496, 0.006155,
+		},
 	},
 	{
-		name: "BartlettHann", fn: BartlettHann, winLen: 20,
-		want: []float64{0.000000, 0.045853, 0.130653, 0.247949, 0.387768, 0.537696, 0.684223, 0.814209, 0.916305, 0.982186,
-			0.982186, 0.916305, 0.814209, 0.684223, 0.537696, 0.387768, 0.247949, 0.130653, 0.045853, 0.000000},
+		name: "BartlettHann", fn: BartlettHann, fnCmplx: BartlettHannComplex,
+		want: []float64{
+			0.016678, 0.077417, 0.171299, 0.291484, 0.428555, 0.571445, 0.708516, 0.828701, 0.922582, 0.983322,
+			0.983322, 0.922582, 0.828701, 0.708516, 0.571445, 0.428555, 0.291484, 0.171299, 0.077417, 0.016678,
+		},
 	},
 	{
-		name: "Hamming", fn: Hamming, winLen: 20,
-		want: []float64{0.086957, 0.111692, 0.183218, 0.293785, 0.431408, 0.581178, 0.726861, 0.852672, 0.944977, 0.993774,
-			0.993774, 0.944977, 0.852672, 0.726861, 0.581178, 0.431409, 0.293785, 0.183218, 0.111692, 0.086957},
+		name: "Hamming", fn: Hamming, fnCmplx: HammingComplex,
+		want: []float64{
+			0.092577, 0.136714, 0.220669, 0.336222, 0.472063, 0.614894, 0.750735, 0.866288, 0.950242, 0.994379,
+			0.994379, 0.950242, 0.866288, 0.750735, 0.614894, 0.472063, 0.336222, 0.220669, 0.136714, 0.092577,
+		},
 	},
 	{
-		name: "Blackman", fn: Blackman, winLen: 20,
-		want: []float64{0.000000, 0.010223, 0.045069, 0.114390, 0.226899, 0.382381, 0.566665, 0.752034, 0.903493, 0.988846,
-			0.988846, 0.903493, 0.752034, 0.566665, 0.382381, 0.226899, 0.114390, 0.045069, 0.010223, 0.000000},
+		name: "Blackman", fn: Blackman, fnCmplx: BlackmanComplex,
+		want: []float64{
+			0.002240, 0.021519, 0.066446, 0.145982, 0.265698, 0.422133, 0.599972, 0.773553, 0.912526, 0.989929,
+			0.989929, 0.912526, 0.773553, 0.599972, 0.422133, 0.265698, 0.145982, 0.066446, 0.021519, 0.002240,
+		},
 	},
 	{
-		name: "BlackmanHarris", fn: BlackmanHarris, winLen: 20,
-		want: []float64{0.000060, 0.002018, 0.012795, 0.046450, 0.122540, 0.256852, 0.448160, 0.668576, 0.866426, 0.984278,
-			0.984278, 0.866426, 0.668576, 0.448160, 0.256852, 0.122540, 0.046450, 0.012795, 0.002018, 0.000060},
+		name: "BlackmanHarris", fn: BlackmanHarris, fnCmplx: BlackmanHarrisComplex,
+		want: []float64{
+			0.000429, 0.004895, 0.021735, 0.065564, 0.153302, 0.295468, 0.485851, 0.695764, 0.878689, 0.985801,
+			0.985801, 0.878689, 0.695764, 0.485851, 0.295468, 0.153302, 0.065564, 0.021735, 0.004895, 0.000429,
+		},
 	},
 	{
-		name: "Nuttall", fn: Nuttall, winLen: 20,
-		want: []float64{0.000000, 0.001706, 0.011614, 0.043682, 0.117808, 0.250658, 0.441946, 0.664015, 0.864348, 0.984019,
-			0.984019, 0.864348, 0.664015, 0.441946, 0.250658, 0.117808, 0.043682, 0.011614, 0.001706, 0.000000},
+		name: "Nuttall", fn: Nuttall, fnCmplx: NuttallComplex,
+		want: []float64{
+			0.000315, 0.004300, 0.020039, 0.062166, 0.148072, 0.289119, 0.479815, 0.691497, 0.876790, 0.985566,
+			0.985566, 0.876790, 0.691497, 0.479815, 0.289119, 0.148072, 0.062166, 0.020039, 0.004300, 0.000315,
+		},
 	},
 	{
-		name: "BlackmanNuttall", fn: BlackmanNuttall, winLen: 20,
-		want: []float64{0.000363, 0.002885, 0.015360, 0.051652, 0.130567, 0.266629, 0.457501, 0.675215, 0.869392, 0.984644,
-			0.984644, 0.869392, 0.675215, 0.457501, 0.266629, 0.130567, 0.051652, 0.015360, 0.002885, 0.000363},
+		name: "BlackmanNuttall", fn: BlackmanNuttall, fnCmplx: BlackmanNuttallComplex,
+		want: []float64{
+			0.000859, 0.006348, 0.025205, 0.071718, 0.161975, 0.305361, 0.494863, 0.701958, 0.881398, 0.986132,
+			0.986132, 0.881398, 0.701958, 0.494863, 0.305361, 0.161975, 0.071718, 0.025205, 0.006348, 0.000859,
+		},
 	},
 	{
-		name: "FlatTop", fn: FlatTop, winLen: 20,
-		want: []float64{-0.000421, -0.003687, -0.017675, -0.045939, -0.070137, -0.037444, 0.115529, 0.402051, 0.737755, 0.967756,
-			0.967756, 0.737755, 0.402051, 0.115529, -0.037444, -0.070137, -0.045939, -0.017675, -0.003687, -0.000421},
+		name: "FlatTop", fn: FlatTop, fnCmplx: FlatTopComplex,
+		want: []float64{
+			-0.001079, -0.007892, -0.026872, -0.056135, -0.069724, -0.015262, 0.157058, 0.444135, 0.760699, 0.970864,
+			0.970864, 0.760699, 0.444135, 0.157058, -0.015262, -0.069724, -0.056135, -0.026872, -0.007892, -0.001079,
+		},
 	},
 }
 
@@ -90,19 +118,24 @@ var gausWindowTests = []struct {
 	want  []float64
 }{
 	{
-		name: "Gaussian (sigma=0.3)", sigma: 0.3,
-		want: []float64{0.003866, 0.011708, 0.031348, 0.074214, 0.155344, 0.287499, 0.470444, 0.680632, 0.870660, 0.984728,
-			0.984728, 0.870660, 0.680632, 0.470444, 0.287499, 0.155344, 0.074214, 0.031348, 0.011708, 0.003866},
+		name: "Gaussian", sigma: 0.3,
+		want: []float64{
+			0.006645, 0.018063, 0.043936, 0.095634, 0.186270, 0.324652, 0.506336, 0.706648, 0.882497, 0.986207,
+			0.986207, 0.882497, 0.706648, 0.506336, 0.324652, 0.186270, 0.095634, 0.043936, 0.018063, 0.006645},
 	},
 	{
-		name: "Gaussian (sigma=0.5)", sigma: 0.5,
-		want: []float64{0.135335, 0.201673, 0.287499, 0.392081, 0.511524, 0.638423, 0.762260, 0.870660, 0.951361, 0.994475,
-			0.994475, 0.951361, 0.870660, 0.762260, 0.638423, 0.511524, 0.392081, 0.287499, 0.201673, 0.135335},
+		name: "Gaussian", sigma: 0.5,
+		want: []float64{
+			0.164474, 0.235746, 0.324652, 0.429557, 0.546074, 0.666977, 0.782705, 0.882497, 0.955997, 0.995012,
+			0.995012, 0.955997, 0.882497, 0.782705, 0.666977, 0.546074, 0.429557, 0.324652, 0.235746, 0.164474,
+		},
 	},
 	{
-		name: "Gaussian (sigma=1.2)", sigma: 1.2,
-		want: []float64{0.706648, 0.757319, 0.805403, 0.849974, 0.890135, 0.925049, 0.953963, 0.976241, 0.991381, 0.999039,
-			0.999039, 0.991381, 0.976241, 0.953963, 0.925049, 0.890135, 0.849974, 0.805403, 0.757319, 0.706648},
+		name: "Gaussian", sigma: 1.2,
+		want: []float64{
+			0.730981, 0.778125, 0.822578, 0.863552, 0.900293, 0.932102, 0.958357, 0.978532, 0.992218, 0.999132,
+			0.999132, 0.992218, 0.978532, 0.958357, 0.932102, 0.900293, 0.863552, 0.822578, 0.778125, 0.730981,
+		},
 	},
 }
 
@@ -111,7 +144,7 @@ func TestWindows(t *testing.T) {
 
 	for _, test := range windowTests {
 		t.Run(test.name, func(t *testing.T) {
-			src := make([]float64, test.winLen)
+			src := make([]float64, len(test.want))
 			for i := range src {
 				src[i] = 1
 			}
@@ -119,7 +152,7 @@ func TestWindows(t *testing.T) {
 			dst := test.fn(src)
 
 			if !floats.EqualApprox(dst, test.want, tol) {
-				t.Errorf("unexpected result for window function %q:\ngot:%v\nwant:%v", test.name, dst, test.want)
+				t.Errorf("unexpected result for window function %q:\ngot:%#.6v\nwant:%#v", test.name, dst, test.want)
 			}
 		})
 	}
@@ -134,15 +167,69 @@ func TestGausWindows(t *testing.T) {
 	}
 
 	for _, test := range gausWindowTests {
-		t.Run(test.name, func(t *testing.T) {
-			// Copy the input since we are mutating it.
+		t.Run(fmt.Sprintf("%s (sigma=%.1f)", test.name, test.sigma), func(t *testing.T) {
 			srcCpy := make([]float64, len(src))
 			copy(srcCpy, src)
 			dst := Gaussian(srcCpy, test.sigma)
 
 			if !floats.EqualApprox(dst, test.want, tol) {
-				t.Errorf("unexpected result for window function %q:\ngot:%v\nwant:%v", test.name, dst, test.want)
+				t.Errorf("unexpected result for window function %q:\ngot:%#.6v\nwant:%#v", test.name, dst, test.want)
 			}
 		})
 	}
+}
+
+func TestWindowsComplex(t *testing.T) {
+	const tol = 1e-6
+
+	for _, test := range windowTests {
+		t.Run(test.name+"Complex", func(t *testing.T) {
+			src := make([]complex128, len(test.want))
+			for i := range src {
+				src[i] = complex(1, 1)
+			}
+
+			dst := test.fnCmplx(src)
+
+			if !equalApprox(dst, test.want, tol) {
+				t.Errorf("unexpected result for window function %q:\ngot:%#.6v\nwant:%#.6v", test.name, dst, test.want)
+			}
+		})
+	}
+}
+
+func TestGausWindowComplex(t *testing.T) {
+	const tol = 1e-6
+
+	src := make([]complex128, 20)
+	for i := range src {
+		src[i] = complex(1, 1)
+	}
+
+	for _, test := range gausWindowTests {
+		t.Run(fmt.Sprintf("%sComplex (sigma=%.1f)", test.name, test.sigma), func(t *testing.T) {
+			srcCpy := make([]complex128, len(src))
+			copy(srcCpy, src)
+			dst := GaussianComplex(srcCpy, test.sigma)
+
+			if !equalApprox(dst, test.want, tol) {
+				t.Errorf("unexpected result for window function %q:\ngot:%#.6v\nwant:%#.6v", test.name, dst, test.want)
+			}
+		})
+	}
+}
+
+func equalApprox(seq1 []complex128, seq2 []float64, tol float64) bool {
+	if len(seq1) != len(seq2) {
+		return false
+	}
+	for i := range seq1 {
+		if !floats.EqualWithinAbsOrRel(real(seq1[i]), seq2[i], tol, tol) {
+			return false
+		}
+		if !floats.EqualWithinAbsOrRel(imag(seq1[i]), seq2[i], tol, tol) {
+			return false
+		}
+	}
+	return true
 }

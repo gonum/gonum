@@ -30,7 +30,7 @@ func (*ListSearch) Uses(has Available) (uses Available, err error) {
 	return has.function()
 }
 
-// InitGlobal initializes the method for optimization. The input dimension
+// Init initializes the method for optimization. The input dimension
 // must match the number of columns of Locs.
 func (l *ListSearch) Init(dim, tasks int) int {
 	if dim <= 0 {

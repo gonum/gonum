@@ -840,7 +840,7 @@ var bfgsTests = []unconstrainedTest{
 			Grad: functions.BrownAndDennis{}.Grad,
 		},
 		x:       []float64{25, 5, -5, -1},
-		gradTol: 1e-5,
+		gradTol: 1e-3,
 	},
 	{
 		name: "ExtendedRosenbrock",

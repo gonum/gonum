@@ -55,7 +55,7 @@ func testDlaln2(t *testing.T, impl Dlaln2er, trans bool, na, nw, extra int, rnd 
 
 	scale, xnormGot, ok := impl.Dlaln2(trans, na, nw, smin, ca, a.Data, a.Stride, d1, d2, b.Data, b.Stride, real(w), imag(w), x.Data, x.Stride)
 
-	prefix := fmt.Sprintf("Case trans=%v, na=%v, nw=%v, extra=%v", trans, na, nw, extra)
+	prefix := fmt.Sprintf("Case trans=%t, na=%v, nw=%v, extra=%v", trans, na, nw, extra)
 
 	if !generalOutsideAllNaN(a) {
 		t.Errorf("%v: out-of-range write to A\n%v", prefix, a.Data)

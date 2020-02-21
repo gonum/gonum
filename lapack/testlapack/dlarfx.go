@@ -77,7 +77,7 @@ func testDlarfx(t *testing.T, impl Dlarfxer, side blas.Side, m, n, extra int, rn
 
 	impl.Dlarfx(side, m, n, v, tau, c.Data, c.Stride, work)
 
-	prefix := fmt.Sprintf("Case side=%v, m=%v, n=%v, extra=%v", side, m, n, extra)
+	prefix := fmt.Sprintf("Case side=%c, m=%v, n=%v, extra=%v", side, m, n, extra)
 
 	// Check any invalid modifications of c.
 	if !generalOutsideAllNaN(c) {

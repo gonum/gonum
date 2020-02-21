@@ -43,7 +43,7 @@ func DlasetTest(t *testing.T, impl Dlaseter) {
 
 				impl.Dlaset(uplo, m, n, alpha, beta, a.Data, a.Stride)
 
-				prefix := fmt.Sprintf("Case #%v: m=%v,n=%v,uplo=%v,extra=%v",
+				prefix := fmt.Sprintf("Case #%v: m=%v,n=%v,uplo=%c,extra=%v",
 					ti, m, n, uplo, extra)
 				if !generalOutsideAllNaN(a) {
 					t.Errorf("%v: out-of-range write to A", prefix)

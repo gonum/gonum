@@ -49,7 +49,7 @@ func testDgebal(t *testing.T, impl Dgebaler, job lapack.BalanceJob, a blas64.Gen
 
 	ilo, ihi := impl.Dgebal(job, n, a.Data, a.Stride, scale)
 
-	prefix := fmt.Sprintf("Case job=%v, n=%v, extra=%v", job, n, extra)
+	prefix := fmt.Sprintf("Case job=%c, n=%v, extra=%v", job, n, extra)
 
 	if !generalOutsideAllNaN(a) {
 		t.Errorf("%v: out-of-range write to A\n%v", prefix, a.Data)

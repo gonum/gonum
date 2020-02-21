@@ -59,7 +59,7 @@ func testDlatrs(t *testing.T, impl Dlatrser, imat int, uplo blas.Uplo, trans bla
 	// Call Dlatrs with normin=false.
 	copy(x, b)
 	scale := impl.Dlatrs(uplo, trans, diag, false, n, a, lda, x, cnorm)
-	prefix := fmt.Sprintf("Case imat=%v (n=%v,lda=%v,trans=%v,uplo=%v,diag=%v", imat, n, lda, trans, uplo, diag)
+	prefix := fmt.Sprintf("Case imat=%v (n=%v,lda=%v,trans=%c,uplo=%c,diag=%c", imat, n, lda, trans, uplo, diag)
 	for i, v := range cnorm {
 		if math.IsNaN(v) {
 			t.Errorf("%v: cnorm[%v] not computed (scale=%v,normin=false)", prefix, i, scale)

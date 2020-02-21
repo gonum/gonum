@@ -84,7 +84,7 @@ func DsytrdTest(t *testing.T, impl Dsytrder) {
 
 				impl.Dsytrd(uplo, n, a.Data, a.Stride, d, e, tau, work, lwork)
 
-				prefix := fmt.Sprintf("Case #%v: uplo=%v,n=%v,lda=%v,work=%v",
+				prefix := fmt.Sprintf("Case #%v: uplo=%c,n=%v,lda=%v,work=%v",
 					tc, uplo, n, lda, wl)
 
 				if !generalOutsideAllNaN(a) {

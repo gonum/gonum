@@ -15,6 +15,8 @@ import (
 	"gonum.org/v1/gonum/stat/distmv"
 )
 
+var _ Method = (*CmaEsChol)(nil)
+
 // TODO(btracey): If we ever implement the traditional CMA-ES algorithm, provide
 // the base explanation there, and modify this description to just
 // describe the differences.

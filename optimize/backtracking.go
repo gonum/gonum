@@ -10,6 +10,8 @@ const (
 	minimumBacktrackingStepSize    = 1e-20
 )
 
+var _ Linesearcher = (*Backtracking)(nil)
+
 // Backtracking is a Linesearcher that uses backtracking to find a point that
 // satisfies the Armijo condition with the given decrease factor. If the Armijo
 // condition has not been met, the step size is decreased by ContractionFactor.

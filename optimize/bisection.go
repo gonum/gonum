@@ -6,9 +6,9 @@ package optimize
 
 import "math"
 
-const (
-	defaultBisectionCurvature = 0.9
-)
+const defaultBisectionCurvature = 0.9
+
+var _ Linesearcher = (*Bisection)(nil)
 
 // Bisection is a Linesearcher that uses a bisection to find a point that
 // satisfies the strong Wolfe conditions with the given curvature factor and

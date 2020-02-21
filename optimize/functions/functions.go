@@ -789,12 +789,13 @@ func (ExtendedRosenbrock) Grad(grad, x []float64) {
 	for i := range grad {
 		grad[i] = 0
 	}
+	// Prevent fused multiply add and fused multiply subtract.
 	for i := 0; i < dim-1; i++ {
-		grad[i] -= 2 * (1 - x[i])
-		grad[i] -= 400 * (x[i+1] - x[i]*x[i]) * x[i]
+		grad[i] -= float64(2 * (1 - x[i]))
+		grad[i] -= float64(400 * (x[i+1] - float64(x[i]*x[i])) * x[i])
 	}
 	for i := 1; i < dim; i++ {
-		grad[i] += 200 * (x[i] - x[i-1]*x[i-1])
+		grad[i] += float64(200 * (x[i] - float64(x[i-1]*x[i-1])))
 	}
 }
 

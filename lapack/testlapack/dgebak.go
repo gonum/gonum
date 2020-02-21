@@ -85,7 +85,7 @@ func testDgebak(t *testing.T, impl Dgebaker, job lapack.BalanceJob, side lapack.
 	got := cloneGeneral(v)
 	impl.Dgebak(job, side, n, ilo, ihi, scale, m, got.Data, got.Stride)
 
-	prefix := fmt.Sprintf("Case job=%v, side=%v, n=%v, ilo=%v, ihi=%v, m=%v, extra=%v",
+	prefix := fmt.Sprintf("Case job=%c, side=%c, n=%v, ilo=%v, ihi=%v, m=%v, extra=%v",
 		job, side, n, ilo, ihi, m, extra)
 
 	if !generalOutsideAllNaN(got) {

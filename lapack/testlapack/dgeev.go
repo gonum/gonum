@@ -590,7 +590,7 @@ func testDgeev(t *testing.T, impl Dgeever, tc string, test dgeevTest, jobvl lapa
 	first := impl.Dgeev(jobvl, jobvr, n, a.Data, a.Stride, wr, wi,
 		vl.Data, vl.Stride, vr.Data, vr.Stride, work, len(work))
 
-	prefix := fmt.Sprintf("Case #%v: n=%v, jobvl=%v, jobvr=%v, extra=%v, work=%v",
+	prefix := fmt.Sprintf("Case #%v: n=%v, jobvl=%c, jobvr=%c, extra=%v, work=%v",
 		tc, n, jobvl, jobvr, extra, wl)
 
 	if !generalOutsideAllNaN(vl) {

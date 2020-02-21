@@ -116,7 +116,7 @@ func testDormhr(t *testing.T, impl Dormhrer, side blas.Side, trans blas.Transpos
 	impl.Dormhr(side, trans, m, n, ilo, ihi, a.Data, a.Stride, tau, c.Data, c.Stride, work, len(work))
 
 	// Compare the two answers.
-	prefix := fmt.Sprintf("Case side=%v, trans=%v, m=%v, n=%v, ilo=%v, ihi=%v, extra=%v, optwork=%v",
+	prefix := fmt.Sprintf("Case side=%c, trans=%c, m=%v, n=%v, ilo=%v, ihi=%v, extra=%v, optwork=%v",
 		side, trans, m, n, ilo, ihi, extra, optwork)
 	if !generalOutsideAllNaN(c) {
 		t.Errorf("%v: out-of-range write to C\n%v", prefix, c.Data)

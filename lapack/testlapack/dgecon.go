@@ -63,7 +63,7 @@ func dgeconTest(t *testing.T, impl Dgeconer, rnd *rand.Rand, n, lda int) {
 	}
 
 	for _, norm := range []lapack.MatrixNorm{lapack.MaxColumnSum, lapack.MaxRowSum} {
-		name := fmt.Sprintf("norm%v,n=%v,lda=%v", string(norm), n, lda)
+		name := fmt.Sprintf("norm=%v,n=%v,lda=%v", string(norm), n, lda)
 
 		// Compute the norm of A and A^{-1}.
 		aNorm := impl.Dlange(norm, n, n, a, lda, work)

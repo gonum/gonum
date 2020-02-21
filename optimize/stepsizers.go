@@ -21,6 +21,12 @@ const (
 	firstOrderMaximumStepSize = quadraticMaximumStepSize
 )
 
+var (
+	_ StepSizer = ConstantStepSize{}
+	_ StepSizer = (*QuadraticStepSize)(nil)
+	_ StepSizer = (*FirstOrderStepSize)(nil)
+)
+
 // ConstantStepSize is a StepSizer that returns the same step size for
 // every iteration.
 type ConstantStepSize struct {

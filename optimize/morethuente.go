@@ -6,6 +6,8 @@ package optimize
 
 import "math"
 
+var _ Linesearcher = (*MoreThuente)(nil)
+
 // MoreThuente is a Linesearcher that finds steps that satisfy both the
 // sufficient decrease and curvature conditions (the strong Wolfe conditions).
 //

@@ -9,8 +9,9 @@ import (
 )
 
 var (
-	_ Method      = (*LBFGS)(nil)
-	_ localMethod = (*LBFGS)(nil)
+	_ Method          = (*LBFGS)(nil)
+	_ localMethod     = (*LBFGS)(nil)
+	_ NextDirectioner = (*LBFGS)(nil)
 )
 
 // LBFGS implements the limited-memory BFGS method for gradient-based

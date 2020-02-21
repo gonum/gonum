@@ -16,8 +16,9 @@ const (
 )
 
 var (
-	_ Method      = (*CG)(nil)
-	_ localMethod = (*CG)(nil)
+	_ Method          = (*CG)(nil)
+	_ localMethod     = (*CG)(nil)
+	_ NextDirectioner = (*CG)(nil)
 )
 
 // CGVariant calculates the scaling parameter, β, used for updating the
@@ -30,6 +31,14 @@ type CGVariant interface {
 	// according to the particular variant of the CG method.
 	Beta(grad, gradPrev, dirPrev []float64) float64
 }
+
+var (
+	_ CGVariant = (*FletcherReeves)(nil)
+	_ CGVariant = (*PolakRibierePolyak)(nil)
+	_ CGVariant = (*HestenesStiefel)(nil)
+	_ CGVariant = (*DaiYuan)(nil)
+	_ CGVariant = (*HagerZhang)(nil)
+)
 
 // CG implements the nonlinear conjugate gradient method for solving nonlinear
 // unconstrained optimization problems. It is a line search method that

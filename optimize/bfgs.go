@@ -11,8 +11,9 @@ import (
 )
 
 var (
-	_ Method      = (*BFGS)(nil)
-	_ localMethod = (*BFGS)(nil)
+	_ Method          = (*BFGS)(nil)
+	_ localMethod     = (*BFGS)(nil)
+	_ NextDirectioner = (*BFGS)(nil)
 )
 
 // BFGS implements the Broyden–Fletcher–Goldfarb–Shanno optimization method. It

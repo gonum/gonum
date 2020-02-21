@@ -7,8 +7,9 @@ package optimize
 import "gonum.org/v1/gonum/floats"
 
 var (
-	_ Method      = (*GradientDescent)(nil)
-	_ localMethod = (*GradientDescent)(nil)
+	_ Method          = (*GradientDescent)(nil)
+	_ localMethod     = (*GradientDescent)(nil)
+	_ NextDirectioner = (*GradientDescent)(nil)
 )
 
 // GradientDescent implements the steepest descent optimization method that

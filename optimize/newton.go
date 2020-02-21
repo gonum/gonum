@@ -13,8 +13,9 @@ import (
 const maxNewtonModifications = 20
 
 var (
-	_ Method      = (*Newton)(nil)
-	_ localMethod = (*Newton)(nil)
+	_ Method          = (*Newton)(nil)
+	_ localMethod     = (*Newton)(nil)
+	_ NextDirectioner = (*Newton)(nil)
 )
 
 // Newton implements a modified Newton's method for Hessian-based unconstrained

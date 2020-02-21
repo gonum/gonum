@@ -16,6 +16,11 @@ type Converger interface {
 	Converged(loc *Location) Status
 }
 
+var (
+	_ Converger = NeverTerminate{}
+	_ Converger = (*FunctionConverge)(nil)
+)
+
 // NeverTerminate implements Converger, always reporting NotTerminated.
 type NeverTerminate struct{}
 

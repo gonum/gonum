@@ -30,6 +30,8 @@ const (
 	printerHessTmpl = "  %9v"                // Appended to base template when loc.Hessian != nil.
 )
 
+var _ Recorder = (*Printer)(nil)
+
 // Printer writes column-format output to the specified writer as the optimization
 // progresses. By default, it writes to os.Stdout.
 type Printer struct {

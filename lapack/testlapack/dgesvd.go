@@ -44,6 +44,8 @@ func DgesvdTest(t *testing.T, impl Dgesvder, tol float64) {
 // Then all combinations of partial SVD results are computed and checked whether
 // they match the full SVD result.
 func dgesvdTest(t *testing.T, impl Dgesvder, m, n, mtype int, tol float64) {
+	const tolOrtho = 1e-15
+
 	rnd := rand.New(rand.NewSource(1))
 
 	// Use a fixed leading dimension to reduce testing time.
@@ -169,12 +171,14 @@ func dgesvdTest(t *testing.T, impl Dgesvder, m, n, mtype int, tol float64) {
 		}
 		if minmn > 0 {
 			// Check that uAll is orthogonal.
-			if !hasOrthonormalColumns(blas64.General{Rows: m, Cols: m, Data: uAll, Stride: ldu}) {
-				t.Errorf("Case %v: UAll is not orthogonal", prefix)
+			q := blas64.General{Rows: m, Cols: m, Data: uAll, Stride: ldu}
+			if resid := residualOrthogonal(q, false); resid > tolOrtho*float64(m) {
+				t.Errorf("Case %v: UAll is not orthogonal; resid=%v, want<=%v", prefix, resid, tolOrtho*float64(m))
 			}
 			// Check that vtAll is orthogonal.
-			if !hasOrthonormalRows(blas64.General{Rows: n, Cols: n, Data: vtAll, Stride: ldvt}) {
-				t.Errorf("Case %v: VTAll is not orthogonal", prefix)
+			q = blas64.General{Rows: n, Cols: n, Data: vtAll, Stride: ldvt}
+			if resid := residualOrthogonal(q, false); resid > tolOrtho*float64(n) {
+				t.Errorf("Case %v: VTAll is not orthogonal; resid=%v, want<=%v", prefix, resid, tolOrtho*float64(n))
 			}
 		}
 		// Check that singular values are decreasing.
@@ -235,15 +239,17 @@ func dgesvdTest(t *testing.T, impl Dgesvder, m, n, mtype int, tol float64) {
 				// Check that U has orthogonal columns and that it matches UAll.
 				switch jobU {
 				case lapack.SVDStore:
-					if !hasOrthonormalColumns(blas64.General{Rows: m, Cols: minmn, Data: u, Stride: ldu}) {
-						t.Errorf("Case %v: columns of U are not orthogonal", prefix)
+					q := blas64.General{Rows: m, Cols: minmn, Data: u, Stride: ldu}
+					if resid := residualOrthogonal(q, false); resid > tolOrtho*float64(m) {
+						t.Errorf("Case %v: columns of U are not orthogonal; resid=%v, want<=%v", prefix, resid, tolOrtho*float64(m))
 					}
 					if res := svdPartialUResidual(m, minmn, u, uAll, ldu); res > tol {
 						t.Errorf("Case %v: columns of U do not match UAll", prefix)
 					}
 				case lapack.SVDAll:
-					if !hasOrthonormalColumns(blas64.General{Rows: m, Cols: m, Data: u, Stride: ldu}) {
-						t.Errorf("Case %v: columns of U are not orthogonal", prefix)
+					q := blas64.General{Rows: m, Cols: m, Data: u, Stride: ldu}
+					if resid := residualOrthogonal(q, false); resid > tolOrtho*float64(m) {
+						t.Errorf("Case %v: columns of U are not orthogonal; resid=%v, want<=%v", prefix, resid, tolOrtho*float64(m))
 					}
 					if res := svdPartialUResidual(m, m, u, uAll, ldu); res > tol {
 						t.Errorf("Case %v: columns of U do not match UAll", prefix)
@@ -252,15 +258,17 @@ func dgesvdTest(t *testing.T, impl Dgesvder, m, n, mtype int, tol float64) {
 				// Check that VT has orthogonal rows and that it matches VTAll.
 				switch jobVT {
 				case lapack.SVDStore:
-					if !hasOrthonormalRows(blas64.General{Rows: minmn, Cols: n, Data: vtAll, Stride: ldvt}) {
-						t.Errorf("Case %v: rows of VT are not orthogonal", prefix)
+					q := blas64.General{Rows: minmn, Cols: n, Data: vtAll, Stride: ldvt}
+					if resid := residualOrthogonal(q, true); resid > tolOrtho*float64(n) {
+						t.Errorf("Case %v: rows of VT are not orthogonal; resid=%v, want<=%v", prefix, resid, tolOrtho*float64(n))
 					}
 					if res := svdPartialVTResidual(minmn, n, vt, vtAll, ldvt); res > tol {
 						t.Errorf("Case %v: rows of VT do not match VTAll", prefix)
 					}
 				case lapack.SVDAll:
-					if !hasOrthonormalRows(blas64.General{Rows: n, Cols: n, Data: vtAll, Stride: ldvt}) {
-						t.Errorf("Case %v: rows of VT are not orthogonal", prefix)
+					q := blas64.General{Rows: n, Cols: n, Data: vtAll, Stride: ldvt}
+					if resid := residualOrthogonal(q, true); resid > tolOrtho*float64(n) {
+						t.Errorf("Case %v: rows of VT are not orthogonal; resid=%v, want<=%v", prefix, resid, tolOrtho*float64(n))
 					}
 					if res := svdPartialVTResidual(n, n, vt, vtAll, ldvt); res > tol {
 						t.Errorf("Case %v: rows of VT do not match VTAll", prefix)

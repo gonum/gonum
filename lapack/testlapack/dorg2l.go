@@ -18,6 +18,8 @@ type Dorg2ler interface {
 }
 
 func Dorg2lTest(t *testing.T, impl Dorg2ler) {
+	const tol = 1e-14
+
 	rnd := rand.New(rand.NewSource(1))
 	for _, test := range []struct {
 		m, n, k, lda int
@@ -48,8 +50,10 @@ func Dorg2lTest(t *testing.T, impl Dorg2ler) {
 		impl.Dgeql2(m, n, a, lda, tau, work)
 
 		impl.Dorg2l(m, n, k, a, lda, tau[n-k:], work)
-		if !hasOrthonormalColumns(blas64.General{Rows: m, Cols: n, Data: a, Stride: lda}) {
-			t.Errorf("Case m=%v, n=%v, k=%v: columns of Q not orthonormal", m, n, k)
+
+		q := blas64.General{Rows: m, Cols: n, Data: a, Stride: lda}
+		if resid := residualOrthogonal(q, false); resid > tol {
+			t.Errorf("Case m=%v, n=%v, k=%v, lda=%v: columns of Q not orthonormal; resid=%v, want<=%v", m, n, k, lda, resid, tol)
 		}
 	}
 }

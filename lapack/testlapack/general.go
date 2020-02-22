@@ -582,7 +582,7 @@ func constructQK(kind string, m, n, k int, a []float64, lda int, tau []float64) 
 	q := blas64.General{
 		Rows:   sz,
 		Cols:   sz,
-		Stride: sz,
+		Stride: max(1, sz),
 		Data:   make([]float64, sz*sz),
 	}
 	for i := 0; i < sz; i++ {
@@ -598,7 +598,7 @@ func constructQK(kind string, m, n, k int, a []float64, lda int, tau []float64) 
 		h := blas64.General{
 			Rows:   sz,
 			Cols:   sz,
-			Stride: sz,
+			Stride: max(1, sz),
 			Data:   make([]float64, sz*sz),
 		}
 		for j := 0; j < sz; j++ {

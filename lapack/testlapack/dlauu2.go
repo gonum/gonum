@@ -12,6 +12,7 @@ import (
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
+	"gonum.org/v1/gonum/lapack"
 )
 
 type Dlauu2er interface {
@@ -87,24 +88,24 @@ func dlauuTest(t *testing.T, dlauu func(blas.Uplo, int, []float64, int), uplo bl
 
 			// Compute U*Uᵀ or Lᵀ*L using Dgemm with U and L
 			// represented as dense triangular matrices.
-			ldwant := n
-			want := make([]float64, n*ldwant)
+			r := cloneGeneral(blas64.General{Rows: n, Cols: n, Data: a, Stride: lda})
 			if uplo == blas.Upper {
 				// Use aCopy as a dense representation of the upper triangular U.
 				u := aCopy
 				ldu := lda
-				// Compute U * Uᵀ and store the result into want.
+				// Compute U*Uᵀ - A and store the result into R.
 				bi.Dgemm(blas.NoTrans, blas.Trans, n, n, n,
-					1, u, ldu, u, ldu, 0, want, ldwant)
+					1, u, ldu, u, ldu, -1, r.Data, r.Stride)
 			} else {
 				// Use aCopy as a dense representation of the lower triangular L.
 				l := aCopy
 				ldl := lda
-				// Compute Lᵀ * L and store the result into want.
+				// Compute Lᵀ*L - A and store the result into R.
 				bi.Dgemm(blas.Trans, blas.NoTrans, n, n, n,
-					1, l, ldl, l, ldl, 0, want, ldwant)
+					1, l, ldl, l, ldl, -1, r.Data, r.Stride)
 			}
-			if !equalApprox(n, n, a, lda, want, tol) {
+			resid := dlange(lapack.MaxColumnSum, r.Rows, r.Cols, r.Data, r.Stride)
+			if resid > tol*float64(n) {
 				t.Errorf("%v: unexpected result", prefix)
 			}
 		}

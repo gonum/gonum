@@ -31,6 +31,8 @@ func Dgehd2Test(t *testing.T, impl Dgehd2er) {
 }
 
 func testDgehd2(t *testing.T, impl Dgehd2er, n, extra int, rnd *rand.Rand) {
+	const tol = 1e-14
+
 	ilo := rnd.Intn(n)
 	ihi := rnd.Intn(n)
 	if ilo > ihi {
@@ -146,8 +148,8 @@ func testDgehd2(t *testing.T, impl Dgehd2er, n, extra int, rnd *rand.Rand) {
 		copy(qCopy.Data, q.Data)
 		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, qCopy, h, 0, q)
 	}
-	if !isOrthogonal(q) {
-		t.Errorf("%v: Q is not orthogonal\nQ=%v", prefix, q)
+	if resid := residualOrthogonal(q, false); resid > tol {
+		t.Errorf("%v: Q is not orthogonal; resid=%v, want<=%v", prefix, resid, tol)
 	}
 
 	// Overwrite NaN elements of aCopy with zeros
@@ -183,13 +185,13 @@ func testDgehd2(t *testing.T, impl Dgehd2er, n, extra int, rnd *rand.Rand) {
 		for j := ilo; j <= ihi; j++ {
 			qaqij := qaq.Data[i*qaq.Stride+j]
 			if j < i-1 {
-				if math.Abs(qaqij) > 1e-14 {
+				if math.Abs(qaqij) > tol {
 					t.Errorf("%v: Qᵀ*A*Q is not upper Hessenberg, [%v,%v]=%v", prefix, i, j, qaqij)
 				}
 				continue
 			}
 			diff := qaqij - a.Data[i*a.Stride+j]
-			if math.Abs(diff) > 1e-14 {
+			if math.Abs(diff) > tol {
 				t.Errorf("%v: Qᵀ*AOrig*Q and A are not equal, diff at [%v,%v]=%v", prefix, i, j, diff)
 			}
 		}

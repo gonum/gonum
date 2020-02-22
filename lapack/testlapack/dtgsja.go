@@ -21,6 +21,8 @@ type Dtgsjaer interface {
 }
 
 func DtgsjaTest(t *testing.T, impl Dtgsjaer) {
+	const tol = 1e-14
+
 	rnd := rand.New(rand.NewSource(1))
 	for cas, test := range []struct {
 		m, p, n, k, l, lda, ldb, ldu, ldv, ldq int
@@ -108,14 +110,14 @@ func DtgsjaTest(t *testing.T, impl Dtgsjaer) {
 		}
 
 		// Check orthogonality of U, V and Q.
-		if !isOrthogonal(u) {
-			t.Errorf("test %d: U is not orthogonal\n%+v", cas, u)
+		if resid := residualOrthogonal(u, false); resid > tol {
+			t.Errorf("Case %v: U is not orthogonal; resid=%v, want<=%v", cas, resid, tol)
 		}
-		if !isOrthogonal(v) {
-			t.Errorf("test %d: V is not orthogonal\n%+v", cas, v)
+		if resid := residualOrthogonal(v, false); resid > tol {
+			t.Errorf("Case %v: V is not orthogonal; resid=%v, want<=%v", cas, resid, tol)
 		}
-		if !isOrthogonal(q) {
-			t.Errorf("test %d: Q is not orthogonal\n%+v", cas, q)
+		if resid := residualOrthogonal(q, false); resid > tol {
+			t.Errorf("Case %v: Q is not orthogonal; resid=%v, want<=%v", cas, resid, tol)
 		}
 
 		// Check C^2 + S^2 = I.
@@ -128,7 +130,7 @@ func DtgsjaTest(t *testing.T, impl Dtgsjaer) {
 		for i := range elements {
 			i += k
 			d := alpha[i]*alpha[i] + beta[i]*beta[i]
-			if !floats.EqualWithinAbsOrRel(d, 1, 1e-14, 1e-14) {
+			if !floats.EqualWithinAbsOrRel(d, 1, tol, tol) {
 				t.Errorf("test %d: alpha_%d^2 + beta_%d^2 != 1: got: %v", cas, i, i, d)
 			}
 		}
@@ -144,7 +146,7 @@ func DtgsjaTest(t *testing.T, impl Dtgsjaer) {
 		d10r := nanGeneral(m, n, n)
 		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, d1, zeroR, 0, d10r)
 
-		if !equalApproxGeneral(uAns, d10r, 1e-14) {
+		if !equalApproxGeneral(uAns, d10r, tol) {
 			t.Errorf("test %d: Uᵀ*A*Q != D1*[ 0 R ]\nUᵀ*A*Q:\n%+v\nD1*[ 0 R ]:\n%+v",
 				cas, uAns, d10r)
 		}
@@ -158,7 +160,7 @@ func DtgsjaTest(t *testing.T, impl Dtgsjaer) {
 		d20r := nanGeneral(p, n, n)
 		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, d2, zeroR, 0, d20r)
 
-		if !equalApproxGeneral(vAns, d20r, 1e-14) {
+		if !equalApproxGeneral(vAns, d20r, tol) {
 			t.Errorf("test %d: Vᵀ*B*Q != D2*[ 0 R ]\nVᵀ*B*Q:\n%+v\nD2*[ 0 R ]:\n%+v",
 				cas, vAns, d20r)
 		}

@@ -20,6 +20,8 @@ type Dlahr2er interface {
 }
 
 func Dlahr2Test(t *testing.T, impl Dlahr2er) {
+	const tol = 1e-14
+
 	rnd := rand.New(rand.NewSource(1))
 	for _, test := range []struct {
 		n, k, nb int
@@ -132,7 +134,7 @@ func Dlahr2Test(t *testing.T, impl Dlahr2er) {
 				for i := 0; i < n; i++ {
 					for j := 0; j < nb; j++ {
 						diff := math.Abs(ywant.Data[i*ywant.Stride+j] - y.Data[i*y.Stride+j])
-						if diff > 1e-14 {
+						if diff > tol {
 							t.Errorf("%v: unexpected Y[%v,%v], diff=%v", prefix, i, j, diff)
 						}
 					}
@@ -140,8 +142,8 @@ func Dlahr2Test(t *testing.T, impl Dlahr2er) {
 
 				// Construct Q directly from the first nb columns of a.
 				q := constructQ("QR", n-k, nb, a.Data[k*a.Stride:], a.Stride, tau)
-				if !isOrthogonal(q) {
-					t.Errorf("%v: Q is not orthogonal", prefix)
+				if resid := residualOrthogonal(q, false); resid > tol*float64(n) {
+					t.Errorf("Case %v: Q is not orthogonal; resid=%v, want<=%v", prefix, resid, tol*float64(n))
 				}
 				// Construct Q as the product Q = I - V*T*Vᵀ.
 				qwant := blas64.General{
@@ -154,8 +156,8 @@ func Dlahr2Test(t *testing.T, impl Dlahr2er) {
 					qwant.Data[i*qwant.Stride+i] = 1
 				}
 				blas64.Gemm(blas.NoTrans, blas.Trans, -1, vt, v, 1, qwant)
-				if !isOrthogonal(qwant) {
-					t.Errorf("%v: Q = I - V*T*Vᵀ is not orthogonal", prefix)
+				if resid := residualOrthogonal(qwant, false); resid > tol*float64(n) {
+					t.Errorf("Case %v: Q = I - V*T*Vᵀ is not orthogonal; resid=%v, want<=%v", prefix, resid, tol*float64(n))
 				}
 
 				// Compare Q and QWant. Note that since Q is
@@ -164,7 +166,7 @@ func Dlahr2Test(t *testing.T, impl Dlahr2er) {
 				for i := 0; i < n-k; i++ {
 					for j := 0; j < n-k; j++ {
 						diff := math.Abs(q.Data[i*q.Stride+j] - qwant.Data[(i+1)*qwant.Stride+j+1])
-						if diff > 1e-14 {
+						if diff > tol {
 							t.Errorf("%v: unexpected Q[%v,%v], diff=%v", prefix, i, j, diff)
 						}
 					}

@@ -12,6 +12,7 @@ import (
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
+	"gonum.org/v1/gonum/lapack"
 )
 
 type Dlaqr23er interface {
@@ -80,7 +81,7 @@ func Dlaqr23Test(t *testing.T, impl Dlaqr23er) {
 		for _, wantz := range []bool{true, false} {
 			for _, n := range []int{1, 2, 3, 4, 5, 6, 10, 18, 31, 100} {
 				for _, extra := range []int{0, 11} {
-					for cas := 0; cas < 30; cas++ {
+					for cas := 0; cas < 10; cas++ {
 						test := newDlaqr23TestCase(wantt, wantz, n, n+extra, rnd)
 						testDlaqr23(t, impl, test, false, 1, rnd)
 						testDlaqr23(t, impl, test, true, 1, rnd)
@@ -351,19 +352,19 @@ func testDlaqr23(t *testing.T, impl Dlaqr23er, test dlaqr23Test, opt bool, recur
 	if zmod {
 		t.Errorf("%v: unexpected modification of Z", prefix)
 	}
-	if !isOrthogonal(z) {
-		t.Errorf("%v: Z is not orthogonal", prefix)
+	// Check that Z is orthogonal.
+	if resid := residualOrthogonal(z, false); resid > tol*float64(n) {
+		t.Errorf("Case %v: Z is not orthogonal; resid=%v, want<=%v", prefix, resid, tol*float64(n))
 	}
 	if wantt {
-		hu := eye(n, n)
-		// Compute H_in*Z.
-		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, test.h, z, 0, hu)
-		uhu := eye(n, n)
-		// Compute Zᵀ*H_in*Z.
-		blas64.Gemm(blas.Trans, blas.NoTrans, 1, z, hu, 0, uhu)
-		// Compare Zᵀ*H_in*Z and H_out.
-		if !equalApproxGeneral(uhu, h, 10*tol) {
-			t.Errorf("%v: Zᵀ*(initial H)*Z and (final H) are not equal", prefix)
+		// Check that |Zᵀ*HOrig*Z - H| is small where H is the result from Dlaqr23.
+		hz := zeros(n, n, n)
+		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, test.h, z, 0, hz)
+		r := cloneGeneral(h)
+		blas64.Gemm(blas.Trans, blas.NoTrans, 1, z, hz, -1, r)
+		resid := dlange(lapack.MaxColumnSum, r.Rows, r.Cols, r.Data, r.Stride)
+		if resid > tol*float64(n) {
+			t.Errorf("%v: |Zᵀ*(initial H)*Z - (final H)|=%v, want<=%v", prefix, resid, tol*float64(n))
 		}
 	}
 }

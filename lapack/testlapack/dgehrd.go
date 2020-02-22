@@ -80,6 +80,8 @@ func DgehrdTest(t *testing.T, impl Dgehrder) {
 }
 
 func testDgehrd(t *testing.T, impl Dgehrder, n, ilo, ihi, extra int, optwork bool, rnd *rand.Rand) {
+	const tol = 1e-13
+
 	a := randomGeneral(n, n, n+extra, rnd)
 	aCopy := a
 	aCopy.Data = make([]float64, len(a.Data))
@@ -164,8 +166,8 @@ func testDgehrd(t *testing.T, impl Dgehrder, n, ilo, ihi, extra int, optwork boo
 		nh := ihi - ilo
 		impl.Dorgqr(nh, nh, nh, q.Data[(ilo+1)*q.Stride+ilo+1:], q.Stride, tau[ilo:ihi], work, len(work))
 	}
-	if !isOrthogonal(q) {
-		t.Errorf("%v: Q is not orthogonal\nQ=%v", prefix, q)
+	if resid := residualOrthogonal(q, false); resid > tol {
+		t.Errorf("%v: Q is not orthogonal; resid=%v, want<=%v", prefix, resid, tol)
 	}
 
 	// Construct Qᵀ * AOrig * Q and check that it is upper Hessenberg.
@@ -187,7 +189,7 @@ func testDgehrd(t *testing.T, impl Dgehrder, n, ilo, ihi, extra int, optwork boo
 		for j := ilo + 1; j <= ihi; j++ {
 			qaqij := qaq.Data[i*qaq.Stride+j]
 			diff := qaqij - a.Data[i*a.Stride+j]
-			if math.Abs(diff) > 1e-13 {
+			if math.Abs(diff) > tol {
 				t.Errorf("%v: Qᵀ*AOrig*Q and A are not equal, diff at [%v,%v]=%v", prefix, i, j, diff)
 			}
 		}
@@ -196,13 +198,13 @@ func testDgehrd(t *testing.T, impl Dgehrder, n, ilo, ihi, extra int, optwork boo
 		for j := ilo; j < n; j++ {
 			qaqij := qaq.Data[i*qaq.Stride+j]
 			if j < i-1 {
-				if math.Abs(qaqij) > 1e-13 {
+				if math.Abs(qaqij) > tol {
 					t.Errorf("%v: Qᵀ*AOrig*Q is not upper Hessenberg, [%v,%v]=%v", prefix, i, j, qaqij)
 				}
 				continue
 			}
 			diff := qaqij - a.Data[i*a.Stride+j]
-			if math.Abs(diff) > 1e-13 {
+			if math.Abs(diff) > tol {
 				t.Errorf("%v: Qᵀ*AOrig*Q and A are not equal, diff at [%v,%v]=%v", prefix, i, j, diff)
 			}
 		}

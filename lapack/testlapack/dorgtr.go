@@ -5,6 +5,7 @@
 package testlapack
 
 import (
+	"fmt"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -20,6 +21,8 @@ type Dorgtrer interface {
 }
 
 func DorgtrTest(t *testing.T, impl Dorgtrer) {
+	const tol = 1e-14
+
 	rnd := rand.New(rand.NewSource(1))
 	for _, uplo := range []blas.Uplo{blas.Upper, blas.Lower} {
 		for _, wl := range []worklen{minimumWork, mediumWork, optimumWork} {
@@ -97,9 +100,10 @@ func DorgtrTest(t *testing.T, impl Dorgtrer) {
 					Data:   a,
 				}
 
-				if !isOrthogonal(q) {
-					t.Errorf("Case uplo=%v,n=%v: Q is not orthogonal", uplo, n)
-					continue
+				name := fmt.Sprintf("uplo=%c,n=%v,lda=%v,work=%v", uplo, n, lda, wl)
+
+				if resid := residualOrthogonal(q, false); resid > tol*float64(n) {
+					t.Errorf("Case %v: Q is not orthogonal; resid=%v, want<=%v", name, resid, tol*float64(n))
 				}
 
 				// Create the tridiagonal matrix explicitly in
@@ -152,8 +156,8 @@ func DorgtrTest(t *testing.T, impl Dorgtrer) {
 
 				// Compare the tridiagonal matrix tri from
 				// Dorgtr with the explicit computation ans.
-				if !floats.EqualApprox(ans.Data, tri.Data, 1e-13) {
-					t.Errorf("Recombination mismatch. n = %v, isUpper = %v", n, uplo == blas.Upper)
+				if !floats.EqualApprox(ans.Data, tri.Data, tol) {
+					t.Errorf("Case %v: Recombination mismatch", name)
 				}
 			}
 		}

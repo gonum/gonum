@@ -14,7 +14,6 @@ import (
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/lapack"
 )
 
@@ -862,13 +861,6 @@ func printRowise(a []float64, m, n, lda int, beyond bool) {
 	}
 }
 
-// copyMatrix copies an m×n matrix src of stride n into an m×n matrix dst of stride ld.
-func copyMatrix(m, n int, dst []float64, ld int, src []float64) {
-	for i := 0; i < m; i++ {
-		copy(dst[i*ld:i*ld+n], src[i*n:i*n+n])
-	}
-}
-
 func copyGeneral(dst, src blas64.General) {
 	r := min(dst.Rows, src.Rows)
 	c := min(dst.Cols, src.Cols)
@@ -924,59 +916,6 @@ func equalApproxGeneral(a, b blas64.General, tol float64) bool {
 		for j := 0; j < a.Cols; j++ {
 			diff := a.Data[i*a.Stride+j] - b.Data[i*b.Stride+j]
 			if math.IsNaN(diff) || math.Abs(diff) > tol {
-				return false
-			}
-		}
-	}
-	return true
-}
-
-// equalApproxTriangular returns whether the triangular matrices A and B of
-// order n are approximately equal within given tolerance.
-func equalApproxTriangular(upper bool, n int, a []float64, lda int, b []float64, tol float64) bool {
-	if upper {
-		for i := 0; i < n; i++ {
-			for j := i; j < n; j++ {
-				diff := a[i*lda+j] - b[i*n+j]
-				if math.IsNaN(diff) || math.Abs(diff) > tol {
-					return false
-				}
-			}
-		}
-		return true
-	}
-	for i := 0; i < n; i++ {
-		for j := 0; j <= i; j++ {
-			diff := a[i*lda+j] - b[i*n+j]
-			if math.IsNaN(diff) || math.Abs(diff) > tol {
-				return false
-			}
-		}
-	}
-	return true
-}
-
-//nolint:deadcode,unused
-func equalApproxSymmetric(a, b blas64.Symmetric, tol float64) bool {
-	if a.Uplo != b.Uplo {
-		return false
-	}
-	if a.N != b.N {
-		return false
-	}
-	if a.Uplo == blas.Upper {
-		for i := 0; i < a.N; i++ {
-			for j := i; j < a.N; j++ {
-				if !floats.EqualWithinAbsOrRel(a.Data[i*a.Stride+j], b.Data[i*b.Stride+j], tol, tol) {
-					return false
-				}
-			}
-		}
-		return true
-	}
-	for i := 0; i < a.N; i++ {
-		for j := 0; j <= i; j++ {
-			if !floats.EqualWithinAbsOrRel(a.Data[i*a.Stride+j], b.Data[i*b.Stride+j], tol, tol) {
 				return false
 			}
 		}
@@ -1217,135 +1156,6 @@ func unbalancedSparseGeneral(m, n, stride int, nonzeros int, rnd *rand.Rand) bla
 		}
 	}
 	return a
-}
-
-// columnOf returns a copy of the j-th column of a.
-func columnOf(a blas64.General, j int) []float64 {
-	if j < 0 || a.Cols <= j {
-		panic("bad column index")
-	}
-	col := make([]float64, a.Rows)
-	for i := range col {
-		col[i] = a.Data[i*a.Stride+j]
-	}
-	return col
-}
-
-// isRightEigenvectorOf returns whether the vector xRe+i*xIm, where i is the
-// imaginary unit, is the right eigenvector of A corresponding to the eigenvalue
-// lambda.
-//
-// A right eigenvector corresponding to a complex eigenvalue λ is a complex
-// non-zero vector x such that
-//  A x = λ x.
-func isRightEigenvectorOf(a blas64.General, xRe, xIm []float64, lambda complex128, tol float64) bool {
-	if a.Rows != a.Cols {
-		panic("matrix not square")
-	}
-
-	if imag(lambda) != 0 && xIm == nil {
-		// Complex eigenvalue of a real matrix cannot have a real
-		// eigenvector.
-		return false
-	}
-
-	n := a.Rows
-
-	// Compute A real(x) and store the result into xReAns.
-	xReAns := make([]float64, n)
-	blas64.Gemv(blas.NoTrans, 1, a, blas64.Vector{Data: xRe, Inc: 1}, 0, blas64.Vector{Data: xReAns, Inc: 1})
-
-	if imag(lambda) == 0 && xIm == nil {
-		// Real eigenvalue and eigenvector.
-
-		// Compute λx and store the result into lambdax.
-		lambdax := make([]float64, n)
-		floats.AddScaled(lambdax, real(lambda), xRe)
-
-		// This is expressed as the inverse to catch the case
-		// xReAns_i = Inf and lambdax_i = Inf of the same sign.
-		return !(floats.Distance(xReAns, lambdax, math.Inf(1)) > tol)
-	}
-
-	// Complex eigenvector, and real or complex eigenvalue.
-
-	// Compute A imag(x) and store the result into xImAns.
-	xImAns := make([]float64, n)
-	blas64.Gemv(blas.NoTrans, 1, a, blas64.Vector{Data: xIm, Inc: 1}, 0, blas64.Vector{Data: xImAns, Inc: 1})
-
-	// Compute λx and store the result into lambdax.
-	lambdax := make([]complex128, n)
-	for i := range lambdax {
-		lambdax[i] = lambda * complex(xRe[i], xIm[i])
-	}
-
-	for i, v := range lambdax {
-		ax := complex(xReAns[i], xImAns[i])
-		if cmplx.Abs(v-ax) > tol {
-			return false
-		}
-	}
-	return true
-}
-
-// isLeftEigenvectorOf returns whether the vector yRe+i*yIm, where i is the
-// imaginary unit, is the left eigenvector of A corresponding to the eigenvalue
-// lambda.
-//
-// A left eigenvector corresponding to a complex eigenvalue λ is a complex
-// non-zero vector y such that
-//  yᴴ A = λ yᴴ,
-// which is equivalent for real A to
-//  Aᵀ y = conj(λ) y,
-func isLeftEigenvectorOf(a blas64.General, yRe, yIm []float64, lambda complex128, tol float64) bool {
-	if a.Rows != a.Cols {
-		panic("matrix not square")
-	}
-
-	if imag(lambda) != 0 && yIm == nil {
-		// Complex eigenvalue of a real matrix cannot have a real
-		// eigenvector.
-		return false
-	}
-
-	n := a.Rows
-
-	// Compute Aᵀ real(y) and store the result into yReAns.
-	yReAns := make([]float64, n)
-	blas64.Gemv(blas.Trans, 1, a, blas64.Vector{Data: yRe, Inc: 1}, 0, blas64.Vector{Data: yReAns, Inc: 1})
-
-	if imag(lambda) == 0 && yIm == nil {
-		// Real eigenvalue and eigenvector.
-
-		// Compute λy and store the result into lambday.
-		lambday := make([]float64, n)
-		floats.AddScaled(lambday, real(lambda), yRe)
-
-		// This is expressed as the inverse to catch the case
-		// yReAns_i = Inf and lambday_i = Inf of the same sign.
-		return !(floats.Distance(yReAns, lambday, math.Inf(1)) > tol)
-	}
-
-	// Complex eigenvector, and real or complex eigenvalue.
-
-	// Compute Aᵀ imag(y) and store the result into yImAns.
-	yImAns := make([]float64, n)
-	blas64.Gemv(blas.Trans, 1, a, blas64.Vector{Data: yIm, Inc: 1}, 0, blas64.Vector{Data: yImAns, Inc: 1})
-
-	// Compute conj(λ)y and store the result into lambday.
-	lambda = cmplx.Conj(lambda)
-	lambday := make([]complex128, n)
-	for i := range lambday {
-		lambday[i] = lambda * complex(yRe[i], yIm[i])
-	}
-
-	for i, v := range lambday {
-		ay := complex(yReAns[i], yImAns[i])
-		if cmplx.Abs(v-ay) > tol {
-			return false
-		}
-	}
-	return true
 }
 
 // rootsOfUnity returns the n complex numbers whose n-th power is equal to 1.

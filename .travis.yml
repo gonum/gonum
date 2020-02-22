@@ -77,7 +77,6 @@ matrix:
     go: master
  allow_failures:
   - go: master
-  - arch: arm64 # TODO(kortschak): Remove this when failures have been resolved.
 
 before_install:
  - ${TRAVIS_BUILD_DIR}/.travis/run-parts ${TRAVIS_BUILD_DIR}/.travis/deps.d/${TRAVIS_OS_NAME}

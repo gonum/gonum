@@ -5,6 +5,13 @@ if [[ "${TRAVIS_SECURE_ENV_VARS}" != true ]]; then
 	exit 0
 fi
 
+# FIXME(kortschak): When we have arm64 assembly kernels,
+# reconsider this for the internal/asm packages.
+if [[ $(go env GOARCH) != "amd64" ]]; then
+	echo "skipping coverage - GOARCH != amd64"
+	exit 0
+fi
+
 ORIGIN_MASTER="$(git ls-remote origin master | cut -f1)"
 CURRENT="$(git rev-parse HEAD)"
 if [[ ${ORIGIN_MASTER} != ${CURRENT} ]]; then

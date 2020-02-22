@@ -5,12 +5,14 @@
 package testlapack
 
 import (
+	"fmt"
 	"testing"
 
 	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
+	"gonum.org/v1/gonum/lapack"
 )
 
 type Dgerqfer interface {
@@ -18,116 +20,72 @@ type Dgerqfer interface {
 }
 
 func DgerqfTest(t *testing.T, impl Dgerqfer) {
-	const tol = 1e-13
-
 	rnd := rand.New(rand.NewSource(1))
-	for c, test := range []struct {
-		m, n, lda int
+	for _, m := range []int{0, 1, 2, 3, 4, 5, 6, 12, 129, 160} {
+		for _, n := range []int{0, 1, 2, 3, 4, 5, 6, 12, 129, 160} {
+			for _, lda := range []int{max(1, n), n + 4} {
+				dgerqfTest(t, impl, rnd, m, n, lda)
+			}
+		}
+	}
+}
+
+func dgerqfTest(t *testing.T, impl Dgerqfer, rnd *rand.Rand, m, n, lda int) {
+	const tol = 1e-14
+
+	a := randomGeneral(m, n, lda, rnd)
+	aCopy := cloneGeneral(a)
+
+	k := min(m, n)
+	tau := make([]float64, k)
+	for i := range tau {
+		tau[i] = rnd.Float64()
+	}
+
+	work := []float64{0}
+	impl.Dgerqf(m, n, a.Data, a.Stride, tau, work, -1)
+	lwkopt := int(work[0])
+	for _, wk := range []struct {
+		name   string
+		length int
 	}{
-		{1, 1, 0},
-		{2, 2, 0},
-		{3, 2, 0},
-		{2, 3, 0},
-		{1, 12, 0},
-		{2, 6, 0},
-		{3, 4, 0},
-		{4, 3, 0},
-		{6, 2, 0},
-		{12, 1, 0},
-		{200, 180, 0},
-		{180, 200, 0},
-		{200, 200, 0},
-		{1, 1, 20},
-		{2, 2, 20},
-		{3, 2, 20},
-		{2, 3, 20},
-		{1, 12, 20},
-		{2, 6, 20},
-		{3, 4, 20},
-		{4, 3, 20},
-		{6, 2, 20},
-		{12, 1, 20},
-		{200, 180, 220},
-		{180, 200, 220},
-		{200, 200, 220},
+		{name: "short", length: m},
+		{name: "medium", length: lwkopt - 1},
+		{name: "long", length: lwkopt},
 	} {
-		n := test.n
-		m := test.m
-		lda := test.lda
-		if lda == 0 {
-			lda = test.n
-		}
-		a := make([]float64, m*lda)
-		for i := range a {
-			a[i] = rnd.Float64()
-		}
-		aCopy := make([]float64, len(a))
-		copy(aCopy, a)
-		k := min(m, n)
-		tau := make([]float64, k)
-		for i := range tau {
-			tau[i] = rnd.Float64()
-		}
-		work := []float64{0}
-		impl.Dgerqf(m, n, a, lda, tau, work, -1)
-		lwkopt := int(work[0])
-		for _, wk := range []struct {
-			name   string
-			length int
-		}{
-			{name: "short", length: m},
-			{name: "medium", length: lwkopt - 1},
-			{name: "long", length: lwkopt},
-		} {
-			if wk.length < max(1, m) {
-				continue
-			}
-			lwork := wk.length
-			work = make([]float64, lwork)
-			for i := range work {
-				work[i] = rnd.Float64()
-			}
-			copy(a, aCopy)
-			impl.Dgerqf(m, n, a, lda, tau, work, lwork)
+		name := fmt.Sprintf("m=%d,n=%d,lda=%d,work=%v", m, n, lda, wk.name)
 
-			// Test that the RQ factorization has completed successfully. Compute
-			// Q based on the vectors.
-			q := constructQ("RQ", m, n, a, lda, tau)
+		lwork := max(max(1, m), wk.length)
+		work = make([]float64, lwork)
+		for i := range work {
+			work[i] = rnd.Float64()
+		}
 
-			// Check that Q is orthogonal.
-			if !isOrthogonal(q) {
-				t.Errorf("Case %v, Q not orthogonal", c)
-			}
-			// Check that A = R * Q
-			r := blas64.General{
-				Rows:   m,
-				Cols:   n,
-				Stride: n,
-				Data:   make([]float64, m*n),
-			}
-			for i := 0; i < m; i++ {
-				off := m - n
-				for j := max(0, i-off); j < n; j++ {
-					r.Data[i*r.Stride+j] = a[i*lda+j]
-				}
-			}
+		copyGeneral(a, aCopy)
+		impl.Dgerqf(m, n, a.Data, a.Stride, tau, work, lwork)
 
-			got := blas64.General{
-				Rows:   m,
-				Cols:   n,
-				Stride: lda,
-				Data:   make([]float64, m*lda),
+		// Test that the RQ factorization has completed successfully. Compute
+		// Q based on the vectors.
+		q := constructQ("RQ", m, n, a.Data, a.Stride, tau)
+
+		// Check that Q is orthogonal.
+		if resid := residualOrthogonal(q, false); resid > tol*float64(m) {
+			t.Errorf("Case %v: Q not orthogonal; resid=%v, want<=%v", name, resid, tol*float64(m))
+		}
+
+		// Check that A = R * Q
+		r := zeros(m, n, n)
+		for i := 0; i < m; i++ {
+			off := m - n
+			for j := max(0, i-off); j < n; j++ {
+				r.Data[i*r.Stride+j] = a.Data[i*a.Stride+j]
 			}
-			blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, r, q, 0, got)
-			want := blas64.General{
-				Rows:   m,
-				Cols:   n,
-				Stride: lda,
-				Data:   aCopy,
-			}
-			if !equalApproxGeneral(got, want, tol) {
-				t.Errorf("Case %d, R*Q != a %s\ngot: %+v\nwant:%+v", c, wk.name, got, want)
-			}
+		}
+		qra := cloneGeneral(aCopy)
+		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, r, q, -1, qra)
+		resid := dlange(lapack.MaxColumnSum, qra.Rows, qra.Cols, qra.Data, qra.Stride)
+		if resid > tol*float64(m) {
+			t.Errorf("Case %v: |R*Q - A|=%v, want<=%v", name, resid, tol*float64(m))
 		}
 	}
 }

@@ -877,20 +877,6 @@ func cloneGeneral(a blas64.General) blas64.General {
 	return c
 }
 
-// equalApprox returns whether the matrices A and B of order n are approximately
-// equal within given tolerance.
-func equalApprox(m, n int, a []float64, lda int, b []float64, tol float64) bool {
-	for i := 0; i < m; i++ {
-		for j := 0; j < n; j++ {
-			diff := a[i*lda+j] - b[i*n+j]
-			if math.IsNaN(diff) || math.Abs(diff) > tol {
-				return false
-			}
-		}
-	}
-	return true
-}
-
 // equalGeneral returns whether the general matrices a and b are equal.
 func equalGeneral(a, b blas64.General) bool {
 	if a.Rows != b.Rows || a.Cols != b.Cols {

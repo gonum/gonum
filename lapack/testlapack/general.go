@@ -1498,3 +1498,159 @@ func svdJobString(job lapack.SVDJob) string {
 	}
 	return "unknown SVD job"
 }
+
+// residualOrthogonal returns the residual
+//  |I - Q * Qᵀ|  if m < n or (m == n and rowwise == true),
+//  |I - Qᵀ * Q|  otherwise.
+// It can be used to check that the matrix Q is orthogonal.
+func residualOrthogonal(q blas64.General, rowwise bool) float64 {
+	m, n := q.Rows, q.Cols
+	if m == 0 || n == 0 {
+		return 0
+	}
+	var transq blas.Transpose
+	if m < n || (m == n && rowwise) {
+		transq = blas.NoTrans
+	} else {
+		transq = blas.Trans
+	}
+	minmn := min(m, n)
+
+	// Set work = I.
+	work := blas64.Symmetric{
+		Uplo:   blas.Upper,
+		N:      minmn,
+		Data:   make([]float64, minmn*minmn),
+		Stride: minmn,
+	}
+	for i := 0; i < minmn; i++ {
+		work.Data[i*work.Stride+i] = 1
+	}
+
+	// Compute
+	//  work = work - Q * Qᵀ = I - Q * Qᵀ
+	// or
+	//  work = work - Qᵀ * Q = I - Qᵀ * Q
+	blas64.Syrk(transq, -1, q, 1, work)
+	return dlansy(lapack.MaxColumnSum, blas.Upper, work.N, work.Data, work.Stride)
+}
+
+// dlansy is a local implementation of Dlansy to keep code paths independent.
+func dlansy(norm lapack.MatrixNorm, uplo blas.Uplo, n int, a []float64, lda int) float64 {
+	if n == 0 {
+		return 0
+	}
+	work := make([]float64, n)
+	switch norm {
+	case lapack.MaxAbs:
+		if uplo == blas.Upper {
+			var max float64
+			for i := 0; i < n; i++ {
+				for j := i; j < n; j++ {
+					v := math.Abs(a[i*lda+j])
+					if math.IsNaN(v) {
+						return math.NaN()
+					}
+					if v > max {
+						max = v
+					}
+				}
+			}
+			return max
+		}
+		var max float64
+		for i := 0; i < n; i++ {
+			for j := 0; j <= i; j++ {
+				v := math.Abs(a[i*lda+j])
+				if math.IsNaN(v) {
+					return math.NaN()
+				}
+				if v > max {
+					max = v
+				}
+			}
+		}
+		return max
+	case lapack.MaxRowSum, lapack.MaxColumnSum:
+		// A symmetric matrix has the same 1-norm and ∞-norm.
+		for i := 0; i < n; i++ {
+			work[i] = 0
+		}
+		if uplo == blas.Upper {
+			for i := 0; i < n; i++ {
+				work[i] += math.Abs(a[i*lda+i])
+				for j := i + 1; j < n; j++ {
+					v := math.Abs(a[i*lda+j])
+					work[i] += v
+					work[j] += v
+				}
+			}
+		} else {
+			for i := 0; i < n; i++ {
+				for j := 0; j < i; j++ {
+					v := math.Abs(a[i*lda+j])
+					work[i] += v
+					work[j] += v
+				}
+				work[i] += math.Abs(a[i*lda+i])
+			}
+		}
+		var max float64
+		for i := 0; i < n; i++ {
+			v := work[i]
+			if math.IsNaN(v) {
+				return math.NaN()
+			}
+			if v > max {
+				max = v
+			}
+		}
+		return max
+	default:
+		// lapack.Frobenius:
+		panic("not implemented")
+	}
+}
+
+// dlange is a local implementation of Dlange to keep code paths independent.
+func dlange(norm lapack.MatrixNorm, m, n int, a []float64, lda int) float64 {
+	if m == 0 || n == 0 {
+		return 0
+	}
+	switch norm {
+	case lapack.MaxAbs:
+		var value float64
+		for i := 0; i < m; i++ {
+			for j := 0; j < n; j++ {
+				value = math.Max(value, math.Abs(a[i*lda+j]))
+			}
+		}
+		return value
+	case lapack.MaxColumnSum:
+		work := make([]float64, n)
+		for i := 0; i < m; i++ {
+			for j := 0; j < n; j++ {
+				work[j] += math.Abs(a[i*lda+j])
+			}
+		}
+		var value float64
+		for i := 0; i < n; i++ {
+			value = math.Max(value, work[i])
+		}
+		return value
+	case lapack.MaxRowSum:
+		var value float64
+		for i := 0; i < m; i++ {
+			var sum float64
+			for j := 0; j < n; j++ {
+				sum += math.Abs(a[i*lda+j])
+			}
+			value = math.Max(value, sum)
+		}
+		return value
+	case lapack.Frobenius:
+		panic("not implemented")
+	default:
+		panic("bad MatrixNorm")
+	}
+}

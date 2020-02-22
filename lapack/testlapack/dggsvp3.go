@@ -20,6 +20,8 @@ type Dggsvp3er interface {
 }
 
 func Dggsvp3Test(t *testing.T, impl Dggsvp3er) {
+	const tol = 1e-14
+
 	rnd := rand.New(rand.NewSource(1))
 	for cas, test := range []struct {
 		m, p, n, lda, ldb, ldu, ldv, ldq int
@@ -110,14 +112,14 @@ func Dggsvp3Test(t *testing.T, impl Dggsvp3er) {
 			work, lwork)
 
 		// Check orthogonality of U, V and Q.
-		if !isOrthogonal(u) {
-			t.Errorf("test %d: U is not orthogonal\n%+v", cas, u)
+		if resid := residualOrthogonal(u, false); resid > tol {
+			t.Errorf("Case %v: U is not orthogonal; resid=%v, want<=%v", cas, resid, tol)
 		}
-		if !isOrthogonal(v) {
-			t.Errorf("test %d: V is not orthogonal\n%+v", cas, v)
+		if resid := residualOrthogonal(v, false); resid > tol {
+			t.Errorf("Case %v: V is not orthogonal; resid=%v, want<=%v", cas, resid, tol)
 		}
-		if !isOrthogonal(q) {
-			t.Errorf("test %d: Q is not orthogonal\n%+v", cas, q)
+		if resid := residualOrthogonal(q, false); resid > tol {
+			t.Errorf("Case %v: Q is not orthogonal; resid=%v, want<=%v", cas, resid, tol)
 		}
 
 		zeroA, zeroB := constructGSVPresults(n, p, m, k, l, a, b)
@@ -128,7 +130,7 @@ func Dggsvp3Test(t *testing.T, impl Dggsvp3er) {
 		uAns := nanGeneral(m, n, n)
 		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, uTmp, q, 0, uAns)
 
-		if !equalApproxGeneral(uAns, zeroA, 1e-14) {
+		if !equalApproxGeneral(uAns, zeroA, tol) {
 			t.Errorf("test %d: Uᵀ*A*Q != [ 0 RA ]\nUᵀ*A*Q:\n%+v\n[ 0 RA ]:\n%+v",
 				cas, uAns, zeroA)
 		}
@@ -139,7 +141,7 @@ func Dggsvp3Test(t *testing.T, impl Dggsvp3er) {
 		vAns := nanGeneral(p, n, n)
 		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, vTmp, q, 0, vAns)
 
-		if !equalApproxGeneral(vAns, zeroB, 1e-14) {
+		if !equalApproxGeneral(vAns, zeroB, tol) {
 			t.Errorf("test %d: Vᵀ*B*Q != [ 0 RB ]\nVᵀ*B*Q:\n%+v\n[ 0 RB ]:\n%+v",
 				cas, vAns, zeroB)
 		}

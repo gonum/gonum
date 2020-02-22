@@ -41,6 +41,7 @@ func TestDlagsy(t *testing.T) {
 }
 
 func TestDlagge(t *testing.T) {
+	const tol = 1e-14
 	rnd := rand.New(rand.NewSource(1))
 	for _, n := range []int{0, 1, 2, 3, 4, 5, 10, 50} {
 		for _, lda := range []int{0, 2*n + 1} {
@@ -61,20 +62,20 @@ func TestDlagge(t *testing.T) {
 
 			Dlagge(a.Rows, a.Cols, 0, 0, d, a.Data, a.Stride, rnd, work)
 
-			if !isOrthogonal(a) {
+			if resid := residualOrthogonal(a, false); resid > tol {
 				t.Errorf("Case n=%v,lda=%v: unexpected result", n, lda)
 			}
 		}
 	}
-
 }
 
 func TestRandomOrthogonal(t *testing.T) {
+	const tol = 1e-14
 	rnd := rand.New(rand.NewSource(1))
 	for n := 1; n <= 20; n++ {
 		q := randomOrthogonal(n, rnd)
-		if !isOrthogonal(q) {
-			t.Errorf("Case n=%v: Q not orthogonal", n)
+		if resid := residualOrthogonal(q, false); resid > tol {
+			t.Errorf("Case n=%v: Q not orthogonal; resid=%v, want<=%v", n, resid, tol)
 		}
 	}
 }

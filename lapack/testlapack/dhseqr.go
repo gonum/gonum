@@ -178,8 +178,8 @@ func testDhseqr(t *testing.T, impl Dhseqrer, i int, test dhseqrTest, job lapack.
 	}
 
 	// Z must be orthogonal.
-	if !isOrthogonal(z) {
-		t.Errorf("%v: Z is not orthogonal", prefix)
+	if resid := residualOrthogonal(z, false); resid > tol*float64(n) {
+		t.Errorf("Case %v: Z is not orthogonal; resid=%v, want<=%v", prefix, resid, tol*float64(n))
 	}
 
 	if job == lapack.EigenvaluesAndSchur {

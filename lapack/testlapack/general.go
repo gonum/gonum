@@ -862,37 +862,6 @@ func printRowise(a []float64, m, n, lda int, beyond bool) {
 	}
 }
 
-// isOrthogonal returns whether a square matrix Q is orthogonal.
-func isOrthogonal(q blas64.General) bool {
-	n := q.Rows
-	if n != q.Cols {
-		panic("matrix not square")
-	}
-	// A real square matrix is orthogonal if and only if its rows form
-	// an orthonormal basis of the Euclidean space R^n.
-	const tol = 1e-13
-	for i := 0; i < n; i++ {
-		nrm := blas64.Nrm2(blas64.Vector{N: n, Data: q.Data[i*q.Stride:], Inc: 1})
-		if math.IsNaN(nrm) {
-			return false
-		}
-		if math.Abs(nrm-1) > tol {
-			return false
-		}
-		for j := i + 1; j < n; j++ {
-			dot := blas64.Dot(blas64.Vector{N: n, Data: q.Data[i*q.Stride:], Inc: 1},
-				blas64.Vector{N: n, Data: q.Data[j*q.Stride:], Inc: 1})
-			if math.IsNaN(dot) {
-				return false
-			}
-			if math.Abs(dot) > tol {
-				return false
-			}
-		}
-	}
-	return true
-}
-
 // copyMatrix copies an m×n matrix src of stride n into an m×n matrix dst of stride ld.
 func copyMatrix(m, n int, dst []float64, ld int, src []float64) {
 	for i := 0; i < m; i++ {

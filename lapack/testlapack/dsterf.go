@@ -177,9 +177,9 @@ func DsterfTest(t *testing.T, impl Dsterfer) {
 				t.Fatalf("%v: computing reference solution using Dsteqr failed", name)
 				continue
 			}
-			if !isOrthogonal(z) {
-				t.Fatalf("%v: eigenvectors are not orthogonal", name)
-				continue
+
+			if resid := residualOrthogonal(z, false); resid > tol*float64(n) {
+				t.Errorf("%v: Z is not orthogonal; resid=%v, want<=%v", name, resid, tol*float64(n))
 			}
 
 			// Check whether eigenvalues from Dsteqr and Dsterf (which use

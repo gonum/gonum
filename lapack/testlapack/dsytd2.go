@@ -19,6 +19,8 @@ type Dsytd2er interface {
 }
 
 func Dsytd2Test(t *testing.T, impl Dsytd2er) {
+	const tol = 1e-14
+
 	rnd := rand.New(rand.NewSource(1))
 	for _, uplo := range []blas.Uplo{blas.Upper, blas.Lower} {
 		for _, test := range []struct {
@@ -118,8 +120,8 @@ func Dsytd2Test(t *testing.T, impl Dsytd2er) {
 				}
 			}
 
-			if !isOrthogonal(qMat) {
-				t.Errorf("Q not orthogonal")
+			if resid := residualOrthogonal(qMat, false); resid > tol {
+				t.Errorf("Q is not orthogonal; resid=%v, want<=%v", resid, tol)
 			}
 
 			// Compute Qᵀ * A * Q.
@@ -175,7 +177,7 @@ func Dsytd2Test(t *testing.T, impl Dsytd2er) {
 			same := true
 			for i := 0; i < n; i++ {
 				for j := 0; j < n; j++ {
-					if math.Abs(ans.Data[i*ans.Stride+j]-tMat.Data[i*tMat.Stride+j]) > 1e-10 {
+					if math.Abs(ans.Data[i*ans.Stride+j]-tMat.Data[i*tMat.Stride+j]) > tol {
 						same = false
 					}
 				}

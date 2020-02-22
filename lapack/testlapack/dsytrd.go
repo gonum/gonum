@@ -12,6 +12,7 @@ import (
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
+	"gonum.org/v1/gonum/lapack"
 )
 
 type Dsytrder interface {
@@ -22,7 +23,8 @@ type Dsytrder interface {
 }
 
 func DsytrdTest(t *testing.T, impl Dsytrder) {
-	const tol = 1e-13
+	const tol = 1e-14
+
 	rnd := rand.New(rand.NewSource(1))
 	for tc, test := range []struct {
 		n, lda int
@@ -124,8 +126,8 @@ func DsytrdTest(t *testing.T, impl Dsytrder) {
 						impl.Dorgqr(n-1, n-1, n-1, q.Data[q.Stride+1:], q.Stride, tau, work, len(work))
 					}
 				}
-				if !isOrthogonal(q) {
-					t.Errorf("%v: Q not orthogonal", prefix)
+				if resid := residualOrthogonal(q, false); resid > tol*float64(n) {
+					t.Errorf("%v: Q is not orthogonal; resid=%v, want<=%v", prefix, resid, tol*float64(n))
 				}
 
 				// Contruct symmetric tridiagonal T from d and e.
@@ -144,16 +146,14 @@ func DsytrdTest(t *testing.T, impl Dsytrder) {
 						tMat.Data[j*tMat.Stride+j+1] = e[j]
 					}
 				}
-
-				// Compute Qᵀ * A * Q.
-				tmp := zeros(n, n, n)
-				blas64.Gemm(blas.Trans, blas.NoTrans, 1, q, aCopy, 0, tmp)
-				got := zeros(n, n, n)
-				blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, tmp, q, 0, got)
-
-				// Compare with T.
-				if !equalApproxGeneral(got, tMat, tol) {
-					t.Errorf("%v: Qᵀ*A*Q != T", prefix)
+				// Compute Qᵀ*A*Q - T.
+				qa := zeros(n, n, n)
+				blas64.Gemm(blas.Trans, blas.NoTrans, 1, q, aCopy, 0, qa)
+				blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, qa, q, -1, tMat)
+				// Check that |Qᵀ*A*Q - T| is small.
+				resid := dlange(lapack.MaxColumnSum, n, n, tMat.Data, tMat.Stride)
+				if resid > tol*float64(n) {
+					t.Errorf("%v: |Qᵀ*A*Q - T|=%v, want<=%v", prefix, resid, tol*float64(n))
 				}
 			}
 		}

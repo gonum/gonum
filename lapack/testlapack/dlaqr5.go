@@ -6,13 +6,13 @@ package testlapack
 
 import (
 	"fmt"
-	"math"
 	"testing"
 
 	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
+	"gonum.org/v1/gonum/lapack"
 )
 
 type Dlaqr5er interface {
@@ -33,6 +33,8 @@ func Dlaqr5Test(t *testing.T, impl Dlaqr5er) {
 }
 
 func testDlaqr5(t *testing.T, impl Dlaqr5er, n, extra, kacc22 int, rnd *rand.Rand) {
+	const tol = 1e-14
+
 	wantt := true
 	wantz := true
 	nshfts := 2 * n
@@ -108,30 +110,17 @@ func testDlaqr5(t *testing.T, impl Dlaqr5er, n, extra, kacc22 int, rnd *rand.Ran
 			}
 		}
 	}
-	if !isOrthogonal(z) {
-		t.Errorf("%v: Z is not orthogonal", prefix)
+	// Check that Z is orthogonal.
+	if resid := residualOrthogonal(z, false); resid > tol*float64(n) {
+		t.Errorf("Case %v: Z is not orthogonal; resid=%v, want<=%v", prefix, resid, tol*float64(n))
 	}
-	// Construct Zᵀ * HOrig * Z and check that it is equal to H from Dlaqr5.
-	hz := blas64.General{
-		Rows:   n,
-		Cols:   n,
-		Stride: n,
-		Data:   make([]float64, n*n),
-	}
+	// Check that |Zᵀ*HOrig*Z - H| is small where H is the result from Dlaqr5.
+	hz := zeros(n, n, n)
 	blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, hCopy, z, 0, hz)
-	zhz := blas64.General{
-		Rows:   n,
-		Cols:   n,
-		Stride: n,
-		Data:   make([]float64, n*n),
-	}
-	blas64.Gemm(blas.Trans, blas.NoTrans, 1, z, hz, 0, zhz)
-	for i := 0; i < n; i++ {
-		for j := 0; j < n; j++ {
-			diff := zhz.Data[i*zhz.Stride+j] - h.Data[i*h.Stride+j]
-			if math.Abs(diff) > 1e-13 {
-				t.Errorf("%v: Zᵀ*HOrig*Z and H are not equal, diff at [%v,%v]=%v", prefix, i, j, diff)
-			}
-		}
+	zhz := cloneGeneral(h)
+	blas64.Gemm(blas.Trans, blas.NoTrans, 1, z, hz, -1, zhz)
+	resid := dlange(lapack.MaxColumnSum, n, n, zhz.Data, zhz.Stride)
+	if resid > tol*float64(n) {
+		t.Errorf("%v: |Zᵀ*HOrig*Z - H|=%v, want<=%v", prefix, resid, tol*float64(n))
 	}
 }

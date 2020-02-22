@@ -19,6 +19,8 @@ type Dgelq2er interface {
 }
 
 func Dgelq2Test(t *testing.T, impl Dgelq2er) {
+	const tol = 1e-14
+
 	rnd := rand.New(rand.NewSource(1))
 	for c, test := range []struct {
 		m, n, lda int
@@ -70,8 +72,8 @@ func Dgelq2Test(t *testing.T, impl Dgelq2er) {
 		Q := constructQ("LQ", m, n, a, lda, tau)
 
 		// Check that Q is orthogonal.
-		if !isOrthogonal(Q) {
-			t.Errorf("Case %v: Q not orthogonal", c)
+		if resid := residualOrthogonal(Q, false); resid > tol {
+			t.Errorf("Case %v: Q not orthogonal; resid=%v, want<=%v", c, resid, tol)
 		}
 
 		L := blas64.General{
@@ -94,7 +96,7 @@ func Dgelq2Test(t *testing.T, impl Dgelq2er) {
 		}
 		copy(ans.Data, aCopy)
 		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, L, Q, 0, ans)
-		if !floats.EqualApprox(aCopy, ans.Data, 1e-14) {
+		if !floats.EqualApprox(aCopy, ans.Data, tol) {
 			t.Errorf("Case %v, LQ mismatch. Want %v, got %v.", c, aCopy, ans.Data)
 		}
 	}

@@ -85,8 +85,8 @@ func testDorghr(t *testing.T, impl Dorghrer, n, ilo, ihi, extra int, optwork boo
 	if !generalOutsideAllNaN(a) {
 		t.Errorf("%v: out-of-range write to A\n%v", prefix, a.Data)
 	}
-	if !isOrthogonal(a) {
-		t.Errorf("%v: A is not orthogonal\n%v", prefix, a.Data)
+	if resid := residualOrthogonal(a, false); resid > tol {
+		t.Errorf("%v: A is not orthogonal; resid=%v, want<=%v", prefix, resid, tol)
 	}
 	for i := 0; i < n; i++ {
 		for j := 0; j < n; j++ {

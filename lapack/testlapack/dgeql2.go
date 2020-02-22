@@ -19,6 +19,8 @@ type Dgeql2er interface {
 }
 
 func Dgeql2Test(t *testing.T, impl Dgeql2er) {
+	const tol = 1e-14
+
 	rnd := rand.New(rand.NewSource(1))
 	// TODO(btracey): Add tests for m < n.
 	for _, test := range []struct {
@@ -71,8 +73,8 @@ func Dgeql2Test(t *testing.T, impl Dgeql2er) {
 			copy(qTmp.Data, q.Data)
 			blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, h, qTmp, 0, q)
 		}
-		if !isOrthogonal(q) {
-			t.Errorf("Q is not orthogonal")
+		if resid := residualOrthogonal(q, false); resid > tol {
+			t.Errorf("Q is not orthogonal; resid=%v, want<=%v", resid, tol)
 		}
 		l := blas64.General{
 			Rows:   m,
@@ -93,7 +95,7 @@ func Dgeql2Test(t *testing.T, impl Dgeql2er) {
 		copy(ans.Data, a)
 
 		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, q, l, 0, ans)
-		if !floats.EqualApprox(ans.Data, aCopy, 1e-10) {
+		if !floats.EqualApprox(ans.Data, aCopy, tol) {
 			t.Errorf("Reconstruction mismatch: m = %v, n = %v", m, n)
 		}
 	}

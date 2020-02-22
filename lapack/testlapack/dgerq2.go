@@ -5,12 +5,14 @@
 package testlapack
 
 import (
+	"fmt"
 	"testing"
 
 	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
+	"gonum.org/v1/gonum/lapack"
 )
 
 type Dgerq2er interface {
@@ -19,90 +21,57 @@ type Dgerq2er interface {
 
 func Dgerq2Test(t *testing.T, impl Dgerq2er) {
 	rnd := rand.New(rand.NewSource(1))
-	for c, test := range []struct {
-		m, n, lda int
-	}{
-		{1, 1, 0},
-		{2, 2, 0},
-		{3, 2, 0},
-		{2, 3, 0},
-		{1, 12, 0},
-		{2, 6, 0},
-		{3, 4, 0},
-		{4, 3, 0},
-		{6, 2, 0},
-		{12, 1, 0},
-		{1, 1, 20},
-		{2, 2, 20},
-		{3, 2, 20},
-		{2, 3, 20},
-		{1, 12, 20},
-		{2, 6, 20},
-		{3, 4, 20},
-		{4, 3, 20},
-		{6, 2, 20},
-		{12, 1, 20},
-	} {
-		n := test.n
-		m := test.m
-		lda := test.lda
-		if lda == 0 {
-			lda = test.n
-		}
-		a := make([]float64, m*lda)
-		for i := range a {
-			a[i] = rnd.Float64()
-		}
-		aCopy := make([]float64, len(a))
-		k := min(m, n)
-		tau := make([]float64, k)
-		for i := range tau {
-			tau[i] = rnd.Float64()
-		}
-		work := make([]float64, m)
-		for i := range work {
-			work[i] = rnd.Float64()
-		}
-		copy(aCopy, a)
-		impl.Dgerq2(m, n, a, lda, tau, work)
-
-		// Test that the RQ factorization has completed successfully. Compute
-		// Q based on the vectors.
-		q := constructQ("RQ", m, n, a, lda, tau)
-
-		// Check that Q is orthogonal.
-		if !isOrthogonal(q) {
-			t.Errorf("Case %v, Q not orthogonal", c)
-		}
-		// Check that A = R * Q
-		r := blas64.General{
-			Rows:   m,
-			Cols:   n,
-			Stride: n,
-			Data:   make([]float64, m*n),
-		}
-		for i := 0; i < m; i++ {
-			off := m - n
-			for j := max(0, i-off); j < n; j++ {
-				r.Data[i*r.Stride+j] = a[i*lda+j]
+	for _, m := range []int{0, 1, 2, 3, 4, 5, 6, 12, 23} {
+		for _, n := range []int{0, 1, 2, 3, 4, 5, 6, 12, 23} {
+			for _, lda := range []int{max(1, n), n + 4} {
+				dgerq2Test(t, impl, rnd, m, n, lda)
 			}
 		}
+	}
+}
 
-		got := blas64.General{
-			Rows:   m,
-			Cols:   n,
-			Stride: lda,
-			Data:   make([]float64, m*lda),
+func dgerq2Test(t *testing.T, impl Dgerq2er, rnd *rand.Rand, m, n, lda int) {
+	const tol = 1e-14
+
+	name := fmt.Sprintf("m=%d,n=%d,lda=%d", m, n, lda)
+
+	a := randomGeneral(m, n, lda, rnd)
+	aCopy := cloneGeneral(a)
+
+	k := min(m, n)
+	tau := make([]float64, k)
+	for i := range tau {
+		tau[i] = rnd.Float64()
+	}
+
+	work := make([]float64, m)
+	for i := range work {
+		work[i] = rnd.Float64()
+	}
+
+	impl.Dgerq2(m, n, a.Data, a.Stride, tau, work)
+
+	// Test that the RQ factorization has completed successfully. Compute
+	// Q based on the vectors.
+	q := constructQ("RQ", m, n, a.Data, a.Stride, tau)
+
+	// Check that Q is orthogonal.
+	if resid := residualOrthogonal(q, false); resid > tol {
+		t.Errorf("Case %v: Q not orthogonal; resid=%v, want<=%v", name, resid, tol)
+	}
+
+	// Check that |R*Q - A| is small.
+	r := zeros(m, n, n)
+	for i := 0; i < m; i++ {
+		off := m - n
+		for j := max(0, i-off); j < n; j++ {
+			r.Data[i*r.Stride+j] = a.Data[i*a.Stride+j]
 		}
-		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, r, q, 0, got)
-		want := blas64.General{
-			Rows:   m,
-			Cols:   n,
-			Stride: lda,
-			Data:   aCopy,
-		}
-		if !equalApproxGeneral(got, want, 1e-14) {
-			t.Errorf("Case %d, R*Q != a\ngot: %+v\nwant:%+v", c, got, want)
-		}
+	}
+	qra := cloneGeneral(aCopy)
+	blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, r, q, -1, qra)
+	resid := dlange(lapack.MaxColumnSum, qra.Rows, qra.Cols, qra.Data, qra.Stride)
+	if resid > tol*float64(m) {
+		t.Errorf("Case %v: |R*Q - A|=%v, want<=%v", name, resid, tol*float64(m))
 	}
 }

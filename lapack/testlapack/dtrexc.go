@@ -6,7 +6,6 @@ package testlapack
 
 import (
 	"fmt"
-	"math"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -191,113 +190,5 @@ func dtrexcTest(t *testing.T, impl Dtrexcer, rnd *rand.Rand, n, ifst, ilst, extr
 	if resid > tol {
 		t.Errorf("%v: mismatch between Qᵀ*(initial T)*Q and (final T); resid=%v, want<=%v",
 			name, resid, tol)
-	}
-}
-
-func residualOrthogonal(q blas64.General, rowwise bool) float64 {
-	m, n := q.Rows, q.Cols
-	if m == 0 || n == 0 {
-		return 0
-	}
-	var transq blas.Transpose
-	if m < n || (m == n && rowwise) {
-		transq = blas.NoTrans
-	} else {
-		transq = blas.Trans
-	}
-	minmn := min(m, n)
-
-	// Set work = I.
-	work := blas64.Symmetric{
-		Uplo:   blas.Upper,
-		N:      minmn,
-		Data:   make([]float64, minmn*minmn),
-		Stride: minmn,
-	}
-	for i := 0; i < minmn; i++ {
-		work.Data[i*work.Stride+i] = 1
-	}
-
-	// Compute
-	//  work = work - Q * Qᵀ = I - Q * Qᵀ
-	// or
-	//  work = work - Qᵀ * Q = I - Qᵀ * Q
-	blas64.Syrk(transq, -1, q, 1, work)
-	return dlansy(lapack.MaxColumnSum, blas.Upper, work.N, work.Data, work.Stride)
-}
-
-func dlansy(norm lapack.MatrixNorm, uplo blas.Uplo, n int, a []float64, lda int) float64 {
-	if n == 0 {
-		return 0
-	}
-	work := make([]float64, n)
-	switch norm {
-	case lapack.MaxAbs:
-		if uplo == blas.Upper {
-			var max float64
-			for i := 0; i < n; i++ {
-				for j := i; j < n; j++ {
-					v := math.Abs(a[i*lda+j])
-					if math.IsNaN(v) {
-						return math.NaN()
-					}
-					if v > max {
-						max = v
-					}
-				}
-			}
-			return max
-		}
-		var max float64
-		for i := 0; i < n; i++ {
-			for j := 0; j <= i; j++ {
-				v := math.Abs(a[i*lda+j])
-				if math.IsNaN(v) {
-					return math.NaN()
-				}
-				if v > max {
-					max = v
-				}
-			}
-		}
-		return max
-	case lapack.MaxRowSum, lapack.MaxColumnSum:
-		// A symmetric matrix has the same 1-norm and ∞-norm.
-		for i := 0; i < n; i++ {
-			work[i] = 0
-		}
-		if uplo == blas.Upper {
-			for i := 0; i < n; i++ {
-				work[i] += math.Abs(a[i*lda+i])
-				for j := i + 1; j < n; j++ {
-					v := math.Abs(a[i*lda+j])
-					work[i] += v
-					work[j] += v
-				}
-			}
-		} else {
-			for i := 0; i < n; i++ {
-				for j := 0; j < i; j++ {
-					v := math.Abs(a[i*lda+j])
-					work[i] += v
-					work[j] += v
-				}
-				work[i] += math.Abs(a[i*lda+i])
-			}
-		}
-		var max float64
-		for i := 0; i < n; i++ {
-			v := work[i]
-			if math.IsNaN(v) {
-				return math.NaN()
-			}
-			if v > max {
-				max = v
-			}
-		}
-		return max
-	default:
-		// lapack.Frobenius:
-		panic("not implemented")
 	}
 }

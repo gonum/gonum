@@ -10,6 +10,7 @@ import (
 	"reflect"
 	"testing"
 
+	"golang.org/x/exp/rand"
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
 	"gonum.org/v1/gonum/floats"
@@ -397,6 +398,18 @@ func (v *basicVector) Len() int {
 	return len(v.m)
 }
 
+type rawVector struct {
+	basicVector
+}
+
+func (v *rawVector) RawVector() blas64.Vector {
+	return blas64.Vector{
+		N:    v.Len(),
+		Data: v.basicVector.m,
+		Inc:  1,
+	}
+}
+
 func TestDot(t *testing.T) {
 	f := func(a, b Matrix) interface{} {
 		return Dot(a.(Vector), b.(Vector))
@@ -690,6 +703,94 @@ func TestDoer(t *testing.T) {
 		}
 		if got != want {
 			t.Errorf("unexpected ColDoer sum: got:%f want:%f", got, want)
+		}
+	}
+}
+
+func TestMulVecToer(t *testing.T) {
+	const tol = 1e-14
+
+	rnd := rand.New(rand.NewSource(1))
+	random := func(n int) []float64 {
+		d := make([]float64, n)
+		for i := range d {
+			d[i] = rnd.NormFloat64()
+		}
+		return d
+	}
+
+	type mulVecToer interface {
+		Matrix
+		MulVecTo(*VecDense, bool, Vector)
+	}
+	for _, a := range []mulVecToer{
+		NewBandDense(1, 1, 0, 0, random(1)),
+		NewBandDense(3, 1, 0, 0, random(1)),
+		NewBandDense(3, 1, 1, 0, random(4)),
+		NewBandDense(1, 3, 0, 0, random(1)),
+		NewBandDense(1, 3, 0, 1, random(2)),
+		NewBandDense(7, 10, 0, 0, random(7)),
+		NewBandDense(7, 10, 2, 3, random(42)),
+		NewBandDense(10, 7, 0, 0, random(7)),
+		NewBandDense(10, 7, 2, 3, random(54)),
+		NewBandDense(10, 10, 0, 0, random(10)),
+		NewBandDense(10, 10, 2, 3, random(60)),
+		NewSymBandDense(1, 0, random(1)),
+		NewSymBandDense(3, 0, random(3)),
+		NewSymBandDense(3, 1, random(6)),
+		NewSymBandDense(10, 0, random(10)),
+		NewSymBandDense(10, 1, random(20)),
+		NewSymBandDense(10, 4, random(50)),
+	} {
+		// Dense copy of A used for computing the expected result.
+		var aDense Dense
+		aDense.CloneFrom(a)
+
+		r, c := a.Dims()
+		for _, trans := range []bool{false, true} {
+			m, n := r, c
+			if trans {
+				m, n = c, r
+			}
+			for _, dst := range []*VecDense{
+				&VecDense{},
+				NewVecDense(m, random(m)),
+			} {
+				for xType := 0; xType <= 3; xType++ {
+					var x Vector
+					switch xType {
+					case 0:
+						x = NewVecDense(n, random(n))
+					case 1:
+						if m != n {
+							continue
+						}
+						x = dst
+					case 2:
+						x = &rawVector{basicVector{random(n)}}
+					case 3:
+						x = &basicVector{random(n)}
+					default:
+						panic("bad xType")
+					}
+
+					var want VecDense
+					if !trans {
+						want.MulVec(&aDense, x)
+					} else {
+						want.MulVec(aDense.T(), x)
+					}
+
+					a.MulVecTo(dst, trans, x)
+
+					var diff VecDense
+					diff.SubVec(dst, &want)
+					if resid := Norm(&diff, 1); resid > tol*float64(m) {
+						t.Errorf("r=%d,c=%d,trans=%t,xType=%d: unexpected result; resid=%v, want<=%v",
+							r, c, trans, xType, resid, tol*float64(m))
+					}
+				}
+			}
 		}
 	}
 }

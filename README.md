@@ -10,7 +10,7 @@ go get -u gonum.org/v1/gonum/...
 
 ## Supported Go versions
 
-Gonum supports and tests on the [two most recent Go releases](https://github.com/gonum/gonum/blob/master/.travis.yml#L6-L10) on Linux, macOS and Windows.
+Gonum supports and tests on the [two most recent Go releases](https://github.com/gonum/gonum/blob/master/.travis.yml#L6-L10) on Linux (amd64 and arm64), macOS and Windows (both on amd64).
 
 ## Release schedule
 

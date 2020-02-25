@@ -19,11 +19,11 @@ import (
 
 const (
 	// dlamchE is the machine epsilon. For IEEE this is 2^{-53}.
-	dlamchE = 1.0 / (1 << 53)
+	dlamchE = 0x1p-53
 	dlamchB = 2
 	dlamchP = dlamchB * dlamchE
 	// dlamchS is the smallest normal number. For IEEE this is 2^{-1022}.
-	dlamchS = 1.0 / (1 << 256) / (1 << 256) / (1 << 256) / (1 << 254)
+	dlamchS = 0x1p-1022
 )
 
 func max(a, b int) int {

@@ -938,7 +938,8 @@ type Tracer interface {
 }
 
 // Trace returns the trace of the matrix. Trace will panic if the
-// matrix is not square.
+// matrix is not square. If a is a Tracer, its Trace method will be
+// used to calculate the matrix trace.
 func Trace(a Matrix) float64 {
 	m, _ := untransposeExtract(a)
 	if t, ok := m.(Tracer); ok {

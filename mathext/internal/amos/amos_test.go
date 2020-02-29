@@ -41,11 +41,11 @@ func randInput(rnd *rand.Rand) input {
 	}
 	is := make([]int, 3)
 	for j := range is {
-		is[j] = rand.Intn(1000)
+		is[j] = rnd.Intn(1000)
 	}
-	kode := rand.Intn(2) + 1
-	id := rand.Intn(2)
-	n := rand.Intn(5) + 1
+	kode := rnd.Intn(2) + 1
+	id := rnd.Intn(2)
+	n := rnd.Intn(5) + 1
 	yr := make([]float64, n+1)
 	yi := make([]float64, n+1)
 	for j := range yr {

@@ -6,11 +6,16 @@ package window_test
 
 import (
 	"fmt"
+	"log"
 	"math"
 	"math/cmplx"
 
 	"gonum.org/v1/gonum/dsp/fourier"
 	"gonum.org/v1/gonum/dsp/window"
+	"gonum.org/v1/plot"
+	"gonum.org/v1/plot/plotter"
+	"gonum.org/v1/plot/plotutil"
+	"gonum.org/v1/plot/vg"
 )
 
 func Example() {
@@ -117,4 +122,92 @@ func ExampleValues() {
 	// Output:
 	//
 	// dst: [0.078459 0.233445 0.382683 0.522499 0.649448 0.760406 0.852640 0.923880 0.972370 0.996917 0.996917 0.972370 0.923880 0.852640 0.760406 0.649448 0.522499 0.382683 0.233445 0.078459]
+}
+
+func Example_plotHamming() {
+	const (
+		N  = 51
+		sz = 5 * vg.Centimeter
+	)
+
+	ham := window.NewValues(window.Hamming, N)
+
+	fft := fourier.NewFFT(2048)
+	tmp := make([]float64, 2048)
+	copy(tmp, ham)
+
+	a := fft.Coefficients(nil, tmp)
+	mag := -math.MaxFloat64
+	for i, v := range a {
+		a[i] = 0.5 * v / N
+		mag = math.Max(mag, cmplx.Abs(a[i]))
+	}
+
+	freq := make([]float64, len(a))
+	for i := range freq {
+		freq[i] = fft.Freq(i)
+	}
+	resp := make([]float64, len(freq))
+	for i, v := range a {
+		resp[i] = 20 * math.Log10(cmplx.Abs(v)/mag)
+	}
+
+	{
+		p, err := plot.New()
+		if err != nil {
+			log.Fatalf("could not create plot: %+v", err)
+		}
+		p.Title.Text = "Hamming window"
+		p.X.Label.Text = "Sample"
+		p.Y.Label.Text = "Amplitude"
+
+		data := make(plotter.XYs, len(ham))
+		for i := range ham {
+			data[i].X = float64(i)
+			data[i].Y = ham[i]
+		}
+
+		pts, err := plotter.NewLine(data)
+		if err != nil {
+			log.Fatalf("could not create line: %+v", err)
+		}
+		pts.LineStyle.Color = plotutil.SoftColors[2]
+		pts.LineStyle.Width = 1.5
+
+		p.Add(plotter.NewGrid(), pts)
+		err = p.Save(math.Phi*sz, sz, "testdata/hamming-sample.png")
+		if err != nil {
+			log.Fatalf("could not save plot: %+v", err)
+		}
+	}
+	{
+		p, err := plot.New()
+		if err != nil {
+			log.Fatalf("could not create plot: %+v", err)
+		}
+		p.Title.Text = "Frequency response of the Hamming window"
+		p.X.Label.Text = "Frequency [cycles/sample]"
+		p.Y.Label.Text = "Magnitude [dB]"
+
+		data := make(plotter.XYs, len(freq))
+		for i := range freq {
+			data[i].X = freq[i]
+			data[i].Y = resp[i]
+		}
+		pts, err := plotter.NewLine(data)
+		if err != nil {
+			log.Fatalf("could not create line: %+v", err)
+		}
+		pts.LineStyle.Color = plotutil.SoftColors[2]
+		pts.LineStyle.Width = 1.5
+
+		p.Add(plotter.NewGrid(), pts)
+
+		err = p.Save(math.Phi*sz, sz, "testdata/hamming-freq.png")
+		if err != nil {
+			log.Fatalf("could not save plot: %+v", err)
+		}
+	}
+
+	// Output:
 }

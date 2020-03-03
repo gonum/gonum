@@ -10,7 +10,7 @@ import (
 	"gonum.org/v1/gonum/num/dual"
 )
 
-func Example_Number_fike() {
+func ExampleNumber_fike() {
 	// Calculate the value and derivative of the function
 	// e^x/(sqrt(sin(x)^3 + cos(x)^3)).
 	fn := func(x dual.Number) dual.Number {

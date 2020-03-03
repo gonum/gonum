@@ -10,7 +10,7 @@ import (
 	"gonum.org/v1/gonum/num/hyperdual"
 )
 
-func Example_Number_fike() {
+func ExampleNumber_fike() {
 	// Calculate the value and first and second derivatives
 	// of the function e^x/(sqrt(sin(x)^3 + cos(x)^3)).
 	fn := func(x hyperdual.Number) hyperdual.Number {

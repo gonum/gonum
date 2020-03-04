@@ -9,6 +9,7 @@ import (
 	"log"
 	"math"
 	"math/cmplx"
+	"os"
 
 	"gonum.org/v1/gonum/dsp/fourier"
 	"gonum.org/v1/gonum/dsp/window"
@@ -16,6 +17,8 @@ import (
 	"gonum.org/v1/plot/plotter"
 	"gonum.org/v1/plot/plotutil"
 	"gonum.org/v1/plot/vg"
+	"gonum.org/v1/plot/vg/draw"
+	"gonum.org/v1/plot/vg/vgimg"
 )
 
 func Example() {
@@ -127,7 +130,7 @@ func ExampleValues() {
 func Example_plotHamming() {
 	const (
 		N  = 51
-		sz = 5 * vg.Centimeter
+		sz = 7.5 * vg.Centimeter
 	)
 
 	ham := window.NewValues(window.Hamming, N)
@@ -152,6 +155,8 @@ func Example_plotHamming() {
 		resp[i] = 20 * math.Log10(cmplx.Abs(v)/mag)
 	}
 
+	plots := make([][]*plot.Plot, 2)
+
 	{
 		p, err := plot.New()
 		if err != nil {
@@ -175,10 +180,7 @@ func Example_plotHamming() {
 		pts.LineStyle.Width = 1.5
 
 		p.Add(plotter.NewGrid(), pts)
-		err = p.Save(math.Phi*sz, sz, "testdata/hamming-sample.png")
-		if err != nil {
-			log.Fatalf("could not save plot: %+v", err)
-		}
+		plots[0] = []*plot.Plot{p}
 	}
 	{
 		p, err := plot.New()
@@ -202,11 +204,27 @@ func Example_plotHamming() {
 		pts.LineStyle.Width = 1.5
 
 		p.Add(plotter.NewGrid(), pts)
+		plots[1] = []*plot.Plot{p}
+	}
 
-		err = p.Save(math.Phi*sz, sz, "testdata/hamming-freq.png")
-		if err != nil {
-			log.Fatalf("could not save plot: %+v", err)
-		}
+	var (
+		img = vgimg.New(math.Phi*sz, sz)
+		dc  = draw.New(img)
+		cs  = plot.Align(plots, draw.Tiles{Rows: 2, Cols: 1}, dc)
+	)
+	for i := 0; i < 2; i++ {
+		plots[i][0].Draw(cs[i][0])
+	}
+
+	w, err := os.Create("testdata/hamming.png")
+	if err != nil {
+		log.Fatalf("could not create output file: %+v", err)
+	}
+	defer w.Close()
+
+	png := vgimg.PngCanvas{Canvas: img}
+	if _, err := png.WriteTo(w); err != nil {
+		log.Fatalf("could not save plot: %+v", err)
 	}
 
 	// Output:

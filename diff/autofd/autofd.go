@@ -108,7 +108,7 @@ func newGenerator(w io.Writer, f Func) (*generator, error) {
 		if obj == nil {
 			return nil, fmt.Errorf("could not lookup %q in package %q", name, path)
 		}
-		var ok = false
+		var ok bool
 		fct, ok = obj.(*types.Func)
 		if !ok {
 			return nil, fmt.Errorf("object %q in package %q is not a func (%T)", name, path, obj)

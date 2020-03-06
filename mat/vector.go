@@ -211,7 +211,7 @@ func (v *VecDense) CloneVec(a Vector) {
 		return
 	}
 	for i := 0; i < a.Len(); i++ {
-		v.SetVec(i, a.AtVec(i))
+		v.setVec(i, a.AtVec(i))
 	}
 }
 

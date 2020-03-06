@@ -13,10 +13,11 @@ import (
 var (
 	vector *VecDense
 
-	_ Matrix    = vector
-	_ allMatrix = vector
-	_ Vector    = vector
-	_ Reseter   = vector
+	_ Matrix        = vector
+	_ allMatrix     = vector
+	_ Vector        = vector
+	_ Reseter       = vector
+	_ MutableVector = vector
 )
 
 // Vector is a vector.
@@ -24,6 +25,12 @@ type Vector interface {
 	Matrix
 	AtVec(int) float64
 	Len() int
+}
+
+// A MutableVector can set elements of a vector.
+type MutableVector interface {
+	Vector
+	SetVec(i int, v float64)
 }
 
 // TransposeVec is a type for performing an implicit transpose of a Vector.

@@ -267,13 +267,13 @@ func (s *SymBandDense) MulVecTo(dst *VecDense, _ bool, x Vector) {
 			blas64.Sbmv(1, s.mat, xVec.mat, 0, dst.mat)
 		} else {
 			xCopy := getWorkspaceVec(n, false)
-			xCopy.CloneVec(xVec)
+			xCopy.CloneFromVec(xVec)
 			blas64.Sbmv(1, s.mat, xCopy.mat, 0, dst.mat)
 			putWorkspaceVec(xCopy)
 		}
 	} else {
 		xCopy := getWorkspaceVec(n, false)
-		xCopy.CloneVec(x)
+		xCopy.CloneFromVec(x)
 		blas64.Sbmv(1, s.mat, xCopy.mat, 0, dst.mat)
 		putWorkspaceVec(xCopy)
 	}

@@ -322,13 +322,13 @@ func (b *BandDense) MulVecTo(dst *VecDense, trans bool, x Vector) {
 			blas64.Gbmv(t, 1, b.mat, xVec.mat, 0, dst.mat)
 		} else {
 			xCopy := getWorkspaceVec(n, false)
-			xCopy.CloneVec(xVec)
+			xCopy.CloneFromVec(xVec)
 			blas64.Gbmv(t, 1, b.mat, xCopy.mat, 0, dst.mat)
 			putWorkspaceVec(xCopy)
 		}
 	} else {
 		xCopy := getWorkspaceVec(n, false)
-		xCopy.CloneVec(x)
+		xCopy.CloneFromVec(x)
 		blas64.Gbmv(t, 1, b.mat, xCopy.mat, 0, dst.mat)
 		putWorkspaceVec(xCopy)
 	}

@@ -194,9 +194,9 @@ func (v *VecDense) Zero() {
 	}
 }
 
-// CloneVec makes a copy of a into the receiver, overwriting the previous value
+// CloneFromVec makes a copy of a into the receiver, overwriting the previous value
 // of the receiver.
-func (v *VecDense) CloneVec(a Vector) {
+func (v *VecDense) CloneFromVec(a Vector) {
 	if v == a {
 		return
 	}
@@ -218,7 +218,7 @@ func (v *VecDense) CloneVec(a Vector) {
 // VecDenseCopyOf returns a newly allocated copy of the elements of a.
 func VecDenseCopyOf(a Vector) *VecDense {
 	v := &VecDense{}
-	v.CloneVec(a)
+	v.CloneFromVec(a)
 	return v
 }
 

@@ -600,6 +600,26 @@ func (t *TriDense) ScaleTri(f float64, a Triangular) {
 	}
 }
 
+// SliceTri returns a new Triangular that shares backing data with the receiver.
+// The returned matrix starts at {i,i} of the receiver and extends k-i rows and
+// columns. The final row and column in the resulting matrix is k-1.
+// SliceTri panics with ErrIndexOutOfRange if the slice is outside the capacity
+// of the receiver.
+func (t *TriDense) SliceTri(i, k int) Triangular {
+	return t.sliceTri(i, k)
+}
+
+func (t *TriDense) sliceTri(i, k int) *TriDense {
+	if i < 0 || t.cap < i || k < i || t.cap < k {
+		panic(ErrIndexOutOfRange)
+	}
+	v := *t
+	v.mat.Data = t.mat.Data[i*t.mat.Stride+i : (k-1)*t.mat.Stride+k]
+	v.mat.N = k - i
+	v.cap = t.cap - i
+	return &v
+}
+
 // Trace returns the trace of the matrix.
 func (t *TriDense) Trace() float64 {
 	// TODO(btracey): could use internal asm sum routine.

@@ -3,11 +3,19 @@
 // license that can be found in the LICENSE file.
 
 // +build fortran
-// TODO(jonlawlor): remove fortran build tag when Gonum only supports go 1.7+.
 
+// Package amoslib is a wrapper around the Fortran amos library.
+//
+// See https://www.netlib.org/amos/. It is included in the Gonum repository
+// for testing purposes only.
+//
+// When using the amoslib package, the "fortran" build tag must be used.
+// The amoslib package depends on libm.so.
 package amoslib
 
 /*
+#cgo LDFLAGS: -lm
+
 double mzabs_(double * ar, double * ai);
 void zs1s2_(double * ZRR, double * ZRI, double * S1R, double * S1I, double * S2R, double * S2I, int* NZ, double *ASCLE, double * ALIM, int * IUF);
 void zacai_(double * ZR, double * ZI, double * FNU, int * KODE, int * N, int * MR, double * YR, double * YI, int * NZ, double * RL, double * tol, double * elim, double * alim);

@@ -196,8 +196,7 @@ func Zshch(ZR, ZI, CSHR, CSHI, CCHR, CCHI float64) (ZRout, ZIout, CSHRout, CSHIo
 	return ZR, ZI, CSHR, CSHI, CCHR, CCHI
 }
 
-func ZairyFort(ZR, ZI float64, ID, KODE int) (AIR, AII float64, NZ int) {
-	var IERR int
+func ZairyFort(ZR, ZI float64, ID, KODE int) (AIR, AII float64, NZ, IERR int) {
 	pzr := (*C.double)(&ZR)
 	pzi := (*C.double)(&ZI)
 	pid := (*C.int)(unsafe.Pointer(&ID))
@@ -210,7 +209,8 @@ func ZairyFort(ZR, ZI float64, ID, KODE int) (AIR, AII float64, NZ int) {
 	C.zairy_(pzr, pzi, pid, pkode, pair, paii, pnz, pierr)
 
 	NZ = int(*pnz)
-	return AIR, AII, NZ
+	IERR = int(*pierr)
+	return AIR, AII, NZ, IERR
 }
 
 func ZksclFort(ZRR, ZRI, FNU float64, N int, YR, YI []float64, NZ int, RZR, RZI, ASCLE, TOL, ELIM float64) (

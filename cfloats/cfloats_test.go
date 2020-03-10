@@ -167,6 +167,31 @@ func TestAddScaledTo(t *testing.T) {
 	}
 }
 
+func TestConj(t *testing.T) {
+	test := []struct {
+		a     []complex128
+		truth []complex128
+	}{
+		{
+			[]complex128{1, -2, 3},
+			[]complex128{1, -2, 3},
+		},
+		{
+			[]complex128{4 + 4i, 5 - 5i, -6 + 6i},
+			[]complex128{4 - 4i, 5 + 5i, -6 - 6i},
+		},
+		{
+			[]complex128{7i, -8i, 9i},
+			[]complex128{-7i, 8i, -9i},
+		},
+	}
+
+	for _, v := range test {
+		n := Conj(v.a)
+		areSlicesEqual(t, v.truth, n, "cfloats: Conj: incorrect values")
+	}
+}
+
 func TestCumProd(t *testing.T) {
 	s := []complex128{3 + 3i, 4 + 4i, 1 + 1i, 7 + 7i, 5 + 5i}
 	receiver := make([]complex128, len(s))

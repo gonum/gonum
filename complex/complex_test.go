@@ -2,7 +2,7 @@
 // Use of this code is governed by a BSD-style
 // license that can be found in the LICENSE file
 
-package cfloats_test
+package complex_test
 
 import (
 	"math"
@@ -12,7 +12,7 @@ import (
 
 	"golang.org/x/exp/rand"
 
-	. "gonum.org/v1/gonum/cfloats"
+	. "gonum.org/v1/gonum/complex"
 	"gonum.org/v1/gonum/floats"
 )
 

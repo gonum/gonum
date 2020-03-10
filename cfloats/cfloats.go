@@ -73,22 +73,6 @@ func AddScaledTo(dst, y []complex128, alpha complex128, s []complex128) []comple
 	return dst
 }
 
-// argsort is a helper that implements sort.Interface, as used by
-// Argsort.
-type argsort struct {
-	s    []complex128
-	inds []int
-}
-
-func (a argsort) Len() int {
-	return len(a.s)
-}
-
-func (a argsort) Swap(i, j int) {
-	a.s[i], a.s[j] = a.s[j], a.s[i]
-	a.inds[i], a.inds[j] = a.inds[j], a.inds[i]
-}
-
 // CumProd finds the cumulative product of the first i elements in
 // s and puts them in place into the ith element of the
 // destination dst. A panic will occur if the lengths of arguments
@@ -541,13 +525,6 @@ func L2DistanceUnitary(x, y []complex128) (norm float64) {
 	return scale * math.Sqrt(sumSquares)
 }
 
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
 // Mul performs element-wise multiplication between dst
 // and s and stores the value in dst. Panics if the
 // lengths of s and t are not equal.
@@ -572,11 +549,6 @@ func MulTo(dst, s, t []complex128) []complex128 {
 	}
 	return dst
 }
-
-const (
-	nanBits = 0x7ff8000000000000
-	nanMask = 0xfff8000000000000
-)
 
 // Norm returns the L norm of the slice S, defined as
 // (sum_{i=1}^N s[i]^L)^{1/L}

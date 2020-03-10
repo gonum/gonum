@@ -35,21 +35,6 @@ func areFloatSlicesEqual(t *testing.T, truth, comp []float64, str string) {
 	}
 }
 
-func areSlicesSame(t *testing.T, truth, comp []complex128, str string) {
-	ok := len(truth) == len(comp)
-	if ok {
-		for i, a := range truth {
-			if !EqualWithinAbsOrRel(a, comp[i], EqTolerance, EqTolerance) && !same(a, comp[i]) {
-				ok = false
-				break
-			}
-		}
-	}
-	if !ok {
-		t.Errorf(str+". Expected %v, returned %v", truth, comp)
-	}
-}
-
 func Panics(fun func()) (b bool) {
 	defer func() {
 		err := recover()

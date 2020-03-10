@@ -9,39 +9,19 @@ import (
 	"math/cmplx"
 	"testing"
 
-	. "gonum.org/v1/gonum/cfloats"
 	"gonum.org/v1/gonum/floats"
 )
 
-const (
-	msgVal   = "%v: unexpected value at %v Got: %v Expected: %v"
-	msgGuard = "%v: Guard violated in %s vector %v %v"
-)
-
 var (
-	inf       = math.Inf(1)
-	cinf      = cmplx.Inf()
-	nan       = math.NaN()
-	cnan      = cmplx.NaN()
-	benchSink complex128
+	inf  = math.Inf(1)
+	cinf = cmplx.Inf()
+	nan  = math.NaN()
+	cnan = cmplx.NaN()
 )
-
-func same(x, y complex128) bool {
-	// return (x == y ||
-	// 	math.IsNaN(real(x)) && math.IsNaN(real(y)) && imag(x) == imag(y) ||
-	// 	math.IsNaN(imag(y)) && math.IsNaN(imag(x)) && real(y) == real(x) ||
-	// 	math.IsNaN(real(x)) && math.IsNaN(real(y)) && math.IsNaN(imag(y)) && math.IsNaN(imag(x)))
-	return x == y || (cmplx.IsNaN(x) && cmplx.IsNaN(y)) || (cmplx.IsInf(x) && cmplx.IsInf(y))
-}
 
 // same tests for nan-aware equality.
 func fsame(a, b float64) bool {
 	return a == b || (math.IsNaN(a) && math.IsNaN(b))
-}
-
-// sameApprox tests for nan-aware equality within tolerance.
-func sameApprox(a, b complex128, tol float64) bool {
-	return same(a, b) || EqualWithinAbsOrRel(a, b, tol, tol)
 }
 
 // sameApprox tests for nan-aware equality within tolerance.
@@ -109,12 +89,6 @@ func checkValidIncGuard(t *testing.T, vec []complex128, guard_val complex128, in
 		}
 	}
 }
-
-var ( // Offset sets for testing alignment handling in Unitary assembly functions.
-	align1 = []int{0, 1}
-	align2 = newIncSet(0, 1)
-	align3 = newIncToSet(0, 1)
-)
 
 type incSet struct {
 	x, y int

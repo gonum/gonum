@@ -7,9 +7,10 @@ package cfloats_test
 import (
 	"math"
 	"math/cmplx"
-	"math/rand"
 	"strconv"
 	"testing"
+
+	"golang.org/x/exp/rand"
 
 	. "gonum.org/v1/gonum/cfloats"
 	"gonum.org/v1/gonum/floats"

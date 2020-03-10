@@ -89,37 +89,3 @@ func checkValidIncGuard(t *testing.T, vec []complex128, guard_val complex128, in
 		}
 	}
 }
-
-type incSet struct {
-	x, y int
-}
-
-// genInc will generate all (x,y) combinations of the input increment set.
-func newIncSet(inc ...int) []incSet {
-	n := len(inc)
-	is := make([]incSet, n*n)
-	for x := range inc {
-		for y := range inc {
-			is[x*n+y] = incSet{inc[x], inc[y]}
-		}
-	}
-	return is
-}
-
-type incToSet struct {
-	dst, x, y int
-}
-
-// genIncTo will generate all (dst,x,y) combinations of the input increment set.
-func newIncToSet(inc ...int) []incToSet {
-	n := len(inc)
-	is := make([]incToSet, n*n*n)
-	for i, dst := range inc {
-		for x := range inc {
-			for y := range inc {
-				is[i*n*n+x*n+y] = incToSet{dst, inc[x], inc[y]}
-			}
-		}
-	}
-	return is
-}

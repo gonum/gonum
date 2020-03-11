@@ -2,7 +2,7 @@
 // Use of this code is governed by a BSD-style
 // license that can be found in the LICENSE file
 
-package cfloats
+package complex
 
 import (
 	"errors"
@@ -12,8 +12,7 @@ import (
 	"gonum.org/v1/gonum/internal/asm/c128"
 )
 
-// Abs generates cmplx.Abs, element-wise, for the elements of s, and stores in dst.
-// Panics if the lengths of dst and s do not match.
+// Abs generates cmplx.Abs, element-wise, for the elements of s, and returns slice.
 func Abs(s []complex128) []float64 {
 	dst := make([]float64, len(s))
 	for i, v := range s {
@@ -70,6 +69,15 @@ func AddScaledTo(dst, y []complex128, alpha complex128, s []complex128) []comple
 		panic("cfloats: lengths of slices do not match")
 	}
 	c128.AxpyUnitaryTo(dst, alpha, s, y)
+	return dst
+}
+
+// Conj generates cmplx.Conj, element-wise, for the elements of s, and returns slice.
+func Conj(s []complex128) []complex128 {
+	dst := make([]complex128, len(s))
+	for i, v := range s {
+		dst[i] = cmplx.Conj(v)
+	}
 	return dst
 }
 

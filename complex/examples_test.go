@@ -2,12 +2,12 @@
 // Use of this code is governed by a BSD-style
 // license that can be found in the LICENSE file
 
-package cfloats_test
+package complex_test
 
 import (
 	"fmt"
 
-	. "gonum.org/v1/gonum/cfloats"
+	. "gonum.org/v1/gonum/complex"
 )
 
 // Set of examples for all the functions

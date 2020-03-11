@@ -2,16 +2,17 @@
 // Use of this code is governed by a BSD-style
 // license that can be found in the LICENSE file
 
-package cfloats_test
+package complex_test
 
 import (
 	"math"
 	"math/cmplx"
-	"math/rand"
 	"strconv"
 	"testing"
 
-	. "gonum.org/v1/gonum/cfloats"
+	"golang.org/x/exp/rand"
+
+	. "gonum.org/v1/gonum/complex"
 	"gonum.org/v1/gonum/floats"
 )
 
@@ -163,6 +164,31 @@ func TestAddScaledTo(t *testing.T) {
 	}
 	if !Panics(func() { AddScaledTo(dst1, short, alpha, s) }) {
 		t.Errorf("Doesn't panic if y is smaller than dst")
+	}
+}
+
+func TestConj(t *testing.T) {
+	test := []struct {
+		a     []complex128
+		truth []complex128
+	}{
+		{
+			[]complex128{1, -2, 3},
+			[]complex128{1, -2, 3},
+		},
+		{
+			[]complex128{4 + 4i, 5 - 5i, -6 + 6i},
+			[]complex128{4 - 4i, 5 + 5i, -6 - 6i},
+		},
+		{
+			[]complex128{7i, -8i, 9i},
+			[]complex128{-7i, 8i, -9i},
+		},
+	}
+
+	for _, v := range test {
+		n := Conj(v.a)
+		areSlicesEqual(t, v.truth, n, "cfloats: Conj: incorrect values")
 	}
 }
 

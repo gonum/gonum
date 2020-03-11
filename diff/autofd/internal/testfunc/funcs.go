@@ -5,9 +5,7 @@
 // Package testfunc holds various functions to test autofd features.
 package testfunc // import "gonum.org/v1/gonum/diff/autofd/internal/testfunc"
 
-import (
-	"math"
-)
+import "math"
 
 func F1(x float64) float64 {
 	return x * x

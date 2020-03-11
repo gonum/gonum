@@ -15,10 +15,11 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
+// Func describes which function will be derived.
 type Func struct {
-	Path  string // import path of the package holding the function
-	Name  string // function or method name
-	Deriv string // name of the output derivative function
+	Path  string // Import path of the package holding the function.
+	Name  string // Function or method name.
+	Deriv string // Name of the output derivative function.
 }
 
 // Derivative generates the derivative code from the given function declaration.
@@ -56,62 +57,58 @@ func newGenerator(w io.Writer, f Func) (*generator, error) {
 	}
 	pkgs, err := packages.Load(cfg, path)
 	if err != nil {
-		return nil, fmt.Errorf("could not load package of %q: %w", f, err)
+		return nil, fmt.Errorf("could not load package of %q %s: %w", f.Path, f.Name, err)
 	}
 
-	pkg := func() *packages.Package {
-		for _, p := range pkgs {
-			if p.PkgPath == path {
-				return p
-			}
+	var pkg *packages.Package
+	for _, p := range pkgs {
+		if p.PkgPath == path {
+			pkg = p
+			break
 		}
-		return nil
-	}()
+	}
 
 	if pkg == nil || len(pkg.Errors) > 0 {
 		return nil, fmt.Errorf("could not find package %q", path)
 	}
 
-	var (
-		fct   *types.Func
-		scope = pkg.Types.Scope()
-	)
+	var fct *types.Func
+	scope := pkg.Types.Scope()
 	switch {
 	case strings.Contains(name, "."):
 		idx := strings.Index(name, ".")
 		obj := scope.Lookup(name[:idx])
 		if obj == nil {
-			return nil, fmt.Errorf("could not lookup %q in package %q", name[:idx], path)
+			return nil, fmt.Errorf("could not find %s in package %q", name[:idx], path)
 		}
 		typ, ok := obj.Type().(*types.Named)
 		if !ok {
 			return nil, fmt.Errorf(
-				"object %q in package %q is not a named type (%T)",
+				"object %s in package %q is not a named type (%T)",
 				name[:idx], path, obj,
 			)
 		}
-		fct = func() *types.Func {
-			for i := 0; i < typ.NumMethods(); i++ {
-				m := typ.Method(i)
-				if m.Name() == name[idx+1:] {
-					return m
-				}
+		for i := 0; i < typ.NumMethods(); i++ {
+			m := typ.Method(i)
+			if m.Name() == name[idx+1:] {
+				fct = m
+				break
 			}
-			return nil
-		}()
+		}
+
 		if fct == nil {
-			return nil, fmt.Errorf("could not find %q in package %q", name, path)
+			return nil, fmt.Errorf("could not find %s in package %q", name, path)
 		}
 
 	default:
 		obj := scope.Lookup(name)
 		if obj == nil {
-			return nil, fmt.Errorf("could not lookup %q in package %q", name, path)
+			return nil, fmt.Errorf("could not find %s in package %q", name, path)
 		}
 		var ok bool
 		fct, ok = obj.(*types.Func)
 		if !ok {
-			return nil, fmt.Errorf("object %q in package %q is not a func (%T)", name, path, obj)
+			return nil, fmt.Errorf("object %s in package %q is not a func (%T)", name, path, obj)
 		}
 	}
 
@@ -128,25 +125,24 @@ func newGenerator(w io.Writer, f Func) (*generator, error) {
 }
 
 func (g *generator) generate() error {
-	fct := func() *ast.FuncDecl {
-		for _, f := range g.pkg.Syntax {
-			for i := range f.Decls {
-				decl, ok := f.Decls[i].(*ast.FuncDecl)
-				if !ok {
-					continue
-				}
+	var fct *ast.FuncDecl
+	for _, f := range g.pkg.Syntax {
+		for i := range f.Decls {
+			decl, ok := f.Decls[i].(*ast.FuncDecl)
+			if !ok {
+				continue
+			}
 
-				if decl.Name.Name == g.fct.Name() {
-					return decl
-				}
+			if decl.Name.Name == g.fct.Name() {
+				fct = decl
+				break
 			}
 		}
-		return nil
-	}()
+	}
 
 	var (
 		ret     *ast.ReturnStmt
-		returns = 0
+		returns int
 	)
 	ast.Inspect(fct.Body, func(n ast.Node) bool {
 		switch stmt := n.(type) {
@@ -157,12 +153,15 @@ func (g *generator) generate() error {
 		return true
 	})
 
-	if returns > 1 {
+	switch returns {
+	case 0:
+		return fmt.Errorf("could not find a return statement")
+	case 1:
+		// ok
+	default:
 		return fmt.Errorf("can not handle functions with multiple return statements")
 	}
-	if returns == 0 {
-		return fmt.Errorf("could not find a return statement")
-	}
+
 	switch len(ret.Results) {
 	case 0:
 		return fmt.Errorf("naked returns not supported")
@@ -177,9 +176,9 @@ func (g *generator) generate() error {
 		g.der,
 		args.At(0).Name(),
 	)
-	g.printf("\treturn ")
+	g.printf("\tv := ")
 	g.expr(ret.Results[0])
-	g.printf(".Emag\n")
+	g.printf("\n\treturn v.Emag\n")
 	g.printf("}\n")
 
 	return g.err
@@ -192,7 +191,7 @@ func (g *generator) expr(expr ast.Expr) {
 
 	switch expr := expr.(type) {
 	default:
-		panic(fmt.Errorf("invalid expr type: %#v (%T)", expr, expr))
+		g.err = fmt.Errorf("invalid expr type: %#v (%T)", expr, expr)
 	case *ast.BasicLit:
 		g.printf("dual.Number{Real:%s}", expr.Value)
 	case *ast.Ident:
@@ -204,7 +203,7 @@ func (g *generator) expr(expr ast.Expr) {
 	case *ast.UnaryExpr:
 		switch expr.Op {
 		default:
-			panic(fmt.Errorf("invalid binary expression token %v", expr.Op))
+			g.err = fmt.Errorf("invalid binary expression token %v", expr.Op)
 		case token.ADD:
 			// no op
 		case token.SUB:
@@ -215,7 +214,7 @@ func (g *generator) expr(expr ast.Expr) {
 	case *ast.BinaryExpr:
 		switch expr.Op {
 		default:
-			panic(fmt.Errorf("invalid binary expression token %v", expr.Op))
+			g.err = fmt.Errorf("invalid binary expression token %v", expr.Op)
 		case token.ADD:
 			g.printf("dual.Add(")
 			g.expr(expr.X)
@@ -257,7 +256,7 @@ func (g *generator) expr(expr ast.Expr) {
 	case *ast.SelectorExpr:
 		x, ok := expr.X.(*ast.Ident)
 		if !ok || x.Name != "math" {
-			panic(fmt.Errorf("invalid selector expression %#v", expr))
+			g.err = fmt.Errorf("invalid selector expression %#v", expr)
 		}
 		switch expr.Sel.Name {
 		case "Abs",
@@ -276,7 +275,7 @@ func (g *generator) expr(expr ast.Expr) {
 			"Ln2", "Log2E", "Ln10", "Log10E":
 			g.printf("dual.Number{Real: math.%s}", expr.Sel.Name)
 		default:
-			panic(fmt.Errorf("invalid selector expression %#v", expr))
+			g.err = fmt.Errorf("invalid selector expression %#v", expr)
 		}
 	}
 }
@@ -286,6 +285,8 @@ func (g *generator) printf(format string, args ...interface{}) {
 }
 
 var (
+	// f1x is the pre-computed signature of 'func(float64) float64'.
+	// this will be checked against to make sure Derivative is called on valid functions.
 	f1x *types.Func
 )
 

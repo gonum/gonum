@@ -284,16 +284,14 @@ func (g *generator) printf(format string, args ...interface{}) {
 	fmt.Fprintf(g.w, format, args...)
 }
 
-var (
-	// f1x is the pre-computed signature of 'func(float64) float64'.
-	// this will be checked against to make sure Derivative is called on valid functions.
-	f1x *types.Func
-)
+// f1x is the pre-computed signature of 'func(float64) float64'.
+// This will be checked against to make sure Derivative is called on valid functions.
+var f1x *types.Func
 
 func init() {
 	const variadic = false
 	f64 := types.NewParam(0, nil, "x", types.Typ[types.Float64])
 
 	sig := types.NewSignature(nil, types.NewTuple(f64), types.NewTuple(f64), variadic)
-	f1x = types.NewFunc(0, nil, "dxf", sig)
+	f1x = types.NewFunc(0, nil, "f1x", sig)
 }

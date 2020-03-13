@@ -162,27 +162,24 @@ func dgemmParallel(aTrans, bTrans bool, m, n, k int, a []float64, lda int, b []f
 	if parBlocks < nWorkers {
 		nWorkers = parBlocks
 	}
-	// There is a tradeoff between the workers having to wait for work
-	// and a large buffer making operations slow.
-	buf := buffMul * nWorkers
-	if buf > parBlocks {
-		buf = parBlocks
-	}
 
-	sendChan := make(chan subMul, buf)
+	var work blockWorkQueue
+	work.Reset(m, n)
 
 	// Launch workers. A worker receives an {i, j} submatrix of c, and computes
-	// A_ik B_ki (or the transposed version) storing the result in c_ij. When the
-	// channel is finally closed, it signals to the waitgroup that it has finished
-	// computing.
+	// A_ik B_ki (or the transposed version) storing the result in c_ij.
 	var wg sync.WaitGroup
 	for i := 0; i < nWorkers; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			for sub := range sendChan {
-				i := sub.i
-				j := sub.j
+
+			for {
+				i, j, ok := work.Next()
+				if !ok {
+					return
+				}
+
 				leni := blockSize
 				if i+leni > m {
 					leni = m - i
@@ -217,16 +214,6 @@ func dgemmParallel(aTrans, bTrans bool, m, n, k int, a []float64, lda int, b []f
 		}()
 	}
 
-	// Send out all of the {i, j} subblocks for computation.
-	for i := 0; i < m; i += blockSize {
-		for j := 0; j < n; j += blockSize {
-			sendChan <- subMul{
-				i: i,
-				j: j,
-			}
-		}
-	}
-	close(sendChan)
 	wg.Wait()
 }
 

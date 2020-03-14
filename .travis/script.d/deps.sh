@@ -9,6 +9,8 @@ pushd $WORK
 
 # Required for format check.
 go get golang.org/x/tools/cmd/goimports
+# Required for linting check: apparently golangci-lint should not be installed using go get (https://github.com/golangci/golangci-lint#go).
+curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.23.8
 # Required for imports check.
 go get gonum.org/v1/tools/cmd/check-imports
 # Required for copyright header check.

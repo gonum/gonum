@@ -14,6 +14,7 @@ import (
 )
 
 func TestSimpsons(t *testing.T) {
+	t.Parallel()
 	rnd := rand.New(rand.NewSource(1))
 	for i, test := range []struct {
 		integral testquad.Integral

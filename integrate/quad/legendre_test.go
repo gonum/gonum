@@ -12,6 +12,7 @@ import (
 )
 
 func TestLegendre(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		f        func(float64) float64
 		min, max float64
@@ -43,6 +44,7 @@ func TestLegendre(t *testing.T) {
 }
 
 func TestLegendreSingle(t *testing.T) {
+	t.Parallel()
 	for c, test := range []struct {
 		n        int
 		min, max float64

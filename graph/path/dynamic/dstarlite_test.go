@@ -26,6 +26,7 @@ var (
 )
 
 func TestDStarLiteNullHeuristic(t *testing.T) {
+	t.Parallel()
 	for _, test := range testgraphs.ShortestPathTests {
 		// Skip zero-weight cycles.
 		if strings.HasPrefix(test.Name, "zero-weight") {
@@ -552,6 +553,7 @@ var dynamicDStarLiteTests = []struct {
 }
 
 func TestDStarLiteDynamic(t *testing.T) {
+	t.Parallel()
 	for i, test := range dynamicDStarLiteTests {
 		for _, remember := range test.remember {
 			l := &testgraphs.LimitedVisionGrid{

@@ -18,6 +18,7 @@ import (
 )
 
 func TestDijkstraFrom(t *testing.T) {
+	t.Parallel()
 	for _, test := range testgraphs.ShortestPathTests {
 		g := test.Graph()
 		for _, e := range test.Edges {
@@ -101,6 +102,7 @@ type incremental struct {
 }
 
 func TestDijkstraAllPaths(t *testing.T) {
+	t.Parallel()
 	for _, test := range testgraphs.ShortestPathTests {
 		g := test.Graph()
 		for _, e := range test.Edges {
@@ -197,6 +199,7 @@ func TestDijkstraAllPaths(t *testing.T) {
 }
 
 func TestAllShortestAbsentNode(t *testing.T) {
+	t.Parallel()
 	g := simple.NewUndirectedGraph()
 	g.SetEdge(simple.Edge{F: simple.Node(1), T: simple.Node(2)})
 	paths := DijkstraAllPaths(g)

@@ -16,6 +16,7 @@ import (
 )
 
 func TestJohnsonAllPaths(t *testing.T) {
+	t.Parallel()
 	for _, test := range testgraphs.ShortestPathTests {
 		g := test.Graph()
 		for _, e := range test.Edges {

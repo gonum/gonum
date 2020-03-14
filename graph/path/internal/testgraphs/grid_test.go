@@ -24,6 +24,7 @@ type node int64
 func (n node) ID() int64 { return int64(n) }
 
 func TestGrid(t *testing.T) {
+	t.Parallel()
 	g := NewGrid(4, 4, false)
 
 	got := g.String()

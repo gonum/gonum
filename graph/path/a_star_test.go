@@ -125,6 +125,7 @@ var aStarTests = []struct {
 }
 
 func TestAStar(t *testing.T) {
+	t.Parallel()
 	for _, test := range aStarTests {
 		pt, _ := AStar(simple.Node(test.s), simple.Node(test.t), test.g, test.heuristic)
 
@@ -153,6 +154,7 @@ func TestAStar(t *testing.T) {
 }
 
 func TestExhaustiveAStar(t *testing.T) {
+	t.Parallel()
 	g := simple.NewWeightedUndirectedGraph(0, math.Inf(1))
 	nodes := []locatedNode{
 		{id: 1, x: 0, y: 6},
@@ -244,6 +246,7 @@ func isMonotonic(g UndirectedWeightLister, h Heuristic) (ok bool, at graph.Edge,
 }
 
 func TestAStarNullHeuristic(t *testing.T) {
+	t.Parallel()
 	for _, test := range testgraphs.ShortestPathTests {
 		g := test.Graph()
 		for _, e := range test.Edges {

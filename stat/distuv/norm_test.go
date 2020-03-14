@@ -15,6 +15,7 @@ import (
 
 // TestNormalProbs tests LogProb, Prob, CumProb, and Quantile
 func TestNormalProbs(t *testing.T) {
+	t.Parallel()
 	pts := []univariateProbPoint{
 		{
 			loc:     0,
@@ -85,6 +86,7 @@ func TestNormalProbs(t *testing.T) {
 }
 
 func TestNormal(t *testing.T) {
+	t.Parallel()
 	src := rand.New(rand.NewSource(1))
 	for i, dist := range []Normal{
 		{Mu: 0, Sigma: 3, Src: src},
@@ -117,10 +119,12 @@ func testNormal(t *testing.T, dist Normal, i int) {
 }
 
 func TestNormFitPrior(t *testing.T) {
+	t.Parallel()
 	testConjugateUpdate(t, func() ConjugateUpdater { return &Normal{Mu: -10, Sigma: 6} })
 }
 
 func TestNormScore(t *testing.T) {
+	t.Parallel()
 	for _, test := range []*Normal{
 		{
 			Mu:    0,
@@ -136,6 +140,7 @@ func TestNormScore(t *testing.T) {
 }
 
 func TestNormalQuantile(t *testing.T) {
+	t.Parallel()
 	// Values from https://www.johndcook.com/blog/normal_cdf_inverse/
 	p := []float64{
 		0.0000001,
@@ -182,6 +187,7 @@ func TestNormalQuantile(t *testing.T) {
 }
 
 func TestNormFitPanic(t *testing.T) {
+	t.Parallel()
 	n := Normal{Mu: 0, Sigma: 1}
 	defer func() {
 		r := recover()
@@ -206,6 +212,7 @@ func BenchmarkNormalQuantile(b *testing.B) {
 
 // See https://github.com/gonum/gonum/issues/577 for details.
 func TestNormalIssue577(t *testing.T) {
+	t.Parallel()
 	x := -36.0
 	max := 1.e-282
 	cdf := Normal{Mu: 0, Sigma: 1}.CDF(x)

@@ -14,6 +14,7 @@ import (
 )
 
 func TestChiSquaredProb(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		x, k, want float64
 	}{
@@ -29,6 +30,7 @@ func TestChiSquaredProb(t *testing.T) {
 }
 
 func TestChiSquaredCDF(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		x, k, want float64
 	}{
@@ -52,6 +54,7 @@ func TestChiSquaredCDF(t *testing.T) {
 }
 
 func TestChiSquared(t *testing.T) {
+	t.Parallel()
 	src := rand.New(rand.NewSource(1))
 	for i, b := range []ChiSquared{
 		{3, src},

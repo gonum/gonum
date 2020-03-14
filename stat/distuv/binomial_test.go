@@ -14,6 +14,7 @@ import (
 )
 
 func TestBinomialProb(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-10
 	for i, tt := range []struct {
 		k    float64
@@ -66,6 +67,7 @@ func TestBinomialProb(t *testing.T) {
 }
 
 func TestBinomialCDF(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-10
 	for i, tt := range []struct {
 		k    float64
@@ -107,6 +109,7 @@ func TestBinomialCDF(t *testing.T) {
 }
 
 func TestBinomial(t *testing.T) {
+	t.Parallel()
 	src := rand.New(rand.NewSource(1))
 	for i, b := range []Binomial{
 		{100, 0.5, src},

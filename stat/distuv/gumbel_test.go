@@ -15,6 +15,7 @@ import (
 )
 
 func TestGumbelRightProbCDF(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		x, mu, beta, wantProb, wantCDF float64
 	}{
@@ -41,6 +42,7 @@ func TestGumbelRightProbCDF(t *testing.T) {
 }
 
 func TestGumbelRight(t *testing.T) {
+	t.Parallel()
 	src := rand.New(rand.NewSource(1))
 	for i, b := range []GumbelRight{
 		{0, 1, src},

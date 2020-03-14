@@ -14,6 +14,7 @@ import (
 )
 
 func TestBhattacharyyaBeta(t *testing.T) {
+	t.Parallel()
 	rnd := rand.New(rand.NewSource(1))
 	for cas, test := range []struct {
 		a, b    Beta
@@ -54,6 +55,7 @@ func TestBhattacharyyaBeta(t *testing.T) {
 }
 
 func TestBhattacharyyaNormal(t *testing.T) {
+	t.Parallel()
 	rnd := rand.New(rand.NewSource(1))
 	for cas, test := range []struct {
 		a, b    Normal
@@ -109,6 +111,7 @@ func bhattacharyyaSample(samples int, l RandLogProber, r LogProber) float64 {
 }
 
 func TestKullbackLeiblerBeta(t *testing.T) {
+	t.Parallel()
 	rnd := rand.New(rand.NewSource(1))
 	for cas, test := range []struct {
 		a, b    Beta
@@ -144,6 +147,7 @@ func TestKullbackLeiblerBeta(t *testing.T) {
 }
 
 func TestKullbackLeiblerNormal(t *testing.T) {
+	t.Parallel()
 	rnd := rand.New(rand.NewSource(1))
 	for cas, test := range []struct {
 		a, b    Normal

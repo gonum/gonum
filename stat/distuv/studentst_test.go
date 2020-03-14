@@ -15,6 +15,7 @@ import (
 )
 
 func TestStudentsTProb(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		x, mu, sigma, nu, want float64
 	}{
@@ -33,6 +34,7 @@ func TestStudentsTProb(t *testing.T) {
 }
 
 func TestStudentsT(t *testing.T) {
+	t.Parallel()
 	src := rand.New(rand.NewSource(1))
 	for i, b := range []StudentsT{
 		{0, 1, 3.3, src},
@@ -65,6 +67,7 @@ func testStudentsT(t *testing.T, c StudentsT, i int) {
 }
 
 func TestStudentsTQuantile(t *testing.T) {
+	t.Parallel()
 	nSteps := 101
 	probs := make([]float64, nSteps)
 	floats.Span(probs, 0, 1)

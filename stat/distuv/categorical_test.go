@@ -14,6 +14,7 @@ import (
 )
 
 func TestCategoricalProb(t *testing.T) {
+	t.Parallel()
 	for _, test := range [][]float64{
 		{1, 2, 3, 0},
 	} {
@@ -42,6 +43,7 @@ func TestCategoricalProb(t *testing.T) {
 }
 
 func TestCategoricalRand(t *testing.T) {
+	t.Parallel()
 	for _, test := range [][]float64{
 		{1, 2, 3, 0},
 	} {
@@ -117,6 +119,7 @@ func samedDistCategorical(dist Categorical, counts, probs []float64, tol float64
 }
 
 func TestCategoricalCDF(t *testing.T) {
+	t.Parallel()
 	for _, test := range [][]float64{
 		{1, 2, 3, 0, 4},
 	} {
@@ -145,6 +148,7 @@ func TestCategoricalCDF(t *testing.T) {
 }
 
 func TestCategoricalEntropy(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		weights []float64
 		entropy float64
@@ -171,6 +175,7 @@ func TestCategoricalEntropy(t *testing.T) {
 }
 
 func TestCategoricalMean(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		weights []float64
 		mean    float64

@@ -12,6 +12,7 @@ import (
 )
 
 func TestLognormal(t *testing.T) {
+	t.Parallel()
 	src := rand.New(rand.NewSource(1))
 	for i, dist := range []LogNormal{
 		{Mu: 0.1, Sigma: 0.3, Src: src},
@@ -40,6 +41,7 @@ func TestLognormal(t *testing.T) {
 
 // See https://github.com/gonum/gonum/issues/577 for details.
 func TestLognormalIssue577(t *testing.T) {
+	t.Parallel()
 	x := 1.0e-16
 	max := 1.0e-295
 	cdf := LogNormal{Mu: 0, Sigma: 1}.CDF(x)

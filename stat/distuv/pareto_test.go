@@ -13,6 +13,7 @@ import (
 )
 
 func TestParetoProb(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		x, xm, alpha, want float64
 	}{
@@ -60,6 +61,7 @@ func TestParetoProb(t *testing.T) {
 }
 
 func TestParetoCDF(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		x, xm, alpha, want float64
 	}{
@@ -137,6 +139,7 @@ func TestParetoCDF(t *testing.T) {
 }
 
 func TestPareto(t *testing.T) {
+	t.Parallel()
 	src := rand.New(rand.NewSource(1))
 	for i, p := range []Pareto{
 		{1, 10, src},

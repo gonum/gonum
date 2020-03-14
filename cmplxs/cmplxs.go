@@ -712,7 +712,6 @@ func Rad(s []float64) {
 	for i, v := range s {
 		s[i] = v * math.Pi / 180
 	}
-	return
 }
 
 // RadTo converts degrees to radians for the elements of s and stores in dst.

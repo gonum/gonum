@@ -15,6 +15,7 @@ import (
 )
 
 func TestNewDiagDense(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		data  []float64
 		n     int
@@ -59,6 +60,7 @@ func TestNewDiagDense(t *testing.T) {
 }
 
 func TestDiagDenseZero(t *testing.T) {
+	t.Parallel()
 	// Elements that equal 1 should be set to zero, elements that equal -1
 	// should remain unchanged.
 	for _, test := range []*DiagDense{
@@ -91,6 +93,7 @@ func TestDiagDenseZero(t *testing.T) {
 }
 
 func TestDiagonalStride(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		diag  *DiagDense
 		dense *Dense
@@ -157,6 +160,7 @@ func TestDiagonalStride(t *testing.T) {
 }
 
 func TestDiagFrom(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		mat  Matrix
 		want *Dense
@@ -425,6 +429,7 @@ func testDiagView(t *testing.T, cas int, test diagDenseViewer) {
 }
 
 func TestDiagonalAtSet(t *testing.T) {
+	t.Parallel()
 	for _, n := range []int{1, 3, 8} {
 		for _, nilstart := range []bool{true, false} {
 			var diag *DiagDense

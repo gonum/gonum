@@ -13,6 +13,7 @@ import (
 )
 
 func TestInner(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		x []float64
 		y []float64
@@ -92,6 +93,7 @@ func TestInner(t *testing.T) {
 }
 
 func TestInnerSym(t *testing.T) {
+	t.Parallel()
 	for _, inc := range []struct{ x, y int }{
 		{1, 1},
 		{1, 2},

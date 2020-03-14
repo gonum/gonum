@@ -60,6 +60,7 @@ func eye(n int) *Dense {
 }
 
 func TestCol(t *testing.T) {
+	t.Parallel()
 	for id, af := range [][][]float64{
 		{
 			{1, 2, 3},
@@ -133,6 +134,7 @@ func TestCol(t *testing.T) {
 }
 
 func TestRow(t *testing.T) {
+	t.Parallel()
 	for id, af := range [][][]float64{
 		{
 			{1, 2, 3},
@@ -201,6 +203,7 @@ func TestRow(t *testing.T) {
 }
 
 func TestCond(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		a       *Dense
 		condOne float64
@@ -290,6 +293,7 @@ func TestCond(t *testing.T) {
 }
 
 func TestDet(t *testing.T) {
+	t.Parallel()
 	for c, test := range []struct {
 		a   *Dense
 		ans float64
@@ -411,6 +415,7 @@ func (v *rawVector) RawVector() blas64.Vector {
 }
 
 func TestDot(t *testing.T) {
+	t.Parallel()
 	f := func(a, b Matrix) interface{} {
 		return Dot(a.(Vector), b.(Vector))
 	}
@@ -432,6 +437,7 @@ func TestDot(t *testing.T) {
 }
 
 func TestEqual(t *testing.T) {
+	t.Parallel()
 	f := func(a, b Matrix) interface{} {
 		return Equal(a, b)
 	}
@@ -442,6 +448,7 @@ func TestEqual(t *testing.T) {
 }
 
 func TestMax(t *testing.T) {
+	t.Parallel()
 	// A direct test of Max with *Dense arguments is in TestNewDense.
 	f := func(a Matrix) interface{} {
 		return Max(a)
@@ -453,6 +460,7 @@ func TestMax(t *testing.T) {
 }
 
 func TestMin(t *testing.T) {
+	t.Parallel()
 	// A direct test of Min with *Dense arguments is in TestNewDense.
 	f := func(a Matrix) interface{} {
 		return Min(a)
@@ -464,6 +472,7 @@ func TestMin(t *testing.T) {
 }
 
 func TestNorm(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		a    [][]float64
 		ord  float64
@@ -520,6 +529,7 @@ func TestNorm(t *testing.T) {
 }
 
 func TestNormZero(t *testing.T) {
+	t.Parallel()
 	for _, a := range []Matrix{
 		&Dense{},
 		&SymDense{},
@@ -542,6 +552,7 @@ func TestNormZero(t *testing.T) {
 }
 
 func TestSum(t *testing.T) {
+	t.Parallel()
 	f := func(a Matrix) interface{} {
 		return Sum(a)
 	}
@@ -552,6 +563,7 @@ func TestSum(t *testing.T) {
 }
 
 func TestTrace(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		a     *Dense
 		trace float64
@@ -576,6 +588,7 @@ func TestTrace(t *testing.T) {
 }
 
 func TestTracer(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		a    Tracer
 		want float64
@@ -617,6 +630,7 @@ func TestTracer(t *testing.T) {
 }
 
 func TestDoer(t *testing.T) {
+	t.Parallel()
 	type MatrixDoer interface {
 		Matrix
 		NonZeroDoer
@@ -708,6 +722,7 @@ func TestDoer(t *testing.T) {
 }
 
 func TestMulVecToer(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-14
 
 	rnd := rand.New(rand.NewSource(1))

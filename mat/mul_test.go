@@ -16,6 +16,7 @@ import (
 
 // TODO: Need to add tests where one is overwritten.
 func TestMulTypes(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		ar     int
 		ac     int

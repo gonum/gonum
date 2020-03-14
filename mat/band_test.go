@@ -12,6 +12,7 @@ import (
 )
 
 func TestNewBand(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		data   []float64
 		r, c   int
@@ -159,6 +160,7 @@ func TestNewBand(t *testing.T) {
 }
 
 func TestNewDiagonalRect(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		data  []float64
 		r, c  int
@@ -249,6 +251,7 @@ func TestNewDiagonalRect(t *testing.T) {
 }
 
 func TestBandDenseZero(t *testing.T) {
+	t.Parallel()
 	// Elements that equal 1 should be set to zero, elements that equal -1
 	// should remain unchanged.
 	for _, test := range []*BandDense{
@@ -302,6 +305,7 @@ func TestBandDenseZero(t *testing.T) {
 }
 
 func TestBandDiagView(t *testing.T) {
+	t.Parallel()
 	for cas, test := range []*BandDense{
 		NewBandDense(1, 1, 0, 0, []float64{1}),
 		NewBandDense(6, 6, 1, 2, []float64{
@@ -326,6 +330,7 @@ func TestBandDiagView(t *testing.T) {
 }
 
 func TestBandAtSet(t *testing.T) {
+	t.Parallel()
 	// 2  3  4  0  0  0
 	// 5  6  7  8  0  0
 	// 0  9 10 11 12  0

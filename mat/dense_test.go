@@ -26,6 +26,7 @@ func asBasicTriBanded(t *TriBandDense) TriBanded { return (*basicTriBanded)(t) }
 func asBasicDiagonal(d *DiagDense) Diagonal      { return (*basicDiagonal)(d) }
 
 func TestNewDense(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		a          []float64
 		rows, cols int
@@ -168,6 +169,7 @@ func TestNewDense(t *testing.T) {
 }
 
 func TestDenseAtSet(t *testing.T) {
+	t.Parallel()
 	for test, af := range [][][]float64{
 		{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}, // even
 		{{1, 2}, {4, 5}, {7, 8}},          // wide
@@ -221,6 +223,7 @@ func TestDenseAtSet(t *testing.T) {
 }
 
 func TestDenseSetRowColumn(t *testing.T) {
+	t.Parallel()
 	for _, as := range [][][]float64{
 		{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}},
 		{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}},
@@ -259,6 +262,7 @@ func TestDenseSetRowColumn(t *testing.T) {
 }
 
 func TestDenseZero(t *testing.T) {
+	t.Parallel()
 	// Elements that equal 1 should be set to zero, elements that equal -1
 	// should remain unchanged.
 	for _, test := range []*Dense{
@@ -291,6 +295,7 @@ func TestDenseZero(t *testing.T) {
 }
 
 func TestDenseRowColView(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		mat [][]float64
 	}{
@@ -394,6 +399,7 @@ func TestDenseRowColView(t *testing.T) {
 }
 
 func TestDenseDiagView(t *testing.T) {
+	t.Parallel()
 	for cas, test := range []*Dense{
 		NewDense(1, 1, []float64{1}),
 		NewDense(2, 2, []float64{1, 2, 3, 4}),
@@ -414,6 +420,7 @@ func TestDenseDiagView(t *testing.T) {
 }
 
 func TestDenseGrow(t *testing.T) {
+	t.Parallel()
 	m := &Dense{}
 	m = m.Grow(10, 10).(*Dense)
 	rows, cols := m.Dims()
@@ -469,6 +476,7 @@ func TestDenseGrow(t *testing.T) {
 }
 
 func TestDenseAdd(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		a, b, r [][]float64
 	}{
@@ -556,6 +564,7 @@ func TestDenseAdd(t *testing.T) {
 }
 
 func TestDenseSub(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		a, b, r [][]float64
 	}{
@@ -643,6 +652,7 @@ func TestDenseSub(t *testing.T) {
 }
 
 func TestDenseMulElem(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		a, b, r [][]float64
 	}{
@@ -746,6 +756,7 @@ func (m *Dense) same(b Matrix) bool {
 }
 
 func TestDenseDivElem(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		a, b, r [][]float64
 	}{
@@ -833,6 +844,7 @@ func TestDenseDivElem(t *testing.T) {
 }
 
 func TestDenseMul(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		a, b, r [][]float64
 	}{
@@ -947,6 +959,7 @@ func randDense(size int, rho float64, rnd func() float64) (*Dense, error) {
 }
 
 func TestDenseExp(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		a    [][]float64
 		want [][]float64
@@ -1001,6 +1014,7 @@ func TestDenseExp(t *testing.T) {
 }
 
 func TestDensePow(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		a    [][]float64
 		n    int
@@ -1088,6 +1102,7 @@ func TestDensePow(t *testing.T) {
 }
 
 func TestDenseKronecker(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		a, b Matrix
 		want *Dense
@@ -1188,6 +1203,7 @@ func TestDenseKronecker(t *testing.T) {
 }
 
 func TestDenseScale(t *testing.T) {
+	t.Parallel()
 	for _, f := range []float64{0.5, 1, 3} {
 		method := func(receiver, a Matrix) {
 			type Scaler interface {
@@ -1204,6 +1220,7 @@ func TestDenseScale(t *testing.T) {
 }
 
 func TestDensePowN(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		a   [][]float64
 		mod func(*Dense)
@@ -1244,6 +1261,7 @@ func (m *Dense) iterativePow(a Matrix, n int) {
 }
 
 func TestDenseCloneT(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		a, want [][]float64
 	}{
@@ -1291,6 +1309,7 @@ func TestDenseCloneT(t *testing.T) {
 }
 
 func TestDenseCopyT(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		a, want [][]float64
 	}{
@@ -1340,6 +1359,7 @@ func TestDenseCopyT(t *testing.T) {
 }
 
 func TestDenseCopyDenseAlias(t *testing.T) {
+	t.Parallel()
 	for _, trans := range []bool{false, true} {
 		for di := 0; di < 2; di++ {
 			for dj := 0; dj < 2; dj++ {
@@ -1378,6 +1398,7 @@ func TestDenseCopyDenseAlias(t *testing.T) {
 }
 
 func TestDenseCopyVecDenseAlias(t *testing.T) {
+	t.Parallel()
 	for _, horiz := range []bool{false, true} {
 		for do := 0; do < 2; do++ {
 			for di := 0; di < 3; di++ {
@@ -1420,6 +1441,7 @@ func TestDenseCopyVecDenseAlias(t *testing.T) {
 func identity(r, c int, v float64) float64 { return v }
 
 func TestDenseApply(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		a, want [][]float64
 		fn      func(r, c int, v float64) float64
@@ -1520,6 +1542,7 @@ func TestDenseApply(t *testing.T) {
 }
 
 func TestDenseClone(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		a    [][]float64
 		i, j int
@@ -1550,6 +1573,7 @@ func TestDenseClone(t *testing.T) {
 
 // TODO(kortschak) Roll this into testOneInput when it exists.
 func TestDenseCopyPanic(t *testing.T) {
+	t.Parallel()
 	for _, a := range []*Dense{
 		{},
 		{mat: blas64.General{Rows: 1}},
@@ -1571,6 +1595,7 @@ func TestDenseCopyPanic(t *testing.T) {
 }
 
 func TestDenseStack(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		a, b, e [][]float64
 	}{
@@ -1615,6 +1640,7 @@ func TestDenseStack(t *testing.T) {
 }
 
 func TestDenseAugment(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		a, b, e [][]float64
 	}{
@@ -1659,6 +1685,7 @@ func TestDenseAugment(t *testing.T) {
 }
 
 func TestDenseRankOne(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		x     []float64
 		y     []float64
@@ -1737,6 +1764,7 @@ func TestDenseRankOne(t *testing.T) {
 }
 
 func TestDenseOuter(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		x []float64
 		y []float64
@@ -1803,6 +1831,7 @@ func TestDenseOuter(t *testing.T) {
 }
 
 func TestDenseInverse(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		a    Matrix
 		want Matrix // nil indicates that a is singular.
@@ -2177,12 +2206,14 @@ func denseMulTransBench(b *testing.B, size int, rho float64) {
 	}
 }
 
-func BenchmarkDenseMulTransDenseSym100Half(b *testing.B)        { denseMulTransSymBench(b, 100, 0.5) }
-func BenchmarkDenseMulTransDenseSym100Tenth(b *testing.B)       { denseMulTransSymBench(b, 100, 0.1) }
-func BenchmarkDenseMulTransDenseSym1000Half(b *testing.B)       { denseMulTransSymBench(b, 1000, 0.5) }
-func BenchmarkDenseMulTransDenseSym1000Tenth(b *testing.B)      { denseMulTransSymBench(b, 1000, 0.1) }
-func BenchmarkDenseMulTransDenseSym1000Hundredth(b *testing.B)  { denseMulTransSymBench(b, 1000, 0.01) }
-func BenchmarkDenseMulTransDenseSym1000Thousandth(b *testing.B) { denseMulTransSymBench(b, 1000, 0.001) }
+func BenchmarkDenseMulTransDenseSym100Half(b *testing.B)       { denseMulTransSymBench(b, 100, 0.5) }
+func BenchmarkDenseMulTransDenseSym100Tenth(b *testing.B)      { denseMulTransSymBench(b, 100, 0.1) }
+func BenchmarkDenseMulTransDenseSym1000Half(b *testing.B)      { denseMulTransSymBench(b, 1000, 0.5) }
+func BenchmarkDenseMulTransDenseSym1000Tenth(b *testing.B)     { denseMulTransSymBench(b, 1000, 0.1) }
+func BenchmarkDenseMulTransDenseSym1000Hundredth(b *testing.B) { denseMulTransSymBench(b, 1000, 0.01) }
+func BenchmarkDenseMulTransDenseSym1000Thousandth(b *testing.B) {
+	denseMulTransSymBench(b, 1000, 0.001)
+}
 func denseMulTransSymBench(b *testing.B, size int, rho float64) {
 	b.StopTimer()
 	a, _ := randDense(size, rho, rand.NormFloat64)

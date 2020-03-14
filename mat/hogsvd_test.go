@@ -11,6 +11,7 @@ import (
 )
 
 func TestHOGSVD(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-10
 	rnd := rand.New(rand.NewSource(1))
 	for cas, test := range []struct {

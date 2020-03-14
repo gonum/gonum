@@ -14,6 +14,7 @@ import (
 )
 
 func TestQR(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		m, n int
 	}{
@@ -72,6 +73,7 @@ func isOrthonormal(q *Dense, tol float64) bool {
 }
 
 func TestQRSolveTo(t *testing.T) {
+	t.Parallel()
 	for _, trans := range []bool{false, true} {
 		for _, test := range []struct {
 			m, n, bc int
@@ -133,6 +135,7 @@ func TestQRSolveTo(t *testing.T) {
 }
 
 func TestQRSolveVecTo(t *testing.T) {
+	t.Parallel()
 	for _, trans := range []bool{false, true} {
 		for _, test := range []struct {
 			m, n int
@@ -189,6 +192,7 @@ func TestQRSolveVecTo(t *testing.T) {
 }
 
 func TestQRSolveCondTo(t *testing.T) {
+	t.Parallel()
 	for _, test := range []*Dense{
 		NewDense(2, 2, []float64{1, 0, 0, 1e-20}),
 		NewDense(3, 2, []float64{1, 0, 0, 1e-20, 0, 0}),

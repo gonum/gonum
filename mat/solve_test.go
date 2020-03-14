@@ -11,6 +11,7 @@ import (
 )
 
 func TestSolve(t *testing.T) {
+	t.Parallel()
 	// Hand-coded cases.
 	for _, test := range []struct {
 		a         [][]float64
@@ -245,6 +246,7 @@ func TestSolve(t *testing.T) {
 }
 
 func TestSolveVec(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		m, n int
 	}{

@@ -11,6 +11,7 @@ import (
 )
 
 func TestDenseOverlaps(t *testing.T) {
+	t.Parallel()
 	type view struct {
 		i, j, r, c int
 		*Dense
@@ -91,6 +92,7 @@ func intervalsOverlap(a, b interval) bool {
 
 // See https://github.com/gonum/matrix/issues/359 for details.
 func TestIssue359(t *testing.T) {
+	t.Parallel()
 	for xi := 0; xi < 2; xi++ {
 		for xj := 0; xj < 2; xj++ {
 			for yi := 0; yi < 2; yi++ {

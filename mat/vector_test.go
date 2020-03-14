@@ -14,6 +14,7 @@ import (
 )
 
 func TestNewVecDense(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		n      int
 		data   []float64
@@ -57,6 +58,7 @@ func TestNewVecDense(t *testing.T) {
 }
 
 func TestCap(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		vector *VecDense
 		want   int
@@ -121,6 +123,7 @@ func TestCap(t *testing.T) {
 }
 
 func TestVecDenseAtSet(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		vector *VecDense
 	}{
@@ -182,6 +185,7 @@ func TestVecDenseAtSet(t *testing.T) {
 }
 
 func TestVecDenseZero(t *testing.T) {
+	t.Parallel()
 	// Elements that equal 1 should be set to zero, elements that equal -1
 	// should remain unchanged.
 	for _, test := range []*VecDense{
@@ -214,6 +218,7 @@ func TestVecDenseZero(t *testing.T) {
 }
 
 func TestVecDenseMul(t *testing.T) {
+	t.Parallel()
 	method := func(receiver, a, b Matrix) {
 		type mulVecer interface {
 			MulVec(a Matrix, b Vector)
@@ -237,6 +242,7 @@ func TestVecDenseMul(t *testing.T) {
 }
 
 func TestVecDenseScale(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		a     Vector
 		alpha float64
@@ -311,6 +317,7 @@ func TestVecDenseScale(t *testing.T) {
 }
 
 func TestCopyVec(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		src   *VecDense
 		dst   *VecDense
@@ -337,6 +344,7 @@ func TestCopyVec(t *testing.T) {
 }
 
 func TestVecDenseAddScaled(t *testing.T) {
+	t.Parallel()
 	for _, alpha := range []float64{0, 1, -1, 2.3, -2.3} {
 		method := func(receiver, a, b Matrix) {
 			type addScaledVecer interface {
@@ -355,6 +363,7 @@ func TestVecDenseAddScaled(t *testing.T) {
 }
 
 func TestVecDenseAdd(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		a, b Vector
 		want *VecDense
@@ -384,6 +393,7 @@ func TestVecDenseAdd(t *testing.T) {
 }
 
 func TestVecDenseSub(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		a, b Vector
 		want *VecDense
@@ -413,6 +423,7 @@ func TestVecDenseSub(t *testing.T) {
 }
 
 func TestVecDenseMulElem(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		a, b Vector
 		want *VecDense
@@ -442,6 +453,7 @@ func TestVecDenseMulElem(t *testing.T) {
 }
 
 func TestVecDenseDivElem(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		a, b Vector
 		want *VecDense

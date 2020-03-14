@@ -7,6 +7,7 @@ package mat
 import "testing"
 
 func TestCDenseNewAtSet(t *testing.T) {
+	t.Parallel()
 	for cas, test := range []struct {
 		a          []complex128
 		rows, cols int

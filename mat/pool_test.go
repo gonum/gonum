@@ -13,6 +13,7 @@ import (
 )
 
 func TestPool(t *testing.T) {
+	t.Parallel()
 	for i := 1; i < 10; i++ {
 		for j := 1; j < 10; j++ {
 			m := NewDense(i, j, nil)

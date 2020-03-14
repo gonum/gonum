@@ -14,6 +14,7 @@ import (
 )
 
 func TestEigen(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		a *Dense
 
@@ -131,6 +132,7 @@ func cmplxEqualTol(v1, v2 []complex128, tol float64) bool {
 }
 
 func TestSymEigen(t *testing.T) {
+	t.Parallel()
 	// Hand coded tests with results from lapack.
 	for _, test := range []struct {
 		mat *SymDense

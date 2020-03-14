@@ -58,6 +58,7 @@ func Panics(fun func()) (b bool) {
 }
 
 func TestAdd(t *testing.T) {
+	t.Parallel()
 	a := []float64{1, 2, 3}
 	b := []float64{4, 5, 6}
 	c := []float64{7, 8, 9}
@@ -79,6 +80,7 @@ func TestAdd(t *testing.T) {
 }
 
 func TestAddTo(t *testing.T) {
+	t.Parallel()
 	a := []float64{1, 2, 3}
 	b := []float64{4, 5, 6}
 	truth := []float64{5, 7, 9}
@@ -98,6 +100,7 @@ func TestAddTo(t *testing.T) {
 }
 
 func TestAddConst(t *testing.T) {
+	t.Parallel()
 	s := []float64{3, 4, 1, 7, 5}
 	c := 6.0
 	truth := []float64{9, 10, 7, 13, 11}
@@ -106,6 +109,7 @@ func TestAddConst(t *testing.T) {
 }
 
 func TestAddScaled(t *testing.T) {
+	t.Parallel()
 	s := []float64{3, 4, 1, 7, 5}
 	alpha := 6.0
 	dst := []float64{1, 2, 3, 4, 5}
@@ -124,6 +128,7 @@ func TestAddScaled(t *testing.T) {
 }
 
 func TestAddScaledTo(t *testing.T) {
+	t.Parallel()
 	s := []float64{3, 4, 1, 7, 5}
 	alpha := 6.0
 	y := []float64{1, 2, 3, 4, 5}
@@ -153,6 +158,7 @@ func TestAddScaledTo(t *testing.T) {
 }
 
 func TestArgsort(t *testing.T) {
+	t.Parallel()
 	s := []float64{3, 4, 1, 7, 5}
 	inds := make([]int, len(s))
 
@@ -177,6 +183,7 @@ func TestArgsort(t *testing.T) {
 }
 
 func TestCount(t *testing.T) {
+	t.Parallel()
 	s := []float64{3, 4, 1, 7, 5}
 	f := func(v float64) bool { return v > 3.5 }
 	truth := 3
@@ -187,6 +194,7 @@ func TestCount(t *testing.T) {
 }
 
 func TestCumProd(t *testing.T) {
+	t.Parallel()
 	s := []float64{3, 4, 1, 7, 5}
 	receiver := make([]float64, len(s))
 	result := CumProd(receiver, s)
@@ -209,6 +217,7 @@ func TestCumProd(t *testing.T) {
 }
 
 func TestCumSum(t *testing.T) {
+	t.Parallel()
 	s := []float64{3, 4, 1, 7, 5}
 	receiver := make([]float64, len(s))
 	result := CumSum(receiver, s)
@@ -231,6 +240,7 @@ func TestCumSum(t *testing.T) {
 }
 
 func TestDistance(t *testing.T) {
+	t.Parallel()
 	norms := []float64{1, 2, 4, math.Inf(1)}
 	slices := []struct {
 		s []float64
@@ -269,6 +279,7 @@ func TestDistance(t *testing.T) {
 }
 
 func TestDiv(t *testing.T) {
+	t.Parallel()
 	s1 := []float64{5, 12, 27}
 	s2 := []float64{1, 2, 3}
 	ans := []float64{5, 6, 9}
@@ -287,6 +298,7 @@ func TestDiv(t *testing.T) {
 }
 
 func TestDivTo(t *testing.T) {
+	t.Parallel()
 	s1 := []float64{5, 12, 27}
 	s1orig := []float64{5, 12, 27}
 	s2 := []float64{1, 2, 3}
@@ -325,6 +337,7 @@ func TestDivTo(t *testing.T) {
 }
 
 func TestDot(t *testing.T) {
+	t.Parallel()
 	s1 := []float64{1, 2, 3, 4}
 	s2 := []float64{-3, 4, 5, -6}
 	truth := -4.0
@@ -340,6 +353,7 @@ func TestDot(t *testing.T) {
 }
 
 func TestEquals(t *testing.T) {
+	t.Parallel()
 	s1 := []float64{1, 2, 3, 4}
 	s2 := []float64{1, 2, 3, 4}
 	if !Equal(s1, s2) {
@@ -355,6 +369,7 @@ func TestEquals(t *testing.T) {
 }
 
 func TestEqualApprox(t *testing.T) {
+	t.Parallel()
 	s1 := []float64{1, 2, 3, 4}
 	s2 := []float64{1, 2, 3, 4 + 1e-10}
 	if EqualApprox(s1, s2, 1e-13) {
@@ -377,6 +392,7 @@ func TestEqualApprox(t *testing.T) {
 }
 
 func TestEqualFunc(t *testing.T) {
+	t.Parallel()
 	s1 := []float64{1, 2, 3, 4}
 	s2 := []float64{1, 2, 3, 4}
 	eq := func(x, y float64) bool { return x == y }
@@ -393,6 +409,7 @@ func TestEqualFunc(t *testing.T) {
 }
 
 func TestEqualsRelative(t *testing.T) {
+	t.Parallel()
 	equalityTests := []struct {
 		a, b  float64
 		tol   float64
@@ -495,6 +512,7 @@ func nextAfterN(x, y float64, n int) float64 {
 }
 
 func TestEqualsULP(t *testing.T) {
+	t.Parallel()
 	if f := 67329.242; !EqualWithinULP(f, nextAfterN(f, math.Inf(1), 10), 10) {
 		t.Errorf("Equal values returned as unequal")
 	}
@@ -516,6 +534,7 @@ func TestEqualsULP(t *testing.T) {
 }
 
 func TestEqualLengths(t *testing.T) {
+	t.Parallel()
 	s1 := []float64{1, 2, 3, 4}
 	s2 := []float64{1, 2, 3, 4}
 	s3 := []float64{1, 2, 3}
@@ -546,6 +565,7 @@ func eqIntSlice(one, two []int) string {
 }
 
 func TestFind(t *testing.T) {
+	t.Parallel()
 	s := []float64{3, 4, 1, 7, 5}
 	f := func(v float64) bool { return v > 3.5 }
 	allTrueInds := []int{1, 3, 4}
@@ -605,6 +625,7 @@ func TestFind(t *testing.T) {
 }
 
 func TestHasNaN(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		s   []float64
 		ans bool
@@ -630,6 +651,7 @@ func TestHasNaN(t *testing.T) {
 }
 
 func TestLogSpan(t *testing.T) {
+	t.Parallel()
 	receiver1 := make([]float64, 6)
 	truth := []float64{0.001, 0.01, 0.1, 1, 10, 100}
 	receiver2 := LogSpan(receiver1, 0.001, 100)
@@ -657,6 +679,7 @@ func TestLogSpan(t *testing.T) {
 }
 
 func TestLogSumExp(t *testing.T) {
+	t.Parallel()
 	s := []float64{1, 2, 3, 4, 5}
 	val := LogSumExp(s)
 	// http://www.wolframalpha.com/input/?i=log%28exp%281%29+%2B+exp%282%29+%2B+exp%283%29+%2B+exp%284%29+%2B+exp%285%29%29
@@ -696,6 +719,7 @@ func TestLogSumExp(t *testing.T) {
 }
 
 func TestMaxAndIdx(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		in      []float64
 		wantIdx int
@@ -745,6 +769,7 @@ func TestMaxAndIdx(t *testing.T) {
 }
 
 func TestMinAndIdx(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		in      []float64
 		wantIdx int
@@ -794,6 +819,7 @@ func TestMinAndIdx(t *testing.T) {
 }
 
 func TestMul(t *testing.T) {
+	t.Parallel()
 	s1 := []float64{1, 2, 3}
 	s2 := []float64{1, 2, 3}
 	ans := []float64{1, 4, 9}
@@ -812,6 +838,7 @@ func TestMul(t *testing.T) {
 }
 
 func TestMulTo(t *testing.T) {
+	t.Parallel()
 	s1 := []float64{1, 2, 3}
 	s1orig := []float64{1, 2, 3}
 	s2 := []float64{1, 2, 3}
@@ -850,6 +877,7 @@ func TestMulTo(t *testing.T) {
 }
 
 func TestNaNWith(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		payload uint64
 		bits    uint64
@@ -879,6 +907,7 @@ func TestNaNWith(t *testing.T) {
 }
 
 func TestNaNPayload(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		f       float64
 		payload uint64
@@ -912,6 +941,7 @@ func TestNaNPayload(t *testing.T) {
 }
 
 func TestNearestIdx(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		in    []float64
 		query float64
@@ -1005,6 +1035,7 @@ func TestNearestIdx(t *testing.T) {
 }
 
 func TestNearestIdxForSpan(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		length int
 		lower  float64
@@ -1118,6 +1149,7 @@ func TestNearestIdxForSpan(t *testing.T) {
 }
 
 func TestNorm(t *testing.T) {
+	t.Parallel()
 	s := []float64{-1, -3.4, 5, -6}
 	val := Norm(s, math.Inf(1))
 	truth := 6.0
@@ -1146,6 +1178,7 @@ func TestNorm(t *testing.T) {
 }
 
 func TestProd(t *testing.T) {
+	t.Parallel()
 	s := []float64{}
 	val := Prod(s)
 	if val != 1 {
@@ -1159,6 +1192,7 @@ func TestProd(t *testing.T) {
 }
 
 func TestReverse(t *testing.T) {
+	t.Parallel()
 	for _, s := range [][]float64{
 		{0},
 		{1, 0},
@@ -1176,6 +1210,7 @@ func TestReverse(t *testing.T) {
 }
 
 func TestRound(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		x    float64
 		prec int
@@ -1239,6 +1274,7 @@ func TestRound(t *testing.T) {
 }
 
 func TestRoundEven(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		x    float64
 		prec int
@@ -1302,6 +1338,7 @@ func TestRoundEven(t *testing.T) {
 }
 
 func TestSame(t *testing.T) {
+	t.Parallel()
 	s1 := []float64{1, 2, 3, 4}
 	s2 := []float64{1, 2, 3, 4}
 	if !Same(s1, s2) {
@@ -1327,6 +1364,7 @@ func TestSame(t *testing.T) {
 }
 
 func TestScale(t *testing.T) {
+	t.Parallel()
 	s := []float64{3, 4, 1, 7, 5}
 	c := 5.0
 	truth := []float64{15, 20, 5, 35, 25}
@@ -1335,6 +1373,7 @@ func TestScale(t *testing.T) {
 }
 
 func TestScaleTo(t *testing.T) {
+	t.Parallel()
 	s := []float64{3, 4, 1, 7, 5}
 	sCopy := make([]float64, len(s))
 	copy(sCopy, s)
@@ -1351,6 +1390,7 @@ func TestScaleTo(t *testing.T) {
 }
 
 func TestSpan(t *testing.T) {
+	t.Parallel()
 	receiver1 := make([]float64, 5)
 	truth := []float64{1, 2, 3, 4, 5}
 	receiver2 := Span(receiver1, 1, 5)
@@ -1444,6 +1484,7 @@ func TestSpan(t *testing.T) {
 }
 
 func TestSub(t *testing.T) {
+	t.Parallel()
 	s := []float64{3, 4, 1, 7, 5}
 	v := []float64{1, 2, 3, 4, 5}
 	truth := []float64{2, 2, -2, 3, 0}
@@ -1456,6 +1497,7 @@ func TestSub(t *testing.T) {
 }
 
 func TestSubTo(t *testing.T) {
+	t.Parallel()
 	s := []float64{3, 4, 1, 7, 5}
 	v := []float64{1, 2, 3, 4, 5}
 	truth := []float64{2, 2, -2, 3, 0}
@@ -1476,6 +1518,7 @@ func TestSubTo(t *testing.T) {
 }
 
 func TestSum(t *testing.T) {
+	t.Parallel()
 	s := []float64{}
 	val := Sum(s)
 	if val != 0 {
@@ -1489,6 +1532,7 @@ func TestSum(t *testing.T) {
 }
 
 func TestWithin(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		s      []float64
 		v      float64

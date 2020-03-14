@@ -13,6 +13,7 @@ import (
 )
 
 func TestExponentialProb(t *testing.T) {
+	t.Parallel()
 	pts := []univariateProbPoint{
 		{
 			loc:     0,
@@ -43,10 +44,12 @@ func TestExponentialProb(t *testing.T) {
 }
 
 func TestExponentialFitPrior(t *testing.T) {
+	t.Parallel()
 	testConjugateUpdate(t, func() ConjugateUpdater { return &Exponential{Rate: 13.7} })
 }
 
 func TestExponential(t *testing.T) {
+	t.Parallel()
 	src := rand.New(rand.NewSource(1))
 	for i, dist := range []Exponential{
 		{Rate: 3, Src: src},
@@ -79,6 +82,7 @@ func testExponential(t *testing.T, dist Exponential, i int) {
 }
 
 func TestExponentialScore(t *testing.T) {
+	t.Parallel()
 	for _, test := range []*Exponential{
 		{
 			Rate: 1,
@@ -95,6 +99,7 @@ func TestExponentialScore(t *testing.T) {
 }
 
 func TestExponentialFitPanic(t *testing.T) {
+	t.Parallel()
 	e := Exponential{Rate: 2}
 	defer func() {
 		r := recover()

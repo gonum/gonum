@@ -13,6 +13,7 @@ import (
 )
 
 func TestHalfKStandardWeibullProb(t *testing.T) {
+	t.Parallel()
 	pts := []univariateProbPoint{
 		{
 			loc:     0,
@@ -43,6 +44,7 @@ func TestHalfKStandardWeibullProb(t *testing.T) {
 }
 
 func TestExponentialStandardWeibullProb(t *testing.T) {
+	t.Parallel()
 	pts := []univariateProbPoint{
 		{
 			loc:     0,
@@ -73,6 +75,7 @@ func TestExponentialStandardWeibullProb(t *testing.T) {
 }
 
 func TestRayleighStandardWeibullProb(t *testing.T) {
+	t.Parallel()
 	pts := []univariateProbPoint{
 		{
 			loc:     0,
@@ -103,6 +106,7 @@ func TestRayleighStandardWeibullProb(t *testing.T) {
 }
 
 func TestFiveKStandardWeibullProb(t *testing.T) {
+	t.Parallel()
 	pts := []univariateProbPoint{
 		{
 			loc:     0,
@@ -133,6 +137,7 @@ func TestFiveKStandardWeibullProb(t *testing.T) {
 }
 
 func TestScaledUpHalfKStandardWeibullProb(t *testing.T) {
+	t.Parallel()
 	pts := []univariateProbPoint{
 		{
 			loc:     0,
@@ -163,6 +168,7 @@ func TestScaledUpHalfKStandardWeibullProb(t *testing.T) {
 }
 
 func TestScaledDownHalfKStandardWeibullProb(t *testing.T) {
+	t.Parallel()
 	pts := []univariateProbPoint{
 		{
 			loc:     0,
@@ -193,6 +199,7 @@ func TestScaledDownHalfKStandardWeibullProb(t *testing.T) {
 }
 
 func TestWeibullScore(t *testing.T) {
+	t.Parallel()
 	for _, test := range []*Weibull{
 		{
 			K:      1,
@@ -212,6 +219,7 @@ func TestWeibullScore(t *testing.T) {
 }
 
 func TestWeibull(t *testing.T) {
+	t.Parallel()
 	src := rand.New(rand.NewSource(1))
 	for i, dist := range []Weibull{
 		{K: 1, Lambda: 1, Src: src},

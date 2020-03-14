@@ -14,6 +14,7 @@ import (
 )
 
 func TestInverseGamma(t *testing.T) {
+	t.Parallel()
 	// Values extracted from a comparison with scipy
 	for _, test := range []struct {
 		x, alpha, want float64

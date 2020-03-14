@@ -14,6 +14,7 @@ import (
 )
 
 func TestPoissonProb(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-10
 	for i, tt := range []struct {
 		k      float64
@@ -62,6 +63,7 @@ func TestPoissonProb(t *testing.T) {
 }
 
 func TestPoissonCDF(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-10
 	for i, tt := range []struct {
 		k      float64
@@ -99,6 +101,7 @@ func TestPoissonCDF(t *testing.T) {
 }
 
 func TestPoisson(t *testing.T) {
+	t.Parallel()
 	src := rand.New(rand.NewSource(1))
 	for i, b := range []Poisson{
 		{100, src},

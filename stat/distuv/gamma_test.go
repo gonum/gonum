@@ -14,6 +14,7 @@ import (
 )
 
 func TestGamma(t *testing.T) {
+	t.Parallel()
 	// Values a comparison with scipy
 	for _, test := range []struct {
 		x, alpha, want float64

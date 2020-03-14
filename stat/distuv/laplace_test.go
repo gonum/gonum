@@ -14,6 +14,7 @@ import (
 )
 
 func TestLaplaceProb(t *testing.T) {
+	t.Parallel()
 	pts := []univariateProbPoint{
 		{
 			loc:     0,
@@ -62,6 +63,7 @@ func TestLaplaceProb(t *testing.T) {
 }
 
 func TestLaplace(t *testing.T) {
+	t.Parallel()
 	src := rand.New(rand.NewSource(1))
 	for i, dist := range []Laplace{
 		{Mu: 0, Scale: 3, Src: src},
@@ -94,6 +96,7 @@ func testLaplace(t *testing.T, dist Laplace, i int) {
 }
 
 func TestLaplaceFit(t *testing.T) {
+	t.Parallel()
 	cases := []struct {
 		samples   []float64
 		weights   []float64
@@ -132,6 +135,7 @@ func TestLaplaceFit(t *testing.T) {
 }
 
 func TestLaplaceFitRandomSamples(t *testing.T) {
+	t.Parallel()
 
 	nSamples := 100000
 	src := rand.New(rand.NewSource(1))

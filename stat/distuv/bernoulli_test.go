@@ -12,6 +12,7 @@ import (
 )
 
 func TestBernouilli(t *testing.T) {
+	t.Parallel()
 	src := rand.New(rand.NewSource(1))
 	for i, dist := range []Bernoulli{
 		{P: 0.5, Src: src},

@@ -13,6 +13,7 @@ import (
 )
 
 func TestTriangleConstraint(t *testing.T) {
+	t.Parallel()
 	defer func() {
 		if r := recover(); r == nil {
 			t.Errorf("The constraints were violated, but not caught")
@@ -26,6 +27,7 @@ func TestTriangleConstraint(t *testing.T) {
 }
 
 func TestTriangle(t *testing.T) {
+	t.Parallel()
 	src := rand.New(rand.NewSource(1))
 	for i, test := range []struct {
 		a, b, c float64
@@ -73,6 +75,7 @@ func TestTriangle(t *testing.T) {
 }
 
 func TestTriangleProb(t *testing.T) {
+	t.Parallel()
 	pts := []univariateProbPoint{
 		{
 			loc:     0.5,

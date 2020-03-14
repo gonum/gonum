@@ -14,6 +14,7 @@ import (
 )
 
 func TestFProb(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		x, d1, d2, want float64
 	}{
@@ -37,6 +38,7 @@ func TestFProb(t *testing.T) {
 }
 
 func TestFCDF(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		x, d1, d2, want float64
 	}{
@@ -60,6 +62,7 @@ func TestFCDF(t *testing.T) {
 }
 
 func TestF(t *testing.T) {
+	t.Parallel()
 	src := rand.New(rand.NewSource(1))
 	for i, b := range []F{
 		{13, 16, src},

@@ -15,6 +15,7 @@ import (
 )
 
 func TestBetaProb(t *testing.T) {
+	t.Parallel()
 	// Values a comparison with scipy
 	for _, test := range []struct {
 		x, alpha, beta, want float64
@@ -33,6 +34,7 @@ func TestBetaProb(t *testing.T) {
 }
 
 func TestBetaRand(t *testing.T) {
+	t.Parallel()
 	src := rand.New(rand.NewSource(1))
 	for i, b := range []Beta{
 		{Alpha: 0.5, Beta: 0.5, Src: src},

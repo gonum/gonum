@@ -13,6 +13,7 @@ import (
 )
 
 func TestUniformProb(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		min, max, x, want float64
 	}{
@@ -30,6 +31,7 @@ func TestUniformProb(t *testing.T) {
 }
 
 func TestUniformCDF(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		min, max, x, want float64
 	}{
@@ -47,6 +49,7 @@ func TestUniformCDF(t *testing.T) {
 }
 
 func TestUniform(t *testing.T) {
+	t.Parallel()
 	src := rand.New(rand.NewSource(1))
 	for i, b := range []Uniform{
 		{1, 2, src},

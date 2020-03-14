@@ -13,6 +13,7 @@ import (
 )
 
 func TestFixed(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		f        func(float64) float64
 		min, max float64
@@ -85,6 +86,7 @@ func (l legendreNonSingle) FixedLocations(x, weight []float64, min, max float64)
 }
 
 func TestFixedNonSingle(t *testing.T) {
+	t.Parallel()
 	// TODO(btracey): Add tests with infinite bounds when we have native support
 	// for indefinite integrals.
 	for i, test := range []struct {

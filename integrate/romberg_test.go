@@ -13,6 +13,7 @@ import (
 )
 
 func TestRomberg(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		integral testquad.Integral
 		n        int

@@ -94,7 +94,6 @@ func Conj(s []complex128) {
 	for i, v := range s {
 		s[i] = cmplx.Conj(v)
 	}
-	return
 }
 
 // ConjTo generates cmplx.Conj, element-wise, for the elements of s, and stores in dst.
@@ -154,7 +153,6 @@ func Deg(s []float64) {
 	for i, v := range s {
 		s[i] = v * 180 / math.Pi
 	}
-	return
 }
 
 // DegTo converts radians to degrees, element-wise, for the elements of s, and stores in dst.
@@ -449,10 +447,7 @@ func Hermitian(r, c int, s []complex128) {
 			dst[i+r*j] = cmplx.Conj(s[i*c+j])
 		}
 	}
-	for i, v := range dst {
-		s[i] = v
-	}
-	return
+	copy(s, dst)
 }
 
 // HermitianTo generates the hermitian (conjugate transpose) of s with r rows and c cols,

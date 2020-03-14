@@ -38,6 +38,7 @@ var infTests = []struct {
 }
 
 func TestIsInf(t *testing.T) {
+	t.Parallel()
 	for _, test := range infTests {
 		got := IsInf(test.q)
 		if got != test.want {

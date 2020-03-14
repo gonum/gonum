@@ -69,6 +69,7 @@ var arithTests = []struct {
 }
 
 func TestArithmetic(t *testing.T) {
+	t.Parallel()
 	for _, test := range arithTests {
 		gotAdd := Add(test.x, test.y)
 		if gotAdd != test.wantAdd {
@@ -111,6 +112,7 @@ var formatTests = []struct {
 }
 
 func TestFormat(t *testing.T) {
+	t.Parallel()
 	for _, test := range formatTests {
 		got := fmt.Sprintf(test.format, test.q)
 		if got != test.want {
@@ -172,6 +174,7 @@ var parseTests = []struct {
 }
 
 func TestParse(t *testing.T) {
+	t.Parallel()
 	for _, test := range parseTests {
 		got, err := Parse(test.s)
 		if err != test.wantErr {

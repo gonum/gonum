@@ -23,6 +23,7 @@ var absTests = []struct {
 }
 
 func TestAbs(t *testing.T) {
+	t.Parallel()
 	for _, test := range absTests {
 		got := Abs(test.q)
 		if math.IsNaN(test.want) {

@@ -34,6 +34,7 @@ var formatTests = []struct {
 }
 
 func TestFormat(t *testing.T) {
+	t.Parallel()
 	for _, test := range formatTests {
 		got := fmt.Sprintf(test.format, test.h)
 		if got != test.want {
@@ -288,6 +289,7 @@ var hyperdualTests = []struct {
 }
 
 func TestHyperdual(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-14
 	for _, test := range hyperdualTests {
 		for _, x := range test.x {
@@ -454,6 +456,7 @@ var powRealTests = []struct {
 }
 
 func TestPowReal(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-15
 	for _, test := range powRealTests {
 		got := PowReal(test.d, test.p)

@@ -140,6 +140,7 @@ var gausWindowTests = []struct {
 }
 
 func TestWindows(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-6
 
 	for _, test := range windowTests {
@@ -167,6 +168,7 @@ func TestWindows(t *testing.T) {
 }
 
 func TestGausWindows(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-6
 
 	for _, test := range gausWindowTests {
@@ -196,6 +198,7 @@ func TestGausWindows(t *testing.T) {
 }
 
 func TestWindowsComplex(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-6
 
 	for _, test := range windowTests {
@@ -223,6 +226,7 @@ func TestWindowsComplex(t *testing.T) {
 }
 
 func TestGausWindowComplex(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-6
 
 	for _, test := range gausWindowTests {

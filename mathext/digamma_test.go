@@ -14,6 +14,7 @@ import (
 var result float64
 
 func TestDigamma(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-10
 
 	for i, test := range []struct {

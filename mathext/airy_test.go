@@ -10,6 +10,7 @@ import (
 )
 
 func TestAiry(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		z, ans complex128
 	}{

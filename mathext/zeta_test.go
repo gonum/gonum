@@ -10,6 +10,7 @@ import (
 )
 
 func TestZeta(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		x, q, want float64
 	}{

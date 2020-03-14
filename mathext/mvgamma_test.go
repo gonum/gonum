@@ -10,6 +10,7 @@ import (
 )
 
 func TestMvLgamma(t *testing.T) {
+	t.Parallel()
 	// Values compared with scipy
 	for i, test := range []struct {
 		v   float64

@@ -12,6 +12,7 @@ import (
 // TestCompleteKE checks if the Legendre's relation for m=0.0001(0.0001)0.9999
 // is satisfied with accuracy 1e-14.
 func TestCompleteKE(t *testing.T) {
+	t.Parallel()
 	const tol = 1.0e-14
 
 	for m := 1; m <= 9999; m++ {
@@ -34,6 +35,7 @@ func TestCompleteKE(t *testing.T) {
 //	K(m) = B(m) + D(m),
 //	E(m) = B(m) + (1-m)D(m).
 func TestCompleteBD(t *testing.T) {
+	t.Parallel()
 	const tol = 1.0e-14
 
 	for m := 1; m <= 9999; m++ {

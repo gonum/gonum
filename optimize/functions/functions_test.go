@@ -7,6 +7,7 @@ package functions
 import "testing"
 
 func TestBeale(t *testing.T) {
+	t.Parallel()
 	tests := []funcTest{
 		{
 			X:        []float64{1, 1},
@@ -23,6 +24,7 @@ func TestBeale(t *testing.T) {
 }
 
 func TestBiggsEXP2(t *testing.T) {
+	t.Parallel()
 	tests := []funcTest{
 		{
 			X:        []float64{1, 2},
@@ -34,6 +36,7 @@ func TestBiggsEXP2(t *testing.T) {
 }
 
 func TestBiggsEXP3(t *testing.T) {
+	t.Parallel()
 	tests := []funcTest{
 		{
 			X:        []float64{1, 2, 1},
@@ -45,6 +48,7 @@ func TestBiggsEXP3(t *testing.T) {
 }
 
 func TestBiggsEXP4(t *testing.T) {
+	t.Parallel()
 	tests := []funcTest{
 		{
 			X: []float64{1, 2, 1, 1},
@@ -57,6 +61,7 @@ func TestBiggsEXP4(t *testing.T) {
 }
 
 func TestBiggsEXP5(t *testing.T) {
+	t.Parallel()
 	tests := []funcTest{
 		{
 			X: []float64{1, 2, 1, 1, 1},
@@ -69,6 +74,7 @@ func TestBiggsEXP5(t *testing.T) {
 }
 
 func TestBiggsEXP6(t *testing.T) {
+	t.Parallel()
 	tests := []funcTest{
 		{
 			X: []float64{1, 2, 1, 1, 1, 1},
@@ -82,6 +88,7 @@ func TestBiggsEXP6(t *testing.T) {
 }
 
 func TestBox3D(t *testing.T) {
+	t.Parallel()
 	tests := []funcTest{
 		{
 			X:        []float64{0, 10, 20},
@@ -93,6 +100,7 @@ func TestBox3D(t *testing.T) {
 }
 
 func TestBrownBadlyScaled(t *testing.T) {
+	t.Parallel()
 	tests := []funcTest{
 		{
 			X:        []float64{1, 1},
@@ -119,6 +127,7 @@ func TestBrownBadlyScaled(t *testing.T) {
 // }
 
 func TestExtendedPowellSingular(t *testing.T) {
+	t.Parallel()
 	tests := []funcTest{
 		{
 			X:        []float64{3, -1, 0, 3},
@@ -135,6 +144,7 @@ func TestExtendedPowellSingular(t *testing.T) {
 }
 
 func TestExtendedRosenbrock(t *testing.T) {
+	t.Parallel()
 	tests := []funcTest{
 		{
 			X:        []float64{-1.2, 1},
@@ -156,6 +166,7 @@ func TestExtendedRosenbrock(t *testing.T) {
 }
 
 func TestGaussian(t *testing.T) {
+	t.Parallel()
 	tests := []funcTest{
 		{
 			X:        []float64{0.4, 1, 0},
@@ -167,6 +178,7 @@ func TestGaussian(t *testing.T) {
 }
 
 func TestGulfResearchAndDevelopment(t *testing.T) {
+	t.Parallel()
 	tests := []funcTest{
 		{
 			X:        []float64{5, 2.5, 0.15},
@@ -178,6 +190,7 @@ func TestGulfResearchAndDevelopment(t *testing.T) {
 }
 
 func TestHelicalValley(t *testing.T) {
+	t.Parallel()
 	tests := []funcTest{
 		{
 			X:        []float64{-1, 0, 0},
@@ -189,6 +202,7 @@ func TestHelicalValley(t *testing.T) {
 }
 
 func TestPenaltyI(t *testing.T) {
+	t.Parallel()
 	tests := []funcTest{
 		{
 			X:        []float64{1, 2, 3, 4},
@@ -206,6 +220,7 @@ func TestPenaltyI(t *testing.T) {
 }
 
 func TestPenaltyII(t *testing.T) {
+	t.Parallel()
 	tests := []funcTest{
 		{
 			X: []float64{0.5, 0.5, 0.5, 0.5},
@@ -226,6 +241,7 @@ func TestPenaltyII(t *testing.T) {
 }
 
 func TestPowelBadlyScaled(t *testing.T) {
+	t.Parallel()
 	tests := []funcTest{
 		{
 			X:        []float64{0, 1},
@@ -237,6 +253,7 @@ func TestPowelBadlyScaled(t *testing.T) {
 }
 
 func TestTrigonometric(t *testing.T) {
+	t.Parallel()
 	tests := []funcTest{
 		{
 			X:        []float64{0.5, 0.5},
@@ -262,6 +279,7 @@ func TestTrigonometric(t *testing.T) {
 }
 
 func TestVariablyDimensioned(t *testing.T) {
+	t.Parallel()
 	tests := []funcTest{
 		{
 			X:        []float64{0.5, 0},
@@ -283,6 +301,7 @@ func TestVariablyDimensioned(t *testing.T) {
 }
 
 func TestWatson(t *testing.T) {
+	t.Parallel()
 	tests := []funcTest{
 		{
 			X:        []float64{0, 0},
@@ -315,6 +334,7 @@ func TestWatson(t *testing.T) {
 }
 
 func TestWood(t *testing.T) {
+	t.Parallel()
 	tests := []funcTest{
 		{
 			X:        []float64{-3, -1, -3, -1},

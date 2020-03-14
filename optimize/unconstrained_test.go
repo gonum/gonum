@@ -997,6 +997,7 @@ func newVariablyDimensioned(dim int, gradTol float64) unconstrainedTest {
 }
 
 func TestLocal(t *testing.T) {
+	t.Parallel()
 	var tests []unconstrainedTest
 	// Mix of functions with and without Grad method.
 	tests = append(tests, gradFreeTests...)
@@ -1005,6 +1006,7 @@ func TestLocal(t *testing.T) {
 }
 
 func TestNelderMead(t *testing.T) {
+	t.Parallel()
 	var tests []unconstrainedTest
 	// Mix of functions with and without Grad method.
 	tests = append(tests, gradFreeTests...)
@@ -1013,10 +1015,12 @@ func TestNelderMead(t *testing.T) {
 }
 
 func TestGradientDescent(t *testing.T) {
+	t.Parallel()
 	testLocal(t, gradientDescentTests, &GradientDescent{})
 }
 
 func TestGradientDescentBacktracking(t *testing.T) {
+	t.Parallel()
 	testLocal(t, gradientDescentTests, &GradientDescent{
 		Linesearcher: &Backtracking{
 			DecreaseFactor: 0.1,
@@ -1025,12 +1029,14 @@ func TestGradientDescentBacktracking(t *testing.T) {
 }
 
 func TestGradientDescentBisection(t *testing.T) {
+	t.Parallel()
 	testLocal(t, gradientDescentTests, &GradientDescent{
 		Linesearcher: &Bisection{},
 	})
 }
 
 func TestCG(t *testing.T) {
+	t.Parallel()
 	var tests []unconstrainedTest
 	tests = append(tests, gradientDescentTests...)
 	tests = append(tests, cgTests...)
@@ -1038,6 +1044,7 @@ func TestCG(t *testing.T) {
 }
 
 func TestFletcherReevesQuadStep(t *testing.T) {
+	t.Parallel()
 	var tests []unconstrainedTest
 	tests = append(tests, gradientDescentTests...)
 	tests = append(tests, cgTests...)
@@ -1048,6 +1055,7 @@ func TestFletcherReevesQuadStep(t *testing.T) {
 }
 
 func TestFletcherReevesFirstOrderStep(t *testing.T) {
+	t.Parallel()
 	var tests []unconstrainedTest
 	tests = append(tests, gradientDescentTests...)
 	tests = append(tests, cgTests...)
@@ -1058,6 +1066,7 @@ func TestFletcherReevesFirstOrderStep(t *testing.T) {
 }
 
 func TestHestenesStiefelQuadStep(t *testing.T) {
+	t.Parallel()
 	var tests []unconstrainedTest
 	tests = append(tests, gradientDescentTests...)
 	tests = append(tests, cgTests...)
@@ -1068,6 +1077,7 @@ func TestHestenesStiefelQuadStep(t *testing.T) {
 }
 
 func TestHestenesStiefelFirstOrderStep(t *testing.T) {
+	t.Parallel()
 	var tests []unconstrainedTest
 	tests = append(tests, gradientDescentTests...)
 	tests = append(tests, cgTests...)
@@ -1078,6 +1088,7 @@ func TestHestenesStiefelFirstOrderStep(t *testing.T) {
 }
 
 func TestPolakRibiereQuadStep(t *testing.T) {
+	t.Parallel()
 	var tests []unconstrainedTest
 	tests = append(tests, gradientDescentTests...)
 	tests = append(tests, cgTests...)
@@ -1088,6 +1099,7 @@ func TestPolakRibiereQuadStep(t *testing.T) {
 }
 
 func TestPolakRibiereFirstOrderStep(t *testing.T) {
+	t.Parallel()
 	var tests []unconstrainedTest
 	tests = append(tests, gradientDescentTests...)
 	tests = append(tests, cgTests...)
@@ -1098,6 +1110,7 @@ func TestPolakRibiereFirstOrderStep(t *testing.T) {
 }
 
 func TestDaiYuanQuadStep(t *testing.T) {
+	t.Parallel()
 	var tests []unconstrainedTest
 	tests = append(tests, gradientDescentTests...)
 	tests = append(tests, cgTests...)
@@ -1108,6 +1121,7 @@ func TestDaiYuanQuadStep(t *testing.T) {
 }
 
 func TestDaiYuanFirstOrderStep(t *testing.T) {
+	t.Parallel()
 	var tests []unconstrainedTest
 	tests = append(tests, gradientDescentTests...)
 	tests = append(tests, cgTests...)
@@ -1118,6 +1132,7 @@ func TestDaiYuanFirstOrderStep(t *testing.T) {
 }
 
 func TestHagerZhangQuadStep(t *testing.T) {
+	t.Parallel()
 	var tests []unconstrainedTest
 	tests = append(tests, gradientDescentTests...)
 	tests = append(tests, cgTests...)
@@ -1128,6 +1143,7 @@ func TestHagerZhangQuadStep(t *testing.T) {
 }
 
 func TestHagerZhangFirstOrderStep(t *testing.T) {
+	t.Parallel()
 	var tests []unconstrainedTest
 	tests = append(tests, gradientDescentTests...)
 	tests = append(tests, cgTests...)
@@ -1138,6 +1154,7 @@ func TestHagerZhangFirstOrderStep(t *testing.T) {
 }
 
 func TestBFGS(t *testing.T) {
+	t.Parallel()
 	var tests []unconstrainedTest
 	tests = append(tests, gradientDescentTests...)
 	tests = append(tests, quasiNewtonTests...)
@@ -1146,6 +1163,7 @@ func TestBFGS(t *testing.T) {
 }
 
 func TestLBFGS(t *testing.T) {
+	t.Parallel()
 	var tests []unconstrainedTest
 	tests = append(tests, gradientDescentTests...)
 	tests = append(tests, quasiNewtonTests...)
@@ -1154,6 +1172,7 @@ func TestLBFGS(t *testing.T) {
 }
 
 func TestNewton(t *testing.T) {
+	t.Parallel()
 	testLocal(t, newtonTests, &Newton{})
 }
 
@@ -1297,6 +1316,7 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 }
 
 func TestIssue76(t *testing.T) {
+	t.Parallel()
 	p := Problem{
 		Func: functions.BrownAndDennis{}.Func,
 		Grad: functions.BrownAndDennis{}.Grad,
@@ -1321,6 +1341,7 @@ func TestIssue76(t *testing.T) {
 }
 
 func TestNelderMeadOneD(t *testing.T) {
+	t.Parallel()
 	p := Problem{
 		Func: func(x []float64) float64 { return x[0] * x[0] },
 	}

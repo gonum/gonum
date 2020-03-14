@@ -16,6 +16,7 @@ import (
 const convergenceTol = 1e-10
 
 func TestSimplex(t *testing.T) {
+	t.Parallel()
 	// First test specific inputs. These were collected from failures
 	// during randomized testing.
 	// TODO(btracey): Test specific problems with known solutions.

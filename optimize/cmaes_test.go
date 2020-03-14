@@ -200,6 +200,7 @@ func cmaTestCases() []cmaTestCase {
 }
 
 func TestCmaEsChol(t *testing.T) {
+	t.Parallel()
 	for i, test := range cmaTestCases() {
 		src := rand.New(rand.NewSource(1))
 		method := test.method

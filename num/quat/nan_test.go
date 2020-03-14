@@ -33,6 +33,7 @@ var nanTests = []struct {
 }
 
 func TestIsNaN(t *testing.T) {
+	t.Parallel()
 	for _, test := range nanTests {
 		got := IsNaN(test.q)
 		if got != test.want {

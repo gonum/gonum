@@ -42,6 +42,7 @@ var expTests = []struct {
 }
 
 func TestExp(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-14
 	for _, test := range expTests {
 		got := Exp(test.q)
@@ -84,6 +85,7 @@ var logTests = []struct {
 }
 
 func TestLog(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-14
 	for _, test := range logTests {
 		got := Log(test.q)
@@ -178,6 +180,7 @@ var powTests = []struct {
 }
 
 func TestPow(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-14
 	for _, test := range powTests {
 		got := Pow(test.q, test.r)
@@ -220,6 +223,7 @@ var sqrtTests = []struct {
 }
 
 func TestSqrt(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-14
 	for _, test := range sqrtTests {
 		got := Sqrt(test.q)

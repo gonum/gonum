@@ -25,6 +25,7 @@ var invTests = []struct {
 }
 
 func TestInv(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-14
 	for _, test := range invTests {
 		got := Mul(test.q, Inv(test.q))

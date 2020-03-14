@@ -34,6 +34,7 @@ var sinTests = []struct {
 }
 
 func TestSin(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-14
 	for _, test := range sinTests {
 		got := Sin(test.q)
@@ -74,6 +75,7 @@ var sinhTests = []struct {
 }
 
 func TestSinh(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-14
 	for _, test := range sinhTests {
 		got := Sinh(test.q)
@@ -102,6 +104,7 @@ var cosTests = []struct {
 }
 
 func TestCos(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-14
 	for _, test := range cosTests {
 		got := Cos(test.q)
@@ -136,6 +139,7 @@ var coshTests = []struct {
 }
 
 func TestCosh(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-14
 	for _, test := range coshTests {
 		got := Cosh(test.q)
@@ -161,6 +165,7 @@ var tanTests = []struct {
 }
 
 func TestTan(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-14
 	for _, test := range tanTests {
 		got := Tan(test.q)
@@ -189,6 +194,7 @@ var tanhTests = []struct {
 }
 
 func TestTanh(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-14
 	for _, test := range tanhTests {
 		got := Tanh(test.q)
@@ -211,6 +217,7 @@ var asinTests = []struct {
 }
 
 func TestAsin(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-14
 	for _, test := range asinTests {
 		got := Asin(test.q)
@@ -248,6 +255,7 @@ var asinhTests = []struct {
 }
 
 func TestAsinh(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-14
 	for _, test := range asinhTests {
 		got := Asinh(test.q)
@@ -270,6 +278,7 @@ var acosTests = []struct {
 }
 
 func TestAcos(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-14
 	for _, test := range acosTests {
 		got := Acos(test.q)
@@ -301,6 +310,7 @@ var acoshTests = []struct {
 }
 
 func TestAcosh(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-14
 	for _, test := range acoshTests {
 		got := Acosh(test.q)
@@ -323,6 +333,7 @@ var atanTests = []struct {
 }
 
 func TestAtan(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-14
 	for _, test := range atanTests {
 		got := Atan(test.q)
@@ -359,6 +370,7 @@ var atanhTests = []struct {
 }
 
 func TestAtanh(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-14
 	for _, test := range atanhTests {
 		got := Atanh(test.q)

@@ -13,6 +13,7 @@ import (
 )
 
 func TestNewTriBand(t *testing.T) {
+	t.Parallel()
 	for cas, test := range []struct {
 		data  []float64
 		n, k  int
@@ -215,6 +216,7 @@ func TestNewTriBand(t *testing.T) {
 }
 
 func TestTriBandAtSetUpper(t *testing.T) {
+	t.Parallel()
 	for _, kind := range []TriKind{Upper, Lower} {
 		var band *TriBandDense
 		var data []float64
@@ -334,6 +336,7 @@ func TestTriBandAtSetUpper(t *testing.T) {
 }
 
 func TestTriBandDenseZero(t *testing.T) {
+	t.Parallel()
 	// Elements that equal 1 should be set to zero, elements that equal -1
 	// should remain unchanged.
 	for _, test := range []*TriBandDense{
@@ -385,6 +388,7 @@ func TestTriBandDenseZero(t *testing.T) {
 }
 
 func TestTriBandDiagView(t *testing.T) {
+	t.Parallel()
 	for cas, test := range []*TriBandDense{
 		NewTriBandDense(1, 0, Upper, []float64{1}),
 		NewTriBandDense(4, 0, Upper, []float64{1, 2, 3, 4}),

@@ -11,6 +11,7 @@ import (
 )
 
 func TestFormat(t *testing.T) {
+	t.Parallel()
 	type rp struct {
 		format string
 		output string

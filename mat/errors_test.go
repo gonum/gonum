@@ -16,6 +16,7 @@ func leaksPanic(fn func()) (panicked bool) {
 }
 
 func TestMaybe(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		fn     func()
 		panics bool

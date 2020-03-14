@@ -11,6 +11,7 @@ import (
 )
 
 func TestLUD(t *testing.T) {
+	t.Parallel()
 	for _, n := range []int{1, 5, 10, 11, 50} {
 		a := NewDense(n, n, nil)
 		for i := 0; i < n; i++ {
@@ -39,6 +40,7 @@ func TestLUD(t *testing.T) {
 }
 
 func TestLURankOne(t *testing.T) {
+	t.Parallel()
 	for _, pivoting := range []bool{true} {
 		for _, n := range []int{3, 10, 50} {
 			// Construct a random LU factorization
@@ -106,6 +108,7 @@ func luReconstruct(lu *LU) *Dense {
 }
 
 func TestLUSolveTo(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		n, bc int
 	}{
@@ -143,6 +146,7 @@ func TestLUSolveTo(t *testing.T) {
 }
 
 func TestLUSolveToCond(t *testing.T) {
+	t.Parallel()
 	for _, test := range []*Dense{
 		NewDense(2, 2, []float64{1, 0, 0, 1e-20}),
 	} {
@@ -164,6 +168,7 @@ func TestLUSolveToCond(t *testing.T) {
 }
 
 func TestLUSolveVecTo(t *testing.T) {
+	t.Parallel()
 	for _, n := range []int{5, 10} {
 		a := NewDense(n, n, nil)
 		for i := 0; i < n; i++ {

@@ -18,6 +18,7 @@ import (
 )
 
 func TestNewSymmetric(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		data []float64
 		n    int
@@ -67,6 +68,7 @@ func TestNewSymmetric(t *testing.T) {
 }
 
 func TestSymAtSet(t *testing.T) {
+	t.Parallel()
 	sym := &SymDense{
 		mat: blas64.Symmetric{
 			N:      3,
@@ -130,6 +132,7 @@ func TestSymAtSet(t *testing.T) {
 }
 
 func TestSymDenseZero(t *testing.T) {
+	t.Parallel()
 	// Elements that equal 1 should be set to zero, elements that equal -1
 	// should remain unchanged.
 	for _, test := range []*SymDense{
@@ -162,6 +165,7 @@ func TestSymDenseZero(t *testing.T) {
 }
 
 func TestSymDiagView(t *testing.T) {
+	t.Parallel()
 	for cas, test := range []*SymDense{
 		NewSymDense(1, []float64{1}),
 		NewSymDense(2, []float64{1, 2, 2, 3}),
@@ -172,6 +176,7 @@ func TestSymDiagView(t *testing.T) {
 }
 
 func TestSymAdd(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		n int
 	}{
@@ -233,6 +238,7 @@ func TestSymAdd(t *testing.T) {
 }
 
 func TestCopy(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		n int
 	}{
@@ -264,6 +270,7 @@ func TestCopy(t *testing.T) {
 // TODO(kortschak) Roll this into testOneInput when it exists.
 // https://github.com/gonum/matrix/issues/171
 func TestSymCopyPanic(t *testing.T) {
+	t.Parallel()
 	var (
 		a SymDense
 		n int
@@ -279,6 +286,7 @@ func TestSymCopyPanic(t *testing.T) {
 }
 
 func TestSymRankOne(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-15
 
 	for _, test := range []struct {
@@ -365,6 +373,7 @@ func TestSymRankOne(t *testing.T) {
 }
 
 func TestIssue250SymRankOne(t *testing.T) {
+	t.Parallel()
 	x := NewVecDense(5, []float64{1, 2, 3, 4, 5})
 	var s1, s2 SymDense
 	s1.SymRankOne(NewSymDense(5, nil), 1, x)
@@ -376,6 +385,7 @@ func TestIssue250SymRankOne(t *testing.T) {
 }
 
 func TestRankTwo(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		n int
 	}{
@@ -434,6 +444,7 @@ func TestRankTwo(t *testing.T) {
 }
 
 func TestSymRankK(t *testing.T) {
+	t.Parallel()
 	alpha := 3.0
 	method := func(receiver, a, b Matrix) {
 		type SymRankKer interface {
@@ -462,6 +473,7 @@ func TestSymRankK(t *testing.T) {
 }
 
 func TestSymOuterK(t *testing.T) {
+	t.Parallel()
 	for _, f := range []float64{0.5, 1, 3} {
 		method := func(receiver, x Matrix) {
 			type SymOuterKer interface {
@@ -479,6 +491,7 @@ func TestSymOuterK(t *testing.T) {
 }
 
 func TestIssue250SymOuterK(t *testing.T) {
+	t.Parallel()
 	x := NewVecDense(5, []float64{1, 2, 3, 4, 5})
 	var s1, s2 SymDense
 	s1.SymOuterK(1, x)
@@ -490,6 +503,7 @@ func TestIssue250SymOuterK(t *testing.T) {
 }
 
 func TestScaleSym(t *testing.T) {
+	t.Parallel()
 	for _, f := range []float64{0.5, 1, 3} {
 		method := func(receiver, a Matrix) {
 			type ScaleSymer interface {
@@ -506,6 +520,7 @@ func TestScaleSym(t *testing.T) {
 }
 
 func TestSubsetSym(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		a    *SymDense
 		dims []int
@@ -587,6 +602,7 @@ func TestSubsetSym(t *testing.T) {
 }
 
 func TestViewGrowSquare(t *testing.T) {
+	t.Parallel()
 	// n is the size of the original SymDense.
 	// The first view uses start1, span1. The second view uses start2, span2 on
 	// the first view.
@@ -669,6 +685,7 @@ func TestViewGrowSquare(t *testing.T) {
 }
 
 func TestPowPSD(t *testing.T) {
+	t.Parallel()
 	for cas, test := range []struct {
 		a   *SymDense
 		pow float64

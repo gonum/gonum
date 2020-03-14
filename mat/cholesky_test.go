@@ -15,6 +15,7 @@ import (
 )
 
 func TestCholesky(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		a *SymDense
 
@@ -74,6 +75,7 @@ func TestCholesky(t *testing.T) {
 }
 
 func TestCholeskyAt(t *testing.T) {
+	t.Parallel()
 	for _, test := range []*SymDense{
 		NewSymDense(3, []float64{
 			53, 59, 37,
@@ -104,6 +106,7 @@ func TestCholeskyAt(t *testing.T) {
 }
 
 func TestCholeskySolveTo(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		a   *SymDense
 		b   *Dense
@@ -151,6 +154,7 @@ func TestCholeskySolveTo(t *testing.T) {
 }
 
 func TestCholeskySolveCholTo(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		a, b *SymDense
 	}{
@@ -218,6 +222,7 @@ func TestCholeskySolveCholTo(t *testing.T) {
 }
 
 func TestCholeskySolveVecTo(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		a   *SymDense
 		b   *VecDense
@@ -265,6 +270,7 @@ func TestCholeskySolveVecTo(t *testing.T) {
 }
 
 func TestCholeskyToSym(t *testing.T) {
+	t.Parallel()
 	for _, test := range []*SymDense{
 		NewSymDense(3, []float64{
 			53, 59, 37,
@@ -287,6 +293,7 @@ func TestCholeskyToSym(t *testing.T) {
 }
 
 func TestCloneCholesky(t *testing.T) {
+	t.Parallel()
 	for _, test := range []*SymDense{
 		NewSymDense(3, []float64{
 			53, 59, 37,
@@ -323,6 +330,7 @@ func TestCloneCholesky(t *testing.T) {
 }
 
 func TestCholeskyInverseTo(t *testing.T) {
+	t.Parallel()
 	for _, n := range []int{1, 3, 5, 9} {
 		data := make([]float64, n*n)
 		for i := range data {
@@ -354,6 +362,7 @@ func TestCholeskyInverseTo(t *testing.T) {
 }
 
 func TestCholeskySymRankOne(t *testing.T) {
+	t.Parallel()
 	rand.Seed(1)
 	for _, n := range []int{1, 2, 3, 4, 5, 7, 10, 20, 50, 100} {
 		for k := 0; k < 50; k++ {
@@ -493,6 +502,7 @@ func TestCholeskySymRankOne(t *testing.T) {
 }
 
 func TestCholeskyExtendVecSym(t *testing.T) {
+	t.Parallel()
 	for cas, test := range []struct {
 		a *SymDense
 	}{
@@ -555,6 +565,7 @@ func TestCholeskyExtendVecSym(t *testing.T) {
 }
 
 func TestCholeskyScale(t *testing.T) {
+	t.Parallel()
 	for cas, test := range []struct {
 		a *SymDense
 		f float64

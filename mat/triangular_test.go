@@ -17,6 +17,7 @@ import (
 )
 
 func TestNewTriangular(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		data []float64
 		n    int
@@ -66,6 +67,7 @@ func TestNewTriangular(t *testing.T) {
 }
 
 func TestTriAtSet(t *testing.T) {
+	t.Parallel()
 	tri := &TriDense{
 		mat: blas64.Triangular{
 			N:      3,
@@ -141,6 +143,7 @@ func TestTriAtSet(t *testing.T) {
 }
 
 func TestTriDenseZero(t *testing.T) {
+	t.Parallel()
 	// Elements that equal 1 should be set to zero, elements that equal -1
 	// should remain unchanged.
 	for _, test := range []*TriDense{
@@ -186,6 +189,7 @@ func TestTriDenseZero(t *testing.T) {
 }
 
 func TestTriDiagView(t *testing.T) {
+	t.Parallel()
 	for cas, test := range []*TriDense{
 		NewTriDense(1, Upper, []float64{1}),
 		NewTriDense(2, Upper, []float64{1, 2, 0, 3}),
@@ -199,6 +203,7 @@ func TestTriDiagView(t *testing.T) {
 }
 
 func TestTriDenseCopy(t *testing.T) {
+	t.Parallel()
 	for i := 0; i < 100; i++ {
 		size := rand.Intn(100)
 		r, err := randDense(size, 0.9, rand.NormFloat64)
@@ -249,6 +254,7 @@ func TestTriDenseCopy(t *testing.T) {
 }
 
 func TestTriTriDenseCopy(t *testing.T) {
+	t.Parallel()
 	for i := 0; i < 100; i++ {
 		size := rand.Intn(100)
 		r, err := randDense(size, 1, rand.NormFloat64)
@@ -301,6 +307,7 @@ func TestTriTriDenseCopy(t *testing.T) {
 }
 
 func TestTriInverse(t *testing.T) {
+	t.Parallel()
 	for _, kind := range []TriKind{Upper, Lower} {
 		for _, n := range []int{1, 3, 5, 9} {
 			data := make([]float64, n*n)
@@ -325,6 +332,7 @@ func TestTriInverse(t *testing.T) {
 }
 
 func TestTriMul(t *testing.T) {
+	t.Parallel()
 	method := func(receiver, a, b Matrix) {
 		type MulTrier interface {
 			MulTri(a, b Triangular)
@@ -380,6 +388,7 @@ func TestTriMul(t *testing.T) {
 }
 
 func TestScaleTri(t *testing.T) {
+	t.Parallel()
 	for _, f := range []float64{0.5, 1, 3} {
 		method := func(receiver, a Matrix) {
 			type ScaleTrier interface {
@@ -397,6 +406,7 @@ func TestScaleTri(t *testing.T) {
 }
 
 func TestCopySymIntoTriangle(t *testing.T) {
+	t.Parallel()
 	nan := math.NaN()
 	for tc, test := range []struct {
 		n     int
@@ -515,6 +525,7 @@ func TestCopySymIntoTriangle(t *testing.T) {
 }
 
 func TestTriSliceTri(t *testing.T) {
+	t.Parallel()
 	rnd := rand.New(rand.NewSource(1))
 	for cas, test := range []struct {
 		n, start1, span1, start2, span2 int

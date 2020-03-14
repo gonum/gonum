@@ -91,6 +91,7 @@ var productTests = []struct {
 }
 
 func TestProduct(t *testing.T) {
+	t.Parallel()
 	for _, test := range productTests {
 		dimensions := test.factors
 		if dimensions == nil && test.n > 0 {

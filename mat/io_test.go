@@ -92,6 +92,7 @@ var denseData = []struct {
 }
 
 func TestDenseMarshal(t *testing.T) {
+	t.Parallel()
 	for i, test := range denseData {
 		buf, err := test.want.MarshalBinary()
 		if err != nil {
@@ -117,6 +118,7 @@ func TestDenseMarshal(t *testing.T) {
 }
 
 func TestDenseMarshalTo(t *testing.T) {
+	t.Parallel()
 	for i, test := range denseData {
 		buf := new(bytes.Buffer)
 		n, err := test.want.MarshalBinaryTo(buf)
@@ -143,6 +145,7 @@ func TestDenseMarshalTo(t *testing.T) {
 }
 
 func TestDenseUnmarshal(t *testing.T) {
+	t.Parallel()
 	for i, test := range denseData {
 		var v Dense
 		err := v.UnmarshalBinary(test.raw)
@@ -163,6 +166,7 @@ func TestDenseUnmarshal(t *testing.T) {
 }
 
 func TestDenseUnmarshalFrom(t *testing.T) {
+	t.Parallel()
 	for i, test := range denseData {
 		var v Dense
 		buf := bytes.NewReader(test.raw)
@@ -189,6 +193,7 @@ func TestDenseUnmarshalFrom(t *testing.T) {
 }
 
 func TestDenseUnmarshalFromError(t *testing.T) {
+	t.Parallel()
 	test := denseData[1]
 	for i, tt := range []struct {
 		beg int
@@ -257,6 +262,7 @@ func TestDenseUnmarshalFromError(t *testing.T) {
 }
 
 func TestDenseIORoundTrip(t *testing.T) {
+	t.Parallel()
 	for i, test := range denseData {
 		buf, err := test.want.MarshalBinary()
 		if err != nil {
@@ -373,6 +379,7 @@ var vectorData = []struct {
 }
 
 func TestVecDenseMarshal(t *testing.T) {
+	t.Parallel()
 	for i, test := range vectorData {
 		buf, err := test.want.MarshalBinary()
 		if err != nil {
@@ -398,6 +405,7 @@ func TestVecDenseMarshal(t *testing.T) {
 }
 
 func TestVecDenseMarshalTo(t *testing.T) {
+	t.Parallel()
 	for i, test := range vectorData {
 		buf := new(bytes.Buffer)
 		n, err := test.want.MarshalBinaryTo(buf)
@@ -424,6 +432,7 @@ func TestVecDenseMarshalTo(t *testing.T) {
 }
 
 func TestVecDenseUnmarshal(t *testing.T) {
+	t.Parallel()
 	for i, test := range vectorData {
 		var v VecDense
 		err := v.UnmarshalBinary(test.raw)
@@ -444,6 +453,7 @@ func TestVecDenseUnmarshal(t *testing.T) {
 }
 
 func TestVecDenseUnmarshalFrom(t *testing.T) {
+	t.Parallel()
 	for i, test := range vectorData {
 		var v VecDense
 		buf := bytes.NewReader(test.raw)
@@ -472,6 +482,7 @@ func TestVecDenseUnmarshalFrom(t *testing.T) {
 }
 
 func TestVecDenseUnmarshalFromError(t *testing.T) {
+	t.Parallel()
 	test := vectorData[1]
 	for i, tt := range []struct {
 		beg int
@@ -528,6 +539,7 @@ func TestVecDenseUnmarshalFromError(t *testing.T) {
 }
 
 func TestVecDenseIORoundTrip(t *testing.T) {
+	t.Parallel()
 	for i, test := range vectorData {
 		buf, err := test.want.MarshalBinary()
 		if err != nil {

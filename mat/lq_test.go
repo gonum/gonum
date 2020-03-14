@@ -11,6 +11,7 @@ import (
 )
 
 func TestLQ(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		m, n int
 	}{
@@ -48,6 +49,7 @@ func TestLQ(t *testing.T) {
 }
 
 func TestLQSolveTo(t *testing.T) {
+	t.Parallel()
 	for _, trans := range []bool{false, true} {
 		for _, test := range []struct {
 			m, n, bc int
@@ -109,6 +111,7 @@ func TestLQSolveTo(t *testing.T) {
 }
 
 func TestLQSolveToVec(t *testing.T) {
+	t.Parallel()
 	for _, trans := range []bool{false, true} {
 		for _, test := range []struct {
 			m, n int
@@ -165,6 +168,7 @@ func TestLQSolveToVec(t *testing.T) {
 }
 
 func TestLQSolveToCond(t *testing.T) {
+	t.Parallel()
 	for _, test := range []*Dense{
 		NewDense(2, 2, []float64{1, 0, 0, 1e-20}),
 		NewDense(2, 3, []float64{1, 0, 0, 0, 1e-20, 0}),

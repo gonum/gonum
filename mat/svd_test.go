@@ -13,6 +13,7 @@ import (
 )
 
 func TestSVD(t *testing.T) {
+	t.Parallel()
 	// Hand coded tests
 	for _, test := range []struct {
 		a *Dense

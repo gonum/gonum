@@ -13,6 +13,7 @@ import (
 )
 
 func TestNewSymBand(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		data  []float64
 		n     int
@@ -79,6 +80,7 @@ func TestNewSymBand(t *testing.T) {
 }
 
 func TestSymBandAtSet(t *testing.T) {
+	t.Parallel()
 	// 1  2  3  0  0  0
 	// 2  4  5  6  0  0
 	// 3  5  7  8  9  0
@@ -181,6 +183,7 @@ func TestSymBandAtSet(t *testing.T) {
 }
 
 func TestSymBandDiagView(t *testing.T) {
+	t.Parallel()
 	for cas, test := range []*SymBandDense{
 		NewSymBandDense(1, 0, []float64{1}),
 		NewSymBandDense(6, 2, []float64{
@@ -197,6 +200,7 @@ func TestSymBandDiagView(t *testing.T) {
 }
 
 func TestSymBandDenseZero(t *testing.T) {
+	t.Parallel()
 	// Elements that equal 1 should be set to zero, elements that equal -1
 	// should remain unchanged.
 	for _, test := range []*SymBandDense{

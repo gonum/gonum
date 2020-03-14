@@ -14,6 +14,7 @@ import (
 )
 
 func TestFFT(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-10
 	rnd := rand.New(rand.NewSource(1))
 	t.Run("NewFFT", func(t *testing.T) {
@@ -217,6 +218,7 @@ func TestCmplxFFT(t *testing.T) {
 }
 
 func TestDCT(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-10
 	rnd := rand.New(rand.NewSource(1))
 	t.Run("NewDCT", func(t *testing.T) {
@@ -259,6 +261,7 @@ func TestDCT(t *testing.T) {
 }
 
 func TestDST(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-10
 	rnd := rand.New(rand.NewSource(1))
 	t.Run("NewDST", func(t *testing.T) {
@@ -301,6 +304,7 @@ func TestDST(t *testing.T) {
 }
 
 func TestQuarterWaveFFT(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-10
 	rnd := rand.New(rand.NewSource(1))
 	t.Run("NewQuarterWaveFFT", func(t *testing.T) {

@@ -18,6 +18,7 @@ import (
 )
 
 func TestRfft(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-12
 	for _, test := range rfftTests {
 		// Compute the work and factor slices and compare to known values.
@@ -273,6 +274,7 @@ var rfftTests = []struct {
 }
 
 func TestCfft(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-12
 	for _, test := range cfftTests {
 		// Compute the work and factor slices and compare to known values.
@@ -616,6 +618,7 @@ var cfftTests = []struct {
 }
 
 func TestSint(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-12
 	for _, test := range sintTests {
 		// Compute the work and factor slices and compare to known values.
@@ -845,6 +848,7 @@ var sintTests = []struct {
 }
 
 func TestCost(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-12
 	for _, test := range costTests {
 		// Compute the work and factor slices and compare to known values.
@@ -1097,6 +1101,7 @@ var costTests = []struct {
 }
 
 func TestCosq(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-12
 	for _, test := range sincosqTests {
 		// Compute the work and factor slices and compare to known values.
@@ -1183,6 +1188,7 @@ func TestCosq(t *testing.T) {
 }
 
 func TestSinq(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-12
 	for _, test := range sincosqTests {
 		// Compute the work and factor slices and compare to known values.

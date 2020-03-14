@@ -11,6 +11,7 @@ import (
 )
 
 func TestNormalQuantile(t *testing.T) {
+	t.Parallel()
 	// Values from https://www.johndcook.com/blog/normal_cdf_inverse/
 	p := []float64{
 		0.0000001,

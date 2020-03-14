@@ -10,6 +10,7 @@ import (
 )
 
 func TestGammaIncReg(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		a, x, want float64
 	}{
@@ -42,6 +43,7 @@ func TestGammaIncReg(t *testing.T) {
 }
 
 func TestGammaIncRegComp(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		a, x, want float64
 	}{
@@ -74,6 +76,7 @@ func TestGammaIncRegComp(t *testing.T) {
 }
 
 func TestGammaIncRegInv(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		a, x, want float64
 	}{
@@ -106,6 +109,7 @@ func TestGammaIncRegInv(t *testing.T) {
 }
 
 func TestGammaIncRegCompInv(t *testing.T) {
+	t.Parallel()
 	for i, test := range []struct {
 		a, x, want float64
 	}{

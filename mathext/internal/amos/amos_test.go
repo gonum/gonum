@@ -62,6 +62,7 @@ func randInput(rnd *rand.Rand) input {
 const nInputs = 100000
 
 func TestAiry(t *testing.T) {
+	t.Parallel()
 	rnd := rand.New(rand.NewSource(1))
 	for i := 0; i < nInputs; i++ {
 		in := randInput(rnd)
@@ -70,6 +71,7 @@ func TestAiry(t *testing.T) {
 }
 
 func TestZacai(t *testing.T) {
+	t.Parallel()
 	switch runtime.GOARCH {
 	case "arm64":
 		t.Skipf("skipping on GOARCH=%s", runtime.GOARCH)
@@ -82,6 +84,7 @@ func TestZacai(t *testing.T) {
 }
 
 func TestZbknu(t *testing.T) {
+	t.Parallel()
 	rnd := rand.New(rand.NewSource(1))
 	for i := 0; i < nInputs; i++ {
 		in := randInput(rnd)
@@ -90,6 +93,7 @@ func TestZbknu(t *testing.T) {
 }
 
 func TestZasyi(t *testing.T) {
+	t.Parallel()
 	rnd := rand.New(rand.NewSource(1))
 	for i := 0; i < nInputs; i++ {
 		in := randInput(rnd)
@@ -98,6 +102,7 @@ func TestZasyi(t *testing.T) {
 }
 
 func TestZseri(t *testing.T) {
+	t.Parallel()
 	switch runtime.GOARCH {
 	case "arm64":
 		t.Skipf("skipping on GOARCH=%s", runtime.GOARCH)
@@ -110,6 +115,7 @@ func TestZseri(t *testing.T) {
 }
 
 func TestZmlri(t *testing.T) {
+	t.Parallel()
 	rnd := rand.New(rand.NewSource(1))
 	for i := 0; i < nInputs; i++ {
 		in := randInput(rnd)
@@ -118,6 +124,7 @@ func TestZmlri(t *testing.T) {
 }
 
 func TestZkscl(t *testing.T) {
+	t.Parallel()
 	rnd := rand.New(rand.NewSource(1))
 	for i := 0; i < nInputs; i++ {
 		in := randInput(rnd)
@@ -126,6 +133,7 @@ func TestZkscl(t *testing.T) {
 }
 
 func TestZuchk(t *testing.T) {
+	t.Parallel()
 	rnd := rand.New(rand.NewSource(1))
 	for i := 0; i < nInputs; i++ {
 		in := randInput(rnd)
@@ -134,6 +142,7 @@ func TestZuchk(t *testing.T) {
 }
 
 func TestZs1s2(t *testing.T) {
+	t.Parallel()
 	rnd := rand.New(rand.NewSource(1))
 	for i := 0; i < nInputs; i++ {
 		in := randInput(rnd)

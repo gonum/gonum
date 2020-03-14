@@ -17,6 +17,7 @@ var _ rand.Source = (*MT19937)(nil)
 // with or without an initial seed array.
 
 func TestMT19937(t *testing.T) {
+	t.Parallel()
 	want := []uint32{
 		3499211612, 581869302, 3890346734, 3586334585, 545404204,
 		4161255391, 3922919429, 949333985, 2715962298, 1323567403,
@@ -38,6 +39,7 @@ func TestMT19937(t *testing.T) {
 }
 
 func TestMT19937SeedFromKeys(t *testing.T) {
+	t.Parallel()
 	want := []uint32{
 		1067595299, 955945823, 477289528, 4107218783, 4228976476,
 		3344332714, 3355579695, 227628506, 810200273, 2591290167,
@@ -60,6 +62,7 @@ func TestMT19937SeedFromKeys(t *testing.T) {
 }
 
 func TestMT19937RoundTrip(t *testing.T) {
+	t.Parallel()
 	var src MT19937
 	src.Seed(uint64(time.Now().Unix()))
 

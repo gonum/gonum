@@ -16,6 +16,7 @@ import (
 var _ rand.Source = (*SplitMix64)(nil)
 
 func TestSplitMix64(t *testing.T) {
+	t.Parallel()
 	want := []uint64{
 		10451216379200822465, 13757245211066428519, 17911839290282890590, 8196980753821780235, 8195237237126968761,
 		14072917602864530048, 16184226688143867045, 9648886400068060533, 5266705631892356520, 14646652180046636950,
@@ -37,6 +38,7 @@ func TestSplitMix64(t *testing.T) {
 }
 
 func TestSplitMix64RoundTrip(t *testing.T) {
+	t.Parallel()
 	var src SplitMix64
 	src.Seed(uint64(time.Now().Unix()))
 
@@ -65,6 +67,7 @@ func TestSplitMix64RoundTrip(t *testing.T) {
 var _ rand.Source = (*Xoshiro256plus)(nil)
 
 func TestXoshiro256plus(t *testing.T) {
+	t.Parallel()
 	want := []uint64{
 		201453059313051084, 16342930563397888806, 2922809869868169223, 13315230553875954649, 6410977891529050008,
 		2721661332018190285, 3769995280709464022, 17208995829377771030, 16938999919058283733, 8307416726322109393,
@@ -86,6 +89,7 @@ func TestXoshiro256plus(t *testing.T) {
 }
 
 func TestXoshiro256plusRoundTrip(t *testing.T) {
+	t.Parallel()
 	var src Xoshiro256plus
 	src.Seed(uint64(time.Now().Unix()))
 
@@ -116,6 +120,7 @@ func TestXoshiro256plusRoundTrip(t *testing.T) {
 var _ rand.Source = (*Xoshiro256plusplus)(nil)
 
 func TestXoshiro256plusplus(t *testing.T) {
+	t.Parallel()
 	want := []uint64{
 		14971601782005023387, 13781649495232077965, 1847458086238483744, 13765271635752736470, 3406718355780431780,
 		10892412867582108485, 18204613561675945223, 9655336933892813345, 1781989159761824720, 2477283028068920342,
@@ -137,6 +142,7 @@ func TestXoshiro256plusplus(t *testing.T) {
 }
 
 func TestXoshiro256plusplusRoundTrip(t *testing.T) {
+	t.Parallel()
 	var src Xoshiro256plusplus
 	src.Seed(uint64(time.Now().Unix()))
 
@@ -167,6 +173,7 @@ func TestXoshiro256plusplusRoundTrip(t *testing.T) {
 var _ rand.Source = (*Xoshiro256starstar)(nil)
 
 func TestXoshiro256starstar(t *testing.T) {
+	t.Parallel()
 	want := []uint64{
 		12966619160104079557, 9600361134598540522, 10590380919521690900, 7218738570589545383, 12860671823995680371,
 		2648436617965840162, 1310552918490157286, 7031611932980406429, 15996139959407692321, 10177250653276320208,
@@ -188,6 +195,7 @@ func TestXoshiro256starstar(t *testing.T) {
 }
 
 func TestXoshiro256starstarRoundTrip(t *testing.T) {
+	t.Parallel()
 	var src Xoshiro256starstar
 	src.Seed(uint64(time.Now().Unix()))
 

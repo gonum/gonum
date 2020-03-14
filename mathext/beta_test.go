@@ -84,6 +84,7 @@ var betaTests = []struct {
 }
 
 func TestBeta(t *testing.T) {
+	t.Parallel()
 	for i, test := range betaTests {
 		v := mathext.Beta(test.p, test.q)
 		testOK := func(x float64) bool {
@@ -142,6 +143,7 @@ func BenchmarkBeta2(b *testing.B) {
 }
 
 func TestLbeta(t *testing.T) {
+	t.Parallel()
 	for i, test := range betaTests {
 		want := math.Log(test.want)
 		v := mathext.Lbeta(test.p, test.q)

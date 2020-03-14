@@ -11,6 +11,7 @@ import (
 )
 
 func TestIncBeta(t *testing.T) {
+	t.Parallel()
 	tol := 1e-14
 	tol2 := 1e-10
 	// Test against values from scipy

@@ -13,6 +13,7 @@ import (
 
 // Testing EllipticF (and EllipticRF) using the addition theorems from http://dlmf.nist.gov/19.11.i
 func TestEllipticF(t *testing.T) {
+	t.Parallel()
 	const tol = 1.0e-14
 	rnd := rand.New(rand.NewSource(1))
 
@@ -59,6 +60,7 @@ func TestEllipticF(t *testing.T) {
 
 // Testing EllipticE (and EllipticRF, EllipticRD) using the addition theorems from http://dlmf.nist.gov/19.11.i
 func TestEllipticE(t *testing.T) {
+	t.Parallel()
 	const tol = 1.0e-14
 	rnd := rand.New(rand.NewSource(1))
 

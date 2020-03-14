@@ -12,6 +12,7 @@ import (
 )
 
 func TestDimless(t *testing.T) {
+	t.Parallel()
 	for _, value := range []float64{-1, 0, 1} {
 		var got Dimless
 		err := got.From(Dimless(value).Unit())
@@ -32,6 +33,7 @@ func TestDimless(t *testing.T) {
 }
 
 func TestDimlessFormat(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		value  Dimless
 		format string

@@ -12,6 +12,7 @@ import (
 )
 
 func TestTime(t *testing.T) {
+	t.Parallel()
 	for _, value := range []float64{-1, 0, 1} {
 		var got Time
 		err := got.From(Time(value).Unit())
@@ -32,6 +33,7 @@ func TestTime(t *testing.T) {
 }
 
 func TestTimeFormat(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		value  Time
 		format string

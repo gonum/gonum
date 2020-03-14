@@ -12,6 +12,7 @@ import (
 )
 
 func TestLength(t *testing.T) {
+	t.Parallel()
 	for _, value := range []float64{-1, 0, 1} {
 		var got Length
 		err := got.From(Length(value).Unit())
@@ -32,6 +33,7 @@ func TestLength(t *testing.T) {
 }
 
 func TestLengthFormat(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		value  Length
 		format string

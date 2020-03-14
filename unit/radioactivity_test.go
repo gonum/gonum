@@ -12,6 +12,7 @@ import (
 )
 
 func TestRadioactivity(t *testing.T) {
+	t.Parallel()
 	for _, value := range []float64{-1, 0, 1} {
 		var got Radioactivity
 		err := got.From(Radioactivity(value).Unit())
@@ -32,6 +33,7 @@ func TestRadioactivity(t *testing.T) {
 }
 
 func TestRadioactivityFormat(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		value  Radioactivity
 		format string

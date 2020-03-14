@@ -12,6 +12,7 @@ import (
 )
 
 func TestEnergy(t *testing.T) {
+	t.Parallel()
 	for _, value := range []float64{-1, 0, 1} {
 		var got Energy
 		err := got.From(Energy(value).Unit())
@@ -32,6 +33,7 @@ func TestEnergy(t *testing.T) {
 }
 
 func TestEnergyFormat(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		value  Energy
 		format string

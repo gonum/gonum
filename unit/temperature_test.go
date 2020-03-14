@@ -12,6 +12,7 @@ import (
 )
 
 func TestTemperature(t *testing.T) {
+	t.Parallel()
 	for _, value := range []float64{-1, 0, 1} {
 		var got Temperature
 		err := got.From(Temperature(value).Unit())
@@ -32,6 +33,7 @@ func TestTemperature(t *testing.T) {
 }
 
 func TestTemperatureFormat(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		value  Temperature
 		format string

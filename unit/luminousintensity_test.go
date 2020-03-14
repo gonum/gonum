@@ -12,6 +12,7 @@ import (
 )
 
 func TestLuminousIntensity(t *testing.T) {
+	t.Parallel()
 	for _, value := range []float64{-1, 0, 1} {
 		var got LuminousIntensity
 		err := got.From(LuminousIntensity(value).Unit())
@@ -32,6 +33,7 @@ func TestLuminousIntensity(t *testing.T) {
 }
 
 func TestLuminousIntensityFormat(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		value  LuminousIntensity
 		format string

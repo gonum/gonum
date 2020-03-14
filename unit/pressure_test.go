@@ -12,6 +12,7 @@ import (
 )
 
 func TestPressure(t *testing.T) {
+	t.Parallel()
 	for _, value := range []float64{-1, 0, 1} {
 		var got Pressure
 		err := got.From(Pressure(value).Unit())
@@ -32,6 +33,7 @@ func TestPressure(t *testing.T) {
 }
 
 func TestPressureFormat(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		value  Pressure
 		format string

@@ -279,6 +279,7 @@ import (
 )
 
 func Test{{.Name}}Format(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct{
 		format string
 		want   string

@@ -12,6 +12,7 @@ import (
 )
 
 func TestAngle(t *testing.T) {
+	t.Parallel()
 	for _, value := range []float64{-1, 0, 1} {
 		var got Angle
 		err := got.From(Angle(value).Unit())
@@ -32,6 +33,7 @@ func TestAngle(t *testing.T) {
 }
 
 func TestAngleFormat(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		value  Angle
 		format string

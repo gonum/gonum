@@ -12,6 +12,7 @@ import (
 )
 
 func TestMagneticFluxDensity(t *testing.T) {
+	t.Parallel()
 	for _, value := range []float64{-1, 0, 1} {
 		var got MagneticFluxDensity
 		err := got.From(MagneticFluxDensity(value).Unit())
@@ -32,6 +33,7 @@ func TestMagneticFluxDensity(t *testing.T) {
 }
 
 func TestMagneticFluxDensityFormat(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		value  MagneticFluxDensity
 		format string

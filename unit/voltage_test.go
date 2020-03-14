@@ -12,6 +12,7 @@ import (
 )
 
 func TestVoltage(t *testing.T) {
+	t.Parallel()
 	for _, value := range []float64{-1, 0, 1} {
 		var got Voltage
 		err := got.From(Voltage(value).Unit())
@@ -32,6 +33,7 @@ func TestVoltage(t *testing.T) {
 }
 
 func TestVoltageFormat(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		value  Voltage
 		format string

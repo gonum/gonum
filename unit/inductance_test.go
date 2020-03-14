@@ -12,6 +12,7 @@ import (
 )
 
 func TestInductance(t *testing.T) {
+	t.Parallel()
 	for _, value := range []float64{-1, 0, 1} {
 		var got Inductance
 		err := got.From(Inductance(value).Unit())
@@ -32,6 +33,7 @@ func TestInductance(t *testing.T) {
 }
 
 func TestInductanceFormat(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		value  Inductance
 		format string

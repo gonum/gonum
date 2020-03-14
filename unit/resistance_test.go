@@ -12,6 +12,7 @@ import (
 )
 
 func TestResistance(t *testing.T) {
+	t.Parallel()
 	for _, value := range []float64{-1, 0, 1} {
 		var got Resistance
 		err := got.From(Resistance(value).Unit())
@@ -32,6 +33,7 @@ func TestResistance(t *testing.T) {
 }
 
 func TestResistanceFormat(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		value  Resistance
 		format string

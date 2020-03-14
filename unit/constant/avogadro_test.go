@@ -12,6 +12,7 @@ import (
 )
 
 func TestAvogadroFormat(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		format string
 		want   string

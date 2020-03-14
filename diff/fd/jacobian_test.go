@@ -56,7 +56,8 @@ func vecFunc43Jac(jac *mat.Dense, x []float64) {
 }
 
 func TestJacobian(t *testing.T) {
-	rand.Seed(1)
+	t.Parallel()
+	rnd := rand.New(rand.NewSource(1))
 
 	// Test with default settings.
 	for tc, test := range []struct {
@@ -85,7 +86,7 @@ func TestJacobian(t *testing.T) {
 	} {
 		const tol = 1e-6
 
-		x := randomSlice(test.n, 10)
+		x := randomSlice(rnd, test.n, 10)
 		xcopy := make([]float64, test.n)
 		copy(xcopy, x)
 
@@ -185,7 +186,7 @@ func TestJacobian(t *testing.T) {
 			formula: Central,
 		},
 	} {
-		x := randomSlice(test.n, 10)
+		x := randomSlice(rnd, test.n, 10)
 		xcopy := make([]float64, test.n)
 		copy(xcopy, x)
 
@@ -250,10 +251,10 @@ func TestJacobian(t *testing.T) {
 }
 
 // randomSlice returns a slice of n elements from the interval [-bound,bound).
-func randomSlice(n int, bound float64) []float64 {
+func randomSlice(rnd *rand.Rand, n int, bound float64) []float64 {
 	x := make([]float64, n)
 	for i := range x {
-		x[i] = 2*bound*rand.Float64() - bound
+		x[i] = 2*bound*rnd.Float64() - bound
 	}
 	return x
 }

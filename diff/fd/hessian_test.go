@@ -16,12 +16,14 @@ type HessianTester interface {
 	Hess(dst mat.MutableSymmetric, x []float64)
 }
 
-var hessianTestCases = []struct {
+type hessianTestCase struct {
 	h        HessianTester
 	x        []float64
 	settings *Settings
 	tol      float64
-}{
+}
+
+var _hessianTestCases = []hessianTestCase{
 	{
 		h:   Watson{},
 		x:   []float64{0.2, 0.3, 0.1, 0.4},
@@ -70,8 +72,22 @@ var hessianTestCases = []struct {
 	},
 }
 
+func hessianTestCases() []hessianTestCase {
+	xs := []hessianTestCase{}
+	for _, test := range _hessianTestCases {
+		n := test
+		if test.settings != nil {
+			clone := *test.settings
+			n.settings = &clone
+		}
+		xs = append(xs, n)
+	}
+	return xs
+}
+
 func TestHessian(t *testing.T) {
-	for cas, test := range hessianTestCases {
+	t.Parallel()
+	for cas, test := range hessianTestCases() {
 		n := len(test.x)
 		var got mat.SymDense
 		Hessian(&got, test.h.Func, test.x, test.settings)

@@ -112,24 +112,29 @@ func testDerivative(t *testing.T, formula Formula, tol float64, tests []testPoin
 }
 
 func TestForward(t *testing.T) {
+	t.Parallel()
 	testDerivative(t, Forward, 2e-4, testsFirst)
 }
 
 func TestBackward(t *testing.T) {
+	t.Parallel()
 	testDerivative(t, Backward, 2e-4, testsFirst)
 }
 
 func TestCentral(t *testing.T) {
+	t.Parallel()
 	testDerivative(t, Central, 1e-6, testsFirst)
 }
 
 func TestCentralSecond(t *testing.T) {
+	t.Parallel()
 	testDerivative(t, Central2nd, 1e-3, testsSecond)
 }
 
 // TestDerivativeDefault checks that the derivative works when settings is nil
 // or zero value.
 func TestDerivativeDefault(t *testing.T) {
+	t.Parallel()
 	tol := 1e-6
 	for i, test := range testsFirst {
 		ans := Derivative(test.f, test.loc, nil)

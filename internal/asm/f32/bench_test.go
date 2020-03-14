@@ -280,7 +280,9 @@ func BenchmarkLF32AxpyIncToN100000Inc2(b *testing.B)  { benchaxpyincto(b, 100000
 func BenchmarkLF32AxpyIncToN100000Inc4(b *testing.B)  { benchaxpyincto(b, 100000, 4, naiveaxpyincto) }
 func BenchmarkLF32AxpyIncToN100000Inc10(b *testing.B) { benchaxpyincto(b, 100000, 10, naiveaxpyincto) }
 
-func BenchmarkLF32AxpyIncToN100000IncM1(b *testing.B)  { benchaxpyincto(b, 100000, -1, naiveaxpyincto) }
-func BenchmarkLF32AxpyIncToN100000IncM2(b *testing.B)  { benchaxpyincto(b, 100000, -2, naiveaxpyincto) }
-func BenchmarkLF32AxpyIncToN100000IncM4(b *testing.B)  { benchaxpyincto(b, 100000, -4, naiveaxpyincto) }
-func BenchmarkLF32AxpyIncToN100000IncM10(b *testing.B) { benchaxpyincto(b, 100000, -10, naiveaxpyincto) }
+func BenchmarkLF32AxpyIncToN100000IncM1(b *testing.B) { benchaxpyincto(b, 100000, -1, naiveaxpyincto) }
+func BenchmarkLF32AxpyIncToN100000IncM2(b *testing.B) { benchaxpyincto(b, 100000, -2, naiveaxpyincto) }
+func BenchmarkLF32AxpyIncToN100000IncM4(b *testing.B) { benchaxpyincto(b, 100000, -4, naiveaxpyincto) }
+func BenchmarkLF32AxpyIncToN100000IncM10(b *testing.B) {
+	benchaxpyincto(b, 100000, -10, naiveaxpyincto)
+}

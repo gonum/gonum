@@ -9,6 +9,7 @@ import (
 )
 
 func TestDisjointSetMakeSet(t *testing.T) {
+	t.Parallel()
 	ds := newDisjointSet()
 	if ds.master == nil {
 		t.Fatal("Internal disjoint set map erroneously nil")
@@ -39,6 +40,7 @@ func TestDisjointSetMakeSet(t *testing.T) {
 }
 
 func TestDisjointSetFind(t *testing.T) {
+	t.Parallel()
 	ds := newDisjointSet()
 
 	ds.makeSet(3)
@@ -50,6 +52,7 @@ func TestDisjointSetFind(t *testing.T) {
 }
 
 func TestUnion(t *testing.T) {
+	t.Parallel()
 	ds := newDisjointSet()
 
 	ds.makeSet(3)

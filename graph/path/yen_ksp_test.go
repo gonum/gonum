@@ -179,6 +179,7 @@ func pathIDs(paths [][]graph.Node) [][]int64 {
 }
 
 func TestYenKSP(t *testing.T) {
+	t.Parallel()
 	for _, test := range yenShortestPathTests {
 		g := test.graph()
 		for _, e := range test.edges {

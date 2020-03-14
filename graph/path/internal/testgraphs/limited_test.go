@@ -1154,6 +1154,7 @@ var limitedVisionTests = []struct {
 }
 
 func TestLimitedVisionGrid(t *testing.T) {
+	t.Parallel()
 	for i, test := range limitedVisionTests {
 		l := &LimitedVisionGrid{
 			Grid:         test.g,

@@ -282,12 +282,14 @@ func testMinumumSpanning(mst func(dst WeightedBuilder, g spanningGraph) float64,
 }
 
 func TestKruskal(t *testing.T) {
+	t.Parallel()
 	testMinumumSpanning(func(dst WeightedBuilder, g spanningGraph) float64 {
 		return Kruskal(dst, g)
 	}, t)
 }
 
 func TestPrim(t *testing.T) {
+	t.Parallel()
 	testMinumumSpanning(func(dst WeightedBuilder, g spanningGraph) float64 {
 		return Prim(dst, g)
 	}, t)

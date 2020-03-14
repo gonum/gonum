@@ -5,20 +5,11 @@
 package testgraphs
 
 import (
-	"fmt"
 	"math"
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/simple"
 )
-
-func init() {
-	for _, test := range ShortestPathTests {
-		if len(test.WantPaths) != 1 && test.HasUniquePath {
-			panic(fmt.Sprintf("%q: bad shortest path test: non-unique paths marked unique", test.Name))
-		}
-	}
-}
 
 // ShortestPathTests are graphs used to test the static shortest path routines in path: BellmanFord,
 // DijkstraAllPaths, DijkstraFrom, FloydWarshall and Johnson, and the static degenerate case for the

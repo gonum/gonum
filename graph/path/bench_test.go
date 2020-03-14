@@ -6,6 +6,7 @@ package path
 
 import (
 	"fmt"
+	"sync"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
@@ -27,22 +28,36 @@ var (
 	nswUndirected_100_5_20_2 = navigableSmallWorldUndirected(100, 5, 20, 2)
 )
 
-func gnpUndirected(n int, p float64) graph.Undirected {
-	g := simple.NewUndirectedGraph()
-	err := gen.Gnp(g, n, p, nil)
-	if err != nil {
-		panic(fmt.Sprintf("path: bad test: %v", err))
+func gnpUndirected(n int, p float64) func() graph.Undirected {
+	var once sync.Once
+	var cache graph.Undirected
+	return func() graph.Undirected {
+		once.Do(func() {
+			g := simple.NewUndirectedGraph()
+			err := gen.Gnp(g, n, p, nil)
+			if err != nil {
+				panic(fmt.Sprintf("path: bad test: %v", err))
+			}
+			cache = g
+		})
+		return cache
 	}
-	return g
 }
 
-func navigableSmallWorldUndirected(n, p, q int, r float64) graph.Undirected {
-	g := simple.NewUndirectedGraph()
-	err := gen.NavigableSmallWorld(g, []int{n, n}, p, q, r, nil)
-	if err != nil {
-		panic(fmt.Sprintf("path: bad test: %v", err))
+func navigableSmallWorldUndirected(n, p, q int, r float64) func() graph.Undirected {
+	var once sync.Once
+	var cache graph.Undirected
+	return func() graph.Undirected {
+		once.Do(func() {
+			g := simple.NewUndirectedGraph()
+			err := gen.NavigableSmallWorld(g, []int{n, n}, p, q, r, nil)
+			if err != nil {
+				panic(fmt.Sprintf("path: bad test: %v", err))
+			}
+			cache = g
+		})
+		return cache
 	}
-	return g
 }
 
 func manhattan(size int) func(x, y graph.Node) float64 {
@@ -81,21 +96,21 @@ func BenchmarkAStarUndirected(b *testing.B) {
 		graph graph.Undirected
 		h     Heuristic
 	}{
-		{"GNP Undirected 10 tenth", gnpUndirected_10_tenth, nil},
-		{"GNP Undirected 100 tenth", gnpUndirected_100_tenth, nil},
-		{"GNP Undirected 1000 tenth", gnpUndirected_1000_tenth, nil},
-		{"GNP Undirected 10 half", gnpUndirected_10_half, nil},
-		{"GNP Undirected 100 half", gnpUndirected_100_half, nil},
-		{"GNP Undirected 1000 half", gnpUndirected_1000_half, nil},
+		{"GNP Undirected 10 tenth", gnpUndirected_10_tenth(), nil},
+		{"GNP Undirected 100 tenth", gnpUndirected_100_tenth(), nil},
+		{"GNP Undirected 1000 tenth", gnpUndirected_1000_tenth(), nil},
+		{"GNP Undirected 10 half", gnpUndirected_10_half(), nil},
+		{"GNP Undirected 100 half", gnpUndirected_100_half(), nil},
+		{"GNP Undirected 1000 half", gnpUndirected_1000_half(), nil},
 
-		{"NSW Undirected 10 2 2 2", nswUndirected_10_2_2_2, nil},
-		{"NSW Undirected 10 2 2 2 heuristic", nswUndirected_10_2_2_2, manhattan(10)},
-		{"NSW Undirected 10 2 5 2", nswUndirected_10_2_5_2, nil},
-		{"NSW Undirected 10 2 5 2 heuristic", nswUndirected_10_2_5_2, manhattan(10)},
-		{"NSW Undirected 100 5 10 2", nswUndirected_100_5_10_2, nil},
-		{"NSW Undirected 100 5 10 2 heuristic", nswUndirected_100_5_10_2, manhattan(100)},
-		{"NSW Undirected 100 5 20 2", nswUndirected_100_5_20_2, nil},
-		{"NSW Undirected 100 5 20 2 heuristic", nswUndirected_100_5_20_2, manhattan(100)},
+		{"NSW Undirected 10 2 2 2", nswUndirected_10_2_2_2(), nil},
+		{"NSW Undirected 10 2 2 2 heuristic", nswUndirected_10_2_2_2(), manhattan(10)},
+		{"NSW Undirected 10 2 5 2", nswUndirected_10_2_5_2(), nil},
+		{"NSW Undirected 10 2 5 2 heuristic", nswUndirected_10_2_5_2(), manhattan(10)},
+		{"NSW Undirected 100 5 10 2", nswUndirected_100_5_10_2(), nil},
+		{"NSW Undirected 100 5 10 2 heuristic", nswUndirected_100_5_10_2(), manhattan(100)},
+		{"NSW Undirected 100 5 20 2", nswUndirected_100_5_20_2(), nil},
+		{"NSW Undirected 100 5 20 2 heuristic", nswUndirected_100_5_20_2(), manhattan(100)},
 	}
 
 	for _, bm := range benchmarks {
@@ -123,13 +138,20 @@ var (
 	gnpDirected_2000_full  = gnpDirected(2000, 1)
 )
 
-func gnpDirected(n int, p float64) graph.Directed {
-	g := simple.NewDirectedGraph()
-	err := gen.Gnp(g, n, p, nil)
-	if err != nil {
-		panic(fmt.Sprintf("path: bad test: %v", err))
+func gnpDirected(n int, p float64) func() graph.Directed {
+	var once sync.Once
+	var cache graph.Directed
+	return func() graph.Directed {
+		once.Do(func() {
+			g := simple.NewDirectedGraph()
+			err := gen.Gnp(g, n, p, nil)
+			if err != nil {
+				panic(fmt.Sprintf("path: bad test: %v", err))
+			}
+			cache = g
+		})
+		return cache
 	}
-	return g
 }
 
 func BenchmarkBellmanFordFrom(b *testing.B) {
@@ -137,15 +159,15 @@ func BenchmarkBellmanFordFrom(b *testing.B) {
 		name  string
 		graph graph.Directed
 	}{
-		{"500 tenth", gnpDirected_500_tenth},
-		{"1000 tenth", gnpDirected_1000_tenth},
-		{"2000 tenth", gnpDirected_2000_tenth},
-		{"500 half", gnpDirected_500_half},
-		{"1000 half", gnpDirected_1000_half},
-		{"2000 half", gnpDirected_2000_half},
-		{"500 full", gnpDirected_500_full},
-		{"1000 full", gnpDirected_1000_full},
-		{"2000 full", gnpDirected_2000_full},
+		{"500 tenth", gnpDirected_500_tenth()},
+		{"1000 tenth", gnpDirected_1000_tenth()},
+		{"2000 tenth", gnpDirected_2000_tenth()},
+		{"500 half", gnpDirected_500_half()},
+		{"1000 half", gnpDirected_1000_half()},
+		{"2000 half", gnpDirected_2000_half()},
+		{"500 full", gnpDirected_500_full()},
+		{"1000 full", gnpDirected_1000_full()},
+		{"2000 full", gnpDirected_2000_full()},
 	}
 
 	for _, bm := range benchmarks {

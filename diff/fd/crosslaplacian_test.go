@@ -45,6 +45,7 @@ func (w WrapperCL) CrossLaplacian(x, y []float64) float64 {
 }
 
 func TestCrossLaplacian(t *testing.T) {
+	t.Parallel()
 	for cas, test := range []struct {
 		l        CrossLaplacianTester
 		x, y     []float64

@@ -42,7 +42,8 @@ func (r Rosenbrock) FDf(x []float64, deriv []float64) (sum float64) {
 }
 
 func TestGradient(t *testing.T) {
-	rand.Seed(1)
+	t.Parallel()
+	rnd := rand.New(rand.NewSource(1))
 	for i, test := range []struct {
 		nDim    int
 		tol     float64
@@ -71,7 +72,7 @@ func TestGradient(t *testing.T) {
 	} {
 		x := make([]float64, test.nDim)
 		for i := range x {
-			x[i] = rand.Float64()
+			x[i] = rnd.Float64()
 		}
 		xcopy := make([]float64, len(x))
 		copy(xcopy, x)
@@ -93,7 +94,7 @@ func TestGradient(t *testing.T) {
 
 		// Try with provided gradient.
 		for i := range gradient {
-			gradient[i] = rand.Float64()
+			gradient[i] = rnd.Float64()
 		}
 		Gradient(gradient, r.F, x, &Settings{
 			Formula: test.formula,
@@ -107,7 +108,7 @@ func TestGradient(t *testing.T) {
 
 		// Try with known value.
 		for i := range gradient {
-			gradient[i] = rand.Float64()
+			gradient[i] = rnd.Float64()
 		}
 		Gradient(gradient, r.F, x, &Settings{
 			Formula:     test.formula,
@@ -120,7 +121,7 @@ func TestGradient(t *testing.T) {
 
 		// Try with concurrent evaluation.
 		for i := range gradient {
-			gradient[i] = rand.Float64()
+			gradient[i] = rnd.Float64()
 		}
 		Gradient(gradient, r.F, x, &Settings{
 			Formula:    test.formula,
@@ -135,7 +136,7 @@ func TestGradient(t *testing.T) {
 
 		// Try with concurrent evaluation with origin known.
 		for i := range gradient {
-			gradient[i] = rand.Float64()
+			gradient[i] = rnd.Float64()
 		}
 		Gradient(gradient, r.F, x, &Settings{
 			Formula:     test.formula,
@@ -149,7 +150,7 @@ func TestGradient(t *testing.T) {
 
 		// Try with nil settings.
 		for i := range gradient {
-			gradient[i] = rand.Float64()
+			gradient[i] = rnd.Float64()
 		}
 		Gradient(gradient, r.F, x, nil)
 		if !floats.EqualApprox(gradient, trueGradient, test.tol) {
@@ -158,7 +159,7 @@ func TestGradient(t *testing.T) {
 
 		// Try with zero-valued settings.
 		for i := range gradient {
-			gradient[i] = rand.Float64()
+			gradient[i] = rnd.Float64()
 		}
 		Gradient(gradient, r.F, x, &Settings{})
 		if !floats.EqualApprox(gradient, trueGradient, test.tol) {
@@ -179,6 +180,7 @@ func Panics(fun func()) (b bool) {
 }
 
 func TestGradientPanics(t *testing.T) {
+	t.Parallel()
 	// Test that it panics
 	if !Panics(func() {
 		Gradient([]float64{0.0}, func(x []float64) float64 { return x[0] * x[0] }, []float64{0.0, 0.0}, nil)

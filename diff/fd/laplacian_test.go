@@ -12,7 +12,8 @@ import (
 )
 
 func TestLaplacian(t *testing.T) {
-	for cas, test := range hessianTestCases {
+	t.Parallel()
+	for cas, test := range hessianTestCases() {
 		// Modify the test cases where the formula is set.
 		settings := test.settings
 		if settings != nil && !settings.Formula.isZero() {

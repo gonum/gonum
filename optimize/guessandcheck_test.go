@@ -13,6 +13,7 @@ import (
 )
 
 func TestGuessAndCheck(t *testing.T) {
+	t.Parallel()
 	dim := 30
 	problem := Problem{
 		Func: functions.ExtendedRosenbrock{}.Func,

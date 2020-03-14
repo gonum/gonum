@@ -13,6 +13,7 @@ import (
 )
 
 func TestMinimalSurface(t *testing.T) {
+	t.Parallel()
 	for _, size := range [][2]int{
 		{20, 30},
 		{30, 30},

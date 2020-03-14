@@ -15,6 +15,7 @@ import (
 )
 
 func TestListSearch(t *testing.T) {
+	t.Parallel()
 	rnd := rand.New(rand.NewSource(1))
 	for cas, test := range []struct {
 		r, c       int

@@ -14,6 +14,7 @@ import (
 )
 
 func TestMoreThuente(t *testing.T) {
+	t.Parallel()
 	d := 0.001
 	c := 0.001
 	ls := &MoreThuente{
@@ -24,6 +25,7 @@ func TestMoreThuente(t *testing.T) {
 }
 
 func TestBisection(t *testing.T) {
+	t.Parallel()
 	c := 0.1
 	ls := &Bisection{
 		CurvatureFactor: c,
@@ -32,6 +34,7 @@ func TestBisection(t *testing.T) {
 }
 
 func TestBacktracking(t *testing.T) {
+	t.Parallel()
 	d := 0.001
 	ls := &Backtracking{
 		DecreaseFactor: d,

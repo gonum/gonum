@@ -337,6 +337,7 @@ var volumeTests = []struct {
 }
 
 func TestVolume(t *testing.T) {
+	t.Parallel()
 	const tol = 1e-15
 
 	for _, test := range volumeTests {
@@ -405,6 +406,7 @@ func walkVolume(t *bucket, fn func(*bucket)) {
 }
 
 func TestVolumeForceOn(t *testing.T) {
+	t.Parallel()
 	const (
 		size = 1000
 		tol  = 1e-3
@@ -433,7 +435,9 @@ func TestVolumeForceOn(t *testing.T) {
 			continue
 		}
 		for _, theta := range []float64{0, 0.3, 0.6, 0.9} {
+			theta := theta
 			t.Run(fmt.Sprintf("%d-body/theta=%v", len(particles), theta), func(t *testing.T) {
+				t.Parallel()
 				var ssd, sd float64
 				var calls int
 				for i, p := range particles {

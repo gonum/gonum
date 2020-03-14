@@ -22,11 +22,6 @@ env:
  global:
   - GO111MODULE=on
   - GOFLAGS="-mod=readonly"
- matrix:
-  - TAGS=""
-  - TAGS="-tags bounds"
-  - TAGS="-tags noasm"
-  - TAGS="-tags appengine"
 
 cache:
  directories:
@@ -40,35 +35,11 @@ git:
 matrix:
  fast_finish: true
  exclude:
-  - os: linux
-    arch: arm64
-    env: TAGS="-tags bounds"
-  - os: linux
-    arch: arm64
-    env: TAGS="-tags noasm"
-  - os: linux
-    arch: arm64
-    env: TAGS="-tags appengine"
-
-  - os: osx
-    env: TAGS="-tags bounds"
-  - os: osx
-    env: TAGS="-tags noasm"
-  - os: osx
-    env: TAGS="-tags appengine"
-
   - os: osx
     arch: arm64
 
   - os: osx
     go: master
-
-  - os: windows
-    env: TAGS="-tags bounds"
-  - os: windows
-    env: TAGS="-tags noasm"
-  - os: windows
-    env: TAGS="-tags appengine"
 
   - os: windows
     arch: arm64

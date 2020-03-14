@@ -13,9 +13,25 @@ if [[ "${dir}" = "" || ! -d "${dir}" ]]; then
     exit 1
 fi
 
-for f in $(echo ${dir%/}/*); do
-	[ -d $f ] && continue
-	[ ! -x $f ] && continue
-	echo "+$f"
-	$f
+fold_start() {
+    echo -e "travis_fold:start:$1\033[33;1m$2\033[0m"
+}
+
+fold_end() {
+    echo -e "\ntravis_fold:end:$1\r"
+}
+
+for tagset in '' 'bounds' 'noasm' 'appengine' ;
+do
+    export TAGS="-tags $tagset"
+    fold_start tag "${TAGS}"
+    for f in $(echo ${dir%/}/*); do
+        [ -d $f ] && continue
+        [ ! -x $f ] && continue
+
+        fold_start part "$(basename $f)"
+        $f
+        fold_end part
+    done
+    fold_end tag
 done

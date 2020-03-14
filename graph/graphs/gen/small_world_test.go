@@ -17,6 +17,7 @@ var smallWorldDimensionParameters = [][]int{
 }
 
 func TestNavigableSmallWorldUndirected(t *testing.T) {
+	t.Parallel()
 	for p := 1; p < 5; p++ {
 		for q := 0; q < 10; q++ {
 			for r := 0.5; r < 10; r++ {
@@ -51,6 +52,7 @@ func TestNavigableSmallWorldUndirected(t *testing.T) {
 }
 
 func TestNavigableSmallWorldDirected(t *testing.T) {
+	t.Parallel()
 	for p := 1; p < 5; p++ {
 		for q := 0; q < 10; q++ {
 			for r := 0.5; r < 10; r++ {

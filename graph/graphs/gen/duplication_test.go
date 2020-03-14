@@ -33,6 +33,7 @@ func (g *duplication) SetEdge(e graph.Edge) {
 }
 
 func TestDuplication(t *testing.T) {
+	t.Parallel()
 	for n := 2; n <= 50; n++ {
 		for alpha := 0.1; alpha <= 1; alpha += 0.1 {
 			for delta := 0.; delta <= 1; delta += 0.2 {

@@ -11,6 +11,7 @@ import (
 )
 
 func TestTunableClusteringScaleFree(t *testing.T) {
+	t.Parallel()
 	for n := 2; n <= 20; n++ {
 		for m := 0; m < n; m++ {
 			for p := 0.; p <= 1; p += 0.1 {
@@ -39,6 +40,7 @@ func TestTunableClusteringScaleFree(t *testing.T) {
 }
 
 func TestPreferentialAttachment(t *testing.T) {
+	t.Parallel()
 	for n := 2; n <= 20; n++ {
 		for m := 0; m < n; m++ {
 			g := &gnUndirected{UndirectedBuilder: simple.NewUndirectedGraph()}

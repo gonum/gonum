@@ -53,6 +53,7 @@ func (g *gnDirected) SetEdge(e graph.Edge) {
 }
 
 func TestGnpUndirected(t *testing.T) {
+	t.Parallel()
 	for n := 2; n <= 20; n++ {
 		for p := 0.; p <= 1; p += 0.1 {
 			g := &gnUndirected{UndirectedBuilder: simple.NewUndirectedGraph()}
@@ -79,6 +80,7 @@ func TestGnpUndirected(t *testing.T) {
 }
 
 func TestGnpDirected(t *testing.T) {
+	t.Parallel()
 	for n := 2; n <= 20; n++ {
 		for p := 0.; p <= 1; p += 0.1 {
 			g := &gnDirected{DirectedBuilder: simple.NewDirectedGraph()}
@@ -102,6 +104,7 @@ func TestGnpDirected(t *testing.T) {
 }
 
 func TestGnmUndirected(t *testing.T) {
+	t.Parallel()
 	for n := 2; n <= 20; n++ {
 		nChoose2 := (n - 1) * n / 2
 		for m := 0; m <= nChoose2; m++ {
@@ -129,6 +132,7 @@ func TestGnmUndirected(t *testing.T) {
 }
 
 func TestGnmDirected(t *testing.T) {
+	t.Parallel()
 	for n := 2; n <= 20; n++ {
 		nChoose2 := (n - 1) * n / 2
 		for m := 0; m <= nChoose2*2; m++ {
@@ -153,6 +157,7 @@ func TestGnmDirected(t *testing.T) {
 }
 
 func TestSmallWorldsBBUndirected(t *testing.T) {
+	t.Parallel()
 	for n := 2; n <= 20; n++ {
 		for d := 1; d <= (n-1)/2; d++ {
 			for p := 0.; p < 1; p += 0.1 {
@@ -181,6 +186,7 @@ func TestSmallWorldsBBUndirected(t *testing.T) {
 }
 
 func TestSmallWorldsBBDirected(t *testing.T) {
+	t.Parallel()
 	for n := 2; n <= 20; n++ {
 		for d := 1; d <= (n-1)/2; d++ {
 			for p := 0.; p < 1; p += 0.1 {
@@ -206,6 +212,7 @@ func TestSmallWorldsBBDirected(t *testing.T) {
 }
 
 func TestPowerLawUndirected(t *testing.T) {
+	t.Parallel()
 	for n := 2; n <= 20; n++ {
 		for d := 1; d <= 5; d++ {
 			g := multi.NewUndirectedGraph()
@@ -236,6 +243,7 @@ func TestPowerLawUndirected(t *testing.T) {
 }
 
 func TestPowerLawDirected(t *testing.T) {
+	t.Parallel()
 	for n := 2; n <= 20; n++ {
 		for d := 1; d <= 5; d++ {
 			g := multi.NewDirectedGraph()
@@ -266,6 +274,7 @@ func TestPowerLawDirected(t *testing.T) {
 }
 
 func TestBipartitePowerLawUndirected(t *testing.T) {
+	t.Parallel()
 	for n := 2; n <= 20; n++ {
 		for d := 1; d <= 5; d++ {
 			g := multi.NewUndirectedGraph()
@@ -315,6 +324,7 @@ func TestBipartitePowerLawUndirected(t *testing.T) {
 }
 
 func TestBipartitePowerLawDirected(t *testing.T) {
+	t.Parallel()
 	for n := 2; n <= 20; n++ {
 		for d := 1; d <= 5; d++ {
 			g := multi.NewDirectedGraph()

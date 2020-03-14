@@ -595,6 +595,7 @@ import (
 )
 
 func Test{{.DimensionName}}(t *testing.T) {
+	t.Parallel()
 	for _, value := range []float64{-1, 0, 1} {
 		var got {{.DimensionName}}
 		err := got.From({{.DimensionName}}(value).Unit())
@@ -615,6 +616,7 @@ func Test{{.DimensionName}}(t *testing.T) {
 }
 
 func Test{{.DimensionName}}Format(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct{
 		value  {{.DimensionName}}
 		format string

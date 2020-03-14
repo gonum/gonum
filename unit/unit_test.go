@@ -102,6 +102,7 @@ var formatTests = []struct {
 }
 
 func TestFormat(t *testing.T) {
+	t.Parallel()
 	for _, ts := range formatTests {
 		if r := fmt.Sprintf(ts.format, ts.unit); r != ts.expect {
 			t.Errorf("Format %q: got: %q expected: %q", ts.format, r, ts.expect)
@@ -110,6 +111,7 @@ func TestFormat(t *testing.T) {
 }
 
 func TestGoStringFormat(t *testing.T) {
+	t.Parallel()
 	expect1 := `&unit.Unit{dimensions:unit.Dimensions{4:2, 7:-1}, value:6.62606957e-34}`
 	expect2 := `&unit.Unit{dimensions:unit.Dimensions{7:-1, 4:2}, value:6.62606957e-34}`
 	if r := fmt.Sprintf("%#v", New(6.62606957e-34, Dimensions{MassDim: 2, TimeDim: -1})); r != expect1 && r != expect2 {
@@ -127,6 +129,7 @@ var initializationTests = []struct {
 }
 
 func TestInitialization(t *testing.T) {
+	t.Parallel()
 	for _, ts := range initializationTests {
 		if ts.expValue != ts.unit.value {
 			t.Errorf("Value wrong on initialization: got: %v expected: %v", ts.unit.value, ts.expValue)
@@ -159,6 +162,7 @@ var dimensionEqualityTests = []struct {
 }
 
 func TestDimensionEquality(t *testing.T) {
+	t.Parallel()
 	for _, ts := range dimensionEqualityTests {
 		if DimensionsMatch(ts.a, ts.b) != ts.shouldMatch {
 			t.Errorf("Dimension comparison incorrect for case %s. got: %v, expected: %v", ts.name, !ts.shouldMatch, ts.shouldMatch)
@@ -180,6 +184,7 @@ var operationTests = []struct {
 }
 
 func TestOperations(t *testing.T) {
+	t.Parallel()
 	for i, test := range operationTests {
 		var got Uniter
 		if panics(func() { got = test.recvOp(test.param) }) {

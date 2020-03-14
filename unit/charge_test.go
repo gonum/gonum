@@ -12,6 +12,7 @@ import (
 )
 
 func TestCharge(t *testing.T) {
+	t.Parallel()
 	for _, value := range []float64{-1, 0, 1} {
 		var got Charge
 		err := got.From(Charge(value).Unit())
@@ -32,6 +33,7 @@ func TestCharge(t *testing.T) {
 }
 
 func TestChargeFormat(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		value  Charge
 		format string

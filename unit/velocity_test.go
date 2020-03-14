@@ -12,6 +12,7 @@ import (
 )
 
 func TestVelocity(t *testing.T) {
+	t.Parallel()
 	for _, value := range []float64{-1, 0, 1} {
 		var got Velocity
 		err := got.From(Velocity(value).Unit())
@@ -32,6 +33,7 @@ func TestVelocity(t *testing.T) {
 }
 
 func TestVelocityFormat(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		value  Velocity
 		format string

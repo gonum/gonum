@@ -12,6 +12,7 @@ import (
 )
 
 func TestCurrent(t *testing.T) {
+	t.Parallel()
 	for _, value := range []float64{-1, 0, 1} {
 		var got Current
 		err := got.From(Current(value).Unit())
@@ -32,6 +33,7 @@ func TestCurrent(t *testing.T) {
 }
 
 func TestCurrentFormat(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		value  Current
 		format string

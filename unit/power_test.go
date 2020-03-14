@@ -12,6 +12,7 @@ import (
 )
 
 func TestPower(t *testing.T) {
+	t.Parallel()
 	for _, value := range []float64{-1, 0, 1} {
 		var got Power
 		err := got.From(Power(value).Unit())
@@ -32,6 +33,7 @@ func TestPower(t *testing.T) {
 }
 
 func TestPowerFormat(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		value  Power
 		format string

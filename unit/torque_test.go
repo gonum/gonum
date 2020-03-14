@@ -12,6 +12,7 @@ import (
 )
 
 func TestTorque(t *testing.T) {
+	t.Parallel()
 	for _, value := range []float64{-1, 0, 1} {
 		var got Torque
 		err := got.From(Torque(value).Unit())
@@ -32,6 +33,7 @@ func TestTorque(t *testing.T) {
 }
 
 func TestTorqueFormat(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		value  Torque
 		format string

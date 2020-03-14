@@ -12,6 +12,7 @@ import (
 )
 
 func TestForce(t *testing.T) {
+	t.Parallel()
 	for _, value := range []float64{-1, 0, 1} {
 		var got Force
 		err := got.From(Force(value).Unit())
@@ -32,6 +33,7 @@ func TestForce(t *testing.T) {
 }
 
 func TestForceFormat(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		value  Force
 		format string

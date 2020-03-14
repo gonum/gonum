@@ -12,6 +12,7 @@ import (
 )
 
 func TestMass(t *testing.T) {
+	t.Parallel()
 	for _, value := range []float64{-1, 0, 1} {
 		var got Mass
 		err := got.From(Mass(value).Unit())
@@ -32,6 +33,7 @@ func TestMass(t *testing.T) {
 }
 
 func TestMassFormat(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		value  Mass
 		format string

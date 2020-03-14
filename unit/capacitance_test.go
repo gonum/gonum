@@ -12,6 +12,7 @@ import (
 )
 
 func TestCapacitance(t *testing.T) {
+	t.Parallel()
 	for _, value := range []float64{-1, 0, 1} {
 		var got Capacitance
 		err := got.From(Capacitance(value).Unit())
@@ -32,6 +33,7 @@ func TestCapacitance(t *testing.T) {
 }
 
 func TestCapacitanceFormat(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		value  Capacitance
 		format string

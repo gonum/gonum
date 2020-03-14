@@ -12,6 +12,7 @@ import (
 )
 
 func TestFrequency(t *testing.T) {
+	t.Parallel()
 	for _, value := range []float64{-1, 0, 1} {
 		var got Frequency
 		err := got.From(Frequency(value).Unit())
@@ -32,6 +33,7 @@ func TestFrequency(t *testing.T) {
 }
 
 func TestFrequencyFormat(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		value  Frequency
 		format string

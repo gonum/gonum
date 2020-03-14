@@ -12,6 +12,7 @@ import (
 )
 
 func TestMole(t *testing.T) {
+	t.Parallel()
 	for _, value := range []float64{-1, 0, 1} {
 		var got Mole
 		err := got.From(Mole(value).Unit())
@@ -32,6 +33,7 @@ func TestMole(t *testing.T) {
 }
 
 func TestMoleFormat(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		value  Mole
 		format string

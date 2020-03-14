@@ -12,6 +12,7 @@ import (
 )
 
 func TestVolume(t *testing.T) {
+	t.Parallel()
 	for _, value := range []float64{-1, 0, 1} {
 		var got Volume
 		err := got.From(Volume(value).Unit())
@@ -32,6 +33,7 @@ func TestVolume(t *testing.T) {
 }
 
 func TestVolumeFormat(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		value  Volume
 		format string

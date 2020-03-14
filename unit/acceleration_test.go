@@ -12,6 +12,7 @@ import (
 )
 
 func TestAcceleration(t *testing.T) {
+	t.Parallel()
 	for _, value := range []float64{-1, 0, 1} {
 		var got Acceleration
 		err := got.From(Acceleration(value).Unit())
@@ -32,6 +33,7 @@ func TestAcceleration(t *testing.T) {
 }
 
 func TestAccelerationFormat(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		value  Acceleration
 		format string

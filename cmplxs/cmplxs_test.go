@@ -2,7 +2,7 @@
 // Use of this code is governed by a BSD-style
 // license that can be found in the LICENSE file
 
-package complex_test
+package cmplxs
 
 import (
 	"math"
@@ -12,7 +12,6 @@ import (
 
 	"golang.org/x/exp/rand"
 
-	. "gonum.org/v1/gonum/complex"
 	"gonum.org/v1/gonum/floats"
 )
 
@@ -30,6 +29,7 @@ func areSlicesEqual(t *testing.T, truth, comp []complex128, str string) {
 	}
 }
 
+// areFloatSlicesEqual is a duplicate of floats.areSlicesEqual
 func areFloatSlicesEqual(t *testing.T, truth, comp []float64, str string) {
 	if !floats.EqualApprox(comp, truth, EqTolerance) {
 		t.Errorf(str+". Expected %v, returned %v", truth, comp)
@@ -58,7 +58,7 @@ func TestAbs(t *testing.T) {
 		},
 		{
 			[]complex128{4 + 4i, 5 - 5i, -6 + 6i},
-			[]float64{5.656854249492381, 7.0710678118654755, 8.485281374238571},
+			[]float64{5.6568542494923801952042, 7.0710678118654752440087, 8.4852813742385702928131},
 		},
 		{
 			[]complex128{7i, -8i, 9i},
@@ -67,8 +67,14 @@ func TestAbs(t *testing.T) {
 	}
 
 	for _, v := range test {
-		n := Abs(v.a)
-		areFloatSlicesEqual(t, v.truth, n, "cfloats: Abs: incorrect values")
+		n := make([]float64, len(v.a))
+		Abs(n, v.a)
+		areFloatSlicesEqual(t, v.truth, n, "incorrect values")
+	}
+
+	// Test that it panics
+	if !Panics(func() { Abs(make([]float64, 2), make([]complex128, 3)) }) {
+		t.Errorf("Did not panic with length mismatch")
 	}
 }
 
@@ -167,6 +173,38 @@ func TestAddScaledTo(t *testing.T) {
 	}
 }
 
+func TestArg(t *testing.T) {
+	test := []struct {
+		a     []complex128
+		truth []float64
+	}{
+		{
+			[]complex128{1, -2, 3},
+			[]float64{0, math.Pi, 0},
+		},
+		{
+			[]complex128{4 + 4i, 5 - 5i, -6 + 6i, -7 - 7i},
+			[]float64{math.Pi / 4, -math.Pi / 4, 3 * math.Pi / 4, -3 * math.Pi / 4},
+		},
+		{
+			[]complex128{7i, -8i, 9i},
+			[]float64{math.Pi / 2, -math.Pi / 2, math.Pi / 2},
+		},
+	}
+
+	for _, v := range test {
+		n := make([]float64, len(v.a))
+		m := Arg(n, v.a)
+		areFloatSlicesEqual(t, v.truth, m, "incorrect returned values")
+		areFloatSlicesEqual(t, v.truth, n, "incorrect stored values")
+	}
+
+	// Test that it panics
+	if !Panics(func() { Arg(make([]float64, 2), make([]complex128, 3)) }) {
+		t.Errorf("Did not panic with length mismatch")
+	}
+}
+
 func TestConj(t *testing.T) {
 	test := []struct {
 		a     []complex128
@@ -187,8 +225,17 @@ func TestConj(t *testing.T) {
 	}
 
 	for _, v := range test {
-		n := Conj(v.a)
-		areSlicesEqual(t, v.truth, n, "cfloats: Conj: incorrect values")
+		n := make([]complex128, len(v.a))
+		m := ConjTo(n, v.a)
+		Conj(v.a)
+		areSlicesEqual(t, v.truth, m, "incorrect returned values")
+		areSlicesEqual(t, v.truth, n, "incorrect placed values")
+		areSlicesEqual(t, v.truth, v.a, "incorrect values")
+	}
+
+	// Test that it panics
+	if !Panics(func() { ConjTo(make([]complex128, 2), make([]complex128, 3)) }) {
+		t.Errorf("Did not panic with length mismatch")
 	}
 }
 
@@ -234,6 +281,40 @@ func TestCumSum(t *testing.T) {
 	truth = []complex128{}
 	CumSum(emptyReceiver, emptyReceiver)
 	areSlicesEqual(t, truth, emptyReceiver, "Wrong cumsum returned with empty receiver")
+}
+
+func TestDeg(t *testing.T) {
+	test := []struct {
+		a     []float64
+		truth []float64
+	}{
+		{
+			[]float64{0, math.Pi, 0},
+			[]float64{0, 180, 0},
+		},
+		{
+			[]float64{math.Pi / 4, -math.Pi / 4, 3 * math.Pi / 4, -3 * math.Pi / 4},
+			[]float64{45, -45, 135, -135},
+		},
+		{
+			[]float64{math.Pi / 2, -math.Pi / 2, math.Pi / 2},
+			[]float64{90, -90, 90},
+		},
+	}
+
+	for _, v := range test {
+		n := make([]float64, len(v.a))
+		m := DegTo(n, v.a)
+		Deg(v.a)
+		areFloatSlicesEqual(t, v.truth, m, "incorrect received values")
+		areFloatSlicesEqual(t, v.truth, n, "incorrect placed values")
+		areFloatSlicesEqual(t, v.truth, v.a, "incorrect values")
+	}
+
+	// Test that it panics
+	if !Panics(func() { DegTo(make([]float64, 2), make([]float64, 3)) }) {
+		t.Errorf("Did not panic with length mismatch")
+	}
 }
 
 func TestDistance(t *testing.T) {
@@ -468,6 +549,12 @@ func TestEqualsRelative(t *testing.T) {
 		{cmplx.Inf(), complex(0, math.Inf(1)), 0, false},
 		{complex(math.Inf(1), math.Inf(1)), cmplx.Inf(), 0, true},
 		{cmplx.Inf(), complex(math.Inf(1), math.Inf(1)), 0, true},
+		{complex(math.Inf(-1), 0), cmplx.Inf(), 0, false},
+		{cmplx.Inf(), complex(math.Inf(-1), 0), 0, false},
+		{complex(0, math.Inf(-1)), cmplx.Inf(), 0, false},
+		{cmplx.Inf(), complex(0, math.Inf(-1)), 0, false},
+		{complex(math.Inf(-1), math.Inf(-1)), cmplx.Inf(), 0, false},
+		{cmplx.Inf(), complex(math.Inf(-1), math.Inf(-1)), 0, false},
 		{cmplx.NaN(), complex(math.MaxFloat64, math.MaxFloat64), 0, false},
 		{complex(math.MaxFloat64, math.MaxFloat64), cmplx.NaN(), 0, false},
 		{cmplx.NaN(), -complex(math.MaxFloat64, math.MaxFloat64), 0, false},
@@ -646,8 +733,135 @@ func TestHasNaN(t *testing.T) {
 	}
 }
 
+func TestHermitian(t *testing.T) {
+	test := []struct {
+		r     int
+		c     int
+		a     []complex128
+		truth []complex128
+	}{
+		{
+			1,
+			3,
+			[]complex128{1, -2, 3},
+			[]complex128{1, -2, 3},
+		},
+		{
+			1,
+			3,
+			[]complex128{4 + 4i, 5 - 5i, -6 + 6i},
+			[]complex128{4 - 4i, 5 + 5i, -6 - 6i},
+		},
+		{
+			1,
+			3,
+			[]complex128{7i, -8i, 9i},
+			[]complex128{-7i, 8i, -9i},
+		},
+		{
+			2,
+			2,
+			[]complex128{1 + 1i, 2 - 2i, -3 + 3i, -4 - 4i},
+			[]complex128{1 - 1i, -3 - 3i, 2 + 2i, -4 + 4i},
+		},
+		{
+			3,
+			3,
+			[]complex128{1 + 1i, 2 - 2i, -3 + 3i, -4 - 4i, 5 + 5i, 6 - 6i, -7 - 7i, 8 + 8i, 9 + 9i},
+			[]complex128{1 - 1i, -4 + 4i, -7 + 7i, 2 + 2i, 5 - 5i, 8 - 8i, -3 - 3i, 6 + 6i, 9 - 9i},
+		},
+		{
+			2,
+			3,
+			[]complex128{1 + 1i, 2 - 2i, -3 + 3i, -4 - 4i, 5 + 5i, 6 - 6i},
+			[]complex128{1 - 1i, -4 + 4i, 2 + 2i, 5 - 5i, -3 - 3i, 6 + 6i},
+		},
+		{
+			4,
+			2,
+			[]complex128{1 + 1i, 2 - 2i, -3 + 3i, -4 - 4i, 5 + 5i, 6 - 6i, -7 - 7i, 8 + 8i},
+			[]complex128{1 - 1i, -3 - 3i, 5 - 5i, -7 + 7i, 2 + 2i, -4 + 4i, 6 + 6i, 8 - 8i},
+		},
+	}
+
+	for _, v := range test {
+		n := make([]complex128, len(v.a))
+		m := HermitianTo(v.r, v.c, n, v.a)
+		Hermitian(v.r, v.c, v.a)
+		areSlicesEqual(t, v.truth, m, "incorrect received values")
+		areSlicesEqual(t, v.truth, n, "incorrect stored values")
+		areSlicesEqual(t, v.truth, v.a, "incorrect values")
+	}
+
+	// Test that it panics
+	if !Panics(func() { Hermitian(2, 3, make([]complex128, 9)) }) {
+		t.Errorf("Did not panic with row/column and slice length mismatch")
+	}
+	if !Panics(func() { HermitianTo(1, 3, make([]complex128, 2), make([]complex128, 3)) }) {
+		t.Errorf("Did not panic with length mismatch")
+	}
+	if !Panics(func() { HermitianTo(2, 3, make([]complex128, 9), make([]complex128, 9)) }) {
+		t.Errorf("Did not panic with row/column and slice length mismatch")
+	}
+}
+
+func TestImag(t *testing.T) {
+	test := []struct {
+		a     []complex128
+		truth []float64
+	}{
+		{
+			[]complex128{1, -2, 3},
+			[]float64{0, 0, 0},
+		},
+		{
+			[]complex128{4 + 4i, 5 - 5i, -6 + 6i},
+			[]float64{4, -5, 6},
+		},
+		{
+			[]complex128{7i, -8i, 9i},
+			[]float64{7, -8, 9},
+		},
+		{
+			[]complex128{1 + 1i, 2 - 2i, -3 + 3i, -4 - 4i},
+			[]float64{1, -2, 3, -4},
+		},
+		{
+			[]complex128{1 + 1i, 2 - 2i, -3 + 3i, -4 - 4i, 5 + 5i, 6 - 6i, -7 - 7i, 8 + 8i, 9 + 9i},
+			[]float64{1, -2, 3, -4, 5, -6, -7, 8, 9},
+		},
+		{
+			[]complex128{1 + 1i, 2 - 2i, -3 + 3i, -4 - 4i, 5 + 5i, 6 - 6i},
+			[]float64{1, -2, 3, -4, 5, -6},
+		},
+		{
+			[]complex128{1 + 1i, 2 - 2i, -3 + 3i, -4 - 4i, 5 + 5i, 6 - 6i, -7 - 7i, 8 + 8i},
+			[]float64{1, -2, 3, -4, 5, -6, -7, 8},
+		},
+	}
+
+	for _, v := range test {
+		n := make([]float64, len(v.a))
+		m := Imag(n, v.a)
+		areFloatSlicesEqual(t, v.truth, m, "incorrect received values")
+		areFloatSlicesEqual(t, v.truth, n, "incorrect stored values")
+	}
+
+	var v []complex128
+	var n []float64
+	m := Imag(n, v)
+	if len(n) != 0 && len(m) != 0 {
+		t.Errorf("incorrect empty slice value")
+	}
+
+	// Test that it panics
+	if !Panics(func() { Imag(make([]float64, 2), make([]complex128, 3)) }) {
+		t.Errorf("Did not panic with length mismatch")
+	}
+}
+
 func TestL1Dist(t *testing.T) {
-	var t_gd, s_gd complex128 = -cinf, cinf
+	var tGd, sGd complex128 = -cinf, cinf
 	for j, v := range []struct {
 		s, t   []complex128
 		expect float64
@@ -693,24 +907,24 @@ func TestL1Dist(t *testing.T) {
 			expect: nan,
 		},
 	} {
-		sg_ln, tg_ln := 4+j%2, 4+j%3
-		v.s, v.t = guardVector(v.s, s_gd, sg_ln), guardVector(v.t, t_gd, tg_ln)
-		s_lc, t_lc := v.s[sg_ln:len(v.s)-sg_ln], v.t[tg_ln:len(v.t)-tg_ln]
-		ret := L1Dist(s_lc, t_lc)
+		sgLn, tgLn := 4+j%2, 4+j%3
+		v.s, v.t = guardVector(v.s, sGd, sgLn), guardVector(v.t, tGd, tgLn)
+		sLc, tLc := v.s[sgLn:len(v.s)-sgLn], v.t[tgLn:len(v.t)-tgLn]
+		ret := L1Dist(sLc, tLc)
 		if !fsame(ret, v.expect) {
 			t.Errorf("Test %d L1Dist error Got: %f Expected: %f", j, ret, v.expect)
 		}
-		if !isValidGuard(v.s, s_gd, sg_ln) {
-			t.Errorf("Test %d Guard violated in s vector %v %v", j, v.s[:sg_ln], v.s[len(v.s)-sg_ln:])
+		if !isValidGuard(v.s, sGd, sgLn) {
+			t.Errorf("Test %d Guard violated in s vector %v %v", j, v.s[:sgLn], v.s[len(v.s)-sgLn:])
 		}
-		if !isValidGuard(v.t, t_gd, tg_ln) {
-			t.Errorf("Test %d Guard violated in t vector %v %v", j, v.t[:tg_ln], v.t[len(v.t)-tg_ln:])
+		if !isValidGuard(v.t, tGd, tgLn) {
+			t.Errorf("Test %d Guard violated in t vector %v %v", j, v.t[:tgLn], v.t[len(v.t)-tgLn:])
 		}
 	}
 }
 
 func TestL1Norm(t *testing.T) {
-	var src_gd complex128 = 1 + 1i
+	var srcGd complex128 = 1 + 1i
 	for j, v := range []struct {
 		want float64
 		x    []complex128
@@ -723,21 +937,21 @@ func TestL1Norm(t *testing.T) {
 		{want: 56.56854249492380195206, x: []complex128{8 + 8i, -8 - 8i, 8 + 8i, -8 - 8i, 8 + 8i}},
 		{want: 7.07106781186547524400, x: []complex128{0, 1 + 1i, 0, -1 - 1i, 0, 1 + 1i, 0, -1 - 1i, 0, 1 + 1i}},
 	} {
-		g_ln := 4 + j%2
-		v.x = guardVector(v.x, src_gd, g_ln)
-		src := v.x[g_ln : len(v.x)-g_ln]
+		gLn := 4 + j%2
+		v.x = guardVector(v.x, srcGd, gLn)
+		src := v.x[gLn : len(v.x)-gLn]
 		ret := L1Norm(src)
 		if !fsame(ret, v.want) {
 			t.Errorf("Test %d L1Norm error Got: %f Expected: %f", j, ret, v.want)
 		}
-		if !isValidGuard(v.x, src_gd, g_ln) {
-			t.Errorf("Test %d Guard violated in src vector %v %v", j, v.x[:g_ln], v.x[len(v.x)-g_ln:])
+		if !isValidGuard(v.x, srcGd, gLn) {
+			t.Errorf("Test %d Guard violated in src vector %v %v", j, v.x[:gLn], v.x[len(v.x)-gLn:])
 		}
 	}
 }
 
 func TestL1NormInc(t *testing.T) {
-	var src_gd complex128 = 1
+	var srcGd complex128 = 1
 	for j, v := range []struct {
 		inc  int
 		want float64
@@ -751,21 +965,21 @@ func TestL1NormInc(t *testing.T) {
 		{inc: 15, want: 56.56854249492380195206, x: []complex128{8 + 8i, -8 - 8i, 8 + 8i, -8 - 8i, 8 + 8i}},
 		{inc: 1, want: 7.07106781186547524400, x: []complex128{0, 1 + 1i, 0, -1 - 1i, 0, 1 + 1i, 0, -1 - 1i, 0, 1 + 1i}},
 	} {
-		g_ln, ln := 4+j%2, len(v.x)
-		v.x = guardIncVector(v.x, src_gd, v.inc, g_ln)
-		src := v.x[g_ln : len(v.x)-g_ln]
+		gLn, ln := 4+j%2, len(v.x)
+		v.x = guardIncVector(v.x, srcGd, v.inc, gLn)
+		src := v.x[gLn : len(v.x)-gLn]
 		ret := L1NormInc(src, ln, v.inc)
 		if !fsame(ret, v.want) {
 			t.Errorf("Test %d L1NormInc error Got: %f Expected: %f", j, ret, v.want)
 		}
-		checkValidIncGuard(t, v.x, src_gd, v.inc, g_ln)
+		checkValidIncGuard(t, v.x, srcGd, v.inc, gLn)
 	}
 }
 
 func TestL2NormUnitary(t *testing.T) {
 	const tol = 1e-15
 
-	var src_gd complex128 = 1
+	var srcGd complex128 = 1
 	for j, v := range []struct {
 		want float64
 		x    []complex128
@@ -779,21 +993,47 @@ func TestL2NormUnitary(t *testing.T) {
 		{want: 25.298221281347034655984, x: []complex128{8 + 8i, -8 - 8i, 8 + 8i, -8 - 8i, 8 + 8i}},
 		{want: 3.162277660168379331998, x: []complex128{0, 1 + 1i, 0, -1 - 1i, 0, 1 + 1i, 0, -1 - 1i, 0, 1 + 1i}},
 	} {
-		g_ln := 4 + j%2
-		v.x = guardVector(v.x, src_gd, g_ln)
-		src := v.x[g_ln : len(v.x)-g_ln]
+		gLn := 4 + j%2
+		v.x = guardVector(v.x, srcGd, gLn)
+		src := v.x[gLn : len(v.x)-gLn]
 		ret := L2NormUnitary(src)
 		if !sameFloatApprox(ret, v.want, tol) {
 			t.Errorf("Test %d L2Norm error Got: %f Expected: %f", j, ret, v.want)
 		}
-		if !isValidGuard(v.x, src_gd, g_ln) {
-			t.Errorf("Test %d Guard violated in src vector %v %v", j, v.x[:g_ln], v.x[len(v.x)-g_ln:])
+		if !isValidGuard(v.x, srcGd, gLn) {
+			t.Errorf("Test %d Guard violated in src vector %v %v", j, v.x[:gLn], v.x[len(v.x)-gLn:])
 		}
 	}
 }
 
+func TestL2NormInc(t *testing.T) {
+	var srcGd complex128 = 1
+	for j, v := range []struct {
+		inc  int
+		want float64
+		x    []complex128
+	}{
+		{inc: 2, want: 0, x: []complex128{}},
+		{inc: 3, want: 2.8284271247461900976021, x: []complex128{2 + 2i}},
+		{inc: 10, want: 5.2915026221291810131558, x: []complex128{1 + 1i, 2 + 2i, 3 + 3i}},
+		{inc: 5, want: 5.2915026221291810131558, x: []complex128{-1 - 1i, -2 - 2i, -3 - 3i}},
+		{inc: 3, want: math.NaN(), x: []complex128{cmplx.NaN()}},
+		{inc: 15, want: 25.298221281347034655984, x: []complex128{8 + 8i, -8 - 8i, 8 + 8i, -8 - 8i, 8 + 8i}},
+		{inc: 1, want: 3.162277660168379331998, x: []complex128{0, 1 + 1i, 0, -1 - 1i, 0, 1 + 1i, 0, -1 - 1i, 0, 1 + 1i}},
+	} {
+		gLn, ln := 4+j%2, len(v.x)
+		v.x = guardIncVector(v.x, srcGd, v.inc, gLn)
+		src := v.x[gLn : len(v.x)-gLn]
+		ret := L2NormInc(src, ln, v.inc)
+		if !fsame(ret, v.want) {
+			t.Errorf("Test %d L1NormInc error Got: %f Expected: %f", j, ret, v.want)
+		}
+		checkValidIncGuard(t, v.x, srcGd, v.inc, gLn)
+	}
+}
+
 func TestLinfDist(t *testing.T) {
-	var t_gd, s_gd complex128 = 0, cinf
+	var tGd, sGd complex128 = 0, cinf
 	for j, v := range []struct {
 		s, t   []complex128
 		expect float64
@@ -834,19 +1074,25 @@ func TestLinfDist(t *testing.T) {
 			expect: 6,
 		},
 	} {
-		sg_ln, tg_ln := 4+j%2, 4+j%3
-		v.s, v.t = guardVector(v.s, s_gd, sg_ln), guardVector(v.t, t_gd, tg_ln)
-		s_lc, t_lc := v.s[sg_ln:len(v.s)-sg_ln], v.t[tg_ln:len(v.t)-tg_ln]
-		ret := LinfDist(s_lc, t_lc)
+		sgLn, tgLn := 4+j%2, 4+j%3
+		v.s, v.t = guardVector(v.s, sGd, sgLn), guardVector(v.t, tGd, tgLn)
+		sLc, tLc := v.s[sgLn:len(v.s)-sgLn], v.t[tgLn:len(v.t)-tgLn]
+		ret := LinfDist(sLc, tLc)
 		if !fsame(ret, v.expect) {
 			t.Errorf("Test %d LcinfDist error Got: %f Expected: %f", j, ret, v.expect)
 		}
-		if !isValidGuard(v.s, s_gd, sg_ln) {
-			t.Errorf("Test %d Guard violated in s vector %v %v", j, v.s[:sg_ln], v.s[len(v.s)-sg_ln:])
+		if !isValidGuard(v.s, sGd, sgLn) {
+			t.Errorf("Test %d Guard violated in s vector %v %v", j, v.s[:sgLn], v.s[len(v.s)-sgLn:])
 		}
-		if !isValidGuard(v.t, t_gd, tg_ln) {
-			t.Errorf("Test %d Guard violated in t vector %v %v", j, v.t[:tg_ln], v.t[len(v.t)-tg_ln:])
+		if !isValidGuard(v.t, tGd, tgLn) {
+			t.Errorf("Test %d Guard violated in t vector %v %v", j, v.t[:tgLn], v.t[len(v.t)-tgLn:])
 		}
+	}
+
+	var v, n []complex128
+	m := LinfDist(n, v)
+	if m != 0 {
+		t.Errorf("incorrect empty slice value")
 	}
 }
 
@@ -934,6 +1180,51 @@ func TestNorm(t *testing.T) {
 	}
 }
 
+func TestPolar(t *testing.T) {
+	test := []struct {
+		a      []complex128
+		truthr []float64
+		truthp []float64
+	}{
+		{
+			[]complex128{1, -2, 3},
+			[]float64{1, 2, 3},
+			[]float64{0, math.Pi, 0},
+		},
+		{
+			[]complex128{4 + 4i, 5 - 5i, -6 + 6i, -7 - 7i},
+			[]float64{5.6568542494923801952042, 7.0710678118654752440087, 8.4852813742385702928131, 9.8994949366116653416176},
+			[]float64{math.Pi / 4, -math.Pi / 4, 3 * math.Pi / 4, -3 * math.Pi / 4},
+		},
+		{
+			[]complex128{7i, -8i, 9i},
+			[]float64{7, 8, 9},
+			[]float64{math.Pi / 2, -math.Pi / 2, math.Pi / 2},
+		},
+	}
+
+	for _, v := range test {
+		rin := make([]float64, len(v.a))
+		pin := make([]float64, len(v.a))
+		r, p := Polar(rin, pin, v.a)
+		areFloatSlicesEqual(t, v.truthr, rin, "incorrect received values")
+		areFloatSlicesEqual(t, v.truthp, pin, "incorrect received values")
+		areFloatSlicesEqual(t, v.truthr, r, "incorrect stored values")
+		areFloatSlicesEqual(t, v.truthp, p, "incorrect stored values")
+	}
+
+	// Test that it panics
+	if !Panics(func() { Polar(make([]float64, 2), make([]float64, 2), make([]complex128, 3)) }) {
+		t.Errorf("Did not panic with length mismatch")
+	}
+	if !Panics(func() { Polar(make([]float64, 3), make([]float64, 2), make([]complex128, 3)) }) {
+		t.Errorf("Did not panic with length mismatch")
+	}
+	if !Panics(func() { Polar(make([]float64, 2), make([]float64, 3), make([]complex128, 3)) }) {
+		t.Errorf("Did not panic with length mismatch")
+	}
+}
+
 func TestProd(t *testing.T) {
 	s := []complex128{}
 	val := Prod(s)
@@ -947,6 +1238,137 @@ func TestProd(t *testing.T) {
 	}
 }
 
+func TestRad(t *testing.T) {
+	test := []struct {
+		a     []float64
+		truth []float64
+	}{
+		{
+			[]float64{0, 180, 0},
+			[]float64{0, math.Pi, 0},
+		},
+		{
+			[]float64{45, -45, 135, -135},
+			[]float64{math.Pi / 4, -math.Pi / 4, 3 * math.Pi / 4, -3 * math.Pi / 4},
+		},
+		{
+			[]float64{90, -90, 90},
+			[]float64{math.Pi / 2, -math.Pi / 2, math.Pi / 2},
+		},
+	}
+
+	for _, v := range test {
+		n := make([]float64, len(v.a))
+		m := RadTo(n, v.a)
+		Rad(v.a)
+		areFloatSlicesEqual(t, v.truth, m, "incorrect returned values")
+		areFloatSlicesEqual(t, v.truth, n, "incorrect stored values")
+		areFloatSlicesEqual(t, v.truth, v.a, "incorrect values")
+	}
+
+	// Test that it panics
+	if !Panics(func() { RadTo(make([]float64, 2), make([]float64, 3)) }) {
+		t.Errorf("Did not panic with length mismatch")
+	}
+}
+
+func TestReal(t *testing.T) {
+	test := []struct {
+		a     []complex128
+		truth []float64
+	}{
+		{
+			[]complex128{1, -2, 3},
+			[]float64{1, -2, 3},
+		},
+		{
+			[]complex128{4 + 4i, 5 - 5i, -6 + 6i},
+			[]float64{4, 5, -6},
+		},
+		{
+			[]complex128{7i, -8i, 9i},
+			[]float64{0, 0, 0},
+		},
+		{
+			[]complex128{1 + 1i, 2 - 2i, -3 + 3i, -4 - 4i},
+			[]float64{1, 2, -3, -4},
+		},
+		{
+			[]complex128{1 + 1i, 2 - 2i, -3 + 3i, -4 - 4i, 5 + 5i, 6 - 6i, -7 - 7i, 8 + 8i, 9 + 9i},
+			[]float64{1, 2, -3, -4, 5, 6, -7, 8, 9},
+		},
+		{
+			[]complex128{1 + 1i, 2 - 2i, -3 + 3i, -4 - 4i, 5 + 5i, 6 - 6i},
+			[]float64{1, 2, -3, -4, 5, 6},
+		},
+		{
+			[]complex128{1 + 1i, 2 - 2i, -3 + 3i, -4 - 4i, 5 + 5i, 6 - 6i, -7 - 7i, 8 + 8i},
+			[]float64{1, 2, -3, -4, 5, 6, -7, 8},
+		},
+	}
+
+	for _, v := range test {
+		n := make([]float64, len(v.a))
+		m := Real(n, v.a)
+		areFloatSlicesEqual(t, v.truth, m, "incorrect received values")
+		areFloatSlicesEqual(t, v.truth, n, "incorrect stored values")
+	}
+
+	var v []complex128
+	var n []float64
+	m := Real(n, v)
+	if len(n) != 0 && len(m) != 0 {
+		t.Errorf("incorrect empty slice value")
+	}
+
+	// Test that it panics
+	if !Panics(func() { Real(make([]float64, 2), make([]complex128, 3)) }) {
+		t.Errorf("Did not panic with length mismatch")
+	}
+}
+
+func TestRect(t *testing.T) {
+	test := []struct {
+		r     []float64
+		p     []float64
+		truth []complex128
+	}{
+		{
+			[]float64{1, 2, 3},
+			[]float64{0, math.Pi, 0},
+			[]complex128{1, -2, 3},
+		},
+		{
+			[]float64{5.6568542494923801952042, 7.0710678118654752440087, 8.4852813742385702928131, 9.8994949366116653416176},
+			[]float64{math.Pi / 4, -math.Pi / 4, 3 * math.Pi / 4, -3 * math.Pi / 4},
+			[]complex128{4 + 4i, 5 - 5i, -6 + 6i, -7 - 7i},
+		},
+		{
+			[]float64{7, 8, 9},
+			[]float64{math.Pi / 2, -math.Pi / 2, math.Pi / 2},
+			[]complex128{7i, -8i, 9i},
+		},
+	}
+
+	for _, v := range test {
+		n := make([]complex128, len(v.r))
+		m := Rect(n, v.r, v.p)
+		areSlicesEqual(t, v.truth, m, "incorrect returned values")
+		areSlicesEqual(t, v.truth, n, "incorrect stored values")
+	}
+
+	// Test that it panics
+	if !Panics(func() { Rect(make([]complex128, 3), make([]float64, 2), make([]float64, 2)) }) {
+		t.Errorf("Did not panic with length mismatch")
+	}
+	if !Panics(func() { Rect(make([]complex128, 3), make([]float64, 3), make([]float64, 2)) }) {
+		t.Errorf("Did not panic with length mismatch")
+	}
+	if !Panics(func() { Rect(make([]complex128, 3), make([]float64, 2), make([]float64, 3)) }) {
+		t.Errorf("Did not panic with length mismatch")
+	}
+}
+
 func TestReverse(t *testing.T) {
 	for _, s := range [][]complex128{
 		{0},
@@ -955,12 +1377,26 @@ func TestReverse(t *testing.T) {
 		{3 + 3i, 2 + 2i, 1 + 1i, 0},
 		{9 + 9i, 8 + 8i, 7 + 7i, 6 + 6i, 5 + 5i, 4 + 4i, 3 + 3i, 2 + 2i, 1 + 1i, 0},
 	} {
+		n := make([]complex128, len(s))
+		m := ReverseTo(n, s)
 		Reverse(s)
-		for i, v := range s {
-			if v != complex(float64(i), float64(i)) {
-				t.Errorf("unexpected values for element %d: got:%v want:%v", i, v, i)
+		for i := 0; i < len(s); i++ {
+			target := complex(float64(i), float64(i))
+			if n[i] != target {
+				t.Errorf("unexpected stored values for element %d: got:%v want:%v", i, n[i], target)
+			}
+			if m[i] != target {
+				t.Errorf("unexpected returned values for element %d: got:%v want:%v", i, m[i], target)
+			}
+			if s[i] != target {
+				t.Errorf("unexpected values for element %d: got:%v want:%v", i, s[i], target)
 			}
 		}
+	}
+
+	// Test that it panics
+	if !Panics(func() { ReverseTo(make([]complex128, 3), make([]complex128, 2)) }) {
+		t.Errorf("Did not panic with length mismatch")
 	}
 }
 

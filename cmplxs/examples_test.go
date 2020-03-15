@@ -2,13 +2,9 @@
 // Use of this code is governed by a BSD-style
 // license that can be found in the LICENSE file
 
-package complex_test
+package cmplxs
 
-import (
-	"fmt"
-
-	. "gonum.org/v1/gonum/complex"
-)
+import "fmt"
 
 // Set of examples for all the functions
 

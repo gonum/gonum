@@ -2,7 +2,7 @@
 // Use of this code is governed by a BSD-style
 // license that can be found in the LICENSE file
 
-package complex
+package cmplxs
 
 import (
 	"errors"
@@ -12,9 +12,13 @@ import (
 	"gonum.org/v1/gonum/internal/asm/c128"
 )
 
-// Abs generates cmplx.Abs, element-wise, for the elements of s, and returns slice.
-func Abs(s []complex128) []float64 {
-	dst := make([]float64, len(s))
+// Abs generates cmplx.Abs, element-wise, for the elements of s and stores in dst.
+// dst is also returned.
+// It panics if the lengths of dst and s are not equal.
+func Abs(dst []float64, s []complex128) []float64 {
+	if len(dst) != len(s) {
+		panic("cmplxs.Abs: length of the slices do not match")
+	}
 	for i, v := range s {
 		dst[i] = cmplx.Abs(v)
 	}
@@ -22,10 +26,10 @@ func Abs(s []complex128) []float64 {
 }
 
 // Add adds, element-wise, the elements of s and dst, and stores in dst.
-// Panics if the lengths of dst and s do not match.
+// It panics if the lengths of dst and s are not equal.
 func Add(dst, s []complex128) {
 	if len(dst) != len(s) {
-		panic("cfloats: length of the slices do not match")
+		panic("cmplxs.Add: length of the slices do not match")
 	}
 	c128.AxpyUnitaryTo(dst, 1, s, dst)
 }
@@ -41,10 +45,10 @@ func AddConst(c complex128, dst []complex128) {
 // stores the result in dst. Panics if the lengths of s, t and dst do not match.
 func AddTo(dst, s, t []complex128) []complex128 {
 	if len(s) != len(t) {
-		panic("cfloats: length of adders do not match")
+		panic("cmplxs.AddTo: length of adders do not match")
 	}
 	if len(dst) != len(s) {
-		panic("cfloats: length of destination does not match length of adder")
+		panic("cmplxs.AddTo: length of destination does not match length of adder")
 	}
 	c128.AxpyUnitaryTo(dst, 1, s, t)
 	return dst
@@ -54,7 +58,7 @@ func AddTo(dst, s, t []complex128) []complex128 {
 // It panics if the lengths of dst and s are not equal.
 func AddScaled(dst []complex128, alpha complex128, s []complex128) {
 	if len(dst) != len(s) {
-		panic("cfloats: length of destination and source to not match")
+		panic("cmplxs: length of destination and source to not match")
 	}
 	c128.AxpyUnitaryTo(dst, alpha, s, dst)
 }
@@ -66,15 +70,38 @@ func AddScaled(dst []complex128, alpha complex128, s []complex128) {
 // At the return of the function, dst[i] = y[i] + alpha * s[i]
 func AddScaledTo(dst, y []complex128, alpha complex128, s []complex128) []complex128 {
 	if len(dst) != len(s) || len(dst) != len(y) {
-		panic("cfloats: lengths of slices do not match")
+		panic("cmplxs.AddScaledTo: lengths of slices do not match")
 	}
 	c128.AxpyUnitaryTo(dst, alpha, s, y)
 	return dst
 }
 
-// Conj generates cmplx.Conj, element-wise, for the elements of s, and returns slice.
-func Conj(s []complex128) []complex128 {
-	dst := make([]complex128, len(s))
+// Arg generates cmplx.Phase, element-wise, for the elements of s, and stores in dst.
+// Phase is in radians.
+// It panics if the lengths of dst and s are not equal.
+func Arg(dst []float64, s []complex128) []float64 {
+	if len(dst) != len(s) {
+		panic("cmplxs.Arg: length of the slices do not match")
+	}
+	for i, v := range s {
+		dst[i] = cmplx.Phase(v)
+	}
+	return dst
+}
+
+// Conj generates cmplx.Conj, element-wise, for the elements of s, and stores in s.
+func Conj(s []complex128) {
+	for i, v := range s {
+		s[i] = cmplx.Conj(v)
+	}
+}
+
+// ConjTo generates cmplx.Conj, element-wise, for the elements of s, and stores in dst.
+// It panics if the lengths of dst and s are not equal.
+func ConjTo(dst, s []complex128) []complex128 {
+	if len(dst) != len(s) {
+		panic("cmplxs.ConjTo: length of the slices do not match")
+	}
 	for i, v := range s {
 		dst[i] = cmplx.Conj(v)
 	}
@@ -89,7 +116,7 @@ func Conj(s []complex128) []complex128 {
 // At the return of the function, dst[i] = s[i] * s[i-1] * s[i-2] * ...
 func CumProd(dst, s []complex128) []complex128 {
 	if len(dst) != len(s) {
-		panic("cfloats: length of destination does not match length of the source")
+		panic("cmplxs.CumProd: length of destination does not match length of the source")
 	}
 	if len(dst) == 0 {
 		return dst
@@ -109,7 +136,7 @@ func CumProd(dst, s []complex128) []complex128 {
 // At the return of the function, dst[i] = s[i] + s[i-1] + s[i-2] + ...
 func CumSum(dst, s []complex128) []complex128 {
 	if len(dst) != len(s) {
-		panic("cfloats: length of destination does not match length of the source")
+		panic("cmplxs.CumSum: length of destination does not match length of the source")
 	}
 	if len(dst) == 0 {
 		return dst
@@ -121,11 +148,30 @@ func CumSum(dst, s []complex128) []complex128 {
 	return dst
 }
 
+// Deg converts radians to degrees, element-wise, for the elements of s, and stores in s.
+func Deg(s []float64) {
+	for i, v := range s {
+		s[i] = v * 180 / math.Pi
+	}
+}
+
+// DegTo converts radians to degrees, element-wise, for the elements of s, and stores in dst.
+// It panics if the lengths of dst and s are not equal.
+func DegTo(dst, s []float64) []float64 {
+	if len(dst) != len(s) {
+		panic("cmplxs.DegTo: length of destination does not match length of the source")
+	}
+	for i, v := range s {
+		dst[i] = v * 180 / math.Pi
+	}
+	return dst
+}
+
 // Distance computes the L-norm of s - t. See Norm for special cases.
 // A panic will occur if the lengths of s and t do not match.
 func Distance(s, t []complex128, L float64) float64 {
 	if len(s) != len(t) {
-		panic("cfloats: slice lengths do not match")
+		panic("cmplxs.Distance: slice lengths do not match")
 	}
 	if len(s) == 0 {
 		return 0
@@ -160,7 +206,7 @@ func Distance(s, t []complex128, L float64) float64 {
 // lengths of s and t are not equal.
 func Div(dst, s []complex128) {
 	if len(dst) != len(s) {
-		panic("cfloats: slice lengths do not match")
+		panic("cmplxs.Div: slice lengths do not match")
 	}
 	for i, v := range s {
 		dst[i] /= v
@@ -172,17 +218,10 @@ func Div(dst, s []complex128) {
 // lengths of s, t, and dst are not equal.
 func DivTo(dst, s, t []complex128) []complex128 {
 	if len(s) != len(t) || len(dst) != len(t) {
-		panic("cfloats: slice lengths do not match")
+		panic("cmplxs.DivTo: slice lengths do not match")
 	}
-	switch {
-	case len(s) > len(t):
-		for i, v := range t {
-			dst[i] = s[i] / v
-		}
-	default:
-		for i, v := range s {
-			dst[i] = v / t[i]
-		}
+	for i, v := range s {
+		dst[i] = v / t[i]
 	}
 	return dst
 }
@@ -192,7 +231,7 @@ func DivTo(dst, s, t []complex128) []complex128 {
 // A panic will occur if lengths of arguments do not match.
 func Dot(s1, s2 []complex128, conj bool) complex128 {
 	if len(s1) != len(s2) {
-		panic("cfloats: lengths of the slices do not match")
+		panic("cmplxs.Dot: lengths of the slices do not match")
 	}
 	switch conj {
 	case true:
@@ -245,24 +284,48 @@ func EqualFunc(s1, s2 []complex128, f func(complex128, complex128) bool) bool {
 	return true
 }
 
+const minNormalFloat64 = 2.2250738585072014e-308
+
 // EqualWithinAbs returns true if a and b have an absolute
 // difference of less than tol.
 func EqualWithinAbs(a, b complex128, tol float64) bool {
 	return a == b || (math.Abs(real(a-b)) <= tol && math.Abs(imag(a-b)) <= tol)
 }
 
-const minNormalFloat64 = 2.2250738585072014e-308
+// EqualWithinAbsOrRel returns true if a and b are equal to within
+// the absolute tolerance.
+func EqualWithinAbsOrRel(a, b complex128, absTol, relTol float64) bool {
+	if EqualWithinAbs(a, b, absTol) {
+		return true
+	}
+	return EqualWithinRel(a, b, relTol)
+}
 
 // EqualWithinRel returns true if the difference between a and b
 // is not greater than tol times the greater value.
 func EqualWithinRel(a, b complex128, tol float64) bool {
+	// if it's equal, return immediately
 	if a == b {
 		return true
 	}
+
+	// check if real or imaginary numbers are infinity
+	switch {
+	case math.IsInf(real(a), 0) && !math.IsInf(real(b), 0):
+		return false
+	case !math.IsInf(real(a), 0) && math.IsInf(real(b), 0):
+		return false
+	case math.IsInf(imag(a), 0) && !math.IsInf(imag(b), 0):
+		return false
+	case !math.IsInf(imag(a), 0) && math.IsInf(imag(b), 0):
+		return false
+	}
+
 	delta := a - b
 	if math.Abs(real(delta)) <= minNormalFloat64 && math.Abs(imag(delta)) <= minNormalFloat64 {
 		return math.Abs(real(delta)) <= tol*minNormalFloat64 && math.Abs(imag(delta)) <= tol*minNormalFloat64
 	}
+
 	// We depend on the division in this relationship to identify
 	// infinities (we rely on the NaN to fail the test) otherwise
 	// we compare Infs of the same sign and evaluate Infs as equal
@@ -276,15 +339,6 @@ func EqualWithinRel(a, b complex128, tol float64) bool {
 	default:
 		return math.Abs(real(delta))/math.Max(math.Abs(real(a)), math.Abs(real(b))) <= tol && math.Abs(imag(delta))/math.Max(math.Abs(imag(a)), math.Abs(imag(b))) <= tol
 	}
-}
-
-// EqualWithinAbsOrRel returns true if a and b are equal to within
-// the absolute tolerance.
-func EqualWithinAbsOrRel(a, b complex128, absTol, relTol float64) bool {
-	if EqualWithinAbs(a, b, absTol) {
-		return true
-	}
-	return EqualWithinRel(a, b, relTol)
 }
 
 // EqualWithinULP returns true if a and b are equal to within
@@ -366,7 +420,7 @@ func Find(inds []int, f func(complex128) bool, s []complex128, k int) ([]int, er
 		}
 	}
 	// Finished iterating over the loop, which means k elements were not found
-	return inds, errors.New("cfloats: insufficient elements found")
+	return inds, errors.New("cmplxs.Find: insufficient elements found")
 }
 
 // HasNaN returns true if the slice s has any values that are NaN and false
@@ -380,16 +434,54 @@ func HasNaN(s []complex128) bool {
 	return false
 }
 
-// Imag returns a slice of the imaginary values
-func Imag(x []complex128) []float64 {
-	y := make([]float64, len(x))
-	if len(x) == 0 {
-		return y
+// Hermitian generates the hermitian (conjugate transpose) of s with r rows and c cols,
+// and stores in s.
+// It panics if the length of s is not equal to r * c.
+func Hermitian(r, c int, s []complex128) {
+	if (r * c) != len(s) {
+		panic("cmplxs.Hermitian: rows & cols do not match with length of s")
 	}
-	for i, v := range x {
-		y[i] = imag(v)
+	dst := make([]complex128, len(s))
+	for i := 0; i < r; i++ {
+		for j := 0; j < c; j++ {
+			dst[i+r*j] = cmplx.Conj(s[i*c+j])
+		}
 	}
-	return y
+	copy(s, dst)
+}
+
+// HermitianTo generates the hermitian (conjugate transpose) of s with r rows and c cols,
+// and stores in dst.
+// It panics if the length of s is not equal to r * c and if the length of s and dst are
+// not equal.
+func HermitianTo(r, c int, dst, s []complex128) []complex128 {
+	if (r * c) != len(s) {
+		panic("cmplxs.HermitianTo: rows & cols do not match with length of s")
+	}
+	if len(s) != len(dst) {
+		panic("cmplxs.HermitianTo: length of s and dst do not match")
+	}
+	for i := 0; i < r; i++ {
+		for j := 0; j < c; j++ {
+			dst[i+r*j] = cmplx.Conj(s[i*c+j])
+		}
+	}
+	return dst
+}
+
+// Imag calculates imag(s) and stores in dst. dst is returned.
+// It panics if the lengths of dst and s are not equal.
+func Imag(dst []float64, s []complex128) []float64 {
+	if len(s) != len(dst) {
+		panic("cmplxs.Imag: length of s and dst do not match")
+	}
+	if len(s) == 0 {
+		return dst
+	}
+	for i, v := range s {
+		dst[i] = imag(v)
+	}
+	return dst
 }
 
 // L1Dist returns the 1-Norm of t - s
@@ -478,10 +570,10 @@ func L2NormUnitary(x []complex128) (norm float64) {
 }
 
 // L2NormInc returns the L2-norm of x.
-func L2NormInc(x []complex128, n, incX uintptr) (norm float64) {
+func L2NormInc(x []complex128, n, incX int) (norm float64) {
 	var scale float64
 	sumSquares := 1.0
-	for ix := uintptr(0); ix < n*incX; ix += incX {
+	for ix := 0; ix < n*incX; ix += incX {
 		val := x[ix]
 		if val == 0 {
 			continue
@@ -538,7 +630,7 @@ func L2DistanceUnitary(x, y []complex128) (norm float64) {
 // lengths of s and t are not equal.
 func Mul(dst, s []complex128) {
 	if len(dst) != len(s) {
-		panic("cfloats: slice lengths do not match")
+		panic("cmplxs: slice lengths do not match")
 	}
 	for i, val := range s {
 		dst[i] *= val
@@ -550,7 +642,7 @@ func Mul(dst, s []complex128) {
 // lengths of s, t, and dst are not equal.
 func MulTo(dst, s, t []complex128) []complex128 {
 	if len(s) != len(t) || len(dst) != len(t) {
-		panic("cfloats: slice lengths do not match")
+		panic("cmplxs: slice lengths do not match")
 	}
 	for i, val := range t {
 		dst[i] = val * s[i]
@@ -593,6 +685,18 @@ func Norm(s []complex128, L float64) float64 {
 	return math.Pow(norm, 1/L)
 }
 
+// Polar generates cmplx.Polar, element-wise, for the elements of s, and returns slices.
+// phase is in radians.
+func Polar(r, p []float64, s []complex128) ([]float64, []float64) {
+	if len(r) != len(p) || len(r) != len(s) {
+		panic("cmplxs.Arg: length of the slices do not match")
+	}
+	for i, v := range s {
+		r[i], p[i] = cmplx.Polar(v)
+	}
+	return r, p
+}
+
 // Prod returns the product of the elements of the slice.
 // Returns 1 if len(s) = 0.
 func Prod(s []complex128) complex128 {
@@ -603,16 +707,54 @@ func Prod(s []complex128) complex128 {
 	return prod
 }
 
-// Real returns a slice of the real values
-func Real(x []complex128) []float64 {
-	y := make([]float64, len(x))
-	if len(x) == 0 {
-		return y
+// Rad converts degrees to radians for the elements of s and stores in s.
+func Rad(s []float64) {
+	for i, v := range s {
+		s[i] = v * math.Pi / 180
 	}
-	for i, v := range x {
-		y[i] = real(v)
+}
+
+// RadTo converts degrees to radians for the elements of s and stores in dst.
+// dst is returned.
+// It panics if the lengths of dst and s are not equal.
+func RadTo(dst, s []float64) []float64 {
+	if len(dst) != len(s) {
+		panic("cmplxs.Real: length of s and dst do not match")
 	}
-	return y
+	if len(s) == 0 {
+		return dst
+	}
+	for i, v := range s {
+		dst[i] = v * math.Pi / 180
+	}
+	return dst
+}
+
+// Real calculates real(s) and stores in dst. dst is returned.
+// It panics if the lengths of dst and s are not equal.
+func Real(dst []float64, s []complex128) []float64 {
+	if len(s) != len(dst) {
+		panic("cmplxs.Real: length of s and dst do not match")
+	}
+	if len(s) == 0 {
+		return dst
+	}
+	for i, v := range s {
+		dst[i] = real(v)
+	}
+	return dst
+}
+
+// Rect calculates cmplx.Rect(r, p) for the elements of r & p, and returns slice.
+// phase is in radians.
+func Rect(dst []complex128, r, p []float64) []complex128 {
+	if len(r) != len(p) || len(r) != len(dst) {
+		panic("cmplxs: Rect: dst, r & p slice lengths do not match")
+	}
+	for i, v := range r {
+		dst[i] = cmplx.Rect(v, p[i])
+	}
+	return dst
 }
 
 // Reverse reverses the order of elements in the slice.
@@ -620,6 +762,19 @@ func Reverse(s []complex128) {
 	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
 		s[i], s[j] = s[j], s[i]
 	}
+}
+
+// ReverseTo reverses the order of elements in s and stores in dst.
+// dst is returned.
+// It panics if the lengths of dst and s are not equal.
+func ReverseTo(dst, s []complex128) []complex128 {
+	if len(s) != len(dst) {
+		panic("cmplxs.ReverseTo: length of s and dst do not match")
+	}
+	for i := 0; i < len(s); i++ {
+		dst[i] = s[len(s)-1-i]
+	}
+	return dst
 }
 
 // Round returns the half away from zero rounded value of x with prec precision.
@@ -759,7 +914,7 @@ func Scale(c complex128, dst []complex128) {
 // ScaleTo multiplies the elements in s by c and stores the result in dst.
 func ScaleTo(dst []complex128, c complex128, s []complex128) []complex128 {
 	if len(dst) != len(s) {
-		panic("cfloats: lengths of slices do not match")
+		panic("cmplxs: lengths of slices do not match")
 	}
 	if len(dst) > 0 {
 		c128.ScalUnitaryTo(dst, c, s)
@@ -771,7 +926,7 @@ func ScaleTo(dst []complex128, c complex128, s []complex128) []complex128 {
 // the lengths of dst and s do not match.
 func Sub(dst, s []complex128) {
 	if len(dst) != len(s) {
-		panic("cfloats: length of the slices do not match")
+		panic("cmplxs: length of the slices do not match")
 	}
 	c128.AxpyUnitaryTo(dst, -1, s, dst)
 }
@@ -780,10 +935,10 @@ func Sub(dst, s []complex128) {
 // stores the result in dst. Panics if the lengths of s, t and dst do not match.
 func SubTo(dst, s, t []complex128) []complex128 {
 	if len(s) != len(t) {
-		panic("cfloats: length of subtractor and subtractee do not match")
+		panic("cmplxs: length of subtractor and subtractee do not match")
 	}
 	if len(dst) != len(s) {
-		panic("cfloats: length of destination does not match length of subtractor")
+		panic("cmplxs: length of destination does not match length of subtractor")
 	}
 	c128.AxpyUnitaryTo(dst, -1, t, s)
 	return dst

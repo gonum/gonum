@@ -39,6 +39,33 @@ func TestD1x(t *testing.T) {
 	}
 }
 
+func TestD2x(t *testing.T) {
+	for _, test := range d2xTests {
+		name := fmt.Sprintf("%s.%s", test.name.Path, test.name.Name)
+		if test.name.Deriv != "" {
+			name += "-" + test.name.Deriv
+		}
+		t.Run(name, func(t *testing.T) {
+			buf := new(strings.Builder)
+			err := autofd.D2x(buf, test.name)
+			switch {
+			case err != nil && test.err != nil:
+				if got, want := err.Error(), test.err.Error(); got != want {
+					t.Fatalf("invalid error.\ngot= %v\nwant=%v\n", got, want)
+				}
+			case err != nil && test.err == nil:
+				t.Fatalf("could not generate derivative: %+v", err)
+			case err == nil && test.err != nil:
+				t.Fatalf("got=%v, want=%v", err, test.err)
+			case err == nil && test.err == nil:
+				if got, want := buf.String(), test.want; got != want {
+					t.Fatalf("invalid derivative:\ngot:\n%s\nwant:\n%s\n", got, want)
+				}
+			}
+		})
+	}
+}
+
 var d1xTests = []struct {
 	name autofd.Func
 	want string
@@ -103,7 +130,7 @@ var d1xTests = []struct {
 	{
 		name: autofd.Func{Path: "gonum.org/v1/gonum/diff/autofd/internal/testfunc", Name: "F5"},
 		want: `func DerivF5(x float64) float64 {
-	v := dual.Mul(dual.Number{Real:2}, dual.Inv((dual.Mul(dual.Number{Real:x, Emag:1}, dual.Mul(dual.Number{Real:1, Emag:1}, dual.Number{Real:x, Emag:1})))))
+	v := dual.Mul(dual.Number{Real:2}, dual.Inv((dual.Mul(dual.Number{Real:x, Emag:1}, dual.Mul(dual.Number{Real:-1}, dual.Number{Real:x, Emag:1})))))
 	return v.Emag
 }
 `,
@@ -258,7 +285,7 @@ var d2xTests = []struct {
 	{
 		name: autofd.Func{Path: "gonum.org/v1/gonum/diff/autofd/internal/testfunc", Name: "F5"},
 		want: `func DerivF5(x float64) float64 {
-	v := hyperdual.Mul(hyperdual.Number{Real:2}, hyperdual.Inv((hyperdual.Mul(hyperdual.Number{Real:x, E1mag:1, E2mag:1}, hyperdual.Mul(hyperdual.Number{Real:1, E1mag:1, E2mag:1}, hyperdual.Number{Real:x, E1mag:1, E2mag:1})))))
+	v := hyperdual.Mul(hyperdual.Number{Real:2}, hyperdual.Inv((hyperdual.Mul(hyperdual.Number{Real:x, E1mag:1, E2mag:1}, hyperdual.Mul(hyperdual.Number{Real:-1}, hyperdual.Number{Real:x, E1mag:1, E2mag:1})))))
 	return v.E1E2mag
 }
 `,

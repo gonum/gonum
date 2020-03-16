@@ -245,9 +245,9 @@ func (g *generator) expr(expr ast.Expr) {
 		case token.SUB:
 			switch g.rank {
 			case d1xKind:
-				g.printf("dual.Mul(dual.Number{Real:1, Emag:1}, ")
+				g.printf("dual.Mul(dual.Number{Real:-1}, ")
 			case d2xKind:
-				g.printf("hyperdual.Mul(hyperdual.Number{Real:1, E1mag:1 E2mag:1}, ")
+				g.printf("hyperdual.Mul(hyperdual.Number{Real:-1}, ")
 			}
 			g.expr(expr.X)
 			g.printf(")")

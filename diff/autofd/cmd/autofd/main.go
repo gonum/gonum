@@ -30,13 +30,15 @@ func main() {
 
 ex:
  $> autofd -pkg gonum.org/v1/gonum/diff/autofd/internal/testfunc -fct F1
- func DerivF1(x float64) float64 {
- 	return dual.Mul(dual.Number{Real:x, Emag:1}, dual.Number{Real:x, Emag:1}).Emag
+ func DerivF1(x float64) (d1, d2 float64) {
+ 	v := hyperdual.Mul(hyperdual.Number{Real:x, E1mag:1, E2mag:1}, hyperdual.Number{Real:x, E1mag:1, E2mag:1})
+ 	return v.E1mag, v.E1E2mag
  }
 
  $> autofd -pkg gonum.org/v1/gonum/diff/autofd/internal/testfunc -fct F1 -der DxF1
- func DxF1(x float64) float64 {
- 	return dual.Mul(dual.Number{Real:x, Emag:1}, dual.Number{Real:x, Emag:1}).Emag
+ func DxF1(x float64) (d1, d2 float64) {
+ 	v := hyperdual.Mul(hyperdual.Number{Real:x, E1mag:1, E2mag:1}, hyperdual.Number{Real:x, E1mag:1, E2mag:1})
+ 	return v.E1mag, v.E1E2mag
  }
 
  $> autofd -pkg gonum.org/v1/gonum/diff/autofd/internal/testfunc -fct T1.F
@@ -58,7 +60,7 @@ Options:
 		log.Fatalf("missing function or method name")
 	}
 
-	err := autofd.D1x(os.Stdout, autofd.Func{
+	err := autofd.Derivative(os.Stdout, autofd.Func{
 		Path:  *pkg,
 		Name:  *fct,
 		Deriv: *der,

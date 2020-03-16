@@ -21,6 +21,7 @@ func main() {
 
 	pkg := flag.String("pkg", "", "import path of the package holding the function or method definition")
 	fct := flag.String("fct", "", "name of the function or method definition")
+	d2 := flag.Bool("d2", false, "whether to generate both first and second derivatives")
 	der := flag.String("der", "", "name of the derivative to generate")
 
 	flag.Usage = func() {
@@ -30,12 +31,18 @@ func main() {
 
 ex:
  $> autofd -pkg gonum.org/v1/gonum/diff/autofd/internal/testfunc -fct F1
+ func DerivF1(x float64) float64 {
+ 	v := dual.Mul(dual.Number{Real:x, Emag:1}, dual.Number{Real:x, Emag:1})
+ 	return v.Emag
+ }
+
+ $> autofd -pkg gonum.org/v1/gonum/diff/autofd/internal/testfunc -fct F1 -d2
  func DerivF1(x float64) (d1, d2 float64) {
  	v := hyperdual.Mul(hyperdual.Number{Real:x, E1mag:1, E2mag:1}, hyperdual.Number{Real:x, E1mag:1, E2mag:1})
  	return v.E1mag, v.E1E2mag
  }
 
- $> autofd -pkg gonum.org/v1/gonum/diff/autofd/internal/testfunc -fct F1 -der DxF1
+ $> autofd -pkg gonum.org/v1/gonum/diff/autofd/internal/testfunc -fct F1 -der DxF1 -d2
  func DxF1(x float64) (d1, d2 float64) {
  	v := hyperdual.Mul(hyperdual.Number{Real:x, E1mag:1, E2mag:1}, hyperdual.Number{Real:x, E1mag:1, E2mag:1})
  	return v.E1mag, v.E1E2mag
@@ -64,7 +71,7 @@ Options:
 		Path:  *pkg,
 		Name:  *fct,
 		Deriv: *der,
-	})
+	}, *d2)
 	if err != nil {
 		log.Fatalf("could not generate derivative of %s.%s: %+v",
 			*pkg, *fct, err,

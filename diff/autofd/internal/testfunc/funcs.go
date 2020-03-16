@@ -5,6 +5,11 @@
 // Package testfunc holds various functions to test autofd features.
 package testfunc // import "gonum.org/v1/gonum/diff/autofd/internal/testfunc"
 
+// Note:
+// Remember to add a test for the first *and* second derivatives
+// in ../../autofd_test.go:derivativeTests when a new function is added
+// to this package.
+
 import "math"
 
 func F1(x float64) float64 {

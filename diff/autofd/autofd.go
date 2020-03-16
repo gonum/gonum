@@ -22,9 +22,11 @@ type Func struct {
 	Deriv string // Name of the output derivative function.
 }
 
-// Derivative generates code for both the first and second derivatives from the given function declaration.
-func Derivative(w io.Writer, f Func) error {
-	gen, err := newGenerator(w, f)
+// Derivative generates code for derivatives from the given function declaration.
+// It generates only the first derivative when d2 is false and generates
+// both first and second derivatives otherwise.
+func Derivative(w io.Writer, f Func, d2 bool) error {
+	gen, err := newGenerator(w, f, d2)
 	if err != nil {
 		return fmt.Errorf("could not create derivative generator: %w", err)
 	}
@@ -35,15 +37,33 @@ func Derivative(w io.Writer, f Func) error {
 	return nil
 }
 
-type generator struct {
-	w   io.Writer
-	pkg *packages.Package
-	fct *types.Func
-	der string
-	err error
+type kind bool
+
+const (
+	d1xKind kind = false
+	d2xKind kind = true
+)
+
+func (k kind) dpkg() string {
+	switch k {
+	case d1xKind:
+		return "dual"
+	case d2xKind:
+		return "hyperdual"
+	}
+	panic("impossible")
 }
 
-func newGenerator(w io.Writer, f Func) (*generator, error) {
+type generator struct {
+	w    io.Writer
+	pkg  *packages.Package
+	fct  *types.Func
+	kind kind
+	der  string
+	err  error
+}
+
+func newGenerator(w io.Writer, f Func, d2 bool) (*generator, error) {
 	path := f.Path
 	name := f.Name
 
@@ -121,7 +141,7 @@ func newGenerator(w io.Writer, f Func) (*generator, error) {
 		der = "Deriv" + strings.Replace(f.Name, ".", "_", -1)
 	}
 
-	return &generator{w: w, pkg: pkg, fct: fct, der: der}, nil
+	return &generator{w: w, pkg: pkg, fct: fct, kind: kind(d2), der: der}, nil
 }
 
 func (g *generator) generate() error {
@@ -172,13 +192,24 @@ func (g *generator) generate() error {
 	}
 
 	args := g.fct.Type().Underlying().(*types.Signature).Params()
-	g.printf("func %s(%s float64) (d1, d2 float64) {\n",
-		g.der,
-		args.At(0).Name(),
-	)
-	g.printf("\tv := ")
-	g.expr(ret.Results[0])
-	g.printf("\n\treturn v.E1mag, v.E1E2mag\n")
+	switch g.kind {
+	case d1xKind:
+		g.printf("func %s(%s float64) float64 {\n",
+			g.der,
+			args.At(0).Name(),
+		)
+		g.printf("\tv := ")
+		g.expr(ret.Results[0])
+		g.printf("\n\treturn v.Emag\n")
+	case d2xKind:
+		g.printf("func %s(%s float64) (d1, d2 float64) {\n",
+			g.der,
+			args.At(0).Name(),
+		)
+		g.printf("\tv := ")
+		g.expr(ret.Results[0])
+		g.printf("\n\treturn v.E1mag, v.E1E2mag\n")
+	}
 	g.printf("}\n")
 
 	return g.err
@@ -193,9 +224,14 @@ func (g *generator) expr(expr ast.Expr) {
 	default:
 		g.err = fmt.Errorf("invalid expr type: %#v (%T)", expr, expr)
 	case *ast.BasicLit:
-		g.printf("hyperdual.Number{Real:%s}", expr.Value)
+		g.printf("%s.Number{Real:%s}", g.dpkg(), expr.Value)
 	case *ast.Ident:
-		g.printf("hyperdual.Number{Real:%s, E1mag:1, E2mag:1}", expr.Name)
+		switch g.kind {
+		case d1xKind:
+			g.printf("%s.Number{Real:%s, Emag:1}", g.dpkg(), expr.Name)
+		case d2xKind:
+			g.printf("%s.Number{Real:%s, E1mag:1, E2mag:1}", g.dpkg(), expr.Name)
+		}
 	case *ast.ParenExpr:
 		g.printf("(")
 		g.expr(expr.X)
@@ -207,7 +243,7 @@ func (g *generator) expr(expr ast.Expr) {
 		case token.ADD:
 			// no op
 		case token.SUB:
-			g.printf("hyperdual.Mul(hyperdual.Number{Real:-1}, ")
+			g.printf("%[1]s.Mul(%[1]s.Number{Real:-1}, ", g.dpkg())
 			g.expr(expr.X)
 			g.printf(")")
 		}
@@ -216,28 +252,28 @@ func (g *generator) expr(expr ast.Expr) {
 		default:
 			g.err = fmt.Errorf("invalid binary expression token %v", expr.Op)
 		case token.ADD:
-			g.printf("hyperdual.Add(")
+			g.printf("%s.Add(", g.dpkg())
 			g.expr(expr.X)
 			g.printf(", ")
 			g.expr(expr.Y)
 			g.printf(")")
 		case token.SUB:
-			g.printf("hyperdual.Sub(")
+			g.printf("%s.Sub(", g.dpkg())
 			g.expr(expr.X)
 			g.printf(", ")
 			g.expr(expr.Y)
 			g.printf(")")
 		case token.MUL:
-			g.printf("hyperdual.Mul(")
+			g.printf("%s.Mul(", g.dpkg())
 			g.expr(expr.X)
 			g.printf(", ")
 			g.expr(expr.Y)
 			g.printf(")")
 		case token.QUO:
-			g.printf("hyperdual.Mul(")
+			g.printf("%s.Mul(", g.dpkg())
 			g.expr(expr.X)
 			g.printf(", ")
-			g.printf("hyperdual.Inv(")
+			g.printf("%s.Inv(", g.dpkg())
 			g.expr(expr.Y)
 			g.printf("))")
 		}
@@ -269,11 +305,11 @@ func (g *generator) expr(expr ast.Expr) {
 			"Sin", "Sinh",
 			"Sqrt",
 			"Tan", "Tanh":
-			g.printf("hyperdual.%s", expr.Sel.Name)
+			g.printf("%s.%s", g.dpkg(), expr.Sel.Name)
 		case "E", "Pi", "Phi",
 			"Sqrt2", "SqrtE", "SqrtPi", "SqrtPhi",
 			"Ln2", "Log2E", "Ln10", "Log10E":
-			g.printf("hyperdual.Number{Real: math.%s}", expr.Sel.Name)
+			g.printf("%s.Number{Real: math.%s}", g.dpkg(), expr.Sel.Name)
 		default:
 			g.err = fmt.Errorf("invalid selector expression %#v", expr)
 		}
@@ -282,6 +318,10 @@ func (g *generator) expr(expr ast.Expr) {
 
 func (g *generator) printf(format string, args ...interface{}) {
 	fmt.Fprintf(g.w, format, args...)
+}
+
+func (g *generator) dpkg() string {
+	return g.kind.dpkg()
 }
 
 // f1x is the pre-computed signature of 'func(float64) float64'.

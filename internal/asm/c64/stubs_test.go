@@ -2,11 +2,122 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package c64
+package c64_test
 
-import "testing"
+import (
+	"fmt"
+	"testing"
 
-var tests = []struct {
+	. "gonum.org/v1/gonum/internal/asm/c64"
+)
+
+func TestAdd(t *testing.T) {
+	var src_gd, dst_gd complex64 = 1, 0
+	for j, v := range []struct {
+		dst, src, expect []complex64
+	}{
+		{
+			dst:    []complex64{1 + 1i},
+			src:    []complex64{0},
+			expect: []complex64{1 + 1i},
+		},
+		{
+			dst:    []complex64{1, 2, 3},
+			src:    []complex64{1 + 1i},
+			expect: []complex64{2 + 1i, 2, 3},
+		},
+		{
+			dst:    []complex64{},
+			src:    []complex64{},
+			expect: []complex64{},
+		},
+		{
+			dst:    []complex64{1},
+			src:    []complex64{cnan},
+			expect: []complex64{cnan},
+		},
+		{
+			dst:    []complex64{8, 8, 8, 8, 8},
+			src:    []complex64{2 + 1i, 4 - 1i, cnan, 8 + 1i, 9 - 1i},
+			expect: []complex64{10 + 1i, 12 - 1i, cnan, 16 + 1i, 17 - 1i},
+		},
+		{
+			dst:    []complex64{0, 1 + 1i, 2, 3 - 1i, 4},
+			src:    []complex64{cinf, 4, cnan, 8 + 1i, 9 - 1i},
+			expect: []complex64{cinf, 5 + 1i, cnan, 11, 13 - 1i},
+		},
+		{
+			dst:    make([]complex64, 50)[1:49],
+			src:    make([]complex64, 50)[1:49],
+			expect: make([]complex64, 50)[1:49],
+		},
+	} {
+		sg_ln, dg_ln := 4+j%2, 4+j%3
+		v.src, v.dst = guardVector(v.src, src_gd, sg_ln), guardVector(v.dst, dst_gd, dg_ln)
+		src, dst := v.src[sg_ln:len(v.src)-sg_ln], v.dst[dg_ln:len(v.dst)-dg_ln]
+		Add(dst, src)
+		for i := range v.expect {
+			if !sameCmplx(dst[i], v.expect[i]) {
+				t.Errorf("Test %d Add error at %d Got: %v Expected: %v", j, i, dst[i], v.expect[i])
+			}
+		}
+		if !isValidGuard(v.src, src_gd, sg_ln) {
+			t.Errorf("Test %d Guard violated in src vector %v %v", j, v.src[:sg_ln], v.src[len(v.src)-sg_ln:])
+		}
+		if !isValidGuard(v.dst, dst_gd, dg_ln) {
+			t.Errorf("Test %d Guard violated in dst vector %v %v", j, v.dst[:dg_ln], v.dst[len(v.dst)-dg_ln:])
+		}
+	}
+}
+
+func TestAddConst(t *testing.T) {
+	var src_gd complex64 = 0
+	for j, v := range []struct {
+		alpha       complex64
+		src, expect []complex64
+	}{
+		{
+			alpha:  1 + 1i,
+			src:    []complex64{0},
+			expect: []complex64{1 + 1i},
+		},
+		{
+			alpha:  5,
+			src:    []complex64{},
+			expect: []complex64{},
+		},
+		{
+			alpha:  1,
+			src:    []complex64{cnan},
+			expect: []complex64{cnan},
+		},
+		{
+			alpha:  8 + 1i,
+			src:    []complex64{2, 4, cnan, 8, 9},
+			expect: []complex64{10 + 1i, 12 + 1i, cnan, 16 + 1i, 17 + 1i},
+		},
+		{
+			alpha:  cinf,
+			src:    []complex64{cinf, 4, cnan, 8, 9},
+			expect: []complex64{cinf, cinf, cnan, cinf, cinf},
+		},
+	} {
+		g_ln := 4 + j%2
+		v.src = guardVector(v.src, src_gd, g_ln)
+		src := v.src[g_ln : len(v.src)-g_ln]
+		AddConst(v.alpha, src)
+		for i := range v.expect {
+			if !sameCmplx(src[i], v.expect[i]) {
+				t.Errorf("Test %d AddConst error at %d Got: %v Expected: %v", j, i, src[i], v.expect[i])
+			}
+		}
+		if !isValidGuard(v.src, src_gd, g_ln) {
+			t.Errorf("Test %d Guard violated in src vector %v %v", j, v.src[:g_ln], v.src[len(v.src)-g_ln:])
+		}
+	}
+}
+
+var axpyTests = []struct {
 	incX, incY, incDst int
 	ix, iy, idst       uintptr
 	a                  complex64
@@ -83,85 +194,510 @@ var tests = []struct {
 }
 
 func TestAxpyUnitary(t *testing.T) {
-	var x_gd, y_gd complex64 = 1, 1
-	for cas, test := range tests {
-		xg_ln, yg_ln := 4+cas%2, 4+cas%3
-		test.x, test.y = guardVector(test.x, x_gd, xg_ln), guardVector(test.y, y_gd, yg_ln)
-		x, y := test.x[xg_ln:len(test.x)-xg_ln], test.y[yg_ln:len(test.y)-yg_ln]
+	const xGdVal, yGdVal = 1, 1
+	for cas, test := range axpyTests {
+		xgLn, ygLn := 4+cas%2, 4+cas%3
+		test.x, test.y = guardVector(test.x, xGdVal, xgLn), guardVector(test.y, yGdVal, ygLn)
+		x, y := test.x[xgLn:len(test.x)-xgLn], test.y[ygLn:len(test.y)-ygLn]
 		AxpyUnitary(test.a, x, y)
 		for i := range test.ex {
 			if y[i] != test.ex[i] {
 				t.Errorf("Test %d Unexpected result at %d Got: %v Expected: %v", cas, i, y[i], test.ex[i])
 			}
 		}
-		if !isValidGuard(test.x, x_gd, xg_ln) {
-			t.Errorf("Test %d Guard violated in x vector %v %v", cas, test.x[:xg_ln], test.x[len(test.x)-xg_ln:])
+		if !isValidGuard(test.x, xGdVal, xgLn) {
+			t.Errorf("Test %d Guard violated in x vector %v %v", cas, test.x[:xgLn], test.x[len(test.x)-xgLn:])
 		}
-		if !isValidGuard(test.y, y_gd, yg_ln) {
-			t.Errorf("Test %d Guard violated in y vector %v %v", cas, test.y[:yg_ln], test.y[len(test.y)-yg_ln:])
+		if !isValidGuard(test.y, yGdVal, ygLn) {
+			t.Errorf("Test %d Guard violated in y vector %v %v", cas, test.y[:ygLn], test.y[len(test.y)-ygLn:])
 		}
 	}
 }
 
 func TestAxpyUnitaryTo(t *testing.T) {
-	var x_gd, y_gd, dst_gd complex64 = 1, 1, 0
-	for cas, test := range tests {
-		xg_ln, yg_ln := 4+cas%2, 4+cas%3
-		test.x, test.y = guardVector(test.x, x_gd, xg_ln), guardVector(test.y, y_gd, yg_ln)
-		test.dst = guardVector(test.dst, dst_gd, xg_ln)
-		x, y := test.x[xg_ln:len(test.x)-xg_ln], test.y[yg_ln:len(test.y)-yg_ln]
-		dst := test.dst[xg_ln : len(test.dst)-xg_ln]
+	const xGdVal, yGdVal, dstGdVal = 1, 1, 0
+	for cas, test := range axpyTests {
+		xgLn, ygLn := 4+cas%2, 4+cas%3
+		test.x, test.y = guardVector(test.x, xGdVal, xgLn), guardVector(test.y, yGdVal, ygLn)
+		test.dst = guardVector(test.dst, dstGdVal, xgLn)
+		x, y := test.x[xgLn:len(test.x)-xgLn], test.y[ygLn:len(test.y)-ygLn]
+		dst := test.dst[xgLn : len(test.dst)-xgLn]
 		AxpyUnitaryTo(dst, test.a, x, y)
 		for i := range test.ex {
 			if dst[i] != test.ex[i] {
 				t.Errorf("Test %d Unexpected result at %d Got: %v Expected: %v", cas, i, dst[i], test.ex[i])
 			}
 		}
-		if !isValidGuard(test.x, x_gd, xg_ln) {
-			t.Errorf("Test %d Guard violated in x vector %v %v", cas, test.x[:xg_ln], test.x[len(test.x)-xg_ln:])
+		if !isValidGuard(test.x, xGdVal, xgLn) {
+			t.Errorf("Test %d Guard violated in x vector %v %v", cas, test.x[:xgLn], test.x[len(test.x)-xgLn:])
 		}
-		if !isValidGuard(test.y, y_gd, yg_ln) {
-			t.Errorf("Test %d Guard violated in y vector %v %v", cas, test.y[:yg_ln], test.y[len(test.y)-yg_ln:])
+		if !isValidGuard(test.y, yGdVal, ygLn) {
+			t.Errorf("Test %d Guard violated in y vector %v %v", cas, test.y[:ygLn], test.y[len(test.y)-ygLn:])
 		}
-		if !isValidGuard(test.dst, dst_gd, xg_ln) {
-			t.Errorf("Test %d Guard violated in dst vector %v %v", cas, test.dst[:xg_ln], test.dst[len(test.dst)-xg_ln:])
+		if !isValidGuard(test.dst, dstGdVal, xgLn) {
+			t.Errorf("Test %d Guard violated in dst vector %v %v", cas, test.dst[:xgLn], test.dst[len(test.dst)-xgLn:])
 		}
+
 	}
 }
 
 func TestAxpyInc(t *testing.T) {
-	var x_gd, y_gd complex64 = 1, 1
-	for cas, test := range tests {
-		xg_ln, yg_ln := 4+cas%2, 4+cas%3
-		test.x, test.y = guardIncVector(test.x, x_gd, test.incX, xg_ln), guardIncVector(test.y, y_gd, test.incY, yg_ln)
-		x, y := test.x[xg_ln:len(test.x)-xg_ln], test.y[yg_ln:len(test.y)-yg_ln]
+	const xGdVal, yGdVal = 1, 1
+	for cas, test := range axpyTests {
+		xgLn, ygLn := 4+cas%2, 4+cas%3
+		test.x, test.y = guardIncVector(test.x, xGdVal, test.incX, xgLn), guardIncVector(test.y, yGdVal, test.incY, ygLn)
+		x, y := test.x[xgLn:len(test.x)-xgLn], test.y[ygLn:len(test.y)-ygLn]
 		AxpyInc(test.a, x, y, uintptr(len(test.ex)), uintptr(test.incX), uintptr(test.incY), test.ix, test.iy)
 		for i := range test.ex {
 			if y[int(test.iy)+i*int(test.incY)] != test.ex[i] {
 				t.Errorf("Test %d Unexpected result at %d Got: %v Expected: %v", cas, i, y[i*int(test.incY)], test.ex[i])
 			}
 		}
-		checkValidIncGuard(t, test.x, x_gd, test.incX, xg_ln)
-		checkValidIncGuard(t, test.y, y_gd, test.incY, yg_ln)
+		checkValidIncGuard(t, test.x, xGdVal, test.incX, xgLn)
+		checkValidIncGuard(t, test.y, yGdVal, test.incY, ygLn)
 	}
 }
 
 func TestAxpyIncTo(t *testing.T) {
-	var x_gd, y_gd, dst_gd complex64 = 1, 1, 0
-	for cas, test := range tests {
-		xg_ln, yg_ln := 4+cas%2, 4+cas%3
-		test.x, test.y = guardIncVector(test.x, x_gd, test.incX, xg_ln), guardIncVector(test.y, y_gd, test.incY, yg_ln)
-		test.dst = guardIncVector(test.dst, dst_gd, test.incDst, xg_ln)
-		x, y := test.x[xg_ln:len(test.x)-xg_ln], test.y[yg_ln:len(test.y)-yg_ln]
-		dst := test.dst[xg_ln : len(test.dst)-xg_ln]
+	const xGdVal, yGdVal, dstGdVal = 1, 1, 0
+	for cas, test := range axpyTests {
+		xgLn, ygLn := 4+cas%2, 4+cas%3
+		test.x, test.y = guardIncVector(test.x, xGdVal, test.incX, xgLn), guardIncVector(test.y, yGdVal, test.incY, ygLn)
+		test.dst = guardIncVector(test.dst, dstGdVal, test.incDst, xgLn)
+		x, y := test.x[xgLn:len(test.x)-xgLn], test.y[ygLn:len(test.y)-ygLn]
+		dst := test.dst[xgLn : len(test.dst)-xgLn]
 		AxpyIncTo(dst, uintptr(test.incDst), test.idst, test.a, x, y, uintptr(len(test.ex)), uintptr(test.incX), uintptr(test.incY), test.ix, test.iy)
 		for i := range test.ex {
 			if dst[int(test.idst)+i*int(test.incDst)] != test.ex[i] {
 				t.Errorf("Test %d Unexpected result at %d Got: %v Expected: %v", cas, i, dst[i*int(test.incDst)], test.ex[i])
 			}
 		}
-		checkValidIncGuard(t, test.x, x_gd, test.incX, xg_ln)
-		checkValidIncGuard(t, test.y, y_gd, test.incY, yg_ln)
-		checkValidIncGuard(t, test.dst, dst_gd, test.incDst, xg_ln)
+		checkValidIncGuard(t, test.x, xGdVal, test.incX, xgLn)
+		checkValidIncGuard(t, test.y, yGdVal, test.incY, ygLn)
+		checkValidIncGuard(t, test.dst, dstGdVal, test.incDst, xgLn)
+	}
+}
+
+func TestCumSum(t *testing.T) {
+	var src_gd, dst_gd complex64 = -1, 0
+	for j, v := range []struct {
+		dst, src, expect []complex64
+	}{
+		{
+			dst:    []complex64{},
+			src:    []complex64{},
+			expect: []complex64{},
+		},
+		{
+			dst:    []complex64{0},
+			src:    []complex64{1 + 1i},
+			expect: []complex64{1 + 1i},
+		},
+		{
+			dst:    []complex64{cnan},
+			src:    []complex64{cnan},
+			expect: []complex64{cnan},
+		},
+		{
+			dst:    []complex64{0, 0, 0},
+			src:    []complex64{1, 2 + 1i, 3 + 2i},
+			expect: []complex64{1, 3 + 1i, 6 + 3i},
+		},
+		{
+			dst:    []complex64{0, 0, 0, 0},
+			src:    []complex64{1, 2 + 1i, 3 + 2i},
+			expect: []complex64{1, 3 + 1i, 6 + 3i},
+		},
+		{
+			dst:    []complex64{0, 0, 0, 0},
+			src:    []complex64{1, 2 + 1i, 3 + 2i, 4 + 3i},
+			expect: []complex64{1, 3 + 1i, 6 + 3i, 10 + 6i},
+		},
+		{
+			dst:    []complex64{1, cnan, cnan, 1, 1},
+			src:    []complex64{1, 1, cnan, 1, 1},
+			expect: []complex64{1, 2, cnan, cnan, cnan},
+		},
+		{
+			dst:    []complex64{cnan, 4, cinf, cinf, 9},
+			src:    []complex64{cinf, 4, cnan, cinf, 9},
+			expect: []complex64{cinf, cinf, cnan, cnan, cnan},
+		},
+		{
+			dst:    make([]complex64, 16),
+			src:    []complex64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+			expect: []complex64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16},
+		},
+	} {
+		g_ln := 4 + j%2
+		v.src, v.dst = guardVector(v.src, src_gd, g_ln), guardVector(v.dst, dst_gd, g_ln)
+		src, dst := v.src[g_ln:len(v.src)-g_ln], v.dst[g_ln:len(v.dst)-g_ln]
+		ret := CumSum(dst, src)
+		for i := range v.expect {
+			if !sameCmplx(ret[i], v.expect[i]) {
+				t.Errorf("Test %d CumSum error at %d Got: %v Expected: %v", j, i, ret[i], v.expect[i])
+			}
+			if !sameCmplx(ret[i], dst[i]) {
+				t.Errorf("Test %d CumSum ret/dst mismatch %d Ret: %v Dst: %v", j, i, ret[i], dst[i])
+			}
+		}
+		if !isValidGuard(v.src, src_gd, g_ln) {
+			t.Errorf("Test %d Guard violated in src vector %v %v", j, v.src[:g_ln], v.src[len(v.src)-g_ln:])
+		}
+		if !isValidGuard(v.dst, dst_gd, g_ln) {
+			t.Errorf("Test %d Guard violated in dst vector %v %v", j, v.dst[:g_ln], v.dst[len(v.dst)-g_ln:])
+		}
+	}
+}
+
+func TestCumProd(t *testing.T) {
+	var src_gd, dst_gd complex64 = -1, 1
+	for j, v := range []struct {
+		dst, src, expect []complex64
+	}{
+		{
+			dst:    []complex64{},
+			src:    []complex64{},
+			expect: []complex64{},
+		},
+		{
+			dst:    []complex64{1},
+			src:    []complex64{1 + 1i},
+			expect: []complex64{1 + 1i},
+		},
+		{
+			dst:    []complex64{cnan},
+			src:    []complex64{cnan},
+			expect: []complex64{cnan},
+		},
+		{
+			dst:    []complex64{0, 0, 0, 0},
+			src:    []complex64{1, 2 + 1i, 3 + 2i, 4 + 3i},
+			expect: []complex64{1, 2 + 1i, 4 + 7i, -5 + 40i},
+		},
+		{
+			dst:    []complex64{0, 0, 0},
+			src:    []complex64{1, 2 + 1i, 3 + 2i},
+			expect: []complex64{1, 2 + 1i, 4 + 7i},
+		},
+		{
+			dst:    []complex64{0, 0, 0, 0},
+			src:    []complex64{1, 2 + 1i, 3 + 2i},
+			expect: []complex64{1, 2 + 1i, 4 + 7i},
+		},
+		{
+			dst:    []complex64{cnan, 1, cnan, 1, 0},
+			src:    []complex64{1, 1, cnan, 1, 1},
+			expect: []complex64{1, 1, cnan, cnan, cnan},
+		},
+		{
+			dst:    []complex64{cnan, 4, cnan, cinf, 9},
+			src:    []complex64{cinf, 4, cnan, cinf, 9},
+			expect: []complex64{cinf, cnan, cnan, cnan, cnan},
+		},
+		{
+			dst:    make([]complex64, 18),
+			src:    []complex64{2i, 2i, 2i, 2i, 2i, 2i, 2i, 2i, 2i, 2i, 2i, 2i, 2i, 2i, 2i, 2i, 2i, 2i},
+			expect: []complex64{2i, -4, -8i, 16, 32i, -64, -128i, 256, 512i, -1024, -2048i, 4096, 8192i, -16384, -32768i, 65536},
+		},
+	} {
+		sg_ln, dg_ln := 4+j%2, 4+j%3
+		v.src, v.dst = guardVector(v.src, src_gd, sg_ln), guardVector(v.dst, dst_gd, dg_ln)
+		src, dst := v.src[sg_ln:len(v.src)-sg_ln], v.dst[dg_ln:len(v.dst)-dg_ln]
+		ret := CumProd(dst, src)
+		for i := range v.expect {
+			if !sameCmplx(ret[i], v.expect[i]) {
+				t.Errorf("Test %d CumProd error at %d Got: %v Expected: %v", j, i, ret[i], v.expect[i])
+			}
+			if !sameCmplx(ret[i], dst[i]) {
+				t.Errorf("Test %d CumProd ret/dst mismatch %d Ret: %v Dst: %v", j, i, ret[i], dst[i])
+			}
+		}
+		if !isValidGuard(v.src, src_gd, sg_ln) {
+			t.Errorf("Test %d Guard violated in src vector %v %v", j, v.src[:sg_ln], v.src[len(v.src)-sg_ln:])
+		}
+		if !isValidGuard(v.dst, dst_gd, dg_ln) {
+			t.Errorf("Test %d Guard violated in dst vector %v %v", j, v.dst[:dg_ln], v.dst[len(v.dst)-dg_ln:])
+		}
+	}
+}
+
+func TestDiv(t *testing.T) {
+	var src_gd, dst_gd complex64 = -1, 0.5
+	for j, v := range []struct {
+		dst, src, expect []complex64
+	}{
+		{
+			dst:    []complex64{1 + 1i},
+			src:    []complex64{1 + 1i},
+			expect: []complex64{1},
+		},
+		{
+			dst:    []complex64{cnan},
+			src:    []complex64{cnan},
+			expect: []complex64{cnan},
+		},
+		{
+			dst:    []complex64{1 + 1i, 2 + 1i, 3 + 1i, 4 + 1i},
+			src:    []complex64{1 + 1i, 2 + 1i, 3 + 1i, 4 + 1i},
+			expect: []complex64{1, 1, 1, 1},
+		},
+		{
+			dst:    []complex64{1 + 1i, 2 + 1i, 3 + 1i, 4 + 1i, 2 + 2i, 4 + 2i, 6 + 2i, 8 + 2i},
+			src:    []complex64{1 + 1i, 2 + 1i, 3 + 1i, 4 + 1i, 1 + 1i, 2 + 1i, 3 + 1i, 4 + 1i},
+			expect: []complex64{1, 1, 1, 1, 2, 2, 2, 2},
+		},
+		{
+			dst:    []complex64{2 + 2i, 4 + 8i, 6 - 12i},
+			src:    []complex64{1 + 1i, 2 + 4i, 3 - 6i},
+			expect: []complex64{2, 2, 2},
+		},
+		{
+			dst:    []complex64{0, 0, 0, 0},
+			src:    []complex64{1 + 1i, 2 + 2i, 3 + 3i},
+			expect: []complex64{0, 0, 0},
+		},
+		{
+			dst:    []complex64{cnan, 1, cnan, 1, 0, cnan, 1, cnan, 1, 0},
+			src:    []complex64{1, 1, cnan, 1, 1, 1, 1, cnan, 1, 1},
+			expect: []complex64{cnan, 1, cnan, 1, 0, cnan, 1, cnan, 1, 0},
+		},
+		{
+			dst:    []complex64{cinf, 4, cnan, cinf, 9, cinf, 4, cnan, cinf, 9},
+			src:    []complex64{cinf, 4, cnan, cinf, 3, cinf, 4, cnan, cinf, 3},
+			expect: []complex64{cnan, 1, cnan, cnan, 3, cnan, 1, cnan, cnan, 3},
+		},
+	} {
+		sg_ln, dg_ln := 4+j%2, 4+j%3
+		v.src, v.dst = guardVector(v.src, src_gd, sg_ln), guardVector(v.dst, dst_gd, dg_ln)
+		src, dst := v.src[sg_ln:len(v.src)-sg_ln], v.dst[dg_ln:len(v.dst)-dg_ln]
+		Div(dst, src)
+		for i := range v.expect {
+			if !sameCmplx(dst[i], v.expect[i]) {
+				t.Errorf("Test %d Div error at %d Got: %v Expected: %v", j, i, dst[i], v.expect[i])
+			}
+		}
+		if !isValidGuard(v.src, src_gd, sg_ln) {
+			t.Errorf("Test %d Guard violated in src vector %v %v", j, v.src[:sg_ln], v.src[len(v.src)-sg_ln:])
+		}
+		if !isValidGuard(v.dst, dst_gd, dg_ln) {
+			t.Errorf("Test %d Guard violated in dst vector %v %v", j, v.dst[:dg_ln], v.dst[len(v.dst)-dg_ln:])
+		}
+	}
+}
+
+func TestDivTo(t *testing.T) {
+	var dst_gd, x_gd, y_gd complex64 = -1, 0.5, 0.25
+	for j, v := range []struct {
+		dst, x, y, expect []complex64
+	}{
+		{
+			dst:    []complex64{1 - 1i},
+			x:      []complex64{1 + 1i},
+			y:      []complex64{1 + 1i},
+			expect: []complex64{1},
+		},
+		{
+			dst:    []complex64{1},
+			x:      []complex64{cnan},
+			y:      []complex64{cnan},
+			expect: []complex64{cnan},
+		},
+		{
+			dst:    []complex64{-2, -2, -2},
+			x:      []complex64{1 + 1i, 2 + 1i, 3 + 1i},
+			y:      []complex64{1 + 1i, 2 + 1i, 3 + 1i},
+			expect: []complex64{1, 1, 1},
+		},
+		{
+			dst:    []complex64{0, 0, 0},
+			x:      []complex64{2 + 2i, 4 + 4i, 6 + 6i},
+			y:      []complex64{1 + 1i, 2 + 2i, 3 + 3i, 4 + 4i},
+			expect: []complex64{2, 2, 2},
+		},
+		{
+			dst:    []complex64{-1, -1, -1},
+			x:      []complex64{0, 0, 0},
+			y:      []complex64{1 + 1i, 2 + 1i, 3 + 1i},
+			expect: []complex64{0, 0, 0},
+		},
+		{
+			dst:    []complex64{cinf, cinf, cinf, cinf, cinf, cinf, cinf, cinf, cinf, cinf},
+			x:      []complex64{cnan, 1, cnan, 1, 0, cnan, 1, cnan, 1, 0},
+			y:      []complex64{1, 1, cnan, 1, 1, 1, 1, cnan, 1, 1},
+			expect: []complex64{cnan, 1, cnan, 1, 0, cnan, 1, cnan, 1, 0},
+		},
+		{
+			dst:    []complex64{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			x:      []complex64{cinf, 4, cnan, cinf, 9, cinf, 4, cnan, cinf, 9},
+			y:      []complex64{cinf, 4, cnan, cinf, 3, cinf, 4, cnan, cinf, 3},
+			expect: []complex64{cnan, 1, cnan, cnan, 3, cnan, 1, cnan, cnan, 3},
+		},
+	} {
+		xg_ln, yg_ln := 4+j%2, 4+j%3
+		v.y, v.x = guardVector(v.y, y_gd, yg_ln), guardVector(v.x, x_gd, xg_ln)
+		y, x := v.y[yg_ln:len(v.y)-yg_ln], v.x[xg_ln:len(v.x)-xg_ln]
+		v.dst = guardVector(v.dst, dst_gd, xg_ln)
+		dst := v.dst[xg_ln : len(v.dst)-xg_ln]
+		ret := DivTo(dst, x, y)
+		for i := range v.expect {
+			if !sameCmplx(ret[i], v.expect[i]) {
+				t.Errorf("Test %d DivTo error at %d Got: %v Expected: %v", j, i, ret[i], v.expect[i])
+			}
+			if !sameCmplx(ret[i], dst[i]) {
+				t.Errorf("Test %d DivTo ret/dst mismatch %d Ret: %v Dst: %v", j, i, ret[i], dst[i])
+			}
+		}
+		if !isValidGuard(v.y, y_gd, yg_ln) {
+			t.Errorf("Test %d Guard violated in y vector %v %v", j, v.y[:yg_ln], v.y[len(v.y)-yg_ln:])
+		}
+		if !isValidGuard(v.x, x_gd, xg_ln) {
+			t.Errorf("Test %d Guard violated in x vector %v %v", j, v.x[:xg_ln], v.x[len(v.x)-xg_ln:])
+		}
+		if !isValidGuard(v.dst, dst_gd, xg_ln) {
+			t.Errorf("Test %d Guard violated in dst vector %v %v", j, v.dst[:xg_ln], v.dst[len(v.dst)-xg_ln:])
+		}
+	}
+}
+
+var scalTests = []struct {
+	alpha complex64
+	x     []complex64
+	want  []complex64
+}{
+	{
+		alpha: 0,
+		x:     []complex64{},
+		want:  []complex64{},
+	},
+	{
+		alpha: 1 + 1i,
+		x:     []complex64{1 + 2i},
+		want:  []complex64{-1 + 3i},
+	},
+	{
+		alpha: 2 + 3i,
+		x:     []complex64{1 + 2i},
+		want:  []complex64{-4 + 7i},
+	},
+	{
+		alpha: 2 - 4i,
+		x:     []complex64{1 + 2i},
+		want:  []complex64{10},
+	},
+	{
+		alpha: 2 + 8i,
+		x:     []complex64{1 + 2i, 5 + 4i, 3 + 6i, 8 + 12i, -3 - 2i, -5 + 5i},
+		want:  []complex64{-14 + 12i, -22 + 48i, -42 + 36i, -80 + 88i, 10 - 28i, -50 - 30i},
+	},
+	{
+		alpha: 5 - 10i,
+		x:     []complex64{1 + 2i, 5 + 4i, 3 + 6i, 8 + 12i, -3 - 2i, -5 + 5i, 1 + 2i, 5 + 4i, 3 + 6i, 8 + 12i, -3 - 2i, -5 + 5i},
+		want:  []complex64{25, 65 - 30i, 75, 160 - 20i, -35 + 20i, 25 + 75i, 25, 65 - 30i, 75, 160 - 20i, -35 + 20i, 25 + 75i},
+	},
+}
+
+func TestScalUnitary(t *testing.T) {
+	const xGdVal = -0.5
+	for i, test := range scalTests {
+		for _, align := range align1 {
+			prefix := fmt.Sprintf("Test %v (x:%v)", i, align)
+			xgLn := 4 + align
+			xg := guardVector(test.x, xGdVal, xgLn)
+			x := xg[xgLn : len(xg)-xgLn]
+
+			ScalUnitary(test.alpha, x)
+
+			for i := range test.want {
+				if !sameCmplx(x[i], test.want[i]) {
+					t.Errorf(msgVal, prefix, i, x[i], test.want[i])
+				}
+			}
+			if !isValidGuard(xg, xGdVal, xgLn) {
+				t.Errorf(msgGuard, prefix, "x", xg[:xgLn], xg[len(xg)-xgLn:])
+			}
+		}
+	}
+}
+
+func TestScalInc(t *testing.T) {
+	const xGdVal = -0.5
+	gdLn := 4
+	for i, test := range scalTests {
+		n := len(test.x)
+		for _, inc := range []int{1, 2, 3, 4, 7, 10} {
+			prefix := fmt.Sprintf("Test %v (x:%v)", i, inc)
+			xg := guardIncVector(test.x, xGdVal, inc, gdLn)
+			x := xg[gdLn : len(xg)-gdLn]
+
+			ScalInc(test.alpha, x, uintptr(n), uintptr(inc))
+
+			for i := range test.want {
+				if !sameCmplx(x[i*inc], test.want[i]) {
+					t.Errorf(msgVal, prefix, i, x[i*inc], test.want[i])
+				}
+			}
+			checkValidIncGuard(t, xg, xGdVal, inc, gdLn)
+		}
+	}
+}
+
+func TestSum(t *testing.T) {
+	var srcGd complex64 = -1
+	for j, v := range []struct {
+		src    []complex64
+		expect complex64
+	}{
+		{
+			src:    []complex64{},
+			expect: 0,
+		},
+		{
+			src:    []complex64{1},
+			expect: 1,
+		},
+		{
+			src:    []complex64{cnan},
+			expect: cnan,
+		},
+		{
+			src:    []complex64{1 + 1i, 2 + 2i, 3 + 3i},
+			expect: 6 + 6i,
+		},
+		{
+			src:    []complex64{1 + 1i, -4, 3 - 1i},
+			expect: 0,
+		},
+		{
+			src:    []complex64{1 - 1i, 2 + 2i, 3 - 3i, 4 + 4i},
+			expect: 10 + 2i,
+		},
+		{
+			src:    []complex64{1, 1, cnan, 1, 1},
+			expect: cnan,
+		},
+		{
+			src:    []complex64{cinf, 4, cnan, cinf, 9},
+			expect: cnan,
+		},
+		{
+			src:    []complex64{1 + 1i, 1 + 1i, 1 + 1i, 1 + 1i, 9 + 9i, 1 + 1i, 1 + 1i, 1 + 1i, 2 + 2i, 1 + 1i, 1 + 1i, 1 + 1i, 1 + 1i, 1 + 1i, 5 + 5i, 1 + 1i},
+			expect: 29 + 29i,
+		},
+		{
+			src:    []complex64{1 + 1i, 1 + 1i, 1 + 1i, 1 + 1i, 9 + 9i, 1 + 1i, 1 + 1i, 1 + 1i, 2 + 2i, 1 + 1i, 1 + 1i, 1 + 1i, 1 + 1i, 1 + 1i, 5 + 5i, 11 + 11i, 1 + 1i, 1 + 1i, 1 + 1i, 9 + 9i, 1 + 1i, 1 + 1i, 1 + 1i, 2 + 2i, 1 + 1i, 1 + 1i, 1 + 1i, 1 + 1i, 1 + 1i, 5 + 5i, 1 + 1i},
+			expect: 67 + 67i,
+		},
+	} {
+		gdLn := 4 + j%2
+		gsrc := guardVector(v.src, srcGd, gdLn)
+		src := gsrc[gdLn : len(gsrc)-gdLn]
+		ret := Sum(src)
+		if !sameCmplx(ret, v.expect) {
+			t.Errorf("Test %d Sum error Got: %v Expected: %v", j, ret, v.expect)
+		}
+		if !isValidGuard(gsrc, srcGd, gdLn) {
+			t.Errorf("Test %d Guard violated in src vector %v %v", j, gsrc[:gdLn], gsrc[len(gsrc)-gdLn:])
+		}
 	}
 }

@@ -2,14 +2,122 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package c128
+package c128_test
 
 import (
 	"fmt"
 	"testing"
+
+	. "gonum.org/v1/gonum/internal/asm/c128"
 )
 
-var tests = []struct {
+func TestAdd(t *testing.T) {
+	var src_gd, dst_gd complex128 = 1, 0
+	for j, v := range []struct {
+		dst, src, expect []complex128
+	}{
+		{
+			dst:    []complex128{1 + 1i},
+			src:    []complex128{0},
+			expect: []complex128{1 + 1i},
+		},
+		{
+			dst:    []complex128{1, 2, 3},
+			src:    []complex128{1 + 1i},
+			expect: []complex128{2 + 1i, 2, 3},
+		},
+		{
+			dst:    []complex128{},
+			src:    []complex128{},
+			expect: []complex128{},
+		},
+		{
+			dst:    []complex128{1},
+			src:    []complex128{cnan},
+			expect: []complex128{cnan},
+		},
+		{
+			dst:    []complex128{8, 8, 8, 8, 8},
+			src:    []complex128{2 + 1i, 4 - 1i, cnan, 8 + 1i, 9 - 1i},
+			expect: []complex128{10 + 1i, 12 - 1i, cnan, 16 + 1i, 17 - 1i},
+		},
+		{
+			dst:    []complex128{0, 1 + 1i, 2, 3 - 1i, 4},
+			src:    []complex128{cinf, 4, cnan, 8 + 1i, 9 - 1i},
+			expect: []complex128{cinf, 5 + 1i, cnan, 11, 13 - 1i},
+		},
+		{
+			dst:    make([]complex128, 50)[1:49],
+			src:    make([]complex128, 50)[1:49],
+			expect: make([]complex128, 50)[1:49],
+		},
+	} {
+		sg_ln, dg_ln := 4+j%2, 4+j%3
+		v.src, v.dst = guardVector(v.src, src_gd, sg_ln), guardVector(v.dst, dst_gd, dg_ln)
+		src, dst := v.src[sg_ln:len(v.src)-sg_ln], v.dst[dg_ln:len(v.dst)-dg_ln]
+		Add(dst, src)
+		for i := range v.expect {
+			if !sameCmplx(dst[i], v.expect[i]) {
+				t.Errorf("Test %d Add error at %d Got: %v Expected: %v", j, i, dst[i], v.expect[i])
+			}
+		}
+		if !isValidGuard(v.src, src_gd, sg_ln) {
+			t.Errorf("Test %d Guard violated in src vector %v %v", j, v.src[:sg_ln], v.src[len(v.src)-sg_ln:])
+		}
+		if !isValidGuard(v.dst, dst_gd, dg_ln) {
+			t.Errorf("Test %d Guard violated in dst vector %v %v", j, v.dst[:dg_ln], v.dst[len(v.dst)-dg_ln:])
+		}
+	}
+}
+
+func TestAddConst(t *testing.T) {
+	var src_gd complex128 = 0
+	for j, v := range []struct {
+		alpha       complex128
+		src, expect []complex128
+	}{
+		{
+			alpha:  1 + 1i,
+			src:    []complex128{0},
+			expect: []complex128{1 + 1i},
+		},
+		{
+			alpha:  5,
+			src:    []complex128{},
+			expect: []complex128{},
+		},
+		{
+			alpha:  1,
+			src:    []complex128{cnan},
+			expect: []complex128{cnan},
+		},
+		{
+			alpha:  8 + 1i,
+			src:    []complex128{2, 4, cnan, 8, 9},
+			expect: []complex128{10 + 1i, 12 + 1i, cnan, 16 + 1i, 17 + 1i},
+		},
+		{
+			alpha:  cinf,
+			src:    []complex128{cinf, 4, cnan, 8, 9},
+			expect: []complex128{cinf, cinf, cnan, cinf, cinf},
+		},
+	} {
+		g_ln := 4 + j%2
+		v.src = guardVector(v.src, src_gd, g_ln)
+		src := v.src[g_ln : len(v.src)-g_ln]
+		AddConst(v.alpha, src)
+		for i := range v.expect {
+			if !sameCmplx(src[i], v.expect[i]) {
+				t.Errorf("Test %d AddConst error at %d Got: %v Expected: %v", j, i, src[i], v.expect[i])
+			}
+		}
+		if !isValidGuard(v.src, src_gd, g_ln) {
+			t.Errorf("Test %d Guard violated in src vector %v %v", j, v.src[:g_ln], v.src[len(v.src)-g_ln:])
+		}
+	}
+}
+
+var axpyTests = []struct {
 	incX, incY, incDst int
 	ix, iy, idst       uintptr
 	a                  complex128
@@ -87,7 +195,7 @@ var tests = []struct {
 
 func TestAxpyUnitary(t *testing.T) {
 	const xGdVal, yGdVal = 1, 1
-	for cas, test := range tests {
+	for cas, test := range axpyTests {
 		xgLn, ygLn := 4+cas%2, 4+cas%3
 		test.x, test.y = guardVector(test.x, xGdVal, xgLn), guardVector(test.y, yGdVal, ygLn)
 		x, y := test.x[xgLn:len(test.x)-xgLn], test.y[ygLn:len(test.y)-ygLn]
@@ -108,7 +216,7 @@ func TestAxpyUnitary(t *testing.T) {
 
 func TestAxpyUnitaryTo(t *testing.T) {
 	const xGdVal, yGdVal, dstGdVal = 1, 1, 0
-	for cas, test := range tests {
+	for cas, test := range axpyTests {
 		xgLn, ygLn := 4+cas%2, 4+cas%3
 		test.x, test.y = guardVector(test.x, xGdVal, xgLn), guardVector(test.y, yGdVal, ygLn)
 		test.dst = guardVector(test.dst, dstGdVal, xgLn)
@@ -135,7 +243,7 @@ func TestAxpyUnitaryTo(t *testing.T) {
 
 func TestAxpyInc(t *testing.T) {
 	const xGdVal, yGdVal = 1, 1
-	for cas, test := range tests {
+	for cas, test := range axpyTests {
 		xgLn, ygLn := 4+cas%2, 4+cas%3
 		test.x, test.y = guardIncVector(test.x, xGdVal, test.incX, xgLn), guardIncVector(test.y, yGdVal, test.incY, ygLn)
 		x, y := test.x[xgLn:len(test.x)-xgLn], test.y[ygLn:len(test.y)-ygLn]
@@ -152,7 +260,7 @@ func TestAxpyInc(t *testing.T) {
 
 func TestAxpyIncTo(t *testing.T) {
 	const xGdVal, yGdVal, dstGdVal = 1, 1, 0
-	for cas, test := range tests {
+	for cas, test := range axpyTests {
 		xgLn, ygLn := 4+cas%2, 4+cas%3
 		test.x, test.y = guardIncVector(test.x, xGdVal, test.incX, xgLn), guardIncVector(test.y, yGdVal, test.incY, ygLn)
 		test.dst = guardIncVector(test.dst, dstGdVal, test.incDst, xgLn)
@@ -167,6 +275,288 @@ func TestAxpyIncTo(t *testing.T) {
 		checkValidIncGuard(t, test.x, xGdVal, test.incX, xgLn)
 		checkValidIncGuard(t, test.y, yGdVal, test.incY, ygLn)
 		checkValidIncGuard(t, test.dst, dstGdVal, test.incDst, xgLn)
+	}
+}
+
+func TestCumSum(t *testing.T) {
+	var src_gd, dst_gd complex128 = -1, 0
+	for j, v := range []struct {
+		dst, src, expect []complex128
+	}{
+		{
+			dst:    []complex128{},
+			src:    []complex128{},
+			expect: []complex128{},
+		},
+		{
+			dst:    []complex128{0},
+			src:    []complex128{1 + 1i},
+			expect: []complex128{1 + 1i},
+		},
+		{
+			dst:    []complex128{cnan},
+			src:    []complex128{cnan},
+			expect: []complex128{cnan},
+		},
+		{
+			dst:    []complex128{0, 0, 0},
+			src:    []complex128{1, 2 + 1i, 3 + 2i},
+			expect: []complex128{1, 3 + 1i, 6 + 3i},
+		},
+		{
+			dst:    []complex128{0, 0, 0, 0},
+			src:    []complex128{1, 2 + 1i, 3 + 2i},
+			expect: []complex128{1, 3 + 1i, 6 + 3i},
+		},
+		{
+			dst:    []complex128{0, 0, 0, 0},
+			src:    []complex128{1, 2 + 1i, 3 + 2i, 4 + 3i},
+			expect: []complex128{1, 3 + 1i, 6 + 3i, 10 + 6i},
+		},
+		{
+			dst:    []complex128{1, cnan, cnan, 1, 1},
+			src:    []complex128{1, 1, cnan, 1, 1},
+			expect: []complex128{1, 2, cnan, cnan, cnan},
+		},
+		{
+			dst:    []complex128{cnan, 4, cinf, cinf, 9},
+			src:    []complex128{cinf, 4, cnan, cinf, 9},
+			expect: []complex128{cinf, cinf, cnan, cnan, cnan},
+		},
+		{
+			dst:    make([]complex128, 16),
+			src:    []complex128{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+			expect: []complex128{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16},
+		},
+	} {
+		g_ln := 4 + j%2
+		v.src, v.dst = guardVector(v.src, src_gd, g_ln), guardVector(v.dst, dst_gd, g_ln)
+		src, dst := v.src[g_ln:len(v.src)-g_ln], v.dst[g_ln:len(v.dst)-g_ln]
+		ret := CumSum(dst, src)
+		for i := range v.expect {
+			if !sameCmplx(ret[i], v.expect[i]) {
+				t.Errorf("Test %d CumSum error at %d Got: %v Expected: %v", j, i, ret[i], v.expect[i])
+			}
+			if !sameCmplx(ret[i], dst[i]) {
+				t.Errorf("Test %d CumSum ret/dst mismatch %d Ret: %v Dst: %v", j, i, ret[i], dst[i])
+			}
+		}
+		if !isValidGuard(v.src, src_gd, g_ln) {
+			t.Errorf("Test %d Guard violated in src vector %v %v", j, v.src[:g_ln], v.src[len(v.src)-g_ln:])
+		}
+		if !isValidGuard(v.dst, dst_gd, g_ln) {
+			t.Errorf("Test %d Guard violated in dst vector %v %v", j, v.dst[:g_ln], v.dst[len(v.dst)-g_ln:])
+		}
+	}
+}
+
+func TestCumProd(t *testing.T) {
+	var src_gd, dst_gd complex128 = -1, 1
+	for j, v := range []struct {
+		dst, src, expect []complex128
+	}{
+		{
+			dst:    []complex128{},
+			src:    []complex128{},
+			expect: []complex128{},
+		},
+		{
+			dst:    []complex128{1},
+			src:    []complex128{1 + 1i},
+			expect: []complex128{1 + 1i},
+		},
+		{
+			dst:    []complex128{cnan},
+			src:    []complex128{cnan},
+			expect: []complex128{cnan},
+		},
+		{
+			dst:    []complex128{0, 0, 0, 0},
+			src:    []complex128{1, 2 + 1i, 3 + 2i, 4 + 3i},
+			expect: []complex128{1, 2 + 1i, 4 + 7i, -5 + 40i},
+		},
+		{
+			dst:    []complex128{0, 0, 0},
+			src:    []complex128{1, 2 + 1i, 3 + 2i},
+			expect: []complex128{1, 2 + 1i, 4 + 7i},
+		},
+		{
+			dst:    []complex128{0, 0, 0, 0},
+			src:    []complex128{1, 2 + 1i, 3 + 2i},
+			expect: []complex128{1, 2 + 1i, 4 + 7i},
+		},
+		{
+			dst:    []complex128{cnan, 1, cnan, 1, 0},
+			src:    []complex128{1, 1, cnan, 1, 1},
+			expect: []complex128{1, 1, cnan, cnan, cnan},
+		},
+		{
+			dst:    []complex128{cnan, 4, cnan, cinf, 9},
+			src:    []complex128{cinf, 4, cnan, cinf, 9},
+			expect: []complex128{cinf, cnan, cnan, cnan, cnan},
+		},
+		{
+			dst:    make([]complex128, 18),
+			src:    []complex128{2i, 2i, 2i, 2i, 2i, 2i, 2i, 2i, 2i, 2i, 2i, 2i, 2i, 2i, 2i, 2i, 2i, 2i},
+			expect: []complex128{2i, -4, -8i, 16, 32i, -64, -128i, 256, 512i, -1024, -2048i, 4096, 8192i, -16384, -32768i, 65536},
+		},
+	} {
+		sg_ln, dg_ln := 4+j%2, 4+j%3
+		v.src, v.dst = guardVector(v.src, src_gd, sg_ln), guardVector(v.dst, dst_gd, dg_ln)
+		src, dst := v.src[sg_ln:len(v.src)-sg_ln], v.dst[dg_ln:len(v.dst)-dg_ln]
+		ret := CumProd(dst, src)
+		for i := range v.expect {
+			if !sameCmplx(ret[i], v.expect[i]) {
+				t.Errorf("Test %d CumProd error at %d Got: %v Expected: %v", j, i, ret[i], v.expect[i])
+			}
+			if !sameCmplx(ret[i], dst[i]) {
+				t.Errorf("Test %d CumProd ret/dst mismatch %d Ret: %v Dst: %v", j, i, ret[i], dst[i])
+			}
+		}
+		if !isValidGuard(v.src, src_gd, sg_ln) {
+			t.Errorf("Test %d Guard violated in src vector %v %v", j, v.src[:sg_ln], v.src[len(v.src)-sg_ln:])
+		}
+		if !isValidGuard(v.dst, dst_gd, dg_ln) {
+			t.Errorf("Test %d Guard violated in dst vector %v %v", j, v.dst[:dg_ln], v.dst[len(v.dst)-dg_ln:])
+		}
+	}
+}
+
+func TestDiv(t *testing.T) {
+	var src_gd, dst_gd complex128 = -1, 0.5
+	for j, v := range []struct {
+		dst, src, expect []complex128
+	}{
+		{
+			dst:    []complex128{1 + 1i},
+			src:    []complex128{1 + 1i},
+			expect: []complex128{1},
+		},
+		{
+			dst:    []complex128{cnan},
+			src:    []complex128{cnan},
+			expect: []complex128{cnan},
+		},
+		{
+			dst:    []complex128{1 + 1i, 2 + 1i, 3 + 1i, 4 + 1i},
+			src:    []complex128{1 + 1i, 2 + 1i, 3 + 1i, 4 + 1i},
+			expect: []complex128{1, 1, 1, 1},
+		},
+		{
+			dst:    []complex128{1 + 1i, 2 + 1i, 3 + 1i, 4 + 1i, 2 + 2i, 4 + 2i, 6 + 2i, 8 + 2i},
+			src:    []complex128{1 + 1i, 2 + 1i, 3 + 1i, 4 + 1i, 1 + 1i, 2 + 1i, 3 + 1i, 4 + 1i},
+			expect: []complex128{1, 1, 1, 1, 2, 2, 2, 2},
+		},
+		{
+			dst:    []complex128{2 + 2i, 4 + 8i, 6 - 12i},
+			src:    []complex128{1 + 1i, 2 + 4i, 3 - 6i},
+			expect: []complex128{2, 2, 2},
+		},
+		{
+			dst:    []complex128{0, 0, 0, 0},
+			src:    []complex128{1 + 1i, 2 + 2i, 3 + 3i},
+			expect: []complex128{0, 0, 0},
+		},
+		{
+			dst:    []complex128{cnan, 1, cnan, 1, 0, cnan, 1, cnan, 1, 0},
+			src:    []complex128{1, 1, cnan, 1, 1, 1, 1, cnan, 1, 1},
+			expect: []complex128{cnan, 1, cnan, 1, 0, cnan, 1, cnan, 1, 0},
+		},
+		{
+			dst:    []complex128{cinf, 4, cnan, cinf, 9, cinf, 4, cnan, cinf, 9},
+			src:    []complex128{cinf, 4, cnan, cinf, 3, cinf, 4, cnan, cinf, 3},
+			expect: []complex128{cnan, 1, cnan, cnan, 3, cnan, 1, cnan, cnan, 3},
+		},
+	} {
+		sg_ln, dg_ln := 4+j%2, 4+j%3
+		v.src, v.dst = guardVector(v.src, src_gd, sg_ln), guardVector(v.dst, dst_gd, dg_ln)
+		src, dst := v.src[sg_ln:len(v.src)-sg_ln], v.dst[dg_ln:len(v.dst)-dg_ln]
+		Div(dst, src)
+		for i := range v.expect {
+			if !sameCmplx(dst[i], v.expect[i]) {
+				t.Errorf("Test %d Div error at %d Got: %v Expected: %v", j, i, dst[i], v.expect[i])
+			}
+		}
+		if !isValidGuard(v.src, src_gd, sg_ln) {
+			t.Errorf("Test %d Guard violated in src vector %v %v", j, v.src[:sg_ln], v.src[len(v.src)-sg_ln:])
+		}
+		if !isValidGuard(v.dst, dst_gd, dg_ln) {
+			t.Errorf("Test %d Guard violated in dst vector %v %v", j, v.dst[:dg_ln], v.dst[len(v.dst)-dg_ln:])
+		}
+	}
+}
+
+func TestDivTo(t *testing.T) {
+	var dst_gd, x_gd, y_gd complex128 = -1, 0.5, 0.25
+	for j, v := range []struct {
+		dst, x, y, expect []complex128
+	}{
+		{
+			dst:    []complex128{1 - 1i},
+			x:      []complex128{1 + 1i},
+			y:      []complex128{1 + 1i},
+			expect: []complex128{1},
+		},
+		{
+			dst:    []complex128{1},
+			x:      []complex128{cnan},
+			y:      []complex128{cnan},
+			expect: []complex128{cnan},
+		},
+		{
+			dst:    []complex128{-2, -2, -2},
+			x:      []complex128{1 + 1i, 2 + 1i, 3 + 1i},
+			y:      []complex128{1 + 1i, 2 + 1i, 3 + 1i},
+			expect: []complex128{1, 1, 1},
+		},
+		{
+			dst:    []complex128{0, 0, 0},
+			x:      []complex128{2 + 2i, 4 + 4i, 6 + 6i},
+			y:      []complex128{1 + 1i, 2 + 2i, 3 + 3i, 4 + 4i},
+			expect: []complex128{2, 2, 2},
+		},
+		{
+			dst:    []complex128{-1, -1, -1},
+			x:      []complex128{0, 0, 0},
+			y:      []complex128{1 + 1i, 2 + 1i, 3 + 1i},
+			expect: []complex128{0, 0, 0},
+		},
+		{
+			dst:    []complex128{cinf, cinf, cinf, cinf, cinf, cinf, cinf, cinf, cinf, cinf},
+			x:      []complex128{cnan, 1, cnan, 1, 0, cnan, 1, cnan, 1, 0},
+			y:      []complex128{1, 1, cnan, 1, 1, 1, 1, cnan, 1, 1},
+			expect: []complex128{cnan, 1, cnan, 1, 0, cnan, 1, cnan, 1, 0},
+		},
+		{
+			dst:    []complex128{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			x:      []complex128{cinf, 4, cnan, cinf, 9, cinf, 4, cnan, cinf, 9},
+			y:      []complex128{cinf, 4, cnan, cinf, 3, cinf, 4, cnan, cinf, 3},
+			expect: []complex128{cnan, 1, cnan, cnan, 3, cnan, 1, cnan, cnan, 3},
+		},
+	} {
+		xg_ln, yg_ln := 4+j%2, 4+j%3
+		v.y, v.x = guardVector(v.y, y_gd, yg_ln), guardVector(v.x, x_gd, xg_ln)
+		y, x := v.y[yg_ln:len(v.y)-yg_ln], v.x[xg_ln:len(v.x)-xg_ln]
+		v.dst = guardVector(v.dst, dst_gd, xg_ln)
+		dst := v.dst[xg_ln : len(v.dst)-xg_ln]
+		ret := DivTo(dst, x, y)
+		for i := range v.expect {
+			if !sameCmplx(ret[i], v.expect[i]) {
+				t.Errorf("Test %d DivTo error at %d Got: %v Expected: %v", j, i, ret[i], v.expect[i])
+			}
+			if !sameCmplx(ret[i], dst[i]) {
+				t.Errorf("Test %d DivTo ret/dst mismatch %d Ret: %v Dst: %v", j, i, ret[i], dst[i])
+			}
+		}
+		if !isValidGuard(v.y, y_gd, yg_ln) {
+			t.Errorf("Test %d Guard violated in y vector %v %v", j, v.y[:yg_ln], v.y[len(v.y)-yg_ln:])
+		}
+		if !isValidGuard(v.x, x_gd, xg_ln) {
+			t.Errorf("Test %d Guard violated in x vector %v %v", j, v.x[:xg_ln], v.x[len(v.x)-xg_ln:])
+		}
+		if !isValidGuard(v.dst, dst_gd, xg_ln) {
+			t.Errorf("Test %d Guard violated in dst vector %v %v", j, v.dst[:xg_ln], v.dst[len(v.dst)-xg_ln:])
+		}
 	}
 }
 
@@ -219,7 +609,7 @@ func TestDscalUnitary(t *testing.T) {
 			DscalUnitary(test.alpha, x)
 
 			for i := range test.want {
-				if !same(x[i], test.want[i]) {
+				if !sameCmplx(x[i], test.want[i]) {
 					t.Errorf(msgVal, prefix, i, x[i], test.want[i])
 				}
 			}
@@ -243,7 +633,7 @@ func TestDscalInc(t *testing.T) {
 			DscalInc(test.alpha, x, uintptr(n), uintptr(incX))
 
 			for i := range test.want {
-				if !same(x[i*incX], test.want[i]) {
+				if !sameCmplx(x[i*incX], test.want[i]) {
 					t.Errorf(msgVal, prefix, i, x[i*incX], test.want[i])
 				}
 			}
@@ -301,7 +691,7 @@ func TestScalUnitary(t *testing.T) {
 			ScalUnitary(test.alpha, x)
 
 			for i := range test.want {
-				if !same(x[i], test.want[i]) {
+				if !sameCmplx(x[i], test.want[i]) {
 					t.Errorf(msgVal, prefix, i, x[i], test.want[i])
 				}
 			}
@@ -325,11 +715,71 @@ func TestScalInc(t *testing.T) {
 			ScalInc(test.alpha, x, uintptr(n), uintptr(inc))
 
 			for i := range test.want {
-				if !same(x[i*inc], test.want[i]) {
+				if !sameCmplx(x[i*inc], test.want[i]) {
 					t.Errorf(msgVal, prefix, i, x[i*inc], test.want[i])
 				}
 			}
 			checkValidIncGuard(t, xg, xGdVal, inc, gdLn)
+		}
+	}
+}
+
+func TestSum(t *testing.T) {
+	var srcGd complex128 = -1
+	for j, v := range []struct {
+		src    []complex128
+		expect complex128
+	}{
+		{
+			src:    []complex128{},
+			expect: 0,
+		},
+		{
+			src:    []complex128{1},
+			expect: 1,
+		},
+		{
+			src:    []complex128{cnan},
+			expect: cnan,
+		},
+		{
+			src:    []complex128{1 + 1i, 2 + 2i, 3 + 3i},
+			expect: 6 + 6i,
+		},
+		{
+			src:    []complex128{1 + 1i, -4, 3 - 1i},
+			expect: 0,
+		},
+		{
+			src:    []complex128{1 - 1i, 2 + 2i, 3 - 3i, 4 + 4i},
+			expect: 10 + 2i,
+		},
+		{
+			src:    []complex128{1, 1, cnan, 1, 1},
+			expect: cnan,
+		},
+		{
+			src:    []complex128{cinf, 4, cnan, cinf, 9},
+			expect: cnan,
+		},
+		{
+			src:    []complex128{1 + 1i, 1 + 1i, 1 + 1i, 1 + 1i, 9 + 9i, 1 + 1i, 1 + 1i, 1 + 1i, 2 + 2i, 1 + 1i, 1 + 1i, 1 + 1i, 1 + 1i, 1 + 1i, 5 + 5i, 1 + 1i},
+			expect: 29 + 29i,
+		},
+		{
+			src:    []complex128{1 + 1i, 1 + 1i, 1 + 1i, 1 + 1i, 9 + 9i, 1 + 1i, 1 + 1i, 1 + 1i, 2 + 2i, 1 + 1i, 1 + 1i, 1 + 1i, 1 + 1i, 1 + 1i, 5 + 5i, 11 + 11i, 1 + 1i, 1 + 1i, 1 + 1i, 9 + 9i, 1 + 1i, 1 + 1i, 1 + 1i, 2 + 2i, 1 + 1i, 1 + 1i, 1 + 1i, 1 + 1i, 1 + 1i, 5 + 5i, 1 + 1i},
+			expect: 67 + 67i,
+		},
+	} {
+		gdLn := 4 + j%2
+		gsrc := guardVector(v.src, srcGd, gdLn)
+		src := gsrc[gdLn : len(gsrc)-gdLn]
+		ret := Sum(src)
+		if !sameCmplx(ret, v.expect) {
+			t.Errorf("Test %d Sum error Got: %v Expected: %v", j, ret, v.expect)
+		}
+		if !isValidGuard(gsrc, srcGd, gdLn) {
+			t.Errorf("Test %d Guard violated in src vector %v %v", j, gsrc[:gdLn], gsrc[len(gsrc)-gdLn:])
 		}
 	}
 }

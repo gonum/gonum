@@ -58,7 +58,7 @@ Options:
 		log.Fatalf("missing function or method name")
 	}
 
-	err := autofd.Derivative(os.Stdout, autofd.Func{
+	err := autofd.D1x(os.Stdout, autofd.Func{
 		Path:  *pkg,
 		Name:  *fct,
 		Deriv: *der,

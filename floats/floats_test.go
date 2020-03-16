@@ -1,6 +1,6 @@
 // Copyright ©2013 The Gonum Authors. All rights reserved.
 // Use of this code is governed by a BSD-style
-// license that can be found in the LICENSE file
+// license that can be found in the LICENSE file.
 
 package floats
 
@@ -285,7 +285,7 @@ func TestDiv(t *testing.T) {
 	ans := []float64{5, 6, 9}
 	Div(s1, s2)
 	if !EqualApprox(s1, ans, EqTolerance) {
-		t.Errorf("Mul doesn't give correct answer")
+		t.Errorf("Div doesn't give correct answer")
 	}
 	s1short := []float64{1}
 	if !Panics(func() { Div(s1short, s2) }) {
@@ -504,13 +504,6 @@ func TestEqualsRelative(t *testing.T) {
 	}
 }
 
-func nextAfterN(x, y float64, n int) float64 {
-	for i := 0; i < n; i++ {
-		x = math.Nextafter(x, y)
-	}
-	return x
-}
-
 func TestEqualsULP(t *testing.T) {
 	t.Parallel()
 	if f := 67329.242; !EqualWithinULP(f, nextAfterN(f, math.Inf(1), 10), 10) {
@@ -533,6 +526,12 @@ func TestEqualsULP(t *testing.T) {
 	}
 }
 
+func nextAfterN(x, y float64, n int) float64 {
+	for i := 0; i < n; i++ {
+		x = math.Nextafter(x, y)
+	}
+	return x
+}
 func TestEqualLengths(t *testing.T) {
 	t.Parallel()
 	s1 := []float64{1, 2, 3, 4}

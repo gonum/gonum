@@ -1,6 +1,6 @@
 // Copyright ©2013 The Gonum Authors. All rights reserved.
 // Use of this code is governed by a BSD-style
-// license that can be found in the LICENSE file
+// license that can be found in the LICENSE file.
 
 package floats
 
@@ -13,8 +13,8 @@ import (
 	"gonum.org/v1/gonum/internal/asm/f64"
 )
 
-// Add adds, element-wise, the elements of s and dst, and stores in dst.
-// Panics if the lengths of dst and s do not match.
+// Add adds, element-wise, the elements of s and dst, and stores the result in dst.
+// It panics if the lengths of dst and s do not match.
 func Add(dst, s []float64) {
 	if len(dst) != len(s) {
 		panic("floats: length of the slices do not match")
@@ -23,7 +23,7 @@ func Add(dst, s []float64) {
 }
 
 // AddTo adds, element-wise, the elements of s and t and
-// stores the result in dst. Panics if the lengths of s, t and dst do not match.
+// stores the result in dst. It panics if the lengths of s, t and dst do not match.
 func AddTo(dst, s, t []float64) []float64 {
 	if len(s) != len(t) {
 		panic("floats: length of adders do not match")
@@ -331,17 +331,17 @@ func EqualLengths(slices ...[]float64) bool {
 // all of the found elements will be returned along with an error.
 // At the return of the function, the input inds will be in an undetermined state.
 func Find(inds []int, f func(float64) bool, s []float64, k int) ([]int, error) {
-	// inds is also returned to allow for calling with nil
+	// inds is also returned to allow for calling with nil.
 
-	// Reslice inds to have zero length
+	// Reslice inds to have zero length.
 	inds = inds[:0]
 
-	// If zero elements requested, can just return
+	// If zero elements requested, can just return.
 	if k == 0 {
 		return inds, nil
 	}
 
-	// If k < 0, return all of the found indices
+	// If k < 0, return all of the found indices.
 	if k < 0 {
 		for i, val := range s {
 			if f(val) {
@@ -351,7 +351,7 @@ func Find(inds []int, f func(float64) bool, s []float64, k int) ([]int, error) {
 		return inds, nil
 	}
 
-	// Otherwise, find the first k elements
+	// Otherwise, find the first k elements.
 	nFound := 0
 	for i, val := range s {
 		if f(val) {
@@ -362,7 +362,7 @@ func Find(inds []int, f func(float64) bool, s []float64, k int) ([]int, error) {
 			}
 		}
 	}
-	// Finished iterating over the loop, which means k elements were not found
+	// Finished iterating over the loop, which means k elements were not found.
 	return inds, errors.New("floats: insufficient elements found")
 }
 
@@ -441,13 +441,13 @@ func MaxIdx(s []float64) int {
 	return ind
 }
 
-// Min returns the maximum value in the input slice. If the slice is empty, Min will panic.
+// Min returns the minimum value in the input slice. If the slice is empty, Min will panic.
 func Min(s []float64) float64 {
 	return s[MinIdx(s)]
 }
 
 // MinIdx returns the index of the minimum value in the input slice. If several
-// entries have the maximum value, the first such index is returned. If the slice
+// entries have the minimum value, the first such index is returned. If the slice
 // is empty, MinIdx will panic.
 func MinIdx(s []float64) int {
 	if len(s) == 0 {

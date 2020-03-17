@@ -342,13 +342,14 @@ func retranspose(a, m Matrix) Matrix {
 }
 
 // makeRandOf returns a new randomly filled m×n matrix of the underlying matrix type.
-func makeRandOf(a Matrix, m, n int) Matrix {
+func makeRandOf(a Matrix, m, n int, src rand.Source) Matrix {
+	rnd := rand.New(src)
 	var rMatrix Matrix
 	switch t := a.(type) {
 	default:
 		panic("unknown type for make rand of")
 	case Untransposer:
-		rMatrix = retranspose(a, makeRandOf(t.Untranspose(), n, m))
+		rMatrix = retranspose(a, makeRandOf(t.Untranspose(), n, m, src))
 	case *Dense, *basicMatrix:
 		var mat = &Dense{}
 		if m != 0 && n != 0 {
@@ -356,7 +357,7 @@ func makeRandOf(a Matrix, m, n int) Matrix {
 		}
 		for i := 0; i < m; i++ {
 			for j := 0; j < n; j++ {
-				mat.Set(i, j, rand.NormFloat64())
+				mat.Set(i, j, rnd.NormFloat64())
 			}
 		}
 		rMatrix = returnAs(mat, t)
@@ -380,7 +381,7 @@ func makeRandOf(a Matrix, m, n int) Matrix {
 			},
 		}
 		for i := 0; i < length; i++ {
-			mat.SetVec(i, rand.NormFloat64())
+			mat.SetVec(i, rnd.NormFloat64())
 		}
 		return mat
 	case *basicVector:
@@ -394,7 +395,7 @@ func makeRandOf(a Matrix, m, n int) Matrix {
 			m: make([]float64, m),
 		}
 		for i := 0; i < m; i++ {
-			mat.m[i] = rand.NormFloat64()
+			mat.m[i] = rnd.NormFloat64()
 		}
 		return mat
 	case *SymDense, *basicSymmetric:
@@ -407,7 +408,7 @@ func makeRandOf(a Matrix, m, n int) Matrix {
 		}
 		for i := 0; i < m; i++ {
 			for j := i; j < n; j++ {
-				mat.SetSym(i, j, rand.NormFloat64())
+				mat.SetSym(i, j, rnd.NormFloat64())
 			}
 		}
 		rMatrix = returnAs(mat, t)
@@ -439,13 +440,13 @@ func makeRandOf(a Matrix, m, n int) Matrix {
 		if triKind == Upper {
 			for i := 0; i < m; i++ {
 				for j := i; j < n; j++ {
-					mat.SetTri(i, j, rand.NormFloat64())
+					mat.SetTri(i, j, rnd.NormFloat64())
 				}
 			}
 		} else {
 			for i := 0; i < m; i++ {
 				for j := 0; j <= i; j++ {
-					mat.SetTri(i, j, rand.NormFloat64())
+					mat.SetTri(i, j, rnd.NormFloat64())
 				}
 			}
 		}
@@ -464,7 +465,7 @@ func makeRandOf(a Matrix, m, n int) Matrix {
 		kl = min(kl, m-1)
 		data := make([]float64, min(m, n+kl)*(kl+ku+1))
 		for i := range data {
-			data[i] = rand.NormFloat64()
+			data[i] = rnd.NormFloat64()
 		}
 		mat := NewBandDense(m, n, kl, ku, data)
 		rMatrix = returnAs(mat, t)
@@ -482,7 +483,7 @@ func makeRandOf(a Matrix, m, n int) Matrix {
 		k = min(k, m-1) // Special case for small sizes.
 		data := make([]float64, m*(k+1))
 		for i := range data {
-			data[i] = rand.NormFloat64()
+			data[i] = rnd.NormFloat64()
 		}
 		mat := NewSymBandDense(n, k, data)
 		rMatrix = returnAs(mat, t)
@@ -503,7 +504,7 @@ func makeRandOf(a Matrix, m, n int) Matrix {
 		k = min(k, m-1) // Special case for small sizes.
 		data := make([]float64, m*(k+1))
 		for i := range data {
-			data[i] = rand.NormFloat64()
+			data[i] = rnd.NormFloat64()
 		}
 		mat := NewTriBandDense(n, k, triKind, data)
 		rMatrix = returnAs(mat, t)
@@ -529,7 +530,7 @@ func makeRandOf(a Matrix, m, n int) Matrix {
 			},
 		}
 		for i := 0; i < n; i++ {
-			mat.SetDiag(i, rand.Float64())
+			mat.SetDiag(i, rnd.Float64())
 		}
 		rMatrix = returnAs(mat, t)
 	}
@@ -908,6 +909,7 @@ func testOneInputFunc(t *testing.T,
 	// legalSize returns true if the size is valid for the function.
 	legalSize func(r, c int) bool,
 ) {
+	src := rand.NewSource(1)
 	for _, aMat := range testMatrices {
 		for _, test := range sizes {
 			// Skip the test if the argument would not be assignable to the
@@ -919,7 +921,7 @@ func testOneInputFunc(t *testing.T,
 			if !legalDims(aMat, test.ar, test.ac) {
 				continue
 			}
-			a := makeRandOf(aMat, test.ar, test.ac)
+			a := makeRandOf(aMat, test.ar, test.ac, src)
 
 			// Compute the true answer if the sizes are legal.
 			dimsOK := legalSize(test.ar, test.ac)
@@ -1072,6 +1074,7 @@ func testTwoInputFunc(t *testing.T,
 	// legalSize returns true if the sizes are valid for the function.
 	legalSize func(ar, ac, br, bc int) bool,
 ) {
+	src := rand.NewSource(1)
 	for _, aMat := range testMatrices {
 		for _, bMat := range testMatrices {
 			// Loop over all of the size combinations (bigger, smaller, etc.).
@@ -1088,8 +1091,8 @@ func testTwoInputFunc(t *testing.T,
 				if !legalDims(bMat, test.br, test.bc) {
 					continue
 				}
-				a := makeRandOf(aMat, test.ar, test.ac)
-				b := makeRandOf(bMat, test.br, test.bc)
+				a := makeRandOf(aMat, test.ar, test.ac, src)
+				b := makeRandOf(bMat, test.br, test.bc, src)
 
 				// Compute the true answer if the sizes are legal.
 				dimsOK := legalSize(test.ar, test.ac, test.br, test.bc)
@@ -1158,6 +1161,7 @@ func testOneInput(t *testing.T,
 	// tol is the tolerance for equality when comparing method results.
 	tol float64,
 ) {
+	src := rand.NewSource(1)
 	for _, aMat := range testMatrices {
 		for _, test := range sizes {
 			// Skip the test if the argument would not be assignable to the
@@ -1169,7 +1173,7 @@ func testOneInput(t *testing.T,
 			if !legalDims(aMat, test.ar, test.ac) {
 				continue
 			}
-			a := makeRandOf(aMat, test.ar, test.ac)
+			a := makeRandOf(aMat, test.ar, test.ac, src)
 
 			// Compute the true answer if the sizes are legal.
 			dimsOK := legalSize(test.ar, test.ac)
@@ -1184,7 +1188,7 @@ func testOneInput(t *testing.T,
 			// Test the method for a zero-value of the receiver.
 			aType, aTrans := untranspose(a)
 			errStr := fmt.Sprintf("%T.%s(%T), size: %#v, atrans %v", receiver, name, aType, test, aTrans)
-			zero := makeRandOf(receiver, 0, 0)
+			zero := makeRandOf(receiver, 0, 0, src)
 			panicked, err := panics(func() { method(zero, a) })
 			if !dimsOK && !panicked {
 				t.Errorf("Did not panic with illegal size: %s", errStr)
@@ -1209,7 +1213,7 @@ func testOneInput(t *testing.T,
 			// The receiver has been overwritten in place so use its size
 			// to construct a new random matrix.
 			rr, rc := zero.Dims()
-			neverZero := makeRandOf(receiver, rr, rc)
+			neverZero := makeRandOf(receiver, rr, rc, src)
 			panicked, _ = panics(func() { method(neverZero, a) })
 			if panicked {
 				t.Errorf("Panicked with non-zero receiver: %s", errStr)
@@ -1223,26 +1227,26 @@ func testOneInput(t *testing.T,
 			default:
 				panic("matrix type not coded for incorrect receiver size")
 			case *Dense:
-				wrongSize := makeRandOf(receiver, rr+1, rc)
+				wrongSize := makeRandOf(receiver, rr+1, rc, src)
 				panicked, _ = panics(func() { method(wrongSize, a) })
 				if !panicked {
 					t.Errorf("Did not panic with wrong number of rows: %s", errStr)
 				}
-				wrongSize = makeRandOf(receiver, rr, rc+1)
+				wrongSize = makeRandOf(receiver, rr, rc+1, src)
 				panicked, _ = panics(func() { method(wrongSize, a) })
 				if !panicked {
 					t.Errorf("Did not panic with wrong number of columns: %s", errStr)
 				}
 			case *TriDense, *SymDense:
 				// Add to the square size.
-				wrongSize := makeRandOf(receiver, rr+1, rc+1)
+				wrongSize := makeRandOf(receiver, rr+1, rc+1, src)
 				panicked, _ = panics(func() { method(wrongSize, a) })
 				if !panicked {
 					t.Errorf("Did not panic with wrong size: %s", errStr)
 				}
 			case *VecDense:
 				// Add to the column length.
-				wrongSize := makeRandOf(receiver, rr+1, rc)
+				wrongSize := makeRandOf(receiver, rr+1, rc, src)
 				panicked, _ = panics(func() { method(wrongSize, a) })
 				if !panicked {
 					t.Errorf("Did not panic with wrong number of rows: %s", errStr)
@@ -1304,6 +1308,7 @@ func testTwoInput(t *testing.T,
 	// tol is the tolerance for equality when comparing method results.
 	tol float64,
 ) {
+	src := rand.NewSource(1)
 	for _, aMat := range testMatrices {
 		for _, bMat := range testMatrices {
 			// Loop over all of the size combinations (bigger, smaller, etc.).
@@ -1320,8 +1325,8 @@ func testTwoInput(t *testing.T,
 				if !legalDims(bMat, test.br, test.bc) {
 					continue
 				}
-				a := makeRandOf(aMat, test.ar, test.ac)
-				b := makeRandOf(bMat, test.br, test.bc)
+				a := makeRandOf(aMat, test.ar, test.ac, src)
+				b := makeRandOf(bMat, test.br, test.bc, src)
 
 				// Compute the true answer if the sizes are legal.
 				dimsOK := legalSize(test.ar, test.ac, test.br, test.bc)
@@ -1339,7 +1344,7 @@ func testTwoInput(t *testing.T,
 				aType, aTrans := untranspose(a)
 				bType, bTrans := untranspose(b)
 				errStr := fmt.Sprintf("%T.%s(%T, %T), sizes: %#v, atrans %v, btrans %v", receiver, name, aType, bType, test, aTrans, bTrans)
-				zero := makeRandOf(receiver, 0, 0)
+				zero := makeRandOf(receiver, 0, 0, src)
 				panicked, err := panics(func() { method(zero, a, b) })
 				if !dimsOK && !panicked {
 					t.Errorf("Did not panic with illegal size: %s", errStr)
@@ -1369,7 +1374,7 @@ func testTwoInput(t *testing.T,
 				// The receiver has been overwritten in place so use its size
 				// to construct a new random matrix.
 				rr, rc := wasZero.Dims()
-				neverZero := makeRandOf(receiver, rr, rc)
+				neverZero := makeRandOf(receiver, rr, rc, src)
 				panicked, message := panics(func() { method(neverZero, a, b) })
 				if panicked {
 					t.Errorf("Panicked with non-zero receiver: %s: %s", errStr, message)
@@ -1384,26 +1389,26 @@ func testTwoInput(t *testing.T,
 				default:
 					panic("matrix type not coded for incorrect receiver size")
 				case *Dense:
-					wrongSize := makeRandOf(receiver, rr+1, rc)
+					wrongSize := makeRandOf(receiver, rr+1, rc, src)
 					panicked, _ = panics(func() { method(wrongSize, a, b) })
 					if !panicked {
 						t.Errorf("Did not panic with wrong number of rows: %s", errStr)
 					}
-					wrongSize = makeRandOf(receiver, rr, rc+1)
+					wrongSize = makeRandOf(receiver, rr, rc+1, src)
 					panicked, _ = panics(func() { method(wrongSize, a, b) })
 					if !panicked {
 						t.Errorf("Did not panic with wrong number of columns: %s", errStr)
 					}
 				case *TriDense, *SymDense:
 					// Add to the square size.
-					wrongSize := makeRandOf(receiver, rr+1, rc+1)
+					wrongSize := makeRandOf(receiver, rr+1, rc+1, src)
 					panicked, _ = panics(func() { method(wrongSize, a, b) })
 					if !panicked {
 						t.Errorf("Did not panic with wrong size: %s", errStr)
 					}
 				case *VecDense:
 					// Add to the column length.
-					wrongSize := makeRandOf(receiver, rr+1, rc)
+					wrongSize := makeRandOf(receiver, rr+1, rc, src)
 					panicked, _ = panics(func() { method(wrongSize, a, b) })
 					if !panicked {
 						t.Errorf("Did not panic with wrong number of rows: %s", errStr)
@@ -1475,7 +1480,7 @@ func testTwoInput(t *testing.T,
 					// Compute the real answer for this case. It is different
 					// from the initial answer since now a and b have the
 					// same data.
-					zero = makeRandOf(wasZero, 0, 0)
+					zero = makeRandOf(wasZero, 0, 0, src)
 					method(zero, aSame, bSame)
 					wasZero, zero = zero, nil // Nil-out zero so we detect illegal use.
 					preData := underlyingData(receiver)

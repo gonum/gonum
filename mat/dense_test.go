@@ -937,7 +937,7 @@ func TestDenseMul(t *testing.T) {
 	testTwoInput(t, "Mul", &Dense{}, method, denseComparison, legalTypesAll, legalSizeMul, 1e-14)
 }
 
-func randDense(size int, rho float64, rnd func() float64) (*Dense, error) {
+func randDense(size int, rho float64, src rand.Source) (*Dense, error) {
 	if size == 0 {
 		return nil, ErrZeroLength
 	}
@@ -948,10 +948,11 @@ func randDense(size int, rho float64, rnd func() float64) (*Dense, error) {
 		},
 		capRows: size, capCols: size,
 	}
+	rnd := rand.New(src)
 	for i := 0; i < size; i++ {
 		for j := 0; j < size; j++ {
-			if rand.Float64() < rho {
-				d.Set(i, j, rnd())
+			if rnd.Float64() < rho {
+				d.Set(i, j, rnd.NormFloat64())
 			}
 		}
 	}
@@ -2099,9 +2100,10 @@ func BenchmarkMulDense1000Tenth(b *testing.B)      { denseMulBench(b, 1000, 0.1)
 func BenchmarkMulDense1000Hundredth(b *testing.B)  { denseMulBench(b, 1000, 0.01) }
 func BenchmarkMulDense1000Thousandth(b *testing.B) { denseMulBench(b, 1000, 0.001) }
 func denseMulBench(b *testing.B, size int, rho float64) {
+	src := rand.NewSource(1)
 	b.StopTimer()
-	a, _ := randDense(size, rho, rand.NormFloat64)
-	d, _ := randDense(size, rho, rand.NormFloat64)
+	a, _ := randDense(size, rho, src)
+	d, _ := randDense(size, rho, src)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		var n Dense
@@ -2117,9 +2119,10 @@ func BenchmarkPreMulDense1000Tenth(b *testing.B)      { densePreMulBench(b, 1000
 func BenchmarkPreMulDense1000Hundredth(b *testing.B)  { densePreMulBench(b, 1000, 0.01) }
 func BenchmarkPreMulDense1000Thousandth(b *testing.B) { densePreMulBench(b, 1000, 0.001) }
 func densePreMulBench(b *testing.B, size int, rho float64) {
+	src := rand.NewSource(1)
 	b.StopTimer()
-	a, _ := randDense(size, rho, rand.NormFloat64)
-	d, _ := randDense(size, rho, rand.NormFloat64)
+	a, _ := randDense(size, rho, src)
+	d, _ := randDense(size, rho, src)
 	wd = NewDense(size, size, nil)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
@@ -2132,7 +2135,8 @@ func BenchmarkDenseRow100(b *testing.B)  { rowDenseBench(b, 100) }
 func BenchmarkDenseRow1000(b *testing.B) { rowDenseBench(b, 1000) }
 
 func rowDenseBench(b *testing.B, size int) {
-	a, _ := randDense(size, 1, rand.NormFloat64)
+	src := rand.NewSource(1)
+	a, _ := randDense(size, 1, src)
 	_, c := a.Dims()
 	dst := make([]float64, c)
 
@@ -2147,7 +2151,8 @@ func BenchmarkDenseExp100(b *testing.B)  { expDenseBench(b, 100) }
 func BenchmarkDenseExp1000(b *testing.B) { expDenseBench(b, 1000) }
 
 func expDenseBench(b *testing.B, size int) {
-	a, _ := randDense(size, 1, rand.NormFloat64)
+	src := rand.NewSource(1)
+	a, _ := randDense(size, 1, src)
 
 	b.ResetTimer()
 	var m Dense
@@ -2179,7 +2184,8 @@ func BenchmarkDensePow100_9(b *testing.B)  { powDenseBench(b, 100, 9) }
 func BenchmarkDensePow1000_9(b *testing.B) { powDenseBench(b, 1000, 9) }
 
 func powDenseBench(b *testing.B, size, n int) {
-	a, _ := randDense(size, 1, rand.NormFloat64)
+	src := rand.NewSource(1)
+	a, _ := randDense(size, 1, src)
 
 	b.ResetTimer()
 	var m Dense
@@ -2195,9 +2201,10 @@ func BenchmarkDenseMulTransDense1000Tenth(b *testing.B)      { denseMulTransBenc
 func BenchmarkDenseMulTransDense1000Hundredth(b *testing.B)  { denseMulTransBench(b, 1000, 0.01) }
 func BenchmarkDenseMulTransDense1000Thousandth(b *testing.B) { denseMulTransBench(b, 1000, 0.001) }
 func denseMulTransBench(b *testing.B, size int, rho float64) {
+	src := rand.NewSource(1)
 	b.StopTimer()
-	a, _ := randDense(size, rho, rand.NormFloat64)
-	d, _ := randDense(size, rho, rand.NormFloat64)
+	a, _ := randDense(size, rho, src)
+	d, _ := randDense(size, rho, src)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		var n Dense
@@ -2215,8 +2222,9 @@ func BenchmarkDenseMulTransDenseSym1000Thousandth(b *testing.B) {
 	denseMulTransSymBench(b, 1000, 0.001)
 }
 func denseMulTransSymBench(b *testing.B, size int, rho float64) {
+	src := rand.NewSource(1)
 	b.StopTimer()
-	a, _ := randDense(size, rho, rand.NormFloat64)
+	a, _ := randDense(size, rho, src)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		var n Dense
@@ -2230,7 +2238,8 @@ func BenchmarkDenseSum1000(b *testing.B) { denseSumBench(b, 1000) }
 var denseSumForBench float64
 
 func denseSumBench(b *testing.B, size int) {
-	a, _ := randDense(size, 1.0, rand.NormFloat64)
+	src := rand.NewSource(1)
+	a, _ := randDense(size, 1.0, src)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		denseSumForBench = Sum(a)

@@ -8,6 +8,8 @@ import (
 	"math"
 	"testing"
 
+	"golang.org/x/exp/rand"
+
 	"gonum.org/v1/gonum/blas/blas64"
 	"gonum.org/v1/gonum/blas/testblas"
 )
@@ -153,12 +155,13 @@ func makeVecDenseInc(inc int, f []float64) *VecDense {
 }
 
 func benchmarkInner(b *testing.B, m, n int) {
+	src := rand.NewSource(1)
 	x := NewVecDense(m, nil)
-	randomSlice(x.mat.Data)
+	randomSlice(x.mat.Data, src)
 	y := NewVecDense(n, nil)
-	randomSlice(y.mat.Data)
+	randomSlice(y.mat.Data, src)
 	data := make([]float64, m*n)
-	randomSlice(data)
+	randomSlice(data, src)
 	mat := &Dense{mat: blas64.General{Rows: m, Cols: n, Stride: n, Data: data}, capRows: m, capCols: n}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {

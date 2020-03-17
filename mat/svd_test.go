@@ -14,6 +14,7 @@ import (
 
 func TestSVD(t *testing.T) {
 	t.Parallel()
+	rnd := rand.New(rand.NewSource(1))
 	// Hand coded tests
 	for _, test := range []struct {
 		a *Dense
@@ -106,7 +107,7 @@ func TestSVD(t *testing.T) {
 		for trial := 0; trial < 10; trial++ {
 			a := NewDense(m, n, nil)
 			for i := range a.mat.Data {
-				a.mat.Data[i] = rand.NormFloat64()
+				a.mat.Data[i] = rnd.NormFloat64()
 			}
 			aCopy := DenseCopyOf(a)
 

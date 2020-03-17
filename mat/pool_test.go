@@ -73,9 +73,10 @@ func BenchmarkMulWorkspaceDense1000Tenth(b *testing.B)      { denseMulWorkspaceB
 func BenchmarkMulWorkspaceDense1000Hundredth(b *testing.B)  { denseMulWorkspaceBench(b, 1000, 0.01) }
 func BenchmarkMulWorkspaceDense1000Thousandth(b *testing.B) { denseMulWorkspaceBench(b, 1000, 0.001) }
 func denseMulWorkspaceBench(b *testing.B, size int, rho float64) {
+	src := rand.NewSource(1)
 	b.StopTimer()
-	a, _ := randDense(size, rho, rand.NormFloat64)
-	d, _ := randDense(size, rho, rand.NormFloat64)
+	a, _ := randDense(size, rho, src)
+	d, _ := randDense(size, rho, src)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		a.Mul(a, d)

@@ -177,6 +177,7 @@ func TestSymDiagView(t *testing.T) {
 
 func TestSymAdd(t *testing.T) {
 	t.Parallel()
+	rnd := rand.New(rand.NewSource(1))
 	for _, test := range []struct {
 		n int
 	}{
@@ -190,11 +191,11 @@ func TestSymAdd(t *testing.T) {
 		n := test.n
 		a := NewSymDense(n, nil)
 		for i := range a.mat.Data {
-			a.mat.Data[i] = rand.Float64()
+			a.mat.Data[i] = rnd.Float64()
 		}
 		b := NewSymDense(n, nil)
 		for i := range a.mat.Data {
-			b.mat.Data[i] = rand.Float64()
+			b.mat.Data[i] = rnd.Float64()
 		}
 		var m Dense
 		m.Add(a, b)
@@ -239,6 +240,7 @@ func TestSymAdd(t *testing.T) {
 
 func TestCopy(t *testing.T) {
 	t.Parallel()
+	rnd := rand.New(rand.NewSource(1))
 	for _, test := range []struct {
 		n int
 	}{
@@ -252,7 +254,7 @@ func TestCopy(t *testing.T) {
 		n := test.n
 		a := NewSymDense(n, nil)
 		for i := range a.mat.Data {
-			a.mat.Data[i] = rand.Float64()
+			a.mat.Data[i] = rnd.Float64()
 		}
 		s := NewSymDense(n, nil)
 		s.CopySym(a)
@@ -287,6 +289,7 @@ func TestSymCopyPanic(t *testing.T) {
 
 func TestSymRankOne(t *testing.T) {
 	t.Parallel()
+	rnd := rand.New(rand.NewSource(1))
 	const tol = 1e-15
 
 	for _, test := range []struct {
@@ -303,11 +306,11 @@ func TestSymRankOne(t *testing.T) {
 		alpha := 2.0
 		a := NewSymDense(n, nil)
 		for i := range a.mat.Data {
-			a.mat.Data[i] = rand.Float64()
+			a.mat.Data[i] = rnd.Float64()
 		}
 		x := make([]float64, n)
 		for i := range x {
-			x[i] = rand.Float64()
+			x[i] = rnd.Float64()
 		}
 
 		xMat := NewDense(n, 1, x)
@@ -386,6 +389,7 @@ func TestIssue250SymRankOne(t *testing.T) {
 
 func TestRankTwo(t *testing.T) {
 	t.Parallel()
+	rnd := rand.New(rand.NewSource(1))
 	for _, test := range []struct {
 		n int
 	}{
@@ -400,13 +404,13 @@ func TestRankTwo(t *testing.T) {
 		alpha := 2.0
 		a := NewSymDense(n, nil)
 		for i := range a.mat.Data {
-			a.mat.Data[i] = rand.Float64()
+			a.mat.Data[i] = rnd.Float64()
 		}
 		x := make([]float64, n)
 		y := make([]float64, n)
 		for i := range x {
-			x[i] = rand.Float64()
-			y[i] = rand.Float64()
+			x[i] = rnd.Float64()
+			y[i] = rnd.Float64()
 		}
 
 		xMat := NewDense(n, 1, x)
@@ -763,19 +767,21 @@ func BenchmarkSymSum1000(b *testing.B) { symSumBench(b, 1000) }
 var symSumForBench float64
 
 func symSumBench(b *testing.B, size int) {
-	a := randSymDense(size)
+	src := rand.NewSource(1)
+	a := randSymDense(size, src)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		symSumForBench = Sum(a)
 	}
 }
 
-func randSymDense(size int) *SymDense {
+func randSymDense(size int, src rand.Source) *SymDense {
+	rnd := rand.New(src)
 	backData := make([]float64, size*size)
 	for i := 0; i < size; i++ {
-		backData[i*size+i] = rand.Float64()
+		backData[i*size+i] = rnd.Float64()
 		for j := i + 1; j < size; j++ {
-			v := rand.Float64()
+			v := rnd.Float64()
 			backData[i*size+j] = v
 			backData[j*size+i] = v
 		}

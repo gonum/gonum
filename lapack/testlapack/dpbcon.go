@@ -19,8 +19,6 @@ type Dpbconer interface {
 	Dpbcon(uplo blas.Uplo, n, kd int, ab []float64, ldab int, anorm float64, work []float64, iwork []int) float64
 
 	Dpbtrser
-	Dlanger
-	Dlansber
 }
 
 // DpbconTest tests Dpbcon by generating a random symmetric band matrix A and
@@ -57,7 +55,7 @@ func dpbconTest(t *testing.T, impl Dpbconer, uplo blas.Uplo, n, kd, ldab int, rn
 
 	// Compute the norm of A.
 	work := make([]float64, 3*n)
-	aNorm := impl.Dlansb(lapack.MaxColumnSum, uplo, n, kd, ab, ldab, work)
+	aNorm := dlansb(lapack.MaxColumnSum, uplo, n, kd, ab, ldab, work)
 
 	// Compute an estimate of rCond.
 	iwork := make([]int, n)
@@ -77,7 +75,7 @@ func dpbconTest(t *testing.T, impl Dpbconer, uplo blas.Uplo, n, kd, ldab int, rn
 		aInv[i*lda+i] = 1
 	}
 	impl.Dpbtrs(uplo, n, kd, n, abFac, ldab, aInv, lda)
-	aInvNorm := impl.Dlange(lapack.MaxColumnSum, n, n, aInv, lda, work)
+	aInvNorm := dlange(lapack.MaxColumnSum, n, n, aInv, lda)
 	rCondWant := 1.0
 	if aNorm > 0 && aInvNorm > 0 {
 		rCondWant = 1 / aNorm / aInvNorm

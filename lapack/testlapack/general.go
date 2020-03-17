@@ -1450,3 +1450,70 @@ func dlange(norm lapack.MatrixNorm, m, n int, a []float64, lda int) float64 {
 		panic("bad MatrixNorm")
 	}
 }
+
+// dlansb is a local implementation of Dlansb to keep code paths independent.
+func dlansb(norm lapack.MatrixNorm, uplo blas.Uplo, n, kd int, ab []float64, ldab int, work []float64) float64 {
+	if n == 0 {
+		return 0
+	}
+	var value float64
+	switch norm {
+	case lapack.MaxAbs:
+		if uplo == blas.Upper {
+			for i := 0; i < n; i++ {
+				for j := 0; j < min(n-i, kd+1); j++ {
+					aij := math.Abs(ab[i*ldab+j])
+					if aij > value || math.IsNaN(aij) {
+						value = aij
+					}
+				}
+			}
+		} else {
+			for i := 0; i < n; i++ {
+				for j := max(0, kd-i); j < kd+1; j++ {
+					aij := math.Abs(ab[i*ldab+j])
+					if aij > value || math.IsNaN(aij) {
+						value = aij
+					}
+				}
+			}
+		}
+	case lapack.MaxColumnSum, lapack.MaxRowSum:
+		work = work[:n]
+		var sum float64
+		if uplo == blas.Upper {
+			for i := range work {
+				work[i] = 0
+			}
+			for i := 0; i < n; i++ {
+				sum := work[i] + math.Abs(ab[i*ldab])
+				for j := i + 1; j < min(i+kd+1, n); j++ {
+					aij := math.Abs(ab[i*ldab+j-i])
+					sum += aij
+					work[j] += aij
+				}
+				if sum > value || math.IsNaN(sum) {
+					value = sum
+				}
+			}
+		} else {
+			for i := 0; i < n; i++ {
+				sum = 0
+				for j := max(0, i-kd); j < i; j++ {
+					aij := math.Abs(ab[i*ldab+kd+j-i])
+					sum += aij
+					work[j] += aij
+				}
+				work[i] = sum + math.Abs(ab[i*ldab+kd])
+			}
+			for _, sum := range work {
+				if sum > value || math.IsNaN(sum) {
+					value = sum
+				}
+			}
+		}
+	case lapack.Frobenius:
+		panic("not implemented")
+	}
+	return value
+}

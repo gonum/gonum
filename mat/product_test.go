@@ -92,6 +92,7 @@ var productTests = []struct {
 
 func TestProduct(t *testing.T) {
 	t.Parallel()
+	rnd := rand.New(rand.NewSource(1))
 	for _, test := range productTests {
 		dimensions := test.factors
 		if dimensions == nil && test.n > 0 {
@@ -100,7 +101,7 @@ func TestProduct(t *testing.T) {
 				if i != 0 {
 					dimensions[i].r = dimensions[i-1].c
 				}
-				dimensions[i].c = rand.Intn(50) + 1
+				dimensions[i].c = rnd.Intn(50) + 1
 			}
 			dimensions[0].r = test.product.r
 			dimensions[test.n-1].c = test.product.c
@@ -109,7 +110,7 @@ func TestProduct(t *testing.T) {
 		for i, d := range dimensions {
 			data := make([]float64, d.r*d.c)
 			for i := range data {
-				data[i] = rand.Float64()
+				data[i] = rnd.Float64()
 			}
 			factors[i] = NewDense(d.r, d.c, data)
 		}

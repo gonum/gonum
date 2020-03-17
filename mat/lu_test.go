@@ -12,11 +12,12 @@ import (
 
 func TestLUD(t *testing.T) {
 	t.Parallel()
+	rnd := rand.New(rand.NewSource(1))
 	for _, n := range []int{1, 5, 10, 11, 50} {
 		a := NewDense(n, n, nil)
 		for i := 0; i < n; i++ {
 			for j := 0; j < n; j++ {
-				a.Set(i, j, rand.NormFloat64())
+				a.Set(i, j, rnd.NormFloat64())
 			}
 		}
 		var want Dense
@@ -41,6 +42,7 @@ func TestLUD(t *testing.T) {
 
 func TestLURankOne(t *testing.T) {
 	t.Parallel()
+	rnd := rand.New(rand.NewSource(1))
 	for _, pivoting := range []bool{true} {
 		for _, n := range []int{3, 10, 50} {
 			// Construct a random LU factorization
@@ -48,7 +50,7 @@ func TestLURankOne(t *testing.T) {
 			lu.lu = NewDense(n, n, nil)
 			for i := 0; i < n; i++ {
 				for j := 0; j < n; j++ {
-					lu.lu.Set(i, j, rand.Float64())
+					lu.lu.Set(i, j, rnd.Float64())
 				}
 			}
 			lu.pivot = make([]int, n)
@@ -59,18 +61,18 @@ func TestLURankOne(t *testing.T) {
 				// For each row, randomly swap with itself or a row after (like is done)
 				// in the actual LU factorization.
 				for i := range lu.pivot {
-					idx := i + rand.Intn(n-i)
+					idx := i + rnd.Intn(n-i)
 					lu.pivot[i], lu.pivot[idx] = lu.pivot[idx], lu.pivot[i]
 				}
 			}
 			// Apply a rank one update. Ensure the update magnitude is larger than
 			// the equal tolerance.
-			alpha := rand.Float64() + 1
+			alpha := rnd.Float64() + 1
 			x := NewVecDense(n, nil)
 			y := NewVecDense(n, nil)
 			for i := 0; i < n; i++ {
-				x.setVec(i, rand.Float64()+1)
-				y.setVec(i, rand.Float64()+1)
+				x.setVec(i, rnd.Float64()+1)
+				y.setVec(i, rnd.Float64()+1)
 			}
 			a := luReconstruct(lu)
 			a.RankOne(a, alpha, x, y)
@@ -109,6 +111,7 @@ func luReconstruct(lu *LU) *Dense {
 
 func TestLUSolveTo(t *testing.T) {
 	t.Parallel()
+	rnd := rand.New(rand.NewSource(1))
 	for _, test := range []struct {
 		n, bc int
 	}{
@@ -121,13 +124,13 @@ func TestLUSolveTo(t *testing.T) {
 		a := NewDense(n, n, nil)
 		for i := 0; i < n; i++ {
 			for j := 0; j < n; j++ {
-				a.Set(i, j, rand.NormFloat64())
+				a.Set(i, j, rnd.NormFloat64())
 			}
 		}
 		b := NewDense(n, bc, nil)
 		for i := 0; i < n; i++ {
 			for j := 0; j < bc; j++ {
-				b.Set(i, j, rand.NormFloat64())
+				b.Set(i, j, rnd.NormFloat64())
 			}
 		}
 		var lu LU
@@ -169,16 +172,17 @@ func TestLUSolveToCond(t *testing.T) {
 
 func TestLUSolveVecTo(t *testing.T) {
 	t.Parallel()
+	rnd := rand.New(rand.NewSource(1))
 	for _, n := range []int{5, 10} {
 		a := NewDense(n, n, nil)
 		for i := 0; i < n; i++ {
 			for j := 0; j < n; j++ {
-				a.Set(i, j, rand.NormFloat64())
+				a.Set(i, j, rnd.NormFloat64())
 			}
 		}
 		b := NewVecDense(n, nil)
 		for i := 0; i < n; i++ {
-			b.SetVec(i, rand.NormFloat64())
+			b.SetVec(i, rnd.NormFloat64())
 		}
 		var lu LU
 		lu.Factorize(a)

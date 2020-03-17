@@ -12,6 +12,7 @@ import (
 
 func TestSolve(t *testing.T) {
 	t.Parallel()
+	rnd := rand.New(rand.NewSource(1))
 	// Hand-coded cases.
 	for _, test := range []struct {
 		a         [][]float64
@@ -204,14 +205,14 @@ func TestSolve(t *testing.T) {
 		a := NewDense(m, n, nil)
 		for i := 0; i < m; i++ {
 			for j := 0; j < n; j++ {
-				a.Set(i, j, rand.Float64())
+				a.Set(i, j, rnd.Float64())
 			}
 		}
 		br := m
 		b := NewDense(br, bc, nil)
 		for i := 0; i < br; i++ {
 			for j := 0; j < bc; j++ {
-				b.Set(i, j, rand.Float64())
+				b.Set(i, j, rnd.Float64())
 			}
 		}
 		var x Dense
@@ -247,6 +248,7 @@ func TestSolve(t *testing.T) {
 
 func TestSolveVec(t *testing.T) {
 	t.Parallel()
+	rnd := rand.New(rand.NewSource(1))
 	for _, test := range []struct {
 		m, n int
 	}{
@@ -265,13 +267,13 @@ func TestSolveVec(t *testing.T) {
 		a := NewDense(m, n, nil)
 		for i := 0; i < m; i++ {
 			for j := 0; j < n; j++ {
-				a.Set(i, j, rand.Float64())
+				a.Set(i, j, rnd.Float64())
 			}
 		}
 		br := m
 		b := NewVecDense(br, nil)
 		for i := 0; i < br; i++ {
-			b.SetVec(i, rand.Float64())
+			b.SetVec(i, rnd.Float64())
 		}
 		var x VecDense
 		err := x.SolveVec(a, b)

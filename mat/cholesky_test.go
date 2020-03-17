@@ -331,10 +331,11 @@ func TestCloneCholesky(t *testing.T) {
 
 func TestCholeskyInverseTo(t *testing.T) {
 	t.Parallel()
+	rnd := rand.New(rand.NewSource(1))
 	for _, n := range []int{1, 3, 5, 9} {
 		data := make([]float64, n*n)
 		for i := range data {
-			data[i] = rand.NormFloat64()
+			data[i] = rnd.NormFloat64()
 		}
 		var s SymDense
 		s.SymOuterK(1, NewDense(n, n, data))
@@ -363,13 +364,13 @@ func TestCholeskyInverseTo(t *testing.T) {
 
 func TestCholeskySymRankOne(t *testing.T) {
 	t.Parallel()
-	rand.Seed(1)
+	rnd := rand.New(rand.NewSource(1))
 	for _, n := range []int{1, 2, 3, 4, 5, 7, 10, 20, 50, 100} {
 		for k := 0; k < 50; k++ {
 			// Construct a random positive definite matrix.
 			data := make([]float64, n*n)
 			for i := range data {
-				data[i] = rand.NormFloat64()
+				data[i] = rnd.NormFloat64()
 			}
 			var a SymDense
 			a.SymOuterK(1, NewDense(n, n, data))
@@ -377,10 +378,10 @@ func TestCholeskySymRankOne(t *testing.T) {
 			// Construct random data for updating.
 			xdata := make([]float64, n)
 			for i := range xdata {
-				xdata[i] = rand.NormFloat64()
+				xdata[i] = rnd.NormFloat64()
 			}
 			x := NewVecDense(n, xdata)
-			alpha := rand.NormFloat64()
+			alpha := rnd.NormFloat64()
 
 			// Compute the updated matrix directly. If alpha > 0, there are no
 			// issues. If alpha < 0, it could be that the final matrix is not

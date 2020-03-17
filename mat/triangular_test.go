@@ -204,9 +204,11 @@ func TestTriDiagView(t *testing.T) {
 
 func TestTriDenseCopy(t *testing.T) {
 	t.Parallel()
+	src := rand.NewSource(1)
+	rnd := rand.New(src)
 	for i := 0; i < 100; i++ {
-		size := rand.Intn(100)
-		r, err := randDense(size, 0.9, rand.NormFloat64)
+		size := rnd.Intn(100)
+		r, err := randDense(size, 0.9, src)
 		if size == 0 {
 			if err != ErrZeroLength {
 				t.Fatalf("expected error %v: got: %v", ErrZeroLength, err)
@@ -255,9 +257,11 @@ func TestTriDenseCopy(t *testing.T) {
 
 func TestTriTriDenseCopy(t *testing.T) {
 	t.Parallel()
+	src := rand.NewSource(1)
+	rnd := rand.New(src)
 	for i := 0; i < 100; i++ {
-		size := rand.Intn(100)
-		r, err := randDense(size, 1, rand.NormFloat64)
+		size := rnd.Intn(100)
+		r, err := randDense(size, 1, src)
 		if size == 0 {
 			if err != ErrZeroLength {
 				t.Fatalf("expected error %v: got: %v", ErrZeroLength, err)
@@ -308,11 +312,12 @@ func TestTriTriDenseCopy(t *testing.T) {
 
 func TestTriInverse(t *testing.T) {
 	t.Parallel()
+	rnd := rand.New(rand.NewSource(1))
 	for _, kind := range []TriKind{Upper, Lower} {
 		for _, n := range []int{1, 3, 5, 9} {
 			data := make([]float64, n*n)
 			for i := range data {
-				data[i] = rand.NormFloat64()
+				data[i] = rnd.NormFloat64()
 			}
 			a := NewTriDense(n, kind, data)
 			var tr TriDense

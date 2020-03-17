@@ -17,6 +17,7 @@ import (
 // TODO: Need to add tests where one is overwritten.
 func TestMulTypes(t *testing.T) {
 	t.Parallel()
+	src := rand.NewSource(1)
 	for _, test := range []struct {
 		ar     int
 		ac     int
@@ -88,11 +89,11 @@ func TestMulTypes(t *testing.T) {
 
 		// Generate random matrices
 		avec := make([]float64, ar*ac)
-		randomSlice(avec)
+		randomSlice(avec, src)
 		a := NewDense(ar, ac, avec)
 
 		bvec := make([]float64, br*bc)
-		randomSlice(bvec)
+		randomSlice(bvec, src)
 
 		b := NewDense(br, bc, bvec)
 
@@ -132,7 +133,7 @@ func TestMulTypes(t *testing.T) {
 
 		// Normal multiply with existing receiver
 		c := NewDense(ar, bc, cvec)
-		randomSlice(cvec)
+		randomSlice(cvec, src)
 		testMul(t, a, b, c, acomp, bcomp, ccomp, false, "existing receiver")
 
 		// Cast a as a basic matrix
@@ -144,18 +145,19 @@ func TestMulTypes(t *testing.T) {
 		testMul(t, a, bm, d, acomp, bcomp, ccomp, true, "b is basic, receiver is empty")
 		d.Reset()
 		testMul(t, am, bm, d, acomp, bcomp, ccomp, true, "both basic, receiver is empty")
-		randomSlice(cvec)
+		randomSlice(cvec, src)
 		testMul(t, am, b, d, acomp, bcomp, ccomp, true, "a is basic, receiver is full")
-		randomSlice(cvec)
+		randomSlice(cvec, src)
 		testMul(t, a, bm, d, acomp, bcomp, ccomp, true, "b is basic, receiver is full")
-		randomSlice(cvec)
+		randomSlice(cvec, src)
 		testMul(t, am, bm, d, acomp, bcomp, ccomp, true, "both basic, receiver is full")
 	}
 }
 
-func randomSlice(s []float64) {
+func randomSlice(s []float64, src rand.Source) {
+	rnd := rand.New(src)
 	for i := range s {
-		s[i] = rand.NormFloat64()
+		s[i] = rnd.NormFloat64()
 	}
 }
 

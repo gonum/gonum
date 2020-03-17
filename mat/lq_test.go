@@ -12,6 +12,7 @@ import (
 
 func TestLQ(t *testing.T) {
 	t.Parallel()
+	rnd := rand.New(rand.NewSource(1))
 	for _, test := range []struct {
 		m, n int
 	}{
@@ -23,7 +24,7 @@ func TestLQ(t *testing.T) {
 		a := NewDense(m, n, nil)
 		for i := 0; i < m; i++ {
 			for j := 0; j < n; j++ {
-				a.Set(i, j, rand.NormFloat64())
+				a.Set(i, j, rnd.NormFloat64())
 			}
 		}
 		var want Dense
@@ -50,6 +51,7 @@ func TestLQ(t *testing.T) {
 
 func TestLQSolveTo(t *testing.T) {
 	t.Parallel()
+	rnd := rand.New(rand.NewSource(1))
 	for _, trans := range []bool{false, true} {
 		for _, test := range []struct {
 			m, n, bc int
@@ -65,7 +67,7 @@ func TestLQSolveTo(t *testing.T) {
 			a := NewDense(m, n, nil)
 			for i := 0; i < m; i++ {
 				for j := 0; j < n; j++ {
-					a.Set(i, j, rand.Float64())
+					a.Set(i, j, rnd.Float64())
 				}
 			}
 			br := m
@@ -75,7 +77,7 @@ func TestLQSolveTo(t *testing.T) {
 			b := NewDense(br, bc, nil)
 			for i := 0; i < br; i++ {
 				for j := 0; j < bc; j++ {
-					b.Set(i, j, rand.Float64())
+					b.Set(i, j, rnd.Float64())
 				}
 			}
 			var x Dense
@@ -112,6 +114,7 @@ func TestLQSolveTo(t *testing.T) {
 
 func TestLQSolveToVec(t *testing.T) {
 	t.Parallel()
+	rnd := rand.New(rand.NewSource(1))
 	for _, trans := range []bool{false, true} {
 		for _, test := range []struct {
 			m, n int
@@ -124,7 +127,7 @@ func TestLQSolveToVec(t *testing.T) {
 			a := NewDense(m, n, nil)
 			for i := 0; i < m; i++ {
 				for j := 0; j < n; j++ {
-					a.Set(i, j, rand.Float64())
+					a.Set(i, j, rnd.Float64())
 				}
 			}
 			br := m
@@ -133,7 +136,7 @@ func TestLQSolveToVec(t *testing.T) {
 			}
 			b := NewVecDense(br, nil)
 			for i := 0; i < br; i++ {
-				b.SetVec(i, rand.Float64())
+				b.SetVec(i, rnd.Float64())
 			}
 			var x VecDense
 			lq := &LQ{}

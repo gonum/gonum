@@ -23,8 +23,8 @@ type Func struct {
 }
 
 // Derivative generates code for derivatives from the given function declaration.
-// It generates only the first derivative when d2 is false and generates
-// both first and second derivatives otherwise.
+// If d2 is true, the generated function returns both the first and second
+// derivatives. Otherwise, only the first derivative function is generated.
 func Derivative(w io.Writer, f Func, d2 bool) error {
 	gen, err := newGenerator(w, f, d2)
 	if err != nil {

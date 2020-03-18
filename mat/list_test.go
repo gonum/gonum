@@ -540,6 +540,204 @@ func makeRandOf(a Matrix, m, n int, src rand.Source) Matrix {
 	return rMatrix
 }
 
+// makeNaNOf returns a new m×n matrix of the underlying matrix type filled with NaN values.
+func makeNaNOf(a Matrix, m, n int) Matrix {
+	var rMatrix Matrix
+	switch t := a.(type) {
+	default:
+		panic("unknown type for makeNaNOf")
+	case Untransposer:
+		rMatrix = retranspose(a, makeNaNOf(t.Untranspose(), n, m))
+	case *Dense, *basicMatrix:
+		var mat = &Dense{}
+		if m != 0 && n != 0 {
+			mat = NewDense(m, n, nil)
+		}
+		for i := 0; i < m; i++ {
+			for j := 0; j < n; j++ {
+				mat.Set(i, j, math.NaN())
+			}
+		}
+		rMatrix = returnAs(mat, t)
+	case *VecDense:
+		if m == 0 && n == 0 {
+			return &VecDense{}
+		}
+		if n != 1 {
+			panic(fmt.Sprintf("bad vector size: m = %v, n = %v", m, n))
+		}
+		length := m
+		inc := 1
+		if t.mat.Inc != 0 {
+			inc = t.mat.Inc
+		}
+		mat := &VecDense{
+			mat: blas64.Vector{
+				N:    length,
+				Inc:  inc,
+				Data: make([]float64, inc*(length-1)+1),
+			},
+		}
+		for i := 0; i < length; i++ {
+			mat.SetVec(i, math.NaN())
+		}
+		return mat
+	case *basicVector:
+		if m == 0 && n == 0 {
+			return &basicVector{}
+		}
+		if n != 1 {
+			panic(fmt.Sprintf("bad vector size: m = %v, n = %v", m, n))
+		}
+		mat := &basicVector{
+			m: make([]float64, m),
+		}
+		for i := 0; i < m; i++ {
+			mat.m[i] = math.NaN()
+		}
+		return mat
+	case *SymDense, *basicSymmetric:
+		if m != n {
+			panic("bad size")
+		}
+		mat := &SymDense{}
+		if n != 0 {
+			mat = NewSymDense(n, nil)
+		}
+		for i := 0; i < m; i++ {
+			for j := i; j < n; j++ {
+				mat.SetSym(i, j, math.NaN())
+			}
+		}
+		rMatrix = returnAs(mat, t)
+	case *TriDense, *basicTriangular:
+		if m != n {
+			panic("bad size")
+		}
+
+		// This is necessary because we are making
+		// a triangle from the zero value, which
+		// always returns upper as true.
+		var triKind TriKind
+		switch t := t.(type) {
+		case *TriDense:
+			triKind = t.triKind()
+		case *basicTriangular:
+			triKind = (*TriDense)(t).triKind()
+		}
+
+		if n == 0 {
+			uplo := blas.Upper
+			if triKind == Lower {
+				uplo = blas.Lower
+			}
+			return returnAs(&TriDense{mat: blas64.Triangular{Uplo: uplo}}, t)
+		}
+
+		mat := NewTriDense(n, triKind, nil)
+		if triKind == Upper {
+			for i := 0; i < m; i++ {
+				for j := i; j < n; j++ {
+					mat.SetTri(i, j, math.NaN())
+				}
+			}
+		} else {
+			for i := 0; i < m; i++ {
+				for j := 0; j <= i; j++ {
+					mat.SetTri(i, j, math.NaN())
+				}
+			}
+		}
+		rMatrix = returnAs(mat, t)
+	case *BandDense, *basicBanded:
+		var kl, ku int
+		switch t := t.(type) {
+		case *BandDense:
+			kl = t.mat.KL
+			ku = t.mat.KU
+		case *basicBanded:
+			ku = (*BandDense)(t).mat.KU
+			kl = (*BandDense)(t).mat.KL
+		}
+		ku = min(ku, n-1)
+		kl = min(kl, m-1)
+		data := make([]float64, min(m, n+kl)*(kl+ku+1))
+		for i := range data {
+			data[i] = math.NaN()
+		}
+		mat := NewBandDense(m, n, kl, ku, data)
+		rMatrix = returnAs(mat, t)
+	case *SymBandDense, *basicSymBanded:
+		if m != n {
+			panic("bad size")
+		}
+		var k int
+		switch t := t.(type) {
+		case *SymBandDense:
+			k = t.mat.K
+		case *basicSymBanded:
+			k = (*SymBandDense)(t).mat.K
+		}
+		k = min(k, m-1) // Special case for small sizes.
+		data := make([]float64, m*(k+1))
+		for i := range data {
+			data[i] = math.NaN()
+		}
+		mat := NewSymBandDense(n, k, data)
+		rMatrix = returnAs(mat, t)
+	case *TriBandDense, *basicTriBanded:
+		if m != n {
+			panic("bad size")
+		}
+		var k int
+		var triKind TriKind
+		switch t := t.(type) {
+		case *TriBandDense:
+			k = t.mat.K
+			triKind = t.triKind()
+		case *basicTriBanded:
+			k = (*TriBandDense)(t).mat.K
+			triKind = (*TriBandDense)(t).triKind()
+		}
+		k = min(k, m-1) // Special case for small sizes.
+		data := make([]float64, m*(k+1))
+		for i := range data {
+			data[i] = math.NaN()
+		}
+		mat := NewTriBandDense(n, k, triKind, data)
+		rMatrix = returnAs(mat, t)
+	case *DiagDense, *basicDiagonal:
+		if m != n {
+			panic("bad size")
+		}
+		var inc int
+		switch t := t.(type) {
+		case *DiagDense:
+			inc = t.mat.Inc
+		case *basicDiagonal:
+			inc = (*DiagDense)(t).mat.Inc
+		}
+		if inc == 0 {
+			inc = 1
+		}
+		mat := &DiagDense{
+			mat: blas64.Vector{
+				N:    n,
+				Inc:  inc,
+				Data: make([]float64, inc*(n-1)+1),
+			},
+		}
+		for i := 0; i < n; i++ {
+			mat.SetDiag(i, math.NaN())
+		}
+		rMatrix = returnAs(mat, t)
+	}
+	if mr, mc := rMatrix.Dims(); mr != m || mc != n {
+		panic(fmt.Sprintf("makeNaNOf for %T returns wrong size: %d×%d != %d×%d", a, m, n, mr, mc))
+	}
+	return rMatrix
+}
+
 // makeCopyOf returns a copy of the matrix.
 func makeCopyOf(a Matrix) Matrix {
 	switch t := a.(type) {
@@ -1188,8 +1386,8 @@ func testOneInput(t *testing.T,
 			// Test the method for a zero-value of the receiver.
 			aType, aTrans := untranspose(a)
 			errStr := fmt.Sprintf("%T.%s(%T), size: %#v, atrans %v", receiver, name, aType, test, aTrans)
-			zero := makeRandOf(receiver, 0, 0, src)
-			panicked, err := panics(func() { method(zero, a) })
+			empty := makeRandOf(receiver, 0, 0, src)
+			panicked, err := panics(func() { method(empty, a) })
 			if !dimsOK && !panicked {
 				t.Errorf("Did not panic with illegal size: %s", errStr)
 				continue
@@ -1204,22 +1402,34 @@ func testOneInput(t *testing.T,
 			if !dimsOK {
 				continue
 			}
-			if !equalApprox(zero, &want, tol, false) {
-				t.Errorf("Answer mismatch with zero receiver: %s.\nGot:\n% v\nWant:\n% v\n", errStr, Formatted(zero), Formatted(&want))
+			if !equalApprox(empty, &want, tol, false) {
+				t.Errorf("Answer mismatch with empty receiver: %s.\nGot:\n% v\nWant:\n% v\n", errStr, Formatted(empty), Formatted(&want))
 				continue
 			}
 
-			// Test the method with a non-zero-value of the receiver.
+			// Test the method with a non-empty-value of the receiver.
 			// The receiver has been overwritten in place so use its size
 			// to construct a new random matrix.
-			rr, rc := zero.Dims()
-			neverZero := makeRandOf(receiver, rr, rc, src)
-			panicked, _ = panics(func() { method(neverZero, a) })
+			rr, rc := empty.Dims()
+			neverEmpty := makeRandOf(receiver, rr, rc, src)
+			panicked, message := panics(func() { method(neverEmpty, a) })
 			if panicked {
-				t.Errorf("Panicked with non-zero receiver: %s", errStr)
+				t.Errorf("Panicked with non-empty receiver: %s: %s", errStr, message)
 			}
-			if !equalApprox(neverZero, &want, tol, false) {
-				t.Errorf("Answer mismatch non-zero receiver: %s", errStr)
+			if !equalApprox(neverEmpty, &want, tol, false) {
+				t.Errorf("Answer mismatch non-empty receiver: %s", errStr)
+			}
+
+			// Test the method with a NaN-filled-value of the receiver.
+			// The receiver has been overwritten in place so use its size
+			// to construct a new NaN matrix.
+			nanMatrix := makeNaNOf(receiver, rr, rc)
+			panicked, message = panics(func() { method(nanMatrix, a) })
+			if panicked {
+				t.Errorf("Panicked with NaN-filled receiver: %s: %s", errStr, message)
+			}
+			if !equalApprox(nanMatrix, &want, tol, false) {
+				t.Errorf("Answer mismatch NaN-filled receiver: %s", errStr)
 			}
 
 			// Test with an incorrectly sized matrix.
@@ -1257,7 +1467,7 @@ func testOneInput(t *testing.T,
 			// if the type and size of the receiver and one of the
 			// arguments match. Test the method works properly
 			// when this is the case.
-			aMaybeSame := maybeSame(neverZero, a)
+			aMaybeSame := maybeSame(neverEmpty, a)
 			if aMaybeSame {
 				aSame := makeCopyOf(a)
 				receiver = aSame
@@ -1340,12 +1550,12 @@ func testTwoInput(t *testing.T,
 				aCopy := makeCopyOf(a)
 				bCopy := makeCopyOf(b)
 
-				// Test the method for a zero-value of the receiver.
+				// Test the method for a empty-value of the receiver.
 				aType, aTrans := untranspose(a)
 				bType, bTrans := untranspose(b)
 				errStr := fmt.Sprintf("%T.%s(%T, %T), sizes: %#v, atrans %v, btrans %v", receiver, name, aType, bType, test, aTrans, bTrans)
-				zero := makeRandOf(receiver, 0, 0, src)
-				panicked, err := panics(func() { method(zero, a, b) })
+				empty := makeRandOf(receiver, 0, 0, src)
+				panicked, err := panics(func() { method(empty, a, b) })
 				if !dimsOK && !panicked {
 					t.Errorf("Did not panic with illegal size: %s", errStr)
 					continue
@@ -1363,25 +1573,38 @@ func testTwoInput(t *testing.T,
 				if !dimsOK {
 					continue
 				}
-				wasZero, zero := zero, nil // Nil-out zero so we detect illegal use.
+				wasEmpty, empty := empty, nil // Nil-out empty so we detect illegal use.
 				// NaN equality is allowed because of 0/0 in DivElem test.
-				if !equalApprox(wasZero, &want, tol, true) {
-					t.Errorf("Answer mismatch with zero receiver: %s", errStr)
+				if !equalApprox(wasEmpty, &want, tol, true) {
+					t.Errorf("Answer mismatch with empty receiver: %s", errStr)
 					continue
 				}
 
-				// Test the method with a non-zero-value of the receiver.
+				// Test the method with a non-empty-value of the receiver.
 				// The receiver has been overwritten in place so use its size
 				// to construct a new random matrix.
-				rr, rc := wasZero.Dims()
-				neverZero := makeRandOf(receiver, rr, rc, src)
-				panicked, message := panics(func() { method(neverZero, a, b) })
+				rr, rc := wasEmpty.Dims()
+				neverEmpty := makeRandOf(receiver, rr, rc, src)
+				panicked, message := panics(func() { method(neverEmpty, a, b) })
 				if panicked {
-					t.Errorf("Panicked with non-zero receiver: %s: %s", errStr, message)
+					t.Errorf("Panicked with non-empty receiver: %s: %s", errStr, message)
 				}
 				// NaN equality is allowed because of 0/0 in DivElem test.
-				if !equalApprox(neverZero, &want, tol, true) {
-					t.Errorf("Answer mismatch non-zero receiver: %s", errStr)
+				if !equalApprox(neverEmpty, &want, tol, true) {
+					t.Errorf("Answer mismatch non-empty receiver: %s", errStr)
+				}
+
+				// Test the method with a NaN-filled value of the receiver.
+				// The receiver has been overwritten in place so use its size
+				// to construct a new NaN matrix.
+				nanMatrix := makeNaNOf(receiver, rr, rc)
+				panicked, message = panics(func() { method(nanMatrix, a, b) })
+				if panicked {
+					t.Errorf("Panicked with NaN-filled receiver: %s: %s", errStr, message)
+				}
+				// NaN equality is allowed because of 0/0 in DivElem test.
+				if !equalApprox(nanMatrix, &want, tol, true) {
+					t.Errorf("Answer mismatch NaN-filled receiver: %s", errStr)
 				}
 
 				// Test with an incorrectly sized matrix.
@@ -1419,8 +1642,8 @@ func testTwoInput(t *testing.T,
 				// if the type and size of the receiver and one of the
 				// arguments match. Test the method works properly
 				// when this is the case.
-				aMaybeSame := maybeSame(neverZero, a)
-				bMaybeSame := maybeSame(neverZero, b)
+				aMaybeSame := maybeSame(neverEmpty, a)
+				bMaybeSame := maybeSame(neverEmpty, b)
 				if aMaybeSame {
 					aSame := makeCopyOf(a)
 					receiver = aSame
@@ -1480,15 +1703,15 @@ func testTwoInput(t *testing.T,
 					// Compute the real answer for this case. It is different
 					// from the initial answer since now a and b have the
 					// same data.
-					zero = makeRandOf(wasZero, 0, 0, src)
-					method(zero, aSame, bSame)
-					wasZero, zero = zero, nil // Nil-out zero so we detect illegal use.
+					empty = makeRandOf(wasEmpty, 0, 0, src)
+					method(empty, aSame, bSame)
+					wasEmpty, empty = empty, nil // Nil-out empty so we detect illegal use.
 					preData := underlyingData(receiver)
 					panicked, err = panics(func() { method(receiver, aSame, bSame) })
 					if panicked {
 						t.Errorf("Panics when both maybeSame: %s: %v", errStr, err)
 					} else {
-						if !equalApprox(receiver, wasZero, tol, false) {
+						if !equalApprox(receiver, wasEmpty, tol, false) {
 							t.Errorf("Wrong answer when both maybeSame: %s", errStr)
 						}
 						postData := underlyingData(receiver)

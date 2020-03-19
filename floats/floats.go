@@ -779,7 +779,7 @@ func isHalfway(x float64) bool {
 	return frac == 0.5 || (math.Nextafter(frac, math.Inf(-1)) < 0.5 && math.Nextafter(frac, math.Inf(1)) > 0.5)
 }
 
-// Same returns true if the input slices have the same length and the all elements
+// Same returns true if the input slices have the same length and all elements
 // have the same value with NaN treated as the same.
 func Same(s, t []float64) bool {
 	if len(s) != len(t) {

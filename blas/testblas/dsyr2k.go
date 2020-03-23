@@ -5,6 +5,7 @@
 package testblas
 
 import (
+	"math"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
@@ -190,6 +191,165 @@ func Dsyr2kTest(t *testing.T, blasser Dsyr2ker) {
 				{140, 0, 0},
 				{250, 410, 0},
 				{360, 568, 774},
+			},
+		},
+
+		{
+			ul:    blas.Upper,
+			tA:    blas.NoTrans,
+			n:     3,
+			k:     2,
+			alpha: 0,
+			a: [][]float64{
+				{1, 2},
+				{3, 4},
+				{5, 6},
+			},
+			b: [][]float64{
+				{7, 8},
+				{9, 10},
+				{11, 12},
+			},
+			c: [][]float64{
+				{math.NaN(), math.NaN(), math.NaN()},
+				{math.Inf(-1), math.NaN(), math.NaN()},
+				{math.Inf(-1), math.Inf(-1), math.NaN()},
+			},
+			ans: [][]float64{
+				{0, 0, 0},
+				{math.Inf(-1), 0, 0},
+				{math.Inf(-1), math.Inf(-1), 0},
+			},
+		},
+		{
+			ul:    blas.Lower,
+			tA:    blas.NoTrans,
+			n:     3,
+			k:     2,
+			alpha: 0,
+			a: [][]float64{
+				{1, 2},
+				{3, 4},
+				{5, 6},
+			},
+			b: [][]float64{
+				{7, 8},
+				{9, 10},
+				{11, 12},
+			},
+			c: [][]float64{
+				{math.NaN(), math.Inf(-1), math.Inf(-1)},
+				{math.NaN(), math.NaN(), math.Inf(-1)},
+				{math.NaN(), math.NaN(), math.NaN()},
+			},
+			ans: [][]float64{
+				{0, math.Inf(-1), math.Inf(-1)},
+				{0, 0, math.Inf(-1)},
+				{0, 0, 0},
+			},
+		},
+		{
+			ul:    blas.Upper,
+			tA:    blas.NoTrans,
+			n:     3,
+			k:     2,
+			alpha: 3,
+			a: [][]float64{
+				{1, 2},
+				{3, 4},
+				{5, 6},
+			},
+			b: [][]float64{
+				{7, 8},
+				{9, 10},
+				{11, 12},
+			},
+			c: [][]float64{
+				{math.NaN(), math.NaN(), math.NaN()},
+				{math.Inf(-1), math.NaN(), math.NaN()},
+				{math.Inf(-1), math.Inf(-1), math.NaN()},
+			},
+			ans: [][]float64{
+				{138, 246, 354},
+				{math.Inf(-1), 402, 558},
+				{math.Inf(-1), math.Inf(-1), 762},
+			},
+		},
+		{
+			ul:    blas.Lower,
+			tA:    blas.NoTrans,
+			n:     3,
+			k:     2,
+			alpha: 3,
+			a: [][]float64{
+				{1, 2},
+				{3, 4},
+				{5, 6},
+			},
+			b: [][]float64{
+				{7, 8},
+				{9, 10},
+				{11, 12},
+			},
+			c: [][]float64{
+				{math.NaN(), math.Inf(-1), math.Inf(-1)},
+				{math.NaN(), math.NaN(), math.Inf(-1)},
+				{math.NaN(), math.NaN(), math.NaN()},
+			},
+			ans: [][]float64{
+				{138, math.Inf(-1), math.Inf(-1)},
+				{246, 402, math.Inf(-1)},
+				{354, 558, 762},
+			},
+		},
+		{
+			ul:    blas.Upper,
+			tA:    blas.Trans,
+			n:     3,
+			k:     2,
+			alpha: 3,
+			a: [][]float64{
+				{1, 3, 5},
+				{2, 4, 6},
+			},
+			b: [][]float64{
+				{7, 9, 11},
+				{8, 10, 12},
+			},
+			c: [][]float64{
+				{math.NaN(), math.NaN(), math.NaN()},
+				{math.Inf(-1), math.NaN(), math.NaN()},
+				{math.Inf(-1), math.Inf(-1), math.NaN()},
+			},
+			ans: [][]float64{
+				{138, 246, 354},
+				{math.Inf(-1), 402, 558},
+				{math.Inf(-1), math.Inf(-1), 762},
+			},
+		},
+		{
+			ul:    blas.Lower,
+			tA:    blas.Trans,
+			n:     3,
+			k:     2,
+			alpha: 3,
+			a: [][]float64{
+				{1, 3, 5},
+				{2, 4, 6},
+			},
+			b: [][]float64{
+				{7, 9, 11},
+				{8, 10, 12},
+			},
+			c: [][]float64{
+				{math.NaN(), math.Inf(-1), math.Inf(-1)},
+				{math.NaN(), math.NaN(), math.Inf(-1)},
+				{math.NaN(), math.NaN(), math.NaN()},
+			},
+			ans: [][]float64{
+				{138, math.Inf(-1), math.Inf(-1)},
+				{246, 402, math.Inf(-1)},
+				{354, 558, 762},
 			},
 		},
 	} {

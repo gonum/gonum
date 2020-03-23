@@ -647,7 +647,10 @@ func zmm(tA, tB blas.Transpose, m, n, k int, alpha complex128, a []complex128, l
 	}
 	for i := 0; i < m; i++ {
 		for j := 0; j < n; j++ {
-			r[i*ldc+j] = alpha*r[i*ldc+j] + beta*c[i*ldc+j]
+			r[i*ldc+j] = alpha * r[i*ldc+j]
+			if beta != 0 {
+				r[i*ldc+j] += beta * c[i*ldc+j]
+			}
 		}
 	}
 	return r

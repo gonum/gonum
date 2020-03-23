@@ -5,6 +5,7 @@
 package testblas
 
 import (
+	"math"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
@@ -266,6 +267,238 @@ func DsymmTest(t *testing.T, blasser Dsymmer) {
 				{139, 236, 291},
 				{202, 299, 387},
 				{25, 65, 65},
+			},
+		},
+
+		{
+			side: blas.Left,
+			ul:   blas.Upper,
+			m:    3,
+			n:    4,
+			a: [][]float64{
+				{2, 3, 4},
+				{0, 6, 7},
+				{0, 0, 10},
+			},
+			b: [][]float64{
+				{2, 3, 4, 8},
+				{5, 6, 7, 15},
+				{8, 9, 10, 20},
+			},
+			c: [][]float64{
+				{math.NaN(), math.NaN(), math.NaN(), math.NaN()},
+				{math.NaN(), math.NaN(), math.NaN(), math.NaN()},
+				{math.NaN(), math.NaN(), math.NaN(), math.NaN()},
+			},
+			alpha: 2,
+			ans: [][]float64{
+				{102, 120, 138, 282},
+				{184, 216, 248, 508},
+				{246, 288, 330, 674},
+			},
+		},
+		{
+			side: blas.Left,
+			ul:   blas.Upper,
+			m:    4,
+			n:    3,
+			a: [][]float64{
+				{2, 3, 4, 8},
+				{0, 6, 7, 9},
+				{0, 0, 10, 10},
+				{0, 0, 0, 11},
+			},
+			b: [][]float64{
+				{2, 3, 4},
+				{5, 6, 7},
+				{8, 9, 10},
+				{2, 1, 1},
+			},
+			c: [][]float64{
+				{math.NaN(), math.NaN(), math.NaN()},
+				{math.NaN(), math.NaN(), math.NaN()},
+				{math.NaN(), math.NaN(), math.NaN()},
+				{math.NaN(), math.NaN(), math.NaN()},
+			},
+			alpha: 2,
+			ans: [][]float64{
+				{134, 136, 154},
+				{220, 234, 266},
+				{286, 308, 350},
+				{326, 358, 412},
+			},
+		},
+		{
+			side: blas.Left,
+			ul:   blas.Lower,
+			m:    3,
+			n:    4,
+			a: [][]float64{
+				{2, 0, 0},
+				{3, 6, 0},
+				{4, 7, 10},
+			},
+			b: [][]float64{
+				{2, 3, 4, 8},
+				{5, 6, 7, 15},
+				{8, 9, 10, 20},
+			},
+			c: [][]float64{
+				{math.NaN(), math.NaN(), math.NaN(), math.NaN()},
+				{math.NaN(), math.NaN(), math.NaN(), math.NaN()},
+				{math.NaN(), math.NaN(), math.NaN(), math.NaN()},
+			},
+			alpha: 2,
+			ans: [][]float64{
+				{102, 120, 138, 282},
+				{184, 216, 248, 508},
+				{246, 288, 330, 674},
+			},
+		},
+		{
+			side: blas.Left,
+			ul:   blas.Lower,
+			m:    4,
+			n:    3,
+			a: [][]float64{
+				{2, 0, 0, 0},
+				{3, 6, 0, 0},
+				{4, 7, 10, 0},
+				{8, 9, 10, 11},
+			},
+			b: [][]float64{
+				{2, 3, 4},
+				{5, 6, 7},
+				{8, 9, 10},
+				{2, 1, 1},
+			},
+			c: [][]float64{
+				{math.NaN(), math.NaN(), math.NaN()},
+				{math.NaN(), math.NaN(), math.NaN()},
+				{math.NaN(), math.NaN(), math.NaN()},
+				{math.NaN(), math.NaN(), math.NaN()},
+			},
+			alpha: 2,
+			ans: [][]float64{
+				{134, 136, 154},
+				{220, 234, 266},
+				{286, 308, 350},
+				{326, 358, 412},
+			},
+		},
+		{
+			side: blas.Right,
+			ul:   blas.Upper,
+			m:    3,
+			n:    4,
+			a: [][]float64{
+				{2, 0, 0, 0},
+				{3, 6, 0, 0},
+				{4, 7, 10, 0},
+				{3, 4, 5, 6},
+			},
+			b: [][]float64{
+				{2, 3, 4, 9},
+				{5, 6, 7, -3},
+				{8, 9, 10, -2},
+			},
+			c: [][]float64{
+				{math.NaN(), math.NaN(), math.NaN(), math.NaN()},
+				{math.NaN(), math.NaN(), math.NaN(), math.NaN()},
+				{math.NaN(), math.NaN(), math.NaN(), math.NaN()},
+			},
+			alpha: 2,
+			ans: [][]float64{
+				{8, 36, 80, 108},
+				{20, 72, 140, -36},
+				{32, 108, 200, -24},
+			},
+		},
+		{
+			side: blas.Right,
+			ul:   blas.Upper,
+			m:    4,
+			n:    3,
+			a: [][]float64{
+				{2, 0, 0},
+				{3, 6, 0},
+				{4, 7, 10},
+			},
+			b: [][]float64{
+				{2, 3, 4},
+				{5, 6, 7},
+				{8, 9, 10},
+				{2, 1, 1},
+			},
+			c: [][]float64{
+				{math.NaN(), math.NaN(), math.NaN()},
+				{math.NaN(), math.NaN(), math.NaN()},
+				{math.NaN(), math.NaN(), math.NaN()},
+				{math.NaN(), math.NaN(), math.NaN()},
+			},
+			alpha: 2,
+			ans: [][]float64{
+				{8, 36, 80, 20},
+				{72, 140, 32, 108},
+				{200, 8, 12, 20},
+			},
+		},
+		{
+			side: blas.Right,
+			ul:   blas.Lower,
+			m:    3,
+			n:    4,
+			a: [][]float64{
+				{2, 0, 0, 0},
+				{3, 6, 0, 0},
+				{4, 7, 10, 0},
+				{3, 4, 5, 6},
+			},
+			b: [][]float64{
+				{2, 3, 4, 2},
+				{5, 6, 7, 1},
+				{8, 9, 10, 1},
+			},
+			c: [][]float64{
+				{math.NaN(), math.NaN(), math.NaN(), math.NaN()},
+				{math.NaN(), math.NaN(), math.NaN(), math.NaN()},
+				{math.NaN(), math.NaN(), math.NaN(), math.NaN()},
+			},
+			alpha: 2,
+			ans: [][]float64{
+				{70, 120, 158, 100},
+				{118, 208, 274, 160},
+				{172, 304, 400, 232},
+			},
+		},
+		{
+			side: blas.Right,
+			ul:   blas.Lower,
+			m:    4,
+			n:    3,
+			a: [][]float64{
+				{2, 0, 0},
+				{3, 6, 0},
+				{4, 7, 10},
+			},
+			b: [][]float64{
+				{2, 3, 4},
+				{5, 6, 7},
+				{8, 9, 10},
+				{2, 1, 1},
+			},
+			c: [][]float64{
+				{math.NaN(), math.NaN(), math.NaN()},
+				{math.NaN(), math.NaN(), math.NaN()},
+				{math.NaN(), math.NaN(), math.NaN()},
+				{math.NaN(), math.NaN(), math.NaN()},
+			},
+			alpha: 2,
+			ans: [][]float64{
+				{58, 104, 138},
+				{112, 200, 264},
+				{166, 296, 390},
+				{22, 38, 50},
 			},
 		},
 	} {

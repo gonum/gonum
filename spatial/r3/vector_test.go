@@ -63,3 +63,28 @@ func TestDot(t *testing.T) {
 		})
 	}
 }
+
+func TestCross(t *testing.T) {
+	for _, test := range []struct {
+		u, v Vec
+		want Vec
+	}{
+		{
+			u:    Vec{1, 2, 3},
+			v:    Vec{1, 2, 3},
+			want: Vec{},
+		},
+		{
+			u:    Vec{1, 2, 3},
+			v:    Vec{2, 3, 4},
+			want: Vec{-1, 2, -1},
+		},
+	} {
+		t.Run("", func(t *testing.T) {
+			got := Cross(test.u, test.v)
+			if got != test.want {
+				t.Fatalf("invalid cross product: got=%v, want=%v", got, test.want)
+			}
+		})
+	}
+}

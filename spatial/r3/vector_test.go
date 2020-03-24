@@ -43,3 +43,23 @@ func TestScale(t *testing.T) {
 		t.Fatalf("invalid f.v: got=%v, want=%v", got, want)
 	}
 }
+
+func TestDot(t *testing.T) {
+	for _, test := range []struct {
+		u, v Vec
+		want float64
+	}{
+		{
+			u:    Vec{1, 2, 3},
+			v:    Vec{1, 2, 3},
+			want: 14,
+		},
+	} {
+		t.Run("", func(t *testing.T) {
+			got := Dot(test.u, test.v)
+			if got != test.want {
+				t.Fatalf("invalid dot product: got=%v, want=%v", got, test.want)
+			}
+		})
+	}
+}

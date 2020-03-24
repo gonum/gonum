@@ -33,7 +33,7 @@ type Force3 func(p1, p2 Particle3, m1, m2 float64, v r3.Vec) r3.Vec
 // particles and returns a zero vector when the two particles are
 // coincident, but performs no other sanity checks.
 func Gravity3(_, _ Particle3, m1, m2 float64, v r3.Vec) r3.Vec {
-	d2 := v.X*v.X + v.Y*v.Y + v.Z*v.Z
+	d2 := v.X()*v.X() + v.Y()*v.Y() + v.Z()*v.Z()
 	if d2 == 0 {
 		return r3.Vec{}
 	}
@@ -80,23 +80,23 @@ func (q *Volume) Reset() (err error) {
 	q.root.bounds.Max = q.root.center
 	for _, e := range q.Particles[1:] {
 		c := e.Coord3()
-		if c.X < q.root.bounds.Min.X {
-			q.root.bounds.Min.X = c.X
+		if c.X() < q.root.bounds.Min.X() {
+			q.root.bounds.Min[0] = c.X()
 		}
-		if c.X > q.root.bounds.Max.X {
-			q.root.bounds.Max.X = c.X
+		if c.X() > q.root.bounds.Max.X() {
+			q.root.bounds.Max[0] = c.X()
 		}
-		if c.Y < q.root.bounds.Min.Y {
-			q.root.bounds.Min.Y = c.Y
+		if c.Y() < q.root.bounds.Min.Y() {
+			q.root.bounds.Min[1] = c.Y()
 		}
-		if c.Y > q.root.bounds.Max.Y {
-			q.root.bounds.Max.Y = c.Y
+		if c.Y() > q.root.bounds.Max.Y() {
+			q.root.bounds.Max[1] = c.Y()
 		}
-		if c.Z < q.root.bounds.Min.Z {
-			q.root.bounds.Min.Z = c.Z
+		if c.Z() < q.root.bounds.Min.Z() {
+			q.root.bounds.Min[2] = c.Z()
 		}
-		if c.Z > q.root.bounds.Max.Z {
-			q.root.bounds.Max.Z = c.Z
+		if c.Z() > q.root.bounds.Max.Z() {
+			q.root.bounds.Max[2] = c.Z()
 		}
 	}
 
@@ -202,37 +202,37 @@ const (
 // octantOf returns which octant of b that p should be placed in.
 func octantOf(b r3.Box, p Particle3) int {
 	center := r3.Vec{
-		X: (b.Min.X + b.Max.X) / 2,
-		Y: (b.Min.Y + b.Max.Y) / 2,
-		Z: (b.Min.Z + b.Max.Z) / 2,
+		(b.Min.X() + b.Max.X()) / 2,
+		(b.Min.Y() + b.Max.Y()) / 2,
+		(b.Min.Z() + b.Max.Z()) / 2,
 	}
 	c := p.Coord3()
-	if checkBounds && (c.X < b.Min.X || b.Max.X < c.X || c.Y < b.Min.Y || b.Max.Y < c.Y || c.Z < b.Min.Z || b.Max.Z < c.Z) {
+	if checkBounds && (c.X() < b.Min.X() || b.Max.X() < c.X() || c.Y() < b.Min.Y() || b.Max.Y() < c.Y() || c.Z() < b.Min.Z() || b.Max.Z() < c.Z()) {
 		panic(fmt.Sprintf("p out of range %+v: %#v", b, p))
 	}
-	if c.X < center.X {
-		if c.Y < center.Y {
-			if c.Z < center.Z {
+	if c.X() < center.X() {
+		if c.Y() < center.Y() {
+			if c.Z() < center.Z() {
 				return lnw
 			} else {
 				return unw
 			}
 		} else {
-			if c.Z < center.Z {
+			if c.Z() < center.Z() {
 				return lsw
 			} else {
 				return usw
 			}
 		}
 	} else {
-		if c.Y < center.Y {
-			if c.Z < center.Z {
+		if c.Y() < center.Y() {
+			if c.Z() < center.Z() {
 				return lne
 			} else {
 				return une
 			}
 		} else {
-			if c.Z < center.Z {
+			if c.Z() < center.Z() {
 				return lse
 			} else {
 				return use
@@ -244,42 +244,42 @@ func octantOf(b r3.Box, p Particle3) int {
 // splitVolume returns an octant subdivision of b in the given direction.
 func splitVolume(b r3.Box, dir int) r3.Box {
 	old := b
-	halfX := (b.Max.X - b.Min.X) / 2
-	halfY := (b.Max.Y - b.Min.Y) / 2
-	halfZ := (b.Max.Z - b.Min.Z) / 2
+	halfX := (b.Max.X() - b.Min.X()) / 2
+	halfY := (b.Max.Y() - b.Min.Y()) / 2
+	halfZ := (b.Max.Z() - b.Min.Z()) / 2
 	switch dir {
 	case lne:
-		b.Min.X += halfX
-		b.Max.Y -= halfY
-		b.Max.Z -= halfZ
+		b.Min[0] += halfX
+		b.Max[1] -= halfY
+		b.Max[2] -= halfZ
 	case lse:
-		b.Min.X += halfX
-		b.Min.Y += halfY
-		b.Max.Z -= halfZ
+		b.Min[0] += halfX
+		b.Min[1] += halfY
+		b.Max[2] -= halfZ
 	case lsw:
-		b.Max.X -= halfX
-		b.Min.Y += halfY
-		b.Max.Z -= halfZ
+		b.Max[0] -= halfX
+		b.Min[1] += halfY
+		b.Max[2] -= halfZ
 	case lnw:
-		b.Max.X -= halfX
-		b.Max.Y -= halfY
-		b.Max.Z -= halfZ
+		b.Max[0] -= halfX
+		b.Max[1] -= halfY
+		b.Max[2] -= halfZ
 	case une:
-		b.Min.X += halfX
-		b.Max.Y -= halfY
-		b.Min.Z += halfZ
+		b.Min[0] += halfX
+		b.Max[1] -= halfY
+		b.Min[2] += halfZ
 	case use:
-		b.Min.X += halfX
-		b.Min.Y += halfY
-		b.Min.Z += halfZ
+		b.Min[0] += halfX
+		b.Min[1] += halfY
+		b.Min[2] += halfZ
 	case usw:
-		b.Max.X -= halfX
-		b.Min.Y += halfY
-		b.Min.Z += halfZ
+		b.Max[0] -= halfX
+		b.Min[1] += halfY
+		b.Min[2] += halfZ
 	case unw:
-		b.Max.X -= halfX
-		b.Max.Y -= halfY
-		b.Min.Z += halfZ
+		b.Max[0] -= halfX
+		b.Max[1] -= halfY
+		b.Min[2] += halfZ
 	}
 	if b == old {
 		panic(volumeTooBig)
@@ -294,22 +294,22 @@ func (b *bucket) summarize() (center r3.Vec, mass float64) {
 			continue
 		}
 		c, m := d.summarize()
-		b.center.X += c.X * m
-		b.center.Y += c.Y * m
-		b.center.Z += c.Z * m
+		b.center[0] += c.X() * m
+		b.center[1] += c.Y() * m
+		b.center[2] += c.Z() * m
 		b.mass += m
 	}
-	b.center.X /= b.mass
-	b.center.Y /= b.mass
-	b.center.Z /= b.mass
+	b.center[0] /= b.mass
+	b.center[1] /= b.mass
+	b.center[2] /= b.mass
 	return b.center, b.mass
 }
 
 // forceOn returns a force vector on p given p's mass m and the force
 // calculation function, using the Barnes-Hut theta approximation parameter.
 func (b *bucket) forceOn(p Particle3, pt r3.Vec, m, theta float64, f Force3) (vector r3.Vec) {
-	s := ((b.bounds.Max.X - b.bounds.Min.X) + (b.bounds.Max.Y - b.bounds.Min.Y) + (b.bounds.Max.Z - b.bounds.Min.Z)) / 3
-	d := math.Hypot(math.Hypot(pt.X-b.center.X, pt.Y-b.center.Y), pt.Z-b.center.Z)
+	s := ((b.bounds.Max.X() - b.bounds.Min.X()) + (b.bounds.Max.Y() - b.bounds.Min.Y()) + (b.bounds.Max.Z() - b.bounds.Min.Z())) / 3
+	d := math.Hypot(math.Hypot(pt.X()-b.center.X(), pt.Y()-b.center.Y()), pt.Z()-b.center.Z())
 	if s/d < theta || b.particle != nil {
 		return f(p, b.particle, m, b.mass, b.center.Sub(pt))
 	}

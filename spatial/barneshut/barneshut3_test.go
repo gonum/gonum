@@ -21,7 +21,7 @@ type particle3 struct {
 	name       string
 }
 
-func (p particle3) Coord3() r3.Vec { return r3.Vec{X: p.x, Y: p.y, Z: p.z} }
+func (p particle3) Coord3() r3.Vec { return r3.Vec{p.x, p.y, p.z} }
 func (p particle3) Mass() float64  { return p.m }
 
 var volumeTests = []struct {
@@ -45,8 +45,8 @@ var volumeTests = []struct {
 		want: &Volume{
 			root: bucket{
 				particle: particle3{x: 0, y: 0, z: 0, m: 1},
-				bounds:   r3.Box{Min: r3.Vec{X: 0, Y: 0, Z: 0}, Max: r3.Vec{X: 0, Y: 0, Z: 0}},
-				center:   r3.Vec{X: 0, Y: 0, Z: 0},
+				bounds:   r3.Box{Min: r3.Vec{0, 0, 0}, Max: r3.Vec{0, 0, 0}},
+				center:   r3.Vec{0, 0, 0},
 				mass:     1,
 			},
 
@@ -64,28 +64,28 @@ var volumeTests = []struct {
 		},
 		want: &Volume{
 			root: bucket{
-				bounds: r3.Box{Min: r3.Vec{X: -1, Y: -1, Z: -1}, Max: r3.Vec{X: 1, Y: 1, Z: 1}},
+				bounds: r3.Box{Min: r3.Vec{-1, -1, -1}, Max: r3.Vec{1, 1, 1}},
 				nodes: [8]*bucket{
 					lnw: {
 						particle: particle3{x: -1, y: -1, z: -1, m: 1},
-						bounds:   r3.Box{Min: r3.Vec{X: -1, Y: -1, Z: -1}, Max: r3.Vec{X: 0, Y: 0, Z: 0}},
-						center:   r3.Vec{X: -1, Y: -1, Z: -1},
+						bounds:   r3.Box{Min: r3.Vec{-1, -1, -1}, Max: r3.Vec{0, 0, 0}},
+						center:   r3.Vec{-1, -1, -1},
 						mass:     1,
 					},
 					use: {
 						particle: particle3{x: 1, y: 1, z: 1, m: 1},
-						bounds:   r3.Box{Min: r3.Vec{X: 0, Y: 0, Z: 0}, Max: r3.Vec{X: 1, Y: 1, Z: 1}},
-						center:   r3.Vec{X: 1, Y: 1, Z: 1},
+						bounds:   r3.Box{Min: r3.Vec{0, 0, 0}, Max: r3.Vec{1, 1, 1}},
+						center:   r3.Vec{1, 1, 1},
 						mass:     1,
 					},
 					usw: {
 						particle: particle3{x: -1, y: 1, z: 0, m: 1},
-						bounds:   r3.Box{Min: r3.Vec{X: -1, Y: 0, Z: 0}, Max: r3.Vec{X: 0, Y: 1, Z: 1}},
-						center:   r3.Vec{X: -1, Y: 1, Z: 0},
+						bounds:   r3.Box{Min: r3.Vec{-1, 0, 0}, Max: r3.Vec{0, 1, 1}},
+						center:   r3.Vec{-1, 1, 0},
 						mass:     1,
 					},
 				},
-				center: r3.Vec{X: -0.3333333333333333, Y: 0.3333333333333333, Z: 0},
+				center: r3.Vec{-0.3333333333333333, 0.3333333333333333, 0},
 				mass:   3,
 			},
 
@@ -106,34 +106,34 @@ var volumeTests = []struct {
 		},
 		want: &Volume{
 			root: bucket{
-				bounds: r3.Box{Min: r3.Vec{X: -1, Y: -1, Z: -1}, Max: r3.Vec{X: 1, Y: 1, Z: 1}},
+				bounds: r3.Box{Min: r3.Vec{-1, -1, -1}, Max: r3.Vec{1, 1, 1}},
 				nodes: [8]*bucket{
 					lse: {
 						particle: particle3{x: 1, y: 1, z: -1, m: 1},
-						bounds:   r3.Box{Min: r3.Vec{X: 0, Y: 0, Z: -1}, Max: r3.Vec{X: 1, Y: 1, Z: 0}},
-						center:   r3.Vec{X: 1, Y: 1, Z: -1},
+						bounds:   r3.Box{Min: r3.Vec{0, 0, -1}, Max: r3.Vec{1, 1, 0}},
+						center:   r3.Vec{1, 1, -1},
 						mass:     1,
 					},
 					lnw: {
 						particle: particle3{x: -1, y: -1, z: -1, m: 1},
-						bounds:   r3.Box{Min: r3.Vec{X: -1, Y: -1, Z: -1}, Max: r3.Vec{X: 0, Y: 0, Z: 0}},
-						center:   r3.Vec{X: -1, Y: -1, Z: -1},
+						bounds:   r3.Box{Min: r3.Vec{-1, -1, -1}, Max: r3.Vec{0, 0, 0}},
+						center:   r3.Vec{-1, -1, -1},
 						mass:     1,
 					},
 					une: {
 						particle: particle3{x: 1, y: -1, z: 1, m: 1},
-						bounds:   r3.Box{Min: r3.Vec{X: 0, Y: -1, Z: 0}, Max: r3.Vec{X: 1, Y: 0, Z: 1}},
-						center:   r3.Vec{X: 1, Y: -1, Z: 1},
+						bounds:   r3.Box{Min: r3.Vec{0, -1, 0}, Max: r3.Vec{1, 0, 1}},
+						center:   r3.Vec{1, -1, 1},
 						mass:     1,
 					},
 					usw: {
 						particle: particle3{x: -1, y: 1, z: 1, m: 1},
-						bounds:   r3.Box{Min: r3.Vec{X: -1, Y: 0, Z: 0}, Max: r3.Vec{X: 0, Y: 1, Z: 1}},
-						center:   r3.Vec{X: -1, Y: 1, Z: 1},
+						bounds:   r3.Box{Min: r3.Vec{-1, 0, 0}, Max: r3.Vec{0, 1, 1}},
+						center:   r3.Vec{-1, 1, 1},
 						mass:     1,
 					},
 				},
-				center: r3.Vec{X: 0, Y: 0, Z: 0},
+				center: r3.Vec{0, 0, 0},
 				mass:   4,
 			},
 
@@ -156,68 +156,68 @@ var volumeTests = []struct {
 		},
 		want: &Volume{
 			root: bucket{
-				bounds: r3.Box{Min: r3.Vec{X: -1.1, Y: -1, Z: -1.1}, Max: r3.Vec{X: 1, Y: 1, Z: 1}},
+				bounds: r3.Box{Min: r3.Vec{-1.1, -1, -1.1}, Max: r3.Vec{1, 1, 1}},
 				nodes: [8]*bucket{
 					lse: {
 						particle: particle3{x: 1, y: 1, z: -1, m: 1},
-						bounds:   r3.Box{Min: r3.Vec{X: -0.050000000000000044, Y: 0, Z: -1.1}, Max: r3.Vec{X: 1, Y: 1, Z: -0.050000000000000044}},
-						center:   r3.Vec{X: 1, Y: 1, Z: -1},
+						bounds:   r3.Box{Min: r3.Vec{-0.050000000000000044, 0, -1.1}, Max: r3.Vec{1, 1, -0.050000000000000044}},
+						center:   r3.Vec{1, 1, -1},
 						mass:     1,
 					},
 					lnw: {
-						bounds: r3.Box{Min: r3.Vec{X: -1.1, Y: -1, Z: -1.1}, Max: r3.Vec{X: -0.050000000000000044, Y: 0, Z: -0.050000000000000044}},
+						bounds: r3.Box{Min: r3.Vec{-1.1, -1, -1.1}, Max: r3.Vec{-0.050000000000000044, 0, -0.050000000000000044}},
 						nodes: [8]*bucket{
 							lnw: {
-								bounds: r3.Box{Min: r3.Vec{X: -1.1, Y: -1, Z: -1.1}, Max: r3.Vec{X: -0.5750000000000001, Y: -0.5, Z: -0.5750000000000001}},
+								bounds: r3.Box{Min: r3.Vec{-1.1, -1, -1.1}, Max: r3.Vec{-0.5750000000000001, -0.5, -0.5750000000000001}},
 								nodes: [8]*bucket{
 									lnw: {
-										bounds: r3.Box{Min: r3.Vec{X: -1.1, Y: -1, Z: -1.1}, Max: r3.Vec{X: -0.8375000000000001, Y: -0.75, Z: -0.8375000000000001}},
+										bounds: r3.Box{Min: r3.Vec{-1.1, -1, -1.1}, Max: r3.Vec{-0.8375000000000001, -0.75, -0.8375000000000001}},
 										nodes: [8]*bucket{
 											lnw: {
-												bounds: r3.Box{Min: r3.Vec{X: -1.1, Y: -1, Z: -1.1}, Max: r3.Vec{X: -0.9687500000000001, Y: -0.875, Z: -0.9687500000000001}},
+												bounds: r3.Box{Min: r3.Vec{-1.1, -1, -1.1}, Max: r3.Vec{-0.9687500000000001, -0.875, -0.9687500000000001}},
 												nodes: [8]*bucket{
 													lnw: {
 														particle: particle3{x: -1.1, y: -1, z: -1.1, m: 1},
-														bounds:   r3.Box{Min: r3.Vec{X: -1.1, Y: -1, Z: -1.1}, Max: r3.Vec{X: -1.034375, Y: -0.9375, Z: -1.034375}},
-														center:   r3.Vec{X: -1.1, Y: -1, Z: -1.1},
+														bounds:   r3.Box{Min: r3.Vec{-1.1, -1, -1.1}, Max: r3.Vec{-1.034375, -0.9375, -1.034375}},
+														center:   r3.Vec{-1.1, -1, -1.1},
 														mass:     1,
 													},
 													une: {
 														particle: particle3{x: -1, y: -1, z: -1, m: 1},
-														bounds:   r3.Box{Min: r3.Vec{X: -1.034375, Y: -1, Z: -1.034375}, Max: r3.Vec{X: -0.9687500000000001, Y: -0.9375, Z: -0.9687500000000001}},
-														center:   r3.Vec{X: -1, Y: -1, Z: -1},
+														bounds:   r3.Box{Min: r3.Vec{-1.034375, -1, -1.034375}, Max: r3.Vec{-0.9687500000000001, -0.9375, -0.9687500000000001}},
+														center:   r3.Vec{-1, -1, -1},
 														mass:     1,
 													},
 												},
-												center: r3.Vec{X: -1.05, Y: -1, Z: -1.05},
+												center: r3.Vec{-1.05, -1, -1.05},
 												mass:   2,
 											},
 										},
-										center: r3.Vec{X: -1.05, Y: -1, Z: -1.05},
+										center: r3.Vec{-1.05, -1, -1.05},
 										mass:   2,
 									},
 								},
-								center: r3.Vec{X: -1.05, Y: -1, Z: -1.05},
+								center: r3.Vec{-1.05, -1, -1.05},
 								mass:   2,
 							},
 						},
-						center: r3.Vec{X: -1.05, Y: -1, Z: -1.05},
+						center: r3.Vec{-1.05, -1, -1.05},
 						mass:   2,
 					},
 					une: {
 						particle: particle3{x: 1, y: -1, z: 1, m: 1},
-						bounds:   r3.Box{Min: r3.Vec{X: -0.050000000000000044, Y: -1, Z: -0.050000000000000044}, Max: r3.Vec{X: 1, Y: 0, Z: 1}},
-						center:   r3.Vec{X: 1, Y: -1, Z: 1},
+						bounds:   r3.Box{Min: r3.Vec{-0.050000000000000044, -1, -0.050000000000000044}, Max: r3.Vec{1, 0, 1}},
+						center:   r3.Vec{1, -1, 1},
 						mass:     1,
 					},
 					usw: {
 						particle: particle3{x: -1, y: 1, z: 1, m: 1},
-						bounds:   r3.Box{Min: r3.Vec{X: -1.1, Y: 0, Z: -0.050000000000000044}, Max: r3.Vec{X: -0.050000000000000044, Y: 1, Z: 1}},
-						center:   r3.Vec{X: -1, Y: 1, Z: 1},
+						bounds:   r3.Box{Min: r3.Vec{-1.1, 0, -0.050000000000000044}, Max: r3.Vec{-0.050000000000000044, 1, 1}},
+						center:   r3.Vec{-1, 1, 1},
 						mass:     1,
 					},
 				},
-				center: r3.Vec{X: -0.22000000000000003, Y: -0.2, Z: -0.22000000000000003},
+				center: r3.Vec{-0.22000000000000003, -0.2, -0.22000000000000003},
 				mass:   5,
 			},
 			Particles: []Particle3{
@@ -245,80 +245,80 @@ var volumeTests = []struct {
 		},
 		want: &Volume{
 			root: bucket{
-				bounds: r3.Box{Min: r3.Vec{X: 42.5, Y: 34, Z: 0}, Max: r3.Vec{X: 285, Y: 334.5, Z: 280}},
+				bounds: r3.Box{Min: r3.Vec{42.5, 34, 0}, Max: r3.Vec{285, 334.5, 280}},
 				nodes: [8]*bucket{
 					lne: {
-						bounds: r3.Box{Min: r3.Vec{X: 163.75, Y: 34, Z: 0}, Max: r3.Vec{X: 285, Y: 184.25, Z: 140}},
+						bounds: r3.Box{Min: r3.Vec{163.75, 34, 0}, Max: r3.Vec{285, 184.25, 140}},
 						nodes: [8]*bucket{
 							lne: {
 								particle: particle3{x: 242, y: 34, z: 40, m: 1, name: "B"},
-								bounds:   r3.Box{Min: r3.Vec{X: 224.375, Y: 34, Z: 0}, Max: r3.Vec{X: 285, Y: 109.125, Z: 70}},
-								center:   r3.Vec{X: 242, Y: 34, Z: 40},
+								bounds:   r3.Box{Min: r3.Vec{224.375, 34, 0}, Max: r3.Vec{285, 109.125, 70}},
+								center:   r3.Vec{242, 34, 40},
 								mass:     1,
 							},
 							une: {
 								particle: particle3{x: 285, y: 106.5, z: 120, m: 1, name: "D"},
-								bounds:   r3.Box{Min: r3.Vec{X: 224.375, Y: 34, Z: 70}, Max: r3.Vec{X: 285, Y: 109.125, Z: 140}},
-								center:   r3.Vec{X: 285, Y: 106.5, Z: 120},
+								bounds:   r3.Box{Min: r3.Vec{224.375, 34, 70}, Max: r3.Vec{285, 109.125, 140}},
+								center:   r3.Vec{285, 106.5, 120},
 								mass:     1,
 							},
 							unw: {
 								particle: particle3{x: 199, y: 69, z: 80, m: 1, name: "C"},
-								bounds:   r3.Box{Min: r3.Vec{X: 163.75, Y: 34, Z: 70}, Max: r3.Vec{X: 224.375, Y: 109.125, Z: 140}},
-								center:   r3.Vec{X: 199, Y: 69, Z: 80},
+								bounds:   r3.Box{Min: r3.Vec{163.75, 34, 70}, Max: r3.Vec{224.375, 109.125, 140}},
+								center:   r3.Vec{199, 69, 80},
 								mass:     1,
 							},
 						},
-						center: r3.Vec{X: 242, Y: 69.83333333333333, Z: 80},
+						center: r3.Vec{242, 69.83333333333333, 80},
 						mass:   3,
 					},
 					lnw: {
 						particle: particle3{x: 64.5, y: 81.5, z: 0, m: 1, name: "A"},
-						bounds:   r3.Box{Min: r3.Vec{X: 42.5, Y: 34, Z: 0}, Max: r3.Vec{X: 163.75, Y: 184.25, Z: 140}},
-						center:   r3.Vec{X: 64.5, Y: 81.5, Z: 0},
+						bounds:   r3.Box{Min: r3.Vec{42.5, 34, 0}, Max: r3.Vec{163.75, 184.25, 140}},
+						center:   r3.Vec{64.5, 81.5, 0},
 						mass:     1,
 					},
 					(*bucket)(nil),
 					use: {
-						bounds: r3.Box{Min: r3.Vec{X: 163.75, Y: 184.25, Z: 140}, Max: r3.Vec{X: 285, Y: 334.5, Z: 280}},
+						bounds: r3.Box{Min: r3.Vec{163.75, 184.25, 140}, Max: r3.Vec{285, 334.5, 280}},
 						nodes: [8]*bucket{
 							lnw: {
 								particle: particle3{x: 170, y: 194.5, z: 160, m: 1, name: "E"},
-								bounds:   r3.Box{Min: r3.Vec{X: 163.75, Y: 184.25, Z: 140}, Max: r3.Vec{X: 224.375, Y: 259.375, Z: 210}},
-								center:   r3.Vec{X: 170, Y: 194.5, Z: 160},
+								bounds:   r3.Box{Min: r3.Vec{163.75, 184.25, 140}, Max: r3.Vec{224.375, 259.375, 210}},
+								center:   r3.Vec{170, 194.5, 160},
 								mass:     1,
 							},
 							use: {
 								particle: particle3{x: 236.5, y: 324, z: 280, m: 1, name: "H"},
-								bounds:   r3.Box{Min: r3.Vec{X: 224.375, Y: 259.375, Z: 210}, Max: r3.Vec{X: 285, Y: 334.5, Z: 280}},
-								center:   r3.Vec{X: 236.5, Y: 324, Z: 280},
+								bounds:   r3.Box{Min: r3.Vec{224.375, 259.375, 210}, Max: r3.Vec{285, 334.5, 280}},
+								center:   r3.Vec{236.5, 324, 280},
 								mass:     1,
 							},
 						},
-						center: r3.Vec{X: 203.25, Y: 259.25, Z: 220},
+						center: r3.Vec{203.25, 259.25, 220},
 						mass:   2,
 					},
 					usw: {
-						bounds: r3.Box{Min: r3.Vec{X: 42.5, Y: 184.25, Z: 140}, Max: r3.Vec{X: 163.75, Y: 334.5, Z: 280}},
+						bounds: r3.Box{Min: r3.Vec{42.5, 184.25, 140}, Max: r3.Vec{163.75, 334.5, 280}},
 						nodes: [8]*bucket{
 							lsw: {
 								particle: particle3{x: 42.5, y: 334.5, z: 200, m: 1, name: "F"},
-								bounds:   r3.Box{Min: r3.Vec{X: 42.5, Y: 259.375, Z: 140}, Max: r3.Vec{X: 103.125, Y: 334.5, Z: 210}},
-								center:   r3.Vec{X: 42.5, Y: 334.5, Z: 200},
+								bounds:   r3.Box{Min: r3.Vec{42.5, 259.375, 140}, Max: r3.Vec{103.125, 334.5, 210}},
+								center:   r3.Vec{42.5, 334.5, 200},
 								mass:     1,
 							},
 							use: {
 								particle: particle3{x: 147, y: 309, z: 240, m: 1, name: "G"},
-								bounds:   r3.Box{Min: r3.Vec{X: 103.125, Y: 259.375, Z: 210}, Max: r3.Vec{X: 163.75, Y: 334.5, Z: 280}},
-								center:   r3.Vec{X: 147, Y: 309, Z: 240},
+								bounds:   r3.Box{Min: r3.Vec{103.125, 259.375, 210}, Max: r3.Vec{163.75, 334.5, 280}},
+								center:   r3.Vec{147, 309, 240},
 								mass:     1,
 							},
 						},
-						center: r3.Vec{X: 94.75, Y: 321.75, Z: 220},
+						center: r3.Vec{94.75, 321.75, 220},
 						mass:   2,
 					},
 				},
-				center: r3.Vec{X: 173.3125, Y: 181.625, Z: 140},
+				center: r3.Vec{173.3125, 181.625, 140},
 				mass:   8,
 			},
 
@@ -368,7 +368,7 @@ func TestVolume(t *testing.T) {
 				}
 			})
 			center, mass := centerOfMass3(sub)
-			if !floats.EqualWithinAbsOrRel(center.X, b.center.X, tol, tol) || !floats.EqualWithinAbsOrRel(center.Y, b.center.Y, tol, tol) || !floats.EqualWithinAbsOrRel(center.Z, b.center.Z, tol, tol) {
+			if !floats.EqualWithinAbsOrRel(center.X(), b.center.X(), tol, tol) || !floats.EqualWithinAbsOrRel(center.Y(), b.center.Y(), tol, tol) || !floats.EqualWithinAbsOrRel(center.Z(), b.center.Z(), tol, tol) {
 				t.Errorf("unexpected result for %q for center of mass: got:%f want:%f", test.name, b.center, center)
 			}
 			if !floats.EqualWithinAbsOrRel(mass, b.mass, tol, tol) {
@@ -383,14 +383,14 @@ func centerOfMass3(particles []Particle3) (center r3.Vec, mass float64) {
 		m := p.Mass()
 		mass += m
 		c := p.Coord3()
-		center.X += c.X * m
-		center.Y += c.Y * m
-		center.Z += c.Z * m
+		center[0] += c.X() * m
+		center[1] += c.Y() * m
+		center[2] += c.Z() * m
 	}
 	if mass != 0 {
-		center.X /= mass
-		center.Y /= mass
-		center.Z /= mass
+		center[0] /= mass
+		center[1] /= mass
+		center[2] /= mass
 	}
 	return center, mass
 }
@@ -447,8 +447,8 @@ func TestVolumeForceOn(t *testing.T) {
 					})
 					pos := p.Coord3().Add(v)
 					d := moved[i].Sub(pos)
-					ssd += d.X*d.X + d.Y*d.Y + d.Z*d.Z
-					sd += math.Hypot(math.Hypot(d.X, d.Y), d.Z)
+					ssd += d.X()*d.X() + d.Y()*d.Y() + d.Z()*d.Z()
+					sd += math.Hypot(math.Hypot(d.X(), d.Y()), d.Z())
 				}
 				rmsd := math.Sqrt(ssd / float64(len(particles)))
 				if rmsd > tol {

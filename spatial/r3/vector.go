@@ -5,31 +5,33 @@
 package r3
 
 // Vec is a 3D vector.
-type Vec struct {
-	X, Y, Z float64
-}
+type Vec [3]float64
+
+func (p Vec) X() float64 { return p[0] }
+func (p Vec) Y() float64 { return p[1] }
+func (p Vec) Z() float64 { return p[2] }
 
 // Add returns the vector sum of p and q.
 func (p Vec) Add(q Vec) Vec {
-	p.X += q.X
-	p.Y += q.Y
-	p.Z += q.Z
+	p[0] += q[0]
+	p[1] += q[1]
+	p[2] += q[2]
 	return p
 }
 
 // Sub returns the vector sum of p and -q.
 func (p Vec) Sub(q Vec) Vec {
-	p.X -= q.X
-	p.Y -= q.Y
-	p.Z -= q.Z
+	p[0] -= q[0]
+	p[1] -= q[1]
+	p[2] -= q[2]
 	return p
 }
 
 // Scale returns the vector p scaled by f.
 func (p Vec) Scale(f float64) Vec {
-	p.X *= f
-	p.Y *= f
-	p.Z *= f
+	p[0] *= f
+	p[1] *= f
+	p[2] *= f
 	return p
 }
 

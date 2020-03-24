@@ -4,6 +4,8 @@
 
 package r3
 
+import "math"
+
 // Vec is a 3D vector.
 type Vec [3]float64
 
@@ -33,6 +35,16 @@ func (p Vec) Scale(f float64) Vec {
 	p[1] *= f
 	p[2] *= f
 	return p
+}
+
+// Norm returns the vector's norm.
+func (v Vec) Norm() float64 {
+	return math.Sqrt(Dot(v, v))
+}
+
+// Norm2 returns the vector's squared norm.
+func (v Vec) Norm2() float64 {
+	return Dot(v, v)
 }
 
 // Dot returns the u.v dot product of u and v.

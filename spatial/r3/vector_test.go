@@ -4,7 +4,10 @@
 
 package r3
 
-import "testing"
+import (
+	"math"
+	"testing"
+)
 
 func TestAdd(t *testing.T) {
 
@@ -84,6 +87,44 @@ func TestCross(t *testing.T) {
 			got := Cross(test.u, test.v)
 			if got != test.want {
 				t.Fatalf("invalid cross product: got=%v, want=%v", got, test.want)
+			}
+		})
+	}
+}
+
+func TestNorm(t *testing.T) {
+	for _, test := range []struct {
+		v    Vec
+		want float64
+	}{
+		{
+			v:    Vec{1, 2, 3},
+			want: math.Sqrt(14),
+		},
+	} {
+		t.Run("", func(t *testing.T) {
+			got := test.v.Norm()
+			if got != test.want {
+				t.Fatalf("invalid |v|: got=%v, want=%v", got, test.want)
+			}
+		})
+	}
+}
+
+func TestNorm2(t *testing.T) {
+	for _, test := range []struct {
+		v    Vec
+		want float64
+	}{
+		{
+			v:    Vec{1, 2, 3},
+			want: 14,
+		},
+	} {
+		t.Run("", func(t *testing.T) {
+			got := test.v.Norm2()
+			if got != test.want {
+				t.Fatalf("invalid |v|^2: got=%v, want=%v", got, test.want)
 			}
 		})
 	}

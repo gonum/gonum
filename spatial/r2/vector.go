@@ -35,6 +35,11 @@ func (p Vec) Dot(q Vec) float64 {
 	return p.X*q.X + p.Y*q.Y
 }
 
+// Cross returns the cross product p×q.
+func (p Vec) Cross(q Vec) float64 {
+	return p.X*q.Y - p.Y*q.X
+}
+
 // Box is a 2D bounding box.
 type Box struct {
 	Min, Max Vec

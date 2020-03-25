@@ -112,3 +112,26 @@ func TestDot(t *testing.T) {
 		})
 	}
 }
+
+func TestCross(t *testing.T) {
+	for _, test := range []struct {
+		v1, v2 Vec
+		want   float64
+	}{
+		{Vec{1, 0}, Vec{1, 0}, 0},
+		{Vec{1, 0}, Vec{0, 1}, 1},
+		{Vec{0, 1}, Vec{1, 0}, -1},
+		{Vec{1, 2}, Vec{-4, 5}, 13},
+		{Vec{1, 2}, Vec{2, 3}, -1},
+	} {
+		t.Run("", func(t *testing.T) {
+			got := test.v1.Cross(test.v2)
+			if got != test.want {
+				t.Fatalf(
+					"error: %v × %v = %v, want %v",
+					test.v1, test.v2, got, test.want,
+				)
+			}
+		})
+	}
+}

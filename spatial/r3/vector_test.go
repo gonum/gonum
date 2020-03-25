@@ -77,3 +77,38 @@ func TestScale(t *testing.T) {
 		})
 	}
 }
+
+func TestDot(t *testing.T) {
+	for _, test := range []struct {
+		u, v Vec
+		want float64
+	}{
+		{Vec{1, 2, 3}, Vec{1, 2, 3}, 14},
+		{Vec{1, 0, 0}, Vec{1, 0, 0}, 1},
+		{Vec{1, 0, 0}, Vec{0, 1, 0}, 0},
+		{Vec{1, 0, 0}, Vec{0, 1, 1}, 0},
+		{Vec{1, 1, 1}, Vec{-1, -1, -1}, -3},
+		{Vec{1, 2, 2}, Vec{-0.3, 0.4, -1.2}, -1.9},
+	} {
+		t.Run("", func(t *testing.T) {
+			{
+				got := test.u.Dot(test.v)
+				if got != test.want {
+					t.Fatalf(
+						"error: %v · %v: got=%v, want=%v",
+						test.u, test.v, got, test.want,
+					)
+				}
+			}
+			{
+				got := test.v.Dot(test.u)
+				if got != test.want {
+					t.Fatalf(
+						"error: %v · %v: got=%v, want=%v",
+						test.v, test.u, got, test.want,
+					)
+				}
+			}
+		})
+	}
+}

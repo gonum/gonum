@@ -30,6 +30,11 @@ func (p Vec) Scale(f float64) Vec {
 	return p
 }
 
+// Dot returns the dot product p·q.
+func (p Vec) Dot(q Vec) float64 {
+	return p.X*q.X + p.Y*q.Y
+}
+
 // Box is a 2D bounding box.
 type Box struct {
 	Min, Max Vec

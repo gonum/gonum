@@ -128,7 +128,8 @@ func (c *Cholesky) Factorize(a Symmetric) (ok bool) {
 	if c.chol == nil {
 		c.chol = NewTriDense(n, Upper, nil)
 	} else {
-		c.chol = NewTriDense(n, Upper, use(c.chol.mat.Data, n*n))
+		c.chol.Reset()
+		c.chol.reuseAsNonZeroed(n, Upper)
 	}
 	copySymIntoTriangle(c.chol, a)
 

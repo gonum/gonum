@@ -93,6 +93,18 @@ func Pbtrf(a blas64.SymmetricBand) (t blas64.TriangularBand, ok bool) {
 	return t, ok
 }
 
+// Pbtrs solves a system of linear equations A*X = B with an n×n symmetric
+// positive definite band matrix A using the Cholesky factorization
+//  A = Uᵀ * U  if t.Uplo == blas.Upper
+//  A = L * Lᵀ  if t.Uplo == blas.Lower
+// t contains the corresponding triangular factor as returned by Pbtrf.
+//
+// On entry, b contains the right hand side matrix B. On return, it is
+// overwritten with the solution matrix X.
+func Pbtrs(t blas64.TriangularBand, b blas64.General) {
+	lapack64.Dpbtrs(t.Uplo, t.N, t.K, b.Cols, t.Data, max(1, t.Stride), b.Data, max(1, b.Stride))
+}
+
 // Gecon estimates the reciprocal of the condition number of the n×n matrix A
 // given the LU decomposition of the matrix. The condition number computed may
 // be based on the 1-norm or the ∞-norm.

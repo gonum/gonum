@@ -97,7 +97,7 @@ func (m *Dense) reuseAsNonZeroed(r, c int) {
 	// reuseAs must be kept in sync with reuseAsZeroed.
 	if m.mat.Rows > m.capRows || m.mat.Cols > m.capCols {
 		// Panic as a string, not a mat.Error.
-		panic("mat: caps not correctly set")
+		panic(badCap)
 	}
 	if r == 0 || c == 0 {
 		panic(ErrZeroLength)
@@ -125,7 +125,7 @@ func (m *Dense) reuseAsZeroed(r, c int) {
 	// reuseAsZeroed must be kept in sync with reuseAsNonZeroed.
 	if m.mat.Rows > m.capRows || m.mat.Cols > m.capCols {
 		// Panic as a string, not a mat.Error.
-		panic("mat: caps not correctly set")
+		panic(badCap)
 	}
 	if r == 0 || c == 0 {
 		panic(ErrZeroLength)

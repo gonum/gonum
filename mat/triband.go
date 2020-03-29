@@ -201,10 +201,10 @@ func NewTriBandDense(n, k int, kind TriKind, data []float64) *TriBandDense {
 		if n == 0 {
 			panic(ErrZeroLength)
 		}
-		panic("mat: negative dimension")
+		panic(ErrNegativeDimension)
 	}
 	if k+1 > n {
-		panic("mat: band out of range")
+		panic(ErrBandwidth)
 	}
 	bc := k + 1
 	if data != nil && len(data) != n*bc {

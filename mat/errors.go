@@ -131,6 +131,7 @@ var (
 	ErrPivot               = Error{"mat: malformed pivot list"}
 	ErrTriangle            = Error{"mat: triangular storage mismatch"}
 	ErrTriangleSet         = Error{"mat: triangular set out of bounds"}
+	ErrBandwidth           = Error{"mat: bandwidth out of range"}
 	ErrBandSet             = Error{"mat: band set out of bounds"}
 	ErrDiagSet             = Error{"mat: diagonal set out of bounds"}
 	ErrSliceLengthMismatch = Error{"mat: input slice length mismatch"}
@@ -149,3 +150,5 @@ type ErrorStack struct {
 }
 
 func (err ErrorStack) Error() string { return err.Err.Error() }
+
+const badCap = "mat: bad capacity"

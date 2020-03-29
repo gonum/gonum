@@ -22,10 +22,7 @@ var (
 	_ MutableSymmetric = symDense
 )
 
-const (
-	badSymTriangle = "mat: blas64.Symmetric not upper"
-	badSymCap      = "mat: bad capacity for SymDense"
-)
+const badSymTriangle = "mat: blas64.Symmetric not upper"
 
 // SymDense is a symmetric matrix that uses dense storage. SymDense
 // matrices are stored in the upper triangle.
@@ -182,7 +179,8 @@ func (s *SymDense) reuseAsNonZeroed(n int) {
 		panic(ErrZeroLength)
 	}
 	if s.mat.N > s.cap {
-		panic(badSymCap)
+		// Panic as a string, not a mat.Error.
+		panic(badCap)
 	}
 	if s.IsEmpty() {
 		s.mat = blas64.Symmetric{
@@ -211,7 +209,8 @@ func (s *SymDense) reuseAsZeroed(n int) {
 		panic(ErrZeroLength)
 	}
 	if s.mat.N > s.cap {
-		panic(badSymCap)
+		// Panic as a string, not a mat.Error.
+		panic(badCap)
 	}
 	if s.IsEmpty() {
 		s.mat = blas64.Symmetric{

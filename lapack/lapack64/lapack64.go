@@ -377,8 +377,16 @@ func Lange(norm lapack.MatrixNorm, a blas64.General, work []float64) float64 {
 	return lapack64.Dlange(norm, a.Rows, a.Cols, a.Data, max(1, a.Stride), work)
 }
 
+// Lansb computes the specified norm of an n×n symmetric band matrix. If
+// norm == lapack.MaxColumnSum or norm == lapack.MaxRowSum, work must have length
+// at least n and this function will panic otherwise.
+// There are no restrictions on work for the other matrix norms.
+func Lansb(norm lapack.MatrixNorm, a blas64.SymmetricBand, work []float64) float64 {
+	return lapack64.Dlansb(norm, a.Uplo, a.N, a.K, a.Data, max(1, a.Stride), work)
+}
+
 // Lansy computes the specified norm of an n×n symmetric matrix. If
-// norm == lapack.MaxColumnSum or norm == lapackMaxRowSum work must have length
+// norm == lapack.MaxColumnSum or norm == lapack.MaxRowSum, work must have length
 // at least n and this function will panic otherwise.
 // There are no restrictions on work for the other matrix norms.
 func Lansy(norm lapack.MatrixNorm, a blas64.Symmetric, work []float64) float64 {

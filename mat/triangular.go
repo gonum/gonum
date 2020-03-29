@@ -257,8 +257,8 @@ func (t *TriDense) IsEmpty() bool {
 	return t.mat.Stride == 0
 }
 
-// untranspose untransposes a matrix if applicable. If a is an Untransposer, then
-// untranspose returns the underlying matrix and true. If it is not, then it returns
+// untransposeTri untransposes a matrix if applicable. If a is an UntransposeTrier, then
+// untransposeTri returns the underlying matrix and true. If it is not, then it returns
 // the input matrix and false.
 func untransposeTri(a Triangular) (Triangular, bool) {
 	if ut, ok := a.(UntransposeTrier); ok {

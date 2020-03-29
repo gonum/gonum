@@ -73,6 +73,26 @@ func Potrs(t blas64.Triangular, b blas64.General) {
 	lapack64.Dpotrs(t.Uplo, t.N, b.Cols, t.Data, max(1, t.Stride), b.Data, max(1, b.Stride))
 }
 
+// Pbtrf computes the Cholesky factorization of an n×n symmetric positive
+// definite band matrix
+//  A = Uᵀ * U  if a.Uplo == blas.Upper
+//  A = L * Lᵀ  if a.Uplo == blas.Lower
+// where U and L are upper, respectively lower, triangular band matrices.
+//
+// The triangular matrix U or L is returned in t, and the underlying data
+// between a and t is shared. The returned bool indicates whether A is positive
+// definite and the factorization could be finished.
+func Pbtrf(a blas64.SymmetricBand) (t blas64.TriangularBand, ok bool) {
+	ok = lapack64.Dpbtrf(a.Uplo, a.N, a.K, a.Data, max(1, a.Stride))
+	t.Uplo = a.Uplo
+	t.Diag = blas.NonUnit
+	t.N = a.N
+	t.K = a.K
+	t.Data = a.Data
+	t.Stride = a.Stride
+	return t, ok
+}
+
 // Gecon estimates the reciprocal of the condition number of the n×n matrix A
 // given the LU decomposition of the matrix. The condition number computed may
 // be based on the 1-norm or the ∞-norm.

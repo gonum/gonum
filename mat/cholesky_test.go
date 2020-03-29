@@ -5,6 +5,7 @@
 package mat
 
 import (
+	"fmt"
 	"math"
 	"strconv"
 	"testing"
@@ -705,5 +706,221 @@ func BenchmarkCholeskyInverseTo(b *testing.B) {
 				}
 			}
 		})
+	}
+}
+
+func TestBandCholeskySolveTo(t *testing.T) {
+	t.Parallel()
+
+	const (
+		nrhs = 4
+		tol  = 1e-14
+	)
+	rnd := rand.New(rand.NewSource(1))
+	for _, n := range []int{1, 2, 3, 5, 10} {
+		for _, k := range []int{0, 1, n / 2, n - 1} {
+			k := min(k, n-1)
+
+			a := NewSymBandDense(n, k, nil)
+			for i := 0; i < n; i++ {
+				a.SetSymBand(i, i, rnd.Float64()+float64(n))
+				for j := i + 1; j < min(i+k+1, n); j++ {
+					a.SetSymBand(i, j, rnd.Float64())
+				}
+			}
+
+			want := NewDense(n, nrhs, nil)
+			for i := 0; i < n; i++ {
+				for j := 0; j < nrhs; j++ {
+					want.Set(i, j, rnd.NormFloat64())
+				}
+			}
+			var b Dense
+			b.Mul(a, want)
+
+			for _, typ := range []SymBanded{a, (*basicSymBanded)(a)} {
+				name := fmt.Sprintf("Case n=%d,k=%d,type=%T,nrhs=%d", n, k, typ, nrhs)
+
+				var chol BandCholesky
+				ok := chol.Factorize(typ)
+				if !ok {
+					t.Fatalf("%v: Factorize failed", name)
+				}
+
+				var got Dense
+				err := chol.SolveTo(&got, &b)
+				if err != nil {
+					t.Errorf("%v: unexpected error from SolveTo: %v", name, err)
+					continue
+				}
+
+				var resid Dense
+				resid.Sub(want, &got)
+				diff := Norm(&resid, math.Inf(1))
+				if diff > tol {
+					t.Errorf("%v: unexpected solution; diff=%v", name, diff)
+				}
+
+				got.Copy(&b)
+				err = chol.SolveTo(&got, &got)
+				if err != nil {
+					t.Errorf("%v: unexpected error from SolveTo when dst==b: %v", name, err)
+					continue
+				}
+
+				resid.Sub(want, &got)
+				diff = Norm(&resid, math.Inf(1))
+				if diff > tol {
+					t.Errorf("%v: unexpected solution when dst==b; diff=%v", name, diff)
+				}
+			}
+		}
+	}
+}
+
+func TestBandCholeskySolveVecTo(t *testing.T) {
+	t.Parallel()
+
+	const tol = 1e-14
+	rnd := rand.New(rand.NewSource(1))
+	for _, n := range []int{1, 2, 3, 5, 10} {
+		for _, k := range []int{0, 1, n / 2, n - 1} {
+			k := min(k, n-1)
+
+			a := NewSymBandDense(n, k, nil)
+			for i := 0; i < n; i++ {
+				a.SetSymBand(i, i, rnd.Float64()+float64(n))
+				for j := i + 1; j < min(i+k+1, n); j++ {
+					a.SetSymBand(i, j, rnd.Float64())
+				}
+			}
+
+			want := NewVecDense(n, nil)
+			for i := 0; i < n; i++ {
+				want.SetVec(i, rnd.NormFloat64())
+			}
+			var b VecDense
+			b.MulVec(a, want)
+
+			for _, typ := range []SymBanded{a, (*basicSymBanded)(a)} {
+				name := fmt.Sprintf("Case n=%d,k=%d,type=%T", n, k, typ)
+
+				var chol BandCholesky
+				ok := chol.Factorize(typ)
+				if !ok {
+					t.Fatalf("%v: Factorize failed", name)
+				}
+
+				var got VecDense
+				err := chol.SolveVecTo(&got, &b)
+				if err != nil {
+					t.Errorf("%v: unexpected error from SolveVecTo: %v", name, err)
+					continue
+				}
+
+				var resid VecDense
+				resid.SubVec(want, &got)
+				diff := Norm(&resid, math.Inf(1))
+				if diff > tol {
+					t.Errorf("%v: unexpected solution; diff=%v", name, diff)
+				}
+
+				got.CopyVec(&b)
+				err = chol.SolveVecTo(&got, &got)
+				if err != nil {
+					t.Errorf("%v: unexpected error from SolveVecTo when dst==b: %v", name, err)
+					continue
+				}
+
+				resid.SubVec(want, &got)
+				diff = Norm(&resid, math.Inf(1))
+				if diff > tol {
+					t.Errorf("%v: unexpected solution when dst==b; diff=%v", name, diff)
+				}
+			}
+		}
+	}
+}
+
+func TestBandCholeskyAt(t *testing.T) {
+	t.Parallel()
+
+	const tol = 1e-14
+	rnd := rand.New(rand.NewSource(1))
+	for _, n := range []int{1, 2, 3, 5, 10} {
+		for _, k := range []int{0, 1, n / 2, n - 1} {
+			k := min(k, n-1)
+			name := fmt.Sprintf("Case n=%d,k=%d", n, k)
+
+			a := NewSymBandDense(n, k, nil)
+			for i := 0; i < n; i++ {
+				a.SetSymBand(i, i, rnd.Float64()+float64(n))
+				for j := i + 1; j < min(i+k+1, n); j++ {
+					a.SetSymBand(i, j, rnd.Float64())
+				}
+			}
+
+			var chol BandCholesky
+			ok := chol.Factorize(a)
+			if !ok {
+				t.Fatalf("%v: Factorize failed", name)
+			}
+
+			resid := NewDense(n, n, nil)
+			for i := 0; i < n; i++ {
+				for j := 0; j < n; j++ {
+					resid.Set(i, j, math.Abs(a.At(i, j)-chol.At(i, j)))
+				}
+			}
+			diff := Norm(resid, math.Inf(1))
+			if diff > tol {
+				t.Errorf("%v: unexpected result; diff=%v, want<=%v", name, diff, tol)
+			}
+		}
+	}
+}
+
+func TestBandCholeskyDet(t *testing.T) {
+	t.Parallel()
+
+	const tol = 1e-14
+	rnd := rand.New(rand.NewSource(1))
+	for _, n := range []int{1, 2, 3, 5, 10} {
+		for _, k := range []int{0, 1, n / 2, n - 1} {
+			k := min(k, n-1)
+			name := fmt.Sprintf("Case n=%d,k=%d", n, k)
+
+			a := NewSymBandDense(n, k, nil)
+			aSym := NewSymDense(n, nil)
+			for i := 0; i < n; i++ {
+				aii := rnd.Float64() + float64(n)
+				a.SetSymBand(i, i, aii)
+				aSym.SetSym(i, i, aii)
+				for j := i + 1; j < min(i+k+1, n); j++ {
+					aij := rnd.Float64()
+					a.SetSymBand(i, j, aij)
+					aSym.SetSym(i, j, aij)
+				}
+			}
+
+			var chol BandCholesky
+			ok := chol.Factorize(a)
+			if !ok {
+				t.Fatalf("%v: Factorize failed", name)
+			}
+
+			var cholDense Cholesky
+			ok = cholDense.Factorize(aSym)
+			if !ok {
+				t.Fatalf("%v: dense Factorize failed", name)
+			}
+
+			want := cholDense.Det()
+			got := chol.Det()
+			diff := math.Abs(got - want)
+			if diff > tol {
+				t.Errorf("%v: unexpected result; got=%v, want=%v (diff=%v)", name, got, want, diff)
+			}
+		}
 	}
 }

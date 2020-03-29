@@ -260,6 +260,94 @@ func (t *TriBandDense) Reset() {
 	t.mat.Data = t.mat.Data[:0]
 }
 
+// ReuseAsTriBand changes the receiver to be of size n×n, bandwidth k+1 and of
+// the given kind, re-using the backing data slice if it has sufficient capacity
+// and allocating a new slice otherwise. The backing data is zero on return.
+//
+// The receiver must be empty, n must be positive and k must be non-negative and
+// less than n, otherwise ReuseAsTriBand will panic. To empty the receiver for
+// re-use, Reset should be used.
+func (t *TriBandDense) ReuseAsTriBand(n, k int, kind TriKind) {
+	if n <= 0 || k < 0 {
+		if n == 0 {
+			panic(ErrZeroLength)
+		}
+		panic(ErrNegativeDimension)
+	}
+	if k+1 > n {
+		panic(ErrBandwidth)
+	}
+	if !t.IsEmpty() {
+		panic(ErrReuseNonEmpty)
+	}
+	t.reuseAsZeroed(n, k, kind)
+}
+
+// reuseAsZeroed resizes an empty receiver to an n×n triangular band matrix with
+// the given bandwidth and orientation. If the receiver is not empty,
+// reuseAsZeroed checks that the receiver has the correct size, bandwidth and
+// orientation. It then zeros out the matrix data.
+func (t *TriBandDense) reuseAsZeroed(n, k int, kind TriKind) {
+	// reuseAsZeroed must be kept in sync with reuseAsNonZeroed.
+	if n == 0 {
+		panic(ErrZeroLength)
+	}
+	ul := blas.Lower
+	if kind == Upper {
+		ul = blas.Upper
+	}
+	if t.IsEmpty() {
+		t.mat = blas64.TriangularBand{
+			Uplo:   ul,
+			Diag:   blas.NonUnit,
+			N:      n,
+			K:      k,
+			Data:   useZeroed(t.mat.Data, n*(k+1)),
+			Stride: k + 1,
+		}
+		return
+	}
+	if t.mat.N != n || t.mat.K != k {
+		panic(ErrShape)
+	}
+	if t.mat.Uplo != ul {
+		panic(ErrTriangle)
+	}
+	t.Zero()
+}
+
+// reuseAsNonZeroed resizes an empty receiver to an n×n triangular band matrix
+// with the given bandwidth and orientation. If the receiver is not empty,
+// reuseAsZeroed checks that the receiver has the correct size, bandwidth and
+// orientation.
+func (t *TriBandDense) reuseAsNonZeroed(n, k int, kind TriKind) {
+	// reuseAsNonZeroed must be kept in sync with reuseAsZeroed.
+	if n == 0 {
+		panic(ErrZeroLength)
+	}
+	ul := blas.Lower
+	if kind == Upper {
+		ul = blas.Upper
+	}
+	if t.IsEmpty() {
+		t.mat = blas64.TriangularBand{
+			Uplo:   ul,
+			Diag:   blas.NonUnit,
+			N:      n,
+			K:      k,
+			Data:   use(t.mat.Data, n*(k+1)),
+			Stride: k + 1,
+		}
+		return
+	}
+	if t.mat.N != n || t.mat.K != k {
+		panic(ErrShape)
+	}
+	if t.mat.Uplo != ul {
+		panic(ErrTriangle)
+	}
+}
+
 // Zero sets all of the matrix elements to zero.
 func (t *TriBandDense) Zero() {
 	if t.isUpper() {

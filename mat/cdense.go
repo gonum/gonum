@@ -93,7 +93,7 @@ func (m *CDense) ReuseAs(r, c int) {
 func (m *CDense) reuseAsNonZeroed(r, c int) {
 	if m.mat.Rows > m.capRows || m.mat.Cols > m.capCols {
 		// Panic as a string, not a mat.Error.
-		panic("mat: caps not correctly set")
+		panic(badCap)
 	}
 	if r == 0 || c == 0 {
 		panic(ErrZeroLength)
@@ -118,7 +118,7 @@ func (m *CDense) reuseAsZeroed(r, c int) {
 	// This must be kept in-sync with reuseAs.
 	if m.mat.Rows > m.capRows || m.mat.Cols > m.capCols {
 		// Panic as a string, not a mat.Error.
-		panic("mat: caps not correctly set")
+		panic(badCap)
 	}
 	if r == 0 || c == 0 {
 		panic(ErrZeroLength)

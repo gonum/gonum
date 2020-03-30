@@ -12,20 +12,12 @@ if [ -n "${TAGS}" ];  then
 	exit 0
 fi
 
-BRANCH=${TRAVIS_BRANCH}
-if [ "${BRANCH}" == "master" ] && [ -n "${TRAVIS_PULL_REQUEST_BRANCH}" ]; then
-	BRANCH=${TRAVIS_PULL_REQUEST_BRANCH}
-fi
-
-if [ "${BRANCH}" == "master" ]; then
-	# Don't run linter on master; it's too late by then.
+if [ "${TRAVIS_PULL_REQUEST}" == "false" ]; then
+	# Only run on pull requests.
 	exit 0
 fi
 
-if [ "${TRAVIS_COMMIT}" == "${TRAVIS_TAG}" ]; then
-	# Don't run linter on tag pushes.
-	exit 0
-fi
+BRANCH="+refs/pull/${TRAVIS_PULL_REQUEST}/head"
 
 set -xe
 

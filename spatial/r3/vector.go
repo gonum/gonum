@@ -4,6 +4,8 @@
 
 package r3
 
+import "math"
+
 // Vec is a 3D vector.
 type Vec struct {
 	X, Y, Z float64
@@ -45,6 +47,18 @@ func (p Vec) Cross(q Vec) Vec {
 		p.Z*q.X - p.X*q.Z,
 		p.X*q.Y - p.Y*q.X,
 	}
+}
+
+// Norm returns the euclidian norm of p:
+//  |p| = sqrt(p_x^2 + p_y^2 + p_z^2)
+func Norm(p Vec) float64 {
+	return math.Sqrt(Norm2(p))
+}
+
+// Norm returns the euclidian squared norm of p:
+//  |p|^2 = p_x^2 + p_y^2 + p_z^2
+func Norm2(p Vec) float64 {
+	return p.X*p.X + p.Y*p.Y + p.Z*p.Z
 }
 
 // Box is a 3D bounding box.

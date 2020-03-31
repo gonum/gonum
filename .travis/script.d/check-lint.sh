@@ -35,5 +35,7 @@ fi
 # if there has been an amended commit, so just get it from the git log.
 SINCE=$(git log --oneline --reverse | head -n1 | cut -f1 -d' ')
 
+git log --oneline --reverse
+
 # Lint changes since we were on master.
 golangci-lint run --new-from-rev=${SINCE}

@@ -42,14 +42,14 @@ func (p Vec) Cross(q Vec) float64 {
 	return p.X*q.Y - p.Y*q.X
 }
 
-// Norm returns the euclidian norm of p:
-//  |p| = sqrt(p_x^2 + p_y^2)
+// Norm returns the Euclidean norm of p
+//  |p| = sqrt(p_x^2 + p_y^2).
 func Norm(p Vec) float64 {
-	return math.Sqrt(Norm2(p))
+	return math.Hypot(p.X, p.Y)
 }
 
-// Norm returns the euclidian squared norm of p:
-//  |p|^2 = p_x^2 + p_y^2
+// Norm returns the Euclidean squared norm of p
+//  |p|^2 = p_x^2 + p_y^2.
 func Norm2(p Vec) float64 {
 	return p.X*p.X + p.Y*p.Y
 }

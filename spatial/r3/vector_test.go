@@ -135,3 +135,44 @@ func TestCross(t *testing.T) {
 		})
 	}
 }
+
+func TestNorm(t *testing.T) {
+	for _, test := range []struct {
+		v    Vec
+		want float64
+	}{
+		{Vec{0, 0, 0}, 0},
+		{Vec{0, 1, 0}, 1},
+		{Vec{3, -4, 12}, 13},
+		{Vec{1, 1e-16, 1e-32}, 1},
+		{Vec{-0, 4.3145006366056343748277397783556100978621924913975e-196, 4.3145006366056343748277397783556100978621924913975e-196}, 6.101625315155041e-196},
+	} {
+		t.Run("", func(t *testing.T) {
+			if got, want := Norm(test.v), test.want; got != want {
+				t.Fatalf("|%v| = %v, want %v", test.v, got, want)
+			}
+		})
+	}
+}
+
+func TestNorm2(t *testing.T) {
+	for _, test := range []struct {
+		v    Vec
+		want float64
+	}{
+		{Vec{0, 0, 0}, 0},
+		{Vec{0, 1, 0}, 1},
+		{Vec{1, 1, 1}, 3},
+		{Vec{1, 2, 3}, 14},
+		{Vec{3, -4, 12}, 169},
+		{Vec{1, 1e-16, 1e-32}, 1},
+		// This will underflow and return zero.
+		{Vec{-0, 4.3145006366056343748277397783556100978621924913975e-196, 4.3145006366056343748277397783556100978621924913975e-196}, 0},
+	} {
+		t.Run("", func(t *testing.T) {
+			if got, want := Norm2(test.v), test.want; got != want {
+				t.Fatalf("|%v|^2 = %v, want %v", test.v, got, want)
+			}
+		})
+	}
+}

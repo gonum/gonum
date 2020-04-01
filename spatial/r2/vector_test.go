@@ -4,7 +4,10 @@
 
 package r2
 
-import "testing"
+import (
+	"math"
+	"testing"
+)
 
 func TestAdd(t *testing.T) {
 	for _, test := range []struct {
@@ -131,6 +134,49 @@ func TestCross(t *testing.T) {
 					"error: %v × %v = %v, want %v",
 					test.v1, test.v2, got, test.want,
 				)
+			}
+		})
+	}
+}
+
+func TestNorm(t *testing.T) {
+	for _, test := range []struct {
+		v    Vec
+		want float64
+	}{
+		{Vec{0, 0}, 0},
+		{Vec{0, 1}, 1},
+		{Vec{1, 1}, math.Sqrt2},
+		{Vec{1, 2}, math.Sqrt(5)},
+		{Vec{3, -4}, 5},
+		{Vec{1, 1e-16}, 1},
+		{Vec{4.3145006366056343748277397783556100978621924913975e-196, 4.3145006366056343748277397783556100978621924913975e-196}, 6.101625315155041e-196},
+	} {
+		t.Run("", func(t *testing.T) {
+			if got, want := Norm(test.v), test.want; got != want {
+				t.Fatalf("|%v| = %v, want %v", test.v, got, want)
+			}
+		})
+	}
+}
+
+func TestNorm2(t *testing.T) {
+	for _, test := range []struct {
+		v    Vec
+		want float64
+	}{
+		{Vec{0, 0}, 0},
+		{Vec{0, 1}, 1},
+		{Vec{1, 1}, 2},
+		{Vec{1, 2}, 5},
+		{Vec{3, -4}, 25},
+		{Vec{1, 1e-16}, 1},
+		// This will underflow and return zero.
+		{Vec{4.3145006366056343748277397783556100978621924913975e-196, 4.3145006366056343748277397783556100978621924913975e-196}, 0},
+	} {
+		t.Run("", func(t *testing.T) {
+			if got, want := Norm2(test.v), test.want; got != want {
+				t.Fatalf("|%v|^2 = %v, want %v", test.v, got, want)
 			}
 		})
 	}

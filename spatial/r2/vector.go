@@ -54,6 +54,16 @@ func Norm2(p Vec) float64 {
 	return p.X*p.X + p.Y*p.Y
 }
 
+// CosTheta returns the cosine of the opening angle between p and q.
+func CosTheta(p, q Vec) float64 {
+	var (
+		np2 = Norm2(p)
+		nq2 = Norm2(q)
+		dot = p.Dot(q)
+	)
+	return dot / math.Sqrt(np2*nq2)
+}
+
 // Box is a 2D bounding box.
 type Box struct {
 	Min, Max Vec

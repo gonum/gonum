@@ -54,6 +54,14 @@ func Norm2(p Vec) float64 {
 	return p.X*p.X + p.Y*p.Y
 }
 
+// Normalize returns the unit vector colinear to p.
+func Normalize(p Vec) Vec {
+	if p.X == 0 && p.Y == 0 {
+		return Vec{}
+	}
+	return p.Scale(1 / Norm(p))
+}
+
 // CosTheta returns the cosine of the opening angle between p and q.
 func CosTheta(p, q Vec) float64 {
 	var (

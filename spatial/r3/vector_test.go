@@ -4,7 +4,10 @@
 
 package r3
 
-import "testing"
+import (
+	"math"
+	"testing"
+)
 
 func TestAdd(t *testing.T) {
 	for _, test := range []struct {
@@ -172,6 +175,31 @@ func TestNorm2(t *testing.T) {
 		t.Run("", func(t *testing.T) {
 			if got, want := Norm2(test.v), test.want; got != want {
 				t.Fatalf("|%v|^2 = %v, want %v", test.v, got, want)
+			}
+		})
+	}
+}
+
+func TestNormalize(t *testing.T) {
+	for _, test := range []struct {
+		v, want Vec
+	}{
+		{Vec{1, 0, 0}, Vec{1, 0, 0}},
+		{Vec{0, 1, 0}, Vec{0, 1, 0}},
+		{Vec{0, 0, 1}, Vec{0, 0, 1}},
+		{Vec{1, 1, 1}, Vec{1. / math.Sqrt(3), 1. / math.Sqrt(3), 1. / math.Sqrt(3)}},
+		{Vec{1, 1e-16, 1e-32}, Vec{1, 1e-16, 1e-32}},
+	} {
+		t.Run("", func(t *testing.T) {
+			got := Normalize(test.v)
+			if got != test.want {
+				t.Fatalf(
+					"Normalize(%v) = %v, want %v",
+					test.v, got, test.want,
+				)
+			}
+			if n, want := Norm(got), 1.0; n != want {
+				t.Fatalf("|%v| = %v, want 1", got, n)
 			}
 		})
 	}

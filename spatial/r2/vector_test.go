@@ -7,6 +7,8 @@ package r2
 import (
 	"math"
 	"testing"
+
+	"gonum.org/v1/gonum/floats"
 )
 
 func TestAdd(t *testing.T) {
@@ -182,6 +184,39 @@ func TestNorm2(t *testing.T) {
 	}
 }
 
+func TestNormalize(t *testing.T) {
+	for _, test := range []struct {
+		v, want Vec
+	}{
+		{Vec{}, Vec{}},
+		{Vec{1, 0}, Vec{1, 0}},
+		{Vec{0, 1}, Vec{0, 1}},
+		{Vec{-1, 0}, Vec{-1, 0}},
+		{Vec{3, 4}, Vec{0.6, 0.8}},
+		{Vec{3, -4}, Vec{0.6, -0.8}},
+		{Vec{1, 1}, Vec{1. / math.Sqrt(2), 1. / math.Sqrt(2)}},
+		{Vec{1, 1e-16}, Vec{1, 1e-16}},
+		{Vec{1, 1e16}, Vec{1e-16, 1}},
+		{Vec{1e4, math.MaxFloat32 - 1}, Vec{0, 1}},
+	} {
+		t.Run("", func(t *testing.T) {
+			got := Normalize(test.v)
+			if !vecApproxEqual(got, test.want) {
+				t.Fatalf(
+					"Normalize(%v) = %v, want %v",
+					test.v, got, test.want,
+				)
+			}
+			if got == (Vec{}) {
+				return
+			}
+			if n, want := Norm(got), 1.0; n != want {
+				t.Fatalf("|%v| = %v, want 1", got, n)
+			}
+		})
+	}
+}
+
 func TestCosTheta(t *testing.T) {
 	for _, test := range []struct {
 		v1, v2 Vec
@@ -202,4 +237,10 @@ func TestCosTheta(t *testing.T) {
 			}
 		})
 	}
+}
+
+func vecApproxEqual(a, b Vec) bool {
+	const tol = 1e-14
+	return floats.EqualWithinAbs(a.X, b.X, tol) &&
+		floats.EqualWithinAbs(a.Y, b.Y, tol)
 }

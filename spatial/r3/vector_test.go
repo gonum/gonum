@@ -180,7 +180,7 @@ func TestNorm2(t *testing.T) {
 	}
 }
 
-func TestNormalize(t *testing.T) {
+func TestUnit(t *testing.T) {
 	for _, test := range []struct {
 		v, want Vec
 	}{
@@ -191,7 +191,7 @@ func TestNormalize(t *testing.T) {
 		{Vec{1, 1e-16, 1e-32}, Vec{1, 1e-16, 1e-32}},
 	} {
 		t.Run("", func(t *testing.T) {
-			got := Normalize(test.v)
+			got := Unit(test.v)
 			if got != test.want {
 				t.Fatalf(
 					"Normalize(%v) = %v, want %v",

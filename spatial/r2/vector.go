@@ -54,8 +54,8 @@ func Norm2(p Vec) float64 {
 	return p.X*p.X + p.Y*p.Y
 }
 
-// Normalize returns the unit vector colinear to p.
-func Normalize(p Vec) Vec {
+// Unit returns the unit vector colinear to p.
+func Unit(p Vec) Vec {
 	if p.X == 0 && p.Y == 0 {
 		return Vec{}
 	}

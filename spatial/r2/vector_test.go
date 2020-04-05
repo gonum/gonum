@@ -184,7 +184,7 @@ func TestNorm2(t *testing.T) {
 	}
 }
 
-func TestNormalize(t *testing.T) {
+func TestUnit(t *testing.T) {
 	for _, test := range []struct {
 		v, want Vec
 	}{
@@ -200,10 +200,10 @@ func TestNormalize(t *testing.T) {
 		{Vec{1e4, math.MaxFloat32 - 1}, Vec{0, 1}},
 	} {
 		t.Run("", func(t *testing.T) {
-			got := Normalize(test.v)
+			got := Unit(test.v)
 			if !vecApproxEqual(got, test.want) {
 				t.Fatalf(
-					"Normalize(%v) = %v, want %v",
+					"Unit(%v) = %v, want %v",
 					test.v, got, test.want,
 				)
 			}

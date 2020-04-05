@@ -184,6 +184,7 @@ func TestUnit(t *testing.T) {
 	for _, test := range []struct {
 		v, want Vec
 	}{
+		{Vec{}, Vec{}},
 		{Vec{1, 0, 0}, Vec{1, 0, 0}},
 		{Vec{0, 1, 0}, Vec{0, 1, 0}},
 		{Vec{0, 0, 1}, Vec{0, 0, 1}},
@@ -197,6 +198,9 @@ func TestUnit(t *testing.T) {
 					"Normalize(%v) = %v, want %v",
 					test.v, got, test.want,
 				)
+			}
+			if test.v == (Vec{}) {
+				return
 			}
 			if n, want := Norm(got), 1.0; n != want {
 				t.Fatalf("|%v| = %v, want 1", got, n)

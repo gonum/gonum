@@ -7,6 +7,8 @@ package r2
 import (
 	"math"
 	"testing"
+
+	"gonum.org/v1/gonum/floats"
 )
 
 func TestAdd(t *testing.T) {
@@ -180,4 +182,78 @@ func TestNorm2(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestUnit(t *testing.T) {
+	for _, test := range []struct {
+		v, want Vec
+	}{
+		{Vec{}, Vec{math.NaN(), math.NaN()}},
+		{Vec{1, 0}, Vec{1, 0}},
+		{Vec{0, 1}, Vec{0, 1}},
+		{Vec{-1, 0}, Vec{-1, 0}},
+		{Vec{3, 4}, Vec{0.6, 0.8}},
+		{Vec{3, -4}, Vec{0.6, -0.8}},
+		{Vec{1, 1}, Vec{1. / math.Sqrt(2), 1. / math.Sqrt(2)}},
+		{Vec{1, 1e-16}, Vec{1, 1e-16}},
+		{Vec{1, 1e16}, Vec{1e-16, 1}},
+		{Vec{1e4, math.MaxFloat32 - 1}, Vec{0, 1}},
+	} {
+		t.Run("", func(t *testing.T) {
+			got := Unit(test.v)
+			if !vecApproxEqual(got, test.want) {
+				t.Fatalf(
+					"Unit(%v) = %v, want %v",
+					test.v, got, test.want,
+				)
+			}
+			if vecIsNaN(got) {
+				return
+			}
+			if n, want := Norm(got), 1.0; n != want {
+				t.Fatalf("|%v| = %v, want 1", got, n)
+			}
+		})
+	}
+}
+
+func TestCos(t *testing.T) {
+	for _, test := range []struct {
+		v1, v2 Vec
+		want   float64
+	}{
+		{Vec{1, 1}, Vec{1, 1}, 1},
+		{Vec{1, 1}, Vec{-1, -1}, -1},
+		{Vec{1, 0}, Vec{1, 0}, 1},
+		{Vec{1, 0}, Vec{0, 1}, 0},
+		{Vec{1, 0}, Vec{-1, 0}, -1},
+	} {
+		t.Run("", func(t *testing.T) {
+			tol := 1e-14
+			got := Cos(test.v1, test.v2)
+			if !floats.EqualWithinAbs(got, test.want, tol) {
+				t.Fatalf("cos(%v, %v)= %v, want %v",
+					test.v1, test.v2, got, test.want,
+				)
+			}
+		})
+	}
+}
+
+func vecIsNaN(v Vec) bool {
+	return math.IsNaN(v.X) && math.IsNaN(v.Y)
+}
+
+func vecIsNaNAny(v Vec) bool {
+	return math.IsNaN(v.X) || math.IsNaN(v.Y)
+}
+
+func vecApproxEqual(a, b Vec) bool {
+	const tol = 1e-14
+	if vecIsNaNAny(a) || vecIsNaNAny(b) {
+		return vecIsNaN(a) && vecIsNaN(b)
+	}
+
+	return floats.EqualWithinAbs(a.X, b.X, tol) &&
+		floats.EqualWithinAbs(a.Y, b.Y, tol)
 }

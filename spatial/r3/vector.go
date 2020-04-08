@@ -61,6 +61,20 @@ func Norm2(p Vec) float64 {
 	return p.X*p.X + p.Y*p.Y + p.Z*p.Z
 }
 
+// Unit returns the unit vector colinear to p.
+// Unit returns {NaN,NaN,NaN} for the zero vector.
+func Unit(p Vec) Vec {
+	if p.X == 0 && p.Y == 0 && p.Z == 0 {
+		return Vec{X: math.NaN(), Y: math.NaN(), Z: math.NaN()}
+	}
+	return p.Scale(1 / Norm(p))
+}
+
+// Cos returns the cosine of the opening angle between p and q.
+func Cos(p, q Vec) float64 {
+	return p.Dot(q) / (Norm(p) * Norm(q))
+}
+
 // Box is a 3D bounding box.
 type Box struct {
 	Min, Max Vec

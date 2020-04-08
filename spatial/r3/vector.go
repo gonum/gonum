@@ -69,14 +69,9 @@ func Unit(p Vec) Vec {
 	return p.Scale(1 / Norm(p))
 }
 
-// CosTheta returns the cosine of the opening angle between p and q.
-func CosTheta(p, q Vec) float64 {
-	var (
-		np2 = Norm2(p)
-		nq2 = Norm2(q)
-		dot = p.Dot(q)
-	)
-	return dot / math.Sqrt(np2*nq2)
+// Cos returns the cosine of the opening angle between p and q.
+func Cos(p, q Vec) float64 {
+	return p.Dot(q) / (Norm(p) * Norm(q))
 }
 
 // Box is a 3D bounding box.

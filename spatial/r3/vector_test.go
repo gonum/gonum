@@ -7,6 +7,8 @@ package r3
 import (
 	"math"
 	"testing"
+
+	"gonum.org/v1/gonum/floats"
 )
 
 func TestAdd(t *testing.T) {
@@ -209,7 +211,7 @@ func TestUnit(t *testing.T) {
 	}
 }
 
-func TestCosTheta(t *testing.T) {
+func TestCos(t *testing.T) {
 	for _, test := range []struct {
 		v1, v2 Vec
 		want   float64
@@ -223,9 +225,10 @@ func TestCosTheta(t *testing.T) {
 		{Vec{1, 0, 0}, Vec{-1, 0, 0}, -1},
 	} {
 		t.Run("", func(t *testing.T) {
-			got := CosTheta(test.v1, test.v2)
-			if got != test.want {
-				t.Fatalf("cos(theta)(%v, %v)= %v, want %v",
+			tol := 1e-14
+			got := Cos(test.v1, test.v2)
+			if !floats.EqualWithinAbs(got, test.want, tol) {
+				t.Fatalf("cos(%v, %v)= %v, want %v",
 					test.v1, test.v2, got, test.want,
 				)
 			}

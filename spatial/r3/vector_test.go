@@ -186,7 +186,7 @@ func TestUnit(t *testing.T) {
 	for _, test := range []struct {
 		v, want Vec
 	}{
-		{Vec{}, Vec{}},
+		{Vec{}, Vec{math.NaN(), math.NaN(), math.NaN()}},
 		{Vec{1, 0, 0}, Vec{1, 0, 0}},
 		{Vec{0, 1, 0}, Vec{0, 1, 0}},
 		{Vec{0, 0, 1}, Vec{0, 0, 1}},
@@ -195,7 +195,7 @@ func TestUnit(t *testing.T) {
 	} {
 		t.Run("", func(t *testing.T) {
 			got := Unit(test.v)
-			if got != test.want {
+			if !vecEqual(got, test.want) {
 				t.Fatalf(
 					"Normalize(%v) = %v, want %v",
 					test.v, got, test.want,
@@ -234,4 +234,19 @@ func TestCos(t *testing.T) {
 			}
 		})
 	}
+}
+
+func vecIsNaN(v Vec) bool {
+	return math.IsNaN(v.X) && math.IsNaN(v.Y) && math.IsNaN(v.Z)
+}
+
+func vecIsNaNAny(v Vec) bool {
+	return math.IsNaN(v.X) || math.IsNaN(v.Y) || math.IsNaN(v.Z)
+}
+
+func vecEqual(a, b Vec) bool {
+	if vecIsNaNAny(a) || vecIsNaNAny(b) {
+		return vecIsNaN(a) && vecIsNaN(b)
+	}
+	return a == b
 }

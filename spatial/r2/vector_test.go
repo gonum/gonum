@@ -188,7 +188,7 @@ func TestUnit(t *testing.T) {
 	for _, test := range []struct {
 		v, want Vec
 	}{
-		{Vec{}, Vec{}},
+		{Vec{}, Vec{math.NaN(), math.NaN()}},
 		{Vec{1, 0}, Vec{1, 0}},
 		{Vec{0, 1}, Vec{0, 1}},
 		{Vec{-1, 0}, Vec{-1, 0}},
@@ -207,7 +207,7 @@ func TestUnit(t *testing.T) {
 					test.v, got, test.want,
 				)
 			}
-			if got == (Vec{}) {
+			if vecIsNaN(got) {
 				return
 			}
 			if n, want := Norm(got), 1.0; n != want {
@@ -240,8 +240,20 @@ func TestCos(t *testing.T) {
 	}
 }
 
+func vecIsNaN(v Vec) bool {
+	return math.IsNaN(v.X) && math.IsNaN(v.Y)
+}
+
+func vecIsNaNAny(v Vec) bool {
+	return math.IsNaN(v.X) || math.IsNaN(v.Y)
+}
+
 func vecApproxEqual(a, b Vec) bool {
 	const tol = 1e-14
+	if vecIsNaNAny(a) || vecIsNaNAny(b) {
+		return vecIsNaN(a) && vecIsNaN(b)
+	}
+
 	return floats.EqualWithinAbs(a.X, b.X, tol) &&
 		floats.EqualWithinAbs(a.Y, b.Y, tol)
 }

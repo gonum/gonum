@@ -55,9 +55,10 @@ func Norm2(p Vec) float64 {
 }
 
 // Unit returns the unit vector colinear to p.
+// Unit returns {NaN,NaN} for the zero vector.
 func Unit(p Vec) Vec {
 	if p.X == 0 && p.Y == 0 {
-		return Vec{}
+		return Vec{X: math.NaN(), Y: math.NaN()}
 	}
 	return p.Scale(1 / Norm(p))
 }

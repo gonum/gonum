@@ -11,6 +11,7 @@ import (
 
 	"golang.org/x/exp/rand"
 
+	"gonum.org/v1/gonum/cmplxs"
 	"gonum.org/v1/gonum/floats"
 )
 
@@ -103,6 +104,11 @@ func sameApprox(a, b, tol float64) bool {
 // sameCmplx tests for nan-aware equality.
 func sameCmplx(a, b complex128) bool {
 	return a == b || (cmplx.IsNaN(a) && cmplx.IsNaN(b))
+}
+
+// sameCmplxApprox tests for nan-aware equality within tolerance.
+func sameCmplxApprox(a, b complex128, tol float64) bool {
+	return sameCmplx(a, b) || cmplxs.EqualWithinAbsOrRel(a, b, tol, tol)
 }
 
 var ( // Offset sets for testing alignment handling in Unitary assembly functions.

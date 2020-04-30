@@ -423,6 +423,8 @@ func TestCumProd(t *testing.T) {
 }
 
 func TestDiv(t *testing.T) {
+	const tol = 1e-15
+
 	var src_gd, dst_gd complex128 = -1, 0.5
 	for j, v := range []struct {
 		dst, src, expect []complex128
@@ -473,7 +475,7 @@ func TestDiv(t *testing.T) {
 		src, dst := v.src[sg_ln:len(v.src)-sg_ln], v.dst[dg_ln:len(v.dst)-dg_ln]
 		Div(dst, src)
 		for i := range v.expect {
-			if !sameCmplx(dst[i], v.expect[i]) {
+			if !sameCmplxApprox(dst[i], v.expect[i], tol) {
 				t.Errorf("Test %d Div error at %d Got: %v Expected: %v", j, i, dst[i], v.expect[i])
 			}
 		}
@@ -487,6 +489,8 @@ func TestDiv(t *testing.T) {
 }
 
 func TestDivTo(t *testing.T) {
+	const tol = 1e-15
+
 	var dst_gd, x_gd, y_gd complex128 = -1, 0.5, 0.25
 	for j, v := range []struct {
 		dst, x, y, expect []complex128
@@ -541,7 +545,7 @@ func TestDivTo(t *testing.T) {
 		dst := v.dst[xg_ln : len(v.dst)-xg_ln]
 		ret := DivTo(dst, x, y)
 		for i := range v.expect {
-			if !sameCmplx(ret[i], v.expect[i]) {
+			if !sameCmplxApprox(ret[i], v.expect[i], tol) {
 				t.Errorf("Test %d DivTo error at %d Got: %v Expected: %v", j, i, ret[i], v.expect[i])
 			}
 			if !sameCmplx(ret[i], dst[i]) {

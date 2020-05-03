@@ -663,31 +663,31 @@ func (c *Cholesky) SymRankOne(orig *Cholesky, alpha float64, x Vector) (ok bool)
 	}
 	umat := c.chol.mat
 	stride := umat.Stride
+	workData := getFloats(umat.N*umat.N, false)
+	defer putFloats(workData)
+	copy(workData, umat.Data)
 	for i := n - 1; i >= 0; i-- {
 		work[i] = 0
 		// Apply Givens matrices to U.
-		// TODO(vladimir-ch): Use workspace to avoid modifying the
-		// receiver in case an invalid factorization is created.
 		blas64.Rot(
 			blas64.Vector{N: n - i, Data: work[i:n], Inc: 1},
-			blas64.Vector{N: n - i, Data: umat.Data[i*stride+i : i*stride+n], Inc: 1},
+			blas64.Vector{N: n - i, Data: workData[i*stride+i : i*stride+n], Inc: 1},
 			cos[i], sin[i])
-		if umat.Data[i*stride+i] == 0 {
+		if workData[i*stride+i] == 0 {
 			// The matrix is singular (may rarely happen due to
 			// floating-point effects?).
 			ok = false
-		} else if umat.Data[i*stride+i] < 0 {
+		} else if workData[i*stride+i] < 0 {
 			// Diagonal elements should be positive. If it happens
 			// that on the i-th row the diagonal is negative,
 			// multiply U from the left by an identity matrix that
 			// has -1 on the i-th row.
-			blas64.Scal(-1, blas64.Vector{N: n - i, Data: umat.Data[i*stride+i : i*stride+n], Inc: 1})
+			blas64.Scal(-1, blas64.Vector{N: n - i, Data: workData[i*stride+i : i*stride+n], Inc: 1})
 		}
 	}
 	if ok {
+		copy(umat.Data, workData)
 		c.updateCond(-1)
-	} else {
-		c.Reset()
 	}
 	return ok
 }

@@ -228,7 +228,7 @@ func (svd *SVD) VTo(dst *Dense) {
 		panic(badFact)
 	}
 	kind := svd.kind
-	if kind&SVDThinU == 0 && kind&SVDFullV == 0 {
+	if kind&SVDThinV == 0 && kind&SVDFullV == 0 {
 		panic("svd: v not computed during factorization")
 	}
 	r := svd.vt.Rows

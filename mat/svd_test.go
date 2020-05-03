@@ -90,6 +90,41 @@ func TestSVD(t *testing.T) {
 		if !EqualApprox(test.a, &ans, 1e-10) {
 			t.Errorf("A reconstruction mismatch.\nGot:\n%v\nWant:\n%v\n", Formatted(&ans), Formatted(test.a))
 		}
+
+		for _, kind := range []SVDKind{
+			SVDThinU, SVDFullU, SVDThinV, SVDFullV,
+		} {
+			var svd SVD
+			svd.Factorize(test.a, kind)
+			if kind&SVDThinU == 0 && kind&SVDFullU == 0 {
+				panicked, message := panics(func() {
+					var dst Dense
+					svd.UTo(&dst)
+				})
+				if !panicked {
+					t.Error("expected panic with no U matrix requested")
+					continue
+				}
+				want := "svd: u not computed during factorization"
+				if message != want {
+					t.Errorf("unexpected message: got:%q want:%q", message, want)
+				}
+			}
+			if kind&SVDThinV == 0 && kind&SVDFullV == 0 {
+				panicked, message := panics(func() {
+					var dst Dense
+					svd.VTo(&dst)
+				})
+				if !panicked {
+					t.Error("expected panic with no V matrix requested")
+					continue
+				}
+				want := "svd: v not computed during factorization"
+				if message != want {
+					t.Errorf("unexpected message: got:%q want:%q", message, want)
+				}
+			}
+		}
 	}
 
 	for _, test := range []struct {

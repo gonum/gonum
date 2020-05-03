@@ -121,6 +121,10 @@ func NewVecDense(n int, data []float64) *VecDense {
 // SliceVec panics with ErrIndexOutOfRange if the slice is outside the capacity
 // of the receiver.
 func (v *VecDense) SliceVec(i, k int) Vector {
+	return v.sliceVec(i, k)
+}
+
+func (v *VecDense) sliceVec(i, k int) *VecDense {
 	if i < 0 || k <= i || v.Cap() < k {
 		panic(ErrIndexOutOfRange)
 	}

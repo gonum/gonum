@@ -147,6 +147,16 @@ func (svd *SVD) Kind() SVDKind {
 	return svd.kind
 }
 
+// Rank returns the rank of A based on the count of singular values greater than cond.
+func (svd *SVD) Rank(cond float64) int {
+	for i, v := range svd.s {
+		if v <= cond {
+			return i
+		}
+	}
+	return len(svd.s)
+}
+
 // Cond returns the 2-norm condition number for the factorized matrix. Cond will
 // panic if the receiver does not contain a successful factorization.
 func (svd *SVD) Cond() float64 {
@@ -248,4 +258,118 @@ func (svd *SVD) VTo(dst *Dense) {
 		capCols: c,
 	}
 	dst.Copy(tmp.T())
+}
+
+// SolveTo calculates the least-squares solution to a linear matrix equation,
+// AX = B, using a rank-truncated SVD based on cond. The result is placed in dst.
+// It returns the residuals calculated from the complete SVD. For this value to be
+// valid the factorization must have been performed with at least SVDFullU.
+// The decomposition must have been factorized computing both the U and V singular
+// vectors, and dst must be either empty or have length equal to svd.Rank(cond).
+func (svd *SVD) SolveTo(dst *Dense, b Matrix, cond float64) []float64 {
+	if !svd.succFact() {
+		panic(badFact)
+	}
+	kind := svd.kind
+	if kind&SVDThinU == 0 && kind&SVDFullU == 0 {
+		panic("svd: u not computed during factorization")
+	}
+	if kind&SVDThinV == 0 && kind&SVDFullV == 0 {
+		panic("svd: v not computed during factorization")
+	}
+
+	u := Dense{
+		mat:     svd.u,
+		capRows: svd.u.Rows,
+		capCols: svd.u.Cols,
+	}
+	vt := Dense{
+		mat:     svd.vt,
+		capRows: svd.vt.Rows,
+		capCols: svd.vt.Cols,
+	}
+	rank := svd.Rank(cond)
+	s := svd.s[:rank]
+
+	_, bc := b.Dims()
+	c := getWorkspace(svd.u.Cols, bc, false)
+	defer putWorkspace(c)
+	c.Mul(u.T(), b)
+
+	y := getWorkspace(rank, bc, false)
+	defer putWorkspace(y)
+	y.DivElem(c.slice(0, rank, 0, bc), repVector{vec: s, cols: bc})
+	dst.Mul(vt.slice(0, rank, 0, svd.vt.Cols).T(), y)
+
+	res := make([]float64, bc)
+	if rank < svd.u.Cols {
+		c = c.slice(len(s), svd.u.Cols, 0, bc)
+		for j := range res {
+			col := c.ColView(j)
+			res[j] = Dot(col, col)
+		}
+	}
+	return res
+}
+
+type repVector struct {
+	vec  []float64
+	cols int
+}
+
+func (m repVector) Dims() (r, c int) { return len(m.vec), m.cols }
+func (m repVector) At(i, j int) float64 {
+	if i < 0 || len(m.vec) <= i || j < 0 || m.cols <= j {
+		panic(ErrIndexOutOfRange.string) // Panic with string to prevent mat.Error recovery.
+	}
+	return m.vec[i]
+}
+func (m repVector) T() Matrix { return Transpose{m} }
+
+// SolveVecTo calculates the least-squares solution to a linear matrix equation,
+// Ax = b, using a rank-truncated SVD based on cond. The result is placed in dst.
+// It returns the residual calculated from the complete SVD. For this value to be
+// valid the factorization must have been performed with at least SVDFullU.
+// The decomposition must have been factorized computing both the U and V singular
+// vectors, and dst must be either empty or have length equal to svd.Rank(cond).
+func (svd *SVD) SolveVecTo(dst *VecDense, b Vector, cond float64) float64 {
+	if !svd.succFact() {
+		panic(badFact)
+	}
+	kind := svd.kind
+	if kind&SVDThinU == 0 && kind&SVDFullU == 0 {
+		panic("svd: u not computed during factorization")
+	}
+	if kind&SVDThinV == 0 && kind&SVDFullV == 0 {
+		panic("svd: v not computed during factorization")
+	}
+
+	u := Dense{
+		mat:     svd.u,
+		capRows: svd.u.Rows,
+		capCols: svd.u.Cols,
+	}
+	vt := Dense{
+		mat:     svd.vt,
+		capRows: svd.vt.Rows,
+		capCols: svd.vt.Cols,
+	}
+	rank := svd.Rank(cond)
+	s := svd.s[:rank]
+
+	c := getWorkspaceVec(svd.u.Cols, false)
+	defer putWorkspaceVec(c)
+	c.MulVec(u.T(), b)
+
+	y := getWorkspaceVec(rank, false)
+	defer putWorkspaceVec(y)
+	y.DivElemVec(c.sliceVec(0, rank), NewVecDense(rank, s))
+	dst.MulVec(vt.slice(0, rank, 0, svd.vt.Cols).T(), y)
+
+	var res float64
+	if rank < c.Len() {
+		c = c.sliceVec(rank, c.Len())
+		res = Dot(c, c)
+	}
+	return res
 }

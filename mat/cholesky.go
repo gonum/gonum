@@ -494,11 +494,8 @@ func (c *Cholesky) ExtendVecSym(a *Cholesky, v Vector) (ok bool) {
 	//  3) c'*c + d'*d = k  =>  d = sqrt(k-c'*c)
 
 	// First, compute c = U'^-1 a
-	// TODO(btracey): Replace this with CopyVec when issue 167 is fixed.
 	w := NewVecDense(n, nil)
-	for i := 0; i < n; i++ {
-		w.SetVec(i, v.At(i, 0))
-	}
+	w.CopyVec(v)
 	k := v.At(n, 0)
 
 	var t VecDense

@@ -528,7 +528,8 @@ func (c *Cholesky) ExtendVecSym(a *Cholesky, v Vector) (ok bool) {
 // Note that when alpha is negative, the updating problem may be ill-conditioned
 // and the results may be inaccurate, or the updated matrix A' may not be
 // positive definite and not have a Cholesky factorization. SymRankOne returns
-// whether the updated matrix A' is positive definite.
+// whether the updated matrix A' is positive definite. If the update fails
+// the receiver is left unchanged.
 //
 // SymRankOne updates a Cholesky factorization in O(n²) time. The Cholesky
 // factorization computation from scratch is O(n³).
@@ -661,13 +662,14 @@ func (c *Cholesky) SymRankOne(orig *Cholesky, alpha float64, x Vector) (ok bool)
 			sin[i] *= -1
 		}
 	}
-	umat := c.chol.mat
-	stride := umat.Stride
+	workMat := getWorkspaceTri(c.chol.mat.N, c.chol.triKind(), false)
+	defer putWorkspaceTri(workMat)
+	workMat.Copy(c.chol)
+	umat := workMat.mat
+	stride := workMat.mat.Stride
 	for i := n - 1; i >= 0; i-- {
 		work[i] = 0
 		// Apply Givens matrices to U.
-		// TODO(vladimir-ch): Use workspace to avoid modifying the
-		// receiver in case an invalid factorization is created.
 		blas64.Rot(
 			blas64.Vector{N: n - i, Data: work[i:n], Inc: 1},
 			blas64.Vector{N: n - i, Data: umat.Data[i*stride+i : i*stride+n], Inc: 1},
@@ -685,9 +687,8 @@ func (c *Cholesky) SymRankOne(orig *Cholesky, alpha float64, x Vector) (ok bool)
 		}
 	}
 	if ok {
+		c.chol.Copy(workMat)
 		c.updateCond(-1)
-	} else {
-		c.Reset()
 	}
 	return ok
 }

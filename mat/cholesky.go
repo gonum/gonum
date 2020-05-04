@@ -46,6 +46,7 @@ type Cholesky struct {
 }
 
 // updateCond updates the condition number of the Cholesky decomposition. If
+
 // norm > 0, then that norm is used as the norm of the original matrix A, otherwise
 // the norm is estimated from the decomposition.
 func (c *Cholesky) updateCond(norm float64) {
@@ -528,7 +529,8 @@ func (c *Cholesky) ExtendVecSym(a *Cholesky, v Vector) (ok bool) {
 // Note that when alpha is negative, the updating problem may be ill-conditioned
 // and the results may be inaccurate, or the updated matrix A' may not be
 // positive definite and not have a Cholesky factorization. SymRankOne returns
-// whether the updated matrix A' is positive definite.
+// whether the updated matrix A' is positive definite.  If the update fails
+// the receiver is left unchanged.
 //
 // SymRankOne updates a Cholesky factorization in O(n²) time. The Cholesky
 // factorization computation from scratch is O(n³).
@@ -661,32 +663,31 @@ func (c *Cholesky) SymRankOne(orig *Cholesky, alpha float64, x Vector) (ok bool)
 			sin[i] *= -1
 		}
 	}
-	umat := c.chol.mat
-	stride := umat.Stride
-	workData := getFloats(umat.N*umat.N, false)
-	defer putFloats(workData)
-	copy(workData, umat.Data)
+	workMat := NewTriDense(c.chol.mat.N, c.chol.triKind(), nil)
+	workMat.Copy(c.chol)
+	umat := workMat.mat
+	stride := workMat.mat.Stride
 	for i := n - 1; i >= 0; i-- {
 		work[i] = 0
 		// Apply Givens matrices to U.
 		blas64.Rot(
 			blas64.Vector{N: n - i, Data: work[i:n], Inc: 1},
-			blas64.Vector{N: n - i, Data: workData[i*stride+i : i*stride+n], Inc: 1},
+			blas64.Vector{N: n - i, Data: umat.Data[i*stride+i : i*stride+n], Inc: 1},
 			cos[i], sin[i])
-		if workData[i*stride+i] == 0 {
+		if umat.Data[i*stride+i] == 0 {
 			// The matrix is singular (may rarely happen due to
 			// floating-point effects?).
 			ok = false
-		} else if workData[i*stride+i] < 0 {
+		} else if umat.Data[i*stride+i] < 0 {
 			// Diagonal elements should be positive. If it happens
 			// that on the i-th row the diagonal is negative,
 			// multiply U from the left by an identity matrix that
 			// has -1 on the i-th row.
-			blas64.Scal(-1, blas64.Vector{N: n - i, Data: workData[i*stride+i : i*stride+n], Inc: 1})
+			blas64.Scal(-1, blas64.Vector{N: n - i, Data: umat.Data[i*stride+i : i*stride+n], Inc: 1})
 		}
 	}
 	if ok {
-		copy(umat.Data, workData)
+		copy(c.chol.mat.Data, umat.Data)
 		c.updateCond(-1)
 	}
 	return ok

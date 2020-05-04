@@ -261,14 +261,18 @@ func (svd *SVD) VTo(dst *Dense) {
 }
 
 // SolveTo calculates the least-squares solution to a linear matrix equation,
-// AX = B, using a rank-truncated SVD based on cond. The result is placed in dst.
+// AX = B, using a rank-truncated SVD. The result is placed in dst.
 // It returns the residuals calculated from the complete SVD. For this value to be
 // valid the factorization must have been performed with at least SVDFullU.
 // The decomposition must have been factorized computing both the U and V singular
-// vectors, and dst must be either empty or have length equal to svd.Rank(cond).
-func (svd *SVD) SolveTo(dst *Dense, b Matrix, cond float64) []float64 {
+// vectors, and dst must be either empty or have length equal to rank.
+// The supplied rank must be a positive index into svd.Values.
+func (svd *SVD) SolveTo(dst *Dense, b Matrix, rank int) []float64 {
 	if !svd.succFact() {
 		panic(badFact)
+	}
+	if rank < 1 || len(svd.s) < rank {
+		panic("svd: rank out of range")
 	}
 	kind := svd.kind
 	if kind&SVDThinU == 0 && kind&SVDFullU == 0 {
@@ -288,7 +292,6 @@ func (svd *SVD) SolveTo(dst *Dense, b Matrix, cond float64) []float64 {
 		capRows: svd.vt.Rows,
 		capCols: svd.vt.Cols,
 	}
-	rank := svd.Rank(cond)
 	s := svd.s[:rank]
 
 	_, bc := b.Dims()
@@ -327,14 +330,18 @@ func (m repVector) At(i, j int) float64 {
 func (m repVector) T() Matrix { return Transpose{m} }
 
 // SolveVecTo calculates the least-squares solution to a linear matrix equation,
-// Ax = b, using a rank-truncated SVD based on cond. The result is placed in dst.
+// Ax = b, using a rank-truncated SVD. The result is placed in dst.
 // It returns the residual calculated from the complete SVD. For this value to be
 // valid the factorization must have been performed with at least SVDFullU.
 // The decomposition must have been factorized computing both the U and V singular
-// vectors, and dst must be either empty or have length equal to svd.Rank(cond).
-func (svd *SVD) SolveVecTo(dst *VecDense, b Vector, cond float64) float64 {
+// vectors, and dst must be either empty or have length equal to rank.
+// The supplied rank must be a positive index into svd.Values.
+func (svd *SVD) SolveVecTo(dst *VecDense, b Vector, rank int) float64 {
 	if !svd.succFact() {
 		panic(badFact)
+	}
+	if rank < 1 || len(svd.s) < rank {
+		panic("svd: rank out of range")
 	}
 	kind := svd.kind
 	if kind&SVDThinU == 0 && kind&SVDFullU == 0 {
@@ -354,7 +361,6 @@ func (svd *SVD) SolveVecTo(dst *VecDense, b Vector, cond float64) float64 {
 		capRows: svd.vt.Rows,
 		capCols: svd.vt.Cols,
 	}
-	rank := svd.Rank(cond)
 	s := svd.s[:rank]
 
 	c := getWorkspaceVec(svd.u.Cols, false)

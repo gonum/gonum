@@ -46,7 +46,6 @@ type Cholesky struct {
 }
 
 // updateCond updates the condition number of the Cholesky decomposition. If
-
 // norm > 0, then that norm is used as the norm of the original matrix A, otherwise
 // the norm is estimated from the decomposition.
 func (c *Cholesky) updateCond(norm float64) {
@@ -663,7 +662,8 @@ func (c *Cholesky) SymRankOne(orig *Cholesky, alpha float64, x Vector) (ok bool)
 			sin[i] *= -1
 		}
 	}
-	workMat := NewTriDense(c.chol.mat.N, c.chol.triKind(), nil)
+	workMat := getWorkspaceTri(c.chol.mat.N, c.chol.triKind(), false)
+	defer putWorkspaceTri(workMat)
 	workMat.Copy(c.chol)
 	umat := workMat.mat
 	stride := workMat.mat.Stride
@@ -687,7 +687,7 @@ func (c *Cholesky) SymRankOne(orig *Cholesky, alpha float64, x Vector) (ok bool)
 		}
 	}
 	if ok {
-		copy(c.chol.mat.Data, umat.Data)
+		c.chol.Copy(workMat)
 		c.updateCond(-1)
 	}
 	return ok

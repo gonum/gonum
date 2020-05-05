@@ -56,6 +56,48 @@ func ExampleFormatted() {
 	//     ⎣0  0        6⎦
 }
 
+func ExampleFormatted_mATLAB() {
+	a := mat.NewDense(3, 3, []float64{1, 2, 3, 0, 4, 5, 0, 0, 6})
+
+	// Create a matrix formatting value using MATLAB format...
+	fa := mat.Formatted(a, mat.FormatMATLAB())
+
+	// and then print with and without layout formatting.
+	fmt.Printf("standard syntax:\na = %v\n\n", fa)
+	fmt.Printf("layout syntax:\na = %#v\n\n", fa)
+
+	// Output:
+	// standard syntax:
+	// a = [1 2 3; 0 4 5; 0 0 6]
+	//
+	// layout syntax:
+	// a = [
+	//  1 2 3
+	//  0 4 5
+	//  0 0 6
+	// ]
+}
+
+func ExampleFormatted_python() {
+	a := mat.NewDense(3, 3, []float64{1, 2, 3, 0, 4, 5, 0, 0, 6})
+
+	// Create a matrix formatting value with a prefix using Python format...
+	fa := mat.Formatted(a, mat.Prefix("    "), mat.FormatPython())
+
+	// and then print with and without layout formatting.
+	fmt.Printf("standard syntax:\na = %v\n\n", fa)
+	fmt.Printf("layout syntax:\na = %#v\n\n", fa)
+
+	// Output:
+	// standard syntax:
+	// a = [[1, 2, 3], [0, 4, 5], [0, 0, 6]]
+	//
+	// layout syntax:
+	// a = [[1, 2, 3],
+	//      [0, 4, 5],
+	//      [0, 0, 6]]
+}
+
 func ExampleExcerpt() {
 	// Excerpt allows diagnostic display of very large
 	// matrices and vectors.
@@ -108,5 +150,4 @@ func ExampleExcerpt() {
 	//
 	// excerpt long row vector: Dims(1, 100)
 	//  [ 0   1   2  ...  ...  97  98  99]
-
 }

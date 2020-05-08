@@ -21,6 +21,7 @@ type Float64 interface {
 	Dgetri(n int, a []float64, lda int, ipiv []int, work []float64, lwork int) (ok bool)
 	Dgetrs(trans blas.Transpose, n, nrhs int, a []float64, lda int, ipiv []int, b []float64, ldb int)
 	Dggsvd3(jobU, jobV, jobQ GSVDJob, m, n, p int, a []float64, lda int, b []float64, ldb int, alpha, beta, u []float64, ldu int, v []float64, ldv int, q []float64, ldq int, work []float64, lwork int, iwork []int) (k, l int, ok bool)
+	Dlantb(norm MatrixNorm, uplo blas.Uplo, diag blas.Diag, n, k int, a []float64, lda int, work []float64) float64
 	Dlantr(norm MatrixNorm, uplo blas.Uplo, diag blas.Diag, m, n int, a []float64, lda int, work []float64) float64
 	Dlange(norm MatrixNorm, m, n int, a []float64, lda int, work []float64) float64
 	Dlansb(norm MatrixNorm, uplo blas.Uplo, n, kd int, a []float64, lda int, work []float64) float64

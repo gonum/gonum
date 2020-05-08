@@ -425,6 +425,13 @@ func Lansy(norm lapack.MatrixNorm, a blas64.Symmetric, work []float64) float64 {
 	return lapack64.Dlansy(norm, a.Uplo, a.N, a.Data, max(1, a.Stride), work)
 }
 
+// Lantb computes the specified norm of an n×n triangular band matrix A. If
+// norm == lapack.MaxColumnSum work must have length at least n and this function
+// will panic otherwise. There are no restrictions on work for the other matrix norms.
+func Lantb(norm lapack.MatrixNorm, a blas64.TriangularBand, work []float64) float64 {
+	return lapack64.Dlantb(norm, a.Uplo, a.Diag, a.N, a.K, a.Data, max(1, a.Stride), work)
+}
+
 // Lantr computes the specified norm of an m×n trapezoidal matrix A. If
 // norm == lapack.MaxColumnSum work must have length at least n and this function
 // will panic otherwise. There are no restrictions on work for the other matrix norms.

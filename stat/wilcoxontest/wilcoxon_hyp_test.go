@@ -1,7 +1,9 @@
 package wilcoxon
 
 import (
+	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -61,7 +63,7 @@ func TestWilcoxonSignedRankTest(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := WilcoxonSignedRankTest(tt.args.x, tt.args.y, tt.args.exactPValue); got != tt.want {
+			if got := WilcoxonSignedRankTest(tt.args.x, tt.args.y, tt.args.exactPValue); !strings.EqualFold(fmt.Sprintf("%0.5f", got), fmt.Sprintf("%0.5f", tt.want)) {
 				t.Errorf("WilcoxonSignedRankTest() = %v, want %v", got, tt.want)
 			}
 		})

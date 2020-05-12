@@ -30,10 +30,6 @@ func ensureDataConformance(x, y []float64) {
 	}
 }
 
-func calculateDifference(dst, x, y []float64) {
-	floats.SubTo(dst, x, y)
-}
-
 func calculateAbsDifference(dst, x, y []float64) {
 	for index, xVal := range x {
 		dst[index] = math.Abs(y[index] - xVal)

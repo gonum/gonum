@@ -138,7 +138,7 @@ func calculateExactPValue(Wmax float64, NZ int) float64 {
 	return 2 * (float64(largerRankSums) / float64(m))
 }
 
-func calculateAsymptoticPValue(Wmin float64, NZ int, tieAdj int) float64 {
+func calculateAsymptoticPValue(Wmin float64, NZ, tieAdj int) float64 {
 	// n should be number of non-zero absolute difference pairs
 	ES := float64(NZ*(NZ+1)) / 4.0
 	VarS := (ES * (float64(2*NZ + 1)) / 6.0) - (float64(tieAdj) / 48.0)
@@ -167,7 +167,7 @@ func calculateAsymptoticPValue(Wmin float64, NZ int, tieAdj int) float64 {
     Returns:
 		The two sided p-value for the test
 */
-func WilcoxonSignedRankTest(x []float64, y []float64, exactPValue bool) float64 {
+func WilcoxonSignedRankTest(x, y []float64, exactPValue bool) float64 {
 	ensureDataConformance(x, y)
 	Wmax, N, tieAdj := wilCoxonSignedRankTest(x, y)
 	if exactPValue && N > 30 {

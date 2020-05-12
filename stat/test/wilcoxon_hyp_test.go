@@ -1,35 +1,14 @@
-package wilcoxon
+// Copyright ©2019 The Gonum Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+package test
 
 import (
 	"fmt"
-	"reflect"
 	"strings"
 	"testing"
 )
-
-func TestRank(t *testing.T) {
-	type args struct {
-		in  []float64
-		out []float64
-	}
-	tests := []struct {
-		name string
-		args args
-		want []float64
-	}{
-		{name: "name1", args: args{
-			in:  []float64{0, 5, 5, 7, 9, 10, 12, 15, 17, 20},
-			out: []float64{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-		}, want: []float64{0, 1.5, 1.5, 3, 4, 5, 6, 7, 8, 9}},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got, _ := Rank(tt.args.in, tt.args.out); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Rank() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
 
 func TestWilcoxonSignedRankTest(t *testing.T) {
 	type args struct {

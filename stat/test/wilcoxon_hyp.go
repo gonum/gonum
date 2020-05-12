@@ -1,9 +1,15 @@
-package wilcoxon
+// Copyright ©2019 The Gonum Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+package test
 
 import (
-	"gonum.org/v1/gonum/stat/distuv"
 	"math"
 	"sort"
+
+	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/stat/distuv"
 )
 
 func ensureDataConformance(x []float64, y []float64) {
@@ -18,23 +24,21 @@ func ensureDataConformance(x []float64, y []float64) {
 	}
 }
 
-func CalculateDifferences(x []float64, y []float64, z []float64) {
+func calculateDifferences(dst []float64, x []float64, y []float64) {
 	ensureDataConformance(x, y)
-	ensureDataConformance(x, z)
+	ensureDataConformance(x, dst)
+	floats.SubTo(dst, x, y)
+}
+
+func calculateAbsDifference(dst []float64, x []float64, y []float64) {
+	ensureDataConformance(x, y)
+	ensureDataConformance(x, dst)
 	for i := 0; i < len(x); i++ {
-		z[i] = x[i] - y[i]
+		dst[i] = math.Abs(y[i] - x[i])
 	}
 }
 
-func CalculateAbsDifference(x []float64, y []float64, z []float64) {
-	ensureDataConformance(x, y)
-	ensureDataConformance(x, z)
-	for i := 0; i < len(x); i++ {
-		z[i] = math.Abs(y[i] - x[i])
-	}
-}
-
-func Rank(in []float64, out []float64) ([]float64, int) {
+func rank(in []float64, out []float64) ([]float64, int) {
 	ensureDataConformance(in, out)
 
 	var tieAdjust = 0
@@ -94,17 +98,17 @@ func Rank(in []float64, out []float64) ([]float64, int) {
 	return out, tieAdjust
 }
 
-func WilCoxonSignedRankTest(x []float64, y []float64) (float64, int, int) {
+func wilCoxonSignedRankTest(x []float64, y []float64) (float64, int, int) {
 	ensureDataConformance(x, y)
 
 	var z = make([]float64, len(x))
 	var absZ = make([]float64, len(x))
-	CalculateDifferences(x, y, z)
-	CalculateAbsDifference(x, y, absZ)
+	calculateDifferences(z, x, y)
+	calculateAbsDifference(absZ, x, y)
 
 	var ranks = make([]float64, len(x))
 	var tieAdj = 0
-	ranks, tieAdj = Rank(absZ, ranks)
+	ranks, tieAdj = rank(absZ, ranks)
 	var tmpLenOfX = len(x)
 
 	var WPlus = 0.0
@@ -120,7 +124,7 @@ func WilCoxonSignedRankTest(x []float64, y []float64) (float64, int, int) {
 	return math.Max(WMinus, WPlus), tmpLenOfX, tieAdj
 }
 
-func CalculateExactPValue(Wmax float64, N int) float64 {
+func calculateExactPValue(Wmax float64, N int) float64 {
 	var m = 1 << N
 
 	largerRankSums := 0
@@ -149,7 +153,7 @@ func CalculateExactPValue(Wmax float64, N int) float64 {
 	return 2 * (float64(largerRankSums) / float64(m))
 }
 
-func CalculateAsymptoticPValue(Wmin float64, NZ int, tieAdj int) float64 {
+func calculateAsymptoticPValue(Wmin float64, NZ int, tieAdj int) float64 {
 
 	// n should be number of non zeros
 
@@ -167,16 +171,20 @@ func CalculateAsymptoticPValue(Wmin float64, NZ int, tieAdj int) float64 {
 	return 2 * standardNormal.CDF(z)
 }
 
+
+// Perform a Wilcoxon signed rank test of the null hypothesis that the distribution of `x`
+// (or the difference `x - y` if `y` is provided) has zero median against the alternative
+// hypothesis that the median is non-zero.
 func WilcoxonSignedRankTest(x []float64, y []float64, exactPValue bool) float64 {
 	ensureDataConformance(x, y)
-	Wmax, N, tieAdj := WilCoxonSignedRankTest(x, y)
+	Wmax, N, tieAdj := wilCoxonSignedRankTest(x, y)
 	if exactPValue && N > 30 {
 		panic("number too large")
 	}
 	if exactPValue {
-		return CalculateExactPValue(Wmax, N)
+		return calculateExactPValue(Wmax, N)
 	} else {
 		Wmin := (float64(N*(N+1)) / 2.0) - Wmax
-		return CalculateAsymptoticPValue(Wmin, N, tieAdj)
+		return calculateAsymptoticPValue(Wmin, N, tieAdj)
 	}
 }

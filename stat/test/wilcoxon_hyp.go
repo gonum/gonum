@@ -12,15 +12,11 @@ import (
 	"gonum.org/v1/gonum/stat/distuv"
 )
 
+const badLengthMismatch = "test: slice length mismatch"
+
 func ensureDataConformance(x []float64, y []float64) {
-	if len(x) == 0 {
-		panic("x array length is zero")
-	}
-	if len(y) == 0 {
-		panic("y array length is zero")
-	}
-	if len(x) != len(y) {
-		panic("dimension mismatch in ensure data conformance")
+	if len(x) == 0 || len(y) == 0 || len(x) != len(y) {
+		panic(badLengthMismatch)
 	}
 }
 

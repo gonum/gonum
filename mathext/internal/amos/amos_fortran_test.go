@@ -16,6 +16,10 @@ import (
 	"gonum.org/v1/gonum/mathext/internal/amos/amoslib"
 )
 
+// BUG(kortschak): Some tests here comparing the direct Go translation
+// of the Fortran code fail. Do not delete these tests or this file until
+// https://github.com/gonum/gonum/issues/1322 has been satisfactorily
+// resolved.
 var runFailing = flag.Bool("failing", false, "run known failing cases")
 
 func TestAiryFortran(t *testing.T) {

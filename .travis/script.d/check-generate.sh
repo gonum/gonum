@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Reset the tree to the current commit to handle
+# any writes during the build.
+git reset --hard
+
 go generate gonum.org/v1/gonum/blas
 go generate gonum.org/v1/gonum/blas/gonum
 go generate gonum.org/v1/gonum/unit

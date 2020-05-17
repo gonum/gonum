@@ -126,7 +126,7 @@ var dominatorsTests = []struct {
 	},
 }
 
-type char int64
+type char rune
 
 func (n char) ID() int64      { return int64(n) }
 func (n char) String() string { return string(n) }

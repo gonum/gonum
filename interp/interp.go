@@ -71,7 +71,7 @@ func find_segment(xs []float64, x float64) (int, float64) {
 	if i < n {
 		if i == 0 {
 			// x < begin()
-			panic(fmt.Sprintf("interp: eval() argument %g outside range", x))
+			panic(fmt.Sprintf("interp: x value %g below lower bound %g", x, xs[0]))
 		} else {
 			return i - 1, xs[i-1]
 		}
@@ -79,7 +79,7 @@ func find_segment(xs []float64, x float64) (int, float64) {
 		if xs[n-1] == x {
 			return n - 1, x
 		} else {
-			panic(fmt.Sprintf("interp: eval() argument %g outside range", x))
+			panic(fmt.Sprintf("interp: x value %g above upper bound %g", x, xs[n-1]))
 		}
 	}
 }

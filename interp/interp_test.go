@@ -57,10 +57,14 @@ func TestFindSegment(t *testing.T) {
 		}
 	}
 	panic_xs := [...]float64{-0.5, 2.1}
-	for _, x := range panic_xs {
+	expected_messages := [...]string{
+		"interp: x value -0.5 below lower bound 0",
+		"interp: x value 2.1 above upper bound 2",
+	}
+	for i, x := range panic_xs {
 		panicked, message := panics(func() { find_segment(xs, x) })
-		if !panicked || message != fmt.Sprintf("interp: eval() argument %g outside range", x) {
-			t.Errorf("expected panic for evaluating at invalid x: %g", x)
+		if !panicked || message != expected_messages[i] {
+			t.Errorf("expected panic with message '%s' for evaluating at invalid x: %g", expected_messages[i], x)
 		}
 	}
 }

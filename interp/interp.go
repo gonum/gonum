@@ -68,7 +68,7 @@ func find_segment(xs []float64, x float64) (int, float64) {
 	// Find minimum i s.t. xs[i] >= x, or len(xs) if not found.
 	n := len(xs)
 	i := sort.Search(n, func(i int) bool { return xs[i] > x })
-	if i < len(xs) {
+	if i < n {
 		if i == 0 {
 			// x < begin()
 			panic(fmt.Sprintf("interp: eval() argument %g outside range", x))

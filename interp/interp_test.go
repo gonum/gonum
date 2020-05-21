@@ -65,6 +65,20 @@ func TestFindSegment(t *testing.T) {
 	}
 }
 
+func BenchmarkFindSegment(b *testing.B) {
+	xs := []float64{0, 1.5, 3, 4.5, 6, 7.5, 9, 12, 13.5, 16.5}
+	for i := 0; i < b.N; i++ {
+		find_segment(xs, 0)
+		find_segment(xs, 16.5)
+		find_segment(xs, 8.25)
+		find_segment(xs, 4.125)
+		find_segment(xs, 13.6)
+		find_segment(xs, 13.5)
+		find_segment(xs, 6)
+		find_segment(xs, 4.5)
+	}
+}
+
 func TestNewLinearInterpolator1D(t *testing.T) {
 	t.Parallel()
 	xs := []float64{0, 1, 2}

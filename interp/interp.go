@@ -76,6 +76,20 @@ type LinearInterpolator1D struct {
 	slopes []float64
 }
 
+// NewLinearInterpolator1D creates a new linear 1D interpolator.
+// xs and ys should contain the X and Y values of interpolated nodes, respectively.
+// Panics if len(xs) < 2, elements of xs are not strictly increasing or
+// len(xs) != len(ys).
+func NewLinearInterpolator1D(xs []float64, ys []float64) *LinearInterpolator1D {
+	validateXsAndYs(xs, ys)
+	m := len(xs) - 1
+	slopes := make([]float64, m)
+	for i := 0; i < m; i++ {
+		slopes[i] = (ys[i+1] - ys[i]) / (xs[i+1] - xs[i])
+	}
+	return &LinearInterpolator1D{xs, ys, slopes}
+}
+
 // Interval implements Interpolator1D.Interval.
 func (li LinearInterpolator1D) Interval() r1.Interval {
 	return r1.Interval{Min: li.xs[0], Max: li.xs[len(li.xs)-1]}
@@ -108,20 +122,6 @@ func validateXsAndYs(xs []float64, ys []float64) {
 	}
 }
 
-// NewLinearInterpolator1D creates a new linear 1D interpolator.
-// xs and ys should contain the X and Y values of interpolated nodes, respectively.
-// Panics if len(xs) < 2, elements of xs are not strictly increasing or
-// len(xs) != len(ys).
-func NewLinearInterpolator1D(xs []float64, ys []float64) *LinearInterpolator1D {
-	validateXsAndYs(xs, ys)
-	m := len(xs) - 1
-	slopes := make([]float64, m)
-	for i := 0; i < m; i++ {
-		slopes[i] = (ys[i+1] - ys[i]) / (xs[i+1] - xs[i])
-	}
-	return &LinearInterpolator1D{xs, ys, slopes}
-}
-
 // PiecewiseConstInterpolator1D is a piecewise constant 1D interpolator.
 // It is defined over [xs[0], xs[len(xs)-1]].
 // If leftContinuous == true, then y(xs[i]) == y(xs[i] - eps) for small
@@ -135,6 +135,15 @@ type PiecewiseConstInterpolator1D struct {
 
 	// Whether the interpolated function is left- or right-continuous.
 	leftContinuous bool
+}
+
+// NewPiecewiseConstInterpolator1D creates a new piecewise constant 1D interpolator.
+// xs and ys should contain the X and Y values of interpolated nodes, respectively.
+// Panics if len(xs) < 2, elements of xs are not strictly increasing or
+// len(xs) != len(ys).
+func NewPiecewiseConstInterpolator1D(xs []float64, ys []float64, leftContinuous bool) *PiecewiseConstInterpolator1D {
+	validateXsAndYs(xs, ys)
+	return &PiecewiseConstInterpolator1D{xs, ys, leftContinuous}
 }
 
 // Interval implements Interpolator1D.Interval.
@@ -153,13 +162,4 @@ func (pci PiecewiseConstInterpolator1D) Eval(x float64) float64 {
 		return pci.ys[i+1]
 	}
 	return pci.ys[i]
-}
-
-// NewPiecewiseConstInterpolator1D creates a new piecewise constant 1D interpolator.
-// xs and ys should contain the X and Y values of interpolated nodes, respectively.
-// Panics if len(xs) < 2, elements of xs are not strictly increasing or
-// len(xs) != len(ys).
-func NewPiecewiseConstInterpolator1D(xs []float64, ys []float64, leftContinuous bool) *PiecewiseConstInterpolator1D {
-	validateXsAndYs(xs, ys)
-	return &PiecewiseConstInterpolator1D{xs, ys, leftContinuous}
 }

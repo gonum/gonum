@@ -34,7 +34,7 @@ func TestNewConstInterpolator1D(t *testing.T) {
 
 func TestConstInterpolator1DEval(t *testing.T) {
 	t.Parallel()
-	const value float64 = 42.0
+	const value = 42.0
 	i1d := NewConstInterpolator1D(value)
 	xs := [...]float64{math.Inf(-1), -11, 0.4, 1e9, math.Inf(1)}
 	for _, x := range xs {

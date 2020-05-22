@@ -6,11 +6,10 @@ import (
 	"sort"
 )
 
-// 1D interpolator interface.
+// Interpolator1D represents a 1D interpolator interface.
 //
 // Interpolates a sequence of (x, y) pairs on a range [begin(), end()].
-// Both begin() and end() can be infinite, but begin() must be lower
-// than end().
+// Both begin() and end() can be infinite, but begin() must be lower than end().
 type Interpolator1D interface {
 	// Returns the lowest allowed argument for evaluate().
 	begin() float64
@@ -23,8 +22,8 @@ type Interpolator1D interface {
 	eval(float64) float64
 }
 
-// Constant 1D interpolator.
-// Defined over the range [-infinity, infinity].
+// ConstInterpolator1D is a constant 1D interpolator,
+// It is defined over the range [-infinity, infinity].
 type ConstInterpolator1D struct {
 	value float64
 }
@@ -41,12 +40,12 @@ func (i1d ConstInterpolator1D) eval(x float64) float64 {
 	return i1d.value
 }
 
-// Creates a new constant 1D interpolator with given value.
+// NewConstInterpolator1D creates a new constant 1D interpolator with given value.
 func NewConstInterpolator1D(value float64) *ConstInterpolator1D {
 	return &ConstInterpolator1D{value}
 }
 
-// Linear 1D interpolator. Defined over the range [xs[0], xs[len(xs) - 1]].
+// LinearInterpolator1D is a linear 1D interpolator. Defined over the range [xs[0], xs[len(xs) - 1]].
 type LinearInterpolator1D struct {
 	xs     []float64
 	ys     []float64
@@ -64,7 +63,7 @@ func (i1d LinearInterpolator1D) end() float64 {
 // Returns a tuple of: (i such that xs[i] <= x < xs[i + 1], xs[i]).
 // Assumes len(xs) >= 2.
 // Panics if such i is not found.
-func find_segment(xs []float64, x float64) (int, float64) {
+func findSegment(xs []float64, x float64) (int, float64) {
 	// Find minimum i s.t. xs[i] >= x, or len(xs) if not found.
 	n := len(xs)
 	i := sort.Search(n, func(i int) bool { return xs[i] > x })
@@ -78,23 +77,21 @@ func find_segment(xs []float64, x float64) (int, float64) {
 	} else {
 		if xs[n-1] == x {
 			return n - 1, x
-		} else {
-			panic(fmt.Sprintf("interp: x value %g above upper bound %g", x, xs[n-1]))
 		}
+		panic(fmt.Sprintf("interp: x value %g above upper bound %g", x, xs[n-1]))
 	}
 }
 
 func (i1d LinearInterpolator1D) eval(x float64) float64 {
-	i, x_i := find_segment(i1d.xs, x)
-	if x == x_i {
+	i, xI := findSegment(i1d.xs, x)
+	if x == xI {
 		return i1d.ys[i]
-	} else {
-		// i < len(i1d.xs) - 1
-		return i1d.ys[i] + i1d.slopes[i]*(x-x_i)
 	}
+	// i < len(i1d.xs) - 1
+	return i1d.ys[i] + i1d.slopes[i]*(x-xI)
 }
 
-// Creates a new linear 1D interpolator.
+// NewLinearInterpolator1D creates a new linear 1D interpolator.
 // Panics if len(xs) < 2, elements of xs are not strictly increasing or
 // len(xs) != len(ys).
 func NewLinearInterpolator1D(xs []float64, ys []float64) *LinearInterpolator1D {

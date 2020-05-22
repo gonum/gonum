@@ -45,7 +45,7 @@ func NewConstInterpolator1D(value float64) *ConstInterpolator1D {
 	return &ConstInterpolator1D{value}
 }
 
-// LinearInterpolator1D is a linear 1D interpolator. Defined over the range [xs[0], xs[len(xs) - 1]].
+// LinearInterpolator1D is a linear 1D interpolator, defined over the range [xs[0], xs[len(xs) - 1]].
 type LinearInterpolator1D struct {
 	xs     []float64
 	ys     []float64
@@ -60,9 +60,8 @@ func (i1d LinearInterpolator1D) end() float64 {
 	return i1d.xs[len(i1d.xs)-1]
 }
 
-// Returns a tuple of: (i such that xs[i] <= x < xs[i + 1], xs[i]).
-// Assumes len(xs) >= 2.
-// Panics if such i is not found.
+// findSegment returns a tuple of: (i such that xs[i] <= x < xs[i + 1], xs[i]),
+// or panics if such i is not found. Assumes that len(xs) >= 2 without checking.
 func findSegment(xs []float64, x float64) (int, float64) {
 	// Find minimum i s.t. xs[i] >= x, or len(xs) if not found.
 	n := len(xs)
@@ -92,6 +91,7 @@ func (i1d LinearInterpolator1D) eval(x float64) float64 {
 }
 
 // NewLinearInterpolator1D creates a new linear 1D interpolator.
+// xs and ys should contain the X and Y values of interpolated nodes, respectively.
 // Panics if len(xs) < 2, elements of xs are not strictly increasing or
 // len(xs) != len(ys).
 func NewLinearInterpolator1D(xs []float64, ys []float64) *LinearInterpolator1D {

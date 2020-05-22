@@ -83,10 +83,10 @@ func BenchmarkFindSegment(b *testing.B) {
 	}
 }
 
-func TestNewLinearInterpolator1D(t *testing.T) {
-	t.Parallel()
+// testPiecewiseInterpolator1DCreation tests common functionality in creating piecewise 1D interpolators.
+func testPiecewiseInterpolator1DCreation(t *testing.T, create func(xs []float64, ys []float64) Interpolator1D) {
 	xs := []float64{0, 1, 2}
-	i1d := NewLinearInterpolator1D(xs, []float64{-0.5, 1.5, 1})
+	i1d := create(xs, []float64{-0.5, 1.5, 1})
 	if xs[0] != i1d.begin() {
 		t.Errorf("unexpected begin() value: got %g: want: %g", i1d.begin(), xs[0])
 	}
@@ -101,14 +101,34 @@ func TestNewLinearInterpolator1D(t *testing.T) {
 	panicParamSets := [...]panicParams{
 		{xs, []float64{-0.5, 1.5}, "xs and ys have different lengths"},
 		{[]float64{0.3}, []float64{0}, "too few points for interpolation"},
-		{[]float64{0.3, 0.3}, []float64{0, 0}, "x values not strictly increasing"},
-		{[]float64{0.3, -0.3}, []float64{0, 0}, "x values not strictly increasing"},
+		{[]float64{0.3, 0.3}, []float64{0, 0}, "xs values not strictly increasing"},
+		{[]float64{0.3, -0.3}, []float64{0, 0}, "xs values not strictly increasing"},
 	}
 	for _, params := range panicParamSets {
-		panicked, message := panics(func() { NewLinearInterpolator1D(params.xs, params.ys) })
+		panicked, message := panics(func() { create(params.xs, params.ys) })
 		expectedMessage := fmt.Sprintf("interp: %s", params.expectedMessage)
 		if !panicked || message != expectedMessage {
 			t.Errorf("expected panic for xs: %v and ys: %v with message: %s", params.xs, params.ys, expectedMessage)
+		}
+	}
+}
+
+func TestNewLinearInterpolator1D(t *testing.T) {
+	t.Parallel()
+	testPiecewiseInterpolator1DCreation(t, func(xs []float64, ys []float64) Interpolator1D { return NewLinearInterpolator1D(xs, ys) })
+}
+
+// testInterpolator1DEval tests evaluation of a 1D interpolator.
+func testInterpolator1DEval(t *testing.T, i1d Interpolator1D, xs []float64, expectedYs []float64, tol float64) {
+	for i, x := range xs {
+		y := i1d.eval(x)
+		yErr := math.Abs(y - expectedYs[i])
+		if yErr > tol {
+			if tol == 0 {
+				t.Errorf("unexpected eval(%g) value: got: %g want: %g", x, y, expectedYs[i])
+			} else {
+				t.Errorf("unexpected eval(%g) value: got: %g want: %g with tolerance: %g", x, y, expectedYs[i], tol)
+			}
 		}
 	}
 }
@@ -118,22 +138,78 @@ func TestLinearInterpolator1DEval(t *testing.T) {
 	xs := []float64{0, 1, 2}
 	ys := []float64{-0.5, 1.5, 1}
 	i1d := NewLinearInterpolator1D(xs, ys)
-	for i, x := range xs {
-		y := i1d.eval(x)
-		if y != ys[i] {
-			t.Errorf("unexpected eval(%g) value: got: %g want: %g", x, y, x)
-		}
+	testInterpolator1DEval(t, i1d, xs, ys, 0)
+	testXs := []float64{0.1, 0.5, 0.8, 1.2}
+	expectedYs := []float64{-0.3, 0.5, 1.1, 1.4}
+	testInterpolator1DEval(t, i1d, testXs, expectedYs, 1e-15)
+}
+
+func BenchmarkNewLinearInterpolator1D(b *testing.B) {
+	xs := []float64{0, 1.5, 3, 4.5, 6, 7.5, 9, 12, 13.5, 16.5}
+	ys := []float64{0, 1, 2, 2.5, 2, 1.5, 4, 10, -2, 2}
+	for i := 0; i < b.N; i++ {
+		NewLinearInterpolator1D(xs, ys)
 	}
-	type params struct {
-		x         float64
-		expectedY float64
+}
+
+func BenchmarkLinearInterpolator1DEval(b *testing.B) {
+	xs := []float64{0, 1.5, 3, 4.5, 6, 7.5, 9, 12, 13.5, 16.5}
+	ys := []float64{0, 1, 2, 2.5, 2, 1.5, 4, 10, -2, 2}
+	i1d := NewLinearInterpolator1D(xs, ys)
+	for i := 0; i < b.N; i++ {
+		i1d.eval(0)
+		i1d.eval(16.5)
+		i1d.eval(4)
+		i1d.eval(7.32)
+		i1d.eval(9.0001)
+		i1d.eval(1.4)
+		i1d.eval(1.6)
+		i1d.eval(13.5)
+		i1d.eval(4.5)
 	}
-	paramSets := [...]params{{0.1, -0.3}, {0.5, 0.5}, {0.8, 1.1}, {1.2, 1.4}}
-	const tolerance float64 = 1e-15
-	for _, params := range paramSets {
-		y := i1d.eval(params.x)
-		if math.Abs(y-params.expectedY) > tolerance {
-			t.Errorf("unexpected eval(%g) value: got: %g want: %g with tolerance: %g", params.x, y, params.expectedY, tolerance)
-		}
+}
+
+func TestNewPiecewiseConstInterpolator1D(t *testing.T) {
+	testPiecewiseInterpolator1DCreation(t, func(xs []float64, ys []float64) Interpolator1D { return NewPiecewiseConstInterpolator1D(xs, ys, true) })
+	testPiecewiseInterpolator1DCreation(t, func(xs []float64, ys []float64) Interpolator1D { return NewPiecewiseConstInterpolator1D(xs, ys, false) })
+}
+
+func benchmarkPiecewiseConstInterpolator1DEval(b *testing.B, leftContinuous bool) {
+	xs := []float64{0, 1.5, 3, 4.5, 6, 7.5, 9, 12, 13.5, 16.5}
+	ys := []float64{0, 1, 2, 2.5, 2, 1.5, 4, 10, -2, 2}
+	i1d := NewPiecewiseConstInterpolator1D(xs, ys, leftContinuous)
+	for i := 0; i < b.N; i++ {
+		i1d.eval(0)
+		i1d.eval(16.5)
+		i1d.eval(4)
+		i1d.eval(7.32)
+		i1d.eval(9.0001)
+		i1d.eval(1.4)
+		i1d.eval(1.6)
+		i1d.eval(13.5)
+		i1d.eval(4.5)
 	}
+}
+
+func BenchmarkPiecewiseConstInterpolator1DLeftContinuousEval(b *testing.B) {
+	benchmarkPiecewiseConstInterpolator1DEval(b, true)
+}
+
+func BenchmarkPiecewiseConstInterpolator1DRightContinuousEval(b *testing.B) {
+	benchmarkPiecewiseConstInterpolator1DEval(b, false)
+}
+
+func TestPiecewiseConstInterpolator1DEval(t *testing.T) {
+	t.Parallel()
+	xs := []float64{0, 1, 2}
+	ys := []float64{-0.5, 1.5, 1}
+	iLeft := NewPiecewiseConstInterpolator1D(xs, ys, true)
+	iRight := NewPiecewiseConstInterpolator1D(xs, ys, false)
+	testInterpolator1DEval(t, iLeft, xs, ys, 0)
+	testInterpolator1DEval(t, iRight, xs, ys, 0)
+	testXs := []float64{0.1, 0.5, 0.8, 1.2}
+	leftYs := []float64{1.5, 1.5, 1.5, 1}
+	rightYs := []float64{-0.5, -0.5, -0.5, 1.5}
+	testInterpolator1DEval(t, iLeft, testXs, leftYs, 0)
+	testInterpolator1DEval(t, iRight, testXs, rightYs, 0)
 }

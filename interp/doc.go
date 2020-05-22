@@ -4,7 +4,8 @@
 
 // Package interp implements algorithms for interpolating sampled values.
 //
-// Contains the following algorithms:
-// 1. constant 1D interpolator
-// 2. linear 1D interpolator
+// Contains the following 1D interpolation algorithms:
+// 1. constant,
+// 2. linear,
+// 3. piecewise constant.
 package interp // import "gonum.org/v1/gonum/interp"

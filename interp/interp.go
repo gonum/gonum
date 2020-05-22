@@ -8,17 +8,17 @@ import (
 	"fmt"
 	"math"
 	"sort"
+
+	"gonum.org/v1/gonum/spatial/r1"
 )
 
 // Interpolator1D represents a 1D interpolator.
 // It interpolates a y(x) function based on some data over a range [begin(), end()].
 // Both begin() and end() can be infinite, but begin() must be lower than end().
 type Interpolator1D interface {
-	// Returns the lowest allowed argument for Eval().
-	begin() float64
 
-	// Returns the highest allowed argument for Eval().
-	end() float64
+	// Returns the closed interval over which one can interpolate.
+	Interval() r1.Interval
 
 	// Evaluates interpolated sequence at x in [begin(), end()].
 	// Panics if the argument is outside this range.
@@ -29,25 +29,17 @@ type Interpolator1D interface {
 // It is defined over the range [-infinity, infinity].
 type ConstInterpolator1D struct {
 	// Constant Y value.
-	value float64
+	Value float64
 }
 
-func (i1d ConstInterpolator1D) begin() float64 {
-	return math.Inf(-1)
-}
-
-func (i1d ConstInterpolator1D) end() float64 {
-	return math.Inf(1)
+// Interval implements Interpolator1D.Interval.
+func (i1d ConstInterpolator1D) Interval() r1.Interval {
+	return r1.Interval{Min: math.Inf(-1), Max: math.Inf(1)}
 }
 
 // Eval implements Interpolator1D.Eval.
 func (i1d ConstInterpolator1D) Eval(x float64) float64 {
-	return i1d.value
-}
-
-// NewConstInterpolator1D creates a new constant 1D interpolator with given value.
-func NewConstInterpolator1D(value float64) *ConstInterpolator1D {
-	return &ConstInterpolator1D{value}
+	return i1d.Value
 }
 
 // findSegment returns a tuple of: (i such that xs[i] <= x < xs[i + 1], xs[i]),
@@ -84,12 +76,9 @@ type LinearInterpolator1D struct {
 	slopes []float64
 }
 
-func (i1d LinearInterpolator1D) begin() float64 {
-	return i1d.xs[0]
-}
-
-func (i1d LinearInterpolator1D) end() float64 {
-	return i1d.xs[len(i1d.xs)-1]
+// Interval implements Interpolator1D.Interval.
+func (i1d LinearInterpolator1D) Interval() r1.Interval {
+	return r1.Interval{Min: i1d.xs[0], Max: i1d.xs[len(i1d.xs)-1]}
 }
 
 // Eval implements Interpolator1D.Eval.
@@ -148,12 +137,9 @@ type PiecewiseConstInterpolator1D struct {
 	leftContinuous bool
 }
 
-func (i1d PiecewiseConstInterpolator1D) begin() float64 {
-	return i1d.xs[0]
-}
-
-func (i1d PiecewiseConstInterpolator1D) end() float64 {
-	return i1d.xs[len(i1d.xs)-1]
+// Interval implements Interpolator1D.Interval.
+func (i1d PiecewiseConstInterpolator1D) Interval() r1.Interval {
+	return r1.Interval{Min: i1d.xs[0], Max: i1d.xs[len(i1d.xs)-1]}
 }
 
 // Eval implements Interpolator1D.Eval.

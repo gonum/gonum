@@ -22,7 +22,7 @@ func panics(fn func()) (panicked bool, message string) {
 
 func TestNewConstInterpolator1D(t *testing.T) {
 	t.Parallel()
-	const value float64 = 42.0
+	const value = 42.0
 	i1d := NewConstInterpolator1D(value)
 	if i1d.begin() != math.Inf(-1) {
 		t.Errorf("unexpected begin() value: got: %g want: %g", i1d.begin(), math.Inf(-1))

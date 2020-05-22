@@ -37,7 +37,7 @@ func TestConstInterpolator1DEval(t *testing.T) {
 	t.Parallel()
 	const value = 42.0
 	ci := ConstInterpolator1D{value}
-	xs := [...]float64{math.Inf(-1), -11, 0.4, 1e9, math.Inf(1)}
+	xs := []float64{math.Inf(-1), -11, 0.4, 1e9, math.Inf(1)}
 	for _, x := range xs {
 		y := ci.Eval(x)
 		if y != value {
@@ -54,15 +54,15 @@ func TestFindSegment(t *testing.T) {
 		expectedI int
 		expectedX float64
 	}
-	paramSets := [...]params{{0, 0, 0}, {0.3, 0, 0}, {1, 1, 1}, {1.5, 1, 1}, {2, 2, 2}}
+	paramSets := []params{{0, 0, 0}, {0.3, 0, 0}, {1, 1, 1}, {1.5, 1, 1}, {2, 2, 2}}
 	for _, param := range paramSets {
 		i, x := findSegment(xs, param.x)
 		if i != param.expectedI || x != param.expectedX {
 			t.Errorf("unexpected value of findSegment(xs, %g): got %d, %g want: %d, %g", param.x, i, x, param.expectedI, param.expectedX)
 		}
 	}
-	panicXs := [...]float64{-0.5, 2.1}
-	expectedMessages := [...]string{
+	panicXs := []float64{-0.5, 2.1}
+	expectedMessages := []string{
 		"interp: x value -0.5 below lower bound 0",
 		"interp: x value 2.1 above upper bound 2",
 	}
@@ -104,7 +104,7 @@ func testPiecewiseInterpolator1DCreation(t *testing.T, create func(xs []float64,
 		ys              []float64
 		expectedMessage string
 	}
-	panicParamSets := [...]panicParams{
+	panicParamSets := []panicParams{
 		{xs, []float64{-0.5, 1.5}, "xs and ys have different lengths"},
 		{[]float64{0.3}, []float64{0}, "too few points for interpolation"},
 		{[]float64{0.3, 0.3}, []float64{0, 0}, "xs values not strictly increasing"},

@@ -33,13 +33,13 @@ type ConstInterpolator1D struct {
 }
 
 // Interval implements Interpolator1D.Interval.
-func (i1d ConstInterpolator1D) Interval() r1.Interval {
+func (ci ConstInterpolator1D) Interval() r1.Interval {
 	return r1.Interval{Min: math.Inf(-1), Max: math.Inf(1)}
 }
 
 // Eval implements Interpolator1D.Eval.
-func (i1d ConstInterpolator1D) Eval(x float64) float64 {
-	return i1d.Value
+func (ci ConstInterpolator1D) Eval(x float64) float64 {
+	return ci.Value
 }
 
 // findSegment returns a tuple of: (i such that xs[i] <= x < xs[i + 1], xs[i]),
@@ -77,18 +77,18 @@ type LinearInterpolator1D struct {
 }
 
 // Interval implements Interpolator1D.Interval.
-func (i1d LinearInterpolator1D) Interval() r1.Interval {
-	return r1.Interval{Min: i1d.xs[0], Max: i1d.xs[len(i1d.xs)-1]}
+func (li LinearInterpolator1D) Interval() r1.Interval {
+	return r1.Interval{Min: li.xs[0], Max: li.xs[len(li.xs)-1]}
 }
 
 // Eval implements Interpolator1D.Eval.
-func (i1d LinearInterpolator1D) Eval(x float64) float64 {
-	i, xI := findSegment(i1d.xs, x)
+func (li LinearInterpolator1D) Eval(x float64) float64 {
+	i, xI := findSegment(li.xs, x)
 	if x == xI {
-		return i1d.ys[i]
+		return li.ys[i]
 	}
 	// i < len(i1d.xs) - 1
-	return i1d.ys[i] + i1d.slopes[i]*(x-xI)
+	return li.ys[i] + li.slopes[i]*(x-xI)
 }
 
 // validateXsAndYs panics if xs and ys do not satify common requirements
@@ -138,21 +138,21 @@ type PiecewiseConstInterpolator1D struct {
 }
 
 // Interval implements Interpolator1D.Interval.
-func (i1d PiecewiseConstInterpolator1D) Interval() r1.Interval {
-	return r1.Interval{Min: i1d.xs[0], Max: i1d.xs[len(i1d.xs)-1]}
+func (pci PiecewiseConstInterpolator1D) Interval() r1.Interval {
+	return r1.Interval{Min: pci.xs[0], Max: pci.xs[len(pci.xs)-1]}
 }
 
 // Eval implements Interpolator1D.Eval.
-func (i1d PiecewiseConstInterpolator1D) Eval(x float64) float64 {
-	i, xI := findSegment(i1d.xs, x)
+func (pci PiecewiseConstInterpolator1D) Eval(x float64) float64 {
+	i, xI := findSegment(pci.xs, x)
 	if x == xI {
-		return i1d.ys[i]
+		return pci.ys[i]
 	}
 	// i < len(i1d.xs) - 1
-	if i1d.leftContinuous {
-		return i1d.ys[i+1]
+	if pci.leftContinuous {
+		return pci.ys[i+1]
 	}
-	return i1d.ys[i]
+	return pci.ys[i]
 }
 
 // NewPiecewiseConstInterpolator1D creates a new piecewise constant 1D interpolator.

@@ -38,9 +38,9 @@ func TestConstInterpolator1DEval(t *testing.T) {
 	i1d := NewConstInterpolator1D(value)
 	xs := [...]float64{math.Inf(-1), -11, 0.4, 1e9, math.Inf(1)}
 	for _, x := range xs {
-		y := i1d.eval(x)
+		y := i1d.Eval(x)
 		if y != value {
-			t.Errorf("unexpected eval(%g) value: got: %g want: %g", x, y, value)
+			t.Errorf("unexpected Eval(%g) value: got: %g want: %g", x, y, value)
 		}
 	}
 }
@@ -125,13 +125,13 @@ func TestNewLinearInterpolator1D(t *testing.T) {
 // testInterpolator1DEval tests evaluation of a 1D interpolator.
 func testInterpolator1DEval(t *testing.T, i1d Interpolator1D, xs []float64, expectedYs []float64, tol float64) {
 	for i, x := range xs {
-		y := i1d.eval(x)
+		y := i1d.Eval(x)
 		yErr := math.Abs(y - expectedYs[i])
 		if yErr > tol {
 			if tol == 0 {
-				t.Errorf("unexpected eval(%g) value: got: %g want: %g", x, y, expectedYs[i])
+				t.Errorf("unexpected Eval(%g) value: got: %g want: %g", x, y, expectedYs[i])
 			} else {
-				t.Errorf("unexpected eval(%g) value: got: %g want: %g with tolerance: %g", x, y, expectedYs[i], tol)
+				t.Errorf("unexpected Eval(%g) value: got: %g want: %g with tolerance: %g", x, y, expectedYs[i], tol)
 			}
 		}
 	}
@@ -161,15 +161,15 @@ func BenchmarkLinearInterpolator1DEval(b *testing.B) {
 	ys := []float64{0, 1, 2, 2.5, 2, 1.5, 4, 10, -2, 2}
 	i1d := NewLinearInterpolator1D(xs, ys)
 	for i := 0; i < b.N; i++ {
-		i1d.eval(0)
-		i1d.eval(16.5)
-		i1d.eval(4)
-		i1d.eval(7.32)
-		i1d.eval(9.0001)
-		i1d.eval(1.4)
-		i1d.eval(1.6)
-		i1d.eval(13.5)
-		i1d.eval(4.5)
+		i1d.Eval(0)
+		i1d.Eval(16.5)
+		i1d.Eval(4)
+		i1d.Eval(7.32)
+		i1d.Eval(9.0001)
+		i1d.Eval(1.4)
+		i1d.Eval(1.6)
+		i1d.Eval(13.5)
+		i1d.Eval(4.5)
 	}
 }
 
@@ -183,15 +183,15 @@ func benchmarkPiecewiseConstInterpolator1DEval(b *testing.B, leftContinuous bool
 	ys := []float64{0, 1, 2, 2.5, 2, 1.5, 4, 10, -2, 2}
 	i1d := NewPiecewiseConstInterpolator1D(xs, ys, leftContinuous)
 	for i := 0; i < b.N; i++ {
-		i1d.eval(0)
-		i1d.eval(16.5)
-		i1d.eval(4)
-		i1d.eval(7.32)
-		i1d.eval(9.0001)
-		i1d.eval(1.4)
-		i1d.eval(1.6)
-		i1d.eval(13.5)
-		i1d.eval(4.5)
+		i1d.Eval(0)
+		i1d.Eval(16.5)
+		i1d.Eval(4)
+		i1d.Eval(7.32)
+		i1d.Eval(9.0001)
+		i1d.Eval(1.4)
+		i1d.Eval(1.6)
+		i1d.Eval(13.5)
+		i1d.Eval(4.5)
 	}
 }
 

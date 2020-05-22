@@ -14,15 +14,15 @@ import (
 // It interpolates a y(x) function based on some data over a range [begin(), end()].
 // Both begin() and end() can be infinite, but begin() must be lower than end().
 type Interpolator1D interface {
-	// Returns the lowest allowed argument for evaluate().
+	// Returns the lowest allowed argument for Eval().
 	begin() float64
 
-	// Returns the highest allowed argument for evaluate().
+	// Returns the highest allowed argument for Eval().
 	end() float64
 
 	// Evaluates interpolated sequence at x in [begin(), end()].
 	// Panics if the argument is outside this range.
-	eval(float64) float64
+	Eval(float64) float64
 }
 
 // ConstInterpolator1D is a constant 1D interpolator,
@@ -40,7 +40,8 @@ func (i1d ConstInterpolator1D) end() float64 {
 	return math.Inf(1)
 }
 
-func (i1d ConstInterpolator1D) eval(x float64) float64 {
+// Eval implements Interpolator1D.Eval.
+func (i1d ConstInterpolator1D) Eval(x float64) float64 {
 	return i1d.value
 }
 
@@ -91,7 +92,8 @@ func (i1d LinearInterpolator1D) end() float64 {
 	return i1d.xs[len(i1d.xs)-1]
 }
 
-func (i1d LinearInterpolator1D) eval(x float64) float64 {
+// Eval implements Interpolator1D.Eval.
+func (i1d LinearInterpolator1D) Eval(x float64) float64 {
 	i, xI := findSegment(i1d.xs, x)
 	if x == xI {
 		return i1d.ys[i]
@@ -154,7 +156,8 @@ func (i1d PiecewiseConstInterpolator1D) end() float64 {
 	return i1d.xs[len(i1d.xs)-1]
 }
 
-func (i1d PiecewiseConstInterpolator1D) eval(x float64) float64 {
+// Eval implements Interpolator1D.Eval.
+func (i1d PiecewiseConstInterpolator1D) Eval(x float64) float64 {
 	i, xI := findSegment(i1d.xs, x)
 	if x == xI {
 		return i1d.ys[i]

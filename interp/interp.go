@@ -12,10 +12,10 @@ import (
 	"gonum.org/v1/gonum/spatial/r1"
 )
 
-// Interpolator1D represents a 1-dimensional interpolator.
+// Interpolator represents a 1-dimensional interpolator.
 // It interpolates a function over a defined closed interval range
 // (which can be infinite on both sides).
-type Interpolator1D interface {
+type Interpolator interface {
 	// Interval returns the valid closed interval for interpolation.
 	Interval() r1.Interval
 
@@ -24,25 +24,25 @@ type Interpolator1D interface {
 	ValueAt(float64) float64
 }
 
-// Constant1D is a constant 1D interpolator,
-// It is defined over the range [-infinity, infinity].
-type Constant1D struct {
+// Constant is an interpolator that predicts the same constant value
+// over the range [-infinity, infinity].
+type Constant struct {
 	// Constant Y value.
 	Value float64
 }
 
 // Interval returns the valid closed interval for interpolation.
-func (ci Constant1D) Interval() r1.Interval {
+func (ci Constant) Interval() r1.Interval {
 	return r1.Interval{Min: math.Inf(-1), Max: math.Inf(1)}
 }
 
 // ValueAt returns the interpolation value at x.
-func (ci Constant1D) ValueAt(x float64) float64 {
+func (ci Constant) ValueAt(x float64) float64 {
 	return ci.Value
 }
 
-// Linear1D is a piecewise linear 1-dimensional interpolator.
-type Linear1D struct {
+// PiecewiseLinear is a piecewise linear 1-dimensional interpolator.
+type PiecewiseLinear struct {
 	// Interpolated X values.
 	xs []float64
 
@@ -53,11 +53,11 @@ type Linear1D struct {
 	slopes []float64
 }
 
-// NewLinear1D creates a new linear 1-dimensional interpolator.
+// NewPiecewiseLinear creates a new linear 1-dimensional interpolator.
 // xs and ys should contain the X and Y values of interpolated nodes, respectively.
-// NewLinear1D panics if len(xs) < 2, elements of xs are not strictly increasing or
+// NewPiecewiseLinear panics if len(xs) < 2, elements of xs are not strictly increasing or
 // len(xs) != len(ys).
-func NewLinear1D(xs []float64, ys []float64) *Linear1D {
+func NewPiecewiseLinear(xs []float64, ys []float64) *PiecewiseLinear {
 	n := len(xs)
 	if len(ys) != n {
 		panic("interp: xs and ys have different lengths")
@@ -74,16 +74,16 @@ func NewLinear1D(xs []float64, ys []float64) *Linear1D {
 		}
 		slopes[i] = (ys[i+1] - ys[i]) / dx
 	}
-	return &Linear1D{xs, ys, slopes}
+	return &PiecewiseLinear{xs, ys, slopes}
 }
 
 // Interval returns the valid closed interval for interpolation.
-func (li Linear1D) Interval() r1.Interval {
+func (li PiecewiseLinear) Interval() r1.Interval {
 	return r1.Interval{Min: li.xs[0], Max: li.xs[len(li.xs)-1]}
 }
 
 // ValueAt returns the interpolation value at x.
-func (li Linear1D) ValueAt(x float64) float64 {
+func (li PiecewiseLinear) ValueAt(x float64) float64 {
 	i, xI := findSegment(li.xs, x)
 	if x == xI {
 		return li.ys[i]
@@ -92,8 +92,8 @@ func (li Linear1D) ValueAt(x float64) float64 {
 	return li.ys[i] + li.slopes[i]*(x-xI)
 }
 
-// PiecewiseConstant1D is a piecewise constant 1-dimensional interpolator.
-type PiecewiseConstant1D struct {
+// PiecewiseConstant is a piecewise constant 1-dimensional interpolator.
+type PiecewiseConstant struct {
 	// Interpolated X values.
 	xs []float64
 
@@ -104,13 +104,13 @@ type PiecewiseConstant1D struct {
 	leftContinuous bool
 }
 
-// NewPiecewiseConstant1D creates a new piecewise constant 1-dimensional interpolator.
+// NewPiecewiseConstant creates a new piecewise constant 1-dimensional interpolator.
 // xs and ys should contain the X and Y values of interpolated nodes, respectively.
 // If leftContinuous == true, then y(xs[i]) == y(xs[i] - eps) for small eps > 0. Otherwise,
 // y(xs[i]) == y(xs[i] + eps).
-// NewPiecewiseConstant1D panics if len(xs) < 2, elements of xs are not strictly increasing or
+// NewPiecewiseConstant panics if len(xs) < 2, elements of xs are not strictly increasing or
 // len(xs) != len(ys).
-func NewPiecewiseConstant1D(xs []float64, ys []float64, leftContinuous bool) *PiecewiseConstant1D {
+func NewPiecewiseConstant(xs []float64, ys []float64, leftContinuous bool) *PiecewiseConstant {
 	n := len(xs)
 	if len(ys) != n {
 		panic("interp: xs and ys have different lengths")
@@ -123,16 +123,16 @@ func NewPiecewiseConstant1D(xs []float64, ys []float64, leftContinuous bool) *Pi
 			panic("interp: xs values not strictly increasing")
 		}
 	}
-	return &PiecewiseConstant1D{xs, ys, leftContinuous}
+	return &PiecewiseConstant{xs, ys, leftContinuous}
 }
 
 // Interval returns the valid closed interval for interpolation.
-func (pci PiecewiseConstant1D) Interval() r1.Interval {
+func (pci PiecewiseConstant) Interval() r1.Interval {
 	return r1.Interval{Min: pci.xs[0], Max: pci.xs[len(pci.xs)-1]}
 }
 
 // ValueAt returns the interpolation value at x.
-func (pci PiecewiseConstant1D) ValueAt(x float64) float64 {
+func (pci PiecewiseConstant) ValueAt(x float64) float64 {
 	i, xI := findSegment(pci.xs, x)
 	if x == xI {
 		return pci.ys[i]

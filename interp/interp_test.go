@@ -63,7 +63,7 @@ func BenchmarkFindSegment(b *testing.B) {
 }
 
 // testPiecewiseInterpolatorCreation tests common functionality in creating piecewise  interpolators.
-func testPiecewiseInterpolatorCreation(t *testing.T, create func(xs []float64, ys []float64) Predictor) {
+func testPiecewiseInterpolatorCreation(t *testing.T, fp FittablePredictor) {
 	type panicParams struct {
 		xs              []float64
 		ys              []float64
@@ -76,7 +76,7 @@ func testPiecewiseInterpolatorCreation(t *testing.T, create func(xs []float64, y
 		{[]float64{0.3, -0.3}, []float64{0, 0}, "xs values not strictly increasing"},
 	}
 	for _, params := range panicParamSets {
-		panicked, message := panics(func() { create(params.xs, params.ys) })
+		panicked, message := panics(func() { fp.Fit(params.xs, params.ys) })
 		expectedMessage := fmt.Sprintf("interp: %s", params.expectedMessage)
 		if !panicked || message != expectedMessage {
 			t.Errorf("expected panic for xs: %v and ys: %v with message: %s", params.xs, params.ys, expectedMessage)
@@ -84,9 +84,9 @@ func testPiecewiseInterpolatorCreation(t *testing.T, create func(xs []float64, y
 	}
 }
 
-func TestNewPiecewiseLinear(t *testing.T) {
+func TestPiecewiseLinearFit(t *testing.T) {
 	t.Parallel()
-	testPiecewiseInterpolatorCreation(t, func(xs []float64, ys []float64) Predictor { return NewPiecewiseLinear(xs, ys) })
+	testPiecewiseInterpolatorCreation(t, &PiecewiseLinear{})
 }
 
 // testInterpolatorPredict tests evaluation of a  interpolator.
@@ -108,7 +108,8 @@ func TestPiecewiseLinearPredict(t *testing.T) {
 	t.Parallel()
 	xs := []float64{0, 1, 2}
 	ys := []float64{-0.5, 1.5, 1}
-	pl := NewPiecewiseLinear(xs, ys)
+	pl := PiecewiseLinear{}
+	pl.Fit(xs, ys)
 	testInterpolatorPredict(t, pl, xs, ys, 0)
 	testInterpolatorPredict(t, pl, []float64{-0.4, 2.6}, []float64{-0.5, 1}, 0)
 	testInterpolatorPredict(t, pl, []float64{0.1, 0.5, 0.8, 1.2}, []float64{-0.3, 0.5, 1.1, 1.4}, 1e-15)
@@ -117,15 +118,17 @@ func TestPiecewiseLinearPredict(t *testing.T) {
 func BenchmarkNewPiecewiseLinear(b *testing.B) {
 	xs := []float64{0, 1.5, 3, 4.5, 6, 7.5, 9, 12, 13.5, 16.5}
 	ys := []float64{0, 1, 2, 2.5, 2, 1.5, 4, 10, -2, 2}
+	pl := PiecewiseLinear{}
 	for i := 0; i < b.N; i++ {
-		NewPiecewiseLinear(xs, ys)
+		pl.Fit(xs, ys)
 	}
 }
 
 func BenchmarkPiecewiseLinearPredict(b *testing.B) {
 	xs := []float64{0, 1.5, 3, 4.5, 6, 7.5, 9, 12, 13.5, 16.5}
 	ys := []float64{0, 1, 2, 2.5, 2, 1.5, 4, 10, -2, 2}
-	pl := NewPiecewiseLinear(xs, ys)
+	pl := PiecewiseLinear{}
+	pl.Fit(xs, ys)
 	for i := 0; i < b.N; i++ {
 		pl.Predict(0)
 		pl.Predict(16.5)
@@ -142,14 +145,15 @@ func BenchmarkPiecewiseLinearPredict(b *testing.B) {
 }
 
 func TestNewPiecewiseConstant(t *testing.T) {
-	testPiecewiseInterpolatorCreation(t, func(xs []float64, ys []float64) Predictor { return NewPiecewiseConstant(xs, ys, true) })
-	testPiecewiseInterpolatorCreation(t, func(xs []float64, ys []float64) Predictor { return NewPiecewiseConstant(xs, ys, false) })
+	testPiecewiseInterpolatorCreation(t, &PiecewiseConstant{LeftContinuous: true})
+	testPiecewiseInterpolatorCreation(t, &PiecewiseConstant{LeftContinuous: false})
 }
 
 func benchmarkPiecewiseConstantPredict(b *testing.B, leftContinuous bool) {
 	xs := []float64{0, 1.5, 3, 4.5, 6, 7.5, 9, 12, 13.5, 16.5}
 	ys := []float64{0, 1, 2, 2.5, 2, 1.5, 4, 10, -2, 2}
-	pc := NewPiecewiseConstant(xs, ys, leftContinuous)
+	pc := PiecewiseConstant{LeftContinuous: leftContinuous}
+	pc.Fit(xs, ys)
 	for i := 0; i < b.N; i++ {
 		pc.Predict(0)
 		pc.Predict(16.5)
@@ -175,8 +179,10 @@ func TestPiecewiseConstantPredict(t *testing.T) {
 	t.Parallel()
 	xs := []float64{0, 1, 2}
 	ys := []float64{-0.5, 1.5, 1}
-	pcLeft := NewPiecewiseConstant(xs, ys, true)
-	pcRight := NewPiecewiseConstant(xs, ys, false)
+	pcLeft := PiecewiseConstant{LeftContinuous: true}
+	pcLeft.Fit(xs, ys)
+	pcRight := PiecewiseConstant{LeftContinuous: false}
+	pcRight.Fit(xs, ys)
 	testInterpolatorPredict(t, pcLeft, xs, ys, 0)
 	testInterpolatorPredict(t, pcRight, xs, ys, 0)
 	testXs := []float64{-0.9, 0.1, 0.5, 0.8, 1.2, 3.1}

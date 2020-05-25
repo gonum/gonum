@@ -15,6 +15,19 @@ type Predictor interface {
 	Predict(float64) float64
 }
 
+// Fitter fits a predictor to data.
+type Fitter interface {
+	// Fit fits a predictor to (X, Y) value pairs provided as two slices.
+	// It panics if len(xs) < 2, elements of xs are not strictly increasing or len(xs) != len(ys).
+	Fit(xs, ys []float64)
+}
+
+// FittablePredictor is a Predictor which can fit itself to data.
+type FittablePredictor interface {
+	Fitter
+	Predictor
+}
+
 // Constant predicts a constant value.
 type Constant struct {
 	// Constant Y value.
@@ -39,11 +52,9 @@ type PiecewiseLinear struct {
 	slopes []float64
 }
 
-// NewPiecewiseLinear creates a new linear 1-dimensional interpolator.
-// xs and ys should contain the X and Y values of interpolated nodes, respectively.
-// NewPiecewiseLinear panics if len(xs) < 2, elements of xs are not strictly increasing or
-// len(xs) != len(ys).
-func NewPiecewiseLinear(xs []float64, ys []float64) *PiecewiseLinear {
+// Fit fits a piecewise linear predictor to (X, Y) value pairs provided as two slices.
+// It panics if len(xs) < 2, elements of xs are not strictly increasing or len(xs) != len(ys).
+func (pl *PiecewiseLinear) Fit(xs, ys []float64) {
 	n := len(xs)
 	if len(ys) != n {
 		panic("interp: xs and ys have different lengths")
@@ -52,15 +63,16 @@ func NewPiecewiseLinear(xs []float64, ys []float64) *PiecewiseLinear {
 		panic("interp: too few points for interpolation")
 	}
 	m := n - 1
-	slopes := make([]float64, m)
+	pl.slopes = make([]float64, m)
 	for i := 0; i < m; i++ {
 		dx := xs[i+1] - xs[i]
 		if dx <= 0 {
 			panic("interp: xs values not strictly increasing")
 		}
-		slopes[i] = (ys[i+1] - ys[i]) / dx
+		pl.slopes[i] = (ys[i+1] - ys[i]) / dx
 	}
-	return &PiecewiseLinear{xs, ys, slopes}
+	pl.xs = xs
+	pl.ys = ys
 }
 
 // Predict returns the interpolation value at x.
@@ -86,23 +98,21 @@ func (pl PiecewiseLinear) Predict(x float64) float64 {
 // PiecewiseConstant is a piecewise constant 1-dimensional interpolator.
 // It extrapolates flat forwards (backwards) the last (first) known Y value.
 type PiecewiseConstant struct {
+	// Whether the interpolated function is left- or right-continuous.
+	// If LeftContinuous == true, then y(xs[i]) == y(xs[i] - eps) for small eps > 0. Otherwise,
+	// y(xs[i]) == y(xs[i] + eps).
+	LeftContinuous bool
+
 	// Interpolated X values.
 	xs []float64
 
 	// Interpolated Y data values, same len as ys.
 	ys []float64
-
-	// Whether the interpolated function is left- or right-continuous.
-	leftContinuous bool
 }
 
-// NewPiecewiseConstant creates a new piecewise constant 1-dimensional interpolator.
-// xs and ys should contain the X and Y values of interpolated nodes, respectively.
-// If leftContinuous == true, then y(xs[i]) == y(xs[i] - eps) for small eps > 0. Otherwise,
-// y(xs[i]) == y(xs[i] + eps).
-// NewPiecewiseConstant panics if len(xs) < 2, elements of xs are not strictly increasing or
-// len(xs) != len(ys).
-func NewPiecewiseConstant(xs []float64, ys []float64, leftContinuous bool) *PiecewiseConstant {
+// Fit fits a piecewise constant predictor to (X, Y) value pairs provided as two slices.
+// It panics if len(xs) < 2, elements of xs are not strictly increasing or len(xs) != len(ys).
+func (pc *PiecewiseConstant) Fit(xs, ys []float64) {
 	n := len(xs)
 	if len(ys) != n {
 		panic("interp: xs and ys have different lengths")
@@ -115,7 +125,8 @@ func NewPiecewiseConstant(xs []float64, ys []float64, leftContinuous bool) *Piec
 			panic("interp: xs values not strictly increasing")
 		}
 	}
-	return &PiecewiseConstant{xs, ys, leftContinuous}
+	pc.xs = xs
+	pc.ys = ys
 }
 
 // Predict returns the interpolation value at x.
@@ -133,7 +144,7 @@ func (pc PiecewiseConstant) Predict(x float64) float64 {
 		// x > pci.xs[i]
 		return pc.ys[n-1]
 	}
-	if pc.leftContinuous {
+	if pc.LeftContinuous {
 		return pc.ys[i+1]
 	}
 	return pc.ys[i]

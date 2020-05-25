@@ -20,7 +20,7 @@ import (
 // number of A is sufficiently large. If A is exactly singular to working precision,
 // Condition == ∞, and the solve algorithm may have completed early. If Condition
 // is large and finite the solve algorithm will be performed, but the computed
-// solution may be innacurate. Due to the nature of finite precision arithmetic,
+// solution may be inaccurate. Due to the nature of finite precision arithmetic,
 // the value of Condition is only an approximate test of singularity.
 type Condition float64
 

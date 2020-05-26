@@ -12,7 +12,7 @@ import (
 // interpolation and extrapolation.
 type Predictor interface {
 	// Predict returns the predicted value at x.
-	Predict(float64) float64
+	Predict(float64 x) float64
 }
 
 // Fitter fits a predictor to data.

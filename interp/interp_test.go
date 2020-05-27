@@ -33,6 +33,19 @@ func TestConstant(t *testing.T) {
 	}
 }
 
+func TestFunction(t *testing.T) {
+	fn := func(x float64) float64 { return math.Exp(x) }
+	predictor := Function(fn)
+	xs := []float64{-100, -1, 0, 0.5, 15}
+	for _, x := range xs {
+		want := fn(x)
+		got := predictor.Predict(x)
+		if got != want {
+			t.Errorf("unexpected Predict(%g) value: got: %g want: %g", x, got, want)
+		}
+	}
+}
+
 func TestFindSegment(t *testing.T) {
 	t.Parallel()
 	xs := []float64{0, 1, 2}

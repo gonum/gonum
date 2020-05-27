@@ -36,6 +36,14 @@ func (c Constant) Predict(x float64) float64 {
 	return float64(c)
 }
 
+// Function predicts by evaluating itself.
+type Function func(float64) float64
+
+// Predict returns the predicted value at x by evaluating fn(x).
+func (fn Function) Predict(x float64) float64 {
+	return fn(x)
+}
+
 // PiecewiseLinear is a piecewise linear 1-dimensional interpolator.
 type PiecewiseLinear struct {
 	// Interpolated X values.

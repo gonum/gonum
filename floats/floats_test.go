@@ -766,6 +766,9 @@ func TestMaxAndIdx(t *testing.T) {
 			t.Errorf("Wrong value "+test.desc+": got:%f want:%f", val, test.wantVal)
 		}
 	}
+	if !Panics(func() { MaxIdx([]float64{}) }) {
+		t.Errorf("Did not panic with zero length")
+	}
 }
 
 func TestMinAndIdx(t *testing.T) {
@@ -815,6 +818,9 @@ func TestMinAndIdx(t *testing.T) {
 		if !same(val, test.wantVal) {
 			t.Errorf("Wrong value "+test.desc+": got:%f want:%f", val, test.wantVal)
 		}
+	}
+	if !Panics(func() { MinIdx([]float64{}) }) {
+		t.Errorf("Did not panic with zero length")
 	}
 }
 
@@ -1032,6 +1038,9 @@ func TestNearestIdx(t *testing.T) {
 			t.Errorf(test.desc+": got:%d want:%d", ind, test.want)
 		}
 	}
+	if !Panics(func() { NearestIdx([]float64{}, 0) }) {
+		t.Errorf("Did not panic with zero length")
+	}
 }
 
 func TestNearestIdxForSpan(t *testing.T) {
@@ -1107,6 +1116,13 @@ func TestNearestIdxForSpan(t *testing.T) {
 			idx:    2,
 		},
 		{
+			length: 5,
+			lower:  math.Inf(-1),
+			upper:  math.Inf(1),
+			value:  math.Inf(-1),
+			idx:    0,
+		},
+		{
 			length: 4,
 			lower:  math.Inf(-1),
 			upper:  math.Inf(1),
@@ -1141,10 +1157,125 @@ func TestNearestIdxForSpan(t *testing.T) {
 			value:  1,
 			idx:    0,
 		},
+		{
+			length: 5,
+			lower:  0,
+			upper:  1,
+			value:  math.NaN(),
+			idx:    0,
+		},
+		{
+			length: 5,
+			lower:  math.NaN(),
+			upper:  1,
+			value:  0,
+			idx:    4,
+		},
+		{
+			length: 5,
+			lower:  math.Inf(-1),
+			upper:  1,
+			value:  math.Inf(-1),
+			idx:    0,
+		},
+		{
+			length: 5,
+			lower:  math.Inf(-1),
+			upper:  1,
+			value:  0,
+			idx:    4,
+		},
+		{
+			length: 5,
+			lower:  math.Inf(1),
+			upper:  1,
+			value:  math.Inf(1),
+			idx:    0,
+		},
+		{
+			length: 5,
+			lower:  math.Inf(1),
+			upper:  1,
+			value:  0,
+			idx:    4,
+		},
+		{
+			length: 5,
+			lower:  100,
+			upper:  math.Inf(-1),
+			value:  math.Inf(-1),
+			idx:    4,
+		},
+		{
+			length: 5,
+			lower:  100,
+			upper:  math.Inf(-1),
+			value:  200,
+			idx:    0,
+		},
+		{
+			length: 5,
+			lower:  100,
+			upper:  math.Inf(1),
+			value:  math.Inf(1),
+			idx:    4,
+		},
+		{
+			length: 5,
+			lower:  100,
+			upper:  math.Inf(1),
+			value:  200,
+			idx:    0,
+		},
+		{
+			length: 5,
+			lower:  -1,
+			upper:  2,
+			value:  math.Inf(-1),
+			idx:    0,
+		},
+		{
+			length: 5,
+			lower:  -1,
+			upper:  2,
+			value:  math.Inf(1),
+			idx:    4,
+		},
+		{
+			length: 5,
+			lower:  1,
+			upper:  -2,
+			value:  math.Inf(-1),
+			idx:    4,
+		},
+		{
+			length: 5,
+			lower:  1,
+			upper:  -2,
+			value:  math.Inf(1),
+			idx:    0,
+		},
+		{
+			length: 5,
+			lower:  2,
+			upper:  0,
+			value:  3,
+			idx:    0,
+		},
+		{
+			length: 5,
+			lower:  2,
+			upper:  0,
+			value:  -1,
+			idx:    4,
+		},
 	} {
 		if idx := NearestIdxForSpan(test.length, test.lower, test.upper, test.value); test.idx != idx {
 			t.Errorf("Case %v mismatch: Want: %v, Got: %v", i, test.idx, idx)
 		}
+	}
+	if !Panics(func() { NearestIdxForSpan(1, 0, 1, 0.5) }) {
+		t.Errorf("Did not panic for too short span length")
 	}
 }
 
@@ -1218,6 +1349,7 @@ func TestRound(t *testing.T) {
 	}{
 		{x: 0, prec: 1, want: 0},
 		{x: math.Inf(1), prec: 1, want: math.Inf(1)},
+		{x: math.Inf(-1), prec: 1, want: math.Inf(-1)},
 		{x: math.NaN(), prec: 1, want: math.NaN()},
 		{x: func() float64 { var f float64; return -f }(), prec: 1, want: 0},
 		{x: math.MaxFloat64 / 2, prec: 1, want: math.MaxFloat64 / 2},
@@ -1253,6 +1385,10 @@ func TestRound(t *testing.T) {
 		{x: 454.455, prec: 4, want: 454.455},
 
 		// Negative precision.
+		{x: math.Inf(1), prec: -1, want: math.Inf(1)},
+		{x: math.Inf(-1), prec: -1, want: math.Inf(-1)},
+		{x: math.NaN(), prec: -1, want: math.NaN()},
+		{x: func() float64 { var f float64; return -f }(), prec: -1, want: 0},
 		{x: 454.45, prec: -1, want: 450},
 		{x: 454.45, prec: -2, want: 500},
 		{x: 500, prec: -3, want: 1000},
@@ -1282,6 +1418,7 @@ func TestRoundEven(t *testing.T) {
 	}{
 		{x: 0, prec: 1, want: 0},
 		{x: math.Inf(1), prec: 1, want: math.Inf(1)},
+		{x: math.Inf(-1), prec: 1, want: math.Inf(-1)},
 		{x: math.NaN(), prec: 1, want: math.NaN()},
 		{x: func() float64 { var f float64; return -f }(), prec: 1, want: 0},
 		{x: math.MaxFloat64 / 2, prec: 1, want: math.MaxFloat64 / 2},
@@ -1317,6 +1454,10 @@ func TestRoundEven(t *testing.T) {
 		{x: 454.455, prec: 4, want: 454.455},
 
 		// Negative precision.
+		{x: math.Inf(1), prec: -1, want: math.Inf(1)},
+		{x: math.Inf(-1), prec: -1, want: math.Inf(-1)},
+		{x: math.NaN(), prec: -1, want: math.NaN()},
+		{x: func() float64 { var f float64; return -f }(), prec: -1, want: 0},
 		{x: 454.45, prec: -1, want: 450},
 		{x: 454.45, prec: -2, want: 500},
 		{x: 500, prec: -3, want: 0},
@@ -1386,6 +1527,9 @@ func TestScaleTo(t *testing.T) {
 	}
 	if !Same(s, sCopy) {
 		t.Errorf("Source modified during call. Got %v, want %v", s, sCopy)
+	}
+	if !Panics(func() { ScaleTo(dst, 0, []float64{1}) }) {
+		t.Errorf("Did not panic when slice lengths do not match")
 	}
 }
 

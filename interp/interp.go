@@ -29,14 +29,11 @@ type FittablePredictor interface {
 }
 
 // Constant predicts a constant value.
-type Constant struct {
-	// Constant Y value.
-	Value float64
-}
+type Constant float64
 
 // Predict returns the predicted value at x.
 func (c Constant) Predict(x float64) float64 {
-	return c.Value
+	return float64(c)
 }
 
 // PiecewiseLinear is a piecewise linear 1-dimensional interpolator.

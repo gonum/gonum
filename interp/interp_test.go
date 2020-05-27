@@ -23,7 +23,7 @@ func panics(fn func()) (panicked bool, message string) {
 func TestConstant(t *testing.T) {
 	t.Parallel()
 	const value = 42.0
-	c := Constant{value}
+	c := Constant(value)
 	xs := []float64{math.Inf(-1), -11, 0.4, 1e9, math.Inf(1)}
 	for _, x := range xs {
 		y := c.Predict(x)

@@ -40,7 +40,6 @@ func (c Constant) Predict(x float64) float64 {
 }
 
 // PiecewiseLinear is a piecewise linear 1-dimensional interpolator.
-// It extrapolates flat forwards (backwards) the last (first) known Y value.
 type PiecewiseLinear struct {
 	// Interpolated X values.
 	xs []float64
@@ -96,7 +95,6 @@ func (pl PiecewiseLinear) Predict(x float64) float64 {
 }
 
 // PiecewiseConstant is a piecewise constant 1-dimensional interpolator.
-// It extrapolates flat forwards (backwards) the last (first) known Y value.
 type PiecewiseConstant struct {
 	// Whether the interpolated function is left- or right-continuous.
 	// If LeftContinuous == true, then y(xs[i]) == y(xs[i] - eps) for small eps > 0. Otherwise,

@@ -1611,6 +1611,20 @@ func TestWithin(t *testing.T) {
 	}
 }
 
+func TestKahanSum(t *testing.T) {
+	t.Parallel()
+	k := 100000
+	s := make([]float64, 2*k+1)
+	for i := -k; i <= k; i++ {
+		s[i+k] = 0.2 * float64(i)
+	}
+	// Test fails if we replace KahanSum(s) with Sum(s).
+	result := KahanSum(s)
+	if math.Abs(result) > EqTolerance {
+		t.Errorf("Wrong sum returned. Want: 0, got: %g", result)
+	}
+}
+
 func randomSlice(l int) []float64 {
 	s := make([]float64, l)
 	for i := range s {
@@ -1801,3 +1815,16 @@ func BenchmarkNorm2Small(b *testing.B)  { benchmarkNorm2(b, Small) }
 func BenchmarkNorm2Medium(b *testing.B) { benchmarkNorm2(b, Medium) }
 func BenchmarkNorm2Large(b *testing.B)  { benchmarkNorm2(b, Large) }
 func BenchmarkNorm2Huge(b *testing.B)   { benchmarkNorm2(b, Huge) }
+
+func benchmarkKahanSum(b *testing.B, size int) {
+	s := randomSlice(size)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		KahanSum(s)
+	}
+}
+
+func BenchmarkKahanSumSmall(b *testing.B)  { benchmarkKahanSum(b, Small) }
+func BenchmarkKahanSumMedium(b *testing.B) { benchmarkKahanSum(b, Medium) }
+func BenchmarkKahanSumLarge(b *testing.B)  { benchmarkKahanSum(b, Large) }
+func BenchmarkKahanSumHuge(b *testing.B)   { benchmarkKahanSum(b, Huge) }

@@ -923,3 +923,18 @@ func Within(s []float64, v float64) int {
 	}
 	return -1
 }
+
+// KahanSum returns the sum of the elements of the slice, calculated in a more
+// accurate but also more expensive way. It uses Kahan's compensated summation
+// algorithm: https://en.wikipedia.org/wiki/Kahan_summation_algorithm.
+func KahanSum(s []float64) float64 {
+	sum := 0.
+	c := 0.
+	for _, x := range s {
+		y := x - c
+		t := sum + y
+		c = (t - sum) - y
+		sum = t
+	}
+	return sum
+}

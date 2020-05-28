@@ -31,11 +31,8 @@ func (b Bernoulli) CDF(x float64) float64 {
 
 // Entropy returns the entropy of the distribution.
 func (b Bernoulli) Entropy() float64 {
-	if b.P == 0 {
+	if b.P == 0 || b.P == 1 {
 		return 0
-	}
-	if b.P == 1 {
-		return 1
 	}
 	q := 1 - b.P
 	return -b.P*math.Log(b.P) - q*math.Log(q)
@@ -83,7 +80,13 @@ func (Bernoulli) NumParameters() int {
 
 // Prob computes the value of the probability distribution at x.
 func (b Bernoulli) Prob(x float64) float64 {
-	return math.Exp(b.LogProb(x))
+	if x == 0 {
+		return 1 - b.P
+	}
+	if x == 1 {
+		return b.P
+	}
+	return 0.
 }
 
 // Quantile returns the inverse of the cumulative probability distribution.
@@ -123,7 +126,13 @@ func (b Bernoulli) StdDev() float64 {
 
 // Survival returns the survival function (complementary CDF) at x.
 func (b Bernoulli) Survival(x float64) float64 {
-	return 1 - b.CDF(x)
+	if x < 0 {
+		return 1
+	}
+	if x < 1 {
+		return b.P
+	}
+	return 0
 }
 
 // Variance returns the variance of the probability distribution.

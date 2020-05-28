@@ -925,8 +925,8 @@ func Within(s []float64, v float64) int {
 }
 
 // KahanSum returns the sum of the elements of the slice, calculated in a more
-// accurate but also more expensive way. It uses Kahan's compensated summation
-// algorithm: https://en.wikipedia.org/wiki/Kahan_summation_algorithm.
+// accurate but also more expensive way than Sum. It uses Kahan's compensated
+// summation algorithm: https://en.wikipedia.org/wiki/Kahan_summation_algorithm.
 func KahanSum(s []float64) float64 {
 	sum := 0.
 	c := 0.
@@ -937,4 +937,18 @@ func KahanSum(s []float64) float64 {
 		sum = t
 	}
 	return sum
+}
+
+// PairwiseSum returns the sum of the elements of the slice, calculated in a more
+// accurate but also more expensive way than Sum. It uses pairwise summation,
+// which divides the summed slice in two equal parts, sums them independently (with
+// recursion) and adds the sums. For slices shorter than 8 elements it simply calls
+// Sum. See https://en.wikipedia.org/wiki/Pairwise_summation for details.
+func PairwiseSum(s []float64) float64 {
+	n := len(s)
+	if n >= 8 {
+		m := n / 2
+		return PairwiseSum(s[0:m]) + PairwiseSum(s[m:n])
+	}
+	return Sum(s)
 }

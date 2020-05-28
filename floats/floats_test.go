@@ -1611,18 +1611,42 @@ func TestWithin(t *testing.T) {
 	}
 }
 
+func testMoreAccurateSum(sum func([]float64) float64, t *testing.T) {
+	k := 100000
+	largeS := make([]float64, 2*k+1)
+	for i := -k; i <= k; i++ {
+		largeS[i+k] = 0.2 * float64(i)
+	}
+
+	for _, test := range []struct {
+		s    []float64
+		want float64
+	}{
+		{
+			// Fails if we use simple Sum.
+			s:    largeS,
+			want: 0.,
+		},
+		{
+			s:    []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+			want: 55,
+		},
+	} {
+		got := sum(test.s)
+		if math.Abs(got-test.want) > EqTolerance {
+			t.Errorf("Wrong sum returned. Want: %g, got: %g", test.want, got)
+		}
+	}
+}
+
 func TestKahanSum(t *testing.T) {
 	t.Parallel()
-	k := 100000
-	s := make([]float64, 2*k+1)
-	for i := -k; i <= k; i++ {
-		s[i+k] = 0.2 * float64(i)
-	}
-	// Test fails if we replace KahanSum(s) with Sum(s).
-	result := KahanSum(s)
-	if math.Abs(result) > EqTolerance {
-		t.Errorf("Wrong sum returned. Want: 0, got: %g", result)
-	}
+	testMoreAccurateSum(KahanSum, t)
+}
+
+func TestPairwiseSum(t *testing.T) {
+	t.Parallel()
+	testMoreAccurateSum(PairwiseSum, t)
 }
 
 func randomSlice(l int) []float64 {
@@ -1828,6 +1852,19 @@ func BenchmarkKahanSumSmall(b *testing.B)  { benchmarkKahanSum(b, Small) }
 func BenchmarkKahanSumMedium(b *testing.B) { benchmarkKahanSum(b, Medium) }
 func BenchmarkKahanSumLarge(b *testing.B)  { benchmarkKahanSum(b, Large) }
 func BenchmarkKahanSumHuge(b *testing.B)   { benchmarkKahanSum(b, Huge) }
+
+func benchmarkPairwiseSum(b *testing.B, size int) {
+	s := randomSlice(size)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		PairwiseSum(s)
+	}
+}
+
+func BenchmarkPairwiseSumSmall(b *testing.B)  { benchmarkPairwiseSum(b, Small) }
+func BenchmarkPairwiseSumMedium(b *testing.B) { benchmarkPairwiseSum(b, Medium) }
+func BenchmarkPairwiseSumLarge(b *testing.B)  { benchmarkPairwiseSum(b, Large) }
+func BenchmarkPairwiseSumHuge(b *testing.B)   { benchmarkPairwiseSum(b, Huge) }
 
 func benchmarkSum(b *testing.B, size int) {
 	s := randomSlice(size)

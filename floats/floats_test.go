@@ -767,7 +767,7 @@ func TestMaxAndIdx(t *testing.T) {
 		}
 	}
 	if !Panics(func() { MaxIdx([]float64{}) }) {
-		t.Errorf("Did not panic with zero length")
+		t.Errorf("Expected panic with zero length")
 	}
 }
 
@@ -820,7 +820,7 @@ func TestMinAndIdx(t *testing.T) {
 		}
 	}
 	if !Panics(func() { MinIdx([]float64{}) }) {
-		t.Errorf("Did not panic with zero length")
+		t.Errorf("Expected panic with zero length")
 	}
 }
 
@@ -1039,7 +1039,7 @@ func TestNearestIdx(t *testing.T) {
 		}
 	}
 	if !Panics(func() { NearestIdx([]float64{}, 0) }) {
-		t.Errorf("Did not panic with zero length")
+		t.Errorf("Expected panic with zero length")
 	}
 }
 
@@ -1282,7 +1282,7 @@ func TestNearestIdxForSpan(t *testing.T) {
 		}
 	}
 	if !Panics(func() { NearestIdxForSpan(1, 0, 1, 0.5) }) {
-		t.Errorf("Did not panic for too short span length")
+		t.Errorf("Expected panic for short span length")
 	}
 }
 
@@ -1536,7 +1536,7 @@ func TestScaleTo(t *testing.T) {
 		t.Errorf("Source modified during call. Got %v, want %v", s, sCopy)
 	}
 	if !Panics(func() { ScaleTo(dst, 0, []float64{1}) }) {
-		t.Errorf("Did not panic when slice lengths do not match")
+		t.Errorf("Expected panic with different slice lengths")
 	}
 }
 

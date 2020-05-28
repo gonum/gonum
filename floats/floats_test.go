@@ -1123,6 +1123,13 @@ func TestNearestIdxForSpan(t *testing.T) {
 			idx:    0,
 		},
 		{
+			length: 5,
+			lower:  math.Inf(-1),
+			upper:  math.Inf(1),
+			value:  math.Inf(1),
+			idx:    4,
+		},
+		{
 			length: 4,
 			lower:  math.Inf(-1),
 			upper:  math.Inf(1),

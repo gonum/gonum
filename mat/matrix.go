@@ -371,7 +371,7 @@ func Row(dst []float64, i int, a Matrix) []float64 {
 // Cond will panic with matrix.ErrShape if the matrix has zero size.
 //
 // BUG(btracey): The computation of the 1-norm and ∞-norm for non-square matrices
-// is innacurate, although is typically the right order of magnitude. See
+// is inaccurate, although is typically the right order of magnitude. See
 // https://github.com/xianyi/OpenBLAS/issues/636. While the value returned will
 // change with the resolution of this bug, the result from Cond will match the
 // condition number used internally.

@@ -924,21 +924,6 @@ func Within(s []float64, v float64) int {
 	return -1
 }
 
-// KahanSum returns the sum of the elements of the slice, calculated in a more
-// accurate but also more expensive way than Sum. It uses Kahan's compensated
-// summation algorithm: https://en.wikipedia.org/wiki/Kahan_summation_algorithm.
-func KahanSum(s []float64) float64 {
-	sum := 0.
-	c := 0.
-	for _, x := range s {
-		y := x - c
-		t := sum + y
-		c = (t - sum) - y
-		sum = t
-	}
-	return sum
-}
-
 // PairwiseSum returns the sum of the elements of the slice, calculated in a more
 // accurate but also more expensive way than Sum. It uses pairwise summation,
 // which divides the summed slice in two equal parts, sums them independently (with
@@ -951,4 +936,23 @@ func PairwiseSum(s []float64) float64 {
 		return PairwiseSum(s[0:m]) + PairwiseSum(s[m:n])
 	}
 	return Sum(s)
+}
+
+// NeumaierSum returns the sum of the elements of the slice, calculated in a more
+// accurate but also more expensive way than Sum. It uses an improved version of
+// Kahan's compensated summation algorithm proposed by Neumaier: see
+// https://en.wikipedia.org/wiki/Kahan_summation_algorithm for details.
+func NeumaierSum(s []float64) float64 {
+	sum := 0.
+	c := 0.
+	for _, x := range s {
+		t := sum + x
+		if math.Abs(sum) >= math.Abs(x) {
+			c += ((sum - t) + x)
+		} else {
+			c += ((x - t) + sum)
+		}
+		sum = t
+	}
+	return sum + c
 }

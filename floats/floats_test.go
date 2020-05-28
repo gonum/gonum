@@ -1611,42 +1611,60 @@ func TestWithin(t *testing.T) {
 	}
 }
 
-func testMoreAccurateSum(sum func([]float64) float64, t *testing.T) {
+func testMoreAccurateSummation(t *testing.T, sum func([]float64) float64) {
 	k := 100000
-	largeS := make([]float64, 2*k+1)
+	s1 := make([]float64, 2*k+1)
 	for i := -k; i <= k; i++ {
-		largeS[i+k] = 0.2 * float64(i)
+		s1[i+k] = 0.2 * float64(i)
 	}
+	s2 := make([]float64, k+1)
+	for i := 0; i < k; i++ {
+		s2[i] = 10. / float64(k)
+	}
+	s2[k] = -10
 
-	for _, test := range []struct {
+	for i, test := range []struct {
 		s    []float64
 		want float64
 	}{
 		{
 			// Fails if we use simple Sum.
-			s:    largeS,
+			s:    s1,
+			want: 0.,
+		},
+		{
+			// Fails if we use simple Sum.
+			s:    s2,
 			want: 0.,
 		},
 		{
 			s:    []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
 			want: 55,
 		},
+		{
+			s:    []float64{1.2e20, 0.1, -2.4e20, -0.1, 1.2e20, 0.2, 0.2},
+			want: 0.4,
+		},
+		{
+			s:    []float64{1, 1e100, 1, -1e100},
+			want: 2.,
+		},
 	} {
 		got := sum(test.s)
 		if math.Abs(got-test.want) > EqTolerance {
-			t.Errorf("Wrong sum returned. Want: %g, got: %g", test.want, got)
+			t.Errorf("Wrong sum returned in test case %d. Want: %g, got: %g", i, test.want, got)
 		}
 	}
 }
 
-func TestKahanSum(t *testing.T) {
-	t.Parallel()
-	testMoreAccurateSum(KahanSum, t)
-}
-
 func TestPairwiseSum(t *testing.T) {
 	t.Parallel()
-	testMoreAccurateSum(PairwiseSum, t)
+	testMoreAccurateSummation(t, PairwiseSum)
+}
+
+func TestNeumaierSum(t *testing.T) {
+	t.Parallel()
+	testMoreAccurateSummation(t, NeumaierSum)
 }
 
 func randomSlice(l int) []float64 {
@@ -1840,19 +1858,6 @@ func BenchmarkNorm2Medium(b *testing.B) { benchmarkNorm2(b, Medium) }
 func BenchmarkNorm2Large(b *testing.B)  { benchmarkNorm2(b, Large) }
 func BenchmarkNorm2Huge(b *testing.B)   { benchmarkNorm2(b, Huge) }
 
-func benchmarkKahanSum(b *testing.B, size int) {
-	s := randomSlice(size)
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		KahanSum(s)
-	}
-}
-
-func BenchmarkKahanSumSmall(b *testing.B)  { benchmarkKahanSum(b, Small) }
-func BenchmarkKahanSumMedium(b *testing.B) { benchmarkKahanSum(b, Medium) }
-func BenchmarkKahanSumLarge(b *testing.B)  { benchmarkKahanSum(b, Large) }
-func BenchmarkKahanSumHuge(b *testing.B)   { benchmarkKahanSum(b, Huge) }
-
 func benchmarkPairwiseSum(b *testing.B, size int) {
 	s := randomSlice(size)
 	b.ResetTimer()
@@ -1865,6 +1870,19 @@ func BenchmarkPairwiseSumSmall(b *testing.B)  { benchmarkPairwiseSum(b, Small) }
 func BenchmarkPairwiseSumMedium(b *testing.B) { benchmarkPairwiseSum(b, Medium) }
 func BenchmarkPairwiseSumLarge(b *testing.B)  { benchmarkPairwiseSum(b, Large) }
 func BenchmarkPairwiseSumHuge(b *testing.B)   { benchmarkPairwiseSum(b, Huge) }
+
+func benchmarkNeumaierSum(b *testing.B, size int) {
+	s := randomSlice(size)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		NeumaierSum(s)
+	}
+}
+
+func BenchmarkNeumaierSumSmall(b *testing.B)  { benchmarkNeumaierSum(b, Small) }
+func BenchmarkNeumaierSumMedium(b *testing.B) { benchmarkNeumaierSum(b, Medium) }
+func BenchmarkNeumaierSumLarge(b *testing.B)  { benchmarkNeumaierSum(b, Large) }
+func BenchmarkNeumaierSumHuge(b *testing.B)   { benchmarkNeumaierSum(b, Huge) }
 
 func benchmarkSum(b *testing.B, size int) {
 	s := randomSlice(size)

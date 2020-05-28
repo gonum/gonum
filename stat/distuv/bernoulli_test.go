@@ -11,7 +11,7 @@ import (
 	"golang.org/x/exp/rand"
 )
 
-func TestBernouilli(t *testing.T) {
+func TestBernoulli(t *testing.T) {
 	t.Parallel()
 	src := rand.New(rand.NewSource(1))
 	for i, dist := range []Bernoulli{
@@ -19,11 +19,12 @@ func TestBernouilli(t *testing.T) {
 		{P: 0.9, Src: src},
 		{P: 0.2, Src: src},
 	} {
-		testBernouilli(t, dist, i)
+		testBernoulli(t, dist, i)
+		testBernoulliCDF(t, dist)
 	}
 }
 
-func testBernouilli(t *testing.T, dist Bernoulli, i int) {
+func testBernoulli(t *testing.T, dist Bernoulli, i int) {
 	const (
 		tol  = 1e-2
 		n    = 3e6
@@ -39,4 +40,22 @@ func testBernouilli(t *testing.T, dist Bernoulli, i int) {
 	checkExKurtosis(t, i, x, dist, tol)
 	checkSkewness(t, i, x, dist, tol)
 	checkProbDiscrete(t, i, x, dist, tol)
+}
+
+func testBernoulliCDF(t *testing.T, dist Bernoulli) {
+	if dist.CDF(-0.000001) != 0 {
+		t.Errorf("Bernoulli CDF below zero is not zero")
+	}
+	if dist.CDF(0) != 1-dist.P {
+		t.Errorf("Bernoulli CDF at zero is not 1 - P(1)")
+	}
+	if dist.CDF(0.0001) != 1-dist.P {
+		t.Errorf("Bernoulli CDF between zero and one is not 1 - P(1)")
+	}
+	if dist.CDF(1) != 1 {
+		t.Errorf("Bernoulli CDF at one is not one")
+	}
+	if dist.CDF(1.00001) != 1 {
+		t.Errorf("Bernoulli CDF above one is not one")
+	}
 }

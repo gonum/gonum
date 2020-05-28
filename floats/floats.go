@@ -577,7 +577,7 @@ func NearestIdxForSpan(n int, l, u float64, v float64) int {
 			if math.Copysign(1, v) == math.Copysign(1, l) {
 				return 0
 			}
-			return n - 1
+			return n/2 + 1
 		}
 		if math.Copysign(1, v) == math.Copysign(1, l) {
 			return 0

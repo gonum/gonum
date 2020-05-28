@@ -1828,3 +1828,16 @@ func BenchmarkKahanSumSmall(b *testing.B)  { benchmarkKahanSum(b, Small) }
 func BenchmarkKahanSumMedium(b *testing.B) { benchmarkKahanSum(b, Medium) }
 func BenchmarkKahanSumLarge(b *testing.B)  { benchmarkKahanSum(b, Large) }
 func BenchmarkKahanSumHuge(b *testing.B)   { benchmarkKahanSum(b, Huge) }
+
+func benchmarkSum(b *testing.B, size int) {
+	s := randomSlice(size)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		Sum(s)
+	}
+}
+
+func BenchmarkSumSmall(b *testing.B)  { benchmarkSum(b, Small) }
+func BenchmarkSumMedium(b *testing.B) { benchmarkSum(b, Medium) }
+func BenchmarkSumLarge(b *testing.B)  { benchmarkSum(b, Large) }
+func BenchmarkSumHuge(b *testing.B)   { benchmarkSum(b, Huge) }

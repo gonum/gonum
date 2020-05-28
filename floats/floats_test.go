@@ -1762,7 +1762,8 @@ func TestWithin(t *testing.T) {
 	}
 }
 
-func testMoreAccurateSummation(t *testing.T, sum func([]float64) float64) {
+func TestNeumaierSum(t *testing.T) {
+	t.Parallel()
 	k := 100000
 	s1 := make([]float64, 2*k+1)
 	for i := -k; i <= k; i++ {
@@ -1801,21 +1802,11 @@ func testMoreAccurateSummation(t *testing.T, sum func([]float64) float64) {
 			want: 2.,
 		},
 	} {
-		got := sum(test.s)
+		got := NeumaierSum(test.s)
 		if math.Abs(got-test.want) > EqTolerance {
 			t.Errorf("Wrong sum returned in test case %d. Want: %g, got: %g", i, test.want, got)
 		}
 	}
-}
-
-func TestPairwiseSum(t *testing.T) {
-	t.Parallel()
-	testMoreAccurateSummation(t, PairwiseSum)
-}
-
-func TestNeumaierSum(t *testing.T) {
-	t.Parallel()
-	testMoreAccurateSummation(t, NeumaierSum)
 }
 
 func randomSlice(l int) []float64 {
@@ -2008,19 +1999,6 @@ func BenchmarkNorm2Small(b *testing.B)  { benchmarkNorm2(b, Small) }
 func BenchmarkNorm2Medium(b *testing.B) { benchmarkNorm2(b, Medium) }
 func BenchmarkNorm2Large(b *testing.B)  { benchmarkNorm2(b, Large) }
 func BenchmarkNorm2Huge(b *testing.B)   { benchmarkNorm2(b, Huge) }
-
-func benchmarkPairwiseSum(b *testing.B, size int) {
-	s := randomSlice(size)
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		PairwiseSum(s)
-	}
-}
-
-func BenchmarkPairwiseSumSmall(b *testing.B)  { benchmarkPairwiseSum(b, Small) }
-func BenchmarkPairwiseSumMedium(b *testing.B) { benchmarkPairwiseSum(b, Medium) }
-func BenchmarkPairwiseSumLarge(b *testing.B)  { benchmarkPairwiseSum(b, Large) }
-func BenchmarkPairwiseSumHuge(b *testing.B)   { benchmarkPairwiseSum(b, Huge) }
 
 func benchmarkNeumaierSum(b *testing.B, size int) {
 	s := randomSlice(size)

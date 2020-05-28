@@ -924,20 +924,6 @@ func Within(s []float64, v float64) int {
 	return -1
 }
 
-// PairwiseSum returns the sum of the elements of the slice, calculated in a more
-// accurate but also more expensive way than Sum. It uses pairwise summation,
-// which divides the summed slice in two equal parts, sums them independently (with
-// recursion) and adds the sums. For slices shorter than 8 elements it simply calls
-// Sum. See https://en.wikipedia.org/wiki/Pairwise_summation for details.
-func PairwiseSum(s []float64) float64 {
-	n := len(s)
-	if n >= 8 {
-		m := n / 2
-		return PairwiseSum(s[0:m]) + PairwiseSum(s[m:n])
-	}
-	return Sum(s)
-}
-
 // NeumaierSum returns the sum of the elements of the slice, calculated in a more
 // accurate but also more expensive way than Sum. It uses an improved version of
 // Kahan's compensated summation algorithm proposed by Neumaier: see

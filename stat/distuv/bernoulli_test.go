@@ -15,17 +15,36 @@ import (
 func TestBernoulli(t *testing.T) {
 	t.Parallel()
 	src := rand.New(rand.NewSource(1))
-	for i, dist := range []Bernoulli{
+	for i, b := range []Bernoulli{
 		{P: 0.5, Src: src},
 		{P: 0.9, Src: src},
 		{P: 0.2, Src: src},
 		{P: 0.0, Src: src},
 		{P: 1.0, Src: src},
 	} {
-		testBernoulli(t, dist, i)
-		testBernoulliCDF(t, dist)
-		testBernoulliSurvival(t, dist)
-		testBernoulliQuantile(t, dist)
+		testBernoulli(t, b, i)
+		testBernoulliCDF(t, b)
+		testBernoulliSurvival(t, b)
+		testBernoulliQuantile(t, b)
+		if b.P == 0 || b.P == 1 {
+			entropy := b.Entropy()
+			if entropy != 0 {
+				t.Errorf("Entropy of a Bernoulli distribution with P = %g is not zero, got: %g", b.P, entropy)
+			}
+		}
+		if b.NumParameters() != 1 {
+			t.Errorf("Wrong number of parameters")
+		}
+		for _, x := range []float64{-0.2, 0.5, 1.1} {
+			logP := b.LogProb(x)
+			p := b.Prob(x)
+			if !math.IsInf(logP, -1) {
+				t.Errorf("Log-probability for x = %g is not -Inf, got: %g", x, logP)
+			}
+			if p != 0 {
+				t.Errorf("Probability for x = %g is not 0, got: %g", x, p)
+			}
+		}
 	}
 }
 
@@ -79,6 +98,9 @@ func testBernoulliCDF(t *testing.T, b Bernoulli) {
 	if b.CDF(0.0001) != 1-b.P {
 		t.Errorf("Bernoulli CDF between zero and one is not 1 - P(1)")
 	}
+	if b.CDF(0.9999) != 1-b.P {
+		t.Errorf("Bernoulli CDF between zero and one is not 1 - P(1)")
+	}
 	if b.CDF(1) != 1 {
 		t.Errorf("Bernoulli CDF at one is not one")
 	}
@@ -106,23 +128,38 @@ func testBernoulliSurvival(t *testing.T, b Bernoulli) {
 }
 
 func testBernoulliQuantile(t *testing.T, b Bernoulli) {
+	if !panics(func() { b.Quantile(-0.0001) }) {
+		t.Errorf("Expected panic with negative argument")
+	}
+	if !panics(func() { b.Quantile(1.0001) }) {
+		t.Errorf("Expected panic with argument above 1")
+	}
 	for _, x := range []float64{0., 1.} {
-		if b.Quantile(b.CDF(x)) != x {
-			t.Errorf("Quantile(CDF(x)) not equal to x for x = %g for P = %g", x, b.P)
+		want := x
+		if b.P == 0 {
+			want = 0
+		}
+		if b.Quantile(b.CDF(x)) != want {
+			t.Errorf("Quantile(CDF(x)) not equal to %g for x = %g for P = %g", want, x, b.P)
 		}
 	}
-	if b.Quantile(1) != 1 {
-		t.Errorf("Quantile at 1 not equal to 1")
+	expectedQuantile1 := 1.
+	if b.P == 0 {
+		expectedQuantile1 = 0.
 	}
-}
-
-func TestBernoulliEntropySpecial(t *testing.T) {
-	src := rand.New(rand.NewSource(1))
-	for _, p := range []float64{0, 1} {
-		b := Bernoulli{p, src}
-		entropy := b.Entropy()
-		if entropy != 0 {
-			t.Errorf("Entropy of a Bernoulli distribution with P = %g is not zero, got: %g", p, entropy)
+	if b.Quantile(1) != expectedQuantile1 {
+		t.Errorf("Quantile at 1 not equal to 1 for P = %g", b.P)
+	}
+	eps := 1e-12
+	if b.P > eps && b.P < 1-eps {
+		if b.Quantile(1-b.P-eps) != 0 {
+			t.Errorf("Quantile slightly below 0 < 1-P < 1 is not zero")
+		}
+		if b.Quantile(1-b.P+eps) != 1 {
+			t.Errorf("Quantile slightly above 0 < 1-P < 1 is not one")
+		}
+		if b.Quantile(1-b.P) != 0 {
+			t.Errorf("Quantile at 0 < 1-P < 1 is not zero")
 		}
 	}
 }

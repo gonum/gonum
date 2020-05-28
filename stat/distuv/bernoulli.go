@@ -89,12 +89,13 @@ func (b Bernoulli) Prob(x float64) float64 {
 	return 0.
 }
 
-// Quantile returns the inverse of the cumulative probability distribution.
+// Quantile returns the minimum value of x from amongst all those values whose CDF value exceeds or equals p.
 func (b Bernoulli) Quantile(p float64) float64 {
 	if p < 0 || 1 < p {
 		panic(badPercentile)
 	}
-	if p < 1-b.P {
+	// Q(p) := min {x | p <= CDF(x) }
+	if p <= 1-b.P {
 		return 0
 	}
 	return 1

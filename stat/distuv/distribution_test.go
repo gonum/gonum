@@ -245,3 +245,14 @@ func testRandLogProbContinuous(t *testing.T, i int, min float64, x []float64, f 
 		}
 	}
 }
+
+func panics(fun func()) (b bool) {
+	defer func() {
+		err := recover()
+		if err != nil {
+			b = true
+		}
+	}()
+	fun()
+	return
+}

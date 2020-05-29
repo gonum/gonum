@@ -81,7 +81,8 @@ func (b Beta) Mean() float64 {
 
 // Mode returns the mode of the distribution.
 //
-// Mode returns NaN if either parameter is less than or equal to 1 as a special case.
+// Mode returns NaN if both parametera are less than or equal to 1 as a special case,
+// 0 if only Alpha <= 1 and 1 if only Beta <= 1.
 func (b Beta) Mode() float64 {
 	if b.Alpha <= 1 {
 		if b.Beta <= 1 {

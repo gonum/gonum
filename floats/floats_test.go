@@ -1762,7 +1762,7 @@ func TestWithin(t *testing.T) {
 	}
 }
 
-func TestNeumaierSum(t *testing.T) {
+func TestSumCompensated(t *testing.T) {
 	t.Parallel()
 	k := 100000
 	s1 := make([]float64, 2*k+1)
@@ -1782,12 +1782,12 @@ func TestNeumaierSum(t *testing.T) {
 		{
 			// Fails if we use simple Sum.
 			s:    s1,
-			want: 0.,
+			want: 0,
 		},
 		{
 			// Fails if we use simple Sum.
 			s:    s2,
-			want: 0.,
+			want: 0,
 		},
 		{
 			s:    []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
@@ -1799,10 +1799,10 @@ func TestNeumaierSum(t *testing.T) {
 		},
 		{
 			s:    []float64{1, 1e100, 1, -1e100},
-			want: 2.,
+			want: 2,
 		},
 	} {
-		got := NeumaierSum(test.s)
+		got := SumCompensated(test.s)
 		if math.Abs(got-test.want) > EqTolerance {
 			t.Errorf("Wrong sum returned in test case %d. Want: %g, got: %g", i, test.want, got)
 		}
@@ -2000,18 +2000,18 @@ func BenchmarkNorm2Medium(b *testing.B) { benchmarkNorm2(b, Medium) }
 func BenchmarkNorm2Large(b *testing.B)  { benchmarkNorm2(b, Large) }
 func BenchmarkNorm2Huge(b *testing.B)   { benchmarkNorm2(b, Huge) }
 
-func benchmarkNeumaierSum(b *testing.B, size int) {
+func benchmarkSumCompensated(b *testing.B, size int) {
 	s := randomSlice(size)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		NeumaierSum(s)
+		SumCompensated(s)
 	}
 }
 
-func BenchmarkNeumaierSumSmall(b *testing.B)  { benchmarkNeumaierSum(b, Small) }
-func BenchmarkNeumaierSumMedium(b *testing.B) { benchmarkNeumaierSum(b, Medium) }
-func BenchmarkNeumaierSumLarge(b *testing.B)  { benchmarkNeumaierSum(b, Large) }
-func BenchmarkNeumaierSumHuge(b *testing.B)   { benchmarkNeumaierSum(b, Huge) }
+func BenchmarkSumCompensatedSmall(b *testing.B)  { benchmarkSumCompensated(b, Small) }
+func BenchmarkSumCompensatedMedium(b *testing.B) { benchmarkSumCompensated(b, Medium) }
+func BenchmarkSumCompensatedLarge(b *testing.B)  { benchmarkSumCompensated(b, Large) }
+func BenchmarkSumCompensatedHuge(b *testing.B)   { benchmarkSumCompensated(b, Huge) }
 
 func benchmarkSum(b *testing.B, size int) {
 	s := randomSlice(size)

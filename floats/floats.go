@@ -924,11 +924,11 @@ func Within(s []float64, v float64) int {
 	return -1
 }
 
-// NeumaierSum returns the sum of the elements of the slice, calculated in a more
+// SumCompensated returns the sum of the elements of the slice, calculated in a more
 // accurate but also more expensive way than Sum. It uses an improved version of
 // Kahan's compensated summation algorithm proposed by Neumaier: see
 // https://en.wikipedia.org/wiki/Kahan_summation_algorithm for details.
-func NeumaierSum(s []float64) float64 {
+func SumCompensated(s []float64) float64 {
 	sum := 0.
 	c := 0.
 	for _, x := range s {

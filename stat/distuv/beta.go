@@ -83,8 +83,14 @@ func (b Beta) Mean() float64 {
 //
 // Mode returns NaN if either parameter is less than or equal to 1 as a special case.
 func (b Beta) Mode() float64 {
-	if b.Alpha <= 1 || b.Beta <= 1 {
-		return math.NaN()
+	if b.Alpha <= 1 {
+		if b.Beta <= 1 {
+			return math.NaN()
+		}
+		return 0
+	}
+	if b.Beta <= 1 {
+		return 1
 	}
 	return (b.Alpha - 1) / (b.Alpha + b.Beta - 2)
 }

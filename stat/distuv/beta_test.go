@@ -121,7 +121,7 @@ func testBetaBadParams(t *testing.T, alpha float64, beta float64, src rand.Sourc
 		t.Errorf("Entropy did not panic for Beta(%g, %g)", alpha, beta)
 	}
 	if !panics(func() { b.LogProb(0.5) }) {
-		t.Errorf("Entropy did not panic for Beta(%g, %g)", alpha, beta)
+		t.Errorf("LogProb did not panic for Beta(%g, %g)", alpha, beta)
 	}
 }
 

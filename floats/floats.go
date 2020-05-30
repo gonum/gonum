@@ -932,8 +932,8 @@ func SumCompensated(s []float64) float64 {
 	// See https://en.wikipedia.org/wiki/Kahan_summation_algorithm for details.
 	var sum, c float64
 	for _, x := range s {
-		// This type conversion is here to prevent a sufficiently
-		// "clever" compiler from optimising away these operations.
+		// This type conversion is here to prevent a sufficiently smart compiler
+		// from optimising away these operations.
 		t := float64(sum + x)
 		if math.Abs(sum) >= math.Abs(x) {
 			c += (sum - t) + x

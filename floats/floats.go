@@ -930,14 +930,15 @@ func SumCompensated(s []float64) float64 {
 	// SumCompensated uses an improved version of Kahan's compensated
 	// summation algorithm proposed by Neumaier.
 	// See https://en.wikipedia.org/wiki/Kahan_summation_algorithm for details.
-	sum := 0.
-	c := 0.
+	var sum, c float64
 	for _, x := range s {
-		t := sum + x
+		// This type conversion is here to prevent a sufficiently
+		// "clever" compiler from optimising away these operations.
+		t := float64(sum + x)
 		if math.Abs(sum) >= math.Abs(x) {
-			c += ((sum - t) + x)
+			c += (sum - t) + x
 		} else {
-			c += ((x - t) + sum)
+			c += (x - t) + sum
 		}
 		sum = t
 	}

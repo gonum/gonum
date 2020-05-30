@@ -76,6 +76,7 @@ func TestBinomialCDF(t *testing.T) {
 		want float64
 	}{
 		// Cumulative probabilities computed with SciPy
+		{-1, 10, 0.5, 0},
 		{0, 10, 0.5, 9.765625e-04},
 		{1, 10, 0.5, 1.0742187499999998e-02},
 		{2, 10, 0.5, 5.468749999999999e-02},
@@ -105,6 +106,11 @@ func TestBinomialCDF(t *testing.T) {
 		if !floats.EqualWithinRel(got, tt.want, tol) {
 			t.Errorf("test-%d: got=%e. want=%e\n", i, got, tt.want)
 		}
+		got = b.Survival(tt.k)
+		want := 1 - tt.want
+		if !floats.EqualWithinRel(got, want, tol) {
+			t.Errorf("test-%d: got=%e. want=%e\n", i, got, tt.want)
+		}
 	}
 }
 
@@ -118,6 +124,9 @@ func TestBinomial(t *testing.T) {
 		{9000, 0.102, src},
 		{1e6, 0.001, src},
 		{25, 0.02, src},
+		{25, 0.99, src},
+		{25, 0.46, src},
+		{25, 0.55, src},
 		{3, 0.8, src},
 	} {
 		testBinomial(t, b, i)
@@ -136,4 +145,9 @@ func testBinomial(t *testing.T, b Binomial, i int) {
 	checkMean(t, i, x, b, tol)
 	checkVarAndStd(t, i, x, b, tol)
 	checkExKurtosis(t, i, x, b, 7e-2)
+	checkSkewness(t, i, x, b, tol)
+
+	if b.NumParameters() != 2 {
+		t.Errorf("Wrong number of parameters")
+	}
 }

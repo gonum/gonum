@@ -1762,6 +1762,53 @@ func TestWithin(t *testing.T) {
 	}
 }
 
+func TestSumCompensated(t *testing.T) {
+	t.Parallel()
+	k := 100000
+	s1 := make([]float64, 2*k+1)
+	for i := -k; i <= k; i++ {
+		s1[i+k] = 0.2 * float64(i)
+	}
+	s2 := make([]float64, k+1)
+	for i := 0; i < k; i++ {
+		s2[i] = 10. / float64(k)
+	}
+	s2[k] = -10
+
+	for i, test := range []struct {
+		s    []float64
+		want float64
+	}{
+		{
+			// Fails if we use simple Sum.
+			s:    s1,
+			want: 0,
+		},
+		{
+			// Fails if we use simple Sum.
+			s:    s2,
+			want: 0,
+		},
+		{
+			s:    []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+			want: 55,
+		},
+		{
+			s:    []float64{1.2e20, 0.1, -2.4e20, -0.1, 1.2e20, 0.2, 0.2},
+			want: 0.4,
+		},
+		{
+			s:    []float64{1, 1e100, 1, -1e100},
+			want: 2,
+		},
+	} {
+		got := SumCompensated(test.s)
+		if math.Abs(got-test.want) > EqTolerance {
+			t.Errorf("Wrong sum returned in test case %d. Want: %g, got: %g", i, test.want, got)
+		}
+	}
+}
+
 func randomSlice(l int) []float64 {
 	s := make([]float64, l)
 	for i := range s {
@@ -1952,3 +1999,29 @@ func BenchmarkNorm2Small(b *testing.B)  { benchmarkNorm2(b, Small) }
 func BenchmarkNorm2Medium(b *testing.B) { benchmarkNorm2(b, Medium) }
 func BenchmarkNorm2Large(b *testing.B)  { benchmarkNorm2(b, Large) }
 func BenchmarkNorm2Huge(b *testing.B)   { benchmarkNorm2(b, Huge) }
+
+func benchmarkSumCompensated(b *testing.B, size int) {
+	s := randomSlice(size)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		SumCompensated(s)
+	}
+}
+
+func BenchmarkSumCompensatedSmall(b *testing.B)  { benchmarkSumCompensated(b, Small) }
+func BenchmarkSumCompensatedMedium(b *testing.B) { benchmarkSumCompensated(b, Medium) }
+func BenchmarkSumCompensatedLarge(b *testing.B)  { benchmarkSumCompensated(b, Large) }
+func BenchmarkSumCompensatedHuge(b *testing.B)   { benchmarkSumCompensated(b, Huge) }
+
+func benchmarkSum(b *testing.B, size int) {
+	s := randomSlice(size)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		Sum(s)
+	}
+}
+
+func BenchmarkSumSmall(b *testing.B)  { benchmarkSum(b, Small) }
+func BenchmarkSumMedium(b *testing.B) { benchmarkSum(b, Medium) }
+func BenchmarkSumLarge(b *testing.B)  { benchmarkSum(b, Large) }
+func BenchmarkSumHuge(b *testing.B)   { benchmarkSum(b, Huge) }

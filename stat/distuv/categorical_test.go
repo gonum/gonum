@@ -13,6 +13,14 @@ import (
 	"gonum.org/v1/gonum/floats"
 )
 
+const (
+	Tiny   = 2
+	Small  = 5
+	Medium = 10
+	Large  = 100
+	Huge   = 1000
+)
+
 func TestCategoricalProb(t *testing.T) {
 	t.Parallel()
 	for _, test := range [][]float64{
@@ -200,3 +208,26 @@ func TestCategoricalMean(t *testing.T) {
 		}
 	}
 }
+
+func benchmarkCategoricalRand(b *testing.B, size int) {
+	src := rand.NewSource(1)
+	rng := rand.New(src)
+	weights := make([]float64, size)
+	for i := 0; i < size; i++ {
+		weights[i] = rng.Float64() + 0.001
+	}
+	dist := NewCategorical(weights, src)
+	for i := 0; i < b.N; i++ {
+		dist.Rand()
+	}
+}
+
+func BenchmarkCategoricalRandTiny(b *testing.B) { benchmarkCategoricalRand(b, Tiny) }
+
+func BenchmarkCategoricalRandSmall(b *testing.B) { benchmarkCategoricalRand(b, Small) }
+
+func BenchmarkCategoricalRandMedium(b *testing.B) { benchmarkCategoricalRand(b, Medium) }
+
+func BenchmarkCategoricalRandLarge(b *testing.B) { benchmarkCategoricalRand(b, Large) }
+
+func BenchmarkCategoricalRandHuge(b *testing.B) { benchmarkCategoricalRand(b, Huge) }

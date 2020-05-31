@@ -31,21 +31,37 @@ func TestCategoricalProb(t *testing.T) {
 		floats.Scale(1/floats.Sum(norm), norm)
 		for i, v := range norm {
 			p := dist.Prob(float64(i))
+			logP := dist.LogProb(float64(i))
 			if math.Abs(p-v) > 1e-14 {
 				t.Errorf("Probability mismatch element %d", i)
 			}
+			if math.Abs(logP-math.Log(v)) > 1e-14 {
+				t.Errorf("Log-probability mismatch element %d", i)
+			}
 			p = dist.Prob(float64(i) + 0.5)
+			logP = dist.LogProb(float64(i) + 0.5)
 			if p != 0 {
 				t.Errorf("Non-zero probability for non-integer x")
 			}
+			if !math.IsInf(logP, -1) {
+				t.Errorf("Log-probability for non-integer x is not -Inf")
+			}
 		}
 		p := dist.Prob(-1)
+		logP := dist.LogProb(-1)
 		if p != 0 {
 			t.Errorf("Non-zero probability for -1")
 		}
+		if !math.IsInf(logP, -1) {
+			t.Errorf("Log-probability for -1 is not -Inf")
+		}
 		p = dist.Prob(float64(len(test)))
+		logP = dist.LogProb(float64(len(test)))
 		if p != 0 {
 			t.Errorf("Non-zero probability for len(test)")
+		}
+		if !math.IsInf(logP, -1) {
+			t.Errorf("Log-probability for len(test) is not -Inf")
 		}
 	}
 }
@@ -94,6 +110,33 @@ func TestCategoricalRand(t *testing.T) {
 		if !same {
 			t.Errorf("Probability mismatch after ReweightAll. Want %v, got %v", probs, counts)
 		}
+	}
+}
+
+func TestCategoricalReweight(t *testing.T) {
+	dist := NewCategorical([]float64{1, 1}, nil)
+	if !panics(func() { dist.Reweight(0, -1) }) {
+		t.Errorf("Reweight did not panic for negative weight")
+	}
+	dist.Reweight(0, 0)
+	if !panics(func() { dist.Reweight(1, 0) }) {
+		t.Errorf("Reweight did not panic when trying to set the last positive weight to zero")
+	}
+}
+
+func TestCategoricalReweightAll(t *testing.T) {
+	w := []float64{0, 1, 2, 1}
+	dist := NewCategorical(w, nil)
+	if !panics(func() { dist.ReweightAll([]float64{1, 1}) }) {
+		t.Errorf("ReweightAll did not panic for different number of weights")
+	}
+	w[0] = -1
+	if !panics(func() { dist.ReweightAll(w) }) {
+		t.Errorf("ReweightAll did not panic for a negative weight")
+	}
+	w = []float64{0, 0, 0, 0}
+	if !panics(func() { dist.ReweightAll(w) }) {
+		t.Errorf("ReweightAll did not panic for weights which are all zero")
 	}
 }
 

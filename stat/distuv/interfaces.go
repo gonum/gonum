@@ -6,7 +6,10 @@ package distuv
 
 // LogProber wraps the LogProb method.
 type LogProber interface {
-	LogProb(float64) float64
+	// LogProb returns the natural logarithm of the
+	// value of the probability density or probability
+	// mass function at x.
+	LogProb(x float64) float64
 }
 
 // Rander wraps the Rand method.
@@ -23,6 +26,7 @@ type RandLogProber interface {
 
 // Quantiler wraps the Quantile method.
 type Quantiler interface {
-	// Quantile returns the minimum value of x from amongst all those values whose CDF value exceeds or equals p.
+	// Quantile returns the minimum value of x from amongst
+	// all those values whose CDF value exceeds or equals p.
 	Quantile(p float64) float64
 }

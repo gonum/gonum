@@ -4,23 +4,25 @@
 
 package distuv
 
-// LogProber calculates the log-probability for a given value of a random variable.
+// LogProber wraps the LogProb method.
 type LogProber interface {
 	LogProb(float64) float64
 }
 
-// Rander samples a random variable.
+// Rander wraps the Rand method.
 type Rander interface {
+	// Rand returns a random sample drawn from the distribution.
 	Rand() float64
 }
 
-// RandLogProber is a Rander and a LogProber.
+// RandLogProber is the interface that groups the Rander and LogProber methods.
 type RandLogProber interface {
 	Rander
 	LogProber
 }
 
-// Quantiler calculates the quantile of a distribution for given probability.
+// Quantiler wraps the Quantile method.
 type Quantiler interface {
+	// Quantile returns the minimum value of x from amongst all those values whose CDF value exceeds or equals p.
 	Quantile(p float64) float64
 }

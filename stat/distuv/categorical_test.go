@@ -31,35 +31,35 @@ func TestCategoricalProb(t *testing.T) {
 		floats.Scale(1/floats.Sum(norm), norm)
 		for i, v := range norm {
 			p := dist.Prob(float64(i))
-			logP := dist.LogProb(float64(i))
 			if math.Abs(p-v) > 1e-14 {
 				t.Errorf("Probability mismatch element %d", i)
 			}
+			logP := dist.LogProb(float64(i))
 			if math.Abs(logP-math.Log(v)) > 1e-14 {
 				t.Errorf("Log-probability mismatch element %d", i)
 			}
 			p = dist.Prob(float64(i) + 0.5)
-			logP = dist.LogProb(float64(i) + 0.5)
 			if p != 0 {
 				t.Errorf("Non-zero probability for non-integer x")
 			}
+			logP = dist.LogProb(float64(i) + 0.5)
 			if !math.IsInf(logP, -1) {
 				t.Errorf("Log-probability for non-integer x is not -Inf")
 			}
 		}
 		p := dist.Prob(-1)
-		logP := dist.LogProb(-1)
 		if p != 0 {
 			t.Errorf("Non-zero probability for -1")
 		}
+		logP := dist.LogProb(-1)
 		if !math.IsInf(logP, -1) {
 			t.Errorf("Log-probability for -1 is not -Inf")
 		}
 		p = dist.Prob(float64(len(test)))
-		logP = dist.LogProb(float64(len(test)))
 		if p != 0 {
 			t.Errorf("Non-zero probability for len(test)")
 		}
+		logP = dist.LogProb(float64(len(test)))
 		if !math.IsInf(logP, -1) {
 			t.Errorf("Log-probability for len(test) is not -Inf")
 		}
@@ -252,6 +252,12 @@ func TestCategoricalMean(t *testing.T) {
 	}
 }
 
+func BenchmarkCategoricalRandTiny(b *testing.B)   { benchmarkCategoricalRand(b, Tiny) }
+func BenchmarkCategoricalRandSmall(b *testing.B)  { benchmarkCategoricalRand(b, Small) }
+func BenchmarkCategoricalRandMedium(b *testing.B) { benchmarkCategoricalRand(b, Medium) }
+func BenchmarkCategoricalRandLarge(b *testing.B)  { benchmarkCategoricalRand(b, Large) }
+func BenchmarkCategoricalRandHuge(b *testing.B)   { benchmarkCategoricalRand(b, Huge) }
+
 func benchmarkCategoricalRand(b *testing.B, size int) {
 	src := rand.NewSource(1)
 	rng := rand.New(src)
@@ -264,13 +270,3 @@ func benchmarkCategoricalRand(b *testing.B, size int) {
 		dist.Rand()
 	}
 }
-
-func BenchmarkCategoricalRandTiny(b *testing.B) { benchmarkCategoricalRand(b, Tiny) }
-
-func BenchmarkCategoricalRandSmall(b *testing.B) { benchmarkCategoricalRand(b, Small) }
-
-func BenchmarkCategoricalRandMedium(b *testing.B) { benchmarkCategoricalRand(b, Medium) }
-
-func BenchmarkCategoricalRandLarge(b *testing.B) { benchmarkCategoricalRand(b, Large) }
-
-func BenchmarkCategoricalRandHuge(b *testing.B) { benchmarkCategoricalRand(b, Huge) }

@@ -55,7 +55,7 @@ func (c ChiSquared) Mean() float64 {
 
 // Mode returns the mode of the distribution.
 func (c ChiSquared) Mode() float64 {
-	return math.Min(c.K-2, 0)
+	return math.Max(c.K-2, 0)
 }
 
 // NumParameters returns the number of parameters in the distribution.

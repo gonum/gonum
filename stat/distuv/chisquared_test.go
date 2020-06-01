@@ -5,6 +5,7 @@
 package distuv
 
 import (
+	"math"
 	"sort"
 	"testing"
 
@@ -81,4 +82,22 @@ func testChiSquared(t *testing.T, c ChiSquared, i int) {
 	checkExKurtosis(t, i, x, c, 7e-2)
 	checkProbContinuous(t, i, x, c, 1e-3)
 	checkQuantileCDFSurvival(t, i, x, c, 1e-2)
+
+	expectedMode := math.Max(c.K-2, 0)
+	if c.Mode() != expectedMode {
+		t.Errorf("Mode is not equal to max(k - 2, 0). Got %v, want %v", c.Mode(), expectedMode)
+	}
+	if c.NumParameters() != 1 {
+		t.Errorf("NumParameters is not 1. Got %v", c.NumParameters())
+	}
+	if !panics(func() { c.Quantile(-0.0001) }) {
+		t.Errorf("Expected panic with negative argument to Quantile")
+	}
+	if !panics(func() { c.Quantile(1.0001) }) {
+		t.Errorf("Expected panic with argument to Quantile above 1")
+	}
+	survival := c.Survival(-0.00001)
+	if survival != 1 {
+		t.Errorf("Survival is not 1 for negative argument. Got %v", survival)
+	}
 }

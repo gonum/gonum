@@ -49,10 +49,10 @@ func (n *Normal) ConjugateUpdate(suffStat []float64, nSamples float64, priorStre
 	// TODO: Support prior strength with math.Inf(1) to allow updating with
 	// a known mean/standard deviation
 	if len(suffStat) != 2 {
-		panic("exponential: incorrect suffStat length")
+		panic("norm: incorrect suffStat length")
 	}
 	if len(priorStrength) != 2 {
-		panic("exponential: incorrect priorStrength length")
+		panic("norm: incorrect priorStrength length")
 	}
 
 	totalMeanSamples := nSamples + priorStrength[0]

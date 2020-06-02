@@ -79,6 +79,48 @@ func testExponential(t *testing.T, dist Exponential, i int) {
 	checkQuantileCDFSurvival(t, i, x, dist, tol)
 	checkProbContinuous(t, i, x, dist, 1e-10)
 	checkProbQuantContinuous(t, i, x, dist, tol)
+
+	if dist.Mode() != 0 {
+		t.Errorf("Mode is not 0. Got %v", dist.Mode())
+	}
+
+	if dist.NumParameters() != 1 {
+		t.Errorf("NumParameters is not 1. Got %v", dist.NumParameters())
+	}
+
+	if dist.NumSuffStat() != 1 {
+		t.Errorf("NumSuffStat is not 1. Got %v", dist.NumSuffStat())
+	}
+
+	scoreInput := dist.ScoreInput(-0.0001)
+	if scoreInput != 0 {
+		t.Errorf("ScoreInput is not 0 for a negative argument. Got %v", scoreInput)
+	}
+	scoreInput = dist.ScoreInput(0)
+	if !math.IsNaN(scoreInput) {
+		t.Errorf("ScoreInput is not NaN at 0. Got %v", scoreInput)
+	}
+	scoreInput = dist.ScoreInput(1)
+	if scoreInput != -dist.Rate {
+		t.Errorf("ScoreInput mismatch for a positive argument. Got %v, want %g", scoreInput, dist.Rate)
+	}
+
+	deriv := make([]float64, 1)
+	dist.Score(deriv, -0.0001)
+	if deriv[0] != 0 {
+		t.Errorf("Score is not {0} for a negative argument. Got %v", deriv[0])
+	}
+	dist.Score(deriv, 0)
+	if !math.IsNaN(deriv[0]) {
+		t.Errorf("Score is not {NaN} at 0. Got %v", deriv[0])
+	}
+
+	if !panics(func() { dist.Quantile(-0.0001) }) {
+		t.Errorf("Expected panic with negative argument to Quantile")
+	}
+	if !panics(func() { dist.Quantile(1.0001) }) {
+		t.Errorf("Expected panic with argument to Quantile above 1")
+	}
 }
 
 func TestExponentialScore(t *testing.T) {

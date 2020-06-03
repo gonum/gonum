@@ -90,12 +90,6 @@ func testChiSquared(t *testing.T, c ChiSquared, i int) {
 	if c.NumParameters() != 1 {
 		t.Errorf("NumParameters is not 1. Got %v", c.NumParameters())
 	}
-	if !panics(func() { c.Quantile(-0.0001) }) {
-		t.Errorf("Expected panic with negative argument to Quantile")
-	}
-	if !panics(func() { c.Quantile(1.0001) }) {
-		t.Errorf("Expected panic with argument to Quantile above 1")
-	}
 	survival := c.Survival(-0.00001)
 	if survival != 1 {
 		t.Errorf("Survival is not 1 for negative argument. Got %v", survival)

@@ -149,6 +149,12 @@ func checkQuantileCDFSurvival(t *testing.T, i int, xs []float64, c cumulanter, t
 			t.Errorf("Survival/CDF mismatch case %v: want: %v, got: %v", i, 1-cdf, c.Survival(x))
 		}
 	}
+	if !panics(func() { c.Quantile(-0.0001) }) {
+		t.Errorf("Expected panic with negative argument to Quantile")
+	}
+	if !panics(func() { c.Quantile(1.0001) }) {
+		t.Errorf("Expected panic with Quantile argument above 1")
+	}
 }
 
 func checkProbContinuous(t *testing.T, i int, x []float64, p probLogprober, tol float64) {

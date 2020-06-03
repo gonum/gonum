@@ -108,11 +108,11 @@ func testExponential(t *testing.T, dist Exponential, i int) {
 	deriv := make([]float64, 1)
 	dist.Score(deriv, -0.0001)
 	if deriv[0] != 0 {
-		t.Errorf("Score is not {0} for a negative argument. Got %v", deriv[0])
+		t.Errorf("Score is not 0 for a negative argument. Got %v", deriv[0])
 	}
 	dist.Score(deriv, 0)
 	if !math.IsNaN(deriv[0]) {
-		t.Errorf("Score is not {NaN} at 0. Got %v", deriv[0])
+		t.Errorf("Score is not NaN at 0. Got %v", deriv[0])
 	}
 
 	if !panics(func() { dist.Quantile(-0.0001) }) {

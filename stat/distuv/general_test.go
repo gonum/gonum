@@ -213,9 +213,9 @@ func testDerivParam(t *testing.T, d derivParamTester) {
 	for _, v := range quantiles {
 		d.setParameters(initParams)
 		x := d.Quantile(v)
-		returnedDeriv := d.Score(deriv, x)
-		if &returnedDeriv[0] != &deriv[0] {
-			t.Errorf("Returned a different derivative slice than passed in. Got %v, want %v", returnedDeriv, deriv)
+		gotDeriv := d.Score(deriv, x)
+		if &gotDeriv[0] != &deriv[0] {
+			t.Errorf("Returned a different derivative slice than passed in. Got %v, want %v", gotDeriv, deriv)
 		}
 		f := func(p []float64) float64 {
 			params := d.parameters(nil)

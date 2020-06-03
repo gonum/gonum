@@ -44,10 +44,17 @@ func (n Normal) CDF(x float64) float64 {
 // this function, Normal.Mu and Normal.Sigma are updated based on the weighted
 // samples, and strength is modified to include the new number of samples observed.
 //
-// This function panics if len(suffStat) != 2 or len(priorStrength) != 2.
+// This function panics if len(suffStat) != n.NumSuffStat() or
+// len(priorStrength) != n.NumSuffStat().
 func (n *Normal) ConjugateUpdate(suffStat []float64, nSamples float64, priorStrength []float64) {
 	// TODO: Support prior strength with math.Inf(1) to allow updating with
 	// a known mean/standard deviation
+	if len(suffStat) != n.NumSuffStat() {
+		panic("norm: incorrect suffStat length")
+	}
+	if len(priorStrength) != n.NumSuffStat() {
+		panic("norm: incorrect priorStrength length")
+	}
 
 	totalMeanSamples := nSamples + priorStrength[0]
 	totalSum := suffStat[0]*nSamples + n.Mu*priorStrength[0]

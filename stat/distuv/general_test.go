@@ -124,6 +124,33 @@ func testConjugateUpdate(t *testing.T, newFittable func() ConjugateUpdater) {
 			}
 		}
 	}
+	testSuffStatPanics(t, newFittable)
+	testConjugateUpdatePanics(t, newFittable)
+}
+
+func testSuffStatPanics(t *testing.T, newFittable func() ConjugateUpdater) {
+	dist := newFittable()
+	sample := randn(dist, 10)
+	if !panics(func() { dist.SuffStat(make([]float64, dist.NumSuffStat()), sample, make([]float64, len(sample)+1)) }) {
+		t.Errorf("Expected panic for mismatch between samples and weights lengths")
+	}
+	if !panics(func() { dist.SuffStat(make([]float64, dist.NumSuffStat()+1), sample, nil) }) {
+		t.Errorf("Expected panic for wrong sufficient statistic length")
+	}
+}
+
+func testConjugateUpdatePanics(t *testing.T, newFittable func() ConjugateUpdater) {
+	dist := newFittable()
+	if !panics(func() {
+		dist.ConjugateUpdate(make([]float64, dist.NumSuffStat()+1), 100, make([]float64, dist.NumParameters()))
+	}) {
+		t.Errorf("Expected panic for wrong sufficient statistic length")
+	}
+	if !panics(func() {
+		dist.ConjugateUpdate(make([]float64, dist.NumSuffStat()), 100, make([]float64, dist.NumParameters()+1))
+	}) {
+		t.Errorf("Expected panic for wrong prior strength length")
+	}
 }
 
 // randn generates a specified number of random samples
@@ -174,6 +201,10 @@ func testDerivParam(t *testing.T, d derivParamTester) {
 	deriv := make([]float64, d.NumParameters())
 	fdDeriv := make([]float64, d.NumParameters())
 
+	if !panics(func() { d.Score(make([]float64, d.NumParameters()+1), 0) }) {
+		t.Errorf("Expected panic for wrong derivative slice length")
+	}
+
 	initParams := d.parameters(nil)
 	init := make([]float64, d.NumParameters())
 	for i, v := range initParams {
@@ -182,7 +213,10 @@ func testDerivParam(t *testing.T, d derivParamTester) {
 	for _, v := range quantiles {
 		d.setParameters(initParams)
 		x := d.Quantile(v)
-		d.Score(deriv, x)
+		gotDeriv := d.Score(deriv, x)
+		if &gotDeriv[0] != &deriv[0] {
+			t.Errorf("Returned a different derivative slice than passed in. Got %v, want %v", gotDeriv, deriv)
+		}
 		f := func(p []float64) float64 {
 			params := d.parameters(nil)
 			for i, v := range p {

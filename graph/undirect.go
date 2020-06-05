@@ -229,7 +229,9 @@ func (e WeightedEdgePair) Weight() float64 { return e.W }
 type nodeIteratorPair struct {
 	a, b Nodes
 
-	curr, cnt int
+	curr Node
+
+	idx, cnt int
 
 	// unique indicates the node in b with the key ID is unique.
 	unique map[int64]bool
@@ -253,32 +255,33 @@ func newNodeIteratorPair(a, b Nodes) *nodeIteratorPair {
 }
 
 func (n *nodeIteratorPair) Len() int {
-	return n.cnt - n.curr
+	return n.cnt - n.idx
 }
 
 func (n *nodeIteratorPair) Next() bool {
 	if n.a.Next() {
-		n.curr++
+		n.idx++
+		n.curr = n.a.Node()
 		return true
 	}
 	for n.b.Next() {
 		if n.unique[n.b.Node().ID()] {
-			n.curr++
+			n.idx++
+			n.curr = n.b.Node()
 			return true
 		}
 	}
+	n.curr = nil
 	return false
 }
 
 func (n *nodeIteratorPair) Node() Node {
-	if n.a.Len() != 0 {
-		return n.a.Node()
-	}
-	return n.b.Node()
+	return n.curr
 }
 
 func (n *nodeIteratorPair) Reset() {
-	n.curr = 0
+	n.idx = 0
+	n.curr = nil
 	n.a.Reset()
 	n.b.Reset()
 }

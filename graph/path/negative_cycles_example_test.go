@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"math"
 
+	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/path"
 	"gonum.org/v1/gonum/graph/simple"
 )
@@ -33,9 +34,11 @@ func ExampleBellmanFordFrom_negativecycles() {
 	}
 
 	// Add a zero-cost path to all nodes from a new node Q.
-	nodes := g.Nodes()
-	for nodes.Next() {
-		g.SetWeightedEdge(simple.WeightedEdge{F: simple.Node('Q'), T: nodes.Node()})
+	// Since the graph is being mutated, we get a range over
+	// a slice of the graph's nodes rather than using the
+	// graph.Nodes iterator directly.
+	for _, n := range graph.NodesOf(g.Nodes()) {
+		g.SetWeightedEdge(simple.WeightedEdge{F: simple.Node('Q'), T: n})
 	}
 
 	// Find the shortest path to each node from Q.

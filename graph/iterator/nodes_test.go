@@ -6,9 +6,11 @@ package iterator_test
 
 import (
 	"reflect"
+	"sort"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/iterator"
 	"gonum.org/v1/gonum/graph/simple"
 )
@@ -440,6 +442,111 @@ func TestNodesByWeightedLinesIterate(t *testing.T) {
 				it.Next()
 			}()
 			it.Reset()
+		}
+	}
+}
+
+type nodeSlicer interface {
+	graph.Nodes
+	graph.NodeSlicer
+}
+
+var nodeSlicerTests = []struct {
+	nodes nodeSlicer
+	want  []graph.Node
+}{
+	{
+		nodes: iterator.NewOrderedNodes([]graph.Node{simple.Node(1)}),
+		want:  []graph.Node{simple.Node(1)},
+	},
+	{
+		nodes: iterator.NewOrderedNodes([]graph.Node{simple.Node(1), simple.Node(2), simple.Node(3)}),
+		want:  []graph.Node{simple.Node(1), simple.Node(2), simple.Node(3)},
+	},
+
+	{
+		nodes: iterator.NewImplicitNodes(1, 2, func(id int) graph.Node { return simple.Node(id) }),
+		want:  []graph.Node{simple.Node(1)},
+	},
+	{
+		nodes: iterator.NewImplicitNodes(1, 4, func(id int) graph.Node { return simple.Node(id) }),
+		want:  []graph.Node{simple.Node(1), simple.Node(2), simple.Node(3)},
+	},
+
+	{
+		nodes: iterator.NewNodes(map[int64]graph.Node{1: simple.Node(1)}),
+		want:  []graph.Node{simple.Node(1)},
+	},
+	{
+		nodes: iterator.NewNodes(map[int64]graph.Node{1: simple.Node(1), 2: simple.Node(2), 3: simple.Node(3)}),
+		want:  []graph.Node{simple.Node(1), simple.Node(2), simple.Node(3)},
+	},
+	{
+		nodes: iterator.NewNodes(map[int64]graph.Node{1: simple.Node(1), 2: simple.Node(2), 3: simple.Node(3), 4: simple.Node(4), 5: simple.Node(5)}),
+		want:  []graph.Node{simple.Node(1), simple.Node(2), simple.Node(3), simple.Node(4), simple.Node(5)},
+	},
+	{
+		nodes: iterator.NewNodes(map[int64]graph.Node{5: simple.Node(5), 3: simple.Node(3), 2: simple.Node(2), 1: simple.Node(1)}),
+		want:  []graph.Node{simple.Node(1), simple.Node(2), simple.Node(3), simple.Node(5)},
+	},
+
+	// The actual values of the edges stored in the edge
+	// map leading to each node are not used, so they are
+	// filled with nil values.
+	//
+	// The three other constructors for NodesByEdge are not
+	// tested for this behaviour since they have already
+	// been tested above.
+	{
+		nodes: iterator.NewNodesByEdge(
+			map[int64]graph.Node{1: simple.Node(1), 2: simple.Node(2), 3: simple.Node(3), 4: simple.Node(4), 5: simple.Node(5)},
+			map[int64]graph.Edge{1: nil},
+		),
+		want: []graph.Node{simple.Node(1)},
+	},
+	{
+		nodes: iterator.NewNodesByEdge(
+			map[int64]graph.Node{1: simple.Node(1), 2: simple.Node(2), 3: simple.Node(3), 4: simple.Node(4), 5: simple.Node(5)},
+			map[int64]graph.Edge{1: nil, 2: nil, 3: nil, 5: nil},
+		),
+		want: []graph.Node{simple.Node(1), simple.Node(2), simple.Node(3), simple.Node(5)},
+	},
+	{
+		nodes: iterator.NewNodesByEdge(
+			map[int64]graph.Node{1: simple.Node(1), 2: simple.Node(2), 3: simple.Node(3), 4: simple.Node(4), 5: simple.Node(5)},
+			map[int64]graph.Edge{5: nil, 3: nil, 2: nil, 1: nil},
+		),
+		want: []graph.Node{simple.Node(1), simple.Node(2), simple.Node(3), simple.Node(5)},
+	},
+}
+
+func TestNodeSlicers(t *testing.T) {
+	for k, test := range nodeSlicerTests {
+		wantLen := test.nodes.Len()
+		for i := 0; i < wantLen; i++ {
+			var gotIter []graph.Node
+			for n := 0; n < i; n++ {
+				ok := test.nodes.Next()
+				if !ok {
+					t.Errorf("test %d: unexpected failed Next call at position %d of len %d", k, n, wantLen)
+				}
+				gotIter = append(gotIter, test.nodes.Node())
+			}
+			gotSlice := test.nodes.NodeSlice()
+			if test.nodes.Next() {
+				t.Errorf("test %d: expected no further iteration possible after NodeSlice with %d pre-iterations of %d", k, i, wantLen)
+			}
+
+			if gotLen := len(gotIter) + len(gotSlice); gotLen != wantLen {
+				t.Errorf("test %d: unexpected total node count: got:%d want:%d", k, gotLen, wantLen)
+			}
+			got := append(gotIter, gotSlice...)
+			sort.Sort(ordered.ByID(got))
+			if !reflect.DeepEqual(got, test.want) {
+				t.Errorf("test %d: unexpected node slice:\ngot: %v\nwant:%v", k, got, test.want)
+			}
+
+			test.nodes.Reset()
 		}
 	}
 }

@@ -116,39 +116,49 @@ var nodesTests = []struct {
 	{nodes: map[int64]graph.Node{5: simple.Node(5), 3: simple.Node(3), 2: simple.Node(2), 1: simple.Node(1)}},
 }
 
-func TestNodesIterate(t *testing.T) {
-	for _, test := range nodesTests {
-		it := iterator.NewNodes(test.nodes)
-		for i := 0; i < 2; i++ {
-			if it.Len() != len(test.nodes) {
-				t.Errorf("unexpected iterator length for round %d: got:%d want:%d", i, it.Len(), len(test.nodes))
-			}
-			var got map[int64]graph.Node
-			if test.nodes != nil {
-				got = make(map[int64]graph.Node)
-			}
-			for it.Next() {
-				n := it.Node()
-				got[n.ID()] = n
-				if len(got)+it.Len() != len(test.nodes) {
-					t.Errorf("unexpected iterator length during iteration for round %d: got:%d want:%d", i, it.Len(), len(test.nodes))
+func TestIterateNodes(t *testing.T) {
+	for _, typ := range []struct {
+		name string
+		new  func(map[int64]graph.Node) graph.Nodes
+	}{
+		{name: "Nodes", new: func(n map[int64]graph.Node) graph.Nodes { return iterator.NewNodes(n) }},
+		{name: "LazyOrderedNodes", new: func(n map[int64]graph.Node) graph.Nodes { return iterator.NewLazyOrderedNodes(n) }},
+	} {
+		t.Run(typ.name, func(t *testing.T) {
+			for _, test := range nodesTests {
+				it := typ.new(test.nodes)
+				for i := 0; i < 2; i++ {
+					if it.Len() != len(test.nodes) {
+						t.Errorf("unexpected iterator length for round %d: got:%d want:%d", i, it.Len(), len(test.nodes))
+					}
+					var got map[int64]graph.Node
+					if test.nodes != nil {
+						got = make(map[int64]graph.Node)
+					}
+					for it.Next() {
+						n := it.Node()
+						got[n.ID()] = n
+						if len(got)+it.Len() != len(test.nodes) {
+							t.Errorf("unexpected iterator length during iteration for round %d: got:%d want:%d", i, it.Len(), len(test.nodes))
+						}
+					}
+					want := test.nodes
+					if !reflect.DeepEqual(got, want) {
+						t.Errorf("unexpected iterator output for round %d: got:%#v want:%#v", i, got, want)
+					}
+					func() {
+						defer func() {
+							r := recover()
+							if r != nil {
+								t.Errorf("unexpected panic: %v", r)
+							}
+						}()
+						it.Next()
+					}()
+					it.Reset()
 				}
 			}
-			want := test.nodes
-			if !reflect.DeepEqual(got, want) {
-				t.Errorf("unexpected iterator output for round %d: got:%#v want:%#v", i, got, want)
-			}
-			func() {
-				defer func() {
-					r := recover()
-					if r != nil {
-						t.Errorf("unexpected panic: %v", r)
-					}
-				}()
-				it.Next()
-			}()
-			it.Reset()
-		}
+		})
 	}
 }
 
@@ -188,42 +198,61 @@ var nodesByEdgeTests = []struct {
 }
 
 func TestNodesByEdgeIterate(t *testing.T) {
-	for _, test := range nodesByEdgeTests {
-		nodes := make(map[int64]graph.Node)
-		for i := int64(0); i < test.n; i++ {
-			nodes[i] = simple.Node(i)
-		}
+	for _, typ := range []struct {
+		name string
+		new  func(map[int64]graph.Node, map[int64]graph.Edge) graph.Nodes
+	}{
+		{
+			name: "NodesByEdge",
+			new: func(n map[int64]graph.Node, e map[int64]graph.Edge) graph.Nodes {
+				return iterator.NewNodesByEdge(n, e)
+			}},
+		{
+			name: "LazyOrderedNodesByEdge",
+			new: func(n map[int64]graph.Node, e map[int64]graph.Edge) graph.Nodes {
+				return iterator.NewLazyOrderedNodesByEdge(n, e)
+			},
+		},
+	} {
+		t.Run(typ.name, func(t *testing.T) {
+			for _, test := range nodesByEdgeTests {
+				nodes := make(map[int64]graph.Node)
+				for i := int64(0); i < test.n; i++ {
+					nodes[i] = simple.Node(i)
+				}
 
-		it := iterator.NewNodesByEdge(nodes, test.edges)
-		for i := 0; i < 2; i++ {
-			if it.Len() != len(test.edges) {
-				t.Errorf("unexpected iterator length for round %d: got:%d want:%d", i, it.Len(), len(nodes))
-			}
-			var got map[int64]graph.Node
-			if test.edges != nil {
-				got = make(map[int64]graph.Node)
-			}
-			for it.Next() {
-				n := it.Node()
-				got[n.ID()] = n
-				if len(got)+it.Len() != len(test.edges) {
-					t.Errorf("unexpected iterator length during iteration for round %d: got:%d want:%d", i, it.Len(), len(nodes))
+				it := typ.new(nodes, test.edges)
+				for i := 0; i < 2; i++ {
+					if it.Len() != len(test.edges) {
+						t.Errorf("unexpected iterator length for round %d: got:%d want:%d", i, it.Len(), len(nodes))
+					}
+					var got map[int64]graph.Node
+					if test.edges != nil {
+						got = make(map[int64]graph.Node)
+					}
+					for it.Next() {
+						n := it.Node()
+						got[n.ID()] = n
+						if len(got)+it.Len() != len(test.edges) {
+							t.Errorf("unexpected iterator length during iteration for round %d: got:%d want:%d", i, it.Len(), len(nodes))
+						}
+					}
+					if !reflect.DeepEqual(got, test.want) {
+						t.Errorf("unexpected iterator output for round %d: got:%#v want:%#v", i, got, test.want)
+					}
+					func() {
+						defer func() {
+							r := recover()
+							if r != nil {
+								t.Errorf("unexpected panic: %v", r)
+							}
+						}()
+						it.Next()
+					}()
+					it.Reset()
 				}
 			}
-			if !reflect.DeepEqual(got, test.want) {
-				t.Errorf("unexpected iterator output for round %d: got:%#v want:%#v", i, got, test.want)
-			}
-			func() {
-				defer func() {
-					r := recover()
-					if r != nil {
-						t.Errorf("unexpected panic: %v", r)
-					}
-				}()
-				it.Next()
-			}()
-			it.Reset()
-		}
+		})
 	}
 }
 
@@ -263,42 +292,61 @@ var nodesByWeightedEdgeTests = []struct {
 }
 
 func TestNodesByWeightedEdgeIterate(t *testing.T) {
-	for _, test := range nodesByWeightedEdgeTests {
-		nodes := make(map[int64]graph.Node)
-		for i := int64(0); i < test.n; i++ {
-			nodes[i] = simple.Node(i)
-		}
+	for _, typ := range []struct {
+		name string
+		new  func(map[int64]graph.Node, map[int64]graph.WeightedEdge) graph.Nodes
+	}{
+		{
+			name: "NodesByWeightedEdge",
+			new: func(n map[int64]graph.Node, e map[int64]graph.WeightedEdge) graph.Nodes {
+				return iterator.NewNodesByWeightedEdge(n, e)
+			}},
+		{
+			name: "LazyOrderedNodesByWeightedEdge",
+			new: func(n map[int64]graph.Node, e map[int64]graph.WeightedEdge) graph.Nodes {
+				return iterator.NewLazyOrderedNodesByWeightedEdge(n, e)
+			},
+		},
+	} {
+		t.Run(typ.name, func(t *testing.T) {
+			for _, test := range nodesByWeightedEdgeTests {
+				nodes := make(map[int64]graph.Node)
+				for i := int64(0); i < test.n; i++ {
+					nodes[i] = simple.Node(i)
+				}
 
-		it := iterator.NewNodesByWeightedEdge(nodes, test.edges)
-		for i := 0; i < 2; i++ {
-			if it.Len() != len(test.edges) {
-				t.Errorf("unexpected iterator length for round %d: got:%d want:%d", i, it.Len(), len(nodes))
-			}
-			var got map[int64]graph.Node
-			if test.edges != nil {
-				got = make(map[int64]graph.Node)
-			}
-			for it.Next() {
-				n := it.Node()
-				got[n.ID()] = n
-				if len(got)+it.Len() != len(test.edges) {
-					t.Errorf("unexpected iterator length during iteration for round %d: got:%d want:%d", i, it.Len(), len(nodes))
+				it := typ.new(nodes, test.edges)
+				for i := 0; i < 2; i++ {
+					if it.Len() != len(test.edges) {
+						t.Errorf("unexpected iterator length for round %d: got:%d want:%d", i, it.Len(), len(nodes))
+					}
+					var got map[int64]graph.Node
+					if test.edges != nil {
+						got = make(map[int64]graph.Node)
+					}
+					for it.Next() {
+						n := it.Node()
+						got[n.ID()] = n
+						if len(got)+it.Len() != len(test.edges) {
+							t.Errorf("unexpected iterator length during iteration for round %d: got:%d want:%d", i, it.Len(), len(nodes))
+						}
+					}
+					if !reflect.DeepEqual(got, test.want) {
+						t.Errorf("unexpected iterator output for round %d: got:%#v want:%#v", i, got, test.want)
+					}
+					func() {
+						defer func() {
+							r := recover()
+							if r != nil {
+								t.Errorf("unexpected panic: %v", r)
+							}
+						}()
+						it.Next()
+					}()
+					it.Reset()
 				}
 			}
-			if !reflect.DeepEqual(got, test.want) {
-				t.Errorf("unexpected iterator output for round %d: got:%#v want:%#v", i, got, test.want)
-			}
-			func() {
-				defer func() {
-					r := recover()
-					if r != nil {
-						t.Errorf("unexpected panic: %v", r)
-					}
-				}()
-				it.Next()
-			}()
-			it.Reset()
-		}
+		})
 	}
 }
 
@@ -338,42 +386,61 @@ var nodesByLinesTests = []struct {
 }
 
 func TestNodesByLinesIterate(t *testing.T) {
-	for _, test := range nodesByLinesTests {
-		nodes := make(map[int64]graph.Node)
-		for i := int64(0); i < test.n; i++ {
-			nodes[i] = simple.Node(i)
-		}
+	for _, typ := range []struct {
+		name string
+		new  func(map[int64]graph.Node, map[int64]map[int64]graph.Line) graph.Nodes
+	}{
+		{
+			name: "NodesByLines",
+			new: func(n map[int64]graph.Node, e map[int64]map[int64]graph.Line) graph.Nodes {
+				return iterator.NewNodesByLines(n, e)
+			}},
+		{
+			name: "LazyOrderedNodesByLines",
+			new: func(n map[int64]graph.Node, e map[int64]map[int64]graph.Line) graph.Nodes {
+				return iterator.NewLazyOrderedNodesByLines(n, e)
+			},
+		},
+	} {
+		t.Run(typ.name, func(t *testing.T) {
+			for _, test := range nodesByLinesTests {
+				nodes := make(map[int64]graph.Node)
+				for i := int64(0); i < test.n; i++ {
+					nodes[i] = simple.Node(i)
+				}
 
-		it := iterator.NewNodesByLines(nodes, test.lines)
-		for i := 0; i < 2; i++ {
-			if it.Len() != len(test.lines) {
-				t.Errorf("unexpected iterator length for round %d: got:%d want:%d", i, it.Len(), len(nodes))
-			}
-			var got map[int64]graph.Node
-			if test.lines != nil {
-				got = make(map[int64]graph.Node)
-			}
-			for it.Next() {
-				n := it.Node()
-				got[n.ID()] = n
-				if len(got)+it.Len() != len(test.lines) {
-					t.Errorf("unexpected iterator length during iteration for round %d: got:%d want:%d", i, it.Len(), len(nodes))
+				it := typ.new(nodes, test.lines)
+				for i := 0; i < 2; i++ {
+					if it.Len() != len(test.lines) {
+						t.Errorf("unexpected iterator length for round %d: got:%d want:%d", i, it.Len(), len(nodes))
+					}
+					var got map[int64]graph.Node
+					if test.lines != nil {
+						got = make(map[int64]graph.Node)
+					}
+					for it.Next() {
+						n := it.Node()
+						got[n.ID()] = n
+						if len(got)+it.Len() != len(test.lines) {
+							t.Errorf("unexpected iterator length during iteration for round %d: got:%d want:%d", i, it.Len(), len(nodes))
+						}
+					}
+					if !reflect.DeepEqual(got, test.want) {
+						t.Errorf("unexpected iterator output for round %d: got:%#v want:%#v", i, got, test.want)
+					}
+					func() {
+						defer func() {
+							r := recover()
+							if r != nil {
+								t.Errorf("unexpected panic: %v", r)
+							}
+						}()
+						it.Next()
+					}()
+					it.Reset()
 				}
 			}
-			if !reflect.DeepEqual(got, test.want) {
-				t.Errorf("unexpected iterator output for round %d: got:%#v want:%#v", i, got, test.want)
-			}
-			func() {
-				defer func() {
-					r := recover()
-					if r != nil {
-						t.Errorf("unexpected panic: %v", r)
-					}
-				}()
-				it.Next()
-			}()
-			it.Reset()
-		}
+		})
 	}
 }
 
@@ -413,42 +480,61 @@ var nodesByWeightedLinesTests = []struct {
 }
 
 func TestNodesByWeightedLinesIterate(t *testing.T) {
-	for _, test := range nodesByWeightedLinesTests {
-		nodes := make(map[int64]graph.Node)
-		for i := int64(0); i < test.n; i++ {
-			nodes[i] = simple.Node(i)
-		}
+	for _, typ := range []struct {
+		name string
+		new  func(map[int64]graph.Node, map[int64]map[int64]graph.WeightedLine) graph.Nodes
+	}{
+		{
+			name: "NodesByWeightedLines",
+			new: func(n map[int64]graph.Node, e map[int64]map[int64]graph.WeightedLine) graph.Nodes {
+				return iterator.NewNodesByWeightedLines(n, e)
+			}},
+		{
+			name: "LazyOrderedNodesByWeightedLines",
+			new: func(n map[int64]graph.Node, e map[int64]map[int64]graph.WeightedLine) graph.Nodes {
+				return iterator.NewLazyOrderedNodesByWeightedLines(n, e)
+			},
+		},
+	} {
+		t.Run(typ.name, func(t *testing.T) {
+			for _, test := range nodesByWeightedLinesTests {
+				nodes := make(map[int64]graph.Node)
+				for i := int64(0); i < test.n; i++ {
+					nodes[i] = simple.Node(i)
+				}
 
-		it := iterator.NewNodesByWeightedLines(nodes, test.lines)
-		for i := 0; i < 2; i++ {
-			if it.Len() != len(test.lines) {
-				t.Errorf("unexpected iterator length for round %d: got:%d want:%d", i, it.Len(), len(nodes))
-			}
-			var got map[int64]graph.Node
-			if test.lines != nil {
-				got = make(map[int64]graph.Node)
-			}
-			for it.Next() {
-				n := it.Node()
-				got[n.ID()] = n
-				if len(got)+it.Len() != len(test.lines) {
-					t.Errorf("unexpected iterator length during iteration for round %d: got:%d want:%d", i, it.Len(), len(nodes))
+				it := typ.new(nodes, test.lines)
+				for i := 0; i < 2; i++ {
+					if it.Len() != len(test.lines) {
+						t.Errorf("unexpected iterator length for round %d: got:%d want:%d", i, it.Len(), len(nodes))
+					}
+					var got map[int64]graph.Node
+					if test.lines != nil {
+						got = make(map[int64]graph.Node)
+					}
+					for it.Next() {
+						n := it.Node()
+						got[n.ID()] = n
+						if len(got)+it.Len() != len(test.lines) {
+							t.Errorf("unexpected iterator length during iteration for round %d: got:%d want:%d", i, it.Len(), len(nodes))
+						}
+					}
+					if !reflect.DeepEqual(got, test.want) {
+						t.Errorf("unexpected iterator output for round %d: got:%#v want:%#v", i, got, test.want)
+					}
+					func() {
+						defer func() {
+							r := recover()
+							if r != nil {
+								t.Errorf("unexpected panic: %v", r)
+							}
+						}()
+						it.Next()
+					}()
+					it.Reset()
 				}
 			}
-			if !reflect.DeepEqual(got, test.want) {
-				t.Errorf("unexpected iterator output for round %d: got:%#v want:%#v", i, got, test.want)
-			}
-			func() {
-				defer func() {
-					r := recover()
-					if r != nil {
-						t.Errorf("unexpected panic: %v", r)
-					}
-				}()
-				it.Next()
-			}()
-			it.Reset()
-		}
+		})
 	}
 }
 
@@ -496,6 +582,23 @@ var nodeSlicerTests = []struct {
 		want:  []graph.Node{simple.Node(1), simple.Node(2), simple.Node(3), simple.Node(5)},
 	},
 
+	{
+		nodes: iterator.NewLazyOrderedNodes(map[int64]graph.Node{1: simple.Node(1)}),
+		want:  []graph.Node{simple.Node(1)},
+	},
+	{
+		nodes: iterator.NewLazyOrderedNodes(map[int64]graph.Node{1: simple.Node(1), 2: simple.Node(2), 3: simple.Node(3)}),
+		want:  []graph.Node{simple.Node(1), simple.Node(2), simple.Node(3)},
+	},
+	{
+		nodes: iterator.NewLazyOrderedNodes(map[int64]graph.Node{1: simple.Node(1), 2: simple.Node(2), 3: simple.Node(3), 4: simple.Node(4), 5: simple.Node(5)}),
+		want:  []graph.Node{simple.Node(1), simple.Node(2), simple.Node(3), simple.Node(4), simple.Node(5)},
+	},
+	{
+		nodes: iterator.NewLazyOrderedNodes(map[int64]graph.Node{5: simple.Node(5), 3: simple.Node(3), 2: simple.Node(2), 1: simple.Node(1)}),
+		want:  []graph.Node{simple.Node(1), simple.Node(2), simple.Node(3), simple.Node(5)},
+	},
+
 	// The actual values of the edges stored in the edge
 	// map leading to each node are not used, so they are
 	// filled with nil values.
@@ -521,6 +624,94 @@ var nodeSlicerTests = []struct {
 		nodes: iterator.NewNodesByEdge(
 			map[int64]graph.Node{1: simple.Node(1), 2: simple.Node(2), 3: simple.Node(3), 4: simple.Node(4), 5: simple.Node(5)},
 			map[int64]graph.Edge{5: nil, 3: nil, 2: nil, 1: nil},
+		),
+		want: []graph.Node{simple.Node(1), simple.Node(2), simple.Node(3), simple.Node(5)},
+	},
+
+	{
+		nodes: iterator.NewLazyOrderedNodesByEdge(
+			map[int64]graph.Node{1: simple.Node(1), 2: simple.Node(2), 3: simple.Node(3), 4: simple.Node(4), 5: simple.Node(5)},
+			map[int64]graph.Edge{1: nil},
+		),
+		want: []graph.Node{simple.Node(1)},
+	},
+	{
+		nodes: iterator.NewLazyOrderedNodesByEdge(
+			map[int64]graph.Node{1: simple.Node(1), 2: simple.Node(2), 3: simple.Node(3), 4: simple.Node(4), 5: simple.Node(5)},
+			map[int64]graph.Edge{1: nil, 2: nil, 3: nil, 5: nil},
+		),
+		want: []graph.Node{simple.Node(1), simple.Node(2), simple.Node(3), simple.Node(5)},
+	},
+	{
+		nodes: iterator.NewLazyOrderedNodesByEdge(
+			map[int64]graph.Node{1: simple.Node(1), 2: simple.Node(2), 3: simple.Node(3), 4: simple.Node(4), 5: simple.Node(5)},
+			map[int64]graph.Edge{5: nil, 3: nil, 2: nil, 1: nil},
+		),
+		want: []graph.Node{simple.Node(1), simple.Node(2), simple.Node(3), simple.Node(5)},
+	},
+
+	{
+		nodes: iterator.NewLazyOrderedNodesByWeightedEdge(
+			map[int64]graph.Node{1: simple.Node(1), 2: simple.Node(2), 3: simple.Node(3), 4: simple.Node(4), 5: simple.Node(5)},
+			map[int64]graph.WeightedEdge{1: nil},
+		),
+		want: []graph.Node{simple.Node(1)},
+	},
+	{
+		nodes: iterator.NewLazyOrderedNodesByWeightedEdge(
+			map[int64]graph.Node{1: simple.Node(1), 2: simple.Node(2), 3: simple.Node(3), 4: simple.Node(4), 5: simple.Node(5)},
+			map[int64]graph.WeightedEdge{1: nil, 2: nil, 3: nil, 5: nil},
+		),
+		want: []graph.Node{simple.Node(1), simple.Node(2), simple.Node(3), simple.Node(5)},
+	},
+	{
+		nodes: iterator.NewLazyOrderedNodesByWeightedEdge(
+			map[int64]graph.Node{1: simple.Node(1), 2: simple.Node(2), 3: simple.Node(3), 4: simple.Node(4), 5: simple.Node(5)},
+			map[int64]graph.WeightedEdge{5: nil, 3: nil, 2: nil, 1: nil},
+		),
+		want: []graph.Node{simple.Node(1), simple.Node(2), simple.Node(3), simple.Node(5)},
+	},
+
+	{
+		nodes: iterator.NewLazyOrderedNodesByLines(
+			map[int64]graph.Node{1: simple.Node(1), 2: simple.Node(2), 3: simple.Node(3), 4: simple.Node(4), 5: simple.Node(5)},
+			map[int64]map[int64]graph.Line{1: nil},
+		),
+		want: []graph.Node{simple.Node(1)},
+	},
+	{
+		nodes: iterator.NewLazyOrderedNodesByLines(
+			map[int64]graph.Node{1: simple.Node(1), 2: simple.Node(2), 3: simple.Node(3), 4: simple.Node(4), 5: simple.Node(5)},
+			map[int64]map[int64]graph.Line{1: nil, 2: nil, 3: nil, 5: nil},
+		),
+		want: []graph.Node{simple.Node(1), simple.Node(2), simple.Node(3), simple.Node(5)},
+	},
+	{
+		nodes: iterator.NewLazyOrderedNodesByLines(
+			map[int64]graph.Node{1: simple.Node(1), 2: simple.Node(2), 3: simple.Node(3), 4: simple.Node(4), 5: simple.Node(5)},
+			map[int64]map[int64]graph.Line{5: nil, 3: nil, 2: nil, 1: nil},
+		),
+		want: []graph.Node{simple.Node(1), simple.Node(2), simple.Node(3), simple.Node(5)},
+	},
+
+	{
+		nodes: iterator.NewLazyOrderedNodesByWeightedLines(
+			map[int64]graph.Node{1: simple.Node(1), 2: simple.Node(2), 3: simple.Node(3), 4: simple.Node(4), 5: simple.Node(5)},
+			map[int64]map[int64]graph.WeightedLine{1: nil},
+		),
+		want: []graph.Node{simple.Node(1)},
+	},
+	{
+		nodes: iterator.NewLazyOrderedNodesByWeightedLines(
+			map[int64]graph.Node{1: simple.Node(1), 2: simple.Node(2), 3: simple.Node(3), 4: simple.Node(4), 5: simple.Node(5)},
+			map[int64]map[int64]graph.WeightedLine{1: nil, 2: nil, 3: nil, 5: nil},
+		),
+		want: []graph.Node{simple.Node(1), simple.Node(2), simple.Node(3), simple.Node(5)},
+	},
+	{
+		nodes: iterator.NewLazyOrderedNodesByWeightedLines(
+			map[int64]graph.Node{1: simple.Node(1), 2: simple.Node(2), 3: simple.Node(3), 4: simple.Node(4), 5: simple.Node(5)},
+			map[int64]map[int64]graph.WeightedLine{5: nil, 3: nil, 2: nil, 1: nil},
 		),
 		want: []graph.Node{simple.Node(1), simple.Node(2), simple.Node(3), simple.Node(5)},
 	},

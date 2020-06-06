@@ -145,7 +145,9 @@ func johnsonGraphFrom(g graph.Directed) johnsonGraph {
 	for i, u := range nodes {
 		uid := u.ID()
 		c.index[uid] = i
-		for _, v := range graph.NodesOf(g.From(uid)) {
+		to := g.From(uid)
+		for to.Next() {
+			v := to.Node()
 			if c.succ[uid] == nil {
 				c.succ[uid] = make(set.Int64s)
 				c.nodes.Add(uid)

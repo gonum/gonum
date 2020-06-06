@@ -62,7 +62,9 @@ func AStar(s, t graph.Node, g traverse.Graph, h Heuristic) (path Shortest, expan
 		}
 
 		visited.Add(uid)
-		for _, v := range graph.NodesOf(g.From(u.node.ID())) {
+		to := g.From(u.node.ID())
+		for to.Next() {
+			v := to.Node()
 			vid := v.ID()
 			if visited.Has(vid) {
 				continue

@@ -117,7 +117,9 @@ func brandes(g graph.Graph, accumulate func(s graph.Node, stack linear.NodeStack
 			v := queue.Dequeue()
 			vid := v.ID()
 			stack.Push(v)
-			for _, w := range graph.NodesOf(g.From(vid)) {
+			to := g.From(vid)
+			for to.Next() {
+				w := to.Node()
 				wid := w.ID()
 				// w found for the first time?
 				if d[wid] < 0 {

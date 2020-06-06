@@ -162,7 +162,9 @@ func (lt *sLengauerTarjan) dfs(g graph.Directed, v graph.Node) {
 	ltv.label = ltv
 	lt.nodes = append(lt.nodes, ltv)
 
-	for _, w := range graph.NodesOf(g.From(v.ID())) {
+	to := g.From(v.ID())
+	for to.Next() {
+		w := to.Node()
 		wid := w.ID()
 
 		idx, ok := lt.indexOf[wid]

@@ -48,7 +48,9 @@ func BellmanFordFrom(u graph.Node, g graph.Graph) (path Shortest, ok bool) {
 		uid := u.ID()
 		j := path.indexOf[uid]
 
-		for _, v := range graph.NodesOf(g.From(uid)) {
+		to := g.From(uid)
+		for to.Next() {
+			v := to.Node()
 			vid := v.ID()
 			k := path.indexOf[vid]
 			w, ok := weight(uid, vid)

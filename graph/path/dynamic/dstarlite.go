@@ -87,7 +87,9 @@ func NewDStarLite(s, t graph.Node, g graph.Graph, h path.Heuristic, m WorldModel
 
 	d.queue.insert(d.t, key{d.heuristic(s, t), 0})
 
-	for _, n := range graph.NodesOf(g.Nodes()) {
+	nodes := g.Nodes()
+	for nodes.Next() {
+		n := nodes.Node()
 		switch n.ID() {
 		case d.s.ID():
 			d.model.AddNode(d.s)
@@ -97,9 +99,13 @@ func NewDStarLite(s, t graph.Node, g graph.Graph, h path.Heuristic, m WorldModel
 			d.model.AddNode(newDStarLiteNode(n))
 		}
 	}
-	for _, u := range graph.NodesOf(d.model.Nodes()) {
+	model := d.model.Nodes()
+	for model.Next() {
+		u := model.Node()
 		uid := u.ID()
-		for _, v := range graph.NodesOf(g.From(uid)) {
+		to := g.From(uid)
+		for to.Next() {
+			v := to.Node()
 			vid := v.ID()
 			w := edgeWeight(d.weight, uid, vid)
 			if w < 0 {
@@ -195,8 +201,9 @@ func (d *DStarLite) findShortestPath() {
 		case u.g > u.rhs:
 			u.g = u.rhs
 			d.queue.remove(u)
-			for _, _s := range graph.NodesOf(d.model.To(uid)) {
-				s := _s.(*dStarLiteNode)
+			from := d.model.To(uid)
+			for from.Next() {
+				s := from.Node().(*dStarLiteNode)
 				sid := s.ID()
 				if sid != d.t.ID() {
 					s.rhs = math.Min(s.rhs, edgeWeight(d.model.Weight, sid, uid)+u.g)
@@ -212,7 +219,9 @@ func (d *DStarLite) findShortestPath() {
 				if s.rhs == edgeWeight(d.model.Weight, sid, uid)+gOld {
 					if s.ID() != d.t.ID() {
 						s.rhs = math.Inf(1)
-						for _, t := range graph.NodesOf(d.model.From(sid)) {
+						to := d.model.From(sid)
+						for to.Next() {
+							t := to.Node()
 							tid := t.ID()
 							s.rhs = math.Min(s.rhs, edgeWeight(d.model.Weight, sid, tid)+t.(*dStarLiteNode).g)
 						}
@@ -249,8 +258,9 @@ func (d *DStarLite) Step() bool {
 
 	var next *dStarLiteNode
 	dsid := d.s.ID()
-	for _, _s := range graph.NodesOf(d.model.From(dsid)) {
-		s := _s.(*dStarLiteNode)
+	to := d.model.From(dsid)
+	for to.Next() {
+		s := to.Node().(*dStarLiteNode)
 		w := edgeWeight(d.model.Weight, dsid, s.ID()) + s.g
 		if w < min || (w == min && s.rhs < rhs) {
 			next = s
@@ -319,7 +329,9 @@ func (d *DStarLite) UpdateWorld(changes []graph.Edge) {
 		} else if u.rhs == cOld+v.g {
 			if uid != d.t.ID() {
 				u.rhs = math.Inf(1)
-				for _, t := range graph.NodesOf(d.model.From(uid)) {
+				to := d.model.From(uid)
+				for to.Next() {
+					t := to.Node()
 					u.rhs = math.Min(u.rhs, edgeWeight(d.model.Weight, uid, t.ID())+t.(*dStarLiteNode).g)
 				}
 			}
@@ -364,8 +376,9 @@ func (d *DStarLite) Path() (p []graph.Node, weight float64) {
 			cost float64
 		)
 		uid := u.ID()
-		for _, _v := range graph.NodesOf(d.model.From(uid)) {
-			v := _v.(*dStarLiteNode)
+		to := d.model.From(uid)
+		for to.Next() {
+			v := to.Node().(*dStarLiteNode)
 			vid := v.ID()
 			w := edgeWeight(d.model.Weight, uid, vid)
 			if rhs := w + v.g; rhs < min || (rhs == min && v.rhs < rhsMin) {

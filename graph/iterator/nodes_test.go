@@ -34,6 +34,9 @@ func TestOrderedNodesIterate(t *testing.T) {
 			var got []graph.Node
 			for it.Next() {
 				got = append(got, it.Node())
+				if len(got)+it.Len() != len(test.nodes) {
+					t.Errorf("unexpected iterator length during iteration for round %d: got:%d want:%d", i, it.Len(), len(test.nodes)-len(got))
+				}
 			}
 			want := test.nodes
 			if !reflect.DeepEqual(got, want) {
@@ -91,6 +94,9 @@ func TestImplicitNodesIterate(t *testing.T) {
 			var got []graph.Node
 			for it.Next() {
 				got = append(got, it.Node())
+				if len(got)+it.Len() != test.end-test.beg {
+					t.Errorf("unexpected iterator length during iteration for round %d: got:%d want:%d", i, it.Len(), (test.end-test.beg)-len(got))
+				}
 			}
 			if !reflect.DeepEqual(got, test.want) {
 				t.Errorf("unexpected iterator output for round %d: got:%#v want:%#v", i, got, test.want)

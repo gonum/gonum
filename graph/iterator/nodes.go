@@ -59,10 +59,7 @@ func (n *OrderedNodes) NodeSlice() []graph.Node {
 	if n.idx >= len(n.nodes) {
 		return nil
 	}
-	idx := n.idx
-	if idx == -1 {
-		idx = 0
-	}
+	idx := n.idx + 1
 	n.idx = len(n.nodes)
 	return n.nodes[idx:]
 }
@@ -121,6 +118,9 @@ func (n *ImplicitNodes) Reset() {
 // NodeSlice returns all the remaining nodes in the iterator and advances
 // the iterator.
 func (n *ImplicitNodes) NodeSlice() []graph.Node {
+	if n.Len() == 0 {
+		return nil
+	}
 	nodes := make([]graph.Node, 0, n.Len())
 	for n.curr++; n.curr < n.end; n.curr++ {
 		nodes = append(nodes, n.newNode(n.curr))
@@ -177,6 +177,21 @@ func (n *Nodes) Reset() {
 	n.curr = nil
 	n.pos = 0
 	n.iter = n.nodes.MapRange()
+}
+
+// NodeSlice returns all the remaining nodes in the iterator and advances
+// the iterator. The order of nodes within the returned slice is not
+// specified.
+func (n *Nodes) NodeSlice() []graph.Node {
+	if n.Len() == 0 {
+		return nil
+	}
+	nodes := make([]graph.Node, 0, n.Len())
+	for n.iter.Next() {
+		nodes = append(nodes, n.iter.Value().Interface().(graph.Node))
+	}
+	n.pos = n.nodes.Len()
+	return nodes
 }
 
 // NodesByEdge implements the graph.Nodes interfaces.
@@ -274,4 +289,19 @@ func (n *NodesByEdge) Reset() {
 	n.curr = nil
 	n.pos = 0
 	n.iter = n.edges.MapRange()
+}
+
+// NodeSlice returns all the remaining nodes in the iterator and advances
+// the iterator. The order of nodes within the returned slice is not
+// specified.
+func (n *NodesByEdge) NodeSlice() []graph.Node {
+	if n.Len() == 0 {
+		return nil
+	}
+	nodes := make([]graph.Node, 0, n.Len())
+	for n.iter.Next() {
+		nodes = append(nodes, n.nodes[n.iter.Key().Int()])
+	}
+	n.pos = n.edges.Len()
+	return nodes
 }

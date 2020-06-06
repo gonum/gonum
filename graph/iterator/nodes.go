@@ -24,10 +24,7 @@ func (n *OrderedNodes) Len() int {
 	if n.idx >= len(n.nodes) {
 		return 0
 	}
-	if n.idx <= 0 {
-		return len(n.nodes)
-	}
-	return len(n.nodes[n.idx:])
+	return len(n.nodes[n.idx+1:])
 }
 
 // Next returns whether the next call of Node will return a valid node.

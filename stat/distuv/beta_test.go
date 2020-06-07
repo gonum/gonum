@@ -94,13 +94,6 @@ func testBeta(t *testing.T, b Beta, i int) {
 	if b.Survival(1.01) != 0 {
 		t.Errorf("Survival above 1 is not 0")
 	}
-
-	if !panics(func() { b.Quantile(-0.01) }) {
-		t.Errorf("Quantile did not panic for negative argument")
-	}
-	if !panics(func() { b.Quantile(1.01) }) {
-		t.Errorf("Quantile did not panic for argument above 1")
-	}
 }
 
 func TestBetaBadParams(t *testing.T) {

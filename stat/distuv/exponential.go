@@ -24,7 +24,7 @@ func (e Exponential) CDF(x float64) float64 {
 	if x < 0 {
 		return 0
 	}
-	return 1 - math.Exp(-e.Rate*x)
+	return -math.Expm1(-e.Rate * x)
 }
 
 // ConjugateUpdate updates the parameters of the distribution from the sufficient

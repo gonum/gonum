@@ -151,3 +151,13 @@ func TestExponentialFitPanic(t *testing.T) {
 	}()
 	e.Fit(make([]float64, 10), nil)
 }
+
+func TestExponentialCDFSmallArgument(t *testing.T) {
+	t.Parallel()
+	e := Exponential{Rate: 1}
+	x := 1e-17
+	p := e.CDF(x)
+	if math.Abs(p-x) > 1e-20 {
+		t.Errorf("Wrong CDF value for small argument. Got: %v, want: %g", p, x)
+	}
+}

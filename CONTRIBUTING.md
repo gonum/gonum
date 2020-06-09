@@ -85,7 +85,7 @@ Benchmarks are optional for new features, but if you are submitting a pull reque
 
 ### Code Review
 
-If you are a contributor, please be welcoming to new contributors.  [Here](http://sarah.thesharps.us/2014/09/01/the-gentle-art-of-patch-review/) is a good guide.
+If you are a contributor, please be welcoming to new contributors.  [Here](https://sage.thesharps.us/2014/09/01/the-gentle-art-of-patch-review/) is a good guide.
 
 There are several terms code reviews may use that you should become familiar with.
 

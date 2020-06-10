@@ -109,9 +109,6 @@ func (f F) Skewness() float64 {
 //
 // StdDev returns NaN if the D2 parameter is less than or equal to 4.
 func (f F) StdDev() float64 {
-	if f.D2 <= 4 {
-		return math.NaN()
-	}
 	return math.Sqrt(f.Variance())
 }
 

@@ -603,7 +603,7 @@ func TestSVDSolveVecTo(t *testing.T) {
 		}
 		svd.SolveVecTo(&x, b, rank)
 		if !EqualApprox(&x, want, 1e-12) {
-			t.Errorf("Solve wantwer mismatch. Want %v, got %v", want, x)
+			t.Errorf("Solve answer mismatch. Want %v, got %v", want, x)
 		}
 	}
 

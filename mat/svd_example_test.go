@@ -12,7 +12,7 @@ import (
 )
 
 func ExampleSVD_SolveTo() {
-	// The system defined described by A is rank deficient.
+	// The system described by A is rank deficient.
 	a := mat.NewDense(5, 3, []float64{
 		-1.7854591879711257, -0.42687285925779594, -0.12730256811265162,
 		-0.5728984211439724, -0.10093393134001777, -0.1181901192353067,
@@ -29,7 +29,7 @@ func ExampleSVD_SolveTo() {
 	}
 
 	// Determine the rank of the A matrix with a near zero condition threshold.
-	var rcond = 1e-15
+	const rcond = 1e-15
 	rank := svd.Rank(rcond)
 	if rank == 0 {
 		log.Fatal("zero rank system")
@@ -47,19 +47,19 @@ func ExampleSVD_SolveTo() {
 	var x mat.Dense
 	svd.SolveTo(&x, b, rank)
 
-	fmt.Printf("singular values = %.4g\nrank = %d\nx = %f",
-		svd.Values(nil), rank, mat.Formatted(&x, mat.Prefix("    ")))
+	fmt.Printf("singular values = %v\nrank = %d\nx = %.15f",
+		format(svd.Values(nil), 4, rcond), rank, mat.Formatted(&x, mat.Prefix("    ")))
 
 	// Output:
-	// singular values = [2.685 1.526 1.835e-16]
+	// singular values = [2.685 1.526 <1e-15]
 	// rank = 2
-	// x = ⎡  1.2120643135523468    1.5074674510939299⎤
-	//     ⎢  0.4154007382647741    -0.624498607705372⎥
-	//     ⎣-0.18318444225528013    2.2213341936891244⎦
+	// x = ⎡ 1.212064313552347   1.507467451093930⎤
+	//     ⎢ 0.415400738264774  -0.624498607705372⎥
+	//     ⎣-0.183184442255280   2.221334193689124⎦
 }
 
 func ExampleSVD_SolveVecTo() {
-	// The system defined described by A is rank deficient.
+	// The system described by A is rank deficient.
 	a := mat.NewDense(5, 3, []float64{
 		-1.7854591879711257, -0.42687285925779594, -0.12730256811265162,
 		-0.5728984211439724, -0.10093393134001777, -0.1181901192353067,
@@ -76,7 +76,7 @@ func ExampleSVD_SolveVecTo() {
 	}
 
 	// Determine the rank of the A matrix with a near zero condition threshold.
-	var rcond = 1e-15
+	const rcond = 1e-15
 	rank := svd.Rank(rcond)
 	if rank == 0 {
 		log.Fatal("zero rank system")
@@ -88,13 +88,25 @@ func ExampleSVD_SolveVecTo() {
 	var x mat.VecDense
 	svd.SolveVecTo(&x, b, rank)
 
-	fmt.Printf("singular values = %.4g\nrank = %d\nx = %f",
-		svd.Values(nil), rank, mat.Formatted(&x, mat.Prefix("    ")))
+	fmt.Printf("singular values = %v\nrank = %d\nx = %.15f",
+		format(svd.Values(nil), 4, rcond), rank, mat.Formatted(&x, mat.Prefix("    ")))
 
 	// Output:
-	// singular values = [2.685 1.526 1.835e-16]
+	// singular values = [2.685 1.526 <1e-15]
 	// rank = 2
-	// x = ⎡  1.2120643135523468⎤
-	//     ⎢  0.4154007382647741⎥
-	//     ⎣-0.18318444225528013⎦
+	// x = ⎡ 1.212064313552347⎤
+	//     ⎢ 0.415400738264774⎥
+	//     ⎣-0.183184442255280⎦
+}
+
+func format(vals []float64, prec int, eps float64) []string {
+	s := make([]string, len(vals))
+	for i, v := range vals {
+		if v < eps {
+			s[i] = fmt.Sprintf("<%.*g", prec, eps)
+			continue
+		}
+		s[i] = fmt.Sprintf("%.*g", prec, v)
+	}
+	return s
 }

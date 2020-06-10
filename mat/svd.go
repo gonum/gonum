@@ -12,7 +12,7 @@ import (
 
 const badRcond = "mat: invalid rcond value"
 
-// SVD is a type for creating and using the Singular Value Decomposition (SVD)
+// SVD is a type for creating and using the Singular Value Decomposition
 // of a matrix.
 type SVD struct {
 	kind SVDKind

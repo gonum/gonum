@@ -150,9 +150,9 @@ func (svd *SVD) Kind() SVDKind {
 }
 
 // Rank returns the rank of A based on the count of singular values greater than
-// rcond scaled by the first singular value.
+// rcond scaled by the largest singular value.
 // Rank will panic if the receiver does not contain a successful factorization or
-// rcond is negative
+// rcond is negative.
 func (svd *SVD) Rank(rcond float64) int {
 	if rcond < 0 {
 		panic(badRcond)

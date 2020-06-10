@@ -10,6 +10,8 @@ import (
 	"gonum.org/v1/gonum/lapack/lapack64"
 )
 
+const badRcond = "mat: invalid rcond value"
+
 // SVD is a type for creating and using the Singular Value Decomposition (SVD)
 // of a matrix.
 type SVD struct {
@@ -147,10 +149,20 @@ func (svd *SVD) Kind() SVDKind {
 	return svd.kind
 }
 
-// Rank returns the rank of A based on the count of singular values greater than cond.
-func (svd *SVD) Rank(cond float64) int {
+// Rank returns the rank of A based on the count of singular values greater than
+// rcond scaled by the first singular value.
+// Rank will panic if the receiver does not contain a successful factorization or
+// rcond is negative
+func (svd *SVD) Rank(rcond float64) int {
+	if rcond < 0 {
+		panic(badRcond)
+	}
+	if !svd.succFact() {
+		panic(badFact)
+	}
+	s0 := svd.s[0]
 	for i, v := range svd.s {
-		if v <= cond {
+		if v <= rcond*s0 {
 			return i
 		}
 	}
@@ -265,8 +277,8 @@ func (svd *SVD) VTo(dst *Dense) {
 // It returns the residuals calculated from the complete SVD. For this value to be
 // valid the factorization must have been performed with at least SVDFullU.
 // The decomposition must have been factorized computing both the U and V singular
-// vectors, and dst must be either empty or have length equal to rank.
-// The supplied rank must be a positive index into svd.Values.
+// vectors, and dst must be either empty or have a row dimension equal to rank.
+// The supplied rank must be a positive end-slice index into svd.Values.
 func (svd *SVD) SolveTo(dst *Dense, b Matrix, rank int) []float64 {
 	if !svd.succFact() {
 		panic(badFact)

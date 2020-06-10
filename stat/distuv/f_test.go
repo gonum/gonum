@@ -91,7 +91,7 @@ func testF(t *testing.T, f F, i int) {
 	checkExKurtosis(t, i, x, f, 1e-1)
 	checkSkewness(t, i, x, f, 5e-2)
 	checkQuantileCDFSurvival(t, i, x, f, 5e-3)
-	checkMode(t, i, x, f, tol)
+	checkMode(t, i, x, f, 2e-2, 3e-2)
 
 	if f.NumParameters() != 2 {
 		t.Errorf("Wrong number of parameters. Got %v, want 2", f.NumParameters())
@@ -116,6 +116,11 @@ func TestFUndefined(t *testing.T) {
 			if !math.IsNaN(mean) {
 				t.Errorf("Expected NaN mean for D1 = %g and D2 = %g, got %v", d1, d2, mean)
 			}
+		}
+	}
+	for _, d1 := range []float64{1, 2} {
+		for _, d2 := range []float64{1, 100} {
+			f := F{d1, d2, nil}
 			mode := f.Mode()
 			if !math.IsNaN(mode) {
 				t.Errorf("Expected NaN mode for D1 = %g and D2 = %g, got %v", d1, d2, mode)

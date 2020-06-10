@@ -220,15 +220,15 @@ func checkProbQuantContinuous(t *testing.T, i int, xs []float64, c cumulantProbe
 	}
 }
 
-func checkMode(t *testing.T, i int, xs []float64, m moder, tol float64) {
+func checkMode(t *testing.T, i int, xs []float64, m moder, dx float64, tol float64) {
 	rXs := make([]float64, len(xs))
-	for i := 0; i < len(xs); i++ {
-		rXs[i] = floats.RoundEven(xs[i]*tol, 0) / tol
-		expected, _ := stat.Mode(rXs, nil)
-		actual := m.Mode()
-		if !floats.EqualWithinAbs(expected, actual, tol) {
-			t.Errorf("Mode mismatch case %d: want %g, got %v", i, expected, actual)
-		}
+	for j, x := range xs {
+		rXs[j] = floats.RoundEven(x/dx, 0) * dx
+	}
+	expected, _ := stat.Mode(rXs, nil)
+	actual := m.Mode()
+	if !floats.EqualWithinAbs(expected, actual, tol) {
+		t.Errorf("Mode mismatch case %d: want %g, got %v", i, expected, actual)
 	}
 }
 

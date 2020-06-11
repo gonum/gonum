@@ -138,14 +138,14 @@ func (p Shortest) To(vid int64) (path []graph.Node, weight float64) {
 				break
 			}
 			seen.Add(to)
-			path = append(path, p.nodes[p.next[to]])
 			to = p.next[to]
+			path = append(path, p.nodes[to])
 		}
 	} else {
 		n := len(p.nodes)
 		for to != from {
-			path = append(path, p.nodes[p.next[to]])
 			to = p.next[to]
+			path = append(path, p.nodes[to])
 			if n < 0 {
 				panic("path: unexpected negative cycle")
 			}

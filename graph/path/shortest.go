@@ -16,8 +16,8 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-// Shortest is a shortest-path tree created by the BellmanFordFrom or DijkstraFrom
-// single-source shortest path functions.
+// Shortest is a shortest-path tree created by the BellmanFordFrom, DijkstraFrom
+// or AStar single-source shortest path functions.
 type Shortest struct {
 	// from holds the source node given to
 	// the function that returned the

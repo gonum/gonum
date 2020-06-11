@@ -15,11 +15,12 @@ import (
 // DijkstraAllPaths, DijkstraFrom, FloydWarshall and Johnson, and the static degenerate case for the
 // dynamic shortest path routine in path/dynamic: DStarLite.
 var ShortestPathTests = []struct {
-	Name              string
-	Graph             func() graph.WeightedEdgeAdder
-	Edges             []simple.WeightedEdge
-	HasNegativeWeight bool
-	HasNegativeCycle  bool
+	Name                   string
+	Graph                  func() graph.WeightedEdgeAdder
+	Edges                  []simple.WeightedEdge
+	HasNegativeWeight      bool
+	HasNegativeCycle       bool
+	HasNegativeCycleInPath bool
 
 	Query         simple.Edge
 	Weight        float64
@@ -594,8 +595,9 @@ var ShortestPathTests = []struct {
 		HasNegativeWeight: true,
 		HasNegativeCycle:  true,
 
-		Query:  simple.Edge{F: simple.Node(0), T: simple.Node(1)},
-		Weight: math.Inf(-1),
+		Query:                  simple.Edge{F: simple.Node(0), T: simple.Node(1)},
+		HasNegativeCycleInPath: true,
+		Weight:                 math.Inf(-1),
 		WantPaths: [][]int64{
 			{0, 1}, // One loop around negative cycle and no lead-in path.
 		},
@@ -615,8 +617,9 @@ var ShortestPathTests = []struct {
 		HasNegativeWeight: true,
 		HasNegativeCycle:  true,
 
-		Query:  simple.Edge{F: simple.Node(0), T: simple.Node(3)},
-		Weight: math.Inf(-1),
+		Query:                  simple.Edge{F: simple.Node(0), T: simple.Node(3)},
+		HasNegativeCycleInPath: true,
+		Weight:                 math.Inf(-1),
 		WantPaths: [][]int64{
 			{1, 2, 1, 3}, // One loop around negative cycle and no lead-in path.
 		},
@@ -636,8 +639,9 @@ var ShortestPathTests = []struct {
 		HasNegativeWeight: true,
 		HasNegativeCycle:  true,
 
-		Query:  simple.Edge{F: simple.Node(0), T: simple.Node(4)},
-		Weight: 10,
+		Query:                  simple.Edge{F: simple.Node(0), T: simple.Node(4)},
+		HasNegativeCycleInPath: false,
+		Weight:                 10,
 		WantPaths: [][]int64{
 			{0, 4},
 		},
@@ -658,8 +662,9 @@ var ShortestPathTests = []struct {
 		HasNegativeWeight: true,
 		HasNegativeCycle:  true,
 
-		Query:  simple.Edge{F: simple.Node(0), T: simple.Node(3)},
-		Weight: math.Inf(-1),
+		Query:                  simple.Edge{F: simple.Node(0), T: simple.Node(3)},
+		HasNegativeCycleInPath: true,
+		Weight:                 math.Inf(-1),
 		WantPaths: [][]int64{
 			{1, 2, 1, 3}, // One loop around negative cycle and no lead-in path.
 		},

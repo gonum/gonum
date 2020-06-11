@@ -174,6 +174,250 @@ func (p Shortest) To(vid int64) (path []graph.Node, weight float64) {
 	return path, math.Min(weight, p.dist[p.indexOf[vid]])
 }
 
+// ShortestAlts is a shortest-path tree created by the BellmanFordAllFrom or DijkstraAllFrom
+// single-source shortest path functions.
+type ShortestAlts struct {
+	// from holds the source node given to
+	// the function that returned the
+	// ShortestAlts value.
+	from graph.Node
+
+	// nodes hold the nodes of the analysed
+	// graph.
+	nodes []graph.Node
+	// indexOf contains a mapping between
+	// the id-dense representation of the
+	// graph and the potentially id-sparse
+	// nodes held in nodes.
+	indexOf map[int64]int
+
+	// dist and next represent the shortest
+	// paths between nodes.
+	//
+	// Indices into dist and next are
+	// mapped through indexOf.
+	//
+	// dist contains the distances
+	// from the from node for each
+	// node in the graph.
+	dist []float64
+	// next contains the shortest-path
+	// tree of the graph. The index is a
+	// linear mapping of to-dense-id.
+	next [][]int
+
+	// hasNegativeCycle indicates
+	// whether the ShortestAlts includes
+	// a negative cycle. This should
+	// be set by the function that
+	// returned the ShortestAlts value.
+	hasNegativeCycle bool
+
+	// cycCosts holds costs between
+	// pairs of nodes to report negative
+	// cycles. cycCosts is only used
+	// if it is non-nil.
+	cycCosts map[[2]int]float64
+}
+
+func newShortestAltsFrom(u graph.Node, nodes []graph.Node) ShortestAlts {
+	indexOf := make(map[int64]int, len(nodes))
+	uid := u.ID()
+	for i, n := range nodes {
+		indexOf[n.ID()] = i
+		if n.ID() == uid {
+			u = n
+		}
+	}
+
+	p := ShortestAlts{
+		from: u,
+
+		nodes:   nodes,
+		indexOf: indexOf,
+
+		dist: make([]float64, len(nodes)),
+		next: make([][]int, len(nodes)),
+	}
+	for i := range nodes {
+		p.dist[i] = math.Inf(1)
+		p.next[i] = nil
+	}
+	p.dist[indexOf[uid]] = 0
+
+	return p
+}
+
+// add adds a node to the ShortestAlts, initialising its stored index and returning, and
+// setting the distance and position as unconnected. add will panic if the node is
+// already present.
+func (p *ShortestAlts) add(u graph.Node) int {
+	uid := u.ID()
+	if _, exists := p.indexOf[uid]; exists {
+		panic("shortest: adding existing node")
+	}
+	idx := len(p.nodes)
+	p.indexOf[uid] = idx
+	p.nodes = append(p.nodes, u)
+	p.dist = append(p.dist, math.Inf(1))
+	p.next = append(p.next, nil)
+	return idx
+}
+
+func (p ShortestAlts) set(to int, weight float64, mid int) {
+	p.dist[to] = weight
+	p.next[to] = []int{mid}
+	if weight < 0 {
+		c, ok := p.cycCosts[[2]int{mid, to}]
+		if !ok {
+			p.cycCosts[[2]int{mid, to}] = weight
+		} else if weight < c {
+			p.cycCosts[[2]int{mid, to}] = math.Inf(-1)
+		}
+	}
+}
+
+func (p ShortestAlts) addPath(to, mid int) {
+	// These are likely to be rare, so just loop over collisions.
+	for _, v := range p.next[to] {
+		if mid == v {
+			return
+		}
+	}
+	p.next[to] = append(p.next[to], mid)
+}
+
+// From returns the starting node of the paths held by the ShortestAlts.
+func (p ShortestAlts) From() graph.Node { return p.from }
+
+// WeightTo returns the weight of the minimum path to v. If the path to v includes
+// a negative cycle, the returned weight will not reflect the true path weight.
+func (p ShortestAlts) WeightTo(vid int64) float64 {
+	to, toOK := p.indexOf[vid]
+	if !toOK {
+		return math.Inf(1)
+	}
+	return p.dist[to]
+}
+
+// To returns a shortest path to v and the weight of the path. If more than
+// one shortest path exists between u and v, a randomly chosen path will be
+// returned and unique is returned false. If a cycle with zero weight exists
+// in the path, it will not be included, but unique will be returned false.
+// If the path to v includes a negative cycle, one pass through the cycle will
+// be included in path, but any path leading into the negative cycle will be
+// lost, and weight will be returned as -Inf.
+func (p ShortestAlts) To(vid int64) (path []graph.Node, weight float64, unique bool) {
+	to, toOK := p.indexOf[vid]
+	if !toOK || math.IsInf(p.dist[to], 1) {
+		return nil, math.Inf(1), false
+	}
+	from := p.indexOf[p.from.ID()]
+	unique = true
+	path = []graph.Node{p.nodes[to]}
+	if p.hasNegativeCycle {
+		weight = math.Inf(1)
+		seen := make(set.Ints)
+		seen.Add(from)
+		for to != from {
+			c := p.next[to]
+			var next int
+			if len(c) != 1 {
+				unique = false
+				next = c[rand.Intn(len(c))]
+			} else {
+				next = c[0]
+			}
+			if math.IsInf(p.cycCosts[[2]int{next, to}], -1) {
+				weight = math.Inf(-1)
+				unique = false
+			}
+			if seen.Has(to) {
+				break
+			}
+			seen.Add(to)
+			path = append(path, p.nodes[next])
+			to = next
+		}
+		weight = math.Min(weight, p.dist[p.indexOf[vid]])
+	} else {
+		seen := make([]int, len(p.nodes))
+		for i := range seen {
+			seen[i] = -1
+		}
+		seen[to] = 0
+
+		var next int
+		for from != to {
+			c := p.next[to]
+			if len(c) != 1 {
+				unique = false
+				next = c[rand.Intn(len(c))]
+			} else {
+				next = c[0]
+			}
+			if seen[next] >= 0 {
+				path = path[:seen[next]]
+			}
+			seen[next] = len(path)
+			path = append(path, p.nodes[next])
+			to = next
+		}
+		weight = p.dist[p.indexOf[vid]]
+	}
+
+	ordered.Reverse(path)
+	return path, weight, unique
+}
+
+// AllTo returns all shortest paths to v and the weight of the paths. Paths
+// containing zero-weight cycles are not returned. If a negative cycle exists between
+// u and v, paths is returned nil and weight is returned as -Inf.
+func (p ShortestAlts) AllTo(vid int64) (paths [][]graph.Node, weight float64) {
+	from := p.indexOf[p.from.ID()]
+	to, toOK := p.indexOf[vid]
+	if !toOK || len(p.next[to]) == 0 {
+		if p.from.ID() == vid {
+			return [][]graph.Node{{p.nodes[from]}}, 0
+		}
+		return nil, math.Inf(1)
+	}
+
+	_, weight, unique := p.To(vid)
+	if math.IsInf(weight, -1) && !unique {
+		return nil, math.Inf(-1)
+	}
+
+	seen := make([]bool, len(p.nodes))
+	paths = p.allTo(from, to, seen, []graph.Node{p.nodes[to]}, nil)
+	weight = p.dist[to]
+
+	return paths, weight
+}
+
+func (p ShortestAlts) allTo(from, to int, seen []bool, path []graph.Node, paths [][]graph.Node) [][]graph.Node {
+	seen[to] = true
+	if from == to {
+		if path == nil {
+			return paths
+		}
+		ordered.Reverse(path)
+		return append(paths, path)
+	}
+	first := true
+	for _, to := range p.next[to] {
+		if seen[to] {
+			continue
+		}
+		if first {
+			path = append([]graph.Node(nil), path...)
+			first = false
+		}
+		paths = p.allTo(from, to, append([]bool(nil), seen...), append(path, p.nodes[to]), paths)
+	}
+	return paths
+}
+
 // AllShortest is a shortest-path tree created by the DijkstraAllPaths, FloydWarshall
 // or JohnsonAllPaths all-pairs shortest paths functions.
 type AllShortest struct {

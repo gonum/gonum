@@ -81,6 +81,78 @@ func BellmanFordFrom(u graph.Node, g graph.Graph) (path Shortest, ok bool) {
 	return path, true
 }
 
+// BellmanFordAllFrom returns a shortest-path tree for shortest paths from u to all nodes in
+// the graph g, or false indicating that a negative cycle exists in the graph. If the graph
+// does not implement Weighted, UniformCost is used.
+//
+// The time complexity of BellmanFordAllFrom is O(|V|.|E|).
+func BellmanFordAllFrom(u graph.Node, g graph.Graph) (path ShortestAlts, ok bool) {
+	if g.Node(u.ID()) == nil {
+		return ShortestAlts{from: u}, true
+	}
+	var weight Weighting
+	if wg, ok := g.(Weighted); ok {
+		weight = wg.Weight
+	} else {
+		weight = UniformCost(g)
+	}
+
+	nodes := graph.NodesOf(g.Nodes())
+
+	path = newShortestAltsFrom(u, nodes)
+	path.dist[path.indexOf[u.ID()]] = 0
+	path.cycCosts = make(map[[2]int]float64)
+
+	// Queue to keep track which nodes need to be relaxed.
+	// Only nodes whose vertex distance changed in the previous iterations
+	// need to be relaxed again.
+	queue := newBellmanFordQueue(path.indexOf)
+	queue.enqueue(u)
+
+	// The maximum number of edges in a graph is |V| * (|V|-1) which is also
+	// the worst case complexity.
+	// If the queue-loop has more iterations than the amount of maximum edges
+	// it indicates that we have a negative cycle.
+	maxEdges := len(nodes) * (len(nodes) - 1)
+	var loops int
+
+	// TODO(kortschak): Consider adding further optimisations
+	// from http://arxiv.org/abs/1111.5414.
+	for queue.len() != 0 {
+		u := queue.dequeue()
+		uid := u.ID()
+		j := path.indexOf[uid]
+
+		for _, v := range graph.NodesOf(g.From(uid)) {
+			vid := v.ID()
+			k := path.indexOf[vid]
+			w, ok := weight(uid, vid)
+			if !ok {
+				panic("bellman-ford: unexpected invalid weight")
+			}
+
+			joint := path.dist[j] + w
+			if joint < path.dist[k] {
+				path.set(k, joint, j)
+
+				if !queue.has(vid) {
+					queue.enqueue(v)
+				}
+			} else if joint == path.dist[k] {
+				path.addPath(k, j)
+			}
+		}
+
+		if loops > maxEdges {
+			path.hasNegativeCycle = true
+			return path, false
+		}
+		loops++
+	}
+
+	return path, true
+}
+
 // bellmanFordQueue is a queue for the Queue-based Bellman-Ford algorithm.
 type bellmanFordQueue struct {
 	// queue holds the nodes which need to be relaxed.

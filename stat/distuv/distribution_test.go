@@ -69,10 +69,6 @@ type cumulantProber interface {
 	probLogprober
 }
 
-type moder interface {
-	Mode() float64
-}
-
 func checkMean(t *testing.T, i int, x []float64, m meaner, tol float64) {
 	mean := stat.Mean(x, nil)
 	if !floats.EqualWithinAbsOrRel(mean, m.Mean(), tol, tol) {
@@ -220,15 +216,19 @@ func checkProbQuantContinuous(t *testing.T, i int, xs []float64, c cumulantProbe
 	}
 }
 
+type moder interface {
+	Mode() float64
+}
+
 func checkMode(t *testing.T, i int, xs []float64, m moder, dx float64, tol float64) {
 	rXs := make([]float64, len(xs))
 	for j, x := range xs {
 		rXs[j] = floats.RoundEven(x/dx, 0) * dx
 	}
-	expected, _ := stat.Mode(rXs, nil)
-	actual := m.Mode()
-	if !floats.EqualWithinAbs(expected, actual, tol) {
-		t.Errorf("Mode mismatch case %d: want %g, got %v", i, expected, actual)
+	want, _ := stat.Mode(rXs, nil)
+	got := m.Mode()
+	if !floats.EqualWithinAbs(want, got, tol) {
+		t.Errorf("Mode mismatch case %d: want %g, got %v", i, want, got)
 	}
 }
 

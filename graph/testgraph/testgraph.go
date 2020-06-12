@@ -1370,7 +1370,7 @@ func AddNodes(t *testing.T, g NodeAdder, n int) {
 	var addedNodes []graph.Node
 	for i := 0; i < n; i++ {
 		node := g.NewNode()
-		prev := g.Nodes().Len()
+		prev := len(graph.NodesOf(g.Nodes()))
 		if g.Node(node.ID()) != nil {
 			curr := g.Nodes().Len()
 			if curr != prev {
@@ -1380,7 +1380,7 @@ func AddNodes(t *testing.T, g NodeAdder, n int) {
 		}
 		g.AddNode(node)
 		addedNodes = append(addedNodes, node)
-		curr := g.Nodes().Len()
+		curr := len(graph.NodesOf(g.Nodes()))
 		if curr != prev+1 {
 			t.Fatalf("AddNode failed to mutate graph: curr graph order != prev graph order+1, %d != %d", curr, prev+1)
 		}
@@ -1425,9 +1425,9 @@ func AddArbitraryNodes(t *testing.T, g NodeAdder, add graph.Nodes) {
 
 	for add.Next() {
 		node := add.Node()
-		prev := g.Nodes().Len()
+		prev := len(graph.NodesOf(g.Nodes()))
 		g.AddNode(node)
-		curr := g.Nodes().Len()
+		curr := len(graph.NodesOf(g.Nodes()))
 		if curr != prev+1 {
 			t.Fatalf("AddNode failed to mutate graph: curr graph order != prev graph order+1, %d != %d", curr, prev+1)
 		}
@@ -1517,9 +1517,9 @@ func RemoveNodes(t *testing.T, g NodeRemover) {
 		}
 		first = false
 
-		prev := g.Nodes().Len()
+		prev := len(graph.NodesOf(g.Nodes()))
 		g.RemoveNode(u.ID())
-		curr := g.Nodes().Len()
+		curr := len(graph.NodesOf(g.Nodes()))
 		if curr != prev-1 {
 			t.Fatalf("RemoveNode failed to mutate graph: curr graph order != prev graph order-1, %d != %d", curr, prev-1)
 		}

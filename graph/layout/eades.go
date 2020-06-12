@@ -65,13 +65,15 @@ func (u *EadesR2) Update(g graph.Graph, layout LayoutR2) bool {
 		}
 		u.nodes = g.Nodes()
 		u.indexOf = make(map[int64]int, u.nodes.Len())
-		u.particles = make([]barneshut.Particle2, 0, u.nodes.Len())
-		u.forces = make([]r2.Vec, u.nodes.Len())
+		if u.nodes.Len() >= 0 {
+			u.particles = make([]barneshut.Particle2, 0, u.nodes.Len())
+		}
 		for u.nodes.Next() {
 			id := u.nodes.Node().ID()
 			u.indexOf[id] = len(u.particles)
 			u.particles = append(u.particles, eadesR2Node{id: id, pos: r2.Vec{X: rnd(), Y: rnd()}})
 		}
+		u.forces = make([]r2.Vec, len(u.particles))
 	}
 	u.nodes.Reset()
 

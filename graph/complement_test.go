@@ -28,7 +28,7 @@ var complementTests = []struct {
 
 func TestComplement(t *testing.T) {
 	for _, test := range complementTests {
-		n := test.g.Nodes().Len()
+		n := len(graph.NodesOf(test.g.Nodes()))
 		wantM := n * (n - 1) // Double counting edges, but no self-loops.
 
 		var gotM int
@@ -72,6 +72,10 @@ var nodeFilterIteratorTests = []struct {
 func TestNodeFilterIterator(t *testing.T) {
 	for _, test := range nodeFilterIteratorTests {
 		it := graph.NewNodeFilterIterator(test.src, test.filter, test.root)
+		if it.Len() < 0 {
+			t.Logf("don't test indeterminate iterators: %T", it)
+			continue
+		}
 		for i := 0; i < 2; i++ {
 			n := it.Len()
 			if n != test.len {

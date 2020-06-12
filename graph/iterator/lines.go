@@ -21,13 +21,7 @@ func NewOrderedLines(lines []graph.Line) *OrderedLines {
 
 // Len returns the remaining number of lines to be iterated over.
 func (e *OrderedLines) Len() int {
-	if e.idx >= len(e.lines) {
-		return 0
-	}
-	if e.idx <= 0 {
-		return len(e.lines)
-	}
-	return len(e.lines[e.idx:])
+	return -1
 }
 
 // Next returns whether the next call of Line will return a valid line.
@@ -83,13 +77,7 @@ func NewOrderedWeightedLines(lines []graph.WeightedLine) *OrderedWeightedLines {
 
 // Len returns the remaining number of lines to be iterated over.
 func (e *OrderedWeightedLines) Len() int {
-	if e.idx >= len(e.lines) {
-		return 0
-	}
-	if e.idx <= 0 {
-		return len(e.lines)
-	}
-	return len(e.lines[e.idx:])
+	return -1
 }
 
 // Next returns whether the next call of WeightedLine will return a valid line.

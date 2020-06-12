@@ -575,7 +575,7 @@ func TestBasicDensePassable(t *testing.T) {
 			t.Errorf("Node that should exist doesn't: %d", i)
 		}
 
-		if degree := dg.From(int64(i)).Len(); degree != 4 {
+		if degree := len(graph.NodesOf(dg.From(int64(i)))); degree != 4 {
 			t.Errorf("Node in passable graph missing neighbors. Node: %d Degree: %d", i, degree)
 		}
 	}

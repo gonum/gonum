@@ -21,10 +21,7 @@ func NewOrderedNodes(nodes []graph.Node) *OrderedNodes {
 
 // Len returns the remaining number of nodes to be iterated over.
 func (n *OrderedNodes) Len() int {
-	if n.idx >= len(n.nodes) {
-		return 0
-	}
-	return len(n.nodes[n.idx+1:])
+	return -1
 }
 
 // Next returns whether the next call of Node will return a valid node.
@@ -77,10 +74,7 @@ func NewLazyOrderedNodes(nodes map[int64]graph.Node) *LazyOrderedNodes {
 
 // Len returns the remaining number of nodes to be iterated over.
 func (n *LazyOrderedNodes) Len() int {
-	if n.iter.nodes == nil {
-		return len(n.nodes)
-	}
-	return n.iter.Len()
+	return -1
 }
 
 // Next returns whether the next call of Node will return a valid node.
@@ -138,10 +132,7 @@ func NewLazyOrderedNodesByEdge(nodes map[int64]graph.Node, edges map[int64]graph
 
 // Len returns the remaining number of nodes to be iterated over.
 func (n *LazyOrderedNodesByEdge) Len() int {
-	if n.iter.nodes == nil {
-		return len(n.edges)
-	}
-	return n.iter.Len()
+	return -1
 }
 
 // Next returns whether the next call of Node will return a valid node.
@@ -200,10 +191,7 @@ func NewLazyOrderedNodesByWeightedEdge(nodes map[int64]graph.Node, edges map[int
 
 // Len returns the remaining number of nodes to be iterated over.
 func (n *LazyOrderedNodesByWeightedEdge) Len() int {
-	if n.iter.nodes == nil {
-		return len(n.edges)
-	}
-	return n.iter.Len()
+	return -1
 }
 
 // Next returns whether the next call of Node will return a valid node.
@@ -262,10 +250,7 @@ func NewLazyOrderedNodesByLines(nodes map[int64]graph.Node, edges map[int64]map[
 
 // Len returns the remaining number of nodes to be iterated over.
 func (n *LazyOrderedNodesByLines) Len() int {
-	if n.iter.nodes == nil {
-		return len(n.edges)
-	}
-	return n.iter.Len()
+	return -1
 }
 
 // Next returns whether the next call of Node will return a valid node.
@@ -324,10 +309,7 @@ func NewLazyOrderedNodesByWeightedLines(nodes map[int64]graph.Node, edges map[in
 
 // Len returns the remaining number of nodes to be iterated over.
 func (n *LazyOrderedNodesByWeightedLines) Len() int {
-	if n.iter.nodes == nil {
-		return len(n.edges)
-	}
-	return n.iter.Len()
+	return -1
 }
 
 // Next returns whether the next call of Node will return a valid node.

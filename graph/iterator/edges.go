@@ -21,13 +21,7 @@ func NewOrderedEdges(edges []graph.Edge) *OrderedEdges {
 
 // Len returns the remaining number of edges to be iterated over.
 func (e *OrderedEdges) Len() int {
-	if e.idx >= len(e.edges) {
-		return 0
-	}
-	if e.idx <= 0 {
-		return len(e.edges)
-	}
-	return len(e.edges[e.idx:])
+	return -1
 }
 
 // Next returns whether the next call of Edge will return a valid edge.
@@ -83,13 +77,7 @@ func NewOrderedWeightedEdges(edges []graph.WeightedEdge) *OrderedWeightedEdges {
 
 // Len returns the remaining number of edges to be iterated over.
 func (e *OrderedWeightedEdges) Len() int {
-	if e.idx >= len(e.edges) {
-		return 0
-	}
-	if e.idx <= 0 {
-		return len(e.edges)
-	}
-	return len(e.edges[e.idx:])
+	return -1
 }
 
 // Next returns whether the next call of WeightedEdge will return a valid edge.

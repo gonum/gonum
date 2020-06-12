@@ -29,6 +29,10 @@ func NewNodes(nodes map[int64]graph.Node) *Nodes {
 
 // Len returns the remaining number of nodes to be iterated over.
 func (n *Nodes) Len() int {
+	return -1
+}
+
+func (n *Nodes) len() int {
 	return n.nodes - n.pos
 }
 
@@ -62,10 +66,10 @@ func (n *Nodes) Reset() {
 // the iterator. The order of nodes within the returned slice is not
 // specified.
 func (n *Nodes) NodeSlice() []graph.Node {
-	if n.Len() == 0 {
+	if n.len() == 0 {
 		return nil
 	}
-	nodes := make([]graph.Node, 0, n.Len())
+	nodes := make([]graph.Node, 0, n.len())
 	for n.iter.next() {
 		nodes = append(nodes, n.iter.node())
 	}
@@ -137,6 +141,10 @@ func NewNodesByWeightedLines(nodes map[int64]graph.Node, lines map[int64]map[int
 
 // Len returns the remaining number of nodes to be iterated over.
 func (n *NodesByEdge) Len() int {
+	return -1
+}
+
+func (n *NodesByEdge) len() int {
 	return n.edges - n.pos
 }
 
@@ -173,7 +181,7 @@ func (n *NodesByEdge) NodeSlice() []graph.Node {
 	if n.Len() == 0 {
 		return nil
 	}
-	nodes := make([]graph.Node, 0, n.Len())
+	nodes := make([]graph.Node, 0, n.len())
 	for n.iter.next() {
 		nodes = append(nodes, n.nodes[n.iter.id()])
 	}

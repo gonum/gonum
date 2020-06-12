@@ -216,6 +216,22 @@ func checkProbQuantContinuous(t *testing.T, i int, xs []float64, c cumulantProbe
 	}
 }
 
+type moder interface {
+	Mode() float64
+}
+
+func checkMode(t *testing.T, i int, xs []float64, m moder, dx float64, tol float64) {
+	rXs := make([]float64, len(xs))
+	for j, x := range xs {
+		rXs[j] = math.RoundToEven(x/dx) * dx
+	}
+	want, _ := stat.Mode(rXs, nil)
+	got := m.Mode()
+	if !floats.EqualWithinAbs(want, got, tol) {
+		t.Errorf("Mode mismatch case %d: want %g, got %v", i, want, got)
+	}
+}
+
 // checkProbDiscrete confirms that PDF and Rand are consistent for discrete distributions.
 func checkProbDiscrete(t *testing.T, i int, xs []float64, p probLogprober, tol float64) {
 	// Make a map of all of the unique samples.

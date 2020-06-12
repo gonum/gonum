@@ -84,7 +84,12 @@ func NewSymNormLaplacian(g graph.Undirected) Laplacian {
 				panic("network: self edge in graph")
 			}
 			if uid < vid {
-				l.SetSym(indexOf[vid], j, -1/(squdeg*math.Sqrt(float64(g.From(vid).Len()))))
+				to := g.From(vid)
+				k := to.Len()
+				if k < 0 {
+					k = len(graph.NodesOf(to))
+				}
+				l.SetSym(indexOf[vid], j, -1/(squdeg*math.Sqrt(float64(k))))
 			}
 		}
 	}

@@ -27,8 +27,14 @@ func (p render) Plot(c draw.Canvas, plt *plot.Plot) {
 	if nodes.Len() == 0 {
 		return
 	}
-	xys := make(plotter.XYs, 0, nodes.Len())
-	ids := make([]string, 0, nodes.Len())
+	var (
+		xys plotter.XYs
+		ids []string
+	)
+	if nodes.Len() >= 0 {
+		xys = make(plotter.XYs, 0, nodes.Len())
+		ids = make([]string, 0, nodes.Len())
+	}
 	for nodes.Next() {
 		u := nodes.Node()
 		uid := u.ID()
@@ -81,7 +87,10 @@ func (p render) DataRange() (xmin, xmax, ymin, ymax float64) {
 	if nodes.Len() == 0 {
 		return
 	}
-	xys := make(plotter.XYs, 0, nodes.Len())
+	var xys plotter.XYs
+	if nodes.Len() >= 0 {
+		xys = make(plotter.XYs, 0, nodes.Len())
+	}
 	for nodes.Next() {
 		u := nodes.Node()
 		uid := u.ID()
@@ -98,12 +107,16 @@ func (p render) GlyphBoxes(plt *plot.Plot) []plot.GlyphBox {
 	if nodes.Len() == 0 {
 		return nil
 	}
-	b := make([]plot.GlyphBox, nodes.Len())
+	var b []plot.GlyphBox
+	if nodes.Len() >= 0 {
+		b = make([]plot.GlyphBox, 0, nodes.Len())
+	}
 	for i := 0; nodes.Next(); i++ {
 		u := nodes.Node()
 		uid := u.ID()
 		ur2 := p.GraphR2.LayoutNodeR2(uid)
 
+		b = append(b, plot.GlyphBox{})
 		b[i].X = plt.X.Norm(ur2.Coord2.X)
 		b[i].Y = plt.Y.Norm(ur2.Coord2.Y)
 		r := radius

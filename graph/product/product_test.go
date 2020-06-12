@@ -86,11 +86,11 @@ func TestCartesian(t *testing.T) {
 		naiveCartesian(want, test.a, test.b)
 		wantBytes, _ := dot.Marshal(want, "", "", "  ")
 
-		gotEdgesLen := got.Edges().Len()
-		nA := test.a.Nodes().Len()
-		mA := test.a.Edges().Len()
-		nB := test.b.Nodes().Len()
-		mB := test.b.Edges().Len()
+		gotEdgesLen := len(graph.EdgesOf(got.Edges()))
+		nA := len(graph.NodesOf(test.a.Nodes()))
+		mA := len(graph.EdgesOf(test.a.Edges()))
+		nB := len(graph.NodesOf(test.b.Nodes()))
+		mB := len(graph.EdgesOf(test.b.Edges()))
 		wantEdgesLen := mB*nA + mA*nB
 		if gotEdgesLen != wantEdgesLen {
 			t.Errorf("unexpected number of edges for Cartesian product of %s: got:%d want:%d",
@@ -133,9 +133,9 @@ func TestTensor(t *testing.T) {
 		naiveTensor(want, test.a, test.b)
 		wantBytes, _ := dot.Marshal(want, "", "", "  ")
 
-		gotEdgesLen := got.Edges().Len()
-		mA := test.a.Edges().Len()
-		mB := test.b.Edges().Len()
+		gotEdgesLen := len(graph.EdgesOf(got.Edges()))
+		mA := len(graph.EdgesOf(test.a.Edges()))
+		mB := len(graph.EdgesOf(test.b.Edges()))
 		wantEdgesLen := 2 * mA * mB
 		if gotEdgesLen != wantEdgesLen {
 			t.Errorf("unexpected number of edges for Tensor product of %s: got:%d want:%d",
@@ -178,11 +178,11 @@ func TestLexicographical(t *testing.T) {
 		naiveLexicographical(want, test.a, test.b)
 		wantBytes, _ := dot.Marshal(want, "", "", "  ")
 
-		gotEdgesLen := got.Edges().Len()
-		nA := test.a.Nodes().Len()
-		mA := test.a.Edges().Len()
-		nB := test.b.Nodes().Len()
-		mB := test.b.Edges().Len()
+		gotEdgesLen := len(graph.EdgesOf(got.Edges()))
+		nA := len(graph.NodesOf(test.a.Nodes()))
+		mA := len(graph.EdgesOf(test.a.Edges()))
+		nB := len(graph.NodesOf(test.b.Nodes()))
+		mB := len(graph.EdgesOf(test.b.Edges()))
 		wantEdgesLen := mB*nA + mA*nB*nB
 		if gotEdgesLen != wantEdgesLen {
 			t.Errorf("unexpected number of edges for Lexicographical product of %s: got:%d want:%d",
@@ -225,11 +225,11 @@ func TestStrong(t *testing.T) {
 		naiveStrong(want, test.a, test.b)
 		wantBytes, _ := dot.Marshal(want, "", "", "  ")
 
-		gotEdgesLen := got.Edges().Len()
-		nA := test.a.Nodes().Len()
-		mA := test.a.Edges().Len()
-		nB := test.b.Nodes().Len()
-		mB := test.b.Edges().Len()
+		gotEdgesLen := len(graph.EdgesOf(got.Edges()))
+		nA := len(graph.NodesOf(test.a.Nodes()))
+		mA := len(graph.EdgesOf(test.a.Edges()))
+		nB := len(graph.NodesOf(test.b.Nodes()))
+		mB := len(graph.EdgesOf(test.b.Edges()))
 		wantEdgesLen := nA*mB + nB*mA + 2*mA*mB
 		if gotEdgesLen != wantEdgesLen {
 			t.Errorf("unexpected number of edges for Strong product of %s: got:%d want:%d",

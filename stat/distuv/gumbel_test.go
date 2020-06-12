@@ -71,4 +71,7 @@ func testGumbelRight(t *testing.T, g GumbelRight, i int) {
 	checkExKurtosis(t, i, x, g, 1e-1)
 	checkSkewness(t, i, x, g, 5e-2)
 	checkQuantileCDFSurvival(t, i, x, g, 5e-3)
+	if g.Mu != g.Mode() {
+		t.Errorf("Mismatch in mode value: got %v, want %g", g.Mode(), g.Mu)
+	}
 }

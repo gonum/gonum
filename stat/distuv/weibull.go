@@ -94,11 +94,8 @@ func (w Weibull) Median() float64 {
 func (w Weibull) Mode() float64 {
 	if w.K > 1 {
 		return w.Lambda * math.Pow((w.K-1)/w.K, 1/w.K)
-	} else if w.K == 1 {
-		return 0
-	} else {
-		return math.NaN()
 	}
+	return 0
 }
 
 // NumParameters returns the number of parameters in the distribution.

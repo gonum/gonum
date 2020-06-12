@@ -36,6 +36,7 @@ func TestLognormal(t *testing.T) {
 		checkQuantileCDFSurvival(t, i, x, dist, tol)
 		checkProbContinuous(t, i, x, dist, 1e-10)
 		checkProbQuantContinuous(t, i, x, dist, tol)
+		checkMode(t, i, x, dist, 1e-2, 1e-2)
 	}
 }
 

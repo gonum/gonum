@@ -162,4 +162,8 @@ func testPareto(t *testing.T, p Pareto, i int) {
 	checkVarAndStd(t, i, x, p, tol)
 	checkExKurtosis(t, i, x, p, 7e-2)
 	checkProbContinuous(t, i, x, p, 1e-3)
+
+	if p.Xm != p.Mode() {
+		t.Errorf("Mismatch in mode value: got %v, want %g", p.Mode(), p.Xm)
+	}
 }

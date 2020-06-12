@@ -64,6 +64,9 @@ func testStudentsT(t *testing.T, c StudentsT, i int) {
 	checkProbContinuous(t, i, x, c, 1e-3)
 	checkQuantileCDFSurvival(t, i, x, c, tol)
 	checkProbQuantContinuous(t, i, x, c, tol)
+	if c.Mu != c.Mode() {
+		t.Errorf("Mismatch in mode value: got %v, want %g", c.Mode(), c.Mu)
+	}
 }
 
 func TestStudentsTQuantile(t *testing.T) {

@@ -222,6 +222,7 @@ func TestWeibull(t *testing.T) {
 	t.Parallel()
 	src := rand.New(rand.NewSource(1))
 	for i, dist := range []Weibull{
+		{K: 0.75, Lambda: 1, Src: src},
 		{K: 1, Lambda: 1, Src: src},
 		{K: 2, Lambda: 3.6, Src: src},
 		{K: 3.4, Lambda: 8, Src: src},
@@ -247,6 +248,13 @@ func testWeibull(t *testing.T, dist Weibull, i int) {
 	checkSkewness(t, i, x, dist, tol)
 	checkMedian(t, i, x, dist, tol)
 	checkQuantileCDFSurvival(t, i, x, dist, tol)
-	checkProbContinuous(t, i, x, dist, 1e-10)
+	var probTol float64
+	if dist.K >= 1 {
+		probTol = 1e-10
+	} else {
+		probTol = 1e-5
+	}
+	checkProbContinuous(t, i, x, dist, probTol)
 	checkProbQuantContinuous(t, i, x, dist, tol)
+	checkMode(t, i, x, dist, 1e-1, 2e-1)
 }

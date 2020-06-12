@@ -93,6 +93,10 @@ func testLaplace(t *testing.T, dist Laplace, i int) {
 	checkQuantileCDFSurvival(t, i, x, dist, tol)
 	checkProbContinuous(t, i, x, dist, 1e-10)
 	checkProbQuantContinuous(t, i, x, dist, tol)
+
+	if dist.Mu != dist.Mode() {
+		t.Errorf("Mismatch in mode value, got: %v, want: %g", dist.Mode(), dist.Mu)
+	}
 }
 
 func TestLaplaceFit(t *testing.T) {

@@ -223,7 +223,7 @@ type moder interface {
 func checkMode(t *testing.T, i int, xs []float64, m moder, dx float64, tol float64) {
 	rXs := make([]float64, len(xs))
 	for j, x := range xs {
-		rXs[j] = floats.RoundEven(x/dx, 0) * dx
+		rXs[j] = math.RoundToEven(x/dx) * dx
 	}
 	want, _ := stat.Mode(rXs, nil)
 	got := m.Mode()

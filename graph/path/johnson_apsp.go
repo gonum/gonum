@@ -152,6 +152,9 @@ func (it *johnsonNodeIterator) Len() int {
 	var len int
 	if it.nodes != nil {
 		len = it.nodes.Len()
+		if len < 0 {
+			return len
+		}
 	}
 	if !it.qUsed {
 		len++

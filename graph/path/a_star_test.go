@@ -194,8 +194,9 @@ func TestExhaustiveAStar(t *testing.T) {
 	}
 
 	ps := DijkstraAllPaths(g)
-	for _, start := range graph.NodesOf(g.Nodes()) {
-		for _, goal := range graph.NodesOf(g.Nodes()) {
+	ends := graph.NodesOf(g.Nodes())
+	for _, start := range ends {
+		for _, goal := range ends {
 			pt, _ := AStar(start, goal, g, heuristic)
 			gotPath, gotWeight := pt.To(goal.ID())
 			wantPath, wantWeight, _ := ps.Between(start.ID(), goal.ID())

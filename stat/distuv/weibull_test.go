@@ -248,6 +248,8 @@ func testWeibull(t *testing.T, dist Weibull, i int) {
 	checkSkewness(t, i, x, dist, tol)
 	checkMedian(t, i, x, dist, tol)
 	checkQuantileCDFSurvival(t, i, x, dist, tol)
+	// Weibull distribution PDF has a singularity at 0 for K < 1,
+	// so we need higher tolerance.
 	var probTol float64
 	if dist.K >= 1 {
 		probTol = 1e-10

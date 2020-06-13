@@ -116,6 +116,10 @@ func testNormal(t *testing.T, dist Normal, i int) {
 	checkQuantileCDFSurvival(t, i, x, dist, tol)
 	checkProbContinuous(t, i, x, dist, 1e-10)
 	checkProbQuantContinuous(t, i, x, dist, tol)
+
+	if dist.Mu != dist.Mode() {
+		t.Errorf("Mismatch in mode value: got %v, want %g", dist.Mode(), dist.Mu)
+	}
 }
 
 func TestNormFitPrior(t *testing.T) {

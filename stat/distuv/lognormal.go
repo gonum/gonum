@@ -57,7 +57,7 @@ func (l LogNormal) Median() float64 {
 
 // Mode returns the mode of the probability distribution.
 func (l LogNormal) Mode() float64 {
-	return l.Mu
+	return math.Exp(l.Mu - l.Sigma*l.Sigma)
 }
 
 // NumParameters returns the number of parameters in the distribution.

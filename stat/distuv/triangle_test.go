@@ -71,6 +71,10 @@ func TestTriangle(t *testing.T) {
 		checkQuantileCDFSurvival(t, i, x, f, tol)
 		checkProbContinuous(t, i, x, f, 1e-10)
 		checkProbQuantContinuous(t, i, x, f, tol)
+
+		if f.c != f.Mode() {
+			t.Errorf("Mismatch in mode value: got %v, want %g", f.Mode(), f.c)
+		}
 	}
 }
 

@@ -54,4 +54,5 @@ func testInverseGamma(t *testing.T, f InverseGamma, i int) {
 	checkExKurtosis(t, i, x, f, 2e-1)
 	checkProbContinuous(t, i, x, f, 1e-3)
 	checkQuantileCDFSurvival(t, i, x, f, 5e-2)
+	checkMode(t, i, x, f, 1e-2, 1e-2)
 }

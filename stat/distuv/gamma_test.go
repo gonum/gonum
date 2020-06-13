@@ -5,6 +5,7 @@
 package distuv
 
 import (
+	"math"
 	"sort"
 	"testing"
 
@@ -64,4 +65,11 @@ func testGamma(t *testing.T, f Gamma, i int) {
 	checkExKurtosis(t, i, x, f, 2e-1)
 	checkProbContinuous(t, i, x, f, 1e-3)
 	checkQuantileCDFSurvival(t, i, x, f, 5e-2)
+	if f.Alpha < 1 {
+		if !math.IsNaN(f.Mode()) {
+			t.Errorf("Expected NaN mode for alpha < 1, got %v", f.Mode())
+		}
+	} else {
+		checkMode(t, i, x, f, 2e-1, 1)
+	}
 }

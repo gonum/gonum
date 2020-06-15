@@ -158,8 +158,12 @@ func checkQuantileCDFSurvival(t *testing.T, i int, xs []float64, c cumulanter, t
 }
 
 func checkProbContinuous(t *testing.T, i int, x []float64, p probLogprober, tol float64) {
-	// Check that the PDF is consistent (integrates to 1).
-	q := quad.Fixed(p.Prob, math.Inf(-1), math.Inf(1), 1000000, nil, 0)
+	checkProbContinuousWithBounds(t, i, x, math.Inf(-1), math.Inf(1), p, tol)
+}
+
+func checkProbContinuousWithBounds(t *testing.T, i int, x []float64, lb float64, ub float64, p probLogprober, tol float64) {
+	// Check that the PDF is consistent (integrates to 1). Takes lower and upper bounds for X.
+	q := quad.Fixed(p.Prob, lb, ub, 1000000, nil, 0)
 	if math.Abs(q-1) > tol {
 		t.Errorf("Probability distribution doesn't integrate to 1. Case %v: Got %v", i, q)
 	}
@@ -261,7 +265,7 @@ func testRandLogProbContinuous(t *testing.T, i int, min float64, x []float64, f 
 			return math.Exp(f.LogProb(x))
 		}
 		// Integrate the PDF to find the CDF
-		estCDF := quad.Fixed(prob, min, pt, 1000, nil, 0)
+		estCDF := quad.Fixed(prob, min, pt, 10000, nil, 0)
 		if !floats.EqualWithinAbsOrRel(cdf, estCDF, tol, tol) {
 			t.Errorf("Mismatch between integral of PDF and empirical CDF. Case %v. Want %v, got %v", i, cdf, estCDF)
 		}

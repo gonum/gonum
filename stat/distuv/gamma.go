@@ -111,7 +111,7 @@ func (g Gamma) Rand() float64 {
 	b := g.Beta
 	switch {
 	case a <= 0:
-		panic("gamma: alpha < 0")
+		panic("gamma: alpha <= 0")
 	case a == 1:
 		// Generate from exponential
 		return exprnd() / b
@@ -124,9 +124,8 @@ func (g Gamma) Rand() float64 {
 
 		// Algorithm adjusted to work in log space as much as possible.
 		lambda := 1/a - 1
-		lw := math.Log(a) - 1 - math.Log(1-a)
-		lr := -math.Log(1 + math.Exp(lw))
-		lc, _ := math.Lgamma(a + 1)
+		w := 1 / lambda / math.E
+		lr := -math.Log1p(w)
 		for {
 			e := exprnd()
 			var z float64
@@ -135,15 +134,16 @@ func (g Gamma) Rand() float64 {
 			} else {
 				z = -exprnd() / lambda
 			}
-			lh := lc - z - math.Exp(-z/a)
+			eza := math.Exp(-z / a)
+			lh := -z - eza
 			var lEta float64
 			if z >= 0 {
-				lEta = lc - z
+				lEta = -z
 			} else {
-				lEta = lc + lw + math.Log(lambda) + lambda*z
+				lEta = -1 + lambda*z
 			}
 			if lh-lEta > -exprnd() {
-				return math.Exp(-z/a) / b
+				return eza / b
 			}
 		}
 	case a >= 0.3 && a < 1:
@@ -163,7 +163,7 @@ func (g Gamma) Rand() float64 {
 		for {
 			u := unifrnd()
 			if u <= a {
-				x = -2 * math.Log(1-math.Pow(u*b, 1/alpha))
+				x = -2 * math.Log1p(-math.Pow(u*b, 1/alpha))
 			} else {
 				x = -math.Log(math.Pow(2, alpha) / alpha * b * (1 - u))
 			}
@@ -237,7 +237,7 @@ func (g Gamma) Survival(x float64) float64 {
 
 // StdDev returns the standard deviation of the probability distribution.
 func (g Gamma) StdDev() float64 {
-	return math.Sqrt(g.Variance())
+	return math.Sqrt(g.Alpha) / g.Beta
 }
 
 // Variance returns the variance of the probability distribution.

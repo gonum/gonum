@@ -161,9 +161,10 @@ func checkProbContinuous(t *testing.T, i int, x []float64, p probLogprober, tol 
 	checkProbContinuousWithBounds(t, i, x, math.Inf(-1), math.Inf(1), p, tol)
 }
 
-func checkProbContinuousWithBounds(t *testing.T, i int, x []float64, lb float64, ub float64, p probLogprober, tol float64) {
-	// Check that the PDF is consistent (integrates to 1). Takes lower and upper bounds for X.
-	q := quad.Fixed(p.Prob, lb, ub, 1000000, nil, 0)
+// checkProbContinuousWithBounds checks that the PDF is consistent
+// with LogPDF and integrates to 1 from the lower to upper bound.
+func checkProbContinuousWithBounds(t *testing.T, i int, x []float64, lower float64, upper float64, p probLogprober, tol float64) {
+	q := quad.Fixed(p.Prob, lower, upper, 1000000, nil, 0)
 	if math.Abs(q-1) > tol {
 		t.Errorf("Probability distribution doesn't integrate to 1. Case %v: Got %v", i, q)
 	}

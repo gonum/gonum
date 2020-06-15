@@ -32,14 +32,11 @@ func TestGamma(t *testing.T) {
 	src := rand.New(rand.NewSource(1))
 	for i, g := range []Gamma{
 		{Alpha: 0.1, Beta: 0.8, Src: src},
-
 		{Alpha: 0.3, Beta: 0.8, Src: src},
 		{Alpha: 0.5, Beta: 0.8, Src: src},
 		{Alpha: 0.9, Beta: 6, Src: src},
 		{Alpha: 0.9, Beta: 500, Src: src},
-
 		{Alpha: 1, Beta: 1, Src: src},
-
 		{Alpha: 1.6, Beta: 0.4, Src: src},
 		{Alpha: 2.6, Beta: 1.5, Src: src},
 		{Alpha: 5.6, Beta: 0.5, Src: src},

@@ -94,7 +94,8 @@ func (g Gamma) Quantile(p float64) float64 {
 // Rand panics if either alpha or beta is <= 0.
 func (g Gamma) Rand() float64 {
 	const (
-		// 0.2 threshold is from https://www4.stat.ncsu.edu/~rmartin/Codes/rgamss.R
+		// The 0.2 threshold is from https://www4.stat.ncsu.edu/~rmartin/Codes/rgamss.R
+		// described in detail in https://arxiv.org/abs/1302.1884.
 		smallAlphaThresh = 0.2
 	)
 	if g.Beta <= 0 {
@@ -128,8 +129,7 @@ func (g Gamma) Rand() float64 {
 
 		// Algorithm adjusted to work in log space as much as possible.
 		lambda := 1/a - 1
-		w := 1 / lambda / math.E
-		lr := -math.Log1p(w)
+		lr := -math.Log1p(1 / lambda / math.E)
 		for {
 			e := exprnd()
 			var z float64

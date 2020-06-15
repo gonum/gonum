@@ -33,6 +33,7 @@ func TestGamma(t *testing.T) {
 	for i, g := range []Gamma{
 		{Alpha: 0.1, Beta: 0.8, Src: src},
 
+		{Alpha: 0.3, Beta: 0.8, Src: src},
 		{Alpha: 0.5, Beta: 0.8, Src: src},
 		{Alpha: 0.9, Beta: 6, Src: src},
 		{Alpha: 0.9, Beta: 500, Src: src},
@@ -62,7 +63,7 @@ func testGamma(t *testing.T, f Gamma, i int) {
 
 	var quadTol float64
 
-	if f.Alpha < 1 {
+	if f.Alpha < 0.3 {
 		// Gamma PDF has a singularity at 0 for alpha < 1.
 		quadTol = 0.2
 	} else {
@@ -72,10 +73,10 @@ func testGamma(t *testing.T, f Gamma, i int) {
 	checkMean(t, i, x, f, tol)
 	checkVarAndStd(t, i, x, f, 2e-2)
 	checkExKurtosis(t, i, x, f, 2e-1)
-	if f.Alpha < 1 {
+	if f.Alpha < 0.3 {
 		quadTol = 0.1
 	} else {
-		quadTol = 1e-4
+		quadTol = 1e-3
 	}
 	checkProbContinuousWithBounds(t, i, x, 0, math.Inf(1), f, quadTol)
 	checkQuantileCDFSurvival(t, i, x, f, 5e-2)

@@ -93,6 +93,10 @@ func (g Gamma) Quantile(p float64) float64 {
 //
 // Rand panics if either alpha or beta is <= 0.
 func (g Gamma) Rand() float64 {
+	const (
+		// 0.2 threshold is from https://www4.stat.ncsu.edu/~rmartin/Codes/rgamss.R
+		smallAlphaThresh = 0.2
+	)
 	if g.Beta <= 0 {
 		panic("gamma: beta <= 0")
 	}
@@ -115,7 +119,7 @@ func (g Gamma) Rand() float64 {
 	case a == 1:
 		// Generate from exponential
 		return exprnd() / b
-	case a < 0.3:
+	case a < smallAlphaThresh:
 		// Generate using
 		//  Liu, Chuanhai, Martin, Ryan and Syring, Nick. "Simulating from a
 		//  gamma distribution with small shape parameter"
@@ -146,7 +150,7 @@ func (g Gamma) Rand() float64 {
 				return eza / b
 			}
 		}
-	case a >= 0.3 && a < 1:
+	case a >= smallAlphaThresh && a < 1:
 		// Generate using:
 		//  Kundu, Debasis, and Rameshwar D. Gupta. "A convenient way of generating
 		//  gamma random variables using generalized exponential distribution."

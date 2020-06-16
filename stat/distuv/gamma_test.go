@@ -102,6 +102,7 @@ func testGamma(t *testing.T, f Gamma, i int) {
 }
 
 func TestGammaPanics(t *testing.T) {
+	t.Parallel()
 	g := Gamma{1, 0, nil}
 	if !panics(func() { g.Rand() }) {
 		t.Errorf("Expected Rand panic for Beta <= 0")

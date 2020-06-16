@@ -93,6 +93,11 @@ func (g Gamma) Quantile(p float64) float64 {
 //
 // Rand panics if either alpha or beta is <= 0.
 func (g Gamma) Rand() float64 {
+	const (
+		// The 0.2 threshold is from https://www4.stat.ncsu.edu/~rmartin/Codes/rgamss.R
+		// described in detail in https://arxiv.org/abs/1302.1884.
+		smallAlphaThresh = 0.2
+	)
 	if g.Beta <= 0 {
 		panic("gamma: beta <= 0")
 	}
@@ -111,11 +116,11 @@ func (g Gamma) Rand() float64 {
 	b := g.Beta
 	switch {
 	case a <= 0:
-		panic("gamma: alpha < 0")
+		panic("gamma: alpha <= 0")
 	case a == 1:
 		// Generate from exponential
 		return exprnd() / b
-	case a < 0.3:
+	case a < smallAlphaThresh:
 		// Generate using
 		//  Liu, Chuanhai, Martin, Ryan and Syring, Nick. "Simulating from a
 		//  gamma distribution with small shape parameter"
@@ -124,9 +129,7 @@ func (g Gamma) Rand() float64 {
 
 		// Algorithm adjusted to work in log space as much as possible.
 		lambda := 1/a - 1
-		lw := math.Log(a) - 1 - math.Log(1-a)
-		lr := -math.Log(1 + math.Exp(lw))
-		lc, _ := math.Lgamma(a + 1)
+		lr := -math.Log1p(1 / lambda / math.E)
 		for {
 			e := exprnd()
 			var z float64
@@ -135,18 +138,19 @@ func (g Gamma) Rand() float64 {
 			} else {
 				z = -exprnd() / lambda
 			}
-			lh := lc - z - math.Exp(-z/a)
+			eza := math.Exp(-z / a)
+			lh := -z - eza
 			var lEta float64
 			if z >= 0 {
-				lEta = lc - z
+				lEta = -z
 			} else {
-				lEta = lc + lw + math.Log(lambda) + lambda*z
+				lEta = -1 + lambda*z
 			}
 			if lh-lEta > -exprnd() {
-				return math.Exp(-z/a) / b
+				return eza / b
 			}
 		}
-	case a >= 0.3 && a < 1:
+	case a >= smallAlphaThresh && a < 1:
 		// Generate using:
 		//  Kundu, Debasis, and Rameshwar D. Gupta. "A convenient way of generating
 		//  gamma random variables using generalized exponential distribution."
@@ -163,7 +167,7 @@ func (g Gamma) Rand() float64 {
 		for {
 			u := unifrnd()
 			if u <= a {
-				x = -2 * math.Log(1-math.Pow(u*b, 1/alpha))
+				x = -2 * math.Log1p(-math.Pow(u*b, 1/alpha))
 			} else {
 				x = -math.Log(math.Pow(2, alpha) / alpha * b * (1 - u))
 			}
@@ -237,7 +241,7 @@ func (g Gamma) Survival(x float64) float64 {
 
 // StdDev returns the standard deviation of the probability distribution.
 func (g Gamma) StdDev() float64 {
-	return math.Sqrt(g.Variance())
+	return math.Sqrt(g.Alpha) / g.Beta
 }
 
 // Variance returns the variance of the probability distribution.

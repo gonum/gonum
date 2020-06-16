@@ -150,9 +150,11 @@ func TestPareto(t *testing.T) {
 }
 
 func testPareto(t *testing.T, p Pareto, i int) {
-	tol := 1e-2
-	const n = 1e6
-	const bins = 50
+	const (
+		tol  = 1e-2
+		n    = 1e6
+		bins = 50
+	)
 	x := make([]float64, n)
 	generateSamples(x, p)
 	sort.Float64s(x)

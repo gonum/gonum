@@ -31,13 +31,12 @@ func TestGamma(t *testing.T) {
 	}
 	src := rand.New(rand.NewSource(1))
 	for i, g := range []Gamma{
-
+		{Alpha: 0.1, Beta: 0.8, Src: src},
+		{Alpha: 0.3, Beta: 0.8, Src: src},
 		{Alpha: 0.5, Beta: 0.8, Src: src},
 		{Alpha: 0.9, Beta: 6, Src: src},
 		{Alpha: 0.9, Beta: 500, Src: src},
-
 		{Alpha: 1, Beta: 1, Src: src},
-
 		{Alpha: 1.6, Beta: 0.4, Src: src},
 		{Alpha: 2.6, Beta: 1.5, Src: src},
 		{Alpha: 5.6, Beta: 0.5, Src: src},
@@ -59,11 +58,24 @@ func testGamma(t *testing.T, f Gamma, i int) {
 	generateSamples(x, f)
 	sort.Float64s(x)
 
-	testRandLogProbContinuous(t, i, 0, x, f, tol, bins)
+	var quadTol float64
+
+	if f.Alpha < 0.3 {
+		// Gamma PDF has a singularity at 0 for alpha < 1.
+		quadTol = 0.2
+	} else {
+		quadTol = tol
+	}
+	testRandLogProbContinuous(t, i, 0, x, f, quadTol, bins)
 	checkMean(t, i, x, f, tol)
 	checkVarAndStd(t, i, x, f, 2e-2)
 	checkExKurtosis(t, i, x, f, 2e-1)
-	checkProbContinuous(t, i, x, f, 1e-3)
+	if f.Alpha < 0.3 {
+		quadTol = 0.1
+	} else {
+		quadTol = 1e-3
+	}
+	checkProbContinuousWithBounds(t, i, x, 0, math.Inf(1), f, quadTol)
 	checkQuantileCDFSurvival(t, i, x, f, 5e-2)
 	if f.Alpha < 1 {
 		if !math.IsNaN(f.Mode()) {
@@ -71,5 +83,31 @@ func testGamma(t *testing.T, f Gamma, i int) {
 		}
 	} else {
 		checkMode(t, i, x, f, 2e-1, 1)
+	}
+	cdfNegX := f.CDF(-0.0001)
+	if cdfNegX != 0 {
+		t.Errorf("Expected zero CDF for negative argument, got %v", cdfNegX)
+	}
+	survNegX := f.Survival(-0.0001)
+	if survNegX != 1 {
+		t.Errorf("Expected survival function of 1 for negative argument, got %v", survNegX)
+	}
+	if f.NumParameters() != 2 {
+		t.Errorf("Mismatch in NumParameters: got %v, want 2", f.NumParameters())
+	}
+	lPdf := f.LogProb(-0.0001)
+	if !math.IsInf(lPdf, -1) {
+		t.Errorf("Expected log(CDF) to be -Infinity for negative argument, got %v", lPdf)
+	}
+}
+
+func TestGammaPanics(t *testing.T) {
+	g := Gamma{1, 0, nil}
+	if !panics(func() { g.Rand() }) {
+		t.Errorf("Expected Rand panic for Beta <= 0")
+	}
+	g = Gamma{0, 1, nil}
+	if !panics(func() { g.Rand() }) {
+		t.Errorf("Expected Rand panic for Alpha <= 0")
 	}
 }

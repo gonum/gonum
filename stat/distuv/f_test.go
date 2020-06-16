@@ -85,7 +85,7 @@ func testF(t *testing.T, f F, i int) {
 	sort.Float64s(x)
 
 	testRandLogProbContinuous(t, i, 0, x, f, tol, bins)
-	checkProbContinuous(t, i, x, f, 1e-3)
+	checkProbContinuous(t, i, x, 0, math.Inf(1), f, 1e-4)
 	checkMean(t, i, x, f, tol)
 	checkVarAndStd(t, i, x, f, tol)
 	checkExKurtosis(t, i, x, f, 1e-1)

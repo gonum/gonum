@@ -61,7 +61,8 @@ func testGamma(t *testing.T, f Gamma, i int) {
 	var quadTol float64
 
 	if f.Alpha < 0.3 {
-		// Gamma PDF has a singularity at 0 for alpha < 1.
+		// Gamma PDF has a singularity at 0 for alpha < 1,
+		// which gets sharper as alpha -> 0.
 		quadTol = 0.2
 	} else {
 		quadTol = tol
@@ -70,12 +71,15 @@ func testGamma(t *testing.T, f Gamma, i int) {
 	checkMean(t, i, x, f, tol)
 	checkVarAndStd(t, i, x, f, 2e-2)
 	checkExKurtosis(t, i, x, f, 2e-1)
-	if f.Alpha < 0.3 {
+	switch {
+	case f.Alpha < 0.3:
 		quadTol = 0.1
-	} else {
+	case f.Alpha < 1:
 		quadTol = 1e-3
+	default:
+		quadTol = 1e-10
 	}
-	checkProbContinuousWithBounds(t, i, x, 0, math.Inf(1), f, quadTol)
+	checkProbContinuous(t, i, x, 0, math.Inf(1), f, quadTol)
 	checkQuantileCDFSurvival(t, i, x, f, 5e-2)
 	if f.Alpha < 1 {
 		if !math.IsNaN(f.Mode()) {

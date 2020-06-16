@@ -80,7 +80,7 @@ func testChiSquared(t *testing.T, c ChiSquared, i int) {
 	checkMean(t, i, x, c, tol)
 	checkVarAndStd(t, i, x, c, tol)
 	checkExKurtosis(t, i, x, c, 7e-2)
-	checkProbContinuous(t, i, x, c, 1e-3)
+	checkProbContinuous(t, i, x, 0, math.Inf(1), c, 1e-5)
 	checkQuantileCDFSurvival(t, i, x, c, 1e-2)
 
 	expectedMode := math.Max(c.K-2, 0)

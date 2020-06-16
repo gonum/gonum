@@ -5,6 +5,7 @@
 package distuv
 
 import (
+	"math"
 	"sort"
 	"testing"
 
@@ -163,7 +164,7 @@ func testPareto(t *testing.T, p Pareto, i int) {
 	checkMean(t, i, x, p, tol)
 	checkVarAndStd(t, i, x, p, tol)
 	checkExKurtosis(t, i, x, p, 7e-2)
-	checkProbContinuous(t, i, x, p, 1e-3)
+	checkProbContinuous(t, i, x, p.Xm, math.Inf(1), p, 1e-10)
 
 	if p.Xm != p.Mode() {
 		t.Errorf("Mismatch in mode value: got %v, want %g", p.Mode(), p.Xm)

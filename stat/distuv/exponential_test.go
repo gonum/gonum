@@ -77,7 +77,7 @@ func testExponential(t *testing.T, dist Exponential, i int) {
 	checkSkewness(t, i, x, dist, tol)
 	checkMedian(t, i, x, dist, tol)
 	checkQuantileCDFSurvival(t, i, x, dist, tol)
-	checkProbContinuous(t, i, x, dist, 1e-10)
+	checkProbContinuous(t, i, x, 0, math.Inf(1), dist, 1e-10)
 	checkProbQuantContinuous(t, i, x, dist, tol)
 
 	if dist.Mode() != 0 {

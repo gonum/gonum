@@ -254,9 +254,9 @@ func testWeibull(t *testing.T, dist Weibull, i int) {
 	if dist.K >= 1 {
 		probTol = 1e-10
 	} else {
-		probTol = 1e-5
+		probTol = 1e-8
 	}
-	checkProbContinuous(t, i, x, dist, probTol)
+	checkProbContinuous(t, i, x, 0, math.Inf(1), dist, probTol)
 	checkProbQuantContinuous(t, i, x, dist, tol)
 	checkMode(t, i, x, dist, 1e-1, 2e-1)
 }

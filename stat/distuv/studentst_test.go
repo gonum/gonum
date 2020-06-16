@@ -61,7 +61,7 @@ func testStudentsT(t *testing.T, c StudentsT, i int) {
 	if c.Nu > 2 {
 		checkVarAndStd(t, i, x, c, 5e-2)
 	}
-	checkProbContinuous(t, i, x, c, 1e-3)
+	checkProbContinuous(t, i, x, math.Inf(-1), math.Inf(1), c, 1e-10)
 	checkQuantileCDFSurvival(t, i, x, c, tol)
 	checkProbQuantContinuous(t, i, x, c, tol)
 	if c.Mu != c.Mode() {

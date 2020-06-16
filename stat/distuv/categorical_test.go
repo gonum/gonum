@@ -114,6 +114,7 @@ func TestCategoricalRand(t *testing.T) {
 }
 
 func TestCategoricalReweight(t *testing.T) {
+	t.Parallel()
 	dist := NewCategorical([]float64{1, 1}, nil)
 	if !panics(func() { dist.Reweight(0, -1) }) {
 		t.Errorf("Reweight did not panic for negative weight")
@@ -125,6 +126,7 @@ func TestCategoricalReweight(t *testing.T) {
 }
 
 func TestCategoricalReweightAll(t *testing.T) {
+	t.Parallel()
 	w := []float64{0, 1, 2, 1}
 	dist := NewCategorical(w, nil)
 	if !panics(func() { dist.ReweightAll([]float64{1, 1}) }) {

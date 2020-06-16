@@ -91,7 +91,7 @@ func testLaplace(t *testing.T, dist Laplace, i int) {
 	checkSkewness(t, i, x, dist, tol)
 	checkMedian(t, i, x, dist, tol)
 	checkQuantileCDFSurvival(t, i, x, dist, tol)
-	checkProbContinuous(t, i, x, dist, 1e-10)
+	checkProbContinuous(t, i, x, math.Inf(-1), math.Inf(1), dist, 1e-10)
 	checkProbQuantContinuous(t, i, x, dist, tol)
 
 	if dist.Mu != dist.Mode() {

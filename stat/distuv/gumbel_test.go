@@ -65,7 +65,7 @@ func testGumbelRight(t *testing.T, g GumbelRight, i int) {
 
 	min := math.Inf(-1)
 	testRandLogProbContinuous(t, i, min, x, g, tol, bins)
-	checkProbContinuous(t, i, x, g, 1e-3)
+	checkProbContinuous(t, i, x, math.Inf(-1), math.Inf(1), g, 1e-10)
 	checkMean(t, i, x, g, tol)
 	checkVarAndStd(t, i, x, g, tol)
 	checkExKurtosis(t, i, x, g, 1e-1)

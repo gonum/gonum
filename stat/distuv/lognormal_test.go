@@ -5,6 +5,7 @@
 package distuv
 
 import (
+	"math"
 	"sort"
 	"testing"
 
@@ -34,7 +35,7 @@ func TestLognormal(t *testing.T) {
 		checkSkewness(t, i, x, dist, 5e-2)
 		checkMedian(t, i, x, dist, tol)
 		checkQuantileCDFSurvival(t, i, x, dist, tol)
-		checkProbContinuous(t, i, x, dist, 1e-10)
+		checkProbContinuous(t, i, x, 0, math.Inf(1), dist, 1e-10)
 		checkProbQuantContinuous(t, i, x, dist, tol)
 		checkMode(t, i, x, dist, 1e-2, 1e-2)
 	}

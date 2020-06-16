@@ -157,13 +157,9 @@ func checkQuantileCDFSurvival(t *testing.T, i int, xs []float64, c cumulanter, t
 	}
 }
 
-func checkProbContinuous(t *testing.T, i int, x []float64, p probLogprober, tol float64) {
-	checkProbContinuousWithBounds(t, i, x, math.Inf(-1), math.Inf(1), p, tol)
-}
-
-// checkProbContinuousWithBounds checks that the PDF is consistent
-// with LogPDF and integrates to 1 from the lower to upper bound.
-func checkProbContinuousWithBounds(t *testing.T, i int, x []float64, lower float64, upper float64, p probLogprober, tol float64) {
+// checkProbContinuous checks that the PDF is consistent with LogPDF
+// and integrates to 1 from the lower to upper bound.
+func checkProbContinuous(t *testing.T, i int, x []float64, lower float64, upper float64, p probLogprober, tol float64) {
 	q := quad.Fixed(p.Prob, lower, upper, 1000000, nil, 0)
 	if math.Abs(q-1) > tol {
 		t.Errorf("Probability distribution doesn't integrate to 1. Case %v: Got %v", i, q)

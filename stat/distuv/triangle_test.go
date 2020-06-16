@@ -69,7 +69,7 @@ func TestTriangle(t *testing.T) {
 		checkSkewness(t, i, x, f, 5e-2)
 		checkMedian(t, i, x, f, tol)
 		checkQuantileCDFSurvival(t, i, x, f, tol)
-		checkProbContinuous(t, i, x, f, 1e-10)
+		checkProbContinuous(t, i, x, f.a, f.b, f, 1e-10)
 		checkProbQuantContinuous(t, i, x, f, tol)
 
 		if f.c != f.Mode() {

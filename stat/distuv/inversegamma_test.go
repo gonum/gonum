@@ -5,6 +5,7 @@
 package distuv
 
 import (
+	"math"
 	"sort"
 	"testing"
 
@@ -52,7 +53,7 @@ func testInverseGamma(t *testing.T, f InverseGamma, i int) {
 	checkMean(t, i, x, f, tol)
 	checkVarAndStd(t, i, x, f, 2e-2)
 	checkExKurtosis(t, i, x, f, 2e-1)
-	checkProbContinuous(t, i, x, f, 1e-3)
+	checkProbContinuous(t, i, x, 0, math.Inf(1), f, 1e-10)
 	checkQuantileCDFSurvival(t, i, x, f, 5e-2)
 	checkMode(t, i, x, f, 1e-2, 1e-2)
 }

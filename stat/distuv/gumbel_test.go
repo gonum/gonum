@@ -66,12 +66,17 @@ func testGumbelRight(t *testing.T, g GumbelRight, i int) {
 	min := math.Inf(-1)
 	testRandLogProbContinuous(t, i, min, x, g, tol, bins)
 	checkProbContinuous(t, i, x, math.Inf(-1), math.Inf(1), g, 1e-10)
+	checkEntropy(t, i, x, g, tol)
 	checkMean(t, i, x, g, tol)
+	checkMedian(t, i, x, g, tol)
 	checkVarAndStd(t, i, x, g, tol)
 	checkExKurtosis(t, i, x, g, 1e-1)
 	checkSkewness(t, i, x, g, 5e-2)
 	checkQuantileCDFSurvival(t, i, x, g, 5e-3)
 	if g.Mu != g.Mode() {
 		t.Errorf("Mismatch in mode value: got %v, want %g", g.Mode(), g.Mu)
+	}
+	if g.NumParameters() != 2 {
+		t.Errorf("Mismatch in NumParameters: got %v, want 2", g.NumParameters())
 	}
 }

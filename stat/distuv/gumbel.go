@@ -57,7 +57,7 @@ func (g GumbelRight) Mean() float64 {
 	return g.Mu + g.Beta*eulerMascheroni
 }
 
-// Median returns the median of the normal distribution.
+// Median returns the median of the Gumbel distribution.
 func (g GumbelRight) Median() float64 {
 	return g.Mu - g.Beta*math.Log(math.Ln2)
 }

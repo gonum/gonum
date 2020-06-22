@@ -35,9 +35,6 @@ func (g InverseGamma) CDF(x float64) float64 {
 	if x < 0 {
 		return 0
 	}
-	// TODO(btracey): Replace this with a direct call to the upper regularized
-	// gamma function if mathext gets it.
-	//return 1 - mathext.GammaInc(g.Alpha, g.Beta/x)
 	return mathext.GammaIncRegComp(g.Alpha, g.Beta/x)
 }
 

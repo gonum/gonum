@@ -22,7 +22,7 @@ func GammaIncReg(a, x float64) float64 {
 
 // GammaIncRegComp computes the complemented regularized incomplete Gamma integral.
 //  GammaIncRegComp(a,x) = 1 - GammaIncReg(a,x)
-//                    = (1/ Γ(a)) \int_0^\infty e^{-t} t^{a-1} dt
+//                       = (1/ Γ(a)) \int_x^\infty e^{-t} t^{a-1} dt
 // The input argument a must be positive and x must be non-negative or
 // GammaIncRegComp will panic.
 func GammaIncRegComp(a, x float64) float64 {

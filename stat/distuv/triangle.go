@@ -92,23 +92,6 @@ func (Triangle) NumParameters() int {
 	return 3
 }
 
-// parameters returns the parameters of the distribution.
-func (t Triangle) parameters(p []Parameter) []Parameter {
-	nParam := t.NumParameters()
-	if p == nil {
-		p = make([]Parameter, nParam)
-	} else if len(p) != nParam {
-		panic("triangle: improper parameter length")
-	}
-	p[0].Name = "A"
-	p[0].Value = t.a
-	p[1].Name = "B"
-	p[1].Value = t.b
-	p[2].Name = "C"
-	p[2].Value = t.c
-	return p
-}
-
 // Prob computes the value of the probability density function at x.
 func (t Triangle) Prob(x float64) float64 {
 	switch {
@@ -151,6 +134,41 @@ func (t Triangle) Rand() float64 {
 	return t.Quantile(rnd)
 }
 
+// Skewness returns the skewness of the distribution.
+func (t Triangle) Skewness() float64 {
+	n := math.Sqrt2 * (t.a + t.b - 2*t.c) * (2*t.a - t.b - t.c) * (t.a - 2*t.b + t.c)
+	d := 5 * math.Pow(t.a*t.a+t.b*t.b+t.c*t.c-t.a*t.b-t.a*t.c-t.b*t.c, 3.0/2.0)
+
+	return n / d
+}
+
+// StdDev returns the standard deviation of the probability distribution.
+func (t Triangle) StdDev() float64 {
+	return math.Sqrt(t.Variance())
+}
+
+// Survival returns the survival function (complementary CDF) at x.
+func (t Triangle) Survival(x float64) float64 {
+	return 1 - t.CDF(x)
+}
+
+// parameters returns the parameters of the distribution.
+func (t Triangle) parameters(p []Parameter) []Parameter {
+	nParam := t.NumParameters()
+	if p == nil {
+		p = make([]Parameter, nParam)
+	} else if len(p) != nParam {
+		panic("triangle: improper parameter length")
+	}
+	p[0].Name = "A"
+	p[0].Value = t.a
+	p[1].Name = "B"
+	p[1].Value = t.b
+	p[2].Name = "C"
+	p[2].Value = t.c
+	return p
+}
+
 // setParameters modifies the parameters of the distribution.
 func (t *Triangle) setParameters(p []Parameter) {
 	if len(p) != t.NumParameters() {
@@ -171,24 +189,6 @@ func (t *Triangle) setParameters(p []Parameter) {
 	t.a = p[0].Value
 	t.b = p[1].Value
 	t.c = p[2].Value
-}
-
-// Skewness returns the skewness of the distribution.
-func (t Triangle) Skewness() float64 {
-	n := math.Sqrt2 * (t.a + t.b - 2*t.c) * (2*t.a - t.b - t.c) * (t.a - 2*t.b + t.c)
-	d := 5 * math.Pow(t.a*t.a+t.b*t.b+t.c*t.c-t.a*t.b-t.a*t.c-t.b*t.c, 3.0/2.0)
-
-	return n / d
-}
-
-// StdDev returns the standard deviation of the probability distribution.
-func (t Triangle) StdDev() float64 {
-	return math.Sqrt(t.Variance())
-}
-
-// Survival returns the survival function (complementary CDF) at x.
-func (t Triangle) Survival(x float64) float64 {
-	return 1 - t.CDF(x)
 }
 
 // Variance returns the variance of the probability distribution.

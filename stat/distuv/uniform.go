@@ -120,22 +120,6 @@ func (u Uniform) Rand() float64 {
 	return rnd*(u.Max-u.Min) + u.Min
 }
 
-// setParameters modifies the parameters of the distribution.
-func (u *Uniform) setParameters(p []Parameter) {
-	if len(p) != u.NumParameters() {
-		panic("uniform: incorrect number of parameters to set")
-	}
-	if p[0].Name != "Min" {
-		panic("uniform: " + panicNameMismatch)
-	}
-	if p[1].Name != "Max" {
-		panic("uniform: " + panicNameMismatch)
-	}
-
-	u.Min = p[0].Value
-	u.Max = p[1].Value
-}
-
 // Skewness returns the skewness of the distribution.
 func (Uniform) Skewness() float64 {
 	return 0
@@ -155,6 +139,22 @@ func (u Uniform) Survival(x float64) float64 {
 		return 0
 	}
 	return (u.Max - x) / (u.Max - u.Min)
+}
+
+// setParameters modifies the parameters of the distribution.
+func (u *Uniform) setParameters(p []Parameter) {
+	if len(p) != u.NumParameters() {
+		panic("uniform: incorrect number of parameters to set")
+	}
+	if p[0].Name != "Min" {
+		panic("uniform: " + panicNameMismatch)
+	}
+	if p[1].Name != "Max" {
+		panic("uniform: " + panicNameMismatch)
+	}
+
+	u.Min = p[0].Value
+	u.Max = p[1].Value
 }
 
 // Variance returns the variance of the probability distribution.

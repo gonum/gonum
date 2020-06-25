@@ -120,6 +120,40 @@ func (u Uniform) Rand() float64 {
 	return rnd*(u.Max-u.Min) + u.Min
 }
 
+// Score returns the score function with respect to the parameters of the
+// distribution at the input location x. The score function is the derivative
+// of the log-likelihood at x with respect to the parameters
+//  (∂/∂θ) log(p(x;θ))
+// If deriv is non-nil, len(deriv) must equal the number of parameters otherwise
+// Score will panic, and the derivative is stored in-place into deriv. If deriv
+// is nil a new slice will be allocated and returned.
+//
+// The order is [∂LogProb / ∂Mu, ∂LogProb / ∂Sigma].
+//
+// For more information, see https://en.wikipedia.org/wiki/Score_%28statistics%29.
+func (u Uniform) Score(deriv []float64, x float64) []float64 {
+	if deriv == nil {
+		deriv = make([]float64, u.NumParameters())
+	}
+	if len(deriv) != u.NumParameters() {
+		panic(badLength)
+	}
+	if (x < u.Min) || (x > u.Max) {
+		deriv[0] = math.NaN()
+		deriv[1] = math.NaN()
+	} else {
+		deriv[0] = 1 / (u.Max - u.Min)
+		deriv[1] = -deriv[0]
+		if x == u.Min {
+			deriv[0] = math.NaN()
+		}
+		if x == u.Max {
+			deriv[1] = math.NaN()
+		}
+	}
+	return deriv
+}
+
 // Skewness returns the skewness of the distribution.
 func (Uniform) Skewness() float64 {
 	return 0

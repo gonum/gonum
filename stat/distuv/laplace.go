@@ -203,7 +203,7 @@ func (l Laplace) Score(deriv []float64, x float64) []float64 {
 		deriv[0] = math.NaN()
 	}
 
-	deriv[1] = math.Abs(diff)/(l.Scale*l.Scale) - 0.5/(l.Scale)
+	deriv[1] = math.Abs(diff)/(l.Scale*l.Scale) - 1/l.Scale
 	return deriv
 }
 

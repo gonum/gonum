@@ -52,6 +52,11 @@ func TestTriangle(t *testing.T) {
 			b: 1.0,
 			c: 0.0,
 		},
+		{
+			a: 0.0,
+			b: 1.2,
+			c: 1.2,
+		},
 	} {
 		f := NewTriangle(test.a, test.b, test.c, src)
 		const (
@@ -107,4 +112,56 @@ func TestTriangleProb(t *testing.T) {
 		},
 	}
 	testDistributionProbs(t, NewTriangle(1, 3, 2, nil), "Standard 1,2,3 Triangle", pts)
+}
+
+func TestTriangleScore(t *testing.T) {
+	const (
+		h   = 1e-6
+		tol = 1e-6
+	)
+	t.Parallel()
+
+	f := Triangle{a: -0.5, b: 0.7, c: 0.1}
+	testDerivParam(t, &f)
+
+	f = Triangle{a: 0, b: 1, c: 0}
+	x := 0.5
+	score := f.Score(nil, x)
+	if !math.IsNaN(score[0]) {
+		t.Errorf("Expected score over A to be NaN for A == C, got %v", score[0])
+	}
+	if !math.IsNaN(score[2]) {
+		t.Errorf("Expected score over C to be NaN for A == C, got %v", score[2])
+	}
+	expectedScore := logProbDerivative(f, x, 1, h)
+	if math.Abs(expectedScore-score[1]) > tol {
+		t.Errorf("Mismatch in score over B for A == C: want %g, got %v", expectedScore, score[1])
+	}
+
+	f = Triangle{a: 0, b: 1, c: 1}
+	score = f.Score(nil, x)
+	if !math.IsNaN(score[1]) {
+		t.Errorf("Expected score over B to be NaN for B == C, got %v", score[0])
+	}
+	if !math.IsNaN(score[2]) {
+		t.Errorf("Expected score over C to be NaN for B == C, got %v", score[2])
+	}
+	expectedScore = logProbDerivative(f, x, 0, h)
+	if math.Abs(expectedScore-score[0]) > tol {
+		t.Errorf("Mismatch in score over A for B == C: want %g, got %v", expectedScore, score[0])
+	}
+}
+
+func logProbDerivative(t Triangle, x float64, i int, h float64) float64 {
+	origParams := t.parameters(nil)
+	params := make([]Parameter, len(origParams))
+	copy(params, origParams)
+	params[i].Value = origParams[i].Value + h
+	t.setParameters(params)
+	lpUp := t.LogProb(x)
+	params[i].Value = origParams[i].Value - h
+	t.setParameters(params)
+	lpDown := t.LogProb(x)
+	t.setParameters(origParams)
+	return (lpUp - lpDown) / (2 * h)
 }

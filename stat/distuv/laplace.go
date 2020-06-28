@@ -183,7 +183,7 @@ func (l Laplace) Rand() float64 {
 // For more information, see https://en.wikipedia.org/wiki/Score_%28statistics%29.
 //
 // Special cases:
-//  Score(Mu) = [NaN, -1/l.Scale]
+//  Score(l.Mu) = [NaN, -1/l.Scale]
 func (l Laplace) Score(deriv []float64, x float64) []float64 {
 	if deriv == nil {
 		deriv = make([]float64, l.NumParameters())

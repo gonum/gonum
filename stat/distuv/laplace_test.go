@@ -98,6 +98,13 @@ func testLaplace(t *testing.T, dist Laplace, i int) {
 	if dist.Mu != dist.Mode() {
 		t.Errorf("Mismatch in mode value, got: %v, want: %g", dist.Mode(), dist.Mu)
 	}
+	score := dist.Score(nil, dist.Mu)
+	if !math.IsNaN(score[0]) {
+		t.Errorf("Expected NaN score over Mu for x == Mu, got %v", score[0])
+	}
+	if score[1] != -1/dist.Scale {
+		t.Errorf("Mismatch in score over Scale value for x == Mu, got: %v, want: %g", score[1], -1/dist.Scale)
+	}
 }
 
 func TestLaplaceFit(t *testing.T) {

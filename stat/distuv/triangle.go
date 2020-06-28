@@ -79,7 +79,6 @@ func (t Triangle) Median() float64 {
 	if t.c >= (t.a+t.b)/2 {
 		return t.a + math.Sqrt((t.b-t.a)*(t.c-t.a)/2)
 	}
-
 	return t.b - math.Sqrt((t.b-t.a)*(t.b-t.c)/2)
 }
 

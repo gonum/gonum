@@ -204,8 +204,27 @@ func testDerivParam(t *testing.T, d derivParamTester) {
 	if !panics(func() { d.Score(make([]float64, d.NumParameters()+1), 0) }) {
 		t.Errorf("Expected panic for wrong derivative slice length")
 	}
+	if !panics(func() { d.parameters(make([]Parameter, d.NumParameters()+1)) }) {
+		t.Errorf("Expected panic for wrong parameter slice length")
+	}
 
 	initParams := d.parameters(nil)
+	tooLongParams := make([]Parameter, len(initParams)+1)
+	copy(tooLongParams, initParams)
+	if !panics(func() { d.setParameters(tooLongParams) }) {
+		t.Errorf("Expected panic for wrong parameter slice length")
+	}
+	badNameParams := make([]Parameter, len(initParams))
+	copy(badNameParams, initParams)
+	const badName = "__badName__"
+	for i := 0; i < len(initParams); i++ {
+		badNameParams[i].Name = badName
+		if !panics(func() { d.setParameters(badNameParams) }) {
+			t.Errorf("Expected panic for wrong %d-th parameter name", i)
+		}
+		badNameParams[i].Name = initParams[i].Name
+	}
+
 	init := make([]float64, d.NumParameters())
 	for i, v := range initParams {
 		init[i] = v.Value

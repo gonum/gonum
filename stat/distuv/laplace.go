@@ -210,11 +210,11 @@ func (l Laplace) Score(deriv []float64, x float64) []float64 {
 // derivative of the log-likelihood
 //  (d/dx) log(p(x)) .
 // Special cases:
-//  ScoreInput(l.Mu) = 0
+//  ScoreInput(l.Mu) = NaN
 func (l Laplace) ScoreInput(x float64) float64 {
 	diff := x - l.Mu
 	if diff == 0 {
-		return 0
+		return math.NaN()
 	}
 	if diff > 0 {
 		return -1 / l.Scale

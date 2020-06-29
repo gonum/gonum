@@ -165,3 +165,28 @@ func logProbDerivative(t Triangle, x float64, i int, h float64) float64 {
 	t.setParameters(origParams)
 	return (lpUp - lpDown) / (2 * h)
 }
+
+func TestTriangleScoreInput(t *testing.T) {
+	t.Parallel()
+	f := Triangle{a: -0.5, b: 0.7, c: 0.1}
+	scoreInput := f.ScoreInput(f.a)
+	if !math.IsNaN(scoreInput) {
+		t.Errorf("Expected NaN input score for x == A, got %v", scoreInput)
+	}
+	scoreInput = f.ScoreInput(f.b)
+	if !math.IsNaN(scoreInput) {
+		t.Errorf("Expected NaN input score for x == B, got %v", scoreInput)
+	}
+	scoreInput = f.ScoreInput(f.c)
+	if !math.IsNaN(scoreInput) {
+		t.Errorf("Expected NaN input score for x == C, got %v", scoreInput)
+	}
+	scoreInput = f.ScoreInput(f.a - 0.0001)
+	if !math.IsNaN(scoreInput) {
+		t.Errorf("Expected NaN input score for x < A, got %v", scoreInput)
+	}
+	scoreInput = f.ScoreInput(f.b + 0.0001)
+	if !math.IsNaN(scoreInput) {
+		t.Errorf("Expected NaN input score for x > B, got %v", scoreInput)
+	}
+}

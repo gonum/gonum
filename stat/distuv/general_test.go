@@ -29,9 +29,17 @@ type UniProbDist interface {
 }
 
 func absEq(a, b float64) bool {
+	return absEqTol(a, b, 1e-14)
+}
+
+func absEqTol(a, b, tol float64) bool {
+	if math.IsNaN(a) || math.IsNaN(b) {
+		// NaN is not equal to anything.
+		return false
+	}
 	// This is expressed as the inverse to catch the
 	// case a = Inf and b = Inf of the same sign.
-	return !(math.Abs(a-b) > 1e-14)
+	return !(math.Abs(a-b) > tol)
 }
 
 // TODO: Implement a better test for Quantile
@@ -185,6 +193,7 @@ func parametersEqual(p1, p2 []Parameter, tol float64) bool {
 type derivParamTester interface {
 	LogProb(x float64) float64
 	Score(deriv []float64, x float64) []float64
+	ScoreInput(x float64) float64
 	Quantile(p float64) float64
 	NumParameters() int
 	parameters([]Parameter) []Parameter
@@ -198,8 +207,8 @@ func testDerivParam(t *testing.T, d derivParamTester) {
 	quantiles := make([]float64, nTest)
 	floats.Span(quantiles, 0.1, 0.9)
 
-	deriv := make([]float64, d.NumParameters())
-	fdDeriv := make([]float64, d.NumParameters())
+	scoreInPlace := make([]float64, d.NumParameters())
+	fdDerivParam := make([]float64, d.NumParameters())
 
 	if !panics(func() { d.Score(make([]float64, d.NumParameters()+1), 0) }) {
 		t.Errorf("Expected panic for wrong derivative slice length")
@@ -232,11 +241,11 @@ func testDerivParam(t *testing.T, d derivParamTester) {
 	for _, v := range quantiles {
 		d.setParameters(initParams)
 		x := d.Quantile(v)
-		gotDeriv := d.Score(deriv, x)
-		if &gotDeriv[0] != &deriv[0] {
-			t.Errorf("Returned a different derivative slice than passed in. Got %v, want %v", gotDeriv, deriv)
+		score := d.Score(scoreInPlace, x)
+		if &score[0] != &scoreInPlace[0] {
+			t.Errorf("Returned a different derivative slice than passed in. Got %v, want %v", score, scoreInPlace)
 		}
-		f := func(p []float64) float64 {
+		logProbParams := func(p []float64) float64 {
 			params := d.parameters(nil)
 			for i, v := range p {
 				params[i].Value = v
@@ -244,14 +253,22 @@ func testDerivParam(t *testing.T, d derivParamTester) {
 			d.setParameters(params)
 			return d.LogProb(x)
 		}
-		fd.Gradient(fdDeriv, f, init, nil)
-		if !floats.EqualApprox(deriv, fdDeriv, 1e-6) {
-			t.Errorf("Derivative mismatch at x = %g. Want %v, got %v", x, fdDeriv, deriv)
+		fd.Gradient(fdDerivParam, logProbParams, init, nil)
+		if !floats.EqualApprox(scoreInPlace, fdDerivParam, 1e-6) {
+			t.Errorf("Score mismatch at x = %g. Want %v, got %v", x, fdDerivParam, scoreInPlace)
 		}
 		d.setParameters(initParams)
-		d2 := d.Score(nil, x)
-		if !floats.EqualApprox(d2, deriv, 1e-14) {
-			t.Errorf("Derivative mismatch when input nil Want %v, got %v", d2, deriv)
+		score2 := d.Score(nil, x)
+		if !floats.EqualApprox(score2, scoreInPlace, 1e-14) {
+			t.Errorf("Score mismatch when input nil Want %v, got %v", score2, scoreInPlace)
+		}
+		logProbInput := func(x2 float64) float64 {
+			return d.LogProb(x2)
+		}
+		scoreInput := d.ScoreInput(x)
+		fdDerivInput := fd.Derivative(logProbInput, x, nil)
+		if !absEqTol(scoreInput, fdDerivInput, 1e-6) {
+			t.Errorf("ScoreInput mismatch at x = %g. Want %v, got %v", x, fdDerivInput, scoreInput)
 		}
 	}
 }

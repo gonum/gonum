@@ -29,9 +29,17 @@ type UniProbDist interface {
 }
 
 func absEq(a, b float64) bool {
+	return absEqTol(a, b, 1e-14)
+}
+
+func absEqTol(a, b, tol float64) bool {
+	if math.IsNaN(a) || math.IsNaN(b) {
+		// NaN is not equal to anything.
+		return false
+	}
 	// This is expressed as the inverse to catch the
 	// case a = Inf and b = Inf of the same sign.
-	return !(math.Abs(a-b) > 1e-14)
+	return !(math.Abs(a-b) > tol)
 }
 
 // TODO: Implement a better test for Quantile

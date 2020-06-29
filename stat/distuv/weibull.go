@@ -66,6 +66,9 @@ func (w Weibull) LogProb(x float64) float64 {
 	if x < 0 {
 		return math.Inf(-1)
 	}
+	if x == 0 && w.K == 1 {
+		return 0
+	}
 	return math.Log(w.K) - math.Log(w.Lambda) + (w.K-1)*(math.Log(x)-math.Log(w.Lambda)) - math.Pow(x/w.Lambda, w.K)
 }
 

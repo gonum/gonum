@@ -76,4 +76,5 @@ func testUniform(t *testing.T, u Uniform, i int) {
 	checkExKurtosis(t, i, x, u, 7e-2)
 	checkProbContinuous(t, i, x, u.Min, u.Max, u, 1e-10)
 	checkQuantileCDFSurvival(t, i, x, u, 1e-2)
+	testDerivParam(t, &u)
 }

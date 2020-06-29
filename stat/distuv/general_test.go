@@ -227,7 +227,7 @@ func testDerivParam(t *testing.T, d derivParamTester) {
 		}
 		fd.Gradient(fdDeriv, f, init, nil)
 		if !floats.EqualApprox(deriv, fdDeriv, 1e-6) {
-			t.Fatal("Derivative mismatch. Want", fdDeriv, ", got", deriv, ".")
+			t.Errorf("Derivative mismatch at x = %g. Want %v, got %v", x, fdDeriv, deriv)
 		}
 		d.setParameters(initParams)
 		d2 := d.Score(nil, x)

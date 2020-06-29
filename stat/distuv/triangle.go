@@ -134,6 +134,66 @@ func (t Triangle) Rand() float64 {
 	return t.Quantile(rnd)
 }
 
+// Score returns the score function with respect to the parameters of the
+// distribution at the input location x. The score function is the derivative
+// of the log-likelihood at x with respect to the parameters
+//  (∂/∂θ) log(p(x;θ))
+// If deriv is non-nil, len(deriv) must equal the number of parameters otherwise
+// Score will panic, and the derivative is stored in-place into deriv. If deriv
+// is nil a new slice will be allocated and returned.
+//
+// The order is [∂LogProb / ∂Mu, ∂LogProb / ∂Sigma].
+//
+// For more information, see https://en.wikipedia.org/wiki/Score_%28statistics%29.
+func (t Triangle) Score(deriv []float64, x float64) []float64 {
+	if deriv == nil {
+		deriv = make([]float64, t.NumParameters())
+	}
+	if len(deriv) != t.NumParameters() {
+		panic(badLength)
+	}
+	if (x < t.a) || (x > t.b) {
+		deriv[0] = math.NaN()
+		deriv[1] = math.NaN()
+		deriv[2] = math.NaN()
+	} else {
+		invBA := 1 / (t.b - t.a)
+		invCA := 1 / (t.c - t.a)
+		invBC := 1 / (t.b - t.c)
+		switch {
+		case x < t.c:
+			deriv[0] = -1/(x-t.a) + invBA + invCA
+			deriv[1] = -invBA
+			deriv[2] = -invCA
+		case x > t.c:
+			deriv[0] = invBA
+			deriv[1] = 1/(t.b-x) - invBA - invBC
+			deriv[2] = invBC
+		default:
+			deriv[0] = invBA
+			deriv[1] = -invBA
+			deriv[2] = 0
+		}
+		switch {
+		case x == t.a:
+			deriv[0] = math.NaN()
+		case x == t.b:
+			deriv[1] = math.NaN()
+		case x == t.c:
+			deriv[2] = math.NaN()
+		}
+		switch {
+		case t.a == t.c:
+			deriv[0] = math.NaN()
+			deriv[2] = math.NaN()
+		case t.b == t.c:
+			deriv[1] = math.NaN()
+			deriv[2] = math.NaN()
+		}
+	}
+	return deriv
+}
+
 // Skewness returns the skewness of the distribution.
 func (t Triangle) Skewness() float64 {
 	n := math.Sqrt2 * (t.a + t.b - 2*t.c) * (2*t.a - t.b - t.c) * (t.a - 2*t.b + t.c)
@@ -152,9 +212,12 @@ func (t Triangle) Survival(x float64) float64 {
 	return 1 - t.CDF(x)
 }
 
-// MarshalParameters implements the ParameterMarshaler interface
-func (t Triangle) MarshalParameters(p []Parameter) {
-	if len(p) != t.NumParameters() {
+// parameters returns the parameters of the distribution.
+func (t Triangle) parameters(p []Parameter) []Parameter {
+	nParam := t.NumParameters()
+	if p == nil {
+		p = make([]Parameter, nParam)
+	} else if len(p) != nParam {
 		panic("triangle: improper parameter length")
 	}
 	p[0].Name = "A"
@@ -163,10 +226,11 @@ func (t Triangle) MarshalParameters(p []Parameter) {
 	p[1].Value = t.b
 	p[2].Name = "C"
 	p[2].Value = t.c
+	return p
 }
 
-// UnmarshalParameters implements the ParameterMarshaler interface
-func (t *Triangle) UnmarshalParameters(p []Parameter) {
+// setParameters modifies the parameters of the distribution.
+func (t *Triangle) setParameters(p []Parameter) {
 	if len(p) != t.NumParameters() {
 		panic("triangle: incorrect number of parameters to set")
 	}

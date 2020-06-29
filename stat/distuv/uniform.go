@@ -58,15 +58,19 @@ func (u Uniform) LogProb(x float64) float64 {
 	return -math.Log(u.Max - u.Min)
 }
 
-// MarshalParameters implements the ParameterMarshaler interface
-func (u Uniform) MarshalParameters(p []Parameter) {
-	if len(p) != u.NumParameters() {
+// parameters returns the parameters of the distribution.
+func (u Uniform) parameters(p []Parameter) []Parameter {
+	nParam := u.NumParameters()
+	if p == nil {
+		p = make([]Parameter, nParam)
+	} else if len(p) != nParam {
 		panic("uniform: improper parameter length")
 	}
 	p[0].Name = "Min"
 	p[0].Value = u.Min
 	p[1].Name = "Max"
 	p[1].Value = u.Max
+	return p
 }
 
 // Mean returns the mean of the probability distribution.
@@ -116,6 +120,40 @@ func (u Uniform) Rand() float64 {
 	return rnd*(u.Max-u.Min) + u.Min
 }
 
+// Score returns the score function with respect to the parameters of the
+// distribution at the input location x. The score function is the derivative
+// of the log-likelihood at x with respect to the parameters
+//  (∂/∂θ) log(p(x;θ))
+// If deriv is non-nil, len(deriv) must equal the number of parameters otherwise
+// Score will panic, and the derivative is stored in-place into deriv. If deriv
+// is nil a new slice will be allocated and returned.
+//
+// The order is [∂LogProb / ∂Mu, ∂LogProb / ∂Sigma].
+//
+// For more information, see https://en.wikipedia.org/wiki/Score_%28statistics%29.
+func (u Uniform) Score(deriv []float64, x float64) []float64 {
+	if deriv == nil {
+		deriv = make([]float64, u.NumParameters())
+	}
+	if len(deriv) != u.NumParameters() {
+		panic(badLength)
+	}
+	if (x < u.Min) || (x > u.Max) {
+		deriv[0] = math.NaN()
+		deriv[1] = math.NaN()
+	} else {
+		deriv[0] = 1 / (u.Max - u.Min)
+		deriv[1] = -deriv[0]
+		if x == u.Min {
+			deriv[0] = math.NaN()
+		}
+		if x == u.Max {
+			deriv[1] = math.NaN()
+		}
+	}
+	return deriv
+}
+
 // Skewness returns the skewness of the distribution.
 func (Uniform) Skewness() float64 {
 	return 0
@@ -137,8 +175,8 @@ func (u Uniform) Survival(x float64) float64 {
 	return (u.Max - x) / (u.Max - u.Min)
 }
 
-// UnmarshalParameters implements the ParameterMarshaler interface
-func (u *Uniform) UnmarshalParameters(p []Parameter) {
+// setParameters modifies the parameters of the distribution.
+func (u *Uniform) setParameters(p []Parameter) {
 	if len(p) != u.NumParameters() {
 		panic("uniform: incorrect number of parameters to set")
 	}

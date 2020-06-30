@@ -5,6 +5,7 @@
 package distuv
 
 import (
+	"math"
 	"sort"
 	"testing"
 
@@ -77,4 +78,20 @@ func testUniform(t *testing.T, u Uniform, i int) {
 	checkProbContinuous(t, i, x, u.Min, u.Max, u, 1e-10)
 	checkQuantileCDFSurvival(t, i, x, u, 1e-2)
 	testDerivParam(t, &u)
+}
+
+func TestUniformScoreInput(t *testing.T) {
+	t.Parallel()
+	u := Uniform{0, 1, nil}
+	scoreInput := u.ScoreInput(0.5)
+	if scoreInput != 0 {
+		t.Errorf("Mismatch in input score for U(0, 1) at x == 0.5: got %v, want 0", scoreInput)
+	}
+	xs := []float64{-0.0001, 0, 1, 1.0001}
+	for _, x := range xs {
+		scoreInput = u.ScoreInput(x)
+		if !math.IsNaN(scoreInput) {
+			t.Errorf("Expected NaN score input for U(0, 1) at x == %g, got %v", x, scoreInput)
+		}
+	}
 }

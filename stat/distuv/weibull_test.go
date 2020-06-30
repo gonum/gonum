@@ -25,7 +25,7 @@ func TestHalfKStandardWeibullProb(t *testing.T) {
 			loc:     -1,
 			prob:    0,
 			cumProb: 0,
-			logProb: 0,
+			logProb: math.Inf(-1),
 		},
 		{
 			loc:     1,
@@ -50,13 +50,13 @@ func TestExponentialStandardWeibullProb(t *testing.T) {
 			loc:     0,
 			prob:    1,
 			cumProb: 0,
-			logProb: math.Inf(1),
+			logProb: 0,
 		},
 		{
 			loc:     -1,
 			prob:    0,
 			cumProb: 0,
-			logProb: 0,
+			logProb: math.Inf(-1),
 		},
 		{
 			loc:     1,
@@ -87,7 +87,7 @@ func TestRayleighStandardWeibullProb(t *testing.T) {
 			loc:     -1,
 			prob:    0,
 			cumProb: 0,
-			logProb: 0,
+			logProb: math.Inf(-1),
 		},
 		{
 			loc:     1,
@@ -118,7 +118,7 @@ func TestFiveKStandardWeibullProb(t *testing.T) {
 			loc:     -1,
 			prob:    0,
 			cumProb: 0,
-			logProb: 0,
+			logProb: math.Inf(-1),
 		},
 		{
 			loc:     1,
@@ -149,7 +149,7 @@ func TestScaledUpHalfKStandardWeibullProb(t *testing.T) {
 			loc:     -1,
 			prob:    0,
 			cumProb: 0,
-			logProb: 0,
+			logProb: math.Inf(-1),
 		},
 		{
 			loc:     1,
@@ -180,7 +180,7 @@ func TestScaledDownHalfKStandardWeibullProb(t *testing.T) {
 			loc:     -1,
 			prob:    0,
 			cumProb: 0,
-			logProb: 0,
+			logProb: math.Inf(-1),
 		},
 		{
 			loc:     1,

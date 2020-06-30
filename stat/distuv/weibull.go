@@ -55,7 +55,7 @@ func (w Weibull) LogCDF(x float64) complex128 {
 }
 
 // LogProb computes the natural logarithm of the value of the probability
-// density function at x. Zero is returned if x is less than zero.
+// density function at x. -Inf is returned if x is less than zero.
 //
 // Special cases occur when x == 0, and the result depends on the shape
 // parameter as follows:
@@ -64,6 +64,9 @@ func (w Weibull) LogCDF(x float64) complex128 {
 //  If K > 1, LogProb returns -Inf.
 func (w Weibull) LogProb(x float64) float64 {
 	if x < 0 {
+		return math.Inf(-1)
+	}
+	if x == 0 && w.K == 1 {
 		return 0
 	}
 	return math.Log(w.K) - math.Log(w.Lambda) + (w.K-1)*(math.Log(x)-math.Log(w.Lambda)) - math.Pow(x/w.Lambda, w.K)

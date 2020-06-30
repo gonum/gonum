@@ -29,9 +29,17 @@ type UniProbDist interface {
 }
 
 func absEq(a, b float64) bool {
+	return absEqTol(a, b, 1e-14)
+}
+
+func absEqTol(a, b, tol float64) bool {
+	if math.IsNaN(a) || math.IsNaN(b) {
+		// NaN is not equal to anything.
+		return false
+	}
 	// This is expressed as the inverse to catch the
 	// case a = Inf and b = Inf of the same sign.
-	return !(math.Abs(a-b) > 1e-14)
+	return !(math.Abs(a-b) > tol)
 }
 
 // TODO: Implement a better test for Quantile
@@ -39,11 +47,11 @@ func testDistributionProbs(t *testing.T, dist UniProbDist, name string, pts []un
 	for _, pt := range pts {
 		logProb := dist.LogProb(pt.loc)
 		if !absEq(logProb, pt.logProb) {
-			t.Errorf("Log probability doesnt match for "+name+". Expected %v. Found %v", pt.logProb, logProb)
+			t.Errorf("Log probability doesnt match for "+name+" at %v. Expected %v. Found %v", pt.loc, pt.logProb, logProb)
 		}
 		prob := dist.Prob(pt.loc)
 		if !absEq(prob, pt.prob) {
-			t.Errorf("Probability doesn't match for "+name+". Expected %v. Found %v", pt.prob, prob)
+			t.Errorf("Probability doesn't match for "+name+" at %v. Expected %v. Found %v", pt.loc, pt.prob, prob)
 		}
 		cumProb := dist.CDF(pt.loc)
 		if !absEq(cumProb, pt.cumProb) {

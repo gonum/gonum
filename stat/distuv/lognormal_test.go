@@ -41,7 +41,7 @@ func TestLognormal(t *testing.T) {
 
 		logProb := dist.LogProb(-0.0001)
 		if !math.IsInf(logProb, -1) {
-			t.Errorf("Expected NaN LogProb for x < 0, got %v", logProb)
+			t.Errorf("Expected LogProb == -Inf for x < 0, got %v", logProb)
 		}
 		if dist.NumParameters() != 2 {
 			t.Errorf("Mismatch in NumParameters: got %v, want 2", dist.NumParameters())

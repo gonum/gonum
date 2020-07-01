@@ -90,7 +90,7 @@ func (p Pareto) Prob(x float64) float64 {
 
 // Quantile returns the inverse of the cumulative probability distribution.
 func (p Pareto) Quantile(prob float64) float64 {
-	if prob < 0 || prob > 1 {
+	if prob < 0 || 1 < prob {
 		panic(badPercentile)
 	}
 	return p.Xm / math.Pow(1-prob, 1/p.Alpha)

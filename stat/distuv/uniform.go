@@ -154,6 +154,17 @@ func (u Uniform) Score(deriv []float64, x float64) []float64 {
 	return deriv
 }
 
+// ScoreInput returns the score function with respect to the input of the
+// distribution at the input location specified by x. The score function is the
+// derivative of the log-likelihood
+//  (d/dx) log(p(x)) .
+func (u Uniform) ScoreInput(x float64) float64 {
+	if (x <= u.Min) || (x >= u.Max) {
+		return math.NaN()
+	}
+	return 0
+}
+
 // Skewness returns the skewness of the distribution.
 func (Uniform) Skewness() float64 {
 	return 0

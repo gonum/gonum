@@ -160,13 +160,46 @@ func testPareto(t *testing.T, p Pareto, i int) {
 	generateSamples(x, p)
 	sort.Float64s(x)
 
+	checkQuantileCDFSurvival(t, i, x, p, 1e-3)
 	testRandLogProbContinuous(t, i, 0, x, p, tol, bins)
 	checkMean(t, i, x, p, tol)
 	checkVarAndStd(t, i, x, p, tol)
 	checkExKurtosis(t, i, x, p, 7e-2)
 	checkProbContinuous(t, i, x, p.Xm, math.Inf(1), p, 1e-10)
+	checkEntropy(t, i, x, p, 1e-2)
+	checkMedian(t, i, x, p, 1e-3)
 
 	if p.Xm != p.Mode() {
 		t.Errorf("Mismatch in mode value: got %v, want %g", p.Mode(), p.Xm)
+	}
+	if p.NumParameters() != 2 {
+		t.Errorf("Mismatch in NumParameters: got %v, want 2", p.NumParameters())
+	}
+	surv := p.Survival(p.Xm - 0.0001)
+	if surv != 1 {
+		t.Errorf("Mismatch in Survival below Xm: got %v, want 1", surv)
+	}
+}
+
+func TestParetoNotExists(t *testing.T) {
+	t.Parallel()
+	p := Pareto{0, 4, nil}
+	exKurt := p.ExKurtosis()
+	if !math.IsNaN(exKurt) {
+		t.Errorf("Expected NaN excess kurtosis for Alpha == 4, got %v", exKurt)
+	}
+	p = Pareto{0, 1, nil}
+	mean := p.Mean()
+	if !math.IsInf(mean, 1) {
+		t.Errorf("Expected mean == +Inf for Alpha == 1, got %v", mean)
+	}
+	p = Pareto{0, 2, nil}
+	variance := p.Variance()
+	if !math.IsInf(variance, 1) {
+		t.Errorf("Expected variance == +Inf for Alpha == 1, got %v", variance)
+	}
+	stdDev := p.StdDev()
+	if !math.IsInf(stdDev, 1) {
+		t.Errorf("Expected standard deviation == +Inf for Alpha == 1, got %v", stdDev)
 	}
 }

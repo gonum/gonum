@@ -31,11 +31,13 @@ func BellmanFordFrom(u graph.Node, g graph.Graph) (path Shortest, ok bool) {
 	path.dist[path.indexOf[u.ID()]] = 0
 
 	// Queue to keep track which nodes need to be relaxed.
-	// Only nodes whose vertex distance changed in the previous iterations need to be relaxed again.
+	// Only nodes whose vertex distance changed in the previous iterations
+	// need to be relaxed again.
 	queue := newBellmanFordQueue(path.indexOf)
 	queue.enqueue(u)
 
-	// The maximum of edges in a graph is |V| * (|V|-1) which is also the worst case complexity.
+	// The maximum number of edges in a graph is |V| * (|V|-1) which is also
+	// the worst case complexity.
 	// If the queue-loop has more iterations than the amount of maximum edges
 	// it indicates that we have a negative cycle.
 	maxEdges := len(nodes) * (len(nodes) - 1)

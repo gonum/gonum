@@ -198,8 +198,9 @@ func (t Triangle) Score(deriv []float64, x float64) []float64 {
 // distribution at the input location specified by x. The score function is the
 // derivative of the log-likelihood
 //  (d/dx) log(p(x)) .
-// Special cases:
-//  ScoreInput(t.c) = NaN
+// Special cases (c is the mode of the distribution):
+//  ScoreInput(c) = NaN
+//  ScoreInput(x) = NaN for x not in (a, b)
 func (t Triangle) ScoreInput(x float64) float64 {
 	if (x <= t.a) || (x >= t.b) || (x == t.c) {
 		return math.NaN()

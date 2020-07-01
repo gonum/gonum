@@ -5,6 +5,7 @@
 package distuv
 
 import (
+	"math"
 	"sort"
 	"testing"
 
@@ -125,7 +126,36 @@ func testPoisson(t *testing.T, p Poisson, i int) {
 	generateSamples(x, p)
 	sort.Float64s(x)
 
+	checkProbDiscrete(t, i, x, p, 2e-3)
 	checkMean(t, i, x, p, tol)
 	checkVarAndStd(t, i, x, p, tol)
 	checkExKurtosis(t, i, x, p, 7e-2)
+	checkSkewness(t, i, x, p, tol)
+
+	if p.NumParameters() != 1 {
+		t.Errorf("Mismatch in NumParameters: got %v, want 1", p.NumParameters())
+	}
+	cdf := p.CDF(-0.0001)
+	if cdf != 0 {
+		t.Errorf("Mismatch in CDF for x < 0: got %v, want 0", cdf)
+	}
+	surv := p.Survival(-0.0001)
+	if surv != 1 {
+		t.Errorf("Mismatch in Survival for x < 0: got %v, want 1", surv)
+	}
+	logProb := p.LogProb(-0.0001)
+	if !math.IsInf(logProb, -1) {
+		t.Errorf("Mismatch in LogProb for x < 0: got %v, want -Inf", logProb)
+	}
+	logProb = p.LogProb(1.5)
+	if !math.IsInf(logProb, -1) {
+		t.Errorf("Mismatch in LogProb for non-integer x: got %v, want -Inf", logProb)
+	}
+	for _, xx := range x {
+		cdf = p.CDF(xx)
+		surv = p.Survival(xx)
+		if math.Abs(cdf+surv-1) > 1e-10 {
+			t.Errorf("Mismatch between CDF and Survival at %g", xx)
+		}
+	}
 }

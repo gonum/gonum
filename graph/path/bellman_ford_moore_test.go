@@ -38,7 +38,7 @@ func TestBellmanFordFrom(t *testing.T) {
 
 		p, weight := pt.To(test.Query.To().ID())
 		if weight != test.Weight {
-			t.Errorf("%q: unexpected weight from Between: got:%f want:%f",
+			t.Errorf("%q: unexpected weight from To: got:%f want:%f",
 				test.Name, weight, test.Weight)
 		}
 		if weight := pt.WeightTo(test.Query.To().ID()); weight != test.Weight {

@@ -597,6 +597,56 @@ var ShortestPathTests = []struct {
 		Query: simple.Edge{F: simple.Node(0), T: simple.Node(1)},
 	},
 	{
+		Name:  "two path directed negative cycle",
+		Graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedDirectedGraph(0, math.Inf(1)) },
+		Edges: []simple.WeightedEdge{
+			{F: simple.Node(0), T: simple.Node(1), W: 1},
+			{F: simple.Node(1), T: simple.Node(2), W: -1},
+			{F: simple.Node(2), T: simple.Node(1), W: -1},
+			{F: simple.Node(1), T: simple.Node(3), W: 1},
+			{F: simple.Node(0), T: simple.Node(4), W: 1},
+		},
+		HasNegativeWeight: true,
+		HasNegativeCycle:  true,
+
+		Query: simple.Edge{F: simple.Node(0), T: simple.Node(3)},
+	},
+	{
+		Name:  "two path directed off-path negative cycle",
+		Graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedDirectedGraph(0, math.Inf(1)) },
+		Edges: []simple.WeightedEdge{
+			{F: simple.Node(0), T: simple.Node(1), W: 1},
+			{F: simple.Node(1), T: simple.Node(2), W: -1},
+			{F: simple.Node(2), T: simple.Node(1), W: -1},
+			{F: simple.Node(1), T: simple.Node(3), W: 1},
+			{F: simple.Node(0), T: simple.Node(4), W: 10}, // Push search into negative cycle.
+		},
+		HasNegativeWeight: true,
+		HasNegativeCycle:  true,
+
+		Query:  simple.Edge{F: simple.Node(0), T: simple.Node(4)},
+		Weight: 10,
+		WantPaths: [][]int64{
+			{0, 4},
+		},
+		HasUniquePath: true,
+	},
+	{
+		Name:  "two path directed diamond negative cycle",
+		Graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedDirectedGraph(0, math.Inf(1)) },
+		Edges: []simple.WeightedEdge{
+			{F: simple.Node(0), T: simple.Node(1), W: 1},
+			{F: simple.Node(1), T: simple.Node(2), W: -1},
+			{F: simple.Node(2), T: simple.Node(1), W: -1},
+			{F: simple.Node(1), T: simple.Node(3), W: 1},
+			{F: simple.Node(0), T: simple.Node(3), W: 10}, // Push search into negative cycle.
+		},
+		HasNegativeWeight: true,
+		HasNegativeCycle:  true,
+
+		Query: simple.Edge{F: simple.Node(0), T: simple.Node(3)},
+	},
+	{
 		Name:  "wp graph negative", // http://en.wikipedia.org/w/index.php?title=Johnson%27s_algorithm&oldid=564595231
 		Graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedDirectedGraph(0, math.Inf(1)) },
 		Edges: []simple.WeightedEdge{

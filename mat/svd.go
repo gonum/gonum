@@ -272,13 +272,24 @@ func (svd *SVD) VTo(dst *Dense) {
 	dst.Copy(tmp.T())
 }
 
-// SolveTo calculates the least-squares solution to a linear matrix equation,
-// AX = B, using a rank-truncated SVD. The result is placed in dst.
-// It returns the residuals calculated from the complete SVD. For this value to be
-// valid the factorization must have been performed with at least SVDFullU.
-// The decomposition must have been factorized computing both the U and V singular
-// vectors, and dst must be either empty or have a row dimension equal to rank.
-// The supplied rank must be a positive end-slice index into svd.Values.
+// SolveTo calculates the minimum-norm solution to a linear least squares problem
+//  minimize over n-element vectors x: |b - A*x|_2 and |x|_2
+// where b is a given m-element vector, using the SVD of m×n matrix A stored in
+// the receiver. A may be rank-deficient, that is, the given effective rank can be
+//  rank ≤ min(m,n)
+// The rank can be computed using SVD.Rank.
+//
+// Several right-hand side vectors b and solution vectors x can be handled in a
+// single call. Vectors b are stored in the columns of the m×k matrix B and the
+// resulting vectors x will be stored in the columns of dst. dst must be either
+// empty or have the size equal to n×k.
+//
+// The decomposition must have been factorized computing both the U and V
+// singular vectors.
+//
+// SolveTo returns the residuals calculated from the complete SVD. For this
+// value to be valid the factorization must have been performed with at least
+// SVDFullU.
 func (svd *SVD) SolveTo(dst *Dense, b Matrix, rank int) []float64 {
 	if !svd.succFact() {
 		panic(badFact)
@@ -341,13 +352,22 @@ func (m repVector) At(i, j int) float64 {
 }
 func (m repVector) T() Matrix { return Transpose{m} }
 
-// SolveVecTo calculates the least-squares solution to a linear matrix equation,
-// Ax = b, using a rank-truncated SVD. The result is placed in dst.
-// It returns the residual calculated from the complete SVD. For this value to be
-// valid the factorization must have been performed with at least SVDFullU.
-// The decomposition must have been factorized computing both the U and V singular
-// vectors, and dst must be either empty or have length equal to rank.
-// The supplied rank must be a positive index into svd.Values.
+// SolveVecTo calculates the minimum-norm solution to a linear least squares problem
+//  minimize over n-element vectors x: |b - A*x|_2 and |x|_2
+// where b is a given m-element vector, using the SVD of m×n matrix A stored in
+// the receiver. A may be rank-deficient, that is, the given effective rank can be
+//  rank ≤ min(m,n)
+// The rank can be computed using SVD.Rank.
+//
+// The resulting vector x will be stored in dst. dst must be either empty or
+// have length equal to n.
+//
+// The decomposition must have been factorized computing both the U and V
+// singular vectors.
+//
+// SolveVecTo returns the residuals calculated from the complete SVD. For this
+// value to be valid the factorization must have been performed with at least
+// SVDFullU.
 func (svd *SVD) SolveVecTo(dst *VecDense, b Vector, rank int) float64 {
 	if !svd.succFact() {
 		panic(badFact)

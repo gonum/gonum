@@ -46,7 +46,7 @@ func TestBhattacharyyaBeta(t *testing.T) {
 			t.Errorf("Bhattacharyya mismatch, case %d: got %v, want %v", cas, got, want)
 		}
 
-		// Bhattacharyya should by symmetric
+		// Bhattacharyya should be symmetric
 		got2 := Bhattacharyya{}.DistBeta(test.b, test.a)
 		if math.Abs(got-got2) > 1e-14 {
 			t.Errorf("Bhattacharyya distance not symmetric")
@@ -87,7 +87,7 @@ func TestBhattacharyyaNormal(t *testing.T) {
 			t.Errorf("Bhattacharyya mismatch, case %d: got %v, want %v", cas, got, want)
 		}
 
-		// Bhattacharyya should by symmetric
+		// Bhattacharyya should be symmetric
 		got2 := Bhattacharyya{}.DistNormal(test.b, test.a)
 		if math.Abs(got-got2) > 1e-14 {
 			t.Errorf("Bhattacharyya distance not symmetric")
@@ -144,6 +144,21 @@ func TestKullbackLeiblerBeta(t *testing.T) {
 			t.Errorf("Kullback-Leibler mismatch, case %d: got %v, want %v", cas, got, want)
 		}
 	}
+	ok := Beta{0.5, 0.5, nil}
+	bad := Beta{0, 1, nil}
+	if !panics(func() { KullbackLeibler{}.DistBeta(bad, ok) }) {
+		t.Errorf("Expected Kullback-Leibler to panic when called with invalid left Beta distribution")
+	}
+	if !panics(func() { KullbackLeibler{}.DistBeta(ok, bad) }) {
+		t.Errorf("Expected Kullback-Leibler to panic when called with invalid right Beta distribution")
+	}
+	bad = Beta{1, 0, nil}
+	if !panics(func() { KullbackLeibler{}.DistBeta(bad, ok) }) {
+		t.Errorf("Expected Kullback-Leibler to panic when called with invalid left Beta distribution")
+	}
+	if !panics(func() { KullbackLeibler{}.DistBeta(ok, bad) }) {
+		t.Errorf("Expected Kullback-Leibler to panic when called with invalid right Beta distribution")
+	}
 }
 
 func TestKullbackLeiblerNormal(t *testing.T) {
@@ -192,4 +207,60 @@ func klSample(samples int, l RandLogProber, r LogProber) float64 {
 		klmc += pa - pb
 	}
 	return klmc / float64(samples)
+}
+
+func TestHellingerBeta(t *testing.T) {
+	t.Parallel()
+	rnd := rand.New(rand.NewSource(1))
+	const tol = 1e-15
+	for cas, test := range []struct {
+		a, b Beta
+	}{
+		{
+			a: Beta{Alpha: 1, Beta: 2, Src: rnd},
+			b: Beta{Alpha: 1, Beta: 4, Src: rnd},
+		},
+		{
+			a: Beta{Alpha: 0.5, Beta: 0.4, Src: rnd},
+			b: Beta{Alpha: 0.7, Beta: 0.2, Src: rnd},
+		},
+		{
+			a: Beta{Alpha: 3, Beta: 5, Src: rnd},
+			b: Beta{Alpha: 5, Beta: 3, Src: rnd},
+		},
+	} {
+		want := math.Sqrt(1 - math.Exp(-Bhattacharyya{}.DistBeta(test.a, test.b)))
+		got := Hellinger{}.DistBeta(test.a, test.b)
+		if !floats.EqualWithinAbsOrRel(want, got, tol, tol) {
+			t.Errorf("Hellinger mismatch, case %d: got %v, want %v", cas, got, want)
+		}
+	}
+}
+
+func TestHellingerNormal(t *testing.T) {
+	t.Parallel()
+	rnd := rand.New(rand.NewSource(1))
+	const tol = 1e-15
+	for cas, test := range []struct {
+		a, b Normal
+	}{
+		{
+			a: Normal{Mu: 1, Sigma: 2, Src: rnd},
+			b: Normal{Mu: 1, Sigma: 4, Src: rnd},
+		},
+		{
+			a: Normal{Mu: 0, Sigma: 2, Src: rnd},
+			b: Normal{Mu: 2, Sigma: 2, Src: rnd},
+		},
+		{
+			a: Normal{Mu: 0, Sigma: 5, Src: rnd},
+			b: Normal{Mu: 2, Sigma: 0.1, Src: rnd},
+		},
+	} {
+		want := math.Sqrt(1 - math.Exp(-Bhattacharyya{}.DistNormal(test.a, test.b)))
+		got := Hellinger{}.DistNormal(test.a, test.b)
+		if !floats.EqualWithinAbsOrRel(want, got, tol, tol) {
+			t.Errorf("Hellinger mismatch, case %d: got %v, want %v", cas, got, want)
+		}
+	}
 }

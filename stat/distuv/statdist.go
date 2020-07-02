@@ -61,16 +61,14 @@ type Hellinger struct{}
 // See the documentation of Bhattacharyya.DistBeta for the distance formula.
 func (Hellinger) DistBeta(l, r Beta) float64 {
 	db := Bhattacharyya{}.DistBeta(l, r)
-	bc := math.Exp(-db)
-	return math.Sqrt(1 - bc)
+	return math.Sqrt(-math.Expm1(-db))
 }
 
 // DistNormal computes the Hellinger distance between Normal distributions l and r.
 // See the documentation of Bhattacharyya.DistNormal for the distance formula.
 func (Hellinger) DistNormal(l, r Normal) float64 {
 	db := Bhattacharyya{}.DistNormal(l, r)
-	bc := math.Exp(-db)
-	return math.Sqrt(1 - bc)
+	return math.Sqrt(-math.Expm1(-db))
 }
 
 // KullbackLeibler is a type for computing the Kullback-Leibler divergence from l to r.

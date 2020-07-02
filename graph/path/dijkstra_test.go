@@ -59,7 +59,7 @@ func TestDijkstraFrom(t *testing.T) {
 
 			p, weight := pt.To(test.Query.To().ID())
 			if weight != test.Weight {
-				t.Errorf("%q %s: unexpected weight from Between: got:%f want:%f",
+				t.Errorf("%q %s: unexpected weight from To: got:%f want:%f",
 					test.Name, tg.typ, weight, test.Weight)
 			}
 			if weight := pt.WeightTo(test.Query.To().ID()); weight != test.Weight {

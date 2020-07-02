@@ -148,3 +148,26 @@ func TestBetaMode(t *testing.T) {
 		}
 	}
 }
+
+func TestBetaIssue1377(t *testing.T) {
+	t.Parallel()
+	b := Beta{Alpha: 1, Beta: 1}
+	p0 := b.Prob(0)
+	if p0 != 1 {
+		t.Errorf("Mismatch in PDF value at x == 0 for Alpha == 1 and Beta == 1: got %v, want 1", p0)
+	}
+	p1 := b.Prob(1)
+	if p1 != 1 {
+		t.Errorf("Mismatch in PDF value at x == 1 for Alpha == 1 and Beta == 1: got %v, want 1", p1)
+	}
+	b = Beta{Alpha: 1, Beta: 10}
+	p0 = b.Prob(0)
+	if math.IsNaN(p0) {
+		t.Errorf("NaN PDF at x == 0 for Alpha == 1 and Beta > 10")
+	}
+	b = Beta{Alpha: 10, Beta: 1}
+	p1 = b.Prob(1)
+	if math.IsNaN(p1) {
+		t.Errorf("NaN PDF at x == 1 for Alpha > 1 and Beta == 1")
+	}
+}

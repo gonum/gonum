@@ -146,8 +146,9 @@ func (pc PiecewiseConstant) Predict(x float64) float64 {
 	return pc.ys[i+1]
 }
 
-// findSegment returns 0 <= i < len(xs) such that xs[i] <= x < xs[i + 1], or -1
-// if no such i is found. It assumes that len(xs) >= 2 without checking.
+// findSegment returns 0 <= i < len(xs) such that xs[i] <= x < xs[i + 1], where xs[len(xs)]
+// is assumed to be +Inf. If no such i is found, it returns -1. It assumes that len(xs) >= 2
+// without checking.
 func findSegment(xs []float64, x float64) int {
 	return sort.Search(len(xs), func(i int) bool { return xs[i] > x }) - 1
 }

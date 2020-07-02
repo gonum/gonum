@@ -34,7 +34,7 @@ func (p Pareto) CDF(x float64) float64 {
 	if x < p.Xm {
 		return 0
 	}
-	return 1 - p.Survival(x)
+	return -math.Expm1(p.Alpha * math.Log(p.Xm/x))
 }
 
 // Entropy returns the differential entropy of the distribution.
@@ -45,7 +45,7 @@ func (p Pareto) Entropy() float64 {
 // ExKurtosis returns the excess kurtosis of the distribution.
 func (p Pareto) ExKurtosis() float64 {
 	if p.Alpha <= 4 {
-		return 0
+		return math.NaN()
 	}
 	return 6 * (p.Alpha*p.Alpha*p.Alpha + p.Alpha*p.Alpha - 6*p.Alpha - 2) / (p.Alpha * (p.Alpha - 3) * (p.Alpha - 4))
 
@@ -70,7 +70,7 @@ func (p Pareto) Mean() float64 {
 
 // Median returns the median of the pareto distribution.
 func (p Pareto) Median() float64 {
-	return p.Xm * math.Pow(2, 1/p.Alpha)
+	return p.Quantile(0.5)
 }
 
 // Mode returns the mode of the distribution.
@@ -86,6 +86,14 @@ func (p Pareto) NumParameters() int {
 // Prob computes the value of the probability density function at x.
 func (p Pareto) Prob(x float64) float64 {
 	return math.Exp(p.LogProb(x))
+}
+
+// Quantile returns the inverse of the cumulative probability distribution.
+func (p Pareto) Quantile(prob float64) float64 {
+	if prob < 0 || 1 < prob {
+		panic(badPercentile)
+	}
+	return p.Xm / math.Pow(1-prob, 1/p.Alpha)
 }
 
 // Rand returns a random sample drawn from the distribution.
@@ -109,7 +117,7 @@ func (p Pareto) Survival(x float64) float64 {
 	if x < p.Xm {
 		return 1
 	}
-	return math.Exp(p.Alpha * (math.Log(p.Xm) - math.Log(x)))
+	return math.Pow(p.Xm/x, p.Alpha)
 }
 
 // Variance returns the variance of the probability distribution.

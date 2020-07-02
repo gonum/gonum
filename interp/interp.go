@@ -99,13 +99,9 @@ func (pl PiecewiseLinear) Predict(x float64) float64 {
 	return pl.ys[i] + pl.slopes[i]*(x-xI)
 }
 
-// PiecewiseConstant is a piecewise constant 1-dimensional interpolator.
+// PiecewiseConstant is a left-continous, piecewise constant
+// 1-dimensional interpolator.
 type PiecewiseConstant struct {
-	// Whether the interpolated function is left- or right-continuous.
-	// If LeftContinuous == true, then y(xs[i]) == y(xs[i] - eps) for small eps > 0. Otherwise,
-	// y(xs[i]) == y(xs[i] + eps).
-	LeftContinuous bool
-
 	// Interpolated X values.
 	xs []float64
 
@@ -147,10 +143,7 @@ func (pc PiecewiseConstant) Predict(x float64) float64 {
 		// x > pci.xs[i]
 		return pc.ys[n-1]
 	}
-	if pc.LeftContinuous {
-		return pc.ys[i+1]
-	}
-	return pc.ys[i]
+	return pc.ys[i+1]
 }
 
 // findSegment returns 0 <= i < len(xs) such that xs[i] <= x < xs[i + 1], or -1

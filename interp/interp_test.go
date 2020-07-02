@@ -121,7 +121,7 @@ func TestPiecewiseLinearPredict(t *testing.T) {
 	t.Parallel()
 	xs := []float64{0, 1, 2}
 	ys := []float64{-0.5, 1.5, 1}
-	pl := PiecewiseLinear{}
+	var pl PiecewiseLinear
 	pl.Fit(xs, ys)
 	testInterpolatorPredict(t, pl, xs, ys, 0)
 	testInterpolatorPredict(t, pl, []float64{-0.4, 2.6}, []float64{-0.5, 1}, 0)
@@ -131,7 +131,7 @@ func TestPiecewiseLinearPredict(t *testing.T) {
 func BenchmarkNewPiecewiseLinear(b *testing.B) {
 	xs := []float64{0, 1.5, 3, 4.5, 6, 7.5, 9, 12, 13.5, 16.5}
 	ys := []float64{0, 1, 2, 2.5, 2, 1.5, 4, 10, -2, 2}
-	pl := PiecewiseLinear{}
+	var pl PiecewiseLinear
 	for i := 0; i < b.N; i++ {
 		pl.Fit(xs, ys)
 	}
@@ -140,7 +140,7 @@ func BenchmarkNewPiecewiseLinear(b *testing.B) {
 func BenchmarkPiecewiseLinearPredict(b *testing.B) {
 	xs := []float64{0, 1.5, 3, 4.5, 6, 7.5, 9, 12, 13.5, 16.5}
 	ys := []float64{0, 1, 2, 2.5, 2, 1.5, 4, 10, -2, 2}
-	pl := PiecewiseLinear{}
+	var pl PiecewiseLinear
 	pl.Fit(xs, ys)
 	for i := 0; i < b.N; i++ {
 		pl.Predict(0)
@@ -158,14 +158,14 @@ func BenchmarkPiecewiseLinearPredict(b *testing.B) {
 }
 
 func TestNewPiecewiseConstant(t *testing.T) {
-	testPiecewiseInterpolatorCreation(t, &PiecewiseConstant{LeftContinuous: true})
-	testPiecewiseInterpolatorCreation(t, &PiecewiseConstant{LeftContinuous: false})
+	var pc PiecewiseConstant
+	testPiecewiseInterpolatorCreation(t, &pc)
 }
 
-func benchmarkPiecewiseConstantPredict(b *testing.B, leftContinuous bool) {
+func benchmarkPiecewiseConstantPredict(b *testing.B) {
 	xs := []float64{0, 1.5, 3, 4.5, 6, 7.5, 9, 12, 13.5, 16.5}
 	ys := []float64{0, 1, 2, 2.5, 2, 1.5, 4, 10, -2, 2}
-	pc := PiecewiseConstant{LeftContinuous: leftContinuous}
+	var pc PiecewiseConstant
 	pc.Fit(xs, ys)
 	for i := 0; i < b.N; i++ {
 		pc.Predict(0)
@@ -180,27 +180,18 @@ func benchmarkPiecewiseConstantPredict(b *testing.B, leftContinuous bool) {
 	}
 }
 
-func BenchmarkPiecewiseConstantLeftContinuousPredict(b *testing.B) {
-	benchmarkPiecewiseConstantPredict(b, true)
-}
-
-func BenchmarkPiecewiseConstantRightContinuousPredict(b *testing.B) {
-	benchmarkPiecewiseConstantPredict(b, false)
+func BenchmarkPiecewiseConstantPredict(b *testing.B) {
+	benchmarkPiecewiseConstantPredict(b)
 }
 
 func TestPiecewiseConstantPredict(t *testing.T) {
 	t.Parallel()
 	xs := []float64{0, 1, 2}
 	ys := []float64{-0.5, 1.5, 1}
-	pcLeft := PiecewiseConstant{LeftContinuous: true}
-	pcLeft.Fit(xs, ys)
-	pcRight := PiecewiseConstant{LeftContinuous: false}
-	pcRight.Fit(xs, ys)
-	testInterpolatorPredict(t, pcLeft, xs, ys, 0)
-	testInterpolatorPredict(t, pcRight, xs, ys, 0)
+	var pc PiecewiseConstant
+	pc.Fit(xs, ys)
+	testInterpolatorPredict(t, pc, xs, ys, 0)
 	testXs := []float64{-0.9, 0.1, 0.5, 0.8, 1.2, 3.1}
 	leftYs := []float64{-0.5, 1.5, 1.5, 1.5, 1, 1}
-	rightYs := []float64{-0.5, -0.5, -0.5, -0.5, 1.5, 1, 1}
-	testInterpolatorPredict(t, pcLeft, testXs, leftYs, 0)
-	testInterpolatorPredict(t, pcRight, testXs, rightYs, 0)
+	testInterpolatorPredict(t, pc, testXs, leftYs, 0)
 }

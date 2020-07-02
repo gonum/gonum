@@ -129,10 +129,7 @@ func (p Poisson) StdDev() float64 {
 
 // Survival returns the survival function (complementary CDF) at x.
 func (p Poisson) Survival(x float64) float64 {
-	if x < 0 {
-		return 1
-	}
-	return mathext.GammaIncReg(math.Floor(x+1), p.Lambda)
+	return 1 - p.CDF(x)
 }
 
 // Variance returns the variance of the probability distribution.

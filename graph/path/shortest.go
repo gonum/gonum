@@ -109,7 +109,7 @@ func (p *Shortest) add(u graph.Node) int {
 func (p Shortest) set(to int, weight float64, mid int) {
 	p.dist[to] = weight
 	p.next[to] = mid
-	if p.cycCosts != nil {
+	if weight < 0 {
 		c, ok := p.cycCosts[[2]int{mid, to}]
 		if !ok {
 			p.cycCosts[[2]int{mid, to}] = weight

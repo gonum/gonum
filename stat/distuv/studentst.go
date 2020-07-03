@@ -151,7 +151,7 @@ func (s StudentsT) Survival(x float64) float64 {
 //
 // The variance is undefined for ν <= 1, and this returns math.NaN().
 func (s StudentsT) Variance() float64 {
-	if s.Nu < 1 {
+	if s.Nu <= 1 {
 		return math.NaN()
 	}
 	if s.Nu <= 2 {

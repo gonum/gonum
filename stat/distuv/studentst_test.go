@@ -67,6 +67,9 @@ func testStudentsT(t *testing.T, c StudentsT, i int) {
 	if c.Mu != c.Mode() {
 		t.Errorf("Mismatch in mode value: got %v, want %g", c.Mode(), c.Mu)
 	}
+	if c.NumParameters() != 3 {
+		t.Errorf("Mismatch in NumParameters: got %v, want 3", c.NumParameters())
+	}
 }
 
 func TestStudentsTQuantile(t *testing.T) {
@@ -88,5 +91,19 @@ func TestStudentsTQuantile(t *testing.T) {
 				break
 			}
 		}
+	}
+}
+
+func TestStudentsVarianceSpecial(t *testing.T) {
+	t.Parallel()
+	dist := StudentsT{0, 1, 1, nil}
+	variance := dist.Variance()
+	if !math.IsNaN(variance) {
+		t.Errorf("Expected NaN variance for Nu <= 1, got %v", variance)
+	}
+	dist = StudentsT{0, 1, 2, nil}
+	variance = dist.Variance()
+	if !math.IsInf(variance, 1) {
+		t.Errorf("Expected +Inf variance for 1 < Nu <= 2, got %v", variance)
 	}
 }

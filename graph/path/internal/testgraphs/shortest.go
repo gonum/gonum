@@ -594,7 +594,13 @@ var ShortestPathTests = []struct {
 		HasNegativeWeight: true,
 		HasNegativeCycle:  true,
 
-		Query: simple.Edge{F: simple.Node(0), T: simple.Node(1)},
+		Query:  simple.Edge{F: simple.Node(0), T: simple.Node(1)},
+		Weight: math.Inf(-1),
+		WantPaths: [][]int64{
+			{0, 1}, // One loop around negative cycle and no lead-in path.
+		},
+
+		NoPathFor: simple.Edge{F: simple.Node(2), T: simple.Node(3)},
 	},
 	{
 		Name:  "two path directed negative cycle",
@@ -609,7 +615,13 @@ var ShortestPathTests = []struct {
 		HasNegativeWeight: true,
 		HasNegativeCycle:  true,
 
-		Query: simple.Edge{F: simple.Node(0), T: simple.Node(3)},
+		Query:  simple.Edge{F: simple.Node(0), T: simple.Node(3)},
+		Weight: math.Inf(-1),
+		WantPaths: [][]int64{
+			{1, 2, 1, 3}, // One loop around negative cycle and no lead-in path.
+		},
+
+		NoPathFor: simple.Edge{F: simple.Node(5), T: simple.Node(6)},
 	},
 	{
 		Name:  "two path directed off-path negative cycle",
@@ -630,6 +642,8 @@ var ShortestPathTests = []struct {
 			{0, 4},
 		},
 		HasUniquePath: true,
+
+		NoPathFor: simple.Edge{F: simple.Node(5), T: simple.Node(6)},
 	},
 	{
 		Name:  "two path directed diamond negative cycle",
@@ -644,7 +658,13 @@ var ShortestPathTests = []struct {
 		HasNegativeWeight: true,
 		HasNegativeCycle:  true,
 
-		Query: simple.Edge{F: simple.Node(0), T: simple.Node(3)},
+		Query:  simple.Edge{F: simple.Node(0), T: simple.Node(3)},
+		Weight: math.Inf(-1),
+		WantPaths: [][]int64{
+			{1, 2, 1, 3}, // One loop around negative cycle and no lead-in path.
+		},
+
+		NoPathFor: simple.Edge{F: simple.Node(5), T: simple.Node(6)},
 	},
 	{
 		Name:  "wp graph negative", // http://en.wikipedia.org/w/index.php?title=Johnson%27s_algorithm&oldid=564595231

@@ -29,6 +29,7 @@ func BellmanFordFrom(u graph.Node, g graph.Graph) (path Shortest, ok bool) {
 
 	path = newShortestFrom(u, nodes)
 	path.dist[path.indexOf[u.ID()]] = 0
+	path.cycCosts = make(map[[2]int]float64)
 
 	// Queue to keep track which nodes need to be relaxed.
 	// Only nodes whose vertex distance changed in the previous iterations

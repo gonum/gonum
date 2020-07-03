@@ -144,19 +144,19 @@ func TestKullbackLeiblerBeta(t *testing.T) {
 			t.Errorf("Kullback-Leibler mismatch, case %d: got %v, want %v", cas, got, want)
 		}
 	}
-	ok := Beta{0.5, 0.5, nil}
+	good := Beta{0.5, 0.5, nil}
 	bad := Beta{0, 1, nil}
-	if !panics(func() { KullbackLeibler{}.DistBeta(bad, ok) }) {
+	if !panics(func() { KullbackLeibler{}.DistBeta(bad, good) }) {
 		t.Errorf("Expected Kullback-Leibler to panic when called with invalid left Beta distribution")
 	}
-	if !panics(func() { KullbackLeibler{}.DistBeta(ok, bad) }) {
+	if !panics(func() { KullbackLeibler{}.DistBeta(good, bad) }) {
 		t.Errorf("Expected Kullback-Leibler to panic when called with invalid right Beta distribution")
 	}
 	bad = Beta{1, 0, nil}
-	if !panics(func() { KullbackLeibler{}.DistBeta(bad, ok) }) {
+	if !panics(func() { KullbackLeibler{}.DistBeta(bad, good) }) {
 		t.Errorf("Expected Kullback-Leibler to panic when called with invalid left Beta distribution")
 	}
-	if !panics(func() { KullbackLeibler{}.DistBeta(ok, bad) }) {
+	if !panics(func() { KullbackLeibler{}.DistBeta(good, bad) }) {
 		t.Errorf("Expected Kullback-Leibler to panic when called with invalid right Beta distribution")
 	}
 }
@@ -229,9 +229,9 @@ func TestHellingerBeta(t *testing.T) {
 			b: Beta{Alpha: 5, Beta: 3, Src: rnd},
 		},
 	} {
-		want := math.Sqrt(1 - math.Exp(-Bhattacharyya{}.DistBeta(test.a, test.b)))
 		got := Hellinger{}.DistBeta(test.a, test.b)
-		if !floats.EqualWithinAbsOrRel(want, got, tol, tol) {
+		want := math.Sqrt(1 - math.Exp(-Bhattacharyya{}.DistBeta(test.a, test.b)))
+		if !floats.EqualWithinAbsOrRel(got, want, tol, tol) {
 			t.Errorf("Hellinger mismatch, case %d: got %v, want %v", cas, got, want)
 		}
 	}
@@ -257,9 +257,9 @@ func TestHellingerNormal(t *testing.T) {
 			b: Normal{Mu: 2, Sigma: 0.1, Src: rnd},
 		},
 	} {
-		want := math.Sqrt(1 - math.Exp(-Bhattacharyya{}.DistNormal(test.a, test.b)))
 		got := Hellinger{}.DistNormal(test.a, test.b)
-		if !floats.EqualWithinAbsOrRel(want, got, tol, tol) {
+		want := math.Sqrt(1 - math.Exp(-Bhattacharyya{}.DistNormal(test.a, test.b)))
+		if !floats.EqualWithinAbsOrRel(got, want, tol, tol) {
 			t.Errorf("Hellinger mismatch, case %d: got %v, want %v", cas, got, want)
 		}
 	}

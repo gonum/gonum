@@ -46,3 +46,7 @@
 // The window intervals used in the window functions are offset by a half
 // to ensure that the window extends to exclude the flanking zeros.
 package window // import "gonum.org/v1/gonum/dsp/window"
+
+// The article at http://www.dsplib.ru/content/win/win.html is the origin
+// of much of the information used in this package. It is in Russian, but
+// Google translate does a pretty good job with it.

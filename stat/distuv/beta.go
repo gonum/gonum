@@ -74,14 +74,10 @@ func (b Beta) LogProb(x float64) float64 {
 	var lx float64
 	if b.Alpha != 1 {
 		lx = (b.Alpha - 1) * math.Log(x)
-	} else {
-		lx = 0
 	}
 	var l1mx float64
 	if b.Beta != 1 {
 		l1mx = (b.Beta - 1) * math.Log(1-x)
-	} else {
-		l1mx = 0
 	}
 	return lab - la - lb + lx + l1mx
 }

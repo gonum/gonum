@@ -149,6 +149,7 @@ func TestBetaMode(t *testing.T) {
 	}
 }
 
+// See https://github.com/gonum/gonum/issues/1377 for details.
 func TestBetaIssue1377(t *testing.T) {
 	t.Parallel()
 	b := Beta{Alpha: 1, Beta: 1}

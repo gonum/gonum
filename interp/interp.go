@@ -5,7 +5,14 @@
 package interp
 
 import (
+	"errors"
 	"sort"
+)
+
+const (
+	differentLengths        = "interp: xs and ys have different lengths"
+	tooFewPoints            = "interp: too few points for interpolation"
+	xsNotStrictlyIncreasing = "interp: xs values not strictly increasing"
 )
 
 // Predictor predicts the value of a function. It handles both
@@ -18,8 +25,9 @@ type Predictor interface {
 // Fitter fits a predictor to data.
 type Fitter interface {
 	// Fit fits a predictor to (X, Y) value pairs provided as two slices.
-	// It panics if len(xs) < 2, elements of xs are not strictly increasing or len(xs) != len(ys).
-	Fit(xs, ys []float64)
+	// It returns an error if len(xs) < 2, elements of xs are not strictly
+	// increasing or len(xs) != len(ys).
+	Fit(xs, ys []float64) error
 }
 
 // FittablePredictor is a Predictor which can fit itself to data.
@@ -56,27 +64,29 @@ type PiecewiseLinear struct {
 	slopes []float64
 }
 
-// Fit fits a piecewise linear predictor to (X, Y) value pairs provided as two slices.
-// It panics if len(xs) < 2, elements of xs are not strictly increasing or len(xs) != len(ys).
-func (pl *PiecewiseLinear) Fit(xs, ys []float64) {
+// Fit fits a predictor to (X, Y) value pairs provided as two slices.
+// It returns an error if len(xs) < 2, elements of xs are not strictly
+// increasing or len(xs) != len(ys).
+func (pl *PiecewiseLinear) Fit(xs, ys []float64) error {
 	n := len(xs)
 	if len(ys) != n {
-		panic("interp: xs and ys have different lengths")
+		return errors.New(differentLengths)
 	}
 	if n < 2 {
-		panic("interp: too few points for interpolation")
+		return errors.New(tooFewPoints)
 	}
 	m := n - 1
 	pl.slopes = make([]float64, m)
 	for i := 0; i < m; i++ {
 		dx := xs[i+1] - xs[i]
 		if dx <= 0 {
-			panic("interp: xs values not strictly increasing")
+			return errors.New(xsNotStrictlyIncreasing)
 		}
 		pl.slopes[i] = (ys[i+1] - ys[i]) / dx
 	}
 	pl.xs = xs
 	pl.ys = ys
+	return nil
 }
 
 // Predict returns the interpolation value at x.
@@ -109,23 +119,25 @@ type PiecewiseConstant struct {
 	ys []float64
 }
 
-// Fit fits a piecewise constant predictor to (X, Y) value pairs provided as two slices.
-// It panics if len(xs) < 2, elements of xs are not strictly increasing or len(xs) != len(ys).
-func (pc *PiecewiseConstant) Fit(xs, ys []float64) {
+// Fit fits a predictor to (X, Y) value pairs provided as two slices.
+// It returns an error if len(xs) < 2, elements of xs are not strictly
+// increasing or len(xs) != len(ys).
+func (pc *PiecewiseConstant) Fit(xs, ys []float64) error {
 	n := len(xs)
 	if len(ys) != n {
-		panic("interp: xs and ys have different lengths")
+		return errors.New(differentLengths)
 	}
 	if n < 2 {
-		panic("interp: too few points for interpolation")
+		return errors.New(tooFewPoints)
 	}
 	for i := 1; i < n; i++ {
 		if xs[i] <= xs[i-1] {
-			panic("interp: xs values not strictly increasing")
+			return errors.New(xsNotStrictlyIncreasing)
 		}
 	}
 	pc.xs = xs
 	pc.ys = ys
+	return nil
 }
 
 // Predict returns the interpolation value at x.

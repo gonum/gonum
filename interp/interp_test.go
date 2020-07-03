@@ -77,22 +77,22 @@ func BenchmarkFindSegment(b *testing.B) {
 
 // testPiecewiseInterpolatorCreation tests common functionality in creating piecewise  interpolators.
 func testPiecewiseInterpolatorCreation(t *testing.T, fp FittablePredictor) {
-	type panicParams struct {
+	type errorParams struct {
 		xs              []float64
 		ys              []float64
 		expectedMessage string
 	}
-	panicParamSets := []panicParams{
+	errorParamSets := []errorParams{
 		{[]float64{0, 1, 2}, []float64{-0.5, 1.5}, "xs and ys have different lengths"},
 		{[]float64{0.3}, []float64{0}, "too few points for interpolation"},
 		{[]float64{0.3, 0.3}, []float64{0, 0}, "xs values not strictly increasing"},
 		{[]float64{0.3, -0.3}, []float64{0, 0}, "xs values not strictly increasing"},
 	}
-	for _, params := range panicParamSets {
-		panicked, message := panics(func() { fp.Fit(params.xs, params.ys) })
+	for _, params := range errorParamSets {
+		err := fp.Fit(params.xs, params.ys)
 		expectedMessage := fmt.Sprintf("interp: %s", params.expectedMessage)
-		if !panicked || message != expectedMessage {
-			t.Errorf("expected panic for xs: %v and ys: %v with message: %s", params.xs, params.ys, expectedMessage)
+		if err == nil || err.Error() != expectedMessage {
+			t.Errorf("expected error for xs: %v and ys: %v with message: %s", params.xs, params.ys, expectedMessage)
 		}
 	}
 }
@@ -122,7 +122,10 @@ func TestPiecewiseLinearPredict(t *testing.T) {
 	xs := []float64{0, 1, 2}
 	ys := []float64{-0.5, 1.5, 1}
 	var pl PiecewiseLinear
-	pl.Fit(xs, ys)
+	err := pl.Fit(xs, ys)
+	if err != nil {
+		t.Errorf("Fit error: %s", err.Error())
+	}
 	testInterpolatorPredict(t, pl, xs, ys, 0)
 	testInterpolatorPredict(t, pl, []float64{-0.4, 2.6}, []float64{-0.5, 1}, 0)
 	testInterpolatorPredict(t, pl, []float64{0.1, 0.5, 0.8, 1.2}, []float64{-0.3, 0.5, 1.1, 1.4}, 1e-15)
@@ -189,7 +192,10 @@ func TestPiecewiseConstantPredict(t *testing.T) {
 	xs := []float64{0, 1, 2}
 	ys := []float64{-0.5, 1.5, 1}
 	var pc PiecewiseConstant
-	pc.Fit(xs, ys)
+	err := pc.Fit(xs, ys)
+	if err != nil {
+		t.Errorf("Fit error: %s", err.Error())
+	}
 	testInterpolatorPredict(t, pc, xs, ys, 0)
 	testXs := []float64{-0.9, 0.1, 0.5, 0.8, 1.2, 3.1}
 	leftYs := []float64{-0.5, 1.5, 1.5, 1.5, 1, 1}

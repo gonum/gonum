@@ -10,16 +10,6 @@ import (
 	"testing"
 )
 
-func panics(fn func()) (panicked bool, message string) {
-	defer func() {
-		r := recover()
-		panicked = r != nil
-		message = fmt.Sprint(r)
-	}()
-	fn()
-	return
-}
-
 func TestConstant(t *testing.T) {
 	t.Parallel()
 	const value = 42.0
@@ -136,7 +126,7 @@ func BenchmarkNewPiecewiseLinear(b *testing.B) {
 	ys := []float64{0, 1, 2, 2.5, 2, 1.5, 4, 10, -2, 2}
 	var pl PiecewiseLinear
 	for i := 0; i < b.N; i++ {
-		pl.Fit(xs, ys)
+		_ = pl.Fit(xs, ys)
 	}
 }
 
@@ -144,7 +134,7 @@ func BenchmarkPiecewiseLinearPredict(b *testing.B) {
 	xs := []float64{0, 1.5, 3, 4.5, 6, 7.5, 9, 12, 13.5, 16.5}
 	ys := []float64{0, 1, 2, 2.5, 2, 1.5, 4, 10, -2, 2}
 	var pl PiecewiseLinear
-	pl.Fit(xs, ys)
+	_ = pl.Fit(xs, ys)
 	for i := 0; i < b.N; i++ {
 		pl.Predict(0)
 		pl.Predict(16.5)
@@ -169,7 +159,7 @@ func benchmarkPiecewiseConstantPredict(b *testing.B) {
 	xs := []float64{0, 1.5, 3, 4.5, 6, 7.5, 9, 12, 13.5, 16.5}
 	ys := []float64{0, 1, 2, 2.5, 2, 1.5, 4, 10, -2, 2}
 	var pc PiecewiseConstant
-	pc.Fit(xs, ys)
+	_ = pc.Fit(xs, ys)
 	for i := 0; i < b.N; i++ {
 		pc.Predict(0)
 		pc.Predict(16.5)

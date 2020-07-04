@@ -422,7 +422,6 @@ type key [2]float64
 // badKey is a poisoned key. Testing for a bad key uses NaN inequality.
 var badKey = key{math.NaN(), math.NaN()}
 
-//nolint:staticcheck
 func (k key) isBadKey() bool { return k != k }
 
 // less returns whether k is less than other. From ISBN:0-262-51129-0 pp476-483:

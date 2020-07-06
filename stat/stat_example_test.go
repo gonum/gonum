@@ -56,7 +56,7 @@ func ExampleKolmogorovSmirnov() {
 	fmt.Printf("diff:     %2.3f\n", floats.Max(diff))
 	fmt.Printf("dist-KS:  %2.3f\n", dist)
 
-	// critical value @95% confidence level
+	// critical value at the 95% confidence level
 	crit := 1.36 / math.Sqrt(float64(n))
 	fmt.Printf("dist(3σ): %2.3f\n", crit)
 

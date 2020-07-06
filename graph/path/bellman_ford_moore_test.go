@@ -26,9 +26,7 @@ func TestBellmanFordFrom(t *testing.T) {
 			if ok {
 				t.Errorf("%q: expected negative cycle", test.Name)
 			}
-			continue
-		}
-		if !ok {
+		} else if !ok {
 			t.Fatalf("%q: unexpected negative cycle", test.Name)
 		}
 
@@ -41,7 +39,7 @@ func TestBellmanFordFrom(t *testing.T) {
 			t.Errorf("%q: unexpected weight from To: got:%f want:%f",
 				test.Name, weight, test.Weight)
 		}
-		if weight := pt.WeightTo(test.Query.To().ID()); weight != test.Weight {
+		if weight := pt.WeightTo(test.Query.To().ID()); !math.IsInf(test.Weight, -1) && weight != test.Weight {
 			t.Errorf("%q: unexpected weight from Weight: got:%f want:%f",
 				test.Name, weight, test.Weight)
 		}

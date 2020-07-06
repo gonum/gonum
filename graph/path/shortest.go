@@ -54,6 +54,12 @@ type Shortest struct {
 	// be set by the function that
 	// returned the Shortest value.
 	hasNegativeCycle bool
+
+	// cycCosts holds costs between
+	// pairs of nodes to report negative
+	// cycles. cycCosts is only used
+	// if it is non-nil.
+	cycCosts map[[2]int]float64
 }
 
 func newShortestFrom(u graph.Node, nodes []graph.Node) Shortest {
@@ -103,6 +109,14 @@ func (p *Shortest) add(u graph.Node) int {
 func (p Shortest) set(to int, weight float64, mid int) {
 	p.dist[to] = weight
 	p.next[to] = mid
+	if weight < 0 {
+		c, ok := p.cycCosts[[2]int{mid, to}]
+		if !ok {
+			p.cycCosts[[2]int{mid, to}] = weight
+		} else if weight < c {
+			p.cycCosts[[2]int{mid, to}] = math.Inf(-1)
+		}
+	}
 }
 
 // From returns the starting node of the paths held by the Shortest.
@@ -120,7 +134,8 @@ func (p Shortest) WeightTo(vid int64) float64 {
 
 // To returns a shortest path to v and the weight of the path. If the path
 // to v includes a negative cycle, one pass through the cycle will be included
-// in path and weight will be returned as -Inf.
+// in path, but any path leading into the negative cycle will be lost, and
+// weight will be returned as -Inf.
 func (p Shortest) To(vid int64) (path []graph.Node, weight float64) {
 	to, toOK := p.indexOf[vid]
 	if !toOK || math.IsInf(p.dist[to], 1) {
@@ -133,13 +148,16 @@ func (p Shortest) To(vid int64) (path []graph.Node, weight float64) {
 		seen := make(set.Ints)
 		seen.Add(from)
 		for to != from {
-			if seen.Has(to) {
+			next := p.next[to]
+			if math.IsInf(p.cycCosts[[2]int{next, to}], -1) {
 				weight = math.Inf(-1)
+			}
+			if seen.Has(to) {
 				break
 			}
 			seen.Add(to)
-			to = p.next[to]
-			path = append(path, p.nodes[to])
+			path = append(path, p.nodes[next])
+			to = next
 		}
 	} else {
 		n := len(p.nodes)

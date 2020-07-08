@@ -62,6 +62,9 @@ type Shortest struct {
 	cycCosts map[[2]int]float64
 }
 
+// newShortestFrom returns a shortest path tree for paths from u
+// initialised with the given nodes. The nodes held by the returned
+// Shortest may be lazily added.
 func newShortestFrom(u graph.Node, nodes []graph.Node) Shortest {
 	indexOf := make(map[int64]int, len(nodes))
 	uid := u.ID()
@@ -106,6 +109,8 @@ func (p *Shortest) add(u graph.Node) int {
 	return idx
 }
 
+// set sets the weight of the path from the node in p.nodes indexed by mid to the node
+// indexed by to.
 func (p Shortest) set(to int, weight float64, mid int) {
 	p.dist[to] = weight
 	p.next[to] = mid
@@ -114,6 +119,12 @@ func (p Shortest) set(to int, weight float64, mid int) {
 		if !ok {
 			p.cycCosts[[2]int{mid, to}] = weight
 		} else if weight < c {
+			// The only ways that we can have a new weight that is
+			// lower than the previous weight is if either the edge
+			// has already been traversed in a negative cycle, or
+			// the edge is reachable from a negative cycle.
+			// Either way the reported path is returned with a
+			// negative infinite path weight.
 			p.cycCosts[[2]int{mid, to}] = math.Inf(-1)
 		}
 	}
@@ -220,6 +231,9 @@ type ShortestAlts struct {
 	cycCosts map[[2]int]float64
 }
 
+// newShortestAltsFrom returns a shortest path tree for all paths from u
+// initialised with the given nodes. The nodes held by the returned
+// Shortest may be lazily added.
 func newShortestAltsFrom(u graph.Node, nodes []graph.Node) ShortestAlts {
 	indexOf := make(map[int64]int, len(nodes))
 	uid := u.ID()
@@ -264,6 +278,8 @@ func (p *ShortestAlts) add(u graph.Node) int {
 	return idx
 }
 
+// set sets the weight of the path from the node in p.nodes indexed by mid to the node
+// indexed by to.
 func (p ShortestAlts) set(to int, weight float64, mid int) {
 	p.dist[to] = weight
 	p.next[to] = []int{mid}
@@ -272,11 +288,20 @@ func (p ShortestAlts) set(to int, weight float64, mid int) {
 		if !ok {
 			p.cycCosts[[2]int{mid, to}] = weight
 		} else if weight < c {
+			// The only ways that we can have a new weight that is
+			// lower than the previous weight is if either the edge
+			// has already been traversed in a negative cycle, or
+			// the edge is reachable from a negative cycle.
+			// Either way the reported path is returned with a
+			// negative infinite path weight.
 			p.cycCosts[[2]int{mid, to}] = math.Inf(-1)
 		}
 	}
 }
 
+// addPath adds a new path from the node in p.nodes indexed by mid to the node indexed
+// by to. The weight of the path is expected to be the same as already existing paths
+// between these nodes, but no check is made for this.
 func (p ShortestAlts) addPath(to, mid int) {
 	// These are likely to be rare, so just loop over collisions.
 	for _, v := range p.next[to] {
@@ -482,6 +507,9 @@ var (
 	defacedBits = math.Float64bits(defaced)
 )
 
+// newAllShortest returns an all-pairs shortest path forest for paths with the
+// given nodes. The forward flag indicates whether the path reconstruction is
+// performed in the forward (Floyd-Warshall) or reverse (Dijkstra/Johnson's) order.
 func newAllShortest(nodes []graph.Node, forward bool) AllShortest {
 	if len(nodes) == 0 {
 		return AllShortest{}
@@ -504,15 +532,21 @@ func newAllShortest(nodes []graph.Node, forward bool) AllShortest {
 	}
 }
 
+// at returns a slice of node indexes into p.nodes for nodes that are mid points
+// between nodes indexed by from and to.
 func (p AllShortest) at(from, to int) (mid []int) {
 	return p.next[from+to*len(p.nodes)]
 }
 
+// set sets the weights of paths between node indexes into p.nodes for from and to
+// passing through the nodes indexed by mid.
 func (p AllShortest) set(from, to int, weight float64, mid ...int) {
 	p.dist.Set(from, to, weight)
 	p.next[from+to*len(p.nodes)] = append(p.next[from+to*len(p.nodes)][:0], mid...)
 }
 
+// add adds paths between node indexed in p.nodes by from and to passing through
+// the nodes indexed by mid.
 func (p AllShortest) add(from, to int, mid ...int) {
 loop: // These are likely to be rare, so just loop over collisions.
 	for _, k := range mid {
@@ -638,6 +672,10 @@ func (p AllShortest) AllBetween(uid, vid int64) (paths [][]graph.Node, weight fl
 	return paths, weight
 }
 
+// allBetween recursively constructs a slice of paths extending from the node
+// indexed into p.nodes by from to the node indexed by to. len(seen) must match
+// the number of nodes held by the receiver. The path parameter is the current
+// working path and the results are written into paths.
 func (p AllShortest) allBetween(from, to int, seen []bool, path []graph.Node, paths [][]graph.Node) [][]graph.Node {
 	if p.forward {
 		seen[from] = true

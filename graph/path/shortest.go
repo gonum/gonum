@@ -55,11 +55,13 @@ type Shortest struct {
 	// returned the Shortest value.
 	hasNegativeCycle bool
 
-	// cycCosts holds costs between
-	// pairs of nodes to report negative
-	// cycles. cycCosts is only used
-	// if it is non-nil.
-	cycCosts map[[2]int]float64
+	// negCosts holds negative costs
+	// between pairs of nodes to report
+	// negative cycles.
+	// negCosts must be initialised by
+	// routines that can handle negative
+	// edge weights.
+	negCosts map[[2]int]float64
 }
 
 // newShortestFrom returns a shortest path tree for paths from u
@@ -115,9 +117,9 @@ func (p Shortest) set(to int, weight float64, mid int) {
 	p.dist[to] = weight
 	p.next[to] = mid
 	if weight < 0 {
-		c, ok := p.cycCosts[[2]int{mid, to}]
+		c, ok := p.negCosts[[2]int{mid, to}]
 		if !ok {
-			p.cycCosts[[2]int{mid, to}] = weight
+			p.negCosts[[2]int{mid, to}] = weight
 		} else if weight < c {
 			// The only ways that we can have a new weight that is
 			// lower than the previous weight is if either the edge
@@ -125,7 +127,7 @@ func (p Shortest) set(to int, weight float64, mid int) {
 			// the edge is reachable from a negative cycle.
 			// Either way the reported path is returned with a
 			// negative infinite path weight.
-			p.cycCosts[[2]int{mid, to}] = math.Inf(-1)
+			p.negCosts[[2]int{mid, to}] = math.Inf(-1)
 		}
 	}
 }
@@ -160,7 +162,7 @@ func (p Shortest) To(vid int64) (path []graph.Node, weight float64) {
 		seen.Add(from)
 		for to != from {
 			next := p.next[to]
-			if math.IsInf(p.cycCosts[[2]int{next, to}], -1) {
+			if math.IsInf(p.negCosts[[2]int{next, to}], -1) {
 				weight = math.Inf(-1)
 			}
 			if seen.Has(to) {
@@ -224,11 +226,13 @@ type ShortestAlts struct {
 	// returned the ShortestAlts value.
 	hasNegativeCycle bool
 
-	// cycCosts holds costs between
-	// pairs of nodes to report negative
-	// cycles. cycCosts is only used
-	// if it is non-nil.
-	cycCosts map[[2]int]float64
+	// negCosts holds negative costs
+	// between pairs of nodes to report
+	// negative cycles.
+	// negCosts must be initialised by
+	// routines that can handle negative
+	// edge weights.
+	negCosts map[[2]int]float64
 }
 
 // newShortestAltsFrom returns a shortest path tree for all paths from u
@@ -284,9 +288,9 @@ func (p ShortestAlts) set(to int, weight float64, mid int) {
 	p.dist[to] = weight
 	p.next[to] = []int{mid}
 	if weight < 0 {
-		c, ok := p.cycCosts[[2]int{mid, to}]
+		c, ok := p.negCosts[[2]int{mid, to}]
 		if !ok {
-			p.cycCosts[[2]int{mid, to}] = weight
+			p.negCosts[[2]int{mid, to}] = weight
 		} else if weight < c {
 			// The only ways that we can have a new weight that is
 			// lower than the previous weight is if either the edge
@@ -294,7 +298,7 @@ func (p ShortestAlts) set(to int, weight float64, mid int) {
 			// the edge is reachable from a negative cycle.
 			// Either way the reported path is returned with a
 			// negative infinite path weight.
-			p.cycCosts[[2]int{mid, to}] = math.Inf(-1)
+			p.negCosts[[2]int{mid, to}] = math.Inf(-1)
 		}
 	}
 }
@@ -353,7 +357,7 @@ func (p ShortestAlts) To(vid int64) (path []graph.Node, weight float64, unique b
 			} else {
 				next = c[0]
 			}
-			if math.IsInf(p.cycCosts[[2]int{next, to}], -1) {
+			if math.IsInf(p.negCosts[[2]int{next, to}], -1) {
 				weight = math.Inf(-1)
 				unique = false
 			}

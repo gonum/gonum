@@ -1,4 +1,4 @@
-// Copyright ©2016 The Gonum Authors. All rights reserved.
+// Copyright ©2020 The Gonum Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -25,7 +25,7 @@ type AlphaStable struct {
 }
 
 // ExKurtosis returns the excess kurtosis of the distribution.
-// ExKurtosis returns NaN for Alpha < 2.
+// ExKurtosis returns NaN when Alpha != 2.
 func (a AlphaStable) ExKurtosis() float64 {
 	if a.Alpha == 2 {
 		return 0
@@ -34,7 +34,7 @@ func (a AlphaStable) ExKurtosis() float64 {
 }
 
 // Mean returns the mean of the probability distribution.
-// Mean returns NaN if Alpha <= 1.
+// Mean returns NaN when Alpha <= 1.
 func (a AlphaStable) Mean() float64 {
 	if a.Alpha > 1 {
 		return a.Mu
@@ -49,7 +49,7 @@ func (a AlphaStable) Median() float64 {
 	if a.Beta == 0 {
 		return a.Mu
 	}
-	panic("Cannot compute Median for Beta != 0")
+	panic("distuv: cannot compute Median for Beta != 0")
 }
 
 // Mode returns the mode of the distribution.
@@ -59,7 +59,7 @@ func (a AlphaStable) Mode() float64 {
 	if a.Beta == 0 {
 		return a.Mu
 	}
-	panic("Cannot compute Mode for Beta != 0")
+	panic("distuv: cannot compute Mode for Beta != 0")
 }
 
 // NumParameters returns the number of parameters in the distribution.
@@ -73,24 +73,21 @@ func (a AlphaStable) Rand() float64 {
 	const halfPi = math.Pi / 2
 	u := Uniform{-halfPi, halfPi, a.Src}.Rand()
 	w := Exponential{1, a.Src}.Rand()
-	var y float64
 	if a.Alpha == 1 {
 		f := halfPi + a.Beta*u
 		x := (f*math.Tan(u) - a.Beta*math.Log(halfPi*w*math.Cos(u)/f)) / halfPi
-		y = a.Scale*(x+a.Beta*math.Log(a.Scale)/halfPi) + a.Mu
-	} else {
-		zeta := -a.Beta * math.Tan(halfPi*a.Alpha)
-		xi := math.Atan(-zeta) / a.Alpha
-		f := a.Alpha * (u + xi)
-		g := math.Sqrt(1+zeta*zeta) * math.Pow(math.Cos(u-f)/w, 1-a.Alpha) / math.Cos(u)
-		x := math.Pow(g, 1/a.Alpha) * math.Sin(f)
-		y = a.Scale*x + a.Mu
+		return a.Scale*(x+a.Beta*math.Log(a.Scale)/halfPi) + a.Mu
 	}
-	return y
+	zeta := -a.Beta * math.Tan(halfPi*a.Alpha)
+	xi := math.Atan(-zeta) / a.Alpha
+	f := a.Alpha * (u + xi)
+	g := math.Sqrt(1+zeta*zeta) * math.Pow(math.Cos(u-f)/w, 1-a.Alpha) / math.Cos(u)
+	x := math.Pow(g, 1/a.Alpha) * math.Sin(f)
+	return a.Scale*x + a.Mu
 }
 
 // Skewness returns the skewness of the distribution.
-// Skewness returns NaN if Alpha < 2.
+// Skewness returns NaN when Alpha != 2.
 func (a AlphaStable) Skewness() float64 {
 	if a.Alpha == 2 {
 		return 0
@@ -104,7 +101,7 @@ func (a AlphaStable) StdDev() float64 {
 }
 
 // Variance returns the variance of the probability distribution.
-// Variance returns +Inf if Alpha < 2.
+// Variance returns +Inf when Alpha != 2.
 func (a AlphaStable) Variance() float64 {
 	if a.Alpha == 2 {
 		return 2 * a.Scale * a.Scale

@@ -10,20 +10,19 @@ import (
 	"golang.org/x/exp/rand"
 )
 
-// AlphaStable represents an α-stable distribution with four parameters:
-//  stability 0 < α ≤ 2
-//  skewness -1 ≤ β ≤ 1
-//  scale c > 0
-//  location μ
-// More information at https://en.wikipedia.org/wiki/Stable_distribution
+// AlphaStable represents an α-stable distribution with four parameters.
+// See https://en.wikipedia.org/wiki/Stable_distribution for more information.
 type AlphaStable struct {
-	// Stability parameter 0 < α ≤ 2.
+	// Alpha is the stability parameter.
+	// It is valid within the range 0 < α ≤ 2.
 	Alpha float64
-	// Skewness parameter -1 ≤ β ≤ 1.
+	// Beta is the skewness parameter.
+	// It is valid within the range -1 ≤ β ≤ 1.
 	Beta float64
-	// Scale parameter > 0.
+	// C is the scale parameter.
+	// It is valid when positive.
 	C float64
-	// Location parameter.
+	// Mu is the location parameter.
 	Mu  float64
 	Src rand.Source
 }

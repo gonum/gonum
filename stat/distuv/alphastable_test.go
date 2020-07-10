@@ -135,6 +135,33 @@ func testAlphaStableAnalytic(t *testing.T, i int, dist AlphaStable) {
 		if got != want {
 			t.Errorf("%d: mismatch in StdDev for Alpha == 2: got %v, want %g", i, got, want)
 		}
+		got = dist.Skewness()
+		want = 0
+		if got != want {
+			t.Errorf("%d: mismatch in Skewness for Alpha == 2: got %v, want %g", i, got, want)
+		}
+		got = dist.ExKurtosis()
+		want = 0
+		if got != want {
+			t.Errorf("%d: mismatch in ExKurtosis for Alpha == 2: got %v, want %g", i, got, want)
+		}
+	} else {
+		got := dist.Variance()
+		if !math.IsInf(got, 1) {
+			t.Errorf("%d: Variance is not +Inf for Alpha != 2: got %v", i, got)
+		}
+		got = dist.StdDev()
+		if !math.IsInf(got, 1) {
+			t.Errorf("%d: StdDev is not +Inf for Alpha != 2: got %v", i, got)
+		}
+		got = dist.Skewness()
+		if !math.IsNaN(got) {
+			t.Errorf("%d: Skewness is not NaN for Alpha != 2: got %v", i, got)
+		}
+		got = dist.ExKurtosis()
+		if !math.IsNaN(got) {
+			t.Errorf("%d: ExKurtosis is not NaN for Alpha != 2: got %v", i, got)
+		}
 	}
 }
 

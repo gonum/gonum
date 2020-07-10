@@ -17,19 +17,19 @@ func TestAlphaStable(t *testing.T) {
 	t.Parallel()
 	src := rand.New(rand.NewSource(1))
 	for i, dist := range []AlphaStable{
-		{Alpha: 0.5, Beta: 0, Scale: 1, Mu: 0, Src: src},
-		{Alpha: 1, Beta: 0, Scale: 1, Mu: 0, Src: src},
-		{Alpha: 2, Beta: 0, Scale: 1, Mu: 0, Src: src},
-		{Alpha: 0.5, Beta: 1, Scale: 1, Mu: 0, Src: src},
-		{Alpha: 1, Beta: 1, Scale: 1, Mu: 0, Src: src},
-		{Alpha: 2, Beta: 1, Scale: 1, Mu: 0, Src: src},
-		{Alpha: 0.5, Beta: 0, Scale: 1, Mu: 1, Src: src},
-		{Alpha: 1, Beta: 0, Scale: 1, Mu: 1, Src: src},
-		{Alpha: 2, Beta: 0, Scale: 1, Mu: 1, Src: src},
-		{Alpha: 0.5, Beta: 0.5, Scale: 1, Mu: 1, Src: src},
-		{Alpha: 1, Beta: 0.5, Scale: 1, Mu: 1, Src: src},
-		{Alpha: 1.1, Beta: 0.5, Scale: 1, Mu: 1, Src: src},
-		{Alpha: 2, Beta: 0.5, Scale: 1, Mu: 1, Src: src},
+		{Alpha: 0.5, Beta: 0, C: 1, Mu: 0, Src: src},
+		{Alpha: 1, Beta: 0, C: 1, Mu: 0, Src: src},
+		{Alpha: 2, Beta: 0, C: 1, Mu: 0, Src: src},
+		{Alpha: 0.5, Beta: 1, C: 1, Mu: 0, Src: src},
+		{Alpha: 1, Beta: 1, C: 1, Mu: 0, Src: src},
+		{Alpha: 2, Beta: 1, C: 1, Mu: 0, Src: src},
+		{Alpha: 0.5, Beta: 0, C: 1, Mu: 1, Src: src},
+		{Alpha: 1, Beta: 0, C: 1, Mu: 1, Src: src},
+		{Alpha: 2, Beta: 0, C: 1, Mu: 1, Src: src},
+		{Alpha: 0.5, Beta: 0.5, C: 1, Mu: 1, Src: src},
+		{Alpha: 1, Beta: 0.5, C: 1, Mu: 1, Src: src},
+		{Alpha: 1.1, Beta: 0.5, C: 1, Mu: 1, Src: src},
+		{Alpha: 2, Beta: 0.5, C: 1, Mu: 1, Src: src},
 	} {
 		testAlphaStableAnalytic(t, i, dist)
 	}
@@ -42,7 +42,7 @@ func TestAlphaStability(t *testing.T) {
 		ksTol = 2e-2
 	)
 	for i, test := range []struct {
-		alpha, beta1, beta2, scale1, scale2, mu1, mu2 float64
+		alpha, beta1, beta2, c1, c2, mu1, mu2 float64
 	}{
 		{2, 0, 0, 1, 2, 0.5, 0.25},
 		{2, 0.9, -0.4, 1, 2, 0.5, 0.25},
@@ -52,14 +52,14 @@ func TestAlphaStability(t *testing.T) {
 		{0.5, 0, 0, 1, 2, 0.5, 0.25},
 		{0.5, -0.5, 0.5, 1, 2, 0.5, 0.25},
 	} {
-		testStability(t, i, n, test.alpha, test.beta1, test.beta2, test.scale1, test.scale2, test.mu1, test.mu2, ksTol)
+		testStability(t, i, n, test.alpha, test.beta1, test.beta2, test.c1, test.c2, test.mu1, test.mu2, ksTol)
 	}
 }
 
 func TestAlphaStableGaussian(t *testing.T) {
 	t.Parallel()
 	src := rand.New(rand.NewSource(1))
-	d := AlphaStable{Alpha: 2, Beta: 0, Scale: 1.5, Mu: -0.4, Src: src}
+	d := AlphaStable{Alpha: 2, Beta: 0, C: 1.5, Mu: -0.4, Src: src}
 	n := 100000
 	x := make([]float64, n)
 	for i := 0; i < n; i++ {
@@ -75,7 +75,7 @@ func TestAlphaStableGaussian(t *testing.T) {
 func TestAlphaStableMean(t *testing.T) {
 	t.Parallel()
 	src := rand.New(rand.NewSource(1))
-	d := AlphaStable{Alpha: 1.75, Beta: 0.2, Scale: 1.2, Mu: 0.3, Src: src}
+	d := AlphaStable{Alpha: 1.75, Beta: 0.2, C: 1.2, Mu: 0.3, Src: src}
 	n := 100000
 	x := make([]float64, n)
 	for i := 0; i < n; i++ {
@@ -87,7 +87,7 @@ func TestAlphaStableMean(t *testing.T) {
 func TestAlphaStableCauchy(t *testing.T) {
 	t.Parallel()
 	src := rand.New(rand.NewSource(1))
-	d := AlphaStable{Alpha: 1, Beta: 0, Scale: 1, Mu: 0, Src: src}
+	d := AlphaStable{Alpha: 1, Beta: 0, C: 1, Mu: 0, Src: src}
 	n := 1000000
 	x := make([]float64, n)
 	for i := 0; i < n; i++ {
@@ -126,12 +126,12 @@ func testAlphaStableAnalytic(t *testing.T, i int, dist AlphaStable) {
 	}
 	if dist.Alpha == 2 {
 		got := dist.Variance()
-		want := 2 * dist.Scale * dist.Scale
+		want := 2 * dist.C * dist.C
 		if got != want {
 			t.Errorf("%d: mismatch in Variance for Alpha == 2: got %v, want %g", i, got, want)
 		}
 		got = dist.StdDev()
-		want = math.Sqrt(2) * dist.Scale
+		want = math.Sqrt(2) * dist.C
 		if got != want {
 			t.Errorf("%d: mismatch in StdDev for Alpha == 2: got %v, want %g", i, got, want)
 		}
@@ -165,14 +165,14 @@ func testAlphaStableAnalytic(t *testing.T, i int, dist AlphaStable) {
 	}
 }
 
-func testStability(t *testing.T, i, n int, alpha, beta1, beta2, scale1, scale2, mu1, mu2, ksTol float64) {
+func testStability(t *testing.T, i, n int, alpha, beta1, beta2, c1, c2, mu1, mu2, ksTol float64) {
 	src := rand.New(rand.NewSource(1))
-	d1 := AlphaStable{alpha, beta1, scale1, mu1, src}
-	d2 := AlphaStable{alpha, beta2, scale2, mu2, src}
-	scale := math.Pow(math.Pow(scale1, alpha)+math.Pow(scale2, alpha), 1/alpha)
-	beta := (beta1*math.Pow(scale1, alpha) + beta2*math.Pow(scale2, alpha)) / math.Pow(scale, alpha)
+	d1 := AlphaStable{alpha, beta1, c1, mu1, src}
+	d2 := AlphaStable{alpha, beta2, c2, mu2, src}
+	c := math.Pow(math.Pow(c1, alpha)+math.Pow(c2, alpha), 1/alpha)
+	beta := (beta1*math.Pow(c1, alpha) + beta2*math.Pow(c2, alpha)) / math.Pow(c, alpha)
 	// Sum of d1 and d2.
-	d := AlphaStable{alpha, beta, scale, mu1 + mu2, src}
+	d := AlphaStable{alpha, beta, c, mu1 + mu2, src}
 	sample1 := make([]float64, n)
 	sample2 := make([]float64, n)
 	for i := 0; i < n; i++ {

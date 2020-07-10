@@ -17,11 +17,15 @@ import (
 //  location μ
 // More information at https://en.wikipedia.org/wiki/Stable_distribution
 type AlphaStable struct {
+	// Stability parameter 0 < α ≤ 2.
 	Alpha float64
-	Beta  float64
-	Scale float64
-	Mu    float64
-	Src   rand.Source
+	// Skewness parameter -1 ≤ β ≤ 1.
+	Beta float64
+	// Scale parameter > 0.
+	C float64
+	// Location parameter.
+	Mu  float64
+	Src rand.Source
 }
 
 // ExKurtosis returns the excess kurtosis of the distribution.
@@ -76,14 +80,14 @@ func (a AlphaStable) Rand() float64 {
 	if a.Alpha == 1 {
 		f := halfPi + a.Beta*u
 		x := (f*math.Tan(u) - a.Beta*math.Log(halfPi*w*math.Cos(u)/f)) / halfPi
-		return a.Scale*(x+a.Beta*math.Log(a.Scale)/halfPi) + a.Mu
+		return a.C*(x+a.Beta*math.Log(a.C)/halfPi) + a.Mu
 	}
 	zeta := -a.Beta * math.Tan(halfPi*a.Alpha)
 	xi := math.Atan(-zeta) / a.Alpha
 	f := a.Alpha * (u + xi)
 	g := math.Sqrt(1+zeta*zeta) * math.Pow(math.Cos(u-f)/w, 1-a.Alpha) / math.Cos(u)
 	x := math.Pow(g, 1/a.Alpha) * math.Sin(f)
-	return a.Scale*x + a.Mu
+	return a.C*x + a.Mu
 }
 
 // Skewness returns the skewness of the distribution.
@@ -104,7 +108,7 @@ func (a AlphaStable) StdDev() float64 {
 // Variance returns +Inf when Alpha != 2.
 func (a AlphaStable) Variance() float64 {
 	if a.Alpha == 2 {
-		return 2 * a.Scale * a.Scale
+		return 2 * a.C * a.C
 	}
 	return math.Inf(1)
 }

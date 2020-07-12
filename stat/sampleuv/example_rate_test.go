@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package sampleuv
+package sampleuv_test
 
-import "gonum.org/v1/gonum/stat/distuv"
+import (
+	"gonum.org/v1/gonum/stat/distuv"
+	"gonum.org/v1/gonum/stat/sampleuv"
+)
 
 func ExampleMetropolisHastings_samplingRate() {
 	// See Burnin example for a description of these quantities.
@@ -22,7 +25,7 @@ func ExampleMetropolisHastings_samplingRate() {
 	// samples are not stored in `samples`.
 	rate := 50
 
-	mh := MetropolisHastings{
+	mh := sampleuv.MetropolisHastings{
 		Initial:  initial,
 		Target:   target,
 		Proposal: proposal,

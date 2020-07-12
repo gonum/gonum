@@ -426,6 +426,10 @@ func (p ShortestAlts) AllTo(vid int64) (paths [][]graph.Node, weight float64) {
 	return paths, weight
 }
 
+// allTo recursively constructs a slice of paths extending from the node
+// indexed into p.nodes by from to the node indexed by to. len(seen) must match
+// the number of nodes held by the receiver. The path parameter is the current
+// working path and the results are written into paths.
 func (p ShortestAlts) allTo(from, to int, seen []bool, path []graph.Node, paths [][]graph.Node) [][]graph.Node {
 	seen[to] = true
 	if from == to {

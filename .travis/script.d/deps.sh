@@ -9,8 +9,6 @@ pushd $WORK
 
 # Required for format check.
 go get golang.org/x/tools/cmd/goimports
-# Required for linting check.
-go get github.com/golangci/golangci-lint/cmd/golangci-lint
 # Required for imports check.
 go get gonum.org/v1/tools/cmd/check-imports
 # Required for copyright header check.

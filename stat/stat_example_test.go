@@ -17,7 +17,6 @@ import (
 )
 
 func ExampleKolmogorovSmirnov() {
-
 	// Given a set of observations xobs, we want to test whether
 	// they come from a given distribution (here, the normal distribution).
 
@@ -60,12 +59,9 @@ func ExampleKolmogorovSmirnov() {
 	crit := 1.36 / math.Sqrt(float64(n))
 	fmt.Printf("dist(3σ): %2.3f\n", crit)
 
-	var h0 string
-	switch {
-	case dist < crit:
+	h0 := "reject"
+	if dist < crit {
 		h0 = "do not reject"
-	default:
-		h0 = "reject"
 	}
 	fmt.Printf("H0:       %s\n", h0)
 

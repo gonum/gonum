@@ -241,27 +241,27 @@ func TestPiecewiseCubicFitWithDerivativesErrors(t *testing.T) {
 		expectedMessage string
 	}{
 		{
-			xs:    []float64{0, 1, 2},
-			ys:    []float64{10, 20},
-			dydxs: []float64{0, 0, 0},
+			xs:              []float64{0, 1, 2},
+			ys:              []float64{10, 20},
+			dydxs:           []float64{0, 0, 0},
 			expectedMessage: differentLengths,
 		},
 		{
-			xs:    []float64{0, 1, 1},
-			ys:    []float64{10, 20, 30},
-			dydxs: []float64{0, 0, 0, 0},
+			xs:              []float64{0, 1, 1},
+			ys:              []float64{10, 20, 30},
+			dydxs:           []float64{0, 0, 0, 0},
 			expectedMessage: differentLengths,
 		},
 		{
-			xs:    []float64{0},
-			ys:    []float64{0},
-			dydxs: []float64{0},
+			xs:              []float64{0},
+			ys:              []float64{0},
+			dydxs:           []float64{0},
 			expectedMessage: tooFewPoints,
 		},
 		{
-			xs:    []float64{0, 1, 1},
-			ys:    []float64{10, 20, 10},
-			dydxs: []float64{0, 0, 0},
+			xs:              []float64{0, 1, 1},
+			ys:              []float64{10, 20, 10},
+			dydxs:           []float64{0, 0, 0},
 			expectedMessage: xsNotStrictlyIncreasing,
 		},
 	} {
@@ -314,6 +314,78 @@ func testFittedPolys(t *testing.T, pc *PiecewiseCubic) {
 		got := pc.Predict(test.x)
 		if math.Abs(got-test.want) > 1e-14 {
 			t.Errorf("Mismatch in test case %d for x = %g: got %v, want %g", i, test.x, got, test.want)
+		}
+	}
+}
+
+func TestAkimaSplinesSingleFunction(t *testing.T) {
+	t.Parallel()
+	const (
+		nPts = 40
+		tol  = 1e-14
+	)
+	for i, test := range []struct {
+		xs, ys []float64
+		f      func(float64) float64
+	}{
+		{
+			xs: []float64{-1, 0, 1},
+			ys: []float64{1, 0, 1},
+			f:  func(x float64) float64 { return x * x },
+		},
+		{
+			xs: []float64{-1, 1},
+			ys: []float64{10, -10},
+			f:  func(x float64) float64 { return -10 * x },
+		},
+		{
+			xs: []float64{-1, 0, 1},
+			ys: []float64{10, 0, -10},
+			f:  func(x float64) float64 { return -10 * x },
+		},
+	} {
+		var as AkimaSplines
+		err := as.Fit(test.xs, test.ys)
+		if err != nil {
+			t.Errorf("Error when fitting AkimaSplines in test case %d: %v", i, err)
+		}
+		x0 := test.xs[0]
+		x1 := test.xs[len(test.xs)-1]
+		dx := (x1 - x0) / nPts
+		for j := -1; j <= nPts+1; j++ {
+			x := x0 + float64(j)*dx
+			got := as.Predict(x)
+			want := test.f(math.Min(x1, math.Max(x0, x)))
+			if math.Abs(got-want) > tol {
+				t.Errorf("Mismatch in interpolated value at x == %g for test case %d: got %v, want %g", x, i, got, want)
+			}
+		}
+	}
+}
+
+func TestAkimaSplinesNoWiggles(t *testing.T) {
+	const nPts = 40
+	const wiggleTol = 1e-1
+	xs := []float64{0, 1, 2, 3, 4, 5}
+	ys := []float64{-2, 0.6, 1.4, -3.8, -4.2, -3.5}
+	var as AkimaSplines
+	err := as.Fit(xs, ys)
+	if err != nil {
+		t.Errorf("Error when fitting AkimaSplines: %v", err)
+	}
+	m := len(xs) - 1
+	for i := 0; i < m; i++ {
+		x0 := xs[i]
+		x1 := xs[i+1]
+		yMin := math.Min(ys[i], ys[i+1])
+		yMax := math.Max(ys[i], ys[i+1])
+		dx := (x1 - x0) / nPts
+		for j := 0; j <= nPts; j++ {
+			x := x0 + float64(j)*dx
+			y := as.Predict(x)
+			if y < yMin-wiggleTol || y > yMax+wiggleTol {
+				t.Errorf("Interpolated values show large wiggles for x == %g: y == %g", x, y)
+			}
 		}
 	}
 }

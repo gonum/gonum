@@ -268,26 +268,26 @@ func (as *AkimaSplines) Fit(xs, ys []float64) error {
 		dydxs[1] = slope
 		return as.FitWithDerivatives(xs, ys, dydxs)
 	}
-	
+
 	m := n - 1
-	slopes := make([]float64, m + 4)
+	slopes := make([]float64, m+4)
 	for i := 0; i < m; i++ {
 		dx := xs[i+1] - xs[i]
 		if dx <= 0 {
 			return errors.New(xsNotStrictlyIncreasing)
 		}
-		slopes[i + 2] = (ys[i+1] - ys[i]) / dx
+		slopes[i+2] = (ys[i+1] - ys[i]) / dx
 	}
-	slopes[1] = 2 * slopes[2] - slopes[3]
-	slopes[0] = 3 * slopes[2] - 2 * slopes[3]
-	slopes[m + 2] = 2 * slopes[n] - slopes[m]
-	slopes[m + 3] = 3 * slopes[n] - 2 * slopes[m]
+	slopes[1] = 2*slopes[2] - slopes[3]
+	slopes[0] = 3*slopes[2] - 2*slopes[3]
+	slopes[m+2] = 2*slopes[n] - slopes[m]
+	slopes[m+3] = 3*slopes[n] - 2*slopes[m]
 	for i := 0; i < n; i++ {
 		wLeft := math.Abs(slopes[i+2] - slopes[i+3])
 		wRight := math.Abs(slopes[i+1] - slopes[i])
 		w := wLeft + wRight
 		if w > 0 {
-			dydxs[i] = (wLeft * slopes[i+1] + wRight * slopes[i+2]) / w
+			dydxs[i] = (wLeft*slopes[i+1] + wRight*slopes[i+2]) / w
 		} else {
 			dydxs[i] = (slopes[i+1] + slopes[i+2]) / 2
 		}

@@ -7,6 +7,8 @@ package interp
 import (
 	"errors"
 	"sort"
+
+	"gonum.org/v1/gonum/mat"
 )
 
 const (
@@ -95,17 +97,17 @@ func (pl PiecewiseLinear) Predict(x float64) float64 {
 	if i < 0 {
 		return pl.ys[0]
 	}
-	// i < len(pci.xs)
+	// i < len(pl.xs)
 	xI := pl.xs[i]
 	if x == xI {
 		return pl.ys[i]
 	}
 	n := len(pl.xs)
 	if i == n-1 {
-		// x > li.xs[i]
+		// x > pl.xs[i]
 		return pl.ys[n-1]
 	}
-	// i < len(i1d.xs) - 1
+	// i < len(pl.xs) - 1
 	return pl.ys[i] + pl.slopes[i]*(x-xI)
 }
 
@@ -146,16 +148,53 @@ func (pc PiecewiseConstant) Predict(x float64) float64 {
 	if i < 0 {
 		return pc.ys[0]
 	}
-	// i < len(pci.xs)
+	// i < len(pc.xs)
 	if x == pc.xs[i] {
 		return pc.ys[i]
 	}
 	n := len(pc.xs)
 	if i == n-1 {
-		// x > pci.xs[i]
+		// x > pc.xs[i]
 		return pc.ys[n-1]
 	}
 	return pc.ys[i+1]
+}
+
+// PiecewiseCubic is a left-continuous, piecewise cubic
+// 1-dimensional interpolator.
+type PiecewiseCubic struct {
+	// Interpolated X values.
+	xs []float64
+
+	// Coefficients of interpolating cubic polynomials, with
+	// len(xs) - 1 rows and 4 columns. The interpolated value
+	// for xs[i] <= x < xs[i + 1] is defined as
+	//   sum_{k = 0}^3 coeffs.At(i, k) * (x - xs[i])^k
+	// To guarantee left-continuity, coeffs.At(i, 0) == ys[i].
+	coeffs mat.Dense
+
+	// Last interpolated Y value, corresponding to xs[len(xs) - 1].
+	lastY float64
+}
+
+// Predict returns the interpolation value at x.
+func (pc *PiecewiseCubic) Predict(x float64) float64 {
+	i := findSegment(pc.xs, x)
+	if i < 0 {
+		return pc.coeffs.At(0, 0)
+	}
+	// i < len(pc.xs)
+	if x == pc.xs[i] {
+		return pc.coeffs.At(0, 0)
+	}
+	n := len(pc.xs)
+	if i == n-1 {
+		// x > pc.xs[i]
+		return pc.lastY
+	}
+	dx := x - pc.xs[i]
+	a := pc.coeffs.RawRowView(i)
+	return ((a[3]*dx+a[2])*dx+a[1])*dx + a[0]
 }
 
 // findSegment returns 0 <= i < len(xs) such that xs[i] <= x < xs[i + 1], where xs[len(xs)]

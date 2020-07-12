@@ -14,16 +14,22 @@ import (
 
 func TestTriangleConstraint(t *testing.T) {
 	t.Parallel()
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("The constraints were violated, but not caught")
-		}
-	}()
-
+	// test b == a
+	if !panics(func() { NewTriangle(1, 1, 1, nil) }) {
+		t.Errorf("Constraint a < b was violated, but not caught")
+	}
 	// test b < a
-	NewTriangle(3, 1, 2, nil)
+	if !panics(func() { NewTriangle(1, 1, 0, nil) }) {
+		t.Errorf("Constraint a < b was violated, but not caught")
+	}
 	// test c > b
-	NewTriangle(1, 2, 3, nil)
+	if !panics(func() { NewTriangle(1, 2, 3, nil) }) {
+		t.Errorf("Constraint a <= c <= b was violated, but not caught")
+	}
+	// test c < a
+	if !panics(func() { NewTriangle(1, 2, 0, nil) }) {
+		t.Errorf("Constraint a <= c <= b was violated, but not caught")
+	}
 }
 
 func TestTriangle(t *testing.T) {
@@ -110,6 +116,12 @@ func TestTriangleProb(t *testing.T) {
 			cumProb: 1,
 			logProb: math.Inf(-1),
 		},
+		{
+			loc:     3.5,
+			prob:    0,
+			cumProb: 1,
+			logProb: math.Inf(-1),
+		},
 	}
 	testDistributionProbs(t, NewTriangle(1, 3, 2, nil), "Standard 1,2,3 Triangle", pts)
 }
@@ -141,7 +153,7 @@ func TestTriangleScore(t *testing.T) {
 	f = Triangle{a: 0, b: 1, c: 1}
 	score = f.Score(nil, x)
 	if !math.IsNaN(score[1]) {
-		t.Errorf("Expected score over B to be NaN for B == C, got %v", score[0])
+		t.Errorf("Expected score over B to be NaN for B == C, got %v", score[1])
 	}
 	if !math.IsNaN(score[2]) {
 		t.Errorf("Expected score over C to be NaN for B == C, got %v", score[2])
@@ -149,6 +161,42 @@ func TestTriangleScore(t *testing.T) {
 	expectedScore = logProbDerivative(f, x, 0, h)
 	if math.Abs(expectedScore-score[0]) > tol {
 		t.Errorf("Mismatch in score over A for B == C: want %g, got %v", expectedScore, score[0])
+	}
+
+	f = Triangle{a: 0, b: 1, c: 0.5}
+	score = f.Score(nil, f.a-0.01)
+	if !math.IsNaN(score[0]) {
+		t.Errorf("Expected score over B to be NaN for x < A, got %v", score[0])
+	}
+	if !math.IsNaN(score[1]) {
+		t.Errorf("Expected score over B to be NaN for x < A, got %v", score[1])
+	}
+	if !math.IsNaN(score[2]) {
+		t.Errorf("Expected score over C to be NaN for x < A, got %v", score[2])
+	}
+
+	score = f.Score(nil, f.b+0.01)
+	if !math.IsNaN(score[0]) {
+		t.Errorf("Expected score over B to be NaN for x > B, got %v", score[0])
+	}
+	if !math.IsNaN(score[1]) {
+		t.Errorf("Expected score over B to be NaN for x > B, got %v", score[1])
+	}
+	if !math.IsNaN(score[2]) {
+		t.Errorf("Expected score over C to be NaN for x > B, got %v", score[2])
+	}
+
+	score = f.Score(nil, f.a)
+	if !math.IsNaN(score[0]) {
+		t.Errorf("Expected score over C to be NaN for x == A, got %v", score[0])
+	}
+	score = f.Score(nil, f.b)
+	if !math.IsNaN(score[1]) {
+		t.Errorf("Expected score over C to be NaN for x == B, got %v", score[1])
+	}
+	score = f.Score(nil, f.c)
+	if !math.IsNaN(score[2]) {
+		t.Errorf("Expected score over C to be NaN for x == C, got %v", score[2])
 	}
 }
 

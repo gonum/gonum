@@ -8,6 +8,9 @@ import (
 	"fmt"
 	"math"
 	"testing"
+
+	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/mat"
 )
 
 func TestConstant(t *testing.T) {
@@ -73,7 +76,7 @@ func testPiecewiseInterpolatorCreation(t *testing.T, fp FittablePredictor) {
 		expectedMessage string
 	}
 	errorParamSets := []errorParams{
-		{[]float64{0, 1, 2}, []float64{-0.5, 1.5}, "xs and ys have different lengths"},
+		{[]float64{0, 1, 2}, []float64{-0.5, 1.5}, "input slices have different lengths"},
 		{[]float64{0.3}, []float64{0}, "too few points for interpolation"},
 		{[]float64{0.3, 0.3}, []float64{0, 0}, "xs values not strictly increasing"},
 		{[]float64{0.3, -0.3}, []float64{0, 0}, "xs values not strictly increasing"},
@@ -190,4 +193,127 @@ func TestPiecewiseConstantPredict(t *testing.T) {
 	testXs := []float64{-0.9, 0.1, 0.5, 0.8, 1.2, 3.1}
 	leftYs := []float64{-0.5, 1.5, 1.5, 1.5, 1, 1}
 	testInterpolatorPredict(t, pc, testXs, leftYs, 0)
+}
+
+func TestPiecewiseCubicPredict(t *testing.T) {
+	t.Parallel()
+	xs := []float64{-1, 0, 1}
+	lastY := rightPoly(xs[2])
+	coeffs := mat.NewDense(2, 4, []float64{3, -3, 1, 0, 1, -1, 0, 1})
+	pc := PiecewiseCubic{xs, coeffs, lastY}
+	testFittedPolys(t, &pc)
+}
+
+func TestPiecewiseCubicFitWithDerivatives(t *testing.T) {
+	t.Parallel()
+	xs := []float64{-1, 0, 1}
+	ys := make([]float64, 3)
+	dydxs := make([]float64, 3)
+	ys[0] = leftPoly(xs[0])
+	ys[1] = leftPoly(xs[1])
+	ys[2] = rightPoly(xs[2])
+	dydxs[0] = leftPolyDerivative(xs[0])
+	dydxs[1] = leftPolyDerivative(xs[1])
+	dydxs[2] = rightPolyDerivative(xs[2])
+	var pc PiecewiseCubic
+	err := pc.FitWithDerivatives(xs, ys, dydxs)
+	if err != nil {
+		t.Errorf("Error when fitting piecewise cubic interpolator: %v", err)
+	}
+	testFittedPolys(t, &pc)
+	lastY := rightPoly(xs[2])
+	if pc.lastY != lastY {
+		t.Errorf("Mismatch in lastY: got %v, want %g", pc.lastY, lastY)
+	}
+	if !floats.Equal(pc.xs, xs) {
+		t.Errorf("Mismatch in xs: got %v, want %v", pc.xs, xs)
+	}
+	coeffs := mat.NewDense(2, 4, []float64{3, -3, 1, 0, 1, -1, 0, 1})
+	if !mat.EqualApprox(pc.coeffs, coeffs, 1e-14) {
+		t.Errorf("Mismatch in coeffs: got %v, want %v", pc.coeffs, coeffs)
+	}
+}
+
+func TestPiecewiseCubicFitWithDerivativesErrors(t *testing.T) {
+	t.Parallel()
+	for _, test := range []struct {
+		xs, ys, dydxs   []float64
+		expectedMessage string
+	}{
+		{
+			xs:    []float64{0, 1, 2},
+			ys:    []float64{10, 20},
+			dydxs: []float64{0, 0, 0},
+			expectedMessage: differentLengths,
+		},
+		{
+			xs:    []float64{0, 1, 1},
+			ys:    []float64{10, 20, 30},
+			dydxs: []float64{0, 0, 0, 0},
+			expectedMessage: differentLengths,
+		},
+		{
+			xs:    []float64{0},
+			ys:    []float64{0},
+			dydxs: []float64{0},
+			expectedMessage: tooFewPoints,
+		},
+		{
+			xs:    []float64{0, 1, 1},
+			ys:    []float64{10, 20, 10},
+			dydxs: []float64{0, 0, 0},
+			expectedMessage: xsNotStrictlyIncreasing,
+		},
+	} {
+		var pc PiecewiseCubic
+		err := pc.FitWithDerivatives(test.xs, test.ys, test.dydxs)
+		if err == nil || err.Error() != test.expectedMessage {
+			t.Errorf("expected error for xs: %v, ys: %v and dydxs: %v with message: %s", test.xs, test.ys, test.dydxs, test.expectedMessage)
+		}
+	}
+}
+
+func leftPoly(x float64) float64 {
+	return x*x - x + 1
+}
+
+func leftPolyDerivative(x float64) float64 {
+	return 2*x - 1
+}
+
+func rightPoly(x float64) float64 {
+	return x*x*x - x + 1
+}
+
+func rightPolyDerivative(x float64) float64 {
+	return 3*x*x - 1
+}
+
+func testFittedPolys(t *testing.T, pc *PiecewiseCubic) {
+	lastY := rightPoly(1)
+	for i, test := range []struct {
+		x    float64
+		want float64
+	}{
+		{-2, 3},
+		{-1, 3},
+		{-0.9, leftPoly(-0.9)},
+		{-0.75, leftPoly(-0.75)},
+		{-0.5, leftPoly(-0.5)},
+		{-0.25, leftPoly(-0.25)},
+		{-0.1, leftPoly(-0.1)},
+		{0, 1},
+		{0.1, rightPoly(0.1)},
+		{0.25, rightPoly(0.25)},
+		{0.5, rightPoly(0.5)},
+		{0.75, rightPoly(0.75)},
+		{0.9, rightPoly(0.9)},
+		{1, lastY},
+		{2, lastY},
+	} {
+		got := pc.Predict(test.x)
+		if math.Abs(got-test.want) > 1e-14 {
+			t.Errorf("Mismatch in test case %d for x = %g: got %v, want %g", i, test.x, got, test.want)
+		}
+	}
 }

@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	differentLengths        = "interp: xs and ys have different lengths"
+	differentLengths        = "interp: input slices have different lengths"
 	tooFewPoints            = "interp: too few points for interpolation"
 	xsNotStrictlyIncreasing = "interp: xs values not strictly increasing"
 )
@@ -86,8 +86,10 @@ func (pl *PiecewiseLinear) Fit(xs, ys []float64) error {
 		}
 		pl.slopes[i] = (ys[i+1] - ys[i]) / dx
 	}
-	pl.xs = xs
-	pl.ys = ys
+	pl.xs = make([]float64, n)
+	pl.ys = make([]float64, n)
+	copy(pl.xs, xs)
+	copy(pl.ys, ys)
 	return nil
 }
 
@@ -137,8 +139,10 @@ func (pc *PiecewiseConstant) Fit(xs, ys []float64) error {
 			return errors.New(xsNotStrictlyIncreasing)
 		}
 	}
-	pc.xs = xs
-	pc.ys = ys
+	pc.xs = make([]float64, n)
+	pc.ys = make([]float64, n)
+	copy(pc.xs, xs)
+	copy(pc.ys, ys)
 	return nil
 }
 
@@ -171,30 +175,70 @@ type PiecewiseCubic struct {
 	// for xs[i] <= x < xs[i + 1] is defined as
 	//   sum_{k = 0}^3 coeffs.At(i, k) * (x - xs[i])^k
 	// To guarantee left-continuity, coeffs.At(i, 0) == ys[i].
-	coeffs mat.Dense
+	coeffs *mat.Dense
 
 	// Last interpolated Y value, corresponding to xs[len(xs) - 1].
 	lastY float64
 }
 
 // Predict returns the interpolation value at x.
-func (pc *PiecewiseCubic) Predict(x float64) float64 {
+func (pc PiecewiseCubic) Predict(x float64) float64 {
 	i := findSegment(pc.xs, x)
 	if i < 0 {
 		return pc.coeffs.At(0, 0)
 	}
+	m := len(pc.xs) - 1
 	// i < len(pc.xs)
 	if x == pc.xs[i] {
-		return pc.coeffs.At(0, 0)
+		if i < m {
+			return pc.coeffs.At(i, 0)
+		}
+		return pc.lastY
 	}
-	n := len(pc.xs)
-	if i == n-1 {
+	if i == m {
 		// x > pc.xs[i]
 		return pc.lastY
 	}
 	dx := x - pc.xs[i]
 	a := pc.coeffs.RawRowView(i)
 	return ((a[3]*dx+a[2])*dx+a[1])*dx + a[0]
+}
+
+// FitWithDerivatives fits a piecewise cubic predictor to (X, Y, dY/dX) value
+// triples provided as three slices.
+// It returns an error if len(xs) < 2, elements of xs are not strictly
+// increasing, len(xs) != len(ys) or len(xs) != len(dydxs).
+func (pc *PiecewiseCubic) FitWithDerivatives(xs, ys, dydxs []float64) error {
+	n := len(xs)
+	if len(ys) != n {
+		return errors.New(differentLengths)
+	}
+	if len(dydxs) != n {
+		return errors.New(differentLengths)
+	}
+	if n < 2 {
+		return errors.New(tooFewPoints)
+	}
+	m := n - 1
+	pc.coeffs = mat.NewDense(m, 4, nil)
+	for i := 0; i < m; i++ {
+		dx := xs[i+1] - xs[i]
+		if dx <= 0 {
+			return errors.New(xsNotStrictlyIncreasing)
+		}
+		dy := ys[i+1] - ys[i]
+		// a_0
+		pc.coeffs.Set(i, 0, ys[i])
+		// a_1
+		pc.coeffs.Set(i, 1, dydxs[i])
+		// Solve a linear equation system for a_2 and a_3.
+		pc.coeffs.Set(i, 2, (3*dy-(2*dydxs[i]+dydxs[i+1])*dx)/dx/dx)
+		pc.coeffs.Set(i, 3, (-2*dy+(dydxs[i]+dydxs[i+1])*dx)/dx/dx/dx)
+	}
+	pc.xs = make([]float64, n)
+	copy(pc.xs, xs)
+	pc.lastY = ys[m]
+	return nil
 }
 
 // findSegment returns 0 <= i < len(xs) such that xs[i] <= x < xs[i + 1], where xs[len(xs)]

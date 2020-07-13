@@ -389,3 +389,33 @@ func TestAkimaSplinesNoWiggles(t *testing.T) {
 		}
 	}
 }
+
+func TestAkimaSplinesFitErrors(t *testing.T) {
+	t.Parallel()
+	for _, test := range []struct {
+		xs, ys          []float64
+		expectedMessage string
+	}{
+		{
+			xs:              []float64{0, 1, 2},
+			ys:              []float64{10, 20},
+			expectedMessage: differentLengths,
+		},
+		{
+			xs:              []float64{0},
+			ys:              []float64{0},
+			expectedMessage: tooFewPoints,
+		},
+		{
+			xs:              []float64{0, 1, 1},
+			ys:              []float64{10, 20, 10},
+			expectedMessage: xsNotStrictlyIncreasing,
+		},
+	} {
+		var as AkimaSplines
+		err := as.Fit(test.xs, test.ys)
+		if err == nil || err.Error() != test.expectedMessage {
+			t.Errorf("expected error for xs: %v and ys: %v with message: %s", test.xs, test.ys, test.expectedMessage)
+		}
+	}
+}

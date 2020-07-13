@@ -14,21 +14,15 @@ import (
 
 func TestTriangleConstraint(t *testing.T) {
 	t.Parallel()
-	// test b == a
-	if !panics(func() { NewTriangle(1, 1, 1, nil) }) {
-		t.Errorf("Constraint a < b was violated, but not caught")
-	}
-	// test b < a
-	if !panics(func() { NewTriangle(1, 1, 0, nil) }) {
-		t.Errorf("Constraint a < b was violated, but not caught")
-	}
-	// test c > b
-	if !panics(func() { NewTriangle(1, 2, 3, nil) }) {
-		t.Errorf("Constraint a <= c <= b was violated, but not caught")
-	}
-	// test c < a
-	if !panics(func() { NewTriangle(1, 2, 0, nil) }) {
-		t.Errorf("Constraint a <= c <= b was violated, but not caught")
+	for _, test := range []struct{ a, b, c float64 }{
+		{a: 1, b: 1, c: 1},
+		{a: 1, b: 1, c: 0},
+		{a: 1, b: 2, c: 3},
+		{a: 1, b: 2, c: 0},
+	} {
+		if !panics(func() { NewTriangle(test.a, test.b, test.c, nil) }) {
+			t.Errorf("expected panic for NewTriangle(%f, %f, %f, nil)", test.a, test.b, test.c)
+		}
 	}
 }
 

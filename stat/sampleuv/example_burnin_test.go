@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package sampleuv
+package sampleuv_test
 
-import "gonum.org/v1/gonum/stat/distuv"
+import (
+	"gonum.org/v1/gonum/stat/distuv"
+	"gonum.org/v1/gonum/stat/sampleuv"
+)
 
 type ProposalDist struct {
 	Sigma float64
@@ -32,6 +35,6 @@ func ExampleMetropolisHastings_burnin() {
 	proposal := ProposalDist{Sigma: 0.2}
 
 	samples := make([]float64, n)
-	mh := MetropolisHastings{Initial: initial, Target: target, Proposal: proposal, BurnIn: burnin}
+	mh := sampleuv.MetropolisHastings{Initial: initial, Target: target, Proposal: proposal, BurnIn: burnin}
 	mh.Sample(samples)
 }

@@ -6,20 +6,24 @@ import (
 	"gonum.org/v1/gonum/graph/simple"
 )
 
-type SimpleGraph struct {
+type SimpleFlowNetwork struct {
 	simple.WeightedDirectedGraph
 }
 
-func (g *SimpleGraph) ResidualGraph() ResidualGraph {
+func copyNodes(g *SimpleFlowNetwork) map[int64]graph.Node {
 	nodes := make(map[int64]graph.Node)
-	from := make(map[int64]map[int64]*ResidualEdge)
 
 	srcNodes := g.Nodes()
 	for srcNodes.Next() {
 		node := srcNodes.Node()
 		nodes[node.ID()] = node
 	}
-	srcNodes.Reset()
+	return nodes
+}
+
+func copyFromEdges(g *SimpleFlowNetwork) map[int64]map[int64]*ResidualEdge {
+	from := make(map[int64]map[int64]*ResidualEdge)
+	srcNodes := g.Nodes()
 	for srcNodes.Next() {
 		u := srcNodes.Node()
 		uid := u.ID()
@@ -40,12 +44,12 @@ func (g *SimpleGraph) ResidualGraph() ResidualGraph {
 			}
 		}
 	}
+	return from
+}
 
-	keys := make([]int64, 0, len(from))
-	for k := range from {
-		keys = append(keys, k)
-	}
-
+func (g *SimpleFlowNetwork) ResidualGraph() ResidualGraph {
+	nodes := copyNodes(g)
+	from := copyFromEdges(g)
 	return &SimpleResidualGraph{
 		nodes: nodes,
 		from:  from,
@@ -91,11 +95,6 @@ func (g *SimpleResidualGraph) SetFlow(uid, vid int64, flow int32) {
 }
 
 func (g *SimpleResidualGraph) ResidualEdge(uid, vid int64) ResidualEdge {
-	keys := make([]int64, 0, len(g.from))
-	for k := range g.from {
-		keys = append(keys, k)
-	}
-
 	if _, ok := g.from[uid]; ok {
 		keys := make([]int64, 0, len(g.from[uid]))
 		for k := range g.from[uid] {

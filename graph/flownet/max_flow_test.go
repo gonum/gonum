@@ -6,7 +6,7 @@ import (
 	"gonum.org/v1/gonum/graph/simple"
 )
 
-func makeGraph() *SimpleGraph {
+func makeGraph() *SimpleFlowNetwork {
 	g := simple.NewWeightedDirectedGraph(0, -1)
 	g.AddNode(simple.Node(0))
 	g.AddNode(simple.Node(1))
@@ -32,11 +32,11 @@ func makeGraph() *SimpleGraph {
 		F: simple.Node(3), T: simple.Node(0),
 		W: 10.0,
 	})
-	return &SimpleGraph{*g}
+	return &SimpleFlowNetwork{*g}
 }
 
 func TestEdgesPresenceSimpleGraph(t *testing.T) {
-	var sg Graph = makeGraph()
+	var sg FordFulkersonGraph = makeGraph()
 	for _, edge := range [][]int64{{0, 1}, {0, 2}, {2, 1}, {3, 2}, {3, 0}} {
 		e := sg.Edge(edge[0], edge[1])
 		if e == nil {
@@ -126,8 +126,10 @@ func TestAugmentingPath(t *testing.T) {
 }
 
 func TestMaxFlow(t *testing.T) {
-	flow := MaxFlow(
+	ek := EdmondsKarp{
 		makeGraph(),
+	}
+	flow := ek.MaxFlow(
 		simple.Node(3),
 		simple.Node(1),
 	)

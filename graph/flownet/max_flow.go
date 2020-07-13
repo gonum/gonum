@@ -14,7 +14,7 @@ type ResidualEdge interface {
 	ReversedResidualEdge() ResidualEdge
 }
 
-type Graph interface {
+type FordFulkersonGraph interface {
 	traverse.Graph
 	ResidualGraph() ResidualGraph
 }
@@ -76,8 +76,12 @@ func AvailableCapacity(edges []ResidualEdge) int32 {
 	return min
 }
 
-func MaxFlow(g Graph, source, sink graph.Node) int32 {
-	rg := g.ResidualGraph()
+type EdmondsKarp struct {
+	g FordFulkersonGraph
+}
+
+func (ek *EdmondsKarp) ResidualGraph(source, sink graph.Node) ResidualGraph {
+	rg := ek.g.ResidualGraph()
 	for {
 		path := AugmentingPath(rg, source, sink)
 		if path == nil {
@@ -93,12 +97,15 @@ func MaxFlow(g Graph, source, sink graph.Node) int32 {
 			)
 		}
 	}
+	return rg
+}
 
+func (ek *EdmondsKarp) MaxFlow(source, sink graph.Node) int32 {
+	rg := ek.ResidualGraph(source, sink)
 	var flow int32
 	to := rg.From(source.ID())
 	for to.Next() {
 		flow += rg.ResidualEdge(source.ID(), to.Node().ID()).CurrentFlow()
 	}
-
 	return flow
 }

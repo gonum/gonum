@@ -137,7 +137,7 @@ func (w Weibull) Rand() float64 {
 // For more information, see https://en.wikipedia.org/wiki/Score_%28statistics%29.
 //
 // Special cases:
-//  Score(0) = [NaN, NaN]
+//  Score(x) = [NaN, NaN] for x <= 0
 func (w Weibull) Score(deriv []float64, x float64) []float64 {
 	if deriv == nil {
 		deriv = make([]float64, w.NumParameters())
@@ -148,11 +148,6 @@ func (w Weibull) Score(deriv []float64, x float64) []float64 {
 	if x > 0 {
 		deriv[0] = 1/w.K + math.Log(x) - math.Log(w.Lambda) - (math.Log(x)-math.Log(w.Lambda))*math.Pow(x/w.Lambda, w.K)
 		deriv[1] = (w.K * (math.Pow(x/w.Lambda, w.K) - 1)) / w.Lambda
-		return deriv
-	}
-	if x < 0 {
-		deriv[0] = 0
-		deriv[1] = 0
 		return deriv
 	}
 	deriv[0] = math.NaN()
@@ -166,13 +161,10 @@ func (w Weibull) Score(deriv []float64, x float64) []float64 {
 //  (d/dx) log(p(x)) .
 //
 // Special cases:
-//  ScoreInput(0) = NaN
+//  ScoreInput(x) = NaN for x <= 0
 func (w Weibull) ScoreInput(x float64) float64 {
 	if x > 0 {
 		return (-w.K*math.Pow(x/w.Lambda, w.K) + w.K - 1) / x
-	}
-	if x < 0 {
-		return 0
 	}
 	return math.NaN()
 }

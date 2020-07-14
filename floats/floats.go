@@ -250,6 +250,14 @@ func EqualFunc(s1, s2 []float64, f func(float64, float64) bool) bool {
 	return true
 }
 
+// EqualOrBothNaN returns true if a and b are exactly equal or both are NaN.
+func EqualOrBothNaN(a, b float64) bool {
+	if math.IsNaN(a) {
+		return math.IsNaN(b)
+	}
+	return a == b
+}
+
 // EqualWithinAbs returns true if a and b have an absolute
 // difference of less than tol.
 func EqualWithinAbs(a, b, tol float64) bool {

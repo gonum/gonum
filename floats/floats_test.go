@@ -408,6 +408,25 @@ func TestEqualFunc(t *testing.T) {
 	}
 }
 
+func TestEqualOrBothNaN(t *testing.T) {
+	t.Parallel()
+	for i, test := range []struct {
+		a, b float64
+		want bool
+	}{
+		{0, 0.1, false},
+		{0, 0, true},
+		{math.NaN(), math.NaN(), true},
+		{1, math.NaN(), false},
+		{math.NaN(), 0, false},
+	} {
+		got := EqualOrBothNaN(test.a, test.b)
+		if got != test.want {
+			t.Errorf("EqualOrBothNaN mismatch in case %d, a == %g and b == %g: got %v, want %v", i, test.a, test.b, got, test.want)
+		}
+	}
+}
+
 func TestEqualsRelative(t *testing.T) {
 	t.Parallel()
 	equalityTests := []struct {

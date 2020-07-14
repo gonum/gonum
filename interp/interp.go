@@ -100,17 +100,14 @@ func (pl PiecewiseLinear) Predict(x float64) float64 {
 	if i < 0 {
 		return pl.ys[0]
 	}
-	// i < len(pl.xs)
 	xI := pl.xs[i]
 	if x == xI {
 		return pl.ys[i]
 	}
 	n := len(pl.xs)
 	if i == n-1 {
-		// x > pl.xs[i]
 		return pl.ys[n-1]
 	}
-	// i < len(pl.xs) - 1
 	return pl.ys[i] + pl.slopes[i]*(x-xI)
 }
 
@@ -153,20 +150,17 @@ func (pc PiecewiseConstant) Predict(x float64) float64 {
 	if i < 0 {
 		return pc.ys[0]
 	}
-	// i < len(pc.xs)
 	if x == pc.xs[i] {
 		return pc.ys[i]
 	}
 	n := len(pc.xs)
 	if i == n-1 {
-		// x > pc.xs[i]
 		return pc.ys[n-1]
 	}
 	return pc.ys[i+1]
 }
 
-// PiecewiseCubic is a left-continuous, piecewise cubic
-// 1-dimensional interpolator.
+// PiecewiseCubic is a left-continuous, piecewise cubic 1-dimensional interpolator.
 type PiecewiseCubic struct {
 	// Interpolated X values.
 	xs []float64
@@ -189,7 +183,6 @@ func (pc PiecewiseCubic) Predict(x float64) float64 {
 		return pc.coeffs.At(0, 0)
 	}
 	m := len(pc.xs) - 1
-	// i < len(pc.xs)
 	if x == pc.xs[i] {
 		if i < m {
 			return pc.coeffs.At(i, 0)
@@ -197,7 +190,6 @@ func (pc PiecewiseCubic) Predict(x float64) float64 {
 		return pc.lastY
 	}
 	if i == m {
-		// x > pc.xs[i]
 		return pc.lastY
 	}
 	dx := x - pc.xs[i]
@@ -242,9 +234,8 @@ func (pc *PiecewiseCubic) FitWithDerivatives(xs, ys, dydxs []float64) error {
 	return nil
 }
 
-// AkimaSplines is a left-continuous, piecewise cubic
-// 1-dimensional interpolator which can be fitted to
-// (X, Y) value pairs without providing derivatives.
+// AkimaSplines is a left-continuous, piecewise cubic 1-dimensional interpolator
+// which can be fitted to (X, Y) value pairs without providing derivatives.
 // See https://www.iue.tuwien.ac.at/phd/rottinger/node60.html for more details.
 type AkimaSplines struct {
 	PiecewiseCubic

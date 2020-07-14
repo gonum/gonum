@@ -23,15 +23,23 @@ func TestUniformProb(t *testing.T) {
 		{2, 4, 5, 0},
 		{2, 4, 3, 0.5},
 		{0, 100, 1, 0.01},
+		{-1, 1, -1.5, 0},
+		{-1, 1, 1.5, 0},
 	} {
-		pdf := Uniform{test.min, test.max, nil}.Prob(test.x)
+		u := Uniform{test.min, test.max, nil}
+		pdf := u.Prob(test.x)
 		if !floats.EqualWithinAbsOrRel(pdf, test.want, 1e-15, 1e-15) {
-			t.Errorf("Pdf mismatch, x = %v, min = %v, max = %v. Got %v, want %v", test.x, test.min, test.max, pdf, test.want)
+			t.Errorf("PDF mismatch, x = %v, min = %v, max = %v. Got %v, want %v", test.x, test.min, test.max, pdf, test.want)
+		}
+		logWant := math.Log(test.want)
+		logPdf := u.LogProb(test.x)
+		if !floats.EqualWithinAbsOrRel(logPdf, logWant, 1e-15, 1e-15) {
+			t.Errorf("Log PDF mismatch, x = %v, min = %v, max = %v. Got %v, want %v", test.x, test.min, test.max, logPdf, logWant)
 		}
 	}
 }
 
-func TestUniformCDF(t *testing.T) {
+func TestUniformCDFSurvival(t *testing.T) {
 	t.Parallel()
 	for _, test := range []struct {
 		min, max, x, want float64
@@ -41,10 +49,17 @@ func TestUniformCDF(t *testing.T) {
 		{0, 100, 0, 0},
 		{0, 100, 50, 0.5},
 		{0, 50, 10, 0.2},
+		{-1, 1, -1.5, 0},
+		{-1, 1, 1.5, 1},
 	} {
-		cdf := Uniform{test.min, test.max, nil}.CDF(test.x)
+		u := Uniform{test.min, test.max, nil}
+		cdf := u.CDF(test.x)
 		if !floats.EqualWithinAbsOrRel(cdf, test.want, 1e-15, 1e-15) {
 			t.Errorf("CDF mismatch, x = %v, min = %v, max = %v. Got %v, want %v", test.x, test.min, test.max, cdf, test.want)
+		}
+		survival := u.Survival(test.x)
+		if !floats.EqualWithinAbsOrRel(survival, 1-test.want, 1e-15, 1e-15) {
+			t.Errorf("CDF mismatch, x = %v, min = %v, max = %v. Got %v, want %v", test.x, test.min, test.max, survival, 1-test.want)
 		}
 	}
 }
@@ -77,7 +92,31 @@ func testUniform(t *testing.T, u Uniform, i int) {
 	checkExKurtosis(t, i, x, u, 7e-2)
 	checkProbContinuous(t, i, x, u.Min, u.Max, u, 1e-10)
 	checkQuantileCDFSurvival(t, i, x, u, 1e-2)
+	checkEntropy(t, i, x, u, tol)
+	checkSkewness(t, i, x, u, tol)
+	checkMedian(t, i, x, u, tol)
 	testDerivParam(t, &u)
+}
+
+func TestUniformScore(t *testing.T) {
+	t.Parallel()
+	u := Uniform{0, 1, nil}
+	for _, test := range []struct {
+		x, wantMin, wantMax float64
+	}{
+		{-0.001, math.NaN(), math.NaN()},
+		{0, math.NaN(), -1},
+		{1, 1, math.NaN()},
+		{1.001, math.NaN(), math.NaN()},
+	} {
+		score := u.Score(nil, test.x)
+		if !same(score[0], test.wantMin) {
+			t.Errorf("Score[0] mismatch for at %g: got %v, want %g", test.x, score[0], test.wantMin)
+		}
+		if !same(score[1], test.wantMax) {
+			t.Errorf("Score[1] mismatch for at %g: got %v, want %g", test.x, score[1], test.wantMax)
+		}
+	}
 }
 
 func TestUniformScoreInput(t *testing.T) {
@@ -94,4 +133,8 @@ func TestUniformScoreInput(t *testing.T) {
 			t.Errorf("Expected NaN score input for U(0, 1) at x == %g, got %v", x, scoreInput)
 		}
 	}
+}
+
+func same(a, b float64) bool {
+	return a == b || (math.IsNaN(a) && math.IsNaN(b))
 }

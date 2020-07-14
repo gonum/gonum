@@ -6,7 +6,6 @@ package distuv
 
 import (
 	"math"
-	"math/cmplx"
 
 	"golang.org/x/exp/rand"
 )
@@ -28,7 +27,7 @@ func (w Weibull) CDF(x float64) float64 {
 	if x < 0 {
 		return 0
 	}
-	return 1 - cmplx.Abs(cmplx.Exp(w.LogCDF(x)))
+	return -math.Expm1(-math.Pow(x/w.Lambda, w.K))
 }
 
 // Entropy returns the entropy of the distribution.
@@ -44,14 +43,6 @@ func (w Weibull) ExKurtosis() float64 {
 // gammIPow is a shortcut for computing the gamma function to a power.
 func (w Weibull) gammaIPow(i, pow float64) float64 {
 	return math.Pow(math.Gamma(1+i/w.K), pow)
-}
-
-// LogCDF computes the value of the log of the cumulative density function at x.
-func (w Weibull) LogCDF(x float64) complex128 {
-	if x < 0 {
-		return 0
-	}
-	return cmplx.Log(-1) + complex(-math.Pow(x/w.Lambda, w.K), 0)
 }
 
 // LogProb computes the natural logarithm of the value of the probability

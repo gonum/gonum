@@ -195,20 +195,130 @@ func TestPiecewiseConstantPredict(t *testing.T) {
 	testInterpolatorPredict(t, pc, testXs, leftYs, 0)
 }
 
-func TestPiecewiseCubicPredict(t *testing.T) {
+func TestPiecewiseCubic(t *testing.T) {
 	t.Parallel()
-	xs := []float64{-1, 0, 1}
-	lastY := rightPoly(xs[2])
-	coeffs := mat.NewDense(2, 4, []float64{3, -3, 1, 0, 1, -1, 0, 1})
-	pc := PiecewiseCubic{xs, coeffs, lastY}
-	testFittedPolys(t, &pc)
+	const (
+		h        = 1e-8
+		valueTol = 1e-14
+		derivTol = 1e-6
+	)
+	for i, test := range []struct {
+		xs []float64
+		f  func(float64) float64
+		df func(float64) float64
+	}{
+		{
+			xs: []float64{-1.001, 0.2, 2},
+			f:  func(x float64) float64 { return x * x },
+			df: func(x float64) float64 { return 2 * x },
+		},
+		{
+			xs: []float64{-1.001, 0.2, 2},
+			f:  func(x float64) float64 { return x * x },
+			df: func(x float64) float64 { return 2 * x },
+		},
+		{
+			xs: []float64{-1.001, 0.2, 10},
+			f:  func(x float64) float64 { return 1.5*x - 1 },
+			df: func(x float64) float64 { return 1.5 },
+		},
+		{
+			xs: []float64{-1.001, 0.2, 10},
+			f:  func(x float64) float64 { return -1 },
+			df: func(x float64) float64 { return 0 },
+		},
+		{
+			xs: []float64{-1.1, 0.2, 0.99, 2.5, 2.99},
+			f:  math.Cos,
+			df: math.Sin,
+		},
+		{
+			xs: []float64{-1.1, 0.2, 0.99, 2.5, 2.99},
+			f:  math.Exp,
+			df: math.Exp,
+		},
+		{
+			xs: []float64{-1.1, 0.2, 0.99, 2.5, 2.99},
+			f:  func(x float64) float64 { return math.Sin(x * x) },
+			df: func(x float64) float64 { return -2 * x * math.Cos(x*x) },
+		},
+	} {
+		ys := applyFunc(test.xs, test.f)
+		dydxs := applyFunc(test.xs, test.df)
+		var pc PiecewiseCubic
+		pc.fitWithDerivatives(test.xs, ys, dydxs)
+		n := len(test.xs)
+		for j := 0; j < n; j++ {
+			x := test.xs[j]
+			got := pc.Predict(x)
+			want := test.f(x)
+			if math.Abs(got-want) > valueTol {
+				t.Errorf("Mismatch in interpolated value at x == %g for test case %d: got %v, want %g", x, i, got, want)
+			}
+			if j < n-1 {
+				got = pc.coeffs.At(j, 0)
+				if math.Abs(got-want) > valueTol {
+					t.Errorf("Mismatch in 0-th order interpolation coefficient in %d-th node for test case %d: got %v, want %g", j, i, got, want)
+				}
+			} else {
+				got = pc.lastY
+				if math.Abs(got-want) > valueTol {
+					t.Errorf("Mismatch in lastY for test case %d: got %v, want %g", i, got, want)
+				}
+			}
+
+			if j > 0 {
+				dx := test.xs[j] - test.xs[j-1]
+				got = ((pc.coeffs.At(j-1, 3)*dx+pc.coeffs.At(j-1, 2))*dx+pc.coeffs.At(j-1, 1))*dx + pc.coeffs.At(j-1, 0)
+				if math.Abs(got-want) > valueTol {
+					t.Errorf("Interpolation coefficients in %d-th node produce mismatch in interpolated value at %g for test case %d: got %v, want %g", j-1, x, i, got, want)
+				}
+			}
+			if j == 0 {
+				got = (pc.Predict(x+h) - pc.Predict(x)) / h
+			} else if j == n-1 {
+				got = (pc.Predict(x) - pc.Predict(x-h)) / h
+			} else {
+				got = (pc.Predict(x+h) - pc.Predict(x-h)) / (2 * h)
+			}
+			want = test.df(x)
+			if math.Abs(got-want) > derivTol {
+				t.Errorf("Mismatch in interpolated derivative value at x == %g for test case %d: got %v, want %g", x, i, got, want)
+			}
+			if j < n-1 {
+				got = pc.coeffs.At(j, 1)
+				if math.Abs(got-want) > valueTol {
+					t.Errorf("Mismatch in 1-st order interpolation coefficient in %d-th node for test case %d: got %v, want %g", j, i, got, want)
+				}
+			}
+			if j > 0 {
+				dx := test.xs[j] - test.xs[j-1]
+				got = (3*pc.coeffs.At(j-1, 3)*dx+2*pc.coeffs.At(j-1, 2))*dx + pc.coeffs.At(j-1, 1)
+				if math.Abs(got-want) > valueTol {
+					t.Errorf("Interpolation coefficients in %d-th node produce mismatch in interpolated derivative value at %g for test case %d: got %v, want %g", j-1, x, i, got, want)
+				}
+			}
+		}
+	}
 }
 
-func TestPiecewiseCubicFitWithDerivatives(t *testing.T) {
+func TestPiecewiseCubicExactFit(t *testing.T) {
 	t.Parallel()
 	xs := []float64{-1, 0, 1}
 	ys := make([]float64, 3)
 	dydxs := make([]float64, 3)
+	leftPoly := func(x float64) float64 {
+		return x*x - x + 1
+	}
+	leftPolyDerivative := func(x float64) float64 {
+		return 2*x - 1
+	}
+	rightPoly := func(x float64) float64 {
+		return x*x*x - x + 1
+	}
+	rightPolyDerivative := func(x float64) float64 {
+		return 3*x*x - 1
+	}
 	ys[0] = leftPoly(xs[0])
 	ys[1] = leftPoly(xs[1])
 	ys[2] = rightPoly(xs[2])
@@ -217,7 +327,6 @@ func TestPiecewiseCubicFitWithDerivatives(t *testing.T) {
 	dydxs[2] = rightPolyDerivative(xs[2])
 	var pc PiecewiseCubic
 	pc.fitWithDerivatives(xs, ys, dydxs)
-	testFittedPolys(t, &pc)
 	lastY := rightPoly(xs[2])
 	if pc.lastY != lastY {
 		t.Errorf("Mismatch in lastY: got %v, want %g", pc.lastY, lastY)
@@ -228,6 +337,31 @@ func TestPiecewiseCubicFitWithDerivatives(t *testing.T) {
 	coeffs := mat.NewDense(2, 4, []float64{3, -3, 1, 0, 1, -1, 0, 1})
 	if !mat.EqualApprox(pc.coeffs, coeffs, 1e-14) {
 		t.Errorf("Mismatch in coeffs: got %v, want %v", pc.coeffs, coeffs)
+	}
+	for i, test := range []struct {
+		x    float64
+		want float64
+	}{
+		{-2, 3},
+		{-1, 3},
+		{-0.9, leftPoly(-0.9)},
+		{-0.75, leftPoly(-0.75)},
+		{-0.5, leftPoly(-0.5)},
+		{-0.25, leftPoly(-0.25)},
+		{-0.1, leftPoly(-0.1)},
+		{0, 1},
+		{0.1, rightPoly(0.1)},
+		{0.25, rightPoly(0.25)},
+		{0.5, rightPoly(0.5)},
+		{0.75, rightPoly(0.75)},
+		{0.9, rightPoly(0.9)},
+		{1, lastY},
+		{2, lastY},
+	} {
+		got := pc.Predict(test.x)
+		if math.Abs(got-test.want) > 1e-14 {
+			t.Errorf("Mismatch in test case %d for x = %g: got %v, want %g", i, test.x, got, test.want)
+		}
 	}
 }
 
@@ -260,51 +394,6 @@ func TestPiecewiseCubicFitWithDerivativesErrors(t *testing.T) {
 		var pc PiecewiseCubic
 		if !panics(func() { pc.fitWithDerivatives(test.xs, test.ys, test.dydxs) }) {
 			t.Errorf("expected panick for xs: %v, ys: %v and dydxs: %v", test.xs, test.ys, test.dydxs)
-		}
-	}
-}
-
-func leftPoly(x float64) float64 {
-	return x*x - x + 1
-}
-
-func leftPolyDerivative(x float64) float64 {
-	return 2*x - 1
-}
-
-func rightPoly(x float64) float64 {
-	return x*x*x - x + 1
-}
-
-func rightPolyDerivative(x float64) float64 {
-	return 3*x*x - 1
-}
-
-func testFittedPolys(t *testing.T, pc *PiecewiseCubic) {
-	lastY := rightPoly(1)
-	for i, test := range []struct {
-		x    float64
-		want float64
-	}{
-		{-2, 3},
-		{-1, 3},
-		{-0.9, leftPoly(-0.9)},
-		{-0.75, leftPoly(-0.75)},
-		{-0.5, leftPoly(-0.5)},
-		{-0.25, leftPoly(-0.25)},
-		{-0.1, leftPoly(-0.1)},
-		{0, 1},
-		{0.1, rightPoly(0.1)},
-		{0.25, rightPoly(0.25)},
-		{0.5, rightPoly(0.5)},
-		{0.75, rightPoly(0.75)},
-		{0.9, rightPoly(0.9)},
-		{1, lastY},
-		{2, lastY},
-	} {
-		got := pc.Predict(test.x)
-		if math.Abs(got-test.want) > 1e-14 {
-			t.Errorf("Mismatch in test case %d for x = %g: got %v, want %g", i, test.x, got, test.want)
 		}
 	}
 }

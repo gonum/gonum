@@ -5,7 +5,6 @@
 package interp
 
 import (
-	"fmt"
 	"math"
 	"testing"
 
@@ -71,21 +70,18 @@ func BenchmarkFindSegment(b *testing.B) {
 // testPiecewiseInterpolatorCreation tests common functionality in creating piecewise  interpolators.
 func testPiecewiseInterpolatorCreation(t *testing.T, fp FittablePredictor) {
 	type errorParams struct {
-		xs              []float64
-		ys              []float64
-		expectedMessage string
+		xs []float64
+		ys []float64
 	}
 	errorParamSets := []errorParams{
-		{[]float64{0, 1, 2}, []float64{-0.5, 1.5}, "input slices have different lengths"},
-		{[]float64{0.3}, []float64{0}, "too few points for interpolation"},
-		{[]float64{0.3, 0.3}, []float64{0, 0}, "xs values not strictly increasing"},
-		{[]float64{0.3, -0.3}, []float64{0, 0}, "xs values not strictly increasing"},
+		{[]float64{0, 1, 2}, []float64{-0.5, 1.5}},
+		{[]float64{0.3}, []float64{0}},
+		{[]float64{0.3, 0.3}, []float64{0, 0}},
+		{[]float64{0.3, -0.3}, []float64{0, 0}},
 	}
 	for _, params := range errorParamSets {
-		err := fp.Fit(params.xs, params.ys)
-		expectedMessage := fmt.Sprintf("interp: %s", params.expectedMessage)
-		if err == nil || err.Error() != expectedMessage {
-			t.Errorf("expected error for xs: %v and ys: %v with message: %s", params.xs, params.ys, expectedMessage)
+		if !panics(func() { fp.Fit(params.xs, params.ys) }) {
+			t.Errorf("expected panic for xs: %v and ys: %v", params.xs, params.ys)
 		}
 	}
 }
@@ -393,7 +389,7 @@ func TestPiecewiseCubicFitWithDerivativesErrors(t *testing.T) {
 	} {
 		var pc PiecewiseCubic
 		if !panics(func() { pc.fitWithDerivatives(test.xs, test.ys, test.dydxs) }) {
-			t.Errorf("expected panick for xs: %v, ys: %v and dydxs: %v", test.xs, test.ys, test.dydxs)
+			t.Errorf("expected panic for xs: %v, ys: %v and dydxs: %v", test.xs, test.ys, test.dydxs)
 		}
 	}
 }
@@ -509,7 +505,7 @@ func TestAkimaSplineFitErrors(t *testing.T) {
 	} {
 		var as AkimaSpline
 		if !panics(func() { as.Fit(test.xs, test.ys) }) {
-			t.Errorf("expected panick for xs: %v and ys: %v", test.xs, test.ys)
+			t.Errorf("expected panic for xs: %v and ys: %v", test.xs, test.ys)
 		}
 	}
 }

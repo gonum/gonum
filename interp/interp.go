@@ -5,7 +5,6 @@
 package interp
 
 import (
-	"errors"
 	"math"
 	"sort"
 
@@ -28,8 +27,9 @@ type Predictor interface {
 // Fitter fits a predictor to data.
 type Fitter interface {
 	// Fit fits a predictor to (X, Y) value pairs provided as two slices.
-	// It returns an error if len(xs) < 2, elements of xs are not strictly
-	// increasing or len(xs) != len(ys).
+	// It panicks if len(xs) < 2, elements of xs are not strictly increasing
+	// or len(xs) != len(ys). It returns an error if there is an unpredictable
+	// failure to fit.
 	Fit(xs, ys []float64) error
 }
 
@@ -68,22 +68,23 @@ type PiecewiseLinear struct {
 }
 
 // Fit fits a predictor to (X, Y) value pairs provided as two slices.
-// It returns an error if len(xs) < 2, elements of xs are not strictly
-// increasing or len(xs) != len(ys).
+// It panicks if len(xs) < 2, elements of xs are not strictly increasing
+// or len(xs) != len(ys). It returns an error if there is an unpredictable
+// failure to fit.
 func (pl *PiecewiseLinear) Fit(xs, ys []float64) error {
 	n := len(xs)
 	if len(ys) != n {
-		return errors.New(differentLengths)
+		panic(differentLengths)
 	}
 	if n < 2 {
-		return errors.New(tooFewPoints)
+		panic(tooFewPoints)
 	}
 	m := n - 1
 	pl.slopes = make([]float64, m)
 	for i := 0; i < m; i++ {
 		dx := xs[i+1] - xs[i]
 		if dx <= 0 {
-			return errors.New(xsNotStrictlyIncreasing)
+			panic(xsNotStrictlyIncreasing)
 		}
 		pl.slopes[i] = (ys[i+1] - ys[i]) / dx
 	}
@@ -122,19 +123,20 @@ type PiecewiseConstant struct {
 }
 
 // Fit fits a predictor to (X, Y) value pairs provided as two slices.
-// It returns an error if len(xs) < 2, elements of xs are not strictly
-// increasing or len(xs) != len(ys).
+// It panicks if len(xs) < 2, elements of xs are not strictly increasing
+// or len(xs) != len(ys). It returns an error if there is an unpredictable
+// failure to fit.
 func (pc *PiecewiseConstant) Fit(xs, ys []float64) error {
 	n := len(xs)
 	if len(ys) != n {
-		return errors.New(differentLengths)
+		panic(differentLengths)
 	}
 	if n < 2 {
-		return errors.New(tooFewPoints)
+		panic(tooFewPoints)
 	}
 	for i := 1; i < n; i++ {
 		if xs[i] <= xs[i-1] {
-			return errors.New(xsNotStrictlyIncreasing)
+			panic(xsNotStrictlyIncreasing)
 		}
 	}
 	pc.xs = make([]float64, n)
@@ -160,7 +162,8 @@ func (pc PiecewiseConstant) Predict(x float64) float64 {
 	return pc.ys[i+1]
 }
 
-// PiecewiseCubic is a left-continuous, piecewise cubic 1-dimensional interpolator.
+// PiecewiseCubic is a piecewise cubic 1-dimensional interpolator with
+// continuous value and first derivative.
 type PiecewiseCubic struct {
 	// Interpolated X values.
 	xs []float64
@@ -197,27 +200,27 @@ func (pc PiecewiseCubic) Predict(x float64) float64 {
 	return ((a[3]*dx+a[2])*dx+a[1])*dx + a[0]
 }
 
-// FitWithDerivatives fits a piecewise cubic predictor to (X, Y, dY/dX) value
+// fitWithDerivatives fits a piecewise cubic predictor to (X, Y, dY/dX) value
 // triples provided as three slices.
-// It returns an error if len(xs) < 2, elements of xs are not strictly
-// increasing, len(xs) != len(ys) or len(xs) != len(dydxs).
-func (pc *PiecewiseCubic) FitWithDerivatives(xs, ys, dydxs []float64) error {
+// It panicks if len(xs) < 2, elements of xs are not strictly increasing,
+// len(xs) != len(ys) or len(xs) != len(dydxs).
+func (pc *PiecewiseCubic) fitWithDerivatives(xs, ys, dydxs []float64) {
 	n := len(xs)
 	if len(ys) != n {
-		return errors.New(differentLengths)
+		panic(differentLengths)
 	}
 	if len(dydxs) != n {
-		return errors.New(differentLengths)
+		panic(differentLengths)
 	}
 	if n < 2 {
-		return errors.New(tooFewPoints)
+		panic(tooFewPoints)
 	}
 	m := n - 1
 	pc.coeffs = mat.NewDense(m, 4, nil)
 	for i := 0; i < m; i++ {
 		dx := xs[i+1] - xs[i]
 		if dx <= 0 {
-			return errors.New(xsNotStrictlyIncreasing)
+			panic(xsNotStrictlyIncreasing)
 		}
 		dy := ys[i+1] - ys[i]
 		// a_0
@@ -231,25 +234,26 @@ func (pc *PiecewiseCubic) FitWithDerivatives(xs, ys, dydxs []float64) error {
 	pc.xs = make([]float64, n)
 	copy(pc.xs, xs)
 	pc.lastY = ys[m]
-	return nil
 }
 
-// AkimaSplines is a left-continuous, piecewise cubic 1-dimensional interpolator
-// which can be fitted to (X, Y) value pairs without providing derivatives.
+// AkimaSpline is a piecewise cubic 1-dimensional interpolator with
+// continuous value and first derivative, which can be fitted to (X, Y)
+// value pairs without providing derivatives.
 // See https://www.iue.tuwien.ac.at/phd/rottinger/node60.html for more details.
-type AkimaSplines struct {
+type AkimaSpline struct {
 	PiecewiseCubic
 }
 
 // Fit fits a predictor to (X, Y) value pairs provided as two slices.
-// It returns an error if len(xs) < 2, elements of xs are not strictly
-// increasing or len(xs) != len(ys).
+// It panicks if len(xs) < 2, elements of xs are not strictly increasing
+// or len(xs) != len(ys). It returns an error if there is an unpredictable
+// failure to fit.
 // If len(xs) == 2, we set both derivatives dY/dX to the slope
 // (ys[1] - ys[0]) / (xs[1] - xs[0]).
-func (as *AkimaSplines) Fit(xs, ys []float64) error {
+func (as *AkimaSpline) Fit(xs, ys []float64) error {
 	n := len(xs)
 	if len(ys) != n {
-		return errors.New(differentLengths)
+		panic(differentLengths)
 	}
 	dydxs := make([]float64, n)
 
@@ -257,7 +261,8 @@ func (as *AkimaSplines) Fit(xs, ys []float64) error {
 		slope := (ys[1] - ys[0]) / (xs[1] - xs[0])
 		dydxs[0] = slope
 		dydxs[1] = slope
-		return as.FitWithDerivatives(xs, ys, dydxs)
+		as.fitWithDerivatives(xs, ys, dydxs)
+		return nil
 	}
 
 	m := n - 1
@@ -265,7 +270,7 @@ func (as *AkimaSplines) Fit(xs, ys []float64) error {
 	for i := 0; i < m; i++ {
 		dx := xs[i+1] - xs[i]
 		if dx <= 0 {
-			return errors.New(xsNotStrictlyIncreasing)
+			panic(xsNotStrictlyIncreasing)
 		}
 		slopes[i+2] = (ys[i+1] - ys[i]) / dx
 	}
@@ -283,7 +288,8 @@ func (as *AkimaSplines) Fit(xs, ys []float64) error {
 			dydxs[i] = (slopes[i+1] + slopes[i+2]) / 2
 		}
 	}
-	return as.FitWithDerivatives(xs, ys, dydxs)
+	as.fitWithDerivatives(xs, ys, dydxs)
+	return nil
 }
 
 // findSegment returns 0 <= i < len(xs) such that xs[i] <= x < xs[i + 1], where xs[len(xs)]

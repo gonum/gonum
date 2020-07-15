@@ -216,10 +216,7 @@ func TestPiecewiseCubicFitWithDerivatives(t *testing.T) {
 	dydxs[1] = leftPolyDerivative(xs[1])
 	dydxs[2] = rightPolyDerivative(xs[2])
 	var pc PiecewiseCubic
-	err := pc.FitWithDerivatives(xs, ys, dydxs)
-	if err != nil {
-		t.Errorf("Error when fitting piecewise cubic interpolator: %v", err)
-	}
+	pc.fitWithDerivatives(xs, ys, dydxs)
 	testFittedPolys(t, &pc)
 	lastY := rightPoly(xs[2])
 	if pc.lastY != lastY {
@@ -237,38 +234,32 @@ func TestPiecewiseCubicFitWithDerivatives(t *testing.T) {
 func TestPiecewiseCubicFitWithDerivativesErrors(t *testing.T) {
 	t.Parallel()
 	for _, test := range []struct {
-		xs, ys, dydxs   []float64
-		expectedMessage string
+		xs, ys, dydxs []float64
 	}{
 		{
-			xs:              []float64{0, 1, 2},
-			ys:              []float64{10, 20},
-			dydxs:           []float64{0, 0, 0},
-			expectedMessage: differentLengths,
+			xs:    []float64{0, 1, 2},
+			ys:    []float64{10, 20},
+			dydxs: []float64{0, 0, 0},
 		},
 		{
-			xs:              []float64{0, 1, 1},
-			ys:              []float64{10, 20, 30},
-			dydxs:           []float64{0, 0, 0, 0},
-			expectedMessage: differentLengths,
+			xs:    []float64{0, 1, 1},
+			ys:    []float64{10, 20, 30},
+			dydxs: []float64{0, 0, 0, 0},
 		},
 		{
-			xs:              []float64{0},
-			ys:              []float64{0},
-			dydxs:           []float64{0},
-			expectedMessage: tooFewPoints,
+			xs:    []float64{0},
+			ys:    []float64{0},
+			dydxs: []float64{0},
 		},
 		{
-			xs:              []float64{0, 1, 1},
-			ys:              []float64{10, 20, 10},
-			dydxs:           []float64{0, 0, 0},
-			expectedMessage: xsNotStrictlyIncreasing,
+			xs:    []float64{0, 1, 1},
+			ys:    []float64{10, 20, 10},
+			dydxs: []float64{0, 0, 0},
 		},
 	} {
 		var pc PiecewiseCubic
-		err := pc.FitWithDerivatives(test.xs, test.ys, test.dydxs)
-		if err == nil || err.Error() != test.expectedMessage {
-			t.Errorf("expected error for xs: %v, ys: %v and dydxs: %v with message: %s", test.xs, test.ys, test.dydxs, test.expectedMessage)
+		if !panics(func() { pc.fitWithDerivatives(test.xs, test.ys, test.dydxs) }) {
+			t.Errorf("expected panick for xs: %v, ys: %v and dydxs: %v", test.xs, test.ys, test.dydxs)
 		}
 	}
 }
@@ -318,36 +309,58 @@ func testFittedPolys(t *testing.T, pc *PiecewiseCubic) {
 	}
 }
 
-func TestAkimaSplinesSingleFunction(t *testing.T) {
+func TestAkimaSpline(t *testing.T) {
 	t.Parallel()
 	const (
-		nPts = 40
-		tol  = 1e-14
+		nPts      = 40
+		wiggleTol = 1e-1
 	)
 	for i, test := range []struct {
-		xs, ys []float64
-		f      func(float64) float64
+		xs  []float64
+		f   func(float64) float64
+		tol float64
 	}{
 		{
-			xs: []float64{-1, 0, 1},
-			ys: []float64{1, 0, 1},
-			f:  func(x float64) float64 { return x * x },
+			xs:  []float64{-1, 0, 1},
+			f:   func(x float64) float64 { return x * x },
+			tol: 1e-14,
 		},
 		{
-			xs: []float64{-1, 1},
-			ys: []float64{10, -10},
-			f:  func(x float64) float64 { return -10 * x },
+			xs:  []float64{-1, 1},
+			f:   func(x float64) float64 { return -10 * x },
+			tol: 1e-14,
 		},
 		{
-			xs: []float64{-1, 0, 1},
-			ys: []float64{10, 0, -10},
-			f:  func(x float64) float64 { return -10 * x },
+			xs:  []float64{-1, 0, 1},
+			f:   func(x float64) float64 { return -10 * x },
+			tol: 1e-14,
+		},
+		{
+			xs:  []float64{-0.2, -0.1, 0, 0.1, 0.2},
+			f:   math.Cos,
+			tol: 1e-4,
+		},
+		{
+			xs:  []float64{-0.2, -0.1, 0, 0.1, 0.2},
+			f:   math.Sin,
+			tol: 1e-4,
+		},
+		{
+			xs:  []float64{-0.2, -0.1, 0, 0.1, 0.2},
+			f:   math.Exp,
+			tol: 1e-4,
+		},
+		{
+			xs:  []float64{-0.2, -0.1, 0, 0.1, 0.2},
+			f:   func(x float64) float64 { return 1 / (1 + math.Exp(-100*x)) },
+			tol: 0.5,
 		},
 	} {
-		var as AkimaSplines
-		err := as.Fit(test.xs, test.ys)
+		var as AkimaSpline
+		ys := applyFunc(test.xs, test.f)
+		err := as.Fit(test.xs, ys)
 		if err != nil {
-			t.Errorf("Error when fitting AkimaSplines in test case %d: %v", i, err)
+			t.Errorf("Error when fitting AkimaSpline in test case %d: %v", i, err)
 		}
 		x0 := test.xs[0]
 		x1 := test.xs[len(test.xs)-1]
@@ -356,66 +369,77 @@ func TestAkimaSplinesSingleFunction(t *testing.T) {
 			x := x0 + float64(j)*dx
 			got := as.Predict(x)
 			want := test.f(math.Min(x1, math.Max(x0, x)))
-			if math.Abs(got-want) > tol {
+			if math.Abs(got-want) > test.tol {
 				t.Errorf("Mismatch in interpolated value at x == %g for test case %d: got %v, want %g", x, i, got, want)
 			}
 		}
-	}
-}
-
-func TestAkimaSplinesNoWiggles(t *testing.T) {
-	const nPts = 40
-	const wiggleTol = 1e-1
-	xs := []float64{0, 1, 2, 3, 4, 5}
-	ys := []float64{-2, 0.6, 1.4, -3.8, -4.2, -3.5}
-	var as AkimaSplines
-	err := as.Fit(xs, ys)
-	if err != nil {
-		t.Errorf("Error when fitting AkimaSplines: %v", err)
-	}
-	m := len(xs) - 1
-	for i := 0; i < m; i++ {
-		x0 := xs[i]
-		x1 := xs[i+1]
-		yMin := math.Min(ys[i], ys[i+1])
-		yMax := math.Max(ys[i], ys[i+1])
-		dx := (x1 - x0) / nPts
-		for j := 0; j <= nPts; j++ {
-			x := x0 + float64(j)*dx
-			y := as.Predict(x)
-			if y < yMin-wiggleTol || y > yMax+wiggleTol {
-				t.Errorf("Interpolated values show large wiggles for x == %g: y == %g", x, y)
+		n := len(test.xs)
+		for j := 0; j < n; j++ {
+			x := test.xs[j]
+			got := as.Predict(x)
+			want := test.f(x)
+			if math.Abs(got-want) > 1e-14 {
+				t.Errorf("Mismatch in interpolated value at x == %g for test case %d: got %v, want %g", x, i, got, want)
+			}
+		}
+		m := n - 1
+		for j := 0; j < m; j++ {
+			x0 := test.xs[j]
+			x1 := test.xs[j+1]
+			yMin := math.Min(ys[j], ys[j+1])
+			yMax := math.Max(ys[j], ys[j+1])
+			dx := (x1 - x0) / nPts
+			for k := 0; k <= nPts; k++ {
+				x := x0 + float64(k)*dx
+				y := as.Predict(x)
+				if y < yMin-wiggleTol || y > yMax+wiggleTol {
+					t.Errorf("Interpolated values show large wiggles at x == %g for test case %d: y == %g outside (%g, %g) more than %g", x, i, y, yMin, yMax, wiggleTol)
+				}
 			}
 		}
 	}
 }
 
-func TestAkimaSplinesFitErrors(t *testing.T) {
+func TestAkimaSplineFitErrors(t *testing.T) {
 	t.Parallel()
 	for _, test := range []struct {
-		xs, ys          []float64
-		expectedMessage string
+		xs, ys []float64
 	}{
 		{
-			xs:              []float64{0, 1, 2},
-			ys:              []float64{10, 20},
-			expectedMessage: differentLengths,
+			xs: []float64{0, 1, 2},
+			ys: []float64{10, 20},
 		},
 		{
-			xs:              []float64{0},
-			ys:              []float64{0},
-			expectedMessage: tooFewPoints,
+			xs: []float64{0},
+			ys: []float64{0},
 		},
 		{
-			xs:              []float64{0, 1, 1},
-			ys:              []float64{10, 20, 10},
-			expectedMessage: xsNotStrictlyIncreasing,
+			xs: []float64{0, 1, 1},
+			ys: []float64{10, 20, 10},
 		},
 	} {
-		var as AkimaSplines
-		err := as.Fit(test.xs, test.ys)
-		if err == nil || err.Error() != test.expectedMessage {
-			t.Errorf("expected error for xs: %v and ys: %v with message: %s", test.xs, test.ys, test.expectedMessage)
+		var as AkimaSpline
+		if !panics(func() { as.Fit(test.xs, test.ys) }) {
+			t.Errorf("expected panick for xs: %v and ys: %v", test.xs, test.ys)
 		}
 	}
+}
+
+func applyFunc(xs []float64, f func(x float64) float64) []float64 {
+	ys := make([]float64, len(xs))
+	for i, x := range xs {
+		ys[i] = f(x)
+	}
+	return ys
+}
+
+func panics(fun func()) (b bool) {
+	defer func() {
+		err := recover()
+		if err != nil {
+			b = true
+		}
+	}()
+	fun()
+	return
 }

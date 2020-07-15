@@ -36,7 +36,7 @@ type formatter struct {
 type FormatOption func(*formatter)
 
 // Prefix sets the formatted prefix to the string p. Prefix is a string that is prepended to
-// each line of output.
+// each line of output after the first line.
 func Prefix(p string) FormatOption {
 	return func(f *formatter) { f.prefix = p }
 }

@@ -198,9 +198,9 @@ func TestScaledDownHalfKStandardWeibullProb(t *testing.T) {
 	testDistributionProbs(t, Weibull{K: 0.5, Lambda: 0.5}, "0.5K 0.5λ Weibull", pts)
 }
 
-func TestWeibullScore(t *testing.T) {
+func TestWeibullScores(t *testing.T) {
 	t.Parallel()
-	for _, test := range []*Weibull{
+	for i, test := range []*Weibull{
 		{
 			K:      1,
 			Lambda: 1,
@@ -215,6 +215,16 @@ func TestWeibullScore(t *testing.T) {
 		},
 	} {
 		testDerivParam(t, test)
+		for _, x := range []float64{0, -0.0001} {
+			score := test.Score(nil, 0)
+			if !math.IsNaN(score[0]) || !math.IsNaN(score[1]) {
+				t.Errorf("Score mismatch for case %d and x == %g: got %v, want [NaN, NaN]", i, x, score)
+			}
+			scoreInput := test.ScoreInput(0)
+			if !math.IsNaN(scoreInput) {
+				t.Errorf("ScoreInput mismatch for case %d and x == %g: got %v, want NaN", i, x, score)
+			}
+		}
 	}
 }
 

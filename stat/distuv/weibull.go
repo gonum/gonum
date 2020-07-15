@@ -6,7 +6,6 @@ package distuv
 
 import (
 	"math"
-	"math/cmplx"
 
 	"golang.org/x/exp/rand"
 )
@@ -28,7 +27,7 @@ func (w Weibull) CDF(x float64) float64 {
 	if x < 0 {
 		return 0
 	}
-	return 1 - cmplx.Abs(cmplx.Exp(w.LogCDF(x)))
+	return -math.Expm1(-math.Pow(x/w.Lambda, w.K))
 }
 
 // Entropy returns the entropy of the distribution.
@@ -44,14 +43,6 @@ func (w Weibull) ExKurtosis() float64 {
 // gammIPow is a shortcut for computing the gamma function to a power.
 func (w Weibull) gammaIPow(i, pow float64) float64 {
 	return math.Pow(math.Gamma(1+i/w.K), pow)
-}
-
-// LogCDF computes the value of the log of the cumulative density function at x.
-func (w Weibull) LogCDF(x float64) complex128 {
-	if x < 0 {
-		return 0
-	}
-	return cmplx.Log(-1) + complex(-math.Pow(x/w.Lambda, w.K), 0)
 }
 
 // LogProb computes the natural logarithm of the value of the probability
@@ -146,7 +137,7 @@ func (w Weibull) Rand() float64 {
 // For more information, see https://en.wikipedia.org/wiki/Score_%28statistics%29.
 //
 // Special cases:
-//  Score(0) = [NaN, NaN]
+//  Score(x) = [NaN, NaN] for x <= 0
 func (w Weibull) Score(deriv []float64, x float64) []float64 {
 	if deriv == nil {
 		deriv = make([]float64, w.NumParameters())
@@ -157,11 +148,6 @@ func (w Weibull) Score(deriv []float64, x float64) []float64 {
 	if x > 0 {
 		deriv[0] = 1/w.K + math.Log(x) - math.Log(w.Lambda) - (math.Log(x)-math.Log(w.Lambda))*math.Pow(x/w.Lambda, w.K)
 		deriv[1] = (w.K * (math.Pow(x/w.Lambda, w.K) - 1)) / w.Lambda
-		return deriv
-	}
-	if x < 0 {
-		deriv[0] = 0
-		deriv[1] = 0
 		return deriv
 	}
 	deriv[0] = math.NaN()
@@ -175,13 +161,10 @@ func (w Weibull) Score(deriv []float64, x float64) []float64 {
 //  (d/dx) log(p(x)) .
 //
 // Special cases:
-//  ScoreInput(0) = NaN
+//  ScoreInput(x) = NaN for x <= 0
 func (w Weibull) ScoreInput(x float64) float64 {
 	if x > 0 {
 		return (-w.K*math.Pow(x/w.Lambda, w.K) + w.K - 1) / x
-	}
-	if x < 0 {
-		return 0
 	}
 	return math.NaN()
 }

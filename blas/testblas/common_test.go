@@ -155,7 +155,7 @@ func TestFlattenBanded(t *testing.T) {
 	} {
 		condensed := flattenBanded(test.dense, test.ku, test.kl)
 		correct := flatten(test.condensed)
-		if !floats.Same(condensed, correct) {
+		if !floats.AllSame(condensed, correct) {
 			t.Errorf("Case %v mismatch. Want %v, got %v.", i, correct, condensed)
 		}
 	}

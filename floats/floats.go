@@ -82,6 +82,21 @@ func (a argsort) Swap(i, j int) {
 	a.inds[i], a.inds[j] = a.inds[j], a.inds[i]
 }
 
+// AllSame returns true if the input slices have the same length and all elements
+// have the same value with NaN treated as the same.
+func AllSame(s, t []float64) bool {
+	if len(s) != len(t) {
+		return false
+	}
+	for i, v := range s {
+		w := t[i]
+		if !Same(v, w) {
+			return false
+		}
+	}
+	return true
+}
+
 // Argsort sorts the elements of dst while tracking their original order.
 // At the conclusion of Argsort, dst will contain the original elements of dst
 // but sorted in increasing order, and inds will contain the original position
@@ -779,19 +794,9 @@ func isHalfway(x float64) bool {
 	return frac == 0.5 || (math.Nextafter(frac, math.Inf(-1)) < 0.5 && math.Nextafter(frac, math.Inf(1)) > 0.5)
 }
 
-// Same returns true if the input slices have the same length and all elements
-// have the same value with NaN treated as the same.
-func Same(s, t []float64) bool {
-	if len(s) != len(t) {
-		return false
-	}
-	for i, v := range s {
-		w := t[i]
-		if v != w && !(math.IsNaN(v) && math.IsNaN(w)) {
-			return false
-		}
-	}
-	return true
+// Same returns true if the inputs have the same value with NaN treated as the same.
+func Same(a, b float64) bool {
+	return a == b || (math.IsNaN(a) && math.IsNaN(b))
 }
 
 // Scale multiplies every element in dst by the scalar c.

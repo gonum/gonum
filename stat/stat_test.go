@@ -1479,10 +1479,10 @@ func TestQuantile(t *testing.T) {
 		for j, p := range test.p {
 			for k, kind := range cumulantKinds {
 				v := Quantile(p, kind, test.x, test.w)
-				if !floats.Same(copyX, test.x) {
+				if !floats.AllSame(copyX, test.x) {
 					t.Errorf("x changed for case %d kind %d percentile %v", i, k, p)
 				}
-				if !floats.Same(copyW, test.w) {
+				if !floats.AllSame(copyW, test.w) {
 					t.Errorf("x changed for case %d kind %d percentile %v", i, k, p)
 				}
 				if v != test.ans[k][j] && !(math.IsNaN(v) && math.IsNaN(test.ans[k][j])) {
@@ -1619,10 +1619,10 @@ func TestSortWeighted(t *testing.T) {
 		},
 	} {
 		SortWeighted(test.x, test.w)
-		if !floats.Same(test.x, test.ansx) {
+		if !floats.AllSame(test.x, test.ansx) {
 			t.Errorf("SortWeighted mismatch case %d. Expected x %v, Found x %v", i, test.ansx, test.x)
 		}
-		if !(test.w == nil) && !floats.Same(test.w, test.answ) {
+		if !(test.w == nil) && !floats.AllSame(test.w, test.answ) {
 			t.Errorf("SortWeighted mismatch case %d. Expected w %v, Found w %v", i, test.answ, test.w)
 		}
 	}
@@ -1666,13 +1666,13 @@ func TestSortWeightedLabeled(t *testing.T) {
 		},
 	} {
 		SortWeightedLabeled(test.x, test.l, test.w)
-		if !floats.Same(test.x, test.ansx) {
+		if !floats.AllSame(test.x, test.ansx) {
 			t.Errorf("SortWeightedLabelled mismatch case %d. Expected x %v, Found x %v", i, test.ansx, test.x)
 		}
 		if (test.l != nil) && !reflect.DeepEqual(test.l, test.ansl) {
 			t.Errorf("SortWeightedLabelled mismatch case %d. Expected l %v, Found l %v", i, test.ansl, test.l)
 		}
-		if (test.w != nil) && !floats.Same(test.w, test.answ) {
+		if (test.w != nil) && !floats.AllSame(test.w, test.answ) {
 			t.Errorf("SortWeightedLabelled mismatch case %d. Expected w %v, Found w %v", i, test.answ, test.w)
 		}
 	}

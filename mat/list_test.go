@@ -110,7 +110,7 @@ func sameAnswerFloatApproxTol(tol float64) func(a, b interface{}) bool {
 
 func sameAnswerF64SliceOfSlice(a, b interface{}) bool {
 	for i, v := range a.([][]float64) {
-		if same := floats.Same(v, b.([][]float64)[i]); !same {
+		if same := floats.AllSame(v, b.([][]float64)[i]); !same {
 			return false
 		}
 	}

@@ -74,7 +74,7 @@ func TestStudentTProbs(t *testing.T) {
 			xcpy := make([]float64, len(x))
 			copy(xcpy, x)
 			p := s.Prob(x)
-			if !floats.Same(x, xcpy) {
+			if !floats.AllSame(x, xcpy) {
 				t.Errorf("X modified during call to prob, %v, %v", x, xcpy)
 			}
 			if !floats.EqualWithinAbsOrRel(p, test.probs[i], 1e-10, 1e-10) {

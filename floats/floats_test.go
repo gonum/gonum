@@ -31,7 +31,7 @@ func areSlicesSame(t *testing.T, truth, comp []float64, str string) {
 	ok := len(truth) == len(comp)
 	if ok {
 		for i, a := range truth {
-			if !EqualWithinAbsOrRel(a, comp[i], EqTolerance, EqTolerance) && !same(a, comp[i]) {
+			if !EqualWithinAbsOrRel(a, comp[i], EqTolerance, EqTolerance) && !Same(a, comp[i]) {
 				ok = false
 				break
 			}
@@ -40,10 +40,6 @@ func areSlicesSame(t *testing.T, truth, comp []float64, str string) {
 	if !ok {
 		t.Errorf(str+". Expected %v, returned %v", truth, comp)
 	}
-}
-
-func same(a, b float64) bool {
-	return a == b || (math.IsNaN(a) && math.IsNaN(b))
 }
 
 func Panics(fun func()) (b bool) {
@@ -154,6 +150,32 @@ func TestAddScaledTo(t *testing.T) {
 	}
 	if !Panics(func() { AddScaledTo(dst1, short, alpha, s) }) {
 		t.Errorf("Doesn't panic if y is smaller than dst")
+	}
+}
+
+func TestAllSame(t *testing.T) {
+	t.Parallel()
+	s1 := []float64{1, 2, 3, 4}
+	s2 := []float64{1, 2, 3, 4}
+	if !AllSame(s1, s2) {
+		t.Errorf("Equal slices returned as unequal")
+	}
+	s2 = []float64{1, 2, 3, 4 + 1e-14}
+	if AllSame(s1, s2) {
+		t.Errorf("Unequal slices returned as equal")
+	}
+	if AllSame(s1, []float64{}) {
+		t.Errorf("Unequal slice lengths returned as equal")
+	}
+	s1 = []float64{1, 2, math.NaN(), 4}
+	s2 = []float64{1, 2, math.NaN(), 4}
+	if !AllSame(s1, s2) {
+		t.Errorf("Slices with matching NaN values returned as unequal")
+	}
+	s1 = []float64{1, 2, math.NaN(), 4}
+	s2 = []float64{1, math.NaN(), 3, 4}
+	if AllSame(s1, s2) {
+		t.Errorf("Slices with unmatching NaN values returned as equal")
 	}
 }
 
@@ -761,7 +783,7 @@ func TestMaxAndIdx(t *testing.T) {
 			t.Errorf("Wrong index "+test.desc+": got:%d want:%d", ind, test.wantIdx)
 		}
 		val := Max(test.in)
-		if !same(val, test.wantVal) {
+		if !Same(val, test.wantVal) {
 			t.Errorf("Wrong value "+test.desc+": got:%f want:%f", val, test.wantVal)
 		}
 	}
@@ -814,7 +836,7 @@ func TestMinAndIdx(t *testing.T) {
 			t.Errorf("Wrong index "+test.desc+": got:%d want:%d", ind, test.wantIdx)
 		}
 		val := Min(test.in)
-		if !same(val, test.wantVal) {
+		if !Same(val, test.wantVal) {
 			t.Errorf("Wrong value "+test.desc+": got:%f want:%f", val, test.wantVal)
 		}
 	}
@@ -1486,27 +1508,40 @@ func TestRoundEven(t *testing.T) {
 
 func TestSame(t *testing.T) {
 	t.Parallel()
-	s1 := []float64{1, 2, 3, 4}
-	s2 := []float64{1, 2, 3, 4}
-	if !Same(s1, s2) {
-		t.Errorf("Equal slices returned as unequal")
-	}
-	s2 = []float64{1, 2, 3, 4 + 1e-14}
-	if Same(s1, s2) {
-		t.Errorf("Unequal slices returned as equal")
-	}
-	if Same(s1, []float64{}) {
-		t.Errorf("Unequal slice lengths returned as equal")
-	}
-	s1 = []float64{1, 2, math.NaN(), 4}
-	s2 = []float64{1, 2, math.NaN(), 4}
-	if !Same(s1, s2) {
-		t.Errorf("Slices with matching NaN values returned as unequal")
-	}
-	s1 = []float64{1, 2, math.NaN(), 4}
-	s2 = []float64{1, math.NaN(), 3, 4}
-	if Same(s1, s2) {
-		t.Errorf("Slices with unmatching NaN values returned as equal")
+	for _, test := range []struct {
+		a, b float64
+		want bool
+	}{
+		{
+			a:    0,
+			b:    0,
+			want: true,
+		},
+		{
+			a:    -1,
+			b:    1,
+			want: false,
+		},
+		{
+			a:    -1,
+			b:    math.NaN(),
+			want: false,
+		},
+		{
+			a:    math.NaN(),
+			b:    10,
+			want: false,
+		},
+		{
+			a:    math.NaN(),
+			b:    math.NaN(),
+			want: true,
+		},
+	} {
+		got := Same(test.a, test.b)
+		if got != test.want {
+			t.Errorf("Mismatch in Same(%g, %g): got %v, want %v", test.a, test.b, got, test.want)
+		}
 	}
 }
 
@@ -1528,10 +1563,10 @@ func TestScaleTo(t *testing.T) {
 	truth := []float64{15, 20, 5, 35, 25}
 	dst := make([]float64, len(s))
 	ScaleTo(dst, c, s)
-	if !Same(dst, truth) {
+	if !AllSame(dst, truth) {
 		t.Errorf("Scale to does not match. Got %v, want %v", dst, truth)
 	}
-	if !Same(s, sCopy) {
+	if !AllSame(s, sCopy) {
 		t.Errorf("Source modified during call. Got %v, want %v", s, sCopy)
 	}
 	if !Panics(func() { ScaleTo(dst, 0, []float64{1}) }) {

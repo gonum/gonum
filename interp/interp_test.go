@@ -80,7 +80,7 @@ func testPiecewiseInterpolatorCreation(t *testing.T, fp FittablePredictor) {
 		{[]float64{0.3, -0.3}, []float64{0, 0}},
 	}
 	for _, params := range errorParamSets {
-		if !panics(func() { fp.Fit(params.xs, params.ys) }) {
+		if !panics(func() { _ = fp.Fit(params.xs, params.ys) }) {
 			t.Errorf("expected panic for xs: %v and ys: %v", params.xs, params.ys)
 		}
 	}
@@ -195,7 +195,7 @@ func TestPiecewiseCubic(t *testing.T) {
 	t.Parallel()
 	const (
 		h        = 1e-8
-		valueTol = 1e-14
+		valueTol = 1e-13
 		derivTol = 1e-6
 	)
 	for i, test := range []struct {
@@ -504,7 +504,7 @@ func TestAkimaSplineFitErrors(t *testing.T) {
 		},
 	} {
 		var as AkimaSpline
-		if !panics(func() { as.Fit(test.xs, test.ys) }) {
+		if !panics(func() { _ = as.Fit(test.xs, test.ys) }) {
 			t.Errorf("expected panic for xs: %v and ys: %v", test.xs, test.ys)
 		}
 	}

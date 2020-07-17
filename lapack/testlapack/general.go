@@ -61,6 +61,43 @@ func (wl worklen) String() string {
 	return ""
 }
 
+func normToString(norm lapack.MatrixNorm) string {
+	switch norm {
+	case lapack.MaxAbs:
+		return "MaxAbs"
+	case lapack.MaxRowSum:
+		return "MaxRowSum"
+	case lapack.MaxColumnSum:
+		return "MaxColSum"
+	case lapack.Frobenius:
+		return "Frobenius"
+	default:
+		panic("invalid norm")
+	}
+}
+
+func uploToString(uplo blas.Uplo) string {
+	switch uplo {
+	case blas.Lower:
+		return "Lower"
+	case blas.Upper:
+		return "Upper"
+	default:
+		panic("invalid uplo")
+	}
+}
+
+func diagToString(diag blas.Diag) string {
+	switch diag {
+	case blas.NonUnit:
+		return "NonUnit"
+	case blas.Unit:
+		return "Unit"
+	default:
+		panic("invalid diag")
+	}
+}
+
 // nanSlice allocates a new slice of length n filled with NaN.
 func nanSlice(n int) []float64 {
 	s := make([]float64, n)

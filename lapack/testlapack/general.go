@@ -1450,15 +1450,14 @@ func dlange(norm lapack.MatrixNorm, m, n int, a []float64, lda int) float64 {
 	if m == 0 || n == 0 {
 		return 0
 	}
+	var value float64
 	switch norm {
 	case lapack.MaxAbs:
-		var value float64
 		for i := 0; i < m; i++ {
 			for j := 0; j < n; j++ {
 				value = math.Max(value, math.Abs(a[i*lda+j]))
 			}
 		}
-		return value
 	case lapack.MaxColumnSum:
 		work := make([]float64, n)
 		for i := 0; i < m; i++ {
@@ -1466,13 +1465,10 @@ func dlange(norm lapack.MatrixNorm, m, n int, a []float64, lda int) float64 {
 				work[j] += math.Abs(a[i*lda+j])
 			}
 		}
-		var value float64
 		for i := 0; i < n; i++ {
 			value = math.Max(value, work[i])
 		}
-		return value
 	case lapack.MaxRowSum:
-		var value float64
 		for i := 0; i < m; i++ {
 			var sum float64
 			for j := 0; j < n; j++ {
@@ -1480,12 +1476,16 @@ func dlange(norm lapack.MatrixNorm, m, n int, a []float64, lda int) float64 {
 			}
 			value = math.Max(value, sum)
 		}
-		return value
 	case lapack.Frobenius:
-		panic("not implemented")
+		for i := 0; i < m; i++ {
+			for j := 0; j < n; j++ {
+				value = math.Hypot(value, a[i*lda+j])
+			}
+		}
 	default:
 		panic("bad MatrixNorm")
 	}
+	return value
 }
 
 // dlansb is a local implementation of Dlansb to keep code paths independent.

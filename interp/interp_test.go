@@ -197,46 +197,55 @@ func TestPiecewiseCubic(t *testing.T) {
 		h        = 1e-8
 		valueTol = 1e-13
 		derivTol = 1e-6
+		nPts     = 100
 	)
 	for i, test := range []struct {
-		xs []float64
-		f  func(float64) float64
-		df func(float64) float64
+		xs    []float64
+		f     func(float64) float64
+		df    func(float64) float64
+		exact bool
 	}{
 		{
-			xs: []float64{-1.001, 0.2, 2},
-			f:  func(x float64) float64 { return x * x },
-			df: func(x float64) float64 { return 2 * x },
+			xs:    []float64{-1.001, 0.2, 2},
+			f:     func(x float64) float64 { return x * x },
+			df:    func(x float64) float64 { return 2 * x },
+			exact: true,
 		},
 		{
-			xs: []float64{-1.001, 0.2, 2},
-			f:  func(x float64) float64 { return x * x },
-			df: func(x float64) float64 { return 2 * x },
+			xs:    []float64{-1.001, 0.2, 2},
+			f:     func(x float64) float64 { return 4*math.Pow(x, 3) - 2*x*x + 10*x - 7 },
+			df:    func(x float64) float64 { return 12*x*x - 4*x + 10 },
+			exact: true,
 		},
 		{
-			xs: []float64{-1.001, 0.2, 10},
-			f:  func(x float64) float64 { return 1.5*x - 1 },
-			df: func(x float64) float64 { return 1.5 },
+			xs:    []float64{-1.001, 0.2, 10},
+			f:     func(x float64) float64 { return 1.5*x - 1 },
+			df:    func(x float64) float64 { return 1.5 },
+			exact: true,
 		},
 		{
-			xs: []float64{-1.001, 0.2, 10},
-			f:  func(x float64) float64 { return -1 },
-			df: func(x float64) float64 { return 0 },
+			xs:    []float64{-1.001, 0.2, 10},
+			f:     func(x float64) float64 { return -1 },
+			df:    func(x float64) float64 { return 0 },
+			exact: true,
 		},
 		{
-			xs: []float64{-1.1, 0.2, 0.99, 2.5, 2.99},
-			f:  math.Cos,
-			df: math.Sin,
+			xs:    []float64{-1.1, 0.2, 0.99, 2.5, 2.99},
+			f:     math.Sin,
+			df:    math.Cos,
+			exact: false,
 		},
 		{
-			xs: []float64{-1.1, 0.2, 0.99, 2.5, 2.99},
-			f:  math.Exp,
-			df: math.Exp,
+			xs:    []float64{-1.1, 0.2, 0.99, 2.5, 2.99},
+			f:     math.Exp,
+			df:    math.Exp,
+			exact: false,
 		},
 		{
-			xs: []float64{-1.1, 0.2, 0.99, 2.5, 2.99},
-			f:  func(x float64) float64 { return math.Sin(x * x) },
-			df: func(x float64) float64 { return -2 * x * math.Cos(x*x) },
+			xs:    []float64{-1.1, 0.2, 0.99, 2.5, 2.99},
+			f:     func(x float64) float64 { return math.Sin(x * x) },
+			df:    func(x float64) float64 { return 2 * x * math.Cos(x*x) },
+			exact: false,
 		},
 	} {
 		ys := applyFunc(test.xs, test.f)
@@ -255,6 +264,17 @@ func TestPiecewiseCubic(t *testing.T) {
 				got = pc.coeffs.At(j, 0)
 				if math.Abs(got-want) > valueTol {
 					t.Errorf("Mismatch in 0-th order interpolation coefficient in %d-th node for test case %d: got %v, want %g", j, i, got, want)
+				}
+				if test.exact {
+					dx := (test.xs[j+1] - x) / nPts
+					for k := 1; k < nPts; k++ {
+						xk := x + float64(k)*dx
+						got := pc.Predict(xk)
+						want := test.f(xk)
+						if math.Abs(got-want) > valueTol {
+							t.Errorf("Mismatch in interpolated value at x == %g for test case %d: got %v, want %g", x, i, got, want)
+						}
+					}
 				}
 			} else {
 				got = pc.lastY
@@ -298,7 +318,7 @@ func TestPiecewiseCubic(t *testing.T) {
 	}
 }
 
-func TestPiecewiseCubicExactFit(t *testing.T) {
+func TestPiecewiseCubicFitWithDerivatives(t *testing.T) {
 	t.Parallel()
 	xs := []float64{-1, 0, 1}
 	ys := make([]float64, 3)
@@ -333,31 +353,6 @@ func TestPiecewiseCubicExactFit(t *testing.T) {
 	coeffs := mat.NewDense(2, 4, []float64{3, -3, 1, 0, 1, -1, 0, 1})
 	if !mat.EqualApprox(pc.coeffs, coeffs, 1e-14) {
 		t.Errorf("Mismatch in coeffs: got %v, want %v", pc.coeffs, coeffs)
-	}
-	for i, test := range []struct {
-		x    float64
-		want float64
-	}{
-		{-2, 3},
-		{-1, 3},
-		{-0.9, leftPoly(-0.9)},
-		{-0.75, leftPoly(-0.75)},
-		{-0.5, leftPoly(-0.5)},
-		{-0.25, leftPoly(-0.25)},
-		{-0.1, leftPoly(-0.1)},
-		{0, 1},
-		{0.1, rightPoly(0.1)},
-		{0.25, rightPoly(0.25)},
-		{0.5, rightPoly(0.5)},
-		{0.75, rightPoly(0.75)},
-		{0.9, rightPoly(0.9)},
-		{1, lastY},
-		{2, lastY},
-	} {
-		got := pc.Predict(test.x)
-		if math.Abs(got-test.want) > 1e-14 {
-			t.Errorf("Mismatch in test case %d for x = %g: got %v, want %g", i, test.x, got, test.want)
-		}
 	}
 }
 

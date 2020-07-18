@@ -27,7 +27,7 @@ type Predictor interface {
 // Fitter fits a predictor to data.
 type Fitter interface {
 	// Fit fits a predictor to (X, Y) value pairs provided as two slices.
-	// It panicks if len(xs) < 2, elements of xs are not strictly increasing
+	// It panics if len(xs) < 2, elements of xs are not strictly increasing
 	// or len(xs) != len(ys). It returns an error if there is an unpredictable
 	// failure to fit.
 	Fit(xs, ys []float64) error
@@ -68,7 +68,7 @@ type PiecewiseLinear struct {
 }
 
 // Fit fits a predictor to (X, Y) value pairs provided as two slices.
-// It panicks if len(xs) < 2, elements of xs are not strictly increasing
+// It panics if len(xs) < 2, elements of xs are not strictly increasing
 // or len(xs) != len(ys). It returns an error if there is an unpredictable
 // failure to fit.
 func (pl *PiecewiseLinear) Fit(xs, ys []float64) error {
@@ -123,7 +123,7 @@ type PiecewiseConstant struct {
 }
 
 // Fit fits a predictor to (X, Y) value pairs provided as two slices.
-// It panicks if len(xs) < 2, elements of xs are not strictly increasing
+// It panics if len(xs) < 2, elements of xs are not strictly increasing
 // or len(xs) != len(ys). It returns an error if there is an unpredictable
 // failure to fit.
 func (pc *PiecewiseConstant) Fit(xs, ys []float64) error {
@@ -202,7 +202,7 @@ func (pc PiecewiseCubic) Predict(x float64) float64 {
 
 // fitWithDerivatives fits a piecewise cubic predictor to (X, Y, dY/dX) value
 // triples provided as three slices.
-// It panicks if len(xs) < 2, elements of xs are not strictly increasing,
+// It panics if len(xs) < 2, elements of xs are not strictly increasing,
 // len(xs) != len(ys) or len(xs) != len(dydxs).
 func (pc *PiecewiseCubic) fitWithDerivatives(xs, ys, dydxs []float64) {
 	n := len(xs)
@@ -241,11 +241,16 @@ func (pc *PiecewiseCubic) fitWithDerivatives(xs, ys, dydxs []float64) {
 // value pairs without providing derivatives.
 // See https://www.iue.tuwien.ac.at/phd/rottinger/node60.html for more details.
 type AkimaSpline struct {
-	PiecewiseCubic
+	cubic PiecewiseCubic
+}
+
+// Predict returns the interpolation value at x.
+func (as *AkimaSpline) Predict(x float64) float64 {
+	return as.cubic.Predict(x)
 }
 
 // Fit fits a predictor to (X, Y) value pairs provided as two slices.
-// It panicks if len(xs) < 2, elements of xs are not strictly increasing
+// It panics if len(xs) < 2, elements of xs are not strictly increasing
 // or len(xs) != len(ys). It returns an error if there is an unpredictable
 // failure to fit.
 // If len(xs) == 2, we set both derivatives dY/dX to the slope
@@ -261,7 +266,7 @@ func (as *AkimaSpline) Fit(xs, ys []float64) error {
 		slope := (ys[1] - ys[0]) / (xs[1] - xs[0])
 		dydxs[0] = slope
 		dydxs[1] = slope
-		as.fitWithDerivatives(xs, ys, dydxs)
+		as.cubic.fitWithDerivatives(xs, ys, dydxs)
 		return nil
 	}
 
@@ -288,7 +293,7 @@ func (as *AkimaSpline) Fit(xs, ys []float64) error {
 			dydxs[i] = (slopes[i+1] + slopes[i+2]) / 2
 		}
 	}
-	as.fitWithDerivatives(xs, ys, dydxs)
+	as.cubic.fitWithDerivatives(xs, ys, dydxs)
 	return nil
 }
 

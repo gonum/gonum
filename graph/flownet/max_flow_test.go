@@ -7,6 +7,14 @@ import (
 )
 
 func makeGraph() *SimpleFlowNetwork {
+	// Create graph:
+	//
+	//    0
+	//  / | \
+	// 3  |  1
+	// \ | /
+	//  2
+	//
 	g := simple.NewWeightedDirectedGraph(0, -1)
 	g.AddNode(simple.Node(0))
 	g.AddNode(simple.Node(1))

@@ -10,4 +10,5 @@ import (
 	"gonum.org/v1/gonum/lapack/testlapack"
 )
 
-func BenchmarkDgeev(b *testing.B) { testlapack.DgeevBenchmark(b, impl) }
+func BenchmarkDgeev(b *testing.B)  { testlapack.DgeevBenchmark(b, impl) }
+func BenchmarkDlantb(b *testing.B) { testlapack.DlantbBenchmark(b, impl) }

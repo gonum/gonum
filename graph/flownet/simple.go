@@ -116,11 +116,6 @@ func (g *SimpleResidualGraph) SetFlow(uid, vid int64, flow int32) {
 // If the two nodes are not connected at all nil is returned.
 func (g *SimpleResidualGraph) ResidualEdge(uid, vid int64) ResidualEdge {
 	if _, ok := g.from[uid]; ok {
-		keys := make([]int64, 0, len(g.from[uid]))
-		for k := range g.from[uid] {
-			keys = append(keys, k)
-		}
-
 		if _, ok := g.from[uid][vid]; ok {
 			return *g.from[uid][vid]
 		}

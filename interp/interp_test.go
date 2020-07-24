@@ -373,6 +373,7 @@ func TestAkimaSpline(t *testing.T) {
 	const (
 		nPts = 40
 		h    = 1e-8
+		tol  = 1e-14
 	)
 	for i, test := range []struct {
 		xs []float64
@@ -398,6 +399,10 @@ func TestAkimaSpline(t *testing.T) {
 			xs: []float64{0, 1},
 			f:  math.Exp,
 		},
+		{
+			xs: []float64{-1, 0.5},
+			f:  math.Cos,
+		},
 	} {
 		var as AkimaSpline
 		n := len(test.xs)
@@ -410,8 +415,21 @@ func TestAkimaSpline(t *testing.T) {
 			x := test.xs[j]
 			got := as.Predict(x)
 			want := test.f(x)
-			if math.Abs(got-want) > 1e-14 {
+			if math.Abs(got-want) > tol {
 				t.Errorf("Mismatch in interpolated value at x == %g for test case %d: got %v, want %g", x, i, got, want)
+			}
+		}
+		if n == 2 {
+			got := as.cubic.coeffs.At(0, 1)
+			want := (ys[1] - ys[0]) / (test.xs[1] - test.xs[0])
+			if math.Abs(got-want) > tol {
+				t.Errorf("Mismatch in approximated slope for length-2 test case %d: got %v, want %g", i, got, want)
+			}
+			for j := 2; i < 4; j++ {
+				got := as.cubic.coeffs.At(0, j)
+				if got != 0 {
+					t.Errorf("Non-zero order-%d coefficient for length-2 test case %d: got %v", j, i, got)
+				}
 			}
 		}
 	}

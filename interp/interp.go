@@ -28,8 +28,7 @@ type Predictor interface {
 type Fitter interface {
 	// Fit fits a predictor to (X, Y) value pairs provided as two slices.
 	// It panics if len(xs) < 2, elements of xs are not strictly increasing
-	// or len(xs) != len(ys). It returns an error if there is an unpredictable
-	// failure to fit.
+	// or len(xs) != len(ys). Returns an error if fitting fails.
 	Fit(xs, ys []float64) error
 }
 
@@ -69,8 +68,7 @@ type PiecewiseLinear struct {
 
 // Fit fits a predictor to (X, Y) value pairs provided as two slices.
 // It panics if len(xs) < 2, elements of xs are not strictly increasing
-// or len(xs) != len(ys). It returns an error if there is an unpredictable
-// failure to fit.
+// or len(xs) != len(ys). Always returns nil.
 func (pl *PiecewiseLinear) Fit(xs, ys []float64) error {
 	n := len(xs)
 	if len(ys) != n {
@@ -124,8 +122,7 @@ type PiecewiseConstant struct {
 
 // Fit fits a predictor to (X, Y) value pairs provided as two slices.
 // It panics if len(xs) < 2, elements of xs are not strictly increasing
-// or len(xs) != len(ys). It returns an error if there is an unpredictable
-// failure to fit.
+// or len(xs) != len(ys). Always returns nil.
 func (pc *PiecewiseConstant) Fit(xs, ys []float64) error {
 	n := len(xs)
 	if len(ys) != n {
@@ -173,14 +170,14 @@ type PiecewiseCubic struct {
 	// for xs[i] <= x < xs[i + 1] is defined as
 	//   sum_{k = 0}^3 coeffs.At(i, k) * (x - xs[i])^k
 	// To guarantee left-continuity, coeffs.At(i, 0) == ys[i].
-	coeffs *mat.Dense
+	coeffs mat.Dense
 
 	// Last interpolated Y value, corresponding to xs[len(xs) - 1].
 	lastY float64
 }
 
 // Predict returns the interpolation value at x.
-func (pc PiecewiseCubic) Predict(x float64) float64 {
+func (pc *PiecewiseCubic) Predict(x float64) float64 {
 	i := findSegment(pc.xs, x)
 	if i < 0 {
 		return pc.coeffs.At(0, 0)
@@ -200,11 +197,11 @@ func (pc PiecewiseCubic) Predict(x float64) float64 {
 	return ((a[3]*dx+a[2])*dx+a[1])*dx + a[0]
 }
 
-// fitWithDerivatives fits a piecewise cubic predictor to (X, Y, dY/dX) value
+// FitWithDerivatives fits a piecewise cubic predictor to (X, Y, dY/dX) value
 // triples provided as three slices.
 // It panics if len(xs) < 2, elements of xs are not strictly increasing,
 // len(xs) != len(ys) or len(xs) != len(dydxs).
-func (pc *PiecewiseCubic) fitWithDerivatives(xs, ys, dydxs []float64) {
+func (pc *PiecewiseCubic) FitWithDerivatives(xs, ys, dydxs []float64) {
 	n := len(xs)
 	if len(ys) != n {
 		panic(differentLengths)
@@ -216,7 +213,8 @@ func (pc *PiecewiseCubic) fitWithDerivatives(xs, ys, dydxs []float64) {
 		panic(tooFewPoints)
 	}
 	m := n - 1
-	pc.coeffs = mat.NewDense(m, 4, nil)
+	pc.coeffs.Reset()
+	pc.coeffs.ReuseAs(m, 4)
 	for i := 0; i < m; i++ {
 		dx := xs[i+1] - xs[i]
 		if dx <= 0 {
@@ -251,10 +249,7 @@ func (as *AkimaSpline) Predict(x float64) float64 {
 
 // Fit fits a predictor to (X, Y) value pairs provided as two slices.
 // It panics if len(xs) < 2, elements of xs are not strictly increasing
-// or len(xs) != len(ys). It returns an error if there is an unpredictable
-// failure to fit.
-// If len(xs) == 2, we set both derivatives dY/dX to the slope
-// (ys[1] - ys[0]) / (xs[1] - xs[0]).
+// or len(xs) != len(ys). Always returns nil.
 func (as *AkimaSpline) Fit(xs, ys []float64) error {
 	n := len(xs)
 	if len(ys) != n {
@@ -266,23 +261,23 @@ func (as *AkimaSpline) Fit(xs, ys []float64) error {
 		slope := (ys[1] - ys[0]) / (xs[1] - xs[0])
 		dydxs[0] = slope
 		dydxs[1] = slope
-		as.cubic.fitWithDerivatives(xs, ys, dydxs)
+		as.cubic.FitWithDerivatives(xs, ys, dydxs)
 		return nil
 	}
 
-	m := n - 1
-	slopes := make([]float64, m+4)
-	for i := 0; i < m; i++ {
-		dx := xs[i+1] - xs[i]
+	m := n + 3
+	slopes := make([]float64, m)
+	slopes[0] = 3*slopes[2] - 2*slopes[3]
+	slopes[1] = 2*slopes[2] - slopes[3]
+	for i := 2; i < m-2; i++ {
+		dx := xs[i-1] - xs[i-2]
 		if dx <= 0 {
 			panic(xsNotStrictlyIncreasing)
 		}
-		slopes[i+2] = (ys[i+1] - ys[i]) / dx
+		slopes[i] = (ys[i-1] - ys[i-2]) / dx
 	}
-	slopes[1] = 2*slopes[2] - slopes[3]
-	slopes[0] = 3*slopes[2] - 2*slopes[3]
-	slopes[m+2] = 2*slopes[n] - slopes[m]
-	slopes[m+3] = 3*slopes[n] - 2*slopes[m]
+	slopes[m-2] = 2*slopes[m-3] - slopes[m-4]
+	slopes[m-1] = 3*slopes[m-3] - 2*slopes[m-4]
 	for i := 0; i < n; i++ {
 		wLeft := math.Abs(slopes[i+2] - slopes[i+3])
 		wRight := math.Abs(slopes[i+1] - slopes[i])
@@ -293,7 +288,7 @@ func (as *AkimaSpline) Fit(xs, ys []float64) error {
 			dydxs[i] = (slopes[i+1] + slopes[i+2]) / 2
 		}
 	}
-	as.cubic.fitWithDerivatives(xs, ys, dydxs)
+	as.cubic.FitWithDerivatives(xs, ys, dydxs)
 	return nil
 }
 

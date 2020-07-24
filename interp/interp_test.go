@@ -200,58 +200,35 @@ func TestPiecewiseCubic(t *testing.T) {
 		nPts     = 100
 	)
 	for i, test := range []struct {
-		xs    []float64
-		f     func(float64) float64
-		df    func(float64) float64
-		exact bool
+		xs []float64
+		f  func(float64) float64
+		df func(float64) float64
 	}{
 		{
-			xs:    []float64{-1.001, 0.2, 2},
-			f:     func(x float64) float64 { return x * x },
-			df:    func(x float64) float64 { return 2 * x },
-			exact: true,
+			xs: []float64{-1.001, 0.2, 2},
+			f:  func(x float64) float64 { return x * x },
+			df: func(x float64) float64 { return 2 * x },
 		},
 		{
-			xs:    []float64{-1.001, 0.2, 2},
-			f:     func(x float64) float64 { return 4*math.Pow(x, 3) - 2*x*x + 10*x - 7 },
-			df:    func(x float64) float64 { return 12*x*x - 4*x + 10 },
-			exact: true,
+			xs: []float64{-1.001, 0.2, 2},
+			f:  func(x float64) float64 { return 4*math.Pow(x, 3) - 2*x*x + 10*x - 7 },
+			df: func(x float64) float64 { return 12*x*x - 4*x + 10 },
 		},
 		{
-			xs:    []float64{-1.001, 0.2, 10},
-			f:     func(x float64) float64 { return 1.5*x - 1 },
-			df:    func(x float64) float64 { return 1.5 },
-			exact: true,
+			xs: []float64{-1.001, 0.2, 10},
+			f:  func(x float64) float64 { return 1.5*x - 1 },
+			df: func(x float64) float64 { return 1.5 },
 		},
 		{
-			xs:    []float64{-1.001, 0.2, 10},
-			f:     func(x float64) float64 { return -1 },
-			df:    func(x float64) float64 { return 0 },
-			exact: true,
-		},
-		{
-			xs:    []float64{-1.1, 0.2, 0.99, 2.5, 2.99},
-			f:     math.Sin,
-			df:    math.Cos,
-			exact: false,
-		},
-		{
-			xs:    []float64{-1.1, 0.2, 0.99, 2.5, 2.99},
-			f:     math.Exp,
-			df:    math.Exp,
-			exact: false,
-		},
-		{
-			xs:    []float64{-1.1, 0.2, 0.99, 2.5, 2.99},
-			f:     func(x float64) float64 { return math.Sin(x * x) },
-			df:    func(x float64) float64 { return 2 * x * math.Cos(x*x) },
-			exact: false,
+			xs: []float64{-1.001, 0.2, 10},
+			f:  func(x float64) float64 { return -1 },
+			df: func(x float64) float64 { return 0 },
 		},
 	} {
 		ys := applyFunc(test.xs, test.f)
 		dydxs := applyFunc(test.xs, test.df)
 		var pc PiecewiseCubic
-		pc.fitWithDerivatives(test.xs, ys, dydxs)
+		pc.FitWithDerivatives(test.xs, ys, dydxs)
 		n := len(test.xs)
 		for j := 0; j < n; j++ {
 			x := test.xs[j]
@@ -265,15 +242,13 @@ func TestPiecewiseCubic(t *testing.T) {
 				if math.Abs(got-want) > valueTol {
 					t.Errorf("Mismatch in 0-th order interpolation coefficient in %d-th node for test case %d: got %v, want %g", j, i, got, want)
 				}
-				if test.exact {
-					dx := (test.xs[j+1] - x) / nPts
-					for k := 1; k < nPts; k++ {
-						xk := x + float64(k)*dx
-						got := pc.Predict(xk)
-						want := test.f(xk)
-						if math.Abs(got-want) > valueTol {
-							t.Errorf("Mismatch in interpolated value at x == %g for test case %d: got %v, want %g", x, i, got, want)
-						}
+				dx := (test.xs[j+1] - x) / nPts
+				for k := 1; k < nPts; k++ {
+					xk := x + float64(k)*dx
+					got := pc.Predict(xk)
+					want := test.f(xk)
+					if math.Abs(got-want) > valueTol {
+						t.Errorf("Mismatch in interpolated value at x == %g for test case %d: got %v, want %g", x, i, got, want)
 					}
 				}
 			} else {
@@ -342,7 +317,7 @@ func TestPiecewiseCubicFitWithDerivatives(t *testing.T) {
 	dydxs[1] = leftPolyDerivative(xs[1])
 	dydxs[2] = rightPolyDerivative(xs[2])
 	var pc PiecewiseCubic
-	pc.fitWithDerivatives(xs, ys, dydxs)
+	pc.FitWithDerivatives(xs, ys, dydxs)
 	lastY := rightPoly(xs[2])
 	if pc.lastY != lastY {
 		t.Errorf("Mismatch in lastY: got %v, want %g", pc.lastY, lastY)
@@ -351,7 +326,7 @@ func TestPiecewiseCubicFitWithDerivatives(t *testing.T) {
 		t.Errorf("Mismatch in xs: got %v, want %v", pc.xs, xs)
 	}
 	coeffs := mat.NewDense(2, 4, []float64{3, -3, 1, 0, 1, -1, 0, 1})
-	if !mat.EqualApprox(pc.coeffs, coeffs, 1e-14) {
+	if !mat.EqualApprox(&pc.coeffs, coeffs, 1e-14) {
 		t.Errorf("Mismatch in coeffs: got %v, want %v", pc.coeffs, coeffs)
 	}
 }
@@ -383,7 +358,7 @@ func TestPiecewiseCubicFitWithDerivativesErrors(t *testing.T) {
 		},
 	} {
 		var pc PiecewiseCubic
-		if !panics(func() { pc.fitWithDerivatives(test.xs, test.ys, test.dydxs) }) {
+		if !panics(func() { pc.FitWithDerivatives(test.xs, test.ys, test.dydxs) }) {
 			t.Errorf("expected panic for xs: %v, ys: %v and dydxs: %v", test.xs, test.ys, test.dydxs)
 		}
 	}
@@ -391,10 +366,7 @@ func TestPiecewiseCubicFitWithDerivativesErrors(t *testing.T) {
 
 func TestAkimaSpline(t *testing.T) {
 	t.Parallel()
-	const (
-		nPts      = 40
-		wiggleTol = 1e-1
-	)
+	const nPts = 40
 	for i, test := range []struct {
 		xs  []float64
 		f   func(float64) float64
@@ -430,11 +402,6 @@ func TestAkimaSpline(t *testing.T) {
 			f:   math.Exp,
 			tol: 1e-4,
 		},
-		{
-			xs:  []float64{-0.2, -0.1, 0, 0.1, 0.2},
-			f:   func(x float64) float64 { return 1 / (1 + math.Exp(-100*x)) },
-			tol: 0.5,
-		},
 	} {
 		var as AkimaSpline
 		ys := applyFunc(test.xs, test.f)
@@ -460,21 +427,6 @@ func TestAkimaSpline(t *testing.T) {
 			want := test.f(x)
 			if math.Abs(got-want) > 1e-14 {
 				t.Errorf("Mismatch in interpolated value at x == %g for test case %d: got %v, want %g", x, i, got, want)
-			}
-		}
-		m := n - 1
-		for j := 0; j < m; j++ {
-			x0 := test.xs[j]
-			x1 := test.xs[j+1]
-			yMin := math.Min(ys[j], ys[j+1])
-			yMax := math.Max(ys[j], ys[j+1])
-			dx := (x1 - x0) / nPts
-			for k := 0; k <= nPts; k++ {
-				x := x0 + float64(k)*dx
-				y := as.Predict(x)
-				if y < yMin-wiggleTol || y > yMax+wiggleTol {
-					t.Errorf("Interpolated values show large wiggles at x == %g for test case %d: y == %g outside (%g, %g) more than %g", x, i, y, yMin, yMax, wiggleTol)
-				}
 			}
 		}
 	}

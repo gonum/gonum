@@ -210,7 +210,7 @@ func TestPiecewiseCubic(t *testing.T) {
 			df: func(x float64) float64 { return 2 * x },
 		},
 		{
-			xs: []float64{-1.001, 0.2, 2},
+			xs: []float64{-1.2, -1.001, 0, 0.2, 2.01, 2.1},
 			f:  func(x float64) float64 { return 4*math.Pow(x, 3) - 2*x*x + 10*x - 7 },
 			df: func(x float64) float64 { return 12*x*x - 4*x + 10 },
 		},

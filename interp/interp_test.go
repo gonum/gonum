@@ -230,6 +230,16 @@ func TestPiecewiseCubic(t *testing.T) {
 		var pc PiecewiseCubic
 		pc.FitWithDerivatives(test.xs, ys, dydxs)
 		n := len(test.xs)
+		got := pc.Predict(test.xs[0] - 0.1)
+		want := ys[0]
+		if got != want {
+			t.Errorf("Mismatch in value extrapolated to the left for test case %d: got %v, want %g", i, got, want)
+		}
+		got = pc.Predict(test.xs[n-1] + 0.1)
+		want = ys[n-1]
+		if got != want {
+			t.Errorf("Mismatch in value extrapolated to the right for test case %d: got %v, want %g", i, got, want)
+		}
 		for j := 0; j < n; j++ {
 			x := test.xs[j]
 			got := pc.Predict(x)
@@ -265,13 +275,7 @@ func TestPiecewiseCubic(t *testing.T) {
 					t.Errorf("Interpolation coefficients in %d-th node produce mismatch in interpolated value at %g for test case %d: got %v, want %g", j-1, x, i, got, want)
 				}
 			}
-			if j == 0 {
-				got = (pc.Predict(x+h) - pc.Predict(x)) / h
-			} else if j == n-1 {
-				got = (pc.Predict(x) - pc.Predict(x-h)) / h
-			} else {
-				got = (pc.Predict(x+h) - pc.Predict(x-h)) / (2 * h)
-			}
+			got = discrDerivPredict(&pc, x, h, j, n)
 			want = test.df(x)
 			if math.Abs(got-want) > derivTol {
 				t.Errorf("Mismatch in interpolated derivative value at x == %g for test case %d: got %v, want %g", x, i, got, want)
@@ -366,50 +370,42 @@ func TestPiecewiseCubicFitWithDerivativesErrors(t *testing.T) {
 
 func TestAkimaSpline(t *testing.T) {
 	t.Parallel()
-	const nPts = 40
+	const (
+		nPts = 40
+		h    = 1e-8
+	)
 	for i, test := range []struct {
-		xs  []float64
-		f   func(float64) float64
-		tol float64
+		xs []float64
+		f  func(float64) float64
 	}{
 		{
-			xs:  []float64{-1, 0, 1},
-			f:   func(x float64) float64 { return x * x },
-			tol: 1e-14,
+			xs: []float64{-5, -3, -2, -1.5, -1, 0.5, 1.5, 2.5, 3},
+			f:  func(x float64) float64 { return x * x },
 		},
 		{
-			xs:  []float64{-1, 1},
-			f:   func(x float64) float64 { return -10 * x },
-			tol: 1e-14,
+			xs: []float64{-5, -3, -2, -1.5, -1, 0.5, 1.5, 2.5, 3},
+			f:  func(x float64) float64 { return math.Pow(x, 3.) - x*x + 2 },
 		},
 		{
-			xs:  []float64{-1, 0, 1},
-			f:   func(x float64) float64 { return -10 * x },
-			tol: 1e-14,
+			xs: []float64{-5, -3, -2, -1.5, -1, 0.5, 1.5, 2.5, 3},
+			f:  func(x float64) float64 { return -10 * x },
 		},
 		{
-			xs:  []float64{-0.2, -0.1, 0, 0.1, 0.2},
-			f:   math.Cos,
-			tol: 1e-4,
+			xs: []float64{-5, -3, -2, -1.5, -1, 0.5, 1.5, 2.5, 3},
+			f:  math.Sin,
 		},
 		{
-			xs:  []float64{-0.2, -0.1, 0, 0.1, 0.2},
-			f:   math.Sin,
-			tol: 1e-4,
-		},
-		{
-			xs:  []float64{-0.2, -0.1, 0, 0.1, 0.2},
-			f:   math.Exp,
-			tol: 1e-4,
+			xs: []float64{0, 1},
+			f:  math.Exp,
 		},
 	} {
 		var as AkimaSpline
+		n := len(test.xs)
 		ys := applyFunc(test.xs, test.f)
 		err := as.Fit(test.xs, ys)
 		if err != nil {
 			t.Errorf("Error when fitting AkimaSpline in test case %d: %v", i, err)
 		}
-		n := len(test.xs)
 		for j := 0; j < n; j++ {
 			x := test.xs[j]
 			got := as.Predict(x)
@@ -463,4 +459,14 @@ func panics(fun func()) (b bool) {
 	}()
 	fun()
 	return
+}
+
+func discrDerivPredict(p Predictor, x, h float64, j, n int) float64 {
+	if j == 0 {
+		return (p.Predict(x+h) - p.Predict(x)) / h
+	} else if j == n-1 {
+		return (p.Predict(x) - p.Predict(x-h)) / h
+	} else {
+		return (p.Predict(x+h) - p.Predict(x-h)) / (2 * h)
+	}
 }

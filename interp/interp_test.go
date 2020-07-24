@@ -409,17 +409,6 @@ func TestAkimaSpline(t *testing.T) {
 		if err != nil {
 			t.Errorf("Error when fitting AkimaSpline in test case %d: %v", i, err)
 		}
-		x0 := test.xs[0]
-		x1 := test.xs[len(test.xs)-1]
-		dx := (x1 - x0) / nPts
-		for j := -1; j <= nPts+1; j++ {
-			x := x0 + float64(j)*dx
-			got := as.Predict(x)
-			want := test.f(math.Min(x1, math.Max(x0, x)))
-			if math.Abs(got-want) > test.tol {
-				t.Errorf("Mismatch in interpolated value at x == %g for test case %d: got %v, want %g", x, i, got, want)
-			}
-		}
 		n := len(test.xs)
 		for j := 0; j < n; j++ {
 			x := test.xs[j]

@@ -445,12 +445,28 @@ func TestAkimaSplineFitErrors(t *testing.T) {
 			ys: []float64{10, 20},
 		},
 		{
+			xs: []float64{0, 1},
+			ys: []float64{10, 20, 30},
+		},
+		{
 			xs: []float64{0},
 			ys: []float64{0},
 		},
 		{
 			xs: []float64{0, 1, 1},
 			ys: []float64{10, 20, 10},
+		},
+		{
+			xs: []float64{0, 2, 1},
+			ys: []float64{10, 20, 10},
+		},
+		{
+			xs: []float64{0, 0},
+			ys: []float64{-1, 2},
+		},
+		{
+			xs: []float64{0, -1},
+			ys: []float64{-1, 2},
 		},
 	} {
 		var as AkimaSpline
@@ -460,7 +476,7 @@ func TestAkimaSplineFitErrors(t *testing.T) {
 	}
 }
 
-func TestWeightedAverage(t *testing.T) {
+func TestAkimaWeightedAverage(t *testing.T) {
 	t.Parallel()
 	for i, test := range []struct {
 		v1, v2, w1, w2, want float64
@@ -508,9 +524,102 @@ func TestWeightedAverage(t *testing.T) {
 			want: 250,
 		},
 	} {
-		got := weightedAverage(test.v1, test.v2, test.w1, test.w2)
+		got := akimaWeightedAverage(test.v1, test.v2, test.w1, test.w2)
 		if !floats.EqualWithinAbsOrRel(got, test.want, 1e-14, 1e-14) {
 			t.Errorf("Mismatch in test case %d: got %v, want %g", i, got, test.want)
+		}
+	}
+}
+
+func TestAkimaSlopes(t *testing.T) {
+	t.Parallel()
+	for i, test := range []struct {
+		xs, ys, want []float64
+	}{
+		{
+			xs:   []float64{-2, 0, 1},
+			ys:   []float64{2, 0, 1.5},
+			want: []float64{-6, -3.5, -1, 1.5, 4, 6.5},
+		},
+		{
+			xs:   []float64{-2, -0.5, 1},
+			ys:   []float64{-2, -0.5, 1},
+			want: []float64{1, 1, 1, 1, 1, 1},
+		},
+		{
+			xs:   []float64{-2, -0.5, 1},
+			ys:   []float64{1, 1, 1},
+			want: []float64{0, 0, 0, 0, 0, 0},
+		},
+		{
+			xs:   []float64{0, 1.5, 2, 4, 4.5, 5, 6, 7.5, 8},
+			ys:   []float64{-5, -4, -3.5, -3.25, -3.25, -2.5, -1.5, -1, 2},
+			want: []float64{0, 1. / 3, 2. / 3, 1, 0.125, 0, 1.5, 1, 1. / 3, 6, 12 - 1./3, 18 - 2./3},
+		},
+	} {
+		got := akimaSlopes(test.xs, test.ys)
+		if !floats.EqualApprox(got, test.want, 1e-14) {
+			t.Errorf("Mismatch in test case %d: got %v, want %v", i, got, test.want)
+		}
+	}
+}
+
+func TestAkimaSlopesErrors(t *testing.T) {
+	t.Parallel()
+	for _, test := range []struct {
+		xs, ys []float64
+	}{
+		{
+			xs: []float64{0, 1, 2},
+			ys: []float64{10, 20},
+		},
+		{
+			xs: []float64{0, 1},
+			ys: []float64{10, 20, 30},
+		},
+		{
+			xs: []float64{0, 2},
+			ys: []float64{0, 1},
+		},
+		{
+			xs: []float64{0, 1, 1},
+			ys: []float64{10, 20, 10},
+		},
+		{
+			xs: []float64{0, 2, 1},
+			ys: []float64{10, 20, 10},
+		},
+		{
+			xs: []float64{0, 0},
+			ys: []float64{-1, 2},
+		},
+		{
+			xs: []float64{0, -1},
+			ys: []float64{-1, 2},
+		},
+	} {
+		if !panics(func() { akimaSlopes(test.xs, test.ys) }) {
+			t.Errorf("expected panic for xs: %v and ys: %v", test.xs, test.ys)
+		}
+	}
+}
+
+func TestAkimaWeights(t *testing.T) {
+	t.Parallel()
+	const tol = 1e-14
+	slopes := []float64{-2, -1, -0.1, 0.2, 1.2, 2.5}
+	want := [][]float64{
+		{0.3, 1},
+		{1, 0.9},
+		{1.3, 0.3},
+	}
+	for i := 0; i < len(want); i++ {
+		gotLeft, gotRight := akimaWeights(slopes, i)
+		if math.Abs(gotLeft-want[i][0]) > 1e-14 {
+			t.Errorf("Mismatch in left weight for node %d: got %v, want %g", i, gotLeft, want[i][0])
+		}
+		if math.Abs(gotRight-want[i][1]) > 1e-14 {
+			t.Errorf("Mismatch in left weight for node %d: got %v, want %g", i, gotRight, want[i][1])
 		}
 	}
 }

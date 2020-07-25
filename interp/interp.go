@@ -258,17 +258,36 @@ func (as *AkimaSpline) Fit(xs, ys []float64) error {
 	dydxs := make([]float64, n)
 
 	if n == 2 {
-		slope := (ys[1] - ys[0]) / (xs[1] - xs[0])
+		dx := xs[1] - xs[0]
+		slope := (ys[1] - ys[0]) / dx
 		dydxs[0] = slope
 		dydxs[1] = slope
 		as.cubic.FitWithDerivatives(xs, ys, dydxs)
 		return nil
 	}
+	slopes := akimaSlopes(xs, ys)
+	for i := 0; i < n; i++ {
+		wLeft, wRight := akimaWeights(slopes, i)
+		dydxs[i] = akimaWeightedAverage(slopes[i+1], slopes[i+2], wLeft, wRight)
+	}
+	as.cubic.FitWithDerivatives(xs, ys, dydxs)
+	return nil
+}
 
+// akimaSlopes returns slopes for Akima spline method, including the approximations
+// of slopes outside the data range (two on each side).
+// It panics if len(xs) <= 2, elements of xs are not strictly increasing
+// or len(xs) != len(ys).
+func akimaSlopes(xs, ys []float64) []float64 {
+	n := len(xs)
+	if n <= 2 {
+		panic(tooFewPoints)
+	}
+	if len(ys) != n {
+		panic(differentLengths)
+	}
 	m := n + 3
 	slopes := make([]float64, m)
-	slopes[0] = 3*slopes[2] - 2*slopes[3]
-	slopes[1] = 2*slopes[2] - slopes[3]
 	for i := 2; i < m-2; i++ {
 		dx := xs[i-1] - xs[i-2]
 		if dx <= 0 {
@@ -276,15 +295,11 @@ func (as *AkimaSpline) Fit(xs, ys []float64) error {
 		}
 		slopes[i] = (ys[i-1] - ys[i-2]) / dx
 	}
+	slopes[0] = 3*slopes[2] - 2*slopes[3]
+	slopes[1] = 2*slopes[2] - slopes[3]
 	slopes[m-2] = 2*slopes[m-3] - slopes[m-4]
 	slopes[m-1] = 3*slopes[m-3] - 2*slopes[m-4]
-	for i := 0; i < n; i++ {
-		wLeft := math.Abs(slopes[i+2] - slopes[i+3])
-		wRight := math.Abs(slopes[i+1] - slopes[i])
-		dydxs[i] = weightedAverage(slopes[i+1], slopes[i+2], wLeft, wRight)
-	}
-	as.cubic.FitWithDerivatives(xs, ys, dydxs)
-	return nil
+	return slopes
 }
 
 // findSegment returns 0 <= i < len(xs) such that xs[i] <= x < xs[i + 1], where xs[len(xs)]
@@ -294,12 +309,20 @@ func findSegment(xs []float64, x float64) int {
 	return sort.Search(len(xs), func(i int) bool { return xs[i] > x }) - 1
 }
 
-// weightedAverage returns (v1 * w1 + v2 * w2) / (w1 + w2) for w1, w2 >= 0 (not checked).
+// akimaWeightedAverage returns (v1 * w1 + v2 * w2) / (w1 + w2) for w1, w2 >= 0 (not checked).
 // If w1 == w2 == 0, it returns a simple average of v1 and v2.
-func weightedAverage(v1, v2, w1, w2 float64) float64 {
+func akimaWeightedAverage(v1, v2, w1, w2 float64) float64 {
 	w := w1 + w2
 	if w > 0 {
 		return (v1*w1 + v2*w2) / w
 	}
 	return 0.5*v1 + 0.5*v2
+}
+
+// akimaWeights returns the left and right weight for approximating
+// the i-th derivative with neighbouring slopes.
+func akimaWeights(slopes []float64, i int) (float64, float64) {
+	wLeft := math.Abs(slopes[i+2] - slopes[i+3])
+	wRight := math.Abs(slopes[i+1] - slopes[i])
+	return wLeft, wRight
 }

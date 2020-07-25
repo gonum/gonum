@@ -615,10 +615,10 @@ func TestAkimaWeights(t *testing.T) {
 	}
 	for i := 0; i < len(want); i++ {
 		gotLeft, gotRight := akimaWeights(slopes, i)
-		if math.Abs(gotLeft-want[i][0]) > 1e-14 {
+		if math.Abs(gotLeft-want[i][0]) > tol {
 			t.Errorf("Mismatch in left weight for node %d: got %v, want %g", i, gotLeft, want[i][0])
 		}
-		if math.Abs(gotRight-want[i][1]) > 1e-14 {
+		if math.Abs(gotRight-want[i][1]) > tol {
 			t.Errorf("Mismatch in left weight for node %d: got %v, want %g", i, gotRight, want[i][1])
 		}
 	}

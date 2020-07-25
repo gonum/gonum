@@ -281,12 +281,7 @@ func (as *AkimaSpline) Fit(xs, ys []float64) error {
 	for i := 0; i < n; i++ {
 		wLeft := math.Abs(slopes[i+2] - slopes[i+3])
 		wRight := math.Abs(slopes[i+1] - slopes[i])
-		w := wLeft + wRight
-		if w > 0 {
-			dydxs[i] = (wLeft*slopes[i+1] + wRight*slopes[i+2]) / w
-		} else {
-			dydxs[i] = (slopes[i+1] + slopes[i+2]) / 2
-		}
+		dydxs[i] = weightedAverage(slopes[i+1], slopes[i+2], wLeft, wRight)
 	}
 	as.cubic.FitWithDerivatives(xs, ys, dydxs)
 	return nil
@@ -297,4 +292,14 @@ func (as *AkimaSpline) Fit(xs, ys []float64) error {
 // without checking.
 func findSegment(xs []float64, x float64) int {
 	return sort.Search(len(xs), func(i int) bool { return xs[i] > x }) - 1
+}
+
+// weightedAverage returns (v1 * w1 + v2 * w2) / (w1 + w2) for w1, w2 >= 0 (not checked).
+// If w1 == w2 == 0, it returns a simple average of v1 and v2.
+func weightedAverage(v1, v2, w1, w2 float64) float64 {
+	w := w1 + w2
+	if w > 0 {
+		return (v1*w1 + v2*w2) / w
+	}
+	return 0.5*v1 + 0.5*v2
 }

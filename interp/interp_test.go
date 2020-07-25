@@ -460,6 +460,61 @@ func TestAkimaSplineFitErrors(t *testing.T) {
 	}
 }
 
+func TestWeightedAverage(t *testing.T) {
+	t.Parallel()
+	for i, test := range []struct {
+		v1, v2, w1, w2, want float64
+	}{
+		{
+			v1:   -1,
+			v2:   1,
+			w1:   0,
+			w2:   0,
+			want: 0,
+		},
+		{
+			v1:   -1,
+			v2:   1,
+			w1:   1e6,
+			w2:   1e6,
+			want: 0,
+		},
+		{
+			v1:   -1,
+			v2:   1,
+			w1:   1e-10,
+			w2:   0,
+			want: -1,
+		},
+		{
+			v1:   -1,
+			v2:   1,
+			w1:   0,
+			w2:   1e-10,
+			want: 1,
+		},
+		{
+			v1:   0,
+			v2:   1000,
+			w1:   1e-13,
+			w2:   3e-13,
+			want: 750,
+		},
+		{
+			v1:   0,
+			v2:   1000,
+			w1:   3e-13,
+			w2:   1e-13,
+			want: 250,
+		},
+	} {
+		got := weightedAverage(test.v1, test.v2, test.w1, test.w2)
+		if !floats.EqualWithinAbsOrRel(got, test.want, 1e-14, 1e-14) {
+			t.Errorf("Mismatch in test case %d: got %v, want %g", i, got, test.want)
+		}
+	}
+}
+
 func applyFunc(xs []float64, f func(x float64) float64) []float64 {
 	ys := make([]float64, len(xs))
 	for i, x := range xs {

@@ -370,11 +370,7 @@ func TestPiecewiseCubicFitWithDerivativesErrors(t *testing.T) {
 
 func TestAkimaSpline(t *testing.T) {
 	t.Parallel()
-	const (
-		nPts = 40
-		h    = 1e-8
-		tol  = 1e-14
-	)
+	const tol = 1e-14
 	for i, test := range []struct {
 		xs []float64
 		f  func(float64) float64
@@ -480,6 +476,7 @@ func TestAkimaWeightedAverage(t *testing.T) {
 	t.Parallel()
 	for i, test := range []struct {
 		v1, v2, w1, w2, want float64
+		// "want" values calculated by hand.
 	}{
 		{
 			v1:   -1,
@@ -535,6 +532,7 @@ func TestAkimaSlopes(t *testing.T) {
 	t.Parallel()
 	for i, test := range []struct {
 		xs, ys, want []float64
+		// "want" values calculated by hand.
 	}{
 		{
 			xs:   []float64{-2, 0, 1},
@@ -608,6 +606,7 @@ func TestAkimaWeights(t *testing.T) {
 	t.Parallel()
 	const tol = 1e-14
 	slopes := []float64{-2, -1, -0.1, 0.2, 1.2, 2.5}
+	// "want" values calculated by hand.
 	want := [][]float64{
 		{0.3, 1},
 		{1, 0.9},

@@ -38,6 +38,15 @@ type FittablePredictor interface {
 	Predictor
 }
 
+// DerivativePredictor predicts both the value and the derivative of
+// a function. It handles both interpolation and extrapolation.
+type DerivativePredictor interface {
+	Predictor
+
+	// PredictDerivative returns the predicted derivative at x.
+	PredictDerivative(x float64) float64
+}
+
 // Constant predicts a constant value.
 type Constant float64
 
@@ -174,6 +183,9 @@ type PiecewiseCubic struct {
 
 	// Last interpolated Y value, corresponding to xs[len(xs) - 1].
 	lastY float64
+
+	// Last interpolated dY/dX value, corresponding to xs[len(xs) - 1].
+	lastDyDx float64
 }
 
 // Predict returns the interpolation value at x.
@@ -195,6 +207,27 @@ func (pc *PiecewiseCubic) Predict(x float64) float64 {
 	dx := x - pc.xs[i]
 	a := pc.coeffs.RawRowView(i)
 	return ((a[3]*dx+a[2])*dx+a[1])*dx + a[0]
+}
+
+// PredictDerivative returns the predicted derivative at x.
+func (pc *PiecewiseCubic) PredictDerivative(x float64) float64 {
+	i := findSegment(pc.xs, x)
+	if i < 0 {
+		return pc.coeffs.At(0, 1)
+	}
+	m := len(pc.xs) - 1
+	if x == pc.xs[i] {
+		if i < m {
+			return pc.coeffs.At(i, 1)
+		}
+		return pc.lastDyDx
+	}
+	if i == m {
+		return pc.lastDyDx
+	}
+	dx := x - pc.xs[i]
+	a := pc.coeffs.RawRowView(i)
+	return (3*a[3]*dx+2*a[2])*dx + a[1]
 }
 
 // FitWithDerivatives fits a piecewise cubic predictor to (X, Y, dY/dX) value
@@ -232,6 +265,7 @@ func (pc *PiecewiseCubic) FitWithDerivatives(xs, ys, dydxs []float64) {
 	pc.xs = make([]float64, n)
 	copy(pc.xs, xs)
 	pc.lastY = ys[m]
+	pc.lastDyDx = dydxs[m]
 }
 
 // AkimaSpline is a piecewise cubic 1-dimensional interpolator with
@@ -245,6 +279,11 @@ type AkimaSpline struct {
 // Predict returns the interpolation value at x.
 func (as *AkimaSpline) Predict(x float64) float64 {
 	return as.cubic.Predict(x)
+}
+
+// PredictDerivative returns the predicted derivative at x.
+func (as *AkimaSpline) PredictDerivative(x float64) float64 {
+	return as.cubic.PredictDerivative(x)
 }
 
 // Fit fits a predictor to (X, Y) value pairs provided as two slices.

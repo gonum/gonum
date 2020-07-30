@@ -27,11 +27,6 @@ type cformatter struct {
 	format func(m CMatrix, prefix string, margin int, dot byte, squueze bool, fs fmt.State, c rune)
 }
 
-type cwidther interface {
-	width(i int) int
-	setWidth(i, w int)
-}
-
 // Formatted returns a fmt.Formatter for the matrix m using the given options.
 func CFormatted(m CMatrix, options ...CFormatOption) fmt.Formatter {
 	f := cformatter{

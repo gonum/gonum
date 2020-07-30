@@ -5,9 +5,11 @@
 package interp
 
 import (
-	"fmt"
 	"math"
 	"testing"
+
+	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/mat"
 )
 
 func TestConstant(t *testing.T) {
@@ -68,21 +70,18 @@ func BenchmarkFindSegment(b *testing.B) {
 // testPiecewiseInterpolatorCreation tests common functionality in creating piecewise  interpolators.
 func testPiecewiseInterpolatorCreation(t *testing.T, fp FittablePredictor) {
 	type errorParams struct {
-		xs              []float64
-		ys              []float64
-		expectedMessage string
+		xs []float64
+		ys []float64
 	}
 	errorParamSets := []errorParams{
-		{[]float64{0, 1, 2}, []float64{-0.5, 1.5}, "xs and ys have different lengths"},
-		{[]float64{0.3}, []float64{0}, "too few points for interpolation"},
-		{[]float64{0.3, 0.3}, []float64{0, 0}, "xs values not strictly increasing"},
-		{[]float64{0.3, -0.3}, []float64{0, 0}, "xs values not strictly increasing"},
+		{[]float64{0, 1, 2}, []float64{-0.5, 1.5}},
+		{[]float64{0.3}, []float64{0}},
+		{[]float64{0.3, 0.3}, []float64{0, 0}},
+		{[]float64{0.3, -0.3}, []float64{0, 0}},
 	}
 	for _, params := range errorParamSets {
-		err := fp.Fit(params.xs, params.ys)
-		expectedMessage := fmt.Sprintf("interp: %s", params.expectedMessage)
-		if err == nil || err.Error() != expectedMessage {
-			t.Errorf("expected error for xs: %v and ys: %v with message: %s", params.xs, params.ys, expectedMessage)
+		if !panics(func() { _ = fp.Fit(params.xs, params.ys) }) {
+			t.Errorf("expected panic for xs: %v and ys: %v", params.xs, params.ys)
 		}
 	}
 }
@@ -190,4 +189,465 @@ func TestPiecewiseConstantPredict(t *testing.T) {
 	testXs := []float64{-0.9, 0.1, 0.5, 0.8, 1.2, 3.1}
 	leftYs := []float64{-0.5, 1.5, 1.5, 1.5, 1, 1}
 	testInterpolatorPredict(t, pc, testXs, leftYs, 0)
+}
+
+func TestPiecewiseCubic(t *testing.T) {
+	t.Parallel()
+	const (
+		h        = 1e-8
+		valueTol = 1e-13
+		derivTol = 1e-6
+		nPts     = 100
+	)
+	for i, test := range []struct {
+		xs []float64
+		f  func(float64) float64
+		df func(float64) float64
+	}{
+		{
+			xs: []float64{-1.001, 0.2, 2},
+			f:  func(x float64) float64 { return x * x },
+			df: func(x float64) float64 { return 2 * x },
+		},
+		{
+			xs: []float64{-1.2, -1.001, 0, 0.2, 2.01, 2.1},
+			f:  func(x float64) float64 { return 4*math.Pow(x, 3) - 2*x*x + 10*x - 7 },
+			df: func(x float64) float64 { return 12*x*x - 4*x + 10 },
+		},
+		{
+			xs: []float64{-1.001, 0.2, 10},
+			f:  func(x float64) float64 { return 1.5*x - 1 },
+			df: func(x float64) float64 { return 1.5 },
+		},
+		{
+			xs: []float64{-1.001, 0.2, 10},
+			f:  func(x float64) float64 { return -1 },
+			df: func(x float64) float64 { return 0 },
+		},
+	} {
+		ys := applyFunc(test.xs, test.f)
+		dydxs := applyFunc(test.xs, test.df)
+		var pc PiecewiseCubic
+		pc.FitWithDerivatives(test.xs, ys, dydxs)
+		n := len(test.xs)
+		got := pc.Predict(test.xs[0] - 0.1)
+		want := ys[0]
+		if got != want {
+			t.Errorf("Mismatch in value extrapolated to the left for test case %d: got %v, want %g", i, got, want)
+		}
+		got = pc.Predict(test.xs[n-1] + 0.1)
+		want = ys[n-1]
+		if got != want {
+			t.Errorf("Mismatch in value extrapolated to the right for test case %d: got %v, want %g", i, got, want)
+		}
+		for j := 0; j < n; j++ {
+			x := test.xs[j]
+			got := pc.Predict(x)
+			want := test.f(x)
+			if math.Abs(got-want) > valueTol {
+				t.Errorf("Mismatch in interpolated value at x == %g for test case %d: got %v, want %g", x, i, got, want)
+			}
+			if j < n-1 {
+				got = pc.coeffs.At(j, 0)
+				if math.Abs(got-want) > valueTol {
+					t.Errorf("Mismatch in 0-th order interpolation coefficient in %d-th node for test case %d: got %v, want %g", j, i, got, want)
+				}
+				dx := (test.xs[j+1] - x) / nPts
+				for k := 1; k < nPts; k++ {
+					xk := x + float64(k)*dx
+					got := pc.Predict(xk)
+					want := test.f(xk)
+					if math.Abs(got-want) > valueTol {
+						t.Errorf("Mismatch in interpolated value at x == %g for test case %d: got %v, want %g", x, i, got, want)
+					}
+				}
+			} else {
+				got = pc.lastY
+				if math.Abs(got-want) > valueTol {
+					t.Errorf("Mismatch in lastY for test case %d: got %v, want %g", i, got, want)
+				}
+			}
+
+			if j > 0 {
+				dx := test.xs[j] - test.xs[j-1]
+				got = ((pc.coeffs.At(j-1, 3)*dx+pc.coeffs.At(j-1, 2))*dx+pc.coeffs.At(j-1, 1))*dx + pc.coeffs.At(j-1, 0)
+				if math.Abs(got-want) > valueTol {
+					t.Errorf("Interpolation coefficients in %d-th node produce mismatch in interpolated value at %g for test case %d: got %v, want %g", j-1, x, i, got, want)
+				}
+			}
+			got = discrDerivPredict(&pc, x, h, j, n)
+			want = test.df(x)
+			if math.Abs(got-want) > derivTol {
+				t.Errorf("Mismatch in interpolated derivative value at x == %g for test case %d: got %v, want %g", x, i, got, want)
+			}
+			if j < n-1 {
+				got = pc.coeffs.At(j, 1)
+				if math.Abs(got-want) > valueTol {
+					t.Errorf("Mismatch in 1-st order interpolation coefficient in %d-th node for test case %d: got %v, want %g", j, i, got, want)
+				}
+			}
+			if j > 0 {
+				dx := test.xs[j] - test.xs[j-1]
+				got = (3*pc.coeffs.At(j-1, 3)*dx+2*pc.coeffs.At(j-1, 2))*dx + pc.coeffs.At(j-1, 1)
+				if math.Abs(got-want) > valueTol {
+					t.Errorf("Interpolation coefficients in %d-th node produce mismatch in interpolated derivative value at %g for test case %d: got %v, want %g", j-1, x, i, got, want)
+				}
+			}
+		}
+	}
+}
+
+func TestPiecewiseCubicFitWithDerivatives(t *testing.T) {
+	t.Parallel()
+	xs := []float64{-1, 0, 1}
+	ys := make([]float64, 3)
+	dydxs := make([]float64, 3)
+	leftPoly := func(x float64) float64 {
+		return x*x - x + 1
+	}
+	leftPolyDerivative := func(x float64) float64 {
+		return 2*x - 1
+	}
+	rightPoly := func(x float64) float64 {
+		return x*x*x - x + 1
+	}
+	rightPolyDerivative := func(x float64) float64 {
+		return 3*x*x - 1
+	}
+	ys[0] = leftPoly(xs[0])
+	ys[1] = leftPoly(xs[1])
+	ys[2] = rightPoly(xs[2])
+	dydxs[0] = leftPolyDerivative(xs[0])
+	dydxs[1] = leftPolyDerivative(xs[1])
+	dydxs[2] = rightPolyDerivative(xs[2])
+	var pc PiecewiseCubic
+	pc.FitWithDerivatives(xs, ys, dydxs)
+	lastY := rightPoly(xs[2])
+	if pc.lastY != lastY {
+		t.Errorf("Mismatch in lastY: got %v, want %g", pc.lastY, lastY)
+	}
+	if !floats.Equal(pc.xs, xs) {
+		t.Errorf("Mismatch in xs: got %v, want %v", pc.xs, xs)
+	}
+	coeffs := mat.NewDense(2, 4, []float64{3, -3, 1, 0, 1, -1, 0, 1})
+	if !mat.EqualApprox(&pc.coeffs, coeffs, 1e-14) {
+		t.Errorf("Mismatch in coeffs: got %v, want %v", pc.coeffs, coeffs)
+	}
+}
+
+func TestPiecewiseCubicFitWithDerivativesErrors(t *testing.T) {
+	t.Parallel()
+	for _, test := range []struct {
+		xs, ys, dydxs []float64
+	}{
+		{
+			xs:    []float64{0, 1, 2},
+			ys:    []float64{10, 20},
+			dydxs: []float64{0, 0, 0},
+		},
+		{
+			xs:    []float64{0, 1, 1},
+			ys:    []float64{10, 20, 30},
+			dydxs: []float64{0, 0, 0, 0},
+		},
+		{
+			xs:    []float64{0},
+			ys:    []float64{0},
+			dydxs: []float64{0},
+		},
+		{
+			xs:    []float64{0, 1, 1},
+			ys:    []float64{10, 20, 10},
+			dydxs: []float64{0, 0, 0},
+		},
+	} {
+		var pc PiecewiseCubic
+		if !panics(func() { pc.FitWithDerivatives(test.xs, test.ys, test.dydxs) }) {
+			t.Errorf("expected panic for xs: %v, ys: %v and dydxs: %v", test.xs, test.ys, test.dydxs)
+		}
+	}
+}
+
+func TestAkimaSpline(t *testing.T) {
+	t.Parallel()
+	const tol = 1e-14
+	for i, test := range []struct {
+		xs []float64
+		f  func(float64) float64
+	}{
+		{
+			xs: []float64{-5, -3, -2, -1.5, -1, 0.5, 1.5, 2.5, 3},
+			f:  func(x float64) float64 { return x * x },
+		},
+		{
+			xs: []float64{-5, -3, -2, -1.5, -1, 0.5, 1.5, 2.5, 3},
+			f:  func(x float64) float64 { return math.Pow(x, 3.) - x*x + 2 },
+		},
+		{
+			xs: []float64{-5, -3, -2, -1.5, -1, 0.5, 1.5, 2.5, 3},
+			f:  func(x float64) float64 { return -10 * x },
+		},
+		{
+			xs: []float64{-5, -3, -2, -1.5, -1, 0.5, 1.5, 2.5, 3},
+			f:  math.Sin,
+		},
+		{
+			xs: []float64{0, 1},
+			f:  math.Exp,
+		},
+		{
+			xs: []float64{-1, 0.5},
+			f:  math.Cos,
+		},
+	} {
+		var as AkimaSpline
+		n := len(test.xs)
+		ys := applyFunc(test.xs, test.f)
+		err := as.Fit(test.xs, ys)
+		if err != nil {
+			t.Errorf("Error when fitting AkimaSpline in test case %d: %v", i, err)
+		}
+		for j := 0; j < n; j++ {
+			x := test.xs[j]
+			got := as.Predict(x)
+			want := test.f(x)
+			if math.Abs(got-want) > tol {
+				t.Errorf("Mismatch in interpolated value at x == %g for test case %d: got %v, want %g", x, i, got, want)
+			}
+		}
+		if n == 2 {
+			got := as.cubic.coeffs.At(0, 1)
+			want := (ys[1] - ys[0]) / (test.xs[1] - test.xs[0])
+			if math.Abs(got-want) > tol {
+				t.Errorf("Mismatch in approximated slope for length-2 test case %d: got %v, want %g", i, got, want)
+			}
+			for j := 2; i < 4; j++ {
+				got := as.cubic.coeffs.At(0, j)
+				if got != 0 {
+					t.Errorf("Non-zero order-%d coefficient for length-2 test case %d: got %v", j, i, got)
+				}
+			}
+		}
+	}
+}
+
+func TestAkimaSplineFitErrors(t *testing.T) {
+	t.Parallel()
+	for _, test := range []struct {
+		xs, ys []float64
+	}{
+		{
+			xs: []float64{0, 1, 2},
+			ys: []float64{10, 20},
+		},
+		{
+			xs: []float64{0, 1},
+			ys: []float64{10, 20, 30},
+		},
+		{
+			xs: []float64{0},
+			ys: []float64{0},
+		},
+		{
+			xs: []float64{0, 1, 1},
+			ys: []float64{10, 20, 10},
+		},
+		{
+			xs: []float64{0, 2, 1},
+			ys: []float64{10, 20, 10},
+		},
+		{
+			xs: []float64{0, 0},
+			ys: []float64{-1, 2},
+		},
+		{
+			xs: []float64{0, -1},
+			ys: []float64{-1, 2},
+		},
+	} {
+		var as AkimaSpline
+		if !panics(func() { _ = as.Fit(test.xs, test.ys) }) {
+			t.Errorf("expected panic for xs: %v and ys: %v", test.xs, test.ys)
+		}
+	}
+}
+
+func TestAkimaWeightedAverage(t *testing.T) {
+	t.Parallel()
+	for i, test := range []struct {
+		v1, v2, w1, w2, want float64
+		// "want" values calculated by hand.
+	}{
+		{
+			v1:   -1,
+			v2:   1,
+			w1:   0,
+			w2:   0,
+			want: 0,
+		},
+		{
+			v1:   -1,
+			v2:   1,
+			w1:   1e6,
+			w2:   1e6,
+			want: 0,
+		},
+		{
+			v1:   -1,
+			v2:   1,
+			w1:   1e-10,
+			w2:   0,
+			want: -1,
+		},
+		{
+			v1:   -1,
+			v2:   1,
+			w1:   0,
+			w2:   1e-10,
+			want: 1,
+		},
+		{
+			v1:   0,
+			v2:   1000,
+			w1:   1e-13,
+			w2:   3e-13,
+			want: 750,
+		},
+		{
+			v1:   0,
+			v2:   1000,
+			w1:   3e-13,
+			w2:   1e-13,
+			want: 250,
+		},
+	} {
+		got := akimaWeightedAverage(test.v1, test.v2, test.w1, test.w2)
+		if !floats.EqualWithinAbsOrRel(got, test.want, 1e-14, 1e-14) {
+			t.Errorf("Mismatch in test case %d: got %v, want %g", i, got, test.want)
+		}
+	}
+}
+
+func TestAkimaSlopes(t *testing.T) {
+	t.Parallel()
+	for i, test := range []struct {
+		xs, ys, want []float64
+		// "want" values calculated by hand.
+	}{
+		{
+			xs:   []float64{-2, 0, 1},
+			ys:   []float64{2, 0, 1.5},
+			want: []float64{-6, -3.5, -1, 1.5, 4, 6.5},
+		},
+		{
+			xs:   []float64{-2, -0.5, 1},
+			ys:   []float64{-2, -0.5, 1},
+			want: []float64{1, 1, 1, 1, 1, 1},
+		},
+		{
+			xs:   []float64{-2, -0.5, 1},
+			ys:   []float64{1, 1, 1},
+			want: []float64{0, 0, 0, 0, 0, 0},
+		},
+		{
+			xs:   []float64{0, 1.5, 2, 4, 4.5, 5, 6, 7.5, 8},
+			ys:   []float64{-5, -4, -3.5, -3.25, -3.25, -2.5, -1.5, -1, 2},
+			want: []float64{0, 1. / 3, 2. / 3, 1, 0.125, 0, 1.5, 1, 1. / 3, 6, 12 - 1./3, 18 - 2./3},
+		},
+	} {
+		got := akimaSlopes(test.xs, test.ys)
+		if !floats.EqualApprox(got, test.want, 1e-14) {
+			t.Errorf("Mismatch in test case %d: got %v, want %v", i, got, test.want)
+		}
+	}
+}
+
+func TestAkimaSlopesErrors(t *testing.T) {
+	t.Parallel()
+	for _, test := range []struct {
+		xs, ys []float64
+	}{
+		{
+			xs: []float64{0, 1, 2},
+			ys: []float64{10, 20},
+		},
+		{
+			xs: []float64{0, 1},
+			ys: []float64{10, 20, 30},
+		},
+		{
+			xs: []float64{0, 2},
+			ys: []float64{0, 1},
+		},
+		{
+			xs: []float64{0, 1, 1},
+			ys: []float64{10, 20, 10},
+		},
+		{
+			xs: []float64{0, 2, 1},
+			ys: []float64{10, 20, 10},
+		},
+		{
+			xs: []float64{0, 0},
+			ys: []float64{-1, 2},
+		},
+		{
+			xs: []float64{0, -1},
+			ys: []float64{-1, 2},
+		},
+	} {
+		if !panics(func() { akimaSlopes(test.xs, test.ys) }) {
+			t.Errorf("expected panic for xs: %v and ys: %v", test.xs, test.ys)
+		}
+	}
+}
+
+func TestAkimaWeights(t *testing.T) {
+	t.Parallel()
+	const tol = 1e-14
+	slopes := []float64{-2, -1, -0.1, 0.2, 1.2, 2.5}
+	// "want" values calculated by hand.
+	want := [][]float64{
+		{0.3, 1},
+		{1, 0.9},
+		{1.3, 0.3},
+	}
+	for i := 0; i < len(want); i++ {
+		gotLeft, gotRight := akimaWeights(slopes, i)
+		if math.Abs(gotLeft-want[i][0]) > tol {
+			t.Errorf("Mismatch in left weight for node %d: got %v, want %g", i, gotLeft, want[i][0])
+		}
+		if math.Abs(gotRight-want[i][1]) > tol {
+			t.Errorf("Mismatch in left weight for node %d: got %v, want %g", i, gotRight, want[i][1])
+		}
+	}
+}
+
+func applyFunc(xs []float64, f func(x float64) float64) []float64 {
+	ys := make([]float64, len(xs))
+	for i, x := range xs {
+		ys[i] = f(x)
+	}
+	return ys
+}
+
+func panics(fun func()) (b bool) {
+	defer func() {
+		err := recover()
+		if err != nil {
+			b = true
+		}
+	}()
+	fun()
+	return
+}
+
+func discrDerivPredict(p Predictor, x, h float64, j, n int) float64 {
+	if j == 0 {
+		return (p.Predict(x+h) - p.Predict(x)) / h
+	} else if j == n-1 {
+		return (p.Predict(x) - p.Predict(x-h)) / h
+	} else {
+		return (p.Predict(x+h) - p.Predict(x-h)) / (2 * h)
+	}
 }

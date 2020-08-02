@@ -25,7 +25,8 @@
 //  // Allocate a zeroed real matrix of size 3×5
 //  zero := mat.NewDense(3, 5, nil)
 // If a backing data slice is provided, the matrix will have those elements.
-// All matrices are all stored in row-major format.
+// All matrices are all stored in row-major format and users should consider
+// this when expressing matrix arithmetic to ensure optimal performance.
 //  // Generate a 6×6 matrix of random values.
 //  data := make([]float64, 36)
 //  for i := range data {

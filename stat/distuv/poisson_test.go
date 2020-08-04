@@ -11,7 +11,7 @@ import (
 
 	"golang.org/x/exp/rand"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 func TestPoissonProb(t *testing.T) {
@@ -57,7 +57,7 @@ func TestPoissonProb(t *testing.T) {
 	} {
 		p := Poisson{Lambda: tt.lambda}
 		got := p.Prob(tt.k)
-		if !floats.EqualWithinAbs(got, tt.want, tol) {
+		if !scalar.EqualWithinAbs(got, tt.want, tol) {
 			t.Errorf("test-%d: got=%e. want=%e\n", i, got, tt.want)
 		}
 	}
@@ -95,7 +95,7 @@ func TestPoissonCDF(t *testing.T) {
 	} {
 		p := Poisson{Lambda: tt.lambda}
 		got := p.CDF(tt.k)
-		if !floats.EqualWithinAbs(got, tt.want, tol) {
+		if !scalar.EqualWithinAbs(got, tt.want, tol) {
 			t.Errorf("test-%d: got=%e. want=%e\n", i, got, tt.want)
 		}
 	}

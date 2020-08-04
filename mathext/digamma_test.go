@@ -8,7 +8,7 @@ import (
 	"math"
 	"testing"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 var result float64
@@ -28,7 +28,7 @@ func TestDigamma(t *testing.T) {
 		{math.NaN(), math.NaN()},
 		{-1.0, math.NaN()},
 		{-100.5, 4.615124601338064117341315601525112558522917517910505881343},
-		{.5, -1.96351002602142347944097633299875556719315960466043},
+		{0.5, -1.96351002602142347944097633299875556719315960466043},
 		{10, 2.251752589066721107647456163885851537211808918028330369448},
 		{math.Pow10(20), 46.05170185988091368035482909368728415202202143924212618733},
 		{-1.111111111e9, math.NaN()},
@@ -36,7 +36,7 @@ func TestDigamma(t *testing.T) {
 	} {
 
 		got := Digamma(test.x)
-		if !(math.IsNaN(got) && math.IsNaN(test.want)) && !floats.EqualWithinAbsOrRel(got, test.want, tol, tol) {
+		if !(math.IsNaN(got) && math.IsNaN(test.want)) && !scalar.EqualWithinAbsOrRel(got, test.want, tol, tol) {
 			t.Errorf("test %d Digamma(%g) failed: got %g want %g", i, test.x, got, test.want)
 		}
 	}

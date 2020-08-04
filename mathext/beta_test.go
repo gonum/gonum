@@ -8,7 +8,7 @@ import (
 	"math"
 	"testing"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/mathext"
 )
 
@@ -88,7 +88,7 @@ func TestBeta(t *testing.T) {
 	for i, test := range betaTests {
 		v := mathext.Beta(test.p, test.q)
 		testOK := func(x float64) bool {
-			return floats.EqualWithinAbsOrRel(x, test.want, 1e-15, 1e-15) || (math.IsNaN(test.want) && math.IsNaN(x))
+			return scalar.EqualWithinAbsOrRel(x, test.want, 1e-15, 1e-15) || (math.IsNaN(test.want) && math.IsNaN(x))
 		}
 		if !testOK(v) {
 			t.Errorf("test #%d: Beta(%v, %v)=%v. want=%v\n",
@@ -109,7 +109,7 @@ func TestBeta(t *testing.T) {
 
 		vv := mathext.Beta(test.p, test.q+1)
 		uu := mathext.Beta(test.p+1, test.q)
-		if !floats.EqualWithinAbsOrRel(v, vv+uu, 1e-15, 1e-15) {
+		if !scalar.EqualWithinAbsOrRel(v, vv+uu, 1e-15, 1e-15) {
 			t.Errorf(
 				"test #%[1]d: Beta(%[2]v, %[3]v)=%[4]v != Beta(%[2]v+1, %[3]v) + Beta(%[2]v, %[3]v+1) (=%[5]v + %[6]v = %[7]v)\n",
 				i, test.p, test.q, v, uu, vv, uu+vv,
@@ -117,7 +117,7 @@ func TestBeta(t *testing.T) {
 		}
 
 		vbeta2 := beta2(test.p, test.q)
-		if !floats.EqualWithinAbsOrRel(v, vbeta2, 1e-15, 1e-15) {
+		if !scalar.EqualWithinAbsOrRel(v, vbeta2, 1e-15, 1e-15) {
 			t.Errorf(
 				"test #%[1]d: Beta(%[2]v, %[3]v) != Γ(p)Γ(q) / Γ(p+q) (v=%[4]v u=%[5]v)\n",
 				i, test.p, test.q, v, vbeta2,
@@ -149,7 +149,7 @@ func TestLbeta(t *testing.T) {
 		v := mathext.Lbeta(test.p, test.q)
 
 		testOK := func(x float64) bool {
-			return floats.EqualWithinAbsOrRel(x, want, 1e-15, 1e-15) || (math.IsNaN(want) && math.IsNaN(x))
+			return scalar.EqualWithinAbsOrRel(x, want, 1e-15, 1e-15) || (math.IsNaN(want) && math.IsNaN(x))
 		}
 		if !testOK(v) {
 			t.Errorf("test #%d: Lbeta(%v, %v)=%v. want=%v\n",
@@ -169,7 +169,7 @@ func TestLbeta(t *testing.T) {
 		}
 
 		vbeta2 := math.Log(beta2(test.p, test.q))
-		if !floats.EqualWithinAbsOrRel(v, vbeta2, 1e-15, 1e-15) {
+		if !scalar.EqualWithinAbsOrRel(v, vbeta2, 1e-15, 1e-15) {
 			t.Errorf(
 				"test #%[1]d: Lbeta(%[2]v, %[3]v) != Log(Γ(p)Γ(q) / Γ(p+q)) (v=%[4]v u=%[5]v)\n",
 				i, test.p, test.q, v, vbeta2,

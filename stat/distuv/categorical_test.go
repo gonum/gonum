@@ -11,6 +11,7 @@ import (
 	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 const (
@@ -163,7 +164,7 @@ func samedDistCategorical(dist Categorical, counts, probs []float64, tol float64
 			same = false
 			break
 		}
-		if !floats.EqualWithinAbsOrRel(prob, counts[i], tol, tol) {
+		if !scalar.EqualWithinAbsOrRel(prob, counts[i], tol, tol) {
 			same = false
 			break
 		}

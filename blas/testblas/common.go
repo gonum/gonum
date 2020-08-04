@@ -10,8 +10,9 @@ import (
 	"testing"
 
 	"golang.org/x/exp/rand"
+
 	"gonum.org/v1/gonum/blas"
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 // throwPanic will throw unexpected panics if true, or will just report them as errors if false
@@ -532,7 +533,7 @@ func zEqualApprox(a, b []complex128, tol float64) bool {
 		panic("mismatched slice length")
 	}
 	for i, ai := range a {
-		if !floats.EqualWithinAbs(cmplx.Abs(ai), cmplx.Abs(b[i]), tol) {
+		if !scalar.EqualWithinAbs(cmplx.Abs(ai), cmplx.Abs(b[i]), tol) {
 			return false
 		}
 	}

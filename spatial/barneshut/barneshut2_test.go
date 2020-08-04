@@ -12,7 +12,7 @@ import (
 
 	"golang.org/x/exp/rand"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/spatial/r2"
 )
 
@@ -373,10 +373,10 @@ func TestPlane(t *testing.T) {
 				}
 			})
 			center, mass := centerOfMass2(sub)
-			if !floats.EqualWithinAbsOrRel(center.X, tl.center.X, tol, tol) || !floats.EqualWithinAbsOrRel(center.Y, tl.center.Y, tol, tol) {
+			if !scalar.EqualWithinAbsOrRel(center.X, tl.center.X, tol, tol) || !scalar.EqualWithinAbsOrRel(center.Y, tl.center.Y, tol, tol) {
 				t.Errorf("unexpected result for %q for center of mass: got:%f want:%f", test.name, tl.center, center)
 			}
-			if !floats.EqualWithinAbsOrRel(mass, tl.mass, tol, tol) {
+			if !scalar.EqualWithinAbsOrRel(mass, tl.mass, tol, tol) {
 				t.Errorf("unexpected result for %q for total mass: got:%f want:%f", test.name, tl.mass, mass)
 			}
 		})

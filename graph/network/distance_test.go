@@ -8,7 +8,7 @@ import (
 	"math"
 	"testing"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/graph/path"
 	"gonum.org/v1/gonum/graph/simple"
 )
@@ -163,7 +163,7 @@ func TestDistanceCentralityUndirected(t *testing.T) {
 
 		got = Closeness(g, p)
 		for n := range test.g {
-			if !floats.EqualWithinAbsOrRel(got[int64(n)], 1/test.farness[int64(n)], tol, tol) {
+			if !scalar.EqualWithinAbsOrRel(got[int64(n)], 1/test.farness[int64(n)], tol, tol) {
 				want := make(map[int64]float64)
 				for n, v := range test.farness {
 					want[n] = 1 / v
@@ -176,7 +176,7 @@ func TestDistanceCentralityUndirected(t *testing.T) {
 
 		got = Farness(g, p)
 		for n := range test.g {
-			if !floats.EqualWithinAbsOrRel(got[int64(n)], test.farness[int64(n)], tol, tol) {
+			if !scalar.EqualWithinAbsOrRel(got[int64(n)], test.farness[int64(n)], tol, tol) {
 				t.Errorf("unexpected farness for test %d:\ngot: %v\nwant:%v",
 					i, orderedFloats(got, prec), orderedFloats(test.farness, prec))
 				break
@@ -185,7 +185,7 @@ func TestDistanceCentralityUndirected(t *testing.T) {
 
 		got = Harmonic(g, p)
 		for n := range test.g {
-			if !floats.EqualWithinAbsOrRel(got[int64(n)], test.harmonic[int64(n)], tol, tol) {
+			if !scalar.EqualWithinAbsOrRel(got[int64(n)], test.harmonic[int64(n)], tol, tol) {
 				t.Errorf("unexpected harmonic centrality for test %d:\ngot: %v\nwant:%v",
 					i, orderedFloats(got, prec), orderedFloats(test.harmonic, prec))
 				break
@@ -194,7 +194,7 @@ func TestDistanceCentralityUndirected(t *testing.T) {
 
 		got = Residual(g, p)
 		for n := range test.g {
-			if !floats.EqualWithinAbsOrRel(got[int64(n)], test.residual[int64(n)], tol, tol) {
+			if !scalar.EqualWithinAbsOrRel(got[int64(n)], test.residual[int64(n)], tol, tol) {
 				t.Errorf("unexpected residual closeness for test %d:\ngot: %v\nwant:%v",
 					i, orderedFloats(got, prec), orderedFloats(test.residual, prec))
 				break
@@ -353,7 +353,7 @@ func TestDistanceCentralityDirected(t *testing.T) {
 
 		got = Closeness(g, p)
 		for n := range test.g {
-			if !floats.EqualWithinAbsOrRel(got[int64(n)], 1/test.farness[int64(n)], tol, tol) {
+			if !scalar.EqualWithinAbsOrRel(got[int64(n)], 1/test.farness[int64(n)], tol, tol) {
 				want := make(map[int64]float64)
 				for n, v := range test.farness {
 					want[int64(n)] = 1 / v
@@ -366,7 +366,7 @@ func TestDistanceCentralityDirected(t *testing.T) {
 
 		got = Farness(g, p)
 		for n := range test.g {
-			if !floats.EqualWithinAbsOrRel(got[int64(n)], test.farness[int64(n)], tol, tol) {
+			if !scalar.EqualWithinAbsOrRel(got[int64(n)], test.farness[int64(n)], tol, tol) {
 				t.Errorf("unexpected farness for test %d:\ngot: %v\nwant:%v",
 					i, orderedFloats(got, prec), orderedFloats(test.farness, prec))
 				break
@@ -375,7 +375,7 @@ func TestDistanceCentralityDirected(t *testing.T) {
 
 		got = Harmonic(g, p)
 		for n := range test.g {
-			if !floats.EqualWithinAbsOrRel(got[int64(n)], test.harmonic[int64(n)], tol, tol) {
+			if !scalar.EqualWithinAbsOrRel(got[int64(n)], test.harmonic[int64(n)], tol, tol) {
 				t.Errorf("unexpected harmonic centrality for test %d:\ngot: %v\nwant:%v",
 					i, orderedFloats(got, prec), orderedFloats(test.harmonic, prec))
 				break
@@ -384,7 +384,7 @@ func TestDistanceCentralityDirected(t *testing.T) {
 
 		got = Residual(g, p)
 		for n := range test.g {
-			if !floats.EqualWithinAbsOrRel(got[int64(n)], test.residual[int64(n)], tol, tol) {
+			if !scalar.EqualWithinAbsOrRel(got[int64(n)], test.residual[int64(n)], tol, tol) {
 				t.Errorf("unexpected residual closeness for test %d:\ngot: %v\nwant:%v",
 					i, orderedFloats(got, prec), orderedFloats(test.residual, prec))
 				break

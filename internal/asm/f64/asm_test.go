@@ -10,7 +10,7 @@ import (
 
 	"golang.org/x/exp/rand"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 const (
@@ -150,7 +150,7 @@ func same(a, b float64) bool {
 
 // sameApprox tests for nan-aware equality within tolerance.
 func sameApprox(a, b, tol float64) bool {
-	return same(a, b) || floats.EqualWithinAbsOrRel(a, b, tol, tol)
+	return same(a, b) || scalar.EqualWithinAbsOrRel(a, b, tol, tol)
 }
 
 var ( // Offset sets for testing alignment handling in Unitary assembly functions.

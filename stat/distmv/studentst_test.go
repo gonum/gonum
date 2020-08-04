@@ -11,6 +11,7 @@ import (
 	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/stat"
 )
@@ -77,7 +78,7 @@ func TestStudentTProbs(t *testing.T) {
 			if !floats.Same(x, xcpy) {
 				t.Errorf("X modified during call to prob, %v, %v", x, xcpy)
 			}
-			if !floats.EqualWithinAbsOrRel(p, test.probs[i], 1e-10, 1e-10) {
+			if !scalar.EqualWithinAbsOrRel(p, test.probs[i], 1e-10, 1e-10) {
 				t.Errorf("Probability mismatch. X = %v. Got %v, want %v.", x, p, test.probs[i])
 			}
 		}

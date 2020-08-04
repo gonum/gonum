@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"math"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/num/dualcmplx"
 )
 
@@ -81,8 +81,8 @@ func Example() {
 		)
 
 		// Clean up floating point error for clarity.
-		pp.x = floats.Round(pp.x, 2)
-		pp.y = floats.Round(pp.y, 2)
+		pp.x = scalar.Round(pp.x, 2)
+		pp.y = scalar.Round(pp.y, 2)
 
 		fmt.Printf(" %d %+v -> %+v\n", i, p, pp)
 	}
@@ -112,8 +112,8 @@ func Example() {
 		)
 
 		// Clean up floating point error for clarity.
-		pp.x = floats.Round(pp.x, 2)
-		pp.y = floats.Round(pp.y, 2)
+		pp.x = scalar.Round(pp.x, 2)
+		pp.y = scalar.Round(pp.y, 2)
 
 		fmt.Printf(" %d %+v -> %+v\n", i, p, pp)
 	}

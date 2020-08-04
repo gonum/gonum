@@ -10,7 +10,8 @@ import (
 	"testing"
 
 	"golang.org/x/exp/rand"
-	"gonum.org/v1/gonum/floats"
+
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 func TestUniformProb(t *testing.T) {
@@ -28,12 +29,12 @@ func TestUniformProb(t *testing.T) {
 	} {
 		u := Uniform{test.min, test.max, nil}
 		pdf := u.Prob(test.x)
-		if !floats.EqualWithinAbsOrRel(pdf, test.want, 1e-15, 1e-15) {
+		if !scalar.EqualWithinAbsOrRel(pdf, test.want, 1e-15, 1e-15) {
 			t.Errorf("PDF mismatch, x = %v, min = %v, max = %v. Got %v, want %v", test.x, test.min, test.max, pdf, test.want)
 		}
 		logWant := math.Log(test.want)
 		logPdf := u.LogProb(test.x)
-		if !floats.EqualWithinAbsOrRel(logPdf, logWant, 1e-15, 1e-15) {
+		if !scalar.EqualWithinAbsOrRel(logPdf, logWant, 1e-15, 1e-15) {
 			t.Errorf("Log PDF mismatch, x = %v, min = %v, max = %v. Got %v, want %v", test.x, test.min, test.max, logPdf, logWant)
 		}
 	}
@@ -54,11 +55,11 @@ func TestUniformCDFSurvival(t *testing.T) {
 	} {
 		u := Uniform{test.min, test.max, nil}
 		cdf := u.CDF(test.x)
-		if !floats.EqualWithinAbsOrRel(cdf, test.want, 1e-15, 1e-15) {
+		if !scalar.EqualWithinAbsOrRel(cdf, test.want, 1e-15, 1e-15) {
 			t.Errorf("CDF mismatch, x = %v, min = %v, max = %v. Got %v, want %v", test.x, test.min, test.max, cdf, test.want)
 		}
 		survival := u.Survival(test.x)
-		if !floats.EqualWithinAbsOrRel(survival, 1-test.want, 1e-15, 1e-15) {
+		if !scalar.EqualWithinAbsOrRel(survival, 1-test.want, 1e-15, 1e-15) {
 			t.Errorf("CDF mismatch, x = %v, min = %v, max = %v. Got %v, want %v", test.x, test.min, test.max, survival, 1-test.want)
 		}
 	}

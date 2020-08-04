@@ -2,7 +2,7 @@
 // Use of this code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package floats_test
+package scalar_test
 
 import (
 	"bufio"
@@ -10,7 +10,7 @@ import (
 	"log"
 	"strings"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/stat"
 )
 
@@ -25,7 +25,7 @@ missing
 	var vals, weights []float64
 	sc := bufio.NewScanner(strings.NewReader(data))
 	for sc.Scan() {
-		v, w, err := floats.ParseWithNA(sc.Text(), "missing")
+		v, w, err := scalar.ParseWithNA(sc.Text(), "missing")
 		if err != nil {
 			log.Fatal(err)
 		}

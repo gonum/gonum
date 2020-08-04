@@ -12,7 +12,7 @@ import (
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/lapack"
 )
 
@@ -78,9 +78,9 @@ func DpoconTest(t *testing.T, impl Dpoconer) {
 		iwork := make([]int, n)
 		cond := impl.Dpocon(uplo, n, a, lda, anorm, work, iwork)
 		// Error if not the same order, otherwise log the difference.
-		if !floats.EqualWithinAbsOrRel(cond, test.cond, 1e0, 1e0) {
+		if !scalar.EqualWithinAbsOrRel(cond, test.cond, 1e0, 1e0) {
 			t.Errorf("Cond mismatch. Want %v, got %v.", test.cond, cond)
-		} else if !floats.EqualWithinAbsOrRel(cond, test.cond, 1e-14, 1e-14) {
+		} else if !scalar.EqualWithinAbsOrRel(cond, test.cond, 1e-14, 1e-14) {
 			log.Printf("Dpocon cond mismatch. Want %v, got %v.", test.cond, cond)
 		}
 	}
@@ -147,9 +147,9 @@ func DpoconTest(t *testing.T, impl Dpoconer) {
 				impl.Dgetrf(n, n, aDense, lda, ipiv)
 				want := impl.Dgecon(lapack.MaxColumnSum, n, aDense, lda, denseNorm, work, iwork)
 				// Error if not the same order, otherwise log the difference.
-				if !floats.EqualWithinAbsOrRel(want, got, 1e0, 1e0) {
+				if !scalar.EqualWithinAbsOrRel(want, got, 1e0, 1e0) {
 					t.Errorf("Dpocon and Dgecon mismatch. Dpocon %v, Dgecon %v.", got, want)
-				} else if !floats.EqualWithinAbsOrRel(want, got, 1e-14, 1e-14) {
+				} else if !scalar.EqualWithinAbsOrRel(want, got, 1e-14, 1e-14) {
 					log.Printf("Dpocon and Dgecon mismatch. Dpocon %v, Dgecon %v.", got, want)
 				}
 			}

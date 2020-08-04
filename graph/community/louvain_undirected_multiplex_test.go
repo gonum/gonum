@@ -13,6 +13,7 @@ import (
 	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/simple"
@@ -274,7 +275,7 @@ func TestCommunityQUndirectedMultiplex(t *testing.T) {
 			}
 			q := QMultiplex(g, communities, weights, []float64{structure.resolution})
 			got := floats.Sum(q)
-			if !floats.EqualWithinAbsOrRel(got, structure.want, structure.tol, structure.tol) && !math.IsNaN(structure.want) {
+			if !scalar.EqualWithinAbsOrRel(got, structure.want, structure.tol, structure.tol) && !math.IsNaN(structure.want) {
 				for _, c := range communities {
 					sort.Sort(ordered.ByID(c))
 				}
@@ -378,7 +379,7 @@ tests:
 					}
 				}
 
-				if !floats.EqualWithinAbsOrRel(got, want, structure.tol, structure.tol) || gotDst != wantDst {
+				if !scalar.EqualWithinAbsOrRel(got, want, structure.tol, structure.tol) || gotDst != wantDst {
 					t.Errorf("unexpected result moving n=%d in c=%d of %s/%.4v: got: %.4v,%d want: %.4v,%d"+
 						"\n\t%v\n\t%v",
 						target.ID(), communityOf[target.ID()], test.name, structure.resolution, got, gotDst, want, wantDst,
@@ -428,17 +429,17 @@ tests:
 
 			cg0 := reduceUndirectedMultiplex(g, nil, weights)
 			cg0Qnull := QMultiplex(cg0, cg0.Structure(), weights, nil)
-			if !floats.EqualWithinAbsOrRel(floats.Sum(gQnull), floats.Sum(cg0Qnull), structure.tol, structure.tol) {
+			if !scalar.EqualWithinAbsOrRel(floats.Sum(gQnull), floats.Sum(cg0Qnull), structure.tol, structure.tol) {
 				t.Errorf("disagreement between null Q from method: %v and function: %v", cg0Qnull, gQnull)
 			}
 			cg0Q := QMultiplex(cg0, communities, weights, []float64{structure.resolution})
-			if !floats.EqualWithinAbsOrRel(floats.Sum(gQ), floats.Sum(cg0Q), structure.tol, structure.tol) {
+			if !scalar.EqualWithinAbsOrRel(floats.Sum(gQ), floats.Sum(cg0Q), structure.tol, structure.tol) {
 				t.Errorf("unexpected Q result after initial reduction: got: %v want :%v", cg0Q, gQ)
 			}
 
 			cg1 := reduceUndirectedMultiplex(cg0, communities, weights)
 			cg1Q := QMultiplex(cg1, cg1.Structure(), weights, []float64{structure.resolution})
-			if !floats.EqualWithinAbsOrRel(floats.Sum(gQ), floats.Sum(cg1Q), structure.tol, structure.tol) {
+			if !scalar.EqualWithinAbsOrRel(floats.Sum(gQ), floats.Sum(cg1Q), structure.tol, structure.tol) {
 				t.Errorf("unexpected Q result after second reduction: got: %v want :%v", cg1Q, gQ)
 			}
 		}
@@ -519,7 +520,7 @@ func TestMoveLocalUndirectedMultiplex(t *testing.T) {
 					l.move(dst, src)
 					after := floats.Sum(QMultiplex(r, l.communities, weights, []float64{structure.resolution}))
 					want := after - before
-					if !floats.EqualWithinAbsOrRel(dQ, want, structure.tol, structure.tol) {
+					if !scalar.EqualWithinAbsOrRel(dQ, want, structure.tol, structure.tol) {
 						t.Errorf("unexpected deltaQ: got: %v want: %v", dQ, want)
 					}
 				}

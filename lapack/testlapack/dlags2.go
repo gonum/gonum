@@ -12,7 +12,7 @@ import (
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 type Dlags2er interface {
@@ -45,15 +45,15 @@ func Dlags2Test(t *testing.T, impl Dlags2er) {
 			// Check that U, V, Q are orthogonal matrices (their
 			// determinant is equal to 1).
 			detU := det2x2(csu, snu, -snu, csu)
-			if !floats.EqualWithinAbsOrRel(math.Abs(detU), 1, 1e-14, 1e-14) {
+			if !scalar.EqualWithinAbsOrRel(math.Abs(detU), 1, 1e-14, 1e-14) {
 				t.Errorf("U not orthogonal: det(U)=%v", detU)
 			}
 			detV := det2x2(csv, snv, -snv, csv)
-			if !floats.EqualWithinAbsOrRel(math.Abs(detV), 1, 1e-14, 1e-14) {
+			if !scalar.EqualWithinAbsOrRel(math.Abs(detV), 1, 1e-14, 1e-14) {
 				t.Errorf("V not orthogonal: det(V)=%v", detV)
 			}
 			detQ := det2x2(csq, snq, -snq, csq)
-			if !floats.EqualWithinAbsOrRel(math.Abs(detQ), 1, 1e-14, 1e-14) {
+			if !scalar.EqualWithinAbsOrRel(math.Abs(detQ), 1, 1e-14, 1e-14) {
 				t.Errorf("Q not orthogonal: det(Q)=%v", detQ)
 			}
 
@@ -106,10 +106,10 @@ func Dlags2Test(t *testing.T, impl Dlags2er) {
 				gotB = b.Data[2]
 			}
 			// Check that they are indeed zero.
-			if !floats.EqualWithinAbsOrRel(gotA, 0, 1e-14, 1e-14) {
+			if !scalar.EqualWithinAbsOrRel(gotA, 0, 1e-14, 1e-14) {
 				t.Errorf("unexpected non-zero value for zero triangle of Uᵀ*A*Q: %v", gotA)
 			}
-			if !floats.EqualWithinAbsOrRel(gotB, 0, 1e-14, 1e-14) {
+			if !scalar.EqualWithinAbsOrRel(gotB, 0, 1e-14, 1e-14) {
 				t.Errorf("unexpected non-zero value for zero triangle of Vᵀ*B*Q: %v", gotB)
 			}
 		}

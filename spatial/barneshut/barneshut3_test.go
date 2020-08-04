@@ -12,7 +12,7 @@ import (
 
 	"golang.org/x/exp/rand"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/spatial/r3"
 )
 
@@ -368,10 +368,10 @@ func TestVolume(t *testing.T) {
 				}
 			})
 			center, mass := centerOfMass3(sub)
-			if !floats.EqualWithinAbsOrRel(center.X, b.center.X, tol, tol) || !floats.EqualWithinAbsOrRel(center.Y, b.center.Y, tol, tol) || !floats.EqualWithinAbsOrRel(center.Z, b.center.Z, tol, tol) {
+			if !scalar.EqualWithinAbsOrRel(center.X, b.center.X, tol, tol) || !scalar.EqualWithinAbsOrRel(center.Y, b.center.Y, tol, tol) || !scalar.EqualWithinAbsOrRel(center.Z, b.center.Z, tol, tol) {
 				t.Errorf("unexpected result for %q for center of mass: got:%f want:%f", test.name, b.center, center)
 			}
-			if !floats.EqualWithinAbsOrRel(mass, b.mass, tol, tol) {
+			if !scalar.EqualWithinAbsOrRel(mass, b.mass, tol, tol) {
 				t.Errorf("unexpected result for %q for total mass: got:%f want:%f", test.name, b.mass, mass)
 			}
 		})

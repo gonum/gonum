@@ -9,7 +9,7 @@ import (
 
 	"golang.org/x/exp/rand"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/internal/set"
@@ -514,7 +514,7 @@ var (
 	// defaced is NaN(0xdefaced) used as a marker for -Inf weight edges
 	// within paths containing negative cycles. Routines marking these
 	// edges should use this value.
-	defaced = floats.NaNWith(0xdefaced)
+	defaced = scalar.NaNWith(0xdefaced)
 	// defacedBits is the bit pattern we look for in AllShortest to
 	// identify the edges.
 	defacedBits = math.Float64bits(defaced)

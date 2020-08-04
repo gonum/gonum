@@ -12,7 +12,7 @@ import (
 
 	"golang.org/x/exp/rand"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 type input struct {
@@ -504,13 +504,13 @@ func sameF64Approx(t *testing.T, str string, c, native, tol float64) {
 	if math.IsNaN(c) && math.IsNaN(native) {
 		return
 	}
-	if floats.EqualWithinAbsOrRel(c, native, tol, tol) {
+	if scalar.EqualWithinAbsOrRel(c, native, tol, tol) {
 		return
 	}
 	// Have a much looser tolerance for correctness when the values are large.
 	// Floating point noise makes the relative tolerance difference greater for
 	// higher values.
-	if c > 1e200 && floats.EqualWithinAbsOrRel(c, native, 10, 10) {
+	if c > 1e200 && scalar.EqualWithinAbsOrRel(c, native, 10, 10) {
 		return
 	}
 	cb := math.Float64bits(c)

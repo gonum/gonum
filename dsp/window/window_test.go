@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 var windowTests = []struct {
@@ -260,10 +261,10 @@ func equalApprox(seq1 []complex128, seq2 []float64, tol float64) bool {
 		return false
 	}
 	for i := range seq1 {
-		if !floats.EqualWithinAbsOrRel(real(seq1[i]), seq2[i], tol, tol) {
+		if !scalar.EqualWithinAbsOrRel(real(seq1[i]), seq2[i], tol, tol) {
 			return false
 		}
-		if !floats.EqualWithinAbsOrRel(imag(seq1[i]), seq2[i], tol, tol) {
+		if !scalar.EqualWithinAbsOrRel(imag(seq1[i]), seq2[i], tol, tol) {
 			return false
 		}
 	}

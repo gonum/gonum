@@ -12,6 +12,7 @@ import (
 	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 func TestStudentsTProb(t *testing.T) {
@@ -27,7 +28,7 @@ func TestStudentsTProb(t *testing.T) {
 		{0.2, 15, 5, 10, 0.0024440848858034393},
 	} {
 		pdf := StudentsT{test.mu, test.sigma, test.nu, nil}.Prob(test.x)
-		if !floats.EqualWithinAbsOrRel(pdf, test.want, 1e-10, 1e-10) {
+		if !scalar.EqualWithinAbsOrRel(pdf, test.want, 1e-10, 1e-10) {
 			t.Errorf("Pdf mismatch, x = %v, Nu = %v. Got %v, want %v", test.x, test.nu, pdf, test.want)
 		}
 	}
@@ -86,7 +87,7 @@ func TestStudentsTQuantile(t *testing.T) {
 		for _, p := range probs {
 			x := b.Quantile(p)
 			p2 := b.CDF(x)
-			if !floats.EqualWithinAbsOrRel(p, p2, 1e-10, 1e-10) {
+			if !scalar.EqualWithinAbsOrRel(p, p2, 1e-10, 1e-10) {
 				t.Errorf("mismatch between CDF and Quantile. Case %v. Want %v, got %v", i, p, p2)
 				break
 			}

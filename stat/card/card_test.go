@@ -17,7 +17,7 @@ import (
 
 	"golang.org/x/exp/rand"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 // exact is an exact cardinality accumulator.
@@ -99,7 +99,7 @@ func TestCounters(t *testing.T) {
 				}
 			}
 
-			if got := c.Count(); !floats.EqualWithinRel(got, test.count, test.tol) {
+			if got := c.Count(); !scalar.EqualWithinRel(got, test.count, test.tol) {
 				t.Errorf("unexpected count for %s: got:%.0f want:%.0f", test.name, got, test.count)
 			}
 		})
@@ -149,7 +149,7 @@ func TestUnion(t *testing.T) {
 			if err != nil {
 				t.Errorf("unexpected error from Union call: %v", err)
 			}
-			if got := u.Count(); !floats.EqualWithinRel(got, 2*test.count, 2*test.tol) {
+			if got := u.Count(); !scalar.EqualWithinRel(got, 2*test.count, 2*test.tol) {
 				t.Errorf("unexpected count for %s: got:%.0f want:%.0f", test.name, got, 2*test.count)
 			}
 		})

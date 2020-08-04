@@ -10,7 +10,7 @@ import (
 
 	"golang.org/x/exp/rand"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 type Dlapy2er interface {
@@ -24,7 +24,7 @@ func Dlapy2Test(t *testing.T, impl Dlapy2er) {
 		y := math.Abs(1e200 * rnd.NormFloat64())
 		got := impl.Dlapy2(x, y)
 		want := math.Hypot(x, y)
-		if !floats.EqualWithinRel(got, want, 1e-16) {
+		if !scalar.EqualWithinRel(got, want, 1e-16) {
 			t.Errorf("Dlapy2(%g, %g) = %g, want %g", x, y, got, want)
 		}
 	}

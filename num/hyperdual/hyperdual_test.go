@@ -9,7 +9,7 @@ import (
 	"math"
 	"testing"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 var formatTests = []struct {
@@ -473,5 +473,5 @@ func sameHyperdual(a, b Number, tol float64) bool {
 
 func same(a, b, tol float64) bool {
 	return (math.IsNaN(a) && math.IsNaN(b)) ||
-		(floats.EqualWithinAbsOrRel(a, b, tol, tol) && math.Float64bits(a)&(1<<63) == math.Float64bits(b)&(1<<63))
+		(scalar.EqualWithinAbsOrRel(a, b, tol, tol) && math.Float64bits(a)&(1<<63) == math.Float64bits(b)&(1<<63))
 }

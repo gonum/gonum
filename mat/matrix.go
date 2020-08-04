@@ -9,7 +9,7 @@ import (
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/lapack"
 	"gonum.org/v1/gonum/lapack/lapack64"
 )
@@ -531,7 +531,7 @@ func EqualApprox(a, b Matrix, epsilon float64) bool {
 			if aTrans == bTrans {
 				for i := 0; i < ra.Rows; i++ {
 					for j := 0; j < ra.Cols; j++ {
-						if !floats.EqualWithinAbsOrRel(ra.Data[i*ra.Stride+j], rb.Data[i*rb.Stride+j], epsilon, epsilon) {
+						if !scalar.EqualWithinAbsOrRel(ra.Data[i*ra.Stride+j], rb.Data[i*rb.Stride+j], epsilon, epsilon) {
 							return false
 						}
 					}
@@ -540,7 +540,7 @@ func EqualApprox(a, b Matrix, epsilon float64) bool {
 			}
 			for i := 0; i < ra.Rows; i++ {
 				for j := 0; j < ra.Cols; j++ {
-					if !floats.EqualWithinAbsOrRel(ra.Data[i*ra.Stride+j], rb.Data[j*rb.Stride+i], epsilon, epsilon) {
+					if !scalar.EqualWithinAbsOrRel(ra.Data[i*ra.Stride+j], rb.Data[j*rb.Stride+i], epsilon, epsilon) {
 						return false
 					}
 				}
@@ -555,7 +555,7 @@ func EqualApprox(a, b Matrix, epsilon float64) bool {
 			// Symmetric matrices are always upper and equal to their transpose.
 			for i := 0; i < ra.N; i++ {
 				for j := i; j < ra.N; j++ {
-					if !floats.EqualWithinAbsOrRel(ra.Data[i*ra.Stride+j], rb.Data[i*rb.Stride+j], epsilon, epsilon) {
+					if !scalar.EqualWithinAbsOrRel(ra.Data[i*ra.Stride+j], rb.Data[i*rb.Stride+j], epsilon, epsilon) {
 						return false
 					}
 				}
@@ -568,7 +568,7 @@ func EqualApprox(a, b Matrix, epsilon float64) bool {
 			// If the raw vectors are the same length they must either both be
 			// transposed or both not transposed (or have length 1).
 			for i := 0; i < ra.mat.N; i++ {
-				if !floats.EqualWithinAbsOrRel(ra.mat.Data[i*ra.mat.Inc], rb.mat.Data[i*rb.mat.Inc], epsilon, epsilon) {
+				if !scalar.EqualWithinAbsOrRel(ra.mat.Data[i*ra.mat.Inc], rb.mat.Data[i*rb.mat.Inc], epsilon, epsilon) {
 					return false
 				}
 			}
@@ -577,7 +577,7 @@ func EqualApprox(a, b Matrix, epsilon float64) bool {
 	}
 	for i := 0; i < ar; i++ {
 		for j := 0; j < ac; j++ {
-			if !floats.EqualWithinAbsOrRel(a.At(i, j), b.At(i, j), epsilon, epsilon) {
+			if !scalar.EqualWithinAbsOrRel(a.At(i, j), b.At(i, j), epsilon, epsilon) {
 				return false
 			}
 		}

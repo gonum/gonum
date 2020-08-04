@@ -9,7 +9,7 @@ import (
 
 	"golang.org/x/exp/rand"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 type Dorgl2er interface {
@@ -53,7 +53,7 @@ func Dorgl2Test(t *testing.T, impl Dorgl2er) {
 		same := true
 		for i := 0; i < m; i++ {
 			for j := 0; j < n; j++ {
-				if !floats.EqualWithinAbsOrRel(q.Data[i*q.Stride+j], a[i*lda+j], 1e-12, 1e-12) {
+				if !scalar.EqualWithinAbsOrRel(q.Data[i*q.Stride+j], a[i*lda+j], 1e-12, 1e-12) {
 					same = false
 					break
 				}

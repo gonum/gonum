@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"golang.org/x/exp/rand"
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 func TestLaplaceProb(t *testing.T) {
@@ -153,10 +153,10 @@ func TestLaplaceFit(t *testing.T) {
 	for i, test := range cases {
 		d := Laplace{}
 		d.Fit(test.samples, test.weights)
-		if !floats.EqualWithinAbsOrRel(d.Mu, test.wantMu, 1e-10, 1e-10) {
+		if !scalar.EqualWithinAbsOrRel(d.Mu, test.wantMu, 1e-10, 1e-10) {
 			t.Errorf("unexpected location result for test %d: got:%f, want:%f", i, d.Mu, test.wantMu)
 		}
-		if !floats.EqualWithinAbsOrRel(d.Scale, test.wantScale, 1e-10, 1e-10) {
+		if !scalar.EqualWithinAbsOrRel(d.Scale, test.wantScale, 1e-10, 1e-10) {
 			t.Errorf("unexpected scale result for test %d: got:%f, want:%f", i, d.Scale, test.wantScale)
 		}
 	}
@@ -178,10 +178,10 @@ func TestLaplaceFitRandomSamples(t *testing.T) {
 	}
 	le := Laplace{}
 	le.Fit(samples, nil)
-	if !floats.EqualWithinAbsOrRel(le.Mu, l.Mu, 1e-2, 1e-2) {
+	if !scalar.EqualWithinAbsOrRel(le.Mu, l.Mu, 1e-2, 1e-2) {
 		t.Errorf("unexpected location result for random test got:%f, want:%f", le.Mu, l.Mu)
 	}
-	if !floats.EqualWithinAbsOrRel(le.Scale, l.Scale, 1e-2, 1e-2) {
+	if !scalar.EqualWithinAbsOrRel(le.Scale, l.Scale, 1e-2, 1e-2) {
 		t.Errorf("unexpected scale result for random test got:%f, want:%f", le.Scale, l.Scale)
 	}
 }

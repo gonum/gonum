@@ -8,7 +8,7 @@ import (
 	"math"
 	"testing"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 const (
@@ -26,7 +26,7 @@ var (
 // sameApprox tests for nan-aware equality within tolerance.
 func sameApprox(x, y, tol float32) bool {
 	a, b := float64(x), float64(y)
-	return same(x, y) || floats.EqualWithinAbsOrRel(a, b, float64(tol), float64(tol))
+	return same(x, y) || scalar.EqualWithinAbsOrRel(a, b, float64(tol), float64(tol))
 }
 
 func same(x, y float32) bool {

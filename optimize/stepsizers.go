@@ -8,6 +8,7 @@ import (
 	"math"
 
 	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 const (
@@ -103,7 +104,7 @@ func (q *QuadraticStepSize) StepSize(loc *Location, dir []float64) (stepSize flo
 	projGrad := floats.Dot(loc.Gradient, dir)
 
 	stepSize = 2 * stepSizePrev
-	if !floats.EqualWithinRel(q.fPrev, loc.F, q.Threshold) {
+	if !scalar.EqualWithinRel(q.fPrev, loc.F, q.Threshold) {
 		// Two consecutive function values are not relatively equal, so
 		// computing the minimum of a quadratic interpolant might make sense
 

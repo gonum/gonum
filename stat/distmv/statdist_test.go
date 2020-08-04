@@ -11,6 +11,7 @@ import (
 	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/spatial/r1"
 )
@@ -42,7 +43,7 @@ func TestBhattacharyyaNormal(t *testing.T) {
 		}
 		want := bhattacharyyaSample(a.Dim(), test.samples, a, b)
 		got := Bhattacharyya{}.DistNormal(a, b)
-		if !floats.EqualWithinAbsOrRel(want, got, test.tol, test.tol) {
+		if !scalar.EqualWithinAbsOrRel(want, got, test.tol, test.tol) {
 			t.Errorf("Bhattacharyya mismatch, case %d: got %v, want %v", cas, got, want)
 		}
 
@@ -77,7 +78,7 @@ func TestBhattacharyyaUniform(t *testing.T) {
 		a, b := test.a, test.b
 		want := bhattacharyyaSample(a.Dim(), test.samples, a, b)
 		got := Bhattacharyya{}.DistUniform(a, b)
-		if !floats.EqualWithinAbsOrRel(want, got, test.tol, test.tol) {
+		if !scalar.EqualWithinAbsOrRel(want, got, test.tol, test.tol) {
 			t.Errorf("Bhattacharyya mismatch, case %d: got %v, want %v", cas, got, want)
 		}
 		// Bhattacharyya should by symmetric
@@ -137,7 +138,7 @@ func TestCrossEntropyNormal(t *testing.T) {
 		}
 		ce /= float64(test.samples)
 		got := CrossEntropy{}.DistNormal(a, b)
-		if !floats.EqualWithinAbsOrRel(ce, got, test.tol, test.tol) {
+		if !scalar.EqualWithinAbsOrRel(ce, got, test.tol, test.tol) {
 			t.Errorf("CrossEntropy mismatch, case %d: got %v, want %v", cas, got, ce)
 		}
 	}
@@ -181,7 +182,7 @@ func TestHellingerNormal(t *testing.T) {
 		}
 		want := math.Sqrt(0.5 * math.Exp(floats.LogSumExp(lAitchEDoubleHockeySticks)-math.Log(float64(test.samples))))
 		got := Hellinger{}.DistNormal(a, b)
-		if !floats.EqualWithinAbsOrRel(want, got, test.tol, test.tol) {
+		if !scalar.EqualWithinAbsOrRel(want, got, test.tol, test.tol) {
 			t.Errorf("Hellinger mismatch, case %d: got %v, want %v", cas, got, want)
 		}
 	}
@@ -210,7 +211,7 @@ func TestKullbackLeiblerDirichlet(t *testing.T) {
 		a, b := test.a, test.b
 		want := klSample(a.Dim(), test.samples, a, b)
 		got := KullbackLeibler{}.DistDirichlet(a, b)
-		if !floats.EqualWithinAbsOrRel(want, got, test.tol, test.tol) {
+		if !scalar.EqualWithinAbsOrRel(want, got, test.tol, test.tol) {
 			t.Errorf("Kullback-Leibler mismatch, case %d: got %v, want %v", cas, got, want)
 		}
 	}
@@ -243,7 +244,7 @@ func TestKullbackLeiblerNormal(t *testing.T) {
 		}
 		want := klSample(a.Dim(), test.samples, a, b)
 		got := KullbackLeibler{}.DistNormal(a, b)
-		if !floats.EqualWithinAbsOrRel(want, got, test.tol, test.tol) {
+		if !scalar.EqualWithinAbsOrRel(want, got, test.tol, test.tol) {
 			t.Errorf("Case %d, KL mismatch: got %v, want %v", cas, got, want)
 		}
 	}
@@ -272,7 +273,7 @@ func TestKullbackLeiblerUniform(t *testing.T) {
 		a, b := test.a, test.b
 		want := klSample(a.Dim(), test.samples, a, b)
 		got := KullbackLeibler{}.DistUniform(a, b)
-		if !floats.EqualWithinAbsOrRel(want, got, test.tol, test.tol) {
+		if !scalar.EqualWithinAbsOrRel(want, got, test.tol, test.tol) {
 			t.Errorf("Kullback-Leibler mismatch, case %d: got %v, want %v", cas, got, want)
 		}
 	}
@@ -320,26 +321,26 @@ func TestRenyiNormal(t *testing.T) {
 		}
 		want := renyiSample(a.Dim(), test.samples, test.alpha, a, b)
 		got := Renyi{Alpha: test.alpha}.DistNormal(a, b)
-		if !floats.EqualWithinAbsOrRel(want, got, test.tol, test.tol) {
+		if !scalar.EqualWithinAbsOrRel(want, got, test.tol, test.tol) {
 			t.Errorf("Case %d: Renyi sampling mismatch: got %v, want %v", cas, got, want)
 		}
 
 		// Compare with Bhattacharyya.
 		want = 2 * Bhattacharyya{}.DistNormal(a, b)
 		got = Renyi{Alpha: 0.5}.DistNormal(a, b)
-		if !floats.EqualWithinAbsOrRel(want, got, 1e-10, 1e-10) {
+		if !scalar.EqualWithinAbsOrRel(want, got, 1e-10, 1e-10) {
 			t.Errorf("Case %d: Renyi mismatch with Bhattacharyya: got %v, want %v", cas, got, want)
 		}
 
 		// Compare with KL in both directions.
 		want = KullbackLeibler{}.DistNormal(a, b)
 		got = Renyi{Alpha: 0.9999999}.DistNormal(a, b) // very close to 1 but not equal to 1.
-		if !floats.EqualWithinAbsOrRel(want, got, 1e-6, 1e-6) {
+		if !scalar.EqualWithinAbsOrRel(want, got, 1e-6, 1e-6) {
 			t.Errorf("Case %d: Renyi mismatch with KL(a||b): got %v, want %v", cas, got, want)
 		}
 		want = KullbackLeibler{}.DistNormal(b, a)
 		got = Renyi{Alpha: 0.9999999}.DistNormal(b, a) // very close to 1 but not equal to 1.
-		if !floats.EqualWithinAbsOrRel(want, got, 1e-6, 1e-6) {
+		if !scalar.EqualWithinAbsOrRel(want, got, 1e-6, 1e-6) {
 			t.Errorf("Case %d: Renyi mismatch with KL(b||a): got %v, want %v", cas, got, want)
 		}
 	}

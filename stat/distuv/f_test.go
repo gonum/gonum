@@ -11,7 +11,7 @@ import (
 
 	"golang.org/x/exp/rand"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 func TestFProb(t *testing.T) {
@@ -32,7 +32,7 @@ func TestFProb(t *testing.T) {
 		{1000, 2, 1, 1.1171959870312232e-05},
 	} {
 		pdf := F{test.d1, test.d2, nil}.Prob(test.x)
-		if !floats.EqualWithinAbsOrRel(pdf, test.want, 1e-10, 1e-10) {
+		if !scalar.EqualWithinAbsOrRel(pdf, test.want, 1e-10, 1e-10) {
 			t.Errorf("Prob mismatch, x = %v, d1 = %v, d2 = %v. Got %v, want %v", test.x, test.d1, test.d2, pdf, test.want)
 		}
 	}
@@ -56,7 +56,7 @@ func TestFCDF(t *testing.T) {
 		{1000, 2, 1, 0.97764490829950534},
 	} {
 		cdf := F{test.d1, test.d2, nil}.CDF(test.x)
-		if !floats.EqualWithinAbsOrRel(cdf, test.want, 1e-10, 1e-10) {
+		if !scalar.EqualWithinAbsOrRel(cdf, test.want, 1e-10, 1e-10) {
 			t.Errorf("CDF mismatch, x = %v, d1 = %v, d2 = %v. Got %v, want %v", test.x, test.d1, test.d2, cdf, test.want)
 		}
 	}

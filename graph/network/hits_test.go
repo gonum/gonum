@@ -10,7 +10,7 @@ import (
 	"sort"
 	"testing"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/graph/simple"
 )
 
@@ -56,12 +56,12 @@ func TestHITS(t *testing.T) {
 		got := HITS(g, test.tol)
 		prec := 1 - int(math.Log10(test.wantTol))
 		for n := range test.g {
-			if !floats.EqualWithinAbsOrRel(got[int64(n)].Hub, test.want[int64(n)].Hub, test.wantTol, test.wantTol) {
+			if !scalar.EqualWithinAbsOrRel(got[int64(n)].Hub, test.want[int64(n)].Hub, test.wantTol, test.wantTol) {
 				t.Errorf("unexpected HITS result for test %d:\ngot: %v\nwant:%v",
 					i, orderedHubAuth(got, prec), orderedHubAuth(test.want, prec))
 				break
 			}
-			if !floats.EqualWithinAbsOrRel(got[int64(n)].Authority, test.want[int64(n)].Authority, test.wantTol, test.wantTol) {
+			if !scalar.EqualWithinAbsOrRel(got[int64(n)].Authority, test.want[int64(n)].Authority, test.wantTol, test.wantTol) {
 				t.Errorf("unexpected HITS result for test %d:\ngot: %v\nwant:%v",
 					i, orderedHubAuth(got, prec), orderedHubAuth(test.want, prec))
 				break

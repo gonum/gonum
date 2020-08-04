@@ -9,7 +9,7 @@ import (
 
 	"golang.org/x/exp/rand"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/lapack"
 )
 
@@ -44,7 +44,7 @@ func DlapllTest(t *testing.T, impl Dlapller) {
 		// Take the smallest singular value.
 		want := s[len(s)-1]
 
-		if !floats.EqualWithinAbsOrRel(got, want, 1e-14, 1e-14) {
+		if !scalar.EqualWithinAbsOrRel(got, want, 1e-14, 1e-14) {
 			t.Errorf("Case %d: unexpected smallest singular value, got:%f want:%f", i, got, want)
 		}
 	}

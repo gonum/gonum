@@ -10,7 +10,7 @@ import (
 	"sort"
 	"testing"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/graph/path"
 	"gonum.org/v1/gonum/graph/simple"
 )
@@ -194,7 +194,7 @@ func TestBetweenness(t *testing.T) {
 			if gotOK != wantOK {
 				t.Errorf("unexpected betweenness result for test %d, node %c", i, n+'A')
 			}
-			if !floats.EqualWithinAbsOrRel(gotN, wantN, test.wantTol, test.wantTol) {
+			if !scalar.EqualWithinAbsOrRel(gotN, wantN, test.wantTol, test.wantTol) {
 				t.Errorf("unexpected betweenness result for test %d:\ngot: %v\nwant:%v",
 					i, orderedFloats(got, prec), orderedFloats(test.want, prec))
 				break
@@ -225,7 +225,7 @@ func TestEdgeBetweenness(t *testing.T) {
 				if gotOK != wantOK {
 					t.Errorf("unexpected betweenness result for test %d, edge (%c,%c)", i, u+'A', v+'A')
 				}
-				if !floats.EqualWithinAbsOrRel(gotQ, wantQ, test.wantTol, test.wantTol) {
+				if !scalar.EqualWithinAbsOrRel(gotQ, wantQ, test.wantTol, test.wantTol) {
 					t.Errorf("unexpected betweenness result for test %d:\ngot: %v\nwant:%v",
 						i, orderedPairFloats(got, prec), orderedPairFloats(test.wantEdges, prec))
 					break outer
@@ -262,7 +262,7 @@ func TestBetweennessWeighted(t *testing.T) {
 			if gotOK != wantOK {
 				t.Errorf("unexpected betweenness existence for test %d, node %c", i, n+'A')
 			}
-			if !floats.EqualWithinAbsOrRel(gotN, wantN, test.wantTol, test.wantTol) {
+			if !scalar.EqualWithinAbsOrRel(gotN, wantN, test.wantTol, test.wantTol) {
 				t.Errorf("unexpected betweenness result for test %d:\ngot: %v\nwant:%v",
 					i, orderedFloats(got, prec), orderedFloats(test.want, prec))
 				break
@@ -300,7 +300,7 @@ func TestEdgeBetweennessWeighted(t *testing.T) {
 				if gotOK != wantOK {
 					t.Errorf("unexpected betweenness result for test %d, edge (%c,%c)", i, u+'A', v+'A')
 				}
-				if !floats.EqualWithinAbsOrRel(gotQ, wantQ, test.wantTol, test.wantTol) {
+				if !scalar.EqualWithinAbsOrRel(gotQ, wantQ, test.wantTol, test.wantTol) {
 					t.Errorf("unexpected betweenness result for test %d:\ngot: %v\nwant:%v",
 						i, orderedPairFloats(got, prec), orderedPairFloats(test.wantEdges, prec))
 					break outer

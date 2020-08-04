@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 func TestHermite(t *testing.T) {
@@ -64,7 +65,7 @@ func TestHermite(t *testing.T) {
 		},
 	} {
 		ev := Fixed(test.f, math.Inf(-1), math.Inf(1), test.n, Hermite{}, 0)
-		if !floats.EqualWithinAbsOrRel(test.ev, ev, test.tol, test.tol) {
+		if !scalar.EqualWithinAbsOrRel(test.ev, ev, test.tol, test.tol) {
 			t.Errorf("Case %d: expected value mismatch.\nWant %v\ngot %v", cas, test.ev, ev)
 		}
 	}

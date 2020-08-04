@@ -15,6 +15,7 @@ import (
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 func TestRfft(t *testing.T) {
@@ -80,7 +81,7 @@ func TestRfft(t *testing.T) {
 			x[i] = xh[i]
 		}
 		rftf /= fn
-		if !floats.EqualWithinAbsOrRel(rftf, 0, tol, tol) {
+		if !scalar.EqualWithinAbsOrRel(rftf, 0, tol, tol) {
 			t.Errorf("unexpected rftf value for n=%d: got:%f want:0", test.n, rftf)
 		}
 
@@ -107,7 +108,7 @@ func TestRfft(t *testing.T) {
 			x[i] = xh[i]
 			y[i] = xh[i]
 		}
-		if !floats.EqualWithinAbsOrRel(rftb, 0, tol, tol) {
+		if !scalar.EqualWithinAbsOrRel(rftb, 0, tol, tol) {
 			t.Errorf("unexpected rftb value for n=%d: got:%f want:0", test.n, rftb)
 		}
 
@@ -119,7 +120,7 @@ func TestRfft(t *testing.T) {
 		for i := 0; i < test.n; i++ {
 			rftfb = math.Max(rftfb, math.Abs(cf*y[i]-x[i]))
 		}
-		if !floats.EqualWithinAbsOrRel(rftfb, 0, tol, tol) {
+		if !scalar.EqualWithinAbsOrRel(rftfb, 0, tol, tol) {
 			t.Errorf("unexpected rftfb value for n=%d: got:%f want:0", test.n, rftfb)
 		}
 	}
@@ -312,7 +313,7 @@ func TestCfft(t *testing.T) {
 		}
 		cftf /= fn
 
-		if !floats.EqualWithinAbsOrRel(cftf, 0, tol, tol) {
+		if !scalar.EqualWithinAbsOrRel(cftf, 0, tol, tol) {
 			t.Errorf("unexpected cftf value for n=%d: got:%f want:0", test.n, cftf)
 		}
 
@@ -329,7 +330,7 @@ func TestCfft(t *testing.T) {
 			x[i] = y2[i]
 		}
 
-		if !floats.EqualWithinAbsOrRel(cftb, 0, tol, tol) {
+		if !scalar.EqualWithinAbsOrRel(cftb, 0, tol, tol) {
 			t.Errorf("unexpected cftb value for n=%d: got:%f want:0", test.n, cftb)
 		}
 
@@ -344,7 +345,7 @@ func TestCfft(t *testing.T) {
 			cftfb = math.Max(cftfb, cmplx.Abs(x[i]/cn-y2[i]))
 		}
 
-		if !floats.EqualWithinAbsOrRel(cftfb, 0, tol, tol) {
+		if !scalar.EqualWithinAbsOrRel(cftfb, 0, tol, tol) {
 			t.Errorf("unexpected cftfb value for n=%d: got:%f want:0", test.n, cftfb)
 		}
 	}
@@ -663,7 +664,7 @@ func TestSint(t *testing.T) {
 			y[i] = x[i]
 		}
 		sintt *= cf
-		if !floats.EqualWithinAbsOrRel(sintt, 0, tol, tol) {
+		if !scalar.EqualWithinAbsOrRel(sintt, 0, tol, tol) {
 			t.Errorf("unexpected sintt value for n=%d: got:%f want:0", test.n, sintt)
 		}
 
@@ -675,7 +676,7 @@ func TestSint(t *testing.T) {
 		for i := 0; i < test.n-1; i++ {
 			sintfb = math.Max(sintfb, math.Abs(cf*x[i]-y[i]))
 		}
-		if !floats.EqualWithinAbsOrRel(sintfb, 0, tol, tol) {
+		if !scalar.EqualWithinAbsOrRel(sintfb, 0, tol, tol) {
 			t.Errorf("unexpected sintfb value for n=%d: got:%f want:0", test.n, sintfb)
 		}
 	}
@@ -894,7 +895,7 @@ func TestCost(t *testing.T) {
 			y[i] = x[i]
 		}
 		costt *= cf
-		if !floats.EqualWithinAbsOrRel(costt, 0, tol, tol) {
+		if !scalar.EqualWithinAbsOrRel(costt, 0, tol, tol) {
 			t.Errorf("unexpected costt value for n=%d: got:%f want:0", test.n, costt)
 		}
 
@@ -906,7 +907,7 @@ func TestCost(t *testing.T) {
 		for i := 0; i < test.n-1; i++ {
 			costfb = math.Max(costfb, math.Abs(cf*x[i]-y[i]))
 		}
-		if !floats.EqualWithinAbsOrRel(costfb, 0, tol, tol) {
+		if !scalar.EqualWithinAbsOrRel(costfb, 0, tol, tol) {
 			t.Errorf("unexpected costfb value for n=%d: got:%f want:0", test.n, costfb)
 		}
 	}
@@ -1146,7 +1147,7 @@ func TestCosq(t *testing.T) {
 			x[i] = xh[i]
 		}
 		cosqbt *= cf
-		if !floats.EqualWithinAbsOrRel(cosqbt, 0, tol, tol) {
+		if !scalar.EqualWithinAbsOrRel(cosqbt, 0, tol, tol) {
 			t.Errorf("unexpected cosqbt value for n=%d: got:%f want:0", test.n, cosqbt)
 		}
 
@@ -1169,7 +1170,7 @@ func TestCosq(t *testing.T) {
 			y[i] = xh[i]
 		}
 		cosqft *= cf
-		if !floats.EqualWithinAbsOrRel(cosqft, 0, tol, tol) {
+		if !scalar.EqualWithinAbsOrRel(cosqft, 0, tol, tol) {
 			t.Errorf("unexpected cosqft value for n=%d: got:%f want:0", test.n, cosqft)
 		}
 
@@ -1181,7 +1182,7 @@ func TestCosq(t *testing.T) {
 		for i := 0; i < test.n; i++ {
 			cosqfb = math.Max(cosqfb, math.Abs(cf*x[i]-y[i]))
 		}
-		if !floats.EqualWithinAbsOrRel(cosqfb, 0, tol, tol) {
+		if !scalar.EqualWithinAbsOrRel(cosqfb, 0, tol, tol) {
 			t.Errorf("unexpected cosqfb value for n=%d: got:%f want:0", test.n, cosqfb)
 		}
 	}
@@ -1233,7 +1234,7 @@ func TestSinq(t *testing.T) {
 			x[i] = xh[i]
 		}
 		sinqbt *= cf
-		if !floats.EqualWithinAbsOrRel(sinqbt, 0, tol, tol) {
+		if !scalar.EqualWithinAbsOrRel(sinqbt, 0, tol, tol) {
 			t.Errorf("unexpected sinqbt value for n=%d: got:%f want:0", test.n, sinqbt)
 		}
 
@@ -1256,7 +1257,7 @@ func TestSinq(t *testing.T) {
 			y[i] = xh[i]
 		}
 		sinqft *= cf
-		if !floats.EqualWithinAbsOrRel(sinqft, 0, tol, tol) {
+		if !scalar.EqualWithinAbsOrRel(sinqft, 0, tol, tol) {
 			t.Errorf("unexpected sinqft value for n=%d: got:%f want:0", test.n, sinqft)
 		}
 
@@ -1268,7 +1269,7 @@ func TestSinq(t *testing.T) {
 		for i := 0; i < test.n; i++ {
 			sinqfb = math.Max(sinqfb, math.Abs(cf*x[i]-y[i]))
 		}
-		if !floats.EqualWithinAbsOrRel(sinqfb, 0, tol, tol) {
+		if !scalar.EqualWithinAbsOrRel(sinqfb, 0, tol, tol) {
 			t.Errorf("unexpected sinqfb value for n=%d: got:%f want:0", test.n, sinqfb)
 		}
 	}

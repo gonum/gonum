@@ -8,7 +8,7 @@ import (
 	"math"
 	"testing"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/simple"
 	"gonum.org/v1/gonum/graph/spectral"
@@ -166,7 +166,7 @@ func TestDiffuse(t *testing.T) {
 			got := Diffuse(nil, test.h, lfn(g), test.t)
 			prec := 1 - int(math.Log10(test.wantTol))
 			for n := range test.g {
-				if !floats.EqualWithinAbsOrRel(got[int64(n)], test.want[normalize][int64(n)], test.wantTol, test.wantTol) {
+				if !scalar.EqualWithinAbsOrRel(got[int64(n)], test.want[normalize][int64(n)], test.wantTol, test.wantTol) {
 					t.Errorf("unexpected Diffuse result for test %d with normalize=%t:\ngot: %v\nwant:%v",
 						i, normalize, orderedFloats(got, prec), orderedFloats(test.want[normalize], prec))
 					break
@@ -183,7 +183,7 @@ func TestDiffuse(t *testing.T) {
 			}
 			gotTemp /= float64(len(got))
 			wantTemp /= float64(len(got))
-			if !floats.EqualWithinAbsOrRel(gotTemp, wantTemp, test.wantTol, test.wantTol) {
+			if !scalar.EqualWithinAbsOrRel(gotTemp, wantTemp, test.wantTol, test.wantTol) {
 				t.Errorf("unexpected total heat for test %d with normalize=%t: got:%v want:%v",
 					i, normalize, gotTemp, wantTemp)
 			}
@@ -364,7 +364,7 @@ func TestDiffuseToEquilibrium(t *testing.T) {
 		}
 		prec := -int(math.Log10(test.tol))
 		for n := range test.g {
-			if !floats.EqualWithinAbsOrRel(got[int64(n)], test.want[int64(n)], test.tol, test.tol) {
+			if !scalar.EqualWithinAbsOrRel(got[int64(n)], test.want[int64(n)], test.tol, test.tol) {
 				t.Errorf("unexpected DiffuseToEquilibrium result for test %d:\ngot: %v\nwant:%v",
 					i, orderedFloats(got, prec), orderedFloats(test.want, prec))
 				break
@@ -377,7 +377,7 @@ func TestDiffuseToEquilibrium(t *testing.T) {
 		}
 		gotTemp /= float64(len(got))
 		wantTemp /= float64(len(got))
-		if !floats.EqualWithinAbsOrRel(gotTemp, wantTemp, test.tol, test.tol) {
+		if !scalar.EqualWithinAbsOrRel(gotTemp, wantTemp, test.tol, test.tol) {
 			t.Errorf("unexpected total heat for test %d: got:%v want:%v",
 				i, gotTemp, wantTemp)
 		}

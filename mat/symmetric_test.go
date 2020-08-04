@@ -14,7 +14,7 @@ import (
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 func TestNewSymmetric(t *testing.T) {
@@ -325,7 +325,7 @@ func TestSymRankOne(t *testing.T) {
 		for i := 0; i < n; i++ {
 			for j := i; j < n; j++ {
 				want := m.At(i, j)
-				if got := s.At(i, j); !floats.EqualWithinAbsOrRel(got, want, tol, tol) {
+				if got := s.At(i, j); !scalar.EqualWithinAbsOrRel(got, want, tol, tol) {
 					t.Errorf("unexpected value for At(%d, %d): got: %v want: %v", i, j, got, want)
 				}
 			}
@@ -337,7 +337,7 @@ func TestSymRankOne(t *testing.T) {
 		for i := 0; i < n; i++ {
 			for j := i; j < n; j++ {
 				want := m.At(i, j)
-				if got := s.At(i, j); !floats.EqualWithinAbsOrRel(got, want, tol, tol) {
+				if got := s.At(i, j); !scalar.EqualWithinAbsOrRel(got, want, tol, tol) {
 					t.Errorf("unexpected value for At(%d, %d): got: %v want: %v", i, j, got, want)
 				}
 			}
@@ -428,7 +428,7 @@ func TestRankTwo(t *testing.T) {
 		s.RankTwo(a, alpha, NewVecDense(len(x), x), NewVecDense(len(y), y))
 		for i := 0; i < n; i++ {
 			for j := i; j < n; j++ {
-				if !floats.EqualWithinAbsOrRel(s.At(i, j), m.At(i, j), 1e-14, 1e-14) {
+				if !scalar.EqualWithinAbsOrRel(s.At(i, j), m.At(i, j), 1e-14, 1e-14) {
 					t.Errorf("unexpected element value at (%d,%d): got: %f want: %f", i, j, m.At(i, j), s.At(i, j))
 				}
 			}
@@ -439,7 +439,7 @@ func TestRankTwo(t *testing.T) {
 		s.RankTwo(s, alpha, NewVecDense(len(x), x), NewVecDense(len(y), y))
 		for i := 0; i < n; i++ {
 			for j := i; j < n; j++ {
-				if !floats.EqualWithinAbsOrRel(s.At(i, j), m.At(i, j), 1e-14, 1e-14) {
+				if !scalar.EqualWithinAbsOrRel(s.At(i, j), m.At(i, j), 1e-14, 1e-14) {
 					t.Errorf("unexpected element value at (%d,%d): got: %f want: %f", i, j, m.At(i, j), s.At(i, j))
 				}
 			}

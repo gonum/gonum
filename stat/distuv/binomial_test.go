@@ -10,7 +10,7 @@ import (
 
 	"golang.org/x/exp/rand"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 func TestBinomialProb(t *testing.T) {
@@ -60,7 +60,7 @@ func TestBinomialProb(t *testing.T) {
 	} {
 		b := Binomial{N: tt.n, P: tt.p}
 		got := b.Prob(tt.k)
-		if !floats.EqualWithinRel(got, tt.want, tol) {
+		if !scalar.EqualWithinRel(got, tt.want, tol) {
 			t.Errorf("test-%d: got=%e. want=%e\n", i, got, tt.want)
 		}
 	}
@@ -103,12 +103,12 @@ func TestBinomialCDF(t *testing.T) {
 	} {
 		b := Binomial{N: tt.n, P: tt.p}
 		got := b.CDF(tt.k)
-		if !floats.EqualWithinRel(got, tt.want, tol) {
+		if !scalar.EqualWithinRel(got, tt.want, tol) {
 			t.Errorf("test-%d: got=%e. want=%e\n", i, got, tt.want)
 		}
 		got = b.Survival(tt.k)
 		want := 1 - tt.want
-		if !floats.EqualWithinRel(got, want, tol) {
+		if !scalar.EqualWithinRel(got, want, tol) {
 			t.Errorf("test-%d: got=%e. want=%e\n", i, got, tt.want)
 		}
 	}

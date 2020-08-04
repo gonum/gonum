@@ -10,7 +10,9 @@ import (
 	"testing"
 
 	"golang.org/x/exp/rand"
+
 	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 // TestNormalProbs tests LogProb, Prob, CumProb, and Quantile
@@ -184,7 +186,7 @@ func TestNormalQuantile(t *testing.T) {
 	}
 	for i, v := range p {
 		got := UnitNormal.Quantile(v)
-		if !floats.EqualWithinAbsOrRel(got, ans[i], 1e-10, 1e-10) {
+		if !scalar.EqualWithinAbsOrRel(got, ans[i], 1e-10, 1e-10) {
 			t.Errorf("Quantile mismatch. Case %d, want: %v, got: %v", i, ans[i], got)
 		}
 	}

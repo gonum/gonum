@@ -9,7 +9,7 @@ import (
 	"testing"
 	"testing/quick"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 const tol = 1e-7
@@ -43,7 +43,7 @@ func TestHypot(t *testing.T) {
 		if math.Hypot(float64(x.X), float64(x.Y)) > math.MaxFloat32 {
 			return true
 		}
-		return floats.EqualWithinRel(float64(y), math.Hypot(float64(x.X), float64(x.Y)), tol)
+		return scalar.EqualWithinRel(float64(y), math.Hypot(float64(x.X), float64(x.Y)), tol)
 	}
 	if err := quick.Check(f, nil); err != nil {
 		t.Error(err)
@@ -105,7 +105,7 @@ func TestSqrt(t *testing.T) {
 		if IsNaN(y) && IsNaN(sqrt(x)) {
 			return true
 		}
-		return floats.EqualWithinRel(float64(y), float64(sqrt(x)), tol)
+		return scalar.EqualWithinRel(float64(y), float64(sqrt(x)), tol)
 	}
 	if err := quick.Check(f, nil); err != nil {
 		t.Error(err)

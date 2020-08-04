@@ -11,7 +11,7 @@ import (
 
 	"golang.org/x/exp/rand"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 type Dznrm2er interface {
@@ -99,7 +99,7 @@ func Dznrm2Test(t *testing.T, impl Dznrm2er) {
 				continue
 			}
 
-			if !floats.EqualWithinAbsOrRel(test.want, got, tol, tol) {
+			if !scalar.EqualWithinAbsOrRel(test.want, got, tol, tol) {
 				t.Errorf("%v: unexpected result. want %v, got %v", prefix, test.want, got)
 			}
 		}
@@ -129,7 +129,7 @@ func Dznrm2Test(t *testing.T, impl Dznrm2er) {
 
 			got := impl.Dznrm2(n, x, incX)
 
-			if !floats.EqualWithinAbsOrRel(want, got, tol, tol) {
+			if !scalar.EqualWithinAbsOrRel(want, got, tol, tol) {
 				t.Errorf("Case n=%v,incX=%v: unexpected result using Dnrm2. want %v, got %v", n, incX, want, got)
 			}
 		}

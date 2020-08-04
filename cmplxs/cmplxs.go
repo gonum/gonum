@@ -9,7 +9,7 @@ import (
 	"math"
 	"math/cmplx"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/internal/asm/c128"
 )
 
@@ -529,7 +529,7 @@ func Round(x complex128, prec int) complex128 {
 		// without the negative bit set.
 		return 0
 	}
-	return complex(floats.Round(real(x), prec), floats.Round(imag(x), prec))
+	return complex(scalar.Round(real(x), prec), scalar.Round(imag(x), prec))
 }
 
 // RoundEven returns the half even rounded value of x with prec precision.
@@ -544,7 +544,7 @@ func RoundEven(x complex128, prec int) complex128 {
 		// without the negative bit set.
 		return 0
 	}
-	return complex(floats.RoundEven(real(x), prec), floats.RoundEven(imag(x), prec))
+	return complex(scalar.RoundEven(real(x), prec), scalar.RoundEven(imag(x), prec))
 }
 
 // Same returns true if the input slices have the same length and all elements

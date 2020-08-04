@@ -14,6 +14,7 @@ import (
 	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 func ExampleCircularMean() {
@@ -981,13 +982,13 @@ func TestLinearRegression(t *testing.T) {
 				t.Errorf("%s: RSquared and RSquaredFrom mismatch: %v != %v", test.name, r, rvals)
 			}
 		}
-		if !floats.EqualWithinAbsOrRel(alpha, test.alpha, test.tol, test.tol) {
+		if !scalar.EqualWithinAbsOrRel(alpha, test.alpha, test.tol, test.tol) {
 			t.Errorf("%s: unexpected alpha estimate: want:%v got:%v", test.name, test.alpha, alpha)
 		}
-		if !floats.EqualWithinAbsOrRel(beta, test.beta, test.tol, test.tol) {
+		if !scalar.EqualWithinAbsOrRel(beta, test.beta, test.tol, test.tol) {
 			t.Errorf("%s: unexpected beta estimate: want:%v got:%v", test.name, test.beta, beta)
 		}
-		if !floats.EqualWithinAbsOrRel(r, test.r, test.tol, test.tol) {
+		if !scalar.EqualWithinAbsOrRel(r, test.r, test.tol, test.tol) {
 			t.Errorf("%s: unexpected r estimate: want:%v got:%v", test.name, test.r, r)
 		}
 	}

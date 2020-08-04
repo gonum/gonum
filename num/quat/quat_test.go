@@ -9,7 +9,7 @@ import (
 	"math"
 	"testing"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 var arithTests = []struct {
@@ -190,10 +190,10 @@ func TestParse(t *testing.T) {
 }
 
 func equalApprox(a, b Number, tol float64) bool {
-	return floats.EqualWithinAbsOrRel(a.Real, b.Real, tol, tol) &&
-		floats.EqualWithinAbsOrRel(a.Imag, b.Imag, tol, tol) &&
-		floats.EqualWithinAbsOrRel(a.Jmag, b.Jmag, tol, tol) &&
-		floats.EqualWithinAbsOrRel(a.Kmag, b.Kmag, tol, tol)
+	return scalar.EqualWithinAbsOrRel(a.Real, b.Real, tol, tol) &&
+		scalar.EqualWithinAbsOrRel(a.Imag, b.Imag, tol, tol) &&
+		scalar.EqualWithinAbsOrRel(a.Jmag, b.Jmag, tol, tol) &&
+		scalar.EqualWithinAbsOrRel(a.Kmag, b.Kmag, tol, tol)
 }
 
 func sameApprox(a, b Number, tol float64) bool {
@@ -207,10 +207,10 @@ func sameApprox(a, b Number, tol float64) bool {
 	case a.Kmag == 0 && b.Kmag == 0:
 		return math.Signbit(a.Kmag) == math.Signbit(b.Kmag)
 	}
-	return (sameFloat(a.Real, b.Real) || floats.EqualWithinAbsOrRel(a.Real, b.Real, tol, tol)) &&
-		(sameFloat(a.Imag, b.Imag) || floats.EqualWithinAbsOrRel(a.Imag, b.Imag, tol, tol)) &&
-		(sameFloat(a.Jmag, b.Jmag) || floats.EqualWithinAbsOrRel(a.Jmag, b.Jmag, tol, tol)) &&
-		(sameFloat(a.Kmag, b.Kmag) || floats.EqualWithinAbsOrRel(a.Kmag, b.Kmag, tol, tol))
+	return (sameFloat(a.Real, b.Real) || scalar.EqualWithinAbsOrRel(a.Real, b.Real, tol, tol)) &&
+		(sameFloat(a.Imag, b.Imag) || scalar.EqualWithinAbsOrRel(a.Imag, b.Imag, tol, tol)) &&
+		(sameFloat(a.Jmag, b.Jmag) || scalar.EqualWithinAbsOrRel(a.Jmag, b.Jmag, tol, tol)) &&
+		(sameFloat(a.Kmag, b.Kmag) || scalar.EqualWithinAbsOrRel(a.Kmag, b.Kmag, tol, tol))
 }
 
 func sameNumber(a, b Number) bool {

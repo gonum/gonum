@@ -11,7 +11,7 @@ import (
 
 	"golang.org/x/exp/rand"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 func TestCholesky(t *testing.T) {
@@ -622,7 +622,7 @@ func equalApproxChol(a, b *Cholesky, matTol, condTol float64) bool {
 	if !EqualApprox(a.chol, b.chol, matTol) {
 		return false
 	}
-	return floats.EqualWithinAbsOrRel(a.cond, b.cond, condTol, condTol)
+	return scalar.EqualWithinAbsOrRel(a.cond, b.cond, condTol, condTol)
 }
 
 func BenchmarkCholeskyFactorize(b *testing.B) {

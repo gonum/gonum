@@ -8,7 +8,7 @@ import (
 	"math"
 	"testing"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -201,7 +201,7 @@ func approxEqual(a, b []float64, epsilon float64) bool {
 		return false
 	}
 	for i, v := range a {
-		if !floats.EqualWithinAbsOrRel(v, b[i], epsilon, epsilon) {
+		if !scalar.EqualWithinAbsOrRel(v, b[i], epsilon, epsilon) {
 			return false
 		}
 	}

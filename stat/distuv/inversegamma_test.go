@@ -11,7 +11,7 @@ import (
 
 	"golang.org/x/exp/rand"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 func TestInverseGamma(t *testing.T) {
@@ -25,7 +25,7 @@ func TestInverseGamma(t *testing.T) {
 		{20, 0.4, 0.0064691988681571536},
 	} {
 		pdf := InverseGamma{Alpha: test.alpha, Beta: 1}.Prob(test.x)
-		if !floats.EqualWithinAbsOrRel(pdf, test.want, 1e-10, 1e-10) {
+		if !scalar.EqualWithinAbsOrRel(pdf, test.want, 1e-10, 1e-10) {
 			t.Errorf("Pdf mismatch. Got %v, want %v", pdf, test.want)
 		}
 	}

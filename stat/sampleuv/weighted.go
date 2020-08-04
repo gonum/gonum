@@ -7,7 +7,7 @@ package sampleuv
 import (
 	"golang.org/x/exp/rand"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 // Weighted provides sampling without replacement from a collection of items with
@@ -59,7 +59,7 @@ func (s Weighted) Len() int { return len(s.weights) }
 // Take returns false if there are no items remaining.
 func (s Weighted) Take() (idx int, ok bool) {
 	const small = 1e-12
-	if floats.EqualWithinAbsOrRel(s.heap[0], 0, small, small) {
+	if scalar.EqualWithinAbsOrRel(s.heap[0], 0, small, small) {
 		return -1, false
 	}
 

@@ -10,7 +10,7 @@ import (
 
 	"golang.org/x/exp/rand"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -284,10 +284,10 @@ func TestGlobalMoransI(t *testing.T) {
 
 		gotI, _, gotZ := GlobalMoransI(data, nil, locality)
 
-		if !floats.EqualWithinAbsOrRel(gotI, test.wantMoranI, tol, tol) {
+		if !scalar.EqualWithinAbsOrRel(gotI, test.wantMoranI, tol, tol) {
 			t.Errorf("unexpected Moran's I value for test %d: got:%v want:%v", ti, gotI, test.wantMoranI)
 		}
-		if !floats.EqualWithinAbsOrRel(gotZ, test.wantZ, tol, tol) {
+		if !scalar.EqualWithinAbsOrRel(gotZ, test.wantZ, tol, tol) {
 			t.Errorf("unexpected Moran's I z-score for test %d: got:%v want:%v", ti, gotZ, test.wantZ)
 		}
 	}

@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 func TestIncBeta(t *testing.T) {
@@ -27,17 +28,17 @@ func TestIncBeta(t *testing.T) {
 		{1, 10, 0.7489, 0.99999900352334858},
 	} {
 		y := RegIncBeta(test.a, test.b, test.x)
-		if !floats.EqualWithinAbsOrRel(y, test.ans, tol, tol) {
+		if !scalar.EqualWithinAbsOrRel(y, test.ans, tol, tol) {
 			t.Errorf("Incomplete beta mismatch. Case %v: Got %v, want %v", i, y, test.ans)
 		}
 
 		yc := 1 - RegIncBeta(test.b, test.a, 1-test.x)
-		if !floats.EqualWithinAbsOrRel(y, yc, tol, tol) {
+		if !scalar.EqualWithinAbsOrRel(y, yc, tol, tol) {
 			t.Errorf("Incomplete beta complementary mismatch. Case %v: Got %v, want %v", i, y, yc)
 		}
 
 		x := InvRegIncBeta(test.a, test.b, y)
-		if !floats.EqualWithinAbsOrRel(x, test.x, tol2, tol2) {
+		if !scalar.EqualWithinAbsOrRel(x, test.x, tol2, tol2) {
 			t.Errorf("Inverse incomplete beta mismatch. Case %v: Got %v, want %v", i, x, test.x)
 		}
 	}
@@ -66,7 +67,7 @@ func TestIncBeta(t *testing.T) {
 					continue
 				}
 				y := RegIncBeta(a, b, x)
-				if !floats.EqualWithinAbsOrRel(yr, y, tol, tol) {
+				if !scalar.EqualWithinAbsOrRel(yr, y, tol, tol) {
 					t.Errorf("Mismatch between inv inc beta and inc beta. a = %v, b = %v, x = %v, got %v, want %v.", a, b, x, y, yr)
 					break
 				}

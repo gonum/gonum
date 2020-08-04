@@ -11,6 +11,7 @@ import (
 	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 func TestGSVD(t *testing.T) {
@@ -83,7 +84,7 @@ func TestGSVD(t *testing.T) {
 				// Check C^2 + S^2 = I.
 				for i := range c {
 					d := c[i]*c[i] + s[i]*s[i]
-					if !floats.EqualWithinAbsOrRel(d, 1, 1e-14, 1e-14) {
+					if !scalar.EqualWithinAbsOrRel(d, 1, 1e-14, 1e-14) {
 						t.Errorf("c_%d^2 + s_%d^2 != 1: got: %v", i, i, d)
 					}
 				}

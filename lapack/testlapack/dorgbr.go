@@ -10,7 +10,7 @@ import (
 	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/lapack"
 )
 
@@ -143,7 +143,7 @@ func DorgbrTest(t *testing.T, impl Dorgbrer) {
 			}
 			for i := 0; i < nRows; i++ {
 				for j := 0; j < nCols; j++ {
-					if !floats.EqualWithinAbsOrRel(a[i*lda+j], ans.Data[i*ans.Stride+j], 1e-8, 1e-8) {
+					if !scalar.EqualWithinAbsOrRel(a[i*lda+j], ans.Data[i*ans.Stride+j], 1e-8, 1e-8) {
 						equal = false
 					}
 				}

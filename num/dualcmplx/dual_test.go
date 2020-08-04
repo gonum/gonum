@@ -10,7 +10,7 @@ import (
 	"math/cmplx"
 	"testing"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 var formatTests = []struct {
@@ -453,6 +453,6 @@ func sameDual(a, b Number, tol float64) bool {
 }
 
 func same(a, b complex128, tol float64) bool {
-	return ((math.IsNaN(real(a)) && (math.IsNaN(real(b)))) || floats.EqualWithinAbsOrRel(real(a), real(b), tol, tol)) &&
-		((math.IsNaN(imag(a)) && (math.IsNaN(imag(b)))) || floats.EqualWithinAbsOrRel(imag(a), imag(b), tol, tol))
+	return ((math.IsNaN(real(a)) && (math.IsNaN(real(b)))) || scalar.EqualWithinAbsOrRel(real(a), real(b), tol, tol)) &&
+		((math.IsNaN(imag(a)) && (math.IsNaN(imag(b)))) || scalar.EqualWithinAbsOrRel(imag(a), imag(b), tol, tol))
 }

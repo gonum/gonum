@@ -9,7 +9,7 @@ import (
 	"math"
 	"testing"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/num/quat"
 )
 
@@ -297,8 +297,8 @@ func same(a, b quat.Number, tol float64) bool {
 }
 
 func equalApprox(a, b quat.Number, tol float64) bool {
-	return floats.EqualWithinAbsOrRel(a.Real, b.Real, tol, tol) &&
-		floats.EqualWithinAbsOrRel(a.Imag, b.Imag, tol, tol) &&
-		floats.EqualWithinAbsOrRel(a.Jmag, b.Jmag, tol, tol) &&
-		floats.EqualWithinAbsOrRel(a.Kmag, b.Kmag, tol, tol)
+	return scalar.EqualWithinAbsOrRel(a.Real, b.Real, tol, tol) &&
+		scalar.EqualWithinAbsOrRel(a.Imag, b.Imag, tol, tol) &&
+		scalar.EqualWithinAbsOrRel(a.Jmag, b.Jmag, tol, tol) &&
+		scalar.EqualWithinAbsOrRel(a.Kmag, b.Kmag, tol, tol)
 }

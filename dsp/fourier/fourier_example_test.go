@@ -10,7 +10,7 @@ import (
 	"math/cmplx"
 
 	"gonum.org/v1/gonum/dsp/fourier"
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -140,7 +140,7 @@ func Example_fFT2() {
 		}
 		cfft.Coefficients(column, column)
 		for i, v := range column[:c] {
-			freqs.Set(i, j, floats.Round(cmplx.Abs(v), 1))
+			freqs.Set(i, j, scalar.Round(cmplx.Abs(v), 1))
 		}
 	}
 
@@ -200,7 +200,7 @@ func Example_cmplxFFT2() {
 		cfft.Coefficients(column, column)
 		for i, v := range column {
 			// Center the frequencies.
-			freqs.Set(cfft.UnshiftIdx(i), cfft.UnshiftIdx(j), floats.Round(cmplx.Abs(v), 1))
+			freqs.Set(cfft.UnshiftIdx(i), cfft.UnshiftIdx(j), scalar.Round(cmplx.Abs(v), 1))
 		}
 	}
 

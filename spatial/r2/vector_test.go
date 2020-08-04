@@ -8,7 +8,7 @@ import (
 	"math"
 	"testing"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 func TestAdd(t *testing.T) {
@@ -231,7 +231,7 @@ func TestCos(t *testing.T) {
 		t.Run("", func(t *testing.T) {
 			tol := 1e-14
 			got := Cos(test.v1, test.v2)
-			if !floats.EqualWithinAbs(got, test.want, tol) {
+			if !scalar.EqualWithinAbs(got, test.want, tol) {
 				t.Fatalf("cos(%v, %v)= %v, want %v",
 					test.v1, test.v2, got, test.want,
 				)
@@ -254,6 +254,6 @@ func vecApproxEqual(a, b Vec) bool {
 		return vecIsNaN(a) && vecIsNaN(b)
 	}
 
-	return floats.EqualWithinAbs(a.X, b.X, tol) &&
-		floats.EqualWithinAbs(a.Y, b.Y, tol)
+	return scalar.EqualWithinAbs(a.X, b.X, tol) &&
+		scalar.EqualWithinAbs(a.Y, b.Y, tol)
 }

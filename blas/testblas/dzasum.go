@@ -9,7 +9,7 @@ import (
 
 	"golang.org/x/exp/rand"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 type Dzasumer interface {
@@ -50,7 +50,7 @@ func DzasumTest(t *testing.T, impl Dzasumer) {
 				}
 				continue
 			}
-			if !floats.EqualWithinAbsOrRel(got, want, tol, tol) {
+			if !scalar.EqualWithinAbsOrRel(got, want, tol, tol) {
 				t.Errorf("Case n=%v,incX=%v: unexpected result. want %v, got %v", n, incX, want, got)
 			}
 		}

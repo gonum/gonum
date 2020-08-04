@@ -11,6 +11,7 @@ import (
 	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 func TestBhattacharyyaBeta(t *testing.T) {
@@ -42,7 +43,7 @@ func TestBhattacharyyaBeta(t *testing.T) {
 	} {
 		want := bhattacharyyaSample(test.samples, test.a, test.b)
 		got := Bhattacharyya{}.DistBeta(test.a, test.b)
-		if !floats.EqualWithinAbsOrRel(want, got, test.tol, test.tol) {
+		if !scalar.EqualWithinAbsOrRel(want, got, test.tol, test.tol) {
 			t.Errorf("Bhattacharyya mismatch, case %d: got %v, want %v", cas, got, want)
 		}
 
@@ -83,7 +84,7 @@ func TestBhattacharyyaNormal(t *testing.T) {
 	} {
 		want := bhattacharyyaSample(test.samples, test.a, test.b)
 		got := Bhattacharyya{}.DistNormal(test.a, test.b)
-		if !floats.EqualWithinAbsOrRel(want, got, test.tol, test.tol) {
+		if !scalar.EqualWithinAbsOrRel(want, got, test.tol, test.tol) {
 			t.Errorf("Bhattacharyya mismatch, case %d: got %v, want %v", cas, got, want)
 		}
 
@@ -140,7 +141,7 @@ func TestKullbackLeiblerBeta(t *testing.T) {
 		a, b := test.a, test.b
 		want := klSample(test.samples, a, b)
 		got := KullbackLeibler{}.DistBeta(a, b)
-		if !floats.EqualWithinAbsOrRel(want, got, test.tol, test.tol) {
+		if !scalar.EqualWithinAbsOrRel(want, got, test.tol, test.tol) {
 			t.Errorf("Kullback-Leibler mismatch, case %d: got %v, want %v", cas, got, want)
 		}
 	}
@@ -191,7 +192,7 @@ func TestKullbackLeiblerNormal(t *testing.T) {
 		a, b := test.a, test.b
 		want := klSample(test.samples, a, b)
 		got := KullbackLeibler{}.DistNormal(a, b)
-		if !floats.EqualWithinAbsOrRel(want, got, test.tol, test.tol) {
+		if !scalar.EqualWithinAbsOrRel(want, got, test.tol, test.tol) {
 			t.Errorf("Kullback-Leibler mismatch, case %d: got %v, want %v", cas, got, want)
 		}
 	}
@@ -231,7 +232,7 @@ func TestHellingerBeta(t *testing.T) {
 	} {
 		got := Hellinger{}.DistBeta(test.a, test.b)
 		want := math.Sqrt(1 - math.Exp(-Bhattacharyya{}.DistBeta(test.a, test.b)))
-		if !floats.EqualWithinAbsOrRel(got, want, tol, tol) {
+		if !scalar.EqualWithinAbsOrRel(got, want, tol, tol) {
 			t.Errorf("Hellinger mismatch, case %d: got %v, want %v", cas, got, want)
 		}
 	}
@@ -259,7 +260,7 @@ func TestHellingerNormal(t *testing.T) {
 	} {
 		got := Hellinger{}.DistNormal(test.a, test.b)
 		want := math.Sqrt(1 - math.Exp(-Bhattacharyya{}.DistNormal(test.a, test.b)))
-		if !floats.EqualWithinAbsOrRel(got, want, tol, tol) {
+		if !scalar.EqualWithinAbsOrRel(got, want, tol, tol) {
 			t.Errorf("Hellinger mismatch, case %d: got %v, want %v", cas, got, want)
 		}
 	}

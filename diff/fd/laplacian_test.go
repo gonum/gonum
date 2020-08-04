@@ -7,7 +7,7 @@ package fd
 import (
 	"testing"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -28,7 +28,7 @@ func TestLaplacian(t *testing.T) {
 		for i := 0; i < n; i++ {
 			want += hess.At(i, i)
 		}
-		if !floats.EqualWithinAbsOrRel(got, want, test.tol, test.tol) {
+		if !scalar.EqualWithinAbsOrRel(got, want, test.tol, test.tol) {
 			t.Errorf("Cas %d: Laplacian mismatch. got %v, want %v", cas, got, want)
 		}
 
@@ -38,7 +38,7 @@ func TestLaplacian(t *testing.T) {
 		}
 		settings.Concurrent = true
 		got2 := Laplacian(test.h.Func, test.x, settings)
-		if !floats.EqualWithinAbsOrRel(got, got2, 1e-5, 1e-5) {
+		if !scalar.EqualWithinAbsOrRel(got, got2, 1e-5, 1e-5) {
 			t.Errorf("Cas %d: Laplacian mismatch. got %v, want %v", cas, got2, got)
 		}
 	}

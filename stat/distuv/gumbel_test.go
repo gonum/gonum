@@ -9,9 +9,8 @@ import (
 	"sort"
 	"testing"
 
-	"gonum.org/v1/gonum/floats"
-
 	"golang.org/x/exp/rand"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 func TestGumbelRightProbCDF(t *testing.T) {
@@ -31,11 +30,11 @@ func TestGumbelRightProbCDF(t *testing.T) {
 	} {
 		g := GumbelRight{Mu: test.mu, Beta: test.beta}
 		pdf := g.Prob(test.x)
-		if !floats.EqualWithinAbsOrRel(pdf, test.wantProb, 1e-12, 1e-12) {
+		if !scalar.EqualWithinAbsOrRel(pdf, test.wantProb, 1e-12, 1e-12) {
 			t.Errorf("Prob mismatch, x = %v, mu = %v, beta = %v. Got %v, want %v", test.x, test.mu, test.beta, pdf, test.wantProb)
 		}
 		cdf := g.CDF(test.x)
-		if !floats.EqualWithinAbsOrRel(cdf, test.wantCDF, 1e-12, 1e-12) {
+		if !scalar.EqualWithinAbsOrRel(cdf, test.wantCDF, 1e-12, 1e-12) {
 			t.Errorf("CDF mismatch, x = %v, mu = %v, beta = %v. Got %v, want %v", test.x, test.mu, test.beta, cdf, test.wantCDF)
 		}
 	}

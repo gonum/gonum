@@ -14,6 +14,7 @@ import (
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
 	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 type Dbdsqrer interface {
@@ -121,7 +122,7 @@ func DbdsqrTest(t *testing.T, impl Dbdsqrer) {
 				same := true
 				for i := 0; i < n; i++ {
 					for j := 0; j < n; j++ {
-						if !floats.EqualWithinAbsOrRel(ansMat.Data[i*ansMat.Stride+j], bMat.Data[i*bMat.Stride+j], 1e-8, 1e-8) {
+						if !scalar.EqualWithinAbsOrRel(ansMat.Data[i*ansMat.Stride+j], bMat.Data[i*bMat.Stride+j], 1e-8, 1e-8) {
 							same = false
 						}
 					}

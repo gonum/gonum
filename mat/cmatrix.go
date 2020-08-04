@@ -9,7 +9,7 @@ import (
 	"math/cmplx"
 
 	"gonum.org/v1/gonum/blas/cblas128"
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 // CMatrix is the basic matrix interface type for complex matrices.
@@ -187,7 +187,7 @@ func cEqualWithinRel(a, b complex128, tol float64) bool {
 	if cmplx.IsNaN(a) || cmplx.IsNaN(b) {
 		return false
 	}
-	// Cannot play the same trick as in floats because there are multiple
+	// Cannot play the same trick as in floats/scalar because there are multiple
 	// possible infinities.
 	if cmplx.IsInf(a) {
 		if !cmplx.IsInf(b) {
@@ -196,12 +196,12 @@ func cEqualWithinRel(a, b complex128, tol float64) bool {
 		ra := real(a)
 		if math.IsInf(ra, 0) {
 			if ra == real(b) {
-				return floats.EqualWithinRel(imag(a), imag(b), tol)
+				return scalar.EqualWithinRel(imag(a), imag(b), tol)
 			}
 			return false
 		}
 		if imag(a) == imag(b) {
-			return floats.EqualWithinRel(ra, real(b), tol)
+			return scalar.EqualWithinRel(ra, real(b), tol)
 		}
 		return false
 	}

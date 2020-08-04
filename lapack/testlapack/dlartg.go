@@ -10,7 +10,7 @@ import (
 
 	"golang.org/x/exp/rand"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 type Dlartger interface {
@@ -73,7 +73,7 @@ func DlartgTest(t *testing.T, impl Dlartger) {
 
 		// Check that the first equation holds.
 		rWant := cs*f + sn*g
-		if !floats.EqualWithinAbsOrRel(math.Abs(rWant), math.Abs(r), tol, tol) {
+		if !scalar.EqualWithinAbsOrRel(math.Abs(rWant), math.Abs(r), tol, tol) {
 			t.Errorf("Case f=%v,g=%v: unexpected r. Want %v, got %v", f, g, rWant, r)
 		}
 		// Check that cs and sn define a plane rotation. The 2×2 matrix

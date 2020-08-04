@@ -11,7 +11,7 @@ import (
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 type Dpotrfer interface {
@@ -105,7 +105,7 @@ func DpotrfTest(t *testing.T, impl Dpotrfer) {
 			case blas.Upper:
 				for i := 0; i < n; i++ {
 					for j := i; j < n; j++ {
-						if !floats.EqualWithinAbsOrRel(ans[i*lda+j], aCopy[i*lda+j], tol, tol) {
+						if !scalar.EqualWithinAbsOrRel(ans[i*lda+j], aCopy[i*lda+j], tol, tol) {
 							match = false
 						}
 					}
@@ -113,7 +113,7 @@ func DpotrfTest(t *testing.T, impl Dpotrfer) {
 			case blas.Lower:
 				for i := 0; i < n; i++ {
 					for j := 0; j <= i; j++ {
-						if !floats.EqualWithinAbsOrRel(ans[i*lda+j], aCopy[i*lda+j], tol, tol) {
+						if !scalar.EqualWithinAbsOrRel(ans[i*lda+j], aCopy[i*lda+j], tol, tol) {
 							match = false
 						}
 					}

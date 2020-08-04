@@ -10,7 +10,7 @@ import (
 	"sort"
 	"testing"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/graph/simple"
 )
 
@@ -94,7 +94,7 @@ func TestPageRank(t *testing.T) {
 		got := pageRank(g, test.damp, test.tol)
 		prec := 1 - int(math.Log10(test.wantTol))
 		for n := range test.g {
-			if !floats.EqualWithinAbsOrRel(got[int64(n)], test.want[int64(n)], test.wantTol, test.wantTol) {
+			if !scalar.EqualWithinAbsOrRel(got[int64(n)], test.want[int64(n)], test.wantTol, test.wantTol) {
 				t.Errorf("unexpected PageRank result for test %d:\ngot: %v\nwant:%v",
 					i, orderedFloats(got, prec), orderedFloats(test.want, prec))
 				break
@@ -118,7 +118,7 @@ func TestPageRankSparse(t *testing.T) {
 		got := pageRankSparse(g, test.damp, test.tol)
 		prec := 1 - int(math.Log10(test.wantTol))
 		for n := range test.g {
-			if !floats.EqualWithinAbsOrRel(got[int64(n)], test.want[int64(n)], test.wantTol, test.wantTol) {
+			if !scalar.EqualWithinAbsOrRel(got[int64(n)], test.want[int64(n)], test.wantTol, test.wantTol) {
 				t.Errorf("unexpected PageRank result for test %d:\ngot: %v\nwant:%v",
 					i, orderedFloats(got, prec), orderedFloats(test.want, prec))
 				break
@@ -204,7 +204,7 @@ func TestEdgeWeightedPageRank(t *testing.T) {
 		got := edgeWeightedPageRank(g, test.damp, test.tol)
 		prec := 1 - int(math.Log10(test.wantTol))
 		for n := range test.g {
-			if !floats.EqualWithinAbsOrRel(got[int64(n)], test.want[int64(n)], test.wantTol, test.wantTol) {
+			if !scalar.EqualWithinAbsOrRel(got[int64(n)], test.want[int64(n)], test.wantTol, test.wantTol) {
 				t.Errorf("unexpected PageRank result for test %d:\ngot: %v\nwant:%v",
 					i, orderedFloats(got, prec), orderedFloats(test.want, prec))
 				break
@@ -235,7 +235,7 @@ func TestEdgeWeightedPageRankSparse(t *testing.T) {
 		got := edgeWeightedPageRankSparse(g, test.damp, test.tol)
 		prec := 1 - int(math.Log10(test.wantTol))
 		for n := range test.g {
-			if !floats.EqualWithinAbsOrRel(got[int64(n)], test.want[int64(n)], test.wantTol, test.wantTol) {
+			if !scalar.EqualWithinAbsOrRel(got[int64(n)], test.want[int64(n)], test.wantTol, test.wantTol) {
 				t.Errorf("unexpected PageRank result for test %d:\ngot: %v\nwant:%v",
 					i, orderedFloats(got, prec), orderedFloats(test.want, prec))
 				break

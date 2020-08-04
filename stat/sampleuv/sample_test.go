@@ -8,7 +8,7 @@ import (
 	"sort"
 	"testing"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/stat"
 	"gonum.org/v1/gonum/stat/distuv"
 )
@@ -50,7 +50,7 @@ func TestImportance(t *testing.T) {
 	weights := make([]float64, nSamples)
 	Importance{Target: target, Proposal: proposal}.SampleWeighted(x, weights)
 	ev := stat.Mean(x, weights)
-	if !floats.EqualWithinAbsOrRel(ev, trueMean, tol, tol) {
+	if !scalar.EqualWithinAbsOrRel(ev, trueMean, tol, tol) {
 		t.Errorf("Mean mismatch: Want %v, got %v", trueMean, ev)
 	}
 }
@@ -66,7 +66,7 @@ func TestRejection(t *testing.T) {
 	r := &Rejection{Target: target, Proposal: proposal, C: 100}
 	r.Sample(x)
 	ev := stat.Mean(x, nil)
-	if !floats.EqualWithinAbsOrRel(ev, trueMean, tol, tol) {
+	if !scalar.EqualWithinAbsOrRel(ev, trueMean, tol, tol) {
 		t.Errorf("Mean mismatch: Want %v, got %v", trueMean, ev)
 	}
 }
@@ -102,7 +102,7 @@ func TestMetropolisHastings(t *testing.T) {
 	mh.Sample(x)
 
 	ev := stat.Mean(x, nil)
-	if !floats.EqualWithinAbsOrRel(ev, trueMean, tol, tol) {
+	if !scalar.EqualWithinAbsOrRel(ev, trueMean, tol, tol) {
 		t.Errorf("Mean mismatch: Want %v, got %v", trueMean, ev)
 	}
 }

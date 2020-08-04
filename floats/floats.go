@@ -8,8 +8,8 @@ import (
 	"errors"
 	"math"
 	"sort"
-	"strconv"
 
+	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/internal/asm/f64"
 )
 
@@ -229,7 +229,7 @@ func EqualApprox(s1, s2 []float64, tol float64) bool {
 		return false
 	}
 	for i, a := range s1 {
-		if !EqualWithinAbsOrRel(a, s2[i], tol, tol) {
+		if !scalar.EqualWithinAbsOrRel(a, s2[i], tol, tol) {
 			return false
 		}
 	}
@@ -248,62 +248,6 @@ func EqualFunc(s1, s2 []float64, f func(float64, float64) bool) bool {
 		}
 	}
 	return true
-}
-
-// EqualWithinAbs returns true if a and b have an absolute
-// difference of less than tol.
-func EqualWithinAbs(a, b, tol float64) bool {
-	return a == b || math.Abs(a-b) <= tol
-}
-
-const minNormalFloat64 = 2.2250738585072014e-308
-
-// EqualWithinRel returns true if the difference between a and b
-// is not greater than tol times the greater value.
-func EqualWithinRel(a, b, tol float64) bool {
-	if a == b {
-		return true
-	}
-	delta := math.Abs(a - b)
-	if delta <= minNormalFloat64 {
-		return delta <= tol*minNormalFloat64
-	}
-	// We depend on the division in this relationship to identify
-	// infinities (we rely on the NaN to fail the test) otherwise
-	// we compare Infs of the same sign and evaluate Infs as equal
-	// independent of sign.
-	return delta/math.Max(math.Abs(a), math.Abs(b)) <= tol
-}
-
-// EqualWithinAbsOrRel returns true if a and b are equal to within
-// the absolute tolerance.
-func EqualWithinAbsOrRel(a, b, absTol, relTol float64) bool {
-	if EqualWithinAbs(a, b, absTol) {
-		return true
-	}
-	return EqualWithinRel(a, b, relTol)
-}
-
-// EqualWithinULP returns true if a and b are equal to within
-// the specified number of floating point units in the last place.
-func EqualWithinULP(a, b float64, ulp uint) bool {
-	if a == b {
-		return true
-	}
-	if math.IsNaN(a) || math.IsNaN(b) {
-		return false
-	}
-	if math.Signbit(a) != math.Signbit(b) {
-		return math.Float64bits(math.Abs(a))+math.Float64bits(math.Abs(b)) <= uint64(ulp)
-	}
-	return ulpDiff(math.Float64bits(a), math.Float64bits(b)) <= uint64(ulp)
-}
-
-func ulpDiff(a, b uint64) uint64 {
-	if a > b {
-		return a - b
-	}
-	return b - a
 }
 
 // EqualLengths returns true if all of the slices have equal length,
@@ -492,29 +436,6 @@ func MulTo(dst, s, t []float64) []float64 {
 	return dst
 }
 
-const (
-	nanBits = 0x7ff8000000000000
-	nanMask = 0xfff8000000000000
-)
-
-// NaNWith returns an IEEE 754 "quiet not-a-number" value with the
-// payload specified in the low 51 bits of payload.
-// The NaN returned by math.NaN has a bit pattern equal to NaNWith(1).
-func NaNWith(payload uint64) float64 {
-	return math.Float64frombits(nanBits | (payload &^ nanMask))
-}
-
-// NaNPayload returns the lowest 51 bits payload of an IEEE 754 "quiet
-// not-a-number". For values of f other than quiet-NaN, NaNPayload
-// returns zero and false.
-func NaNPayload(f float64) (payload uint64, ok bool) {
-	b := math.Float64bits(f)
-	if b&nanBits != nanBits {
-		return 0, false
-	}
-	return b &^ nanMask, true
-}
-
 // NearestIdx returns the index of the element in s
 // whose value is nearest to v.  If several such
 // elements exist, the lowest index is returned.
@@ -665,19 +586,6 @@ func Norm(s []float64, L float64) float64 {
 	return math.Pow(norm, 1/L)
 }
 
-// ParseWithNA converts the string s to a float64 in v.
-// If s equals missing, w is returned as 0, otherwise 1.
-func ParseWithNA(s, missing string) (v, w float64, err error) {
-	if s == missing {
-		return 0, 0, nil
-	}
-	v, err = strconv.ParseFloat(s, 64)
-	if err == nil {
-		w = 1
-	}
-	return v, w, err
-}
-
 // Prod returns the product of the elements of the slice.
 // Returns 1 if len(s) = 0.
 func Prod(s []float64) float64 {
@@ -693,90 +601,6 @@ func Reverse(s []float64) {
 	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
 		s[i], s[j] = s[j], s[i]
 	}
-}
-
-// Round returns the half away from zero rounded value of x with prec precision.
-//
-// Special cases are:
-// 	Round(±0) = +0
-// 	Round(±Inf) = ±Inf
-// 	Round(NaN) = NaN
-func Round(x float64, prec int) float64 {
-	if x == 0 {
-		// Make sure zero is returned
-		// without the negative bit set.
-		return 0
-	}
-	// Fast path for positive precision on integers.
-	if prec >= 0 && x == math.Trunc(x) {
-		return x
-	}
-	pow := math.Pow10(prec)
-	intermed := x * pow
-	if math.IsInf(intermed, 0) {
-		return x
-	}
-	if x < 0 {
-		x = math.Ceil(intermed - 0.5)
-	} else {
-		x = math.Floor(intermed + 0.5)
-	}
-
-	if x == 0 {
-		return 0
-	}
-
-	return x / pow
-}
-
-// RoundEven returns the half even rounded value of x with prec precision.
-//
-// Special cases are:
-// 	RoundEven(±0) = +0
-// 	RoundEven(±Inf) = ±Inf
-// 	RoundEven(NaN) = NaN
-func RoundEven(x float64, prec int) float64 {
-	if x == 0 {
-		// Make sure zero is returned
-		// without the negative bit set.
-		return 0
-	}
-	// Fast path for positive precision on integers.
-	if prec >= 0 && x == math.Trunc(x) {
-		return x
-	}
-	pow := math.Pow10(prec)
-	intermed := x * pow
-	if math.IsInf(intermed, 0) {
-		return x
-	}
-	if isHalfway(intermed) {
-		correction, _ := math.Modf(math.Mod(intermed, 2))
-		intermed += correction
-		if intermed > 0 {
-			x = math.Floor(intermed)
-		} else {
-			x = math.Ceil(intermed)
-		}
-	} else {
-		if x < 0 {
-			x = math.Ceil(intermed - 0.5)
-		} else {
-			x = math.Floor(intermed + 0.5)
-		}
-	}
-
-	if x == 0 {
-		return 0
-	}
-
-	return x / pow
-}
-
-func isHalfway(x float64) bool {
-	_, frac := math.Modf(x)
-	frac = math.Abs(frac)
-	return frac == 0.5 || (math.Nextafter(frac, math.Inf(-1)) < 0.5 && math.Nextafter(frac, math.Inf(1)) > 0.5)
 }
 
 // Same returns true if the input slices have the same length and all elements

@@ -10,7 +10,7 @@ import (
 	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/cmplxs"
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/internal/cmplx64"
 	"gonum.org/v1/gonum/internal/math32"
 )
@@ -98,7 +98,7 @@ func same(a, b float32) bool {
 
 // sameApprox tests for nan-aware equality within tolerance.
 func sameApprox(a, b, tol float32) bool {
-	return same(a, b) || floats.EqualWithinAbsOrRel(float64(a), float64(b), float64(tol), float64(tol))
+	return same(a, b) || scalar.EqualWithinAbsOrRel(float64(a), float64(b), float64(tol), float64(tol))
 }
 
 // sameCmplx tests for nan-aware equality.

@@ -16,6 +16,7 @@ import (
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
 	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 // legalSizeSameRectangular returns whether the two matrices have the same rectangular shape.
@@ -104,7 +105,7 @@ func sameAnswerFloatApproxTol(tol float64) func(a, b interface{}) bool {
 		if math.IsNaN(a.(float64)) {
 			return math.IsNaN(b.(float64))
 		}
-		return floats.EqualWithinAbsOrRel(a.(float64), b.(float64), tol, tol)
+		return scalar.EqualWithinAbsOrRel(a.(float64), b.(float64), tol, tol)
 	}
 }
 
@@ -906,7 +907,7 @@ func equalApprox(a, b Matrix, tol float64, ignoreNaN bool) bool {
 	}
 	for i := 0; i < ar; i++ {
 		for j := 0; j < ac; j++ {
-			if !floats.EqualWithinAbsOrRel(a.At(i, j), b.At(i, j), tol, tol) {
+			if !scalar.EqualWithinAbsOrRel(a.At(i, j), b.At(i, j), tol, tol) {
 				if ignoreNaN && math.IsNaN(a.At(i, j)) && math.IsNaN(b.At(i, j)) {
 					continue
 				}

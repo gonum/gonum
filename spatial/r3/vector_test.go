@@ -8,7 +8,7 @@ import (
 	"math"
 	"testing"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 func TestAdd(t *testing.T) {
@@ -227,7 +227,7 @@ func TestCos(t *testing.T) {
 		t.Run("", func(t *testing.T) {
 			tol := 1e-14
 			got := Cos(test.v1, test.v2)
-			if !floats.EqualWithinAbs(got, test.want, tol) {
+			if !scalar.EqualWithinAbs(got, test.want, tol) {
 				t.Fatalf("cos(%v, %v)= %v, want %v",
 					test.v1, test.v2, got, test.want,
 				)

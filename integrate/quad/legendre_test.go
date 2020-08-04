@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 func TestLegendre(t *testing.T) {
@@ -32,11 +33,11 @@ func TestLegendre(t *testing.T) {
 	} {
 		for j, n := range test.n {
 			ans := Fixed(test.f, test.min, test.max, n, Legendre{}, 0)
-			if !floats.EqualWithinAbsOrRel(ans, test.ans, test.tol[j], test.tol[j]) {
+			if !scalar.EqualWithinAbsOrRel(ans, test.ans, test.tol[j], test.tol[j]) {
 				t.Errorf("Mismatch. Case = %d, n = %d. Want %v, got %v", i, n, test.ans, ans)
 			}
 			ans2 := Fixed(test.f, test.min, test.max, n, Legendre{}, 3)
-			if !floats.EqualWithinAbsOrRel(ans2, test.ans, test.tol[j], test.tol[j]) {
+			if !scalar.EqualWithinAbsOrRel(ans2, test.ans, test.tol[j], test.tol[j]) {
 				t.Errorf("Mismatch concurrent. Case = %d, n = %d. Want %v, got %v", i, n, test.ans, ans)
 			}
 		}

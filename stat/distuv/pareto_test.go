@@ -10,7 +10,8 @@ import (
 	"testing"
 
 	"golang.org/x/exp/rand"
-	"gonum.org/v1/gonum/floats"
+
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 func TestParetoProb(t *testing.T) {
@@ -55,7 +56,7 @@ func TestParetoProb(t *testing.T) {
 		{5, 1, 3, 0.0048},
 	} {
 		pdf := Pareto{test.xm, test.alpha, nil}.Prob(test.x)
-		if !floats.EqualWithinAbsOrRel(pdf, test.want, 1e-10, 1e-10) {
+		if !scalar.EqualWithinAbsOrRel(pdf, test.want, 1e-10, 1e-10) {
 			t.Errorf("Pdf mismatch, x = %v, xm = %v, alpha = %v. Got %v, want %v", test.x, test.xm, test.alpha, pdf, test.want)
 		}
 	}
@@ -133,7 +134,7 @@ func TestParetoCDF(t *testing.T) {
 		{10, 1, 3, 0.999},
 	} {
 		cdf := Pareto{test.xm, test.alpha, nil}.CDF(test.x)
-		if !floats.EqualWithinAbsOrRel(cdf, test.want, 1e-10, 1e-10) {
+		if !scalar.EqualWithinAbsOrRel(cdf, test.want, 1e-10, 1e-10) {
 			t.Errorf("CDF mismatch, x = %v, xm = %v, alpha = %v. Got %v, want %v", test.x, test.xm, test.alpha, cdf, test.want)
 		}
 	}

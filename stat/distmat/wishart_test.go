@@ -10,7 +10,7 @@ import (
 
 	"golang.org/x/exp/rand"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -65,7 +65,7 @@ func TestWishart(t *testing.T) {
 			if math.Abs(lp-lpc) > 1e-14 {
 				t.Errorf("Case %d, test %d: probability mismatch between chol and not", c, i)
 			}
-			if !floats.EqualWithinAbsOrRel(lp, test.lps[i], 1e-14, 1e-14) {
+			if !scalar.EqualWithinAbsOrRel(lp, test.lps[i], 1e-14, 1e-14) {
 				t.Errorf("Case %d, test %d: got %v, want %v", c, i, lp, test.lps[i])
 			}
 		}

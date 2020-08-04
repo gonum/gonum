@@ -7,7 +7,7 @@ package fd
 import (
 	"testing"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -94,7 +94,7 @@ func TestCrossLaplacian(t *testing.T) {
 	} {
 		got := CrossLaplacian(test.l.Func, test.x, test.y, test.settings)
 		want := test.l.CrossLaplacian(test.x, test.y)
-		if !floats.EqualWithinAbsOrRel(got, want, test.tol, test.tol) {
+		if !scalar.EqualWithinAbsOrRel(got, want, test.tol, test.tol) {
 			t.Errorf("Cas %d: CrossLaplacian mismatch serial. got %v, want %v", cas, got, want)
 		}
 
@@ -105,7 +105,7 @@ func TestCrossLaplacian(t *testing.T) {
 		}
 		settings.Concurrent = true
 		got2 := CrossLaplacian(test.l.Func, test.x, test.y, settings)
-		if !floats.EqualWithinAbsOrRel(got, got2, 1e-6, 1e-6) {
+		if !scalar.EqualWithinAbsOrRel(got, got2, 1e-6, 1e-6) {
 			t.Errorf("Cas %d: Laplacian mismatch. got %v, want %v", cas, got2, got)
 		}
 	}

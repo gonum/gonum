@@ -11,7 +11,7 @@ import (
 
 	"golang.org/x/exp/rand"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 func TestBetaProb(t *testing.T) {
@@ -27,7 +27,7 @@ func TestBetaProb(t *testing.T) {
 		{-1, 0.5, 0.5, 0},
 	} {
 		pdf := Beta{Alpha: test.alpha, Beta: test.beta}.Prob(test.x)
-		if !floats.EqualWithinAbsOrRel(pdf, test.want, 1e-10, 1e-10) {
+		if !scalar.EqualWithinAbsOrRel(pdf, test.want, 1e-10, 1e-10) {
 			t.Errorf("Pdf mismatch. Got %v, want %v", pdf, test.want)
 		}
 	}
@@ -130,7 +130,7 @@ func TestBetaMode(t *testing.T) {
 		{4, 5, 3. / 7.},
 	} {
 		mode := Beta{Alpha: test.alpha, Beta: test.beta}.Mode()
-		if !floats.EqualWithinAbsOrRel(mode, test.want, 1e-10, 1e-10) {
+		if !scalar.EqualWithinAbsOrRel(mode, test.want, 1e-10, 1e-10) {
 			t.Errorf("Mode mismatch for Beta(%g, %g). Got %v, want %g", test.alpha, test.beta, mode, test.want)
 		}
 	}

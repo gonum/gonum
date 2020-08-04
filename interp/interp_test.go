@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -522,7 +523,7 @@ func TestAkimaWeightedAverage(t *testing.T) {
 		},
 	} {
 		got := akimaWeightedAverage(test.v1, test.v2, test.w1, test.w2)
-		if !floats.EqualWithinAbsOrRel(got, test.want, 1e-14, 1e-14) {
+		if !scalar.EqualWithinAbsOrRel(got, test.want, 1e-14, 1e-14) {
 			t.Errorf("Mismatch in test case %d: got %v, want %g", i, got, test.want)
 		}
 	}

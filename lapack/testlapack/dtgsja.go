@@ -11,7 +11,7 @@ import (
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/lapack"
 )
 
@@ -130,7 +130,7 @@ func DtgsjaTest(t *testing.T, impl Dtgsjaer) {
 		for i := range elements {
 			i += k
 			d := alpha[i]*alpha[i] + beta[i]*beta[i]
-			if !floats.EqualWithinAbsOrRel(d, 1, tol, tol) {
+			if !scalar.EqualWithinAbsOrRel(d, 1, tol, tol) {
 				t.Errorf("test %d: alpha_%d^2 + beta_%d^2 != 1: got: %v", cas, i, i, d)
 			}
 		}

@@ -11,7 +11,7 @@ import (
 
 	"golang.org/x/exp/rand"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 func TestChiSquaredProb(t *testing.T) {
@@ -24,7 +24,7 @@ func TestChiSquaredProb(t *testing.T) {
 		{0.8, 0.2, 0.080363259903912673},
 	} {
 		pdf := ChiSquared{test.k, nil}.Prob(test.x)
-		if !floats.EqualWithinAbsOrRel(pdf, test.want, 1e-10, 1e-10) {
+		if !scalar.EqualWithinAbsOrRel(pdf, test.want, 1e-10, 1e-10) {
 			t.Errorf("Pdf mismatch, x = %v, K = %v. Got %v, want %v", test.x, test.k, pdf, test.want)
 		}
 	}
@@ -48,7 +48,7 @@ func TestChiSquaredCDF(t *testing.T) {
 		{25, 15, 0.95005656637357172},
 	} {
 		cdf := ChiSquared{test.k, nil}.CDF(test.x)
-		if !floats.EqualWithinAbsOrRel(cdf, test.want, 1e-10, 1e-10) {
+		if !scalar.EqualWithinAbsOrRel(cdf, test.want, 1e-10, 1e-10) {
 			t.Errorf("CDF mismatch, x = %v, K = %v. Got %v, want %v", test.x, test.k, cdf, test.want)
 		}
 	}

@@ -30,12 +30,7 @@ func sameApprox(x, y, tol float32) bool {
 }
 
 func same(x, y float32) bool {
-	a, b := float64(x), float64(y)
-	return a == b || (math.IsNaN(a) && math.IsNaN(b))
-}
-
-func same64(a, b float64) bool {
-	return a == b || (math.IsNaN(a) && math.IsNaN(b))
+	return scalar.Same(float64(x), float64(y))
 }
 
 // sameStrided returns true if the strided vector x contains elements of the

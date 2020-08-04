@@ -7,6 +7,7 @@ package f64_test
 import (
 	"testing"
 
+	"gonum.org/v1/gonum/floats/scalar"
 	. "gonum.org/v1/gonum/internal/asm/f64"
 )
 
@@ -28,7 +29,7 @@ func TestL1Norm(t *testing.T) {
 		v.x = guardVector(v.x, src_gd, g_ln)
 		src := v.x[g_ln : len(v.x)-g_ln]
 		ret := L1Norm(src)
-		if !same(ret, v.want) {
+		if !scalar.Same(ret, v.want) {
 			t.Errorf("Test %d L1Norm error Got: %f Expected: %f", j, ret, v.want)
 		}
 		if !isValidGuard(v.x, src_gd, g_ln) {
@@ -56,7 +57,7 @@ func TestL1NormInc(t *testing.T) {
 		v.x = guardIncVector(v.x, src_gd, v.inc, g_ln)
 		src := v.x[g_ln : len(v.x)-g_ln]
 		ret := L1NormInc(src, ln, v.inc)
-		if !same(ret, v.want) {
+		if !scalar.Same(ret, v.want) {
 			t.Errorf("Test %d L1NormInc error Got: %f Expected: %f", j, ret, v.want)
 		}
 		checkValidIncGuard(t, v.x, src_gd, v.inc, g_ln)
@@ -109,7 +110,7 @@ func TestAdd(t *testing.T) {
 		src, dst := v.src[sg_ln:len(v.src)-sg_ln], v.dst[dg_ln:len(v.dst)-dg_ln]
 		Add(dst, src)
 		for i := range v.expect {
-			if !same(dst[i], v.expect[i]) {
+			if !scalar.Same(dst[i], v.expect[i]) {
 				t.Errorf("Test %d Add error at %d Got: %v Expected: %v", j, i, dst[i], v.expect[i])
 			}
 		}
@@ -159,7 +160,7 @@ func TestAddConst(t *testing.T) {
 		src := v.src[g_ln : len(v.src)-g_ln]
 		AddConst(v.alpha, src)
 		for i := range v.expect {
-			if !same(src[i], v.expect[i]) {
+			if !scalar.Same(src[i], v.expect[i]) {
 				t.Errorf("Test %d AddConst error at %d Got: %v Expected: %v", j, i, src[i], v.expect[i])
 			}
 		}
@@ -225,10 +226,10 @@ func TestCumSum(t *testing.T) {
 		src, dst := v.src[g_ln:len(v.src)-g_ln], v.dst[g_ln:len(v.dst)-g_ln]
 		ret := CumSum(dst, src)
 		for i := range v.expect {
-			if !same(ret[i], v.expect[i]) {
+			if !scalar.Same(ret[i], v.expect[i]) {
 				t.Errorf("Test %d CumSum error at %d Got: %v Expected: %v", j, i, ret[i], v.expect[i])
 			}
-			if !same(ret[i], dst[i]) {
+			if !scalar.Same(ret[i], dst[i]) {
 				t.Errorf("Test %d CumSum ret/dst mismatch %d Ret: %v Dst: %v", j, i, ret[i], dst[i])
 			}
 		}
@@ -297,10 +298,10 @@ func TestCumProd(t *testing.T) {
 		src, dst := v.src[sg_ln:len(v.src)-sg_ln], v.dst[dg_ln:len(v.dst)-dg_ln]
 		ret := CumProd(dst, src)
 		for i := range v.expect {
-			if !same(ret[i], v.expect[i]) {
+			if !scalar.Same(ret[i], v.expect[i]) {
 				t.Errorf("Test %d CumProd error at %d Got: %v Expected: %v", j, i, ret[i], v.expect[i])
 			}
-			if !same(ret[i], dst[i]) {
+			if !scalar.Same(ret[i], dst[i]) {
 				t.Errorf("Test %d CumProd ret/dst mismatch %d Ret: %v Dst: %v", j, i, ret[i], dst[i])
 			}
 		}
@@ -364,7 +365,7 @@ func TestDiv(t *testing.T) {
 		src, dst := v.src[sg_ln:len(v.src)-sg_ln], v.dst[dg_ln:len(v.dst)-dg_ln]
 		Div(dst, src)
 		for i := range v.expect {
-			if !same(dst[i], v.expect[i]) {
+			if !scalar.Same(dst[i], v.expect[i]) {
 				t.Errorf("Test %d Div error at %d Got: %v Expected: %v", j, i, dst[i], v.expect[i])
 			}
 		}
@@ -432,10 +433,10 @@ func TestDivTo(t *testing.T) {
 		dst := v.dst[xg_ln : len(v.dst)-xg_ln]
 		ret := DivTo(dst, x, y)
 		for i := range v.expect {
-			if !same(ret[i], v.expect[i]) {
+			if !scalar.Same(ret[i], v.expect[i]) {
 				t.Errorf("Test %d DivTo error at %d Got: %v Expected: %v", j, i, ret[i], v.expect[i])
 			}
-			if !same(ret[i], dst[i]) {
+			if !scalar.Same(ret[i], dst[i]) {
 				t.Errorf("Test %d DivTo ret/dst mismatch %d Ret: %v Dst: %v", j, i, ret[i], dst[i])
 			}
 		}
@@ -502,7 +503,7 @@ func TestL1Dist(t *testing.T) {
 		v.s, v.t = guardVector(v.s, s_gd, sg_ln), guardVector(v.t, t_gd, tg_ln)
 		s_lc, t_lc := v.s[sg_ln:len(v.s)-sg_ln], v.t[tg_ln:len(v.t)-tg_ln]
 		ret := L1Dist(s_lc, t_lc)
-		if !same(ret, v.expect) {
+		if !scalar.Same(ret, v.expect) {
 			t.Errorf("Test %d L1Dist error Got: %f Expected: %f", j, ret, v.expect)
 		}
 		if !isValidGuard(v.s, s_gd, sg_ln) {
@@ -565,7 +566,7 @@ func TestLinfDist(t *testing.T) {
 		v.s, v.t = guardVector(v.s, s_gd, sg_ln), guardVector(v.t, t_gd, tg_ln)
 		s_lc, t_lc := v.s[sg_ln:len(v.s)-sg_ln], v.t[tg_ln:len(v.t)-tg_ln]
 		ret := LinfDist(s_lc, t_lc)
-		if !same(ret, v.expect) {
+		if !scalar.Same(ret, v.expect) {
 			t.Errorf("Test %d LinfDist error Got: %f Expected: %f", j, ret, v.expect)
 		}
 		if !isValidGuard(v.s, s_gd, sg_ln) {
@@ -628,7 +629,7 @@ func TestSum(t *testing.T) {
 		gsrc := guardVector(v.src, srcGd, gdLn)
 		src := gsrc[gdLn : len(gsrc)-gdLn]
 		ret := Sum(src)
-		if !same(ret, v.expect) {
+		if !scalar.Same(ret, v.expect) {
 			t.Errorf("Test %d Sum error Got: %v Expected: %v", j, ret, v.expect)
 		}
 		if !isValidGuard(gsrc, srcGd, gdLn) {

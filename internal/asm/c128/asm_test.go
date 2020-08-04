@@ -91,14 +91,9 @@ func checkValidIncGuard(t *testing.T, vec []complex128, gdVal complex128, inc, g
 	}
 }
 
-// same tests for nan-aware equality.
-func same(a, b float64) bool {
-	return a == b || (math.IsNaN(a) && math.IsNaN(b))
-}
-
 // sameApprox tests for nan-aware equality within tolerance.
 func sameApprox(a, b, tol float64) bool {
-	return same(a, b) || scalar.EqualWithinAbsOrRel(a, b, tol, tol)
+	return scalar.Same(a, b) || scalar.EqualWithinAbsOrRel(a, b, tol, tol)
 }
 
 // sameCmplx tests for nan-aware equality.

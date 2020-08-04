@@ -33,7 +33,7 @@ func areSlicesSame(t *testing.T, truth, comp []float64, str string) {
 	ok := len(truth) == len(comp)
 	if ok {
 		for i, a := range truth {
-			if !scalar.EqualWithinAbsOrRel(a, comp[i], EqTolerance, EqTolerance) && !same(a, comp[i]) {
+			if !scalar.EqualWithinAbsOrRel(a, comp[i], EqTolerance, EqTolerance) && !scalar.Same(a, comp[i]) {
 				ok = false
 				break
 			}
@@ -42,10 +42,6 @@ func areSlicesSame(t *testing.T, truth, comp []float64, str string) {
 	if !ok {
 		t.Errorf(str+". Expected %v, returned %v", truth, comp)
 	}
-}
-
-func same(a, b float64) bool {
-	return a == b || (math.IsNaN(a) && math.IsNaN(b))
 }
 
 func Panics(fun func()) (b bool) {
@@ -735,7 +731,7 @@ func TestMaxAndIdx(t *testing.T) {
 			t.Errorf("Wrong index "+test.desc+": got:%d want:%d", ind, test.wantIdx)
 		}
 		val := Max(test.in)
-		if !same(val, test.wantVal) {
+		if !scalar.Same(val, test.wantVal) {
 			t.Errorf("Wrong value "+test.desc+": got:%f want:%f", val, test.wantVal)
 		}
 	}
@@ -788,7 +784,7 @@ func TestMinAndIdx(t *testing.T) {
 			t.Errorf("Wrong index "+test.desc+": got:%d want:%d", ind, test.wantIdx)
 		}
 		val := Min(test.in)
-		if !same(val, test.wantVal) {
+		if !scalar.Same(val, test.wantVal) {
 			t.Errorf("Wrong value "+test.desc+": got:%f want:%f", val, test.wantVal)
 		}
 	}

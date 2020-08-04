@@ -9,6 +9,7 @@ import (
 	"math"
 	"testing"
 
+	"gonum.org/v1/gonum/floats/scalar"
 	. "gonum.org/v1/gonum/internal/asm/f32"
 )
 
@@ -130,7 +131,7 @@ func TestDdotUnitary(t *testing.T) {
 			xg, yg := guardVector(test.x, xGdVal, xgLn), guardVector(test.y, yGdVal, ygLn)
 			x, y := xg[xgLn:len(xg)-xgLn], yg[ygLn:len(yg)-ygLn]
 			res := DdotUnitary(x, y)
-			if !same64(res, test.dWant) {
+			if !scalar.Same(res, test.dWant) {
 				t.Errorf(msgRes, prefix, res, test.dWant)
 			}
 			if !isValidGuard(xg, xGdVal, xgLn) {
@@ -162,7 +163,7 @@ func TestDdotInc(t *testing.T) {
 				want = test.dWantRev
 			}
 			res := DdotInc(x, y, uintptr(test.n), uintptr(inc.x), uintptr(inc.y), uintptr(ix), uintptr(iy))
-			if !same64(res, want) {
+			if !scalar.Same(res, want) {
 				t.Errorf(msgRes, prefix, res, want)
 			}
 			checkValidIncGuard(t, xg, xGdVal, inc.x, gdLn)

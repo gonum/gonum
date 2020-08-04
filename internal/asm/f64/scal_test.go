@@ -10,6 +10,7 @@ import (
 
 	"golang.org/x/exp/rand"
 
+	"gonum.org/v1/gonum/floats/scalar"
 	. "gonum.org/v1/gonum/internal/asm/f64"
 )
 
@@ -87,7 +88,7 @@ func TestScalUnitary(t *testing.T) {
 			ScalUnitary(test.alpha, x)
 
 			for i := range test.want {
-				if !same(x[i], test.want[i]) {
+				if !scalar.Same(x[i], test.want[i]) {
 					t.Errorf(msgVal, prefix, i, x[i], test.want[i])
 				}
 			}
@@ -113,7 +114,7 @@ func TestScalUnitaryTo(t *testing.T) {
 			ScalUnitaryTo(dst, test.alpha, x)
 
 			for i := range test.want {
-				if !same(dst[i], test.want[i]) {
+				if !scalar.Same(dst[i], test.want[i]) {
 					t.Errorf(msgVal, prefix, i, dst[i], test.want[i])
 				}
 			}
@@ -143,7 +144,7 @@ func TestScalInc(t *testing.T) {
 			ScalInc(test.alpha, x, uintptr(n), uintptr(incX))
 
 			for i := range test.want {
-				if !same(x[i*incX], test.want[i]) {
+				if !scalar.Same(x[i*incX], test.want[i]) {
 					t.Errorf(msgVal, prefix, i, x[i*incX], test.want[i])
 				}
 			}
@@ -167,7 +168,7 @@ func TestScalIncTo(t *testing.T) {
 			ScalIncTo(dst, uintptr(inc.y), test.alpha, x, uintptr(n), uintptr(inc.x))
 
 			for i := range test.want {
-				if !same(dst[i*inc.y], test.want[i]) {
+				if !scalar.Same(dst[i*inc.y], test.want[i]) {
 					t.Errorf(msgVal, prefix, i, dst[i*inc.y], test.want[i])
 				}
 			}

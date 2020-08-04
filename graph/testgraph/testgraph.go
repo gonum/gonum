@@ -8,13 +8,13 @@ package testgraph // import "gonum.org/v1/gonum/graph/testgraph"
 
 import (
 	"fmt"
-	"math"
 	"reflect"
 	"sort"
 	"testing"
 
 	"golang.org/x/exp/rand"
 
+	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/internal/set"
@@ -1141,12 +1141,12 @@ func Weight(t *testing.T, b Builder) {
 					if e != nil {
 						t.Errorf("missing edge weight for existing edge for test %q: (%v)--(%v)", test.name, x.ID(), y.ID())
 					}
-					if !same(w, absent) {
+					if !scalar.Same(w, absent) {
 						t.Errorf("unexpected absent weight for test %q: got:%v want:%v", test.name, w, absent)
 					}
 
 				case !multi && x.ID() == y.ID():
-					if !same(w, self) {
+					if !scalar.Same(w, self) {
 						t.Errorf("unexpected self weight for test %q: got:%v want:%v", test.name, w, self)
 					}
 
@@ -1196,15 +1196,15 @@ func AdjacencyMatrix(t *testing.T, b Builder) {
 				w, ok := wg.Weight(x.ID(), y.ID())
 				switch {
 				case !ok:
-					if !same(m.At(i, j), absent) {
+					if !scalar.Same(m.At(i, j), absent) {
 						t.Errorf("weight mismatch for test %q: (%v)--(%v) matrix=%v graph=%v", test.name, x.ID(), y.ID(), m.At(i, j), w)
 					}
 				case x.ID() == y.ID():
-					if !same(m.At(i, j), self) {
+					if !scalar.Same(m.At(i, j), self) {
 						t.Errorf("weight mismatch for test %q: (%v)--(%v) matrix=%v graph=%v", test.name, x.ID(), y.ID(), m.At(i, j), w)
 					}
 				default:
-					if !same(m.At(i, j), w) {
+					if !scalar.Same(m.At(i, j), w) {
 						t.Errorf("weight mismatch for test %q: (%v)--(%v) matrix=%v graph=%v", test.name, x.ID(), y.ID(), m.At(i, j), w)
 					}
 				}
@@ -2035,10 +2035,6 @@ func undirectedIDs(e Edge) (lo, hi int64, inverted bool) {
 
 type edge struct {
 	f, t, id int64
-}
-
-func same(a, b float64) bool {
-	return (math.IsNaN(a) && math.IsNaN(b)) || a == b
 }
 
 func panics(fn func()) (ok bool) {

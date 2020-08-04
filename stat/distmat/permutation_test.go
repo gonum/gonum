@@ -6,11 +6,11 @@ package distmat
 
 import (
 	"math/cmplx"
-	"math/rand"
 	"testing"
 
-	"gonum.org/v1/gonum/floats"
+	"golang.org/x/exp/rand"
 
+	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/mat"
 )
 

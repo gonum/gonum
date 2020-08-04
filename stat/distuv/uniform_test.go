@@ -111,10 +111,10 @@ func TestUniformScore(t *testing.T) {
 		{1.001, math.NaN(), math.NaN()},
 	} {
 		score := u.Score(nil, test.x)
-		if !same(score[0], test.wantMin) {
+		if !scalar.Same(score[0], test.wantMin) {
 			t.Errorf("Score[0] mismatch for at %g: got %v, want %g", test.x, score[0], test.wantMin)
 		}
-		if !same(score[1], test.wantMax) {
+		if !scalar.Same(score[1], test.wantMax) {
 			t.Errorf("Score[1] mismatch for at %g: got %v, want %g", test.x, score[1], test.wantMax)
 		}
 	}
@@ -134,8 +134,4 @@ func TestUniformScoreInput(t *testing.T) {
 			t.Errorf("Expected NaN score input for U(0, 1) at x == %g, got %v", x, scoreInput)
 		}
 	}
-}
-
-func same(a, b float64) bool {
-	return a == b || (math.IsNaN(a) && math.IsNaN(b))
 }

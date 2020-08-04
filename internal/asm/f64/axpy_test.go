@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"testing"
 
+	"gonum.org/v1/gonum/floats/scalar"
 	. "gonum.org/v1/gonum/internal/asm/f64"
 )
 
@@ -114,7 +115,7 @@ func TestAxpyUnitary(t *testing.T) {
 			x, y := xg[xgLn:len(xg)-xgLn], yg[ygLn:len(yg)-ygLn]
 			AxpyUnitary(test.alpha, x, y)
 			for i := range test.want {
-				if !same(y[i], test.want[i]) {
+				if !scalar.Same(y[i], test.want[i]) {
 					t.Errorf(msgVal, prefix, i, y[i], test.want[i])
 				}
 			}
@@ -146,7 +147,7 @@ func TestAxpyUnitaryTo(t *testing.T) {
 
 			AxpyUnitaryTo(dst, test.alpha, x, y)
 			for i := range test.want {
-				if !same(dst[i], test.want[i]) {
+				if !scalar.Same(dst[i], test.want[i]) {
 					t.Errorf(msgVal, prefix, i, dst[i], test.want[i])
 				}
 			}
@@ -198,7 +199,7 @@ func TestAxpyInc(t *testing.T) {
 				inc.y = -inc.y
 			}
 			for i := range want {
-				if !same(y[i*inc.y], want[i]) {
+				if !scalar.Same(y[i*inc.y], want[i]) {
 					t.Errorf(msgVal, prefix, i, y[iy+i*inc.y], want[i])
 				}
 			}
@@ -252,7 +253,7 @@ func TestAxpyIncTo(t *testing.T) {
 				inc.dst = -inc.dst
 			}
 			for i := range want {
-				if !same(dst[i*inc.dst], want[iW+i*incW]) {
+				if !scalar.Same(dst[i*inc.dst], want[iW+i*incW]) {
 					t.Errorf(msgVal, prefix, i, dst[i*inc.dst], want[iW+i*incW])
 				}
 			}

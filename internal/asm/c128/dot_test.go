@@ -7,6 +7,8 @@ package c128
 import (
 	"fmt"
 	"testing"
+
+	"gonum.org/v1/gonum/cmplxs/cscalar"
 )
 
 var dotTests = []struct {
@@ -75,7 +77,7 @@ func TestDotcUnitary(t *testing.T) {
 			xg, yg := guardVector(test.x, gd, xgLn), guardVector(test.y, gd, ygLn)
 			x, y := xg[xgLn:len(xg)-xgLn], yg[ygLn:len(yg)-ygLn]
 			res := DotcUnitary(x, y)
-			if !same(res, test.wantc) {
+			if !cscalar.Same(res, test.wantc) {
 				t.Errorf(msgVal, prefix, i, res, test.wantc)
 			}
 			if !isValidGuard(xg, gd, xgLn) {
@@ -107,7 +109,7 @@ func TestDotcInc(t *testing.T) {
 			if inc.x*inc.y > 0 {
 				want = test.wantc
 			}
-			if !same(res, want) {
+			if !cscalar.Same(res, want) {
 				t.Errorf(msgVal, prefix, i, res, want)
 				t.Error(x, y)
 			}
@@ -126,7 +128,7 @@ func TestDotuUnitary(t *testing.T) {
 			xg, yg := guardVector(test.x, gd, xgLn), guardVector(test.y, gd, ygLn)
 			x, y := xg[xgLn:len(xg)-xgLn], yg[ygLn:len(yg)-ygLn]
 			res := DotuUnitary(x, y)
-			if !same(res, test.wantu) {
+			if !cscalar.Same(res, test.wantu) {
 				t.Errorf(msgVal, prefix, i, res, test.wantu)
 			}
 			if !isValidGuard(xg, gd, xgLn) {
@@ -158,7 +160,7 @@ func TestDotuInc(t *testing.T) {
 			if inc.x*inc.y > 0 {
 				want = test.wantu
 			}
-			if !same(res, want) {
+			if !cscalar.Same(res, want) {
 				t.Errorf(msgVal, prefix, i, res, want)
 			}
 			checkValidIncGuard(t, xg, gd, inc.x, gdLn)

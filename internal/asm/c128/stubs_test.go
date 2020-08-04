@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"testing"
 
+	"gonum.org/v1/gonum/cmplxs/cscalar"
 	. "gonum.org/v1/gonum/internal/asm/c128"
 )
 
@@ -57,7 +58,7 @@ func TestAdd(t *testing.T) {
 		src, dst := v.src[sg_ln:len(v.src)-sg_ln], v.dst[dg_ln:len(v.dst)-dg_ln]
 		Add(dst, src)
 		for i := range v.expect {
-			if !sameCmplx(dst[i], v.expect[i]) {
+			if !cscalar.Same(dst[i], v.expect[i]) {
 				t.Errorf("Test %d Add error at %d Got: %v Expected: %v", j, i, dst[i], v.expect[i])
 			}
 		}
@@ -107,7 +108,7 @@ func TestAddConst(t *testing.T) {
 		src := v.src[g_ln : len(v.src)-g_ln]
 		AddConst(v.alpha, src)
 		for i := range v.expect {
-			if !sameCmplx(src[i], v.expect[i]) {
+			if !cscalar.Same(src[i], v.expect[i]) {
 				t.Errorf("Test %d AddConst error at %d Got: %v Expected: %v", j, i, src[i], v.expect[i])
 			}
 		}
@@ -334,10 +335,10 @@ func TestCumSum(t *testing.T) {
 		src, dst := v.src[g_ln:len(v.src)-g_ln], v.dst[g_ln:len(v.dst)-g_ln]
 		ret := CumSum(dst, src)
 		for i := range v.expect {
-			if !sameCmplx(ret[i], v.expect[i]) {
+			if !cscalar.Same(ret[i], v.expect[i]) {
 				t.Errorf("Test %d CumSum error at %d Got: %v Expected: %v", j, i, ret[i], v.expect[i])
 			}
-			if !sameCmplx(ret[i], dst[i]) {
+			if !cscalar.Same(ret[i], dst[i]) {
 				t.Errorf("Test %d CumSum ret/dst mismatch %d Ret: %v Dst: %v", j, i, ret[i], dst[i])
 			}
 		}
@@ -406,10 +407,10 @@ func TestCumProd(t *testing.T) {
 		src, dst := v.src[sg_ln:len(v.src)-sg_ln], v.dst[dg_ln:len(v.dst)-dg_ln]
 		ret := CumProd(dst, src)
 		for i := range v.expect {
-			if !sameCmplx(ret[i], v.expect[i]) {
+			if !cscalar.Same(ret[i], v.expect[i]) {
 				t.Errorf("Test %d CumProd error at %d Got: %v Expected: %v", j, i, ret[i], v.expect[i])
 			}
-			if !sameCmplx(ret[i], dst[i]) {
+			if !cscalar.Same(ret[i], dst[i]) {
 				t.Errorf("Test %d CumProd ret/dst mismatch %d Ret: %v Dst: %v", j, i, ret[i], dst[i])
 			}
 		}
@@ -548,7 +549,7 @@ func TestDivTo(t *testing.T) {
 			if !sameCmplxApprox(ret[i], v.expect[i], tol) {
 				t.Errorf("Test %d DivTo error at %d Got: %v Expected: %v", j, i, ret[i], v.expect[i])
 			}
-			if !sameCmplx(ret[i], dst[i]) {
+			if !cscalar.Same(ret[i], dst[i]) {
 				t.Errorf("Test %d DivTo ret/dst mismatch %d Ret: %v Dst: %v", j, i, ret[i], dst[i])
 			}
 		}
@@ -613,7 +614,7 @@ func TestDscalUnitary(t *testing.T) {
 			DscalUnitary(test.alpha, x)
 
 			for i := range test.want {
-				if !sameCmplx(x[i], test.want[i]) {
+				if !cscalar.Same(x[i], test.want[i]) {
 					t.Errorf(msgVal, prefix, i, x[i], test.want[i])
 				}
 			}
@@ -637,7 +638,7 @@ func TestDscalInc(t *testing.T) {
 			DscalInc(test.alpha, x, uintptr(n), uintptr(incX))
 
 			for i := range test.want {
-				if !sameCmplx(x[i*incX], test.want[i]) {
+				if !cscalar.Same(x[i*incX], test.want[i]) {
 					t.Errorf(msgVal, prefix, i, x[i*incX], test.want[i])
 				}
 			}
@@ -695,7 +696,7 @@ func TestScalUnitary(t *testing.T) {
 			ScalUnitary(test.alpha, x)
 
 			for i := range test.want {
-				if !sameCmplx(x[i], test.want[i]) {
+				if !cscalar.Same(x[i], test.want[i]) {
 					t.Errorf(msgVal, prefix, i, x[i], test.want[i])
 				}
 			}
@@ -719,7 +720,7 @@ func TestScalInc(t *testing.T) {
 			ScalInc(test.alpha, x, uintptr(n), uintptr(inc))
 
 			for i := range test.want {
-				if !sameCmplx(x[i*inc], test.want[i]) {
+				if !cscalar.Same(x[i*inc], test.want[i]) {
 					t.Errorf(msgVal, prefix, i, x[i*inc], test.want[i])
 				}
 			}
@@ -779,7 +780,7 @@ func TestSum(t *testing.T) {
 		gsrc := guardVector(v.src, srcGd, gdLn)
 		src := gsrc[gdLn : len(gsrc)-gdLn]
 		ret := Sum(src)
-		if !sameCmplx(ret, v.expect) {
+		if !cscalar.Same(ret, v.expect) {
 			t.Errorf("Test %d Sum error Got: %v Expected: %v", j, ret, v.expect)
 		}
 		if !isValidGuard(gsrc, srcGd, gdLn) {

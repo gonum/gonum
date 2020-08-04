@@ -5,12 +5,13 @@
 package c64
 
 import (
-	"math/cmplx"
 	"testing"
+
+	"gonum.org/v1/gonum/cmplxs/cscalar"
 )
 
 func same(x, y complex64) bool {
-	return x == y || (cmplx.IsNaN(complex128(x)) && cmplx.IsNaN(complex128(y)))
+	return cscalar.Same(complex128(x), complex128(y))
 }
 
 func guardVector(vec []complex64, gdVal complex64, gdLen int) (guarded []complex64) {

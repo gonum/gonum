@@ -19,13 +19,6 @@ var (
 	benchSink complex128
 )
 
-func same(x, y complex128) bool {
-	return (x == y ||
-		math.IsNaN(real(x)) && math.IsNaN(real(y)) && imag(x) == imag(y) ||
-		math.IsNaN(imag(y)) && math.IsNaN(imag(x)) && real(y) == real(x) ||
-		math.IsNaN(real(x)) && math.IsNaN(real(y)) && math.IsNaN(imag(y)) && math.IsNaN(imag(x)))
-}
-
 func guardVector(vec []complex128, guard_val complex128, guard_len int) (guarded []complex128) {
 	guarded = make([]complex128, len(vec)+guard_len*2)
 	copy(guarded[guard_len:], vec)

@@ -2,7 +2,7 @@
 // Use of this code is governed by a BSD-style
 // license that can be found in the LICENSE file
 
-package cmplxs
+package cscalar
 
 import (
 	"math"
@@ -85,12 +85,8 @@ func TestParse(t *testing.T) {
 		if err != nil {
 			continue
 		}
-		if !same(got, test.want) {
+		if !Same(got, test.want) {
 			t.Errorf("unexpected result for Parse(%q): got:%v, want:%v", test.s, got, test.want)
 		}
 	}
-}
-
-func same(a, b complex128) bool {
-	return a == b || (cmplx.IsNaN(a) && cmplx.IsNaN(b))
 }

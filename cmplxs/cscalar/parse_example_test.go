@@ -2,7 +2,7 @@
 // Use of this code is governed by a BSD-style
 // license that can be found in the LICENSE file
 
-package cmplxs_test
+package cscalar_test
 
 import (
 	"bufio"
@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"gonum.org/v1/gonum/cmplxs"
+	"gonum.org/v1/gonum/cmplxs/cscalar"
 	"gonum.org/v1/gonum/floats"
 )
 
@@ -28,7 +29,7 @@ missing
 	)
 	sc := bufio.NewScanner(strings.NewReader(data))
 	for sc.Scan() {
-		v, w, err := cmplxs.ParseWithNA(sc.Text(), "missing")
+		v, w, err := cscalar.ParseWithNA(sc.Text(), "missing")
 		if err != nil {
 			log.Fatal(err)
 		}

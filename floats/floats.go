@@ -207,7 +207,7 @@ func Dot(s1, s2 []float64) float64 {
 	return f64.DotUnitary(s1, s2)
 }
 
-// Equal returns true if the slices have equal lengths and
+// Equal returns true when the slices have equal lengths and
 // all elements are numerically identical.
 func Equal(s1, s2 []float64) bool {
 	if len(s1) != len(s2) {
@@ -221,7 +221,7 @@ func Equal(s1, s2 []float64) bool {
 	return true
 }
 
-// EqualApprox returns true if the slices have equal lengths and
+// EqualApprox returns true when the slices have equal lengths and
 // all element pairs have an absolute tolerance less than tol or a
 // relative tolerance less than tol.
 func EqualApprox(s1, s2 []float64, tol float64) bool {
@@ -236,7 +236,7 @@ func EqualApprox(s1, s2 []float64, tol float64) bool {
 	return true
 }
 
-// EqualFunc returns true if the slices have the same lengths
+// EqualFunc returns true when the slices have the same lengths
 // and the function returns true for all element pairs.
 func EqualFunc(s1, s2 []float64, f func(float64, float64) bool) bool {
 	if len(s1) != len(s2) {
@@ -250,8 +250,8 @@ func EqualFunc(s1, s2 []float64, f func(float64, float64) bool) bool {
 	return true
 }
 
-// EqualLengths returns true if all of the slices have equal length,
-// and false otherwise. Returns true if there are no input slices.
+// EqualLengths returns true when all of the slices have equal length,
+// and false otherwise. It also returns true when there are no input slices.
 func EqualLengths(slices ...[]float64) bool {
 	// This length check is needed: http://play.golang.org/p/sdty6YiLhM
 	if len(slices) == 0 {
@@ -310,7 +310,7 @@ func Find(inds []int, f func(float64) bool, s []float64, k int) ([]int, error) {
 	return inds, errors.New("floats: insufficient elements found")
 }
 
-// HasNaN returns true if the slice s has any values that are NaN and false
+// HasNaN returns true when the slice s has any values that are NaN and false
 // otherwise.
 func HasNaN(s []float64) bool {
 	for _, v := range s {
@@ -603,8 +603,8 @@ func Reverse(s []float64) {
 	}
 }
 
-// Same returns true if the input slices have the same length and all elements
-// have the same value with NaN treated as the same.
+// Same returns true when the input slices have the same length and all
+// elements have the same value with NaN treated as the same.
 func Same(s, t []float64) bool {
 	if len(s) != len(t) {
 		return false

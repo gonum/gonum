@@ -178,7 +178,7 @@ func Dot(s1, s2 []complex128) complex128 {
 	return c128.DotUnitary(s1, s2)
 }
 
-// Equal returns true if the slices have equal lengths and
+// Equal returns true when the slices have equal lengths and
 // all elements are numerically identical.
 func Equal(s1, s2 []complex128) bool {
 	if len(s1) != len(s2) {
@@ -192,7 +192,7 @@ func Equal(s1, s2 []complex128) bool {
 	return true
 }
 
-// EqualApprox returns true if the slices have equal lengths and
+// EqualApprox returns true when the slices have equal lengths and
 // all element pairs have an absolute tolerance less than tol or a
 // relative tolerance less than tol.
 func EqualApprox(s1, s2 []complex128, tol float64) bool {
@@ -207,7 +207,7 @@ func EqualApprox(s1, s2 []complex128, tol float64) bool {
 	return true
 }
 
-// EqualFunc returns true if the slices have the same lengths
+// EqualFunc returns true when the slices have the same lengths
 // and the function returns true for all element pairs.
 func EqualFunc(s1, s2 []complex128, f func(complex128, complex128) bool) bool {
 	if len(s1) != len(s2) {
@@ -221,8 +221,8 @@ func EqualFunc(s1, s2 []complex128, f func(complex128, complex128) bool) bool {
 	return true
 }
 
-// EqualLengths returns true if all of the slices have equal length,
-// and false otherwise. Returns true if there are no input slices.
+// EqualLengths returns true when all of the slices have equal length,
+// and false otherwise. It also eturns true when there are no input slices.
 func EqualLengths(slices ...[]complex128) bool {
 	// This length check is needed: http://play.golang.org/p/sdty6YiLhM
 	if len(slices) == 0 {
@@ -281,7 +281,7 @@ func Find(inds []int, f func(complex128) bool, s []complex128, k int) ([]int, er
 	return inds, errors.New("cmplxs: insufficient elements found")
 }
 
-// HasNaN returns true if the slice s has any values that are NaN and false
+// HasNaN returns true when the slice s has any values that are NaN and false
 // otherwise.
 func HasNaN(s []complex128) bool {
 	for _, v := range s {
@@ -315,9 +315,9 @@ func MaxAbs(s []complex128) complex128 {
 	return s[MaxAbsIdx(s)]
 }
 
-// MaxAbsIdx returns the index of the maximum absolute value in the input slice. If several
-// entries have the maximum absolute value, the first such index is returned. If the slice
-// is empty, MaxAbsIdx will panic.
+// MaxAbsIdx returns the index of the maximum absolute value in the input slice.
+// If several entries have the maximum absolute value, the first such index is
+// returned. If the slice is empty, MaxAbsIdx will panic.
 func MaxAbsIdx(s []complex128) int {
 	if len(s) == 0 {
 		panic("cmplxs: zero slice length")
@@ -470,8 +470,8 @@ func Reverse(s []complex128) {
 	}
 }
 
-// Same returns true if the input slices have the same length and all elements
-// have the same value with NaN treated as the same.
+// Same returns true when the input slices have the same length and all
+// elements have the same value with NaN treated as the same.
 func Same(s, t []complex128) bool {
 	if len(s) != len(t) {
 		return false

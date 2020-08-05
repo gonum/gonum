@@ -9,16 +9,19 @@ import (
 	"strconv"
 )
 
-// EqualWithinAbs returns true if a and b have an absolute
-// difference of less than tol.
+// EqualWithinAbs returns true when a and b have an absolute difference
+// not greater than tol.
 func EqualWithinAbs(a, b, tol float64) bool {
 	return a == b || math.Abs(a-b) <= tol
 }
 
-const minNormalFloat64 = 2.2250738585072014e-308
+// minNormalFloat64 is the smallest normal number. For 64 bit IEEE-754
+// floats this is 2^{-1022}.
+const minNormalFloat64 = 0x1p-1022
 
-// EqualWithinRel returns true if the difference between a and b
-// is not greater than tol times the greater value.
+// EqualWithinRel returns true when the difference between a and b
+// is not greater than tol times the greater absolute value of a and b,
+//  abs(a-b) <= tol * max(abs(a), abs(b)).
 func EqualWithinRel(a, b, tol float64) bool {
 	if a == b {
 		return true
@@ -34,16 +37,14 @@ func EqualWithinRel(a, b, tol float64) bool {
 	return delta/math.Max(math.Abs(a), math.Abs(b)) <= tol
 }
 
-// EqualWithinAbsOrRel returns true if a and b are equal to within
-// the absolute tolerance.
+// EqualWithinAbsOrRel returns true when a and b are equal to within
+// the absolute or relative tolerances. See EqualWithinAbs and
+// EqualWithinRel for details.
 func EqualWithinAbsOrRel(a, b, absTol, relTol float64) bool {
-	if EqualWithinAbs(a, b, absTol) {
-		return true
-	}
-	return EqualWithinRel(a, b, relTol)
+	return EqualWithinAbs(a, b, absTol) || EqualWithinRel(a, b, relTol)
 }
 
-// EqualWithinULP returns true if a and b are equal to within
+// EqualWithinULP returns true when a and b are equal to within
 // the specified number of floating point units in the last place.
 func EqualWithinULP(a, b float64, ulp uint) bool {
 	if a == b {
@@ -185,7 +186,7 @@ func isHalfway(x float64) bool {
 	return frac == 0.5 || (math.Nextafter(frac, math.Inf(-1)) < 0.5 && math.Nextafter(frac, math.Inf(1)) > 0.5)
 }
 
-// Same returns true if the inputs have the same value with NaN treated as the same.
+// Same returns true when the inputs have the same value, allowing NaN equality.
 func Same(a, b float64) bool {
 	return a == b || (math.IsNaN(a) && math.IsNaN(b))
 }

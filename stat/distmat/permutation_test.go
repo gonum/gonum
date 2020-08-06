@@ -5,7 +5,6 @@
 package distmat
 
 import (
-	"math/cmplx"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -17,45 +16,32 @@ import (
 func TestUniformPermutation(t *testing.T) {
 	up := NewUniformPermutation(rand.NewSource(1))
 	for _, n := range []int{10, 32, 64, 100} {
-		m := up.Matrix(n)
+		m := mat.NewDense(n, n, nil)
 		if m == nil {
 			t.Error("Matrix failed")
 		}
-		if !confirmEigenvaluesAreRootsOfUnity(m) {
-			t.Error("eigenvalue not a root of unity")
-		}
-		if !confirmEachColumnOneNZ(m) {
+		up.PermTo(m)
+		if !confirmEachRowAndColumnOneNZ(m) {
 			t.Error("didnt get back a permutation matrix")
 		}
 	}
 
 }
 
-func confirmEigenvaluesAreRootsOfUnity(m mat.Matrix) bool {
-	n, _ := m.Dims()
-	var e mat.Eigen
-	e.Factorize(m, mat.EigenLeft)
-	values := make([]complex128, n)
-	e.Values(values)
-	for _, v := range values {
-		a := cmplx.Abs(v)
-		if !floats.EqualWithinAbs(a, 1.0, 1e-12) {
-			return false
-		}
-	}
-	return true
-}
-
-func confirmEachColumnOneNZ(m mat.Matrix) bool {
+func confirmEachRowAndColumnOneNZ(m mat.Matrix) bool {
 	r, c := m.Dims()
 	for i := 0; i < r; i++ {
-		count := 0
+		rowCount := 0
+		colCount := 0
 		for j := 0; j < c; j++ {
 			if !floats.EqualWithinAbs(m.At(i, j), 0.0, 1e-12) {
-				count++
+				rowCount++
+			}
+			if !floats.EqualWithinAbs(m.At(j, i), 0.0, 1e-12) {
+				colCount++
 			}
 		}
-		if count != 1 {
+		if rowCount != 1 || colCount != 1 {
 			return false
 		}
 	}

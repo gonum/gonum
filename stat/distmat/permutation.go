@@ -10,30 +10,25 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-// UniformPermutation is a distribution over permutation matrices
+// UniformPermutation is a uniform distribution over the n!
+// permutation matrices of size n x n for a given n.
 type UniformPermutation struct {
-	src rand.Source
+	rnd     *rand.Rand
+	indices []int
 }
 
 // NewUniformPermutation constructs a new permutation matrix
 // generator using the given random source.
 func NewUniformPermutation(src rand.Source) *UniformPermutation {
-	up := UniformPermutation{src: src}
-	return &up
+	return &UniformPermutation{rnd: rand.New(src)}
 }
 
-// Matrix draws a random permutuation matrix of dimension n.
-func (up *UniformPermutation) Matrix(n int) *mat.Dense {
-	m := mat.NewDense(n, n, nil)
-	up.MatrixTo(m)
-	return m
-}
-
-// MatrixTo sets the given matrix to be a random permutation matrix
-// panics if m is not square
-// Note this does not zero the matrix -- before calling this ensure it
-// is full of 0s.
-func (up *UniformPermutation) MatrixTo(m *mat.Dense) {
+// PermTo sets the given matrix to be a random permutation matrix.
+// It does not zero the destination's elements, so it is the responsibility
+// of the caller to ensure it is correctly conditioned prior to the call.
+//
+// PermTo panics if m is not square.
+func (p *UniformPermutation) PermTo(m *mat.Dense) {
 	r, c := m.Dims()
 	if r != c {
 		panic(mat.ErrShape)
@@ -41,13 +36,14 @@ func (up *UniformPermutation) MatrixTo(m *mat.Dense) {
 	if r == 0 {
 		return
 	}
-	iList := make([]int, r)
-	for i := range iList {
-		iList[i] = i
+	if len(p.indices) != r {
+		p.indices = make([]int, r)
 	}
-	rnd := rand.New(up.src)
-	rnd.Shuffle(r, func(i, j int) { iList[i], iList[j] = iList[j], iList[i] })
-	for i, j := range iList {
-		m.Set(i, j, 1.0)
+	for k := range p.indices {
+		p.indices[k] = k
+	}
+	p.rnd.Shuffle(r, func(i, j int) { p.indices[i], p.indices[j] = p.indices[j], p.indices[i] })
+	for i, j := range p.indices {
+		m.Set(i, j, 1)
 	}
 }

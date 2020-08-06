@@ -11,7 +11,7 @@ import (
 )
 
 // UniformPermutation is a uniform distribution over the n!
-// permutation matrices of size n x n for a given n.
+// permutation matrices of size n×n for a given n.
 type UniformPermutation struct {
 	rnd     *rand.Rand
 	indices []int
@@ -27,9 +27,9 @@ func NewUniformPermutation(src rand.Source) *UniformPermutation {
 // It does not zero the destination's elements, so it is the responsibility
 // of the caller to ensure it is correctly conditioned prior to the call.
 //
-// PermTo panics if m is not square.
-func (p *UniformPermutation) PermTo(m *mat.Dense) {
-	r, c := m.Dims()
+// PermTo panics if dst is not square.
+func (p *UniformPermutation) PermTo(dst *mat.Dense) {
+	r, c := dst.Dims()
 	if r != c {
 		panic(mat.ErrShape)
 	}
@@ -38,12 +38,12 @@ func (p *UniformPermutation) PermTo(m *mat.Dense) {
 	}
 	if len(p.indices) != r {
 		p.indices = make([]int, r)
-	}
-	for k := range p.indices {
-		p.indices[k] = k
+		for k := range p.indices {
+			p.indices[k] = k
+		}
 	}
 	p.rnd.Shuffle(r, func(i, j int) { p.indices[i], p.indices[j] = p.indices[j], p.indices[i] })
 	for i, j := range p.indices {
-		m.Set(i, j, 1)
+		dst.Set(i, j, 1)
 	}
 }

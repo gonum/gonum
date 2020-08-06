@@ -31,17 +31,30 @@ func TestUniformPermutation(t *testing.T) {
 func confirmEachRowAndColumnOneNZ(m mat.Matrix) bool {
 	r, c := m.Dims()
 	for i := 0; i < r; i++ {
-		rowCount := 0
-		colCount := 0
+		rowNZ := 0
+		colNZ := 0
+		rowN1 := 0
+		colN1 := 0
 		for j := 0; j < c; j++ {
-			if !floats.EqualWithinAbs(m.At(i, j), 0.0, 1e-12) {
-				rowCount++
+			if floats.EqualWithinAbs(m.At(i, j), 0, 1e-12) {
+				rowNZ++
+			} else if floats.EqualWithinAbs(m.At(i, j), 1, 1e-12) {
+				rowN1++
+			} else {
+				return false
 			}
-			if !floats.EqualWithinAbs(m.At(j, i), 0.0, 1e-12) {
-				colCount++
+			if floats.EqualWithinAbs(m.At(j, i), 0, 1e-12) {
+				colNZ++
+			} else if floats.EqualWithinAbs(m.At(j, i), 1, 1e-12) {
+				colN1++
+			} else {
+				return false
 			}
 		}
-		if rowCount != 1 || colCount != 1 {
+		if rowNZ != (r-1) || colNZ != (r-1) {
+			return false
+		}
+		if rowN1 != 1 || colN1 != 1 {
 			return false
 		}
 	}

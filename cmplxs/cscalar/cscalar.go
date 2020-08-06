@@ -45,17 +45,17 @@ func EqualWithinAbsOrRel(a, b complex128, absTol, relTol float64) bool {
 	return EqualWithinAbs(a, b, absTol) || EqualWithinRel(a, b, relTol)
 }
 
-// ParseWithNA converts the string s to a complex128 in v.
-// If s equals missing, w is returned as 0, otherwise 1.
-func ParseWithNA(s, missing string) (v complex128, w float64, err error) {
+// ParseWithNA converts the string s to a complex128 in value.
+// If s equals missing, weight is returned as 0, otherwise 1.
+func ParseWithNA(s, missing string) (value complex128, weight float64, err error) {
 	if s == missing {
 		return 0, 0, nil
 	}
-	v, err = parse(s)
+	value, err = parse(s)
 	if err == nil {
-		w = 1
+		weight = 1
 	}
-	return v, w, err
+	return value, weight, err
 }
 
 // Round returns the half away from zero rounded value of x with prec precision.

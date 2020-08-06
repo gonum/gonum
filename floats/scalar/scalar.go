@@ -89,17 +89,17 @@ func NaNPayload(f float64) (payload uint64, ok bool) {
 	return b &^ nanMask, true
 }
 
-// ParseWithNA converts the string s to a float64 in v.
-// If s equals missing, w is returned as 0, otherwise 1.
-func ParseWithNA(s, missing string) (v, w float64, err error) {
+// ParseWithNA converts the string s to a float64 in value.
+// If s equals missing, weight is returned as 0, otherwise 1.
+func ParseWithNA(s, missing string) (value, weight float64, err error) {
 	if s == missing {
 		return 0, 0, nil
 	}
-	v, err = strconv.ParseFloat(s, 64)
+	value, err = strconv.ParseFloat(s, 64)
 	if err == nil {
-		w = 1
+		weight = 1
 	}
-	return v, w, err
+	return value, weight, err
 }
 
 // Round returns the half away from zero rounded value of x with prec precision.

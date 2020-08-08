@@ -21,42 +21,38 @@ func TestUniformPermutation(t *testing.T) {
 			t.Error("Matrix failed")
 		}
 		up.PermTo(m)
-		if !confirmEachRowAndColumnOneNZ(m) {
-			t.Error("didnt get back a permutation matrix")
+		r, c := m.Dims()
+		if r != n || c != n {
+			t.Error("got back matrix of wrong size")
 		}
+		confirmPermMatrix(t, m)
 	}
 
 }
 
-func confirmEachRowAndColumnOneNZ(m mat.Matrix) bool {
+func confirmPermMatrix(t *testing.T, m mat.Matrix) {
+	t.Helper()
 	r, c := m.Dims()
+	if r != c {
+		t.Error("matrix not square")
+	}
+	rowSums := make([]float64, r)
+	colSums := make([]float64, c)
 	for i := 0; i < r; i++ {
-		rowNZ := 0
-		colNZ := 0
-		rowN1 := 0
-		colN1 := 0
-		for j := 0; j < c; j++ {
-			if floats.EqualWithinAbs(m.At(i, j), 0, 1e-12) {
-				rowNZ++
-			} else if floats.EqualWithinAbs(m.At(i, j), 1, 1e-12) {
-				rowN1++
-			} else {
-				return false
+		for j, v := range mat.Row(nil, i, m) {
+			switch v {
+			case 0, 1:
+				rowSums[i] += v
+				colSums[j] += v
+			default:
+				t.Errorf("unexpected value %f at position %d %d", v, i, j)
 			}
-			if floats.EqualWithinAbs(m.At(j, i), 0, 1e-12) {
-				colNZ++
-			} else if floats.EqualWithinAbs(m.At(j, i), 1, 1e-12) {
-				colN1++
-			} else {
-				return false
-			}
-		}
-		if rowNZ != (r-1) || colNZ != (r-1) {
-			return false
-		}
-		if rowN1 != 1 || colN1 != 1 {
-			return false
 		}
 	}
-	return true
+	if floats.Max(rowSums) != 1 || floats.Min(rowSums) != 1 {
+		t.Error("found non-1 row sum")
+	}
+	if floats.Max(colSums) != 1 || floats.Min(colSums) != 1 {
+		t.Error("found non-1 row sum")
+	}
 }

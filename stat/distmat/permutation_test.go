@@ -16,15 +16,7 @@ func TestUniformPermutation(t *testing.T) {
 	up := NewUniformPermutation(rand.NewSource(1))
 	for _, n := range []int{10, 32, 64, 100} {
 		m := mat.NewDense(n, n, nil)
-		if m == nil {
-			t.Error("Matrix failed")
-		}
 		up.PermTo(m)
-		// Ensure Dims() unchanged.
-		r, c := m.Dims()
-		if r != n || c != n {
-			t.Errorf("got back matrix of wrong size. expected %d x %d, got %d x %d", n, n, r, c)
-		}
 		// Test that each row and column satisfies the permutation matrix
 		// invariant that all rows and columns have a single unit element
 		// and the remaining elements are zero.

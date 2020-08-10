@@ -231,15 +231,30 @@ func TestPiecewiseCubic(t *testing.T) {
 		var pc PiecewiseCubic
 		pc.FitWithDerivatives(test.xs, ys, dydxs)
 		n := len(test.xs)
-		got := pc.Predict(test.xs[0] - 0.1)
+		m := n - 1
+		x0 := test.xs[0]
+		x1 := test.xs[m]
+		x := x0 - 0.1
+		got := pc.Predict(x)
 		want := ys[0]
 		if got != want {
 			t.Errorf("Mismatch in value extrapolated to the left for test case %d: got %v, want %g", i, got, want)
 		}
-		got = pc.Predict(test.xs[n-1] + 0.1)
-		want = ys[n-1]
+		got = pc.PredictDerivative(x)
+		want = dydxs[0]
+		if got != want {
+			t.Errorf("Mismatch in derivative extrapolated to the left for test case %d: got %v, want %g", i, got, want)
+		}
+		x = x1 + 0.1
+		got = pc.Predict(x)
+		want = ys[m]
 		if got != want {
 			t.Errorf("Mismatch in value extrapolated to the right for test case %d: got %v, want %g", i, got, want)
+		}
+		got = pc.PredictDerivative(x)
+		want = dydxs[m]
+		if got != want {
+			t.Errorf("Mismatch in derivative extrapolated to the right for test case %d: got %v, want %g", i, got, want)
 		}
 		for j := 0; j < n; j++ {
 			x := test.xs[j]
@@ -248,7 +263,7 @@ func TestPiecewiseCubic(t *testing.T) {
 			if math.Abs(got-want) > valueTol {
 				t.Errorf("Mismatch in interpolated value at x == %g for test case %d: got %v, want %g", x, i, got, want)
 			}
-			if j < n-1 {
+			if j < m {
 				got = pc.coeffs.At(j, 0)
 				if math.Abs(got-want) > valueTol {
 					t.Errorf("Mismatch in 0-th order interpolation coefficient in %d-th node for test case %d: got %v, want %g", j, i, got, want)
@@ -260,6 +275,11 @@ func TestPiecewiseCubic(t *testing.T) {
 					want := test.f(xk)
 					if math.Abs(got-want) > valueTol {
 						t.Errorf("Mismatch in interpolated value at x == %g for test case %d: got %v, want %g", x, i, got, want)
+					}
+					got = pc.PredictDerivative(xk)
+					want = discrDerivPredict(&pc, x0, x1, xk, h)
+					if math.Abs(got-want) > derivTol {
+						t.Errorf("Mismatch in interpolated derivative at x == %g for test case %d: got %v, want %g", x, i, got, want)
 					}
 				}
 			} else {
@@ -276,23 +296,14 @@ func TestPiecewiseCubic(t *testing.T) {
 					t.Errorf("Interpolation coefficients in %d-th node produce mismatch in interpolated value at %g for test case %d: got %v, want %g", j-1, x, i, got, want)
 				}
 			}
-			got = discrDerivPredict(&pc, x, h, j, n)
+			got = discrDerivPredict(&pc, x0, x1, x, h)
 			want = test.df(x)
 			if math.Abs(got-want) > derivTol {
+				t.Errorf("Mismatch in numerical derivative of interpolated function at x == %g for test case %d: got %v, want %g", x, i, got, want)
+			}
+			got = pc.PredictDerivative(x)
+			if math.Abs(got-want) > valueTol {
 				t.Errorf("Mismatch in interpolated derivative value at x == %g for test case %d: got %v, want %g", x, i, got, want)
-			}
-			if j < n-1 {
-				got = pc.coeffs.At(j, 1)
-				if math.Abs(got-want) > valueTol {
-					t.Errorf("Mismatch in 1-st order interpolation coefficient in %d-th node for test case %d: got %v, want %g", j, i, got, want)
-				}
-			}
-			if j > 0 {
-				dx := test.xs[j] - test.xs[j-1]
-				got = (3*pc.coeffs.At(j-1, 3)*dx+2*pc.coeffs.At(j-1, 2))*dx + pc.coeffs.At(j-1, 1)
-				if math.Abs(got-want) > valueTol {
-					t.Errorf("Interpolation coefficients in %d-th node produce mismatch in interpolated derivative value at %g for test case %d: got %v, want %g", j-1, x, i, got, want)
-				}
 			}
 		}
 	}
@@ -326,6 +337,10 @@ func TestPiecewiseCubicFitWithDerivatives(t *testing.T) {
 	lastY := rightPoly(xs[2])
 	if pc.lastY != lastY {
 		t.Errorf("Mismatch in lastY: got %v, want %g", pc.lastY, lastY)
+	}
+	lastDyDx := rightPolyDerivative(xs[2])
+	if pc.lastDyDx != lastDyDx {
+		t.Errorf("Mismatch in lastDxDy: got %v, want %g", pc.lastDyDx, lastDyDx)
 	}
 	if !floats.Equal(pc.xs, xs) {
 		t.Errorf("Mismatch in xs: got %v, want %v", pc.xs, xs)
@@ -371,7 +386,13 @@ func TestPiecewiseCubicFitWithDerivativesErrors(t *testing.T) {
 
 func TestAkimaSpline(t *testing.T) {
 	t.Parallel()
-	const tol = 1e-14
+	const (
+		derivAbsTol = 1e-8
+		derivRelTol = 1e-7
+		h           = 1e-8
+		nPts        = 100
+		tol         = 1e-14
+	)
 	for i, test := range []struct {
 		xs []float64
 		f  func(float64) float64
@@ -403,6 +424,9 @@ func TestAkimaSpline(t *testing.T) {
 	} {
 		var as AkimaSpline
 		n := len(test.xs)
+		m := n - 1
+		x0 := test.xs[0]
+		x1 := test.xs[m]
 		ys := applyFunc(test.xs, test.f)
 		err := as.Fit(test.xs, ys)
 		if err != nil {
@@ -414,6 +438,17 @@ func TestAkimaSpline(t *testing.T) {
 			want := test.f(x)
 			if math.Abs(got-want) > tol {
 				t.Errorf("Mismatch in interpolated value at x == %g for test case %d: got %v, want %g", x, i, got, want)
+			}
+			if j < m {
+				dx := (test.xs[j+1] - x) / nPts
+				for k := 1; k < nPts; k++ {
+					xk := x + float64(k)*dx
+					got = as.PredictDerivative(xk)
+					want = discrDerivPredict(&as, x0, x1, xk, h)
+					if math.Abs(got-want) > derivRelTol*math.Abs(want)+derivAbsTol {
+						t.Errorf("Mismatch in interpolated derivative at x == %g for test case %d: got %v, want %g", x, i, got, want)
+					}
+				}
 			}
 		}
 		if n == 2 {
@@ -643,10 +678,10 @@ func panics(fun func()) (b bool) {
 	return
 }
 
-func discrDerivPredict(p Predictor, x, h float64, j, n int) float64 {
-	if j == 0 {
+func discrDerivPredict(p Predictor, x0, x1, x, h float64) float64 {
+	if x <= x0+h {
 		return (p.Predict(x+h) - p.Predict(x)) / h
-	} else if j == n-1 {
+	} else if x >= x1-h {
 		return (p.Predict(x) - p.Predict(x-h)) / h
 	} else {
 		return (p.Predict(x+h) - p.Predict(x-h)) / (2 * h)

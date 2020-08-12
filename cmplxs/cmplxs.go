@@ -85,6 +85,22 @@ func Count(f func(complex128) bool, s []complex128) int {
 	return n
 }
 
+// Complex fills each of the elements of dst with the complex number
+// constructed from the corresponding elements of real and imag.
+// A panic will occur if the lengths of arguments do not match.
+func Complex(dst []complex128, real, imag []float64) []complex128 {
+	if len(dst) != len(real) || len(dst) != len(imag) {
+		panic("cmplxs: length of destination does not match length of the source")
+	}
+	if len(dst) == 0 {
+		return dst
+	}
+	for i, r := range real {
+		dst[i] = complex(r, imag[i])
+	}
+	return dst
+}
+
 // CumProd finds the cumulative product of elements of s and store it in
 // place into dst so that
 //  dst[i] = s[i] * s[i-1] * s[i-2] * ... * s[0]
@@ -292,6 +308,21 @@ func HasNaN(s []complex128) bool {
 	return false
 }
 
+// Imag places the imaginary components of src into dst.
+// A panic will occur if the lengths of arguments do not match.
+func Imag(dst []float64, src []complex128) []float64 {
+	if len(dst) != len(src) {
+		panic("cmplxs: length of destination does not match length of the source")
+	}
+	if len(dst) == 0 {
+		return dst
+	}
+	for i, z := range src {
+		dst[i] = imag(z)
+	}
+	return dst
+}
+
 // LogSpan returns a set of n equally spaced points in log space between,
 // l and u where N is equal to len(dst). The first element of the
 // resulting dst will be l and the final element of dst will be u.
@@ -461,6 +492,21 @@ func Prod(s []complex128) complex128 {
 		prod *= val
 	}
 	return prod
+}
+
+// Real places the real components of src into dst.
+// A panic will occur if the lengths of arguments do not match.
+func Real(dst []float64, src []complex128) []float64 {
+	if len(dst) != len(src) {
+		panic("cmplxs: length of destination does not match length of the source")
+	}
+	if len(dst) == 0 {
+		return dst
+	}
+	for i, z := range src {
+		dst[i] = real(z)
+	}
+	return dst
 }
 
 // Reverse reverses the order of elements in the slice.

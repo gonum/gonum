@@ -14,6 +14,7 @@ import (
 	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/cmplxs/cscalar"
+	"gonum.org/v1/gonum/floats"
 )
 
 const (
@@ -181,6 +182,69 @@ func TestCumProd(t *testing.T) {
 	truth = []complex128{}
 	CumProd(emptyReceiver, emptyReceiver)
 	areSlicesEqual(t, truth, emptyReceiver, "Wrong cumprod returned with empty receiver")
+}
+
+func TestComplex(t *testing.T) {
+	for i, test := range []struct {
+		dst        []complex128
+		real, imag []float64
+		want       []complex128
+		panics     bool
+	}{
+		{},
+		{
+			dst:  make([]complex128, 4),
+			real: []float64{1, 2, 3, 4},
+			imag: []float64{1, 2, 3, 4},
+			want: []complex128{1 + 1i, 2 + 2i, 3 + 3i, 4 + 4i},
+		},
+		{
+			dst:    make([]complex128, 3),
+			real:   []float64{1, 2, 3, 4},
+			imag:   []float64{1, 2, 3, 4},
+			panics: true,
+		},
+		{
+			dst:    make([]complex128, 4),
+			real:   []float64{1, 2, 3},
+			imag:   []float64{1, 2, 3, 4},
+			panics: true,
+		},
+		{
+			dst:    make([]complex128, 4),
+			real:   []float64{1, 2, 3, 4},
+			imag:   []float64{1, 2, 3},
+			panics: true,
+		},
+		{
+			dst:  make([]complex128, 4),
+			real: []float64{1, 2, 3, 4},
+			imag: []float64{1, 2, 3, math.NaN()},
+			want: []complex128{1 + 1i, 2 + 2i, 3 + 3i, cmplx.NaN()},
+		},
+	} {
+		var got []complex128
+		panicked := Panics(func() {
+			got = Complex(test.dst, test.real, test.imag)
+		})
+		if panicked != test.panics {
+			if panicked {
+				t.Errorf("unexpected panic for test %d", i)
+			} else {
+				t.Errorf("expected panic for test %d", i)
+			}
+		}
+		if panicked || test.panics {
+			continue
+		}
+		if !Same(got, test.dst) {
+			t.Errorf("mismatch between dst and return test %d: got:%v want:%v", i, got, test.dst)
+		}
+		if !Same(got, test.want) {
+			t.Errorf("unexpected result for test %d: got:%v want:%v", i, got, test.want)
+		}
+	}
+
 }
 
 func TestCumSum(t *testing.T) {
@@ -479,6 +543,54 @@ func TestHasNaN(t *testing.T) {
 			t.Errorf("HasNaN mismatch case %d. Expected %v, Found %v", i, test.ans, b)
 		}
 	}
+}
+
+func TestImag(t *testing.T) {
+	for i, test := range []struct {
+		dst    []float64
+		src    []complex128
+		want   []float64
+		panics bool
+	}{
+		{},
+		{
+			dst:  make([]float64, 4),
+			src:  []complex128{1 + 1i, 2 + 2i, 3 + 3i, 4 + 4i},
+			want: []float64{1, 2, 3, 4},
+		},
+		{
+			dst:    make([]float64, 3),
+			src:    []complex128{1 + 1i, 2 + 2i, 3 + 3i, 4 + 4i},
+			panics: true,
+		},
+		{
+			dst:  make([]float64, 4),
+			src:  []complex128{1 + 1i, 2 + 2i, 3 + 3i, cmplx.NaN()},
+			want: []float64{1, 2, 3, math.NaN()},
+		},
+	} {
+		var got []float64
+		panicked := Panics(func() {
+			got = Imag(test.dst, test.src)
+		})
+		if panicked != test.panics {
+			if panicked {
+				t.Errorf("unexpected panic for test %d", i)
+			} else {
+				t.Errorf("expected panic for test %d", i)
+			}
+		}
+		if panicked || test.panics {
+			continue
+		}
+		if !floats.Same(got, test.dst) {
+			t.Errorf("mismatch between dst and return test %d: got:%v want:%v", i, got, test.dst)
+		}
+		if !floats.Same(got, test.want) {
+			t.Errorf("unexpected result for test %d: got:%v want:%v", i, got, test.want)
+		}
+	}
+
 }
 
 func TestLogSpan(t *testing.T) {
@@ -798,6 +910,53 @@ func TestReverse(t *testing.T) {
 	}
 }
 
+func TestReal(t *testing.T) {
+	for i, test := range []struct {
+		dst    []float64
+		src    []complex128
+		want   []float64
+		panics bool
+	}{
+		{},
+		{
+			dst:  make([]float64, 4),
+			src:  []complex128{1 + 1i, 2 + 2i, 3 + 3i, 4 + 4i},
+			want: []float64{1, 2, 3, 4},
+		},
+		{
+			dst:    make([]float64, 3),
+			src:    []complex128{1 + 1i, 2 + 2i, 3 + 3i, 4 + 4i},
+			panics: true,
+		},
+		{
+			dst:  make([]float64, 4),
+			src:  []complex128{1 + 1i, 2 + 2i, 3 + 3i, cmplx.NaN()},
+			want: []float64{1, 2, 3, math.NaN()},
+		},
+	} {
+		var got []float64
+		panicked := Panics(func() {
+			got = Real(test.dst, test.src)
+		})
+		if panicked != test.panics {
+			if panicked {
+				t.Errorf("unexpected panic for test %d", i)
+			} else {
+				t.Errorf("expected panic for test %d", i)
+			}
+		}
+		if panicked || test.panics {
+			continue
+		}
+		if !floats.Same(got, test.dst) {
+			t.Errorf("mismatch between dst and return test %d: got:%v want:%v", i, got, test.dst)
+		}
+		if !floats.Same(got, test.want) {
+			t.Errorf("unexpected result for test %d: got:%v want:%v", i, got, test.want)
+		}
+	}
+
+}
 func TestSame(t *testing.T) {
 	s1 := []complex128{1 + 1i, 2 + 2i, 3 + 3i, 4 + 4i}
 	s2 := []complex128{1 + 1i, 2 + 2i, 3 + 3i, 4 + 4i}

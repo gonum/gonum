@@ -13,11 +13,18 @@ import (
 	"gonum.org/v1/gonum/internal/asm/c128"
 )
 
+const (
+	zeroLength   = "cmplxs: zero length slice"
+	shortSpan    = "cmplxs: slice length less than 2"
+	badLength    = "cmplxs: slice lengths do not match"
+	badDstLength = "cmplxs: destination slice length does not match input"
+)
+
 // Abs calculates the absolute values of the elements of s, and stores them in dst.
-// It panics if the lengths of dst and s do not match.
+// It panics if the argument lengths do not match.
 func Abs(dst []float64, s []complex128) {
 	if len(dst) != len(s) {
-		panic("cmplxs: length of the slices do not match")
+		panic(badDstLength)
 	}
 	for i, v := range s {
 		dst[i] = cmplx.Abs(v)
@@ -25,22 +32,23 @@ func Abs(dst []float64, s []complex128) {
 }
 
 // Add adds, element-wise, the elements of s and dst, and stores the result in dst.
-// It panics if the lengths of dst and s do not match.
+// It panics if the argument lengths do not match.
 func Add(dst, s []complex128) {
 	if len(dst) != len(s) {
-		panic("cmplxs: length of the slices do not match")
+		panic(badLength)
 	}
 	c128.AxpyUnitaryTo(dst, 1, s, dst)
 }
 
 // AddTo adds, element-wise, the elements of s and t and
-// stores the result in dst. It panics if the lengths of s, t and dst do not match.
+// stores the result in dst.
+// It panics if the argument lengths do not match.
 func AddTo(dst, s, t []complex128) []complex128 {
 	if len(s) != len(t) {
-		panic("cmplxs: length of adders do not match")
+		panic(badLength)
 	}
 	if len(dst) != len(s) {
-		panic("cmplxs: length of destination does not match length of adder")
+		panic(badDstLength)
 	}
 	c128.AxpyUnitaryTo(dst, 1, s, t)
 	return dst
@@ -52,22 +60,25 @@ func AddConst(c complex128, dst []complex128) {
 }
 
 // AddScaled performs dst = dst + alpha * s.
-// It panics if the lengths of dst and s are not equal.
+// It panics if the slice argument lengths do not match.
 func AddScaled(dst []complex128, alpha complex128, s []complex128) {
 	if len(dst) != len(s) {
-		panic("cmplxs: length of destination and source to not match")
+		panic(badLength)
 	}
 	c128.AxpyUnitaryTo(dst, alpha, s, dst)
 }
 
 // AddScaledTo performs dst = y + alpha * s, where alpha is a scalar,
 // and dst, y and s are all slices.
-// It panics if the lengths of dst, y, and s are not equal.
+// It panics if the slice argument lengths do not match.
 //
 // At the return of the function, dst[i] = y[i] + alpha * s[i]
 func AddScaledTo(dst, y []complex128, alpha complex128, s []complex128) []complex128 {
-	if len(dst) != len(s) || len(dst) != len(y) {
-		panic("cmplxs: lengths of slices do not match")
+	if len(s) != len(y) {
+		panic(badLength)
+	}
+	if len(dst) != len(y) {
+		panic(badDstLength)
 	}
 	c128.AxpyUnitaryTo(dst, alpha, s, y)
 	return dst
@@ -87,10 +98,13 @@ func Count(f func(complex128) bool, s []complex128) int {
 
 // Complex fills each of the elements of dst with the complex number
 // constructed from the corresponding elements of real and imag.
-// A panic will occur if the lengths of arguments do not match.
+// It panics if the argument lengths do not match.
 func Complex(dst []complex128, real, imag []float64) []complex128 {
-	if len(dst) != len(real) || len(dst) != len(imag) {
-		panic("cmplxs: length of destination does not match length of the source")
+	if len(real) != len(imag) {
+		panic(badLength)
+	}
+	if len(dst) != len(real) {
+		panic(badDstLength)
 	}
 	if len(dst) == 0 {
 		return dst
@@ -104,10 +118,10 @@ func Complex(dst []complex128, real, imag []float64) []complex128 {
 // CumProd finds the cumulative product of elements of s and store it in
 // place into dst so that
 //  dst[i] = s[i] * s[i-1] * s[i-2] * ... * s[0]
-// A panic will occur if the lengths of arguments do not match.
+// It panics if the argument lengths do not match.
 func CumProd(dst, s []complex128) []complex128 {
 	if len(dst) != len(s) {
-		panic("cmplxs: length of destination does not match length of the source")
+		panic(badDstLength)
 	}
 	if len(dst) == 0 {
 		return dst
@@ -118,10 +132,10 @@ func CumProd(dst, s []complex128) []complex128 {
 // CumSum finds the cumulative sum of elements of s and stores it in place
 // into dst so that
 //  dst[i] = s[i] + s[i-1] + s[i-2] + ... + s[0]
-// A panic will occur if the lengths of arguments do not match.
+// It panics if the argument lengths do not match.
 func CumSum(dst, s []complex128) []complex128 {
 	if len(dst) != len(s) {
-		panic("cmplxs: length of destination does not match length of the source")
+		panic(badDstLength)
 	}
 	if len(dst) == 0 {
 		return dst
@@ -130,10 +144,10 @@ func CumSum(dst, s []complex128) []complex128 {
 }
 
 // Distance computes the L-norm of s - t. See Norm for special cases.
-// A panic will occur if the lengths of s and t do not match.
+// It panics if the slice argument lengths do not match.
 func Distance(s, t []complex128, L float64) float64 {
 	if len(s) != len(t) {
-		panic("cmplxs: slice lengths do not match")
+		panic(badLength)
 	}
 	if len(s) == 0 {
 		return 0
@@ -165,31 +179,34 @@ func Distance(s, t []complex128, L float64) float64 {
 }
 
 // Div performs element-wise division dst / s
-// and stores the result in dst. It panics if the
-// lengths of s and t are not equal.
+// and stores the result in dst.
+// It panics if the argument lengths do not match.
 func Div(dst, s []complex128) {
 	if len(dst) != len(s) {
-		panic("cmplxs: slice lengths do not match")
+		panic(badLength)
 	}
 	c128.Div(dst, s)
 }
 
 // DivTo performs element-wise division s / t
-// and stores the result in dst. It panics if the
-// lengths of s, t, and dst are not equal.
+// and stores the result in dst.
+// It panics if the argument lengths do not match.
 func DivTo(dst, s, t []complex128) []complex128 {
-	if len(s) != len(t) || len(dst) != len(t) {
-		panic("cmplxs: slice lengths do not match")
+	if len(s) != len(t) {
+		panic(badLength)
+	}
+	if len(dst) != len(s) {
+		panic(badDstLength)
 	}
 	return c128.DivTo(dst, s, t)
 }
 
 // Dot computes the dot product of s1 and s2, i.e.
 // sum_{i = 1}^N conj(s1[i])*s2[i].
-// A panic will occur if lengths of arguments do not match.
+// It panics if the argument lengths do not match.
 func Dot(s1, s2 []complex128) complex128 {
 	if len(s1) != len(s2) {
-		panic("cmplxs: lengths of the slices do not match")
+		panic(badLength)
 	}
 	return c128.DotUnitary(s1, s2)
 }
@@ -309,10 +326,10 @@ func HasNaN(s []complex128) bool {
 }
 
 // Imag places the imaginary components of src into dst.
-// A panic will occur if the lengths of arguments do not match.
+// It panics if the argument lengths do not match.
 func Imag(dst []float64, src []complex128) []float64 {
 	if len(dst) != len(src) {
-		panic("cmplxs: length of destination does not match length of the source")
+		panic(badDstLength)
 	}
 	if len(dst) == 0 {
 		return dst
@@ -341,17 +358,18 @@ func LogSpan(dst []complex128, l, u complex128) []complex128 {
 }
 
 // MaxAbs returns the maximum absolute value in the input slice.
-// If the slice is empty, MaxAbs will panic.
+// It panics if s is zero length.
 func MaxAbs(s []complex128) complex128 {
 	return s[MaxAbsIdx(s)]
 }
 
 // MaxAbsIdx returns the index of the maximum absolute value in the input slice.
 // If several entries have the maximum absolute value, the first such index is
-// returned. If the slice is empty, MaxAbsIdx will panic.
+// returned.
+// It panics if s is zero length.
 func MaxAbsIdx(s []complex128) int {
 	if len(s) == 0 {
-		panic("cmplxs: zero slice length")
+		panic(zeroLength)
 	}
 	max := math.NaN()
 	var ind int
@@ -368,17 +386,17 @@ func MaxAbsIdx(s []complex128) int {
 }
 
 // MinAbs returns the minimum absolute value in the input slice.
-// If the slice is empty, MinAbs will panic.
+// It panics if s is zero length.
 func MinAbs(s []complex128) complex128 {
 	return s[MinAbsIdx(s)]
 }
 
 // MinAbsIdx returns the index of the minimum absolute value in the input slice. If several
-// entries have the minimum absolute value, the first such index is returned. If the slice
-// is empty, MinAbsIdx will panic.
+// entries have the minimum absolute value, the first such index is returned.
+// It panics if s is zero length.
 func MinAbsIdx(s []complex128) int {
 	if len(s) == 0 {
-		panic("cmplxs: zero slice length")
+		panic(zeroLength)
 	}
 	min := math.NaN()
 	var ind int
@@ -395,11 +413,11 @@ func MinAbsIdx(s []complex128) int {
 }
 
 // Mul performs element-wise multiplication between dst
-// and s and stores the result in dst. Panics if the
-// lengths of s and t are not equal.
+// and s and stores the result in dst.
+// It panics if the argument lengths do not match.
 func Mul(dst, s []complex128) {
 	if len(dst) != len(s) {
-		panic("cmplxs: slice lengths do not match")
+		panic(badLength)
 	}
 	for i, val := range s {
 		dst[i] *= val
@@ -407,11 +425,14 @@ func Mul(dst, s []complex128) {
 }
 
 // MulTo performs element-wise multiplication between s
-// and t and stores the result in dst. Panics if the
-// lengths of s, t, and dst are not equal.
+// and t and stores the result in dst.
+// It panics if the argument lengths do not match.
 func MulTo(dst, s, t []complex128) []complex128 {
-	if len(s) != len(t) || len(dst) != len(t) {
-		panic("cmplxs: slice lengths do not match")
+	if len(s) != len(t) {
+		panic(badLength)
+	}
+	if len(dst) != len(s) {
+		panic(badDstLength)
 	}
 	for i, val := range t {
 		dst[i] = val * s[i]
@@ -420,12 +441,12 @@ func MulTo(dst, s, t []complex128) []complex128 {
 }
 
 // NearestIdx returns the index of the element in s
-// whose value is nearest to v.  If several such
+// whose value is nearest to v. If several such
 // elements exist, the lowest index is returned.
-// NearestIdx panics if len(s) == 0.
+// It panics if s is zero length.
 func NearestIdx(s []complex128, v complex128) int {
 	if len(s) == 0 {
-		panic("cmplxs: zero length slice")
+		panic(zeroLength)
 	}
 	switch {
 	case cmplx.IsNaN(v):
@@ -495,10 +516,10 @@ func Prod(s []complex128) complex128 {
 }
 
 // Real places the real components of src into dst.
-// A panic will occur if the lengths of arguments do not match.
+// It panics if the argument lengths do not match.
 func Real(dst []float64, src []complex128) []float64 {
 	if len(dst) != len(src) {
-		panic("cmplxs: length of destination does not match length of the source")
+		panic(badDstLength)
 	}
 	if len(dst) == 0 {
 		return dst
@@ -539,9 +560,10 @@ func Scale(c complex128, dst []complex128) {
 }
 
 // ScaleTo multiplies the elements in s by c and stores the result in dst.
+// It panics if the slice argument lengths do not match.
 func ScaleTo(dst []complex128, c complex128, s []complex128) []complex128 {
 	if len(dst) != len(s) {
-		panic("cmplxs: lengths of slices do not match")
+		panic(badDstLength)
 	}
 	if len(dst) > 0 {
 		c128.ScalUnitaryTo(dst, c, s)
@@ -552,8 +574,7 @@ func ScaleTo(dst []complex128, c complex128, s []complex128) []complex128 {
 // Span returns a set of N equally spaced points between l and u, where N
 // is equal to the length of the destination. The first element of the destination
 // is l, the final element of the destination is u.
-//
-// Panics if len(dst) < 2.
+// It panics if the length of dst is less than 2.
 //
 // Span also returns the mutated slice dst, so that it can be used in range expressions,
 // like:
@@ -562,7 +583,7 @@ func ScaleTo(dst []complex128, c complex128, s []complex128) []complex128 {
 func Span(dst []complex128, l, u complex128) []complex128 {
 	n := len(dst)
 	if n < 2 {
-		panic("cmplxs: destination must have length >1")
+		panic(shortSpan)
 	}
 
 	// Special cases for Inf and NaN.
@@ -605,23 +626,24 @@ func Span(dst []complex128, l, u complex128) []complex128 {
 	return dst
 }
 
-// Sub subtracts, element-wise, the elements of s from dst. Panics if
-// the lengths of dst and s do not match.
+// Sub subtracts, element-wise, the elements of s from dst.
+// It panics if the argument lengths do not match.
 func Sub(dst, s []complex128) {
 	if len(dst) != len(s) {
-		panic("cmplxs: length of the slices do not match")
+		panic(badLength)
 	}
 	c128.AxpyUnitaryTo(dst, -1, s, dst)
 }
 
 // SubTo subtracts, element-wise, the elements of t from s and
-// stores the result in dst. Panics if the lengths of s, t and dst do not match.
+// stores the result in dst.
+// It panics if the argument lengths do not match.
 func SubTo(dst, s, t []complex128) []complex128 {
 	if len(s) != len(t) {
-		panic("cmplxs: length of subtractor and subtractee do not match")
+		panic(badLength)
 	}
 	if len(dst) != len(s) {
-		panic("cmplxs: length of destination does not match length of subtractor")
+		panic(badDstLength)
 	}
 	c128.AxpyUnitaryTo(dst, -1, t, s)
 	return dst

@@ -14,6 +14,7 @@ import (
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
+	"gonum.org/v1/gonum/internal/asm/f64"
 	"gonum.org/v1/gonum/lapack"
 )
 
@@ -1478,9 +1479,8 @@ func dlange(norm lapack.MatrixNorm, m, n int, a []float64, lda int) float64 {
 		}
 	case lapack.Frobenius:
 		for i := 0; i < m; i++ {
-			for j := 0; j < n; j++ {
-				value = math.Hypot(value, a[i*lda+j])
-			}
+			row := f64.L2NormUnitary(a[i*lda : i*lda+n])
+			value = math.Hypot(value, row)
 		}
 	default:
 		panic("bad MatrixNorm")

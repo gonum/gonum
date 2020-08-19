@@ -22,10 +22,7 @@ type Dpotrier interface {
 
 func DpotriTest(t *testing.T, impl Dpotrier) {
 	for _, uplo := range []blas.Uplo{blas.Upper, blas.Lower} {
-		name := "Upper"
-		if uplo == blas.Lower {
-			name = "Lower"
-		}
+		name := uploToString(uplo)
 		t.Run(name, func(t *testing.T) {
 			// Include small and large sizes to make sure that both
 			// unblocked and blocked paths are taken.

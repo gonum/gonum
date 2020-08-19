@@ -21,10 +21,7 @@ type Dlauu2er interface {
 
 func Dlauu2Test(t *testing.T, impl Dlauu2er) {
 	for _, uplo := range []blas.Uplo{blas.Upper, blas.Lower} {
-		name := "Upper"
-		if uplo == blas.Lower {
-			name = "Lower"
-		}
+		name := uploToString(uplo)
 		t.Run(name, func(t *testing.T) {
 			ns := []int{0, 1, 2, 3, 4, 5, 10, 25}
 			dlauuTest(t, impl.Dlauu2, uplo, ns)

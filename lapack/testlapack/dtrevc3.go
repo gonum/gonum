@@ -27,11 +27,11 @@ func Dtrevc3Test(t *testing.T, impl Dtrevc3er) {
 		var name string
 		switch side {
 		case lapack.EVRight:
-			name = "Rigth"
+			name = "EVRigth"
 		case lapack.EVLeft:
-			name = "Left"
+			name = "EVLeft"
 		case lapack.EVBoth:
-			name = "Both"
+			name = "EVBoth"
 		}
 		t.Run(name, func(t *testing.T) {
 			runDtrevc3Test(t, impl, rnd, side)

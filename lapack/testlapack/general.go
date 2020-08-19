@@ -99,6 +99,17 @@ func diagToString(diag blas.Diag) string {
 	}
 }
 
+func sideToString(side blas.Side) string {
+	switch side {
+	case blas.Left:
+		return "Left"
+	case blas.Right:
+		return "Right"
+	default:
+		panic("invalid side")
+	}
+}
+
 // nanSlice allocates a new slice of length n filled with NaN.
 func nanSlice(n int) []float64 {
 	s := make([]float64, n)

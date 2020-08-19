@@ -22,10 +22,7 @@ type Dlarfer interface {
 
 func DlarfTest(t *testing.T, impl Dlarfer) {
 	for _, side := range []blas.Side{blas.Left, blas.Right} {
-		name := "Right"
-		if side == blas.Left {
-			name = "Left"
-		}
+		name := sideToString(side)
 		t.Run(name, func(t *testing.T) {
 			runDlarfTest(t, impl, side)
 		})

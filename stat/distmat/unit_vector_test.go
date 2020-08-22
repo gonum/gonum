@@ -9,7 +9,7 @@ import (
 
 	"golang.org/x/exp/rand"
 
-	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -19,7 +19,7 @@ func TestUnitVector(t *testing.T) {
 		v := mat.NewVecDense(n, nil)
 		u.UnitVecTo(v)
 		l := mat.Norm(v, 2)
-		if !floats.EqualWithinAbs(l, 1.0, 1e-12) {
+		if !scalar.EqualWithinAbs(l, 1.0, 1e-12) {
 			t.Errorf("expected length 1 but got %f", l)
 		}
 	}

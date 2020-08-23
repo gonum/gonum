@@ -11,7 +11,9 @@ import (
 	"gonum.org/v1/gonum/stat/distuv"
 )
 
-// UnitVector is a uniform distribtion over the surface of a sphere.
+const unitVecMinLength = 1e-5
+
+// UnitVector is a uniform distribution over the surface of a sphere.
 type UnitVector struct {
 	norm distuv.Normal
 }
@@ -21,23 +23,28 @@ func NewUnitVector(src rand.Source) *UnitVector {
 	return &UnitVector{norm: distuv.Normal{Mu: 0, Sigma: 1, Src: src}}
 }
 
-// UnitVecTo sets the given n-dimension vector to be a random
-// unit-length n-dimension vector.
+// UnitVecTo sets dst to be a random unit-length vector.
 //
 // This uses the algorithm of Mueller from:
 // https://dl.acm.org/doi/10.1145/377939.377946
-// and summarized on an non-paywalled page at:
+// and summarized at:
 // https://mathworld.wolfram.com/HyperspherePointPicking.html
 //
 // UnitVecTo panics if dst has 0 length.
 func (u *UnitVector) UnitVecTo(dst *mat.VecDense) {
 	r := dst.Len()
 	if r == 0 {
-		panic(mat.ErrZeroLength)
+		panic(zeroDim)
 	}
-	for i := 0; i < r; i++ {
-		dst.SetVec(i, u.norm.Rand())
+	for {
+		for i := 0; i < r; i++ {
+			dst.SetVec(i, u.norm.Rand())
+		}
+		l := mat.Norm(dst, 2)
+		// Use l only if it is not too short.  Otherwise try again.
+		if l > unitVecMinLength {
+			dst.ScaleVec(1/l, dst)
+			return
+		}
 	}
-	l := mat.Norm(dst, 2)
-	dst.ScaleVec(1/l, dst)
 }

@@ -5,3 +5,4 @@
 package distmat
 
 const badDim = "distmat: dimension mismatch"
+const zeroDim = "distmat: zero dimension"

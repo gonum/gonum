@@ -12,9 +12,10 @@ import (
 	"gonum.org/v1/gonum/stat/distmat"
 )
 
-// ExampleUnitRandomWalk takes a random walk in n-space
-// and then computes how far from the origin it ended up.
-func ExampleUnitRandomWalk() {
+// ExampleUnitVector uses the UnitVector distribution to take
+// a random walk in n-space.  At the end it computes how far
+// from the origin the walk finished.
+func ExampleUnitVector() {
 	src := rand.NewSource(1)
 	rnd := rand.New(src)
 	dist := distmat.NewUnitVector(src)

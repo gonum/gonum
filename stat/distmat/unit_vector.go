@@ -11,7 +11,7 @@ import (
 	"gonum.org/v1/gonum/stat/distuv"
 )
 
-// UnitVector is a uniform distribtion over the surface a sphere.
+// UnitVector is a uniform distribtion over the surface of a sphere.
 type UnitVector struct {
 	norm distuv.Normal
 }

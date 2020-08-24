@@ -384,6 +384,42 @@ func TestPiecewiseCubicFitWithDerivativesErrors(t *testing.T) {
 	}
 }
 
+func TestCalculateSlopesErrors(t *testing.T) {
+	t.Parallel()
+	for _, test := range []struct {
+		xs, ys []float64
+	}{
+		{
+			xs: []float64{0},
+			ys: []float64{0},
+		},
+		{
+			xs: []float64{0, 1, 2},
+			ys: []float64{0, 1}},
+		{
+			xs: []float64{0, 0, 1},
+			ys: []float64{0, 0, 0},
+		},
+		{
+			xs: []float64{0, 1, 0},
+			ys: []float64{0, 0, 0},
+		},
+	} {
+		if !panics(func() { calculateSlopes(test.xs, test.ys) }) {
+			t.Errorf("expected panic for xs: %v and ys: %v", test.xs, test.ys)
+		}
+	}
+}
+
+func TestCalculateSlopes(t *testing.T) {
+	t.Parallel()
+	got := calculateSlopes([]float64{0, 2, 3, 5}, []float64{0, 1, 1, -1})
+	want := []float64{0.5, 0, -1}
+	if !floats.EqualApprox(got, want, 1e-14) {
+		t.Errorf("Mismatch in calculated slops: got %v, want %v", got, want)
+	}
+}
+
 func TestAkimaSpline(t *testing.T) {
 	t.Parallel()
 	const (

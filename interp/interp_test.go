@@ -845,7 +845,7 @@ func TestFritschButlandErrors(t *testing.T) {
 		},
 	} {
 		var fb FritschButland
-		if !panics(func() { fb.Fit(test.xs, test.ys) }) {
+		if !panics(func() { _ = fb.Fit(test.xs, test.ys) }) {
 			t.Errorf("expected panic for xs: %v and ys: %v", test.xs, test.ys)
 		}
 	}

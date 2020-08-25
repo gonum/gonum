@@ -386,7 +386,7 @@ func (fb *FritschButland) PredictDerivative(x float64) float64 {
 // or len(xs) != len(ys). Always returns nil.
 func (fb *FritschButland) Fit(xs, ys []float64) error {
 	n := len(xs)
-	if n <= 2 {
+	if n < 2 {
 		panic(tooFewPoints)
 	}
 	if len(ys) != n {
@@ -408,14 +408,51 @@ func (fb *FritschButland) Fit(xs, ys []float64) error {
 	for i := 1; i < m; i++ {
 		slope := slopes[i]
 		if slope*prevSlope > 0 {
-			dydxs[i] = 3
+			dydxs[i] = 3 * (xs[i+1] - xs[i-1]) / ((2*xs[i+1]-xs[i-1]-xs[i])/slopes[i-1] +
+				(xs[i+1]+xs[i]-2*xs[i-1])/slopes[i])
 		} else {
 			dydxs[i] = 0
 		}
 		prevSlope = slope
 	}
+	dydxs[0] = fritschButlandEdgeDerivative(xs, ys, slopes, true)
+	dydxs[m] = fritschButlandEdgeDerivative(xs, ys, slopes, false)
 	fb.cubic.FitWithDerivatives(xs, ys, dydxs)
 	return nil
+}
+
+// fritschButlandEdgeDerivative calculates dy/dx approximation for the
+// Fritsch-Butland method for the left or right edge node.
+func fritschButlandEdgeDerivative(xs, ys, slopes []float64, leftEdge bool) float64 {
+	n := len(xs)
+	var dE, dI, h, hE, f float64
+	if leftEdge {
+		dE = slopes[0]
+		dI = slopes[1]
+		xE := xs[0]
+		xM := xs[1]
+		xI := xs[2]
+		hE = xM - xE
+		h = xI - xE
+		f = xM + xI - 2*xE
+	} else {
+		dE = slopes[n-2]
+		dI = slopes[n-3]
+		xE := xs[n-1]
+		xM := xs[n-2]
+		xI := xs[n-3]
+		hE = xE - xM
+		h = xE - xI
+		f = 2*xE - xI - xM
+	}
+	g := (f*dE - hE*dI) / h
+	if g*dE <= 0 {
+		return 0
+	}
+	if dE*dI <= 0 && math.Abs(g) > 3*math.Abs(dE) {
+		return 3 * dE
+	}
+	return g
 }
 
 // calculateSlopes calculates slopes (ys[i+1] - ys[i]) / (xs[i+1] - xs[i]).

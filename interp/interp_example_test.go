@@ -20,10 +20,10 @@ func ExampleFit() {
 	var as interp.AkimaSpline
 	var fb interp.FritschButland
 
-	pc.Fit(xs, ys)
-	pl.Fit(xs, ys)
-	as.Fit(xs, ys)
-	fb.Fit(xs, ys)
+	_ = pc.Fit(xs, ys)
+	_ = pl.Fit(xs, ys)
+	_ = as.Fit(xs, ys)
+	_ = fb.Fit(xs, ys)
 
 	predictors := []interp.Predictor{&pc, &pl, &as, &fb}
 

@@ -12,7 +12,9 @@ import (
 )
 
 func ExamplePredictor() {
-	// Interpolated data with widely varying curvature.
+	// An example of fitting different interpolation
+	// algorithms to (X, Y) data with widely varying curvature.
+	//
 	// Cubic interpolators have to balance the smoothness
 	// of the generated curve with suppressing ugly wiggles
 	// (compare the output of AkimaSpline with that of

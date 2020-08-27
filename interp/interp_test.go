@@ -659,6 +659,234 @@ func TestAkimaWeights(t *testing.T) {
 	}
 }
 
+func TestFritschButland(t *testing.T) {
+	t.Parallel()
+	const (
+		tol  = 1e-14
+		nPts = 100
+	)
+	for k, test := range []struct {
+		xs, ys []float64
+	}{
+		{
+			xs: []float64{0, 2},
+			ys: []float64{0, 0.5},
+		},
+		{
+			xs: []float64{0, 2},
+			ys: []float64{0, -0.5},
+		},
+		{
+			xs: []float64{0, 2},
+			ys: []float64{0, 0},
+		},
+		{
+			xs: []float64{0, 2, 3, 4},
+			ys: []float64{0, 1, 2, 2.5},
+		},
+		{
+			xs: []float64{0, 2, 3, 4},
+			ys: []float64{0, 1.5, 1.5, 2.5},
+		},
+		{
+			xs: []float64{0, 2, 3, 4},
+			ys: []float64{0, 1.5, 1.5, 1},
+		},
+		{
+			xs: []float64{0, 2, 3, 4},
+			ys: []float64{0, 2.5, 1.5, 1},
+		},
+		{
+			xs: []float64{0, 2, 3, 4},
+			ys: []float64{0, 2.5, 1.5, 2},
+		},
+		{
+			xs: []float64{0, 2, 3, 4},
+			ys: []float64{4, 3, 2, 1},
+		},
+		{
+			xs: []float64{0, 2, 3, 4},
+			ys: []float64{4, 3, 2, 2},
+		},
+		{
+			xs: []float64{0, 2, 3, 4},
+			ys: []float64{4, 3, 2, 5},
+		},
+		{
+			xs: []float64{0, 2, 3, 4, 5, 6},
+			ys: []float64{0, 1, 0.5, 0.5, 1.5, 1.5},
+		},
+		{
+			xs: []float64{0, 2, 3, 4, 5, 6},
+			ys: []float64{0, 1, 1.5, 2.5, 1.5, 1},
+		},
+		{
+			xs: []float64{0, 2, 3, 4, 5, 6},
+			ys: []float64{0, -1, -1.5, -2.5, -1.5, -1},
+		},
+		{
+			xs: []float64{0, 2, 3, 4, 5, 6},
+			ys: []float64{0, 1, 0.5, 1.5, 1, 2},
+		},
+		{
+			xs: []float64{0, 2, 3, 4, 5, 6},
+			ys: []float64{0, 1, 1.5, 2.5, 3, 4},
+		},
+		{
+			xs: []float64{0, 2, 3, 4, 5, 6},
+			ys: []float64{0, 0.0001, -1.5, -2.5, -0.0001, 0},
+		},
+	} {
+		var fb FritschButland
+		err := fb.Fit(test.xs, test.ys)
+		if err != nil {
+			t.Errorf("Error when fitting FritschButland in test case %d: %v", k, err)
+		}
+		n := len(test.xs)
+		for i := 0; i < n; i++ {
+			got := fb.Predict(test.xs[i])
+			want := test.ys[i]
+			if got != want {
+				t.Errorf("Mismatch in interpolated value for node %d in test case %d: got %v, want %g", i, k, got, want)
+			}
+		}
+		if n == 2 {
+			h := test.xs[1] - test.xs[0]
+			want := (test.ys[1] - test.ys[0]) / h
+			for i := 0; i < 2; i++ {
+				got := fb.PredictDerivative(test.xs[i])
+				if !scalar.EqualWithinAbs(got, want, tol) {
+					t.Errorf("Mismatch in approximated derivative for node %d in 2-node test case %d: got %v, want %g", i, k, got, want)
+				}
+			}
+			dx := h / (nPts + 1)
+			for i := 1; i < nPts; i++ {
+				x := test.xs[0] + float64(i)*dx
+				got := fb.PredictDerivative(x)
+				if !scalar.EqualWithinAbs(got, want, tol) {
+					t.Errorf("Mismatch in interpolated derivative for x == %g in 2-node test case %d: got %v, want %g", x, k, got, want)
+				}
+			}
+		} else {
+			m := n - 1
+			for i := 1; i < m; i++ {
+				got := fb.PredictDerivative(test.xs[i])
+				slope := (test.ys[i+1] - test.ys[i]) / (test.xs[i+1] - test.xs[i])
+				prevSlope := (test.ys[i] - test.ys[i-1]) / (test.xs[i] - test.xs[i-1])
+				if slope*prevSlope > 0 {
+					if got == 0 {
+						t.Errorf("Approximated derivative is zero for node %d in test case %d: %g", i, k, got)
+					} else if math.Signbit(slope) != math.Signbit(got) {
+						t.Errorf("Approximated derivative has wrong sign for node %d in test case %d: got %g, want %g", i, k, math.Copysign(1, got), math.Copysign(1, slope))
+					}
+				} else {
+					if got != 0 {
+						t.Errorf("Approximated derivative is not zero for node %d in test case %d: %g", i, k, got)
+					}
+				}
+			}
+			for i := 0; i < m; i++ {
+				yL := test.ys[i]
+				yR := test.ys[i+1]
+				xL := test.xs[i]
+				dx := (test.xs[i+1] - xL) / (nPts + 1)
+				if yL == yR {
+					for j := 1; j < nPts; j++ {
+						x := xL + float64(j)*dx
+						got := fb.Predict(x)
+						if got != yL {
+							t.Errorf("Mismatch in interpolated value for x == %g in test case %d: got %v, want %g", x, k, got, yL)
+						}
+						got = fb.PredictDerivative(x)
+						if got != 0 {
+							t.Errorf("Interpolated derivative not zero for x == %g in test case %d: got %v", x, k, got)
+						}
+					}
+				} else {
+					minY := math.Min(yL, yR)
+					maxY := math.Max(yL, yR)
+					for j := 1; j < nPts; j++ {
+						x := xL + float64(j)*dx
+						got := fb.Predict(x)
+						if got < minY || got > maxY {
+							t.Errorf("Interpolated value out of [%g, %g] bounds for x == %g in test case %d: got %v", minY, maxY, x, k, got)
+						}
+						got = fb.PredictDerivative(x)
+						dy := yR - yL
+						if got*dy < 0 {
+							t.Errorf("Interpolated derivative has wrong sign for x == %g in test case %d: want %g, got %g", x, k, math.Copysign(1, dy), math.Copysign(1, got))
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+func TestFritschButlandErrors(t *testing.T) {
+	t.Parallel()
+	for _, test := range []struct {
+		xs, ys []float64
+	}{
+		{
+			xs: []float64{0},
+			ys: []float64{0},
+		},
+		{
+			xs: []float64{0, 1, 2},
+			ys: []float64{0, 1}},
+		{
+			xs: []float64{0, 0, 1},
+			ys: []float64{0, 0, 0},
+		},
+		{
+			xs: []float64{0, 1, 0},
+			ys: []float64{0, 0, 0},
+		},
+	} {
+		var fb FritschButland
+		if !panics(func() { _ = fb.Fit(test.xs, test.ys) }) {
+			t.Errorf("expected panic for xs: %v and ys: %v", test.xs, test.ys)
+		}
+	}
+}
+
+func TestCalculateSlopesErrors(t *testing.T) {
+	t.Parallel()
+	for _, test := range []struct {
+		xs, ys []float64
+	}{
+		{
+			xs: []float64{0},
+			ys: []float64{0},
+		},
+		{
+			xs: []float64{0, 1, 2},
+			ys: []float64{0, 1}},
+		{
+			xs: []float64{0, 0, 1},
+			ys: []float64{0, 0, 0},
+		},
+		{
+			xs: []float64{0, 1, 0},
+			ys: []float64{0, 0, 0},
+		},
+	} {
+		if !panics(func() { calculateSlopes(test.xs, test.ys) }) {
+			t.Errorf("expected panic for xs: %v and ys: %v", test.xs, test.ys)
+		}
+	}
+}
+
+func TestCalculateSlopes(t *testing.T) {
+	t.Parallel()
+	got := calculateSlopes([]float64{0, 2, 3, 5}, []float64{0, 1, 1, -1})
+	want := []float64{0.5, 0, -1}
+	if !floats.EqualApprox(got, want, 1e-14) {
+		t.Errorf("Mismatch in calculated slops: got %v, want %v", got, want)
+	}
+}
+
 func applyFunc(xs []float64, f func(x float64) float64) []float64 {
 	ys := make([]float64, len(xs))
 	for i, x := range xs {

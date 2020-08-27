@@ -86,15 +86,7 @@ func (pl *PiecewiseLinear) Fit(xs, ys []float64) error {
 	if n < 2 {
 		panic(tooFewPoints)
 	}
-	m := n - 1
-	pl.slopes = make([]float64, m)
-	for i := 0; i < m; i++ {
-		dx := xs[i+1] - xs[i]
-		if dx <= 0 {
-			panic(xsNotStrictlyIncreasing)
-		}
-		pl.slopes[i] = (ys[i+1] - ys[i]) / dx
-	}
+	pl.slopes = calculateSlopes(xs, ys)
 	pl.xs = make([]float64, n)
 	pl.ys = make([]float64, n)
 	copy(pl.xs, xs)
@@ -364,4 +356,130 @@ func akimaWeights(slopes []float64, i int) (float64, float64) {
 	wLeft := math.Abs(slopes[i+2] - slopes[i+3])
 	wRight := math.Abs(slopes[i+1] - slopes[i])
 	return wLeft, wRight
+}
+
+// FritschButland is a piecewise cubic 1-dimensional interpolator with
+// continuous value and first derivative, which can be fitted to (X, Y)
+// value pairs without providing derivatives.
+// It is monotone, local and produces a C^1 curve. Its downside is that
+// exhibits high tension, flattening out unnaturally the interpolated
+// curve between the nodes.
+// See Fritsch, F. N. and Butland, J., "A method for constructing local
+// monotone piecewise cubic interpolants" (1984), SIAM J. Sci. Statist.
+// Comput., 5(2), pp. 300-304.
+type FritschButland struct {
+	cubic PiecewiseCubic
+}
+
+// Predict returns the interpolation value at x.
+func (fb *FritschButland) Predict(x float64) float64 {
+	return fb.cubic.Predict(x)
+}
+
+// PredictDerivative returns the predicted derivative at x.
+func (fb *FritschButland) PredictDerivative(x float64) float64 {
+	return fb.cubic.PredictDerivative(x)
+}
+
+// Fit fits a predictor to (X, Y) value pairs provided as two slices.
+// It panics if len(xs) < 2, elements of xs are not strictly increasing
+// or len(xs) != len(ys). Always returns nil.
+func (fb *FritschButland) Fit(xs, ys []float64) error {
+	n := len(xs)
+	if n < 2 {
+		panic(tooFewPoints)
+	}
+	if len(ys) != n {
+		panic(differentLengths)
+	}
+	dydxs := make([]float64, n)
+
+	if n == 2 {
+		dx := xs[1] - xs[0]
+		slope := (ys[1] - ys[0]) / dx
+		dydxs[0] = slope
+		dydxs[1] = slope
+		fb.cubic.FitWithDerivatives(xs, ys, dydxs)
+		return nil
+	}
+	slopes := calculateSlopes(xs, ys)
+	m := len(slopes)
+	prevSlope := slopes[0]
+	for i := 1; i < m; i++ {
+		slope := slopes[i]
+		if slope*prevSlope > 0 {
+			dydxs[i] = 3 * (xs[i+1] - xs[i-1]) / ((2*xs[i+1]-xs[i-1]-xs[i])/slopes[i-1] +
+				(xs[i+1]+xs[i]-2*xs[i-1])/slopes[i])
+		} else {
+			dydxs[i] = 0
+		}
+		prevSlope = slope
+	}
+	dydxs[0] = fritschButlandEdgeDerivative(xs, ys, slopes, true)
+	dydxs[m] = fritschButlandEdgeDerivative(xs, ys, slopes, false)
+	fb.cubic.FitWithDerivatives(xs, ys, dydxs)
+	return nil
+}
+
+// fritschButlandEdgeDerivative calculates dy/dx approximation for the
+// Fritsch-Butland method for the left or right edge node.
+func fritschButlandEdgeDerivative(xs, ys, slopes []float64, leftEdge bool) float64 {
+	n := len(xs)
+	var dE, dI, h, hE, f float64
+	if leftEdge {
+		dE = slopes[0]
+		dI = slopes[1]
+		xE := xs[0]
+		xM := xs[1]
+		xI := xs[2]
+		hE = xM - xE
+		h = xI - xE
+		f = xM + xI - 2*xE
+	} else {
+		dE = slopes[n-2]
+		dI = slopes[n-3]
+		xE := xs[n-1]
+		xM := xs[n-2]
+		xI := xs[n-3]
+		hE = xE - xM
+		h = xE - xI
+		f = 2*xE - xI - xM
+	}
+	g := (f*dE - hE*dI) / h
+	if g*dE <= 0 {
+		return 0
+	}
+	if dE*dI <= 0 && math.Abs(g) > 3*math.Abs(dE) {
+		return 3 * dE
+	}
+	return g
+}
+
+// calculateSlopes calculates slopes (ys[i+1] - ys[i]) / (xs[i+1] - xs[i]).
+// It panics if len(xs) < 2, elements of xs are not strictly increasing
+// or len(xs) != len(ys).
+func calculateSlopes(xs, ys []float64) []float64 {
+	n := len(xs)
+	if n <= 2 {
+		panic(tooFewPoints)
+	}
+	if len(ys) != n {
+		panic(differentLengths)
+	}
+	m := n - 1
+	slopes := make([]float64, m)
+	prevX := xs[0]
+	prevY := ys[0]
+	for i := 0; i < m; i++ {
+		x := xs[i+1]
+		y := ys[i+1]
+		dx := x - prevX
+		if dx <= 0 {
+			panic(xsNotStrictlyIncreasing)
+		}
+		slopes[i] = (y - prevY) / dx
+		prevX = x
+		prevY = y
+	}
+	return slopes
 }

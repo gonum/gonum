@@ -12,6 +12,11 @@ import (
 )
 
 func ExamplePredictor() {
+	// Interpolated data with widely varying curvature.
+	// Cubic interpolators have to balance the smoothness
+	// of the generated curve with suppressing ugly wiggles
+	// (compare the output of AkimaSpline with that of
+	// FritschButland).
 	xs := []float64{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}
 	ys := []float64{0, 0.001, 0.002, 0.1, 1, 2, 2.5, -10, -10.01, 2.49, 2.53, 2.55}
 

@@ -15,7 +15,7 @@ import (
 
 func ExamplePredictor() {
 	// An example of fitting different interpolation
-	// algorithms to (X, Y) data with widely varying curvature.
+	// algorithms to (X, Y) data with widely varying slope.
 	//
 	// Cubic interpolators have to balance the smoothness
 	// of the generated curve with suppressing ugly wiggles

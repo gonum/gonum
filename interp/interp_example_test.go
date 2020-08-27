@@ -20,12 +20,13 @@ func ExamplePredictor() {
 	var as interp.AkimaSpline
 	var fb interp.FritschButland
 
-	_ = pc.Fit(xs, ys)
-	_ = pl.Fit(xs, ys)
-	_ = as.Fit(xs, ys)
-	_ = fb.Fit(xs, ys)
-
-	predictors := []interp.Predictor{&pc, &pl, &as, &fb}
+	predictors := []interp.FittablePredictor{&pc, &pl, &as, &fb}
+	for i, p := range predictors {
+		err := p.Fit(xs, ys)
+		if err != nil {
+			panic(fmt.Sprintf("Error fitting %d-th predictor: %v", i, err))
+		}
+	}
 
 	n := len(xs)
 	dx := 0.25

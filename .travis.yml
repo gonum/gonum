@@ -26,7 +26,7 @@ env:
   - TAGS=""
   - TAGS="-tags bounds"
   - TAGS="-tags noasm"
-  - TAGS="-tags appengine"
+  - TAGS="-tags safe"
 
 cache:
  directories:
@@ -48,14 +48,14 @@ matrix:
     env: TAGS="-tags noasm"
   - os: linux
     arch: arm64
-    env: TAGS="-tags appengine"
+    env: TAGS="-tags safe"
 
   - os: osx
     env: TAGS="-tags bounds"
   - os: osx
     env: TAGS="-tags noasm"
   - os: osx
-    env: TAGS="-tags appengine"
+    env: TAGS="-tags safe"
 
   - os: osx
     arch: arm64
@@ -68,7 +68,7 @@ matrix:
   - os: windows
     env: TAGS="-tags noasm"
   - os: windows
-    env: TAGS="-tags appengine"
+    env: TAGS="-tags safe"
 
   - os: windows
     arch: arm64

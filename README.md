@@ -30,8 +30,7 @@ Building Gonum applications will work without knowing how to use these tags, but
 
 The current list of non-internal tags is as follows:
 
-- appengine — do not use assembly or unsafe
-- safe — synonym for appengine
+- safe — do not use assembly or unsafe
 - bounds — use bounds checks even in internal calls
 - cblas — use CGO gonum.org/v1/netlib/blas/netlib BLAS implementation in tests (only in [mat package](https://godoc.org/gonum.org/v1/gonum/mat))
 - noasm — do not use assembly implementations

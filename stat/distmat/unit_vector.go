@@ -11,8 +11,6 @@ import (
 	"gonum.org/v1/gonum/stat/distuv"
 )
 
-const unitVecMinLength = 1e-5
-
 // UnitVector is a uniform distribution over the surface of a sphere.
 type UnitVector struct {
 	norm distuv.Normal
@@ -42,7 +40,8 @@ func (u *UnitVector) UnitVecTo(dst *mat.VecDense) {
 		}
 		l := mat.Norm(dst, 2)
 		// Use l only if it is not too short.  Otherwise try again.
-		if l > unitVecMinLength {
+		const minLength = 1e-5
+		if l > minLength {
 			dst.ScaleVec(1/l, dst)
 			return
 		}

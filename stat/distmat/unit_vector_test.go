@@ -49,18 +49,3 @@ func TestUnitVectorStats(t *testing.T) {
 		}
 	}
 }
-
-func TestStdLib(t *testing.T) {
-	n := 1e7
-	src := rand.NewSource(1)
-	rnd := rand.New(src)
-	tot := 0.0
-	for i := 0; i < int(n); i++ {
-		tot += rnd.Float64()
-	}
-	tot = tot / n
-	if !scalar.EqualWithinAbs(tot, 0.5, 1e-4) {
-		t.Errorf("floating problem: %v", tot)
-	}
-
-}

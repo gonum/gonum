@@ -4,5 +4,7 @@
 
 package distmat
 
-const badDim = "distmat: dimension mismatch"
-const zeroDim = "distmat: zero dimension"
+const (
+	badDim  = "distmat: dimension mismatch"
+	zeroDim = "distmat: zero dimension"
+)

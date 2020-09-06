@@ -330,6 +330,63 @@ func (g Gaussian) Transform(seq []float64) []float64 {
 	return seq
 }
 
+// B Dube, 2020-09-06: the values for specrtal leakage come from
+// A.D. Poularikas, "The Handbook of Formulas and Tables for Signal Processing"
+// table 7.1
+
+// Tukey can modify a sequence by the Tukey window and return the result.
+// See https://en.wikipedia.org/wiki/Window_function#Tukey_window
+// and https://prod-ng.sandia.gov/techlib-noauth/access-control.cgi/2017/174042.pdf page 88
+//
+// The Tukey window is an adjustible window.  It can be thought of as something
+// between a rectangular and a Hann window, with a flat center and tapered edges.
+//
+// The properties of the window depend on the value of α (alpha).  α controls
+// the fraction of the window which contains a cosine taper.  α = 0.5 gives a
+// window whos central 50% is a flat top and outer quartiles are tapered.
+// 0 < α < 1; if α is outside the bounds, it is treated as 0 or 1.
+//
+// Spectral leakage parameters for alpha=0.5 are
+// ΔF_0 = 1.22, ΔF_0.5 = 1.15, K = 1.3, ɣ_max = -15, β = -2.5.
+type Tukey struct {
+	Alpha float64
+}
+
+// Transform applies the Tukey transformation to seq in place, using the value
+// of the receiver as the sigma parameter, and returning the result
+func (tuk Tukey) Transform(seq []float64) []float64 {
+	if tuk.Alpha <= 0 {
+		return Rectangular(seq)
+	} else if tuk.Alpha >= 1 {
+		return Hann(seq)
+	}
+
+	var (
+		cos = math.Cos
+		pi  = math.Pi
+		a   = tuk.Alpha
+	)
+
+	sep := 0.5 * a * float64(len(seq)-1)
+	sepI := int(math.Floor(sep)) + 1
+	sep2 := float64((len(seq) - 1)) * (1 - .5*a)
+	sep2I := int(math.Ceil(sep2))
+	for i := range seq {
+		var w float64
+		if i < sepI {
+			ii := float64(i)
+			w = 0.5 * (1 + cos(pi*(ii/sep-1)))
+		} else if i < sep2I {
+			w = 1
+		} else {
+			ii := float64(i)
+			w = 0.5 * (1 + cos(pi*(ii/sep-2/a+1)))
+		}
+		seq[i] *= w
+	}
+	return seq
+}
+
 // Values is an arbitrary real window function.
 type Values []float64
 

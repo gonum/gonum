@@ -12,6 +12,15 @@ import (
 	"gonum.org/v1/gonum/floats/scalar"
 )
 
+// parametricWindow is used in a switch when testing monoparametric windows
+// to change which struct is created
+type parametricWindow int
+
+const (
+	gaussWin parametricWindow = iota
+	tukeyWin
+)
+
 var windowTests = []struct {
 	name    string
 	fn      func([]float64) []float64
@@ -113,29 +122,51 @@ var windowTests = []struct {
 	},
 }
 
-var gausWindowTests = []struct {
+var monoParamWindowTests = []struct {
 	name  string
-	sigma float64
+	param float64
+	win   parametricWindow
 	want  []float64
 }{
 	{
-		name: "Gaussian", sigma: 0.3,
+		name: "Gaussian", param: 0.3, win: gaussWin,
 		want: []float64{
 			0.006645, 0.018063, 0.043936, 0.095634, 0.186270, 0.324652, 0.506336, 0.706648, 0.882497, 0.986207,
 			0.986207, 0.882497, 0.706648, 0.506336, 0.324652, 0.186270, 0.095634, 0.043936, 0.018063, 0.006645},
 	},
 	{
-		name: "Gaussian", sigma: 0.5,
+		name: "Gaussian", param: 0.5, win: gaussWin,
 		want: []float64{
 			0.164474, 0.235746, 0.324652, 0.429557, 0.546074, 0.666977, 0.782705, 0.882497, 0.955997, 0.995012,
 			0.995012, 0.955997, 0.882497, 0.782705, 0.666977, 0.546074, 0.429557, 0.324652, 0.235746, 0.164474,
 		},
 	},
 	{
-		name: "Gaussian", sigma: 1.2,
+		name: "Gaussian", param: 1.2, win: gaussWin,
 		want: []float64{
 			0.730981, 0.778125, 0.822578, 0.863552, 0.900293, 0.932102, 0.958357, 0.978532, 0.992218, 0.999132,
 			0.999132, 0.992218, 0.978532, 0.958357, 0.932102, 0.900293, 0.863552, 0.822578, 0.778125, 0.730981,
+		},
+	},
+	{
+		name: "Tukey", param: 1, win: tukeyWin,
+		want: []float64{ // copied from Hann
+			0.006155, 0.054496, 0.146447, 0.273005, 0.421783, 0.578217, 0.726995, 0.853553, 0.945503, 0.993844,
+			0.993844, 0.945503, 0.853553, 0.726995, 0.578217, 0.421783, 0.273005, 0.146447, 0.054496, 0.006155,
+		},
+	},
+	{
+		name: "Tukey", param: 0, win: tukeyWin,
+		want: []float64{ // copied from rectangular
+			1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+			1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		},
+	},
+	{
+		name: "Tukey", param: 0.5, win: tukeyWin,
+		want: []float64{
+			0.000000, 0.105430, 0.377257, 0.700847, 0.939737, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
+			1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 0.939737, 0.700847, 0.377257, 0.105429, 0.000000,
 		},
 	},
 }
@@ -168,20 +199,30 @@ func TestWindows(t *testing.T) {
 	}
 }
 
-func TestGausWindows(t *testing.T) {
+func TestMonoParametricWindows(t *testing.T) {
 	t.Parallel()
 	const tol = 1e-6
 
-	for _, test := range gausWindowTests {
-		t.Run(fmt.Sprintf("%s (sigma=%.1f)", test.name, test.sigma), func(t *testing.T) {
+	for _, test := range monoParamWindowTests {
+		t.Run(fmt.Sprintf("%s (param=%.1f)", test.name, test.param), func(t *testing.T) {
 			src := make([]float64, 20)
 			for i := range src {
 				src[i] = 1
 			}
+			type transformer interface {
+				Transform([]float64) []float64
+			}
+			var trans transformer
+			switch test.win {
+			case gaussWin:
+				trans = Gaussian{test.param}
+			case tukeyWin:
+				trans = Tukey{test.param}
+			default:
+				t.Errorf("expected mono parametric window: %s", test.name)
+			}
 
-			gaussian := Gaussian{test.sigma}
-
-			dst := gaussian.Transform(src)
+			dst := trans.Transform(src)
 			if !floats.EqualApprox(dst, test.want, tol) {
 				t.Errorf("unexpected result for window function %q:\ngot:%#.6v\nwant:%#v", test.name, dst, test.want)
 			}
@@ -190,7 +231,7 @@ func TestGausWindows(t *testing.T) {
 				src[i] = 1
 			}
 
-			dst = NewValues(gaussian.Transform, len(src)).Transform(src)
+			dst = NewValues(trans.Transform, len(src)).Transform(src)
 			if !floats.EqualApprox(dst, test.want, tol) {
 				t.Errorf("unexpected result for lookup window function %q:\ngot:%#.6v\nwant:%#.6v", test.name, dst, test.want)
 			}
@@ -230,29 +271,31 @@ func TestGausWindowComplex(t *testing.T) {
 	t.Parallel()
 	const tol = 1e-6
 
-	for _, test := range gausWindowTests {
-		t.Run(fmt.Sprintf("%sComplex (sigma=%.1f)", test.name, test.sigma), func(t *testing.T) {
-			src := make([]complex128, 20)
-			for i := range src {
-				src[i] = complex(1, 1)
-			}
+	for _, test := range monoParamWindowTests {
+		if test.win == gaussWin {
+			t.Run(fmt.Sprintf("%sComplex (sigma=%.1f)", test.name, test.param), func(t *testing.T) {
+				src := make([]complex128, 20)
+				for i := range src {
+					src[i] = complex(1, 1)
+				}
 
-			gaussian := GaussianComplex{test.sigma}
+				gaussian := GaussianComplex{test.param}
 
-			dst := gaussian.Transform(src)
-			if !equalApprox(dst, test.want, tol) {
-				t.Errorf("unexpected result for window function %q:\ngot:%#.6v\nwant:%#.6v", test.name, dst, test.want)
-			}
+				dst := gaussian.Transform(src)
+				if !equalApprox(dst, test.want, tol) {
+					t.Errorf("unexpected result for window function %q:\ngot:%#.6v\nwant:%#.6v", test.name, dst, test.want)
+				}
 
-			for i := range src {
-				src[i] = complex(1, 1)
-			}
+				for i := range src {
+					src[i] = complex(1, 1)
+				}
 
-			dst = NewValuesComplex(gaussian.Transform, len(src)).Transform(src)
-			if !equalApprox(dst, test.want, tol) {
-				t.Errorf("unexpected result for lookup window function %q:\ngot:%#.6v\nwant:%#.6v", test.name, dst, test.want)
-			}
-		})
+				dst = NewValuesComplex(gaussian.Transform, len(src)).Transform(src)
+				if !equalApprox(dst, test.want, tol) {
+					t.Errorf("unexpected result for lookup window function %q:\ngot:%#.6v\nwant:%#.6v", test.name, dst, test.want)
+				}
+			})
+		}
 	}
 }
 

@@ -330,10 +330,6 @@ func (g Gaussian) Transform(seq []float64) []float64 {
 	return seq
 }
 
-// The values for spectral leakage come from
-// A.D. Poularikas, "The Handbook of Formulas and Tables for Signal Processing"
-// table 7.1
-
 // Tukey can modify a sequence using the Tukey window and return the result.
 // See https://en.wikipedia.org/wiki/Window_function#Tukey_window
 // and https://prod-ng.sandia.gov/techlib-noauth/access-control.cgi/2017/174042.pdf page 88
@@ -341,10 +337,10 @@ func (g Gaussian) Transform(seq []float64) []float64 {
 // The Tukey window is an adjustible window. It can be thought of as something
 // between a rectangular and a Hann window, with a flat center and tapered edges.
 //
-// The properties of the window depend on the value of α (alpha). α controls
+// The properties of the window depend on the value of α (alpha). It controls
 // the fraction of the window which contains a cosine taper. α = 0.5 gives a
-// window whose central 50% is flat and outer quartiles are tapered.  α = 1 is
-// equivalent to a Hann window.  α = 0 is equivalent to a rectangular window.
+// window whose central 50% is flat and outer quartiles are tapered. α = 1 is
+// equivalent to a Hann window. α = 0 is equivalent to a rectangular window.
 // 0 <= α <= 1; if α is outside the bounds, it is treated as 0 or 1.
 //
 // Spectral leakage parameters are summarized in the table:
@@ -355,6 +351,9 @@ func (g Gaussian) Transform(seq []float64) []float64 {
 //  K      |   1.13  |   1.3  |   2.5  |
 //  ɣ_max  | -14     | -15    | -19    |
 //  β      |  -1.11  |  -2.5  |  -4.01 |
+//
+// whose values are from A.D. Poularikas,
+// "The Handbook of Formulas and Tables for Signal Processing" table 7.1
 type Tukey struct {
 	Alpha float64
 }

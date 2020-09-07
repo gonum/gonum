@@ -12,12 +12,8 @@ import (
 	"gonum.org/v1/gonum/floats/scalar"
 )
 
-// parametricWindow is used in a switch when testing monoparametric windows
-// to change which struct is created
-type parametricWindow int
-
 const (
-	gaussWin parametricWindow = iota
+	gaussWin = iota
 	tukeyWin
 )
 
@@ -123,47 +119,47 @@ var windowTests = []struct {
 }
 
 var monoParamWindowTests = []struct {
-	name  string
-	param float64
-	win   parametricWindow
-	want  []float64
+	name    string
+	param   float64
+	winType int
+	want    []float64
 }{
 	{
-		name: "Gaussian", param: 0.3, win: gaussWin,
+		name: "Gaussian", param: 0.3, winType: gaussWin,
 		want: []float64{
 			0.006645, 0.018063, 0.043936, 0.095634, 0.186270, 0.324652, 0.506336, 0.706648, 0.882497, 0.986207,
 			0.986207, 0.882497, 0.706648, 0.506336, 0.324652, 0.186270, 0.095634, 0.043936, 0.018063, 0.006645},
 	},
 	{
-		name: "Gaussian", param: 0.5, win: gaussWin,
+		name: "Gaussian", param: 0.5, winType: gaussWin,
 		want: []float64{
 			0.164474, 0.235746, 0.324652, 0.429557, 0.546074, 0.666977, 0.782705, 0.882497, 0.955997, 0.995012,
 			0.995012, 0.955997, 0.882497, 0.782705, 0.666977, 0.546074, 0.429557, 0.324652, 0.235746, 0.164474,
 		},
 	},
 	{
-		name: "Gaussian", param: 1.2, win: gaussWin,
+		name: "Gaussian", param: 1.2, winType: gaussWin,
 		want: []float64{
 			0.730981, 0.778125, 0.822578, 0.863552, 0.900293, 0.932102, 0.958357, 0.978532, 0.992218, 0.999132,
 			0.999132, 0.992218, 0.978532, 0.958357, 0.932102, 0.900293, 0.863552, 0.822578, 0.778125, 0.730981,
 		},
 	},
 	{
-		name: "Tukey", param: 1, win: tukeyWin,
+		name: "Tukey", param: 1, winType: tukeyWin,
 		want: []float64{ // copied from Hann
 			0.006155, 0.054496, 0.146447, 0.273005, 0.421783, 0.578217, 0.726995, 0.853553, 0.945503, 0.993844,
 			0.993844, 0.945503, 0.853553, 0.726995, 0.578217, 0.421783, 0.273005, 0.146447, 0.054496, 0.006155,
 		},
 	},
 	{
-		name: "Tukey", param: 0, win: tukeyWin,
+		name: "Tukey", param: 0, winType: tukeyWin,
 		want: []float64{ // copied from rectangular
 			1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 			1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 		},
 	},
 	{
-		name: "Tukey", param: 0.5, win: tukeyWin,
+		name: "Tukey", param: 0.5, winType: tukeyWin,
 		want: []float64{
 			0.000000, 0.105430, 0.377257, 0.700847, 0.939737, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
 			1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 0.939737, 0.700847, 0.377257, 0.105429, 0.000000,
@@ -212,16 +208,7 @@ func TestMonoParametricWindows(t *testing.T) {
 			type transformer interface {
 				Transform([]float64) []float64
 			}
-			var trans transformer
-			switch test.win {
-			case gaussWin:
-				trans = Gaussian{test.param}
-			case tukeyWin:
-				trans = Tukey{test.param}
-			default:
-				t.Errorf("expected mono parametric window: %s", test.name)
-			}
-
+			trans := []transformer{Gaussian{test.param}, Tukey{test.param}}[test.winType]
 			dst := trans.Transform(src)
 			if !floats.EqualApprox(dst, test.want, tol) {
 				t.Errorf("unexpected result for window function %q:\ngot:%#.6v\nwant:%#v", test.name, dst, test.want)
@@ -272,7 +259,7 @@ func TestGausWindowComplex(t *testing.T) {
 	const tol = 1e-6
 
 	for _, test := range monoParamWindowTests {
-		if test.win == gaussWin {
+		if test.winType == gaussWin {
 			t.Run(fmt.Sprintf("%sComplex (sigma=%.1f)", test.name, test.param), func(t *testing.T) {
 				src := make([]complex128, 20)
 				for i := range src {

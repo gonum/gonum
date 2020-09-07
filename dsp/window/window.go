@@ -330,7 +330,7 @@ func (g Gaussian) Transform(seq []float64) []float64 {
 	return seq
 }
 
-// The values for specrtal leakage come from
+// The values for spectral leakage come from
 // A.D. Poularikas, "The Handbook of Formulas and Tables for Signal Processing"
 // table 7.1
 

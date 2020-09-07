@@ -294,7 +294,7 @@ func FlatTop(seq []float64) []float64 {
 	return seq
 }
 
-// Gaussian can modify a sequence by the Gaussian window and return the result.
+// Gaussian can modify a sequence using the Gaussian window and return the result.
 // See https://en.wikipedia.org/wiki/Window_function#Gaussian_window
 // and https://www.recordingblogs.com/wiki/gaussian-window for details.
 //
@@ -330,11 +330,11 @@ func (g Gaussian) Transform(seq []float64) []float64 {
 	return seq
 }
 
-// the values for specrtal leakage come from
+// The values for specrtal leakage come from
 // A.D. Poularikas, "The Handbook of Formulas and Tables for Signal Processing"
 // table 7.1
 
-// Tukey can modify a sequence by the Tukey window and return the result.
+// Tukey can modify a sequence using the Tukey window and return the result.
 // See https://en.wikipedia.org/wiki/Window_function#Tukey_window
 // and https://prod-ng.sandia.gov/techlib-noauth/access-control.cgi/2017/174042.pdf page 88
 //
@@ -343,11 +343,18 @@ func (g Gaussian) Transform(seq []float64) []float64 {
 //
 // The properties of the window depend on the value of α (alpha). α controls
 // the fraction of the window which contains a cosine taper. α = 0.5 gives a
-// window whos central 50% is a flat top and outer quartiles are tapered.
-// 0 < α < 1; if α is outside the bounds, it is treated as 0 or 1.
+// window whose central 50% is flat and outer quartiles are tapered.  α = 1 is
+// equivalent to a Hann window.  α = 0 is equivalent to a rectangular window.
+// 0 <= α <= 1; if α is outside the bounds, it is treated as 0 or 1.
 //
-// Spectral leakage parameters for Alpha=0.5 are
-// ΔF_0 = 1.22, ΔF_0.5 = 1.15, K = 1.3, ɣ_max = -15, β = -2.5.
+// Spectral leakage parameters are summarized in the table:
+//         |  α=0.25 |  α=0.5 | α=0.75 |
+//  -------|---------------------------|
+//  ΔF_0   |   1.1   |   1.22 |   1.36 |
+//  ΔF_0.5 |   1.01  |   1.15 |   2.24 |
+//  K      |   1.13  |   1.3  |   2.5  |
+//  ɣ_max  | -14     | -15    | -19    |
+//  β      |  -1.11  |  -2.5  |  -4.01 |
 type Tukey struct {
 	Alpha float64
 }
@@ -361,22 +368,12 @@ func (t Tukey) Transform(seq []float64) []float64 {
 		return Hann(seq)
 	}
 
-	sep := 0.5 * t.Alpha * float64(len(seq)-1)
-	sepI := int(math.Floor(sep)) + 1
-	sep2 := float64((len(seq) - 1)) * (1 - .5*t.Alpha)
-	sep2I := int(math.Ceil(sep2))
-	for i := range seq {
-		var w float64
-		if i < sepI {
-			ii := float64(i)
-			w = 0.5 * (1 + math.Cos(math.Pi*(ii/sep-1)))
-		} else if i < sep2I {
-			w = 1
-		} else {
-			ii := float64(i)
-			w = 0.5 * (1 + math.Cos(math.Pi*(ii/sep-2/t.Alpha+1)))
-		}
+	alphaL := t.Alpha * float64(len(seq)-1)
+	width := int(0.5*alphaL) + 1
+	for i := range seq[:width] {
+		w := 0.5 * (1 - math.Cos(2*math.Pi*float64(i)/alphaL))
 		seq[i] *= w
+		seq[len(seq)-1-i] *= w
 	}
 	return seq
 }

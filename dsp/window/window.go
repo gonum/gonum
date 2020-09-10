@@ -330,6 +330,17 @@ func (g Gaussian) Transform(seq []float64) []float64 {
 	return seq
 }
 
+// TransformComplex applies the Gaussian transformation to seq in place, using the value
+// of the receiver as the sigma parameter, and returning the result.
+func (g Gaussian) TransformComplex(seq []complex128) []complex128 {
+	a := float64(len(seq)) / 2
+	for i := range seq {
+		x := -0.5 * math.Pow(((float64(i)+0.5)-a)/(g.Sigma*a), 2)
+		seq[i] *= complex(math.Exp(x), 0)
+	}
+	return seq
+}
+
 // Tukey can modify a sequence using the Tukey window and return the result.
 // See https://en.wikipedia.org/wiki/Window_function#Tukey_window
 // and https://prod-ng.sandia.gov/techlib-noauth/access-control.cgi/2017/174042.pdf page 88
@@ -371,6 +382,25 @@ func (t Tukey) Transform(seq []float64) []float64 {
 	width := int(0.5*alphaL) + 1
 	for i := range seq[:width] {
 		w := 0.5 * (1 - math.Cos(2*math.Pi*float64(i)/alphaL))
+		seq[i] *= w
+		seq[len(seq)-1-i] *= w
+	}
+	return seq
+}
+
+// TransformComplex applies the Tukey transformation to seq in place, using the
+// value of the receiver as the Alpha parameter, and returning the result
+func (t Tukey) TransformComplex(seq []complex128) []complex128 {
+	if t.Alpha <= 0 {
+		return RectangularComplex(seq)
+	} else if t.Alpha >= 1 {
+		return HannComplex(seq)
+	}
+
+	alphaL := t.Alpha * float64(len(seq)-1)
+	width := int(0.5*alphaL) + 1
+	for i := range seq[:width] {
+		w := complex(0.5*(1-math.Cos(2*math.Pi*float64(i)/alphaL)), 0)
 		seq[i] *= w
 		seq[len(seq)-1-i] *= w
 	}

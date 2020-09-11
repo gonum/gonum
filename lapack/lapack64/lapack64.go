@@ -73,6 +73,21 @@ func Potrs(t blas64.Triangular, b blas64.General) {
 	lapack64.Dpotrs(t.Uplo, t.N, b.Cols, t.Data, max(1, t.Stride), b.Data, max(1, b.Stride))
 }
 
+// Pbcon returns an estimate of the reciprocal of the condition number (in the
+// 1-norm) of an n×n symmetric positive definite band matrix using the Cholesky
+// factorization
+//  A = Uᵀ*U  if uplo == blas.Upper
+//  A = L*Lᵀ  if uplo == blas.Lower
+// computed by Pbtrf. The estimate is obtained for norm(inv(A)), and the
+// reciprocal of the condition number is computed as
+//  rcond = 1 / (anorm * norm(inv(A))).
+//
+// The length of work must be at least 3*n and the length of iwork must be at
+// least n.
+func Pbcon(a blas64.SymmetricBand, anorm float64, work []float64, iwork []int) float64 {
+	return lapack64.Dpbcon(a.Uplo, a.N, a.K, a.Data, a.Stride, anorm, work, iwork)
+}
+
 // Pbtrf computes the Cholesky factorization of an n×n symmetric positive
 // definite band matrix
 //  A = Uᵀ * U  if a.Uplo == blas.Upper

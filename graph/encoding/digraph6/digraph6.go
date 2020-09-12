@@ -57,7 +57,12 @@ func Encode(g graph.Graph) Graph {
 
 	var buf strings.Builder
 	buf.WriteByte('&')
-	switch {
+	// digraph6 specifies graphs of order up to 68719476735
+	// which overflows int on 32 bit architectures. We know
+	// that on those machines n will not be this large, since
+	// it came from a length, but explicitly convert to 64
+	// bits to allow the package to build on those architectures.
+	switch n := int64(n); {
 	case n < 63:
 		buf.WriteByte(byte(n) + 63)
 	case n < 258048:

@@ -67,16 +67,16 @@ func Example() {
 	// freq=0.4500	cycles/period, magnitude=0.0707,	phase=-1.7279
 	// freq=0.5000	cycles/period, magnitude=0.0000,	phase=0.0000
 	// Hamming window:
-	// freq=0.0000	cycles/period, magnitude=0.0506,	phase=0.0000
-	// freq=0.0500	cycles/period, magnitude=0.5386,	phase=-2.9845
-	// freq=0.1000	cycles/period, magnitude=7.3350,	phase=0.3142
-	// freq=0.1500	cycles/period, magnitude=8.9523,	phase=-2.6704
-	// freq=0.2000	cycles/period, magnitude=1.7979,	phase=0.6283
-	// freq=0.2500	cycles/period, magnitude=0.0957,	phase=0.7854
-	// freq=0.3000	cycles/period, magnitude=0.0050,	phase=-2.1991
-	// freq=0.3500	cycles/period, magnitude=0.0158,	phase=-2.0420
-	// freq=0.4000	cycles/period, magnitude=0.0125,	phase=-1.8850
-	// freq=0.4500	cycles/period, magnitude=0.0065,	phase=-1.7279
+	// freq=0.0000	cycles/period, magnitude=0.0218,	phase=3.1416
+	// freq=0.0500	cycles/period, magnitude=0.8022,	phase=-2.9845
+	// freq=0.1000	cycles/period, magnitude=7.1723,	phase=0.3142
+	// freq=0.1500	cycles/period, magnitude=8.6285,	phase=-2.6704
+	// freq=0.2000	cycles/period, magnitude=2.0420,	phase=0.6283
+	// freq=0.2500	cycles/period, magnitude=0.0702,	phase=0.7854
+	// freq=0.3000	cycles/period, magnitude=0.0217,	phase=-2.1991
+	// freq=0.3500	cycles/period, magnitude=0.0259,	phase=-2.0420
+	// freq=0.4000	cycles/period, magnitude=0.0184,	phase=-1.8850
+	// freq=0.4500	cycles/period, magnitude=0.0092,	phase=-1.7279
 	// freq=0.5000	cycles/period, magnitude=0.0000,	phase=0.0000
 }
 
@@ -100,8 +100,8 @@ func ExampleHamming() {
 	// Output:
 	//
 	// src:    [1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000]
-	// srcCpy: [0.092577 0.136714 0.220669 0.336222 0.472063 0.614894 0.750735 0.866288 0.950242 0.994379 0.994379 0.950242 0.866288 0.750735 0.614894 0.472063 0.336222 0.220669 0.136714 0.092577]
-	// dst:    [0.092577 0.136714 0.220669 0.336222 0.472063 0.614894 0.750735 0.866288 0.950242 0.994379 0.994379 0.950242 0.866288 0.750735 0.614894 0.472063 0.336222 0.220669 0.136714 0.092577]
+	// srcCpy: [0.086957 0.111692 0.183218 0.293785 0.431409 0.581178 0.726861 0.852672 0.944977 0.993774 0.993774 0.944977 0.852672 0.726861 0.581178 0.431409 0.293785 0.183218 0.111692 0.086957]
+	// dst:    [0.086957 0.111692 0.183218 0.293785 0.431409 0.581178 0.726861 0.852672 0.944977 0.993774 0.993774 0.944977 0.852672 0.726861 0.581178 0.431409 0.293785 0.183218 0.111692 0.086957]
 }
 
 func ExampleValues() {
@@ -116,5 +116,5 @@ func ExampleValues() {
 
 	// Output:
 	//
-	// dst: [0.078459 0.233445 0.382683 0.522499 0.649448 0.760406 0.852640 0.923880 0.972370 0.996917 0.996917 0.972370 0.923880 0.852640 0.760406 0.649448 0.522499 0.382683 0.233445 0.078459]
+	// dst: [0.000000 0.164595 0.324699 0.475947 0.614213 0.735724 0.837166 0.915773 0.969400 0.996584 0.996584 0.969400 0.915773 0.837166 0.735724 0.614213 0.475947 0.324699 0.164595 0.000000]
 }

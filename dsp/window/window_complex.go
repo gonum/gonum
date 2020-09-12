@@ -36,8 +36,9 @@ func RectangularComplex(seq []complex128) []complex128 {
 // Spectral leakage parameters: ΔF_0 = 3, ΔF_0.5 = 1.23, K = 1.5, ɣ_max = -23, β = -3.93.
 func SineComplex(seq []complex128) []complex128 {
 	k := math.Pi / float64(len(seq)-1)
-	for i := range seq {
-		seq[i] *= complex(math.Sin(k*float64(i)), 0)
+	for i, v := range seq {
+		w := math.Sin(k * float64(i))
+		seq[i] = complex(w*real(v), w*imag(v))
 	}
 	return seq
 }
@@ -55,13 +56,14 @@ func SineComplex(seq []complex128) []complex128 {
 // Spectral leakage parameters: ΔF_0 = 3.24, ΔF_0.5 = 1.3, K = 1.62, ɣ_max = -26.4, β = -4.6.
 func LanczosComplex(seq []complex128) []complex128 {
 	k := 2 / float64(len(seq)-1)
-	for i := range seq {
+	for i, v := range seq {
 		x := math.Pi * (k*float64(i) - 1)
 		if x == 0 {
 			// Avoid NaN.
 			continue
 		}
-		seq[i] *= complex(math.Sin(x)/x, 0)
+		w := math.Sin(x) / x
+		seq[i] = complex(w*real(v), w*imag(v))
 	}
 	return seq
 }
@@ -79,8 +81,9 @@ func LanczosComplex(seq []complex128) []complex128 {
 // Spectral leakage parameters: ΔF_0 = 4, ΔF_0.5 = 1.33, K = 2, ɣ_max = -26.5, β = -6.
 func TriangularComplex(seq []complex128) []complex128 {
 	a := float64(len(seq)-1) / 2
-	for i := range seq {
-		seq[i] *= complex(1-math.Abs(float64(i)/a-1), 0)
+	for i, v := range seq {
+		w := 1 - math.Abs(float64(i)/a-1)
+		seq[i] = complex(w*real(v), w*imag(v))
 	}
 	return seq
 }
@@ -98,8 +101,9 @@ func TriangularComplex(seq []complex128) []complex128 {
 // Spectral leakage parameters: ΔF_0 = 4, ΔF_0.5 = 1.5, K = 2, ɣ_max = -31.5, β = -6.
 func HannComplex(seq []complex128) []complex128 {
 	k := 2 * math.Pi / float64(len(seq)-1)
-	for i := range seq {
-		seq[i] *= complex(0.5*(1-math.Cos(k*float64(i))), 0)
+	for i, v := range seq {
+		w := 0.5 * (1 - math.Cos(k*float64(i)))
+		seq[i] = complex(w*real(v), w*imag(v))
 	}
 	return seq
 }
@@ -123,8 +127,9 @@ func BartlettHannComplex(seq []complex128) []complex128 {
 	)
 
 	k := 2 * math.Pi / float64(len(seq)-1)
-	for i := range seq {
-		seq[i] *= complex(a0-a1*math.Abs(float64(i)/float64(len(seq)-1)-0.5)-a2*math.Cos(k*float64(i)), 0)
+	for i, v := range seq {
+		w := a0 - a1*math.Abs(float64(i)/float64(len(seq)-1)-0.5) - a2*math.Cos(k*float64(i))
+		seq[i] = complex(w*real(v), w*imag(v))
 	}
 	return seq
 }
@@ -148,8 +153,9 @@ func HammingComplex(seq []complex128) []complex128 {
 	)
 
 	k := 2 * math.Pi / float64(len(seq)-1)
-	for i := range seq {
-		seq[i] *= complex(a0-a1*math.Cos(k*float64(i)), 0)
+	for i, v := range seq {
+		w := a0 - a1*math.Cos(k*float64(i))
+		seq[i] = complex(w*real(v), w*imag(v))
 	}
 	return seq
 }
@@ -173,9 +179,10 @@ func BlackmanComplex(seq []complex128) []complex128 {
 	)
 
 	k := 2 * math.Pi / float64(len(seq)-1)
-	for i := range seq {
+	for i, v := range seq {
 		x := k * float64(i)
-		seq[i] *= complex(a0-a1*math.Cos(x)+a2*math.Cos(2*x), 0)
+		w := a0 - a1*math.Cos(x) + a2*math.Cos(2*x)
+		seq[i] = complex(w*real(v), w*imag(v))
 	}
 	return seq
 }
@@ -201,9 +208,10 @@ func BlackmanHarrisComplex(seq []complex128) []complex128 {
 	)
 
 	k := 2 * math.Pi / float64(len(seq)-1)
-	for i := range seq {
+	for i, v := range seq {
 		x := k * float64(i)
-		seq[i] *= complex(a0-a1*math.Cos(x)+a2*math.Cos(2*x)-a3*math.Cos(3*x), 0)
+		w := a0 - a1*math.Cos(x) + a2*math.Cos(2*x) - a3*math.Cos(3*x)
+		seq[i] = complex(w*real(v), w*imag(v))
 	}
 	return seq
 }
@@ -229,9 +237,10 @@ func NuttallComplex(seq []complex128) []complex128 {
 	)
 
 	k := 2 * math.Pi / float64(len(seq)-1)
-	for i := range seq {
+	for i, v := range seq {
 		x := k * float64(i)
-		seq[i] *= complex(a0-a1*math.Cos(x)+a2*math.Cos(2*x)-a3*math.Cos(3*x), 0)
+		w := a0 - a1*math.Cos(x) + a2*math.Cos(2*x) - a3*math.Cos(3*x)
+		seq[i] = complex(w*real(v), w*imag(v))
 	}
 	return seq
 }
@@ -257,9 +266,10 @@ func BlackmanNuttallComplex(seq []complex128) []complex128 {
 	)
 
 	k := 2 * math.Pi / float64(len(seq)-1)
-	for i := range seq {
+	for i, v := range seq {
 		x := k * float64(i)
-		seq[i] *= complex(a0-a1*math.Cos(x)+a2*math.Cos(2*x)-a3*math.Cos(3*x), 0)
+		w := a0 - a1*math.Cos(x) + a2*math.Cos(2*x) - a3*math.Cos(3*x)
+		seq[i] = complex(w*real(v), w*imag(v))
 	}
 	return seq
 }
@@ -287,9 +297,10 @@ func FlatTopComplex(seq []complex128) []complex128 {
 	)
 
 	k := 2 * math.Pi / float64(len(seq)-1)
-	for i := range seq {
+	for i, v := range seq {
 		x := k * float64(i)
-		seq[i] *= complex(a0-a1*math.Cos(x)+a2*math.Cos(2*x)-a3*math.Cos(3*x)+a4*math.Cos(4*x), 0)
+		w := a0 - a1*math.Cos(x) + a2*math.Cos(2*x) - a3*math.Cos(3*x) + a4*math.Cos(4*x)
+		seq[i] = complex(w*real(v), w*imag(v))
 	}
 	return seq
 }

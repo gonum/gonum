@@ -46,9 +46,10 @@ func (g Gaussian) Transform(seq []float64) []float64 {
 // of the receiver as the sigma parameter, and returning the result.
 func (g Gaussian) TransformComplex(seq []complex128) []complex128 {
 	a := float64(len(seq)-1) / 2
-	for i := range seq {
+	for i, v := range seq {
 		x := -0.5 * math.Pow((float64(i)-a)/(g.Sigma*a), 2)
-		seq[i] *= complex(math.Exp(x), 0)
+		w := math.Exp(x)
+		seq[i] = complex(w*real(v), w*imag(v))
 	}
 	return seq
 }
@@ -107,10 +108,11 @@ func (t Tukey) TransformComplex(seq []complex128) []complex128 {
 	default:
 		alphaL := t.Alpha * float64(len(seq)-1)
 		width := int(0.5*alphaL) + 1
-		for i := range seq[:width] {
-			w := complex(0.5*(1-math.Cos(2*math.Pi*float64(i)/alphaL)), 0)
-			seq[i] *= w
-			seq[len(seq)-1-i] *= w
+		for i, v := range seq[:width] {
+			w := 0.5 * (1 - math.Cos(2*math.Pi*float64(i)/alphaL))
+			v = complex(w*real(v), w*imag(v))
+			seq[i] = v
+			seq[len(seq)-1-i] = v
 		}
 		return seq
 	}

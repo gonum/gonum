@@ -202,7 +202,7 @@ func TestWindowsComplex(t *testing.T) {
 				src[i] = complex(1, 1)
 			}
 
-			dst = NewValuesComplex(test.fnCmplx, len(src)).Transform(src)
+			dst = NewValues(test.fn, len(src)).TransformComplex(src)
 			if !equalApprox(dst, test.want, tol) {
 				t.Errorf("unexpected result for lookup window function %q:\ngot:%#.6v\nwant:%#.6v", test.name, dst, test.want)
 			}

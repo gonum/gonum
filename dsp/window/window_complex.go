@@ -6,7 +6,7 @@ package window
 
 import "math"
 
-// RectangularComplex modifies seq in place by the Rectangular window and returns the result.
+// Rectangular modifies seq in place by the Rectangular window and returns the result.
 // See https://en.wikipedia.org/wiki/Window_function#Rectangular_window and
 // https://www.recordingblogs.com/wiki/rectangular-window for details.
 //

@@ -629,13 +629,16 @@ func (v *VecDense) MulVec(a Matrix, b Vector) {
 			return
 		}
 	case *TriDense:
-		v.CopyVec(b)
-		aU.checkOverlap(v.asGeneral())
-		ta := blas.NoTrans
-		if trans {
-			ta = blas.Trans
+		if fast {
+			v.CopyVec(b)
+			aU.checkOverlap(v.asGeneral())
+			ta := blas.NoTrans
+			if trans {
+				ta = blas.Trans
+			}
+			blas64.Trmv(ta, aU.mat, v.mat)
+			return
 		}
-		blas64.Trmv(ta, aU.mat, v.mat)
 	case *Dense:
 		if fast {
 			aU.checkOverlap(v.asGeneral())

@@ -227,14 +227,15 @@ func expressionsFor(factors []dims) chan *node {
 
 // catalan returns the nth 0-based Catalan number.
 func catalan(n int) int {
-	p := 1
+	// Work in 64-bit integers since we overflow 32-bits for some tests.
+	p := int64(1)
 	for k := n + 1; k < 2*n+1; k++ {
-		p *= k
+		p *= int64(k)
 	}
 	for k := 2; k < n+2; k++ {
-		p /= k
+		p /= int64(k)
 	}
-	return p
+	return int(p)
 }
 
 // bestExpressonFor returns the lowest cost expression for the given expression

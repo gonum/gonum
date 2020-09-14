@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"strconv"
 	"testing"
+	"unsafe"
 
 	"gonum.org/v1/gonum/floats/scalar"
 )
@@ -81,7 +82,12 @@ func TestBinomial(t *testing.T) {
 		}
 	}
 	var (
-		n    = 61
+		// Ensure that we have enough space to represent results.
+		// TODO(kortschak): Replace the unsafe.Sizeof(int(0)) expression with
+		// sizeof.Int if https://github.com/golang/go/issues/29982 is
+		// implemented. See also https://github.com/golang/go/issues/40168.
+		n = int(unsafe.Sizeof(int(0))*8 - 3)
+
 		want big.Int
 		got  big.Int
 	)

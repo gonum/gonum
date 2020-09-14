@@ -21,7 +21,8 @@ var (
 	tag string
 
 	// arch is modified in isomap_arm64_test.go to "_arm64" on arm64
-	// to allow differences in numerical precision to be allowed for.
+	// and "_386" on 386 to allow differences in numerical precision
+	// to be allowed for.
 	arch string
 )
 

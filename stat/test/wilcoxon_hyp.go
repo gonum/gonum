@@ -162,22 +162,11 @@ func calculateAsymptoticPValue(Wmin float64, NZ, tieAdj int) float64 {
 	return 2 * standardNormal.CDF(z)
 }
 
-/*
-	WilcoxonSignedRankTest implements Wilcoxon signed rank test (https://en.wikipedia.org/wiki/Wilcoxon_signed-rank_test)
-	The Wilcoxon signed-rank test tests the null hypothesis that two paired samples come from the same distribution. In particular, it tests whether the distribution of the differences x - y is symmetric about zero. It is a non-parametric version of the paired T-test.
-
-	Parameters:
-		x:
-			The first set of measurements.
-		y:
-			The second set of measurements.
-		exactPValue:
-			Exact P value computation is expensive, it is only available for the sample sizes with size less than 30.
-			WilcoxonSignedRankTest panics when exactPValue is true and len(x) is greater than 30.
-
-    Returns:
-		The two sided p-value for the test
-*/
+// WilcoxonSignedRankTest implements Wilcoxon signed rank test (https://en.wikipedia.org/wiki/Wilcoxon_signed-rank_test)
+// The Wilcoxon signed-rank test tests the null hypothesis that two paired samples come from the same distribution.
+// In particular, it tests whether the distribution of the differences x - y is symmetric about zero. It is a non-parametric version of the paired T-test.
+// x and y are the first and second set of measurements respectively. Exact P value computation is expensive, it is only available for the sample sizes with size less than 30.
+// WilcoxonSignedRankTest panics when exactPValue is true and len(x) is greater than 30. The two sided p-value for the test.
 func WilcoxonSignedRankTest(x, y []float64, exactPValue bool) float64 {
 	ensureDataConformance(x, y)
 	Wmax, N, tieAdj := wilCoxonSignedRankTest(x, y)

@@ -424,6 +424,17 @@ func Lange(norm lapack.MatrixNorm, a blas64.General, work []float64) float64 {
 	return lapack64.Dlange(norm, a.Rows, a.Cols, a.Data, max(1, a.Stride), work)
 }
 
+// Lansb computes the specified norm of an n×n symmetric band matrix. If
+// norm == lapack.MaxColumnSum or norm == lapack.MaxRowSum, work must have length
+// at least n and this function will panic otherwise.
+// There are no restrictions on work for the other matrix norms.
+//
+// Dlansb is not part of the lapack.Float64 interface and so calls to Lansb are always
+// executed by the Gonum implementation.
+func Lansb(norm lapack.MatrixNorm, a blas64.SymmetricBand, work []float64) float64 {
+	return gonum.Implementation{}.Dlansb(norm, a.Uplo, a.N, a.K, a.Data, max(1, a.Stride), work)
+}
+
 // Lansy computes the specified norm of an n×n symmetric matrix. If
 // norm == lapack.MaxColumnSum or norm == lapack.MaxRowSum, work must have length
 // at least n and this function will panic otherwise.
@@ -437,6 +448,14 @@ func Lansy(norm lapack.MatrixNorm, a blas64.Symmetric, work []float64) float64 {
 // will panic otherwise. There are no restrictions on work for the other matrix norms.
 func Lantr(norm lapack.MatrixNorm, a blas64.Triangular, work []float64) float64 {
 	return lapack64.Dlantr(norm, a.Uplo, a.Diag, a.N, a.N, a.Data, max(1, a.Stride), work)
+}
+
+// Lantb computes the specified norm of an n×n triangular band matrix A. If
+// norm == lapack.MaxColumnSum work must have length at least n and this function
+// will panic otherwise. There are no restrictions on work for the other matrix
+// norms.
+func Lantb(norm lapack.MatrixNorm, a blas64.TriangularBand, work []float64) float64 {
+	return gonum.Implementation{}.Dlantb(norm, a.Uplo, a.Diag, a.N, a.K, a.Data, max(1, a.Stride), work)
 }
 
 // Lapmt rearranges the columns of the m×n matrix X as specified by the

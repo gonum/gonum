@@ -111,42 +111,42 @@ var windowTests = []struct {
 		},
 	},
 	{
-		name: "Gaussian_0.3", fn: Gaussian{0.3}.Transform, fnCmplx: GaussianComplex{0.3}.Transform,
+		name: "Gaussian{0.3}.Transform", fn: Gaussian{0.3}.Transform, fnCmplx: Gaussian{0.3}.TransformComplex,
 		want: []float64{
 			0.003866, 0.011708, 0.031348, 0.074214, 0.155344, 0.287499, 0.470444, 0.680632, 0.870660, 0.984728,
 			0.984728, 0.870660, 0.680632, 0.470444, 0.287499, 0.155344, 0.074214, 0.031348, 0.011708, 0.003866,
 		},
 	},
 	{
-		name: "Gaussian_0.5", fn: Gaussian{0.5}.Transform, fnCmplx: GaussianComplex{0.5}.Transform,
+		name: "Gaussian{0.5}.Transform", fn: Gaussian{0.5}.Transform, fnCmplx: Gaussian{0.5}.TransformComplex,
 		want: []float64{
 			0.135335, 0.201673, 0.287499, 0.392081, 0.511524, 0.638423, 0.762260, 0.870660, 0.951361, 0.994475,
 			0.994475, 0.951361, 0.870660, 0.762260, 0.638423, 0.511524, 0.392081, 0.287499, 0.201673, 0.135335,
 		},
 	},
 	{
-		name: "Gaussian_1.2", fn: Gaussian{1.2}.Transform, fnCmplx: GaussianComplex{1.2}.Transform,
+		name: "Gaussian{1.2}.Transform", fn: Gaussian{1.2}.Transform, fnCmplx: Gaussian{1.2}.TransformComplex,
 		want: []float64{
 			0.706648, 0.757319, 0.805403, 0.849974, 0.890135, 0.925049, 0.953963, 0.976241, 0.991381, 0.999039,
 			0.999039, 0.991381, 0.976241, 0.953963, 0.925049, 0.890135, 0.849974, 0.805403, 0.757319, 0.706648,
 		},
 	},
 	{
-		name: "Tukey_1", fn: Tukey{1}.Transform, fnCmplx: TukeyComplex{1}.Transform,
+		name: "Tukey{1}.Transform", fn: Tukey{1}.Transform, fnCmplx: Tukey{1}.TransformComplex,
 		want: []float64{ // Hann window case.
 			0.000000, 0.027091, 0.105430, 0.226526, 0.377257, 0.541290, 0.700848, 0.838641, 0.939737, 0.993181,
 			0.993181, 0.939737, 0.838641, 0.700848, 0.541290, 0.377257, 0.226526, 0.105430, 0.027091, 0.000000,
 		},
 	},
 	{
-		name: "Tukey_0", fn: Tukey{0}.Transform, fnCmplx: TukeyComplex{0}.Transform,
+		name: "Tukey{0}.Transform", fn: Tukey{0}.Transform, fnCmplx: Tukey{0}.TransformComplex,
 		want: []float64{ // Rectangular window case.
 			1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 			1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 		},
 	},
 	{
-		name: "Tukey_0.5", fn: Tukey{0.5}.Transform, fnCmplx: TukeyComplex{0.5}.Transform,
+		name: "Tukey{0.5}.Transform", fn: Tukey{0.5}.Transform, fnCmplx: Tukey{0.5}.TransformComplex,
 		want: []float64{
 			0.000000, 0.105430, 0.377257, 0.700847, 0.939737, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
 			1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 0.939737, 0.700847, 0.377257, 0.105429, 0.000000,

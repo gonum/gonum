@@ -5,7 +5,6 @@
 package window
 
 import (
-	"fmt"
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
@@ -111,32 +110,46 @@ var windowTests = []struct {
 			0.967756, 0.737755, 0.402051, 0.115529, -0.037444, -0.070137, -0.045939, -0.017675, -0.003687, -0.000421,
 		},
 	},
-}
-
-var gausWindowTests = []struct {
-	name  string
-	sigma float64
-	want  []float64
-}{
 	{
-		name: "Gaussian", sigma: 0.3,
+		name: "Gaussian_0.3", fn: Gaussian{0.3}.Transform, fnCmplx: GaussianComplex{0.3}.Transform,
 		want: []float64{
 			0.003866, 0.011708, 0.031348, 0.074214, 0.155344, 0.287499, 0.470444, 0.680632, 0.870660, 0.984728,
 			0.984728, 0.870660, 0.680632, 0.470444, 0.287499, 0.155344, 0.074214, 0.031348, 0.011708, 0.003866,
 		},
 	},
 	{
-		name: "Gaussian", sigma: 0.5,
+		name: "Gaussian_0.5", fn: Gaussian{0.5}.Transform, fnCmplx: GaussianComplex{0.5}.Transform,
 		want: []float64{
 			0.135335, 0.201673, 0.287499, 0.392081, 0.511524, 0.638423, 0.762260, 0.870660, 0.951361, 0.994475,
 			0.994475, 0.951361, 0.870660, 0.762260, 0.638423, 0.511524, 0.392081, 0.287499, 0.201673, 0.135335,
 		},
 	},
 	{
-		name: "Gaussian", sigma: 1.2,
+		name: "Gaussian_1.2", fn: Gaussian{1.2}.Transform, fnCmplx: GaussianComplex{1.2}.Transform,
 		want: []float64{
 			0.706648, 0.757319, 0.805403, 0.849974, 0.890135, 0.925049, 0.953963, 0.976241, 0.991381, 0.999039,
 			0.999039, 0.991381, 0.976241, 0.953963, 0.925049, 0.890135, 0.849974, 0.805403, 0.757319, 0.706648,
+		},
+	},
+	{
+		name: "Tukey_1", fn: Tukey{1}.Transform, fnCmplx: TukeyComplex{1}.Transform,
+		want: []float64{ // Hann window case.
+			0.000000, 0.027091, 0.105430, 0.226526, 0.377257, 0.541290, 0.700848, 0.838641, 0.939737, 0.993181,
+			0.993181, 0.939737, 0.838641, 0.700848, 0.541290, 0.377257, 0.226526, 0.105430, 0.027091, 0.000000,
+		},
+	},
+	{
+		name: "Tukey_0", fn: Tukey{0}.Transform, fnCmplx: TukeyComplex{0}.Transform,
+		want: []float64{ // Rectangular window case.
+			1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+			1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		},
+	},
+	{
+		name: "Tukey_0.5", fn: Tukey{0.5}.Transform, fnCmplx: TukeyComplex{0.5}.Transform,
+		want: []float64{
+			0.000000, 0.105430, 0.377257, 0.700847, 0.939737, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
+			1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 0.939737, 0.700847, 0.377257, 0.105429, 0.000000,
 		},
 	},
 }
@@ -169,36 +182,6 @@ func TestWindows(t *testing.T) {
 	}
 }
 
-func TestGausWindows(t *testing.T) {
-	t.Parallel()
-	const tol = 1e-6
-
-	for _, test := range gausWindowTests {
-		t.Run(fmt.Sprintf("%s (sigma=%.1f)", test.name, test.sigma), func(t *testing.T) {
-			src := make([]float64, 20)
-			for i := range src {
-				src[i] = 1
-			}
-
-			gaussian := Gaussian{test.sigma}
-
-			dst := gaussian.Transform(src)
-			if !floats.EqualApprox(dst, test.want, tol) {
-				t.Errorf("unexpected result for window function %q:\ngot:%#.6v\nwant:%#v", test.name, dst, test.want)
-			}
-
-			for i := range src {
-				src[i] = 1
-			}
-
-			dst = NewValues(gaussian.Transform, len(src)).Transform(src)
-			if !floats.EqualApprox(dst, test.want, tol) {
-				t.Errorf("unexpected result for lookup window function %q:\ngot:%#.6v\nwant:%#.6v", test.name, dst, test.want)
-			}
-		})
-	}
-}
-
 func TestWindowsComplex(t *testing.T) {
 	t.Parallel()
 	const tol = 1e-6
@@ -220,36 +203,6 @@ func TestWindowsComplex(t *testing.T) {
 			}
 
 			dst = NewValuesComplex(test.fnCmplx, len(src)).Transform(src)
-			if !equalApprox(dst, test.want, tol) {
-				t.Errorf("unexpected result for lookup window function %q:\ngot:%#.6v\nwant:%#.6v", test.name, dst, test.want)
-			}
-		})
-	}
-}
-
-func TestGausWindowComplex(t *testing.T) {
-	t.Parallel()
-	const tol = 1e-6
-
-	for _, test := range gausWindowTests {
-		t.Run(fmt.Sprintf("%sComplex (sigma=%.1f)", test.name, test.sigma), func(t *testing.T) {
-			src := make([]complex128, 20)
-			for i := range src {
-				src[i] = complex(1, 1)
-			}
-
-			gaussian := GaussianComplex{test.sigma}
-
-			dst := gaussian.Transform(src)
-			if !equalApprox(dst, test.want, tol) {
-				t.Errorf("unexpected result for window function %q:\ngot:%#.6v\nwant:%#.6v", test.name, dst, test.want)
-			}
-
-			for i := range src {
-				src[i] = complex(1, 1)
-			}
-
-			dst = NewValuesComplex(gaussian.Transform, len(src)).Transform(src)
 			if !equalApprox(dst, test.want, tol) {
 				t.Errorf("unexpected result for lookup window function %q:\ngot:%#.6v\nwant:%#.6v", test.name, dst, test.want)
 			}

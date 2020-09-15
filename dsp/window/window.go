@@ -330,6 +330,49 @@ func (g Gaussian) Transform(seq []float64) []float64 {
 	return seq
 }
 
+// Tukey can modify a sequence using the Tukey window and return the result.
+// See https://en.wikipedia.org/wiki/Window_function#Tukey_window
+// and https://www.recordingblogs.com/wiki/tukey-window for details.
+//
+// The Tukey window is an adjustable window.
+//
+// The sequence weights are
+//  w[k] = 0.5 * (1 + cos(π*(|k - M| - αM)/((1-α) * M))), |k - M| ≥ αM
+//       = 1, |k - M| < αM
+// with M = (N - 1)/2 for k=0,1,...,N-1 where N is the length of the window.
+//
+// Spectral leakage parameters are summarized in the table:
+//         |  α=0.3 |  α=0.5 |  α=0.7 |
+//  -------|--------------------------|
+//  ΔF_0   |   1.33 |   1.22 |   1.13 |
+//  ΔF_0.5 |   1.28 |   1.16 |   1.04 |
+//  K      |   0.67 |   0.61 |   0.57 |
+//  ɣ_max  | -18.2  | -15.1  | -13.8  |
+//  β      |  -1.41 |  -2.50 |  -3.74 |
+type Tukey struct {
+	Alpha float64
+}
+
+// Transform applies the Tukey transformation to seq in place, using the value
+// of the receiver as the Alpha parameter, and returning the result
+func (t Tukey) Transform(seq []float64) []float64 {
+	switch {
+	case t.Alpha <= 0:
+		return Rectangular(seq)
+	case t.Alpha >= 1:
+		return Hann(seq)
+	default:
+		alphaL := t.Alpha * float64(len(seq)-1)
+		width := int(0.5*alphaL) + 1
+		for i := range seq[:width] {
+			w := 0.5 * (1 - math.Cos(2*math.Pi*float64(i)/alphaL))
+			seq[i] *= w
+			seq[len(seq)-1-i] *= w
+		}
+		return seq
+	}
+}
+
 // Values is an arbitrary real window function.
 type Values []float64
 

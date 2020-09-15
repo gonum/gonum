@@ -219,11 +219,17 @@ func (g Gamma) Rand() float64 {
 		d := a - 1.0/3
 		c := 1 / (3 * math.Sqrt(d))
 		for {
-			u := -exprnd()
 			x := normrnd()
 			v := 1 + x*c
+			if v <= 0.0 {
+				continue
+			}
 			v = v * v * v
-			if u < 0.5*x*x+d*(1-v+math.Log(v)) {
+			u := unifrnd()
+			if u < 1.0-0.0331*(x*x)*(x*x) {
+				return d * v / b
+			}
+			if math.Log(u) < 0.5*x*x+d*(1-v+math.Log(v)) {
 				return d * v / b
 			}
 		}

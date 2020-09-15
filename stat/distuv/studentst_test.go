@@ -50,7 +50,7 @@ func TestStudentsT(t *testing.T) {
 func testStudentsT(t *testing.T, c StudentsT, i int) {
 	const (
 		tol  = 1e-2
-		n    = 1e5
+		n    = 3e5
 		bins = 50
 	)
 	x := make([]float64, n)

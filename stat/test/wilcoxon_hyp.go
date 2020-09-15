@@ -51,9 +51,9 @@ func rank(out, in []float64) int {
 		return pairStructArr[i].Value < pairStructArr[j].Value
 	})
 
-	mpOut := make(map[float64]int, len(out))   // tracks the rank
-	mpCount := make(map[float64]int, len(out)) // tracks the count
-	tmpRank := make(map[float64]struct{})      // tracks the tied ranks
+	mpOut := make(map[float64]int, len(out))   // tracks the rank.
+	mpCount := make(map[float64]int, len(out)) // tracks the count.
+	tmpRank := make(map[float64]struct{})      // tracks the tied ranks.
 	rank := 1
 	for i := 0; i < lengthOfIn; i++ {
 		val := pairStructArr[i].Value
@@ -135,7 +135,7 @@ func calculateExactPValue(Wmax float64, NZ int) float64 {
 		rankSum := 0
 		// Generate all possible rank sums.
 		for j := 0; j < NZ; j++ {
-			// (i >> j) & 1 extract i's j-th bit from the right
+			// (i >> j) & 1 extract i's j-th bit from the right.
 			if ((i >> j) & 1) == 1 {
 				rankSum += j + 1
 			}
@@ -151,32 +151,32 @@ func calculateExactPValue(Wmax float64, NZ int) float64 {
 }
 
 func calculateAsymptoticPValue(Wmin float64, NZ, tieAdj int) float64 {
-	// n should be number of non-zero absolute difference pairs
+	// n should be number of non-zero absolute difference pairs.
 	ES := float64(NZ*(NZ+1)) / 4.0
 	VarS := (ES * (float64(2*NZ + 1)) / 6.0) - (float64(tieAdj) / 48.0)
 
-	// - 0.5 is a continuity correction
+	// - 0.5 is a continuity correction.
 	z := (Wmin - ES - 0.5) / math.Sqrt(VarS)
 
 	standardNormal := distuv.UnitNormal
 	return 2 * standardNormal.CDF(z)
 }
 
-// WilcoxonSignedRankTest implements Wilcoxon signed rank test (https://en.wikipedia.org/wiki/Wilcoxon_signed-rank_test)
+// WilcoxonSignedRankTest implements Wilcoxon signed rank test (https://en.wikipedia.org/wiki/Wilcoxon_signed-rank_test, https://data.library.virginia.edu/the-wilcoxon-rank-sum-test/).
 // The Wilcoxon signed-rank test tests the null hypothesis that two paired samples come from the same distribution.
 // In particular, it tests whether the distribution of the differences x - y is symmetric about zero. It is a non-parametric version of the paired T-test.
-// x and y are the first and second set of measurements respectively. Exact P value computation is expensive, it is only available for the sample sizes with size less than 30.
-// WilcoxonSignedRankTest panics when exactPValue is true and len(x) is greater than 30. The two sided p-value for the test.
-func WilcoxonSignedRankTest(x, y []float64, exactPValue bool) float64 {
+// x and y are the first and second set of measurements respectively and the elements shouldn't be same otherwise this function panics. Exact P value computation is expensive, it is only available for sample sizes with size less than 30.
+// WilcoxonSignedRankTest panics when exactPValue is true and len(x) is greater than 30 otherwise it returns two sided p-value.
+func WilcoxonSignedRankTest(x, y []float64, exactPValue bool) (float64, float64) {
 	ensureDataConformance(x, y)
 	Wmax, N, tieAdj := wilCoxonSignedRankTest(x, y)
 	if exactPValue && N > 30 {
 		panic(BadNumberTooLarge)
 	}
 	if exactPValue {
-		return calculateExactPValue(Wmax, N)
+		return calculateExactPValue(Wmax, N), Wmax
 	} else {
 		Wmin := (float64(N*(N+1)) / 2.0) - Wmax
-		return calculateAsymptoticPValue(Wmin, N, tieAdj)
+		return calculateAsymptoticPValue(Wmin, N, tieAdj), Wmin
 	}
 }

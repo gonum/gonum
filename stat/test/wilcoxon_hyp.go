@@ -14,7 +14,8 @@ import (
 
 const badLengthMismatch = "test: slice length mismatch"
 const badLengthIsZero = "test: slice length is zero"
-const badNumberTooLarge = "test: number too large"
+const BadNumberTooLarge = "test: number too large"
+const badAllElementsAreSame = "test: x-y is zero for all elements"
 
 type pairStruct struct {
 	Position int
@@ -96,11 +97,22 @@ func wilCoxonSignedRankTest(x, y []float64) (float64, int, int) {
 	z := make([]float64, len(x))
 	absZ := make([]float64, len(x))
 	floats.SubTo(z, x, y)
-	calculateAbsDifference(absZ, x, y)
 
+	allZero := true
+	for _, val := range z {
+		if val != 0 {
+			allZero = false
+			break
+		}
+	}
+	if allZero {
+		panic(badAllElementsAreSame)
+	}
+
+	calculateAbsDifference(absZ, x, y)
 	ranks := make([]float64, len(x))
 	tieAdj := rank(ranks, absZ)
-	tmpLenOfX := len(x)
+	n := len(x)
 
 	WPlus := 0.0
 	WMinus := 0.0
@@ -108,11 +120,11 @@ func wilCoxonSignedRankTest(x, y []float64) (float64, int, int) {
 		if z[index] > 0 {
 			WPlus += rank
 		} else if z[index] == 0 {
-			tmpLenOfX--
+			n--
 		}
 	}
-	WMinus = (float64(tmpLenOfX*(tmpLenOfX+1)) / 2.0) - WPlus
-	return math.Max(WMinus, WPlus), tmpLenOfX, tieAdj
+	WMinus = (float64(n*(n+1)) / 2.0) - WPlus
+	return math.Max(WMinus, WPlus), n, tieAdj
 }
 
 func calculateExactPValue(Wmax float64, NZ int) float64 {
@@ -121,7 +133,7 @@ func calculateExactPValue(Wmax float64, NZ int) float64 {
 
 	for i := 0; i < m; i++ {
 		rankSum := 0
-		// Generate all possible rank sums
+		// Generate all possible rank sums.
 		for j := 0; j < NZ; j++ {
 			// (i >> j) & 1 extract i's j-th bit from the right
 			if ((i >> j) & 1) == 1 {
@@ -134,7 +146,7 @@ func calculateExactPValue(Wmax float64, NZ int) float64 {
 	}
 
 	// largerRankSums / m gives the one-sided p-value, so it's multiplied
-	// with 2 to get the two-sided p-value
+	// with 2 to get the two-sided p-value.
 	return 2 * (float64(largerRankSums) / float64(m))
 }
 
@@ -152,8 +164,7 @@ func calculateAsymptoticPValue(Wmin float64, NZ, tieAdj int) float64 {
 
 /*
 	WilcoxonSignedRankTest implements Wilcoxon signed rank test (https://en.wikipedia.org/wiki/Wilcoxon_signed-rank_test)
-
-	The Wilcoxon signed-rank test tests the null hypothesis that two related paired samples come from the same distribution. In particular, it tests whether the distribution of the differences x - y is symmetric about zero. It is a non-parametric version of the paired T-test.
+	The Wilcoxon signed-rank test tests the null hypothesis that two paired samples come from the same distribution. In particular, it tests whether the distribution of the differences x - y is symmetric about zero. It is a non-parametric version of the paired T-test.
 
 	Parameters:
 		x:
@@ -161,8 +172,8 @@ func calculateAsymptoticPValue(Wmin float64, NZ, tieAdj int) float64 {
 		y:
 			The second set of measurements.
 		exactPValue:
-			Exact P value computation is expensive, it is only available for the measurements with dimension less than 30.
-			Exact P Value as true for measurements greater than 30 panics.
+			Exact P value computation is expensive, it is only available for the sample sizes with size less than 30.
+			WilcoxonSignedRankTest panics when exactPValue is true and len(x) is greater than 30.
 
     Returns:
 		The two sided p-value for the test
@@ -171,7 +182,7 @@ func WilcoxonSignedRankTest(x, y []float64, exactPValue bool) float64 {
 	ensureDataConformance(x, y)
 	Wmax, N, tieAdj := wilCoxonSignedRankTest(x, y)
 	if exactPValue && N > 30 {
-		panic(badNumberTooLarge)
+		panic(BadNumberTooLarge)
 	}
 	if exactPValue {
 		return calculateExactPValue(Wmax, N)

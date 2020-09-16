@@ -67,16 +67,16 @@ func Example() {
 	// freq=0.4500	cycles/period, magnitude=0.0707,	phase=-1.7279
 	// freq=0.5000	cycles/period, magnitude=0.0000,	phase=0.0000
 	// Hamming window:
-	// freq=0.0000	cycles/period, magnitude=0.0218,	phase=3.1416
-	// freq=0.0500	cycles/period, magnitude=0.8022,	phase=-2.9845
-	// freq=0.1000	cycles/period, magnitude=7.1723,	phase=0.3142
-	// freq=0.1500	cycles/period, magnitude=8.6285,	phase=-2.6704
-	// freq=0.2000	cycles/period, magnitude=2.0420,	phase=0.6283
-	// freq=0.2500	cycles/period, magnitude=0.0702,	phase=0.7854
-	// freq=0.3000	cycles/period, magnitude=0.0217,	phase=-2.1991
-	// freq=0.3500	cycles/period, magnitude=0.0259,	phase=-2.0420
-	// freq=0.4000	cycles/period, magnitude=0.0184,	phase=-1.8850
-	// freq=0.4500	cycles/period, magnitude=0.0092,	phase=-1.7279
+	// freq=0.0000	cycles/period, magnitude=0.0542,	phase=3.1416
+	// freq=0.0500	cycles/period, magnitude=0.8458,	phase=-2.9845
+	// freq=0.1000	cycles/period, magnitude=7.1519,	phase=0.3142
+	// freq=0.1500	cycles/period, magnitude=8.5907,	phase=-2.6704
+	// freq=0.2000	cycles/period, magnitude=2.0804,	phase=0.6283
+	// freq=0.2500	cycles/period, magnitude=0.0816,	phase=0.7854
+	// freq=0.3000	cycles/period, magnitude=0.0156,	phase=-2.1991
+	// freq=0.3500	cycles/period, magnitude=0.0224,	phase=-2.0420
+	// freq=0.4000	cycles/period, magnitude=0.0163,	phase=-1.8850
+	// freq=0.4500	cycles/period, magnitude=0.0083,	phase=-1.7279
 	// freq=0.5000	cycles/period, magnitude=0.0000,	phase=0.0000
 }
 
@@ -100,8 +100,8 @@ func ExampleHamming() {
 	// Output:
 	//
 	// src:    [1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000]
-	// srcCpy: [0.086957 0.111692 0.183218 0.293785 0.431409 0.581178 0.726861 0.852672 0.944977 0.993774 0.993774 0.944977 0.852672 0.726861 0.581178 0.431409 0.293785 0.183218 0.111692 0.086957]
-	// dst:    [0.086957 0.111692 0.183218 0.293785 0.431409 0.581178 0.726861 0.852672 0.944977 0.993774 0.993774 0.944977 0.852672 0.726861 0.581178 0.431409 0.293785 0.183218 0.111692 0.086957]
+	// srcCpy: [0.080000 0.104924 0.176995 0.288404 0.427077 0.577986 0.724780 0.851550 0.944558 0.993726 0.993726 0.944558 0.851550 0.724780 0.577986 0.427077 0.288404 0.176995 0.104924 0.080000]
+	// dst:    [0.080000 0.104924 0.176995 0.288404 0.427077 0.577986 0.724780 0.851550 0.944558 0.993726 0.993726 0.944558 0.851550 0.724780 0.577986 0.427077 0.288404 0.176995 0.104924 0.080000]
 }
 
 func ExampleValues() {

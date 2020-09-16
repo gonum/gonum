@@ -143,8 +143,8 @@ func BartlettHann(seq []float64) []float64 {
 // Spectral leakage parameters: ΔF_0 = 4, ΔF_0.5 = 1.33, K = 2, ɣ_max = -42, β = -5.37.
 func Hamming(seq []float64) []float64 {
 	const (
-		a0 = 25.0 / 46.0
-		a1 = 1 - a0
+		a0 = 0.54
+		a1 = 0.46
 	)
 
 	k := 2 * math.Pi / float64(len(seq)-1)

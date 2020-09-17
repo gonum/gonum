@@ -5,6 +5,7 @@
 package distuv
 
 import (
+	"fmt"
 	"math"
 	"sort"
 	"testing"
@@ -114,5 +115,22 @@ func TestGammaPanics(t *testing.T) {
 	g = Gamma{0, 1, nil}
 	if !panics(func() { g.Rand() }) {
 		t.Errorf("Expected Rand panic for Alpha <= 0")
+	}
+}
+
+func BenchmarkGammaRand(b *testing.B) {
+	src := rand.New(rand.NewSource(1))
+	for i, g := range []Gamma{
+		{Alpha: 0.1, Beta: 0.8, Src: src},
+		{Alpha: 0.5, Beta: 0.8, Src: src},
+		{Alpha: 1, Beta: 1, Src: src},
+		{Alpha: 1.6, Beta: 0.4, Src: src},
+		{Alpha: 30, Beta: 1.7, Src: src},
+	} {
+		b.Run(fmt.Sprintf("case %d", i), func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				g.Rand()
+			}
+		})
 	}
 }

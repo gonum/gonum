@@ -49,7 +49,7 @@ func TestBetaRand(t *testing.T) {
 func testBeta(t *testing.T, b Beta, i int) {
 	const (
 		tol  = 1e-2
-		n    = 5e4
+		n    = 1e5
 		bins = 10
 	)
 	x := make([]float64, n)

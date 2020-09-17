@@ -95,7 +95,7 @@ outer:
 		for j := 0; j < ip-1; j++ {
 			ld += l1
 			i := is
-			fi := 0.
+			fi := 0.0
 			argld := float64(ld) * argh
 			for ii := 2; ii < ido; ii += 2 {
 				fi++
@@ -260,12 +260,15 @@ func radf2(ido, l1 int, cc, ch, wa1 []float64) {
 		for k := 0; k < l1; k++ {
 			for i := 2; i < ido; i += 2 {
 				ic := idp2 - (i + 1)
+
 				tr2 := wa1[i-2]*cc3.at(i-1, k, 1) + wa1[i-1]*cc3.at(i, k, 1)
 				ti2 := wa1[i-2]*cc3.at(i, k, 1) - wa1[i-1]*cc3.at(i-1, k, 1)
-				ch3.set(i, 0, k, cc3.at(i, k, 0)+ti2)
-				ch3.set(ic, 1, k, ti2-cc3.at(i, k, 0))
+
 				ch3.set(i-1, 0, k, cc3.at(i-1, k, 0)+tr2)
+				ch3.set(i, 0, k, cc3.at(i, k, 0)+ti2)
+
 				ch3.set(ic-1, 1, k, cc3.at(i-1, k, 0)-tr2)
+				ch3.set(ic, 1, k, ti2-cc3.at(i, k, 0))
 			}
 		}
 		if ido%2 == 1 {
@@ -300,21 +303,29 @@ func radf3(ido, l1 int, cc, ch, wa1, wa2 []float64) {
 	for k := 0; k < l1; k++ {
 		for i := 2; i < ido; i += 2 {
 			ic := idp2 - (i + 1)
+
 			dr2 := wa1[i-2]*cc3.at(i-1, k, 1) + wa1[i-1]*cc3.at(i, k, 1)
 			di2 := wa1[i-2]*cc3.at(i, k, 1) - wa1[i-1]*cc3.at(i-1, k, 1)
+
 			dr3 := wa2[i-2]*cc3.at(i-1, k, 2) + wa2[i-1]*cc3.at(i, k, 2)
 			di3 := wa2[i-2]*cc3.at(i, k, 2) - wa2[i-1]*cc3.at(i-1, k, 2)
+
 			cr2 := dr2 + dr3
 			ci2 := di2 + di3
+
 			ch3.set(i-1, 0, k, cc3.at(i-1, k, 0)+cr2)
 			ch3.set(i, 0, k, cc3.at(i, k, 0)+ci2)
+
 			tr2 := cc3.at(i-1, k, 0) + taur*cr2
 			ti2 := cc3.at(i, k, 0) + taur*ci2
+
 			tr3 := taui * (di2 - di3)
 			ti3 := taui * (dr3 - dr2)
+
 			ch3.set(i-1, 2, k, tr2+tr3)
-			ch3.set(ic-1, 1, k, tr2-tr3)
 			ch3.set(i, 2, k, ti2+ti3)
+
+			ch3.set(ic-1, 1, k, tr2-tr3)
 			ch3.set(ic, 1, k, ti3-ti2)
 		}
 	}
@@ -342,27 +353,38 @@ func radf4(ido, l1 int, cc, ch, wa1, wa2, wa3 []float64) {
 		for k := 0; k < l1; k++ {
 			for i := 2; i < ido; i += 2 {
 				ic := idp2 - (i + 1)
+
 				cr2 := wa1[i-2]*cc3.at(i-1, k, 1) + wa1[i-1]*cc3.at(i, k, 1)
 				ci2 := wa1[i-2]*cc3.at(i, k, 1) - wa1[i-1]*cc3.at(i-1, k, 1)
+
 				cr3 := wa2[i-2]*cc3.at(i-1, k, 2) + wa2[i-1]*cc3.at(i, k, 2)
 				ci3 := wa2[i-2]*cc3.at(i, k, 2) - wa2[i-1]*cc3.at(i-1, k, 2)
+
 				cr4 := wa3[i-2]*cc3.at(i-1, k, 3) + wa3[i-1]*cc3.at(i, k, 3)
 				ci4 := wa3[i-2]*cc3.at(i, k, 3) - wa3[i-1]*cc3.at(i-1, k, 3)
+
 				tr1 := cr2 + cr4
-				tr4 := cr4 - cr2
 				ti1 := ci2 + ci4
-				ti4 := ci2 - ci4
-				ti2 := cc3.at(i, k, 0) + ci3
-				ti3 := cc3.at(i, k, 0) - ci3
+
 				tr2 := cc3.at(i-1, k, 0) + cr3
+				ti2 := cc3.at(i, k, 0) + ci3
+
 				tr3 := cc3.at(i-1, k, 0) - cr3
+				ti3 := cc3.at(i, k, 0) - ci3
+
+				tr4 := cr4 - cr2
+				ti4 := ci2 - ci4
+
 				ch3.set(i-1, 0, k, tr1+tr2)
-				ch3.set(ic-1, 3, k, tr2-tr1)
 				ch3.set(i, 0, k, ti1+ti2)
+
+				ch3.set(ic-1, 3, k, tr2-tr1)
 				ch3.set(ic, 3, k, ti1-ti2)
+
 				ch3.set(i-1, 2, k, ti4+tr3)
-				ch3.set(ic-1, 1, k, tr3-ti4)
 				ch3.set(i, 2, k, tr4+ti3)
+
+				ch3.set(ic-1, 1, k, tr3-ti4)
 				ch3.set(ic, 1, k, tr4-ti3)
 			}
 		}
@@ -394,9 +416,9 @@ func radf5(ido, l1 int, cc, ch, wa1, wa2, wa3, wa4 []float64) {
 
 	for k := 0; k < l1; k++ {
 		cr2 := cc3.at(0, k, 4) + cc3.at(0, k, 1)
-		ci5 := cc3.at(0, k, 4) - cc3.at(0, k, 1)
 		cr3 := cc3.at(0, k, 3) + cc3.at(0, k, 2)
 		ci4 := cc3.at(0, k, 3) - cc3.at(0, k, 2)
+		ci5 := cc3.at(0, k, 4) - cc3.at(0, k, 1)
 		ch3.set(0, 0, k, cc3.at(0, k, 0)+cr2+cr3)
 		ch3.set(ido-1, 1, k, cc3.at(0, k, 0)+tr11*cr2+tr12*cr3)
 		ch3.set(0, 2, k, ti11*ci5+ti12*ci4)
@@ -411,40 +433,57 @@ func radf5(ido, l1 int, cc, ch, wa1, wa2, wa3, wa4 []float64) {
 	for k := 0; k < l1; k++ {
 		for i := 2; i < ido; i += 2 {
 			ic := idp2 - (i + 1)
+
 			dr2 := wa1[i-2]*cc3.at(i-1, k, 1) + wa1[i-1]*cc3.at(i, k, 1)
 			di2 := wa1[i-2]*cc3.at(i, k, 1) - wa1[i-1]*cc3.at(i-1, k, 1)
+
 			dr3 := wa2[i-2]*cc3.at(i-1, k, 2) + wa2[i-1]*cc3.at(i, k, 2)
 			di3 := wa2[i-2]*cc3.at(i, k, 2) - wa2[i-1]*cc3.at(i-1, k, 2)
+
 			dr4 := wa3[i-2]*cc3.at(i-1, k, 3) + wa3[i-1]*cc3.at(i, k, 3)
 			di4 := wa3[i-2]*cc3.at(i, k, 3) - wa3[i-1]*cc3.at(i-1, k, 3)
+
 			dr5 := wa4[i-2]*cc3.at(i-1, k, 4) + wa4[i-1]*cc3.at(i, k, 4)
 			di5 := wa4[i-2]*cc3.at(i, k, 4) - wa4[i-1]*cc3.at(i-1, k, 4)
+
 			cr2 := dr2 + dr5
-			ci5 := dr5 - dr2
-			cr5 := di2 - di5
 			ci2 := di2 + di5
+
 			cr3 := dr3 + dr4
-			ci4 := dr4 - dr3
-			cr4 := di3 - di4
 			ci3 := di3 + di4
+
+			cr4 := di3 - di4
+			ci4 := dr4 - dr3
+
+			cr5 := di2 - di5
+			ci5 := dr5 - dr2
+
 			ch3.set(i-1, 0, k, cc3.at(i-1, k, 0)+cr2+cr3)
 			ch3.set(i, 0, k, cc3.at(i, k, 0)+ci2+ci3)
+
 			tr2 := cc3.at(i-1, k, 0) + tr11*cr2 + tr12*cr3
 			ti2 := cc3.at(i, k, 0) + tr11*ci2 + tr12*ci3
+
 			tr3 := cc3.at(i-1, k, 0) + tr12*cr2 + tr11*cr3
 			ti3 := cc3.at(i, k, 0) + tr12*ci2 + tr11*ci3
-			tr5 := ti11*cr5 + ti12*cr4
-			ti5 := ti11*ci5 + ti12*ci4
+
 			tr4 := ti12*cr5 - ti11*cr4
 			ti4 := ti12*ci5 - ti11*ci4
-			ch3.set(i-1, 2, k, tr2+tr5)
+
+			tr5 := ti11*cr5 + ti12*cr4
+			ti5 := ti11*ci5 + ti12*ci4
+
 			ch3.set(ic-1, 1, k, tr2-tr5)
-			ch3.set(i, 2, k, ti2+ti5)
 			ch3.set(ic, 1, k, ti5-ti2)
-			ch3.set(i-1, 4, k, tr3+tr4)
+
+			ch3.set(i-1, 2, k, tr2+tr5)
+			ch3.set(i, 2, k, ti2+ti5)
+
 			ch3.set(ic-1, 3, k, tr3-tr4)
-			ch3.set(i, 4, k, ti3+ti4)
 			ch3.set(ic, 3, k, ti4-ti3)
+
+			ch3.set(i-1, 4, k, tr3+tr4)
+			ch3.set(i, 4, k, ti3+ti4)
 		}
 	}
 }
@@ -508,8 +547,9 @@ func radfg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) {
 				for i := 2; i < ido; i += 2 {
 					for k := 0; k < l1; k++ {
 						c13.set(i-1, k, j, ch3.at(i-1, k, j)+ch3.at(i-1, k, jc))
-						c13.set(i-1, k, jc, ch3.at(i, k, j)-ch3.at(i, k, jc))
 						c13.set(i, k, j, ch3.at(i, k, j)+ch3.at(i, k, jc))
+
+						c13.set(i-1, k, jc, ch3.at(i, k, j)-ch3.at(i, k, jc))
 						c13.set(i, k, jc, ch3.at(i-1, k, jc)-ch3.at(i-1, k, j))
 					}
 				}
@@ -520,8 +560,9 @@ func radfg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) {
 				for k := 0; k < l1; k++ {
 					for i := 2; i < ido; i += 2 {
 						c13.set(i-1, k, j, ch3.at(i-1, k, j)+ch3.at(i-1, k, jc))
-						c13.set(i-1, k, jc, ch3.at(i, k, j)-ch3.at(i, k, jc))
 						c13.set(i, k, j, ch3.at(i, k, j)+ch3.at(i, k, jc))
+
+						c13.set(i-1, k, jc, ch3.at(i, k, j)-ch3.at(i, k, jc))
 						c13.set(i, k, jc, ch3.at(i-1, k, jc)-ch3.at(i-1, k, j))
 					}
 				}
@@ -601,8 +642,9 @@ func radfg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) {
 				ic := ido - i
 				for k := 0; k < l1; k++ {
 					cc3.set(i-1, j2, k, ch3.at(i-1, k, j)+ch3.at(i-1, k, jc))
-					cc3.set(ic-1, j2-1, k, ch3.at(i-1, k, j)-ch3.at(i-1, k, jc))
 					cc3.set(i, j2, k, ch3.at(i, k, j)+ch3.at(i, k, jc))
+
+					cc3.set(ic-1, j2-1, k, ch3.at(i-1, k, j)-ch3.at(i-1, k, jc))
 					cc3.set(ic, j2-1, k, ch3.at(i, k, jc)-ch3.at(i, k, j))
 				}
 			}
@@ -615,9 +657,11 @@ func radfg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) {
 		for k := 0; k < l1; k++ {
 			for i := 2; i < ido; i += 2 {
 				ic := ido - i
+
 				cc3.set(i-1, j2, k, ch3.at(i-1, k, j)+ch3.at(i-1, k, jc))
-				cc3.set(ic-1, j2-1, k, ch3.at(i-1, k, j)-ch3.at(i-1, k, jc))
 				cc3.set(i, j2, k, ch3.at(i, k, j)+ch3.at(i, k, jc))
+
+				cc3.set(ic-1, j2-1, k, ch3.at(i-1, k, j)-ch3.at(i-1, k, jc))
 				cc3.set(ic, j2-1, k, ch3.at(i, k, jc)-ch3.at(i, k, j))
 			}
 		}
@@ -772,10 +816,13 @@ func radb2(ido, l1 int, cc, ch, wa1 []float64) {
 		for k := 0; k < l1; k++ {
 			for i := 2; i < ido; i += 2 {
 				ic := idp2 - (i + 1)
+
 				ch3.set(i-1, k, 0, cc3.at(i-1, 0, k)+cc3.at(ic-1, 1, k))
-				tr2 := cc3.at(i-1, 0, k) - cc3.at(ic-1, 1, k)
 				ch3.set(i, k, 0, cc3.at(i, 0, k)-cc3.at(ic, 1, k))
+
+				tr2 := cc3.at(i-1, 0, k) - cc3.at(ic-1, 1, k)
 				ti2 := cc3.at(i, 0, k) + cc3.at(ic, 1, k)
+
 				ch3.set(i-1, k, 1, wa1[i-2]*tr2-wa1[i-1]*ti2)
 				ch3.set(i, k, 1, wa1[i-2]*ti2+wa1[i-1]*tr2)
 			}
@@ -817,20 +864,28 @@ func radb3(ido, l1 int, cc, ch, wa1, wa2 []float64) {
 	for k := 0; k < l1; k++ {
 		for i := 2; i < ido; i += 2 {
 			ic := idp2 - (i + 1)
+
 			tr2 := cc3.at(i-1, 2, k) + cc3.at(ic-1, 1, k)
-			cr2 := cc3.at(i-1, 0, k) + taur*tr2
-			ch3.set(i-1, k, 0, cc3.at(i-1, 0, k)+tr2)
 			ti2 := cc3.at(i, 2, k) - cc3.at(ic, 1, k)
+
+			cr2 := cc3.at(i-1, 0, k) + taur*tr2
 			ci2 := cc3.at(i, 0, k) + taur*ti2
+
+			ch3.set(i-1, k, 0, cc3.at(i-1, 0, k)+tr2)
 			ch3.set(i, k, 0, cc3.at(i, 0, k)+ti2)
+
 			cr3 := taui * (cc3.at(i-1, 2, k) - cc3.at(ic-1, 1, k))
 			ci3 := taui * (cc3.at(i, 2, k) + cc3.at(ic, 1, k))
+
 			dr2 := cr2 - ci3
-			dr3 := cr2 + ci3
 			di2 := ci2 + cr3
+
+			dr3 := cr2 + ci3
 			di3 := ci2 - cr3
+
 			ch3.set(i-1, k, 1, wa1[i-2]*dr2-wa1[i-1]*di2)
 			ch3.set(i, k, 1, wa1[i-2]*di2+wa1[i-1]*dr2)
+
 			ch3.set(i-1, k, 2, wa2[i-2]*dr3-wa2[i-1]*di3)
 			ch3.set(i, k, 2, wa2[i-2]*di3+wa2[i-1]*dr3)
 		}
@@ -860,26 +915,37 @@ func radb4(ido, l1 int, cc, ch, wa1, wa2, wa3 []float64) {
 		for k := 0; k < l1; k++ {
 			for i := 2; i < ido; i += 2 {
 				ic := idp2 - (i + 1)
-				ti1 := cc3.at(i, 0, k) + cc3.at(ic, 3, k)
-				ti2 := cc3.at(i, 0, k) - cc3.at(ic, 3, k)
-				ti3 := cc3.at(i, 2, k) - cc3.at(ic, 1, k)
-				tr4 := cc3.at(i, 2, k) + cc3.at(ic, 1, k)
+
 				tr1 := cc3.at(i-1, 0, k) - cc3.at(ic-1, 3, k)
+				ti1 := cc3.at(i, 0, k) + cc3.at(ic, 3, k)
+
 				tr2 := cc3.at(i-1, 0, k) + cc3.at(ic-1, 3, k)
-				ti4 := cc3.at(i-1, 2, k) - cc3.at(ic-1, 1, k)
+				ti2 := cc3.at(i, 0, k) - cc3.at(ic, 3, k)
+
 				tr3 := cc3.at(i-1, 2, k) + cc3.at(ic-1, 1, k)
+				ti3 := cc3.at(i, 2, k) - cc3.at(ic, 1, k)
+
+				tr4 := cc3.at(i, 2, k) + cc3.at(ic, 1, k)
+				ti4 := cc3.at(i-1, 2, k) - cc3.at(ic-1, 1, k)
+
 				ch3.set(i-1, k, 0, tr2+tr3)
-				cr3 := tr2 - tr3
 				ch3.set(i, k, 0, ti2+ti3)
-				ci3 := ti2 - ti3
+
 				cr2 := tr1 - tr4
-				cr4 := tr1 + tr4
 				ci2 := ti1 + ti4
+
+				cr3 := tr2 - tr3
+				ci3 := ti2 - ti3
+
+				cr4 := tr1 + tr4
 				ci4 := ti1 - ti4
+
 				ch3.set(i-1, k, 1, wa1[i-2]*cr2-wa1[i-1]*ci2)
 				ch3.set(i, k, 1, wa1[i-2]*ci2+wa1[i-1]*cr2)
+
 				ch3.set(i-1, k, 2, wa2[i-2]*cr3-wa2[i-1]*ci3)
 				ch3.set(i, k, 2, wa2[i-2]*ci3+wa2[i-1]*cr3)
+
 				ch3.set(i-1, k, 3, wa3[i-2]*cr4-wa3[i-1]*ci4)
 				ch3.set(i, k, 3, wa3[i-2]*ci4+wa3[i-1]*cr4)
 			}
@@ -890,10 +956,10 @@ func radb4(ido, l1 int, cc, ch, wa1, wa2, wa3 []float64) {
 		}
 	}
 	for k := 0; k < l1; k++ {
-		ti1 := cc3.at(0, 1, k) + cc3.at(0, 3, k)
-		ti2 := cc3.at(0, 3, k) - cc3.at(0, 1, k)
 		tr1 := cc3.at(ido-1, 0, k) - cc3.at(ido-1, 2, k)
+		ti1 := cc3.at(0, 1, k) + cc3.at(0, 3, k)
 		tr2 := cc3.at(ido-1, 0, k) + cc3.at(ido-1, 2, k)
+		ti2 := cc3.at(0, 3, k) - cc3.at(0, 1, k)
 		ch3.set(ido-1, k, 0, tr2+tr2)
 		ch3.set(ido-1, k, 1, math.Sqrt2*(tr1-ti1))
 		ch3.set(ido-1, k, 2, ti2+ti2)
@@ -913,15 +979,20 @@ func radb5(ido, l1 int, cc, ch, wa1, wa2, wa3, wa4 []float64) {
 	ch3 := newThreeArray(ido, l1, 5, ch)
 
 	for k := 0; k < l1; k++ {
-		ti5 := cc3.at(0, 2, k) + cc3.at(0, 2, k)
-		ti4 := cc3.at(0, 4, k) + cc3.at(0, 4, k)
 		tr2 := cc3.at(ido-1, 1, k) + cc3.at(ido-1, 1, k)
 		tr3 := cc3.at(ido-1, 3, k) + cc3.at(ido-1, 3, k)
+		ti4 := cc3.at(0, 4, k) + cc3.at(0, 4, k)
+		ti5 := cc3.at(0, 2, k) + cc3.at(0, 2, k)
 		ch3.set(0, k, 0, cc3.at(0, 0, k)+tr2+tr3)
+
 		cr2 := cc3.at(0, 0, k) + tr11*tr2 + tr12*tr3
+
 		cr3 := cc3.at(0, 0, k) + tr12*tr2 + tr11*tr3
-		ci5 := ti11*ti5 + ti12*ti4
+
 		ci4 := ti12*ti5 - ti11*ti4
+
+		ci5 := ti11*ti5 + ti12*ti4
+
 		ch3.set(0, k, 1, cr2-ci5)
 		ch3.set(0, k, 2, cr3-ci4)
 		ch3.set(0, k, 3, cr3+ci4)
@@ -936,38 +1007,55 @@ func radb5(ido, l1 int, cc, ch, wa1, wa2, wa3, wa4 []float64) {
 	for k := 0; k < l1; k++ {
 		for i := 2; i < ido; i += 2 {
 			ic := idp2 - (i + 1)
-			ti5 := cc3.at(i, 2, k) + cc3.at(ic, 1, k)
-			ti2 := cc3.at(i, 2, k) - cc3.at(ic, 1, k)
-			ti4 := cc3.at(i, 4, k) + cc3.at(ic, 3, k)
-			ti3 := cc3.at(i, 4, k) - cc3.at(ic, 3, k)
-			tr5 := cc3.at(i-1, 2, k) - cc3.at(ic-1, 1, k)
+
 			tr2 := cc3.at(i-1, 2, k) + cc3.at(ic-1, 1, k)
-			tr4 := cc3.at(i-1, 4, k) - cc3.at(ic-1, 3, k)
+			ti2 := cc3.at(i, 2, k) - cc3.at(ic, 1, k)
+
 			tr3 := cc3.at(i-1, 4, k) + cc3.at(ic-1, 3, k)
+			ti3 := cc3.at(i, 4, k) - cc3.at(ic, 3, k)
+
+			tr4 := cc3.at(i-1, 4, k) - cc3.at(ic-1, 3, k)
+			ti4 := cc3.at(i, 4, k) + cc3.at(ic, 3, k)
+
+			tr5 := cc3.at(i-1, 2, k) - cc3.at(ic-1, 1, k)
+			ti5 := cc3.at(i, 2, k) + cc3.at(ic, 1, k)
+
 			ch3.set(i-1, k, 0, cc3.at(i-1, 0, k)+tr2+tr3)
 			ch3.set(i, k, 0, cc3.at(i, 0, k)+ti2+ti3)
+
 			cr2 := cc3.at(i-1, 0, k) + tr11*tr2 + tr12*tr3
 			ci2 := cc3.at(i, 0, k) + tr11*ti2 + tr12*ti3
+
 			cr3 := cc3.at(i-1, 0, k) + tr12*tr2 + tr11*tr3
 			ci3 := cc3.at(i, 0, k) + tr12*ti2 + tr11*ti3
-			cr5 := ti11*tr5 + ti12*tr4
-			ci5 := ti11*ti5 + ti12*ti4
+
 			cr4 := ti12*tr5 - ti11*tr4
 			ci4 := ti12*ti5 - ti11*ti4
-			dr3 := cr3 - ci4
-			dr4 := cr3 + ci4
-			di3 := ci3 + cr4
-			di4 := ci3 - cr4
-			dr5 := cr2 + ci5
+
+			cr5 := ti11*tr5 + ti12*tr4
+			ci5 := ti11*ti5 + ti12*ti4
+
 			dr2 := cr2 - ci5
-			di5 := ci2 - cr5
 			di2 := ci2 + cr5
+
+			dr3 := cr3 - ci4
+			di3 := ci3 + cr4
+
+			dr4 := cr3 + ci4
+			di4 := ci3 - cr4
+
+			dr5 := cr2 + ci5
+			di5 := ci2 - cr5
+
 			ch3.set(i-1, k, 1, wa1[i-2]*dr2-wa1[i-1]*di2)
 			ch3.set(i, k, 1, wa1[i-2]*di2+wa1[i-1]*dr2)
+
 			ch3.set(i-1, k, 2, wa2[i-2]*dr3-wa2[i-1]*di3)
 			ch3.set(i, k, 2, wa2[i-2]*di3+wa2[i-1]*dr3)
+
 			ch3.set(i-1, k, 3, wa3[i-2]*dr4-wa3[i-1]*di4)
 			ch3.set(i, k, 3, wa3[i-2]*di4+wa3[i-1]*dr4)
+
 			ch3.set(i-1, k, 4, wa4[i-2]*dr5-wa4[i-1]*di5)
 			ch3.set(i, k, 4, wa4[i-2]*di5+wa4[i-1]*dr5)
 		}
@@ -1019,8 +1107,9 @@ func radbg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) {
 					ic := ido - i
 					for k := 0; k < l1; k++ {
 						ch3.set(i-1, k, j, cc3.at(i-1, j2, k)+cc3.at(ic-1, j2-1, k))
-						ch3.set(i-1, k, jc, cc3.at(i-1, j2, k)-cc3.at(ic-1, j2-1, k))
 						ch3.set(i, k, j, cc3.at(i, j2, k)-cc3.at(ic, j2-1, k))
+
+						ch3.set(i-1, k, jc, cc3.at(i-1, j2, k)-cc3.at(ic-1, j2-1, k))
 						ch3.set(i, k, jc, cc3.at(i, j2, k)+cc3.at(ic, j2-1, k))
 					}
 				}
@@ -1033,8 +1122,9 @@ func radbg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) {
 					for i := 2; i < ido; i += 2 {
 						ic := ido - i
 						ch3.set(i-1, k, j, cc3.at(i-1, j2, k)+cc3.at(ic-1, j2-1, k))
-						ch3.set(i-1, k, jc, cc3.at(i-1, j2, k)-cc3.at(ic-1, j2-1, k))
 						ch3.set(i, k, j, cc3.at(i, j2, k)-cc3.at(ic, j2-1, k))
+
+						ch3.set(i-1, k, jc, cc3.at(i-1, j2, k)-cc3.at(ic-1, j2-1, k))
 						ch3.set(i, k, jc, cc3.at(i, j2, k)+cc3.at(ic, j2-1, k))
 					}
 				}
@@ -1089,8 +1179,9 @@ func radbg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) {
 				for i := 2; i < ido; i += 2 {
 					for k := 0; k < l1; k++ {
 						ch3.set(i-1, k, j, c13.at(i-1, k, j)-c13.at(i, k, jc))
-						ch3.set(i-1, k, jc, c13.at(i-1, k, j)+c13.at(i, k, jc))
 						ch3.set(i, k, j, c13.at(i, k, j)+c13.at(i-1, k, jc))
+
+						ch3.set(i-1, k, jc, c13.at(i-1, k, j)+c13.at(i, k, jc))
 						ch3.set(i, k, jc, c13.at(i, k, j)-c13.at(i-1, k, jc))
 					}
 				}
@@ -1101,8 +1192,9 @@ func radbg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) {
 				for k := 0; k < l1; k++ {
 					for i := 2; i < ido; i += 2 {
 						ch3.set(i-1, k, j, c13.at(i-1, k, j)-c13.at(i, k, jc))
-						ch3.set(i-1, k, jc, c13.at(i-1, k, j)+c13.at(i, k, jc))
 						ch3.set(i, k, j, c13.at(i, k, j)+c13.at(i-1, k, jc))
+
+						ch3.set(i-1, k, jc, c13.at(i-1, k, j)+c13.at(i, k, jc))
 						ch3.set(i, k, jc, c13.at(i, k, j)-c13.at(i-1, k, jc))
 					}
 				}

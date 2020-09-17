@@ -315,8 +315,9 @@ func pass2(ido, l1 int, cc, ch, wa1 []float64, sign float64) {
 	if ido <= 2 {
 		for k := 0; k < l1; k++ {
 			ch3.set(0, k, 0, cc3.at(0, 0, k)+cc3.at(0, 1, k))
-			ch3.set(0, k, 1, cc3.at(0, 0, k)-cc3.at(0, 1, k))
 			ch3.set(1, k, 0, cc3.at(1, 0, k)+cc3.at(1, 1, k))
+
+			ch3.set(0, k, 1, cc3.at(0, 0, k)-cc3.at(0, 1, k))
 			ch3.set(1, k, 1, cc3.at(1, 0, k)-cc3.at(1, 1, k))
 		}
 		return
@@ -324,11 +325,13 @@ func pass2(ido, l1 int, cc, ch, wa1 []float64, sign float64) {
 	for k := 0; k < l1; k++ {
 		for i := 1; i < ido; i += 2 {
 			ch3.set(i-1, k, 0, cc3.at(i-1, 0, k)+cc3.at(i-1, 1, k))
-			tr2 := cc3.at(i-1, 0, k) - cc3.at(i-1, 1, k)
 			ch3.set(i, k, 0, cc3.at(i, 0, k)+cc3.at(i, 1, k))
+
+			tr2 := cc3.at(i-1, 0, k) - cc3.at(i-1, 1, k)
 			ti2 := cc3.at(i, 0, k) - cc3.at(i, 1, k)
-			ch3.set(i, k, 1, wa1[i-1]*ti2+sign*wa1[i]*tr2)
+
 			ch3.set(i-1, k, 1, wa1[i-1]*tr2-sign*wa1[i]*ti2)
+			ch3.set(i, k, 1, wa1[i-1]*ti2+sign*wa1[i]*tr2)
 		}
 	}
 }
@@ -346,16 +349,21 @@ func pass3(ido, l1 int, cc, ch, wa1, wa2 []float64, sign float64) {
 	if ido == 2 {
 		for k := 0; k < l1; k++ {
 			tr2 := cc3.at(0, 1, k) + cc3.at(0, 2, k)
-			cr2 := cc3.at(0, 0, k) + taur*tr2
-			ch3.set(0, k, 0, cc3.at(0, 0, k)+tr2)
 			ti2 := cc3.at(1, 1, k) + cc3.at(1, 2, k)
+
+			cr2 := cc3.at(0, 0, k) + taur*tr2
 			ci2 := cc3.at(1, 0, k) + taur*ti2
+
+			ch3.set(0, k, 0, cc3.at(0, 0, k)+tr2)
 			ch3.set(1, k, 0, cc3.at(1, 0, k)+ti2)
+
 			cr3 := sign * taui * (cc3.at(0, 1, k) - cc3.at(0, 2, k))
 			ci3 := sign * taui * (cc3.at(1, 1, k) - cc3.at(1, 2, k))
+
 			ch3.set(0, k, 1, cr2-ci3)
-			ch3.set(0, k, 2, cr2+ci3)
 			ch3.set(1, k, 1, ci2+cr3)
+
+			ch3.set(0, k, 2, cr2+ci3)
 			ch3.set(1, k, 2, ci2-cr3)
 		}
 		return
@@ -363,21 +371,28 @@ func pass3(ido, l1 int, cc, ch, wa1, wa2 []float64, sign float64) {
 	for k := 0; k < l1; k++ {
 		for i := 1; i < ido; i += 2 {
 			tr2 := cc3.at(i-1, 1, k) + cc3.at(i-1, 2, k)
-			cr2 := cc3.at(i-1, 0, k) + taur*tr2
-			ch3.set(i-1, k, 0, cc3.at(i-1, 0, k)+tr2)
 			ti2 := cc3.at(i, 1, k) + cc3.at(i, 2, k)
+
+			cr2 := cc3.at(i-1, 0, k) + taur*tr2
 			ci2 := cc3.at(i, 0, k) + taur*ti2
+
+			ch3.set(i-1, k, 0, cc3.at(i-1, 0, k)+tr2)
 			ch3.set(i, k, 0, cc3.at(i, 0, k)+ti2)
+
 			cr3 := sign * taui * (cc3.at(i-1, 1, k) - cc3.at(i-1, 2, k))
 			ci3 := sign * taui * (cc3.at(i, 1, k) - cc3.at(i, 2, k))
+
 			dr2 := cr2 - ci3
-			dr3 := cr2 + ci3
 			di2 := ci2 + cr3
+
+			dr3 := cr2 + ci3
 			di3 := ci2 - cr3
-			ch3.set(i, k, 1, wa1[i-1]*di2+sign*wa1[i]*dr2)
+
 			ch3.set(i-1, k, 1, wa1[i-1]*dr2-sign*wa1[i]*di2)
-			ch3.set(i, k, 2, wa2[i-1]*di3+sign*wa2[i]*dr3)
+			ch3.set(i, k, 1, wa1[i-1]*di2+sign*wa1[i]*dr2)
+
 			ch3.set(i-1, k, 2, wa2[i-1]*dr3-sign*wa2[i]*di3)
+			ch3.set(i, k, 2, wa2[i-1]*di3+sign*wa2[i]*dr3)
 		}
 	}
 }
@@ -389,47 +404,64 @@ func pass4(ido, l1 int, cc, ch, wa1, wa2, wa3 []float64, sign float64) {
 
 	if ido == 2 {
 		for k := 0; k < l1; k++ {
-			ti1 := cc3.at(1, 0, k) - cc3.at(1, 2, k)
-			ti2 := cc3.at(1, 0, k) + cc3.at(1, 2, k)
-			tr4 := sign * (cc3.at(1, 3, k) - cc3.at(1, 1, k))
-			ti3 := cc3.at(1, 1, k) + cc3.at(1, 3, k)
 			tr1 := cc3.at(0, 0, k) - cc3.at(0, 2, k)
+			ti1 := cc3.at(1, 0, k) - cc3.at(1, 2, k)
+
 			tr2 := cc3.at(0, 0, k) + cc3.at(0, 2, k)
-			ti4 := sign * (cc3.at(0, 1, k) - cc3.at(0, 3, k))
+			ti2 := cc3.at(1, 0, k) + cc3.at(1, 2, k)
+
 			tr3 := cc3.at(0, 1, k) + cc3.at(0, 3, k)
+			ti3 := cc3.at(1, 1, k) + cc3.at(1, 3, k)
+
+			tr4 := sign * (cc3.at(1, 3, k) - cc3.at(1, 1, k))
+			ti4 := sign * (cc3.at(0, 1, k) - cc3.at(0, 3, k))
+
 			ch3.set(0, k, 0, tr2+tr3)
-			ch3.set(0, k, 2, tr2-tr3)
 			ch3.set(1, k, 0, ti2+ti3)
-			ch3.set(1, k, 2, ti2-ti3)
+
 			ch3.set(0, k, 1, tr1+tr4)
-			ch3.set(0, k, 3, tr1-tr4)
 			ch3.set(1, k, 1, ti1+ti4)
+
+			ch3.set(0, k, 2, tr2-tr3)
+			ch3.set(1, k, 2, ti2-ti3)
+
+			ch3.set(0, k, 3, tr1-tr4)
 			ch3.set(1, k, 3, ti1-ti4)
 		}
 		return
 	}
 	for k := 0; k < l1; k++ {
 		for i := 1; i < ido; i += 2 {
-			ti1 := cc3.at(i, 0, k) - cc3.at(i, 2, k)
-			ti2 := cc3.at(i, 0, k) + cc3.at(i, 2, k)
-			ti3 := cc3.at(i, 1, k) + cc3.at(i, 3, k)
-			tr4 := sign * (cc3.at(i, 3, k) - cc3.at(i, 1, k))
 			tr1 := cc3.at(i-1, 0, k) - cc3.at(i-1, 2, k)
+			ti1 := cc3.at(i, 0, k) - cc3.at(i, 2, k)
+
 			tr2 := cc3.at(i-1, 0, k) + cc3.at(i-1, 2, k)
-			ti4 := sign * (cc3.at(i-1, 1, k) - cc3.at(i-1, 3, k))
+			ti2 := cc3.at(i, 0, k) + cc3.at(i, 2, k)
+
 			tr3 := cc3.at(i-1, 1, k) + cc3.at(i-1, 3, k)
+			ti3 := cc3.at(i, 1, k) + cc3.at(i, 3, k)
+
+			tr4 := sign * (cc3.at(i, 3, k) - cc3.at(i, 1, k))
+			ti4 := sign * (cc3.at(i-1, 1, k) - cc3.at(i-1, 3, k))
+
 			ch3.set(i-1, k, 0, tr2+tr3)
-			cr3 := tr2 - tr3
 			ch3.set(i, k, 0, ti2+ti3)
-			ci3 := ti2 - ti3
+
 			cr2 := tr1 + tr4
-			cr4 := tr1 - tr4
 			ci2 := ti1 + ti4
+
+			cr3 := tr2 - tr3
+			ci3 := ti2 - ti3
+
+			cr4 := tr1 - tr4
 			ci4 := ti1 - ti4
+
 			ch3.set(i-1, k, 1, wa1[i-1]*cr2-sign*wa1[i]*ci2)
 			ch3.set(i, k, 1, wa1[i-1]*ci2+sign*wa1[i]*cr2)
+
 			ch3.set(i-1, k, 2, wa2[i-1]*cr3-sign*wa2[i]*ci3)
 			ch3.set(i, k, 2, wa2[i-1]*ci3+sign*wa2[i]*cr3)
+
 			ch3.set(i-1, k, 3, wa3[i-1]*cr4-sign*wa3[i]*ci4)
 			ch3.set(i, k, 3, wa3[i-1]*ci4+sign*wa3[i]*cr4)
 		}
@@ -450,69 +482,97 @@ func pass5(ido, l1 int, cc, ch, wa1, wa2, wa3, wa4 []float64, sign float64) {
 
 	if ido == 2 {
 		for k := 0; k < l1; k++ {
-			ti5 := cc3.at(1, 1, k) - cc3.at(1, 4, k)
-			ti2 := cc3.at(1, 1, k) + cc3.at(1, 4, k)
-			ti4 := cc3.at(1, 2, k) - cc3.at(1, 3, k)
-			ti3 := cc3.at(1, 2, k) + cc3.at(1, 3, k)
-			tr5 := cc3.at(0, 1, k) - cc3.at(0, 4, k)
 			tr2 := cc3.at(0, 1, k) + cc3.at(0, 4, k)
-			tr4 := cc3.at(0, 2, k) - cc3.at(0, 3, k)
+			ti2 := cc3.at(1, 1, k) + cc3.at(1, 4, k)
+
 			tr3 := cc3.at(0, 2, k) + cc3.at(0, 3, k)
+			ti3 := cc3.at(1, 2, k) + cc3.at(1, 3, k)
+
+			tr4 := cc3.at(0, 2, k) - cc3.at(0, 3, k)
+			ti4 := cc3.at(1, 2, k) - cc3.at(1, 3, k)
+
+			tr5 := cc3.at(0, 1, k) - cc3.at(0, 4, k)
+			ti5 := cc3.at(1, 1, k) - cc3.at(1, 4, k)
+
 			ch3.set(0, k, 0, cc3.at(0, 0, k)+tr2+tr3)
 			ch3.set(1, k, 0, cc3.at(1, 0, k)+ti2+ti3)
+
 			cr2 := cc3.at(0, 0, k) + tr11*tr2 + tr12*tr3
 			ci2 := cc3.at(1, 0, k) + tr11*ti2 + tr12*ti3
+
 			cr3 := cc3.at(0, 0, k) + tr12*tr2 + tr11*tr3
 			ci3 := cc3.at(1, 0, k) + tr12*ti2 + tr11*ti3
-			cr5 := sign * (ti11*tr5 + ti12*tr4)
-			ci5 := sign * (ti11*ti5 + ti12*ti4)
+
 			cr4 := sign * (ti12*tr5 - ti11*tr4)
 			ci4 := sign * (ti12*ti5 - ti11*ti4)
+
+			cr5 := sign * (ti11*tr5 + ti12*tr4)
+			ci5 := sign * (ti11*ti5 + ti12*ti4)
+
 			ch3.set(0, k, 1, cr2-ci5)
-			ch3.set(0, k, 4, cr2+ci5)
 			ch3.set(1, k, 1, ci2+cr5)
-			ch3.set(1, k, 2, ci3+cr4)
+
 			ch3.set(0, k, 2, cr3-ci4)
+			ch3.set(1, k, 2, ci3+cr4)
+
 			ch3.set(0, k, 3, cr3+ci4)
 			ch3.set(1, k, 3, ci3-cr4)
+
+			ch3.set(0, k, 4, cr2+ci5)
 			ch3.set(1, k, 4, ci2-cr5)
 		}
 		return
 	}
 	for k := 0; k < l1; k++ {
 		for i := 1; i < ido; i += 2 {
-			ti5 := cc3.at(i, 1, k) - cc3.at(i, 4, k)
-			ti2 := cc3.at(i, 1, k) + cc3.at(i, 4, k)
-			ti4 := cc3.at(i, 2, k) - cc3.at(i, 3, k)
-			ti3 := cc3.at(i, 2, k) + cc3.at(i, 3, k)
-			tr5 := cc3.at(i-1, 1, k) - cc3.at(i-1, 4, k)
 			tr2 := cc3.at(i-1, 1, k) + cc3.at(i-1, 4, k)
-			tr4 := cc3.at(i-1, 2, k) - cc3.at(i-1, 3, k)
+			ti2 := cc3.at(i, 1, k) + cc3.at(i, 4, k)
+
 			tr3 := cc3.at(i-1, 2, k) + cc3.at(i-1, 3, k)
+			ti3 := cc3.at(i, 2, k) + cc3.at(i, 3, k)
+
+			tr4 := cc3.at(i-1, 2, k) - cc3.at(i-1, 3, k)
+			ti4 := cc3.at(i, 2, k) - cc3.at(i, 3, k)
+
+			tr5 := cc3.at(i-1, 1, k) - cc3.at(i-1, 4, k)
+			ti5 := cc3.at(i, 1, k) - cc3.at(i, 4, k)
+
 			ch3.set(i-1, k, 0, cc3.at(i-1, 0, k)+tr2+tr3)
 			ch3.set(i, k, 0, cc3.at(i, 0, k)+ti2+ti3)
+
 			cr2 := cc3.at(i-1, 0, k) + tr11*tr2 + tr12*tr3
 			ci2 := cc3.at(i, 0, k) + tr11*ti2 + tr12*ti3
+
 			cr3 := cc3.at(i-1, 0, k) + tr12*tr2 + tr11*tr3
 			ci3 := cc3.at(i, 0, k) + tr12*ti2 + tr11*ti3
-			cr5 := sign * (ti11*tr5 + ti12*tr4)
-			ci5 := sign * (ti11*ti5 + ti12*ti4)
+
 			cr4 := sign * (ti12*tr5 - ti11*tr4)
 			ci4 := sign * (ti12*ti5 - ti11*ti4)
-			dr3 := cr3 - ci4
-			dr4 := cr3 + ci4
-			di3 := ci3 + cr4
-			di4 := ci3 - cr4
-			dr5 := cr2 + ci5
+
+			cr5 := sign * (ti11*tr5 + ti12*tr4)
+			ci5 := sign * (ti11*ti5 + ti12*ti4)
+
 			dr2 := cr2 - ci5
-			di5 := ci2 - cr5
 			di2 := ci2 + cr5
+
+			dr3 := cr3 - ci4
+			di3 := ci3 + cr4
+
+			dr4 := cr3 + ci4
+			di4 := ci3 - cr4
+
+			dr5 := cr2 + ci5
+			di5 := ci2 - cr5
+
 			ch3.set(i-1, k, 1, wa1[i-1]*dr2-sign*wa1[i]*di2)
 			ch3.set(i, k, 1, wa1[i-1]*di2+sign*wa1[i]*dr2)
+
 			ch3.set(i-1, k, 2, wa2[i-1]*dr3-sign*wa2[i]*di3)
 			ch3.set(i, k, 2, wa2[i-1]*di3+sign*wa2[i]*dr3)
+
 			ch3.set(i-1, k, 3, wa3[i-1]*dr4-sign*wa3[i]*di4)
 			ch3.set(i, k, 3, wa3[i-1]*di4+sign*wa3[i]*dr4)
+
 			ch3.set(i-1, k, 4, wa4[i-1]*dr5-sign*wa4[i]*di5)
 			ch3.set(i, k, 4, wa4[i-1]*di5+sign*wa4[i]*dr5)
 		}
@@ -599,8 +659,9 @@ func pass(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64, sign float64
 		jc := ip - j
 		for ik := 1; ik < idl1; ik += 2 {
 			ch2m.set(ik-1, j, c2m.at(ik-1, j)-c2m.at(ik, jc))
-			ch2m.set(ik-1, jc, c2m.at(ik-1, j)+c2m.at(ik, jc))
 			ch2m.set(ik, j, c2m.at(ik, j)+c2m.at(ik-1, jc))
+
+			ch2m.set(ik-1, jc, c2m.at(ik-1, j)+c2m.at(ik, jc))
 			ch2m.set(ik, jc, c2m.at(ik, j)-c2m.at(ik-1, jc))
 		}
 	}

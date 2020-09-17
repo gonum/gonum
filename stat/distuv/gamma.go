@@ -150,73 +150,17 @@ func (g Gamma) Rand() float64 {
 				return eza / b
 			}
 		}
-	case a >= smallAlphaThresh && a < 1:
-		// Generate using:
-		//  Kundu, Debasis, and Rameshwar D. Gupta. "A convenient way of generating
-		//  gamma random variables using generalized exponential distribution."
-		//  Computational Statistics & Data Analysis 51.6 (2007): 2796-2802.
-
-		// TODO(btracey): Change to using Algorithm 3 if we can find the bug in
-		// the implementation below.
-
-		// Algorithm 2.
-		alpha := g.Alpha
-		a := math.Pow(1-expNegOneHalf, alpha) / (math.Pow(1-expNegOneHalf, alpha) + alpha*math.Exp(-1)/math.Pow(2, alpha))
-		b := math.Pow(1-expNegOneHalf, alpha) + alpha/math.E/math.Pow(2, alpha)
-		var x float64
-		for {
-			u := unifrnd()
-			if u <= a {
-				x = -2 * math.Log1p(-math.Pow(u*b, 1/alpha))
-			} else {
-				x = -math.Log(math.Pow(2, alpha) / alpha * b * (1 - u))
-			}
-			v := unifrnd()
-			if x <= 1 {
-				if v <= math.Pow(x, alpha-1)*math.Exp(-x/2)/(math.Pow(2, alpha-1)*math.Pow(1-math.Exp(-x/2), alpha-1)) {
-					break
-				}
-			} else {
-				if v <= math.Pow(x, alpha-1) {
-					break
-				}
-			}
-		}
-		return x / g.Beta
-
-		/*
-			//  Algorithm 3.
-			d := 1.0334 - 0.0766*math.Exp(2.2942*alpha)
-			a := math.Pow(2, alpha) * math.Pow(1-math.Exp(-d/2), alpha)
-			b := alpha * math.Pow(d, alpha-1) * math.Exp(-d)
-			c := a + b
-			var x float64
-			for {
-				u := unifrnd()
-				if u <= a/(a+b) {
-					x = -2 * math.Log(1-math.Pow(c*u, 1/a)/2)
-				} else {
-					x = -math.Log(c * (1 - u) / (alpha * math.Pow(d, alpha-1)))
-				}
-				v := unifrnd()
-				if x <= d {
-					if v <= (math.Pow(x, alpha-1)*math.Exp(-x/2))/(math.Pow(2, alpha-1)*math.Pow(1-math.Exp(-x/2), alpha-1)) {
-						break
-					}
-				} else {
-					if v <= math.Pow(d/x, 1-alpha) {
-						break
-					}
-				}
-			}
-			return x / g.Beta
-		*/
-	case a > 1:
+	case a >= smallAlphaThresh:
 		// Generate using:
 		//  Marsaglia, George, and Wai Wan Tsang. "A simple method for generating
 		//  gamma variables." ACM Transactions on Mathematical Software (TOMS)
 		//  26.3 (2000): 363-372.
 		d := a - 1.0/3
+		m := 1.0
+		if a < 1 {
+			d += 1.0
+			m = math.Pow(unifrnd(), 1/a)
+		}
 		c := 1 / (3 * math.Sqrt(d))
 		for {
 			x := normrnd()
@@ -227,10 +171,10 @@ func (g Gamma) Rand() float64 {
 			v = v * v * v
 			u := unifrnd()
 			if u < 1.0-0.0331*(x*x)*(x*x) {
-				return d * v / b
+				return m * d * v / b
 			}
 			if math.Log(u) < 0.5*x*x+d*(1-v+math.Log(v)) {
-				return d * v / b
+				return m * d * v / b
 			}
 		}
 	}

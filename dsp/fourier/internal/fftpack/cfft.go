@@ -219,8 +219,8 @@ func Cfftf(n int, r, work []float64, ifac []int) {
 //         calls of Cfftf or Cfftb.
 //  ifac   Contains results which must not be destroyed between
 //         calls of Cfftf or Cfftb.
-func Cfftb(n int, r, work []float64, ifac []int) {
-	if len(r) < 2*n {
+func Cfftb(n int, c, work []float64, ifac []int) {
+	if len(c) < 2*n {
 		panic("fourier: short sequence")
 	}
 	if len(work) < 4*n {
@@ -232,7 +232,7 @@ func Cfftb(n int, r, work []float64, ifac []int) {
 	if n == 1 {
 		return
 	}
-	cfft1(n, r[:2*n], work[:2*n], work[2*n:4*n], ifac[:15], 1)
+	cfft1(n, c[:2*n], work[:2*n], work[2*n:4*n], ifac[:15], 1)
 }
 
 // cfft1 implements cfftf1 and cfftb1 depending on sign.

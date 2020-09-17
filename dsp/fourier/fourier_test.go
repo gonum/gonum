@@ -5,6 +5,7 @@
 package fourier
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -387,4 +388,76 @@ func equalApprox(a, b []complex128, tol float64) bool {
 		bi[i] = imag(cv)
 	}
 	return floats.EqualApprox(ar, br, tol) && floats.EqualApprox(ai, bi, tol)
+}
+
+func BenchmarkRealFFTCoefficients(b *testing.B) {
+	for _, n := range []int{4, 100, 256, 4000, 4096, 1e6, 1 << 20, 1 << 24} {
+		fft := NewFFT(n)
+		seq := randFloats(n, rand.NewSource(1))
+		dst := make([]complex128, n/2+1)
+
+		b.Run(fmt.Sprint(n), func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				fft.Coefficients(dst, seq)
+			}
+		})
+	}
+}
+
+func BenchmarkRealFFTSequence(b *testing.B) {
+	for _, n := range []int{4, 100, 256, 4000, 4096, 1e6, 1 << 20, 1 << 24} {
+		fft := NewFFT(n)
+		coeff := randComplexes(n/2+1, rand.NewSource(1))
+		dst := make([]float64, n)
+
+		b.Run(fmt.Sprint(n), func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				fft.Sequence(dst, coeff)
+			}
+		})
+	}
+}
+
+func BenchmarkCmplxFFTCoefficients(b *testing.B) {
+	for _, n := range []int{4, 100, 256, 4000, 4096, 1e6, 1 << 20, 1 << 24} {
+		fft := NewCmplxFFT(n)
+		d := randComplexes(n, rand.NewSource(1))
+
+		b.Run(fmt.Sprint(n), func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				fft.Coefficients(d, d)
+			}
+		})
+	}
+}
+
+func BenchmarkCmplxFFTSequence(b *testing.B) {
+	for _, n := range []int{4, 100, 256, 4000, 4096, 1e6, 1 << 20, 1 << 24} {
+		fft := NewCmplxFFT(n)
+		d := randComplexes(n, rand.NewSource(1))
+
+		b.Run(fmt.Sprint(n), func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				fft.Sequence(d, d)
+			}
+		})
+	}
+}
+
+func randFloats(n int, src rand.Source) []float64 {
+	rnd := rand.New(src)
+	f := make([]float64, n)
+	for i := range f {
+		f[i] = rnd.Float64()
+	}
+	return f
+}
+
+func randComplexes(n int, src rand.Source) []complex128 {
+	rnd := rand.New(src)
+	c := make([]complex128, n)
+	for i := range c {
+		c[i] = complex(rnd.Float64(), rnd.Float64())
+	}
+	return c
 }

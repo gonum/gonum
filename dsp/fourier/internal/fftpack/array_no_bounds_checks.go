@@ -31,8 +31,17 @@ func (a twoArray) at(i, j int) float64 {
 	return a.data[i+a.jStride*j]
 }
 
+func (a twoArray) atCmplx(i, j int) complex128 {
+	return complex(a.data[i+a.jStride*j], a.data[i+a.jStride*j+1])
+}
+
 func (a twoArray) set(i, j int, v float64) {
 	a.data[i+a.jStride*j] = v
+}
+
+func (a twoArray) setCmplx(i, j int, v complex128) {
+	a.data[i+a.jStride*j] = real(v)
+	a.data[i+a.jStride*j+1] = imag(v)
 }
 
 func (a twoArray) add(i, j int, v float64) {
@@ -59,6 +68,15 @@ func (a threeArray) at(i, j, k int) float64 {
 	return a.data[i+a.jStride*j+a.kStride*k]
 }
 
+func (a threeArray) atCmplx(i, j, k int) complex128 {
+	return complex(a.data[i+a.jStride*j+a.kStride*k], a.data[i+a.jStride*j+a.kStride*k+1])
+}
+
 func (a threeArray) set(i, j, k int, v float64) {
 	a.data[i+a.jStride*j+a.kStride*k] = v
+}
+
+func (a threeArray) setCmplx(i, j, k int, v complex128) {
+	a.data[i+a.jStride*j+a.kStride*k] = real(v)
+	a.data[i+a.jStride*j+a.kStride*k+1] = imag(v)
 }

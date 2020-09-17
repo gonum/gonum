@@ -14,116 +14,169 @@ import (
 	"reflect"
 	"testing"
 
+	"gonum.org/v1/gonum/cmplxs"
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/floats/scalar"
 )
 
 func TestRfft(t *testing.T) {
 	t.Parallel()
-	const tol = 1e-12
+	// Golden value cases where golden values have
+	// been obtained from the original Fortran code.
 	for _, test := range rfftTests {
-		// Compute the work and factor slices and compare to known values.
-		work := make([]float64, 2*test.n)
-		ifac := make([]int, 15)
-		Rffti(test.n, work, ifac)
-		var failed bool
-		if !floats.EqualApprox(work, test.wantiwork, 1e-6) {
-			failed = true
-			t.Errorf("unexpected work after call to rffti for n=%d", test.n)
-		}
-		if !reflect.DeepEqual(ifac, test.wantiifac) {
-			failed = true
-			t.Errorf("unexpected ifac after call to rffti for n=%d", test.n)
-		}
-		if failed {
-			continue
-		}
+		const tol = 1e-12
+		testRfft(t, test.n, tol, test.wantiwork, test.wantiifac)
+	}
 
-		// Construct a sequence with known a frequency spectrum and compare
-		// the computed spectrum.
-		modn := test.n % 2
-		fn := float64(test.n)
-		nm1 := test.n - 1
-		x, y, xh := series(test.n)
+	// General cases based purely on FFT behaviour.
+	for n := 1; n < 500; n++ {
+		const tol = 1e-9
+		testRfft(t, n, tol, nil, nil)
+	}
+}
 
-		dt := 2 * math.Pi / fn
-		ns2 := (test.n + 1) / 2
-		if ns2 >= 2 {
-			for k := 1; k < ns2; k++ { //eek
-				var sum1, sum2 float64
-				arg := float64(k) * dt
-				for i := 0; i < test.n; i++ {
-					arg1 := float64(i) * arg
-					sum1 += x[i] * math.Cos(arg1)
-					sum2 += x[i] * math.Sin(arg1)
-				}
-				y[2*k-1] = sum1
-				y[2*k] = -sum2
+func testRfft(t *testing.T, n int, tol float64, wantiwork []float64, wantiifac []int) {
+	// Compute the work and factor slices and compare to known values.
+	work := make([]float64, 2*n)
+	ifac := make([]int, 15)
+	Rffti(n, work, ifac)
+	var failed bool
+	if wantiwork != nil && !floats.EqualApprox(work, wantiwork, 1e-6) {
+		failed = true
+		t.Errorf("unexpected work after call to rffti for n=%d", n)
+	}
+	if wantiifac != nil && !reflect.DeepEqual(ifac, wantiifac) {
+		failed = true
+		t.Errorf("unexpected ifac after call to rffti for n=%d", n)
+	}
+	if failed {
+		return
+	}
+
+	// Construct a sequence with known a frequency spectrum and compare
+	// the computed spectrum.
+	modn := n % 2
+	fn := float64(n)
+	nm1 := n - 1
+	x, y, xh := series(n)
+
+	dt := 2 * math.Pi / fn
+	ns2 := (n + 1) / 2
+	if ns2 >= 2 {
+		for k := 1; k < ns2; k++ { //eek
+			var sum1, sum2 float64
+			arg := float64(k) * dt
+			for i := 0; i < n; i++ {
+				arg1 := float64(i) * arg
+				sum1 += x[i] * math.Cos(arg1)
+				sum2 += x[i] * math.Sin(arg1)
 			}
-		}
-		var sum1, sum2 float64
-		for i := 0; i < nm1; i += 2 {
-			sum1 += x[i]
-			sum2 += x[i+1]
-		}
-		if modn == 1 {
-			sum1 += x[test.n-1]
-		}
-		y[0] = sum1 + sum2
-		if modn == 0 {
-			y[test.n-1] = sum1 - sum2
-		}
-
-		Rfftf(test.n, x, work, ifac)
-		var rftf float64
-		for i := 0; i < test.n; i++ {
-			rftf = math.Max(rftf, math.Abs(x[i]-y[i]))
-			x[i] = xh[i]
-		}
-		rftf /= fn
-		if !scalar.EqualWithinAbsOrRel(rftf, 0, tol, tol) {
-			t.Errorf("unexpected rftf value for n=%d: got:%f want:0", test.n, rftf)
-		}
-
-		// Construct a frequency spectrum and compare the computed sequence.
-		for i := 0; i < test.n; i++ {
-			sum := x[0] / 2
-			arg := float64(i) * dt
-			if ns2 >= 2 {
-				for k := 1; k < ns2; k++ { //eek
-					arg1 := float64(k) * arg
-					sum += x[2*k-1]*math.Cos(arg1) - x[2*k]*math.Sin(arg1)
-				}
-			}
-			if modn == 0 {
-				// This is how it was written in FFTPACK.
-				sum += 0.5 * math.Pow(-1, float64(i)) * x[test.n-1]
-			}
-			y[i] = 2 * sum
-		}
-		Rfftb(test.n, x, work, ifac)
-		var rftb float64
-		for i := 0; i < test.n; i++ {
-			rftb = math.Max(rftb, math.Abs(x[i]-y[i]))
-			x[i] = xh[i]
-			y[i] = xh[i]
-		}
-		if !scalar.EqualWithinAbsOrRel(rftb, 0, tol, tol) {
-			t.Errorf("unexpected rftb value for n=%d: got:%f want:0", test.n, rftb)
-		}
-
-		// Check that Rfftb and Rfftf are inverses.
-		Rfftb(test.n, y, work, ifac)
-		Rfftf(test.n, y, work, ifac)
-		cf := 1.0 / fn
-		var rftfb float64
-		for i := 0; i < test.n; i++ {
-			rftfb = math.Max(rftfb, math.Abs(cf*y[i]-x[i]))
-		}
-		if !scalar.EqualWithinAbsOrRel(rftfb, 0, tol, tol) {
-			t.Errorf("unexpected rftfb value for n=%d: got:%f want:0", test.n, rftfb)
+			y[2*k-1] = sum1
+			y[2*k] = -sum2
 		}
 	}
+	var sum1, sum2 float64
+	for i := 0; i < nm1; i += 2 {
+		sum1 += x[i]
+		sum2 += x[i+1]
+	}
+	if modn == 1 {
+		sum1 += x[n-1]
+	}
+	y[0] = sum1 + sum2
+	if modn == 0 {
+		y[n-1] = sum1 - sum2
+	}
+
+	want := naiveDFTreal(x)
+
+	Rfftf(n, x, work, ifac)
+
+	// Compare the result to a naive DFT implementation.
+	if got := packCoeffs(x); !cmplxs.EqualApprox(got, want, tol) {
+		t.Errorf("unexpected coefficients for n=%d: got:%f want:%f", n, got, want)
+	}
+
+	var rftf float64
+	for i := 0; i < n; i++ {
+		rftf = math.Max(rftf, math.Abs(x[i]-y[i]))
+		x[i] = xh[i]
+	}
+
+	rftf /= fn
+	if !scalar.EqualWithinAbsOrRel(rftf, 0, tol, tol) {
+		t.Errorf("unexpected rftf value for n=%d: got:%f want:0", n, rftf)
+	}
+
+	// Construct a frequency spectrum and compare the computed sequence.
+	for i := 0; i < n; i++ {
+		sum := x[0] / 2
+		arg := float64(i) * dt
+		if ns2 >= 2 {
+			for k := 1; k < ns2; k++ { //eek
+				arg1 := float64(k) * arg
+				sum += x[2*k-1]*math.Cos(arg1) - x[2*k]*math.Sin(arg1)
+			}
+		}
+		if modn == 0 {
+			// This is how it was written in FFTPACK.
+			sum += 0.5 * math.Pow(-1, float64(i)) * x[n-1]
+		}
+		y[i] = 2 * sum
+	}
+	Rfftb(n, x, work, ifac)
+	var rftb float64
+	for i := 0; i < n; i++ {
+		rftb = math.Max(rftb, math.Abs(x[i]-y[i]))
+		x[i] = xh[i]
+		y[i] = xh[i]
+	}
+	if !scalar.EqualWithinAbsOrRel(rftb, 0, tol, tol) {
+		t.Errorf("unexpected rftb value for n=%d: got:%g want:0", n, rftb)
+	}
+
+	// Check that Rfftb and Rfftf are inverses.
+	Rfftb(n, y, work, ifac)
+	Rfftf(n, y, work, ifac)
+	cf := 1.0 / fn
+	var rftfb float64
+	for i := 0; i < n; i++ {
+		rftfb = math.Max(rftfb, math.Abs(cf*y[i]-x[i]))
+	}
+	if !scalar.EqualWithinAbsOrRel(rftfb, 0, tol, tol) {
+		t.Errorf("unexpected rftfb value for n=%d: got:%f want:0", n, rftfb)
+	}
+}
+
+// naiveDFTreal is the naive O(n^2) DFT implementation.
+func naiveDFTreal(x []float64) (y []complex128) {
+	y = make([]complex128, len(x))
+	dt := -2 * math.Pi / float64(len(x))
+	for i := range x {
+		arg1 := float64(i) * dt
+		for k, xv := range x {
+			arg2 := float64(k) * arg1
+			y[i] += complex(xv*math.Cos(arg2), xv*math.Sin(arg2))
+		}
+	}
+	return y[:len(x)/2+1]
+}
+
+func packCoeffs(x []float64) []complex128 {
+	y := make([]complex128, len(x)/2+1)
+	y[0] = complex(x[0], 0)
+	if len(x) < 2 {
+		return y
+	}
+	if len(x)%2 == 1 {
+		y[len(y)-1] = complex(x[len(x)-2], x[len(x)-1])
+	} else {
+		y[len(y)-1] = complex(x[len(x)-1], 0)
+	}
+	for i := 1; i < len(y)-1; i++ {
+		y[i] = complex(x[2*i-1], x[2*i])
+	}
+	return y
 }
 
 var rfftTests = []struct {
@@ -276,81 +329,114 @@ var rfftTests = []struct {
 
 func TestCfft(t *testing.T) {
 	t.Parallel()
+
 	const tol = 1e-12
+
+	// Golden value cases where golden values have
+	// been obtained from the original Fortran code.
 	for _, test := range cfftTests {
-		// Compute the work and factor slices and compare to known values.
-		work := make([]float64, 4*test.n)
-		ifac := make([]int, 15)
-		Cffti(test.n, work, ifac)
-		var failed bool
-		if !floats.EqualApprox(work, test.wantiwork, 1e-6) {
-			failed = true
-			t.Errorf("unexpected work after call to cffti for n=%d", test.n)
-		}
-		if !reflect.DeepEqual(ifac, test.wantiifac) {
-			failed = true
-			t.Errorf("unexpected ifac after call to cffti for n=%d", test.n)
-		}
-		if failed {
-			continue
-		}
+		testCfft(t, test.n, tol, test.wantiwork, test.wantiifac)
+	}
 
-		// Construct a sequence with known a frequency spectrum and compare
-		// the computed spectrum.
-		fn := float64(test.n)
-		cn := complex(fn, 0)
-
-		x, y1 := cmplxSeries(test.n)
-
-		cx := cmplxAsFloat(x)
-		Cfftf(test.n, cx, work, ifac)
-		x = floatAsCmplx(cx)
-
-		var cftf float64
-		for i := 0; i < test.n; i++ {
-			cftf = math.Max(cftf, cmplx.Abs(x[i]-y1[i]))
-			x[i] /= cn
-		}
-		cftf /= fn
-
-		if !scalar.EqualWithinAbsOrRel(cftf, 0, tol, tol) {
-			t.Errorf("unexpected cftf value for n=%d: got:%f want:0", test.n, cftf)
-		}
-
-		// Construct a frequency spectrum and compare the computed sequence.
-		y2 := updatedCmplxSeries(x)
-
-		cx = cmplxAsFloat(x)
-		Cfftb(test.n, cx, work, ifac)
-		x = floatAsCmplx(cx)
-
-		var cftb float64
-		for i := 0; i < test.n; i++ {
-			cftb = math.Max(cftb, cmplx.Abs(x[i]-y2[i]))
-			x[i] = y2[i]
-		}
-
-		if !scalar.EqualWithinAbsOrRel(cftb, 0, tol, tol) {
-			t.Errorf("unexpected cftb value for n=%d: got:%f want:0", test.n, cftb)
-		}
-
-		// Check that Cfftb and Cfftf are inverses.
-		cx = cmplxAsFloat(x)
-		Cfftf(test.n, cx, work, ifac)
-		Cfftb(test.n, cx, work, ifac)
-		x = floatAsCmplx(cx)
-
-		var cftfb float64
-		for i := 0; i < test.n; i++ {
-			cftfb = math.Max(cftfb, cmplx.Abs(x[i]/cn-y2[i]))
-		}
-
-		if !scalar.EqualWithinAbsOrRel(cftfb, 0, tol, tol) {
-			t.Errorf("unexpected cftfb value for n=%d: got:%f want:0", test.n, cftfb)
-		}
+	// General cases based purely on FFT behaviour.
+	for n := 1; n < 500; n++ {
+		testCfft(t, n, tol, nil, nil)
 	}
 }
 
+func testCfft(t *testing.T, n int, tol float64, wantiwork []float64, wantiifac []int) {
+	// Compute the work and factor slices and compare to known values.
+	work := make([]float64, 4*n)
+	ifac := make([]int, 15)
+	Cffti(n, work, ifac)
+	var failed bool
+	if wantiwork != nil && !floats.EqualApprox(work, wantiwork, 1e-6) {
+		failed = true
+		t.Errorf("unexpected work after call to cffti for n=%d", n)
+	}
+	if wantiifac != nil && !reflect.DeepEqual(ifac, wantiifac) {
+		failed = true
+		t.Errorf("unexpected ifac after call to cffti for n=%d", n)
+	}
+	if failed {
+		return
+	}
+
+	// Construct a sequence with known a frequency spectrum and compare
+	// the computed spectrum.
+	fn := float64(n)
+	cn := complex(fn, 0)
+
+	x, y1 := cmplxSeries(n)
+
+	want := naiveDFT(x)
+
+	cx := cmplxAsFloat(x)
+	Cfftf(n, cx, work, ifac)
+	x = floatAsCmplx(cx)
+
+	// Compare the result to a naive DFT implementation.
+	if !cmplxs.EqualApprox(x, want, tol*10) {
+		t.Errorf("unexpected coefficients for n=%d: got:%f want:%f", n, x, want)
+	}
+
+	var cftf float64
+	for i := 0; i < n; i++ {
+		cftf = math.Max(cftf, cmplx.Abs(x[i]-y1[i]))
+		x[i] /= cn
+	}
+	cftf /= fn
+
+	if !scalar.EqualWithinAbsOrRel(cftf, 0, tol, tol) {
+		t.Errorf("unexpected cftf value for n=%d: got:%f want:0", n, cftf)
+	}
+
+	// Construct a frequency spectrum and compare the computed sequence.
+	y2 := updatedCmplxSeries(x)
+
+	cx = cmplxAsFloat(x)
+	Cfftb(n, cx, work, ifac)
+	x = floatAsCmplx(cx)
+
+	var cftb float64
+	for i := 0; i < n; i++ {
+		cftb = math.Max(cftb, cmplx.Abs(x[i]-y2[i]))
+		x[i] = y2[i]
+	}
+
+	if !scalar.EqualWithinAbsOrRel(cftb, 0, tol, tol) {
+		t.Errorf("unexpected cftb value for n=%d: got:%f want:0", n, cftb)
+	}
+
+	// Check that Cfftb and Cfftf are inverses.
+	cx = cmplxAsFloat(x)
+	Cfftf(n, cx, work, ifac)
+	Cfftb(n, cx, work, ifac)
+	x = floatAsCmplx(cx)
+
+	var cftfb float64
+	for i := 0; i < n; i++ {
+		cftfb = math.Max(cftfb, cmplx.Abs(x[i]/cn-y2[i]))
+	}
+
+	if !scalar.EqualWithinAbsOrRel(cftfb, 0, tol, tol) {
+		t.Errorf("unexpected cftfb value for n=%d: got:%f want:0", n, cftfb)
+	}
+}
+
+// naiveDFT is the naive O(n^2) DFT implementation.
+func naiveDFT(x []complex128) (y []complex128) {
+	y = make([]complex128, len(x))
+	dt := -2 * math.Pi / float64(len(x))
+	for i := range x {
+		arg1 := float64(i) * dt
+		for k, xv := range x {
+			arg2 := float64(k) * arg1
+			y[i] += complex(math.Cos(arg2), math.Sin(arg2)) * xv
+		}
+	}
+	return y
+}
 func cmplxSeries(n int) (x, y []complex128) {
 	x = make([]complex128, n)
 	for i := 0; i < n; i++ {

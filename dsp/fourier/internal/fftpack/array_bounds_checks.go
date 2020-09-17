@@ -39,11 +39,26 @@ func (a twoArray) at(i, j int) float64 {
 	return a.data[i+a.jStride*j]
 }
 
+func (a twoArray) atCmplx(i, j int) complex128 {
+	if i < 0 || a.i <= i || j < 0 || a.j <= j {
+		panic(fmt.Sprintf("out of bounds at(%d, %d): bounds i=%d, j=%d", i, j, a.i, a.j))
+	}
+	return complex(a.data[i+a.jStride*j], a.data[i+a.jStride*j+1])
+}
+
 func (a twoArray) set(i, j int, v float64) {
 	if i < 0 || a.i <= i || j < 0 || a.j <= j {
 		panic(fmt.Sprintf("out of bounds set(%d, %d): bounds i=%d, j=%d", i, j, a.i, a.j))
 	}
 	a.data[i+a.jStride*j] = v
+}
+
+func (a twoArray) setCmplx(i, j int, v complex128) {
+	if i < 0 || a.i <= i || j < 0 || a.j <= j {
+		panic(fmt.Sprintf("out of bounds set(%d, %d): bounds i=%d, j=%d", i, j, a.i, a.j))
+	}
+	a.data[i+a.jStride*j] = real(v)
+	a.data[i+a.jStride*j+1] = imag(v)
 }
 
 func (a twoArray) add(i, j int, v float64) {
@@ -80,9 +95,24 @@ func (a threeArray) at(i, j, k int) float64 {
 	return a.data[i+a.jStride*j+a.kStride*k]
 }
 
+func (a threeArray) atCmplx(i, j, k int) complex128 {
+	if i < 0 || a.i <= i || j < 0 || a.j <= j || k < 0 || a.k <= k {
+		panic(fmt.Sprintf("out of bounds at(%d, %d, %d): bounds i=%d, j=%d, k=%d", i, j, k, a.i, a.j, a.k))
+	}
+	return complex(a.data[i+a.jStride*j+a.kStride*k], a.data[i+a.jStride*j+a.kStride*k+1])
+}
+
 func (a threeArray) set(i, j, k int, v float64) {
 	if i < 0 || a.i <= i || j < 0 || a.j <= j || k < 0 || a.k <= k {
 		panic(fmt.Sprintf("out of bounds set(%d, %d, %d): bounds i=%d, j=%d, k=%d", i, j, k, a.i, a.j, a.k))
 	}
 	a.data[i+a.jStride*j+a.kStride*k] = v
+}
+
+func (a threeArray) setCmplx(i, j, k int, v complex128) {
+	if i < 0 || a.i <= i || j < 0 || a.j <= j || k < 0 || a.k <= k {
+		panic(fmt.Sprintf("out of bounds set(%d, %d, %d): bounds i=%d, j=%d, k=%d", i, j, k, a.i, a.j, a.k))
+	}
+	a.data[i+a.jStride*j+a.kStride*k] = real(v)
+	a.data[i+a.jStride*j+a.kStride*k+1] = imag(v)
 }

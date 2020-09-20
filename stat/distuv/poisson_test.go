@@ -5,6 +5,7 @@
 package distuv
 
 import (
+	"fmt"
 	"math"
 	"sort"
 	"testing"
@@ -157,5 +158,24 @@ func testPoisson(t *testing.T, p Poisson, i int) {
 		if math.Abs(cdf+surv-1) > 1e-10 {
 			t.Errorf("Mismatch between CDF and Survival at %g", xx)
 		}
+	}
+}
+
+func BenchmarkPoissonRand(b *testing.B) {
+	src := rand.New(rand.NewSource(1))
+	for i, p := range []Poisson{
+		{100, src},
+		{15, src},
+		{10, src},
+		{9.9, src},
+		{3, src},
+		{1.5, src},
+		{0.9, src},
+	} {
+		b.Run(fmt.Sprintf("case %d", i), func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				p.Rand()
+			}
+		})
 	}
 }

@@ -75,7 +75,7 @@ func (t *FFT) Coefficients(dst []complex128, seq []float64) []complex128 {
 	return dst
 }
 
-// Sequence computes the real perodic sequence from the Fourier coefficients,
+// Sequence computes the real periodic sequence from the Fourier coefficients,
 // converting the frequency spectrum in coeff into a time series, placing the
 // result in dst and returning it. This transform is unnormalized; a call to
 // Coefficients followed by a call of Sequence will multiply the input sequence
@@ -187,7 +187,7 @@ func (t *CmplxFFT) Coefficients(dst, seq []complex128) []complex128 {
 	return dst
 }
 
-// Sequence computes the complex perodic sequence from the Fourier coefficients,
+// Sequence computes the complex periodic sequence from the Fourier coefficients,
 // converting the frequency spectrum in coeff into a time series, placing the
 // result in dst and returning it. This transform is unnormalized; a call to
 // Coefficients followed by a call of Sequence will multiply the input sequence

@@ -391,7 +391,12 @@ func equalApprox(a, b []complex128, tol float64) bool {
 }
 
 func BenchmarkRealFFTCoefficients(b *testing.B) {
-	for _, n := range []int{4, 100, 256, 4000, 4096, 1e6, 1 << 20, 1 << 24} {
+	var sizes []int
+	for n := 16; n < 1<<24; n <<= 3 {
+		sizes = append(sizes, n)
+	}
+	sizes = append(sizes, 100, 4000, 1e6)
+	for _, n := range sizes {
 		fft := NewFFT(n)
 		seq := randFloats(n, rand.NewSource(1))
 		dst := make([]complex128, n/2+1)
@@ -405,7 +410,12 @@ func BenchmarkRealFFTCoefficients(b *testing.B) {
 }
 
 func BenchmarkRealFFTSequence(b *testing.B) {
-	for _, n := range []int{4, 100, 256, 4000, 4096, 1e6, 1 << 20, 1 << 24} {
+	var sizes []int
+	for n := 16; n < 1<<24; n <<= 3 {
+		sizes = append(sizes, n)
+	}
+	sizes = append(sizes, 100, 4000, 1e6)
+	for _, n := range sizes {
 		fft := NewFFT(n)
 		coeff := randComplexes(n/2+1, rand.NewSource(1))
 		dst := make([]float64, n)
@@ -419,7 +429,12 @@ func BenchmarkRealFFTSequence(b *testing.B) {
 }
 
 func BenchmarkCmplxFFTCoefficients(b *testing.B) {
-	for _, n := range []int{4, 100, 256, 4000, 4096, 1e6, 1 << 20, 1 << 24} {
+	var sizes []int
+	for n := 16; n < 1<<24; n <<= 3 {
+		sizes = append(sizes, n)
+	}
+	sizes = append(sizes, 100, 4000, 1e6)
+	for _, n := range sizes {
 		fft := NewCmplxFFT(n)
 		d := randComplexes(n, rand.NewSource(1))
 
@@ -432,7 +447,12 @@ func BenchmarkCmplxFFTCoefficients(b *testing.B) {
 }
 
 func BenchmarkCmplxFFTSequence(b *testing.B) {
-	for _, n := range []int{4, 100, 256, 4000, 4096, 1e6, 1 << 20, 1 << 24} {
+	var sizes []int
+	for n := 16; n < 1<<24; n <<= 3 {
+		sizes = append(sizes, n)
+	}
+	sizes = append(sizes, 100, 4000, 1e6)
+	for _, n := range sizes {
 		fft := NewCmplxFFT(n)
 		d := randComplexes(n, rand.NewSource(1))
 

@@ -90,29 +90,34 @@ func (p Poisson) Rand() float64 {
 		}
 		return em
 	}
-	// Use rejection method.
+	// Generate using:
+	//  W. Hörmann. "The transformed rejection method for generating Poisson
+	//  random variables." Insurance: Mathematics and Economics
+	//  12.1 (1993): 39-45.
+
+	// Algorithm PTRS
 	rnd = rand.Float64
 	if rng != nil {
 		rnd = rng.Float64
 	}
-	sq := math.Sqrt(2.0 * p.Lambda)
-	alxm := math.Log(p.Lambda)
-	lg, _ := math.Lgamma(p.Lambda + 1)
-	g := p.Lambda*alxm - lg
+	b := 0.931 + 2.53*math.Sqrt(p.Lambda)
+	a := -0.059 + 0.02483*b
+	invalpha := 1.1239 + 1.1328/(b-3.4)
+	vr := 0.9277 - 3.6224/(b-2)
 	for {
-		var em, y float64
-		for {
-			y = math.Tan(math.Pi * rnd())
-			em = sq*y + p.Lambda
-			if em >= 0 {
-				break
-			}
+		U := rnd() - 0.5
+		V := rnd()
+		us := 0.5 - math.Abs(U)
+		k := math.Floor((2*a/us+b)*U + p.Lambda + 0.43)
+		if us >= 0.07 && V <= vr {
+			return k
 		}
-		em = math.Floor(em)
-		lg, _ = math.Lgamma(em + 1)
-		t := 0.9 * (1.0 + y*y) * math.Exp(em*alxm-lg-g)
-		if rnd() <= t {
-			return em
+		if k <= 0 || (us < 0.013 && V > us) {
+			continue
+		}
+		lg, _ := math.Lgamma(k + 1)
+		if math.Log(V*invalpha/(a/(us*us)+b)) <= k*math.Log(p.Lambda)-p.Lambda-lg {
+			return k
 		}
 	}
 }

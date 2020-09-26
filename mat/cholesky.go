@@ -401,23 +401,23 @@ func (c *Cholesky) ToSym(dst *SymDense) {
 // matrix is ill-conditioned, a Condition error will be returned.
 // Note that matrix inversion is numerically unstable, and should generally be
 // avoided where possible, for example by using the Solve routines.
-func (c *Cholesky) InverseTo(s *SymDense) error {
+func (c *Cholesky) InverseTo(dst *SymDense) error {
 	if !c.valid() {
 		panic(badCholesky)
 	}
-	s.reuseAsNonZeroed(c.chol.mat.N)
+	dst.reuseAsNonZeroed(c.chol.mat.N)
 	// Create a TriDense representing the Cholesky factor U with the backing
-	// slice from s.
-	// Operations on u are reflected in s.
+	// slice from dst.
+	// Operations on u are reflected in dst.
 	u := &TriDense{
 		mat: blas64.Triangular{
 			Uplo:   blas.Upper,
 			Diag:   blas.NonUnit,
-			N:      s.mat.N,
-			Data:   s.mat.Data,
-			Stride: s.mat.Stride,
+			N:      dst.mat.N,
+			Data:   dst.mat.Data,
+			Stride: dst.mat.Stride,
 		},
-		cap: s.mat.N,
+		cap: dst.mat.N,
 	}
 	u.Copy(c.chol)
 

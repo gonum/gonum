@@ -573,6 +573,11 @@ func TestDtrtri(t *testing.T) {
 	testlapack.DtrtriTest(t, impl)
 }
 
+func TestDtrtrs(t *testing.T) {
+	t.Parallel()
+	testlapack.DtrtrsTest(t, impl)
+}
+
 func TestIladlc(t *testing.T) {
 	t.Parallel()
 	testlapack.IladlcTest(t, impl)

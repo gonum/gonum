@@ -17,11 +17,11 @@ import (
 	"gonum.org/v1/gonum/lapack"
 )
 
-type Dtrtrser interface {
-	Dtrtrs(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag, n, nrhs int, a []float64, lda int, b []float64, ldb int) bool
+type Dtbtrser interface {
+	Dtbtrs(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag, n, kd, nrhs int, a []float64, lda int, b []float64, ldb int) bool
 }
 
-func DtrtrsTest(t *testing.T, impl Dtrtrser) {
+func DtbtrsTest(t *testing.T, impl Dtbtrser) {
 	rnd := rand.New(rand.NewSource(1))
 
 	for _, trans := range []blas.Transpose{blas.NoTrans, blas.Trans, blas.ConjTrans} {
@@ -29,15 +29,17 @@ func DtrtrsTest(t *testing.T, impl Dtrtrser) {
 		t.Run(name, func(t *testing.T) {
 			for _, uplo := range []blas.Uplo{blas.Upper, blas.Lower} {
 				for _, diag := range []blas.Diag{blas.Unit, blas.NonUnit} {
-					for _, n := range []int{0, 1, 2, 3, 4, 5, 10} {
-						for _, nrhs := range []int{0, 1, 2, 3, 4, 5, 10, 15} {
-							for _, lda := range []int{max(1, n), n + 3} {
-								for _, ldb := range []int{max(1, nrhs), nrhs + 3} {
-									if diag == blas.Unit {
-										dtrtrsTest(t, impl, rnd, uplo, trans, diag, n, nrhs, lda, ldb, false)
-									} else {
-										dtrtrsTest(t, impl, rnd, uplo, trans, diag, n, nrhs, lda, ldb, true)
-										dtrtrsTest(t, impl, rnd, uplo, trans, diag, n, nrhs, lda, ldb, false)
+					for _, n := range []int{0, 1, 2, 3, 4, 5, 10, 23} {
+						for _, kd := range []int{0, 1, 2, n / 2, max(0, n-1), n, n + 5} {
+							for _, nrhs := range []int{0, 1, 2, 3, 4, 5} {
+								for _, lda := range []int{kd + 1, kd + 3} {
+									for _, ldb := range []int{max(1, nrhs), nrhs + 3} {
+										if diag == blas.Unit {
+											dtbtrsTest(t, impl, rnd, uplo, trans, diag, n, kd, nrhs, lda, ldb, false)
+										} else {
+											dtbtrsTest(t, impl, rnd, uplo, trans, diag, n, kd, nrhs, lda, ldb, true)
+											dtbtrsTest(t, impl, rnd, uplo, trans, diag, n, kd, nrhs, lda, ldb, false)
+										}
 									}
 								}
 							}
@@ -49,7 +51,7 @@ func DtrtrsTest(t *testing.T, impl Dtrtrser) {
 	}
 }
 
-func dtrtrsTest(t *testing.T, impl Dtrtrser, rnd *rand.Rand, uplo blas.Uplo, trans blas.Transpose, diag blas.Diag, n, nrhs int, lda, ldb int, singular bool) {
+func dtbtrsTest(t *testing.T, impl Dtbtrser, rnd *rand.Rand, uplo blas.Uplo, trans blas.Transpose, diag blas.Diag, n, kd, nrhs int, lda, ldb int, singular bool) {
 	if singular && diag == blas.Unit {
 		panic("blas.Unit triangular matrix cannot be singular")
 	}
@@ -59,7 +61,7 @@ func dtrtrsTest(t *testing.T, impl Dtrtrser, rnd *rand.Rand, uplo blas.Uplo, tra
 	if n == 0 {
 		singular = false
 	}
-	name := fmt.Sprintf("uplo=%v,diag=%v,n=%v,nrhs=%v,lda=%v,ldb=%v,sing=%v", string(uplo), string(diag), n, nrhs, lda, ldb, singular)
+	name := fmt.Sprintf("uplo=%v,diag=%v,n=%v,kd=%v,nrhs=%v,lda=%v,ldb=%v,sing=%v", string(uplo), string(diag), n, kd, nrhs, lda, ldb, singular)
 
 	// Generate a random triangular matrix A. One of its triangles won't be
 	// referenced.
@@ -69,7 +71,11 @@ func dtrtrsTest(t *testing.T, impl Dtrtrser, rnd *rand.Rand, uplo blas.Uplo, tra
 	}
 	if singular {
 		i := rnd.Intn(n)
-		a[i*lda+i] = 0
+		if uplo == blas.Upper {
+			a[i*lda] = 0
+		} else {
+			a[i*lda+kd] = 0
+		}
 	}
 	aCopy := make([]float64, len(a))
 	copy(aCopy, a)
@@ -80,16 +86,19 @@ func dtrtrsTest(t *testing.T, impl Dtrtrser, rnd *rand.Rand, uplo blas.Uplo, tra
 		x[i] = rnd.NormFloat64()
 	}
 
-	// Generate the right-hand side as A * X  or  Aᵀ * X.
+	// Generate the right-hand side B as A * X  or  Aᵀ * X.
 	b := make([]float64, len(x))
 	copy(b, x)
 	bi := blas64.Implementation()
-	bi.Dtrmm(blas.Left, uplo, trans, diag, n, nrhs, 1, a, lda, b, ldb)
+	if n > 0 {
+		for j := 0; j < nrhs; j++ {
+			bi.Dtbmv(uplo, trans, diag, n, kd, a, lda, b[j:], ldb)
+		}
+	}
 
 	got := make([]float64, len(b))
 	copy(got, b)
-
-	ok := impl.Dtrtrs(uplo, trans, diag, n, nrhs, a, lda, got, ldb)
+	ok := impl.Dtbtrs(uplo, trans, diag, n, kd, nrhs, a, lda, got, ldb)
 
 	if !floats.Equal(a, aCopy) {
 		t.Errorf("%v: unexpected modification of A", name)
@@ -115,9 +124,9 @@ func dtrtrsTest(t *testing.T, impl Dtrtrser, rnd *rand.Rand, uplo blas.Uplo, tra
 	// Compute the 1-norm of A or Aᵀ.
 	var aNorm float64
 	if trans == blas.NoTrans {
-		aNorm = dlantr(lapack.MaxColumnSum, uplo, diag, n, n, a, lda, work)
+		aNorm = dlantb(lapack.MaxColumnSum, uplo, diag, n, kd, a, lda, work)
 	} else {
-		aNorm = dlantr(lapack.MaxRowSum, uplo, diag, n, n, a, lda, work)
+		aNorm = dlantb(lapack.MaxRowSum, uplo, diag, n, kd, a, lda, work)
 	}
 
 	// Compute the maximum over the number of right-hand sides of
@@ -125,7 +134,7 @@ func dtrtrsTest(t *testing.T, impl Dtrtrser, rnd *rand.Rand, uplo blas.Uplo, tra
 	var resid float64
 	for j := 0; j < nrhs; j++ {
 		bi.Dcopy(n, got[j:], ldb, work, 1)
-		bi.Dtrmv(uplo, trans, diag, n, a, lda, work, 1)
+		bi.Dtbmv(uplo, trans, diag, n, kd, a, lda, work, 1)
 		bi.Daxpy(n, -1, b[j:], ldb, work, 1)
 		rjNorm := bi.Dasum(n, work, 1)
 		xNorm := bi.Dasum(n, got[j:], ldb)

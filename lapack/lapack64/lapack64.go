@@ -559,6 +559,17 @@ func Syev(jobz lapack.EVJob, a blas64.Symmetric, w, work []float64, lwork int) (
 	return lapack64.Dsyev(jobz, a.Uplo, a.N, a.Data, max(1, a.Stride), w, work, lwork)
 }
 
+// Tbtrs solves a triangular system of the form
+//  A * X = B   if trans == blas.NoTrans
+//  Aᵀ * X = B  if trans == blas.Trans or blas.ConjTrans
+// where A is an n×n triangular band matrix, and B is an n×nrhs matrix.
+//
+// Tbtrs returns whether A is non-singular. If A is singular, no solutions X
+// are computed.
+func Tbtrs(trans blas.Transpose, a blas64.TriangularBand, b blas64.General) (ok bool) {
+	return lapack64.Dtbtrs(a.Uplo, trans, a.Diag, a.N, a.K, b.Cols, a.Data, max(1, a.Stride), b.Data, max(1, b.Stride))
+}
+
 // Trcon estimates the reciprocal of the condition number of a triangular matrix A.
 // The condition number computed may be based on the 1-norm or the ∞-norm.
 //

@@ -297,3 +297,71 @@ func fritschButlandEdgeDerivative(xs, ys, slopes []float64, leftEdge bool) float
 	}
 	return g
 }
+
+// CubicSpline manage necessary equation for Natural cubic spline.
+type CubicSpline struct {
+	xs []float64
+
+	coeffs mat.Dense
+	SY mat.Dense
+}
+
+// Fit fits a predictor to (X, Y) value pairs provided as two slices.
+func (cs *CubicSpline) Fit(xs, xy []float64) {
+	n := len(xs)
+	if n < 2 {
+		panic(tooFewPoints)
+	}
+	if len(ys) != n {
+		panic(differentLengths)
+	}
+	cs.coeffs = mat.NewDense((n - 1) * 4,(n - 1) * 4, nil)
+	cs.SY = mat.NewDense((n - 1) * 4, 1, nil)
+	cs.xs = xs
+	for i := 0; i < n - 1; i++ {
+		for j := 0; j < 4; j++ {
+			cs.coeffs.Set(i, 4*i + j, math.Pow(xs[i], j))
+			cs.coeffs.Set(i + n - 1, 4*i + j, math.Pow(xs[i + 1], j))
+			if i < n - 2 {
+				cs.coeffs.Set(i+2*(n-1), 4*i+j, float64(j)*math.Pow(xs[i+1], j-1))
+				cs.coeffs.Set(i+2*(n-1), 4*(i+1)+j, float64(-j)*math.Pow(xs[i+1], j-1))
+			}
+		}
+		if i < n - 2 {
+			cs.coeffs.Set(i+(n-1)*3-1, 4*i+3, float64(3)*xs[i+1])
+			cs.coeffs.Set(i+(n-1)*3-1, 4*i+2, float64(1))
+			cs.coeffs.Set(i+(n-1)*3-1, 4*(i+1)+3, float64(-3)*xs[i+1])
+			cs.coeffs.Set(i+(n-1)*3-1, 4*(i+1)+2, float64(-1))
+		}
+		cs.SY.Set(i, 0, xy[i])
+		cs.SY.Set(i + n - 1, 0, xy[i + 1])
+	}
+	cs.coeffs.Set(4*(n-1)-2, 3, float64(3)*xs[0])
+	cs.coeffs.Set(4*(n-1)-2, 2, float64(1))
+	cs.coeffs.Set(4*(n-1)-1, 4*(n-1)-1, float64(3)*xs[n-1])
+	cs.coeffs.Set(4*(n-1)-1, 4*(n-1)-2, float64(1))
+	return nil
+}
+
+// Predict returns the interpolation value at x.
+func (cs *CubicSpline) Predict (x float64) float64 {
+	coeffIdx := 0
+	n := len(cs.xs)
+	for _, xi := range cs.xs {
+		if xi > x {
+			coeffIdx--
+			break
+		}
+		if coeffIdx == -1 {
+			coeffIdx++
+		} else if coeffIdx == n - 1 {
+			coeffIdx--
+		}
+		coeffIdx++
+	}
+	a := cs.coeffs[4*coeffIdx + 3]
+	b := cs.coeffs[4*coeffIdx + 2]
+	c := cs.coeffs[4*coeffIdx + 1]
+	d := cs.coeffs[4*coeffIdx]
+	return a*math.Pow(x, 3) + b*math.Pow(x, 2) + c*x + d
+}

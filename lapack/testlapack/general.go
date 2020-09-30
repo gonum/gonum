@@ -1464,9 +1464,10 @@ func dlansy(norm lapack.MatrixNorm, uplo blas.Uplo, n int, a []float64, lda int)
 			}
 		}
 		return max
-	default:
-		// lapack.Frobenius:
+	case lapack.Frobenius:
 		panic("not implemented")
+	default:
+		panic("invalid norm")
 	}
 }
 
@@ -1507,7 +1508,7 @@ func dlange(norm lapack.MatrixNorm, m, n int, a []float64, lda int) float64 {
 			value = math.Hypot(value, row)
 		}
 	default:
-		panic("bad MatrixNorm")
+		panic("invalid norm")
 	}
 	return value
 }
@@ -1575,6 +1576,8 @@ func dlansb(norm lapack.MatrixNorm, uplo blas.Uplo, n, kd int, ab []float64, lda
 		}
 	case lapack.Frobenius:
 		panic("not implemented")
+	default:
+		panic("invalid norm")
 	}
 	return value
 }
@@ -1761,9 +1764,10 @@ func dlantr(norm lapack.MatrixNorm, uplo blas.Uplo, diag blas.Diag, m, n int, a 
 				return maxsum
 			}
 		}
-	default:
-		// lapack.Frobenius
+	case lapack.Frobenius:
 		panic("not implemented")
+	default:
+		panic("invalid norm")
 	}
 }
 
@@ -1896,6 +1900,8 @@ func dlantb(norm lapack.MatrixNorm, uplo blas.Uplo, diag blas.Diag, n, k int, a 
 		}
 	case lapack.Frobenius:
 		panic("not implemented")
+	default:
+		panic("invalid norm")
 	}
 	return value
 }

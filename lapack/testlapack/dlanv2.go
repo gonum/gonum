@@ -53,6 +53,9 @@ func Dlanv2Test(t *testing.T, impl Dlanv2er) {
 			d := rnd.NormFloat64()
 			dlanv2Test(t, impl, a, b, c, d)
 		}
+
+		// https://github.com/Reference-LAPACK/lapack/issues/263
+		dlanv2Test(t, impl, 0, 1, -1, math.Nextafter(0, 1))
 	})
 }
 

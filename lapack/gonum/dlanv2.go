@@ -69,6 +69,7 @@ func (impl Implementation) Dlanv2(a, b, c, d float64) (aa, bb, cc, dd float64, r
 			safmn2 := math.Pow(dlamchB, math.Log(dlamchS/dlamchE)/math.Log(dlamchB)/2)
 			safmx2 := 1 / safmn2
 			sigma := b + c
+		loop:
 			for iter := 0; iter < 20; iter++ {
 				scale = math.Max(math.Abs(temp), math.Abs(sigma))
 				switch {
@@ -78,6 +79,8 @@ func (impl Implementation) Dlanv2(a, b, c, d float64) (aa, bb, cc, dd float64, r
 				case scale <= safmn2:
 					sigma *= safmx2
 					temp *= safmx2
+				default:
+					break loop
 				}
 			}
 			p = temp / 2

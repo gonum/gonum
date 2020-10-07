@@ -22,7 +22,7 @@ import (
 type Binomial struct {
 	// N is the total number of Bernoulli trials. N must be greater than 0.
 	N float64
-	// P is the probablity of success in any given trial. P must be in [0, 1].
+	// P is the probability of success in any given trial. P must be in [0, 1].
 	P float64
 
 	Src rand.Source

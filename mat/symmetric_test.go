@@ -685,6 +685,12 @@ func TestViewGrowSquare(t *testing.T) {
 				}
 			}
 		}
+
+		s.Reset()
+		rg := s.GrowSym(n).(*SymDense)
+		if rg.mat.Stride < n {
+			t.Errorf("unexpected stride after GrowSym on empty matrix: got:%d want >= %d", rg.mat.Stride, n)
+		}
 	}
 }
 

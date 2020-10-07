@@ -600,7 +600,7 @@ func (s *SymDense) GrowSym(n int) Symmetric {
 	}
 	var v SymDense
 	n += s.mat.N
-	if n > s.cap {
+	if s.IsEmpty() || n > s.cap {
 		v.mat = blas64.Symmetric{
 			N:      n,
 			Stride: n,

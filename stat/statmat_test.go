@@ -88,8 +88,8 @@ func TestCovarianceMatrix(t *testing.T) {
 				}
 			}
 		}
-
 	}
+
 	if !panics(func() { CovarianceMatrix(nil, mat.NewDense(5, 2, nil), []float64{}) }) {
 		t.Errorf("CovarianceMatrix did not panic with weight size mismatch")
 	}
@@ -98,6 +98,13 @@ func TestCovarianceMatrix(t *testing.T) {
 	}
 	if !panics(func() { CovarianceMatrix(nil, mat.NewDense(2, 2, []float64{1, 2, 3, 4}), []float64{1, -1}) }) {
 		t.Errorf("CovarianceMatrix did not panic with negative weights")
+	}
+	if panics(func() {
+		dst := mat.NewSymDense(4, nil)
+		dst.Reset()
+		CovarianceMatrix(dst, mat.NewDense(2, 2, []float64{1, 2, 3, 4}), nil)
+	}) {
+		t.Errorf("CovarianceMatrix panics with reset destination")
 	}
 }
 
@@ -307,9 +314,11 @@ func randMat(r, c int) mat.Matrix {
 }
 
 func benchmarkCovarianceMatrix(b *testing.B, m mat.Matrix) {
+	var res mat.SymDense
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		CovarianceMatrix(nil, m, nil)
+		res.Reset()
+		CovarianceMatrix(&res, m, nil)
 	}
 }
 func benchmarkCovarianceMatrixWeighted(b *testing.B, m mat.Matrix) {
@@ -318,9 +327,11 @@ func benchmarkCovarianceMatrixWeighted(b *testing.B, m mat.Matrix) {
 	for i := range wts {
 		wts[i] = 0.5
 	}
+	var res mat.SymDense
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		CovarianceMatrix(nil, m, wts)
+		res.Reset()
+		CovarianceMatrix(&res, m, wts)
 	}
 }
 func benchmarkCovarianceMatrixInPlace(b *testing.B, m mat.Matrix) {

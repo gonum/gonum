@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -31,6 +32,9 @@ func BenchmarkDominators(b *testing.B) {
 
 	fis, err := ioutil.ReadDir(testdata)
 	if err != nil {
+		if os.IsNotExist(err) {
+			b.Skipf("no control flow testdata: %v", err)
+		}
 		b.Fatalf("failed to open control flow testdata: %v", err)
 	}
 	for _, fi := range fis {

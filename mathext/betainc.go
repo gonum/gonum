@@ -22,7 +22,7 @@ func RegIncBeta(a, b float64, x float64) float64 {
 // The domain of definition is 0 <= y <= 1, and the parameters a and b must be
 // positive. For other values of x, a, and b InvRegIncBeta will panic.
 func InvRegIncBeta(a, b float64, y float64) float64 {
-	if y < 0 || y > 1 {
+	if y < 0 || 1 < y {
 		panic("mathext: parameter out of range")
 	}
 	return cephes.Incbi(a, b, y)

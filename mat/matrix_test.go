@@ -768,7 +768,7 @@ func TestMulVecToer(t *testing.T) {
 				m, n = c, r
 			}
 			for _, dst := range []*VecDense{
-				&VecDense{},
+				new(VecDense),
 				NewVecDense(m, random(m)),
 			} {
 				for xType := 0; xType <= 3; xType++ {

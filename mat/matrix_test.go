@@ -372,48 +372,6 @@ func TestDet(t *testing.T) {
 	testOneInputFunc(t, "DetVsChol", f, denseComparison, sameAnswerFloatApproxTol(1e-10), isAnyType, isWide)
 }
 
-type basicVector struct {
-	m []float64
-}
-
-func (v *basicVector) AtVec(i int) float64 {
-	if i < 0 || i >= v.Len() {
-		panic(ErrRowAccess)
-	}
-	return v.m[i]
-}
-
-func (v *basicVector) At(r, c int) float64 {
-	if c != 0 {
-		panic(ErrColAccess)
-	}
-	return v.AtVec(r)
-}
-
-func (v *basicVector) Dims() (r, c int) {
-	return v.Len(), 1
-}
-
-func (v *basicVector) T() Matrix {
-	return Transpose{v}
-}
-
-func (v *basicVector) Len() int {
-	return len(v.m)
-}
-
-type rawVector struct {
-	basicVector
-}
-
-func (v *rawVector) RawVector() blas64.Vector {
-	return blas64.Vector{
-		N:    v.Len(),
-		Data: v.basicVector.m,
-		Inc:  1,
-	}
-}
-
 func TestDot(t *testing.T) {
 	t.Parallel()
 	f := func(a, b Matrix) interface{} {
@@ -782,9 +740,9 @@ func TestMulVecToer(t *testing.T) {
 						}
 						x = dst
 					case 2:
-						x = &rawVector{basicVector{random(n)}}
+						x = &rawVector{(*basicVector)(NewVecDense(n, random(n)))}
 					case 3:
-						x = &basicVector{random(n)}
+						x = asBasicVector(NewVecDense(n, random(n)))
 					default:
 						panic("bad xType")
 					}

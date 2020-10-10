@@ -218,6 +218,24 @@ func (m *basicMatrix) T() Matrix {
 	return Transpose{m}
 }
 
+type basicVector VecDense
+
+var _ Vector = &basicVector{}
+
+func (v *basicVector) At(r, c int) float64 { return (*VecDense)(v).At(r, c) }
+func (v *basicVector) AtVec(i int) float64 { return (*VecDense)(v).AtVec(i) }
+func (v *basicVector) Dims() (r, c int)    { return (*VecDense)(v).Dims() }
+func (v *basicVector) Len() int            { return (*VecDense)(v).Len() }
+func (v *basicVector) T() Matrix           { return Transpose{v} }
+
+type rawVector struct {
+	*basicVector
+}
+
+func (v *rawVector) RawVector() blas64.Vector {
+	return v.basicVector.mat
+}
+
 type basicBanded BandDense
 
 var _ Banded = &basicBanded{}

@@ -5,6 +5,7 @@
 package mat
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -412,5 +413,165 @@ func TestTriBandDiagView(t *testing.T) {
 		}),
 	} {
 		testDiagView(t, cas, test)
+	}
+}
+
+func TestTriBandDenseSolveTo(t *testing.T) {
+	t.Parallel()
+
+	const tol = 1e-15
+
+	for tc, test := range []struct {
+		a *TriBandDense
+		b *Dense
+	}{
+		{
+			a: NewTriBandDense(5, 2, Upper, []float64{
+				-0.34, -0.49, -0.51,
+				-0.25, -0.5, 1.03,
+				-1.1, 0.3, -0.82,
+				1.69, 0.69, -2.22,
+				-0.62, 1.22, -0.85,
+			}),
+			b: NewDense(5, 2, []float64{
+				0.44, 1.34,
+				0.07, -1.45,
+				-0.32, -0.88,
+				-0.09, -0.15,
+				-1.17, -0.19,
+			}),
+		},
+		{
+			a: NewTriBandDense(5, 2, Lower, []float64{
+				0, 0, -0.34,
+				0, -0.49, -0.25,
+				-0.51, -0.5, -1.1,
+				1.03, 0.3, 1.69,
+				-0.82, 0.69, -0.62,
+			}),
+			b: NewDense(5, 2, []float64{
+				0.44, 1.34,
+				0.07, -1.45,
+				-0.32, -0.88,
+				-0.09, -0.15,
+				-1.17, -0.19,
+			}),
+		},
+	} {
+		a := test.a
+		for _, trans := range []bool{false, true} {
+			for _, dstSameAsB := range []bool{false, true} {
+				name := fmt.Sprintf("Case %d,trans=%v,dstSameAsB=%v", tc, trans, dstSameAsB)
+
+				n, nrhs := test.b.Dims()
+				var dst Dense
+				var err error
+				if dstSameAsB {
+					dst = *NewDense(n, nrhs, nil)
+					dst.Copy(test.b)
+					err = a.SolveTo(&dst, trans, &dst)
+				} else {
+					tmp := NewDense(n, nrhs, nil)
+					tmp.Copy(test.b)
+					err = a.SolveTo(&dst, trans, asBasicMatrix(tmp))
+				}
+
+				if err != nil {
+					t.Fatalf("%v: unexpected error from SolveTo", name)
+				}
+
+				var resid Dense
+				if trans {
+					resid.Mul(a.T(), &dst)
+				} else {
+					resid.Mul(a, &dst)
+				}
+				resid.Sub(&resid, test.b)
+				diff := Norm(&resid, 1)
+				if diff > tol {
+					t.Errorf("%v: unexpected result; diff=%v,want<=%v", name, diff, tol)
+				}
+			}
+		}
+	}
+}
+
+func TestTriBandDenseSolveVecTo(t *testing.T) {
+	t.Parallel()
+
+	const tol = 1e-15
+
+	for tc, test := range []struct {
+		a *TriBandDense
+		b *VecDense
+	}{
+		{
+			a: NewTriBandDense(5, 2, Upper, []float64{
+				-0.34, -0.49, -0.51,
+				-0.25, -0.5, 1.03,
+				-1.1, 0.3, -0.82,
+				1.69, 0.69, -2.22,
+				-0.62, 1.22, -0.85,
+			}),
+			b: NewVecDense(5, []float64{
+				0.44,
+				0.07,
+				-0.32,
+				-0.09,
+				-1.17,
+			}),
+		},
+		{
+			a: NewTriBandDense(5, 2, Lower, []float64{
+				0, 0, -0.34,
+				0, -0.49, -0.25,
+				-0.51, -0.5, -1.1,
+				1.03, 0.3, 1.69,
+				-0.82, 0.69, -0.62,
+			}),
+			b: NewVecDense(5, []float64{
+				0.44,
+				0.07,
+				-0.32,
+				-0.09,
+				-1.17,
+			}),
+		},
+	} {
+		a := test.a
+		for _, trans := range []bool{false, true} {
+			for _, dstSameAsB := range []bool{false, true} {
+				name := fmt.Sprintf("Case %d,trans=%v,dstSameAsB=%v", tc, trans, dstSameAsB)
+
+				n, _ := test.b.Dims()
+				var dst VecDense
+				var err error
+				if dstSameAsB {
+					dst = *NewVecDense(n, nil)
+					dst.CopyVec(test.b)
+					err = a.SolveVecTo(&dst, trans, &dst)
+				} else {
+					tmp := NewVecDense(n, nil)
+					tmp.CopyVec(test.b)
+					err = a.SolveVecTo(&dst, trans, asBasicVector(tmp))
+				}
+
+				if err != nil {
+					t.Fatalf("%v: unexpected error from SolveVecTo", name)
+				}
+
+				var resid VecDense
+				if trans {
+					resid.MulVec(a.T(), &dst)
+				} else {
+					resid.MulVec(a, &dst)
+				}
+				resid.SubVec(&resid, test.b)
+				diff := Norm(&resid, 1)
+				if diff > tol {
+					t.Errorf("%v: unexpected result; diff=%v,want<=%v", name, diff, tol)
+				}
+			}
+		}
 	}
 }

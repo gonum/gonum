@@ -5,8 +5,11 @@
 package mat
 
 import (
+	"math"
+
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
+	"gonum.org/v1/gonum/lapack/lapack64"
 )
 
 var (
@@ -456,6 +459,64 @@ func (t *TriBandDense) Trace() float64 {
 		tr += rb.Data[offsetIndex+i*rb.Stride]
 	}
 	return tr
+}
+
+// SolveTo solves a triangular system T * X = B  or  Tᵀ * X = B where T is an
+// n×n triangular band matrix represented by the receiver and B is a given
+// n×nrhs matrix. If T is non-singular, the result will be stored into dst and
+// nil will be returned. If T is singular, the contents of dst will be undefined
+// and a Condition error will be returned.
+func (t *TriBandDense) SolveTo(dst *Dense, trans bool, b Matrix) error {
+	n, nrhs := b.Dims()
+	if n != t.mat.N {
+		panic(ErrShape)
+	}
+	if b, ok := b.(RawMatrixer); ok && dst != b {
+		dst.checkOverlap(b.RawMatrix())
+	}
+	dst.reuseAsNonZeroed(n, nrhs)
+	if dst != b {
+		dst.Copy(b)
+	}
+	var ok bool
+	if trans {
+		ok = lapack64.Tbtrs(blas.Trans, t.mat, dst.mat)
+	} else {
+		ok = lapack64.Tbtrs(blas.NoTrans, t.mat, dst.mat)
+	}
+	if !ok {
+		return Condition(math.Inf(1))
+	}
+	return nil
+}
+
+// SolveVecTo solves a triangular system T * x = b  or  Tᵀ * x = b where T is an
+// n×n triangular band matrix represented by the receiver and b is a given
+// n-vector. If T is non-singular, the result will be stored into dst and nil
+// will be returned. If T is singular, the contents of dst will be undefined and
+// a Condition error will be returned.
+func (t *TriBandDense) SolveVecTo(dst *VecDense, trans bool, b Vector) error {
+	n, nrhs := b.Dims()
+	if n != t.mat.N || nrhs != 1 {
+		panic(ErrShape)
+	}
+	if b, ok := b.(RawVectorer); ok && dst != b {
+		dst.checkOverlap(b.RawVector())
+	}
+	dst.reuseAsNonZeroed(n)
+	if dst != b {
+		dst.CopyVec(b)
+	}
+	var ok bool
+	if trans {
+		ok = lapack64.Tbtrs(blas.Trans, t.mat, dst.asGeneral())
+	} else {
+		ok = lapack64.Tbtrs(blas.NoTrans, t.mat, dst.asGeneral())
+	}
+	if !ok {
+		return Condition(math.Inf(1))
+	}
+	return nil
 }
 
 func copySymBandIntoTriBand(dst *TriBandDense, s SymBanded) {

@@ -386,19 +386,17 @@ func makeRandOf(a Matrix, m, n int, src rand.Source) Matrix {
 		}
 		return mat
 	case *basicVector:
-		if m == 0 && n == 0 {
-			return &basicVector{}
-		}
 		if n != 1 {
 			panic(fmt.Sprintf("bad vector size: m = %v, n = %v", m, n))
 		}
-		mat := &basicVector{
-			m: make([]float64, m),
+		if m == 0 {
+			return &basicVector{}
 		}
+		mat := NewVecDense(m, nil)
 		for i := 0; i < m; i++ {
-			mat.m[i] = rnd.NormFloat64()
+			mat.SetVec(i, rnd.NormFloat64())
 		}
-		return mat
+		return asBasicVector(mat)
 	case *SymDense, *basicSymmetric:
 		if m != n {
 			panic("bad size")
@@ -584,19 +582,17 @@ func makeNaNOf(a Matrix, m, n int) Matrix {
 		}
 		return mat
 	case *basicVector:
-		if m == 0 && n == 0 {
-			return &basicVector{}
-		}
 		if n != 1 {
 			panic(fmt.Sprintf("bad vector size: m = %v, n = %v", m, n))
 		}
-		mat := &basicVector{
-			m: make([]float64, m),
+		if m == 0 {
+			return &basicVector{}
 		}
+		mat := NewVecDense(m, nil)
 		for i := 0; i < m; i++ {
-			mat.m[i] = math.NaN()
+			mat.SetVec(i, math.NaN())
 		}
-		return mat
+		return asBasicVector(mat)
 	case *SymDense, *basicSymmetric:
 		if m != n {
 			panic("bad size")
@@ -832,21 +828,13 @@ func makeCopyOf(a Matrix) Matrix {
 		copy(m.mat.Data, tri.mat.Data)
 		return returnAs(m, t)
 	case *VecDense:
-		m := &VecDense{
-			mat: blas64.Vector{
-				N:    t.mat.N,
-				Inc:  t.mat.Inc,
-				Data: make([]float64, t.mat.Inc*(t.mat.N-1)+1),
-			},
-		}
-		copy(m.mat.Data, t.mat.Data)
-		return m
+		var m VecDense
+		m.CloneFromVec(t)
+		return &m
 	case *basicVector:
-		m := &basicVector{
-			m: make([]float64, t.Len()),
-		}
-		copy(m.m, t.m)
-		return m
+		var m VecDense
+		m.CloneFromVec(t)
+		return asBasicVector(&m)
 	case *DiagDense, *basicDiagonal:
 		var diag *DiagDense
 		switch s := t.(type) {

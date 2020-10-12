@@ -15,8 +15,8 @@ import (
 // where A is an n×n triangular band matrix with kd super- or subdiagonals, and
 // B is an n×nrhs matrix.
 //
-// Dtbtrs returns whether A is non-singular. If A is singular, no solutions X
-// are computed.
+// Dtbtrs returns whether A is non-singular. If A is singular, no solution X is
+// computed.
 func (impl Implementation) Dtbtrs(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag, n, kd, nrhs int, a []float64, lda int, b []float64, ldb int) (ok bool) {
 	switch {
 	case uplo != blas.Upper && uplo != blas.Lower:

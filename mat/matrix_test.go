@@ -740,7 +740,7 @@ func TestMulVecToer(t *testing.T) {
 						}
 						x = dst
 					case 2:
-						x = &rawVector{(*basicVector)(NewVecDense(n, random(n)))}
+						x = &rawVector{asBasicVector(NewVecDense(n, random(n)))}
 					case 3:
 						x = asBasicVector(NewVecDense(n, random(n)))
 					default:

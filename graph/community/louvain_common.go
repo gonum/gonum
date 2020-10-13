@@ -356,6 +356,10 @@ func (s *slice) TakeMin(p *int) bool {
 const (
 	negativeWeight = "community: unexpected negative edge weight"
 	positiveWeight = "community: unexpected positive edge weight"
+
+	// Threshold for modularity change.
+	// If a modularity gain is lower than this value, we assume there is no gain.
+	modularityEpsilon = 0.0000001
 )
 
 // positiveWeightFuncFor returns a constructed weight function for the

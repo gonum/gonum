@@ -486,7 +486,7 @@ func (l *undirectedLocalMover) localMovingHeuristic(rnd func(int) int) (done boo
 		l.shuffle(rnd)
 		for _, n := range l.nodes {
 			dQ, dst, src := l.deltaQ(n)
-			if dQ <= 0 {
+			if dQ <= modularityEpsilon {
 				continue
 			}
 			l.move(dst, src)

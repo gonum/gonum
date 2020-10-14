@@ -747,7 +747,7 @@ func (l *directedMultiplexLocalMover) localMovingHeuristic(rnd func(int) int) (d
 		l.shuffle(rnd)
 		for _, n := range l.nodes {
 			dQ, dst, src := l.deltaQ(n)
-			if dQ <= 0 {
+			if dQ <= deltaQtol {
 				continue
 			}
 			l.move(dst, src)

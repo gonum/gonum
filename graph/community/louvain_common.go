@@ -357,9 +357,8 @@ const (
 	negativeWeight = "community: unexpected negative edge weight"
 	positiveWeight = "community: unexpected positive edge weight"
 
-	// Threshold for modularity change.
-	// If a modularity gain is lower than this value, we assume there is no gain.
-	modularityEpsilon = 0.0000001
+	// deltaQtol is the tolerance for progression of the local moving heuristic's improvement of Q.
+	deltaQtol = 1e-15
 )
 
 // positiveWeightFuncFor returns a constructed weight function for the

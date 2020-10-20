@@ -45,7 +45,7 @@ func TestExponentialProb(t *testing.T) {
 
 func TestExponentialFitPrior(t *testing.T) {
 	t.Parallel()
-	testConjugateUpdate(t, func() ConjugateUpdater { return &Exponential{Rate: 13.7} })
+	testConjugateUpdate(t, func() ConjugateUpdater { return &Exponential{Rate: 13.7, Src: rand.NewSource(1)} })
 }
 
 func TestExponential(t *testing.T) {

@@ -203,6 +203,11 @@ func TestDlange(t *testing.T) {
 	testlapack.DlangeTest(t, impl)
 }
 
+func TestDlangt(t *testing.T) {
+	t.Parallel()
+	testlapack.DlangtTest(t, impl)
+}
+
 func TestDlapy2(t *testing.T) {
 	t.Parallel()
 	testlapack.Dlapy2Test(t, impl)

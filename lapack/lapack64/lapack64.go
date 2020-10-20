@@ -432,6 +432,14 @@ func Lange(norm lapack.MatrixNorm, a blas64.General, work []float64) float64 {
 	return lapack64.Dlange(norm, a.Rows, a.Cols, a.Data, max(1, a.Stride), work)
 }
 
+// Langt computes the specified norm of an n×n tridiagonal matrix.
+//
+// Dlangt is not part of the lapack.Float64 interface and so calls to Langt are
+// always executed by the Gonum implementation.
+func Langt(norm lapack.MatrixNorm, a Tridiagonal) float64 {
+	return gonum.Implementation{}.Dlangt(norm, a.N, a.DL, a.D, a.DU)
+}
+
 // Lansb computes the specified norm of an n×n symmetric band matrix. If
 // norm == lapack.MaxColumnSum or norm == lapack.MaxRowSum, work must have length
 // at least n and this function will panic otherwise.

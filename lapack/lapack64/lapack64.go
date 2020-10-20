@@ -19,6 +19,14 @@ func Use(l lapack.Float64) {
 	lapack64 = l
 }
 
+// Tridiagonal represents a tridiagonal matrix using its three diagonals.
+type Tridiagonal struct {
+	N  int
+	DL []float64
+	D  []float64
+	DU []float64
+}
+
 func max(a, b int) int {
 	if a > b {
 		return a

@@ -118,7 +118,7 @@ func dlantbTest(t *testing.T, impl Dlantber, rnd *rand.Rand, norm lapack.MatrixN
 
 	if math.IsNaN(want) {
 		if !math.IsNaN(got) {
-			t.Errorf("%v: unexpected result with NaN element; got %v, want %v\n%v\n%v", name, got, want, a, aGen)
+			t.Errorf("%v: unexpected result with NaN element; got %v, want %v", name, got, want)
 		}
 		return
 	}

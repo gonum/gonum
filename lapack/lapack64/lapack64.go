@@ -420,6 +420,28 @@ func Ggsvd3(jobU, jobV, jobQ lapack.GSVDJob, a, b blas64.General, alpha, beta []
 	return lapack64.Dggsvd3(jobU, jobV, jobQ, a.Rows, a.Cols, b.Rows, a.Data, max(1, a.Stride), b.Data, max(1, b.Stride), alpha, beta, u.Data, max(1, u.Stride), v.Data, max(1, v.Stride), q.Data, max(1, q.Stride), work, lwork, iwork)
 }
 
+// Gtsv solves one of the equations
+//  A * X = B   if trans == blas.NoTrans
+//  Aᵀ * X = B  if trans == blas.Trans or blas.ConjTrans
+// where A is an n×n tridiagonal matrix. It uses Gaussian elimination with
+// partial pivoting.
+//
+// On entry, a contains the matrix A, on return it will be overwritten.
+//
+// On entry, b contains the n×nrhs right-hand side matrix B. On return, it will
+// be overwritten. If ok is true, it will be overwritten by the solution matrix X.
+//
+// Gtsv returns whether the solution X has been successfuly computed.
+//
+// Dgtsv is not part of the lapack.Float64 interface and so calls to Gtsv are
+// always executed by the Gonum implementation.
+func Gtsv(trans blas.Transpose, a Tridiagonal, b blas64.General) (ok bool) {
+	if trans != blas.NoTrans {
+		a.DL, a.DU = a.DU, a.DL
+	}
+	return gonum.Implementation{}.Dgtsv(a.N, b.Cols, a.DL, a.D, a.DU, b.Data, max(1, b.Stride))
+}
+
 // Lagtm performs one of the matrix-matrix operations
 //  C = alpha * A * B + beta * C   if trans == blas.NoTrans
 //  C = alpha * Aᵀ * B + beta * C  if trans == blas.Trans or blas.ConjTrans

@@ -183,6 +183,11 @@ func TestDlags2(t *testing.T) {
 	testlapack.Dlags2Test(t, impl)
 }
 
+func TestDlagtm(t *testing.T) {
+	t.Parallel()
+	testlapack.DlagtmTest(t, impl)
+}
+
 func TestDlahqr(t *testing.T) {
 	t.Parallel()
 	testlapack.DlahqrTest(t, impl)

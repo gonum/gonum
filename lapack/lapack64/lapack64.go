@@ -420,6 +420,18 @@ func Ggsvd3(jobU, jobV, jobQ lapack.GSVDJob, a, b blas64.General, alpha, beta []
 	return lapack64.Dggsvd3(jobU, jobV, jobQ, a.Rows, a.Cols, b.Rows, a.Data, max(1, a.Stride), b.Data, max(1, b.Stride), alpha, beta, u.Data, max(1, u.Stride), v.Data, max(1, v.Stride), q.Data, max(1, q.Stride), work, lwork, iwork)
 }
 
+// Lagtm performs one of the matrix-matrix operations
+//  C = alpha * A * B + beta * C   if trans == blas.NoTrans
+//  C = alpha * Aᵀ * B + beta * C  if trans == blas.Trans or blas.ConjTrans
+// where A is an m×m tridiagonal matrix represented by its diagonals dl, d, du,
+// B and C are m×n dense matrices, and alpha and beta are scalars.
+//
+// Dlagtm is not part of the lapack.Float64 interface and so calls to Lagtm are
+// always executed by the Gonum implementation.
+func Lagtm(trans blas.Transpose, alpha float64, a Tridiagonal, b blas64.General, beta float64, c blas64.General) {
+	gonum.Implementation{}.Dlagtm(trans, c.Rows, c.Cols, alpha, a.DL, a.D, a.DU, b.Data, max(1, b.Stride), beta, c.Data, max(1, c.Stride))
+}
+
 // Lange computes the matrix norm of the general m×n matrix A. The input norm
 // specifies the norm computed.
 //  lapack.MaxAbs: the maximum absolute value of an element.

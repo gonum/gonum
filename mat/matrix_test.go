@@ -612,6 +612,12 @@ func TestDoer(t *testing.T) {
 		NewSymBandDense(3, 1, ones(3*(1+1))),
 		NewSymBandDense(6, 1, ones(6*(1+1))),
 		NewSymBandDense(6, 2, ones(6*(2+1))),
+		NewTridiag(1, nil, ones(1), nil),
+		NewTridiag(2, ones(1), ones(2), ones(1)),
+		NewTridiag(3, ones(2), ones(3), ones(2)),
+		NewTridiag(4, ones(3), ones(4), ones(3)),
+		NewTridiag(7, ones(6), ones(7), ones(6)),
+		NewTridiag(10, ones(9), ones(10), ones(9)),
 	} {
 		r, c := m.Dims()
 
@@ -714,6 +720,12 @@ func TestMulVecToer(t *testing.T) {
 		NewSymBandDense(10, 0, random(10)),
 		NewSymBandDense(10, 1, random(20)),
 		NewSymBandDense(10, 4, random(50)),
+		NewTridiag(1, nil, random(1), nil),
+		NewTridiag(2, random(1), random(2), random(1)),
+		NewTridiag(3, random(2), random(3), random(2)),
+		NewTridiag(4, random(3), random(4), random(3)),
+		NewTridiag(7, random(6), random(7), random(6)),
+		NewTridiag(10, random(9), random(10), random(9)),
 	} {
 		// Dense copy of A used for computing the expected result.
 		var aDense Dense

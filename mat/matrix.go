@@ -244,7 +244,7 @@ func untranspose(a Matrix) (Matrix, bool) {
 func untransposeExtract(a Matrix) (Matrix, bool) {
 	ut, trans := untranspose(a)
 	switch m := ut.(type) {
-	case *DiagDense, *SymBandDense, *TriBandDense, *BandDense, *TriDense, *SymDense, *Dense, *VecDense:
+	case *DiagDense, *SymBandDense, *TriBandDense, *BandDense, *TriDense, *SymDense, *Dense, *VecDense, *Tridiag:
 		return m, trans
 	// TODO(btracey): Add here if we ever have an equivalent of RawDiagDense.
 	case RawSymBander:
@@ -291,6 +291,10 @@ func untransposeExtract(a Matrix) (Matrix, bool) {
 		var v VecDense
 		v.SetRawVector(m.RawVector())
 		return &v, trans
+	case RawTridiagonaler:
+		var d Tridiag
+		d.SetRawTridiagonal(m.RawTridiagonal())
+		return &d, trans
 	default:
 		return ut, trans
 	}

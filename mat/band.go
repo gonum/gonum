@@ -134,10 +134,10 @@ func NewBandDense(r, c, kl, ku int, data []float64) *BandDense {
 		if r == 0 || c == 0 {
 			panic(ErrZeroLength)
 		}
-		panic("mat: negative dimension")
+		panic(ErrNegativeDimension)
 	}
 	if kl+1 > r || ku+1 > c {
-		panic("mat: band out of range")
+		panic(ErrBandwidth)
 	}
 	bc := kl + ku + 1
 	if data != nil && len(data) != min(r, c+kl)*bc {

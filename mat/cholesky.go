@@ -225,6 +225,8 @@ func (c *Cholesky) LogDet() float64 {
 
 // SolveTo finds the matrix X that solves A * X = B where A is represented
 // by the Cholesky decomposition. The result is stored in-place into dst.
+// If the Cholesky decomposition is singular or near-singular a Condition error
+// is returned. See the documentation for Condition for more information.
 func (c *Cholesky) SolveTo(dst *Dense, b Matrix) error {
 	if !c.valid() {
 		panic(badCholesky)
@@ -249,6 +251,8 @@ func (c *Cholesky) SolveTo(dst *Dense, b Matrix) error {
 // SolveCholTo finds the matrix X that solves A * X = B where A and B are represented
 // by their Cholesky decompositions a and b. The result is stored in-place into
 // dst.
+// If the Cholesky decomposition is singular or near-singular a Condition error
+// is returned. See the documentation for Condition for more information.
 func (a *Cholesky) SolveCholTo(dst *Dense, b *Cholesky) error {
 	if !a.valid() || !b.valid() {
 		panic(badCholesky)
@@ -272,6 +276,8 @@ func (a *Cholesky) SolveCholTo(dst *Dense, b *Cholesky) error {
 // SolveVecTo finds the vector x that solves A * x = b where A is represented
 // by the Cholesky decomposition. The result is stored in-place into
 // dst.
+// If the Cholesky decomposition is singular or near-singular a Condition error
+// is returned. See the documentation for Condition for more information.
 func (c *Cholesky) SolveVecTo(dst *VecDense, b Vector) error {
 	if !c.valid() {
 		panic(badCholesky)
@@ -757,6 +763,8 @@ func (ch *BandCholesky) Factorize(a SymBanded) (ok bool) {
 
 // SolveTo finds the matrix X that solves A * X = B where A is represented by
 // the Cholesky decomposition. The result is stored in-place into dst.
+// If the Cholesky decomposition is singular or near-singular a Condition error
+// is returned. See the documentation for Condition for more information.
 func (ch *BandCholesky) SolveTo(dst *Dense, b Matrix) error {
 	if !ch.valid() {
 		panic(badCholesky)
@@ -778,6 +786,8 @@ func (ch *BandCholesky) SolveTo(dst *Dense, b Matrix) error {
 
 // SolveVecTo finds the vector x that solves A * x = b where A is represented by
 // the Cholesky decomposition. The result is stored in-place into dst.
+// If the Cholesky decomposition is singular or near-singular a Condition error
+// is returned. See the documentation for Condition for more information.
 func (ch *BandCholesky) SolveVecTo(dst *VecDense, b Vector) error {
 	if !ch.valid() {
 		panic(badCholesky)

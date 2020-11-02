@@ -745,15 +745,13 @@ func Min(a Matrix) float64 {
 	}
 }
 
-// Norm returns the specified (induced) norm of the matrix a. See
-// https://en.wikipedia.org/wiki/Matrix_norm for the definition of an induced norm.
+// Norm returns the specified norm of the matrix A. Valid norms are:
+//  1 - The maximum absolute column sum
+//  2 - The Frobenius norm, the square root of the sum of the squares of the elements
+//  Inf - The maximum absolute row sum
 //
-// Valid norms are:
-//    1 - The maximum absolute column sum
-//    2 - Frobenius norm, the square root of the sum of the squares of the elements.
-//  Inf - The maximum absolute row sum.
 // Norm will panic with ErrNormOrder if an illegal norm order is specified and
-// with matrix.ErrShape if the matrix has zero size.
+// with ErrShape if the matrix has zero size.
 func Norm(a Matrix, norm float64) float64 {
 	r, c := a.Dims()
 	if r == 0 || c == 0 {

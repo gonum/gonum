@@ -75,7 +75,7 @@ func (p render) Plot(c draw.Canvas, plt *plot.Plot) {
 		panic(err)
 	}
 	for i := range l.TextStyle {
-		l.TextStyle[i] = draw.TextStyle{Font: fnt, XAlign: draw.XCenter, YAlign: -0.33}
+		l.TextStyle[i] = draw.TextStyle{Font: fnt, XAlign: draw.XCenter, YAlign: -0.25}
 	}
 
 	l.Plot(c, plt)

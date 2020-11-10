@@ -111,38 +111,40 @@ func ExampleDense_DivElem() {
 }
 
 func ExampleDense_Inverse() {
-	// Initialize two matrices, a and ia.
+	// Initialize a matrix A.
 	a := mat.NewDense(2, 2, []float64{
-		4, 0,
-		0, 4,
+		2, 1,
+		6, 4,
 	})
-	var ia mat.Dense
 
-	// Take the inverse of a and place the result in ia.
-	err := ia.Inverse(a)
+	// Compute the inverse of A.
+	var aInv mat.Dense
+	err := aInv.Inverse(a)
 	if err != nil {
-		log.Fatalf("a is not invertible: %v", err)
+		log.Fatalf("A is not invertible: %v", err)
 	}
 
 	// Print the result using the formatter.
-	fa := mat.Formatted(&ia, mat.Prefix("     "), mat.Squeeze())
-	fmt.Printf("ia = %.2g\n\n", fa)
+	fa := mat.Formatted(&aInv, mat.Prefix("       "), mat.Squeeze())
+	fmt.Printf("aInv = %.2g\n\n", fa)
 
-	// Confirm that A * A^-1 = I
-	var r mat.Dense
-	r.Mul(a, &ia)
-	fr := mat.Formatted(&r, mat.Prefix("    "), mat.Squeeze())
-	fmt.Printf("r = %v\n\n", fr)
+	// Confirm that A * A^-1 = I.
+	var I mat.Dense
+	I.Mul(a, &aInv)
+	fi := mat.Formatted(&I, mat.Prefix("    "), mat.Squeeze())
+	fmt.Printf("I = %v\n\n", fi)
 
-	// The Inverse operation, however, is numerically unstable,
-	// and should typically be avoided.
-	// For example, a common need is to find x = A^-1 * b.
-	// In this case, the SolveVec method of VecDense
-	// (if b is a Vector) or Solve method of Dense (if b is a
-	// matrix) should used instead of computing the Inverse of A.
+	// The Inverse operation, however, should typically be avoided. If the
+	// goal is to solve a linear system
+	//  A * X = B,
+	// then the inverse is not needed and computing the solution as
+	// X = A^{-1} * B is slower and has worse stability properties than
+	// solving the original problem. In this case, the SolveVec method of
+	// VecDense (if B is a vector) or Solve method of Dense (if B is a
+	// matrix) should be used instead of computing the Inverse of A.
 	b := mat.NewDense(2, 2, []float64{
-		2, 0,
-		0, 2,
+		2, 3,
+		1, 2,
 	})
 	var x mat.Dense
 	err = x.Solve(a, b)
@@ -152,18 +154,18 @@ func ExampleDense_Inverse() {
 
 	// Print the result using the formatter.
 	fx := mat.Formatted(&x, mat.Prefix("    "), mat.Squeeze())
-	fmt.Printf("x = %v", fx)
+	fmt.Printf("x = %.1f", fx)
 
 	// Output:
 	//
-	// ia = ⎡0.25    -0⎤
-	//      ⎣   0  0.25⎦
+	// aInv = ⎡ 2  -0.5⎤
+	//        ⎣-3     1⎦
 	//
-	// r = ⎡1  0⎤
+	// I = ⎡1  0⎤
 	//     ⎣0  1⎦
 	//
-	// x = ⎡0.5    0⎤
-	//     ⎣  0  0.5⎦
+	// x = ⎡ 3.5   5.0⎤
+	//     ⎣-5.0  -7.0⎦
 }
 
 func ExampleDense_Mul() {

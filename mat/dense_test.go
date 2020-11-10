@@ -2079,6 +2079,60 @@ func TestDenseInverse(t *testing.T) {
 			fmt.Println(Formatted(&m))
 		}
 	}
+
+	// Randomized tests
+	const tol = 1e-16
+	rnd := rand.New(rand.NewSource(1))
+	for _, recvSameAsA := range []bool{false, true} {
+		for _, trans := range []bool{false, true} {
+			if trans && recvSameAsA {
+				// Transposed argument cannot be a receiver.
+				continue
+			}
+			for _, n := range []int{1, 2, 3, 5, 10, 50, 100} {
+				name := fmt.Sprintf("n=%d,recvSameAsA=%v,trans=%v", n, recvSameAsA, trans)
+
+				// Generate the contents of a random dense matrix.
+				data := make([]float64, n*n)
+				for i := range data {
+					data[i] = rnd.NormFloat64()
+				}
+
+				var a Matrix
+				var aInv Dense
+				if recvSameAsA {
+					aInv = *NewDense(n, n, data)
+					a = &aInv
+				} else {
+					if trans {
+						a = NewDense(n, n, data).T()
+					} else {
+						a = asBasicMatrix(NewDense(n, n, data))
+					}
+
+				}
+				var aOrig Dense
+				aOrig.CloneFrom(a)
+
+				err := aInv.Inverse(a)
+				if err != nil {
+					t.Errorf("%v: unexpected failure of Inverse, %v", name, err)
+					continue
+				}
+
+				// Compute the residual |I - A^{-1} * A| / (N * |A| * |A^{-1}).
+				var aaInv Dense
+				aaInv.Mul(&aInv, &aOrig)
+				for i := 0; i < n; i++ {
+					aaInv.Set(i, i, 1-aaInv.At(i, i))
+				}
+				resid := Norm(&aaInv, 1) / (float64(n) * Norm(&aOrig, 1) * Norm(&aInv, 1))
+				if resid > tol {
+					t.Errorf("%v: A*A^{-1} is not identity, resid=%v,want<=%v", name, resid, tol)
+				}
+			}
+		}
+	}
 }
 
 var (

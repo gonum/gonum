@@ -237,28 +237,35 @@ func (m *Dense) Inverse(a Matrix) error {
 	default:
 		m.Copy(a)
 	}
+	// Compute the norm of A.
+	work := getFloats(4*r, false) // Length must be at least 4*r for Gecon.
+	norm := lapack64.Lange(CondNorm, m.mat, work)
+	// Compute the LU factorization of A.
 	ipiv := getInts(r, false)
 	defer putInts(ipiv)
 	ok := lapack64.Getrf(m.mat, ipiv)
 	if !ok {
+		// A is exactly singular.
 		return Condition(math.Inf(1))
 	}
-	work := getFloats(4*r, false) // must be at least 4*r for cond.
+	// Compute the condition number of A using the LU factorization.
+	iwork := getInts(r, false)
+	defer putInts(iwork)
+	rcond := lapack64.Gecon(CondNorm, m.mat, norm, work, iwork)
+	// Compute A^{-1} from the LU factorization regardless of the value of rcond.
 	lapack64.Getri(m.mat, ipiv, work, -1)
-	if int(work[0]) > 4*r {
+	if int(work[0]) > len(work) {
 		l := int(work[0])
 		putFloats(work)
 		work = getFloats(l, false)
-	} else {
-		work = work[:4*r]
 	}
 	defer putFloats(work)
-	lapack64.Getri(m.mat, ipiv, work, len(work))
-	norm := lapack64.Lange(CondNorm, m.mat, work)
-	rcond := lapack64.Gecon(CondNorm, m.mat, norm, work, ipiv) // reuse ipiv
-	if rcond == 0 {
+	ok = lapack64.Getri(m.mat, ipiv, work, len(work))
+	if !ok || rcond == 0 {
+		// A is exactly singular.
 		return Condition(math.Inf(1))
 	}
+	// Check whether A is singular for computational purposes.
 	cond := 1 / rcond
 	if cond > ConditionTolerance {
 		return Condition(cond)

@@ -84,7 +84,7 @@ func copyGraph(dst encoding.Builder, src *ast.Graph) (err error) {
 		case error:
 			err = e
 		default:
-			panic(e)
+			err = fmt.Errorf(fmt.Sprintf("error decoding graph %s", e))
 		}
 	}()
 	gen := &simpleGraph{

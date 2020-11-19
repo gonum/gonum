@@ -393,6 +393,19 @@ func TestMultigraphDecoding(t *testing.T) {
 	}
 }
 
+func TestSelfReference(t *testing.T) {
+	var dst encoding.Builder = simple.NewDirectedGraph()
+
+	err := Unmarshal([]byte(selfReferentialGraph), dst)
+	if err == nil || err.Error() != "error decoding graph simple: adding self edge" {
+		t.Errorf("got unexpected error '%s'", err)
+	}
+}
+
+const selfReferentialGraph = `digraph {
+	1 -> 1
+}`
+
 const directedMultigraph = `digraph {
 	// Node definitions.
 	0;

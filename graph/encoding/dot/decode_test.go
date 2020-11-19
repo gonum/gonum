@@ -644,3 +644,60 @@ func (a *attributes) SetAttribute(attr encoding.Attribute) error {
 	*a = append(*a, attr)
 	return nil
 }
+
+const undirectedSelfLoopGraph = `graph {
+	// Node definitions.
+	0;
+	1;
+
+	// Edge definitions.
+	0 -- 0;
+	1 -- 1;
+}`
+
+const directedSelfLoopGraph = `digraph {
+	// Node definitions.
+	0;
+	1;
+
+	// Edge definitions.
+	0 -> 0;
+	1 -> 1;
+}`
+
+func TestSelfLoopSimple(t *testing.T) {
+	for _, test := range []struct {
+		dst func() encoding.Builder
+		src string
+	}{
+		{
+			dst: func() encoding.Builder { return simple.NewUndirectedGraph() },
+			src: undirectedSelfLoopGraph,
+		},
+		{
+			dst: func() encoding.Builder { return simple.NewDirectedGraph() },
+			src: directedSelfLoopGraph,
+		},
+	} {
+		dst := test.dst()
+		message, panicked := panics(func() {
+			err := Unmarshal([]byte(test.src), dst)
+			if err == nil {
+				t.Errorf("expected error for self loop addition to %T", dst)
+			}
+		})
+		if panicked {
+			t.Errorf("unexpected panic for self loop addition to %T: %s", dst, message)
+		}
+	}
+}
+
+func panics(fn func()) (message string, ok bool) {
+	defer func() {
+		r := recover()
+		message = fmt.Sprint(r)
+		ok = r != nil
+	}()
+	fn()
+	return
+}

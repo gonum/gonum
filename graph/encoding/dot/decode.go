@@ -275,6 +275,16 @@ func applyPortsToEdge(from ast.Vertex, to *ast.Edge, edge basicEdge) {
 func (gen *simpleGraph) addEdgeStmt(dst encoding.Builder, stmt *ast.EdgeStmt) {
 	fs := gen.addVertex(dst, stmt.From)
 	ts := gen.addEdge(dst, stmt.To, stmt.Attrs)
+	defer func() {
+		switch e := recover().(type) {
+		case nil:
+			// Do nothing.
+		case error:
+			panic(e)
+		default:
+			panic(fmt.Errorf("panic setting edge: %v", e))
+		}
+	}()
 	for _, f := range fs {
 		for _, t := range ts {
 			edge := dst.NewEdge(f, t)

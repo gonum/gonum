@@ -63,18 +63,18 @@ func halton(batch *mat.Dense, kind HaltonKind, q distmv.Quantiler, src rand.Sour
 	case Owen:
 		for j := 0; j < d; j++ {
 			b := nthPrime(j)
-			div := 1
+			div := int64(1)
 			b2r := 1 / float64(b)
 			for 1-b2r < 1 {
 				p := perm(b)
 				for i := 0; i < n; i++ {
-					dig := (i / div) % b
+					dig := (int64(i) / div) % int64(b)
 					pdig := float64(p[dig])
 					v := batch.At(i, j)
 					v += pdig * b2r
 					batch.Set(i, j, v)
 				}
-				div *= b
+				div *= int64(b)
 				b2r /= float64(b)
 			}
 		}

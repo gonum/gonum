@@ -448,6 +448,7 @@ func (p ShortestAlts) allTo(from, to int, seen []bool, path []graph.Node, paths 
 			path = append([]graph.Node(nil), path...)
 			first = false
 		}
+		path = path[:len(path):len(path)]
 		paths = p.allTo(from, to, append([]bool(nil), seen...), append(path, p.nodes[to]), paths)
 	}
 	return paths
@@ -718,6 +719,7 @@ func (p AllShortest) allBetween(from, to int, seen []bool, path []graph.Node, pa
 		} else {
 			to = n
 		}
+		path = path[:len(path):len(path)]
 		paths = p.allBetween(from, to, append([]bool(nil), seen...), append(path, p.nodes[n]), paths)
 	}
 	return paths

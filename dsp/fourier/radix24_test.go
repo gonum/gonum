@@ -10,6 +10,7 @@ import (
 	"math/bits"
 	"strconv"
 	"testing"
+	"unsafe"
 
 	"golang.org/x/exp/rand"
 
@@ -198,10 +199,12 @@ func TestReversePairs(t *testing.T) {
 // naiveReversePairs does a bit-pair reversal by formatting as a base-4 string,
 // reversing the digits of the formatted number and then re-parsing the value.
 func naiveReversePairs(x uint) uint {
+	bits := int(unsafe.Sizeof(uint(0)) * 8)
+
 	// Format the number as a quaternary, padded with zeros.
 	// We avoid the leftpad issue by doing it ourselves.
-	b := strconv.AppendUint(bytes.Repeat([]byte("0"), 32), uint64(x), 4)
-	b = b[len(b)-32:]
+	b := strconv.AppendUint(bytes.Repeat([]byte("0"), bits/2), uint64(x), 4)
+	b = b[len(b)-bits/2:]
 
 	// Reverse the quits.
 	for i, j := 0, len(b)-1; i < j; i, j = i+1, j-1 {

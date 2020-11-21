@@ -39,7 +39,7 @@ func BellmanFordFrom(u graph.Node, g graph.Graph) (path Shortest, ok bool) {
 
 	// The maximum number of edges in a graph is |V| * (|V|-1) which is also
 	// the worst case complexity.
-	// If the queue-loop has more iterations than the amount of maximum edges
+	// If the queue-loop has more iterations than the maximum number of edges
 	// it indicates that we have a negative cycle.
 	maxEdges := int64(len(nodes)) * int64(len(nodes)-1)
 	var loops int64
@@ -111,7 +111,7 @@ func BellmanFordAllFrom(u graph.Node, g graph.Graph) (path ShortestAlts, ok bool
 
 	// The maximum number of edges in a graph is |V| * (|V|-1) which is also
 	// the worst case complexity.
-	// If the queue-loop has more iterations than the amount of maximum edges
+	// If the queue-loop has more iterations than the maximum number of edges
 	// it indicates that we have a negative cycle.
 	maxEdges := int64(len(nodes)) * int64(len(nodes)-1)
 	var loops int64

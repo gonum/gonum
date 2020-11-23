@@ -12,6 +12,7 @@ import (
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/graphs/gen"
 	"gonum.org/v1/gonum/graph/simple"
+	"gonum.org/v1/gonum/graph/traverse"
 )
 
 var (
@@ -170,11 +171,22 @@ func BenchmarkBellmanFordFrom(b *testing.B) {
 		{"2000 full", gnpDirected_2000_full()},
 	}
 
+	type incremental struct {
+		traverse.Graph
+	}
 	for _, bm := range benchmarks {
-		b.Run(bm.name, func(b *testing.B) {
-			for i := 0; i < b.N; i++ {
-				BellmanFordFrom(bm.graph.Node(0), bm.graph)
-			}
-		})
+		for _, tg := range []struct {
+			typ string
+			g   traverse.Graph
+		}{
+			{g: bm.graph},
+			{typ: " incremental", g: incremental{bm.graph}},
+		} {
+			b.Run(bm.name+tg.typ, func(b *testing.B) {
+				for i := 0; i < b.N; i++ {
+					BellmanFordFrom(bm.graph.Node(0), tg.g)
+				}
+			})
+		}
 	}
 }

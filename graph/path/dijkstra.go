@@ -27,7 +27,7 @@ func DijkstraFrom(u graph.Node, g traverse.Graph) Shortest {
 		}
 		path = newShortestFrom(u, graph.NodesOf(h.Nodes()))
 	} else {
-		if g.From(u.ID()) == nil {
+		if g.From(u.ID()) == graph.Empty {
 			return Shortest{from: u}
 		}
 		path = newShortestFrom(u, []graph.Node{u})
@@ -100,7 +100,7 @@ func DijkstraAllFrom(u graph.Node, g traverse.Graph) ShortestAlts {
 		}
 		path = newShortestAltsFrom(u, graph.NodesOf(h.Nodes()))
 	} else {
-		if g.From(u.ID()) == nil {
+		if g.From(u.ID()) == graph.Empty {
 			return ShortestAlts{from: u}
 		}
 		path = newShortestAltsFrom(u, []graph.Node{u})

@@ -286,9 +286,9 @@ var (
 	_ WeightedLineSlicer = Empty
 )
 
-const nothing = empty(true)
+const nothing = empty(0)
 
-type empty bool
+type empty int
 
 func (empty) Next() bool                        { return false }
 func (empty) Len() int                          { return 0 }
@@ -303,3 +303,6 @@ func (empty) Line() Line                        { return nil }
 func (empty) LineSlice() []Line                 { return nil }
 func (empty) WeightedLine() WeightedLine        { return nil }
 func (empty) WeightedLineSlice() []WeightedLine { return nil }
+
+func (empty) String() string   { return "<empty>" }
+func (empty) GoString() string { return "graph.Empty" }

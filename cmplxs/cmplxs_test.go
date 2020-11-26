@@ -1108,17 +1108,19 @@ func TestSum(t *testing.T) {
 	}
 }
 
-func randomSlice(l int) []complex128 {
+func randomSlice(l int, src rand.Source) []complex128 {
+	rnd := rand.New(src)
 	s := make([]complex128, l)
 	for i := range s {
-		s[i] = complex(rand.Float64(), rand.Float64())
+		s[i] = complex(rnd.Float64(), rnd.Float64())
 	}
 	return s
 }
 
 func benchmarkAdd(b *testing.B, size int) {
-	s1 := randomSlice(size)
-	s2 := randomSlice(size)
+	src := rand.NewSource(1)
+	s1 := randomSlice(size, src)
+	s2 := randomSlice(size, src)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		Add(s1, s2)
@@ -1130,9 +1132,10 @@ func BenchmarkAddLarge(b *testing.B) { benchmarkAdd(b, Large) }
 func BenchmarkAddHuge(b *testing.B)  { benchmarkAdd(b, Huge) }
 
 func benchmarkAddTo(b *testing.B, size int) {
-	s1 := randomSlice(size)
-	s2 := randomSlice(size)
-	dst := randomSlice(size)
+	src := rand.NewSource(1)
+	s1 := randomSlice(size, src)
+	s2 := randomSlice(size, src)
+	dst := randomSlice(size, src)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		AddTo(dst, s1, s2)
@@ -1144,8 +1147,9 @@ func BenchmarkAddToLarge(b *testing.B) { benchmarkAddTo(b, Large) }
 func BenchmarkAddToHuge(b *testing.B)  { benchmarkAddTo(b, Huge) }
 
 func benchmarkCumProd(b *testing.B, size int) {
-	s := randomSlice(size)
-	dst := randomSlice(size)
+	src := rand.NewSource(1)
+	s := randomSlice(size, src)
+	dst := randomSlice(size, src)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		CumProd(dst, s)
@@ -1157,8 +1161,9 @@ func BenchmarkCumProdLarge(b *testing.B) { benchmarkCumProd(b, Large) }
 func BenchmarkCumProdHuge(b *testing.B)  { benchmarkCumProd(b, Huge) }
 
 func benchmarkCumSum(b *testing.B, size int) {
-	s := randomSlice(size)
-	dst := randomSlice(size)
+	src := rand.NewSource(1)
+	s := randomSlice(size, src)
+	dst := randomSlice(size, src)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		CumSum(dst, s)
@@ -1170,8 +1175,9 @@ func BenchmarkCumSumLarge(b *testing.B) { benchmarkCumSum(b, Large) }
 func BenchmarkCumSumHuge(b *testing.B)  { benchmarkCumSum(b, Huge) }
 
 func benchmarkDiv(b *testing.B, size int) {
-	s := randomSlice(size)
-	dst := randomSlice(size)
+	src := rand.NewSource(1)
+	s := randomSlice(size, src)
+	dst := randomSlice(size, src)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		Div(dst, s)
@@ -1183,9 +1189,10 @@ func BenchmarkDivLarge(b *testing.B) { benchmarkDiv(b, Large) }
 func BenchmarkDivHuge(b *testing.B)  { benchmarkDiv(b, Huge) }
 
 func benchmarkDivTo(b *testing.B, size int) {
-	s1 := randomSlice(size)
-	s2 := randomSlice(size)
-	dst := randomSlice(size)
+	src := rand.NewSource(1)
+	s1 := randomSlice(size, src)
+	s2 := randomSlice(size, src)
+	dst := randomSlice(size, src)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		DivTo(dst, s1, s2)
@@ -1197,8 +1204,9 @@ func BenchmarkDivToLarge(b *testing.B) { benchmarkDivTo(b, Large) }
 func BenchmarkDivToHuge(b *testing.B)  { benchmarkDivTo(b, Huge) }
 
 func benchmarkSub(b *testing.B, size int) {
-	s1 := randomSlice(size)
-	s2 := randomSlice(size)
+	src := rand.NewSource(1)
+	s1 := randomSlice(size, src)
+	s2 := randomSlice(size, src)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		Sub(s1, s2)
@@ -1210,9 +1218,10 @@ func BenchmarkSubLarge(b *testing.B) { benchmarkSub(b, Large) }
 func BenchmarkSubHuge(b *testing.B)  { benchmarkSub(b, Huge) }
 
 func benchmarkSubTo(b *testing.B, size int) {
-	s1 := randomSlice(size)
-	s2 := randomSlice(size)
-	dst := randomSlice(size)
+	src := rand.NewSource(1)
+	s1 := randomSlice(size, src)
+	s2 := randomSlice(size, src)
+	dst := randomSlice(size, src)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		SubTo(dst, s1, s2)
@@ -1224,8 +1233,9 @@ func BenchmarkSubToLarge(b *testing.B) { benchmarkSubTo(b, Large) }
 func BenchmarkSubToHuge(b *testing.B)  { benchmarkSubTo(b, Huge) }
 
 func benchmarkDot(b *testing.B, size int) {
-	s1 := randomSlice(size)
-	s2 := randomSlice(size)
+	src := rand.NewSource(1)
+	s1 := randomSlice(size, src)
+	s2 := randomSlice(size, src)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		Dot(s1, s2)
@@ -1237,9 +1247,10 @@ func BenchmarkDotLarge(b *testing.B) { benchmarkDot(b, Large) }
 func BenchmarkDotHuge(b *testing.B)  { benchmarkDot(b, Huge) }
 
 func benchmarkAddScaledTo(b *testing.B, size int) {
-	dst := randomSlice(size)
-	y := randomSlice(size)
-	s := randomSlice(size)
+	src := rand.NewSource(1)
+	dst := randomSlice(size, src)
+	y := randomSlice(size, src)
+	s := randomSlice(size, src)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		AddScaledTo(dst, y, 2.3, s)
@@ -1251,7 +1262,8 @@ func BenchmarkAddScaledToLarge(b *testing.B)  { benchmarkAddScaledTo(b, Large) }
 func BenchmarkAddScaledToHuge(b *testing.B)   { benchmarkAddScaledTo(b, Huge) }
 
 func benchmarkScale(b *testing.B, size int) {
-	dst := randomSlice(size)
+	src := rand.NewSource(1)
+	dst := randomSlice(size, src)
 	b.ResetTimer()
 	for i := 0; i < b.N; i += 2 {
 		Scale(2.0, dst)
@@ -1264,7 +1276,8 @@ func BenchmarkScaleLarge(b *testing.B)  { benchmarkScale(b, Large) }
 func BenchmarkScaleHuge(b *testing.B)   { benchmarkScale(b, Huge) }
 
 func benchmarkNorm2(b *testing.B, size int) {
-	s := randomSlice(size)
+	src := rand.NewSource(1)
+	s := randomSlice(size, src)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		Norm(s, 2)

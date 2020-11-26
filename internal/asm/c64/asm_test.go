@@ -7,8 +7,6 @@ package c64_test
 import (
 	"testing"
 
-	"golang.org/x/exp/rand"
-
 	"gonum.org/v1/gonum/cmplxs/cscalar"
 	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/internal/cmplx64"
@@ -109,14 +107,3 @@ func sameCmplxApprox(a, b complex64, tol float32) bool {
 var ( // Offset sets for testing alignment handling in Unitary assembly functions.
 	align1 = []int{0, 1}
 )
-
-func randomSlice(n, inc int) []complex64 {
-	if inc < 0 {
-		inc = -inc
-	}
-	x := make([]complex64, (n-1)*inc+1)
-	for i := range x {
-		x[i] = complex(float32(rand.Float64()), float32(rand.Float64()))
-	}
-	return x
-}

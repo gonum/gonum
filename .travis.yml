@@ -81,11 +81,6 @@ matrix:
 before_install:
  - ${TRAVIS_BUILD_DIR}/.travis/run-parts ${TRAVIS_BUILD_DIR}/.travis/deps.d/${TRAVIS_OS_NAME}
 
-addons:
-  apt:
-    packages:
-     - graphviz
-
 go_import_path: gonum.org/v1/gonum
 
 # Get deps, build, test, and ensure the code is gofmt'ed.

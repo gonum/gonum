@@ -27,6 +27,7 @@ env:
   - TAGS="-tags bounds"
   - TAGS="-tags noasm"
   - TAGS="-tags appengine"
+  - FORCE_GOARCH=386
 
 cache:
  directories:
@@ -49,6 +50,9 @@ matrix:
   - os: linux
     arch: arm64
     env: TAGS="-tags appengine"
+  - os: linux
+    arch: arm64
+    env: FORCE_GOARCH=386
 
   - os: osx
     env: TAGS="-tags bounds"
@@ -56,6 +60,8 @@ matrix:
     env: TAGS="-tags noasm"
   - os: osx
     env: TAGS="-tags appengine"
+  - os: osx
+    env: FORCE_GOARCH=386
 
   - os: osx
     arch: arm64
@@ -69,6 +75,8 @@ matrix:
     env: TAGS="-tags noasm"
   - os: windows
     env: TAGS="-tags appengine"
+  - os: windows
+    env: FORCE_GOARCH=386
 
   - os: windows
     arch: arm64

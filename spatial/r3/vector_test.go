@@ -236,6 +236,34 @@ func TestCos(t *testing.T) {
 	}
 }
 
+func TestRotate(t *testing.T) {
+	const tol = 1e-14
+	for _, test := range []struct {
+		v, axis Vec
+		alpha   float64
+		want    Vec
+	}{
+		{Vec{1, 0, 0}, Vec{1, 0, 0}, math.Pi / 2, Vec{1, 0, 0}},
+		{Vec{1, 0, 0}, Vec{1, 0, 0}, 0, Vec{1, 0, 0}},
+		{Vec{1, 0, 0}, Vec{1, 0, 0}, 2 * math.Pi, Vec{1, 0, 0}},
+		{Vec{1, 0, 0}, Vec{0, 0, 0}, math.Pi / 2, Vec{1, 0, 0}},
+		{Vec{1, 0, 0}, Vec{0, 1, 0}, math.Pi / 2, Vec{0, 0, -1}},
+		{Vec{1, 0, 0}, Vec{0, 1, 0}, math.Pi, Vec{-1, 0, 0}},
+		{Vec{2, 0, 0}, Vec{0, 1, 0}, math.Pi, Vec{-2, 0, 0}},
+		{Vec{1, 2, 3}, Vec{1, 1, 1}, 2. / 3. * math.Pi, Vec{3, 1, 2}},
+	} {
+		t.Run("", func(t *testing.T) {
+			got := test.v.Rotate(test.alpha, test.axis)
+			if !vecApproxEqual(got, test.want, tol) {
+				t.Fatalf(
+					"rotate(%v, %v, %v)= %v, want=%v",
+					test.v, test.alpha, test.axis, got, test.want,
+				)
+			}
+		})
+	}
+}
+
 func vecIsNaN(v Vec) bool {
 	return math.IsNaN(v.X) && math.IsNaN(v.Y) && math.IsNaN(v.Z)
 }
@@ -249,4 +277,13 @@ func vecEqual(a, b Vec) bool {
 		return vecIsNaN(a) && vecIsNaN(b)
 	}
 	return a == b
+}
+
+func vecApproxEqual(a, b Vec, tol float64) bool {
+	if vecIsNaNAny(a) || vecIsNaNAny(b) {
+		return vecIsNaN(a) && vecIsNaN(b)
+	}
+	return scalar.EqualWithinAbs(a.X, b.X, tol) &&
+		scalar.EqualWithinAbs(a.Y, b.Y, tol) &&
+		scalar.EqualWithinAbs(a.Z, b.Z, tol)
 }

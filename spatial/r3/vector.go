@@ -4,7 +4,11 @@
 
 package r3
 
-import "math"
+import (
+	"math"
+
+	"gonum.org/v1/gonum/num/quat"
+)
 
 // Vec is a 3D vector.
 type Vec struct {
@@ -47,6 +51,29 @@ func (p Vec) Cross(q Vec) Vec {
 		p.Z*q.X - p.X*q.Z,
 		p.X*q.Y - p.Y*q.X,
 	}
+}
+
+// Rotate returns a new vector, rotated by alpha around the provided axis.
+func (p Vec) Rotate(alpha float64, axis Vec) Vec {
+	if alpha == 0 || (axis == Vec{}) {
+		return p
+	}
+	alpha *= 0.5
+	var (
+		q        = raise(axis)
+		sin, cos = math.Sincos(alpha)
+	)
+	q = quat.Scale(sin/quat.Abs(q), q)
+	q.Real += cos
+	if len := quat.Abs(q); len != 1 {
+		q = quat.Scale(1/len, q)
+	}
+	pp := quat.Mul(quat.Mul(q, raise(p)), quat.Conj(q))
+	return Vec{X: pp.Imag, Y: pp.Jmag, Z: pp.Kmag}
+}
+
+func raise(p Vec) quat.Number {
+	return quat.Number{Imag: p.X, Jmag: p.Y, Kmag: p.Z}
 }
 
 // Norm returns the Euclidean norm of p

@@ -10,6 +10,12 @@ import (
 	"gonum.org/v1/gonum/num/quat"
 )
 
+// TODO:
+//  - create rotations from Euler angles (NewRotationFromEuler?)
+//  - create rotations from rotation matrices (NewRotationFromMatrix?)
+//  - return the equivalent Euler angles from a Rotation
+//  - return the equivalent rotation matrix from a Rotation
+
 // Rotation describes a rotation in space.
 type Rotation struct {
 	q quat.Number

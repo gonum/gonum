@@ -240,6 +240,31 @@ func TestCos(t *testing.T) {
 	}
 }
 
+func TestRotate(t *testing.T) {
+	for _, test := range []struct {
+		v, q  Vec
+		alpha float64
+		want  Vec
+	}{
+		{Vec{1, 0}, Vec{0, 0}, math.Pi / 2, Vec{0, 1}},
+		{Vec{1, 0}, Vec{0, 0}, 3 * math.Pi / 2, Vec{0, -1}},
+		{Vec{1, 0}, Vec{0, 1}, 0, Vec{1, 0}},
+		{Vec{1, 0}, Vec{0, 1}, 2 * math.Pi, Vec{1, 0}},
+		{Vec{1, 1}, Vec{0, 0}, math.Pi, Vec{-1, -1}},
+		{Vec{2, 2}, Vec{1, 1}, math.Pi / 2, Vec{0, 2}},
+		{Vec{2, 2}, Vec{1, 1}, math.Pi, Vec{0, 0}},
+		{Vec{2, 2}, Vec{2, 0}, math.Pi, Vec{2, -2}},
+	} {
+		got := test.v.Rotate(test.alpha, test.q)
+		if !vecApproxEqual(got, test.want) {
+			t.Errorf(
+				"rotate(%v, %v, %v)= %v, want=%v",
+				test.v, test.alpha, test.q, got, test.want,
+			)
+		}
+	}
+}
+
 func vecIsNaN(v Vec) bool {
 	return math.IsNaN(v.X) && math.IsNaN(v.Y)
 }

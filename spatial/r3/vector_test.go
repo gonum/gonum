@@ -246,7 +246,7 @@ func TestRotate(t *testing.T) {
 		{Vec{1, 0, 0}, Vec{1, 0, 0}, math.Pi / 2, Vec{1, 0, 0}},
 		{Vec{1, 0, 0}, Vec{1, 0, 0}, 0, Vec{1, 0, 0}},
 		{Vec{1, 0, 0}, Vec{1, 0, 0}, 2 * math.Pi, Vec{1, 0, 0}},
-		{Vec{1, 0, 0}, Vec{0, 0, 0}, math.Pi / 2, Vec{1, 0, 0}},
+		{Vec{1, 0, 0}, Vec{0, 0, 0}, math.Pi / 2, Vec{math.NaN(), math.NaN(), math.NaN()}},
 		{Vec{1, 0, 0}, Vec{0, 1, 0}, math.Pi / 2, Vec{0, 0, -1}},
 		{Vec{1, 0, 0}, Vec{0, 1, 0}, math.Pi, Vec{-1, 0, 0}},
 		{Vec{2, 0, 0}, Vec{0, 1, 0}, math.Pi, Vec{-2, 0, 0}},

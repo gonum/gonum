@@ -393,6 +393,77 @@ func TestMultigraphDecoding(t *testing.T) {
 	}
 }
 
+func TestMultigraphLineIDsharing(t *testing.T) {
+	for i, test := range []struct {
+		directed bool
+		lines    []multi.Line
+		expected string
+	}{
+		{
+			directed: true,
+			lines: []multi.Line{
+				{F: multi.Node(0), T: multi.Node(1), UID: 0},
+				{F: multi.Node(0), T: multi.Node(1), UID: 1},
+				{F: multi.Node(0), T: multi.Node(2), UID: 0},
+				{F: multi.Node(2), T: multi.Node(0), UID: 0},
+			},
+			expected: directedMultigraph,
+		},
+		{
+			directed: false,
+			lines: []multi.Line{
+				{F: multi.Node(0), T: multi.Node(1), UID: 0},
+				{F: multi.Node(0), T: multi.Node(1), UID: 1},
+				{F: multi.Node(0), T: multi.Node(2), UID: 0},
+				{F: multi.Node(0), T: multi.Node(2), UID: 1},
+			},
+			expected: undirectedMultigraph,
+		},
+		{
+			directed: true,
+			lines: []multi.Line{
+				{F: multi.Node(0), T: multi.Node(0), UID: 0},
+				{F: multi.Node(0), T: multi.Node(0), UID: 1},
+				{F: multi.Node(1), T: multi.Node(1), UID: 0},
+				{F: multi.Node(1), T: multi.Node(1), UID: 1},
+			},
+			expected: directedSelfLoopMultigraph,
+		},
+		{
+			directed: false,
+			lines: []multi.Line{
+				{F: multi.Node(0), T: multi.Node(0), UID: 0},
+				{F: multi.Node(0), T: multi.Node(0), UID: 1},
+				{F: multi.Node(1), T: multi.Node(1), UID: 0},
+				{F: multi.Node(1), T: multi.Node(1), UID: 1},
+			},
+			expected: undirectedSelfLoopMultigraph,
+		},
+	} {
+		var dst encoding.MultiBuilder
+		if test.directed {
+			dst = multi.NewDirectedGraph()
+		} else {
+			dst = multi.NewUndirectedGraph()
+		}
+
+		for _, l := range test.lines {
+			dst.SetLine(l)
+		}
+
+		buf, err := MarshalMulti(dst, "", "", "\t")
+		if err != nil {
+			t.Errorf("i=%d: unable to marshal graph; %v", i, dst)
+			continue
+		}
+		actual := string(buf)
+		if actual != test.expected {
+			t.Errorf("i=%d: graph content mismatch; want:\n%s\n\nactual:\n%s", i, test.expected, actual)
+			continue
+		}
+	}
+}
+
 const directedMultigraph = `digraph {
 	// Node definitions.
 	0;

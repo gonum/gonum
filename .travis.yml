@@ -1,5 +1,7 @@
 sudo: false
 
+dist: bionic
+
 language: go
 
 # Do not move these lines; they are referred to by README.md.
@@ -88,6 +90,11 @@ matrix:
 
 before_install:
  - ${TRAVIS_BUILD_DIR}/.travis/run-parts ${TRAVIS_BUILD_DIR}/.travis/deps.d/${TRAVIS_OS_NAME}
+
+addons:
+  apt:
+    packages:
+     - ragel
 
 go_import_path: gonum.org/v1/gonum
 

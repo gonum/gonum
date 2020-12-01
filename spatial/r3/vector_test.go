@@ -252,15 +252,13 @@ func TestRotate(t *testing.T) {
 		{Vec{2, 0, 0}, Vec{0, 1, 0}, math.Pi, Vec{-2, 0, 0}},
 		{Vec{1, 2, 3}, Vec{1, 1, 1}, 2. / 3. * math.Pi, Vec{3, 1, 2}},
 	} {
-		t.Run("", func(t *testing.T) {
-			got := test.v.Rotate(test.alpha, test.axis)
-			if !vecApproxEqual(got, test.want, tol) {
-				t.Fatalf(
-					"rotate(%v, %v, %v)= %v, want=%v",
-					test.v, test.alpha, test.axis, got, test.want,
-				)
-			}
-		})
+		got := test.v.Rotate(test.alpha, test.axis)
+		if !vecApproxEqual(got, test.want, tol) {
+			t.Errorf(
+				"rotate(%v, %v, %v)= %v, want=%v",
+				test.v, test.alpha, test.axis, got, test.want,
+			)
+		}
 	}
 }
 

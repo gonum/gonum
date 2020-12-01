@@ -58,10 +58,6 @@ func (p Vec) Rotate(alpha float64, axis Vec) Vec {
 	return NewRotation(alpha, axis).Rotate(p)
 }
 
-func raise(p Vec) quat.Number {
-	return quat.Number{Imag: p.X, Jmag: p.Y, Kmag: p.Z}
-}
-
 // Norm returns the Euclidean norm of p
 //  |p| = sqrt(p_x^2 + p_y^2 + p_z^2).
 func Norm(p Vec) float64 {
@@ -93,11 +89,15 @@ type Box struct {
 	Min, Max Vec
 }
 
-// TODO:
+// TODO: possibly useful additions to the current rotation API:
 //  - create rotations from Euler angles (NewRotationFromEuler?)
 //  - create rotations from rotation matrices (NewRotationFromMatrix?)
 //  - return the equivalent Euler angles from a Rotation
 //  - return the equivalent rotation matrix from a Rotation
+//
+// Euler angles have issues (see [1] for a discussion).
+// We should think carefully before adding them in.
+// [1]: http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/
 
 // Rotation describes a rotation in space.
 type Rotation quat.Number
@@ -105,9 +105,7 @@ type Rotation quat.Number
 // NewRotation creates a rotation by alpha, around axis.
 func NewRotation(alpha float64, axis Vec) Rotation {
 	if alpha == 0 {
-		return Rotation(quat.Number{
-			Real: 1, Imag: 1, Jmag: 1, Kmag: 1,
-		})
+		return Rotation{Real: 1}
 	}
 	q := raise(axis)
 	sin, cos := math.Sincos(0.5 * alpha)
@@ -131,7 +129,9 @@ func (r Rotation) Rotate(p Vec) Vec {
 }
 
 func (r Rotation) isIdentity() bool {
-	return quat.Number(r) == quat.Number{
-		Real: 1, Imag: 1, Jmag: 1, Kmag: 1,
-	}
+	return r == Rotation{Real: 1}
+}
+
+func raise(p Vec) quat.Number {
+	return quat.Number{Imag: p.X, Jmag: p.Y, Kmag: p.Z}
 }

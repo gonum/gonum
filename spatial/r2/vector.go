@@ -42,7 +42,7 @@ func (p Vec) Cross(q Vec) float64 {
 	return p.X*q.Y - p.Y*q.X
 }
 
-// Rotate returns a new vector, rotated by alpha around the provided vector.
+// Rotate returns a new vector, rotated by alpha around the provided point, q.
 func (p Vec) Rotate(alpha float64, q Vec) Vec {
 	return NewRotation(alpha, q).Rotate(p)
 }

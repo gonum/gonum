@@ -42,6 +42,11 @@ func (p Vec) Cross(q Vec) float64 {
 	return p.X*q.Y - p.Y*q.X
 }
 
+// Rotate returns a new vector, rotated by alpha around the provided point, q.
+func (p Vec) Rotate(alpha float64, q Vec) Vec {
+	return NewRotation(alpha, q).Rotate(p)
+}
+
 // Norm returns the Euclidean norm of p
 //  |p| = sqrt(p_x^2 + p_y^2).
 func Norm(p Vec) float64 {
@@ -71,4 +76,35 @@ func Cos(p, q Vec) float64 {
 // Box is a 2D bounding box.
 type Box struct {
 	Min, Max Vec
+}
+
+// Rotation describes a rotation in 2D.
+type Rotation struct {
+	sin, cos float64
+	p        Vec
+}
+
+// NewRotation creates a rotation by alpha, around p.
+func NewRotation(alpha float64, p Vec) Rotation {
+	if alpha == 0 {
+		return Rotation{sin: 0, cos: 1, p: p}
+	}
+	sin, cos := math.Sincos(alpha)
+	return Rotation{sin: sin, cos: cos, p: p}
+}
+
+// Rotate returns the rotated vector according to the definition of rot.
+func (r Rotation) Rotate(p Vec) Vec {
+	if r.isIdentity() {
+		return p
+	}
+	o := p.Sub(r.p)
+	return Vec{
+		X: (o.X*r.cos - o.Y*r.sin),
+		Y: (o.X*r.sin + o.Y*r.cos),
+	}.Add(r.p)
+}
+
+func (r Rotation) isIdentity() bool {
+	return r.sin == 0 && r.cos == 1
 }

@@ -10,30 +10,26 @@ import (
 
 func TestDisjointSetMakeSet(t *testing.T) {
 	t.Parallel()
-	ds := newDisjointSet()
-	if ds.master == nil {
-		t.Fatal("Internal disjoint set map erroneously nil")
-	} else if len(ds.master) != 0 {
+
+	ds := make(djSet)
+	ds.add(3)
+	if len(ds) != 1 {
 		t.Error("Disjoint set master map of wrong size")
 	}
 
-	ds.makeSet(3)
-	if len(ds.master) != 1 {
-		t.Error("Disjoint set master map of wrong size")
-	}
-
-	if node, ok := ds.master[3]; !ok {
+	node, ok := ds[3]
+	if !ok {
 		t.Error("Make set did not successfully add element")
 	} else {
 		if node == nil {
-			t.Fatal("Disjoint set node from makeSet is nil")
+			t.Fatal("Disjoint set node from add is nil")
 		}
 
 		if node.rank != 0 {
 			t.Error("Node rank set incorrectly")
 		}
 
-		if node.parent != node {
+		if node.parent != nil {
 			t.Error("Node parent set incorrectly")
 		}
 	}
@@ -41,10 +37,12 @@ func TestDisjointSetMakeSet(t *testing.T) {
 
 func TestDisjointSetFind(t *testing.T) {
 	t.Parallel()
-	ds := newDisjointSet()
 
-	ds.makeSet(3)
-	ds.makeSet(5)
+	ds := make(djSet)
+	ds.add(3)
+	ds.add(4)
+	ds.add(5)
+	ds.union(ds.find(3), ds.find(4))
 
 	if ds.find(3) == ds.find(5) {
 		t.Error("Disjoint sets incorrectly found to be the same")
@@ -53,12 +51,13 @@ func TestDisjointSetFind(t *testing.T) {
 
 func TestUnion(t *testing.T) {
 	t.Parallel()
-	ds := newDisjointSet()
 
-	ds.makeSet(3)
-	ds.makeSet(5)
-
-	ds.union(ds.find(3), ds.find(5))
+	ds := make(djSet)
+	ds.add(3)
+	ds.add(4)
+	ds.add(5)
+	ds.union(ds.find(3), ds.find(4))
+	ds.union(ds.find(4), ds.find(5))
 
 	if ds.find(3) != ds.find(5) {
 		t.Error("Sets found to be disjoint after union")

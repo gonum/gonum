@@ -165,10 +165,12 @@ func Kruskal(dst WeightedBuilder, g UndirectedWeightLister) float64 {
 	edges := graph.WeightedEdgesOf(g.WeightedEdges())
 	sort.Sort(byWeight(edges))
 
-	ds := newDisjointSet()
-	for _, node := range graph.NodesOf(g.Nodes()) {
-		dst.AddNode(node)
-		ds.makeSet(node.ID())
+	ds := make(djSet)
+	it := g.Nodes()
+	for it.Next() {
+		n := it.Node()
+		dst.AddNode(n)
+		ds.add(n.ID())
 	}
 
 	var w float64

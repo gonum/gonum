@@ -4,10 +4,10 @@
 
 package path
 
-// djSet implement a disjoint set finder using the union-find algorithm.
+// djSet implements a disjoint set finder using the union-find algorithm.
 type djSet map[int64]*dsNode
 
-// add adds e to the collections of sets held by the disjoint set.
+// add adds e to the collection of sets held by the disjoint set.
 func (s djSet) add(e int64) {
 	if _, ok := s[e]; ok {
 		return
@@ -28,7 +28,7 @@ func (djSet) union(a, b *dsNode) {
 		return
 	}
 	rb.parent = ra
-	if rb.rank == ra.rank {
+	if ra.rank == rb.rank {
 		ra.rank++
 	}
 }

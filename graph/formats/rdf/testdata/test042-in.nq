@@ -1,0 +1,4 @@
+_:b0 <http://example.org/vocab#p1> _:b1 .
+_:b1 <http://example.org/vocab#p1> _:b2 .
+_:b3 <http://example.org/vocab#p1> _:b4 .
+_:b4 <http://example.org/vocab#p1> _:b5 .

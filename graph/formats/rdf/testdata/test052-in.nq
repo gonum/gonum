@@ -1,0 +1,4 @@
+<http://example.org/test#example1> <http://example.org/test#property1> <http://example.org/test#example2> .
+<http://example.org/test#example1> <http://example.org/test#property2> <http://example.org/test#example3> .
+<http://example.org/test#example1> <http://example.org/test#property3> <http://example.org/test#example4> .
+<http://example.org/test#example2> <http://example.org/test#property4> "foo" .

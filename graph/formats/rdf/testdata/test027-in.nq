@@ -1,0 +1,6 @@
+_:b0 <http://example.org/vocab#next> _:b1 .
+_:b0 <http://example.org/vocab#prev> _:b2 .
+_:b1 <http://example.org/vocab#next> _:b2 .
+_:b1 <http://example.org/vocab#prev> _:b0 .
+_:b2 <http://example.org/vocab#next> _:b0 .
+_:b2 <http://example.org/vocab#prev> _:b1 .

@@ -1,0 +1,1 @@
+<http://example.org/test#example> <http://example.org/vocab#date> "2011-01-25T00:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .

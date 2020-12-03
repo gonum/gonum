@@ -1,0 +1,5 @@
+<ex:p> <ex:q> _:a .
+<ex:p> <ex:q> _:b .
+<ex:s> <ex:p> _:a .
+<ex:s> <ex:r> _:c .
+_:c <ex:p> _:b .

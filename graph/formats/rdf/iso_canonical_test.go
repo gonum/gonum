@@ -24,7 +24,7 @@ import (
 
 var (
 	origSeed = flag.Int64("seed", 1, "specify random seed to use for each test (negative for Unix time)")
-	tests    = flag.String("test", "*.n[qt]", "specify test case in testdata")
+	tests    = flag.String("test", "*-in.n[qt]", "specify test case in testdata")
 )
 
 func TestIsoCanonicalHashes(t *testing.T) {

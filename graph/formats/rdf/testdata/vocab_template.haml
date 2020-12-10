@@ -1,0 +1,88 @@
+!!! 5
+%html{lang: :en, prefix: "rdfn: http://json-ld.github.io/normalization/tests/vocab# mf: http://www.w3.org/2001/sw/DataAccess/tests/test-manifest# rdft: http://www.w3.org/ns/rdftest#"}
+  %head
+    %meta{"http-equiv" => "Content-Type", content: "text/html;charset=utf-8"}
+    %meta{name: "viewport", content: "width=device-width, initial-scale=1.0"}
+    %link{rel: "stylesheet", type: "text/css", href: "https://www.w3.org/StyleSheets/TR/base"}
+    :css
+      body: {bacground-image: none;}
+      dt {margin-top: 2em;}
+      dd code {display: inline;}
+      footer {text-align: center;}
+    %title
+      = ontology['dc:title']
+  %body{resource: ontology['@id'], typeof: "owl:Ontology"}
+    %meta{property: "dc:creator", value: ontology["dc:creator"]}
+    %link{property: "dc:identifier", href: ontology["@id"]}
+    %p
+      %a{href: "http://www.w3.org/"}
+        %img{src: "http://www.w3.org/Icons/w3c_home", alt: "W3C", height: 48, width: 72}
+    %h1{property: "dc:title rdfs:label"}<= ontology["dc:title"]
+    %span{property: "dc:description rdfs:comment"}
+      :markdown
+        #{ontology["dc:description"].gsub(/^\s+/, '')}
+
+        This vocabulary extends the [RDF Test Vocabulary](http://www.w3.org/ns/rdftest#)
+        and [Test Manifest Vocabulary](http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#) with Normalization-specific tests.
+        The URI of the vocabulary is `http://json-ld.github.io/normalization/tests/vocab#`
+        (abbreviated by `rdfn` in this document).
+        [Turtle](vocab.ttl) and [JSON-LD](vocab.jsonld) versions of the vocabular are also available.
+        The vocabulary is published by the [W3C Credentials Community Group](https://www.w3.org/community/credentials/).
+    %section
+      %h2="Vocabulary Terms"
+      %p="The vocabulary terms below constitute the complete RDF Dataset Normalization Test vocabulary"
+      %section
+        %h3#classes="Classes"
+        %dl
+          - classes.sort_by {|c| c['@id']}.each do |cls|
+            %dt{about: cls['@id'], typeof: cls['@type'], property: "rdfs:label"}<~cls["@id"]
+            %dd{about: cls['@id']}
+              %em{property: "rdfs:label"}<~cls["rdfs:label"]
+              %span{property: "rdfs:comment"}<
+                :markdown
+                  #{cls["rdfs:comment"].to_s.gsub(/^\s+/, '')}
+              - if cls["rdfs:subClassOf"]
+                %div
+                  %strong
+                    subClassOf:
+                  - if cls["rdfs:subClassOf"].is_a?(Array)
+                    %ul
+                      - cls["rdfs:subClassOf"].each do |e|
+                        %li
+                          %code{property: "rdfs:subClassOf", resource: e}=e
+                  - else
+                    %code{property: "rdfs:subClassOf", resource: cls["rdfs:subClassOf"]}=cls["rdfs:subClassOf"]
+      %section
+        %h3#properties="Properties"
+        %dl
+          - properties.sort_by {|c| c['@id']}.each do |prop|
+            %dt{about: prop['@id'], typeof: prop['@type'], property: "rdfs:label"}<~prop["@id"]
+            %dd{about: prop['@id']}
+              %em{property: "rdfs:label"}<~prop["rdfs:label"]
+              %span{property: "rdfs:comment"}<
+                :markdown
+                  #{prop["rdfs:comment"].to_s.gsub(/^\s+/, '')}
+              - if prop["rdfs:domain"]
+                %div
+                  %strong
+                    domain:
+                  - if prop["rdfs:domain"].is_a?(Array)
+                    %ul
+                      - prop["rdfs:domain"].each do |e|
+                        %li
+                          %code{property: "rdfs:domain", resource: e}=e
+                  - else
+                    %code{property: "rdfs:domain", resource: prop["rdfs:domain"]}=prop["rdfs:domain"]
+              - if prop["rdfs:range"]
+                %div
+                  %strong
+                    range:
+                  - if prop["rdfs:range"].is_a?(Array)
+                    %ul
+                      - prop["rdfs:range"].each do |e|
+                        %li
+                          %code{property: "rdfs:range", resource: e}=e
+                  - else
+                    %code{property: "rdfs:range", resource: prop["rdfs:range"]}=prop["rdfs:range"]
+    %footer
+      %span{property: "dc:publisher"}<= ontology["dc:publisher"]

@@ -1,0 +1,6 @@
+_:c14n0 <http://example.org/vocab#next> _:c14n1 .
+_:c14n0 <http://example.org/vocab#prev> _:c14n2 .
+_:c14n1 <http://example.org/vocab#next> _:c14n2 .
+_:c14n1 <http://example.org/vocab#prev> _:c14n0 .
+_:c14n2 <http://example.org/vocab#next> _:c14n0 .
+_:c14n2 <http://example.org/vocab#prev> _:c14n1 .

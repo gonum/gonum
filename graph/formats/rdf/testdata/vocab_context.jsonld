@@ -1,0 +1,16 @@
+{
+  "@context": {
+    "dc": "http://purl.org/dc/elements/1.1/",
+    "mf": "http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfn": "http://json-ld.github.io/normalization/tests/vocab#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "rdft": "http://www.w3.org/ns/rdftest#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+
+    "dc:identifier": {"@type": "@id"},
+    "rdfs:subClassOf": {"@type": "@id"},
+    "rdfs:domain": {"@type": "@id"},
+    "rdfs:range": {"@type": "@id"}
+  }
+}

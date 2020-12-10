@@ -1,0 +1,59 @@
+{
+  "@context": {
+    "dc": "http://purl.org/dc/elements/1.1/",
+    "mf": "http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfn": "http://json-ld.github.io/normalization/tests/vocab#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "rdft": "http://www.w3.org/ns/rdftest#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "dc:identifier": {
+      "@type": "@id"
+    },
+    "rdfs:subClassOf": {
+      "@type": "@id"
+    },
+    "rdfs:domain": {
+      "@type": "@id"
+    },
+    "rdfs:range": {
+      "@type": "@id"
+    }
+  },
+  "@graph": [
+    {
+      "@id": "http://json-ld.github.io/normalization/tests/vocab#",
+      "dc:creator": "Gregg Kellogg",
+      "dc:date": "2015-05-19",
+      "dc:description": "\n    This is a vocabulary document used to define classes and properties used in\n    [RDF Dataset Normalization Test Cases](http://json-ld.github.io/normalization/tests/) and associated test manifests.\n  ",
+      "dc:identifier": "http://json-ld.github.io/normalization/tests/vocab#",
+      "dc:publisher": "W3C Credentials Community Group",
+      "dc:title": "RDF Dataset Normalization Test Vocabulary",
+      "rdfs:comment": "This is a vocabulary document used to define classes and properties used in [RDF Dataset Normalization Test Cases](http://json-ld.github.io/normalization/tests/) and associated test manifests."
+    },
+    {
+      "@id": "rdfn:Test",
+      "@type": "rdfs:Class",
+      "rdfs:comment": "All RDF Dataset Normalization tests have an input file referenced using `mf:action` and a result file referenced using `mf:result`. Results are compared as text where the result of running the test is serialized to canonical N-Quads, lexicographically-sorted.",
+      "rdfs:label": "Superclass of all RDF Dataset Normalization tests",
+      "rdfs:subClassOf": [
+        "mf:ManifestEntry",
+        "rdft:Test"
+      ]
+    },
+    {
+      "@id": "rdfn:Urdna2015EvalTest",
+      "@type": "rdfs:Class",
+      "rdfs:comment": "Normalization performed using the URDNA2015 algorithm.",
+      "rdfs:label": "URDNA2015 Evaluation Test",
+      "rdfs:subClassOf": "rdfn:Test"
+    },
+    {
+      "@id": "rdfn:Urgna2012EvalTest",
+      "@type": "rdfs:Class",
+      "rdfs:comment": "Normalization performed using the URGNA2012 algorithm.",
+      "rdfs:label": "URGNA2012 Evaluation Test",
+      "rdfs:subClassOf": "rdfn:Test"
+    }
+  ]
+}

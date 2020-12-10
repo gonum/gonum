@@ -1,0 +1,445 @@
+## RDF Dataset Normalization tests
+## Distributed under both the W3C Test Suite License[1] and the W3C 3-
+## clause BSD License[2]. To contribute to a W3C Test Suite, see the
+## policies and contribution forms [3]
+##
+## 1. http://www.w3.org/Consortium/Legal/2008/04-testsuite-license
+## 2. http://www.w3.org/Consortium/Legal/2008/03-bsd-license
+## 3. http://www.w3.org/2004/10/27-testcases
+##
+## Test types
+## * rdfn:Urgna2012EvalTest  - Normalization using URGNA2012
+## * rdfn:Urdna2015EvalTest  - Normalization using URDNA2015
+
+@prefix : <manifest-urgna2012#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix mf:   <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#> .
+@prefix rdft: <http://www.w3.org/ns/rdftest#> .
+@prefix rdfn: <http://json-ld.github.io/normalization/test-vocab#> .
+
+<manifest-urgna2012>  a mf:Manifest ;
+
+  rdfs:label "RDF Graph Normalization (URGNA2012)";
+  rdfs:comment "Tests the 2012 version of RDF Graph Normalization.";
+  mf:entries (
+    :test001 :test002 :test003 :test004 :test005 :test006 :test007 :test008 :test009 :test010
+    :test011 :test012 :test013 :test014 :test015 :test016 :test017 :test018 :test019 :test020
+    :test021 :test022 :test023 :test024 :test025 :test026 :test027 :test028 :test029 :test030
+    :test031 :test032 :test033 :test034 :test035 :test036 :test037 :test038 :test039 :test040
+    :test041 :test042 :test043 :test044 :test045 :test046 :test047 :test048 :test049 :test050
+    :test051 :test052 :test053 :test054 :test055 :test056 :test060 :test061 :test062
+  ) .
+
+:test001 a rdfn:Urgna2012EvalTest;
+  mf:name "simple id";
+  rdft:approval rdft:Proposed;
+  mf:action <test001-in.nq>;
+  mf:result <test001-urgna2012.nq>;
+  .
+
+:test002 a rdfn:Urgna2012EvalTest;
+  mf:name "duplicate property iri values";
+  rdft:approval rdft:Proposed;
+  mf:action <test002-in.nq>;
+  mf:result <test002-urgna2012.nq>;
+  .
+
+:test003 a rdfn:Urgna2012EvalTest;
+  mf:name "bnode";
+  rdft:approval rdft:Proposed;
+  mf:action <test003-in.nq>;
+  mf:result <test003-urgna2012.nq>;
+  .
+
+:test004 a rdfn:Urgna2012EvalTest;
+  mf:name "bnode plus embed w/subject";
+  rdft:approval rdft:Proposed;
+  mf:action <test004-in.nq>;
+  mf:result <test004-urgna2012.nq>;
+  .
+
+:test005 a rdfn:Urgna2012EvalTest;
+  mf:name "bnode embed";
+  rdft:approval rdft:Proposed;
+  mf:action <test005-in.nq>;
+  mf:result <test005-urgna2012.nq>;
+  .
+
+:test006 a rdfn:Urgna2012EvalTest;
+  mf:name "multiple rdf types";
+  rdft:approval rdft:Proposed;
+  mf:action <test006-in.nq>;
+  mf:result <test006-urgna2012.nq>;
+  .
+
+:test007 a rdfn:Urgna2012EvalTest;
+  mf:name "coerce CURIE value";
+  rdft:approval rdft:Proposed;
+  mf:action <test007-in.nq>;
+  mf:result <test007-urgna2012.nq>;
+  .
+
+:test008 a rdfn:Urgna2012EvalTest;
+  mf:name "single subject complex";
+  rdft:approval rdft:Proposed;
+  mf:action <test008-in.nq>;
+  mf:result <test008-urgna2012.nq>;
+  .
+
+:test009 a rdfn:Urgna2012EvalTest;
+  mf:name "multiple subjects - complex";
+  rdft:approval rdft:Proposed;
+  mf:action <test009-in.nq>;
+  mf:result <test009-urgna2012.nq>;
+  .
+
+:test010 a rdfn:Urgna2012EvalTest;
+  mf:name "type";
+  rdft:approval rdft:Proposed;
+  mf:action <test010-in.nq>;
+  mf:result <test010-urgna2012.nq>;
+  .
+
+:test011 a rdfn:Urgna2012EvalTest;
+  mf:name "type-coerced type";
+  rdft:approval rdft:Proposed;
+  mf:action <test011-in.nq>;
+  mf:result <test011-urgna2012.nq>;
+  .
+
+:test012 a rdfn:Urgna2012EvalTest;
+  mf:name "type-coerced type, remove duplicate reference";
+  rdft:approval rdft:Proposed;
+  mf:action <test012-in.nq>;
+  mf:result <test012-urgna2012.nq>;
+  .
+
+:test013 a rdfn:Urgna2012EvalTest;
+  mf:name "type-coerced type, cycle";
+  rdft:approval rdft:Proposed;
+  mf:action <test013-in.nq>;
+  mf:result <test013-urgna2012.nq>;
+  .
+
+:test014 a rdfn:Urgna2012EvalTest;
+  mf:name "check types";
+  rdft:approval rdft:Proposed;
+  mf:action <test014-in.nq>;
+  mf:result <test014-urgna2012.nq>;
+  .
+
+:test015 a rdfn:Urgna2012EvalTest;
+  mf:name "top level context";
+  rdft:approval rdft:Proposed;
+  mf:action <test015-in.nq>;
+  mf:result <test015-urgna2012.nq>;
+  .
+
+:test016 a rdfn:Urgna2012EvalTest;
+  mf:name "blank node - dual link - embed";
+  rdft:approval rdft:Proposed;
+  mf:action <test016-in.nq>;
+  mf:result <test016-urgna2012.nq>;
+  .
+
+:test017 a rdfn:Urgna2012EvalTest;
+  mf:name "blank node - dual link - non-embed";
+  rdft:approval rdft:Proposed;
+  mf:action <test017-in.nq>;
+  mf:result <test017-urgna2012.nq>;
+  .
+
+:test018 a rdfn:Urgna2012EvalTest;
+  mf:name "blank node - self link";
+  rdft:approval rdft:Proposed;
+  mf:action <test018-in.nq>;
+  mf:result <test018-urgna2012.nq>;
+  .
+
+:test019 a rdfn:Urgna2012EvalTest;
+  mf:name "blank node - disjoint self links";
+  rdft:approval rdft:Proposed;
+  mf:action <test019-in.nq>;
+  mf:result <test019-urgna2012.nq>;
+  .
+
+:test020 a rdfn:Urgna2012EvalTest;
+  mf:name "blank node - diamond";
+  rdft:approval rdft:Proposed;
+  mf:action <test020-in.nq>;
+  mf:result <test020-urgna2012.nq>;
+  .
+
+:test021 a rdfn:Urgna2012EvalTest;
+  mf:name "blank node - circle of 2";
+  rdft:approval rdft:Proposed;
+  mf:action <test021-in.nq>;
+  mf:result <test021-urgna2012.nq>;
+  .
+
+:test022 a rdfn:Urgna2012EvalTest;
+  mf:name "blank node - double circle of 2";
+  rdft:approval rdft:Proposed;
+  mf:action <test022-in.nq>;
+  mf:result <test022-urgna2012.nq>;
+  .
+
+:test023 a rdfn:Urgna2012EvalTest;
+  mf:name "blank node - circle of 3";
+  rdft:approval rdft:Proposed;
+  mf:action <test023-in.nq>;
+  mf:result <test023-urgna2012.nq>;
+  .
+
+:test024 a rdfn:Urgna2012EvalTest;
+  mf:name "blank node - double circle of 3 (1-2-3)";
+  rdft:approval rdft:Proposed;
+  mf:action <test024-in.nq>;
+  mf:result <test024-urgna2012.nq>;
+  .
+
+:test025 a rdfn:Urgna2012EvalTest;
+  mf:name "blank node - double circle of 3 (1-3-2)";
+  rdft:approval rdft:Proposed;
+  mf:action <test025-in.nq>;
+  mf:result <test025-urgna2012.nq>;
+  .
+
+:test026 a rdfn:Urgna2012EvalTest;
+  mf:name "blank node - double circle of 3 (2-1-3)";
+  rdft:approval rdft:Proposed;
+  mf:action <test026-in.nq>;
+  mf:result <test026-urgna2012.nq>;
+  .
+
+:test027 a rdfn:Urgna2012EvalTest;
+  mf:name "blank node - double circle of 3 (2-3-1)";
+  rdft:approval rdft:Proposed;
+  mf:action <test027-in.nq>;
+  mf:result <test027-urgna2012.nq>;
+  .
+
+:test028 a rdfn:Urgna2012EvalTest;
+  mf:name "blank node - double circle of 3 (3-2-1)";
+  rdft:approval rdft:Proposed;
+  mf:action <test028-in.nq>;
+  mf:result <test028-urgna2012.nq>;
+  .
+
+:test029 a rdfn:Urgna2012EvalTest;
+  mf:name "blank node - double circle of 3 (3-1-2)";
+  rdft:approval rdft:Proposed;
+  mf:action <test029-in.nq>;
+  mf:result <test029-urgna2012.nq>;
+  .
+
+:test030 a rdfn:Urgna2012EvalTest;
+  mf:name "blank node - point at circle of 3";
+  rdft:approval rdft:Proposed;
+  mf:action <test030-in.nq>;
+  mf:result <test030-urgna2012.nq>;
+  .
+
+:test031 a rdfn:Urgna2012EvalTest;
+  mf:name "bnode (1)";
+  rdft:approval rdft:Proposed;
+  mf:action <test031-in.nq>;
+  mf:result <test031-urgna2012.nq>;
+  .
+
+:test032 a rdfn:Urgna2012EvalTest;
+  mf:name "bnode (2)";
+  rdft:approval rdft:Proposed;
+  mf:action <test032-in.nq>;
+  mf:result <test032-urgna2012.nq>;
+  .
+
+:test033 a rdfn:Urgna2012EvalTest;
+  mf:name "disjoint identical subgraphs (1)";
+  rdft:approval rdft:Proposed;
+  mf:action <test033-in.nq>;
+  mf:result <test033-urgna2012.nq>;
+  .
+
+:test034 a rdfn:Urgna2012EvalTest;
+  mf:name "disjoint identical subgraphs (2)";
+  rdft:approval rdft:Proposed;
+  mf:action <test034-in.nq>;
+  mf:result <test034-urgna2012.nq>;
+  .
+
+:test035 a rdfn:Urgna2012EvalTest;
+  mf:name "reordered w/strings (1)";
+  rdft:approval rdft:Proposed;
+  mf:action <test035-in.nq>;
+  mf:result <test035-urgna2012.nq>;
+  .
+
+:test036 a rdfn:Urgna2012EvalTest;
+  mf:name "reordered w/strings (2)";
+  rdft:approval rdft:Proposed;
+  mf:action <test036-in.nq>;
+  mf:result <test036-urgna2012.nq>;
+  .
+
+:test037 a rdfn:Urgna2012EvalTest;
+  mf:name "reordered w/strings (3)";
+  rdft:approval rdft:Proposed;
+  mf:action <test037-in.nq>;
+  mf:result <test037-urgna2012.nq>;
+  .
+
+:test038 a rdfn:Urgna2012EvalTest;
+  mf:name "reordered 4 bnodes, reordered 2 properties (1)";
+  rdft:approval rdft:Proposed;
+  mf:action <test038-in.nq>;
+  mf:result <test038-urgna2012.nq>;
+  .
+
+:test039 a rdfn:Urgna2012EvalTest;
+  mf:name "reordered 4 bnodes, reordered 2 properties (2)";
+  rdft:approval rdft:Proposed;
+  mf:action <test039-in.nq>;
+  mf:result <test039-urgna2012.nq>;
+  .
+
+:test040 a rdfn:Urgna2012EvalTest;
+  mf:name "reordered 6 bnodes (1)";
+  rdft:approval rdft:Proposed;
+  mf:action <test040-in.nq>;
+  mf:result <test040-urgna2012.nq>;
+  .
+
+:test041 a rdfn:Urgna2012EvalTest;
+  mf:name "reordered 6 bnodes (2)";
+  rdft:approval rdft:Proposed;
+  mf:action <test041-in.nq>;
+  mf:result <test041-urgna2012.nq>;
+  .
+
+:test042 a rdfn:Urgna2012EvalTest;
+  mf:name "reordered 6 bnodes (3)";
+  rdft:approval rdft:Proposed;
+  mf:action <test042-in.nq>;
+  mf:result <test042-urgna2012.nq>;
+  .
+
+:test043 a rdfn:Urgna2012EvalTest;
+  mf:name "literal with language";
+  rdft:approval rdft:Proposed;
+  mf:action <test043-in.nq>;
+  mf:result <test043-urgna2012.nq>;
+  .
+
+:test044 a rdfn:Urgna2012EvalTest;
+  mf:name "evil (1)";
+  rdft:approval rdft:Proposed;
+  mf:action <test044-in.nq>;
+  mf:result <test044-urgna2012.nq>;
+  .
+
+:test045 a rdfn:Urgna2012EvalTest;
+  mf:name "evil (2)";
+  rdft:approval rdft:Proposed;
+  mf:action <test045-in.nq>;
+  mf:result <test045-urgna2012.nq>;
+  .
+
+:test046 a rdfn:Urgna2012EvalTest;
+  mf:name "evil (3)";
+  rdft:approval rdft:Proposed;
+  mf:action <test046-in.nq>;
+  mf:result <test046-urgna2012.nq>;
+  .
+
+:test047 a rdfn:Urgna2012EvalTest;
+  mf:name "deep diff (1)";
+  rdft:approval rdft:Proposed;
+  mf:action <test047-in.nq>;
+  mf:result <test047-urgna2012.nq>;
+  .
+
+:test048 a rdfn:Urgna2012EvalTest;
+  mf:name "deep diff (2)";
+  rdft:approval rdft:Proposed;
+  mf:action <test048-in.nq>;
+  mf:result <test048-urgna2012.nq>;
+  .
+
+:test049 a rdfn:Urgna2012EvalTest;
+  mf:name "remove null";
+  rdft:approval rdft:Proposed;
+  mf:action <test049-in.nq>;
+  mf:result <test049-urgna2012.nq>;
+  .
+
+:test050 a rdfn:Urgna2012EvalTest;
+  mf:name "nulls";
+  rdft:approval rdft:Proposed;
+  mf:action <test050-in.nq>;
+  mf:result <test050-urgna2012.nq>;
+  .
+
+:test051 a rdfn:Urgna2012EvalTest;
+  mf:name "merging subjects";
+  rdft:approval rdft:Proposed;
+  mf:action <test051-in.nq>;
+  mf:result <test051-urgna2012.nq>;
+  .
+
+:test052 a rdfn:Urgna2012EvalTest;
+  mf:name "alias keywords";
+  rdft:approval rdft:Proposed;
+  mf:action <test052-in.nq>;
+  mf:result <test052-urgna2012.nq>;
+  .
+
+:test053 a rdfn:Urgna2012EvalTest;
+  mf:name "@list";
+  rdft:approval rdft:Proposed;
+  mf:action <test053-in.nq>;
+  mf:result <test053-urgna2012.nq>;
+  .
+
+:test054 a rdfn:Urgna2012EvalTest;
+  mf:name "t-graph";
+  rdft:approval rdft:Proposed;
+  mf:action <test054-in.nq>;
+  mf:result <test054-urgna2012.nq>;
+  .
+
+:test055 a rdfn:Urgna2012EvalTest;
+  mf:name "simple reorder (1)";
+  rdft:approval rdft:Proposed;
+  mf:action <test055-in.nq>;
+  mf:result <test055-urgna2012.nq>;
+  .
+
+:test056 a rdfn:Urgna2012EvalTest;
+  mf:name "simple reorder (2)";
+  rdft:approval rdft:Proposed;
+  mf:action <test056-in.nq>;
+  mf:result <test056-urgna2012.nq>;
+  .
+
+:test060 a rdfn:Urgna2012EvalTest;
+  mf:name "n-quads escaping";
+  rdft:approval rdft:Proposed;
+  mf:action <test060-in.nq>;
+  mf:result <test060-urgna2012.nq>;
+  .
+
+:test061 a rdfn:Urgna2012EvalTest;
+  mf:name "same literal value with multiple languages";
+  rdft:approval rdft:Proposed;
+  mf:action <test061-in.nq>;
+  mf:result <test061-urgna2012.nq>;
+  .
+
+:test062 a rdfn:Urgna2012EvalTest;
+  mf:name "same literal value with multiple datatypes";
+  rdft:approval rdft:Proposed;
+  mf:action <test062-in.nq>;
+  mf:result <test062-urgna2012.nq>;
+  .

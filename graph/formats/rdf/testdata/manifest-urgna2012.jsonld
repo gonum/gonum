@@ -1,0 +1,569 @@
+{
+  "@context": {
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "mf": "http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#",
+    "mq": "http://www.w3.org/2001/sw/DataAccess/tests/test-query#",
+    "rdfn": "http://json-ld.github.io/normalization/test-vocab#",
+    "rdft": "http://www.w3.org/ns/rdftest#",
+    "id": "@id",
+    "type": "@type",
+    "action": {
+      "@id": "mf:action",
+      "@type": "@id"
+    },
+    "approval": {
+      "@id": "rdft:approval",
+      "@type": "@id"
+    },
+    "comment": "rdfs:comment",
+    "entries": {
+      "@id": "mf:entries",
+      "@type": "@id",
+      "@container": "@list"
+    },
+    "label": "rdfs:label",
+    "name": "mf:name",
+    "result": {
+      "@id": "mf:result",
+      "@type": "@id"
+    }
+  },
+  "id": "manifest-urgna2012",
+  "type": "mf:Manifest",
+  "label": "RDF Graph Normalization (URGNA2012)",
+  "comment": "Tests the 2012 version of RDF Graph Normalization.",
+  "entries": [
+    {
+      "id": "manifest-urgna2012#test001",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "simple id",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test001-in.nq",
+      "result": "test001-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test002",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "duplicate property iri values",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test002-in.nq",
+      "result": "test002-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test003",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "bnode",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test003-in.nq",
+      "result": "test003-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test004",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "bnode plus embed w/subject",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test004-in.nq",
+      "result": "test004-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test005",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "bnode embed",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test005-in.nq",
+      "result": "test005-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test006",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "multiple rdf types",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test006-in.nq",
+      "result": "test006-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test007",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "coerce CURIE value",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test007-in.nq",
+      "result": "test007-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test008",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "single subject complex",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test008-in.nq",
+      "result": "test008-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test009",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "multiple subjects - complex",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test009-in.nq",
+      "result": "test009-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test010",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "type",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test010-in.nq",
+      "result": "test010-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test011",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "type-coerced type",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test011-in.nq",
+      "result": "test011-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test012",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "type-coerced type, remove duplicate reference",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test012-in.nq",
+      "result": "test012-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test013",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "type-coerced type, cycle",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test013-in.nq",
+      "result": "test013-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test014",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "check types",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test014-in.nq",
+      "result": "test014-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test015",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "top level context",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test015-in.nq",
+      "result": "test015-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test016",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "blank node - dual link - embed",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test016-in.nq",
+      "result": "test016-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test017",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "blank node - dual link - non-embed",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test017-in.nq",
+      "result": "test017-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test018",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "blank node - self link",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test018-in.nq",
+      "result": "test018-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test019",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "blank node - disjoint self links",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test019-in.nq",
+      "result": "test019-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test020",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "blank node - diamond",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test020-in.nq",
+      "result": "test020-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test021",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "blank node - circle of 2",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test021-in.nq",
+      "result": "test021-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test022",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "blank node - double circle of 2",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test022-in.nq",
+      "result": "test022-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test023",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "blank node - circle of 3",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test023-in.nq",
+      "result": "test023-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test024",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "blank node - double circle of 3 (1-2-3)",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test024-in.nq",
+      "result": "test024-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test025",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "blank node - double circle of 3 (1-3-2)",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test025-in.nq",
+      "result": "test025-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test026",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "blank node - double circle of 3 (2-1-3)",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test026-in.nq",
+      "result": "test026-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test027",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "blank node - double circle of 3 (2-3-1)",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test027-in.nq",
+      "result": "test027-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test028",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "blank node - double circle of 3 (3-2-1)",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test028-in.nq",
+      "result": "test028-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test029",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "blank node - double circle of 3 (3-1-2)",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test029-in.nq",
+      "result": "test029-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test030",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "blank node - point at circle of 3",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test030-in.nq",
+      "result": "test030-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test031",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "bnode (1)",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test031-in.nq",
+      "result": "test031-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test032",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "bnode (2)",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test032-in.nq",
+      "result": "test032-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test033",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "disjoint identical subgraphs (1)",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test033-in.nq",
+      "result": "test033-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test034",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "disjoint identical subgraphs (2)",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test034-in.nq",
+      "result": "test034-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test035",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "reordered w/strings (1)",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test035-in.nq",
+      "result": "test035-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test036",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "reordered w/strings (2)",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test036-in.nq",
+      "result": "test036-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test037",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "reordered w/strings (3)",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test037-in.nq",
+      "result": "test037-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test038",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "reordered 4 bnodes, reordered 2 properties (1)",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test038-in.nq",
+      "result": "test038-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test039",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "reordered 4 bnodes, reordered 2 properties (2)",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test039-in.nq",
+      "result": "test039-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test040",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "reordered 6 bnodes (1)",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test040-in.nq",
+      "result": "test040-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test041",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "reordered 6 bnodes (2)",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test041-in.nq",
+      "result": "test041-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test042",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "reordered 6 bnodes (3)",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test042-in.nq",
+      "result": "test042-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test043",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "literal with language",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test043-in.nq",
+      "result": "test043-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test044",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "evil (1)",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test044-in.nq",
+      "result": "test044-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test045",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "evil (2)",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test045-in.nq",
+      "result": "test045-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test046",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "evil (3)",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test046-in.nq",
+      "result": "test046-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test047",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "deep diff (1)",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test047-in.nq",
+      "result": "test047-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test048",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "deep diff (2)",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test048-in.nq",
+      "result": "test048-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test049",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "remove null",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test049-in.nq",
+      "result": "test049-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test050",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "nulls",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test050-in.nq",
+      "result": "test050-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test051",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "merging subjects",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test051-in.nq",
+      "result": "test051-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test052",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "alias keywords",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test052-in.nq",
+      "result": "test052-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test053",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "@list",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test053-in.nq",
+      "result": "test053-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test054",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "t-graph",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test054-in.nq",
+      "result": "test054-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test055",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "simple reorder (1)",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test055-in.nq",
+      "result": "test055-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test056",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "simple reorder (2)",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test056-in.nq",
+      "result": "test056-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test060",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "n-quads escaping",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test060-in.nq",
+      "result": "test060-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test061",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "same literal value with multiple languages",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test061-in.nq",
+      "result": "test061-urgna2012.nq"
+    },
+    {
+      "id": "manifest-urgna2012#test062",
+      "type": "rdfn:Urgna2012EvalTest",
+      "name": "same literal value with multiple datatypes",
+      "comment": null,
+      "approval": "rdft:Proposed",
+      "action": "test062-in.nq",
+      "result": "test062-urgna2012.nq"
+    }
+  ]
+}

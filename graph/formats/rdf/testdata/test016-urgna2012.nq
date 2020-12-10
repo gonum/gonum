@@ -1,0 +1,3 @@
+<http://example.org/test> <http://example.org/vocab#A> _:c14n0 .
+<http://example.org/test> <http://example.org/vocab#B> _:c14n0 .
+<http://example.org/test> <http://example.org/vocab#embed> _:c14n0 .

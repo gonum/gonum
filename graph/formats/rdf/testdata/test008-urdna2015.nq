@@ -1,0 +1,6 @@
+<http://example.org/test#book> <http://example.org/vocab#contains> <http://example.org/test#chapter> .
+<http://example.org/test#book> <http://purl.org/dc/elements/1.1/contributor> "Writer" .
+<http://example.org/test#book> <http://purl.org/dc/elements/1.1/title> "My Book" .
+<http://example.org/test#chapter> <http://purl.org/dc/elements/1.1/description> "Fun" .
+<http://example.org/test#chapter> <http://purl.org/dc/elements/1.1/title> "Chapter One" .
+<http://example.org/test#library> <http://example.org/vocab#contains> <http://example.org/test#book> .

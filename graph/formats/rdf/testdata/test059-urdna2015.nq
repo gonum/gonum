@@ -1,0 +1,8 @@
+<urn:ex:s> <urn:ex:p> <urn:ex:o> <urn:ex:g> .
+_:c14n0 <urn:ex:p> <urn:ex:o> <urn:ex:g> .
+_:c14n1 <urn:ex:p> _:c14n3 _:c14n2 .
+_:c14n10 <urn:ex:p> _:c14n12 _:c14n11 .
+_:c14n13 <urn:ex:p> _:c14n15 _:c14n14 .
+_:c14n16 <urn:ex:p> _:c14n18 _:c14n17 .
+_:c14n4 <urn:ex:p> _:c14n6 _:c14n5 .
+_:c14n7 <urn:ex:p> _:c14n9 _:c14n8 .

@@ -1,0 +1,17 @@
+{
+  "@context": {
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "mf": "http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#",
+    "id": "@id",
+    "type": "@type",
+    "comment": "rdfs:comment",
+    "include": {"@id": "mf:include", "@type": "@id", "@container": "@list"},
+    "label": "rdfs:label"
+  },
+  "id": "",
+  "type": "mf:Manifest",
+  "label": "RDF Dataset Normalization Test Cases",
+  "comment": "Includes manifests for different application profiles.",
+  "include": ["manifest-urgna2012", "manifest-urdna2015"]
+}

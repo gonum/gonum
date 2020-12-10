@@ -1,0 +1,3 @@
+_:c14n1 <http://example.org/vocab#array> "value" .
+_:c14n1 <http://example.org/vocab#doc> "Test 'null' in various locations" .
+_:c14n1 <http://example.org/vocab#object> _:c14n0 .

@@ -69,31 +69,31 @@ func TestDirectedMatrix(t *testing.T) {
 		testgraph.AdjacencyMatrix(t, directedMatrixBuilder)
 	})
 	t.Run("EdgeExistence", func(t *testing.T) {
-		testgraph.EdgeExistence(t, directedMatrixBuilder)
+		testgraph.EdgeExistence(t, directedMatrixBuilder, reversesEdges)
 	})
 	t.Run("NodeExistence", func(t *testing.T) {
 		testgraph.NodeExistence(t, directedMatrixBuilder)
 	})
 	t.Run("ReturnAdjacentNodes", func(t *testing.T) {
-		testgraph.ReturnAdjacentNodes(t, directedMatrixBuilder, true)
+		testgraph.ReturnAdjacentNodes(t, directedMatrixBuilder, usesEmpty, reversesEdges)
 	})
 	t.Run("ReturnAllEdges", func(t *testing.T) {
-		testgraph.ReturnAllEdges(t, directedMatrixBuilder, true)
+		testgraph.ReturnAllEdges(t, directedMatrixBuilder, usesEmpty)
 	})
 	t.Run("ReturnAllNodes", func(t *testing.T) {
-		testgraph.ReturnAllNodes(t, directedMatrixBuilder, true)
+		testgraph.ReturnAllNodes(t, directedMatrixBuilder, usesEmpty)
 	})
 	t.Run("ReturnAllWeightedEdges", func(t *testing.T) {
-		testgraph.ReturnAllWeightedEdges(t, directedMatrixBuilder, true)
+		testgraph.ReturnAllWeightedEdges(t, directedMatrixBuilder, usesEmpty)
 	})
 	t.Run("ReturnEdgeSlice", func(t *testing.T) {
-		testgraph.ReturnEdgeSlice(t, directedMatrixBuilder, true)
+		testgraph.ReturnEdgeSlice(t, directedMatrixBuilder, usesEmpty)
 	})
 	t.Run("ReturnWeightedEdgeSlice", func(t *testing.T) {
-		testgraph.ReturnWeightedEdgeSlice(t, directedMatrixBuilder, true)
+		testgraph.ReturnWeightedEdgeSlice(t, directedMatrixBuilder, usesEmpty)
 	})
 	t.Run("ReturnNodeSlice", func(t *testing.T) {
-		testgraph.ReturnNodeSlice(t, directedMatrixBuilder, true)
+		testgraph.ReturnNodeSlice(t, directedMatrixBuilder, usesEmpty)
 	})
 	t.Run("Weight", func(t *testing.T) {
 		testgraph.Weight(t, directedMatrixBuilder)
@@ -188,31 +188,31 @@ func TestDirectedMatrixFrom(t *testing.T) {
 		testgraph.AdjacencyMatrix(t, directedMatrixFromBuilder)
 	})
 	t.Run("EdgeExistence", func(t *testing.T) {
-		testgraph.EdgeExistence(t, directedMatrixFromBuilder)
+		testgraph.EdgeExistence(t, directedMatrixFromBuilder, reversesEdges)
 	})
 	t.Run("NodeExistence", func(t *testing.T) {
 		testgraph.NodeExistence(t, directedMatrixFromBuilder)
 	})
 	t.Run("ReturnAdjacentNodes", func(t *testing.T) {
-		testgraph.ReturnAdjacentNodes(t, directedMatrixFromBuilder, true)
+		testgraph.ReturnAdjacentNodes(t, directedMatrixFromBuilder, usesEmpty, reversesEdges)
 	})
 	t.Run("ReturnAllEdges", func(t *testing.T) {
-		testgraph.ReturnAllEdges(t, directedMatrixFromBuilder, true)
+		testgraph.ReturnAllEdges(t, directedMatrixFromBuilder, usesEmpty)
 	})
 	t.Run("ReturnAllNodes", func(t *testing.T) {
-		testgraph.ReturnAllNodes(t, directedMatrixFromBuilder, true)
+		testgraph.ReturnAllNodes(t, directedMatrixFromBuilder, usesEmpty)
 	})
 	t.Run("ReturnAllWeightedEdges", func(t *testing.T) {
-		testgraph.ReturnAllWeightedEdges(t, directedMatrixFromBuilder, true)
+		testgraph.ReturnAllWeightedEdges(t, directedMatrixFromBuilder, usesEmpty)
 	})
 	t.Run("ReturnEdgeSlice", func(t *testing.T) {
-		testgraph.ReturnEdgeSlice(t, directedMatrixFromBuilder, true)
+		testgraph.ReturnEdgeSlice(t, directedMatrixFromBuilder, usesEmpty)
 	})
 	t.Run("ReturnWeightedEdgeSlice", func(t *testing.T) {
-		testgraph.ReturnWeightedEdgeSlice(t, directedMatrixFromBuilder, true)
+		testgraph.ReturnWeightedEdgeSlice(t, directedMatrixFromBuilder, usesEmpty)
 	})
 	t.Run("ReturnNodeSlice", func(t *testing.T) {
-		testgraph.ReturnNodeSlice(t, directedMatrixFromBuilder, true)
+		testgraph.ReturnNodeSlice(t, directedMatrixFromBuilder, usesEmpty)
 	})
 	t.Run("Weight", func(t *testing.T) {
 		testgraph.Weight(t, directedMatrixFromBuilder)
@@ -320,31 +320,31 @@ func TestUnirectedMatrix(t *testing.T) {
 		testgraph.AdjacencyMatrix(t, undirectedMatrixBuilder)
 	})
 	t.Run("EdgeExistence", func(t *testing.T) {
-		testgraph.EdgeExistence(t, undirectedMatrixBuilder)
+		testgraph.EdgeExistence(t, undirectedMatrixBuilder, reversesEdges)
 	})
 	t.Run("NodeExistence", func(t *testing.T) {
 		testgraph.NodeExistence(t, undirectedMatrixBuilder)
 	})
 	t.Run("ReturnAdjacentNodes", func(t *testing.T) {
-		testgraph.ReturnAdjacentNodes(t, undirectedMatrixBuilder, true)
+		testgraph.ReturnAdjacentNodes(t, undirectedMatrixBuilder, usesEmpty, reversesEdges)
 	})
 	t.Run("ReturnAllEdges", func(t *testing.T) {
-		testgraph.ReturnAllEdges(t, undirectedMatrixBuilder, true)
+		testgraph.ReturnAllEdges(t, undirectedMatrixBuilder, usesEmpty)
 	})
 	t.Run("ReturnAllNodes", func(t *testing.T) {
-		testgraph.ReturnAllNodes(t, undirectedMatrixBuilder, true)
+		testgraph.ReturnAllNodes(t, undirectedMatrixBuilder, usesEmpty)
 	})
 	t.Run("ReturnAllWeightedEdges", func(t *testing.T) {
-		testgraph.ReturnAllWeightedEdges(t, undirectedMatrixBuilder, true)
+		testgraph.ReturnAllWeightedEdges(t, undirectedMatrixBuilder, usesEmpty)
 	})
 	t.Run("ReturnEdgeSlice", func(t *testing.T) {
-		testgraph.ReturnEdgeSlice(t, undirectedMatrixBuilder, true)
+		testgraph.ReturnEdgeSlice(t, undirectedMatrixBuilder, usesEmpty)
 	})
 	t.Run("ReturnWeightedEdgeSlice", func(t *testing.T) {
-		testgraph.ReturnWeightedEdgeSlice(t, undirectedMatrixBuilder, true)
+		testgraph.ReturnWeightedEdgeSlice(t, undirectedMatrixBuilder, usesEmpty)
 	})
 	t.Run("ReturnNodeSlice", func(t *testing.T) {
-		testgraph.ReturnNodeSlice(t, undirectedMatrixBuilder, true)
+		testgraph.ReturnNodeSlice(t, undirectedMatrixBuilder, usesEmpty)
 	})
 	t.Run("Weight", func(t *testing.T) {
 		testgraph.Weight(t, undirectedMatrixBuilder)
@@ -439,31 +439,31 @@ func TestUndirectedMatrixFrom(t *testing.T) {
 		testgraph.AdjacencyMatrix(t, undirectedMatrixFromBuilder)
 	})
 	t.Run("EdgeExistence", func(t *testing.T) {
-		testgraph.EdgeExistence(t, undirectedMatrixFromBuilder)
+		testgraph.EdgeExistence(t, undirectedMatrixFromBuilder, reversesEdges)
 	})
 	t.Run("NodeExistence", func(t *testing.T) {
 		testgraph.NodeExistence(t, undirectedMatrixFromBuilder)
 	})
 	t.Run("ReturnAdjacentNodes", func(t *testing.T) {
-		testgraph.ReturnAdjacentNodes(t, undirectedMatrixFromBuilder, true)
+		testgraph.ReturnAdjacentNodes(t, undirectedMatrixFromBuilder, usesEmpty, reversesEdges)
 	})
 	t.Run("ReturnAllEdges", func(t *testing.T) {
-		testgraph.ReturnAllEdges(t, undirectedMatrixFromBuilder, true)
+		testgraph.ReturnAllEdges(t, undirectedMatrixFromBuilder, usesEmpty)
 	})
 	t.Run("ReturnAllNodes", func(t *testing.T) {
-		testgraph.ReturnAllNodes(t, undirectedMatrixFromBuilder, true)
+		testgraph.ReturnAllNodes(t, undirectedMatrixFromBuilder, usesEmpty)
 	})
 	t.Run("ReturnAllWeightedEdges", func(t *testing.T) {
-		testgraph.ReturnAllWeightedEdges(t, undirectedMatrixFromBuilder, true)
+		testgraph.ReturnAllWeightedEdges(t, undirectedMatrixFromBuilder, usesEmpty)
 	})
 	t.Run("ReturnEdgeSlice", func(t *testing.T) {
-		testgraph.ReturnEdgeSlice(t, undirectedMatrixFromBuilder, true)
+		testgraph.ReturnEdgeSlice(t, undirectedMatrixFromBuilder, usesEmpty)
 	})
 	t.Run("ReturnWeightedEdgeSlice", func(t *testing.T) {
-		testgraph.ReturnWeightedEdgeSlice(t, undirectedMatrixFromBuilder, true)
+		testgraph.ReturnWeightedEdgeSlice(t, undirectedMatrixFromBuilder, usesEmpty)
 	})
 	t.Run("ReturnNodeSlice", func(t *testing.T) {
-		testgraph.ReturnNodeSlice(t, undirectedMatrixFromBuilder, true)
+		testgraph.ReturnNodeSlice(t, undirectedMatrixFromBuilder, usesEmpty)
 	})
 	t.Run("Weight", func(t *testing.T) {
 		testgraph.Weight(t, undirectedMatrixFromBuilder)

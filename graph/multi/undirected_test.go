@@ -17,6 +17,11 @@ import (
 	"gonum.org/v1/gonum/graph/testgraph"
 )
 
+const (
+	usesEmpty     = true
+	reversesEdges = true
+)
+
 func undirectedBuilder(nodes []graph.Node, edges []testgraph.WeightedLine, _, _ float64) (g graph.Graph, n []graph.Node, e []testgraph.Edge, s, a float64, ok bool) {
 	seen := set.NewNodes()
 	ug := multi.NewUndirectedGraph()
@@ -50,25 +55,25 @@ func undirectedBuilder(nodes []graph.Node, edges []testgraph.WeightedLine, _, _ 
 
 func TestUndirected(t *testing.T) {
 	t.Run("EdgeExistence", func(t *testing.T) {
-		testgraph.EdgeExistence(t, undirectedBuilder)
+		testgraph.EdgeExistence(t, undirectedBuilder, reversesEdges)
 	})
 	t.Run("LineExistence", func(t *testing.T) {
-		testgraph.LineExistence(t, directedBuilder, true)
+		testgraph.LineExistence(t, undirectedBuilder, usesEmpty, reversesEdges)
 	})
 	t.Run("NodeExistence", func(t *testing.T) {
 		testgraph.NodeExistence(t, undirectedBuilder)
 	})
 	t.Run("ReturnAdjacentNodes", func(t *testing.T) {
-		testgraph.ReturnAdjacentNodes(t, undirectedBuilder, true)
+		testgraph.ReturnAdjacentNodes(t, undirectedBuilder, usesEmpty, reversesEdges)
 	})
 	t.Run("ReturnAllLines", func(t *testing.T) {
-		testgraph.ReturnAllLines(t, undirectedBuilder, true)
+		testgraph.ReturnAllLines(t, undirectedBuilder, usesEmpty)
 	})
 	t.Run("ReturnAllNodes", func(t *testing.T) {
-		testgraph.ReturnAllNodes(t, undirectedBuilder, true)
+		testgraph.ReturnAllNodes(t, undirectedBuilder, usesEmpty)
 	})
 	t.Run("ReturnNodeSlice", func(t *testing.T) {
-		testgraph.ReturnNodeSlice(t, undirectedBuilder, true)
+		testgraph.ReturnNodeSlice(t, undirectedBuilder, usesEmpty)
 	})
 
 	t.Run("AddNodes", func(t *testing.T) {

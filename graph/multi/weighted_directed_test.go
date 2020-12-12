@@ -60,28 +60,28 @@ func weightedDirectedBuilder(nodes []graph.Node, edges []testgraph.WeightedLine,
 
 func TestWeightedDirected(t *testing.T) {
 	t.Run("EdgeExistence", func(t *testing.T) {
-		testgraph.EdgeExistence(t, weightedDirectedBuilder)
+		testgraph.EdgeExistence(t, weightedDirectedBuilder, reversesEdges)
 	})
 	t.Run("LineExistence", func(t *testing.T) {
-		testgraph.LineExistence(t, directedBuilder, true)
+		testgraph.LineExistence(t, directedBuilder, usesEmpty, reversesEdges)
 	})
 	t.Run("NodeExistence", func(t *testing.T) {
 		testgraph.NodeExistence(t, weightedDirectedBuilder)
 	})
 	t.Run("ReturnAdjacentNodes", func(t *testing.T) {
-		testgraph.ReturnAdjacentNodes(t, weightedDirectedBuilder, true)
+		testgraph.ReturnAdjacentNodes(t, weightedDirectedBuilder, usesEmpty, reversesEdges)
 	})
 	t.Run("ReturnAllLines", func(t *testing.T) {
-		testgraph.ReturnAllLines(t, weightedDirectedBuilder, true)
+		testgraph.ReturnAllLines(t, weightedDirectedBuilder, usesEmpty)
 	})
 	t.Run("ReturnAllNodes", func(t *testing.T) {
-		testgraph.ReturnAllNodes(t, weightedDirectedBuilder, true)
+		testgraph.ReturnAllNodes(t, weightedDirectedBuilder, usesEmpty)
 	})
 	t.Run("ReturnAllWeightedLines", func(t *testing.T) {
-		testgraph.ReturnAllWeightedLines(t, weightedDirectedBuilder, true)
+		testgraph.ReturnAllWeightedLines(t, weightedDirectedBuilder, usesEmpty)
 	})
 	t.Run("ReturnNodeSlice", func(t *testing.T) {
-		testgraph.ReturnNodeSlice(t, weightedDirectedBuilder, true)
+		testgraph.ReturnNodeSlice(t, weightedDirectedBuilder, usesEmpty)
 	})
 	t.Run("Weight", func(t *testing.T) {
 		testgraph.Weight(t, weightedDirectedBuilder)

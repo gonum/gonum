@@ -48,6 +48,11 @@ func checkEmptyIterator(t *testing.T, it graph.Iterator, useEmpty bool) {
 	}
 }
 
+func hasEnds(x, y graph.Node, e Edge) bool {
+	return (e.From().ID() == x.ID() && e.To().ID() == y.ID()) ||
+		(e.From().ID() == y.ID() && e.To().ID() == x.ID())
+}
+
 // Edge supports basic edge operations.
 type Edge interface {
 	// From returns the from node of the edge.
@@ -632,8 +637,10 @@ func checkEdges(t *testing.T, name string, g graph.Graph, got, want []Edge) {
 // that the nodes and traversed edges exist within the graph, checking the
 // Node, Edge, EdgeBetween and HasEdgeBetween methods of graph.Graph, the
 // EdgeBetween method of graph.Undirected and the HasEdgeFromTo method of
-// graph.Directed.
-func EdgeExistence(t *testing.T, b Builder) {
+// graph.Directed. If reversedEdge is true, edges will be checked to make
+// sure edges returned match the orientation of an Edge or WeightedEdge
+// call.
+func EdgeExistence(t *testing.T, b Builder, reversedEdge bool) {
 	for _, test := range testCases {
 		g, nodes, edges, _, _, ok := b(test.nodes, test.edges, test.self, test.absent)
 		if !ok {
@@ -658,9 +665,9 @@ func EdgeExistence(t *testing.T, b Builder) {
 				} else {
 					if want[edge{f: x.ID(), t: y.ID()}] {
 						e := g.Edge(x.ID(), y.ID())
-						if e == nil {
+						if e == nil || !hasEnds(x, y, e) {
 							t.Errorf("missing edge for test %q: (%v)--(%v)", test.name, x.ID(), y.ID())
-						} else if e.From().ID() != x.ID() || e.To().ID() != y.ID() {
+						} else if reversedEdge && (e.From().ID() != x.ID() || e.To().ID() != y.ID()) {
 							t.Errorf("inverted edge for test %q query with F=%d T=%d: got:%#v",
 								test.name, x.ID(), y.ID(), e)
 						}
@@ -740,8 +747,10 @@ func EdgeExistence(t *testing.T, b Builder) {
 // that the nodes and traversed edges exist within the graph, checking the
 // Node, Edge, EdgeBetween and HasEdgeBetween methods of graph.Graph, the
 // EdgeBetween method of graph.Undirected and the HasEdgeFromTo method of
-// graph.Directed.
-func LineExistence(t *testing.T, b Builder, useEmpty bool) {
+// graph.Directed. If reversedLine is true, lines will be checked to make
+// sure lines returned match the orientation of an Line or WeightedLine
+// call.
+func LineExistence(t *testing.T, b Builder, useEmpty, reversedLine bool) {
 	for _, test := range testCases {
 		g, nodes, edges, _, _, ok := b(test.nodes, test.edges, test.self, test.absent)
 		if !ok {
@@ -778,7 +787,9 @@ func LineExistence(t *testing.T, b Builder, useEmpty bool) {
 							} else {
 								for lit.Next() {
 									l := lit.Line()
-									if l.From().ID() != x.ID() || l.To().ID() != y.ID() {
+									if l == nil || !hasEnds(x, y, l) {
+										t.Errorf("missing edge for test %q: (%v)--(%v)", test.name, x.ID(), y.ID())
+									} else if reversedLine && (l.From().ID() != x.ID() || l.To().ID() != y.ID()) {
 										t.Errorf("inverted edge for test %q query with F=%d T=%d: got:%#v",
 											test.name, x.ID(), y.ID(), l)
 									}
@@ -829,7 +840,9 @@ func LineExistence(t *testing.T, b Builder, useEmpty bool) {
 						} else {
 							for lit.Next() {
 								l := lit.Line()
-								if l.From().ID() != x.ID() || l.To().ID() != y.ID() {
+								if l == nil || !hasEnds(x, y, l) {
+									t.Errorf("missing edge for test %q: (%v)--(%v)", test.name, x.ID(), y.ID())
+								} else if reversedLine && (l.From().ID() != x.ID() || l.To().ID() != y.ID()) {
 									t.Errorf("inverted edge for test %q query with F=%d T=%d: got:%#v",
 										test.name, x.ID(), y.ID(), l)
 								}
@@ -846,7 +859,9 @@ func LineExistence(t *testing.T, b Builder, useEmpty bool) {
 						} else {
 							for lit.Next() {
 								l := lit.Line()
-								if l.From().ID() != x.ID() || l.To().ID() != y.ID() {
+								if l == nil || !hasEnds(x, y, l) {
+									t.Errorf("missing edge for test %q: (%v)--(%v)", test.name, x.ID(), y.ID())
+								} else if reversedLine && (l.From().ID() != x.ID() || l.To().ID() != y.ID()) {
 									t.Errorf("inverted edge for test %q query with F=%d T=%d: got:%#v",
 										test.name, x.ID(), y.ID(), l)
 								}
@@ -900,7 +915,7 @@ func LineExistence(t *testing.T, b Builder, useEmpty bool) {
 						} else {
 							for lit.Next() {
 								l := lit.WeightedLine()
-								if l.From().ID() != x.ID() || l.To().ID() != y.ID() {
+								if reversedLine && (l.From().ID() != x.ID() || l.To().ID() != y.ID()) {
 									t.Errorf("inverted edge for test %q query with F=%d T=%d: got:%#v",
 										test.name, x.ID(), y.ID(), l)
 								}
@@ -917,7 +932,7 @@ func LineExistence(t *testing.T, b Builder, useEmpty bool) {
 						} else {
 							for lit.Next() {
 								l := lit.WeightedLine()
-								if l.From().ID() != x.ID() || l.To().ID() != y.ID() {
+								if reversedLine && (l.From().ID() != x.ID() || l.To().ID() != y.ID()) {
 									t.Errorf("inverted edge for test %q query with F=%d T=%d: got:%#v",
 										test.name, x.ID(), y.ID(), l)
 								}
@@ -941,8 +956,10 @@ func LineExistence(t *testing.T, b Builder, useEmpty bool) {
 // methods of graph.Graph, the EdgeBetween method of graph.Undirected and the
 // HasEdgeFromTo method of graph.Directed.
 // If useEmpty is true, graph iterators will be checked for the use of
-// graph.Empty if they are empty.
-func ReturnAdjacentNodes(t *testing.T, b Builder, useEmpty bool) {
+// graph.Empty if they are empty. If reversedEdge is true, edges will be checked
+// to make sure edges returned match the orientation of an Edge or WeightedEdge
+// call.
+func ReturnAdjacentNodes(t *testing.T, b Builder, useEmpty, reversedEdge bool) {
 	for _, test := range testCases {
 		g, nodes, edges, _, _, ok := b(test.nodes, test.edges, test.self, test.absent)
 		if !ok {
@@ -1051,20 +1068,20 @@ func ReturnAdjacentNodes(t *testing.T, b Builder, useEmpty bool) {
 						t.Errorf("missing from node for test %q: %v", test.name, u.ID())
 					}
 					qe := g.Edge(u.ID(), v.ID())
-					if qe == nil {
+					if qe == nil || !hasEnds(u, v, qe) {
 						t.Errorf("missing from edge for test %q: (%v)--(%v)", test.name, u.ID(), v.ID())
 						continue
 					}
-					if qe.From().ID() != u.ID() || qe.To().ID() != v.ID() {
+					if reversedEdge && (qe.From().ID() != u.ID() || qe.To().ID() != v.ID()) {
 						t.Errorf("inverted edge for test %q query with F=%d T=%d: got:%#v",
 							test.name, u.ID(), v.ID(), qe)
 					}
 					qe = g.EdgeBetween(u.ID(), v.ID())
-					if qe == nil {
+					if qe == nil || !hasEnds(u, v, qe) {
 						t.Errorf("missing from edge for test %q: (%v)--(%v)", test.name, u.ID(), v.ID())
 						continue
 					}
-					if qe.From().ID() != u.ID() || qe.To().ID() != v.ID() {
+					if reversedEdge && (qe.From().ID() != u.ID() || qe.To().ID() != v.ID()) {
 						t.Errorf("inverted edge for test %q query with F=%d T=%d: got:%#v",
 							test.name, u.ID(), v.ID(), qe)
 					}

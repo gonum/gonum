@@ -135,18 +135,14 @@ func (g *WeightedUndirectedGraph) Lines(uid, vid int64) graph.Lines {
 
 // LinesBetween returns the lines between nodes x and y.
 func (g *WeightedUndirectedGraph) LinesBetween(xid, yid int64) graph.Lines {
-	edge := g.lines[xid][yid]
-	if len(edge) == 0 {
+	if !g.HasEdgeBetween(xid, yid) {
 		return graph.Empty
 	}
 	var lines []graph.Line
-	seen := make(map[int64]struct{})
-	for _, l := range edge {
-		lid := l.ID()
-		if _, ok := seen[lid]; ok {
-			continue
+	for _, l := range g.lines[xid][yid] {
+		if l.From().ID() != xid {
+			l = l.ReversedLine().(graph.WeightedLine)
 		}
-		seen[lid] = struct{}{}
 		lines = append(lines, l)
 	}
 	return iterator.NewOrderedLines(lines)
@@ -337,18 +333,11 @@ func (g *WeightedUndirectedGraph) WeightedLines(uid, vid int64) graph.WeightedLi
 
 // WeightedLinesBetween returns the lines between nodes x and y.
 func (g *WeightedUndirectedGraph) WeightedLinesBetween(xid, yid int64) graph.WeightedLines {
-	edge := g.lines[xid][yid]
-	if len(edge) == 0 {
+	if !g.HasEdgeBetween(xid, yid) {
 		return graph.Empty
 	}
 	var lines []graph.WeightedLine
-	seen := make(map[int64]struct{})
-	for _, l := range edge {
-		lid := l.ID()
-		if _, ok := seen[lid]; ok {
-			continue
-		}
-		seen[lid] = struct{}{}
+	for _, l := range g.lines[xid][yid] {
 		if l.From().ID() != xid {
 			l = l.ReversedLine().(graph.WeightedLine)
 		}

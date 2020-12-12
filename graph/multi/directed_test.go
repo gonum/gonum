@@ -50,25 +50,25 @@ func directedBuilder(nodes []graph.Node, edges []testgraph.WeightedLine, _, _ fl
 
 func TestDirected(t *testing.T) {
 	t.Run("EdgeExistence", func(t *testing.T) {
-		testgraph.EdgeExistence(t, directedBuilder)
+		testgraph.EdgeExistence(t, directedBuilder, reversesEdges)
 	})
 	t.Run("LineExistence", func(t *testing.T) {
-		testgraph.LineExistence(t, directedBuilder, true)
+		testgraph.LineExistence(t, directedBuilder, usesEmpty, reversesEdges)
 	})
 	t.Run("NodeExistence", func(t *testing.T) {
 		testgraph.NodeExistence(t, directedBuilder)
 	})
 	t.Run("ReturnAdjacentNodes", func(t *testing.T) {
-		testgraph.ReturnAdjacentNodes(t, directedBuilder, true)
+		testgraph.ReturnAdjacentNodes(t, directedBuilder, usesEmpty, reversesEdges)
 	})
 	t.Run("ReturnAllLines", func(t *testing.T) {
-		testgraph.ReturnAllLines(t, directedBuilder, true)
+		testgraph.ReturnAllLines(t, directedBuilder, usesEmpty)
 	})
 	t.Run("ReturnAllNodes", func(t *testing.T) {
-		testgraph.ReturnAllNodes(t, directedBuilder, true)
+		testgraph.ReturnAllNodes(t, directedBuilder, usesEmpty)
 	})
 	t.Run("ReturnNodeSlice", func(t *testing.T) {
-		testgraph.ReturnNodeSlice(t, directedBuilder, true)
+		testgraph.ReturnNodeSlice(t, directedBuilder, usesEmpty)
 	})
 
 	t.Run("AddNodes", func(t *testing.T) {

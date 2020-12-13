@@ -32,7 +32,7 @@ type DirectedGraph struct {
 	to    map[int64]map[int64]map[int64]graph.Line
 
 	nodeIDs uid.Set
-	lineIDs uid.Set
+	lineIDs map[int64]map[int64]*uid.Set
 }
 
 // NewDirectedGraph returns a DirectedGraph.
@@ -43,7 +43,7 @@ func NewDirectedGraph() *DirectedGraph {
 		to:    make(map[int64]map[int64]map[int64]graph.Line),
 
 		nodeIDs: uid.NewSet(),
-		lineIDs: uid.NewSet(),
+		lineIDs: make(map[int64]map[int64]*uid.Set),
 	}
 }
 
@@ -140,7 +140,22 @@ func (g *DirectedGraph) Lines(uid, vid int64) graph.Lines {
 // The returned Line will have a graph-unique ID.
 // The Line's ID does not become valid in g until the Line is added to g.
 func (g *DirectedGraph) NewLine(from, to graph.Node) graph.Line {
-	return Line{F: from, T: to, UID: g.lineIDs.NewID()}
+	fid := from.ID()
+	tid := to.ID()
+	var lineID int64
+	switch {
+	case g.lineIDs[fid] == nil:
+		uids := uid.NewSet()
+		lineID = uids.NewID()
+		g.lineIDs[fid] = map[int64]*uid.Set{tid: &uids}
+	case g.lineIDs[fid][tid] == nil:
+		uids := uid.NewSet()
+		lineID = uids.NewID()
+		g.lineIDs[fid][tid] = &uids
+	default:
+		lineID = g.lineIDs[fid][tid].NewID()
+	}
+	return Line{F: from, T: to, UID: lineID}
 }
 
 // NewNode returns a new unique Node to be added to g. The Node's ID does
@@ -190,7 +205,8 @@ func (g *DirectedGraph) RemoveLine(fid, tid, id int64) {
 	if len(g.to[tid][fid]) == 0 {
 		delete(g.to[tid], fid)
 	}
-	g.lineIDs.Release(id)
+
+	g.lineIDs[fid][tid].Release(id)
 }
 
 // RemoveNode removes the node with the given ID from the graph, as well as any edges attached
@@ -253,7 +269,15 @@ func (g *DirectedGraph) SetLine(l graph.Line) {
 		g.to[tid][fid][lid] = l
 	}
 
-	g.lineIDs.Use(lid)
+	switch {
+	case g.lineIDs[fid] == nil:
+		uids := uid.NewSet()
+		g.lineIDs[fid] = map[int64]*uid.Set{tid: &uids}
+	case g.lineIDs[fid][tid] == nil:
+		uids := uid.NewSet()
+		g.lineIDs[fid][tid] = &uids
+	}
+	g.lineIDs[fid][tid].Use(lid)
 }
 
 // To returns all nodes in g that can reach directly to n.

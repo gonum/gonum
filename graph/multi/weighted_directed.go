@@ -41,7 +41,7 @@ type WeightedDirectedGraph struct {
 	to    map[int64]map[int64]map[int64]graph.WeightedLine
 
 	nodeIDs uid.Set
-	lineIDs uid.Set
+	lineIDs map[int64]map[int64]*uid.Set
 }
 
 // NewWeightedDirectedGraph returns a WeightedDirectedGraph.
@@ -52,7 +52,7 @@ func NewWeightedDirectedGraph() *WeightedDirectedGraph {
 		to:    make(map[int64]map[int64]map[int64]graph.WeightedLine),
 
 		nodeIDs: uid.NewSet(),
-		lineIDs: uid.NewSet(),
+		lineIDs: make(map[int64]map[int64]*uid.Set),
 	}
 }
 
@@ -160,7 +160,22 @@ func (g *WeightedDirectedGraph) NewNode() graph.Node {
 // The returned WeightedLine will have a graph-unique ID.
 // The Line's ID does not become valid in g until the Line is added to g.
 func (g *WeightedDirectedGraph) NewWeightedLine(from, to graph.Node, weight float64) graph.WeightedLine {
-	return WeightedLine{F: from, T: to, W: weight, UID: g.lineIDs.NewID()}
+	fid := from.ID()
+	tid := to.ID()
+	var lineID int64
+	switch {
+	case g.lineIDs[fid] == nil:
+		uids := uid.NewSet()
+		lineID = uids.NewID()
+		g.lineIDs[fid] = map[int64]*uid.Set{tid: &uids}
+	case g.lineIDs[fid][tid] == nil:
+		uids := uid.NewSet()
+		lineID = uids.NewID()
+		g.lineIDs[fid][tid] = &uids
+	default:
+		lineID = g.lineIDs[fid][tid].NewID()
+	}
+	return WeightedLine{F: from, T: to, W: weight, UID: lineID}
 }
 
 // Node returns the node with the given ID if it exists in the graph,
@@ -198,7 +213,8 @@ func (g *WeightedDirectedGraph) RemoveLine(fid, tid, id int64) {
 	if len(g.to[tid][fid]) == 0 {
 		delete(g.to[tid], fid)
 	}
-	g.lineIDs.Release(id)
+
+	g.lineIDs[fid][tid].Release(id)
 }
 
 // RemoveNode removes the node with the given ID from the graph, as well as any edges attached
@@ -261,7 +277,15 @@ func (g *WeightedDirectedGraph) SetWeightedLine(l graph.WeightedLine) {
 		g.to[tid][fid][lid] = l
 	}
 
-	g.lineIDs.Use(l.ID())
+	switch {
+	case g.lineIDs[fid] == nil:
+		uids := uid.NewSet()
+		g.lineIDs[fid] = map[int64]*uid.Set{tid: &uids}
+	case g.lineIDs[fid][tid] == nil:
+		uids := uid.NewSet()
+		g.lineIDs[fid][tid] = &uids
+	}
+	g.lineIDs[fid][tid].Use(lid)
 }
 
 // To returns all nodes in g that can reach directly to n.

@@ -31,7 +31,7 @@ type UndirectedGraph struct {
 	lines map[int64]map[int64]map[int64]graph.Line
 
 	nodeIDs uid.Set
-	lineIDs uid.Set
+	lineIDs map[int64]map[int64]*uid.Set
 }
 
 // NewUndirectedGraph returns an UndirectedGraph.
@@ -41,7 +41,7 @@ func NewUndirectedGraph() *UndirectedGraph {
 		lines: make(map[int64]map[int64]map[int64]graph.Line),
 
 		nodeIDs: uid.NewSet(),
-		lineIDs: uid.NewSet(),
+		lineIDs: make(map[int64]map[int64]*uid.Set),
 	}
 }
 
@@ -146,7 +146,25 @@ func (g *UndirectedGraph) LinesBetween(xid, yid int64) graph.Lines {
 // The returned Line will have a graph-unique ID.
 // The Line's ID does not become valid in g until the Line is added to g.
 func (g *UndirectedGraph) NewLine(from, to graph.Node) graph.Line {
-	return Line{F: from, T: to, UID: g.lineIDs.NewID()}
+	xid := from.ID()
+	yid := to.ID()
+	if yid < xid {
+		xid, yid = yid, xid
+	}
+	var lineID int64
+	switch {
+	case g.lineIDs[xid] == nil:
+		uids := uid.NewSet()
+		lineID = uids.NewID()
+		g.lineIDs[xid] = map[int64]*uid.Set{yid: &uids}
+	case g.lineIDs[xid][yid] == nil:
+		uids := uid.NewSet()
+		lineID = uids.NewID()
+		g.lineIDs[xid][yid] = &uids
+	default:
+		lineID = g.lineIDs[xid][yid].NewID()
+	}
+	return Line{F: from, T: to, UID: lineID}
 }
 
 // NewNode returns a new unique Node to be added to g. The Node's ID does
@@ -196,7 +214,13 @@ func (g *UndirectedGraph) RemoveLine(fid, tid, id int64) {
 	if len(g.lines[tid][fid]) == 0 {
 		delete(g.lines[tid], fid)
 	}
-	g.lineIDs.Release(id)
+
+	xid := fid
+	yid := tid
+	if yid < xid {
+		xid, yid = yid, xid
+	}
+	g.lineIDs[xid][yid].Release(id)
 }
 
 // RemoveNode removes the node with the given ID from the graph, as well as any edges attached
@@ -254,5 +278,18 @@ func (g *UndirectedGraph) SetLine(l graph.Line) {
 		g.lines[tid][fid][lid] = l
 	}
 
-	g.lineIDs.Use(lid)
+	xid := fid
+	yid := tid
+	if yid < xid {
+		xid, yid = yid, xid
+	}
+	switch {
+	case g.lineIDs[xid] == nil:
+		uids := uid.NewSet()
+		g.lineIDs[xid] = map[int64]*uid.Set{yid: &uids}
+	case g.lineIDs[xid][yid] == nil:
+		uids := uid.NewSet()
+		g.lineIDs[xid][yid] = &uids
+	}
+	g.lineIDs[xid][yid].Use(lid)
 }

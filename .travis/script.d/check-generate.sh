@@ -15,3 +15,6 @@ if [ -n "$(git diff)" ]; then
 	git diff
 	exit 1
 fi
+
+rm -rf *
+git reset --hard

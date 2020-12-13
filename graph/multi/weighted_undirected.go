@@ -40,7 +40,7 @@ type WeightedUndirectedGraph struct {
 	lines map[int64]map[int64]map[int64]graph.WeightedLine
 
 	nodeIDs uid.Set
-	lineIDs uid.Set
+	lineIDs map[int64]map[int64]*uid.Set
 }
 
 // NewWeightedUndirectedGraph returns an WeightedUndirectedGraph.
@@ -50,7 +50,7 @@ func NewWeightedUndirectedGraph() *WeightedUndirectedGraph {
 		lines: make(map[int64]map[int64]map[int64]graph.WeightedLine),
 
 		nodeIDs: uid.NewSet(),
-		lineIDs: uid.NewSet(),
+		lineIDs: make(map[int64]map[int64]*uid.Set),
 	}
 }
 
@@ -164,7 +164,25 @@ func (g *WeightedUndirectedGraph) NewNode() graph.Node {
 // The returned WeightedLine will have a graph-unique ID.
 // The Line's ID does not become valid in g until the Line is added to g.
 func (g *WeightedUndirectedGraph) NewWeightedLine(from, to graph.Node, weight float64) graph.WeightedLine {
-	return WeightedLine{F: from, T: to, W: weight, UID: g.lineIDs.NewID()}
+	xid := from.ID()
+	yid := to.ID()
+	if yid < xid {
+		xid, yid = yid, xid
+	}
+	var lineID int64
+	switch {
+	case g.lineIDs[xid] == nil:
+		uids := uid.NewSet()
+		lineID = uids.NewID()
+		g.lineIDs[xid] = map[int64]*uid.Set{yid: &uids}
+	case g.lineIDs[xid][yid] == nil:
+		uids := uid.NewSet()
+		lineID = uids.NewID()
+		g.lineIDs[xid][yid] = &uids
+	default:
+		lineID = g.lineIDs[xid][yid].NewID()
+	}
+	return WeightedLine{F: from, T: to, W: weight, UID: lineID}
 }
 
 // Node returns the node with the given ID if it exists in the graph,
@@ -202,7 +220,13 @@ func (g *WeightedUndirectedGraph) RemoveLine(fid, tid, id int64) {
 	if len(g.lines[tid][fid]) == 0 {
 		delete(g.lines[tid], fid)
 	}
-	g.lineIDs.Release(id)
+
+	xid := fid
+	yid := tid
+	if yid < xid {
+		xid, yid = yid, xid
+	}
+	g.lineIDs[xid][yid].Release(id)
 }
 
 // RemoveNode removes the node with the given ID from the graph, as well as any edges attached
@@ -260,7 +284,20 @@ func (g *WeightedUndirectedGraph) SetWeightedLine(l graph.WeightedLine) {
 		g.lines[tid][fid][lid] = l
 	}
 
-	g.lineIDs.Use(lid)
+	xid := fid
+	yid := tid
+	if yid < xid {
+		xid, yid = yid, xid
+	}
+	switch {
+	case g.lineIDs[xid] == nil:
+		uids := uid.NewSet()
+		g.lineIDs[xid] = map[int64]*uid.Set{yid: &uids}
+	case g.lineIDs[xid][yid] == nil:
+		uids := uid.NewSet()
+		g.lineIDs[xid][yid] = &uids
+	}
+	g.lineIDs[xid][yid].Use(lid)
 }
 
 // Weight returns the weight for the lines between x and y summarised by the receiver's

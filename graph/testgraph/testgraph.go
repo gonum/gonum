@@ -1771,20 +1771,20 @@ func AddLines(t *testing.T, n int, g LineAdder, newNode func(id int64) graph.Nod
 	}
 
 	rnd := rand.New(rand.NewSource(1))
-	seen := make(set.Int64s)
+	seen := make(tripleInt64s)
 	for i := 0; i < n; i++ {
 		u := newNode(rnd.Int63n(int64(n)))
 		v := newNode(rnd.Int63n(int64(n)))
 		prev := g.Lines(u.ID(), v.ID())
 		l := g.NewLine(u, v)
-		if seen.Has(l.ID()) {
+		if seen.has(u.ID(), v.ID(), l.ID()) {
 			t.Fatalf("NewLine returned an existing line: %#v", l)
 		}
 		if g.Lines(u.ID(), v.ID()).Len() != prev.Len() {
 			t.Fatalf("NewLine added a line: %#v", l)
 		}
 		g.SetLine(l)
-		seen.Add(l.ID())
+		seen.add(u.ID(), v.ID(), l.ID())
 		if g.Lines(u.ID(), v.ID()).Len() != prev.Len()+1 {
 			t.Fatalf("SetLine failed to add line: %#v", l)
 		}
@@ -1835,20 +1835,20 @@ func AddWeightedLines(t *testing.T, n int, g WeightedLineAdder, w float64, newNo
 	}
 
 	rnd := rand.New(rand.NewSource(1))
-	seen := make(set.Int64s)
+	seen := make(tripleInt64s)
 	for i := 0; i < n; i++ {
 		u := newNode(rnd.Int63n(int64(n)))
 		v := newNode(rnd.Int63n(int64(n)))
 		prev := g.Lines(u.ID(), v.ID())
 		l := g.NewWeightedLine(u, v, w)
-		if seen.Has(l.ID()) {
+		if seen.has(u.ID(), v.ID(), l.ID()) {
 			t.Fatalf("NewWeightedLine returned an existing line: %#v", l)
 		}
 		if g.Lines(u.ID(), v.ID()).Len() != prev.Len() {
 			t.Fatalf("NewWeightedLine added a line: %#v", l)
 		}
 		g.SetWeightedLine(l)
-		seen.Add(l.ID())
+		seen.add(u.ID(), v.ID(), l.ID())
 		curr := g.Lines(u.ID(), v.ID())
 		if curr.Len() != prev.Len()+1 {
 			t.Fatalf("SetWeightedLine failed to add line: %#v", l)
@@ -2130,4 +2130,18 @@ func (n *RandomNodes) Reset() {
 	n.state = rand.New(rand.NewSource(n.seed))
 	n.seen = make(set.Int64s)
 	n.count = 0
+}
+
+// tripleInt64s is a set of [3]int64 identifiers.
+type tripleInt64s map[[3]int64]struct{}
+
+// add inserts an element into the set.
+func (s tripleInt64s) add(x, y, z int64) {
+	s[[3]int64{x, y, z}] = struct{}{}
+}
+
+// has reports the existence of the element in the set.
+func (s tripleInt64s) has(x, y, z int64) bool {
+	_, ok := s[[3]int64{x, y, z}]
+	return ok
 }

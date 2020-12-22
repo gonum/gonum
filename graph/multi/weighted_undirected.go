@@ -8,8 +8,8 @@ import (
 	"fmt"
 
 	"gonum.org/v1/gonum/graph"
-	"gonum.org/v1/gonum/graph/internal/uid"
 	"gonum.org/v1/gonum/graph/iterator"
+	"gonum.org/v1/gonum/graph/set/uid"
 )
 
 var (
@@ -39,7 +39,7 @@ type WeightedUndirectedGraph struct {
 	nodes map[int64]graph.Node
 	lines map[int64]map[int64]map[int64]graph.WeightedLine
 
-	nodeIDs uid.Set
+	nodeIDs *uid.Set
 	lineIDs map[int64]map[int64]*uid.Set
 }
 
@@ -174,11 +174,11 @@ func (g *WeightedUndirectedGraph) NewWeightedLine(from, to graph.Node, weight fl
 	case g.lineIDs[xid] == nil:
 		uids := uid.NewSet()
 		lineID = uids.NewID()
-		g.lineIDs[xid] = map[int64]*uid.Set{yid: &uids}
+		g.lineIDs[xid] = map[int64]*uid.Set{yid: uids}
 	case g.lineIDs[xid][yid] == nil:
 		uids := uid.NewSet()
 		lineID = uids.NewID()
-		g.lineIDs[xid][yid] = &uids
+		g.lineIDs[xid][yid] = uids
 	default:
 		lineID = g.lineIDs[xid][yid].NewID()
 	}
@@ -292,10 +292,10 @@ func (g *WeightedUndirectedGraph) SetWeightedLine(l graph.WeightedLine) {
 	switch {
 	case g.lineIDs[xid] == nil:
 		uids := uid.NewSet()
-		g.lineIDs[xid] = map[int64]*uid.Set{yid: &uids}
+		g.lineIDs[xid] = map[int64]*uid.Set{yid: uids}
 	case g.lineIDs[xid][yid] == nil:
 		uids := uid.NewSet()
-		g.lineIDs[xid][yid] = &uids
+		g.lineIDs[xid][yid] = uids
 	}
 	g.lineIDs[xid][yid].Use(lid)
 }

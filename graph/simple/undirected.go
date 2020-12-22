@@ -8,8 +8,8 @@ import (
 	"fmt"
 
 	"gonum.org/v1/gonum/graph"
-	"gonum.org/v1/gonum/graph/internal/uid"
 	"gonum.org/v1/gonum/graph/iterator"
+	"gonum.org/v1/gonum/graph/set/uid"
 )
 
 var (
@@ -28,7 +28,7 @@ type UndirectedGraph struct {
 	nodes map[int64]graph.Node
 	edges map[int64]map[int64]graph.Edge
 
-	nodeIDs uid.Set
+	nodeIDs *uid.Set
 }
 
 // NewUndirectedGraph returns an UndirectedGraph.

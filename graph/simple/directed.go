@@ -8,8 +8,8 @@ import (
 	"fmt"
 
 	"gonum.org/v1/gonum/graph"
-	"gonum.org/v1/gonum/graph/internal/uid"
 	"gonum.org/v1/gonum/graph/iterator"
+	"gonum.org/v1/gonum/graph/set/uid"
 )
 
 var (
@@ -29,7 +29,7 @@ type DirectedGraph struct {
 	from  map[int64]map[int64]graph.Edge
 	to    map[int64]map[int64]graph.Edge
 
-	nodeIDs uid.Set
+	nodeIDs *uid.Set
 }
 
 // NewDirectedGraph returns a DirectedGraph.

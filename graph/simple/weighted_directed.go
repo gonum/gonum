@@ -8,8 +8,8 @@ import (
 	"fmt"
 
 	"gonum.org/v1/gonum/graph"
-	"gonum.org/v1/gonum/graph/internal/uid"
 	"gonum.org/v1/gonum/graph/iterator"
+	"gonum.org/v1/gonum/graph/set/uid"
 )
 
 var (
@@ -33,7 +33,7 @@ type WeightedDirectedGraph struct {
 
 	self, absent float64
 
-	nodeIDs uid.Set
+	nodeIDs *uid.Set
 }
 
 // NewWeightedDirectedGraph returns a WeightedDirectedGraph with the specified self and absent

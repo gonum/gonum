@@ -20,10 +20,9 @@ type Set struct {
 	used, free set.Int64s
 }
 
-// NewSet returns a new Set. The returned value should not be passed
-// except by pointer.
-func NewSet() Set {
-	return Set{maxID: -1, used: make(set.Int64s), free: make(set.Int64s)}
+// NewSet returns a new Set.
+func NewSet() *Set {
+	return &Set{maxID: -1, used: make(set.Int64s), free: make(set.Int64s)}
 }
 
 // NewID returns a new unique ID. The ID returned is not considered used

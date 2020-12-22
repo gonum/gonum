@@ -8,8 +8,8 @@ import (
 	"fmt"
 
 	"gonum.org/v1/gonum/graph"
-	"gonum.org/v1/gonum/graph/internal/uid"
 	"gonum.org/v1/gonum/graph/iterator"
+	"gonum.org/v1/gonum/graph/set/uid"
 )
 
 var (
@@ -31,7 +31,7 @@ type DirectedGraph struct {
 	from  map[int64]map[int64]map[int64]graph.Line
 	to    map[int64]map[int64]map[int64]graph.Line
 
-	nodeIDs uid.Set
+	nodeIDs *uid.Set
 	lineIDs map[int64]map[int64]*uid.Set
 }
 
@@ -147,11 +147,11 @@ func (g *DirectedGraph) NewLine(from, to graph.Node) graph.Line {
 	case g.lineIDs[fid] == nil:
 		uids := uid.NewSet()
 		lineID = uids.NewID()
-		g.lineIDs[fid] = map[int64]*uid.Set{tid: &uids}
+		g.lineIDs[fid] = map[int64]*uid.Set{tid: uids}
 	case g.lineIDs[fid][tid] == nil:
 		uids := uid.NewSet()
 		lineID = uids.NewID()
-		g.lineIDs[fid][tid] = &uids
+		g.lineIDs[fid][tid] = uids
 	default:
 		lineID = g.lineIDs[fid][tid].NewID()
 	}
@@ -272,10 +272,10 @@ func (g *DirectedGraph) SetLine(l graph.Line) {
 	switch {
 	case g.lineIDs[fid] == nil:
 		uids := uid.NewSet()
-		g.lineIDs[fid] = map[int64]*uid.Set{tid: &uids}
+		g.lineIDs[fid] = map[int64]*uid.Set{tid: uids}
 	case g.lineIDs[fid][tid] == nil:
 		uids := uid.NewSet()
-		g.lineIDs[fid][tid] = &uids
+		g.lineIDs[fid][tid] = uids
 	}
 	g.lineIDs[fid][tid].Use(lid)
 }

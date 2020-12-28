@@ -1,0 +1,63 @@
+name: Codecov
+
+on:
+  pull_request:
+    branches: [ master ]
+    types:
+      - closed
+
+jobs:
+
+  build:
+    name: Build
+    if: github.event.pull_request.merged == true
+    strategy:
+      matrix:
+        go-version: [1.15.x, 1.14.x]
+        platform: [ubuntu-latest]
+        env:
+          - TAGS=""
+          - TAGS="-tags bounds"
+          - TAGS="-tags noasm"
+          - TAGS="-tags safe"
+
+    runs-on: ${{ matrix.platform }}
+    env:
+        GO111MODULE: on
+        GOPATH: ${{ github.workspace }}
+    defaults:
+        run:
+            working-directory: ${{ env.GOPATH }}/src/gonum.org/v1/gonum
+
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: ${{ matrix.go-version }}
+
+    - name: Cache-Go
+      uses: actions/cache@v1
+      with:
+        path: |
+            ~/go/pkg/mod              # Module download cache
+            ~/.cache/go-build         # Build cache (Linux)
+            ~/Library/Caches/go-build # Build cache (Mac)
+            '%LocalAppData%\go-build' # Build cache (Windows)
+
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+          path: ${{ env.GOPATH }}/src/gonum.org/v1/gonum
+
+    - name: Coverage
+      if: matrix.platform == 'ubuntu-latest'
+      run: |
+        ./.github/workflows/test-coverage.sh
+
+    - name: Upload-Coverage
+      if: matrix.platform == 'ubuntu-latest'
+      uses: codecov/codecov-action@v1

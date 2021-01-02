@@ -25,11 +25,42 @@ func (m *CDense) Dims() (r, c int) {
 	return m.mat.Rows, m.mat.Cols
 }
 
+// Caps returns the number of rows and columns in the backing matrix.
+func (m *CDense) Caps() (r, c int) { return m.capRows, m.capCols }
+
 // H performs an implicit conjugate transpose by returning the receiver inside a
 // Conjugate.
 func (m *CDense) H() CMatrix {
 	return Conjugate{m}
 }
+
+// Slice returns a new Matrix that shares backing data with the receiver.
+// The returned matrix starts at {i,j} of the receiver and extends k-i rows
+// and l-j columns. The final row in the resulting matrix is k-1 and the
+// final column is l-1.
+// Slice panics with ErrIndexOutOfRange if the slice is outside the capacity
+// of the receiver.
+func (m *CDense) Slice(i, k, j, l int) CMatrix {
+	return m.slice(i, k, j, l)
+}
+
+func (m *CDense) slice(i, k, j, l int) *CDense {
+	mr, mc := m.Caps()
+	if i < 0 || mr <= i || j < 0 || mc <= j || k < i || mr < k || l < j || mc < l {
+		if i == k || j == l {
+			panic(ErrZeroLength)
+		}
+		panic(ErrIndexOutOfRange)
+	}
+	t := *m
+	t.mat.Data = t.mat.Data[i*t.mat.Stride+j : (k-1)*t.mat.Stride+l]
+	t.mat.Rows = k - i
+	t.mat.Cols = l - j
+	t.capRows -= i
+	t.capCols -= j
+	return &t
+}
+
 
 // NewCDense creates a new complex Dense matrix with r rows and c columns.
 // If data == nil, a new slice is allocated for the backing slice.

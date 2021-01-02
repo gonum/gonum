@@ -47,3 +47,59 @@ func TestCDenseNewAtSet(t *testing.T) {
 		}
 	}
 }
+
+func TestCDenseGrow(t *testing.T) {
+	t.Parallel()
+	m := &Dense{}
+	m = m.Grow(10, 10).(*Dense)
+	rows, cols := m.Dims()
+	capRows, capCols := m.Caps()
+	if rows != 10 {
+		t.Errorf("unexpected value for rows: got: %d want: 10", rows)
+	}
+	if cols != 10 {
+		t.Errorf("unexpected value for cols: got: %d want: 10", cols)
+	}
+	if capRows != 10 {
+		t.Errorf("unexpected value for capRows: got: %d want: 10", capRows)
+	}
+	if capCols != 10 {
+		t.Errorf("unexpected value for capCols: got: %d want: 10", capCols)
+	}
+
+	// Test grow within caps is in-place.
+	m.Set(1, 1, 1)
+	v := m.Slice(1, 5, 1, 5).(*Dense)
+	if v.At(0, 0) != m.At(1, 1) {
+		t.Errorf("unexpected viewed element value: got: %v want: %v", v.At(0, 0), m.At(1, 1))
+	}
+	v = v.Grow(5, 5).(*Dense)
+	if !Equal(v, m.Slice(1, 10, 1, 10)) {
+		t.Error("unexpected view value after grow")
+	}
+
+	// Test grow bigger than caps copies.
+	v = v.Grow(5, 5).(*Dense)
+	if !Equal(v.Slice(0, 9, 0, 9), m.Slice(1, 10, 1, 10)) {
+		t.Error("unexpected mismatched common view value after grow")
+	}
+	v.Set(0, 0, 0)
+	if Equal(v.Slice(0, 9, 0, 9), m.Slice(1, 10, 1, 10)) {
+		t.Error("unexpected matching view value after grow past capacity")
+	}
+
+	// Test grow uses existing data slice when matrix is zero size.
+	v.Reset()
+	p, l := &v.mat.Data[:1][0], cap(v.mat.Data)
+	*p = 1 // This element is at position (-1, -1) relative to v and so should not be visible.
+	v = v.Grow(5, 5).(*Dense)
+	if &v.mat.Data[:1][0] != p {
+		t.Error("grow unexpectedly copied slice within cap limit")
+	}
+	if cap(v.mat.Data) != l {
+		t.Errorf("unexpected change in data slice capacity: got: %d want: %d", cap(v.mat.Data), l)
+	}
+	if v.At(0, 0) != 0 {
+		t.Errorf("unexpected value for At(0, 0): got: %v want: 0", v.At(0, 0))
+	}
+}

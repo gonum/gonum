@@ -231,3 +231,68 @@ func (m *CDense) Copy(a CMatrix) (r, c int) {
 // Changes to elements in the receiver following the call will be reflected
 // in returned cblas128.General.
 func (m *CDense) RawCMatrix() cblas128.General { return m.mat }
+
+// Grow returns the receiver expanded by r rows and c columns. If the dimensions
+// of the expanded matrix are outside the capacities of the receiver a new
+// allocation is made, otherwise not. Note the receiver itself is not modified
+// during the call to Grow.
+func (m *CDense) Grow(r, c int) CMatrix {
+	if r < 0 || c < 0 {
+		panic(ErrIndexOutOfRange)
+	}
+	if r == 0 && c == 0 {
+		return m
+	}
+
+	r += m.mat.Rows
+	c += m.mat.Cols
+
+	var t CDense
+	switch {
+	case m.mat.Rows == 0 || m.mat.Cols == 0:
+		t.mat = cblas128.General{
+			Rows:   r,
+			Cols:   c,
+			Stride: c,
+			// We zero because we don't know how the matrix will be used.
+			// In other places, the mat is immediately filled with a result;
+			// this is not the case here.
+			Data: useZeroedC(m.mat.Data, r*c),
+		}
+	case r > m.capRows || c > m.capCols:
+		cr := max(r, m.capRows)
+		cc := max(c, m.capCols)
+		t.mat = cblas128.General{
+			Rows:   r,
+			Cols:   c,
+			Stride: cc,
+			Data:   make([]complex128, cr*cc),
+		}
+		t.capRows = cr
+		t.capCols = cc
+		// Copy the complete matrix over to the new matrix.
+		// Including elements not currently visible. Use a temporary structure
+		// to avoid modifying the receiver.
+		var tmp CDense
+		tmp.mat = cblas128.General{
+			Rows:   m.mat.Rows,
+			Cols:   m.mat.Cols,
+			Stride: m.mat.Stride,
+			Data:   m.mat.Data,
+		}
+		tmp.capRows = m.capRows
+		tmp.capCols = m.capCols
+		t.Copy(&tmp)
+		return &t
+	default:
+		t.mat = cblas128.General{
+			Data:   m.mat.Data[:(r-1)*m.mat.Stride+c],
+			Rows:   r,
+			Cols:   c,
+			Stride: m.mat.Stride,
+		}
+	}
+	t.capRows = r
+	t.capCols = c
+	return &t
+}

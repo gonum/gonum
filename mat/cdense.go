@@ -25,11 +25,42 @@ func (m *CDense) Dims() (r, c int) {
 	return m.mat.Rows, m.mat.Cols
 }
 
+// Caps returns the number of rows and columns in the backing matrix.
+func (m *CDense) Caps() (r, c int) { return m.capRows, m.capCols }
+
 // H performs an implicit conjugate transpose by returning the receiver inside a
 // Conjugate.
 func (m *CDense) H() CMatrix {
 	return Conjugate{m}
 }
+
+// Slice returns a new Matrix that shares backing data with the receiver.
+// The returned matrix starts at {i,j} of the receiver and extends k-i rows
+// and l-j columns. The final row in the resulting matrix is k-1 and the
+// final column is l-1.
+// Slice panics with ErrIndexOutOfRange if the slice is outside the capacity
+// of the receiver.
+func (m *CDense) Slice(i, k, j, l int) CMatrix {
+	return m.slice(i, k, j, l)
+}
+
+func (m *CDense) slice(i, k, j, l int) *CDense {
+	mr, mc := m.Caps()
+	if i < 0 || mr <= i || j < 0 || mc <= j || k < i || mr < k || l < j || mc < l {
+		if i == k || j == l {
+			panic(ErrZeroLength)
+		}
+		panic(ErrIndexOutOfRange)
+	}
+	t := *m
+	t.mat.Data = t.mat.Data[i*t.mat.Stride+j : (k-1)*t.mat.Stride+l]
+	t.mat.Rows = k - i
+	t.mat.Cols = l - j
+	t.capRows -= i
+	t.capCols -= j
+	return &t
+}
+
 
 // NewCDense creates a new complex Dense matrix with r rows and c columns.
 // If data == nil, a new slice is allocated for the backing slice.
@@ -200,3 +231,68 @@ func (m *CDense) Copy(a CMatrix) (r, c int) {
 // Changes to elements in the receiver following the call will be reflected
 // in returned cblas128.General.
 func (m *CDense) RawCMatrix() cblas128.General { return m.mat }
+
+// Grow returns the receiver expanded by r rows and c columns. If the dimensions
+// of the expanded matrix are outside the capacities of the receiver a new
+// allocation is made, otherwise not. Note the receiver itself is not modified
+// during the call to Grow.
+func (m *CDense) Grow(r, c int) CMatrix {
+	if r < 0 || c < 0 {
+		panic(ErrIndexOutOfRange)
+	}
+	if r == 0 && c == 0 {
+		return m
+	}
+
+	r += m.mat.Rows
+	c += m.mat.Cols
+
+	var t CDense
+	switch {
+	case m.mat.Rows == 0 || m.mat.Cols == 0:
+		t.mat = cblas128.General{
+			Rows:   r,
+			Cols:   c,
+			Stride: c,
+			// We zero because we don't know how the matrix will be used.
+			// In other places, the mat is immediately filled with a result;
+			// this is not the case here.
+			Data: useZeroedC(m.mat.Data, r*c),
+		}
+	case r > m.capRows || c > m.capCols:
+		cr := max(r, m.capRows)
+		cc := max(c, m.capCols)
+		t.mat = cblas128.General{
+			Rows:   r,
+			Cols:   c,
+			Stride: cc,
+			Data:   make([]complex128, cr*cc),
+		}
+		t.capRows = cr
+		t.capCols = cc
+		// Copy the complete matrix over to the new matrix.
+		// Including elements not currently visible. Use a temporary structure
+		// to avoid modifying the receiver.
+		var tmp CDense
+		tmp.mat = cblas128.General{
+			Rows:   m.mat.Rows,
+			Cols:   m.mat.Cols,
+			Stride: m.mat.Stride,
+			Data:   m.mat.Data,
+		}
+		tmp.capRows = m.capRows
+		tmp.capCols = m.capCols
+		t.Copy(&tmp)
+		return &t
+	default:
+		t.mat = cblas128.General{
+			Data:   m.mat.Data[:(r-1)*m.mat.Stride+c],
+			Rows:   r,
+			Cols:   c,
+			Stride: m.mat.Stride,
+		}
+	}
+	t.capRows = r
+	t.capCols = c
+	return &t
+}

@@ -21,8 +21,8 @@ func (m *Dense) Add(a, b Matrix) {
 		panic(ErrShape)
 	}
 
-	aU, _ := untransposeExtract(a)
-	bU, _ := untransposeExtract(b)
+	aU, aTrans := untransposeExtract(a)
+	bU, bTrans := untransposeExtract(b)
 	m.reuseAsNonZeroed(ar, ac)
 
 	if arm, ok := a.(*Dense); ok {
@@ -46,10 +46,10 @@ func (m *Dense) Add(a, b Matrix) {
 	m.checkOverlapMatrix(aU)
 	m.checkOverlapMatrix(bU)
 	var restore func()
-	if m == aU {
+	if aTrans && m == aU {
 		m, restore = m.isolatedWorkspace(aU)
 		defer restore()
-	} else if m == bU {
+	} else if bTrans && m == bU {
 		m, restore = m.isolatedWorkspace(bU)
 		defer restore()
 	}
@@ -70,8 +70,8 @@ func (m *Dense) Sub(a, b Matrix) {
 		panic(ErrShape)
 	}
 
-	aU, _ := untransposeExtract(a)
-	bU, _ := untransposeExtract(b)
+	aU, aTrans := untransposeExtract(a)
+	bU, bTrans := untransposeExtract(b)
 	m.reuseAsNonZeroed(ar, ac)
 
 	if arm, ok := a.(*Dense); ok {
@@ -95,10 +95,10 @@ func (m *Dense) Sub(a, b Matrix) {
 	m.checkOverlapMatrix(aU)
 	m.checkOverlapMatrix(bU)
 	var restore func()
-	if m == aU {
+	if aTrans && m == aU {
 		m, restore = m.isolatedWorkspace(aU)
 		defer restore()
-	} else if m == bU {
+	} else if bTrans && m == bU {
 		m, restore = m.isolatedWorkspace(bU)
 		defer restore()
 	}
@@ -120,8 +120,8 @@ func (m *Dense) MulElem(a, b Matrix) {
 		panic(ErrShape)
 	}
 
-	aU, _ := untransposeExtract(a)
-	bU, _ := untransposeExtract(b)
+	aU, aTrans := untransposeExtract(a)
+	bU, bTrans := untransposeExtract(b)
 	m.reuseAsNonZeroed(ar, ac)
 
 	if arm, ok := a.(*Dense); ok {
@@ -145,10 +145,10 @@ func (m *Dense) MulElem(a, b Matrix) {
 	m.checkOverlapMatrix(aU)
 	m.checkOverlapMatrix(bU)
 	var restore func()
-	if m == aU {
+	if aTrans && m == aU {
 		m, restore = m.isolatedWorkspace(aU)
 		defer restore()
-	} else if m == bU {
+	} else if bTrans && m == bU {
 		m, restore = m.isolatedWorkspace(bU)
 		defer restore()
 	}
@@ -170,8 +170,8 @@ func (m *Dense) DivElem(a, b Matrix) {
 		panic(ErrShape)
 	}
 
-	aU, _ := untransposeExtract(a)
-	bU, _ := untransposeExtract(b)
+	aU, aTrans := untransposeExtract(a)
+	bU, bTrans := untransposeExtract(b)
 	m.reuseAsNonZeroed(ar, ac)
 
 	if arm, ok := a.(*Dense); ok {
@@ -195,10 +195,10 @@ func (m *Dense) DivElem(a, b Matrix) {
 	m.checkOverlapMatrix(aU)
 	m.checkOverlapMatrix(bU)
 	var restore func()
-	if m == aU {
+	if aTrans && m == aU {
 		m, restore = m.isolatedWorkspace(aU)
 		defer restore()
-	} else if m == bU {
+	} else if bTrans && m == bU {
 		m, restore = m.isolatedWorkspace(bU)
 		defer restore()
 	}

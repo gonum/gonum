@@ -4,7 +4,12 @@
 
 package mat
 
-import "testing"
+import (
+	"math/cmplx"
+	"testing"
+
+	"golang.org/x/exp/rand"
+)
 
 func TestCDenseNewAtSet(t *testing.T) {
 	t.Parallel()
@@ -42,6 +47,96 @@ func TestCDenseNewAtSet(t *testing.T) {
 				m.Set(i, j, v+add)
 				if m.At(i, j) != test.a[idx]+add {
 					t.Errorf("unexpected set value for test %d at i=%d, j=%d: got: %v, want: %v", cas, i, j, v, test.a[idx]+add)
+				}
+			}
+		}
+	}
+}
+
+func TestCDenseConjElem(t *testing.T) {
+	t.Parallel()
+
+	rnd := rand.New(rand.NewSource(1))
+
+	for r := 1; r <= 8; r++ {
+		for c := 1; c <= 8; c++ {
+			const (
+				empty = iota
+				fit
+				sliced
+				self
+			)
+			for _, dst := range []int{empty, fit, sliced, self} {
+				const (
+					noTrans = iota
+					trans
+					conjTrans
+					bothHT
+					bothTH
+				)
+				for _, src := range []int{noTrans, trans, conjTrans, bothHT, bothTH} {
+					d := NewCDense(r, c, nil)
+					for i := 0; i < r; i++ {
+						for j := 0; j < c; j++ {
+							d.Set(i, j, complex(rnd.NormFloat64(), rnd.NormFloat64()))
+						}
+					}
+
+					var (
+						a  CMatrix
+						op string
+					)
+					switch src {
+					case noTrans:
+						a = d
+					case trans:
+						r, c = c, r
+						a = d.T()
+						op = ".T"
+					case conjTrans:
+						r, c = c, r
+						a = d.H()
+						op = ".H"
+					case bothHT:
+						a = d.H().T()
+						op = ".H.T"
+					case bothTH:
+						a = d.T().H()
+						op = ".T.H"
+					default:
+						panic("invalid src op")
+					}
+					aCopy := NewCDense(r, c, nil)
+					aCopy.Copy(a)
+
+					var got *CDense
+					switch dst {
+					case empty:
+						got = &CDense{}
+					case fit:
+						got = NewCDense(r, c, nil)
+					case sliced:
+						got = NewCDense(r*2, c*2, nil).Slice(1, r+1, 1, c+1).(*CDense)
+					case self:
+						if r != c && (src == conjTrans || src == trans) {
+							continue
+						}
+						got = d
+					default:
+						panic("invalid dst size")
+					}
+
+					got.ConjElem(a)
+
+					for i := 0; i < r; i++ {
+						for j := 0; j < c; j++ {
+							if got.At(i, j) != cmplx.Conj(aCopy.At(i, j)) {
+								t.Errorf("unexpected results a%s[%d, %d] for r=%d c=%d %v != %v",
+									op, i, j, r, c, got.At(i, j), cmplx.Conj(a.At(i, j)),
+								)
+							}
+						}
+					}
 				}
 			}
 		}

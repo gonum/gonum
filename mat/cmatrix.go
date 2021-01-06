@@ -14,20 +14,20 @@ import (
 
 // CMatrix is the basic matrix interface type for complex matrices.
 type CMatrix interface {
-	// Dims returns the dimensions of a Matrix.
+	// Dims returns the dimensions of a CMatrix.
 	Dims() (r, c int)
 
 	// At returns the value of a matrix element at row i, column j.
 	// It will panic if i or j are out of bounds for the matrix.
 	At(i, j int) complex128
 
-	// H returns the conjugate transpose of the Matrix. Whether H
+	// H returns the conjugate transpose of the CMatrix. Whether H
 	// returns a copy of the underlying data is implementation dependent.
 	// This method may be implemented using the ConjTranspose type, which
 	// provides an implicit matrix conjugate transpose.
 	H() CMatrix
 
-	// T returns the transpose of the Matrix. Whether T returns a copy of the
+	// T returns the transpose of the CMatrix. Whether T returns a copy of the
 	// underlying data is implementation dependent.
 	// This method may be implemented using the CTranspose type, which
 	// provides an implicit matrix transpose.
@@ -61,7 +61,7 @@ func (t ConjTranspose) At(i, j int) complex128 {
 
 // Dims returns the dimensions of the transposed matrix. The number of rows returned
 // is the number of columns in the CMatrix field, and the number of columns is
-// the number of rows in the Matrix field.
+// the number of rows in the CMatrix field.
 func (t ConjTranspose) Dims() (r, c int) {
 	c, r = t.CMatrix.Dims()
 	return r, c
@@ -72,7 +72,7 @@ func (t ConjTranspose) H() CMatrix {
 	return t.CMatrix
 }
 
-// T performs an implicit transpose by  returning the receiver inside a
+// T performs an implicit transpose by returning the receiver inside a
 // CTranspose.
 func (t ConjTranspose) T() CMatrix {
 	return CTranspose{t}
@@ -98,13 +98,13 @@ func (t CTranspose) At(i, j int) complex128 {
 
 // Dims returns the dimensions of the transposed matrix. The number of rows returned
 // is the number of columns in the CMatrix field, and the number of columns is
-// the number of rows in the Matrix field.
+// the number of rows in the CMatrix field.
 func (t CTranspose) Dims() (r, c int) {
 	c, r = t.CMatrix.Dims()
 	return r, c
 }
 
-// H performs an implicit transpose by  returning the receiver inside a
+// H performs an implicit transpose by returning the receiver inside a
 // ConjTranspose.
 func (t CTranspose) H() CMatrix {
 	return ConjTranspose{t}

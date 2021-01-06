@@ -249,7 +249,7 @@ func putInts(w []int) {
 
 // getWorkspaceCmplx returns a *CDense of size r×c and a data slice
 // with a cap that is less than 2*r*c. If clear is true, the
-// data slice visible through the Matrix interface is zeroed.
+// data slice visible through the CMatrix interface is zeroed.
 func getWorkspaceCmplx(r, c int, clear bool) *CDense {
 	l := uint64(r * c)
 	w := poolCmplx[bits(l)].Get().(*CDense)

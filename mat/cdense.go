@@ -44,10 +44,10 @@ func (m *CDense) T() CMatrix {
 	return CTranspose{m}
 }
 
-// ConjElem calculates the element-wise conjugate of a and stores the result
-// in the receiver.
-// ConjElem will panic if m and a do not have the same dimension unless m is empty.
-func (m *CDense) ConjElem(a CMatrix) {
+// Conj calculates the element-wise conjugate of a and stores the result in the
+// receiver.
+// Conj will panic if m and a do not have the same dimension unless m is empty.
+func (m *CDense) Conj(a CMatrix) {
 	ar, ac := a.Dims()
 	aU, aTrans, aConj := untransposeExtractCmplx(a)
 	m.reuseAsNonZeroed(ar, ac)
@@ -82,7 +82,7 @@ func (m *CDense) ConjElem(a CMatrix) {
 	}
 }
 
-// Slice returns a new Matrix that shares backing data with the receiver.
+// Slice returns a new CMatrix that shares backing data with the receiver.
 // The returned matrix starts at {i,j} of the receiver and extends k-i rows
 // and l-j columns. The final row in the resulting matrix is k-1 and the
 // final column is l-1.

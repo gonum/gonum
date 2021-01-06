@@ -126,7 +126,7 @@ func TestCDenseConjElem(t *testing.T) {
 						panic("invalid dst size")
 					}
 
-					got.ConjElem(a)
+					got.Conj(a)
 
 					for i := 0; i < r; i++ {
 						for j := 0; j < c; j++ {

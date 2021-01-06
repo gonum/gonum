@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-// ether is a non-existant unit used for testing.
+// ether is a non-existent unit used for testing.
 type ether float64
 
 func (e ether) Unit() *Unit {
@@ -106,6 +106,21 @@ func TestFormat(t *testing.T) {
 	for _, ts := range formatTests {
 		if r := fmt.Sprintf(ts.format, ts.unit); r != ts.expect {
 			t.Errorf("Format %q: got: %q expected: %q", ts.format, r, ts.expect)
+		}
+	}
+}
+
+func TestCopy(t *testing.T) {
+	t.Parallel()
+	for _, ts := range formatTests {
+		u := ts.unit.Unit()
+		if len(u.Dimensions()) == 0 {
+			continue
+		}
+		c := u.Copy()
+		c.Mul(c)
+		if DimensionsMatch(u, c) {
+			t.Errorf("dimensions match after mutating copy of %v: %v == %v", u, u.Dimensions(), c.Dimensions())
 		}
 	}
 }

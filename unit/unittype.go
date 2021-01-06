@@ -245,7 +245,7 @@ func (u unitPrinters) Swap(i, j int) {
 // Unit represents a dimensional value. The dimensions will typically be in SI
 // units, but can also include dimensions created with NewDimension. The Unit type
 // is most useful for ensuring dimensional consistency when manipulating types
-// with different units, for example, by multiplying  an acceleration with a
+// with different units, for example, by multiplying an acceleration with a
 // mass to get a force. See the package documentation for further explanation.
 type Unit struct {
 	dimensions Dimensions
@@ -283,9 +283,19 @@ func (u *Unit) Add(uniter Uniter) *Unit {
 	return u
 }
 
-// Unit implements the Uniter interface
+// Unit implements the Uniter interface, returning the receiver. If a
+// copy of the receiver is required, use the Copy method.
 func (u *Unit) Unit() *Unit {
 	return u
+}
+
+// Copy returns a copy of the Unit that can be mutated without the change
+// being reflected in the original value.
+func (u *Unit) Copy() *Unit {
+	return &Unit{
+		dimensions: u.dimensions.clone(),
+		value:      u.value,
+	}
 }
 
 // Mul multiply the receiver by the input changing the dimensions

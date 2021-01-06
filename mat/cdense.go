@@ -4,7 +4,11 @@
 
 package mat
 
-import "gonum.org/v1/gonum/blas/cblas128"
+import (
+	"math/cmplx"
+
+	"gonum.org/v1/gonum/blas/cblas128"
+)
 
 var (
 	cDense *CDense
@@ -29,12 +33,56 @@ func (m *CDense) Dims() (r, c int) {
 func (m *CDense) Caps() (r, c int) { return m.capRows, m.capCols }
 
 // H performs an implicit conjugate transpose by returning the receiver inside a
-// Conjugate.
+// ConjTranspose.
 func (m *CDense) H() CMatrix {
-	return Conjugate{m}
+	return ConjTranspose{m}
 }
 
-// Slice returns a new Matrix that shares backing data with the receiver.
+// T performs an implicit transpose by returning the receiver inside a
+// CTranspose.
+func (m *CDense) T() CMatrix {
+	return CTranspose{m}
+}
+
+// Conj calculates the element-wise conjugate of a and stores the result in the
+// receiver.
+// Conj will panic if m and a do not have the same dimension unless m is empty.
+func (m *CDense) Conj(a CMatrix) {
+	ar, ac := a.Dims()
+	aU, aTrans, aConj := untransposeExtractCmplx(a)
+	m.reuseAsNonZeroed(ar, ac)
+
+	if arm, ok := a.(*CDense); ok {
+		amat := arm.mat
+		if m != aU {
+			m.checkOverlap(amat)
+		}
+		for ja, jm := 0, 0; ja < ar*amat.Stride; ja, jm = ja+amat.Stride, jm+m.mat.Stride {
+			for i, v := range amat.Data[ja : ja+ac] {
+				m.mat.Data[i+jm] = cmplx.Conj(v)
+			}
+		}
+		return
+	}
+
+	m.checkOverlapMatrix(aU)
+	if aTrans != aConj && m == aU {
+		// Only make workspace if the destination is transposed
+		// with respect to the source and they are the same
+		// matrix.
+		var restore func()
+		m, restore = m.isolatedWorkspace(aU)
+		defer restore()
+	}
+
+	for r := 0; r < ar; r++ {
+		for c := 0; c < ac; c++ {
+			m.set(r, c, cmplx.Conj(a.At(r, c)))
+		}
+	}
+}
+
+// Slice returns a new CMatrix that shares backing data with the receiver.
 // The returned matrix starts at {i,j} of the receiver and extends k-i rows
 // and l-j columns. The final row in the resulting matrix is k-1 and the
 // final column is l-1.
@@ -60,7 +108,6 @@ func (m *CDense) slice(i, k, j, l int) *CDense {
 	t.capCols -= j
 	return &t
 }
-
 
 // NewCDense creates a new complex Dense matrix with r rows and c columns.
 // If data == nil, a new slice is allocated for the backing slice.
@@ -171,6 +218,21 @@ func (m *CDense) reuseAsZeroed(r, c int) {
 	m.Zero()
 }
 
+// isolatedWorkspace returns a new dense matrix w with the size of a and
+// returns a callback to defer which performs cleanup at the return of the call.
+// This should be used when a method receiver is the same pointer as an input argument.
+func (m *CDense) isolatedWorkspace(a CMatrix) (w *CDense, restore func()) {
+	r, c := a.Dims()
+	if r == 0 || c == 0 {
+		panic(ErrZeroLength)
+	}
+	w = getWorkspaceCmplx(r, c, false)
+	return w, func() {
+		m.Copy(w)
+		putWorkspaceCmplx(w)
+	}
+}
+
 // Reset zeros the dimensions of the matrix so that it can be reused as the
 // receiver of a dimensionally restricted operation.
 //
@@ -225,6 +287,14 @@ func (m *CDense) Copy(a CMatrix) (r, c int) {
 		}
 	}
 	return r, c
+}
+
+// SetRawCMatrix sets the underlying cblas128.General used by the receiver.
+// Changes to elements in the receiver following the call will be reflected
+// in b.
+func (m *CDense) SetRawCMatrix(b cblas128.General) {
+	m.capRows, m.capCols = b.Rows, b.Cols
+	m.mat = b
 }
 
 // RawCMatrix returns the underlying cblas128.General used by the receiver.

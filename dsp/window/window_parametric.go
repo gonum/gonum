@@ -147,6 +147,24 @@ func (v Values) Transform(seq []float64) []float64 {
 	return seq
 }
 
+// TransformTo applies the weights in the receiver to src placing the result
+// in dst. If v is nil, TransformTo is a no-op, otherwise the length of v must
+// match the length of src and dst.
+func (v Values) TransformTo(dst, src []float64) {
+	if v == nil {
+		return
+	}
+	if len(v) != len(src) {
+		panic("window: seq length mismatch")
+	}
+	if len(v) != len(dst) {
+		panic("window: dst length mismatch")
+	}
+	for i, w := range v {
+		dst[i] = w * src[i]
+	}
+}
+
 // TransformComplex applies the weights in the receiver to seq in place, returning
 // the result. If v is nil, TransformComplex is a no-op, otherwise the length of v
 // must match the length of seq.
@@ -162,4 +180,23 @@ func (v Values) TransformComplex(seq []complex128) []complex128 {
 		seq[i] = complex(w*real(sv), w*imag(sv))
 	}
 	return seq
+}
+
+// TransformComplexTo applies the weights in the receiver to src placing the
+// result in dst. If v is nil, TransformComplexTo is a no-op, otherwise the
+// length of v must match the length of src and dst.
+func (v Values) TransformComplexTo(dst, src []complex128) {
+	if v == nil {
+		return
+	}
+	if len(v) != len(src) {
+		panic("window: seq length mismatch")
+	}
+	if len(v) != len(dst) {
+		panic("window: dst length mismatch")
+	}
+	for i, w := range v {
+		sv := src[i]
+		dst[i] = complex(w*real(sv), w*imag(sv))
+	}
 }

@@ -174,7 +174,18 @@ func TestWindows(t *testing.T) {
 				src[i] = 1
 			}
 
-			dst = NewValues(test.fn, len(src)).Transform(src)
+			vals := NewValues(test.fn, len(src))
+			dst = vals.Transform(src)
+			if !floats.EqualApprox(dst, test.want, tol) {
+				t.Errorf("unexpected result for lookup window function %q:\ngot:%#.6v\nwant:%#.6v", test.name, dst, test.want)
+			}
+
+			for i := range src {
+				src[i] = 1
+			}
+
+			dst = make([]float64, len(src))
+			vals.TransformTo(dst, src)
 			if !floats.EqualApprox(dst, test.want, tol) {
 				t.Errorf("unexpected result for lookup window function %q:\ngot:%#.6v\nwant:%#.6v", test.name, dst, test.want)
 			}
@@ -202,7 +213,18 @@ func TestWindowsComplex(t *testing.T) {
 				src[i] = complex(1, 1)
 			}
 
-			dst = NewValues(test.fn, len(src)).TransformComplex(src)
+			vals := NewValues(test.fn, len(src))
+			dst = vals.TransformComplex(src)
+			if !equalApprox(dst, test.want, tol) {
+				t.Errorf("unexpected result for lookup window function %q:\ngot:%#.6v\nwant:%#.6v", test.name, dst, test.want)
+			}
+
+			for i := range src {
+				src[i] = complex(1, 1)
+			}
+
+			dst = make([]complex128, len(src))
+			vals.TransformComplexTo(dst, src)
 			if !equalApprox(dst, test.want, tol) {
 				t.Errorf("unexpected result for lookup window function %q:\ngot:%#.6v\nwant:%#.6v", test.name, dst, test.want)
 			}

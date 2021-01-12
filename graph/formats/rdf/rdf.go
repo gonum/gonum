@@ -222,26 +222,29 @@ func (dec *Decoder) Reset(r io.Reader) {
 func (dec *Decoder) Unmarshal() (*Statement, error) {
 	for dec.scanner.Scan() {
 		data := bytes.TrimSpace(dec.scanner.Bytes())
-		if len(data) != 0 && data[0] != '#' {
-			s, err := ParseNQuad(string(data))
-			if err != nil {
-				return nil, fmt.Errorf("rdf: failed to parse %q: %w", data, err)
-			}
-			if s == nil {
-				continue
-			}
-			s.Subject.Value = dec.strings.intern(s.Subject.Value)
-			s.Predicate.Value = dec.strings.intern(s.Predicate.Value)
-			s.Object.Value = dec.strings.intern(s.Object.Value)
-			s.Subject.UID = dec.idFor(s.Subject.Value)
-			s.Object.UID = dec.idFor(s.Object.Value)
-			s.Predicate.UID = dec.idFor(s.Predicate.Value)
-			if s.Label.Value != "" {
-				s.Label.Value = dec.strings.intern(s.Label.Value)
-				s.Label.UID = dec.idFor(s.Label.Value)
-			}
-			return s, nil
+		if len(data) == 0 || data[0] == '#' {
+			continue
 		}
+
+		s, err := ParseNQuad(string(data))
+		if err != nil {
+			return nil, fmt.Errorf("rdf: failed to parse %q: %w", data, err)
+		}
+		if s == nil {
+			continue
+		}
+
+		s.Subject.Value = dec.strings.intern(s.Subject.Value)
+		s.Predicate.Value = dec.strings.intern(s.Predicate.Value)
+		s.Object.Value = dec.strings.intern(s.Object.Value)
+		s.Subject.UID = dec.idFor(s.Subject.Value)
+		s.Object.UID = dec.idFor(s.Object.Value)
+		s.Predicate.UID = dec.idFor(s.Predicate.Value)
+		if s.Label.Value != "" {
+			s.Label.Value = dec.strings.intern(s.Label.Value)
+			s.Label.UID = dec.idFor(s.Label.Value)
+		}
+		return s, nil
 	}
 	dec.strings = nil
 	err := dec.scanner.Err()

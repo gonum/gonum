@@ -18,6 +18,8 @@ go get golang.org/x/tools/cmd/cover
 go get github.com/mattn/goveralls
 # Required for dot parser checks.
 go get github.com/goccmack/gocc@66c61e9
+# Required for rdf parser checks.
+go get golang.org/x/tools/cmd/stringer
 
 # Clean up.
 # TODO(kortschak): Remove when golang/go#30515 is resolved.

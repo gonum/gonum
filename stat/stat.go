@@ -1277,7 +1277,7 @@ func MeanVariance(x, weights []float64) (mean, variance float64) {
 			ss += d * d
 			compensation += d
 		}
-		variance = (ss - compensation*compensation/float64(len(x))) / float64(len(x)-1)
+		variance = ss / float64(len(x)-1)
 		return mean, variance
 	}
 

@@ -16,36 +16,39 @@ type Vec struct {
 }
 
 // Add returns the vector sum of p and q.
-func (p Vec) Add(q Vec) Vec {
-	p.X += q.X
-	p.Y += q.Y
-	p.Z += q.Z
-	return p
+func Add(p, q Vec) Vec {
+	return Vec{
+		X: p.X + q.X,
+		Y: p.Y + q.Y,
+		Z: p.Z + q.Z,
+	}
 }
 
 // Sub returns the vector sum of p and -q.
-func (p Vec) Sub(q Vec) Vec {
-	p.X -= q.X
-	p.Y -= q.Y
-	p.Z -= q.Z
-	return p
+func Sub(p, q Vec) Vec {
+	return Vec{
+		X: p.X - q.X,
+		Y: p.Y - q.Y,
+		Z: p.Z - q.Z,
+	}
 }
 
 // Scale returns the vector p scaled by f.
-func (p Vec) Scale(f float64) Vec {
-	p.X *= f
-	p.Y *= f
-	p.Z *= f
-	return p
+func Scale(f float64, p Vec) Vec {
+	return Vec{
+		X: f * p.X,
+		Y: f * p.Y,
+		Z: f * p.Z,
+	}
 }
 
 // Dot returns the dot product p·q.
-func (p Vec) Dot(q Vec) float64 {
+func Dot(p, q Vec) float64 {
 	return p.X*q.X + p.Y*q.Y + p.Z*q.Z
 }
 
 // Cross returns the cross product p×q.
-func (p Vec) Cross(q Vec) Vec {
+func Cross(p, q Vec) Vec {
 	return Vec{
 		p.Y*q.Z - p.Z*q.Y,
 		p.Z*q.X - p.X*q.Z,
@@ -54,7 +57,7 @@ func (p Vec) Cross(q Vec) Vec {
 }
 
 // Rotate returns a new vector, rotated by alpha around the provided axis.
-func (p Vec) Rotate(alpha float64, axis Vec) Vec {
+func Rotate(p Vec, alpha float64, axis Vec) Vec {
 	return NewRotation(alpha, axis).Rotate(p)
 }
 
@@ -76,12 +79,12 @@ func Unit(p Vec) Vec {
 	if p.X == 0 && p.Y == 0 && p.Z == 0 {
 		return Vec{X: math.NaN(), Y: math.NaN(), Z: math.NaN()}
 	}
-	return p.Scale(1 / Norm(p))
+	return Scale(1/Norm(p), p)
 }
 
 // Cos returns the cosine of the opening angle between p and q.
 func Cos(p, q Vec) float64 {
-	return p.Dot(q) / (Norm(p) * Norm(q))
+	return Dot(p, q) / (Norm(p) * Norm(q))
 }
 
 // Box is a 3D bounding box.

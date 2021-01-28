@@ -12,38 +12,41 @@ type Vec struct {
 }
 
 // Add returns the vector sum of p and q.
-func (p Vec) Add(q Vec) Vec {
-	p.X += q.X
-	p.Y += q.Y
-	return p
+func Add(p, q Vec) Vec {
+	return Vec{
+		X: p.X + q.X,
+		Y: p.Y + q.Y,
+	}
 }
 
 // Sub returns the vector sum of p and -q.
-func (p Vec) Sub(q Vec) Vec {
-	p.X -= q.X
-	p.Y -= q.Y
-	return p
+func Sub(p, q Vec) Vec {
+	return Vec{
+		X: p.X - q.X,
+		Y: p.Y - q.Y,
+	}
 }
 
 // Scale returns the vector p scaled by f.
-func (p Vec) Scale(f float64) Vec {
-	p.X *= f
-	p.Y *= f
-	return p
+func Scale(f float64, p Vec) Vec {
+	return Vec{
+		X: f * p.X,
+		Y: f * p.Y,
+	}
 }
 
 // Dot returns the dot product p·q.
-func (p Vec) Dot(q Vec) float64 {
+func Dot(p, q Vec) float64 {
 	return p.X*q.X + p.Y*q.Y
 }
 
 // Cross returns the cross product p×q.
-func (p Vec) Cross(q Vec) float64 {
+func Cross(p, q Vec) float64 {
 	return p.X*q.Y - p.Y*q.X
 }
 
 // Rotate returns a new vector, rotated by alpha around the provided point, q.
-func (p Vec) Rotate(alpha float64, q Vec) Vec {
+func Rotate(p Vec, alpha float64, q Vec) Vec {
 	return NewRotation(alpha, q).Rotate(p)
 }
 
@@ -65,12 +68,12 @@ func Unit(p Vec) Vec {
 	if p.X == 0 && p.Y == 0 {
 		return Vec{X: math.NaN(), Y: math.NaN()}
 	}
-	return p.Scale(1 / Norm(p))
+	return Scale(1/Norm(p), p)
 }
 
 // Cos returns the cosine of the opening angle between p and q.
 func Cos(p, q Vec) float64 {
-	return p.Dot(q) / (Norm(p) * Norm(q))
+	return Dot(p, q) / (Norm(p) * Norm(q))
 }
 
 // Box is a 2D bounding box.
@@ -98,11 +101,11 @@ func (r Rotation) Rotate(p Vec) Vec {
 	if r.isIdentity() {
 		return p
 	}
-	o := p.Sub(r.p)
-	return Vec{
+	o := Sub(p, r.p)
+	return Add(Vec{
 		X: (o.X*r.cos - o.Y*r.sin),
 		Y: (o.X*r.sin + o.Y*r.cos),
-	}.Add(r.p)
+	}, r.p)
 }
 
 func (r Rotation) isIdentity() bool {

@@ -22,7 +22,7 @@ func TestAdd(t *testing.T) {
 		{Vec{1, -3}, Vec{1, -6}, Vec{2, -9}},
 		{Vec{1, 2}, Vec{-1, -2}, Vec{}},
 	} {
-		got := test.v1.Add(test.v2)
+		got := Add(test.v1, test.v2)
 		if got != test.want {
 			t.Errorf(
 				"error: %v + %v: got=%v, want=%v",
@@ -43,7 +43,7 @@ func TestSub(t *testing.T) {
 		{Vec{1, -3}, Vec{1, -6}, Vec{0, 3}},
 		{Vec{1, 2}, Vec{1, 2}, Vec{}},
 	} {
-		got := test.v1.Sub(test.v2)
+		got := Sub(test.v1, test.v2)
 		if got != test.want {
 			t.Errorf(
 				"error: %v - %v: got=%v, want=%v",
@@ -67,7 +67,7 @@ func TestScale(t *testing.T) {
 		{2, Vec{1, -3}, Vec{2, -6}},
 		{10, Vec{1, 2}, Vec{10, 20}},
 	} {
-		got := test.v.Scale(test.a)
+		got := Scale(test.a, test.v)
 		if got != test.want {
 			t.Errorf(
 				"error: %v * %v: got=%v, want=%v",
@@ -89,7 +89,7 @@ func TestDot(t *testing.T) {
 		{Vec{1, 2}, Vec{-0.3, 0.4}, 0.5},
 	} {
 		{
-			got := test.u.Dot(test.v)
+			got := Dot(test.u, test.v)
 			if got != test.want {
 				t.Errorf(
 					"error: %v · %v: got=%v, want=%v",
@@ -98,7 +98,7 @@ func TestDot(t *testing.T) {
 			}
 		}
 		{
-			got := test.v.Dot(test.u)
+			got := Dot(test.v, test.u)
 			if got != test.want {
 				t.Errorf(
 					"error: %v · %v: got=%v, want=%v",
@@ -120,7 +120,7 @@ func TestCross(t *testing.T) {
 		{Vec{1, 2}, Vec{-4, 5}, 13},
 		{Vec{1, 2}, Vec{2, 3}, -1},
 	} {
-		got := test.v1.Cross(test.v2)
+		got := Cross(test.v1, test.v2)
 		if got != test.want {
 			t.Errorf(
 				"error: %v × %v = %v, want %v",
@@ -236,7 +236,7 @@ func TestRotate(t *testing.T) {
 		{Vec{2, 2}, Vec{1, 1}, math.Pi, Vec{0, 0}},
 		{Vec{2, 2}, Vec{2, 0}, math.Pi, Vec{2, -2}},
 	} {
-		got := test.v.Rotate(test.alpha, test.q)
+		got := Rotate(test.v, test.alpha, test.q)
 		if !vecApproxEqual(got, test.want) {
 			t.Errorf(
 				"rotate(%v, %v, %v)= %v, want=%v",

@@ -37,7 +37,7 @@ func Gravity2(_, _ Particle2, m1, m2 float64, v r2.Vec) r2.Vec {
 	if d2 == 0 {
 		return r2.Vec{}
 	}
-	return v.Scale((m1 * m2) / (d2 * math.Sqrt(d2)))
+	return r2.Scale((m1*m2)/(d2*math.Sqrt(d2)), v)
 }
 
 // Plane implements Barnes-Hut force approximation calculations.
@@ -135,7 +135,7 @@ func (q *Plane) ForceOn(p Particle2, theta float64, f Force2) (force r2.Vec) {
 	m := p.Mass()
 	pv := p.Coord2()
 	for _, e := range q.Particles {
-		v = v.Add(f(p, e, m, e.Mass(), e.Coord2().Sub(pv)))
+		v = r2.Add(v, f(p, e, m, e.Mass(), r2.Sub(e.Coord2(), pv)))
 	}
 	return v
 }
@@ -260,7 +260,7 @@ func (t *tile) forceOn(p Particle2, pt r2.Vec, m, theta float64, f Force2) (vect
 	s := ((t.bounds.Max.X - t.bounds.Min.X) + (t.bounds.Max.Y - t.bounds.Min.Y)) / 2
 	d := math.Hypot(pt.X-t.center.X, pt.Y-t.center.Y)
 	if s/d < theta || t.particle != nil {
-		return f(p, t.particle, m, t.mass, t.center.Sub(pt))
+		return f(p, t.particle, m, t.mass, r2.Sub(t.center, pt))
 	}
 
 	var v r2.Vec
@@ -268,7 +268,7 @@ func (t *tile) forceOn(p Particle2, pt r2.Vec, m, theta float64, f Force2) (vect
 		if d == nil {
 			continue
 		}
-		v = v.Add(d.forceOn(p, pt, m, theta, f))
+		v = r2.Add(v, d.forceOn(p, pt, m, theta, f))
 	}
 	return v
 }

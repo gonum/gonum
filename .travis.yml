@@ -13,11 +13,8 @@ go:
 
 os:
  - linux
- - osx
- - windows
 
 arch:
- - amd64
  - arm64
 
 env:
@@ -29,62 +26,14 @@ env:
   - TAGS="-tags bounds"
   - TAGS="-tags noasm"
   - TAGS="-tags safe"
-  - FORCE_GOARCH=386
 
 cache:
  directories:
   - $HOME/.cache/go-build
   - $HOME/gopath/pkg/mod
 
-git:
- depth: 1
- autocrlf: input
-
 matrix:
  fast_finish: true
- exclude:
-  - os: linux
-    arch: arm64
-    env: TAGS="-tags bounds"
-  - os: linux
-    arch: arm64
-    env: TAGS="-tags noasm"
-  - os: linux
-    arch: arm64
-    env: TAGS="-tags safe"
-  - os: linux
-    arch: arm64
-    env: FORCE_GOARCH=386
-
-  - os: osx
-    env: TAGS="-tags bounds"
-  - os: osx
-    env: TAGS="-tags noasm"
-  - os: osx
-    env: TAGS="-tags safe"
-  - os: osx
-    env: FORCE_GOARCH=386
-
-  - os: osx
-    arch: arm64
-
-  - os: osx
-    go: master
-
-  - os: windows
-    env: TAGS="-tags bounds"
-  - os: windows
-    env: TAGS="-tags noasm"
-  - os: windows
-    env: TAGS="-tags safe"
-  - os: windows
-    env: FORCE_GOARCH=386
-
-  - os: windows
-    arch: arm64
-
-  - os: windows
-    go: master
  allow_failures:
   - go: master
 

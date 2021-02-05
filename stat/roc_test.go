@@ -210,6 +210,14 @@ func TestROC(t *testing.T) {
 			wantFPR:    nil,
 			wantThresh: nil,
 		},
+		{ // 23
+			y:          []float64{0.1, 0.35, 0.4, 0.8},
+			c:          []bool{true, false, true, false},
+			cutoffs:    []float64{-1, 0.1, 0.35, 0.4, 0.8, 0.9, 1},
+			wantTPR:    []float64{0, 0, 0, 0, 0.5, 0.5, 1},
+			wantFPR:    []float64{0, 0, 0, 0.5, 0.5, 1, 1},
+			wantThresh: []float64{math.Inf(1), 1, 0.9, 0.8, 0.4, 0.35, 0.1},
+		},
 	}
 	for i, test := range cases {
 		gotTPR, gotFPR, gotThresh := ROC(test.cutoffs, test.y, test.c, test.w)

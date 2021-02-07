@@ -23,9 +23,9 @@ func TestROC(t *testing.T) {
 		wantFPR    []float64
 		wantThresh []float64
 	}{
-		// Test cases were calculated using sklearn metrics.roc_curve when
-		// cutoffs is nil. Where cutoffs is not nil, a visual inspection is
-		// used.
+		// Test cases were informed by using sklearn metrics.roc_curve when
+		// cutoffs is nil, but all test cases (including when cutoffs is not
+		// nil) where calculated manually.
 		// Some differences exist between unweighted ROCs from our function
 		// and metrics.roc_curve which appears to use integer cutoffs in that
 		// case. sklearn also appears to do some magic that trims leading zeros
@@ -49,35 +49,35 @@ func TestROC(t *testing.T) {
 			y:          []float64{0, 3, 5, 6, 7.5, 8},
 			c:          []bool{false, true, false, true, true, true},
 			cutoffs:    []float64{-1, 2, 4, 6, 8},
-			wantTPR:    []float64{0, 0.5, 0.75, 1, 1},
+			wantTPR:    []float64{0.25, 0.75, 0.75, 1, 1},
 			wantFPR:    []float64{0, 0, 0.5, 0.5, 1},
-			wantThresh: []float64{math.Inf(1), 8, 6, 4, 2},
+			wantThresh: []float64{8, 6, 4, 2, -1},
 		},
 		{ // 3
 			y:          []float64{0, 3, 5, 6, 7.5, 8},
 			c:          []bool{false, true, false, true, true, true},
 			cutoffs:    []float64{-1, 1, 2, 3, 4, 5, 6, 7, 8},
-			wantTPR:    []float64{0, 0.5, 0.5, 0.75, 0.75, 0.75, 1, 1, 1},
-			wantFPR:    []float64{0, 0, 0, 0, 0.5, 0.5, 0.5, 0.5, 1},
-			wantThresh: []float64{math.Inf(1), 8, 7, 6, 5, 4, 3, 2, 1},
+			wantTPR:    []float64{0.25, 0.5, 0.75, 0.75, 0.75, 1, 1, 1, 1},
+			wantFPR:    []float64{0, 0, 0, 0.5, 0.5, 0.5, 0.5, 0.5, 1},
+			wantThresh: []float64{8, 7, 6, 5, 4, 3, 2, 1, -1},
 		},
 		{ // 4
 			y:          []float64{0, 3, 5, 6, 7.5, 8},
 			c:          []bool{false, true, false, true, true, true},
 			w:          []float64{4, 1, 6, 3, 2, 2},
 			cutoffs:    []float64{-1, 2, 4, 6, 8},
-			wantTPR:    []float64{0, 0.5, 0.875, 1, 1},
+			wantTPR:    []float64{0.25, 0.875, 0.875, 1, 1},
 			wantFPR:    []float64{0, 0, 0.6, 0.6, 1},
-			wantThresh: []float64{math.Inf(1), 8, 6, 4, 2},
+			wantThresh: []float64{8, 6, 4, 2, -1},
 		},
 		{ // 5
 			y:          []float64{0, 3, 5, 6, 7.5, 8},
 			c:          []bool{false, true, false, true, true, true},
 			w:          []float64{4, 1, 6, 3, 2, 2},
 			cutoffs:    []float64{-1, 1, 2, 3, 4, 5, 6, 7, 8},
-			wantTPR:    []float64{0, 0.5, 0.5, 0.875, 0.875, 0.875, 1, 1, 1},
-			wantFPR:    []float64{0, 0, 0, 0, 0.6, 0.6, 0.6, 0.6, 1},
-			wantThresh: []float64{math.Inf(1), 8, 7, 6, 5, 4, 3, 2, 1},
+			wantTPR:    []float64{0.25, 0.5, 0.875, 0.875, 0.875, 1, 1, 1, 1},
+			wantFPR:    []float64{0, 0, 0, 0.6, 0.6, 0.6, 0.6, 0.6, 1},
+			wantThresh: []float64{8, 7, 6, 5, 4, 3, 2, 1, -1},
 		},
 		{ // 6
 			y:          []float64{0, 3, 6, 6, 6, 8},
@@ -98,35 +98,35 @@ func TestROC(t *testing.T) {
 			y:          []float64{0, 3, 6, 6, 6, 8},
 			c:          []bool{false, true, false, true, true, true},
 			cutoffs:    []float64{-1, 2, 4, 6, 8},
-			wantTPR:    []float64{0, 0.25, 0.75, 1, 1},
-			wantFPR:    []float64{0, 0, 0.5, 0.5, 1},
-			wantThresh: []float64{math.Inf(1), 8, 6, 4, 2},
+			wantTPR:    []float64{0.25, 0.75, 0.75, 1, 1},
+			wantFPR:    []float64{0, 0.5, 0.5, 0.5, 1},
+			wantThresh: []float64{8, 6, 4, 2, -1},
 		},
 		{ // 9
 			y:          []float64{0, 3, 6, 6, 6, 8},
 			c:          []bool{false, true, false, true, true, true},
 			cutoffs:    []float64{-1, 1, 2, 3, 4, 5, 6, 7, 8},
-			wantTPR:    []float64{0, 0.25, 0.25, 0.75, 0.75, 0.75, 1, 1, 1},
-			wantFPR:    []float64{0, 0, 0, 0.5, 0.5, 0.5, 0.5, 0.5, 1},
-			wantThresh: []float64{math.Inf(1), 8, 7, 6, 5, 4, 3, 2, 1},
+			wantTPR:    []float64{0.25, 0.25, 0.75, 0.75, 0.75, 1, 1, 1, 1},
+			wantFPR:    []float64{0, 0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 1},
+			wantThresh: []float64{8, 7, 6, 5, 4, 3, 2, 1, -1},
 		},
 		{ // 10
 			y:          []float64{0, 3, 6, 6, 6, 8},
 			c:          []bool{false, true, false, true, true, true},
 			w:          []float64{4, 1, 6, 3, 2, 2},
 			cutoffs:    []float64{-1, 2, 4, 6, 8},
-			wantTPR:    []float64{0, 0.25, 0.875, 1, 1},
-			wantFPR:    []float64{0, 0, 0.6, 0.6, 1},
-			wantThresh: []float64{math.Inf(1), 8, 6, 4, 2},
+			wantTPR:    []float64{0.25, 0.875, 0.875, 1, 1},
+			wantFPR:    []float64{0, 0.6, 0.6, 0.6, 1},
+			wantThresh: []float64{8, 6, 4, 2, -1},
 		},
 		{ // 11
 			y:          []float64{0, 3, 6, 6, 6, 8},
 			c:          []bool{false, true, false, true, true, true},
 			w:          []float64{4, 1, 6, 3, 2, 2},
 			cutoffs:    []float64{-1, 1, 2, 3, 4, 5, 6, 7, 8},
-			wantTPR:    []float64{0, 0.25, 0.25, 0.875, 0.875, 0.875, 1, 1, 1},
-			wantFPR:    []float64{0, 0, 0, 0.6, 0.6, 0.6, 0.6, 0.6, 1},
-			wantThresh: []float64{math.Inf(1), 8, 7, 6, 5, 4, 3, 2, 1},
+			wantTPR:    []float64{0.25, 0.25, 0.875, 0.875, 0.875, 1, 1, 1, 1},
+			wantFPR:    []float64{0, 0, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 1},
+			wantThresh: []float64{8, 7, 6, 5, 4, 3, 2, 1, -1},
 		},
 		{ // 12
 			y:          []float64{0.1, 0.35, 0.4, 0.8},
@@ -147,8 +147,8 @@ func TestROC(t *testing.T) {
 			c:          []bool{false, true, false, false, true, true, false},
 			cutoffs:    []float64{-1, 2.5, 5, 7.5, 10},
 			wantTPR:    []float64{0, 0, 0, 0, 1},
-			wantFPR:    []float64{0, 0.25, 0.25, 0.25, 1},
-			wantThresh: []float64{math.Inf(1), 10, 7.5, 5, 2.5},
+			wantFPR:    []float64{0.25, 0.25, 0.25, 0.25, 1},
+			wantThresh: []float64{10, 7.5, 5, 2.5, -1},
 		},
 		{ // 15
 			y:          []float64{1, 2},
@@ -162,16 +162,16 @@ func TestROC(t *testing.T) {
 			c:          []bool{false, false},
 			cutoffs:    []float64{-1, 2},
 			wantTPR:    []float64{math.NaN(), math.NaN()},
-			wantFPR:    []float64{0, 1},
-			wantThresh: []float64{math.Inf(1), 2},
+			wantFPR:    []float64{0.5, 1},
+			wantThresh: []float64{2, -1},
 		},
 		{ // 17
 			y:          []float64{1, 2},
 			c:          []bool{false, false},
 			cutoffs:    []float64{0, 1.2, 1.4, 1.6, 1.8, 2},
 			wantTPR:    []float64{math.NaN(), math.NaN(), math.NaN(), math.NaN(), math.NaN(), math.NaN()},
-			wantFPR:    []float64{0, 0.5, 0.5, 0.5, 0.5, 1},
-			wantThresh: []float64{math.Inf(1), 2, 1.8, 1.6, 1.4, 1.2},
+			wantFPR:    []float64{0.5, 0.5, 0.5, 0.5, 0.5, 1},
+			wantThresh: []float64{2, 1.8, 1.6, 1.4, 1.2, 0},
 		},
 		{ // 18
 			y:          []float64{1},
@@ -185,8 +185,8 @@ func TestROC(t *testing.T) {
 			c:          []bool{false},
 			cutoffs:    []float64{-1, 1},
 			wantTPR:    []float64{math.NaN(), math.NaN()},
-			wantFPR:    []float64{0, 1},
-			wantThresh: []float64{math.Inf(1), 1},
+			wantFPR:    []float64{1, 1},
+			wantThresh: []float64{1, -1},
 		},
 		{ // 20
 			y:          []float64{1},
@@ -209,6 +209,38 @@ func TestROC(t *testing.T) {
 			wantTPR:    nil,
 			wantFPR:    nil,
 			wantThresh: nil,
+		},
+		{ // 23
+			y:          []float64{0.1, 0.35, 0.4, 0.8},
+			c:          []bool{true, false, true, false},
+			cutoffs:    []float64{-1, 0.1, 0.35, 0.4, 0.8, 0.9, 1},
+			wantTPR:    []float64{0, 0, 0, 0.5, 0.5, 1, 1},
+			wantFPR:    []float64{0, 0, 0.5, 0.5, 1, 1, 1},
+			wantThresh: []float64{1, 0.9, 0.8, 0.4, 0.35, 0.1, -1},
+		},
+		{ // 24
+			y:          []float64{0.1, 0.35, 0.4, 0.8},
+			c:          []bool{true, false, true, false},
+			cutoffs:    []float64{math.Inf(-1), 0.1, 0.36, 0.8},
+			wantTPR:    []float64{0, 0.5, 1, 1},
+			wantFPR:    []float64{0.5, 0.5, 1, 1},
+			wantThresh: []float64{0.8, 0.36, 0.1, math.Inf(-1)},
+		},
+		{ // 25
+			y:          []float64{0, 3, 5, 6, 7.5, 8},
+			c:          []bool{false, true, false, true, true, true},
+			cutoffs:    make([]float64, 0, 10),
+			wantTPR:    []float64{0, 0.25, 0.5, 0.75, 0.75, 1, 1},
+			wantFPR:    []float64{0, 0, 0, 0, 0.5, 0.5, 1},
+			wantThresh: []float64{math.Inf(1), 8, 7.5, 6, 5, 3, 0},
+		},
+		{ // 26
+			y:          []float64{0.1, 0.35, 0.4, 0.8},
+			c:          []bool{true, false, true, false},
+			cutoffs:    []float64{-1, 0.1, 0.35, 0.4, 0.8, 0.9, 1, 1.1, 1.2},
+			wantTPR:    []float64{0, 0, 0, 0, 0, 0.5, 0.5, 1, 1},
+			wantFPR:    []float64{0, 0, 0, 0, 0.5, 0.5, 1, 1, 1},
+			wantThresh: []float64{1.2, 1.1, 1, 0.9, 0.8, 0.4, 0.35, 0.1, -1},
 		},
 	}
 	for i, test := range cases {

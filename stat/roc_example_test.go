@@ -85,7 +85,7 @@ func ExampleROC_knownCutoffs() {
 	fmt.Printf("false positive rate: %v\n", fpr)
 
 	// Output:
-	// true  positive rate: [0.875 0.875 1]
+	// true  positive rate: [0.875 1 1]
 	// false positive rate: [0.6 0.6 1]
 }
 
@@ -104,8 +104,8 @@ func ExampleROC_equallySpacedCutoffs() {
 	fmt.Printf("false positive rate: %.3v\n", fpr)
 
 	// Output:
-	// true  positive rate: [0 0.333 0.333 0.583 0.583 0.583 0.667 0.667 1]
-	// false positive rate: [0 0 0 0 1 1 1 1 1]
+	// true  positive rate: [0.167 0.333 0.583 0.583 0.583 0.667 0.667 0.667 1]
+	// false positive rate: [0 0 0 1 1 1 1 1 1]
 }
 
 func ExampleROC_aUC() {

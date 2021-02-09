@@ -256,3 +256,63 @@ func TestROC(t *testing.T) {
 		}
 	}
 }
+
+func TestTOC(t *testing.T) {
+	cases := []struct {
+		c       []bool
+		wantMin []float64
+		wantMax []float64
+		wantTOC []float64
+	}{
+		{ // 0
+			// This is the example given in the paper's supplement.
+			// http://www2.clarku.edu/~rpontius/TOCexample2.xlsx
+			// It is also shown in the WP article.
+			// https://en.wikipedia.org/wiki/Total_operating_characteristic#/media/File:TOC_labeled.png
+			c: []bool{
+				false, true, false, false, true, false,
+				true, false, false, true, true, true,
+				true, true, true, true, false, false,
+				false, false, false, false, false, false,
+				false, false, false, false, false, false,
+			},
+			wantMin: []float64{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+			wantMax: []float64{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10},
+			wantTOC: []float64{0, 0, 1, 1, 1, 2, 2, 3, 3, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10},
+		},
+		{ // 1
+			c:       []bool{},
+			wantMin: nil,
+			wantMax: nil,
+			wantTOC: nil,
+		},
+		{ // 2
+			c: []bool{
+				false, false, false, false, false,
+			},
+			wantMin: []float64{0, 0, 0, 0, 0, 0},
+			wantMax: []float64{0, 0, 0, 0, 0, 0},
+			wantTOC: []float64{0, 0, 0, 0, 0, 0},
+		},
+		{ // 3
+			c: []bool{
+				true, true, true, true, true,
+			},
+			wantMin: []float64{0, 1, 2, 3, 4, 5},
+			wantMax: []float64{0, 1, 2, 3, 4, 5},
+			wantTOC: []float64{0, 1, 2, 3, 4, 5},
+		},
+	}
+	for i, test := range cases {
+		gotMin, gotTOC, gotMax := TOC(test.c)
+		if !floats.Same(gotMin, test.wantMin) {
+			t.Errorf("%d: unexpected minimum bound got:%v want:%v", i, gotMin, test.wantMin)
+		}
+		if !floats.Same(gotMax, test.wantMax) {
+			t.Errorf("%d: unexpected maximum bound got:%v want:%v", i, gotMax, test.wantMax)
+		}
+		if !floats.Same(gotTOC, test.wantTOC) {
+			t.Errorf("%d: unexpected TOC got:%v want:%v", i, gotTOC, test.wantTOC)
+		}
+	}
+}

@@ -127,3 +127,38 @@ func ROC(cutoffs, y []float64, classes []bool, weights []float64) (tpr, fpr, thr
 
 	return tpr, fpr, cutoffs
 }
+
+// TOC returns the Total Operating Characteristic for the classes provided
+// and the minimum and maximum bounds for the TOC.
+//
+// The input classes should be sorted according to the rank variable.
+// SortWeightedLabeled can be used to sort classes together with the rank
+// variable. The returned ntp values can be interpreted as true positives
+// where values at or above the given rank are assigned class true for each
+// given rank from 1 to len(classes). The values of min and max provide the
+// minimum and maximum possible number of true values for the set of classes.
+//
+// More details about TOC curves are available at
+// https://en.wikipedia.org/wiki/Total_operating_characteristic
+func TOC(classes []bool) (min, ntp, max []float64) {
+	if len(classes) == 0 {
+		return nil, nil, nil
+	}
+	ntp = make([]float64, len(classes)+1)
+	for i := range ntp[1:] {
+		ntp[i+1] = ntp[i]
+		if classes[i] {
+			ntp[i+1] += 1
+		}
+	}
+	totalPositive := ntp[len(ntp)-1]
+	min = make([]float64, len(ntp))
+	for i := range min {
+		min[i] = math.Max(0, totalPositive-float64(len(classes)-i))
+	}
+	max = make([]float64, len(ntp))
+	for i := range max {
+		max[i] = math.Min(totalPositive, float64(i))
+	}
+	return min, ntp, max
+}

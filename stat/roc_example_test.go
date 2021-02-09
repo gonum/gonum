@@ -125,3 +125,40 @@ func ExampleROC_aUC() {
 	// false positive rate: [0 0.5 0.5 1 1]
 	// auc: 0.25
 }
+
+func ExampleTOC() {
+	classes := []bool{
+		false, true, false, false, true, false,
+		true, false, false, true, true, true,
+		true, true, true, true, false, false,
+		false, false, false, false, false, false,
+		false, false, false, false, false, false,
+	}
+
+	min, ntp, max := stat.TOC(classes)
+	fmt.Printf("minimum bound: %v\n", min)
+	fmt.Printf("TOC:           %v\n", ntp)
+	fmt.Printf("maximum bound: %v\n", max)
+
+	// Output:
+	// minimum bound: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2 3 4 5 6 7 8 9 10]
+	// TOC:           [0 0 1 1 1 2 2 3 3 3 4 5 6 7 8 9 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10]
+	// maximum bound: [0 1 2 3 4 5 6 7 8 9 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10]
+}
+
+func ExampleTOC_unsorted() {
+	y := []float64{8, 7.5, 6, 5, 3, 0}
+	classes := []bool{true, true, true, false, true, false}
+
+	stat.SortWeightedLabeled(y, classes, nil)
+
+	min, ntp, max := stat.TOC(classes)
+	fmt.Printf("minimum bound: %v\n", min)
+	fmt.Printf("TOC:           %v\n", ntp)
+	fmt.Printf("maximum bound: %v\n", max)
+
+	// Output:
+	// minimum bound: [0 0 0 1 2 3 4]
+	// TOC:           [0 0 1 1 2 3 4]
+	// maximum bound: [0 1 2 3 4 4 4]
+}

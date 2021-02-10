@@ -25,7 +25,7 @@ func TestROC(t *testing.T) {
 	}{
 		// Test cases were informed by using sklearn metrics.roc_curve when
 		// cutoffs is nil, but all test cases (including when cutoffs is not
-		// nil) where calculated manually.
+		// nil) were calculated manually.
 		// Some differences exist between unweighted ROCs from our function
 		// and metrics.roc_curve which appears to use integer cutoffs in that
 		// case. sklearn also appears to do some magic that trims leading zeros

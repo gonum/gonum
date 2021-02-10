@@ -26,7 +26,8 @@ import (
 // assigned class labels are compared with the true values in the classes
 // slice and used to calculate the FPR and TPR.
 //
-// If weights is nil, all weights are treated as 1.
+// If weights is nil, all weights are treated as 1. If weights is not nil
+// it must have the same length as y and classes, otherwise ROC will panic.
 //
 // If cutoffs is nil or empty, all possible cutoffs are calculated,
 // resulting in fpr and tpr having length one greater than the number of

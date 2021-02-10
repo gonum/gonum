@@ -108,7 +108,7 @@ func ExampleROC_equallySpacedCutoffs() {
 	// false positive rate: [0 0 0 1 1 1 1 1 1]
 }
 
-func ExampleROC_aUC() {
+func ExampleROC_aUC_unweighted() {
 	y := []float64{0.1, 0.35, 0.4, 0.8}
 	classes := []bool{true, false, true, false}
 
@@ -124,6 +124,22 @@ func ExampleROC_aUC() {
 	// true  positive rate: [0 0 0.5 0.5 1]
 	// false positive rate: [0 0.5 0.5 1 1]
 	// auc: 0.25
+}
+
+func ExampleROC_aUC_weighted() {
+	y := []float64{0.1, 0.35, 0.4, 0.8}
+	classes := []bool{true, false, true, false}
+	weights := []float64{1, 2, 2, 1}
+
+	tpr, fpr, _ := stat.ROC(nil, y, classes, weights)
+
+	// Compute Area Under Curve.
+	auc := integrate.Trapezoidal(fpr, tpr)
+	fmt.Printf("auc: %f\n", auc)
+
+	// Output:
+	// auc: 0.444444
+
 }
 
 func ExampleTOC() {
@@ -162,4 +178,73 @@ func ExampleTOC_unsorted() {
 	// minimum bound: [0 0 0 3 6 8 10]
 	// TOC:           [0 4 4 10 10 10 10]
 	// maximum bound: [0 4 5 10 10 10 10]
+}
+
+func ExampleTOC_aUC_unweighted() {
+	classes := []bool{true, false, true, false}
+
+	_, ntp, _ := stat.TOC(classes, nil)
+	pos := ntp[len(ntp)-1]
+	base := float64(len(classes)) - pos
+
+	// Compute the area under ntp and under the
+	// minimum bound.
+	x := floats.Span(make([]float64, len(classes)+1), 0, float64(len(classes)))
+	aucNTP := integrate.Trapezoidal(x, ntp)
+	aucMin := pos * pos / 2
+
+	// Calculate the the area under the curve
+	// within the bounding parallelogram.
+	auc := aucNTP - aucMin
+
+	// Calculate the area within the bounding
+	// parallelogram.
+	par := pos * base
+
+	// The AUC is the ratio of the area under
+	// the curve within the bounding parallelogram
+	// and the total parallelogram bound.
+	auc /= par
+
+	fmt.Printf("number of true positives: %v\n", ntp)
+	fmt.Printf("auc: %v\n", auc)
+
+	// Output:
+	// number of true positives: [0 0 1 1 2]
+	// auc: 0.25
+}
+
+func ExampleTOC_aUC_weighted() {
+	classes := []bool{true, false, true, false}
+	weights := []float64{1, 2, 2, 1}
+
+	min, ntp, max := stat.TOC(classes, weights)
+
+	// Compute the area under ntp and under the
+	// minimum and maximum bounds.
+	x := make([]float64, len(classes)+1)
+	floats.CumSum(x[1:], weights)
+	aucNTP := integrate.Trapezoidal(x, ntp)
+	aucMin := integrate.Trapezoidal(x, min)
+	aucMax := integrate.Trapezoidal(x, max)
+
+	// Calculate the the area under the curve
+	// within the bounding parallelogram.
+	auc := aucNTP - aucMin
+
+	// Calculate the area within the bounding
+	// parallelogram.
+	par := aucMax - aucMin
+
+	// The AUC is the ratio of the area under
+	// the curve within the bounding parallelogram
+	// and the total parallelogram bound.
+	auc /= par
+
+	fmt.Printf("number of true positives: %v\n", ntp)
+	fmt.Printf("auc: %f\n", auc)
+
+	// Output:
+	// number of true positives: [0 0 2 2 3]
+	// auc: 0.444444
 }

@@ -270,12 +270,14 @@ func TestTOC(t *testing.T) {
 			// http://www2.clarku.edu/~rpontius/TOCexample2.xlsx
 			// It is also shown in the WP article.
 			// https://en.wikipedia.org/wiki/Total_operating_characteristic#/media/File:TOC_labeled.png
+			// Note that classes are parity reversed from the data
+			// in the paper's example.
 			c: []bool{
-				false, true, false, false, true, false,
-				true, false, false, true, true, true,
-				true, true, true, true, false, false,
-				false, false, false, false, false, false,
-				false, false, false, false, false, false,
+				true, false, true, true, false, true,
+				false, true, true, false, false, false,
+				false, false, false, false, true, true,
+				true, true, true, true, true, true,
+				true, true, true, true, true, true,
 			},
 			wantMin: []float64{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
 			wantMax: []float64{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10},
@@ -291,24 +293,24 @@ func TestTOC(t *testing.T) {
 			c: []bool{
 				false, false, false, false, false,
 			},
-			wantMin: []float64{0, 0, 0, 0, 0, 0},
-			wantMax: []float64{0, 0, 0, 0, 0, 0},
-			wantTOC: []float64{0, 0, 0, 0, 0, 0},
+			wantMin: []float64{0, 1, 2, 3, 4, 5},
+			wantMax: []float64{0, 1, 2, 3, 4, 5},
+			wantTOC: []float64{0, 1, 2, 3, 4, 5},
 		},
 		{ // 3
 			c: []bool{
 				true, true, true, true, true,
 			},
-			wantMin: []float64{0, 1, 2, 3, 4, 5},
-			wantMax: []float64{0, 1, 2, 3, 4, 5},
-			wantTOC: []float64{0, 1, 2, 3, 4, 5},
+			wantMin: []float64{0, 0, 0, 0, 0, 0},
+			wantMax: []float64{0, 0, 0, 0, 0, 0},
+			wantTOC: []float64{0, 0, 0, 0, 0, 0},
 		},
 		{ // 4
 			c:       []bool{false, true, false, true, true, true},
 			w:       []float64{4, 1, 6, 3, 2, 2},
-			wantMin: []float64{0, 0, 0, 1, 4, 6, 8},
-			wantMax: []float64{0, 4, 5, 8, 8, 8, 8},
-			wantTOC: []float64{0, 0, 1, 1, 4, 6, 8},
+			wantMin: []float64{0, 0, 0, 3, 6, 8, 10},
+			wantMax: []float64{0, 4, 5, 10, 10, 10, 10},
+			wantTOC: []float64{0, 4, 4, 10, 10, 10, 10},
 		},
 	}
 	for i, test := range cases {

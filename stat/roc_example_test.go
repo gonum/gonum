@@ -128,11 +128,11 @@ func ExampleROC_aUC() {
 
 func ExampleTOC() {
 	classes := []bool{
-		false, true, false, false, true, false,
-		true, false, false, true, true, true,
-		true, true, true, true, false, false,
-		false, false, false, false, false, false,
-		false, false, false, false, false, false,
+		true, false, true, true, false, true,
+		false, true, true, false, false, false,
+		false, false, false, false, true, true,
+		true, true, true, true, true, true,
+		true, true, true, true, true, true,
 	}
 
 	min, ntp, max := stat.TOC(classes, nil)
@@ -159,7 +159,7 @@ func ExampleTOC_unsorted() {
 	fmt.Printf("maximum bound: %v\n", max)
 
 	// Output:
-	// minimum bound: [0 0 0 1 4 6 8]
-	// TOC:           [0 0 1 1 4 6 8]
-	// maximum bound: [0 4 5 8 8 8 8]
+	// minimum bound: [0 0 0 3 6 8 10]
+	// TOC:           [0 4 4 10 10 10 10]
+	// maximum bound: [0 4 5 10 10 10 10]
 }

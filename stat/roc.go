@@ -134,8 +134,8 @@ func ROC(cutoffs, y []float64, classes []bool, weights []float64) (tpr, fpr, thr
 // and the minimum and maximum bounds for the TOC.
 //
 // The input classes should be sorted with their weights according to the
-// rank variable. SortWeightedLabeled can be used to sort classes together
-// with weights by the rank variable.
+// rank variable ascending. SortWeightedLabeled can be used to sort classes
+// together with weights by the rank variable.
 //
 // The returned ntp values can be interpreted as true positives where values
 // at or above the given rank are assigned class true for each given rank
@@ -161,7 +161,7 @@ func TOC(classes []bool, weights []float64) (min, ntp, max []float64) {
 	if weights == nil {
 		for i := range ntp[1:] {
 			ntp[i+1] = ntp[i]
-			if classes[i] {
+			if !classes[i] {
 				ntp[i+1] += 1
 			}
 		}
@@ -177,7 +177,7 @@ func TOC(classes []bool, weights []float64) (min, ntp, max []float64) {
 
 	for i := range ntp[1:] {
 		ntp[i+1] = ntp[i]
-		if classes[i] {
+		if !classes[i] {
 			ntp[i+1] += weights[i]
 		}
 	}

@@ -135,7 +135,7 @@ func ExampleTOC() {
 		false, false, false, false, false, false,
 	}
 
-	min, ntp, max := stat.TOC(classes)
+	min, ntp, max := stat.TOC(classes, nil)
 	fmt.Printf("minimum bound: %v\n", min)
 	fmt.Printf("TOC:           %v\n", ntp)
 	fmt.Printf("maximum bound: %v\n", max)
@@ -149,16 +149,17 @@ func ExampleTOC() {
 func ExampleTOC_unsorted() {
 	y := []float64{8, 7.5, 6, 5, 3, 0}
 	classes := []bool{true, true, true, false, true, false}
+	weights := []float64{2, 2, 3, 6, 1, 4}
 
-	stat.SortWeightedLabeled(y, classes, nil)
+	stat.SortWeightedLabeled(y, classes, weights)
 
-	min, ntp, max := stat.TOC(classes)
+	min, ntp, max := stat.TOC(classes, weights)
 	fmt.Printf("minimum bound: %v\n", min)
 	fmt.Printf("TOC:           %v\n", ntp)
 	fmt.Printf("maximum bound: %v\n", max)
 
 	// Output:
-	// minimum bound: [0 0 0 1 2 3 4]
-	// TOC:           [0 0 1 1 2 3 4]
-	// maximum bound: [0 1 2 3 4 4 4]
+	// minimum bound: [0 0 0 1 4 6 8]
+	// TOC:           [0 0 1 1 4 6 8]
+	// maximum bound: [0 4 5 8 8 8 8]
 }

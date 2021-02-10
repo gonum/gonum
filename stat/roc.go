@@ -7,6 +7,8 @@ package stat
 import (
 	"math"
 	"sort"
+
+	"gonum.org/v1/gonum/floats"
 )
 
 // ROC returns paired false positive rate (FPR) and true positive rate
@@ -131,34 +133,63 @@ func ROC(cutoffs, y []float64, classes []bool, weights []float64) (tpr, fpr, thr
 // TOC returns the Total Operating Characteristic for the classes provided
 // and the minimum and maximum bounds for the TOC.
 //
-// The input classes should be sorted according to the rank variable.
-// SortWeightedLabeled can be used to sort classes together with the rank
-// variable. The returned ntp values can be interpreted as true positives
-// where values at or above the given rank are assigned class true for each
-// given rank from 1 to len(classes). The values of min and max provide the
-// minimum and maximum possible number of true values for the set of classes.
+// The input classes should be sorted with their weights according to the
+// rank variable. SortWeightedLabeled can be used to sort classes together
+// with weights by the rank variable.
+//
+// The returned ntp values can be interpreted as true positives where values
+// at or above the given rank are assigned class true for each given rank
+// from 1 to len(classes). The values of min and max provide the minimum and
+// maximum possible number of true values for the set of classes.
+//
+// If weights is nil, all weights are treated as 1. If weights is not nil
+// it must have the same length as classes, otherwise TOC will panic.
 //
 // More details about TOC curves are available at
 // https://en.wikipedia.org/wiki/Total_operating_characteristic
-func TOC(classes []bool) (min, ntp, max []float64) {
+func TOC(classes []bool, weights []float64) (min, ntp, max []float64) {
+	if weights != nil && len(classes) != len(weights) {
+		panic("stat: slice length mismatch")
+	}
 	if len(classes) == 0 {
 		return nil, nil, nil
 	}
+
 	ntp = make([]float64, len(classes)+1)
+	min = make([]float64, len(ntp))
+	max = make([]float64, len(ntp))
+	if weights == nil {
+		for i := range ntp[1:] {
+			ntp[i+1] = ntp[i]
+			if classes[i] {
+				ntp[i+1] += 1
+			}
+		}
+		totalPositive := ntp[len(ntp)-1]
+		for i := range min {
+			min[i] = math.Max(0, totalPositive-float64(len(classes)-i))
+		}
+		for i := range max {
+			max[i] = math.Min(totalPositive, float64(i))
+		}
+		return min, ntp, max
+	}
+
 	for i := range ntp[1:] {
 		ntp[i+1] = ntp[i]
 		if classes[i] {
-			ntp[i+1] += 1
+			ntp[i+1] += weights[i]
 		}
 	}
+	cumw := make([]float64, len(ntp))
+	floats.CumSum(cumw[1:], weights)
+	totw := cumw[len(cumw)-1]
 	totalPositive := ntp[len(ntp)-1]
-	min = make([]float64, len(ntp))
 	for i := range min {
-		min[i] = math.Max(0, totalPositive-float64(len(classes)-i))
+		min[i] = math.Max(0, totalPositive-(totw-cumw[i]))
 	}
-	max = make([]float64, len(ntp))
 	for i := range max {
-		max[i] = math.Min(totalPositive, float64(i))
+		max[i] = math.Min(totalPositive, cumw[i])
 	}
 	return min, ntp, max
 }

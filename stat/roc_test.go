@@ -260,6 +260,7 @@ func TestROC(t *testing.T) {
 func TestTOC(t *testing.T) {
 	cases := []struct {
 		c       []bool
+		w       []float64
 		wantMin []float64
 		wantMax []float64
 		wantTOC []float64
@@ -302,9 +303,16 @@ func TestTOC(t *testing.T) {
 			wantMax: []float64{0, 1, 2, 3, 4, 5},
 			wantTOC: []float64{0, 1, 2, 3, 4, 5},
 		},
+		{ // 4
+			c:       []bool{false, true, false, true, true, true},
+			w:       []float64{4, 1, 6, 3, 2, 2},
+			wantMin: []float64{0, 0, 0, 1, 4, 6, 8},
+			wantMax: []float64{0, 4, 5, 8, 8, 8, 8},
+			wantTOC: []float64{0, 0, 1, 1, 4, 6, 8},
+		},
 	}
 	for i, test := range cases {
-		gotMin, gotTOC, gotMax := TOC(test.c)
+		gotMin, gotTOC, gotMax := TOC(test.c, test.w)
 		if !floats.Same(gotMin, test.wantMin) {
 			t.Errorf("%d: unexpected minimum bound got:%v want:%v", i, gotMin, test.wantMin)
 		}

@@ -1,1 +1,1 @@
-../../script.d/nothing.sh
+../../../.github/workflows/script.d/nothing.sh

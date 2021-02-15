@@ -1,1 +1,1 @@
-../../script.d/test.sh
+../../../.github/workflows/script.d/test.sh

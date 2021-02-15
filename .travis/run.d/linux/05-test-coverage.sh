@@ -1,1 +1,1 @@
-../../script.d/test-coverage.sh
+../../../.github/workflows/script.d/travis-test-coverage.sh

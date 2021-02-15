@@ -1,1 +1,1 @@
-../../script.d/check-copyright.sh
+../../../.github/workflows/script.d/check-copyright.sh

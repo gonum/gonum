@@ -63,20 +63,20 @@ jobs:
     - name: Check copyrights+imports+formatting+generate
       if: matrix.platform == 'ubuntu-latest' && matrix.tags == ''
       run: |
-        ./.travis/script.d/deps.sh
-        ./.travis/script.d/check-copyright.sh
-        ./.travis/script.d/check-imports.sh
-        ./.travis/script.d/check-formatting.sh
-        ./.travis/script.d/check-generate.sh
+        ./.github/workflows/script.d/deps.sh
+        ./.github/workflows/script.d/check-copyright.sh
+        ./.github/workflows/script.d/check-imports.sh
+        ./.github/workflows/script.d/check-formatting.sh
+        ./.github/workflows/script.d/check-generate.sh
 
     - name: Test
       run: |
-        ./.travis/script.d/test.sh
+        ./.github/workflows/script.d/test.sh
 
     - name: Coverage
       if: matrix.platform == 'ubuntu-latest'
       run: |
-        ./.github/workflows/test-coverage.sh
+        ./.github/workflows/script.d/test-coverage.sh
 
     - name: Upload-Coverage
       if: matrix.platform == 'ubuntu-latest'

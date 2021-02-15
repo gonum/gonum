@@ -1,1 +1,1 @@
-../../script.d/check-generate.sh
+../../../.github/workflows/script.d/check-generate.sh

@@ -56,7 +56,7 @@ jobs:
     - name: Coverage
       if: matrix.platform == 'ubuntu-latest'
       run: |
-        ./.github/workflows/test-coverage.sh
+        ./.github/workflows/script.d/test-coverage.sh
 
     - name: Upload-Coverage
       if: matrix.platform == 'ubuntu-latest'

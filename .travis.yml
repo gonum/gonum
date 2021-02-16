@@ -7,8 +7,8 @@ language: go
 # Do not move these lines; they are referred to by README.md.
 # Versions of go that are explicitly supported by Gonum, plus Go tip.
 go:
+ - 1.16.x
  - 1.15.x
- - 1.14.x
  - master
 
 os:

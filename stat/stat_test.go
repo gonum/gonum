@@ -1556,6 +1556,19 @@ func ExampleStdDev() {
 	// The weighted standard deviation of the samples is 10.5733
 }
 
+func ExamplePopulationStdDev() {
+	x := []float64{8, 2, -9, 15, 4}
+	stdev := PopulationStdDev(x, nil)
+	fmt.Printf("The standard deviation of the population is %.4f\n", stdev)
+
+	weights := []float64{2, 2, 6, 7, 1}
+	weightedStdev := PopulationStdDev(x, weights)
+	fmt.Printf("The weighted standard deviation of the population is %.4f\n", weightedStdev)
+	// Output:
+	// The standard deviation of the population is 7.8740
+	// The weighted standard deviation of the population is 10.2754
+}
+
 func ExampleStdErr() {
 	x := []float64{8, 2, -9, 15, 4}
 	weights := []float64{2, 2, 6, 7, 1}
@@ -1731,7 +1744,58 @@ func TestVariance(t *testing.T) {
 	if !panics(func() { Variance(make([]float64, 3), make([]float64, 2)) }) {
 		t.Errorf("Variance did not panic with x, weights length mismatch")
 	}
+}
 
+func TestPopulationVariance(t *testing.T) {
+	for i, test := range []struct {
+		x       []float64
+		weights []float64
+		ans     float64
+	}{
+		{
+			x:       []float64{8, -3, 7, 8, -4},
+			weights: nil,
+			ans:     30.16,
+		},
+		{
+			x:       []float64{8, -3, 7, 8, -4},
+			weights: []float64{1, 1, 1, 1, 1},
+			ans:     30.16,
+		},
+		{
+			x:       []float64{8, 3, 7, 8, 4},
+			weights: []float64{2, 1, 2, 1, 1},
+			ans:     3.6734693877551026,
+		},
+		{
+			x:       []float64{1, 4, 9},
+			weights: []float64{1, 1.5, 1},
+			ans:     9.387755102040817,
+		},
+		{
+			x:       []float64{1, 2, 3},
+			weights: []float64{1, 1.5, 1},
+			ans:     0.5714285714285714,
+		},
+		{
+			x:       []float64{2},
+			weights: nil,
+			ans:     0,
+		},
+		{
+			x:       []float64{2},
+			weights: []float64{2},
+			ans:     0,
+		},
+	} {
+		variance := PopulationVariance(test.x, test.weights)
+		if math.Abs(variance-test.ans) > 1e-14 {
+			t.Errorf("PopulationVariance mismatch case %d. Expected %v, Found %v", i, test.ans, variance)
+		}
+	}
+	if !panics(func() { PopulationVariance(make([]float64, 3), make([]float64, 2)) }) {
+		t.Errorf("PopulationVariance did not panic with x, weights length mismatch")
+	}
 }
 
 func ExampleVariance() {
@@ -1745,6 +1809,19 @@ func ExampleVariance() {
 	// Output:
 	// The variance of the samples is 77.5000
 	// The weighted variance of the samples is 111.7941
+}
+
+func ExamplePopulationVariance() {
+	x := []float64{8, 2, -9, 15, 4}
+	variance := PopulationVariance(x, nil)
+	fmt.Printf("The biased variance of the samples is %.4f\n", variance)
+
+	weights := []float64{2, 2, 6, 7, 1}
+	weightedVariance := PopulationVariance(x, weights)
+	fmt.Printf("The weighted biased variance of the samples is %.4f\n", weightedVariance)
+	// Output:
+	// The biased variance of the samples is 62.0000
+	// The weighted biased variance of the samples is 105.5833
 }
 
 func TestStdScore(t *testing.T) {

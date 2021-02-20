@@ -1,1 +1,1 @@
-../../script.d/check-formatting.sh
+../../../.github/workflows/script.d/check-formatting.sh

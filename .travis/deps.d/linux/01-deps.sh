@@ -1,1 +1,1 @@
-../../script.d/deps.sh
+../../../.github/workflows/script.d/deps.sh

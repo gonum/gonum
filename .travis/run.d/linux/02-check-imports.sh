@@ -1,1 +1,1 @@
-../../script.d/check-imports.sh
+../../../.github/workflows/script.d/check-imports.sh

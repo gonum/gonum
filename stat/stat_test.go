@@ -1556,13 +1556,13 @@ func ExampleStdDev() {
 	// The weighted standard deviation of the samples is 10.5733
 }
 
-func ExamplePopulationStdDev() {
+func ExamplePopStdDev() {
 	x := []float64{8, 2, -9, 15, 4}
-	stdev := PopulationStdDev(x, nil)
+	stdev := PopStdDev(x, nil)
 	fmt.Printf("The standard deviation of the population is %.4f\n", stdev)
 
 	weights := []float64{2, 2, 6, 7, 1}
-	weightedStdev := PopulationStdDev(x, weights)
+	weightedStdev := PopStdDev(x, weights)
 	fmt.Printf("The weighted standard deviation of the population is %.4f\n", weightedStdev)
 	// Output:
 	// The standard deviation of the population is 7.8740
@@ -1746,7 +1746,7 @@ func TestVariance(t *testing.T) {
 	}
 }
 
-func TestPopulationVariance(t *testing.T) {
+func TestPopVariance(t *testing.T) {
 	for i, test := range []struct {
 		x       []float64
 		weights []float64
@@ -1788,13 +1788,13 @@ func TestPopulationVariance(t *testing.T) {
 			ans:     0,
 		},
 	} {
-		variance := PopulationVariance(test.x, test.weights)
+		variance := PopVariance(test.x, test.weights)
 		if math.Abs(variance-test.ans) > 1e-14 {
-			t.Errorf("PopulationVariance mismatch case %d. Expected %v, Found %v", i, test.ans, variance)
+			t.Errorf("PopVariance mismatch case %d. Expected %v, Found %v", i, test.ans, variance)
 		}
 	}
-	if !panics(func() { PopulationVariance(make([]float64, 3), make([]float64, 2)) }) {
-		t.Errorf("PopulationVariance did not panic with x, weights length mismatch")
+	if !panics(func() { PopVariance(make([]float64, 3), make([]float64, 2)) }) {
+		t.Errorf("PopVariance did not panic with x, weights length mismatch")
 	}
 }
 
@@ -1811,13 +1811,13 @@ func ExampleVariance() {
 	// The weighted variance of the samples is 111.7941
 }
 
-func ExamplePopulationVariance() {
+func ExamplePopVariance() {
 	x := []float64{8, 2, -9, 15, 4}
-	variance := PopulationVariance(x, nil)
+	variance := PopVariance(x, nil)
 	fmt.Printf("The biased variance of the samples is %.4f\n", variance)
 
 	weights := []float64{2, 2, 6, 7, 1}
-	weightedVariance := PopulationVariance(x, weights)
+	weightedVariance := PopVariance(x, weights)
 	fmt.Printf("The weighted biased variance of the samples is %.4f\n", weightedVariance)
 	// Output:
 	// The biased variance of the samples is 62.0000

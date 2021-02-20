@@ -1269,14 +1269,14 @@ func MeanVariance(x, weights []float64) (mean, variance float64) {
 	return mean, unnormalisedVariance / (sumWeights - 1)
 }
 
-// PopulationMeanVariance computes the sample mean and biased variance (also known as
+// PopMeanVariance computes the sample mean and biased variance (also known as
 // "population variance"), where the mean and variance are
 //  \sum_i w_i * x_i / (sum_i w_i)
 //  \sum_i w_i (x_i - mean)^2 / (sum_i w_i)
 // respectively.
 // If weights is nil then all of the weights are 1. If weights is not nil, then
 // len(x) must equal len(weights).
-func PopulationMeanVariance(x, weights []float64) (mean, variance float64) {
+func PopMeanVariance(x, weights []float64) (mean, variance float64) {
 	var (
 		unnormalisedVariance float64
 		sumWeights           float64
@@ -1285,26 +1285,26 @@ func PopulationMeanVariance(x, weights []float64) (mean, variance float64) {
 	return mean, unnormalisedVariance / sumWeights
 }
 
-// PopulationMeanStdDev returns the sample mean and biased standard deviation
+// PopMeanStdDev returns the sample mean and biased standard deviation
 // (also known as "population standard deviation").
-func PopulationMeanStdDev(x, weights []float64) (mean, std float64) {
-	mean, variance := PopulationMeanVariance(x, weights)
+func PopMeanStdDev(x, weights []float64) (mean, std float64) {
+	mean, variance := PopMeanVariance(x, weights)
 	return mean, math.Sqrt(variance)
 }
 
-// PopulationStdDev returns the population standard deviation, i.e., a square root
+// PopStdDev returns the population standard deviation, i.e., a square root
 // of the biased variance estimate.
-func PopulationStdDev(x, weights []float64) float64 {
-	_, stDev := PopulationMeanStdDev(x, weights)
+func PopStdDev(x, weights []float64) float64 {
+	_, stDev := PopMeanStdDev(x, weights)
 	return stDev
 }
 
-// PopulationVariance computes the unbiased weighted sample variance:
+// PopVariance computes the unbiased weighted sample variance:
 //  \sum_i w_i (x_i - mean)^2 / (sum_i w_i)
 // If weights is nil then all of the weights are 1. If weights is not nil, then
 // len(x) must equal len(weights).
-func PopulationVariance(x, weights []float64) float64 {
-	_, variance := PopulationMeanVariance(x, weights)
+func PopVariance(x, weights []float64) float64 {
+	_, variance := PopMeanVariance(x, weights)
 	return variance
 }
 

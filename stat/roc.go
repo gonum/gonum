@@ -133,14 +133,15 @@ func ROC(cutoffs, y []float64, classes []bool, weights []float64) (tpr, fpr, thr
 // TOC returns the Total Operating Characteristic for the classes provided
 // and the minimum and maximum bounds for the TOC.
 //
-// The input classes should be sorted with their weights according to the
-// rank variable ascending. SortWeightedLabeled can be used to sort classes
+// The input y values that correspond to classes and weights must be sorted
+// in ascending order. classes[i] is the class of value y[i] and weights[i]
+// is the weight of y[i]. SortWeightedLabeled can be used to sort classes
 // together with weights by the rank variable.
 //
-// The returned ntp values can be interpreted as true positives where values
-// at or above the given rank are assigned class true for each given rank
-// from 1 to len(classes). The values of min and max provide the minimum and
-// maximum possible number of true values for the set of classes.
+// The returned ntp values can be interpreted as the number of true positives
+// where values at or above the given rank are assigned class true for each
+// given rank from 1 to len(classes). The values of min and max provide the
+// minimum and maximum possible number of true values for the set of classes.
 //
 // If weights is nil, all weights are treated as 1. If weights is not nil
 // it must have the same length as classes, otherwise TOC will panic.

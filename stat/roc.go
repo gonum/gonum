@@ -143,8 +143,10 @@ func ROC(cutoffs, y []float64, classes []bool, weights []float64) (tpr, fpr, thr
 // rank from 1 to len(classes). The values of min and max provide the minimum
 // and maximum possible number of true values for the set of classes.
 //
-// If weights is nil, all weights are treated as 1. If weights is not nil
-// it must have the same length as classes, otherwise TOC will panic.
+// If weights is nil, all weights are treated as 1. When weights are not nil,
+// the calculation of min and max allows for partial assignment of single data
+// points. If weights is not nil it must have the same length as classes,
+// otherwise TOC will panic.
 //
 // More details about TOC curves are available at
 // https://en.wikipedia.org/wiki/Total_operating_characteristic

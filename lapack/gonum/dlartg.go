@@ -39,7 +39,7 @@ func (impl Implementation) Dlartg(f, g float64) (cs, sn, r float64) {
 			f1 *= safmn2
 			g1 *= safmn2
 			scale = math.Max(math.Abs(f1), math.Abs(g1))
-			if scale < safmx2 {
+			if scale < safmx2 || count == 20 {
 				break
 			}
 		}
@@ -56,7 +56,7 @@ func (impl Implementation) Dlartg(f, g float64) (cs, sn, r float64) {
 			f1 *= safmx2
 			g1 *= safmx2
 			scale = math.Max(math.Abs(f1), math.Abs(g1))
-			if scale >= safmn2 {
+			if scale >= safmn2 || count == 20 {
 				break
 			}
 		}

@@ -5,12 +5,9 @@
 package testlapack
 
 import (
+	"fmt"
 	"math"
 	"testing"
-
-	"golang.org/x/exp/rand"
-
-	"gonum.org/v1/gonum/floats/scalar"
 )
 
 type Dlartger interface {
@@ -18,102 +15,85 @@ type Dlartger interface {
 }
 
 func DlartgTest(t *testing.T, impl Dlartger) {
-	const tol = 1e-14
-	// safmn2 and safmx2 are copied from native.Dlartg.
-	// safmn2 ~ 2*10^{-146}
-	safmn2 := math.Pow(dlamchB, math.Trunc(math.Log(dlamchS/dlamchE)/math.Log(dlamchB)/2))
-	// safmx2 ~ 5*10^145
-	safmx2 := 1 / safmn2
-	rnd := rand.New(rand.NewSource(1))
-	for i := 0; i < 1000; i++ {
-		// Generate randomly huge, tiny, and "normal" input arguments to Dlartg.
-		var f float64
-		var fHuge bool
-		switch rnd.Intn(3) {
-		case 0:
-			// Huge f.
-			fHuge = true
-			// scale is in the range (10^{-10}, 10^10].
-			scale := math.Pow(10, 10-20*rnd.Float64())
-			// f is in the range (5*10^135, 5*10^155].
-			f = scale * safmx2
-		case 1:
-			// Tiny f.
-			// f is in the range (2*10^{-156}, 2*10^{-136}].
-			f = math.Pow(10, 10-20*rnd.Float64()) * safmn2
-		default:
-			f = rnd.NormFloat64()
-		}
-		if rnd.Intn(2) == 0 {
-			// Sometimes change the sign of f.
-			f *= -1
-		}
+	const tol = 20 * dlamchP
 
-		var g float64
-		var gHuge bool
-		switch rnd.Intn(3) {
-		case 0:
-			// Huge g.
-			gHuge = true
-			g = math.Pow(10, 10-20*rnd.Float64()) * safmx2
-		case 1:
-			// Tiny g.
-			g = math.Pow(10, 10-20*rnd.Float64()) * safmn2
-		default:
-			g = rnd.NormFloat64()
-		}
-		if rnd.Intn(2) == 0 {
-			g *= -1
-		}
+	safmin := dlamchS
+	safmax := 1 / safmin
+	values := []float64{
+		-safmax,
+		-1 / dlamchP,
+		-1,
+		-1.0 / 3,
+		-dlamchP,
+		-safmin,
+		0,
+		safmin,
+		dlamchP,
+		1.0 / 3,
+		1,
+		1 / dlamchP,
+		safmax,
+		math.Inf(-1),
+		math.Inf(1),
+		math.NaN(),
+	}
 
-		// Generate a plane rotation so that
-		//  [ cs sn] * [f] = [r]
-		//  [-sn cs]   [g] = [0]
-		cs, sn, r := impl.Dlartg(f, g)
+	for _, f := range values {
+		for _, g := range values {
+			name := fmt.Sprintf("Case f=%v,g=%v", f, g)
 
-		// Check that the first equation holds.
-		rWant := cs*f + sn*g
-		if !scalar.EqualWithinAbsOrRel(math.Abs(rWant), math.Abs(r), tol, tol) {
-			t.Errorf("Case f=%v,g=%v: unexpected r. Want %v, got %v", f, g, rWant, r)
-		}
-		// Check that cs and sn define a plane rotation. The 2×2 matrix
-		// has orthogonal columns by construction, so only check that
-		// the columns/rows have unit norm.
-		oneTest := cs*cs + sn*sn
-		if math.Abs(oneTest-1) > tol {
-			t.Errorf("Case f=%v,g=%v: expected cs^2+sn^2==1, got %v", f, g, oneTest)
-		}
-		if !fHuge && !gHuge {
-			// Check that the second equation holds.
-			// If both numbers are huge, cancellation errors make
-			// this test unreliable.
-			zeroTest := -sn*f + cs*g
-			if math.Abs(zeroTest) > tol {
-				t.Errorf("Case f=%v,g=%v: expected zero, got %v", f, g, zeroTest)
+			// Generate a plane rotation so that
+			//  [ cs sn] * [f] = [r]
+			//  [-sn cs]   [g] = [0]
+			// where cs*cs + sn*sn = 1.
+			cs, sn, r := impl.Dlartg(f, g)
+
+			switch {
+			case math.IsNaN(f) || math.IsNaN(g):
+				if !math.IsNaN(r) {
+					t.Errorf("%v: unexpected r=%v; want NaN", name, r)
+				}
+			case math.IsInf(f, 0) || math.IsInf(g, 0):
+				if !math.IsNaN(r) && !math.IsInf(r, 0) {
+					t.Errorf("%v: unexpected r=%v; want NaN or Inf", name, r)
+				}
+			default:
+				d := math.Max(math.Abs(f), math.Abs(g))
+				d = math.Min(math.Max(safmin, d), safmax)
+				fs := f / d
+				gs := g / d
+				rs := r / d
+
+				// Check that cs*f + sn*g = r.
+				rnorm := math.Abs(rs)
+				if rnorm == 0 {
+					rnorm = math.Max(math.Abs(fs), math.Abs(gs))
+					if rnorm == 0 {
+						rnorm = 1
+					}
+				}
+				resid := math.Abs(rs-(cs*fs+sn*gs)) / rnorm
+				if resid > tol {
+					t.Errorf("%v: cs*f + sn*g != r; resid=%v", name, resid)
+				}
+
+				// Check that -sn*f + cs*g = 0.
+				resid = math.Abs(-sn*fs + cs*gs)
+				if resid > tol {
+					t.Errorf("%v: -sn*f + cs*g != 0; resid=%v", name, resid)
+				}
+
+				// Check that cs*cs + sn*sn = 1.
+				resid = math.Abs(1 - (cs*cs + sn*sn))
+				if resid > tol {
+					t.Errorf("%v: cs*cs + sn*sn != 1; resid=%v", name, resid)
+				}
+
+				// Check that cs is non-negative.
+				if math.Abs(f) > math.Abs(g) && cs < 0 {
+					t.Errorf("%v: cs is negative; cs=%v", name, cs)
+				}
 			}
-		}
-		// Check that cs is positive as documented.
-		if math.Abs(f) > math.Abs(g) && cs < 0 {
-			t.Errorf("Case f=%v,g=%v: unexpected negative cs %v", f, g, cs)
-		}
-	}
-	// Check other documented special cases.
-	for i := 0; i < 100; i++ {
-		cs, sn, _ := impl.Dlartg(rnd.NormFloat64(), 0)
-		if cs != 1 {
-			t.Errorf("Unexpected cs for g=0. Want 1, got %v", cs)
-		}
-		if sn != 0 {
-			t.Errorf("Unexpected sn for g=0. Want 0, got %v", sn)
-		}
-	}
-	for i := 0; i < 100; i++ {
-		cs, sn, _ := impl.Dlartg(0, rnd.NormFloat64())
-		if cs != 0 {
-			t.Errorf("Unexpected cs for f=0. Want 0, got %v", cs)
-		}
-		if sn != 1 {
-			t.Errorf("Unexpected sn for f=0. Want 1, got %v", sn)
 		}
 	}
 }

@@ -184,12 +184,15 @@ func DsterfTest(t *testing.T, impl Dsterfer) {
 
 			// Check whether eigenvalues from Dsteqr and Dsterf (which use
 			// different algorithms) are equal.
-			var diff float64
-			for i := range dGot {
-				diffAbs := math.Abs(dGot[i] - dWant[i])
+			var diff, dMax float64
+			for i, di := range dGot {
+				diffAbs := math.Abs(di - dWant[i])
 				diff = math.Max(diff, diffAbs)
+				dAbs := math.Max(math.Abs(di), math.Abs(dWant[i]))
+				dMax = math.Max(dMax, dAbs)
 			}
-			if diff > tol {
+			dMax = math.Max(dlamchS, dMax)
+			if diff > tol*dMax {
 				t.Errorf("%v: unexpected result; |dGot-dWant|=%v", name, diff)
 			}
 

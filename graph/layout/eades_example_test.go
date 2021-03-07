@@ -1,3 +1,7 @@
+// Copyright ©2021 The Gonum Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file
+
 package layout
 
 import (
@@ -13,14 +17,17 @@ func ExampleEadesR2() {
 
 	g := makeCompleteGraph(6)
 
-	// Graph layout
+	// Graph layout.
+	// Explained in "A heuristic for graph drawing",
+	// Congressus numerantium 42:149-160.
+	// Experiment with these values for more/less nodes.
 	eades := EadesR2{Repulsion: 1, Rate: 0.05, Updates: 30, Theta: 0.2}
 
-	// Contains graph, layout and updater function
+	// Contains graph, layout and updater function.
 	optimizer := NewOptimizerR2(g, eades.Update)
 
 	// Reposition nodes until eades.Updates == 0
-	// by calling layout updater in Update method
+	// by calling layout updater in Update method.
 	for optimizer.Update() {
 
 	}
@@ -30,13 +37,13 @@ func ExampleEadesR2() {
 		panic(err)
 	}
 
-	// Add to plot
+	// Add to plot.
 	p.Add(render{optimizer})
 	p.HideAxes()
 
 	path := filepath.Join("testdata", "k6_eades.png")
 
-	// Render graph on save
+	// Render graph on save.
 	if err := p.Save(10*vg.Centimeter, 10*vg.Centimeter, path); err != nil {
 		panic(err)
 	}

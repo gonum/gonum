@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/simple"
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/vg"
@@ -12,20 +11,16 @@ import (
 
 func ExampleEadesR2() {
 
-	g := simple.NewUndirectedGraph()
+	g := makeCompleteGraph(6)
 
-	s1 := makeStar(0, 4)
-	s2 := makeStar(4, 4)
+	// Graph layout
+	eades := EadesR2{Repulsion: 1, Rate: 0.05, Updates: 30, Theta: 0.2}
 
-	graph.Copy(g, s1)
-	graph.Copy(g, s2)
-
-	g.SetEdge(g.NewEdge(simple.Node(0), simple.Node(4)))
-
-	eades := EadesR2{Repulsion: 1, Rate: 0.1, Updates: 30, Theta: 0.1}
-
+	// Contains graph, layout and updater function
 	optimizer := NewOptimizerR2(g, eades.Update)
 
+	// Reposition nodes until eades.Updates == 0
+	// by calling layout updater in Update method
 	for optimizer.Update() {
 
 	}
@@ -35,24 +30,30 @@ func ExampleEadesR2() {
 		panic(err)
 	}
 
+	// Add to plot
 	p.Add(render{optimizer})
 	p.HideAxes()
 
-	path := filepath.Join("testdata", "graph.png")
+	path := filepath.Join("testdata", "k6_eades.png")
+
+	// Render graph on save
 	if err := p.Save(10*vg.Centimeter, 10*vg.Centimeter, path); err != nil {
 		panic(err)
 	}
 
-	fmt.Println("Saved plot to testdata/graph.png")
+	fmt.Println("Saved plot to testdata/k6_eades.png")
 
-	// Output: Saved plot to testdata/graph.png
+	// Output: Saved plot to testdata/k6_eades.png
 }
 
-func makeStar(start, length int) *simple.UndirectedGraph {
+// Each node is connected to all other nodes
+func makeCompleteGraph(n int) *simple.UndirectedGraph {
 	g := simple.NewUndirectedGraph()
 
-	for n := start + 1; n < start+length; n++ {
-		g.SetEdge(g.NewEdge(simple.Node(start), simple.Node(n)))
+	for i := 0; i < n; i++ {
+		for j := i + 1; j < n; j++ {
+			g.SetEdge(g.NewEdge(simple.Node(i), simple.Node(j)))
+		}
 	}
 
 	return g

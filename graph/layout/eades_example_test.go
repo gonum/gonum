@@ -33,8 +33,7 @@ func ExampleEadesR2() {
 	// Contains graph, layout and updater function.
 	optimizer := layout.NewOptimizerR2(g, eades.Update)
 
-	// Reposition nodes until eades.Updates == 0
-	// by calling layout updater in Update method.
+	// Update layout.
 	for optimizer.Update() {
 	}
 

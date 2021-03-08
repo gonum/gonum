@@ -22,7 +22,12 @@ import (
 func ExampleEadesR2() {
 	// Make a simple graph and render it as a PNG
 	// with the EadesR2 force-directed layout.
-	g := makeCompleteGraph(6)
+	g := simple.NewUndirectedGraph()
+	for i := 0; i < 6; i++ {
+		for j := i + 1; j < 6; j++ {
+			g.SetEdge(g.NewEdge(simple.Node(i), simple.Node(j)))
+		}
+	}
 
 	// Graph layout.
 	// Explained in "A heuristic for graph drawing",
@@ -53,19 +58,6 @@ func ExampleEadesR2() {
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-// Each node is connected to all other nodes.
-func makeCompleteGraph(n int) *simple.UndirectedGraph {
-	g := simple.NewUndirectedGraph()
-
-	for i := 0; i < n; i++ {
-		for j := i + 1; j < n; j++ {
-			g.SetEdge(g.NewEdge(simple.Node(i), simple.Node(j)))
-		}
-	}
-
-	return g
 }
 
 const radius = vg.Length(15)

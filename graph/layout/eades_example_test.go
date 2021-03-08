@@ -9,7 +9,6 @@ import (
 	"image/color"
 	"log"
 	"math"
-	"path/filepath"
 
 	"gonum.org/v1/gonum/graph/layout"
 	"gonum.org/v1/gonum/graph/simple"
@@ -48,10 +47,8 @@ func ExampleEadesR2() {
 	p.Add(render{optimizer})
 	p.HideAxes()
 
-	path := filepath.Join("testdata", "k6_eades.png")
-
 	// Render graph on save.
-	err = p.Save(10*vg.Centimeter, 10*vg.Centimeter, path)
+	err = p.Save(10*vg.Centimeter, 10*vg.Centimeter, "k6_eades.png")
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -5,6 +5,7 @@
 package layout
 
 import (
+	"log"
 	"path/filepath"
 
 	"gonum.org/v1/gonum/graph/simple"
@@ -33,7 +34,7 @@ func ExampleEadesR2() {
 
 	p, err := plot.New()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	// Add to plot.
@@ -43,8 +44,9 @@ func ExampleEadesR2() {
 	path := filepath.Join("testdata", "k6_eades.png")
 
 	// Render graph on save.
-	if err := p.Save(10*vg.Centimeter, 10*vg.Centimeter, path); err != nil {
-		panic(err)
+	err = p.Save(10*vg.Centimeter, 10*vg.Centimeter, path)
+	if err != nil {
+		log.Fatal(err)
 	}
 }
 

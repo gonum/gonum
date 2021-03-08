@@ -30,7 +30,6 @@ func ExampleEadesR2() {
 	// Reposition nodes until eades.Updates == 0
 	// by calling layout updater in Update method.
 	for optimizer.Update() {
-
 	}
 
 	p, err := plot.New()

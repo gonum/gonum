@@ -5,7 +5,6 @@
 package layout
 
 import (
-	"fmt"
 	"path/filepath"
 
 	"gonum.org/v1/gonum/graph/simple"
@@ -47,10 +46,6 @@ func ExampleEadesR2() {
 	if err := p.Save(10*vg.Centimeter, 10*vg.Centimeter, path); err != nil {
 		panic(err)
 	}
-
-	fmt.Println("Saved plot to testdata/k6_eades.png")
-
-	// Output: Saved plot to testdata/k6_eades.png
 }
 
 // Each node is connected to all other nodes.

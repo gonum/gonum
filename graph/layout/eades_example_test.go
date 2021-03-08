@@ -22,8 +22,9 @@ func ExampleEadesR2() {
 	// Make a simple graph and render it as a PNG
 	// with the EadesR2 force-directed layout.
 	g := simple.NewUndirectedGraph()
-	for i := 0; i < 6; i++ {
-		for j := i + 1; j < 6; j++ {
+	const n = 6
+	for i := 0; i < n; i++ {
+		for j := i + 1; j < n; j++ {
 			g.SetEdge(g.NewEdge(simple.Node(i), simple.Node(j)))
 		}
 	}

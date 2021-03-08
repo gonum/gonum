@@ -14,13 +14,14 @@ import (
 )
 
 func ExampleEadesR2() {
-
+	// Make a simple graph and render it as a PNG
+	// with the EadesR2 force-directed layout.
 	g := makeCompleteGraph(6)
 
 	// Graph layout.
 	// Explained in "A heuristic for graph drawing",
 	// Congressus numerantium 42:149-160.
-	// Experiment with these values for more/less nodes.
+	// Experiment with these values with more/less nodes.
 	eades := EadesR2{Repulsion: 1, Rate: 0.05, Updates: 30, Theta: 0.2}
 
 	// Contains graph, layout and updater function.
@@ -53,7 +54,7 @@ func ExampleEadesR2() {
 	// Output: Saved plot to testdata/k6_eades.png
 }
 
-// Each node is connected to all other nodes
+// Each node is connected to all other nodes.
 func makeCompleteGraph(n int) *simple.UndirectedGraph {
 	g := simple.NewUndirectedGraph()
 

@@ -29,16 +29,13 @@ func ExampleEadesR2() {
 		}
 	}
 
-	// Graph layout.
-	// Explained in "A heuristic for graph drawing",
-	// Congressus numerantium 42:149-160.
-	// Experiment with these values with more/less nodes.
+	// Use the Eades layout algorithm with reasonable defaults.
 	eades := layout.EadesR2{Repulsion: 1, Rate: 0.05, Updates: 30, Theta: 0.2}
 
-	// Contains graph, layout and updater function.
+	// Make a layout optimizer with the target graph and update function.
 	optimizer := layout.NewOptimizerR2(g, eades.Update)
 
-	// Update layout.
+	// Perform layout optimization.
 	for optimizer.Update() {
 	}
 

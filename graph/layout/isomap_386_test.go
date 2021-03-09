@@ -4,7 +4,7 @@
 
 // +build 386
 
-package layout
+package layout_test
 
 // Change the testdata path for calculations done on 386.
 func init() {

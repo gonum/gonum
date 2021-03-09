@@ -15,25 +15,26 @@ import (
 )
 
 func ExampleFFT_Coefficients() {
-	// Period is a set of samples over a given period.
-	period := []float64{1, 0, 2, 0, 4, 0, 2, 0}
+	// Samples is a set of samples over a given period.
+	samples := []float64{1, 0, 2, 0, 4, 0, 2, 0}
+	period := float64(len(samples))
 
 	// Initialize an FFT and perform the analysis.
-	fft := fourier.NewFFT(len(period))
-	coeff := fft.Coefficients(nil, period)
+	fft := fourier.NewFFT(len(samples))
+	coeff := fft.Coefficients(nil, samples)
 
 	for i, c := range coeff {
 		fmt.Printf("freq=%v cycles/period, magnitude=%v, phase=%.4g\n",
-			fft.Freq(i), cmplx.Abs(c), cmplx.Phase(c))
+			fft.Freq(i)*period, cmplx.Abs(c), cmplx.Phase(c))
 	}
 
 	// Output:
 	//
 	// freq=0 cycles/period, magnitude=9, phase=0
-	// freq=0.125 cycles/period, magnitude=3, phase=3.142
-	// freq=0.25 cycles/period, magnitude=1, phase=-0
-	// freq=0.375 cycles/period, magnitude=3, phase=3.142
-	// freq=0.5 cycles/period, magnitude=9, phase=0
+	// freq=1 cycles/period, magnitude=3, phase=3.142
+	// freq=2 cycles/period, magnitude=1, phase=-0
+	// freq=3 cycles/period, magnitude=3, phase=3.142
+	// freq=4 cycles/period, magnitude=9, phase=0
 }
 
 func ExampleFFT_Coefficients_tone() {
@@ -68,31 +69,32 @@ func ExampleFFT_Coefficients_tone() {
 }
 
 func ExampleCmplxFFT_Coefficients() {
-	// Period is a set of samples over a given period.
-	period := []complex128{1, 0, 2, 0, 4, 0, 2, 0}
+	// Samples is a set of samples over a given period.
+	samples := []complex128{1, 0, 2, 0, 4, 0, 2, 0}
+	period := float64(len(samples))
 
 	// Initialize a complex FFT and perform the analysis.
-	fft := fourier.NewCmplxFFT(len(period))
-	coeff := fft.Coefficients(nil, period)
+	fft := fourier.NewCmplxFFT(len(samples))
+	coeff := fft.Coefficients(nil, samples)
 
 	for i := range coeff {
 		// Center the spectrum.
 		i = fft.ShiftIdx(i)
 
 		fmt.Printf("freq=%v cycles/period, magnitude=%v, phase=%.4g\n",
-			fft.Freq(i), cmplx.Abs(coeff[i]), cmplx.Phase(coeff[i]))
+			fft.Freq(i)*period, cmplx.Abs(coeff[i]), cmplx.Phase(coeff[i]))
 	}
 
 	// Output:
 	//
-	// freq=-0.5 cycles/period, magnitude=9, phase=0
-	// freq=-0.375 cycles/period, magnitude=3, phase=3.142
-	// freq=-0.25 cycles/period, magnitude=1, phase=0
-	// freq=-0.125 cycles/period, magnitude=3, phase=3.142
+	// freq=-4 cycles/period, magnitude=9, phase=0
+	// freq=-3 cycles/period, magnitude=3, phase=3.142
+	// freq=-2 cycles/period, magnitude=1, phase=0
+	// freq=-1 cycles/period, magnitude=3, phase=3.142
 	// freq=0 cycles/period, magnitude=9, phase=0
-	// freq=0.125 cycles/period, magnitude=3, phase=3.142
-	// freq=0.25 cycles/period, magnitude=1, phase=0
-	// freq=0.375 cycles/period, magnitude=3, phase=3.142
+	// freq=1 cycles/period, magnitude=3, phase=3.142
+	// freq=2 cycles/period, magnitude=1, phase=0
+	// freq=3 cycles/period, magnitude=3, phase=3.142
 }
 
 func Example_fFT2() {

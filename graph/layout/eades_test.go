@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package layout
+package layout_test
 
 import (
 	"path/filepath"
@@ -15,6 +15,8 @@ import (
 	"gonum.org/v1/gonum/spatial/r2"
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/vg"
+
+	. "gonum.org/v1/gonum/graph/layout"
 )
 
 var eadesR2Tests = []struct {

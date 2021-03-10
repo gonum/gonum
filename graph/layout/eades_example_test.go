@@ -13,6 +13,7 @@ import (
 	"gonum.org/v1/gonum/graph/layout"
 	"gonum.org/v1/gonum/graph/simple"
 	"gonum.org/v1/plot"
+	"gonum.org/v1/plot/font"
 	"gonum.org/v1/plot/plotter"
 	"gonum.org/v1/plot/vg"
 	"gonum.org/v1/plot/vg/draw"
@@ -39,17 +40,14 @@ func ExampleEadesR2() {
 	for optimizer.Update() {
 	}
 
-	p, err := plot.New()
-	if err != nil {
-		log.Fatal(err)
-	}
+	p := plot.New()
 
 	// Add to plot.
 	p.Add(render{optimizer})
 	p.HideAxes()
 
 	// Render graph on save.
-	err = p.Save(10*vg.Centimeter, 10*vg.Centimeter, "k6_eades.png")
+	err := p.Save(10*vg.Centimeter, 10*vg.Centimeter, "k6_eades.png")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -110,12 +108,12 @@ func (p render) Plot(c draw.Canvas, plt *plot.Plot) {
 	if err != nil {
 		panic(err)
 	}
-	fnt, err := vg.MakeFont(plot.DefaultFont, vg.Points(18))
-	if err != nil {
-		panic(err)
-	}
+	fnt := font.From(plot.DefaultFont, 18)
 	for i := range l.TextStyle {
-		l.TextStyle[i] = draw.TextStyle{Font: fnt, XAlign: draw.XCenter, YAlign: -0.25}
+		l.TextStyle[i] = draw.TextStyle{
+			Font: fnt, Handler: plot.DefaultTextHandler,
+			XAlign: draw.XCenter, YAlign: -0.4,
+		}
 	}
 
 	l.Plot(c, plt)

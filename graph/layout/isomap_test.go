@@ -166,15 +166,11 @@ func TestIsomapR2(t *testing.T) {
 		for o.Update() {
 			n++
 		}
-		p, err := plot.New()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-			continue
-		}
+		p := plot.New()
 		p.Add(render{o})
 		p.HideAxes()
 		path := filepath.Join("testdata", test.name+tag+arch+".png")
-		err = p.Save(10*vg.Centimeter, 10*vg.Centimeter, path)
+		err := p.Save(10*vg.Centimeter, 10*vg.Centimeter, path)
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 			continue

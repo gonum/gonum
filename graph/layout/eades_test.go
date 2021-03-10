@@ -208,15 +208,11 @@ func TestEadesR2(t *testing.T) {
 			t.Errorf("unexpected number of iterations for %q: got:%d want:%d", test.name, n, test.wantIters)
 		}
 
-		p, err := plot.New()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-			continue
-		}
+		p := plot.New()
 		p.Add(render{o})
 		p.HideAxes()
 		path := filepath.Join("testdata", test.name+".png")
-		err = p.Save(10*vg.Centimeter, 10*vg.Centimeter, path)
+		err := p.Save(10*vg.Centimeter, 10*vg.Centimeter, path)
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 			continue

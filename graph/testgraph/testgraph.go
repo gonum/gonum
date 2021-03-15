@@ -1376,6 +1376,9 @@ type NodeAdder interface {
 // AddNodes gets a new node from g and adds it to the graph, repeating this pair
 // of operations n times. The existence of added nodes is confirmed in the graph.
 // AddNodes also checks that re-adding each of the added nodes causes a panic.
+// If g satisfies NodeWithIDer, the NodeWithID method is tested for an additional
+// n rounds of node addition using NodeWithID to create new nodes as well as
+// confirming that NodeWithID returns existing nodes.
 func AddNodes(t *testing.T, g NodeAdder, n int) {
 	defer func() {
 		r := recover()
@@ -1424,6 +1427,34 @@ func AddNodes(t *testing.T, g NodeAdder, n int) {
 		})
 		if !panicked {
 			t.Fatalf("expected panic adding existing node: %v", it.Node())
+		}
+	}
+
+	if gwi, ok := g.(graph.NodeWithIDer); ok {
+		// Test existing nodes.
+		it := g.Nodes()
+		for it.Next() {
+			id := it.Node().ID()
+			n, new := gwi.NodeWithID(id)
+			if n == nil {
+				t.Errorf("unexpected nil node for existing node with ID=%d", id)
+			}
+			if new {
+				t.Errorf("unexpected new node for existing node with ID=%d", id)
+			}
+		}
+		// Run n rounds of ID-specified node addition.
+		for i := 0; i < n; i++ {
+			id := g.NewNode().ID() // Get a guaranteed non-existing node.
+			n, new := gwi.NodeWithID(id)
+			if n == nil {
+				// Could not create a node, valid behaviour.
+				continue
+			}
+			if !new {
+				t.Errorf("unexpected old node for non-existing node with ID=%d", id)
+			}
+			g.AddNode(n) // Use the node to advance to a new non-existing node.
 		}
 	}
 }

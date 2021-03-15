@@ -21,8 +21,8 @@ import (
 // sort y together with classes and weights.
 //
 // For a given cutoff value, observations corresponding to entries in y
-// greater than the cutoff value are classified as false, while those
-// less than or equal to the cutoff value are classified as true. These
+// greater than the cutoff value are classified as true, while those
+// less than or equal to the cutoff value are classified as false. These
 // assigned class labels are compared with the true values in the classes
 // slice and used to calculate the FPR and TPR.
 //

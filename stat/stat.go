@@ -1261,6 +1261,54 @@ func Variance(x, weights []float64) float64 {
 // len(x) must equal len(weights).
 // When weights sum to 1 or less, a biased variance estimator should be used.
 func MeanVariance(x, weights []float64) (mean, variance float64) {
+	var (
+		unnormalisedVariance float64
+		sumWeights           float64
+	)
+	mean, unnormalisedVariance, sumWeights = meanUnnormalisedVarianceSumWeights(x, weights)
+	return mean, unnormalisedVariance / (sumWeights - 1)
+}
+
+// PopMeanVariance computes the sample mean and biased variance (also known as
+// "population variance"), where the mean and variance are
+//  \sum_i w_i * x_i / (sum_i w_i)
+//  \sum_i w_i (x_i - mean)^2 / (sum_i w_i)
+// respectively.
+// If weights is nil then all of the weights are 1. If weights is not nil, then
+// len(x) must equal len(weights).
+func PopMeanVariance(x, weights []float64) (mean, variance float64) {
+	var (
+		unnormalisedVariance float64
+		sumWeights           float64
+	)
+	mean, unnormalisedVariance, sumWeights = meanUnnormalisedVarianceSumWeights(x, weights)
+	return mean, unnormalisedVariance / sumWeights
+}
+
+// PopMeanStdDev returns the sample mean and biased standard deviation
+// (also known as "population standard deviation").
+func PopMeanStdDev(x, weights []float64) (mean, std float64) {
+	mean, variance := PopMeanVariance(x, weights)
+	return mean, math.Sqrt(variance)
+}
+
+// PopStdDev returns the population standard deviation, i.e., a square root
+// of the biased variance estimate.
+func PopStdDev(x, weights []float64) float64 {
+	_, stDev := PopMeanStdDev(x, weights)
+	return stDev
+}
+
+// PopVariance computes the unbiased weighted sample variance:
+//  \sum_i w_i (x_i - mean)^2 / (sum_i w_i)
+// If weights is nil then all of the weights are 1. If weights is not nil, then
+// len(x) must equal len(weights).
+func PopVariance(x, weights []float64) float64 {
+	_, variance := PopMeanVariance(x, weights)
+	return variance
+}
+
+func meanUnnormalisedVarianceSumWeights(x, weights []float64) (mean, unnormalisedVariance, sumWeights float64) {
 	// This uses the corrected two-pass algorithm (1.7), from "Algorithms for computing
 	// the sample variance: Analysis and recommendations" by Chan, Tony F., Gene H. Golub,
 	// and Randall J. LeVeque.
@@ -1277,11 +1325,10 @@ func MeanVariance(x, weights []float64) (mean, variance float64) {
 			ss += d * d
 			compensation += d
 		}
-		variance = (ss - compensation*compensation/float64(len(x))) / float64(len(x)-1)
-		return mean, variance
+		unnormalisedVariance = (ss - compensation*compensation/float64(len(x)))
+		return mean, unnormalisedVariance, float64(len(x))
 	}
 
-	var sumWeights float64
 	for i, v := range x {
 		w := weights[i]
 		d := v - mean
@@ -1290,6 +1337,6 @@ func MeanVariance(x, weights []float64) (mean, variance float64) {
 		compensation += wd
 		sumWeights += w
 	}
-	variance = (ss - compensation*compensation/sumWeights) / (sumWeights - 1)
-	return mean, variance
+	unnormalisedVariance = (ss - compensation*compensation/sumWeights)
+	return mean, unnormalisedVariance, sumWeights
 }

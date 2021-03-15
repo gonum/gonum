@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package layout
+package layout_test
 
 import (
 	"path/filepath"
@@ -13,6 +13,8 @@ import (
 	"gonum.org/v1/gonum/spatial/r2"
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/vg"
+
+	. "gonum.org/v1/gonum/graph/layout"
 )
 
 var (
@@ -164,15 +166,11 @@ func TestIsomapR2(t *testing.T) {
 		for o.Update() {
 			n++
 		}
-		p, err := plot.New()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-			continue
-		}
+		p := plot.New()
 		p.Add(render{o})
 		p.HideAxes()
 		path := filepath.Join("testdata", test.name+tag+arch+".png")
-		err = p.Save(10*vg.Centimeter, 10*vg.Centimeter, path)
+		err := p.Save(10*vg.Centimeter, 10*vg.Centimeter, path)
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 			continue

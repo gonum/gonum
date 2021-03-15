@@ -4,7 +4,7 @@
 
 // +build arm64
 
-package layout
+package layout_test
 
 // Change the testdata path for calculations done on arm64.
 func init() {

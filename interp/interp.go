@@ -167,7 +167,7 @@ func findSegment(xs []float64, x float64) int {
 // or len(xs) != len(ys).
 func calculateSlopes(xs, ys []float64) []float64 {
 	n := len(xs)
-	if n <= 2 {
+	if n < 2 {
 		panic(tooFewPoints)
 	}
 	if len(ys) != n {

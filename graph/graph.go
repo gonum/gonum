@@ -146,6 +146,18 @@ type NodeAdder interface {
 	AddNode(Node)
 }
 
+// NodeWithIDer is a graph that can return potentially new nodes with
+// a defined ID.
+type NodeWithIDer interface {
+	// NodeWithID returns a Node with the given ID if possible.
+	// A nil Node will be returned if no Node exists or
+	// can be created.
+	// If a non-nil Node is returned that is not already in the
+	// graph NodeWithID will return true for new and the Node
+	// must be added to the graph before use.
+	NodeWithID(id int64) (n Node, new bool)
+}
+
 // NodeRemover is an interface for removing nodes from a graph.
 type NodeRemover interface {
 	// RemoveNode removes the node with the given ID

@@ -14,6 +14,8 @@ import (
 // TorgersonScaling converts a dissimilarity matrix to a matrix containing
 // Euclidean coordinates. TorgersonScaling places the coordinates in dst and
 // returns it and the number of positive Eigenvalues if successful.
+// Note that Eigen Decomposition is numerically unstable and so Eigenvalues
+// near zero should be examined and the value returned for k is advisory only.
 // If the scaling is not successful, dst will be empty upon return.
 // When the scaling is successful, dst will be resized to k columns wide.
 // Eigenvalues will be copied into eigdst and returned as eig if it is provided.

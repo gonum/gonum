@@ -132,53 +132,60 @@ func (n char) ID() int64      { return int64(n) }
 func (n char) String() string { return string(n) }
 
 func TestDominators(t *testing.T) {
-	for _, test := range dominatorsTests {
-		g := simple.NewDirectedGraph()
-		for _, e := range test.edges {
-			g.SetEdge(e)
-		}
-
-		for _, alg := range []struct {
-			name string
-			fn   func(graph.Node, graph.Directed) DominatorTree
-		}{
-			{"Dominators", Dominators},
-			{"DominatorsSLT", DominatorsSLT},
-		} {
-			got := alg.fn(test.n, g)
-
-			if !reflect.DeepEqual(got.Root(), test.want.root) {
-				t.Errorf("unexpected dominator tree root from %s: got:%v want:%v",
-					alg.name, got.root, test.want.root)
+	// The dominator functions are non-deterministic due
+	// to map iteration ordering, so repeat the tests to
+	// ensure consistent coverage. The value of 100 was
+	// chosen empirically to have no observed reduction
+	// in coverage in several hundred runs of go test -cover.
+	for i := 0; i < 100; i++ {
+		for _, test := range dominatorsTests {
+			g := simple.NewDirectedGraph()
+			for _, e := range test.edges {
+				g.SetEdge(e)
 			}
 
-			if !reflect.DeepEqual(got.dominatorOf, test.want.dominatorOf) {
-				t.Errorf("unexpected dominator tree from %s: got:%v want:%v",
-					alg.name, got.dominatorOf, test.want.dominatorOf)
-			}
+			for _, alg := range []struct {
+				name string
+				fn   func(graph.Node, graph.Directed) DominatorTree
+			}{
+				{"Dominators", Dominators},
+				{"DominatorsSLT", DominatorsSLT},
+			} {
+				got := alg.fn(test.n, g)
 
-			for q, want := range test.want.dominatorOf {
-				node := got.DominatorOf(q)
-				if node != want {
-					t.Errorf("unexpected dominator tree result from %s dominated of %v: got:%v want:%v",
-						alg.name, q, node, want)
+				if !reflect.DeepEqual(got.Root(), test.want.root) {
+					t.Errorf("unexpected dominator tree root from %s: got:%v want:%v",
+						alg.name, got.root, test.want.root)
 				}
-			}
 
-			for _, nodes := range got.dominatedBy {
-				sort.Sort(ordered.ByID(nodes))
-			}
+				if !reflect.DeepEqual(got.dominatorOf, test.want.dominatorOf) {
+					t.Errorf("unexpected dominator tree from %s: got:%v want:%v",
+						alg.name, got.dominatorOf, test.want.dominatorOf)
+				}
 
-			if !reflect.DeepEqual(got.dominatedBy, test.want.dominatedBy) {
-				t.Errorf("unexpected dominator tree from %s: got:%v want:%v",
-					alg.name, got.dominatedBy, test.want.dominatedBy)
-			}
+				for q, want := range test.want.dominatorOf {
+					node := got.DominatorOf(q)
+					if node != want {
+						t.Errorf("unexpected dominator tree result from %s dominated of %v: got:%v want:%v",
+							alg.name, q, node, want)
+					}
+				}
 
-			for q, want := range test.want.dominatedBy {
-				nodes := got.DominatedBy(q)
-				if !reflect.DeepEqual(nodes, want) {
-					t.Errorf("unexpected dominator tree result from %s dominated by %v: got:%v want:%v",
-						alg.name, q, nodes, want)
+				for _, nodes := range got.dominatedBy {
+					sort.Sort(ordered.ByID(nodes))
+				}
+
+				if !reflect.DeepEqual(got.dominatedBy, test.want.dominatedBy) {
+					t.Errorf("unexpected dominator tree from %s: got:%v want:%v",
+						alg.name, got.dominatedBy, test.want.dominatedBy)
+				}
+
+				for q, want := range test.want.dominatedBy {
+					nodes := got.DominatedBy(q)
+					if !reflect.DeepEqual(nodes, want) {
+						t.Errorf("unexpected dominator tree result from %s dominated by %v: got:%v want:%v",
+							alg.name, q, nodes, want)
+					}
 				}
 			}
 		}

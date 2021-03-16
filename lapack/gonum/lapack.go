@@ -48,4 +48,10 @@ const (
 	// 1/dlamchS does not overflow, or also the smallest normal number.
 	// For IEEE this is 2^{-1022}.
 	dlamchS = 0x1p-1022
+
+	// (rtmin,rtmax) is a range of well-scaled numbers whose square
+	// or sum of squares is also safe.
+	// drtmin is sqrt(dlamchS/dlamchP)
+	drtmin = 0x1p-485
+	drtmax = 1 / drtmin
 )

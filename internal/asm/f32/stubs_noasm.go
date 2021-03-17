@@ -111,3 +111,17 @@ func DdotInc(x, y []float32, n, incX, incY, ix, iy uintptr) (sum float64) {
 	}
 	return
 }
+
+// Sum is
+//  var sum float32
+//  for _, v := range x {
+//  	sum += v
+//  }
+//  return sum
+func Sum(x []float32) float32 {
+	var sum float32
+	for _, v := range x {
+		sum += v
+	}
+	return sum
+}

@@ -31,16 +31,15 @@ TEXT ·Sum(SB), NOSPLIT, $0
 	MOVQ X_PTR, TAIL // Check memory alignment
 	ANDQ $15, TAIL   // TAIL = &x % 16
 	JZ   no_trim     // if TAIL == 0 { goto no_trim }
-	SUBQ $16, TAIL
+	SUBQ $16, TAIL   // TAIL -= 16
 
-sum_align:
-	// Align on 16-byte boundary
+sum_align: // Align on 16-byte boundary do {
 	ADDSS (X_PTR)(IDX*4), SUM // SUM += x[0]
-	INCQ  IDX         // i++
-	DECQ  LEN         // LEN--
-	JZ    sum_end     // if LEN == 0 { return }
-	ADDQ  $4, TAIL
-	JNZ   sum_align
+	INCQ  IDX                 // i++
+	DECQ  LEN                 // LEN--
+	JZ    sum_end             // if LEN == 0 { return }
+	ADDQ  $4, TAIL            // TAIL += 4
+	JNZ   sum_align           //  } while TAIL < 0
 
 no_trim:
 	MOVQ LEN, TAIL
@@ -49,14 +48,14 @@ no_trim:
 
 
 sum_loop: // sum 16x wide do {
-	ADDPS (X_PTR)(IDX*4), SUM      // sum_i += x[i:i+4]
+	ADDPS (X_PTR)(IDX*4), SUM     // sum_i += x[i:i+4]
 	ADDPS 16(X_PTR)(IDX*4), SUM_1
 	ADDPS 32(X_PTR)(IDX*4), SUM_2
 	ADDPS 48(X_PTR)(IDX*4), SUM_3
 
-	ADDQ  $16, IDX             // i += 16
+	ADDQ  $16, IDX                // i += 16
 	DECQ  LEN
-	JNZ   sum_loop             // } while --LEN > 0
+	JNZ   sum_loop                // } while --LEN > 0
 
 sum_tail8:
 	ADDPS SUM_3, SUM
@@ -65,7 +64,7 @@ sum_tail8:
 	TESTQ $8, TAIL
 	JZ    sum_tail4
 
-	ADDPS (X_PTR)(IDX*4), SUM     // sum_i += x[i:i+4]
+	ADDPS (X_PTR)(IDX*4), SUM // sum_i += x[i:i+4]
 	ADDPS 16(X_PTR)(IDX*4), SUM_1
 	ADDQ  $8, IDX
 
@@ -75,12 +74,12 @@ sum_tail4:
 	TESTQ $4, TAIL
 	JZ    sum_tail2
 
-	ADDPS (X_PTR)(IDX*4), SUM     // sum_i += x[i:i+4]
+	ADDPS (X_PTR)(IDX*4), SUM // sum_i += x[i:i+4]
 	ADDQ  $4, IDX
 
 sum_tail2:
-	HADDPS SUM, SUM // sum_i[:2] += sum_i[2:4]
-	HADDPS SUM, SUM // sum_i[0] += sum_i[1]
+	HADDPS SUM, SUM           // sum_i[:2] += sum_i[2:4]
+	HADDPS SUM, SUM           // sum_i[0] += sum_i[1]
 
 	TESTQ $2, TAIL
 	JZ    sum_tail1

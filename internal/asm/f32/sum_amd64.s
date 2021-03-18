@@ -39,7 +39,7 @@ sum_align: // Align on 16-byte boundary do {
 	DECQ  LEN                 // LEN--
 	JZ    sum_end             // if LEN == 0 { return }
 	ADDQ  $4, TAIL            // TAIL += 4
-	JNZ   sum_align           //  } while TAIL < 0
+	JNZ   sum_align           // } while TAIL < 0
 
 no_trim:
 	MOVQ LEN, TAIL

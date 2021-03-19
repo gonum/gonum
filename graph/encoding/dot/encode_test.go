@@ -424,6 +424,20 @@ var encodeTests = []struct {
 
 	want string
 }{
+	// Empty graph.
+	{
+		name: "Empty Undirected",
+		g:    simple.NewUndirectedGraph(),
+		want: `strict graph "Empty Undirected" {
+}`,
+	},
+	{
+		name: "Empty Directed",
+		g:    simple.NewDirectedGraph(),
+		want: `strict digraph "Empty Directed" {
+}`,
+	},
+
 	// Basic graph.Graph handling.
 	{
 		name: "PageRank",

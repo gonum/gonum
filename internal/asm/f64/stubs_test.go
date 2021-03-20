@@ -635,5 +635,16 @@ func TestSum(t *testing.T) {
 		if !isValidGuard(gsrc, srcGd, gdLn) {
 			t.Errorf("Test %d Guard violated in src vector %v %v", j, gsrc[:gdLn], gsrc[len(gsrc)-gdLn:])
 		}
+
+		gdLn++
+		gsrc = guardVector(v.src, srcGd, gdLn)
+		src = gsrc[gdLn : len(gsrc)-gdLn]
+		ret = Sum(src)
+		if !scalar.Same(ret, v.expect) {
+			t.Errorf("Test %d Sum error Got: %v Expected: %v", j, ret, v.expect)
+		}
+		if !isValidGuard(gsrc, srcGd, gdLn) {
+			t.Errorf("Test %d Guard violated in src vector %v %v", j, gsrc[:gdLn], gsrc[len(gsrc)-gdLn:])
+		}
 	}
 }

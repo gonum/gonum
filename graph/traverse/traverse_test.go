@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"reflect"
 	"sort"
+	"strings"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
@@ -54,6 +55,16 @@ var (
 		3: linksTo(4, 5),
 		4: nil,
 		5: nil,
+	}
+
+	// g1595 is the graph shown in https://github.com/gonum/gonum/issues/1595 with the addition
+	// of an unconnected 0 node (due to limitations of intset).
+	g1595 = []intset{
+		0: nil,
+		1: linksTo(2, 4),
+		2: linksTo(3),
+		3: nil,
+		4: nil,
 	}
 )
 
@@ -158,13 +169,13 @@ func TestBreadthFirst(t *testing.T) {
 			return false
 		})
 		if !test.final[final] {
-			t.Errorf("unexepected final node for test %d:\ngot:  %v\nwant: %v", i, final, test.final)
+			t.Errorf("unexpected final node for test %d:\ngot:  %v\nwant: %v", i, final, test.final)
 		}
 		for _, l := range got {
 			sort.Sort(ordered.Int64s(l))
 		}
 		if !reflect.DeepEqual(got, test.want) {
-			t.Errorf("unexepected BFS level structure for test %d:\ngot:  %v\nwant: %v", i, got, test.want)
+			t.Errorf("unexpected BFS level structure for test %d:\ngot:  %v\nwant: %v", i, got, test.want)
 		}
 	}
 }
@@ -175,13 +186,22 @@ var depthFirstTests = []struct {
 	edge  func(graph.Edge) bool
 	until func(graph.Node) bool
 	final map[graph.Node]bool
-	want  []int64
+	want  [][]int64
 }{
 	{
 		g:     wpBronKerboschGraph,
 		from:  simple.Node(1),
 		final: map[graph.Node]bool{nil: true},
-		want:  []int64{0, 1, 2, 3, 4, 5},
+		want: [][]int64{
+			{1, 0, 4, 3, 5, 2},
+			{1, 0, 4, 3, 2, 5},
+			{1, 2, 3, 4, 0, 5},
+			{1, 2, 3, 5, 4, 0},
+			{1, 4, 0, 3, 5, 2},
+			{1, 4, 0, 3, 2, 5},
+			{1, 4, 3, 2, 5, 0},
+			{1, 4, 3, 5, 2, 0},
+		},
 	},
 	{
 		g: wpBronKerboschGraph,
@@ -191,7 +211,12 @@ var depthFirstTests = []struct {
 		},
 		from:  simple.Node(1),
 		final: map[graph.Node]bool{nil: true},
-		want:  []int64{0, 1, 2, 3, 4},
+		want: [][]int64{
+			{1, 0, 4, 3, 2},
+			{1, 2, 3, 4, 0},
+			{1, 4, 0, 3, 2},
+			{1, 4, 3, 2, 0},
+		},
 	},
 	{
 		g:     wpBronKerboschGraph,
@@ -203,19 +228,26 @@ var depthFirstTests = []struct {
 		g:     batageljZaversnikGraph,
 		from:  simple.Node(0),
 		final: map[graph.Node]bool{nil: true},
-		want:  []int64{0},
+		want:  [][]int64{{0}},
 	},
 	{
 		g:     batageljZaversnikGraph,
 		from:  simple.Node(3),
 		final: map[graph.Node]bool{nil: true},
-		want:  []int64{1, 2, 3, 4, 5},
+		want: [][]int64{
+			{3, 1, 2, 4, 5},
+			{3, 4, 2, 1, 5},
+			{3, 4, 5, 2, 1},
+		},
 	},
 	{
-		g:     batageljZaversnikGraph,
-		from:  simple.Node(13),
+		g:     g1595,
+		from:  simple.Node(1),
 		final: map[graph.Node]bool{nil: true},
-		want:  []int64{6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20},
+		want: [][]int64{
+			{1, 4, 2, 3},
+			{1, 2, 3, 4},
+		},
 	},
 }
 
@@ -243,11 +275,21 @@ func TestDepthFirst(t *testing.T) {
 			return false
 		})
 		if !test.final[final] {
-			t.Errorf("unexepected final node for test %d:\ngot:  %v\nwant: %v", i, final, test.final)
+			t.Errorf("unexpected final node for test %d:\ngot:  %v\nwant: %v", i, final, test.final)
 		}
-		sort.Sort(ordered.Int64s(got))
-		if test.want != nil && !reflect.DeepEqual(got, test.want) {
-			t.Errorf("unexepected DFS traversed nodes for test %d:\ngot:  %v\nwant: %v", i, got, test.want)
+		var ok bool
+		for _, want := range test.want {
+			if reflect.DeepEqual(got, want) {
+				ok = true
+				break
+			}
+		}
+		if test.want != nil && !ok {
+			var wanted strings.Builder
+			for _, w := range test.want {
+				fmt.Fprintf(&wanted, "     %v\n", w)
+			}
+			t.Errorf("unexpected DFS traversed nodes for test %d:\ngot: %v\nwant one of:\n%s", i, got, &wanted)
 		}
 	}
 }

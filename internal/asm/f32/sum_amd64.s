@@ -78,18 +78,18 @@ sum_tail4:
 	ADDQ  $4, IDX
 
 sum_tail2:
-	HADDPS SUM, SUM           // sum_i[:2] += sum_i[2:4]
-	HADDPS SUM, SUM           // sum_i[0] += sum_i[1]
+	HADDPS SUM, SUM            // sum_i[:2] += sum_i[2:4]
 
 	TESTQ $2, TAIL
 	JZ    sum_tail1
 
-	ADDSS (X_PTR)(IDX*4), SUM // sum_i += x[i:i+1]
-	ADDQ  $1, IDX
-	ADDSS (X_PTR)(IDX*4), SUM // sum_i += x[i:i+1]
-	ADDQ  $1, IDX
+	MOVSD (X_PTR)(IDX*4), SUM_1 // reuse SUM_1
+	ADDPS SUM_1, SUM            // sum_i += x[i:i+2]
+	ADDQ  $2, IDX
 
 sum_tail1:
+	HADDPS SUM, SUM // sum_i[0] += sum_i[1]
+
 	TESTQ $1, TAIL
 	JZ    sum_end
 

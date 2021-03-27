@@ -7,6 +7,7 @@ package floats
 import (
 	"fmt"
 	"math"
+	"sort"
 	"strconv"
 	"testing"
 
@@ -176,6 +177,29 @@ func TestArgsort(t *testing.T) {
 
 	inds = []int{1, 2}
 	if !Panics(func() { Argsort(s, inds) }) {
+		t.Error("does not panic if lengths do not match")
+	}
+}
+
+func TestArgsortStable(t *testing.T) {
+	for i := 1; i <= 100; i++ {
+		data := make([]float64, i+2)
+		data[0] = 2
+		data[len(data)-1] = 2
+		for j := 1; j <= i; j++ {
+			data[j] = 1
+		}
+		idx := make([]int, len(data))
+		ArgsortStable(data, idx)
+		if !sort.Float64sAreSorted(data) {
+			t.Errorf("unexpected data sort order for case %d", i)
+		}
+		if !sort.IntsAreSorted(idx[:i]) {
+			t.Errorf("unexpected index sort order for case %d", i)
+		}
+	}
+
+	if !Panics(func() { ArgsortStable([]float64{1, 2, 3}, []int{0, 0}) }) {
 		t.Error("does not panic if lengths do not match")
 	}
 }

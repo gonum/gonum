@@ -74,7 +74,7 @@ func AddScaledTo(dst, y []float64, alpha float64, s []float64) []float64 {
 }
 
 // argsort is a helper that implements sort.Interface, as used by
-// Argsort.
+// Argsort and ArgsortStable.
 type argsort struct {
 	s    []float64
 	inds []int
@@ -108,6 +108,24 @@ func Argsort(dst []float64, inds []int) {
 
 	a := argsort{s: dst, inds: inds}
 	sort.Sort(a)
+}
+
+// ArgsortStable sorts the elements of dst while tracking their original order and
+// keeping the original order of equal elements. At the conclusion of ArgsortStable,
+// dst will contain the original elements of dst but sorted in increasing order,
+// and inds will contain the original position of the elements in the slice such
+// that dst[i] = origDst[inds[i]].
+// It panics if the argument lengths do not match.
+func ArgsortStable(dst []float64, inds []int) {
+	if len(dst) != len(inds) {
+		panic(badDstLength)
+	}
+	for i := range dst {
+		inds[i] = i
+	}
+
+	a := argsort{s: dst, inds: inds}
+	sort.Stable(a)
 }
 
 // Count applies the function f to every element of s and returns the number

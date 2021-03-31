@@ -798,6 +798,28 @@ func DtrmmTest(t *testing.T, blasser Dtrmmer) {
 				{26, 80, 248},
 			},
 		},
+		{
+			s:     blas.Right,
+			ul:    blas.Lower,
+			tA:    blas.Trans,
+			d:     blas.Unit,
+			m:     2,
+			n:     3,
+			alpha: 0,
+			a: [][]float64{
+				{1, 0, 0},
+				{2, 4, 0},
+				{3, 5, 6},
+			},
+			b: [][]float64{
+				{10, 11, 12},
+				{13, 14, 15},
+			},
+			ans: [][]float64{
+				{0, 0, 0},
+				{0, 0, 0},
+			},
+		},
 	} {
 		aFlat := flatten(test.a)
 		bFlat := flatten(test.b)

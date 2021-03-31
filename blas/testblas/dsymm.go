@@ -60,6 +60,34 @@ func DsymmTest(t *testing.T, blasser Dsymmer) {
 		{
 			side: blas.Left,
 			ul:   blas.Upper,
+			m:    3,
+			n:    4,
+			a: [][]float64{
+				{0, 0, 0},
+				{0, 0, 0},
+				{0, 0, 0},
+			},
+			b: [][]float64{
+				{0, 0, 0, 0},
+				{0, 0, 0, 0},
+				{0, 0, 0, 0},
+			},
+			c: [][]float64{
+				{8, 12, 2, 1},
+				{9, 12, 9, 9},
+				{12, 1, -1, 5},
+			},
+			alpha: 0,
+			beta:  2,
+			ans: [][]float64{
+				{16, 24, 4, 2},
+				{18, 24, 18, 18},
+				{24, 2, -2, 10},
+			},
+		},
+		{
+			side: blas.Left,
+			ul:   blas.Upper,
 			m:    4,
 			n:    3,
 			a: [][]float64{

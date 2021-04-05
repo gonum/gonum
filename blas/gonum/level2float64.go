@@ -223,6 +223,76 @@ func (Implementation) Dgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float64, 
 	}
 }
 
+// Dgemv computes
+//  y = alpha * A * x + beta * y   if tA = blas.NoTrans
+//  y = alpha * Aᵀ * x + beta * y  if tA = blas.Trans or blas.ConjTrans
+// where A is an m×n dense matrix, x and y are vectors, and alpha and beta are scalars.
+func (Implementation) Dgemv(tA blas.Transpose, m, n int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int) {
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic(badTranspose)
+	}
+	if m < 0 {
+		panic(mLT0)
+	}
+	if n < 0 {
+		panic(nLT0)
+	}
+	if lda < max(1, n) {
+		panic(badLdA)
+	}
+	if incX == 0 {
+		panic(zeroIncX)
+	}
+	if incY == 0 {
+		panic(zeroIncY)
+	}
+	// Set up indexes
+	lenX := m
+	lenY := n
+	if tA == blas.NoTrans {
+		lenX = n
+		lenY = m
+	}
+
+	// Quick return if possible
+	if m == 0 || n == 0 {
+		return
+	}
+
+	if (incX > 0 && (lenX-1)*incX >= len(x)) || (incX < 0 && (1-lenX)*incX >= len(x)) {
+		panic(shortX)
+	}
+	if (incY > 0 && (lenY-1)*incY >= len(y)) || (incY < 0 && (1-lenY)*incY >= len(y)) {
+		panic(shortY)
+	}
+	if len(a) < lda*(m-1)+n {
+		panic(shortA)
+	}
+
+	// Quick return if possible
+	if alpha == 0 && beta == 1 {
+		return
+	}
+
+	if alpha == 0 {
+		// First form y = beta * y
+		if incY > 0 {
+			Implementation{}.Dscal(lenY, beta, y, incY)
+		} else {
+			Implementation{}.Dscal(lenY, beta, y, -incY)
+		}
+		return
+	}
+
+	// Form y = alpha * A * x + y
+	if tA == blas.NoTrans {
+		f64.GemvN(uintptr(m), uintptr(n), alpha, a, uintptr(lda), x, uintptr(incX), beta, y, uintptr(incY))
+		return
+	}
+	// Cases where a is transposed.
+	f64.GemvT(uintptr(m), uintptr(n), alpha, a, uintptr(lda), x, uintptr(incX), beta, y, uintptr(incY))
+}
+
 // Dtrmv performs one of the matrix-vector operations
 //  x = A * x   if tA == blas.NoTrans
 //  x = Aᵀ * x  if tA == blas.Trans or blas.ConjTrans

@@ -129,6 +129,9 @@ cat level2float64.go \
 | gofmt -r 'f64.ScalInc -> f32.ScalInc' \
 | gofmt -r 'f64.ScalUnitary -> f32.ScalUnitary' \
 | gofmt -r 'f64.Ger -> f32.Ger' \
+| gofmt -r 'f64.GemvN -> f32.GemvN' \
+| gofmt -r 'f64.GemvT -> f32.GemvT' \
+| gofmt -r 'Implementation{}.Dscal -> Implementation{}.Sscal' \
 \
 | sed -e "s_^\(func (Implementation) \)D\(.*\)\$_$WARNINGF32\1S\2_" \
       -e 's_^// D_// S_' \

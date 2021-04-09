@@ -176,7 +176,7 @@ func (s *SymBandDense) Reset() {
 	s.mat.K = 0
 	s.mat.Stride = 0
 	s.mat.Uplo = 0
-	s.mat.Data = s.mat.Data[:0:0]
+	s.mat.Data = s.mat.Data[:0]
 }
 
 // Zero sets all of the matrix elements to zero.

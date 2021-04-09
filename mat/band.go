@@ -215,7 +215,7 @@ func (b *BandDense) Reset() {
 	b.mat.KL = 0
 	b.mat.KU = 0
 	b.mat.Stride = 0
-	b.mat.Data = b.mat.Data[:0:0]
+	b.mat.Data = b.mat.Data[:0]
 }
 
 // DiagView returns the diagonal as a matrix backed by the original data.

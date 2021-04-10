@@ -140,8 +140,13 @@ func ROC(cutoffs, y []float64, classes []bool, weights []float64) (tpr, fpr, thr
 //
 // The returned ntp values can be interpreted as the number of true positives
 // where values above the given rank are assigned class true for each given
-// rank from 1 to len(classes). The values of min and max provide the minimum
-// and maximum possible number of true values for the set of classes.
+// rank from 1 to len(classes).
+//  ntp_i = sum_{j = 0}^{i} [ !classes_j ] * weight_j
+// The values of min and max provide the minimum and maximum possible number
+// of false values for the set of classes. The first element of ntp, min and
+// max are always zero as this corresponds to assigning all data class false
+// and the last elements are always weighted sum of classes as this corresponds
+// to assigning every data class false.
 //
 // If weights is nil, all weights are treated as 1. When weights are not nil,
 // the calculation of min and max allows for partial assignment of single data
@@ -165,14 +170,12 @@ func TOC(classes []bool, weights []float64) (min, ntp, max []float64) {
 		for i := range ntp[1:] {
 			ntp[i+1] = ntp[i]
 			if !classes[i] {
-				ntp[i+1] += 1
+				ntp[i+1]++
 			}
 		}
 		totalPositive := ntp[len(ntp)-1]
-		for i := range min {
+		for i := range ntp {
 			min[i] = math.Max(0, totalPositive-float64(len(classes)-i))
-		}
-		for i := range max {
 			max[i] = math.Min(totalPositive, float64(i))
 		}
 		return min, ntp, max
@@ -188,10 +191,8 @@ func TOC(classes []bool, weights []float64) (min, ntp, max []float64) {
 	floats.CumSum(cumw[1:], weights)
 	totw := cumw[len(cumw)-1]
 	totalPositive := ntp[len(ntp)-1]
-	for i := range min {
+	for i := range ntp {
 		min[i] = math.Max(0, totalPositive-(totw-cumw[i]))
-	}
-	for i := range max {
 		max[i] = math.Min(totalPositive, cumw[i])
 	}
 	return min, ntp, max

@@ -136,7 +136,7 @@ func ROC(cutoffs, y []float64, classes []bool, weights []float64) (tpr, fpr, thr
 // The input y values that correspond to classes and weights must be sorted
 // in ascending order. classes[i] is the class of value y[i] and weights[i]
 // is the weight of y[i]. SortWeightedLabeled can be used to sort classes
-// together with weights by the rank variable.
+// together with weights by the rank variable, i+1.
 //
 // The returned ntp values can be interpreted as the number of true positives
 // where values above the given rank are assigned class true for each given

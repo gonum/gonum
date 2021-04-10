@@ -6,7 +6,8 @@ package window
 
 import "math"
 
-// Gaussian can modify a sequence using the Gaussian window and return the result.
+// Gaussian can modify a sequence using the Gaussian window and return the
+// result.
 // See https://en.wikipedia.org/wiki/Window_function#Gaussian_window
 // and https://www.recordingblogs.com/wiki/gaussian-window for details.
 //
@@ -31,8 +32,8 @@ type Gaussian struct {
 	Sigma float64
 }
 
-// Transform applies the Gaussian transformation to seq in place, using the value
-// of the receiver as the sigma parameter, and returning the result.
+// Transform applies the Gaussian transformation to seq in place, using the
+// value of the receiver as the sigma parameter, and returning the result.
 func (g Gaussian) Transform(seq []float64) []float64 {
 	a := float64(len(seq)-1) / 2
 	for i := range seq {
@@ -42,8 +43,9 @@ func (g Gaussian) Transform(seq []float64) []float64 {
 	return seq
 }
 
-// TransformComplex applies the Gaussian transformation to seq in place, using the value
-// of the receiver as the sigma parameter, and returning the result.
+// TransformComplex applies the Gaussian transformation to seq in place,
+// using the value of the receiver as the sigma parameter, and returning
+// the result.
 func (g Gaussian) TransformComplex(seq []complex128) []complex128 {
 	a := float64(len(seq)-1) / 2
 	for i, v := range seq {
@@ -77,8 +79,8 @@ type Tukey struct {
 	Alpha float64
 }
 
-// Transform applies the Tukey transformation to seq in place, using the value
-// of the receiver as the Alpha parameter, and returning the result
+// Transform applies the Tukey transformation to seq in place, using the
+// value of the receiver as the Alpha parameter, and returning the result.
 func (t Tukey) Transform(seq []float64) []float64 {
 	switch {
 	case t.Alpha <= 0:
@@ -97,8 +99,8 @@ func (t Tukey) Transform(seq []float64) []float64 {
 	}
 }
 
-// TransformComplex applies the Tukey transformation to seq in place, using the value
-// of the receiver as the Alpha parameter, and returning the result
+// TransformComplex applies the Tukey transformation to seq in place, using
+// the value of the receiver as the Alpha parameter, and returning the result.
 func (t Tukey) TransformComplex(seq []complex128) []complex128 {
 	switch {
 	case t.Alpha <= 0:
@@ -165,9 +167,9 @@ func (v Values) TransformTo(dst, src []float64) {
 	}
 }
 
-// TransformComplex applies the weights in the receiver to seq in place, returning
-// the result. If v is nil, TransformComplex is a no-op, otherwise the length of v
-// must match the length of seq.
+// TransformComplex applies the weights in the receiver to seq in place,
+// returning the result. If v is nil, TransformComplex is a no-op, otherwise
+// the length of v must match the length of seq.
 func (v Values) TransformComplex(seq []complex128) []complex128 {
 	if v == nil {
 		return seq

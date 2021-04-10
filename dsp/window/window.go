@@ -6,7 +6,8 @@ package window
 
 import "math"
 
-// Rectangular modifies seq in place by the Rectangular window and returns the result.
+// Rectangular modifies seq in place by the Rectangular window and returns
+// the result.
 // See https://en.wikipedia.org/wiki/Window_function#Rectangular_window and
 // https://www.recordingblogs.com/wiki/rectangular-window for details.
 //
@@ -66,7 +67,8 @@ func Lanczos(seq []float64) []float64 {
 	return seq
 }
 
-// Triangular modifies seq in place by the Triangular window and returns the result.
+// Triangular modifies seq in place by the Triangular window and returns
+// the result.
 // See https://en.wikipedia.org/wiki/Window_function#Triangular_window and
 // https://www.recordingblogs.com/wiki/triangular-window for details.
 //
@@ -104,7 +106,8 @@ func Hann(seq []float64) []float64 {
 	return seq
 }
 
-// BartlettHann modifies seq in place by the Bartlett-Hann window and returns result.
+// BartlettHann modifies seq in place by the Bartlett-Hann window and returns
+// result.
 // See https://en.wikipedia.org/wiki/Window_function#Bartlett%E2%80%93Hann_window
 // and https://www.recordingblogs.com/wiki/bartlett-hann-window for details.
 //
@@ -154,7 +157,8 @@ func Hamming(seq []float64) []float64 {
 	return seq
 }
 
-// Blackman modifies seq in place by the Blackman window and returns the result.
+// Blackman modifies seq in place by the Blackman window and returns the
+// result.
 // See https://en.wikipedia.org/wiki/Window_function#Blackman_window and
 // https://www.recordingblogs.com/wiki/blackman-window for details.
 //
@@ -180,7 +184,8 @@ func Blackman(seq []float64) []float64 {
 	return seq
 }
 
-// BlackmanHarris modifies seq in place by the Blackman-Harris window and returns the result.
+// BlackmanHarris modifies seq in place by the Blackman-Harris window and
+// returns the result.
 // See https://en.wikipedia.org/wiki/Window_function#Blackman%E2%80%93Harris_window
 // and https://www.recordingblogs.com/wiki/blackman-harris-window for details.
 //
@@ -236,7 +241,8 @@ func Nuttall(seq []float64) []float64 {
 	return seq
 }
 
-// BlackmanNuttall modifies seq in place by the Blackman-Nuttall window and returns the result.
+// BlackmanNuttall modifies seq in place by the Blackman-Nuttall window and
+// returns the result.
 // See https://en.wikipedia.org/wiki/Window_function#Blackman%E2%80%93Nuttall_window
 // and https://www.recordingblogs.com/wiki/blackman-nuttall-window for details.
 //
@@ -264,7 +270,8 @@ func BlackmanNuttall(seq []float64) []float64 {
 	return seq
 }
 
-// FlatTop modifies seq in place by the Flat Top window and returns the result.
+// FlatTop modifies seq in place by the Flat Top window and returns the
+// result.
 // See https://en.wikipedia.org/wiki/Window_function#Flat_top_window and
 // https://www.recordingblogs.com/wiki/flat-top-window for details.
 //

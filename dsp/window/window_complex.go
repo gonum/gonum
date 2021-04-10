@@ -6,7 +6,8 @@ package window
 
 import "math"
 
-// Rectangular modifies seq in place by the Rectangular window and returns the result.
+// Rectangular modifies seq in place by the Rectangular window and returns
+// the result.
 // See https://en.wikipedia.org/wiki/Window_function#Rectangular_window and
 // https://www.recordingblogs.com/wiki/rectangular-window for details.
 //
@@ -23,7 +24,8 @@ func RectangularComplex(seq []complex128) []complex128 {
 	return seq
 }
 
-// SineComplex modifies seq in place by the Sine window and returns the result.
+// SineComplex modifies seq in place by the Sine window and returns the
+// result.
 // See https://en.wikipedia.org/wiki/Window_function#Sine_window and
 // https://www.recordingblogs.com/wiki/sine-window for details.
 //
@@ -43,7 +45,8 @@ func SineComplex(seq []complex128) []complex128 {
 	return seq
 }
 
-// LanczosComplex modifies seq in place by the Lanczos window and returns the result.
+// LanczosComplex modifies seq in place by the Lanczos window and returns
+// the result.
 // See https://en.wikipedia.org/wiki/Window_function#Lanczos_window and
 // https://www.recordingblogs.com/wiki/lanczos-window for details.
 //
@@ -68,7 +71,8 @@ func LanczosComplex(seq []complex128) []complex128 {
 	return seq
 }
 
-// TriangularComplex modifies seq in place by the Triangular window and returns the result.
+// TriangularComplex modifies seq in place by the Triangular window and
+// returns the result.
 // See https://en.wikipedia.org/wiki/Window_function#Triangular_window and
 // https://www.recordingblogs.com/wiki/triangular-window for details.
 //
@@ -108,7 +112,8 @@ func HannComplex(seq []complex128) []complex128 {
 	return seq
 }
 
-// BartlettHannComplex modifies seq in place by the Bartlett-Hann window and returns result.
+// BartlettHannComplex modifies seq in place by the Bartlett-Hann window
+// and returns result.
 // See https://en.wikipedia.org/wiki/Window_function#Bartlett%E2%80%93Hann_window
 // and https://www.recordingblogs.com/wiki/bartlett-hann-window for details.
 //
@@ -134,7 +139,8 @@ func BartlettHannComplex(seq []complex128) []complex128 {
 	return seq
 }
 
-// HammingComplex modifies seq in place by the Hamming window and returns the result.
+// HammingComplex modifies seq in place by the Hamming window and returns
+// the result.
 // See https://en.wikipedia.org/wiki/Window_function#Hann_and_Hamming_windows
 // and https://www.recordingblogs.com/wiki/hamming-window for details.
 //
@@ -160,7 +166,8 @@ func HammingComplex(seq []complex128) []complex128 {
 	return seq
 }
 
-// BlackmanComplex modifies seq in place by the Blackman window and returns the result.
+// BlackmanComplex modifies seq in place by the Blackman window and returns
+// the result.
 // See https://en.wikipedia.org/wiki/Window_function#Blackman_window and
 // https://www.recordingblogs.com/wiki/blackman-window for details.
 //
@@ -187,7 +194,8 @@ func BlackmanComplex(seq []complex128) []complex128 {
 	return seq
 }
 
-// BlackmanHarrisComplex modifies seq in place by the Blackman-Harris window and returns the result.
+// BlackmanHarrisComplex modifies seq in place by the Blackman-Harris window
+// and returns the result.
 // See https://en.wikipedia.org/wiki/Window_function#Blackman%E2%80%93Harris_window
 // and https://www.recordingblogs.com/wiki/blackman-harris-window for details.
 //
@@ -216,7 +224,8 @@ func BlackmanHarrisComplex(seq []complex128) []complex128 {
 	return seq
 }
 
-// NuttallComplex modifies seq in place by the Nuttall window and returns the result.
+// NuttallComplex modifies seq in place by the Nuttall window and returns
+// the result.
 // See https://en.wikipedia.org/wiki/Window_function#Nuttall_window,_continuous_first_derivative
 // and https://www.recordingblogs.com/wiki/nuttall-window for details.
 //
@@ -245,7 +254,8 @@ func NuttallComplex(seq []complex128) []complex128 {
 	return seq
 }
 
-// BlackmanNuttallComplex modifies seq in place by the Blackman-Nuttall window and returns the result.
+// BlackmanNuttallComplex modifies seq in place by the Blackman-Nuttall
+// window and returns the result.
 // See https://en.wikipedia.org/wiki/Window_function#Blackman%E2%80%93Nuttall_window
 // and https://www.recordingblogs.com/wiki/blackman-nuttall-window for details.
 //
@@ -274,7 +284,8 @@ func BlackmanNuttallComplex(seq []complex128) []complex128 {
 	return seq
 }
 
-// FlatTopComplex modifies seq in place by the Flat Top window and returns the result.
+// FlatTopComplex modifies seq in place by the Flat Top window and returns
+// the result.
 // See https://en.wikipedia.org/wiki/Window_function#Flat_top_window and
 // https://www.recordingblogs.com/wiki/flat-top-window for details.
 //

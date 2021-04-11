@@ -146,7 +146,7 @@ func ROC(cutoffs, y []float64, classes []bool, weights []float64) (tpr, fpr, thr
 // of false values for the set of classes. The first element of ntp, min and
 // max are always zero as this corresponds to assigning all data class false
 // and the last elements are always weighted sum of classes as this corresponds
-// to assigning every data class false.
+// to assigning every data class true.
 //
 // If weights is nil, all weights are treated as 1. When weights are not nil,
 // the calculation of min and max allows for partial assignment of single data

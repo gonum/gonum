@@ -7,8 +7,6 @@ package stat
 import (
 	"math"
 	"sort"
-
-	"gonum.org/v1/gonum/floats"
 )
 
 // ROC returns paired false positive rate (FPR) and true positive rate
@@ -141,7 +139,7 @@ func ROC(cutoffs, y []float64, classes []bool, weights []float64) (tpr, fpr, thr
 // The returned ntp values can be interpreted as the number of true positives
 // where values above the given rank are assigned class true for each given
 // rank from 1 to len(classes).
-//  ntp_i = sum_{j = 1}^{i} [ !classes_{j-1} ] * weights_{j-1}, where [x] = 1 if x else 0.
+//  ntp_i = sum_{j = 1}^{len(ntp)-i-1} [ classes_j ] * weights_j, where [x] = 1 if x else 0.
 // and
 //  ntp_0 = 0
 // The values of min and max provide the minimum and maximum possible number
@@ -171,7 +169,7 @@ func TOC(classes []bool, weights []float64) (min, ntp, max []float64) {
 	if weights == nil {
 		for i := range ntp[1:] {
 			ntp[i+1] = ntp[i]
-			if !classes[i] {
+			if classes[len(classes)-i-1] {
 				ntp[i+1]++
 			}
 		}
@@ -183,14 +181,15 @@ func TOC(classes []bool, weights []float64) (min, ntp, max []float64) {
 		return min, ntp, max
 	}
 
+	cumw := max // Reuse max for cumulative weight. Update its elements last.
 	for i := range ntp[1:] {
 		ntp[i+1] = ntp[i]
-		if !classes[i] {
-			ntp[i+1] += weights[i]
+		w := weights[len(weights)-i-1]
+		cumw[i+1] = cumw[i] + w
+		if classes[len(classes)-i-1] {
+			ntp[i+1] += w
 		}
 	}
-	cumw := make([]float64, len(ntp))
-	floats.CumSum(cumw[1:], weights)
 	totw := cumw[len(cumw)-1]
 	totalPositive := ntp[len(ntp)-1]
 	for i := range ntp {

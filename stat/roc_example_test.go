@@ -144,11 +144,11 @@ func ExampleROC_aUC_weighted() {
 
 func ExampleTOC() {
 	classes := []bool{
-		true, false, true, true, false, true,
-		false, true, true, false, false, false,
-		false, false, false, false, true, true,
-		true, true, true, true, true, true,
-		true, true, true, true, true, true,
+		false, false, false, false, false, false,
+		false, false, false, false, false, false,
+		false, false, true, true, true, true,
+		true, true, true, false, false, true,
+		false, true, false, false, true, false,
 	}
 
 	min, ntp, max := stat.TOC(classes, nil)
@@ -164,8 +164,8 @@ func ExampleTOC() {
 
 func ExampleTOC_unsorted() {
 	y := []float64{8, 7.5, 6, 5, 3, 0}
-	classes := []bool{true, true, true, false, true, false}
-	weights := []float64{2, 2, 3, 6, 1, 4}
+	classes := []bool{true, false, true, false, false, false}
+	weights := []float64{4, 1, 6, 3, 2, 2}
 
 	stat.SortWeightedLabeled(y, classes, weights)
 

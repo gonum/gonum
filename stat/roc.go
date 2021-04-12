@@ -139,14 +139,13 @@ func ROC(cutoffs, y []float64, classes []bool, weights []float64) (tpr, fpr, thr
 // The returned ntp values can be interpreted as the number of true positives
 // where values above the given rank are assigned class true for each given
 // rank from 1 to len(classes).
-//  ntp_i = sum_{j = 1}^{len(ntp)-i-1} [ classes_j ] * weights_j, where [x] = 1 if x else 0.
-// and
-//  ntp_0 = 0
+//  ntp_i = sum_{j ≥ len(ntp)-1 - i} [ classes_j ] * weights_j, where [x] = 1 if x else 0.
 // The values of min and max provide the minimum and maximum possible number
 // of false values for the set of classes. The first element of ntp, min and
 // max are always zero as this corresponds to assigning all data class false
 // and the last elements are always weighted sum of classes as this corresponds
-// to assigning every data class true.
+// to assigning every data class true. For len(classes) != 0, the lengths of
+// min, ntp and max are len(classes)+1.
 //
 // If weights is nil, all weights are treated as 1. When weights are not nil,
 // the calculation of min and max allows for partial assignment of single data

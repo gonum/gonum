@@ -353,10 +353,10 @@ func (a *Tridiag) At(i, j int) float64 {
 }
 
 func (a *Tridiag) at(i, j int) float64 {
-	if uint(i) >= uint(d.mat.N) {
+	if uint(i) >= uint(a.mat.N) {
 		panic(ErrRowAccess)
 	}
-	if uint(j) >= uint(d.mat.N) {
+	if uint(j) >= uint(a.mat.N) {
 		panic(ErrColAccess)
 	}
 	switch i - j {

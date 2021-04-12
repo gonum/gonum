@@ -12,26 +12,38 @@ jobs:
       matrix:
         go-version: [1.16.x, 1.15.x]
         platform: [ubuntu-latest, macos-latest]
-        env:
-          - TAGS=""
-          - TAGS="-tags bounds"
-          - TAGS="-tags noasm"
-          - TAGS="-tags safe"
-          - FORCE_GOARCH=386
+        force-goarch: ["", "386"]
+        tags: 
+          - ""
+          - "-tags bounds"
+          - "-tags noasm"
+          - "-tags safe"
+
         exclude:
+          - platform: ubuntu-latest
+            tags: "-tags bounds"
+            force-goarch: "386"
+          - platform: ubuntu-latest
+            tags: "-tags noasm"
+            force-goarch: "386"
+          - platform: ubuntu-latest
+            tags: "-tags safe"
+            force-goarch: "386"
           - platform: macos-latest
-            env: TAGS="-tags bounds"
+            force-goarch: "386"
           - platform: macos-latest
-            env: TAGS="-tags noasm"
+            tags: "-tags bounds"
           - platform: macos-latest
-            env: TAGS="-tags safe"
+            tags: "-tags noasm"
           - platform: macos-latest
-            env: FORCE_GOARCH=386
+            tags: "-tags safe"
 
     runs-on: ${{ matrix.platform }}
     env:
         GO111MODULE: on
         GOPATH: ${{ github.workspace }}
+        TAGS: ${{ matrix.tags }}
+        FORCE_GOARCH: ${{ matrix.force-goarch }}
     defaults:
         run:
             working-directory: ${{ env.GOPATH }}/src/gonum.org/v1/gonum

@@ -15,16 +15,17 @@ jobs:
       matrix:
         go-version: [1.16.x, 1.15.x]
         platform: [ubuntu-latest]
-        env:
-          - TAGS=""
-          - TAGS="-tags bounds"
-          - TAGS="-tags noasm"
-          - TAGS="-tags safe"
+        tags: 
+          - ""
+          - "-tags bounds"
+          - "-tags noasm"
+          - "-tags safe"
 
     runs-on: ${{ matrix.platform }}
     env:
         GO111MODULE: on
         GOPATH: ${{ github.workspace }}
+        TAGS: ${{ matrix.tags }}
     defaults:
         run:
             working-directory: ${{ env.GOPATH }}/src/gonum.org/v1/gonum

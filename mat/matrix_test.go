@@ -542,7 +542,7 @@ func TestTrace(t *testing.T) {
 	denseComparison := func(a *Dense) interface{} {
 		return Trace(a)
 	}
-	testOneInputFunc(t, "Trace", f, denseComparison, sameAnswerFloat, isAnyType, isSquare)
+	testOneInputFunc(t, "Trace", f, denseComparison, sameAnswerFloatApproxTol(1e-15), isAnyType, isSquare)
 }
 
 func TestTracer(t *testing.T) {

@@ -325,18 +325,6 @@ func TestTridiagZero(t *testing.T) {
 	}
 }
 
-func TestTridiagTrace(t *testing.T) {
-	t.Parallel()
-	for _, n := range []int{1, 2, 3, 4, 7, 10} {
-		a, ref := newTestTridiag(n)
-		want := ref.Trace()
-		got := a.Trace()
-		if got != want {
-			t.Errorf("Case n=%d: unexpected trace: got %f, want %f", n, got, want)
-		}
-	}
-}
-
 func TestTridiagNorm(t *testing.T) {
 	t.Parallel()
 	for _, n := range []int{1, 2, 3, 4, 7, 10} {

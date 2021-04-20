@@ -129,10 +129,10 @@ func (a *Tridiag) Reset() {
 	a.mat.DU = a.mat.DU[:0]
 }
 
-// Clone makes a copy of the input Tridiag into the receiver, overwriting the
-// previous value of the receiver. Clone does not place any restrictions on
-// receiver shape.
-func (a *Tridiag) Clone(from *Tridiag) {
+// CloneFromTridiag makes a copy of the input Tridiag into the receiver,
+// overwriting the previous value of the receiver. CloneFromTridiag does not
+// place any restrictions on receiver shape.
+func (a *Tridiag) CloneFromTridiag(from *Tridiag) {
 	n := from.mat.N
 	switch n {
 	case 0:
@@ -232,7 +232,7 @@ func (a *Tridiag) SolveTo(dst *Dense, trans bool, b Matrix) error {
 		dst.Copy(b)
 	}
 	var aCopy Tridiag
-	aCopy.Clone(a)
+	aCopy.CloneFromTridiag(a)
 	var ok bool
 	if trans {
 		ok = lapack64.Gtsv(blas.Trans, aCopy.mat, dst.mat)
@@ -263,7 +263,7 @@ func (a *Tridiag) SolveVecTo(dst *VecDense, trans bool, b Vector) error {
 		dst.CopyVec(b)
 	}
 	var aCopy Tridiag
-	aCopy.Clone(a)
+	aCopy.CloneFromTridiag(a)
 	var ok bool
 	if trans {
 		ok = lapack64.Gtsv(blas.Trans, aCopy.mat, dst.asGeneral())

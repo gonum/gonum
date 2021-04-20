@@ -848,6 +848,10 @@ func makeCopyOf(a Matrix) Matrix {
 		}
 		copy(d.mat.Data, diag.mat.Data)
 		return returnAs(d, t)
+	case *Tridiag:
+		var m Tridiag
+		m.CloneFromTridiag(a.(*Tridiag))
+		return returnAs(&m, t)
 	}
 }
 

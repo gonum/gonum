@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/iterator"
 	"gonum.org/v1/gonum/graph/simple"
 )
 
@@ -217,3 +218,46 @@ func linksTo(nodes ...graph.Node) map[int]struct{} {
 	}
 	return s
 }
+
+func TestLargeEncoding(t *testing.T) {
+	for _, l := range []int{
+		50, 60, 70, 80, 100, 1e4,
+	} {
+		g6 := Encode(implicitCycle(l))
+		if !IsValid(g6) {
+			t.Errorf("graph6-encoding unexpectedly invalid: %v", g6)
+		}
+		for i, b := range []byte(g6) {
+			if b < 63 || 126 < b {
+				t.Errorf("graph6-encoding contains invalid character at %d: %q", i, b)
+			}
+		}
+	}
+}
+
+type implicitCycle int32
+
+func (i implicitCycle) Node(id int64) graph.Node {
+	if id < int64(i) {
+		return node(id)
+	}
+	return nil
+}
+func (i implicitCycle) Nodes() graph.Nodes {
+	return iterator.NewImplicitNodes(0, int(i), func(id int) graph.Node { return node(id) })
+}
+func (i implicitCycle) From(id int64) graph.Nodes {
+	if i < 2 {
+		return graph.Empty
+	}
+	// This is not a valid undirected cycle, but it gets bits
+	// into the routine for testing and that is all we care about.
+	next := int(id+1) % int(i)
+	return iterator.NewImplicitNodes(next, next+1, func(id int) graph.Node { return node(id) })
+}
+func (i implicitCycle) HasEdgeBetween(xid, yid int64) bool { return false }
+func (i implicitCycle) Edge(xid, yid int64) graph.Edge     { return nil }
+
+type node int32
+
+func (n node) ID() int64 { return int64(n) }

@@ -98,6 +98,9 @@ func TestImplicitNodesIterate(t *testing.T) {
 					t.Errorf("unexpected iterator length during iteration for round %d: got:%d want:%d", i, it.Len(), (test.end-test.beg)-len(got))
 				}
 			}
+			if it.Len() != 0 {
+				t.Errorf("unexpected depleted iterator length for round %d: got:%d want:0", i, it.Len())
+			}
 			if !reflect.DeepEqual(got, test.want) {
 				t.Errorf("unexpected iterator output for round %d: got:%#v want:%#v", i, got, test.want)
 			}

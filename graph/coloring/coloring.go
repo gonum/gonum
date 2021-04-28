@@ -93,7 +93,7 @@ func DsaturExact(ctx context.Context, g graph.Undirected) (k int, colors map[int
 
 	selector := &order.saturationDegree
 	cand := newDsaturColoring(order.nodes, make(map[int64]int))
-	k, colors, err = dSaturExact(ctx, selector, cand, lb, 0, ub, nil)
+	k, colors, err = dSaturExact(ctx, selector, cand, 0, ub, nil)
 	if colors == nil {
 		return ub, initial, err
 	}
@@ -151,12 +151,14 @@ func (c dSaturColoring) uncolor(id int64) {
 // dSaturExact recursively searches for an exact mimimum color coloring of the
 // full graph in cand. If no chromatic number lower than ub is found, colors is
 // returned as nil.
-func dSaturExact(ctx context.Context, selector *saturationDegree, cand dSaturColoring, lb, k, ub int, best map[int64]int) (newK int, colors map[int64]int, err error) {
+func dSaturExact(ctx context.Context, selector *saturationDegree, cand dSaturColoring, k, ub int, best map[int64]int) (newK int, colors map[int64]int, err error) {
 	if len(cand.uncolored) == 0 {
-		if k < ub {
-			return k, clone(cand.colors), nil
-		}
-		return ub, best, nil
+		// In the published algorithm, this is guarded by k < ub,
+		// but dSaturExact is never called with k >= ub; in the
+		// initial call we have excluded cases where k == ub and
+		// it cannot be greater, and in the recursive call, we
+		// have already checked that k < ub.
+		return k, clone(cand.colors), nil
 	}
 
 	select {
@@ -209,8 +211,11 @@ func dSaturExact(ctx context.Context, selector *saturationDegree, cand dSaturCol
 		if c == newCol {
 			effK++
 		}
-		if max(effK, lb) < ub {
-			ub, best, err = dSaturExact(ctx, selector, cand, lb, effK, ub, best)
+		// In the published algorithm, the expression max(effK, lb) < ub is
+		// used, but lb < ub always since it is not updated and dSaturExact
+		// is not called if lb == ub, and it cannot be greater.
+		if effK < ub {
+			ub, best, err = dSaturExact(ctx, selector, cand, effK, ub, best)
 			if err != nil {
 				return ub, best, err
 			}
@@ -218,13 +223,6 @@ func dSaturExact(ctx context.Context, selector *saturationDegree, cand dSaturCol
 	}
 
 	return ub, best, nil
-}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
 }
 
 // maximumClique returns a maximum clique in g and its order.

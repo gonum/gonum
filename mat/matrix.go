@@ -11,7 +11,6 @@ import (
 	"gonum.org/v1/gonum/blas/blas64"
 	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/lapack"
-	"gonum.org/v1/gonum/lapack/lapack64"
 )
 
 // Matrix is the basic matrix interface type.
@@ -749,6 +748,11 @@ func Min(a Matrix) float64 {
 	}
 }
 
+// A Normer can compute a norm of the matrix.
+type Normer interface {
+	Norm(norm float64) float64
+}
+
 // Norm returns the specified norm of the matrix A. Valid norms are:
 //  1 - The maximum absolute column sum
 //  2 - The Frobenius norm, the square root of the sum of the squares of the elements
@@ -759,55 +763,19 @@ func Min(a Matrix) float64 {
 func Norm(a Matrix, norm float64) float64 {
 	r, c := a.Dims()
 	if r == 0 || c == 0 {
-		panic(ErrShape)
+		panic(ErrZeroLength)
 	}
-	aU, aTrans := untranspose(a)
-	var work []float64
-	switch rma := aU.(type) {
-	case RawMatrixer:
-		rm := rma.RawMatrix()
-		n := normLapack(norm, aTrans)
-		if n == lapack.MaxColumnSum {
-			work = getFloats(rm.Cols, false)
-			defer putFloats(work)
-		}
-		return lapack64.Lange(n, rm, work)
-	case RawTriangular:
-		rm := rma.RawTriangular()
-		n := normLapack(norm, aTrans)
-		if n == lapack.MaxRowSum || n == lapack.MaxColumnSum {
-			work = getFloats(rm.N, false)
-			defer putFloats(work)
-		}
-		return lapack64.Lantr(n, rm, work)
-	case RawSymmetricer:
-		rm := rma.RawSymmetric()
-		n := normLapack(norm, aTrans)
-		if n == lapack.MaxRowSum || n == lapack.MaxColumnSum {
-			work = getFloats(rm.N, false)
-			defer putFloats(work)
-		}
-		return lapack64.Lansy(n, rm, work)
-	case *VecDense:
-		rv := rma.RawVector()
-		switch norm {
-		default:
-			panic(ErrNormOrder)
-		case 1:
-			if aTrans {
-				imax := blas64.Iamax(rv)
-				return math.Abs(rma.At(imax, 0))
+	m, trans := untransposeExtract(a)
+	if m, ok := m.(Normer); ok {
+		if trans {
+			switch norm {
+			case 1:
+				norm = math.Inf(1)
+			case math.Inf(1):
+				norm = 1
 			}
-			return blas64.Asum(rv)
-		case 2:
-			return blas64.Nrm2(rv)
-		case math.Inf(1):
-			if aTrans {
-				return blas64.Asum(rv)
-			}
-			imax := blas64.Iamax(rv)
-			return math.Abs(rma.At(imax, 0))
 		}
+		return m.Norm(norm)
 	}
 	switch norm {
 	default:

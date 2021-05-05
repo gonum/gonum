@@ -7,6 +7,8 @@ package mat
 import (
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
+	"gonum.org/v1/gonum/lapack"
+	"gonum.org/v1/gonum/lapack/lapack64"
 )
 
 var (
@@ -583,4 +585,23 @@ func (m *Dense) Trace() float64 {
 		v += m.mat.Data[i*m.mat.Stride+i]
 	}
 	return v
+}
+
+// Norm returns the specified norm of the receiver. Valid norms are:
+//  1 - The maximum absolute column sum
+//  2 - The Frobenius norm, the square root of the sum of the squares of the elements
+//  Inf - The maximum absolute row sum
+//
+// Norm will panic with ErrNormOrder if an illegal norm is specified.
+func (m *Dense) Norm(norm float64) float64 {
+	if m.IsEmpty() {
+		panic(ErrZeroLength)
+	}
+	lnorm := normLapack(norm, false)
+	if lnorm == lapack.MaxColumnSum {
+		work := getFloats(m.mat.Cols, false)
+		defer putFloats(work)
+		return lapack64.Lange(lnorm, m.mat, work)
+	}
+	return lapack64.Lange(lnorm, m.mat, nil)
 }

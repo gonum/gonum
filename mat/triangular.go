@@ -9,6 +9,7 @@ import (
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
+	"gonum.org/v1/gonum/lapack"
 	"gonum.org/v1/gonum/lapack/lapack64"
 )
 
@@ -618,6 +619,25 @@ func (t *TriDense) sliceTri(i, k int) *TriDense {
 	v.mat.N = k - i
 	v.cap = t.cap - i
 	return &v
+}
+
+// Norm returns the specified norm of the receiver. Valid norms are:
+//  1 - The maximum absolute column sum
+//  2 - The Frobenius norm, the square root of the sum of the squares of the elements
+//  Inf - The maximum absolute row sum
+//
+// Norm will panic with ErrNormOrder if an illegal norm is specified.
+func (t *TriDense) Norm(norm float64) float64 {
+	if t.IsEmpty() {
+		panic(ErrZeroLength)
+	}
+	lnorm := normLapack(norm, false)
+	if lnorm == lapack.MaxColumnSum {
+		work := getFloats(t.mat.N, false)
+		defer putFloats(work)
+		return lapack64.Lantr(lnorm, t.mat, work)
+	}
+	return lapack64.Lantr(lnorm, t.mat, nil)
 }
 
 // Trace returns the trace of the matrix.

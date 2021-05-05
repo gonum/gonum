@@ -501,7 +501,7 @@ func TestNormZero(t *testing.T) {
 			if !panicked {
 				t.Errorf("expected panic for Norm(&%T{}, %v)", a, norm)
 			}
-			if message != ErrShape.Error() {
+			if message != ErrZeroLength.Error() {
 				t.Errorf("unexpected panic string for Norm(&%T{}, %v): got:%s want:%s",
 					a, norm, message, ErrShape.Error())
 			}

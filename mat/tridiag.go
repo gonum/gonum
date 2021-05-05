@@ -188,6 +188,9 @@ func (a *Tridiag) Trace() float64 {
 //
 // Norm will panic with ErrNormOrder if an illegal norm is specified.
 func (a *Tridiag) Norm(norm float64) float64 {
+	if a.IsEmpty() {
+		panic(ErrZeroLength)
+	}
 	return lapack64.Langt(normLapack(norm, false), a.mat)
 }
 

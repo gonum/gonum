@@ -7,6 +7,8 @@ package mat
 import (
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
+	"gonum.org/v1/gonum/lapack"
+	"gonum.org/v1/gonum/lapack/lapack64"
 )
 
 var (
@@ -283,6 +285,23 @@ func (b *BandDense) Zero() {
 		u := min(nCol, m+kL-i)
 		zero(b.mat.Data[i*b.mat.Stride+l : i*b.mat.Stride+u])
 	}
+}
+
+// Norm returns the specified norm of the receiver. Valid norms are:
+//  1 - The maximum absolute column sum
+//  2 - The Frobenius norm, the square root of the sum of the squares of the elements
+//  Inf - The maximum absolute row sum
+//
+// Norm will panic with ErrNormOrder if an illegal norm is specified.
+func (b *BandDense) Norm(norm float64) float64 {
+	if b.IsEmpty() {
+		panic(ErrZeroLength)
+	}
+	lnorm := normLapack(norm, false)
+	if lnorm == lapack.MaxColumnSum || lnorm == lapack.MaxRowSum {
+		return lapack64.Langb(lnorm, b.mat)
+	}
+	return lapack64.Langb(lnorm, b.mat)
 }
 
 // Trace computes the trace of the matrix.

@@ -11,15 +11,17 @@ import (
 	"gonum.org/v1/gonum/lapack"
 )
 
-// Dlangb returns the given norm of an n×n band matrix with kl sub-diagonals and
+// Dlangb returns the given norm of an m×n band matrix with kl sub-diagonals and
 // ku super-diagonals.
 //
 // When norm is lapack.MaxColumnSum, the length of work must be at least n.
-func (impl Implementation) Dlangb(norm lapack.MatrixNorm, n, kl, ku int, ab []float64, ldab int, work []float64) float64 {
+func (impl Implementation) Dlangb(norm lapack.MatrixNorm, m, n, kl, ku int, ab []float64, ldab int, work []float64) float64 {
 	ncol := kl + 1 + ku
 	switch {
 	case norm != lapack.MaxAbs && norm != lapack.MaxRowSum && norm != lapack.MaxColumnSum && norm != lapack.Frobenius:
 		panic(badNorm)
+	case m < 0:
+		panic(mLT0)
 	case n < 0:
 		panic(nLT0)
 	case kl < 0:
@@ -31,12 +33,12 @@ func (impl Implementation) Dlangb(norm lapack.MatrixNorm, n, kl, ku int, ab []fl
 	}
 
 	// Quick return if possible.
-	if n == 0 {
+	if m == 0 || n == 0 {
 		return 0
 	}
 
 	switch {
-	case len(ab) < (n-1)*ldab+ncol:
+	case len(ab) < min(m, n+kl)*ldab:
 		panic(shortAB)
 	case len(work) < n && norm == lapack.MaxColumnSum:
 		panic(shortWork)
@@ -45,7 +47,7 @@ func (impl Implementation) Dlangb(norm lapack.MatrixNorm, n, kl, ku int, ab []fl
 	var value float64
 	switch norm {
 	case lapack.MaxAbs:
-		for i := 0; i < n; i++ {
+		for i := 0; i < min(m, n+kl); i++ {
 			l := max(0, kl-i)
 			u := min(n+kl-i, ncol)
 			for _, aij := range ab[i*ldab+l : i*ldab+u] {
@@ -56,7 +58,7 @@ func (impl Implementation) Dlangb(norm lapack.MatrixNorm, n, kl, ku int, ab []fl
 			}
 		}
 	case lapack.MaxRowSum:
-		for i := 0; i < n; i++ {
+		for i := 0; i < min(m, n+kl); i++ {
 			l := max(0, kl-i)
 			u := min(n+kl-i, ncol)
 			sum := f64.L1Norm(ab[i*ldab+l : i*ldab+u])
@@ -69,7 +71,7 @@ func (impl Implementation) Dlangb(norm lapack.MatrixNorm, n, kl, ku int, ab []fl
 		for j := range work {
 			work[j] = 0
 		}
-		for i := 0; i < n; i++ {
+		for i := 0; i < min(m, n+kl); i++ {
 			l := max(0, kl-i)
 			u := min(n+kl-i, ncol)
 			for jb, aij := range ab[i*ldab+l : i*ldab+u] {
@@ -85,7 +87,7 @@ func (impl Implementation) Dlangb(norm lapack.MatrixNorm, n, kl, ku int, ab []fl
 	case lapack.Frobenius:
 		scale := 0.0
 		ssq := 1.0
-		for i := 0; i < n; i++ {
+		for i := 0; i < min(m, n+kl); i++ {
 			l := max(0, kl-i)
 			u := min(n+kl-i, ncol)
 			ilen := u - l

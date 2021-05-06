@@ -16,7 +16,7 @@ import (
 )
 
 type Dlangber interface {
-	Dlangb(norm lapack.MatrixNorm, n, kl, ku int, ab []float64, ldab int, work []float64) float64
+	Dlangb(norm lapack.MatrixNorm, m, n, kl, ku int, ab []float64, ldab int, work []float64) float64
 }
 
 func DlangbTest(t *testing.T, impl Dlangber) {
@@ -24,11 +24,13 @@ func DlangbTest(t *testing.T, impl Dlangber) {
 	for _, norm := range []lapack.MatrixNorm{lapack.MaxAbs, lapack.MaxRowSum, lapack.MaxColumnSum, lapack.Frobenius} {
 		t.Run(normToString(norm), func(t *testing.T) {
 			for _, n := range []int{0, 1, 2, 3, 4, 5, 10} {
-				for _, kl := range []int{0, 1, 2, 3, 4, 5, 10} {
-					for _, ku := range []int{0, 1, 2, 3, 4, 5, 10} {
-						for _, ldab := range []int{kl + ku + 1, kl + ku + 1 + 7} {
-							for iter := 0; iter < 10; iter++ {
-								dlangbTest(t, impl, rnd, norm, n, kl, ku, ldab)
+				for _, m := range []int{0, 1, 2, 3, 4, 5, 10} {
+					for _, kl := range []int{0, 1, 2, 3, 4, 5, 10} {
+						for _, ku := range []int{0, 1, 2, 3, 4, 5, 10} {
+							for _, ldab := range []int{kl + ku + 1, kl + ku + 1 + 7} {
+								for iter := 0; iter < 10; iter++ {
+									dlangbTest(t, impl, rnd, norm, m, n, kl, ku, ldab)
+								}
 							}
 						}
 					}
@@ -38,28 +40,28 @@ func DlangbTest(t *testing.T, impl Dlangber) {
 	}
 }
 
-func dlangbTest(t *testing.T, impl Dlangber, rnd *rand.Rand, norm lapack.MatrixNorm, n, kl, ku, ldab int) {
+func dlangbTest(t *testing.T, impl Dlangber, rnd *rand.Rand, norm lapack.MatrixNorm, m, n, kl, ku, ldab int) {
 	const tol = 1e-14
 
-	name := fmt.Sprintf("n=%v,kl=%v,ku=%v,ldab=%v", n, kl, ku, ldab)
+	name := fmt.Sprintf("m=%v,n=%v,kl=%v,ku=%v,ldab=%v", m, n, kl, ku, ldab)
 
 	// Generate a random band matrix.
-	ab := randomSlice(n*ldab, rnd)
+	ab := randomSlice(m*ldab, rnd)
 	// Sometimes put a NaN into the matrix.
-	if n > 0 && rnd.Float64() < 0.5 {
-		i := rnd.Intn(n)
+	if m > 0 && n > 0 && rnd.Float64() < 0.5 {
+		i := rnd.Intn(m)
 		ab[i*ldab+kl] = math.NaN()
 	}
 	abCopy := make([]float64, len(ab))
 	copy(abCopy, ab)
 
 	// Deal with zero-sized matrices early.
-	if n == 0 {
-		got := impl.Dlangb(norm, n, kl, ku, nil, ldab, nil)
+	if m == 0 || n == 0 {
+		got := impl.Dlangb(norm, m, n, kl, ku, nil, ldab, nil)
 		if got != 0 {
 			t.Errorf("%v: unexpected result for zero-sized matrix with nil input", name)
 		}
-		got = impl.Dlangb(norm, n, kl, ku, ab, ldab, nil)
+		got = impl.Dlangb(norm, m, n, kl, ku, ab, ldab, nil)
 		if !floats.Same(ab, abCopy) {
 			t.Errorf("%v: unexpected modification in dl", name)
 		}
@@ -69,25 +71,24 @@ func dlangbTest(t *testing.T, impl Dlangber, rnd *rand.Rand, norm lapack.MatrixN
 		return
 	}
 
-	// Generate a dense representation of the matrix and compute the wanted result.
-	a := zeros(n, n, n)
-	for i := 0; i < n; i++ {
-		for j := max(0, i-kl); j < min(i+ku+1, n); j++ {
-			a.Data[i*a.Stride+j] = ab[i*ldab+j-i+kl]
-		}
-	}
-
 	var work []float64
 	if norm == lapack.MaxColumnSum {
 		work = make([]float64, n)
 	}
-	got := impl.Dlangb(norm, n, kl, ku, ab, ldab, work)
+	got := impl.Dlangb(norm, m, n, kl, ku, ab, ldab, work)
 
 	if !floats.Same(ab, abCopy) {
 		t.Errorf("%v: unexpected modification in ab", name)
 	}
 
-	want := dlange(norm, n, n, a.Data, a.Stride)
+	// Generate a dense representation of the matrix and compute the wanted result.
+	a := zeros(m, n, n)
+	for i := 0; i < m; i++ {
+		for j := max(0, i-kl); j < min(i+ku+1, n); j++ {
+			a.Data[i*a.Stride+j] = ab[i*ldab+j-i+kl]
+		}
+	}
+	want := dlange(norm, a.Rows, a.Cols, a.Data, a.Stride)
 
 	if math.IsNaN(want) {
 		if !math.IsNaN(got) {

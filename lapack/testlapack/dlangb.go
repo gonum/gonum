@@ -16,7 +16,7 @@ import (
 )
 
 type Dlangber interface {
-	Dlangb(norm lapack.MatrixNorm, m, n, kl, ku int, ab []float64, ldab int, work []float64) float64
+	Dlangb(norm lapack.MatrixNorm, m, n, kl, ku int, ab []float64, ldab int) float64
 }
 
 func DlangbTest(t *testing.T, impl Dlangber) {
@@ -28,9 +28,7 @@ func DlangbTest(t *testing.T, impl Dlangber) {
 					for _, kl := range []int{0, 1, 2, 3, 4, 5, 10} {
 						for _, ku := range []int{0, 1, 2, 3, 4, 5, 10} {
 							for _, ldab := range []int{kl + ku + 1, kl + ku + 1 + 7} {
-								for iter := 0; iter < 10; iter++ {
-									dlangbTest(t, impl, rnd, norm, m, n, kl, ku, ldab)
-								}
+								dlangbTest(t, impl, rnd, norm, m, n, kl, ku, ldab)
 							}
 						}
 					}
@@ -57,11 +55,11 @@ func dlangbTest(t *testing.T, impl Dlangber, rnd *rand.Rand, norm lapack.MatrixN
 
 	// Deal with zero-sized matrices early.
 	if m == 0 || n == 0 {
-		got := impl.Dlangb(norm, m, n, kl, ku, nil, ldab, nil)
+		got := impl.Dlangb(norm, m, n, kl, ku, nil, ldab)
 		if got != 0 {
 			t.Errorf("%v: unexpected result for zero-sized matrix with nil input", name)
 		}
-		got = impl.Dlangb(norm, m, n, kl, ku, ab, ldab, nil)
+		got = impl.Dlangb(norm, m, n, kl, ku, ab, ldab)
 		if !floats.Same(ab, abCopy) {
 			t.Errorf("%v: unexpected modification in dl", name)
 		}
@@ -71,11 +69,7 @@ func dlangbTest(t *testing.T, impl Dlangber, rnd *rand.Rand, norm lapack.MatrixN
 		return
 	}
 
-	var work []float64
-	if norm == lapack.MaxColumnSum {
-		work = make([]float64, n)
-	}
-	got := impl.Dlangb(norm, m, n, kl, ku, ab, ldab, work)
+	got := impl.Dlangb(norm, m, n, kl, ku, ab, ldab)
 
 	if !floats.Same(ab, abCopy) {
 		t.Errorf("%v: unexpected modification in ab", name)
@@ -94,6 +88,11 @@ func dlangbTest(t *testing.T, impl Dlangber, rnd *rand.Rand, norm lapack.MatrixN
 		if !math.IsNaN(got) {
 			t.Errorf("%v: unexpected result with NaN element; got %v, want %v", name, got, want)
 		}
+		return
+	}
+
+	if math.IsNaN(got) {
+		t.Errorf("%v: unexpected NaN; want %v", name, want)
 		return
 	}
 

@@ -469,12 +469,10 @@ func Lange(norm lapack.MatrixNorm, a blas64.General, work []float64) float64 {
 // Langb returns the given norm of a general m×n band matrix with kl sub-diagonals and
 // ku super-diagonals.
 //
-// When norm is lapack.MaxColumnSum, the length of work must be at least n.
-//
 // Dlangb is not part of the lapack.Float64 interface and so calls to Langb are always
 // executed by the Gonum implementation.
-func Langb(norm lapack.MatrixNorm, a blas64.Band, work []float64) float64 {
-	return gonum.Implementation{}.Dlangb(norm, a.Rows, a.Cols, a.KL, a.KU, a.Data, max(1, a.Stride), work)
+func Langb(norm lapack.MatrixNorm, a blas64.Band) float64 {
+	return gonum.Implementation{}.Dlangb(norm, a.Rows, a.Cols, a.KL, a.KU, a.Data, max(1, a.Stride))
 }
 
 // Langt computes the specified norm of an n×n tridiagonal matrix.

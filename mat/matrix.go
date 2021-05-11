@@ -44,6 +44,7 @@ type allMatrix interface {
 type denseMatrix interface {
 	DiagView() Diagonal
 	Tracer
+	Normer
 }
 
 var (

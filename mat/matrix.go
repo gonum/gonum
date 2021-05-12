@@ -756,7 +756,10 @@ func Min(a Matrix) float64 {
 	}
 }
 
-// A Normer can compute a norm of the matrix.
+// A Normer can compute a norm of the matrix. Valid norms are:
+//  1 - The maximum absolute column sum
+//  2 - The Frobenius norm, the square root of the sum of the squares of the elements
+//  Inf - The maximum absolute row sum
 type Normer interface {
 	Norm(norm float64) float64
 }

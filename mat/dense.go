@@ -573,11 +573,17 @@ func (m *Dense) Augment(a, b Matrix) {
 	w.Copy(b)
 }
 
-// Trace returns the trace of the matrix. The matrix must be square or Trace
-// will panic.
+// Trace returns the trace of the matrix.
+//
+// Trace will panic with ErrSquare if the matrix is not square and with
+// ErrZeroLength if the matrix has zero size.
 func (m *Dense) Trace() float64 {
-	if m.mat.Rows != m.mat.Cols {
+	r, c := m.Dims()
+	if r != c {
 		panic(ErrSquare)
+	}
+	if m.IsEmpty() {
+		panic(ErrZeroLength)
 	}
 	// TODO(btracey): could use internal asm sum routine.
 	var v float64
@@ -592,7 +598,8 @@ func (m *Dense) Trace() float64 {
 //  2 - The Frobenius norm, the square root of the sum of the squares of the elements
 //  Inf - The maximum absolute row sum
 //
-// Norm will panic with ErrNormOrder if an illegal norm is specified.
+// Norm will panic with ErrNormOrder if an illegal norm is specified and with
+// ErrShape if the matrix has zero size.
 func (m *Dense) Norm(norm float64) float64 {
 	if m.IsEmpty() {
 		panic(ErrZeroLength)

@@ -584,7 +584,8 @@ func (s *SymDense) sliceSym(i, k int) *SymDense {
 //  2 - The Frobenius norm, the square root of the sum of the squares of the elements
 //  Inf - The maximum absolute row sum
 //
-// Norm will panic with ErrNormOrder if an illegal norm is specified.
+// Norm will panic with ErrNormOrder if an illegal norm is specified and with
+// ErrZeroLength if the matrix has zero size.
 func (s *SymDense) Norm(norm float64) float64 {
 	if s.IsEmpty() {
 		panic(ErrZeroLength)
@@ -599,7 +600,12 @@ func (s *SymDense) Norm(norm float64) float64 {
 }
 
 // Trace returns the trace of the matrix.
+//
+// Trace will panic with ErrZeroLength if the matrix has zero size.
 func (s *SymDense) Trace() float64 {
+	if s.IsEmpty() {
+		panic(ErrZeroLength)
+	}
 	// TODO(btracey): could use internal asm sum routine.
 	var v float64
 	for i := 0; i < s.mat.N; i++ {

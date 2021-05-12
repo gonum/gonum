@@ -626,7 +626,8 @@ func (t *TriDense) sliceTri(i, k int) *TriDense {
 //  2 - The Frobenius norm, the square root of the sum of the squares of the elements
 //  Inf - The maximum absolute row sum
 //
-// Norm will panic with ErrNormOrder if an illegal norm is specified.
+// Norm will panic with ErrNormOrder if an illegal norm is specified and with
+// ErrZeroLength if the matrix has zero size.
 func (t *TriDense) Norm(norm float64) float64 {
 	if t.IsEmpty() {
 		panic(ErrZeroLength)
@@ -641,7 +642,12 @@ func (t *TriDense) Norm(norm float64) float64 {
 }
 
 // Trace returns the trace of the matrix.
+//
+// Trace will panic with ErrZeroLength if the matrix has zero size.
 func (t *TriDense) Trace() float64 {
+	if t.IsEmpty() {
+		panic(ErrZeroLength)
+	}
 	// TODO(btracey): could use internal asm sum routine.
 	var v float64
 	for i := 0; i < t.mat.N; i++ {

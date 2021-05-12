@@ -468,7 +468,7 @@ func strictCopy(m *Dense, a Matrix) {
 }
 
 // Exp calculates the exponential of the matrix a, e^a, placing the result
-// in the receiver. Exp will panic with matrix.ErrShape if a is not square.
+// in the receiver. Exp will panic with ErrShape if a is not square.
 func (m *Dense) Exp(a Matrix) {
 	// The implementation used here is from Functions of Matrices: Theory and Computation
 	// Chapter 10, Algorithm 10.20. https://doi.org/10.1137/1.9780898717778.ch10

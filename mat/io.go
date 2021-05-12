@@ -132,7 +132,7 @@ func (m Dense) MarshalBinaryTo(w io.Writer) (int, error) {
 // See MarshalBinary for the on-disk layout.
 //
 // Limited checks on the validity of the binary input are performed:
-//  - matrix.ErrShape is returned if the number of rows or columns is negative,
+//  - ErrShape is returned if the number of rows or columns is negative,
 //  - an error is returned if the resulting Dense matrix is too
 //  big for the current architecture (e.g. a 16GB matrix written by a
 //  64b application and read back from a 32b application.)
@@ -191,7 +191,7 @@ func (m *Dense) UnmarshalBinary(data []byte) error {
 // See MarshalBinary for the on-disk layout.
 //
 // Limited checks on the validity of the binary input are performed:
-//  - matrix.ErrShape is returned if the number of rows or columns is negative,
+//  - ErrShape is returned if the number of rows or columns is negative,
 //  - an error is returned if the resulting Dense matrix is too
 //  big for the current architecture (e.g. a 16GB matrix written by a
 //  64b application and read back from a 32b application.)
@@ -318,7 +318,7 @@ func (v VecDense) MarshalBinaryTo(w io.Writer) (int, error) {
 // See MarshalBinary for the on-disk layout.
 //
 // Limited checks on the validity of the binary input are performed:
-//  - matrix.ErrShape is returned if the number of rows is negative,
+//  - ErrShape is returned if the number of rows is negative,
 //  - an error is returned if the resulting VecDense is too
 //  big for the current architecture (e.g. a 16GB vector written by a
 //  64b application and read back from a 32b application.)

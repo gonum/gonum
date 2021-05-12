@@ -183,12 +183,6 @@ type Grower interface {
 	Grow(r, c int) Matrix
 }
 
-// A BandWidther represents a banded matrix and can return the left and right half-bandwidths, k1 and
-// k2.
-type BandWidther interface {
-	BandWidth() (k1, k2 int)
-}
-
 // A RawMatrixSetter can set the underlying blas64.General used by the receiver. There is no restriction
 // on the shape of the receiver. Changes to the receiver's elements will be reflected in the blas64.General.Data.
 type RawMatrixSetter interface {

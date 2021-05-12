@@ -424,6 +424,34 @@ func Mul(dst, s []complex128) {
 	}
 }
 
+// MulConj performs element-wise multiplication between dst
+// and the conjugate of s and stores the result in dst.
+// It panics if the argument lengths do not match.
+func MulConj(dst, s []complex128) {
+	if len(dst) != len(s) {
+		panic(badLength)
+	}
+	for i, val := range s {
+		dst[i] *= cmplx.Conj(val)
+	}
+}
+
+// MulConjTo performs element-wise multiplication between s
+// and the conjugate of t and stores the result in dst.
+// It panics if the argument lengths do not match.
+func MulConjTo(dst, s, t []complex128) []complex128 {
+	if len(s) != len(t) {
+		panic(badLength)
+	}
+	if len(dst) != len(s) {
+		panic(badDstLength)
+	}
+	for i, val := range t {
+		dst[i] = cmplx.Conj(val) * s[i]
+	}
+	return dst
+}
+
 // MulTo performs element-wise multiplication between s
 // and t and stores the result in dst.
 // It panics if the argument lengths do not match.
@@ -557,6 +585,26 @@ func Scale(c complex128, dst []complex128) {
 	if len(dst) > 0 {
 		c128.ScalUnitary(c, dst)
 	}
+}
+
+// ScaleReal multiplies every element in dst by the real scalar f.
+func ScaleReal(f float64, dst []complex128) {
+	for i, z := range dst {
+		dst[i] = complex(f*real(z), f*imag(z))
+	}
+}
+
+// ScaleRealTo multiplies the elements in s by the real scalar f and
+// stores the result in dst.
+// It panics if the slice argument lengths do not match.
+func ScaleRealTo(dst []complex128, f float64, s []complex128) []complex128 {
+	if len(dst) != len(s) {
+		panic(badDstLength)
+	}
+	for i, z := range s {
+		dst[i] = complex(f*real(z), f*imag(z))
+	}
+	return dst
 }
 
 // ScaleTo multiplies the elements in s by c and stores the result in dst.

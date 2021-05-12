@@ -453,7 +453,8 @@ func (t *TriBandDense) DiagView() Diagonal {
 //  2 - The Frobenius norm, the square root of the sum of the squares of the elements
 //  Inf - The maximum absolute row sum
 //
-// Norm will panic with ErrNormOrder if an illegal norm is specified.
+// Norm will panic with ErrNormOrder if an illegal norm is specified and with
+// ErrZeroLength if the matrix has zero size.
 func (t *TriBandDense) Norm(norm float64) float64 {
 	if t.IsEmpty() {
 		panic(ErrZeroLength)
@@ -467,8 +468,13 @@ func (t *TriBandDense) Norm(norm float64) float64 {
 	return lapack64.Lantb(lnorm, t.mat, nil)
 }
 
-// Trace returns the trace.
+// Trace returns the trace of the matrix.
+//
+// Trace will panic with ErrZeroLength if the matrix has zero size.
 func (t *TriBandDense) Trace() float64 {
+	if t.IsEmpty() {
+		panic(ErrZeroLength)
+	}
 	rb := t.RawTriBand()
 	var tr float64
 	var offsetIndex int

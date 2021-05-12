@@ -249,7 +249,8 @@ func (s *SymBandDense) DoColNonZero(j int, fn func(i, j int, v float64)) {
 //  2 - The Frobenius norm, the square root of the sum of the squares of the elements
 //  Inf - The maximum absolute row sum
 //
-// Norm will panic with ErrNormOrder if an illegal norm is specified.
+// Norm will panic with ErrNormOrder if an illegal norm is specified and with
+// ErrZeroLength if the matrix has zero size.
 func (s *SymBandDense) Norm(norm float64) float64 {
 	if s.IsEmpty() {
 		panic(ErrZeroLength)
@@ -263,8 +264,13 @@ func (s *SymBandDense) Norm(norm float64) float64 {
 	return lapack64.Lansb(lnorm, s.mat, nil)
 }
 
-// Trace returns the trace.
+// Trace returns the trace of the matrix.
+//
+// Trace will panic with ErrZeroLength if the matrix has zero size.
 func (s *SymBandDense) Trace() float64 {
+	if s.IsEmpty() {
+		panic(ErrZeroLength)
+	}
 	rb := s.RawSymBand()
 	var tr float64
 	for i := 0; i < rb.N; i++ {

@@ -177,7 +177,12 @@ func (a *Tridiag) Zero() {
 }
 
 // Trace returns the trace of the matrix.
+//
+// Trace will panic with ErrZeroLength if the matrix has zero size.
 func (a *Tridiag) Trace() float64 {
+	if a.IsEmpty() {
+		panic(ErrZeroLength)
+	}
 	return f64.Sum(a.mat.D)
 }
 
@@ -186,7 +191,8 @@ func (a *Tridiag) Trace() float64 {
 //  2 - The Frobenius norm, the square root of the sum of the squares of the elements
 //  Inf - The maximum absolute row sum
 //
-// Norm will panic with ErrNormOrder if an illegal norm is specified.
+// Norm will panic with ErrNormOrder if an illegal norm is specified and with
+// ErrZeroLength if the matrix has zero size.
 func (a *Tridiag) Norm(norm float64) float64 {
 	if a.IsEmpty() {
 		panic(ErrZeroLength)

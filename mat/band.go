@@ -292,7 +292,8 @@ func (b *BandDense) Zero() {
 //  2 - The Frobenius norm, the square root of the sum of the squares of the elements
 //  Inf - The maximum absolute row sum
 //
-// Norm will panic with ErrNormOrder if an illegal norm is specified.
+// Norm will panic with ErrNormOrder if an illegal norm is specified and with
+// ErrZeroLength if the matrix has zero size.
 func (b *BandDense) Norm(norm float64) float64 {
 	if b.IsEmpty() {
 		panic(ErrZeroLength)
@@ -304,11 +305,17 @@ func (b *BandDense) Norm(norm float64) float64 {
 	return lapack64.Langb(lnorm, b.mat)
 }
 
-// Trace computes the trace of the matrix.
+// Trace returns the trace of the matrix.
+//
+// Trace will panic with ErrSquare if the matrix is not square and with
+// ErrZeroLength if the matrix has zero size.
 func (b *BandDense) Trace() float64 {
 	r, c := b.Dims()
 	if r != c {
-		panic(ErrShape)
+		panic(ErrSquare)
+	}
+	if b.IsEmpty() {
+		panic(ErrZeroLength)
 	}
 	rb := b.RawBand()
 	var tr float64

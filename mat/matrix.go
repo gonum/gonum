@@ -376,7 +376,7 @@ func Row(dst []float64, i int, a Matrix) []float64 {
 func Cond(a Matrix, norm float64) float64 {
 	m, n := a.Dims()
 	if m == 0 || n == 0 {
-		panic(ErrShape)
+		panic(ErrZeroLength)
 	}
 	var lnorm lapack.MatrixNorm
 	switch norm {
@@ -413,20 +413,28 @@ func Cond(a Matrix, norm float64) float64 {
 	return lq.Cond()
 }
 
-// Det returns the determinant of the matrix a. In many expressions using LogDet
-// will be more numerically stable.
+// Det returns the determinant of the quare matrix a. In many expressions using
+// LogDet will be more numerically stable.
+//
+// Det panics with ErrSquare if a is not square and with ErrZeroLength if a has
+// zero size.
 func Det(a Matrix) float64 {
 	det, sign := LogDet(a)
 	return math.Exp(det) * sign
 }
 
 // Dot returns the sum of the element-wise product of a and b.
-// Dot panics if the matrix sizes are unequal.
+//
+// Dot panics with ErrShape if the vector sizes are unequal and with
+// ErrZeroLength if the sizes are zero.
 func Dot(a, b Vector) float64 {
 	la := a.Len()
 	lb := b.Len()
 	if la != lb {
 		panic(ErrShape)
+	}
+	if la == 0 {
+		panic(ErrZeroLength)
 	}
 	if arv, ok := a.(RawVectorer); ok {
 		if brv, ok := b.(RawVectorer); ok {
@@ -586,6 +594,9 @@ func EqualApprox(a, b Matrix, epsilon float64) bool {
 // LogDet returns the log of the determinant and the sign of the determinant
 // for the matrix that has been factorized. Numerical stability in product and
 // division expressions is generally improved by working in log space.
+//
+// LogDet panics with ErrSquare is a is not square and with ErrZeroLength if a
+// has zero size.
 func LogDet(a Matrix) (det float64, sign float64) {
 	// TODO(btracey): Add specialized routines for TriDense, etc.
 	var lu LU
@@ -594,11 +605,12 @@ func LogDet(a Matrix) (det float64, sign float64) {
 }
 
 // Max returns the largest element value of the matrix A.
-// Max will panic with matrix.ErrShape if the matrix has zero size.
+//
+// Max will panic with ErrZeroLength if the matrix has zero size.
 func Max(a Matrix) float64 {
 	r, c := a.Dims()
 	if r == 0 || c == 0 {
-		panic(ErrShape)
+		panic(ErrZeroLength)
 	}
 	// Max(A) = Max(Aᵀ)
 	aU, _ := untranspose(a)
@@ -669,11 +681,12 @@ func Max(a Matrix) float64 {
 }
 
 // Min returns the smallest element value of the matrix A.
-// Min will panic with matrix.ErrShape if the matrix has zero size.
+//
+// Min will panic with ErrZeroLength if the matrix has zero size.
 func Min(a Matrix) float64 {
 	r, c := a.Dims()
 	if r == 0 || c == 0 {
-		panic(ErrShape)
+		panic(ErrZeroLength)
 	}
 	// Min(A) = Min(Aᵀ)
 	aU, _ := untranspose(a)
@@ -753,8 +766,10 @@ type Normer interface {
 //  2 - The Frobenius norm, the square root of the sum of the squares of the elements
 //  Inf - The maximum absolute row sum
 //
-// Norm will panic with ErrNormOrder if an illegal norm order is specified and
-// with ErrShape if the matrix has zero size.
+// If a is a Normer, its Norm method will be used to calculate the norm.
+//
+// Norm will panic with ErrNormOrder if an illegal norm is specified and with
+// ErrShape if the matrix has zero size.
 func Norm(a Matrix, norm float64) float64 {
 	r, c := a.Dims()
 	if r == 0 || c == 0 {
@@ -834,8 +849,13 @@ func normLapack(norm float64, aTrans bool) lapack.MatrixNorm {
 }
 
 // Sum returns the sum of the elements of the matrix.
+//
+// Sum will panic with ErrZeroLength if the matrix has zero size.
 func Sum(a Matrix) float64 {
-
+	r, c := a.Dims()
+	if r == 0 || c == 0 {
+		panic(ErrZeroLength)
+	}
 	var sum float64
 	aU, _ := untranspose(a)
 	switch rma := aU.(type) {
@@ -896,21 +916,26 @@ func Sum(a Matrix) float64 {
 	}
 }
 
-// A Tracer can compute the trace of the matrix. Trace must panic if the
-// matrix is not square.
+// A Tracer can compute the trace of the matrix. Trace must panic with ErrSquare
+// if the matrix is not square.
 type Tracer interface {
 	Trace() float64
 }
 
-// Trace returns the trace of the matrix. Trace will panic if the
-// matrix is not square. If a is a Tracer, its Trace method will be
-// used to calculate the matrix trace.
+// Trace returns the trace of the matrix. If a is a Tracer, its Trace method
+// will be used to calculate the matrix trace.
+//
+// Trace will panic with ErrSquare if the matrix is not square and with
+// ErrZeroLength if the matrix has zero size.
 func Trace(a Matrix) float64 {
+	r, c := a.Dims()
+	if r == 0 || c == 0 {
+		panic(ErrZeroLength)
+	}
 	m, _ := untransposeExtract(a)
 	if t, ok := m.(Tracer); ok {
 		return t.Trace()
 	}
-	r, c := a.Dims()
 	if r != c {
 		panic(ErrSquare)
 	}

@@ -269,7 +269,8 @@ func (v *VecDense) CopyVec(a Vector) int {
 //  2 - The Euclidean norm, the square root of the sum of the squares of the elements
 //  Inf - The maximum element magnitude
 //
-// Norm will panic with ErrNormOrder if an illegal norm is specified.
+// Norm will panic with ErrNormOrder if an illegal norm is specified and with
+// ErrZeroLength if the vector has zero size.
 func (v *VecDense) Norm(norm float64) float64 {
 	if v.IsEmpty() {
 		panic(ErrZeroLength)

@@ -190,7 +190,7 @@ func (gsvd *HOGSVD) UTo(dst *Dense, n int) {
 // Values returns the nth set of singular values of the factorized system.
 // If the input slice is non-nil, the values will be stored in-place into the slice.
 // In this case, the slice must have length c, and Values will panic with
-// matrix.ErrSliceLengthMismatch otherwise. If the input slice is nil,
+// ErrSliceLengthMismatch otherwise. If the input slice is nil,
 // a new slice of the appropriate length will be allocated and returned.
 //
 // Values will panic if the receiver does not contain a successful factorization.

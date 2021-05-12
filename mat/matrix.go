@@ -366,7 +366,7 @@ func Row(dst []float64, i int, a Matrix) []float64 {
 
 // Cond returns the condition number of the given matrix under the given norm.
 // The condition number must be based on the 1-norm, 2-norm or ∞-norm.
-// Cond will panic with matrix.ErrShape if the matrix has zero size.
+// Cond will panic with ErrZeroLength if the matrix has zero size.
 //
 // BUG(btracey): The computation of the 1-norm and ∞-norm for non-square matrices
 // is inaccurate, although is typically the right order of magnitude. See

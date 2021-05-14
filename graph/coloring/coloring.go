@@ -88,6 +88,11 @@ func DsaturExact(term Terminator, g graph.Undirected) (k int, colors map[int64]i
 	// tighter upper bound by doing a single run of an approximate
 	// Brélaz Dsatur coloring, using the result if the recurrence is
 	// cancelled.
+	// We also use the initial maximum clique as a starting point for
+	// the exact search. If there is more than one maxumum clique, we
+	// need to ensure that we pick the one that will lead us down the
+	// easiest branch of the search tree. This will be the maximum
+	// clique with the lowest degree into the remainder of the graph.
 
 	nodes := g.Nodes()
 	n := nodes.Len()
@@ -95,7 +100,7 @@ func DsaturExact(term Terminator, g graph.Undirected) (k int, colors map[int64]i
 		return
 	}
 
-	lb, maxClique := maximumClique(g)
+	lb, maxClique, cliques := maximumClique(g)
 	if lb == n {
 		return lb, colorClique(maxClique), nil
 	}
@@ -109,8 +114,8 @@ func DsaturExact(term Terminator, g graph.Undirected) (k int, colors map[int64]i
 	}
 
 	selector := &order.saturationDegree
-	cand := newDsaturColoring(order.nodes, make(map[int64]int))
-	k, colors, err = dSaturExact(term, selector, cand, 0, ub, nil)
+	cand := newDsaturColoring(order.nodes, bestMaximumClique(g, cliques))
+	k, colors, err = dSaturExact(term, selector, cand, len(cand.colors), ub, nil)
 	if colors == nil {
 		return ub, initial, err
 	}
@@ -249,13 +254,53 @@ func dSaturExact(term Terminator, selector *saturationDegree, cand dSaturColorin
 }
 
 // maximumClique returns a maximum clique in g and its order.
-func maximumClique(g graph.Undirected) (k int, maxClique []graph.Node) {
+func maximumClique(g graph.Undirected) (k int, maxClique []graph.Node, cliques [][]graph.Node) {
+	cliques = topo.BronKerbosch(g)
 	for _, c := range topo.BronKerbosch(g) {
 		if len(c) > len(maxClique) {
 			maxClique = c
 		}
 	}
-	return len(maxClique), maxClique
+	return len(maxClique), maxClique, cliques
+}
+
+// bestMaximumClique returns the maximum clique in g with the lowest degree into
+// the remainder of the graph.
+func bestMaximumClique(g graph.Undirected, cliques [][]graph.Node) (colors map[int64]int) {
+	switch len(cliques) {
+	case 0:
+		return nil
+	case 1:
+		return colorClique(cliques[0])
+	}
+
+	sort.Slice(cliques, func(i, j int) bool { return len(cliques[i]) > len(cliques[j]) })
+	maxClique := cliques[0]
+	minDegree := cliqueDegree(g, maxClique)
+	for _, c := range cliques[1:] {
+		if len(c) < len(maxClique) {
+			break
+		}
+		d := cliqueDegree(g, c)
+		if d < minDegree {
+			minDegree = d
+			maxClique = c
+		}
+	}
+
+	return colorClique(maxClique)
+}
+
+// cliqueDegree returns the degree of the clique to nodes outside the clique.
+func cliqueDegree(g graph.Undirected, clique []graph.Node) int {
+	n := make(set.Int64s)
+	for _, u := range clique {
+		to := g.From(u.ID())
+		for to.Next() {
+			n.Add(to.Node().ID())
+		}
+	}
+	return n.Count() - len(clique)
 }
 
 // colorClique returns a valid coloring for the given clique.

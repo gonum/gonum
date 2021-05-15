@@ -461,8 +461,8 @@ func (t *TriBandDense) Norm(norm float64) float64 {
 	}
 	lnorm := normLapack(norm, false)
 	if lnorm == lapack.MaxColumnSum {
-		work := getFloats(t.mat.N, false)
-		defer putFloats(work)
+		work := getFloat64s(t.mat.N, false)
+		defer putFloat64s(work)
 		return lapack64.Lantb(lnorm, t.mat, work)
 	}
 	return lapack64.Lantb(lnorm, t.mat, nil)

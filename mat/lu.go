@@ -30,8 +30,8 @@ type LU struct {
 // norm of the original matrix. If anorm is negative it will be estimated.
 func (lu *LU) updateCond(anorm float64, norm lapack.MatrixNorm) {
 	n := lu.lu.mat.Cols
-	work := getFloats(4*n, false)
-	defer putFloats(work)
+	work := getFloat64s(4*n, false)
+	defer putFloat64s(work)
 	iwork := getInts(n, false)
 	defer putInts(iwork)
 	if anorm < 0 {
@@ -79,9 +79,9 @@ func (lu *LU) factorize(a Matrix, norm lapack.MatrixNorm) {
 		lu.pivot = make([]int, r)
 	}
 	lu.pivot = lu.pivot[:r]
-	work := getFloats(r, false)
+	work := getFloat64s(r, false)
 	anorm := lapack64.Lange(norm, lu.lu.mat, work)
-	putFloats(work)
+	putFloat64s(work)
 	lapack64.Getrf(lu.lu.mat, lu.pivot)
 	lu.updateCond(anorm, norm)
 }
@@ -131,8 +131,8 @@ func (lu *LU) LogDet() (det float64, sign float64) {
 	}
 
 	_, n := lu.lu.Dims()
-	logDiag := getFloats(n, false)
-	defer putFloats(logDiag)
+	logDiag := getFloat64s(n, false)
+	defer putFloat64s(logDiag)
 	sign = 1.0
 	for i := 0; i < n; i++ {
 		v := lu.lu.at(i, i)
@@ -214,10 +214,10 @@ func (lu *LU) RankOne(orig *LU, alpha float64, x, y Vector) {
 		lu.lu.Copy(orig.lu)
 	}
 
-	xs := getFloats(n, false)
-	defer putFloats(xs)
-	ys := getFloats(n, false)
-	defer putFloats(ys)
+	xs := getFloat64s(n, false)
+	defer putFloat64s(xs)
+	ys := getFloat64s(n, false)
+	defer putFloat64s(ys)
 	for i := 0; i < n; i++ {
 		xs[i] = x.AtVec(i)
 		ys[i] = y.AtVec(i)

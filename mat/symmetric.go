@@ -238,10 +238,10 @@ func (s *SymDense) isolatedWorkspace(a Symmetric) (w *SymDense, restore func()) 
 	if n == 0 {
 		panic(ErrZeroLength)
 	}
-	w = getWorkspaceSym(n, false)
+	w = getSymDenseWorkspace(n, false)
 	return w, func() {
 		s.CopySym(w)
-		putWorkspaceSym(w)
+		putSymDenseWorkspace(w)
 	}
 }
 
@@ -405,10 +405,10 @@ func (s *SymDense) SymOuterK(alpha float64, x Matrix) {
 		panic(badSymTriangle)
 	case s.mat.N == n:
 		if s == x {
-			w := getWorkspaceSym(n, true)
+			w := getSymDenseWorkspace(n, true)
 			w.SymRankK(w, alpha, x)
 			s.CopySym(w)
-			putWorkspaceSym(w)
+			putSymDenseWorkspace(w)
 		} else {
 			switch r := x.(type) {
 			case RawMatrixer:
@@ -592,8 +592,8 @@ func (s *SymDense) Norm(norm float64) float64 {
 	}
 	lnorm := normLapack(norm, false)
 	if lnorm == lapack.MaxColumnSum || lnorm == lapack.MaxRowSum {
-		work := getFloats(s.mat.N, false)
-		defer putFloats(work)
+		work := getFloat64s(s.mat.N, false)
+		defer putFloat64s(work)
 		return lapack64.Lansy(lnorm, s.mat, work)
 	}
 	return lapack64.Lansy(lnorm, s.mat, nil)

@@ -52,10 +52,10 @@ func (m *Dense) Solve(a, b Matrix) error {
 		case RawMatrixer:
 			if m != bU || bTrans {
 				if m == bU || m.checkOverlap(rm.RawMatrix()) {
-					tmp := getWorkspace(br, bc, false)
+					tmp := getDenseWorkspace(br, bc, false)
 					tmp.Copy(b)
 					m.Copy(tmp)
-					putWorkspace(tmp)
+					putDenseWorkspace(tmp)
 					break
 				}
 				m.Copy(b)
@@ -65,19 +65,19 @@ func (m *Dense) Solve(a, b Matrix) error {
 				m.Copy(b)
 			} else if bTrans {
 				// m and b share data so Copy cannot be used directly.
-				tmp := getWorkspace(br, bc, false)
+				tmp := getDenseWorkspace(br, bc, false)
 				tmp.Copy(b)
 				m.Copy(tmp)
-				putWorkspace(tmp)
+				putDenseWorkspace(tmp)
 			}
 		}
 
 		rm := rma.RawTriangular()
 		blas64.Trsm(side, tA, 1, rm, m.mat)
-		work := getFloats(3*rm.N, false)
+		work := getFloat64s(3*rm.N, false)
 		iwork := getInts(rm.N, false)
 		cond := lapack64.Trcon(CondNorm, rm, work, iwork)
-		putFloats(work)
+		putFloat64s(work)
 		putInts(iwork)
 		if cond > ConditionTolerance {
 			return Condition(cond)

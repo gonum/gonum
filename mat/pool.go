@@ -24,68 +24,72 @@ func poolFor(size uint) int {
 }
 
 var (
-	// pool contains size stratified workspace Dense pools.
-	// Each pool element i returns sized matrices with a data
+	// poolDense contains size stratified workspace Dense pools.
+	// Each poolDense element i returns sized matrices with a data
 	// slice capped at 1<<i.
-	pool [63]sync.Pool
+	poolDense [63]sync.Pool
 
-	// poolSym is the SymDense equivalent of pool.
-	poolSym [63]sync.Pool
+	// poolSymDense is the SymDense equivalent of poolDense.
+	poolSymDense [63]sync.Pool
 
-	// poolTri is the TriDense equivalent of pool.
-	poolTri [63]sync.Pool
+	// poolTriDense is the TriDense equivalent of poolDense.
+	poolTriDense [63]sync.Pool
 
-	// poolVec is the VecDense equivalent of pool.
-	poolVec [63]sync.Pool
+	// poolVecDense is the VecDense equivalent of poolDense.
+	poolVecDense [63]sync.Pool
 
-	// poolFloats is the []float64 equivalent of pool.
-	poolFloats [63]sync.Pool
+	// poolCDense is the CDense equivalent of poolDense.
+	poolCDense [63]sync.Pool
 
-	// poolInts is the []int equivalent of pool.
+	// poolFloat64s is the []float64 equivalent of poolDense.
+	poolFloat64s [63]sync.Pool
+
+	// poolInts is the []int equivalent of poolDense.
 	poolInts [63]sync.Pool
-
-	// poolCmplx is the CDense equivalent of pool.
-	poolCmplx [63]sync.Pool
 )
 
 func init() {
-	for i := range pool {
+	for i := range poolDense {
 		l := 1 << uint(i)
-		pool[i].New = func() interface{} {
+		// Real matrix pools.
+		poolDense[i].New = func() interface{} {
 			return &Dense{mat: blas64.General{
 				Data: make([]float64, l),
 			}}
 		}
-		poolSym[i].New = func() interface{} {
+		poolSymDense[i].New = func() interface{} {
 			return &SymDense{mat: blas64.Symmetric{
 				Uplo: blas.Upper,
 				Data: make([]float64, l),
 			}}
 		}
-		poolTri[i].New = func() interface{} {
+		poolTriDense[i].New = func() interface{} {
 			return &TriDense{mat: blas64.Triangular{
 				Data: make([]float64, l),
 			}}
 		}
-		poolVec[i].New = func() interface{} {
+		poolVecDense[i].New = func() interface{} {
 			return &VecDense{mat: blas64.Vector{
 				Inc:  1,
 				Data: make([]float64, l),
 			}}
 		}
-		poolFloats[i].New = func() interface{} {
+
+		// Complex matrix pools.
+		poolCDense[i].New = func() interface{} {
+			return &CDense{mat: cblas128.General{
+				Data: make([]complex128, l),
+			}}
+		}
+
+		// Helper pools.
+		poolFloat64s[i].New = func() interface{} {
 			s := make([]float64, l)
 			return &s
 		}
 		poolInts[i].New = func() interface{} {
 			s := make([]int, l)
 			return &s
-		}
-
-		poolCmplx[i].New = func() interface{} {
-			return &CDense{mat: cblas128.General{
-				Data: make([]complex128, l),
-			}}
 		}
 	}
 }
@@ -95,7 +99,7 @@ func init() {
 // data slice visible through the Matrix interface is zeroed.
 func getWorkspace(r, c int, clear bool) *Dense {
 	l := uint(r * c)
-	w := pool[poolFor(l)].Get().(*Dense)
+	w := poolDense[poolFor(l)].Get().(*Dense)
 	w.mat.Data = w.mat.Data[:l]
 	if clear {
 		zero(w.mat.Data)
@@ -112,7 +116,7 @@ func getWorkspace(r, c int, clear bool) *Dense {
 // workspace pool. putWorkspace must not be called with a matrix
 // where references to the underlying data slice have been kept.
 func putWorkspace(w *Dense) {
-	pool[poolFor(uint(cap(w.mat.Data)))].Put(w)
+	poolDense[poolFor(uint(cap(w.mat.Data)))].Put(w)
 }
 
 // getWorkspaceSym returns a *SymDense of size n and a cap that
@@ -121,7 +125,7 @@ func putWorkspace(w *Dense) {
 func getWorkspaceSym(n int, clear bool) *SymDense {
 	l := uint(n)
 	l *= l
-	s := poolSym[poolFor(l)].Get().(*SymDense)
+	s := poolSymDense[poolFor(l)].Get().(*SymDense)
 	s.mat.Data = s.mat.Data[:l]
 	if clear {
 		zero(s.mat.Data)
@@ -136,7 +140,7 @@ func getWorkspaceSym(n int, clear bool) *SymDense {
 // workspace pool. putWorkspaceSym must not be called with a matrix
 // where references to the underlying data slice have been kept.
 func putWorkspaceSym(s *SymDense) {
-	poolSym[poolFor(uint(cap(s.mat.Data)))].Put(s)
+	poolSymDense[poolFor(uint(cap(s.mat.Data)))].Put(s)
 }
 
 // getWorkspaceTri returns a *TriDense of size n and a cap that
@@ -145,7 +149,7 @@ func putWorkspaceSym(s *SymDense) {
 func getWorkspaceTri(n int, kind TriKind, clear bool) *TriDense {
 	l := uint(n)
 	l *= l
-	t := poolTri[poolFor(l)].Get().(*TriDense)
+	t := poolTriDense[poolFor(l)].Get().(*TriDense)
 	t.mat.Data = t.mat.Data[:l]
 	if clear {
 		zero(t.mat.Data)
@@ -168,7 +172,7 @@ func getWorkspaceTri(n int, kind TriKind, clear bool) *TriDense {
 // workspace pool. putWorkspaceTri must not be called with a matrix
 // where references to the underlying data slice have been kept.
 func putWorkspaceTri(t *TriDense) {
-	poolTri[poolFor(uint(cap(t.mat.Data)))].Put(t)
+	poolTriDense[poolFor(uint(cap(t.mat.Data)))].Put(t)
 }
 
 // getWorkspaceVec returns a *VecDense of length n and a cap that
@@ -176,7 +180,7 @@ func putWorkspaceTri(t *TriDense) {
 // through the Matrix interface is zeroed.
 func getWorkspaceVec(n int, clear bool) *VecDense {
 	l := uint(n)
-	v := poolVec[poolFor(l)].Get().(*VecDense)
+	v := poolVecDense[poolFor(l)].Get().(*VecDense)
 	v.mat.Data = v.mat.Data[:l]
 	if clear {
 		zero(v.mat.Data)
@@ -189,13 +193,13 @@ func getWorkspaceVec(n int, clear bool) *VecDense {
 // workspace pool. putWorkspaceVec must not be called with a matrix
 // where references to the underlying data slice have been kept.
 func putWorkspaceVec(v *VecDense) {
-	poolVec[poolFor(uint(cap(v.mat.Data)))].Put(v)
+	poolVecDense[poolFor(uint(cap(v.mat.Data)))].Put(v)
 }
 
 // getFloats returns a []float64 of length l and a cap that is
 // less than 2*l. If clear is true, the slice visible is zeroed.
 func getFloats(l int, clear bool) []float64 {
-	w := *poolFloats[poolFor(uint(l))].Get().(*[]float64)
+	w := *poolFloat64s[poolFor(uint(l))].Get().(*[]float64)
 	w = w[:l]
 	if clear {
 		zero(w)
@@ -207,7 +211,7 @@ func getFloats(l int, clear bool) []float64 {
 // workspace pool. putFloats must not be called with a slice
 // where references to the underlying data have been kept.
 func putFloats(w []float64) {
-	poolFloats[poolFor(uint(cap(w)))].Put(&w)
+	poolFloat64s[poolFor(uint(cap(w)))].Put(&w)
 }
 
 // getInts returns a []ints of length l and a cap that is
@@ -235,7 +239,7 @@ func putInts(w []int) {
 // data slice visible through the CMatrix interface is zeroed.
 func getWorkspaceCmplx(r, c int, clear bool) *CDense {
 	l := uint(r * c)
-	w := poolCmplx[poolFor(l)].Get().(*CDense)
+	w := poolCDense[poolFor(l)].Get().(*CDense)
 	w.mat.Data = w.mat.Data[:l]
 	if clear {
 		zeroC(w.mat.Data)
@@ -252,5 +256,5 @@ func getWorkspaceCmplx(r, c int, clear bool) *CDense {
 // workspace pool. putWorkspace must not be called with a matrix
 // where references to the underlying data slice have been kept.
 func putWorkspaceCmplx(w *CDense) {
-	poolCmplx[poolFor(uint(cap(w.mat.Data)))].Put(w)
+	poolCDense[poolFor(uint(cap(w.mat.Data)))].Put(w)
 }

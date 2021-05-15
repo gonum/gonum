@@ -6,6 +6,7 @@ package coloring
 
 import (
 	"context"
+	"flag"
 	"testing"
 	"time"
 
@@ -17,10 +18,14 @@ import (
 	"gonum.org/v1/gonum/graph/simple"
 )
 
+var runLong = flag.Bool("color.long", false, "run long exact coloring tests")
+
 var coloringTests = []struct {
 	name   string
 	g      graph.Undirected
 	colors int
+
+	long bool
 
 	partial map[int64]int
 
@@ -361,6 +366,49 @@ var coloringTests = []struct {
 		colors:     2,
 		randomized: setOf(2, 3),
 	},
+
+	// DIMACS queens graphs
+	{
+		name:        "queen5_5",
+		g:           graph6.Graph("X~~FJk~F|KIxizS^dF{iWQjcdV[dFyQb}KiWOdVHAT\\acg~acg~"),
+		colors:      5,
+		dsatur:      setOf(5),
+		randomized:  setOf(5, 6, 7, 8, 9, 10),
+		rlf:         setOf(5),
+		sanSegundo:  setOf(5),
+		welshPowell: setOf(5, 6, 7),
+	},
+	{
+		name:        "queen6_6",
+		g:           graph6.Graph("c~~}FDrMw~`~goSwtMYhvIF{SN{dEAQfCehrcTMyPO~ca`~acgoPQSwcCtMWcahvaQIF|CcSN{KSdEAAIQfC__ehrCCcTMwSQPO~ogca`~"),
+		colors:      7,
+		dsatur:      setOf(7, 8, 9),
+		randomized:  setOf(7, 8, 9, 10, 11, 12),
+		rlf:         setOf(7, 8),
+		sanSegundo:  setOf(7, 8),
+		welshPowell: setOf(7, 8, 9),
+	},
+	{
+		name:        "queen7_7",
+		g:           graph6.Graph("p~~~}B`[XrbnB~@~sKAb`iMLS[xS\\wgN{IB~cSKAPPocibbcibfQDPvc`O^wcIB~aQIE@CcS[HCdS[WaQiM]GcIbnPC`O^xCQD@~ogca`_Ogcab`GCQTPpa@CdS[wQGcIbn`GaOgN|APC`O^{EDCcSKA@AaQIMC_OGcibbCA@CdS[wOHCQDPv_gQGcIB~_gQGcIB~"),
+		colors:      7,
+		dsatur:      setOf(7, 8, 9, 10, 11),
+		randomized:  setOf(7, 8, 9, 10, 11, 12, 13),
+		rlf:         setOf(7, 8, 9),
+		sanSegundo:  setOf(7, 8, 9),
+		welshPowell: setOf(7, 8, 9, 10, 11, 12),
+	},
+	{
+		name:        "queen8_8",
+		long:        true,
+		g:           graph6.Graph("~?@?~~~~~?wJ`fFFNBn_~wF~gK@OwLOwYg[[iFNDOzwSB~_gF~cIB?QDB_cdOw[ciFFQQg[{cDOzwcD?~wQA_^}GcIB?PC`OwHCQTB`aKciFFaCciFNPAOTBncOcD?~waC_gF~`GaOgK@APC`OwHAPCdOwW_GqQg[[GaCciFN`COcDOzyCPAOSB~cGaC_gF~_gQGcIB?OSHCQDB_c@APCdOwW_GAKciFFA?aGQQg[{C`COcDOz{C`COcD?~yAOaGQA_^}@_gQGcIB?OCDAPC`OwH?OCHCQTB`a?_GAKciFFA?_GaCciFN@?QCPAOTBn_SC`COcD?~{A_cGaC_gF~"),
+		colors:      9,
+		dsatur:      setOf(9, 10, 11, 12),
+		randomized:  setOf(9, 10, 11, 12, 13, 14, 15),
+		rlf:         setOf(9, 10),
+		sanSegundo:  setOf(9, 10, 11),
+		welshPowell: setOf(9, 10, 11, 12, 13, 14, 15),
+	},
 }
 
 func setOf(vals ...int) set.Ints {
@@ -409,6 +457,9 @@ func TestDsaturExact(t *testing.T) {
 	timeout := time.Microsecond
 	for _, test := range coloringTests {
 		for _, useTimeout := range []bool{false, true} {
+			if test.long && !*runLong && !useTimeout {
+				continue
+			}
 			ctx := context.Background()
 			cancel := func() {}
 			if useTimeout {
@@ -417,8 +468,8 @@ func TestDsaturExact(t *testing.T) {
 			k, colors, err := DsaturExact(ctx, test.g)
 			cancel()
 			if k != test.colors && (useTimeout && !test.dsatur.Has(k)) {
-				t.Errorf("unexpected chromatic number for %q: got:%d want:%d or in %v\ncolors:%v",
-					test.name, k, test.colors, test.dsatur, colors)
+				t.Errorf("unexpected chromatic number for %q timeout=%t: got:%d want:%d or in %v\ncolors:%v",
+					test.name, useTimeout, k, test.colors, test.dsatur, colors)
 			}
 			if s := Sets(colors); len(s) != k {
 				t.Errorf("mismatch between number of color sets and k: |sets|=%d k=%d", len(s), k)
@@ -686,14 +737,16 @@ func BenchmarkColoring(b *testing.B) {
 					}
 				}
 			})
-			b.Run("DsaturExact", func(b *testing.B) {
-				for i := 0; i < b.N; i++ {
-					_, _, err := DsaturExact(context.Background(), bench.g)
-					if err != nil {
-						b.Fatalf("coloring failed: %v", err)
+			if !bench.long || *runLong {
+				b.Run("DsaturExact", func(b *testing.B) {
+					for i := 0; i < b.N; i++ {
+						_, _, err := DsaturExact(context.Background(), bench.g)
+						if err != nil {
+							b.Fatalf("coloring failed: %v", err)
+						}
 					}
-				}
-			})
+				})
+			}
 			b.Run("RecursiveLargestFirst", func(b *testing.B) {
 				for i := 0; i < b.N; i++ {
 					RecursiveLargestFirst(bench.g)

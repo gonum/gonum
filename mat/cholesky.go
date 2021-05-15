@@ -55,8 +55,8 @@ type Cholesky struct {
 // the norm is estimated from the decomposition.
 func (c *Cholesky) updateCond(norm float64) {
 	n := c.chol.mat.N
-	work := getFloats(3*n, false)
-	defer putFloats(work)
+	work := getFloat64s(3*n, false)
+	defer putFloat64s(work)
 	if norm < 0 {
 		// This is an approximation. By the definition of a norm,
 		//  |AB| <= |A| |B|.
@@ -139,9 +139,9 @@ func (c *Cholesky) Factorize(a Symmetric) (ok bool) {
 	copySymIntoTriangle(c.chol, a)
 
 	sym := c.chol.asSymBlas()
-	work := getFloats(c.chol.mat.N, false)
+	work := getFloat64s(c.chol.mat.N, false)
 	norm := lapack64.Lansy(CondNorm, sym, work)
-	putFloats(work)
+	putFloat64s(work)
 	_, ok = lapack64.Potrf(sym)
 	if ok {
 		c.updateCond(norm)
@@ -592,8 +592,8 @@ func (c *Cholesky) SymRankOne(orig *Cholesky, alpha float64, x Vector) (ok bool)
 	//   EPFL Technical Report 161468 (2004)
 	//   http://infoscience.epfl.ch/record/161468
 
-	work := getFloats(n, false)
-	defer putFloats(work)
+	work := getFloat64s(n, false)
+	defer putFloat64s(work)
 	var xmat blas64.Vector
 	if rv, ok := x.(RawVectorer); ok {
 		xmat = rv.RawVector()
@@ -660,10 +660,10 @@ func (c *Cholesky) SymRankOne(orig *Cholesky, alpha float64, x Vector) (ok bool)
 		return false
 	}
 	norm = math.Sqrt((1 + norm) * (1 - norm))
-	cos := getFloats(n, false)
-	defer putFloats(cos)
-	sin := getFloats(n, false)
-	defer putFloats(sin)
+	cos := getFloat64s(n, false)
+	defer putFloat64s(cos)
+	sin := getFloat64s(n, false)
+	defer putFloat64s(sin)
 	for i := n - 1; i >= 0; i-- {
 		// Compute parameters of Givens matrices that zero elements of p
 		// backwards.
@@ -674,8 +674,8 @@ func (c *Cholesky) SymRankOne(orig *Cholesky, alpha float64, x Vector) (ok bool)
 			sin[i] *= -1
 		}
 	}
-	workMat := getWorkspaceTri(c.chol.mat.N, c.chol.triKind(), false)
-	defer putWorkspaceTri(workMat)
+	workMat := getTriDenseWorkspace(c.chol.mat.N, c.chol.triKind(), false)
+	defer putTriWorkspace(workMat)
 	workMat.Copy(c.chol)
 	umat := workMat.mat
 	stride := workMat.mat.Stride
@@ -752,12 +752,12 @@ func (ch *BandCholesky) Factorize(a SymBanded) (ok bool) {
 		ch.Reset()
 		return false
 	}
-	work := getFloats(3*n, false)
+	work := getFloat64s(3*n, false)
 	iwork := getInts(n, false)
 	aNorm := lapack64.Lansb(CondNorm, cSym, work)
 	ch.cond = 1 / lapack64.Pbcon(cSym, aNorm, work, iwork)
 	putInts(iwork)
-	putFloats(work)
+	putFloat64s(work)
 	return true
 }
 

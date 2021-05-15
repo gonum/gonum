@@ -366,10 +366,10 @@ func (t *TriDense) isolatedWorkspace(a Triangular) (w *TriDense, restore func())
 	if n == 0 {
 		panic(ErrZeroLength)
 	}
-	w = getWorkspaceTri(n, kind, false)
+	w = getTriDenseWorkspace(n, kind, false)
 	return w, func() {
 		t.Copy(w)
-		putWorkspaceTri(w)
+		putTriWorkspace(w)
 	}
 }
 
@@ -459,10 +459,10 @@ func (t *TriDense) InverseTri(a Triangular) error {
 	n, _ := a.Triangle()
 	t.reuseAsNonZeroed(a.Triangle())
 	t.Copy(a)
-	work := getFloats(3*n, false)
+	work := getFloat64s(3*n, false)
 	iwork := getInts(n, false)
 	cond := lapack64.Trcon(CondNorm, t.mat, work, iwork)
-	putFloats(work)
+	putFloat64s(work)
 	putInts(iwork)
 	if math.IsInf(cond, 1) {
 		return Condition(cond)
@@ -634,8 +634,8 @@ func (t *TriDense) Norm(norm float64) float64 {
 	}
 	lnorm := normLapack(norm, false)
 	if lnorm == lapack.MaxColumnSum {
-		work := getFloats(t.mat.N, false)
-		defer putFloats(work)
+		work := getFloat64s(t.mat.N, false)
+		defer putFloat64s(work)
 		return lapack64.Lantr(lnorm, t.mat, work)
 	}
 	return lapack64.Lantr(lnorm, t.mat, nil)

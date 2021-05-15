@@ -45,7 +45,7 @@ func (m *Dense) Product(factors ...Matrix) {
 	result := p.multiply()
 	m.reuseAsNonZeroed(result.Dims())
 	m.Copy(result)
-	putWorkspace(result)
+	putDenseWorkspace(result)
 }
 
 // debugProductWalk enables debugging output for Product.
@@ -154,13 +154,13 @@ func (p *multiplier) multiplySubchain(i, j int) (m Matrix, intermediate bool) {
 			i, ar, ac, result(aTmp), j, br, bc, result(bTmp))
 	}
 
-	r := getWorkspace(ar, bc, false)
+	r := getDenseWorkspace(ar, bc, false)
 	r.Mul(a, b)
 	if aTmp {
-		putWorkspace(a.(*Dense))
+		putDenseWorkspace(a.(*Dense))
 	}
 	if bTmp {
-		putWorkspace(b.(*Dense))
+		putDenseWorkspace(b.(*Dense))
 	}
 	return r, true
 }

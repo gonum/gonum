@@ -131,9 +131,9 @@ func (svd *SVD) Factorize(a Matrix, kind SVDKind) (ok bool) {
 
 	work := []float64{0}
 	lapack64.Gesvd(jobU, jobVT, aCopy.mat, svd.u, svd.vt, svd.s, work, -1)
-	work = getFloats(int(work[0]), false)
+	work = getFloat64s(int(work[0]), false)
 	ok = lapack64.Gesvd(jobU, jobVT, aCopy.mat, svd.u, svd.vt, svd.s, work, len(work))
-	putFloats(work)
+	putFloat64s(work)
 	if !ok {
 		svd.kind = 0
 	}
@@ -318,12 +318,12 @@ func (svd *SVD) SolveTo(dst *Dense, b Matrix, rank int) []float64 {
 	s := svd.s[:rank]
 
 	_, bc := b.Dims()
-	c := getWorkspace(svd.u.Cols, bc, false)
-	defer putWorkspace(c)
+	c := getDenseWorkspace(svd.u.Cols, bc, false)
+	defer putDenseWorkspace(c)
 	c.Mul(u.T(), b)
 
-	y := getWorkspace(rank, bc, false)
-	defer putWorkspace(y)
+	y := getDenseWorkspace(rank, bc, false)
+	defer putDenseWorkspace(y)
 	y.DivElem(c.slice(0, rank, 0, bc), repVector{vec: s, cols: bc})
 	dst.Mul(vt.slice(0, rank, 0, svd.vt.Cols).T(), y)
 
@@ -395,12 +395,12 @@ func (svd *SVD) SolveVecTo(dst *VecDense, b Vector, rank int) float64 {
 	}
 	s := svd.s[:rank]
 
-	c := getWorkspaceVec(svd.u.Cols, false)
-	defer putWorkspaceVec(c)
+	c := getVecDenseWorkspace(svd.u.Cols, false)
+	defer putVecDenseWorkspace(c)
 	c.MulVec(u.T(), b)
 
-	y := getWorkspaceVec(rank, false)
-	defer putWorkspaceVec(y)
+	y := getVecDenseWorkspace(rank, false)
+	defer putVecDenseWorkspace(y)
 	y.DivElemVec(c.sliceVec(0, rank), NewVecDense(rank, s))
 	dst.MulVec(vt.slice(0, rank, 0, svd.vt.Cols).T(), y)
 

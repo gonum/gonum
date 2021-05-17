@@ -35,6 +35,7 @@ cat level1float64.go \
       -e 's_^// Id_// Is_' \
       -e 's_"gonum.org/v1/gonum/internal/asm/f64"_"gonum.org/v1/gonum/internal/asm/f32"_' \
       -e 's_"math"_math "gonum.org/v1/gonum/internal/math32"_' \
+      -e 's_safmin = 0x1p-1022_safmin = 0x1p-126_' \
 >> level1float32.go
 
 echo Generating level1cmplx64.go

@@ -1640,6 +1640,96 @@ func DrotgTest(t *testing.T, d Drotger) {
 			t.Errorf("drotg: z mismatch %v: expected %v, found %v", test.Name, test.Z, z)
 		}
 	}
+
+	const (
+		ulp    = 0x1p-52
+		safmin = 0x1p-1022
+		safmax = 1 / safmin
+		tol    = 20 * ulp
+	)
+	values := []float64{
+		-safmax,
+		-1 / ulp,
+		-1,
+		-1.0 / 3,
+		-ulp,
+		-safmin,
+		0,
+		safmin,
+		ulp,
+		1.0 / 3,
+		1,
+		1 / ulp,
+		safmax,
+		math.Inf(-1),
+		math.Inf(1),
+		math.NaN(),
+	}
+	for _, f := range values {
+		for _, g := range values {
+			name := fmt.Sprintf("Case f=%v,g=%v", f, g)
+
+			// Generate a plane rotation so that
+			//  [ cs sn] * [f] = [r]
+			//  [-sn cs]   [g] = [0]
+			// where cs*cs + sn*sn = 1.
+			cs, sn, r, _ := drotg(f, g)
+
+			switch {
+			case math.IsNaN(f) || math.IsNaN(g):
+				if !math.IsNaN(r) {
+					t.Errorf("%v: unexpected r=%v; want NaN", name, r)
+				}
+			case math.IsInf(f, 0) || math.IsInf(g, 0):
+				if !math.IsNaN(r) && !math.IsInf(r, 0) {
+					t.Errorf("%v: unexpected r=%v; want NaN or Inf", name, r)
+				}
+			default:
+				d := math.Max(math.Abs(f), math.Abs(g))
+				d = math.Min(math.Max(safmin, d), safmax)
+				fs := f / d
+				gs := g / d
+				rs := r / d
+
+				// Check that cs*f + sn*g = r.
+				rnorm := math.Abs(rs)
+				if rnorm == 0 {
+					rnorm = math.Max(math.Abs(fs), math.Abs(gs))
+					if rnorm == 0 {
+						rnorm = 1
+					}
+				}
+				resid := math.Abs(rs-(cs*fs+sn*gs)) / rnorm
+				if resid > tol {
+					t.Errorf("%v: cs*f + sn*g != r; resid=%v", name, resid)
+				}
+
+				// Check that -sn*f + cs*g = 0.
+				resid = math.Abs(-sn*fs + cs*gs)
+				if resid > tol {
+					t.Errorf("%v: -sn*f + cs*g != 0; resid=%v", name, resid)
+				}
+
+				// Check that cs*cs + sn*sn = 1.
+				resid = math.Abs(1 - (cs*cs + sn*sn))
+				if resid > tol {
+					t.Errorf("%v: cs*cs + sn*sn != 1; resid=%v", name, resid)
+				}
+
+				// Check that cs is non-negative.
+				if math.Abs(f) > math.Abs(g) {
+					if cs < 0 {
+						t.Errorf("%v: cs is negative; cs=%v", name, cs)
+					}
+				} else {
+					if cs*math.Copysign(1, f)*math.Copysign(1, g) < 0 {
+						t.Errorf("%v: sign of cs doesn't match sign of f and g; cs=%v, sign(f)=%v, sign(g)=%v",
+							name, cs, math.Copysign(1, f), math.Copysign(1, g))
+					}
+				}
+			}
+		}
+	}
 }
 
 type DrotmgTestStruct struct {

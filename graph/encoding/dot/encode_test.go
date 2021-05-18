@@ -388,7 +388,7 @@ func undirectedSubGraphFrom(g []intset, s map[int64][]intset) graph.Graph {
 				sub.SetEdge(ce)
 			}
 		}
-		subs[i] = subGraph{id: int64(i), Graph: sub}
+		subs[i] = subGraph{id: i, Graph: sub}
 		base += int64(len(sg))
 	}
 

@@ -249,8 +249,8 @@ func TestAxpyInc(t *testing.T) {
 		x, y := test.x[xgLn:len(test.x)-xgLn], test.y[ygLn:len(test.y)-ygLn]
 		AxpyInc(test.a, x, y, uintptr(len(test.ex)), uintptr(test.incX), uintptr(test.incY), test.ix, test.iy)
 		for i := range test.ex {
-			if y[int(test.iy)+i*int(test.incY)] != test.ex[i] {
-				t.Errorf("Test %d Unexpected result at %d Got: %v Expected: %v", cas, i, y[i*int(test.incY)], test.ex[i])
+			if y[int(test.iy)+i*test.incY] != test.ex[i] {
+				t.Errorf("Test %d Unexpected result at %d Got: %v Expected: %v", cas, i, y[i*test.incY], test.ex[i])
 			}
 		}
 		checkValidIncGuard(t, test.x, xGdVal, test.incX, xgLn)
@@ -268,8 +268,8 @@ func TestAxpyIncTo(t *testing.T) {
 		dst := test.dst[xgLn : len(test.dst)-xgLn]
 		AxpyIncTo(dst, uintptr(test.incDst), test.idst, test.a, x, y, uintptr(len(test.ex)), uintptr(test.incX), uintptr(test.incY), test.ix, test.iy)
 		for i := range test.ex {
-			if dst[int(test.idst)+i*int(test.incDst)] != test.ex[i] {
-				t.Errorf("Test %d Unexpected result at %d Got: %v Expected: %v", cas, i, dst[i*int(test.incDst)], test.ex[i])
+			if dst[int(test.idst)+i*test.incDst] != test.ex[i] {
+				t.Errorf("Test %d Unexpected result at %d Got: %v Expected: %v", cas, i, dst[i*test.incDst], test.ex[i])
 			}
 		}
 		checkValidIncGuard(t, test.x, xGdVal, test.incX, xgLn)

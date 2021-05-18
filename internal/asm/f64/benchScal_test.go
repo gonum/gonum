@@ -31,7 +31,7 @@ func BenchmarkScalUnitaryTo(t *testing.B) {
 	tstName := "ScalUnitaryTo"
 	for _, ln := range uniScal {
 		t.Run(fmt.Sprintf("%s-%d", tstName, ln), func(b *testing.B) {
-			b.SetBytes(int64(64 * ln))
+			b.SetBytes(64 * ln)
 			x, y := x[:ln], y[:ln]
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {

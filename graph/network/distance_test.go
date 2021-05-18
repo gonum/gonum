@@ -356,7 +356,7 @@ func TestDistanceCentralityDirected(t *testing.T) {
 			if !scalar.EqualWithinAbsOrRel(got[int64(n)], 1/test.farness[int64(n)], tol, tol) {
 				want := make(map[int64]float64)
 				for n, v := range test.farness {
-					want[int64(n)] = 1 / v
+					want[n] = 1 / v
 				}
 				t.Errorf("unexpected closeness centrality for test %d:\ngot: %v\nwant:%v",
 					i, orderedFloats(got, prec), orderedFloats(want, prec))

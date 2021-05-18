@@ -75,7 +75,7 @@ func TestPathExistsInUndirected(t *testing.T) {
 				g.AddNode(simple.Node(u))
 			}
 			for v := range e {
-				if g.Node(int64(v)) == nil {
+				if g.Node(v) == nil {
 					g.AddNode(simple.Node(v))
 				}
 				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v)})
@@ -114,7 +114,7 @@ func TestPathExistsInDirected(t *testing.T) {
 				g.AddNode(simple.Node(u))
 			}
 			for v := range e {
-				if g.Node(int64(v)) == nil {
+				if g.Node(v) == nil {
 					g.AddNode(simple.Node(v))
 				}
 				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v)})
@@ -151,7 +151,7 @@ func TestConnectedComponents(t *testing.T) {
 				g.AddNode(simple.Node(u))
 			}
 			for v := range e {
-				if g.Node(int64(v)) == nil {
+				if g.Node(v) == nil {
 					g.AddNode(simple.Node(v))
 				}
 				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v)})

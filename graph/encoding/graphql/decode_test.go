@@ -175,7 +175,7 @@ type node struct {
 }
 
 func (n *node) ID() int64     { return int64(n.id) }
-func (n *node) DOTID() string { return fmt.Sprintf("0x%016x", uint64(n.id)) }
+func (n *node) DOTID() string { return fmt.Sprintf("0x%016x", n.id) }
 
 func (n *node) SetIDFromString(uid string) error {
 	if !strings.HasPrefix(uid, "0x") {

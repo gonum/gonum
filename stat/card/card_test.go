@@ -188,7 +188,7 @@ func TestResetCounters(t *testing.T) {
 		var counts [2]float64
 		for k := range counts {
 			rnd := rand.New(rand.NewSource(1))
-			for i := 0; i < int(test.count); i++ {
+			for i := 0; i < test.count; i++ {
 				dst = strconv.AppendUint(dst[:0], rnd.Uint64(), 16)
 				dst = append(dst, '-')
 				dst = strconv.AppendUint(dst, uint64(i), 16)
@@ -280,7 +280,7 @@ func TestBinaryEncoding(t *testing.T) {
 	for _, test := range counterEncoderTests {
 		rnd := rand.New(rand.NewSource(1))
 		src := test.src()
-		for i := 0; i < int(test.count); i++ {
+		for i := 0; i < test.count; i++ {
 			buf := strconv.AppendUint(nil, rnd.Uint64(), 16)
 			buf = append(buf, '-')
 			buf = strconv.AppendUint(buf, uint64(i), 16)
@@ -408,7 +408,7 @@ func BenchmarkCounters(b *testing.B) {
 		var dst []byte
 		b.Run(bench.name, func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
-				for j := 0; j < int(bench.count); j++ {
+				for j := 0; j < bench.count; j++ {
 					dst = strconv.AppendUint(dst[:0], rnd.Uint64(), 16)
 					dst = append(dst, '-')
 					dst = strconv.AppendUint(dst, uint64(j), 16)

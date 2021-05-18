@@ -200,3 +200,49 @@ func ExampleComplete_undirectedSet() {
 	// 	5 -- 9;
 	// }
 }
+
+func ExampleTree_undirectedRange() {
+	dst := simple.NewUndirectedGraph()
+	gen.Tree(dst, 2, gen.IDRange{First: 0, Last: 14})
+	b, err := dot.Marshal(dst, "full_binary_tree_undirected", "", "\t")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("%s\n", b)
+
+	// Output:
+	// strict graph full_binary_tree_undirected {
+	// 	// Node definitions.
+	// 	0;
+	// 	1;
+	// 	2;
+	// 	3;
+	// 	4;
+	// 	5;
+	// 	6;
+	// 	7;
+	// 	8;
+	// 	9;
+	// 	10;
+	// 	11;
+	// 	12;
+	// 	13;
+	// 	14;
+	//
+	// 	// Edge definitions.
+	// 	0 -- 1;
+	// 	0 -- 2;
+	// 	1 -- 3;
+	// 	1 -- 4;
+	// 	2 -- 5;
+	// 	2 -- 6;
+	// 	3 -- 7;
+	// 	3 -- 8;
+	// 	4 -- 9;
+	// 	4 -- 10;
+	// 	5 -- 11;
+	// 	5 -- 12;
+	// 	6 -- 13;
+	// 	6 -- 14;
+	// }
+}

@@ -63,5 +63,6 @@ jobs:
       if: matrix.platform == 'ubuntu-latest'
       uses: codecov/codecov-action@v1
       with:
+        override_pr: ${{ github.event.pull_request.number }}
         override_commit: ${{ github.event.pull_request.merge_commit_sha }}
         override_branch: "master"

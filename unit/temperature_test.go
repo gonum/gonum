@@ -20,7 +20,7 @@ func TestTemperature(t *testing.T) {
 			t.Errorf("unexpected error for %T conversion: %v", got, err)
 		}
 		if got != Temperature(value) {
-			t.Errorf("unexpected result from round trip of %T(%v): got: %v want: %v", got, float64(value), got, value)
+			t.Errorf("unexpected result from round trip of %T(%v): got: %v want: %v", got, value, got, value)
 		}
 		if got != got.Temperature() {
 			t.Errorf("unexpected result from self interface method call: got: %#v want: %#v", got, value)
@@ -49,7 +49,7 @@ func TestTemperatureFormat(t *testing.T) {
 	} {
 		got := fmt.Sprintf(test.format, test.value)
 		if got != test.want {
-			t.Errorf("Format %q %v: got: %q want: %q", test.format, float64(test.value), got, test.want)
+			t.Errorf("Format %q %v: got: %q want: %q", test.format, test.value, got, test.want)
 		}
 	}
 }

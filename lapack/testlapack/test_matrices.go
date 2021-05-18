@@ -402,7 +402,7 @@ func (h Hanowa) Eigenvalues() []complex128 {
 	if h.N&0x1 != 0 {
 		panic("lapack: matrix order must be even")
 	}
-	n := int(h.N)
+	n := h.N
 	ev := make([]complex128, n)
 	for i := 0; i < n/2; i++ {
 		ev[2*i] = complex(h.Alpha, float64(-i-1))
@@ -495,7 +495,7 @@ func (t Tris) Matrix() blas64.General {
 }
 
 func (t Tris) Eigenvalues() []complex128 {
-	n := int(t.N)
+	n := t.N
 	ev := make([]complex128, n)
 	for i := range ev {
 		angle := float64(i+1) * math.Pi / float64(n+1)

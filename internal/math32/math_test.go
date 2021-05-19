@@ -84,6 +84,52 @@ func TestIsNaN(t *testing.T) {
 	}
 }
 
+func TestMax(t *testing.T) {
+	values := []float32{
+		Inf(-1),
+		-12.34,
+		-1,
+		Copysign(0, -1),
+		0,
+		1,
+		12.34,
+		Inf(1),
+		NaN(),
+	}
+	for _, v1 := range values {
+		for _, v2 := range values {
+			got := Max(v1, v2)
+			want := float32(math.Max(float64(v1), float64(v2)))
+			if !alike(got, want) {
+				t.Errorf("Max(%v, %v) = %v, want %v", v1, v2, got, want)
+			}
+		}
+	}
+}
+
+func TestMin(t *testing.T) {
+	values := []float32{
+		Inf(-1),
+		-12.34,
+		-1,
+		Copysign(0, -1),
+		0,
+		1,
+		12.34,
+		Inf(1),
+		NaN(),
+	}
+	for _, v1 := range values {
+		for _, v2 := range values {
+			got := Min(v1, v2)
+			want := float32(math.Min(float64(v1), float64(v2)))
+			if !alike(got, want) {
+				t.Errorf("Min(%v, %v) = %v, want %v", v1, v2, got, want)
+			}
+		}
+	}
+}
+
 func TestNaN(t *testing.T) {
 	if !math.IsNaN(float64(NaN())) {
 		t.Errorf("float32(nan) is a number: %f", NaN())
@@ -235,4 +281,14 @@ func sqrt(x float32) float32 {
 	}
 	ix = q>>1 + uint32(exp-1+bias)<<shift // significand + biased exponent
 	return math.Float32frombits(ix)
+}
+
+func alike(a, b float32) bool {
+	switch {
+	case IsNaN(a) && IsNaN(b):
+		return true
+	case a == b:
+		return Signbit(a) == Signbit(b)
+	}
+	return false
 }

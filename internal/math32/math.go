@@ -107,5 +107,56 @@ func IsNaN(f float32) (is bool) {
 	return f != f
 }
 
+// Max returns the larger of x or y.
+//
+// Special cases are:
+//	Max(x, +Inf) = Max(+Inf, x) = +Inf
+//	Max(x, NaN) = Max(NaN, x) = NaN
+//	Max(+0, ±0) = Max(±0, +0) = +0
+//	Max(-0, -0) = -0
+func Max(x, y float32) float32 {
+	// special cases
+	switch {
+	case IsInf(x, 1) || IsInf(y, 1):
+		return Inf(1)
+	case IsNaN(x) || IsNaN(y):
+		return NaN()
+	case x == 0 && x == y:
+		if Signbit(x) {
+			return y
+		}
+		return x
+	}
+	if x > y {
+		return x
+	}
+	return y
+}
+
+// Min returns the smaller of x or y.
+//
+// Special cases are:
+//	Min(x, -Inf) = Min(-Inf, x) = -Inf
+//	Min(x, NaN) = Min(NaN, x) = NaN
+//	Min(-0, ±0) = Min(±0, -0) = -0
+func Min(x, y float32) float32 {
+	// special cases
+	switch {
+	case IsInf(x, -1) || IsInf(y, -1):
+		return Inf(-1)
+	case IsNaN(x) || IsNaN(y):
+		return NaN()
+	case x == 0 && x == y:
+		if Signbit(x) {
+			return x
+		}
+		return y
+	}
+	if x < y {
+		return x
+	}
+	return y
+}
+
 // NaN returns an IEEE 754 ``not-a-number'' value.
 func NaN() float32 { return math.Float32frombits(unan) }

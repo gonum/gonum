@@ -1026,6 +1026,7 @@ func MomentAbout(moment float64, x []float64, mean float64, weights []float64) f
 //
 // The x data must be sorted in increasing order. If weights is nil then all
 // of the weights are 1. If weights is not nil, then len(x) must equal len(weights).
+// Quantile will panic if the length of x is zero.
 //
 // CumulantKind behaviors:
 //  - Empirical: Returns the lowest value q for which q is greater than or equal
@@ -1038,6 +1039,9 @@ func Quantile(p float64, c CumulantKind, x, weights []float64) float64 {
 
 	if weights != nil && len(x) != len(weights) {
 		panic("stat: slice length mismatch")
+	}
+	if len(x) == 0 {
+		panic("stat: zero length slice")
 	}
 	if floats.HasNaN(x) {
 		return math.NaN() // This is needed because the algorithm breaks otherwise.

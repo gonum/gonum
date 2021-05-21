@@ -56,6 +56,7 @@ func Bhattacharyya(p, q []float64) float64 {
 //
 // The x data must be sorted in increasing order. If weights is nil then all
 // of the weights are 1. If weights is not nil, then len(x) must equal len(weights).
+// CDF will panic if the length of x is zero.
 //
 // CumulantKind behaviors:
 //  - Empirical: Returns the lowest fraction for which q is greater than or equal
@@ -66,6 +67,9 @@ func CDF(q float64, c CumulantKind, x, weights []float64) float64 {
 	}
 	if floats.HasNaN(x) {
 		return math.NaN()
+	}
+	if len(x) == 0 {
+		panic("stat: zero length slice")
 	}
 	if !sort.Float64sAreSorted(x) {
 		panic("x data are not sorted")

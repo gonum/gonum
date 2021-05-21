@@ -1397,6 +1397,16 @@ func TestCDF(t *testing.T) {
 		weights []float64
 	}{
 		{
+			name: "x == nil",
+			kind: Empirical,
+			x:    nil,
+		},
+		{
+			name: "len(x) == 0",
+			kind: Empirical,
+			x:    []float64{},
+		},
+		{
 			name:    "len(x) != len(weights)",
 			q:       1.5,
 			kind:    Empirical,

@@ -316,9 +316,9 @@ func undirectedPortedAttrGraphFrom(g []intset, attr [][]encoding.Attribute, port
 
 type graphAttributer struct {
 	graph.Graph
-	graph attributer
-	node  attributer
-	edge  attributer
+	graph encoding.Attributer
+	node  encoding.Attributer
+	edge  encoding.Attributer
 }
 
 type attributer []encoding.Attribute
@@ -1141,11 +1141,14 @@ var encodeTests = []struct {
 
 	// Handling graph attributes.
 	{
-		g: graphAttributer{Graph: undirectedEdgeAttrGraphFrom(powerMethodGraph, map[edge][]encoding.Attribute{
-			{from: 0, to: 2}: {{Key: "label", Value: `"???"`}, {Key: "style", Value: "dashed"}},
-			{from: 2, to: 4}: {},
-			{from: 3, to: 4}: {{Key: "color", Value: "red"}},
-		})},
+		g: graphAttributer{
+			Graph: undirectedEdgeAttrGraphFrom(powerMethodGraph, map[edge][]encoding.Attribute{
+				{from: 0, to: 2}: {{Key: "label", Value: `"???"`}, {Key: "style", Value: "dashed"}},
+				{from: 2, to: 4}: {},
+				{from: 3, to: 4}: {{Key: "color", Value: "red"}},
+			}),
+			graph: nil, node: nil, edge: nil,
+		},
 
 		want: `strict graph {
 	// Node definitions.
@@ -1169,13 +1172,15 @@ var encodeTests = []struct {
 }`,
 	},
 	{
-		g: graphAttributer{Graph: undirectedEdgeAttrGraphFrom(powerMethodGraph, map[edge][]encoding.Attribute{
-			{from: 0, to: 2}: {{Key: "label", Value: `"???"`}, {Key: "style", Value: "dashed"}},
-			{from: 2, to: 4}: {},
-			{from: 3, to: 4}: {{Key: "color", Value: "red"}},
-		}),
-			graph: []encoding.Attribute{{Key: "rankdir", Value: `"LR"`}},
-			node:  []encoding.Attribute{{Key: "fontsize", Value: "16"}, {Key: "shape", Value: "ellipse"}},
+		g: graphAttributer{
+			Graph: undirectedEdgeAttrGraphFrom(powerMethodGraph, map[edge][]encoding.Attribute{
+				{from: 0, to: 2}: {{Key: "label", Value: `"???"`}, {Key: "style", Value: "dashed"}},
+				{from: 2, to: 4}: {},
+				{from: 3, to: 4}: {{Key: "color", Value: "red"}},
+			}),
+			graph: attributer{{Key: "rankdir", Value: `"LR"`}},
+			node:  attributer{{Key: "fontsize", Value: "16"}, {Key: "shape", Value: "ellipse"}},
+			edge:  nil,
 		},
 
 		want: `strict graph {

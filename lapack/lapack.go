@@ -7,7 +7,9 @@ package lapack
 import "gonum.org/v1/gonum/blas"
 
 // Complex128 defines the public complex128 LAPACK API supported by gonum/lapack.
-type Complex128 interface{}
+type Complex128 interface{
+	Zgetri(n int, a []complex128, lda int, ipiv []int, work []complex128, lwork int) (ok bool)
+}
 
 // Float64 defines the public float64 LAPACK API supported by gonum/lapack.
 type Float64 interface {

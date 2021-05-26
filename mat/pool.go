@@ -63,6 +63,9 @@ var (
 
 	// poolCmplx is the CDense equivalent of pool.
 	poolCmplx [63]sync.Pool
+
+	// poolComplexes is the []complex128 equivalent of pool.
+	poolComplexes [63]sync.Pool
 )
 
 func init() {
@@ -103,6 +106,10 @@ func init() {
 			return &CDense{mat: cblas128.General{
 				Data: make([]complex128, l),
 			}}
+		}
+		poolComplexes[i].New = func() interface{} {
+			s := make([]complex128, l)
+			return &s
 		}
 	}
 }
@@ -270,4 +277,24 @@ func getWorkspaceCmplx(r, c int, clear bool) *CDense {
 // where references to the underlying data slice have been kept.
 func putWorkspaceCmplx(w *CDense) {
 	poolCmplx[bits(uint64(cap(w.mat.Data)))].Put(w)
+}
+
+// getZs returns a []complex128 of length l and a cap that is
+// less than 2*l. If clear is true, the slice visible is zeroed.
+func getZs(l int, clear bool) []complex128 {
+	w := *poolComplexes[bits(uint64(l))].Get().(*[]complex128)
+	w = w[:l]
+	if clear {
+		for i := range w {
+			w[i] = 0
+		}
+	}
+	return w
+}
+
+// putZs replaces a used []complex128 into the appropriate size
+// workspace pool. putZs must not be called with a slice where
+// references to the underlying data have been kept.
+func putZs(w []complex128) {
+	poolComplexes[bits(uint64(cap(w)))].Put(&w)
 }

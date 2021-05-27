@@ -103,8 +103,11 @@ func dlatrsResidual(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag, n int,
 		}
 	}
 
-	eps := dlamchE
-	smlnum := dlamchS
+	const (
+		eps  = dlamchE
+		tiny = safmin
+	)
+
 	bi := blas64.Implementation()
 
 	// Compute norm(trans(A)*x-scale*b) / (norm(trans(A))*norm(x)*eps)
@@ -124,14 +127,14 @@ func dlatrsResidual(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag, n int,
 	resid = math.Abs(work[ix])
 	ix = bi.Idamax(n, x, 1)
 	xnorm = math.Abs(x[ix])
-	if resid*smlnum <= xnorm {
+	if resid*tiny <= xnorm {
 		if xnorm > 0 {
 			resid /= xnorm
 		}
 	} else if resid > 0 {
 		resid = 1 / eps
 	}
-	if resid*smlnum <= tnorm {
+	if resid*tiny <= tnorm {
 		if tnorm > 0 {
 			resid /= tnorm
 		}

@@ -96,15 +96,12 @@ func dgesvdTest(t *testing.T, impl Dgesvder, m, n, mtype int, tol float64) {
 			false,                  // signs of s[i] are not randomly flipped
 			1, rnd)                 // random numbers are drawn uniformly from [0,1)
 		// Decide scale factor for the singular values based on the matrix type.
-		ulp := dlamchP
-		unfl := dlamchS
-		ovfl := 1 / unfl
 		aNorm = 1
 		if mtype == 4 {
-			aNorm = unfl / ulp
+			aNorm = smlnum
 		}
 		if mtype == 5 {
-			aNorm = ovfl * ulp
+			aNorm = bignum
 		}
 		// Scale singular values so that the maximum singular value is
 		// equal to aNorm (we know that the singular values are

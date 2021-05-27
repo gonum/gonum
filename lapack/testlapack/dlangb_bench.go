@@ -14,14 +14,6 @@ import (
 )
 
 func DlangbBenchmark(b *testing.B, impl Dlangber) {
-	const (
-		safmin = dlamchS
-		safmax = 1 / safmin
-		ulp    = dlamchP
-		smlnum = safmin / ulp
-		bignum = safmax * ulp
-	)
-
 	rnd := rand.New(rand.NewSource(1))
 	for _, bm := range []struct {
 		n, k int

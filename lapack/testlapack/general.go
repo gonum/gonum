@@ -24,6 +24,12 @@ const (
 	dlamchP = dlamchB * dlamchE
 	// dlamchS is the smallest normal number. For IEEE this is 2^{-1022}.
 	dlamchS = 0x1p-1022
+
+	safmin = dlamchS
+	safmax = 1 / safmin
+	ulp    = dlamchP
+	smlnum = safmin / ulp
+	bignum = safmax * ulp
 )
 
 func max(a, b int) int {

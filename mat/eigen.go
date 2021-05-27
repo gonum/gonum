@@ -70,11 +70,10 @@ func (e *EigenSym) succFact() bool {
 	return len(e.values) != 0
 }
 
-// Values extracts the eigenvalues of the factorized matrix. If dst is
-// non-nil, the values are stored in-place into dst. In this case
-// dst must have length n, otherwise Values will panic. If dst is
-// nil, then a new slice will be allocated of the proper length and filled
-// with the eigenvalues.
+// Values extracts the eigenvalues of the factorized matrix in ascending order.
+// If dst is non-nil, the values are stored in-place into dst. In this case dst
+// must have length n, otherwise Values will panic. If dst is nil, then a new
+// slice will be allocated of the proper length and filled with the eigenvalues.
 //
 // Values panics if the Eigen decomposition was not successful.
 func (e *EigenSym) Values(dst []float64) []float64 {

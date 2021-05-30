@@ -110,6 +110,48 @@ func (pc *PiecewiseCubic) FitWithDerivatives(xs, ys, dydxs []float64) {
 	pc.lastDyDx = dydxs[m]
 }
 
+// FitWithSecondDerivatives fits a piecewise cubic predictor to (X, Y, d^2Y/dX^2) value
+// triples provided as three slices.
+// It panics if len(xs) < 2, elements of xs are not strictly increasing,
+// len(xs) != len(ys) or len(xs) != len(d2ydx2s).
+// Note: this method does not guarantee on its own the continuity of 1st derivatives.
+func (pc *PiecewiseCubic) fitWithSecondDerivatives(xs, ys, d2ydx2s []float64) {
+	n := len(xs)
+	if len(ys) != n {
+		panic(differentLengths)
+	}
+	if len(d2ydx2s) != n {
+		panic(differentLengths)
+	}
+	if n < 2 {
+		panic(tooFewPoints)
+	}
+	m := n - 1
+	pc.coeffs.Reset()
+	pc.coeffs.ReuseAs(m, 4)
+	for i := 0; i < m; i++ {
+		dx := xs[i+1] - xs[i]
+		if dx <= 0 {
+			panic(xsNotStrictlyIncreasing)
+		}
+		dy := ys[i+1] - ys[i]
+		dm := d2ydx2s[i+1] - d2ydx2s[i]
+		// a_0
+		pc.coeffs.Set(i, 0, ys[i])
+		// a_1.
+		pc.coeffs.Set(i, 1, (dy-d2ydx2s[i]/2-dm/6)/dx)
+		// a_2
+		pc.coeffs.Set(i, 2, d2ydx2s[i]/2/dx/dx)
+		// a_3
+		pc.coeffs.Set(i, 3, dm/6/dx/dx/dx)
+	}
+	pc.xs = make([]float64, n)
+	copy(pc.xs, xs)
+	pc.lastY = ys[m]
+	lastDx := xs[m] - xs[m-1]
+	pc.lastDyDx = pc.coeffs.At(m-1, 1) + 2*pc.coeffs.At(m-1, 2)*lastDx + 3*pc.coeffs.At(m-1, 3)*lastDx*lastDx
+}
+
 // AkimaSpline is a piecewise cubic 1-dimensional interpolator with
 // continuous value and first derivative, which can be fitted to (X, Y)
 // value pairs without providing derivatives.

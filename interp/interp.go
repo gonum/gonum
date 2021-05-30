@@ -10,6 +10,7 @@ const (
 	differentLengths        = "interp: input slices have different lengths"
 	tooFewPoints            = "interp: too few points for interpolation"
 	xsNotStrictlyIncreasing = "interp: xs values not strictly increasing"
+	badBoundaryConditions   = "interp: boundary conditions are not specified correctly"
 )
 
 // Predictor predicts the value of a function. It handles both

@@ -62,13 +62,16 @@ func Encode(g graph.Graph) Graph {
 	// those machines n will not be this large, since it came
 	// from a length, but explicitly convert to 64 bits to
 	// allow the package to build on those architectures.
+	//
+	// See the section Small nonnegative integers in the spec
+	// for details of this section.
 	switch n := int64(n); {
 	case n < 63:
 		buf.WriteByte(byte(n) + 63)
 	case n < 258048:
-		buf.Write([]byte{126, byte(n>>12) + 63, byte(n>>6) + 63, byte(n) + 63})
+		buf.Write([]byte{126, bit6(n>>12) + 63, bit6(n>>6) + 63, bit6(n) + 63})
 	case n < 68719476736:
-		buf.Write([]byte{126, 126, byte(n>>30) + 63, byte(n>>24) + 63, byte(n>>18) + 63, byte(n>>12) + 63, byte(n>>6) + 63, byte(n) + 63})
+		buf.Write([]byte{126, 126, bit6(n>>30) + 63, bit6(n>>24) + 63, bit6(n>>18) + 63, bit6(n>>12) + 63, bit6(n>>6) + 63, bit6(n) + 63})
 	default:
 		panic("digraph6: too large")
 	}
@@ -87,6 +90,11 @@ func Encode(g graph.Graph) Graph {
 	}
 
 	return Graph(buf.String())
+}
+
+// bit6 returns only the lower 6 bits of b.
+func bit6(b int64) byte {
+	return byte(b) & 0x3f
 }
 
 // IsValid returns whether the graph is a valid digraph6 encoding. An invalid Graph
@@ -270,6 +278,11 @@ func numberOf(g Graph) int64 {
 		return -1
 	}
 	g = g[1:]
+	for _, b := range []byte(g) {
+		if b < 63 || 126 < b {
+			return -1
+		}
+	}
 	if g[0] != 126 {
 		return int64(g[0] - 63)
 	}

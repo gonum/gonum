@@ -725,6 +725,66 @@ func TestMul(t *testing.T) {
 	}
 }
 
+func TestMulConj(t *testing.T) {
+	s1 := []complex128{2 + 1i, 3 + 2i, 4 + 3i}
+	s2 := []complex128{1 + 2i, 2 + 3i, 3 + 4i}
+	s2orig := []complex128{1 + 2i, 2 + 3i, 3 + 4i}
+	ans := []complex128{4 - 3i, 12 - 5i, 24 - 7i}
+	MulConj(s1, s2)
+	if !Equal(s1, ans) {
+		t.Errorf("MulConj doesn't give correct answer. Expected %v, Found %v", ans, s1)
+	}
+	if !Equal(s2, s2orig) {
+		t.Errorf("s2 changes during MulTo")
+	}
+	s1short := []complex128{1}
+	if !Panics(func() { MulConj(s1short, s2) }) {
+		t.Errorf("Did not panic with unequal lengths")
+	}
+	s2short := []complex128{1}
+	if !Panics(func() { MulConj(s1, s2short) }) {
+		t.Errorf("Did not panic with unequal lengths")
+	}
+}
+
+func TestMulConjTo(t *testing.T) {
+	s1 := []complex128{2 + 1i, 3 + 2i, 4 + 3i}
+	s1orig := []complex128{2 + 1i, 3 + 2i, 4 + 3i}
+	s2 := []complex128{1 + 2i, 2 + 3i, 3 + 4i}
+	s2orig := []complex128{1 + 2i, 2 + 3i, 3 + 4i}
+	dst1 := make([]complex128, 3)
+	ans := []complex128{4 - 3i, 12 - 5i, 24 - 7i}
+	dst2 := MulConjTo(dst1, s1, s2)
+	if !Equal(dst1, ans) {
+		t.Errorf("MulConjTo doesn't give correct answer in mutated slice")
+	}
+	if !Equal(dst2, ans) {
+		t.Errorf("MulConjTo doesn't give correct answer in returned slice")
+	}
+	if !Equal(s1, s1orig) {
+		t.Errorf("S1 changes during MulConjTo")
+	}
+	if !Equal(s2, s2orig) {
+		t.Errorf("s2 changes during MulConjTo")
+	}
+	MulConjTo(dst1, s1, s2)
+	if !Equal(dst1, ans) {
+		t.Errorf("MulConjTo doesn't give correct answer reusing dst")
+	}
+	dstShort := []complex128{1}
+	if !Panics(func() { MulConjTo(dstShort, s1, s2) }) {
+		t.Errorf("Did not panic with dst wrong length")
+	}
+	s1short := []complex128{1}
+	if !Panics(func() { MulConjTo(dst1, s1short, s2) }) {
+		t.Errorf("Did not panic with s1 wrong length")
+	}
+	s2short := []complex128{1}
+	if !Panics(func() { MulConjTo(dst1, s1, s2short) }) {
+		t.Errorf("Did not panic with s2 wrong length")
+	}
+}
+
 func TestMulTo(t *testing.T) {
 	s1 := []complex128{1 + 1i, 2 + 2i, 3 + 3i}
 	s1orig := []complex128{1 + 1i, 2 + 2i, 3 + 3i}
@@ -984,25 +1044,49 @@ func TestSame(t *testing.T) {
 
 func TestScale(t *testing.T) {
 	s := []complex128{3, 4, 1, 7, 5}
-	c := 5 + 5i
-	truth := []complex128{15 + 15i, 20 + 20i, 5 + 5i, 35 + 35i, 25 + 25i}
+	c := 4 + 5i
+	truth := []complex128{12 + 15i, 16 + 20i, 4 + 5i, 28 + 35i, 20 + 25i}
 	Scale(c, s)
 	areSlicesEqual(t, truth, s, "Bad scaling")
+}
+
+func TestScaleReal(t *testing.T) {
+	s := []complex128{3 + 4i, 4 + 5i, 1 + 2i, 7 + 6i, 5 + 2i}
+	f := 5.0
+	truth := []complex128{15 + 20i, 20 + 25i, 5 + 10i, 35 + 30i, 25 + 10i}
+	ScaleReal(f, s)
+	areSlicesEqual(t, truth, s, "Bad scaling")
+}
+
+func TestScaleRealTo(t *testing.T) {
+	s := []complex128{3 + 4i, 4 + 5i, 1 + 2i, 7 + 6i, 5 + 2i}
+	sCopy := make([]complex128, len(s))
+	copy(sCopy, s)
+	f := 5.0
+	truth := []complex128{15 + 20i, 20 + 25i, 5 + 10i, 35 + 30i, 25 + 10i}
+	dst := make([]complex128, len(s))
+	ScaleRealTo(dst, f, s)
+	if !Same(dst, truth) {
+		t.Errorf("ScaleRealTo dst does not match. Got %v, want %v", dst, truth)
+	}
+	if !Same(s, sCopy) {
+		t.Errorf("SourceRealTo s modified during call. Got %v, want %v", s, sCopy)
+	}
 }
 
 func TestScaleTo(t *testing.T) {
 	s := []complex128{3, 4, 1, 7, 5}
 	sCopy := make([]complex128, len(s))
 	copy(sCopy, s)
-	c := 5 + 5i
-	truth := []complex128{15 + 15i, 20 + 20i, 5 + 5i, 35 + 35i, 25 + 25i}
+	c := 4 + 5i
+	truth := []complex128{12 + 15i, 16 + 20i, 4 + 5i, 28 + 35i, 20 + 25i}
 	dst := make([]complex128, len(s))
 	ScaleTo(dst, c, s)
 	if !Same(dst, truth) {
-		t.Errorf("Scale to does not match. Got %v, want %v", dst, truth)
+		t.Errorf("ScaleTo dst does not match. Got %v, want %v", dst, truth)
 	}
 	if !Same(s, sCopy) {
-		t.Errorf("Source modified during call. Got %v, want %v", s, sCopy)
+		t.Errorf("SourceTo s modified during call. Got %v, want %v", s, sCopy)
 	}
 }
 

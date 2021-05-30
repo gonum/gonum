@@ -226,10 +226,10 @@ func (m *Dense) Inverse(a Matrix) error {
 	case *Dense:
 		if m != aU || aTrans {
 			if m == aU || m.checkOverlap(rm.mat) {
-				tmp := getWorkspace(r, c, false)
+				tmp := getDenseWorkspace(r, c, false)
 				tmp.Copy(a)
 				m.Copy(tmp)
-				putWorkspace(tmp)
+				putDenseWorkspace(tmp)
 				break
 			}
 			m.Copy(a)
@@ -238,7 +238,7 @@ func (m *Dense) Inverse(a Matrix) error {
 		m.Copy(a)
 	}
 	// Compute the norm of A.
-	work := getFloats(4*r, false) // Length must be at least 4*r for Gecon.
+	work := getFloat64s(4*r, false) // Length must be at least 4*r for Gecon.
 	norm := lapack64.Lange(CondNorm, m.mat, work)
 	// Compute the LU factorization of A.
 	ipiv := getInts(r, false)
@@ -256,10 +256,10 @@ func (m *Dense) Inverse(a Matrix) error {
 	lapack64.Getri(m.mat, ipiv, work, -1)
 	if int(work[0]) > len(work) {
 		l := int(work[0])
-		putFloats(work)
-		work = getFloats(l, false)
+		putFloat64s(work)
+		work = getFloat64s(l, false)
 	}
-	defer putFloats(work)
+	defer putFloat64s(work)
 	ok = lapack64.Getri(m.mat, ipiv, work, len(work))
 	if !ok || rcond == 0 {
 		// A is exactly singular.
@@ -321,10 +321,10 @@ func (m *Dense) Mul(a, b Matrix) {
 
 		case *SymDense:
 			if aTrans {
-				c := getWorkspace(ac, ar, false)
+				c := getDenseWorkspace(ac, ar, false)
 				blas64.Symm(blas.Left, 1, bU.mat, aU.mat, 0, c.mat)
 				strictCopy(m, c.T())
-				putWorkspace(c)
+				putDenseWorkspace(c)
 				return
 			}
 			blas64.Symm(blas.Right, 1, bU.mat, aU.mat, 0, m.mat)
@@ -333,7 +333,7 @@ func (m *Dense) Mul(a, b Matrix) {
 		case *TriDense:
 			// Trmm updates in place, so copy aU first.
 			if aTrans {
-				c := getWorkspace(ac, ar, false)
+				c := getDenseWorkspace(ac, ar, false)
 				var tmp Dense
 				tmp.SetRawMatrix(aU.mat)
 				c.Copy(&tmp)
@@ -343,7 +343,7 @@ func (m *Dense) Mul(a, b Matrix) {
 				}
 				blas64.Trmm(blas.Left, bT, 1, bU.mat, c.mat)
 				strictCopy(m, c.T())
-				putWorkspace(c)
+				putDenseWorkspace(c)
 				return
 			}
 			m.Copy(a)
@@ -380,10 +380,10 @@ func (m *Dense) Mul(a, b Matrix) {
 		switch aU := aU.(type) {
 		case *SymDense:
 			if bTrans {
-				c := getWorkspace(bc, br, false)
+				c := getDenseWorkspace(bc, br, false)
 				blas64.Symm(blas.Right, 1, aU.mat, bU.mat, 0, c.mat)
 				strictCopy(m, c.T())
-				putWorkspace(c)
+				putDenseWorkspace(c)
 				return
 			}
 			blas64.Symm(blas.Left, 1, aU.mat, bU.mat, 0, m.mat)
@@ -392,7 +392,7 @@ func (m *Dense) Mul(a, b Matrix) {
 		case *TriDense:
 			// Trmm updates in place, so copy bU first.
 			if bTrans {
-				c := getWorkspace(bc, br, false)
+				c := getDenseWorkspace(bc, br, false)
 				var tmp Dense
 				tmp.SetRawMatrix(bU.mat)
 				c.Copy(&tmp)
@@ -402,7 +402,7 @@ func (m *Dense) Mul(a, b Matrix) {
 				}
 				blas64.Trmm(blas.Right, aT, 1, aU.mat, c.mat)
 				strictCopy(m, c.T())
-				putWorkspace(c)
+				putDenseWorkspace(c)
 				return
 			}
 			m.Copy(b)
@@ -441,8 +441,8 @@ func (m *Dense) Mul(a, b Matrix) {
 
 	m.checkOverlapMatrix(aU)
 	m.checkOverlapMatrix(bU)
-	row := getFloats(ac, false)
-	defer putFloats(row)
+	row := getFloat64s(ac, false)
+	defer putFloat64s(row)
 	for r := 0; r < ar; r++ {
 		for i := range row {
 			row[i] = a.At(r, i)
@@ -468,7 +468,7 @@ func strictCopy(m *Dense, a Matrix) {
 }
 
 // Exp calculates the exponential of the matrix a, e^a, placing the result
-// in the receiver. Exp will panic with matrix.ErrShape if a is not square.
+// in the receiver. Exp will panic with ErrShape if a is not square.
 func (m *Dense) Exp(a Matrix) {
 	// The implementation used here is from Functions of Matrices: Theory and Computation
 	// Chapter 10, Algorithm 10.20. https://doi.org/10.1137/1.9780898717778.ch10
@@ -504,19 +504,19 @@ func (m *Dense) Exp(a Matrix) {
 
 	a1 := m
 	a1.Copy(a)
-	v := getWorkspace(r, r, true)
+	v := getDenseWorkspace(r, r, true)
 	vraw := v.RawMatrix()
 	n := r * r
 	vvec := blas64.Vector{N: n, Inc: 1, Data: vraw.Data}
-	defer putWorkspace(v)
+	defer putDenseWorkspace(v)
 
-	u := getWorkspace(r, r, true)
+	u := getDenseWorkspace(r, r, true)
 	uraw := u.RawMatrix()
 	uvec := blas64.Vector{N: n, Inc: 1, Data: uraw.Data}
-	defer putWorkspace(u)
+	defer putDenseWorkspace(u)
 
-	a2 := getWorkspace(r, r, false)
-	defer putWorkspace(a2)
+	a2 := getDenseWorkspace(r, r, false)
+	defer putDenseWorkspace(a2)
 
 	n1 := Norm(a, 1)
 	for i, t := range pade {
@@ -526,10 +526,10 @@ func (m *Dense) Exp(a Matrix) {
 
 		// This loop only executes once, so
 		// this is not as horrible as it looks.
-		p := getWorkspace(r, r, true)
+		p := getDenseWorkspace(r, r, true)
 		praw := p.RawMatrix()
 		pvec := blas64.Vector{N: n, Inc: 1, Data: praw.Data}
-		defer putWorkspace(p)
+		defer putDenseWorkspace(p)
 
 		for k := 0; k < r; k++ {
 			p.set(k, k, 1)
@@ -571,27 +571,27 @@ func (m *Dense) Exp(a Matrix) {
 	}
 	a2.Mul(a1, a1)
 
-	i := getWorkspace(r, r, true)
+	i := getDenseWorkspace(r, r, true)
 	for j := 0; j < r; j++ {
 		i.set(j, j, 1)
 	}
 	iraw := i.RawMatrix()
 	ivec := blas64.Vector{N: n, Inc: 1, Data: iraw.Data}
-	defer putWorkspace(i)
+	defer putDenseWorkspace(i)
 
 	a2raw := a2.RawMatrix()
 	a2vec := blas64.Vector{N: n, Inc: 1, Data: a2raw.Data}
 
-	a4 := getWorkspace(r, r, false)
+	a4 := getDenseWorkspace(r, r, false)
 	a4raw := a4.RawMatrix()
 	a4vec := blas64.Vector{N: n, Inc: 1, Data: a4raw.Data}
-	defer putWorkspace(a4)
+	defer putDenseWorkspace(a4)
 	a4.Mul(a2, a2)
 
-	a6 := getWorkspace(r, r, false)
+	a6 := getDenseWorkspace(r, r, false)
 	a6raw := a6.RawMatrix()
 	a6vec := blas64.Vector{N: n, Inc: 1, Data: a6raw.Data}
-	defer putWorkspace(a6)
+	defer putDenseWorkspace(a6)
 	a6.Mul(a2, a4)
 
 	// V = A_6(b_12*A_6 + b_10*A_4 + b_8*A_2) + b_6*A_6 + b_4*A_4 + b_2*A_2 +b_0*I
@@ -659,11 +659,11 @@ func (m *Dense) Pow(a Matrix, n int) {
 	}
 
 	// Perform iterative exponentiation by squaring in work space.
-	w := getWorkspace(r, r, false)
+	w := getDenseWorkspace(r, r, false)
 	w.Copy(a)
-	s := getWorkspace(r, r, false)
+	s := getDenseWorkspace(r, r, false)
 	s.Copy(a)
-	x := getWorkspace(r, r, false)
+	x := getDenseWorkspace(r, r, false)
 	for n--; n > 0; n >>= 1 {
 		if n&1 != 0 {
 			x.Mul(w, s)
@@ -675,9 +675,9 @@ func (m *Dense) Pow(a Matrix, n int) {
 		}
 	}
 	m.Copy(w)
-	putWorkspace(w)
-	putWorkspace(s)
-	putWorkspace(x)
+	putDenseWorkspace(w)
+	putDenseWorkspace(s)
+	putDenseWorkspace(x)
 }
 
 // Kronecker calculates the Kronecker product of a and b, placing the result in

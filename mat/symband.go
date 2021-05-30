@@ -7,6 +7,8 @@ package mat
 import (
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
+	"gonum.org/v1/gonum/lapack"
+	"gonum.org/v1/gonum/lapack/lapack64"
 )
 
 var (
@@ -176,7 +178,7 @@ func (s *SymBandDense) Reset() {
 	s.mat.K = 0
 	s.mat.Stride = 0
 	s.mat.Uplo = 0
-	s.mat.Data = s.mat.Data[:0:0]
+	s.mat.Data = s.mat.Data[:0]
 }
 
 // Zero sets all of the matrix elements to zero.
@@ -242,8 +244,33 @@ func (s *SymBandDense) DoColNonZero(j int, fn func(i, j int, v float64)) {
 	}
 }
 
-// Trace returns the trace.
+// Norm returns the specified norm of the receiver. Valid norms are:
+//  1 - The maximum absolute column sum
+//  2 - The Frobenius norm, the square root of the sum of the squares of the elements
+//  Inf - The maximum absolute row sum
+//
+// Norm will panic with ErrNormOrder if an illegal norm is specified and with
+// ErrZeroLength if the matrix has zero size.
+func (s *SymBandDense) Norm(norm float64) float64 {
+	if s.IsEmpty() {
+		panic(ErrZeroLength)
+	}
+	lnorm := normLapack(norm, false)
+	if lnorm == lapack.MaxColumnSum || lnorm == lapack.MaxRowSum {
+		work := getFloat64s(s.mat.N, false)
+		defer putFloat64s(work)
+		return lapack64.Lansb(lnorm, s.mat, work)
+	}
+	return lapack64.Lansb(lnorm, s.mat, nil)
+}
+
+// Trace returns the trace of the matrix.
+//
+// Trace will panic with ErrZeroLength if the matrix has zero size.
 func (s *SymBandDense) Trace() float64 {
+	if s.IsEmpty() {
+		panic(ErrZeroLength)
+	}
 	rb := s.RawSymBand()
 	var tr float64
 	for i := 0; i < rb.N; i++ {
@@ -266,15 +293,15 @@ func (s *SymBandDense) MulVecTo(dst *VecDense, _ bool, x Vector) {
 			dst.checkOverlap(xVec.mat)
 			blas64.Sbmv(1, s.mat, xVec.mat, 0, dst.mat)
 		} else {
-			xCopy := getWorkspaceVec(n, false)
+			xCopy := getVecDenseWorkspace(n, false)
 			xCopy.CloneFromVec(xVec)
 			blas64.Sbmv(1, s.mat, xCopy.mat, 0, dst.mat)
-			putWorkspaceVec(xCopy)
+			putVecDenseWorkspace(xCopy)
 		}
 	} else {
-		xCopy := getWorkspaceVec(n, false)
+		xCopy := getVecDenseWorkspace(n, false)
 		xCopy.CloneFromVec(x)
 		blas64.Sbmv(1, s.mat, xCopy.mat, 0, dst.mat)
-		putWorkspaceVec(xCopy)
+		putVecDenseWorkspace(xCopy)
 	}
 }

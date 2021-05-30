@@ -769,10 +769,9 @@ func residualRightEV(a, e blas64.General, wr, wi []float64) float64 {
 	}
 	bi.Dgemm(blas.NoTrans, blas.NoTrans, n, n, n, 1, a.Data, a.Stride, e.Data, e.Stride, -1, r, ldr)
 
-	unfl := dlamchS
-	ulp := dlamchE
-	anorm := math.Max(dlange(lapack.MaxColumnSum, n, n, a.Data, a.Stride), unfl)
-	enorm := math.Max(dlange(lapack.MaxColumnSum, n, n, e.Data, e.Stride), ulp)
+	const eps = dlamchE
+	anorm := math.Max(dlange(lapack.MaxColumnSum, n, n, a.Data, a.Stride), safmin)
+	enorm := math.Max(dlange(lapack.MaxColumnSum, n, n, e.Data, e.Stride), eps)
 	errnorm := dlange(lapack.MaxColumnSum, n, n, r, ldr) / enorm
 	if anorm > errnorm {
 		return errnorm / anorm
@@ -824,10 +823,9 @@ func residualLeftEV(a, e blas64.General, wr, wi []float64) float64 {
 	}
 	bi.Dgemm(blas.Trans, blas.NoTrans, n, n, n, 1, a.Data, a.Stride, e.Data, e.Stride, -1, r, ldr)
 
-	unfl := dlamchS
-	ulp := dlamchE
-	anorm := math.Max(dlange(lapack.MaxRowSum, n, n, a.Data, a.Stride), unfl)
-	enorm := math.Max(dlange(lapack.MaxColumnSum, n, n, e.Data, e.Stride), ulp)
+	const eps = dlamchE
+	anorm := math.Max(dlange(lapack.MaxRowSum, n, n, a.Data, a.Stride), safmin)
+	enorm := math.Max(dlange(lapack.MaxColumnSum, n, n, e.Data, e.Stride), eps)
 	errnorm := dlange(lapack.MaxColumnSum, n, n, r, ldr) / enorm
 	if anorm > errnorm {
 		return errnorm / anorm

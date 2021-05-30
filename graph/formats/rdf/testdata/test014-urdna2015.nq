@@ -1,0 +1,3 @@
+<http://example.org/test> <http://example.org/vocab#bool> "true"^^<http://www.w3.org/2001/XMLSchema#boolean> .
+<http://example.org/test> <http://example.org/vocab#double> "1.23E0"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://example.org/test> <http://example.org/vocab#int> "123"^^<http://www.w3.org/2001/XMLSchema#integer> .

@@ -20,7 +20,7 @@ func TestPool(t *testing.T) {
 			for k := 0; k < 5; k++ {
 				work := make([]*Dense, rand.Intn(10)+1)
 				for l := range work {
-					w := getWorkspace(i, j, true)
+					w := getDenseWorkspace(i, j, true)
 					if !reflect.DeepEqual(w.mat, m.mat) {
 						t.Error("unexpected non-zeroed matrix returned by getWorkspace")
 					}
@@ -37,7 +37,7 @@ func TestPool(t *testing.T) {
 					work[l] = w
 				}
 				for _, w := range work {
-					putWorkspace(w)
+					putDenseWorkspace(w)
 				}
 			}
 		}
@@ -48,8 +48,8 @@ var benchmat *Dense
 
 func poolBenchmark(n, r, c int, clear bool) {
 	for i := 0; i < n; i++ {
-		benchmat = getWorkspace(r, c, clear)
-		putWorkspace(benchmat)
+		benchmat = getDenseWorkspace(r, c, clear)
+		putDenseWorkspace(benchmat)
 	}
 }
 

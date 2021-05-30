@@ -35,6 +35,7 @@ cat level1float64.go \
       -e 's_^// Id_// Is_' \
       -e 's_"gonum.org/v1/gonum/internal/asm/f64"_"gonum.org/v1/gonum/internal/asm/f32"_' \
       -e 's_"math"_math "gonum.org/v1/gonum/internal/math32"_' \
+      -e 's_safmin = 0x1p-1022_safmin = 0x1p-126_' \
 >> level1float32.go
 
 echo Generating level1cmplx64.go
@@ -129,6 +130,9 @@ cat level2float64.go \
 | gofmt -r 'f64.ScalInc -> f32.ScalInc' \
 | gofmt -r 'f64.ScalUnitary -> f32.ScalUnitary' \
 | gofmt -r 'f64.Ger -> f32.Ger' \
+| gofmt -r 'f64.GemvN -> f32.GemvN' \
+| gofmt -r 'f64.GemvT -> f32.GemvT' \
+| gofmt -r 'Implementation{}.Dscal -> Implementation{}.Sscal' \
 \
 | sed -e "s_^\(func (Implementation) \)D\(.*\)\$_$WARNINGF32\1S\2_" \
       -e 's_^// D_// S_' \

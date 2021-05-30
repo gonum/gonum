@@ -23,6 +23,14 @@ func (m *basicMatrix) At(r, c int) float64 { return (*Dense)(m).At(r, c) }
 func (m *basicMatrix) Dims() (r, c int)    { return (*Dense)(m).Dims() }
 func (m *basicMatrix) T() Matrix           { return Transpose{m} }
 
+type rawMatrix struct {
+	*basicMatrix
+}
+
+func (a *rawMatrix) RawMatrix() blas64.General {
+	return a.basicMatrix.mat
+}
+
 type basicVector VecDense
 
 var _ Vector = &basicVector{}

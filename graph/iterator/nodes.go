@@ -389,6 +389,9 @@ func NewImplicitNodes(beg, end int, new func(id int) graph.Node) *ImplicitNodes 
 
 // Len returns the remaining number of nodes to be iterated over.
 func (n *ImplicitNodes) Len() int {
+	if n.end <= n.curr {
+		return 0
+	}
 	return n.end - n.curr - 1
 }
 

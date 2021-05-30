@@ -1,0 +1,3 @@
+<http://example.org/test#example> <http://example.org/test#property> "object1" .
+<http://example.org/test#example> <http://example.org/test#property> "object2" .
+<http://example.org/test#example> <http://example.org/test#property> "object3" .

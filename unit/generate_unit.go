@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build ignore
 // +build ignore
 
 package main
@@ -603,7 +604,7 @@ func Test{{.DimensionName}}(t *testing.T) {
 			t.Errorf("unexpected error for %T conversion: %v", got, err)
 		}
 		if got != {{.DimensionName}}(value) {
-			t.Errorf("unexpected result from round trip of %T(%v): got: %v want: %v", got, float64(value), got, value)
+			t.Errorf("unexpected result from round trip of %T(%v): got: %v want: %v", got, value, got, value)
 		}
 		if got != got.{{.DimensionName}}() {
 			t.Errorf("unexpected result from self interface method call: got: %#v want: %#v", got, value)
@@ -632,7 +633,7 @@ func Test{{.DimensionName}}Format(t *testing.T) {
 	} {
 		got := fmt.Sprintf(test.format, test.value)
 		if got != test.want {
-			t.Errorf("Format %q %v: got: %q want: %q", test.format, float64(test.value), got, test.want)
+			t.Errorf("Format %q %v: got: %q want: %q", test.format, test.value, got, test.want)
 		}
 	}
 }

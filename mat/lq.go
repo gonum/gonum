@@ -31,12 +31,12 @@ func (lq *LQ) updateCond(norm lapack.MatrixNorm) {
 	// is not the case for CondNorm. Hopefully the error is negligible: κ
 	// is only a qualitative measure anyway.
 	m := lq.lq.mat.Rows
-	work := getFloats(3*m, false)
+	work := getFloat64s(3*m, false)
 	iwork := getInts(m, false)
 	l := lq.lq.asTriDense(m, blas.NonUnit, blas.Lower)
 	v := lapack64.Trcon(norm, l.mat, work, iwork)
 	lq.cond = 1 / v
-	putFloats(work)
+	putFloat64s(work)
 	putInts(iwork)
 }
 
@@ -63,9 +63,9 @@ func (lq *LQ) factorize(a Matrix, norm lapack.MatrixNorm) {
 	work := []float64{0}
 	lq.tau = make([]float64, k)
 	lapack64.Gelqf(lq.lq.mat, lq.tau, work, -1)
-	work = getFloats(int(work[0]), false)
+	work = getFloat64s(int(work[0]), false)
 	lapack64.Gelqf(lq.lq.mat, lq.tau, work, len(work))
-	putFloats(work)
+	putFloat64s(work)
 	lq.updateCond(norm)
 }
 
@@ -159,9 +159,9 @@ func (lq *LQ) QTo(dst *Dense) {
 	// Construct Q from the elementary reflectors.
 	work := []float64{0}
 	lapack64.Ormlq(blas.Left, blas.NoTrans, lq.lq.mat, lq.tau, q, work, -1)
-	work = getFloats(int(work[0]), false)
+	work = getFloat64s(int(work[0]), false)
 	lapack64.Ormlq(blas.Left, blas.NoTrans, lq.lq.mat, lq.tau, q, work, len(work))
-	putFloats(work)
+	putFloat64s(work)
 }
 
 // SolveTo finds a minimum-norm solution to a system of linear equations defined
@@ -199,15 +199,15 @@ func (lq *LQ) SolveTo(dst *Dense, trans bool, b Matrix) error {
 	}
 	// Do not need to worry about overlap between x and b because w has its own
 	// independent storage.
-	w := getWorkspace(max(r, c), bc, false)
+	w := getDenseWorkspace(max(r, c), bc, false)
 	w.Copy(b)
 	t := lq.lq.asTriDense(lq.lq.mat.Rows, blas.NonUnit, blas.Lower).mat
 	if trans {
 		work := []float64{0}
 		lapack64.Ormlq(blas.Left, blas.NoTrans, lq.lq.mat, lq.tau, w.mat, work, -1)
-		work = getFloats(int(work[0]), false)
+		work = getFloat64s(int(work[0]), false)
 		lapack64.Ormlq(blas.Left, blas.NoTrans, lq.lq.mat, lq.tau, w.mat, work, len(work))
-		putFloats(work)
+		putFloat64s(work)
 
 		ok := lapack64.Trtrs(blas.Trans, t, w.mat)
 		if !ok {
@@ -223,13 +223,13 @@ func (lq *LQ) SolveTo(dst *Dense, trans bool, b Matrix) error {
 		}
 		work := []float64{0}
 		lapack64.Ormlq(blas.Left, blas.Trans, lq.lq.mat, lq.tau, w.mat, work, -1)
-		work = getFloats(int(work[0]), false)
+		work = getFloat64s(int(work[0]), false)
 		lapack64.Ormlq(blas.Left, blas.Trans, lq.lq.mat, lq.tau, w.mat, work, len(work))
-		putFloats(work)
+		putFloat64s(work)
 	}
 	// x was set above to be the correct size for the result.
 	dst.Copy(w)
-	putWorkspace(w)
+	putDenseWorkspace(w)
 	if lq.cond > ConditionTolerance {
 		return Condition(lq.cond)
 	}

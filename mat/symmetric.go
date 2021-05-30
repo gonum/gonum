@@ -9,6 +9,8 @@ import (
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
+	"gonum.org/v1/gonum/lapack"
+	"gonum.org/v1/gonum/lapack/lapack64"
 )
 
 var (
@@ -236,10 +238,10 @@ func (s *SymDense) isolatedWorkspace(a Symmetric) (w *SymDense, restore func()) 
 	if n == 0 {
 		panic(ErrZeroLength)
 	}
-	w = getWorkspaceSym(n, false)
+	w = getSymDenseWorkspace(n, false)
 	return w, func() {
 		s.CopySym(w)
-		putWorkspaceSym(w)
+		putSymDenseWorkspace(w)
 	}
 }
 
@@ -403,10 +405,10 @@ func (s *SymDense) SymOuterK(alpha float64, x Matrix) {
 		panic(badSymTriangle)
 	case s.mat.N == n:
 		if s == x {
-			w := getWorkspaceSym(n, true)
+			w := getSymDenseWorkspace(n, true)
 			w.SymRankK(w, alpha, x)
 			s.CopySym(w)
-			putWorkspaceSym(w)
+			putSymDenseWorkspace(w)
 		} else {
 			switch r := x.(type) {
 			case RawMatrixer:
@@ -577,8 +579,33 @@ func (s *SymDense) sliceSym(i, k int) *SymDense {
 	return &v
 }
 
+// Norm returns the specified norm of the receiver. Valid norms are:
+//  1 - The maximum absolute column sum
+//  2 - The Frobenius norm, the square root of the sum of the squares of the elements
+//  Inf - The maximum absolute row sum
+//
+// Norm will panic with ErrNormOrder if an illegal norm is specified and with
+// ErrZeroLength if the matrix has zero size.
+func (s *SymDense) Norm(norm float64) float64 {
+	if s.IsEmpty() {
+		panic(ErrZeroLength)
+	}
+	lnorm := normLapack(norm, false)
+	if lnorm == lapack.MaxColumnSum || lnorm == lapack.MaxRowSum {
+		work := getFloat64s(s.mat.N, false)
+		defer putFloat64s(work)
+		return lapack64.Lansy(lnorm, s.mat, work)
+	}
+	return lapack64.Lansy(lnorm, s.mat, nil)
+}
+
 // Trace returns the trace of the matrix.
+//
+// Trace will panic with ErrZeroLength if the matrix has zero size.
 func (s *SymDense) Trace() float64 {
+	if s.IsEmpty() {
+		panic(ErrZeroLength)
+	}
 	// TODO(btracey): could use internal asm sum routine.
 	var v float64
 	for i := 0; i < s.mat.N; i++ {

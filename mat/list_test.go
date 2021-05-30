@@ -238,7 +238,7 @@ func legalDims(a Matrix, m, n int) bool {
 		return true
 	case *SymDense, *TriDense, *basicSymmetric, *basicTriangular,
 		*SymBandDense, *basicSymBanded, *TriBandDense, *basicTriBanded,
-		*basicDiagonal, *DiagDense:
+		*basicDiagonal, *DiagDense, *Tridiag:
 		if m < 0 || n < 0 || m != n {
 			return false
 		}
@@ -319,6 +319,13 @@ func returnAs(a, t Matrix) Matrix {
 			return mat
 		case *basicDiagonal:
 			return asBasicDiagonal(mat)
+		}
+	case *Tridiag:
+		switch t.(type) {
+		default:
+			panic("bad type")
+		case *Tridiag:
+			return mat
 		}
 	}
 }
@@ -530,6 +537,17 @@ func makeRandOf(a Matrix, m, n int, src rand.Source) Matrix {
 		}
 		for i := 0; i < n; i++ {
 			mat.SetDiag(i, rnd.Float64())
+		}
+		rMatrix = returnAs(mat, t)
+	case *Tridiag:
+		if m != n {
+			panic("bad size")
+		}
+		mat := NewTridiag(n, nil, nil, nil)
+		for i := 0; i < n; i++ {
+			for j := max(0, i-1); j <= min(i+1, n-1); j++ {
+				mat.SetBand(i, j, rnd.NormFloat64())
+			}
 		}
 		rMatrix = returnAs(mat, t)
 	}
@@ -848,6 +866,10 @@ func makeCopyOf(a Matrix) Matrix {
 		}
 		copy(d.mat.Data, diag.mat.Data)
 		return returnAs(d, t)
+	case *Tridiag:
+		var m Tridiag
+		m.CloneFromTridiag(a.(*Tridiag))
+		return returnAs(&m, t)
 	}
 }
 
@@ -1058,6 +1080,10 @@ var testMatrices = []Matrix{
 	TransposeTri{&basicDiagonal{}},
 	TransposeBand{&basicDiagonal{}},
 	TransposeTriBand{&basicDiagonal{}},
+
+	&Tridiag{},
+	Transpose{&Tridiag{}},
+	TransposeBand{&Tridiag{}},
 }
 
 var sizes = []struct {
@@ -1139,7 +1165,7 @@ func testOneInputFunc(t *testing.T,
 				continue
 			}
 			if !sameAnswer(want, got) {
-				t.Errorf("Answer mismatch: %s", errStr)
+				t.Errorf("Answer mismatch: %s; got %v, want %v", errStr, got, want)
 			}
 		}
 	}

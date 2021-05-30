@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build !noasm && !gccgo && !safe
 // +build !noasm,!gccgo,!safe
 
 package f32
@@ -66,3 +67,11 @@ func DotUnitary(x, y []float32) (sum float32)
 //  }
 //  return sum
 func DotInc(x, y []float32, n, incX, incY, ix, iy uintptr) (sum float32)
+
+// Sum is
+//  var sum float32
+//  for _, v := range x {
+// 		sum += v
+//  }
+//  return sum
+func Sum(x []float32) float32

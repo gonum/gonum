@@ -5,6 +5,8 @@
 package mat
 
 import (
+	"math"
+
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
 	"gonum.org/v1/gonum/internal/asm/f64"
@@ -260,6 +262,30 @@ func (v *VecDense) CopyVec(a Vector) int {
 		v.setVec(i, a.AtVec(i))
 	}
 	return n
+}
+
+// Norm returns the specified norm of the receiver. Valid norms are:
+//  1 - The sum of the element magnitudes
+//  2 - The Euclidean norm, the square root of the sum of the squares of the elements
+//  Inf - The maximum element magnitude
+//
+// Norm will panic with ErrNormOrder if an illegal norm is specified and with
+// ErrZeroLength if the vector has zero size.
+func (v *VecDense) Norm(norm float64) float64 {
+	if v.IsEmpty() {
+		panic(ErrZeroLength)
+	}
+	switch norm {
+	default:
+		panic(ErrNormOrder)
+	case 1:
+		return blas64.Asum(v.mat)
+	case 2:
+		return blas64.Nrm2(v.mat)
+	case math.Inf(1):
+		imax := blas64.Iamax(v.mat)
+		return math.Abs(v.at(imax))
+	}
 }
 
 // ScaleVec scales the vector a by alpha, placing the result in the receiver.
@@ -747,10 +773,10 @@ func (v *VecDense) isolatedWorkspace(a Vector) (n *VecDense, restore func()) {
 	if l == 0 {
 		panic(ErrZeroLength)
 	}
-	n = getWorkspaceVec(l, false)
+	n = getVecDenseWorkspace(l, false)
 	return n, func() {
 		v.CopyVec(n)
-		putWorkspaceVec(n)
+		putVecDenseWorkspace(n)
 	}
 }
 

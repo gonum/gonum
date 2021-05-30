@@ -341,9 +341,10 @@ func dlattr(imat int, uplo blas.Uplo, trans blas.Transpose, n int, a []float64, 
 		return blas.NonUnit
 	}
 
-	ulp := dlamchE * dlamchB
-	smlnum := dlamchS
-	bignum := (1 - ulp) / smlnum
+	const (
+		tiny = safmin
+		huge = (1 - ulp) / tiny
+	)
 
 	bi := blas64.Implementation()
 
@@ -388,10 +389,10 @@ func dlattr(imat int, uplo blas.Uplo, trans blas.Transpose, n int, a []float64, 
 		for i := 0; i < n; i++ {
 			a[i*lda+i] = math.Copysign(2, a[i*lda+i])
 		}
-		// Set the right hand side so that the largest value is bignum.
+		// Set the right hand side so that the largest value is huge.
 		dlarnv(b, 2, rnd)
 		imax := bi.Idamax(n, b, 1)
-		bscal := bignum / math.Max(1, b[imax])
+		bscal := huge / math.Max(1, b[imax])
 		bi.Dscal(n, bscal, b, 1)
 	case 12:
 		// Make the first diagonal element in the solve small to cause
@@ -406,14 +407,14 @@ func dlattr(imat int, uplo blas.Uplo, trans blas.Transpose, n int, a []float64, 
 				bi.Dscal(n-i-1, tscal, a[i*lda+i+1:], 1)
 				a[i*lda+i] = math.Copysign(1, a[i*lda+i])
 			}
-			a[(n-1)*lda+n-1] *= smlnum
+			a[(n-1)*lda+n-1] *= tiny
 		case blas.Lower:
 			for i := 0; i < n; i++ {
 				dlarnv(a[i*lda:i*lda+i+1], 2, rnd)
 				bi.Dscal(i, tscal, a[i*lda:], 1)
 				a[i*lda+i] = math.Copysign(1, a[i*lda+i])
 			}
-			a[0] *= smlnum
+			a[0] *= tiny
 		}
 		dlarnv(b, 2, rnd)
 	case 13:
@@ -427,13 +428,13 @@ func dlattr(imat int, uplo blas.Uplo, trans blas.Transpose, n int, a []float64, 
 				dlarnv(a[i*lda+i:i*lda+n], 2, rnd)
 				a[i*lda+i] = math.Copysign(1, a[i*lda+i])
 			}
-			a[(n-1)*lda+n-1] *= smlnum
+			a[(n-1)*lda+n-1] *= tiny
 		case blas.Lower:
 			for i := 0; i < n; i++ {
 				dlarnv(a[i*lda:i*lda+i+1], 2, rnd)
 				a[i*lda+i] = math.Copysign(1, a[i*lda+i])
 			}
-			a[0] *= smlnum
+			a[0] *= tiny
 		}
 		dlarnv(b, 2, rnd)
 	case 14:
@@ -448,7 +449,7 @@ func dlattr(imat int, uplo blas.Uplo, trans blas.Transpose, n int, a []float64, 
 					a[i*lda+j] = 0
 				}
 				if (n-1-i)&0x2 == 0 {
-					a[i*lda+i] = smlnum
+					a[i*lda+i] = tiny
 				} else {
 					a[i*lda+i] = 1
 				}
@@ -459,7 +460,7 @@ func dlattr(imat int, uplo blas.Uplo, trans blas.Transpose, n int, a []float64, 
 					a[i*lda+j] = 0
 				}
 				if i&0x2 == 0 {
-					a[i*lda+i] = smlnum
+					a[i*lda+i] = tiny
 				} else {
 					a[i*lda+i] = 1
 				}
@@ -471,12 +472,12 @@ func dlattr(imat int, uplo blas.Uplo, trans blas.Transpose, n int, a []float64, 
 			b[0] = 0
 			for i := n - 1; i > 0; i -= 2 {
 				b[i] = 0
-				b[i-1] = smlnum
+				b[i-1] = tiny
 			}
 		case blas.Lower:
 			for i := 0; i < n-1; i += 2 {
 				b[i] = 0
-				b[i+1] = smlnum
+				b[i+1] = tiny
 			}
 			b[n-1] = 0
 		}
@@ -486,7 +487,7 @@ func dlattr(imat int, uplo blas.Uplo, trans blas.Transpose, n int, a []float64, 
 		// needed, the matrix is bidiagonal.
 		diag = blas.NonUnit
 		texp := 1 / math.Max(1, float64(n-1))
-		tscal := math.Pow(smlnum, texp)
+		tscal := math.Pow(tiny, texp)
 		switch uplo {
 		case blas.Upper:
 			for i := 0; i < n; i++ {
@@ -535,7 +536,7 @@ func dlattr(imat int, uplo blas.Uplo, trans blas.Transpose, n int, a []float64, 
 		// is constructed to cause overflow when adding a column in
 		// every other step.
 		diag = blas.NonUnit
-		tscal := (1 - ulp) / (dlamchS / ulp)
+		tscal := (1 - ulp) / tiny
 		texp := 1.0
 		switch uplo {
 		case blas.Upper:
@@ -588,20 +589,20 @@ func dlattr(imat int, uplo blas.Uplo, trans blas.Transpose, n int, a []float64, 
 				a[i*lda+i] = math.NaN()
 			}
 		}
-		// Set the right hand side so that the largest value is bignum.
+		// Set the right hand side so that the largest value is huge.
 		dlarnv(b, 2, rnd)
 		iy := bi.Idamax(n, b, 1)
 		bnorm := math.Abs(b[iy])
-		bscal := bignum / math.Max(1, bnorm)
+		bscal := huge / math.Max(1, bnorm)
 		bi.Dscal(n, bscal, b, 1)
 	case 19:
 		// Generate a triangular matrix with elements between
-		// bignum/(n-1) and bignum so that at least one of the column
-		// norms will exceed bignum.
+		// huge/(n-1) and huge so that at least one of the column
+		// norms will exceed huge.
 		// Dlatrs cannot handle this case for (typically) n>5.
 		diag = blas.NonUnit
-		tleft := bignum / math.Max(1, float64(n-1))
-		tscal := bignum * (float64(n-1) / math.Max(1, float64(n)))
+		tleft := huge / math.Max(1, float64(n-1))
+		tscal := huge * (float64(n-1) / math.Max(1, float64(n)))
 		switch uplo {
 		case blas.Upper:
 			for i := 0; i < n; i++ {
@@ -754,15 +755,12 @@ func dlattb(kind int, uplo blas.Uplo, trans blas.Transpose, n, kd int, ab []floa
 	}
 
 	const (
-		unfl   = dlamchS
-		ulp    = dlamchE * dlamchB
-		smlnum = unfl
-		bignum = (1 - ulp) / smlnum
+		tiny = safmin
+		huge = (1 - ulp) / tiny
 
-		eps   = dlamchP
-		small = 0.25 * (dlamchS / eps)
+		small = 0.25 * (safmin / ulp)
 		large = 1 / small
-		badc2 = 0.1 / eps
+		badc2 = 0.1 / ulp
 	)
 	badc1 := math.Sqrt(badc2)
 
@@ -969,9 +967,9 @@ func dlattb(kind int, uplo blas.Uplo, trans blas.Transpose, n, kd int, ab []floa
 				ab[i*ldab+kd] = math.Copysign(2, ab[i*ldab+kd])
 			}
 		}
-		// Set the right hand side so that the largest value is bignum.
+		// Set the right hand side so that the largest value is huge.
 		bnorm := math.Abs(b[bi.Idamax(n, b, 1)])
-		bscal := bignum / math.Max(1, bnorm)
+		bscal := huge / math.Max(1, bnorm)
 		bi.Dscal(n, bscal, b, 1)
 
 	case 11:
@@ -989,7 +987,7 @@ func dlattb(kind int, uplo blas.Uplo, trans blas.Transpose, n, kd int, ab []floa
 				}
 				ab[i*ldab] = math.Copysign(1, ab[i*ldab])
 			}
-			ab[(n-1)*ldab] *= smlnum
+			ab[(n-1)*ldab] *= tiny
 		} else {
 			for i := 0; i < n; i++ {
 				jlen := min(i+1, kd+1)
@@ -1000,7 +998,7 @@ func dlattb(kind int, uplo blas.Uplo, trans blas.Transpose, n, kd int, ab []floa
 				}
 				ab[i*ldab+kd] = math.Copysign(1, ab[i*ldab+kd])
 			}
-			ab[kd] *= smlnum
+			ab[kd] *= tiny
 		}
 
 	case 12:
@@ -1014,7 +1012,7 @@ func dlattb(kind int, uplo blas.Uplo, trans blas.Transpose, n, kd int, ab []floa
 				dlarnv(arow, 2, rnd)
 				ab[i*ldab] = math.Copysign(1, ab[i*ldab])
 			}
-			ab[(n-1)*ldab] *= smlnum
+			ab[(n-1)*ldab] *= tiny
 		} else {
 			for i := 0; i < n; i++ {
 				jlen := min(i+1, kd+1)
@@ -1022,7 +1020,7 @@ func dlattb(kind int, uplo blas.Uplo, trans blas.Transpose, n, kd int, ab []floa
 				dlarnv(arow, 2, rnd)
 				ab[i*ldab+kd] = math.Copysign(1, ab[i*ldab+kd])
 			}
-			ab[kd] *= smlnum
+			ab[kd] *= tiny
 		}
 
 	case 13:
@@ -1033,7 +1031,7 @@ func dlattb(kind int, uplo blas.Uplo, trans blas.Transpose, n, kd int, ab []floa
 			icount := 1
 			for i := n - 1; i >= 0; i-- {
 				if icount <= 2 {
-					ab[i*ldab] = smlnum
+					ab[i*ldab] = tiny
 				} else {
 					ab[i*ldab] = 1
 				}
@@ -1052,7 +1050,7 @@ func dlattb(kind int, uplo blas.Uplo, trans blas.Transpose, n, kd int, ab []floa
 					ab[i*ldab+j] = 0
 				}
 				if icount <= 2 {
-					ab[i*ldab+kd] = smlnum
+					ab[i*ldab+kd] = tiny
 				} else {
 					ab[i*ldab+kd] = 1
 				}
@@ -1067,13 +1065,13 @@ func dlattb(kind int, uplo blas.Uplo, trans blas.Transpose, n, kd int, ab []floa
 			b[0] = 0
 			for i := n - 1; i > 1; i -= 2 {
 				b[i] = 0
-				b[i-1] = smlnum
+				b[i-1] = tiny
 			}
 		} else {
 			b[n-1] = 0
 			for i := 0; i < n-1; i += 2 {
 				b[i] = 0
-				b[i+1] = smlnum
+				b[i+1] = tiny
 			}
 		}
 
@@ -1081,7 +1079,7 @@ func dlattb(kind int, uplo blas.Uplo, trans blas.Transpose, n, kd int, ab []floa
 		// Make the diagonal elements small to cause gradual overflow when
 		// dividing by T[j,j]. To control the amount of scaling needed, the
 		// matrix is bidiagonal.
-		tscal := math.Pow(smlnum, 1/float64(kd+1))
+		tscal := math.Pow(tiny, 1/float64(kd+1))
 		if uplo == blas.Upper {
 			for i := 0; i < n; i++ {
 				ab[i*ldab] = tscal
@@ -1191,21 +1189,21 @@ func dlattb(kind int, uplo blas.Uplo, trans blas.Transpose, n, kd int, ab []floa
 				ab[i*ldab+kd] = float64(i + 2)
 			}
 		}
-		// Set the right hand side so that the largest value is bignum.
+		// Set the right hand side so that the largest value is huge.
 		bnorm := math.Abs(b[bi.Idamax(n, b, 1)])
-		bscal := bignum / math.Max(1, bnorm)
+		bscal := huge / math.Max(1, bnorm)
 		bi.Dscal(n, bscal, b, 1)
 
 	case 18:
-		// Generate a triangular matrix with elements between bignum/kd and
-		// bignum so that at least one of the column norms will exceed bignum.
-		tleft := bignum / math.Max(1, float64(kd))
+		// Generate a triangular matrix with elements between huge/kd and
+		// huge so that at least one of the column norms will exceed huge.
+		tleft := huge / math.Max(1, float64(kd))
 		// The reference LAPACK has
-		//  tscal := bignum * (float64(kd) / float64(kd+1))
+		//  tscal := huge * (float64(kd) / float64(kd+1))
 		// but this causes overflow when computing cnorm in Dlatbs. Our choice
 		// is more conservative but increases coverage in the same way as the
 		// LAPACK version.
-		tscal := bignum / math.Max(1, float64(kd))
+		tscal := huge / math.Max(1, float64(kd))
 		if uplo == blas.Upper {
 			for i := 0; i < n; i++ {
 				for j := 0; j < min(n-i, kd+1); j++ {

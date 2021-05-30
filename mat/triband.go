@@ -9,6 +9,7 @@ import (
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
+	"gonum.org/v1/gonum/lapack"
 	"gonum.org/v1/gonum/lapack/lapack64"
 )
 
@@ -447,8 +448,33 @@ func (t *TriBandDense) DiagView() Diagonal {
 	}
 }
 
-// Trace returns the trace.
+// Norm returns the specified norm of the receiver. Valid norms are:
+//  1 - The maximum absolute column sum
+//  2 - The Frobenius norm, the square root of the sum of the squares of the elements
+//  Inf - The maximum absolute row sum
+//
+// Norm will panic with ErrNormOrder if an illegal norm is specified and with
+// ErrZeroLength if the matrix has zero size.
+func (t *TriBandDense) Norm(norm float64) float64 {
+	if t.IsEmpty() {
+		panic(ErrZeroLength)
+	}
+	lnorm := normLapack(norm, false)
+	if lnorm == lapack.MaxColumnSum {
+		work := getFloat64s(t.mat.N, false)
+		defer putFloat64s(work)
+		return lapack64.Lantb(lnorm, t.mat, work)
+	}
+	return lapack64.Lantb(lnorm, t.mat, nil)
+}
+
+// Trace returns the trace of the matrix.
+//
+// Trace will panic with ErrZeroLength if the matrix has zero size.
 func (t *TriBandDense) Trace() float64 {
+	if t.IsEmpty() {
+		panic(ErrZeroLength)
+	}
 	rb := t.RawTriBand()
 	var tr float64
 	var offsetIndex int

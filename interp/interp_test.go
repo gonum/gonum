@@ -219,10 +219,24 @@ func TestCalculateSlopesErrors(t *testing.T) {
 
 func TestCalculateSlopes(t *testing.T) {
 	t.Parallel()
-	got := calculateSlopes([]float64{0, 2, 3, 5}, []float64{0, 1, 1, -1})
-	want := []float64{0.5, 0, -1}
-	if !floats.EqualApprox(got, want, 1e-14) {
-		t.Errorf("Mismatch in calculated slops: got %v, want %v", got, want)
+	for i, test := range []struct {
+		xs, ys, want []float64
+	}{
+		{
+			xs:   []float64{0, 2, 3, 5},
+			ys:   []float64{0, 1, 1, -1},
+			want: []float64{0.5, 0, -1},
+		},
+		{
+			xs:   []float64{10, 20},
+			ys:   []float64{50, 100},
+			want: []float64{5},
+		},
+	} {
+		got := calculateSlopes(test.xs, test.ys)
+		if !floats.EqualApprox(got, test.want, 1e-14) {
+			t.Errorf("Mismatch in calculated slopes in case %d: got %v, want %v", i, got, test.want)
+		}
 	}
 }
 

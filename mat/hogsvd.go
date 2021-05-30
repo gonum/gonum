@@ -79,10 +79,10 @@ func (gsvd *HOGSVD) Factorize(m ...Matrix) (ok bool) {
 		}
 	}
 
-	s := getWorkspace(c, c, true)
-	defer putWorkspace(s)
-	sij := getWorkspace(c, c, false)
-	defer putWorkspace(sij)
+	s := getDenseWorkspace(c, c, true)
+	defer putDenseWorkspace(s)
+	sij := getDenseWorkspace(c, c, false)
+	defer putDenseWorkspace(sij)
 	for i, ai := range a {
 		for _, aj := range a[i+1:] {
 			gsvd.err = ai.SolveCholTo(sij, &aj)
@@ -126,8 +126,8 @@ func (gsvd *HOGSVD) Factorize(m ...Matrix) (ok bool) {
 	}
 
 	b := make([]Dense, len(m))
-	biT := getWorkspace(c, r, false)
-	defer putWorkspace(biT)
+	biT := getDenseWorkspace(c, r, false)
+	defer putDenseWorkspace(biT)
 	for i, d := range m {
 		// All calls to reset will leave an emptied
 		// matrix with capacity to store the result
@@ -190,7 +190,7 @@ func (gsvd *HOGSVD) UTo(dst *Dense, n int) {
 // Values returns the nth set of singular values of the factorized system.
 // If the input slice is non-nil, the values will be stored in-place into the slice.
 // In this case, the slice must have length c, and Values will panic with
-// matrix.ErrSliceLengthMismatch otherwise. If the input slice is nil,
+// ErrSliceLengthMismatch otherwise. If the input slice is nil,
 // a new slice of the appropriate length will be allocated and returned.
 //
 // Values will panic if the receiver does not contain a successful factorization.

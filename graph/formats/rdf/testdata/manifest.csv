@@ -1,0 +1,63 @@
+test,name,comment,approval,urgna2012,urdna2015
+test001,simple id,,,TRUE,TRUE
+test002,duplicate property iri values,,,TRUE,TRUE
+test003,bnode,,,TRUE,TRUE
+test004,bnode plus embed w/subject,,,TRUE,TRUE
+test005,bnode embed,,,TRUE,TRUE
+test006,multiple rdf types,,,TRUE,TRUE
+test007,coerce CURIE value,,,TRUE,TRUE
+test008,single subject complex,,,TRUE,TRUE
+test009,multiple subjects - complex,,,TRUE,TRUE
+test010,type,,,TRUE,TRUE
+test011,type-coerced type,,,TRUE,TRUE
+test012,"type-coerced type, remove duplicate reference",,,TRUE,TRUE
+test013,"type-coerced type, cycle",,,TRUE,TRUE
+test014,check types,,,TRUE,TRUE
+test015,top level context,,,TRUE,TRUE
+test016,blank node - dual link - embed,,,TRUE,TRUE
+test017,blank node - dual link - non-embed,,,TRUE,TRUE
+test018,blank node - self link,,,TRUE,TRUE
+test019,blank node - disjoint self links,,,TRUE,TRUE
+test020,blank node - diamond,,,TRUE,TRUE
+test021,blank node - circle of 2,,,TRUE,TRUE
+test022,blank node - double circle of 2,,,TRUE,TRUE
+test023,blank node - circle of 3,,,TRUE,TRUE
+test024,blank node - double circle of 3 (1-2-3),,,TRUE,TRUE
+test025,blank node - double circle of 3 (1-3-2),,,TRUE,TRUE
+test026,blank node - double circle of 3 (2-1-3),,,TRUE,TRUE
+test027,blank node - double circle of 3 (2-3-1),,,TRUE,TRUE
+test028,blank node - double circle of 3 (3-2-1),,,TRUE,TRUE
+test029,blank node - double circle of 3 (3-1-2),,,TRUE,TRUE
+test030,blank node - point at circle of 3,,,TRUE,TRUE
+test031,bnode (1),,,TRUE,TRUE
+test032,bnode (2),,,TRUE,TRUE
+test033,disjoint identical subgraphs (1),,,TRUE,TRUE
+test034,disjoint identical subgraphs (2),,,TRUE,TRUE
+test035,reordered w/strings (1),,,TRUE,TRUE
+test036,reordered w/strings (2),,,TRUE,TRUE
+test037,reordered w/strings (3),,,TRUE,TRUE
+test038,"reordered 4 bnodes, reordered 2 properties (1)",,,TRUE,TRUE
+test039,"reordered 4 bnodes, reordered 2 properties (2)",,,TRUE,TRUE
+test040,reordered 6 bnodes (1),,,TRUE,TRUE
+test041,reordered 6 bnodes (2),,,TRUE,TRUE
+test042,reordered 6 bnodes (3),,,TRUE,TRUE
+test043,literal with language,,,TRUE,TRUE
+test044,evil (1),,,TRUE,TRUE
+test045,evil (2),,,TRUE,TRUE
+test046,evil (3),,,TRUE,TRUE
+test047,deep diff (1),,,TRUE,TRUE
+test048,deep diff (2),,,TRUE,TRUE
+test049,remove null,,,TRUE,TRUE
+test050,nulls,,,TRUE,TRUE
+test051,merging subjects,,,TRUE,TRUE
+test052,alias keywords,,,TRUE,TRUE
+test053,@list,,,TRUE,TRUE
+test054,t-graph,,,TRUE,TRUE
+test055,simple reorder (1),,,TRUE,TRUE
+test056,simple reorder (2),,,TRUE,TRUE
+test057,unnamed graph,,,FALSE,TRUE
+test058,unnamed graph with blank node objects,,,FALSE,TRUE
+test059,n-quads parsing,,,FALSE,TRUE
+test060,n-quads escaping,,,TRUE,TRUE
+test061,same literal value with multiple languages,,,TRUE,TRUE
+test062,same literal value with multiple datatypes,,,TRUE,TRUE

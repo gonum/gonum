@@ -5,6 +5,8 @@
 package mat
 
 import (
+	"math"
+
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
 )
@@ -314,13 +316,39 @@ func (d *DiagDense) IsEmpty() bool {
 	return d.mat.Inc == 0
 }
 
-// Trace returns the trace.
+// Trace returns the trace of the matrix.
+//
+// Trace will panic with with ErrZeroLength if the matrix has zero size.
 func (d *DiagDense) Trace() float64 {
+	if d.IsEmpty() {
+		panic(ErrZeroLength)
+	}
 	rb := d.RawBand()
 	var tr float64
 	for i := 0; i < rb.Rows; i++ {
 		tr += rb.Data[rb.KL+i*rb.Stride]
 	}
 	return tr
+}
 
+// Norm returns the specified norm of the receiver. Valid norms are:
+//  1 or Inf - The maximum diagonal element magnitude
+//  2 - The Frobenius norm, the square root of the sum of the squares of
+//      the diagonal elements
+//
+// Norm will panic with ErrNormOrder if an illegal norm is specified and with
+// ErrZeroLength if the receiver has zero size.
+func (d *DiagDense) Norm(norm float64) float64 {
+	if d.IsEmpty() {
+		panic(ErrZeroLength)
+	}
+	switch norm {
+	default:
+		panic(ErrNormOrder)
+	case 1, math.Inf(1):
+		imax := blas64.Iamax(d.mat)
+		return math.Abs(d.at(imax, imax))
+	case 2:
+		return blas64.Nrm2(d.mat)
+	}
 }

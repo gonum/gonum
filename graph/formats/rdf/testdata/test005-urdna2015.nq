@@ -1,0 +1,3 @@
+<http://example.org/test#example> <http://example.org/vocab#embed> _:c14n0 .
+<http://example.org/test#example> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.org/vocab#Foo> .
+_:c14n0 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.org/vocab#Bar> .

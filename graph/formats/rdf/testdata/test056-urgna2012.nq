@@ -1,0 +1,3 @@
+_:c14n0 <http://example.org/vocab#p> <http://example.com> .
+_:c14n0 <http://example.org/vocab#p> _:c14n1 .
+_:c14n1 <http://example.org/vocab#p> <http://example.org> .

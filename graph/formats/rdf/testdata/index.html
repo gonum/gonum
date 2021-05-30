@@ -1,0 +1,3124 @@
+<!DOCTYPE html>
+<html lang='en' prefix='rdfn: http://json-ld.github.io/normalization/test-vocab# mf: http://www.w3.org/2001/sw/DataAccess/tests/test-manifest# rdft: http://www.w3.org/ns/rdftest#'>
+  <head>
+    <meta content='text/html;charset=utf-8' http-equiv='Content-Type'>
+    <meta content='width=device-width, initial-scale=1.0' name='viewport'>
+    <link href='https://www.w3.org/StyleSheets/TR/base' rel='stylesheet' type='text/css'>
+    <style>
+      body: {bacground-image: none;}
+      dl.test-detail, dl.test-options {
+        padding: 0.5em;
+      }
+      dl.test-detail>dt, dl.test-options>dt {
+        float: left;
+        clear: left;
+        text-align: right;
+        font-weight: bold;
+        color: green;
+      }
+      dl.test-detail>dt:after, dl.test-options>dt:after {content: ": "}
+      dl.test-detail>dd, dl.test-options>dd {
+        margin: 0 0 0 110px;
+        padding: 0 0 0.5em 0;
+      }
+      dl.test-description>dt {margin-top: 2em;}
+      dd {margin-left: 0;}
+      dd code {display: inline;}
+      footer {text-align: center;}
+    </style>
+    <title>
+      RDF Dataset Normalization Test Cases
+    </title>
+    <style>
+      em.rfc2119 { 
+        text-transform: lowercase;
+        font-variant:   small-caps;
+        font-style:     normal;
+        color:          #900;
+      }
+      a.testlink {
+        color: inherit;
+        text-decoration: none;
+      }
+      a.testlink:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body resource='' typeof='mf:Manifest'>
+    <p>
+      <a href='http://www.w3.org/'>
+        <img alt='W3C' height='48' src='http://www.w3.org/Icons/w3c_home' width='72'>
+      </a>
+    </p>
+    <h1 property='rdfs:label'>RDF Dataset Normalization Test Cases</h1>
+    <p property='rdfs:comment'>Includes manifests for different application profiles.</p>
+    <p>This page describes RDF Dataset Normalization tests for URGNA2012 and URDNA2015 profiles. These tests are also described in <a href="manifest.jsonld">JSON-LD</a> and <a href="manifest.ttl">Turtle</a> formats for convenience. The manifest vocabulary is described in the <a href="vocab.html">RDF Dataset Normalization Test Vocabulary</a> (<a href="vocab.jsonld">JSON-LD</a>, <a href="vocab.ttl">Turtle</a>) and is based on the <a href="http://www.w3.org/TR/2014/NOTE-rdf11-testcases-20140225/">RDF Test Vocabulary</a>.</p>
+    <h2 id="general-instructions-for-running-the-rdf-dataset-normalization-test-suites">General instructions for running the RDF Dataset Normalization Test suites</h2>
+    <p>FIXME</p>
+    <h2 id="contributing-tests">Contributing Tests</h2>
+    <p>The test manifests and entries are built automatically from <a href="manifest.csv" class="uri">manifest.csv</a> using <a href="mk_manifest.rb" class="uri">mk_manifest.rb</a>, where each row defines a combination of RDF, JSON and Validation tests for the same <em>action</em> and implicit files. Tests may be contributed via pull request to <a href="https://github.com/json-ld/normalization" class="uri">https://github.com/json-ld/normalization</a> with suitable changes to the <a href="manifest.csv" class="uri">manifest.csv</a> and necessary <em>action</em> and <em>result</em> files. Tests will also be considered if a contribution is sent to <a href="mailto:public-credentials@w3.org">public-credentials@w3.org</a>.</p>
+    <h2 id="distribution">Distribution</h2>
+    <p>Distributed under both the <a href="http://www.w3.org/Consortium/Legal/2008/04-testsuite-license">W3C Test Suite License</a> and the <a href="http://www.w3.org/Consortium/Legal/2008/03-bsd-license">W3C 3-clause BSD License</a>. To contribute to a W3C Test Suite, see the <a href="http://www.w3.org/2004/10/27-testcases">policies and contribution forms</a>.</p>
+    <h2 id="disclaimer">Disclaimer</h2>
+    <p>UNDER BOTH MUTUALLY EXCLUSIVE LICENSES, THIS DOCUMENT AND ALL DOCUMENTS, TESTS AND SOFTWARE THAT LINK THIS STATEMENT ARE PROVIDED “AS IS,” AND COPYRIGHT HOLDERS MAKE NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, OR TITLE; THAT THE CONTENTS OF THE DOCUMENT ARE SUITABLE FOR ANY PURPOSE; NOR THAT THE IMPLEMENTATION OF SUCH CONTENTS WILL NOT INFRINGE ANY THIRD PARTY PATENTS, COPYRIGHTS, TRADEMARKS OR OTHER RIGHTS. COPYRIGHT HOLDERS WILL NOT BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF ANY USE OF THE DOCUMENT OR THE PERFORMANCE OR IMPLEMENTATION OF THE CONTENTS THEREOF.</p>
+    <section class='contents'>
+      <h2>Contents</h2>
+      <ol>
+        <li>
+          <a href='#manifest-urgna2012'>RDF Graph Normalization (URGNA2012)</a>
+          – 59 entries
+        </li>
+        <li>
+          <a href='#manifest-urdna2015'>RDF Dataset Normalization (URDNA2015)</a>
+          – 62 entries
+        </li>
+      </ol>
+    </section>
+    <section id='manifest-urgna2012' inlist property='mf:entry' resource='manifest-urgna2012' typeof='mf:Manifest'>
+      <h2>RDF Graph Normalization (URGNA2012) (59 entries)</h2>
+      <p property='rdfs:comment'>Tests the 2012 version of RDF Graph Normalization.</p>
+      <p>
+        Instructions specific to running URGNA2012 tests.
+      </p>
+      <dl class='test-description'>
+        <dt id='manifest-urgna2012#test001'>
+          <a class='testlink' href='#manifest-urgna2012#test001'>
+            manifest-urgna2012#test001:
+          </a>
+          <span about='manifest-urgna2012#test001' property='mf:name'>simple id</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test001' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test001-in.nq' property='mf:action'>test001-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test001-urgna2012.nq' property='mf:result'>test001-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test002'>
+          <a class='testlink' href='#manifest-urgna2012#test002'>
+            manifest-urgna2012#test002:
+          </a>
+          <span about='manifest-urgna2012#test002' property='mf:name'>duplicate property iri values</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test002' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test002-in.nq' property='mf:action'>test002-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test002-urgna2012.nq' property='mf:result'>test002-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test003'>
+          <a class='testlink' href='#manifest-urgna2012#test003'>
+            manifest-urgna2012#test003:
+          </a>
+          <span about='manifest-urgna2012#test003' property='mf:name'>bnode</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test003' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test003-in.nq' property='mf:action'>test003-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test003-urgna2012.nq' property='mf:result'>test003-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test004'>
+          <a class='testlink' href='#manifest-urgna2012#test004'>
+            manifest-urgna2012#test004:
+          </a>
+          <span about='manifest-urgna2012#test004' property='mf:name'>bnode plus embed w/subject</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test004' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test004-in.nq' property='mf:action'>test004-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test004-urgna2012.nq' property='mf:result'>test004-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test005'>
+          <a class='testlink' href='#manifest-urgna2012#test005'>
+            manifest-urgna2012#test005:
+          </a>
+          <span about='manifest-urgna2012#test005' property='mf:name'>bnode embed</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test005' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test005-in.nq' property='mf:action'>test005-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test005-urgna2012.nq' property='mf:result'>test005-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test006'>
+          <a class='testlink' href='#manifest-urgna2012#test006'>
+            manifest-urgna2012#test006:
+          </a>
+          <span about='manifest-urgna2012#test006' property='mf:name'>multiple rdf types</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test006' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test006-in.nq' property='mf:action'>test006-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test006-urgna2012.nq' property='mf:result'>test006-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test007'>
+          <a class='testlink' href='#manifest-urgna2012#test007'>
+            manifest-urgna2012#test007:
+          </a>
+          <span about='manifest-urgna2012#test007' property='mf:name'>coerce CURIE value</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test007' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test007-in.nq' property='mf:action'>test007-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test007-urgna2012.nq' property='mf:result'>test007-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test008'>
+          <a class='testlink' href='#manifest-urgna2012#test008'>
+            manifest-urgna2012#test008:
+          </a>
+          <span about='manifest-urgna2012#test008' property='mf:name'>single subject complex</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test008' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test008-in.nq' property='mf:action'>test008-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test008-urgna2012.nq' property='mf:result'>test008-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test009'>
+          <a class='testlink' href='#manifest-urgna2012#test009'>
+            manifest-urgna2012#test009:
+          </a>
+          <span about='manifest-urgna2012#test009' property='mf:name'>multiple subjects - complex</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test009' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test009-in.nq' property='mf:action'>test009-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test009-urgna2012.nq' property='mf:result'>test009-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test010'>
+          <a class='testlink' href='#manifest-urgna2012#test010'>
+            manifest-urgna2012#test010:
+          </a>
+          <span about='manifest-urgna2012#test010' property='mf:name'>type</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test010' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test010-in.nq' property='mf:action'>test010-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test010-urgna2012.nq' property='mf:result'>test010-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test011'>
+          <a class='testlink' href='#manifest-urgna2012#test011'>
+            manifest-urgna2012#test011:
+          </a>
+          <span about='manifest-urgna2012#test011' property='mf:name'>type-coerced type</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test011' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test011-in.nq' property='mf:action'>test011-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test011-urgna2012.nq' property='mf:result'>test011-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test012'>
+          <a class='testlink' href='#manifest-urgna2012#test012'>
+            manifest-urgna2012#test012:
+          </a>
+          <span about='manifest-urgna2012#test012' property='mf:name'>type-coerced type, remove duplicate reference</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test012' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test012-in.nq' property='mf:action'>test012-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test012-urgna2012.nq' property='mf:result'>test012-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test013'>
+          <a class='testlink' href='#manifest-urgna2012#test013'>
+            manifest-urgna2012#test013:
+          </a>
+          <span about='manifest-urgna2012#test013' property='mf:name'>type-coerced type, cycle</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test013' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test013-in.nq' property='mf:action'>test013-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test013-urgna2012.nq' property='mf:result'>test013-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test014'>
+          <a class='testlink' href='#manifest-urgna2012#test014'>
+            manifest-urgna2012#test014:
+          </a>
+          <span about='manifest-urgna2012#test014' property='mf:name'>check types</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test014' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test014-in.nq' property='mf:action'>test014-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test014-urgna2012.nq' property='mf:result'>test014-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test015'>
+          <a class='testlink' href='#manifest-urgna2012#test015'>
+            manifest-urgna2012#test015:
+          </a>
+          <span about='manifest-urgna2012#test015' property='mf:name'>top level context</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test015' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test015-in.nq' property='mf:action'>test015-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test015-urgna2012.nq' property='mf:result'>test015-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test016'>
+          <a class='testlink' href='#manifest-urgna2012#test016'>
+            manifest-urgna2012#test016:
+          </a>
+          <span about='manifest-urgna2012#test016' property='mf:name'>blank node - dual link - embed</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test016' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test016-in.nq' property='mf:action'>test016-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test016-urgna2012.nq' property='mf:result'>test016-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test017'>
+          <a class='testlink' href='#manifest-urgna2012#test017'>
+            manifest-urgna2012#test017:
+          </a>
+          <span about='manifest-urgna2012#test017' property='mf:name'>blank node - dual link - non-embed</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test017' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test017-in.nq' property='mf:action'>test017-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test017-urgna2012.nq' property='mf:result'>test017-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test018'>
+          <a class='testlink' href='#manifest-urgna2012#test018'>
+            manifest-urgna2012#test018:
+          </a>
+          <span about='manifest-urgna2012#test018' property='mf:name'>blank node - self link</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test018' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test018-in.nq' property='mf:action'>test018-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test018-urgna2012.nq' property='mf:result'>test018-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test019'>
+          <a class='testlink' href='#manifest-urgna2012#test019'>
+            manifest-urgna2012#test019:
+          </a>
+          <span about='manifest-urgna2012#test019' property='mf:name'>blank node - disjoint self links</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test019' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test019-in.nq' property='mf:action'>test019-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test019-urgna2012.nq' property='mf:result'>test019-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test020'>
+          <a class='testlink' href='#manifest-urgna2012#test020'>
+            manifest-urgna2012#test020:
+          </a>
+          <span about='manifest-urgna2012#test020' property='mf:name'>blank node - diamond</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test020' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test020-in.nq' property='mf:action'>test020-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test020-urgna2012.nq' property='mf:result'>test020-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test021'>
+          <a class='testlink' href='#manifest-urgna2012#test021'>
+            manifest-urgna2012#test021:
+          </a>
+          <span about='manifest-urgna2012#test021' property='mf:name'>blank node - circle of 2</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test021' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test021-in.nq' property='mf:action'>test021-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test021-urgna2012.nq' property='mf:result'>test021-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test022'>
+          <a class='testlink' href='#manifest-urgna2012#test022'>
+            manifest-urgna2012#test022:
+          </a>
+          <span about='manifest-urgna2012#test022' property='mf:name'>blank node - double circle of 2</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test022' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test022-in.nq' property='mf:action'>test022-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test022-urgna2012.nq' property='mf:result'>test022-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test023'>
+          <a class='testlink' href='#manifest-urgna2012#test023'>
+            manifest-urgna2012#test023:
+          </a>
+          <span about='manifest-urgna2012#test023' property='mf:name'>blank node - circle of 3</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test023' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test023-in.nq' property='mf:action'>test023-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test023-urgna2012.nq' property='mf:result'>test023-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test024'>
+          <a class='testlink' href='#manifest-urgna2012#test024'>
+            manifest-urgna2012#test024:
+          </a>
+          <span about='manifest-urgna2012#test024' property='mf:name'>blank node - double circle of 3 (1-2-3)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test024' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test024-in.nq' property='mf:action'>test024-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test024-urgna2012.nq' property='mf:result'>test024-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test025'>
+          <a class='testlink' href='#manifest-urgna2012#test025'>
+            manifest-urgna2012#test025:
+          </a>
+          <span about='manifest-urgna2012#test025' property='mf:name'>blank node - double circle of 3 (1-3-2)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test025' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test025-in.nq' property='mf:action'>test025-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test025-urgna2012.nq' property='mf:result'>test025-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test026'>
+          <a class='testlink' href='#manifest-urgna2012#test026'>
+            manifest-urgna2012#test026:
+          </a>
+          <span about='manifest-urgna2012#test026' property='mf:name'>blank node - double circle of 3 (2-1-3)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test026' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test026-in.nq' property='mf:action'>test026-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test026-urgna2012.nq' property='mf:result'>test026-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test027'>
+          <a class='testlink' href='#manifest-urgna2012#test027'>
+            manifest-urgna2012#test027:
+          </a>
+          <span about='manifest-urgna2012#test027' property='mf:name'>blank node - double circle of 3 (2-3-1)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test027' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test027-in.nq' property='mf:action'>test027-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test027-urgna2012.nq' property='mf:result'>test027-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test028'>
+          <a class='testlink' href='#manifest-urgna2012#test028'>
+            manifest-urgna2012#test028:
+          </a>
+          <span about='manifest-urgna2012#test028' property='mf:name'>blank node - double circle of 3 (3-2-1)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test028' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test028-in.nq' property='mf:action'>test028-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test028-urgna2012.nq' property='mf:result'>test028-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test029'>
+          <a class='testlink' href='#manifest-urgna2012#test029'>
+            manifest-urgna2012#test029:
+          </a>
+          <span about='manifest-urgna2012#test029' property='mf:name'>blank node - double circle of 3 (3-1-2)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test029' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test029-in.nq' property='mf:action'>test029-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test029-urgna2012.nq' property='mf:result'>test029-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test030'>
+          <a class='testlink' href='#manifest-urgna2012#test030'>
+            manifest-urgna2012#test030:
+          </a>
+          <span about='manifest-urgna2012#test030' property='mf:name'>blank node - point at circle of 3</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test030' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test030-in.nq' property='mf:action'>test030-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test030-urgna2012.nq' property='mf:result'>test030-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test031'>
+          <a class='testlink' href='#manifest-urgna2012#test031'>
+            manifest-urgna2012#test031:
+          </a>
+          <span about='manifest-urgna2012#test031' property='mf:name'>bnode (1)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test031' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test031-in.nq' property='mf:action'>test031-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test031-urgna2012.nq' property='mf:result'>test031-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test032'>
+          <a class='testlink' href='#manifest-urgna2012#test032'>
+            manifest-urgna2012#test032:
+          </a>
+          <span about='manifest-urgna2012#test032' property='mf:name'>bnode (2)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test032' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test032-in.nq' property='mf:action'>test032-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test032-urgna2012.nq' property='mf:result'>test032-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test033'>
+          <a class='testlink' href='#manifest-urgna2012#test033'>
+            manifest-urgna2012#test033:
+          </a>
+          <span about='manifest-urgna2012#test033' property='mf:name'>disjoint identical subgraphs (1)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test033' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test033-in.nq' property='mf:action'>test033-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test033-urgna2012.nq' property='mf:result'>test033-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test034'>
+          <a class='testlink' href='#manifest-urgna2012#test034'>
+            manifest-urgna2012#test034:
+          </a>
+          <span about='manifest-urgna2012#test034' property='mf:name'>disjoint identical subgraphs (2)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test034' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test034-in.nq' property='mf:action'>test034-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test034-urgna2012.nq' property='mf:result'>test034-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test035'>
+          <a class='testlink' href='#manifest-urgna2012#test035'>
+            manifest-urgna2012#test035:
+          </a>
+          <span about='manifest-urgna2012#test035' property='mf:name'>reordered w/strings (1)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test035' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test035-in.nq' property='mf:action'>test035-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test035-urgna2012.nq' property='mf:result'>test035-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test036'>
+          <a class='testlink' href='#manifest-urgna2012#test036'>
+            manifest-urgna2012#test036:
+          </a>
+          <span about='manifest-urgna2012#test036' property='mf:name'>reordered w/strings (2)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test036' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test036-in.nq' property='mf:action'>test036-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test036-urgna2012.nq' property='mf:result'>test036-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test037'>
+          <a class='testlink' href='#manifest-urgna2012#test037'>
+            manifest-urgna2012#test037:
+          </a>
+          <span about='manifest-urgna2012#test037' property='mf:name'>reordered w/strings (3)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test037' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test037-in.nq' property='mf:action'>test037-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test037-urgna2012.nq' property='mf:result'>test037-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test038'>
+          <a class='testlink' href='#manifest-urgna2012#test038'>
+            manifest-urgna2012#test038:
+          </a>
+          <span about='manifest-urgna2012#test038' property='mf:name'>reordered 4 bnodes, reordered 2 properties (1)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test038' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test038-in.nq' property='mf:action'>test038-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test038-urgna2012.nq' property='mf:result'>test038-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test039'>
+          <a class='testlink' href='#manifest-urgna2012#test039'>
+            manifest-urgna2012#test039:
+          </a>
+          <span about='manifest-urgna2012#test039' property='mf:name'>reordered 4 bnodes, reordered 2 properties (2)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test039' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test039-in.nq' property='mf:action'>test039-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test039-urgna2012.nq' property='mf:result'>test039-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test040'>
+          <a class='testlink' href='#manifest-urgna2012#test040'>
+            manifest-urgna2012#test040:
+          </a>
+          <span about='manifest-urgna2012#test040' property='mf:name'>reordered 6 bnodes (1)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test040' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test040-in.nq' property='mf:action'>test040-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test040-urgna2012.nq' property='mf:result'>test040-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test041'>
+          <a class='testlink' href='#manifest-urgna2012#test041'>
+            manifest-urgna2012#test041:
+          </a>
+          <span about='manifest-urgna2012#test041' property='mf:name'>reordered 6 bnodes (2)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test041' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test041-in.nq' property='mf:action'>test041-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test041-urgna2012.nq' property='mf:result'>test041-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test042'>
+          <a class='testlink' href='#manifest-urgna2012#test042'>
+            manifest-urgna2012#test042:
+          </a>
+          <span about='manifest-urgna2012#test042' property='mf:name'>reordered 6 bnodes (3)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test042' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test042-in.nq' property='mf:action'>test042-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test042-urgna2012.nq' property='mf:result'>test042-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test043'>
+          <a class='testlink' href='#manifest-urgna2012#test043'>
+            manifest-urgna2012#test043:
+          </a>
+          <span about='manifest-urgna2012#test043' property='mf:name'>literal with language</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test043' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test043-in.nq' property='mf:action'>test043-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test043-urgna2012.nq' property='mf:result'>test043-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test044'>
+          <a class='testlink' href='#manifest-urgna2012#test044'>
+            manifest-urgna2012#test044:
+          </a>
+          <span about='manifest-urgna2012#test044' property='mf:name'>evil (1)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test044' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test044-in.nq' property='mf:action'>test044-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test044-urgna2012.nq' property='mf:result'>test044-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test045'>
+          <a class='testlink' href='#manifest-urgna2012#test045'>
+            manifest-urgna2012#test045:
+          </a>
+          <span about='manifest-urgna2012#test045' property='mf:name'>evil (2)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test045' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test045-in.nq' property='mf:action'>test045-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test045-urgna2012.nq' property='mf:result'>test045-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test046'>
+          <a class='testlink' href='#manifest-urgna2012#test046'>
+            manifest-urgna2012#test046:
+          </a>
+          <span about='manifest-urgna2012#test046' property='mf:name'>evil (3)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test046' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test046-in.nq' property='mf:action'>test046-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test046-urgna2012.nq' property='mf:result'>test046-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test047'>
+          <a class='testlink' href='#manifest-urgna2012#test047'>
+            manifest-urgna2012#test047:
+          </a>
+          <span about='manifest-urgna2012#test047' property='mf:name'>deep diff (1)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test047' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test047-in.nq' property='mf:action'>test047-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test047-urgna2012.nq' property='mf:result'>test047-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test048'>
+          <a class='testlink' href='#manifest-urgna2012#test048'>
+            manifest-urgna2012#test048:
+          </a>
+          <span about='manifest-urgna2012#test048' property='mf:name'>deep diff (2)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test048' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test048-in.nq' property='mf:action'>test048-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test048-urgna2012.nq' property='mf:result'>test048-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test049'>
+          <a class='testlink' href='#manifest-urgna2012#test049'>
+            manifest-urgna2012#test049:
+          </a>
+          <span about='manifest-urgna2012#test049' property='mf:name'>remove null</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test049' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test049-in.nq' property='mf:action'>test049-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test049-urgna2012.nq' property='mf:result'>test049-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test050'>
+          <a class='testlink' href='#manifest-urgna2012#test050'>
+            manifest-urgna2012#test050:
+          </a>
+          <span about='manifest-urgna2012#test050' property='mf:name'>nulls</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test050' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test050-in.nq' property='mf:action'>test050-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test050-urgna2012.nq' property='mf:result'>test050-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test051'>
+          <a class='testlink' href='#manifest-urgna2012#test051'>
+            manifest-urgna2012#test051:
+          </a>
+          <span about='manifest-urgna2012#test051' property='mf:name'>merging subjects</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test051' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test051-in.nq' property='mf:action'>test051-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test051-urgna2012.nq' property='mf:result'>test051-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test052'>
+          <a class='testlink' href='#manifest-urgna2012#test052'>
+            manifest-urgna2012#test052:
+          </a>
+          <span about='manifest-urgna2012#test052' property='mf:name'>alias keywords</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test052' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test052-in.nq' property='mf:action'>test052-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test052-urgna2012.nq' property='mf:result'>test052-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test053'>
+          <a class='testlink' href='#manifest-urgna2012#test053'>
+            manifest-urgna2012#test053:
+          </a>
+          <span about='manifest-urgna2012#test053' property='mf:name'>@list</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test053' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test053-in.nq' property='mf:action'>test053-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test053-urgna2012.nq' property='mf:result'>test053-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test054'>
+          <a class='testlink' href='#manifest-urgna2012#test054'>
+            manifest-urgna2012#test054:
+          </a>
+          <span about='manifest-urgna2012#test054' property='mf:name'>t-graph</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test054' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test054-in.nq' property='mf:action'>test054-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test054-urgna2012.nq' property='mf:result'>test054-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test055'>
+          <a class='testlink' href='#manifest-urgna2012#test055'>
+            manifest-urgna2012#test055:
+          </a>
+          <span about='manifest-urgna2012#test055' property='mf:name'>simple reorder (1)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test055' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test055-in.nq' property='mf:action'>test055-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test055-urgna2012.nq' property='mf:result'>test055-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test056'>
+          <a class='testlink' href='#manifest-urgna2012#test056'>
+            manifest-urgna2012#test056:
+          </a>
+          <span about='manifest-urgna2012#test056' property='mf:name'>simple reorder (2)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test056' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test056-in.nq' property='mf:action'>test056-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test056-urgna2012.nq' property='mf:result'>test056-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test060'>
+          <a class='testlink' href='#manifest-urgna2012#test060'>
+            manifest-urgna2012#test060:
+          </a>
+          <span about='manifest-urgna2012#test060' property='mf:name'>n-quads escaping</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test060' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test060-in.nq' property='mf:action'>test060-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test060-urgna2012.nq' property='mf:result'>test060-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test061'>
+          <a class='testlink' href='#manifest-urgna2012#test061'>
+            manifest-urgna2012#test061:
+          </a>
+          <span about='manifest-urgna2012#test061' property='mf:name'>same literal value with multiple languages</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test061' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test061-in.nq' property='mf:action'>test061-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test061-urgna2012.nq' property='mf:result'>test061-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urgna2012#test062'>
+          <a class='testlink' href='#manifest-urgna2012#test062'>
+            manifest-urgna2012#test062:
+          </a>
+          <span about='manifest-urgna2012#test062' property='mf:name'>same literal value with multiple datatypes</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urgna2012#test062' typeof='rdfn:Urgna2012EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urgna2012EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test062-in.nq' property='mf:action'>test062-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test062-urgna2012.nq' property='mf:result'>test062-urgna2012.nq</a>
+            </dd>
+          </dl>
+        </dd>
+      </dl>
+    </section>
+    <section id='manifest-urdna2015' inlist property='mf:entry' resource='manifest-urdna2015' typeof='mf:Manifest'>
+      <h2>RDF Dataset Normalization (URDNA2015) (62 entries)</h2>
+      <p property='rdfs:comment'>Tests the 2015 version of RDF Dataset Normalization.</p>
+      <p>
+      </p>
+      <dl class='test-description'>
+        <dt id='manifest-urdna2015#test001'>
+          <a class='testlink' href='#manifest-urdna2015#test001'>
+            manifest-urdna2015#test001:
+          </a>
+          <span about='manifest-urdna2015#test001' property='mf:name'>simple id</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test001' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test001-in.nq' property='mf:action'>test001-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test001-urdna2015.nq' property='mf:result'>test001-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test002'>
+          <a class='testlink' href='#manifest-urdna2015#test002'>
+            manifest-urdna2015#test002:
+          </a>
+          <span about='manifest-urdna2015#test002' property='mf:name'>duplicate property iri values</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test002' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test002-in.nq' property='mf:action'>test002-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test002-urdna2015.nq' property='mf:result'>test002-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test003'>
+          <a class='testlink' href='#manifest-urdna2015#test003'>
+            manifest-urdna2015#test003:
+          </a>
+          <span about='manifest-urdna2015#test003' property='mf:name'>bnode</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test003' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test003-in.nq' property='mf:action'>test003-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test003-urdna2015.nq' property='mf:result'>test003-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test004'>
+          <a class='testlink' href='#manifest-urdna2015#test004'>
+            manifest-urdna2015#test004:
+          </a>
+          <span about='manifest-urdna2015#test004' property='mf:name'>bnode plus embed w/subject</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test004' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test004-in.nq' property='mf:action'>test004-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test004-urdna2015.nq' property='mf:result'>test004-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test005'>
+          <a class='testlink' href='#manifest-urdna2015#test005'>
+            manifest-urdna2015#test005:
+          </a>
+          <span about='manifest-urdna2015#test005' property='mf:name'>bnode embed</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test005' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test005-in.nq' property='mf:action'>test005-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test005-urdna2015.nq' property='mf:result'>test005-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test006'>
+          <a class='testlink' href='#manifest-urdna2015#test006'>
+            manifest-urdna2015#test006:
+          </a>
+          <span about='manifest-urdna2015#test006' property='mf:name'>multiple rdf types</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test006' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test006-in.nq' property='mf:action'>test006-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test006-urdna2015.nq' property='mf:result'>test006-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test007'>
+          <a class='testlink' href='#manifest-urdna2015#test007'>
+            manifest-urdna2015#test007:
+          </a>
+          <span about='manifest-urdna2015#test007' property='mf:name'>coerce CURIE value</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test007' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test007-in.nq' property='mf:action'>test007-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test007-urdna2015.nq' property='mf:result'>test007-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test008'>
+          <a class='testlink' href='#manifest-urdna2015#test008'>
+            manifest-urdna2015#test008:
+          </a>
+          <span about='manifest-urdna2015#test008' property='mf:name'>single subject complex</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test008' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test008-in.nq' property='mf:action'>test008-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test008-urdna2015.nq' property='mf:result'>test008-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test009'>
+          <a class='testlink' href='#manifest-urdna2015#test009'>
+            manifest-urdna2015#test009:
+          </a>
+          <span about='manifest-urdna2015#test009' property='mf:name'>multiple subjects - complex</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test009' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test009-in.nq' property='mf:action'>test009-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test009-urdna2015.nq' property='mf:result'>test009-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test010'>
+          <a class='testlink' href='#manifest-urdna2015#test010'>
+            manifest-urdna2015#test010:
+          </a>
+          <span about='manifest-urdna2015#test010' property='mf:name'>type</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test010' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test010-in.nq' property='mf:action'>test010-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test010-urdna2015.nq' property='mf:result'>test010-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test011'>
+          <a class='testlink' href='#manifest-urdna2015#test011'>
+            manifest-urdna2015#test011:
+          </a>
+          <span about='manifest-urdna2015#test011' property='mf:name'>type-coerced type</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test011' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test011-in.nq' property='mf:action'>test011-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test011-urdna2015.nq' property='mf:result'>test011-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test012'>
+          <a class='testlink' href='#manifest-urdna2015#test012'>
+            manifest-urdna2015#test012:
+          </a>
+          <span about='manifest-urdna2015#test012' property='mf:name'>type-coerced type, remove duplicate reference</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test012' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test012-in.nq' property='mf:action'>test012-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test012-urdna2015.nq' property='mf:result'>test012-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test013'>
+          <a class='testlink' href='#manifest-urdna2015#test013'>
+            manifest-urdna2015#test013:
+          </a>
+          <span about='manifest-urdna2015#test013' property='mf:name'>type-coerced type, cycle</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test013' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test013-in.nq' property='mf:action'>test013-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test013-urdna2015.nq' property='mf:result'>test013-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test014'>
+          <a class='testlink' href='#manifest-urdna2015#test014'>
+            manifest-urdna2015#test014:
+          </a>
+          <span about='manifest-urdna2015#test014' property='mf:name'>check types</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test014' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test014-in.nq' property='mf:action'>test014-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test014-urdna2015.nq' property='mf:result'>test014-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test015'>
+          <a class='testlink' href='#manifest-urdna2015#test015'>
+            manifest-urdna2015#test015:
+          </a>
+          <span about='manifest-urdna2015#test015' property='mf:name'>top level context</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test015' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test015-in.nq' property='mf:action'>test015-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test015-urdna2015.nq' property='mf:result'>test015-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test016'>
+          <a class='testlink' href='#manifest-urdna2015#test016'>
+            manifest-urdna2015#test016:
+          </a>
+          <span about='manifest-urdna2015#test016' property='mf:name'>blank node - dual link - embed</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test016' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test016-in.nq' property='mf:action'>test016-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test016-urdna2015.nq' property='mf:result'>test016-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test017'>
+          <a class='testlink' href='#manifest-urdna2015#test017'>
+            manifest-urdna2015#test017:
+          </a>
+          <span about='manifest-urdna2015#test017' property='mf:name'>blank node - dual link - non-embed</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test017' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test017-in.nq' property='mf:action'>test017-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test017-urdna2015.nq' property='mf:result'>test017-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test018'>
+          <a class='testlink' href='#manifest-urdna2015#test018'>
+            manifest-urdna2015#test018:
+          </a>
+          <span about='manifest-urdna2015#test018' property='mf:name'>blank node - self link</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test018' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test018-in.nq' property='mf:action'>test018-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test018-urdna2015.nq' property='mf:result'>test018-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test019'>
+          <a class='testlink' href='#manifest-urdna2015#test019'>
+            manifest-urdna2015#test019:
+          </a>
+          <span about='manifest-urdna2015#test019' property='mf:name'>blank node - disjoint self links</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test019' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test019-in.nq' property='mf:action'>test019-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test019-urdna2015.nq' property='mf:result'>test019-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test020'>
+          <a class='testlink' href='#manifest-urdna2015#test020'>
+            manifest-urdna2015#test020:
+          </a>
+          <span about='manifest-urdna2015#test020' property='mf:name'>blank node - diamond</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test020' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test020-in.nq' property='mf:action'>test020-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test020-urdna2015.nq' property='mf:result'>test020-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test021'>
+          <a class='testlink' href='#manifest-urdna2015#test021'>
+            manifest-urdna2015#test021:
+          </a>
+          <span about='manifest-urdna2015#test021' property='mf:name'>blank node - circle of 2</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test021' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test021-in.nq' property='mf:action'>test021-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test021-urdna2015.nq' property='mf:result'>test021-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test022'>
+          <a class='testlink' href='#manifest-urdna2015#test022'>
+            manifest-urdna2015#test022:
+          </a>
+          <span about='manifest-urdna2015#test022' property='mf:name'>blank node - double circle of 2</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test022' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test022-in.nq' property='mf:action'>test022-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test022-urdna2015.nq' property='mf:result'>test022-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test023'>
+          <a class='testlink' href='#manifest-urdna2015#test023'>
+            manifest-urdna2015#test023:
+          </a>
+          <span about='manifest-urdna2015#test023' property='mf:name'>blank node - circle of 3</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test023' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test023-in.nq' property='mf:action'>test023-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test023-urdna2015.nq' property='mf:result'>test023-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test024'>
+          <a class='testlink' href='#manifest-urdna2015#test024'>
+            manifest-urdna2015#test024:
+          </a>
+          <span about='manifest-urdna2015#test024' property='mf:name'>blank node - double circle of 3 (1-2-3)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test024' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test024-in.nq' property='mf:action'>test024-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test024-urdna2015.nq' property='mf:result'>test024-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test025'>
+          <a class='testlink' href='#manifest-urdna2015#test025'>
+            manifest-urdna2015#test025:
+          </a>
+          <span about='manifest-urdna2015#test025' property='mf:name'>blank node - double circle of 3 (1-3-2)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test025' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test025-in.nq' property='mf:action'>test025-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test025-urdna2015.nq' property='mf:result'>test025-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test026'>
+          <a class='testlink' href='#manifest-urdna2015#test026'>
+            manifest-urdna2015#test026:
+          </a>
+          <span about='manifest-urdna2015#test026' property='mf:name'>blank node - double circle of 3 (2-1-3)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test026' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test026-in.nq' property='mf:action'>test026-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test026-urdna2015.nq' property='mf:result'>test026-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test027'>
+          <a class='testlink' href='#manifest-urdna2015#test027'>
+            manifest-urdna2015#test027:
+          </a>
+          <span about='manifest-urdna2015#test027' property='mf:name'>blank node - double circle of 3 (2-3-1)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test027' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test027-in.nq' property='mf:action'>test027-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test027-urdna2015.nq' property='mf:result'>test027-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test028'>
+          <a class='testlink' href='#manifest-urdna2015#test028'>
+            manifest-urdna2015#test028:
+          </a>
+          <span about='manifest-urdna2015#test028' property='mf:name'>blank node - double circle of 3 (3-2-1)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test028' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test028-in.nq' property='mf:action'>test028-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test028-urdna2015.nq' property='mf:result'>test028-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test029'>
+          <a class='testlink' href='#manifest-urdna2015#test029'>
+            manifest-urdna2015#test029:
+          </a>
+          <span about='manifest-urdna2015#test029' property='mf:name'>blank node - double circle of 3 (3-1-2)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test029' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test029-in.nq' property='mf:action'>test029-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test029-urdna2015.nq' property='mf:result'>test029-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test030'>
+          <a class='testlink' href='#manifest-urdna2015#test030'>
+            manifest-urdna2015#test030:
+          </a>
+          <span about='manifest-urdna2015#test030' property='mf:name'>blank node - point at circle of 3</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test030' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test030-in.nq' property='mf:action'>test030-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test030-urdna2015.nq' property='mf:result'>test030-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test031'>
+          <a class='testlink' href='#manifest-urdna2015#test031'>
+            manifest-urdna2015#test031:
+          </a>
+          <span about='manifest-urdna2015#test031' property='mf:name'>bnode (1)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test031' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test031-in.nq' property='mf:action'>test031-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test031-urdna2015.nq' property='mf:result'>test031-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test032'>
+          <a class='testlink' href='#manifest-urdna2015#test032'>
+            manifest-urdna2015#test032:
+          </a>
+          <span about='manifest-urdna2015#test032' property='mf:name'>bnode (2)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test032' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test032-in.nq' property='mf:action'>test032-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test032-urdna2015.nq' property='mf:result'>test032-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test033'>
+          <a class='testlink' href='#manifest-urdna2015#test033'>
+            manifest-urdna2015#test033:
+          </a>
+          <span about='manifest-urdna2015#test033' property='mf:name'>disjoint identical subgraphs (1)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test033' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test033-in.nq' property='mf:action'>test033-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test033-urdna2015.nq' property='mf:result'>test033-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test034'>
+          <a class='testlink' href='#manifest-urdna2015#test034'>
+            manifest-urdna2015#test034:
+          </a>
+          <span about='manifest-urdna2015#test034' property='mf:name'>disjoint identical subgraphs (2)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test034' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test034-in.nq' property='mf:action'>test034-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test034-urdna2015.nq' property='mf:result'>test034-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test035'>
+          <a class='testlink' href='#manifest-urdna2015#test035'>
+            manifest-urdna2015#test035:
+          </a>
+          <span about='manifest-urdna2015#test035' property='mf:name'>reordered w/strings (1)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test035' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test035-in.nq' property='mf:action'>test035-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test035-urdna2015.nq' property='mf:result'>test035-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test036'>
+          <a class='testlink' href='#manifest-urdna2015#test036'>
+            manifest-urdna2015#test036:
+          </a>
+          <span about='manifest-urdna2015#test036' property='mf:name'>reordered w/strings (2)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test036' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test036-in.nq' property='mf:action'>test036-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test036-urdna2015.nq' property='mf:result'>test036-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test037'>
+          <a class='testlink' href='#manifest-urdna2015#test037'>
+            manifest-urdna2015#test037:
+          </a>
+          <span about='manifest-urdna2015#test037' property='mf:name'>reordered w/strings (3)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test037' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test037-in.nq' property='mf:action'>test037-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test037-urdna2015.nq' property='mf:result'>test037-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test038'>
+          <a class='testlink' href='#manifest-urdna2015#test038'>
+            manifest-urdna2015#test038:
+          </a>
+          <span about='manifest-urdna2015#test038' property='mf:name'>reordered 4 bnodes, reordered 2 properties (1)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test038' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test038-in.nq' property='mf:action'>test038-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test038-urdna2015.nq' property='mf:result'>test038-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test039'>
+          <a class='testlink' href='#manifest-urdna2015#test039'>
+            manifest-urdna2015#test039:
+          </a>
+          <span about='manifest-urdna2015#test039' property='mf:name'>reordered 4 bnodes, reordered 2 properties (2)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test039' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test039-in.nq' property='mf:action'>test039-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test039-urdna2015.nq' property='mf:result'>test039-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test040'>
+          <a class='testlink' href='#manifest-urdna2015#test040'>
+            manifest-urdna2015#test040:
+          </a>
+          <span about='manifest-urdna2015#test040' property='mf:name'>reordered 6 bnodes (1)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test040' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test040-in.nq' property='mf:action'>test040-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test040-urdna2015.nq' property='mf:result'>test040-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test041'>
+          <a class='testlink' href='#manifest-urdna2015#test041'>
+            manifest-urdna2015#test041:
+          </a>
+          <span about='manifest-urdna2015#test041' property='mf:name'>reordered 6 bnodes (2)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test041' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test041-in.nq' property='mf:action'>test041-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test041-urdna2015.nq' property='mf:result'>test041-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test042'>
+          <a class='testlink' href='#manifest-urdna2015#test042'>
+            manifest-urdna2015#test042:
+          </a>
+          <span about='manifest-urdna2015#test042' property='mf:name'>reordered 6 bnodes (3)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test042' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test042-in.nq' property='mf:action'>test042-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test042-urdna2015.nq' property='mf:result'>test042-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test043'>
+          <a class='testlink' href='#manifest-urdna2015#test043'>
+            manifest-urdna2015#test043:
+          </a>
+          <span about='manifest-urdna2015#test043' property='mf:name'>literal with language</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test043' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test043-in.nq' property='mf:action'>test043-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test043-urdna2015.nq' property='mf:result'>test043-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test044'>
+          <a class='testlink' href='#manifest-urdna2015#test044'>
+            manifest-urdna2015#test044:
+          </a>
+          <span about='manifest-urdna2015#test044' property='mf:name'>evil (1)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test044' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test044-in.nq' property='mf:action'>test044-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test044-urdna2015.nq' property='mf:result'>test044-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test045'>
+          <a class='testlink' href='#manifest-urdna2015#test045'>
+            manifest-urdna2015#test045:
+          </a>
+          <span about='manifest-urdna2015#test045' property='mf:name'>evil (2)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test045' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test045-in.nq' property='mf:action'>test045-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test045-urdna2015.nq' property='mf:result'>test045-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test046'>
+          <a class='testlink' href='#manifest-urdna2015#test046'>
+            manifest-urdna2015#test046:
+          </a>
+          <span about='manifest-urdna2015#test046' property='mf:name'>evil (3)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test046' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test046-in.nq' property='mf:action'>test046-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test046-urdna2015.nq' property='mf:result'>test046-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test047'>
+          <a class='testlink' href='#manifest-urdna2015#test047'>
+            manifest-urdna2015#test047:
+          </a>
+          <span about='manifest-urdna2015#test047' property='mf:name'>deep diff (1)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test047' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test047-in.nq' property='mf:action'>test047-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test047-urdna2015.nq' property='mf:result'>test047-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test048'>
+          <a class='testlink' href='#manifest-urdna2015#test048'>
+            manifest-urdna2015#test048:
+          </a>
+          <span about='manifest-urdna2015#test048' property='mf:name'>deep diff (2)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test048' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test048-in.nq' property='mf:action'>test048-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test048-urdna2015.nq' property='mf:result'>test048-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test049'>
+          <a class='testlink' href='#manifest-urdna2015#test049'>
+            manifest-urdna2015#test049:
+          </a>
+          <span about='manifest-urdna2015#test049' property='mf:name'>remove null</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test049' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test049-in.nq' property='mf:action'>test049-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test049-urdna2015.nq' property='mf:result'>test049-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test050'>
+          <a class='testlink' href='#manifest-urdna2015#test050'>
+            manifest-urdna2015#test050:
+          </a>
+          <span about='manifest-urdna2015#test050' property='mf:name'>nulls</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test050' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test050-in.nq' property='mf:action'>test050-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test050-urdna2015.nq' property='mf:result'>test050-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test051'>
+          <a class='testlink' href='#manifest-urdna2015#test051'>
+            manifest-urdna2015#test051:
+          </a>
+          <span about='manifest-urdna2015#test051' property='mf:name'>merging subjects</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test051' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test051-in.nq' property='mf:action'>test051-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test051-urdna2015.nq' property='mf:result'>test051-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test052'>
+          <a class='testlink' href='#manifest-urdna2015#test052'>
+            manifest-urdna2015#test052:
+          </a>
+          <span about='manifest-urdna2015#test052' property='mf:name'>alias keywords</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test052' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test052-in.nq' property='mf:action'>test052-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test052-urdna2015.nq' property='mf:result'>test052-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test053'>
+          <a class='testlink' href='#manifest-urdna2015#test053'>
+            manifest-urdna2015#test053:
+          </a>
+          <span about='manifest-urdna2015#test053' property='mf:name'>@list</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test053' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test053-in.nq' property='mf:action'>test053-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test053-urdna2015.nq' property='mf:result'>test053-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test054'>
+          <a class='testlink' href='#manifest-urdna2015#test054'>
+            manifest-urdna2015#test054:
+          </a>
+          <span about='manifest-urdna2015#test054' property='mf:name'>t-graph</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test054' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test054-in.nq' property='mf:action'>test054-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test054-urdna2015.nq' property='mf:result'>test054-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test055'>
+          <a class='testlink' href='#manifest-urdna2015#test055'>
+            manifest-urdna2015#test055:
+          </a>
+          <span about='manifest-urdna2015#test055' property='mf:name'>simple reorder (1)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test055' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test055-in.nq' property='mf:action'>test055-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test055-urdna2015.nq' property='mf:result'>test055-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test056'>
+          <a class='testlink' href='#manifest-urdna2015#test056'>
+            manifest-urdna2015#test056:
+          </a>
+          <span about='manifest-urdna2015#test056' property='mf:name'>simple reorder (2)</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test056' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test056-in.nq' property='mf:action'>test056-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test056-urdna2015.nq' property='mf:result'>test056-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test057'>
+          <a class='testlink' href='#manifest-urdna2015#test057'>
+            manifest-urdna2015#test057:
+          </a>
+          <span about='manifest-urdna2015#test057' property='mf:name'>unnamed graph</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test057' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test057-in.nq' property='mf:action'>test057-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test057-urdna2015.nq' property='mf:result'>test057-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test058'>
+          <a class='testlink' href='#manifest-urdna2015#test058'>
+            manifest-urdna2015#test058:
+          </a>
+          <span about='manifest-urdna2015#test058' property='mf:name'>unnamed graph with blank node objects</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test058' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test058-in.nq' property='mf:action'>test058-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test058-urdna2015.nq' property='mf:result'>test058-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test059'>
+          <a class='testlink' href='#manifest-urdna2015#test059'>
+            manifest-urdna2015#test059:
+          </a>
+          <span about='manifest-urdna2015#test059' property='mf:name'>n-quads parsing</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test059' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test059-in.nq' property='mf:action'>test059-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test059-urdna2015.nq' property='mf:result'>test059-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test060'>
+          <a class='testlink' href='#manifest-urdna2015#test060'>
+            manifest-urdna2015#test060:
+          </a>
+          <span about='manifest-urdna2015#test060' property='mf:name'>n-quads escaping</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test060' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test060-in.nq' property='mf:action'>test060-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test060-urdna2015.nq' property='mf:result'>test060-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test061'>
+          <a class='testlink' href='#manifest-urdna2015#test061'>
+            manifest-urdna2015#test061:
+          </a>
+          <span about='manifest-urdna2015#test061' property='mf:name'>same literal value with multiple languages</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test061' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test061-in.nq' property='mf:action'>test061-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test061-urdna2015.nq' property='mf:result'>test061-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+        <dt id='manifest-urdna2015#test062'>
+          <a class='testlink' href='#manifest-urdna2015#test062'>
+            manifest-urdna2015#test062:
+          </a>
+          <span about='manifest-urdna2015#test062' property='mf:name'>same literal value with multiple datatypes</span>
+        </dt>
+        <dd inlist property='mf:entry' resource='manifest-urdna2015#test062' typeof='rdfn:Urdna2015EvalTest'>
+          <div property='rdfs:comment'>
+            
+          </div>
+          <dl class='test-detail'>
+            <dt>type</dt>
+            <dd>rdfn:Urdna2015EvalTest</dd>
+            <dt>approval</dt>
+            <dd property='mf:approval' resource='rdft:Proposed'>rdft:Proposed</dd>
+            <dt>action</dt>
+            <dd>
+              <a href='test062-in.nq' property='mf:action'>test062-in.nq</a>
+            </dd>
+            <dt>result</dt>
+            <dd>
+              <a href='test062-urdna2015.nq' property='mf:result'>test062-urdna2015.nq</a>
+            </dd>
+          </dl>
+        </dd>
+      </dl>
+    </section>
+    <footer>
+      <p><a href="http://www.w3.org/Consortium/Legal/ipr-notice#Copyright">Copyright ©</a> 2015 <a href="http://www.w3.org/">W3C</a>® (<a href="http://www.csail.mit.edu/">MIT</a>, <a href="http://www.ercim.org/">ERCIM</a>, <a href="http://www.keio.ac.jp/">Keio</a>, <a href="http://ev.buaa.edu.cn/">Beihang</a>). W3C® <a href="http://www.w3.org/Consortium/Legal/ipr-notice#Legal_Disclaimer">liability</a>, <a href="http://www.w3.org/Consortium/Legal/ipr-notice#W3C_Trademarks">trademark</a> and <a href="http://www.w3.org/Consortium/Legal/copyright-documents">document use</a> rules apply.</p>
+    </footer>
+  </body>
+</html>

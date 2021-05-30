@@ -4,6 +4,7 @@
 
 // This file must be kept in sync with index_bound_checks.go.
 
+//go:build !bounds
 // +build !bounds
 
 package mat
@@ -356,4 +357,53 @@ func (d *DiagDense) SetDiag(i int, v float64) {
 
 func (d *DiagDense) setDiag(i int, v float64) {
 	d.mat.Data[i*d.mat.Inc] = v
+}
+
+// At returns the element at row i, column j.
+func (a *Tridiag) At(i, j int) float64 {
+	if uint(i) >= uint(a.mat.N) {
+		panic(ErrRowAccess)
+	}
+	if uint(j) >= uint(a.mat.N) {
+		panic(ErrColAccess)
+	}
+	return a.at(i, j)
+}
+
+func (a *Tridiag) at(i, j int) float64 {
+	switch i - j {
+	case -1:
+		return a.mat.DU[i]
+	case 0:
+		return a.mat.D[i]
+	case 1:
+		return a.mat.DL[j]
+	default:
+		return 0
+	}
+}
+
+// SetBand sets the element at row i, column j to the value v.
+// It panics if the location is outside the appropriate region of the matrix.
+func (a *Tridiag) SetBand(i, j int, v float64) {
+	if uint(i) >= uint(a.mat.N) {
+		panic(ErrRowAccess)
+	}
+	if uint(j) >= uint(a.mat.N) {
+		panic(ErrColAccess)
+	}
+	a.set(i, j, v)
+}
+
+func (a *Tridiag) set(i, j int, v float64) {
+	switch i - j {
+	case -1:
+		a.mat.DU[i] = v
+	case 0:
+		a.mat.D[i] = v
+	case 1:
+		a.mat.DL[j] = v
+	default:
+		panic(ErrBandSet)
+	}
 }

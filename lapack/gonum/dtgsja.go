@@ -326,10 +326,8 @@ func (impl Implementation) Dtgsja(jobU, jobV, jobQ lapack.GSVDJob, m, p, n, k, l
 				for i := 0; i < min(l, m-k); i++ {
 					a1 := a[(k+i)*lda+n-l+i]
 					b1 := b[i*ldb+n-l+i]
-
-					if a1 != 0 {
-						gamma := b1 / a1
-
+					gamma := b1 / a1
+					if !math.IsInf(gamma, 0) {
 						// Change sign if necessary.
 						if gamma < 0 {
 							bi.Dscal(l-i, -1, b[i*ldb+n-l+i:], 1)

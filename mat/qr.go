@@ -31,11 +31,11 @@ func (qr *QR) updateCond(norm lapack.MatrixNorm) {
 	// is not the case for CondNorm. Hopefully the error is negligible: κ
 	// is only a qualitative measure anyway.
 	n := qr.qr.mat.Cols
-	work := getFloats(3*n, false)
+	work := getFloat64s(3*n, false)
 	iwork := getInts(n, false)
 	r := qr.qr.asTriDense(n, blas.NonUnit, blas.Upper)
 	v := lapack64.Trcon(norm, r.mat, work, iwork)
-	putFloats(work)
+	putFloat64s(work)
 	putInts(iwork)
 	qr.cond = 1 / v
 }
@@ -63,9 +63,9 @@ func (qr *QR) factorize(a Matrix, norm lapack.MatrixNorm) {
 	work := []float64{0}
 	qr.tau = make([]float64, k)
 	lapack64.Geqrf(qr.qr.mat, qr.tau, work, -1)
-	work = getFloats(int(work[0]), false)
+	work = getFloat64s(int(work[0]), false)
 	lapack64.Geqrf(qr.qr.mat, qr.tau, work, len(work))
-	putFloats(work)
+	putFloat64s(work)
 	qr.updateCond(norm)
 }
 
@@ -154,9 +154,9 @@ func (qr *QR) QTo(dst *Dense) {
 	// Construct Q from the elementary reflectors.
 	work := []float64{0}
 	lapack64.Ormqr(blas.Left, blas.NoTrans, qr.qr.mat, qr.tau, dst.mat, work, -1)
-	work = getFloats(int(work[0]), false)
+	work = getFloat64s(int(work[0]), false)
 	lapack64.Ormqr(blas.Left, blas.NoTrans, qr.qr.mat, qr.tau, dst.mat, work, len(work))
-	putFloats(work)
+	putFloat64s(work)
 }
 
 // SolveTo finds a minimum-norm solution to a system of linear equations defined
@@ -194,7 +194,7 @@ func (qr *QR) SolveTo(dst *Dense, trans bool, b Matrix) error {
 	}
 	// Do not need to worry about overlap between m and b because x has its own
 	// independent storage.
-	w := getWorkspace(max(r, c), bc, false)
+	w := getDenseWorkspace(max(r, c), bc, false)
 	w.Copy(b)
 	t := qr.qr.asTriDense(qr.qr.mat.Cols, blas.NonUnit, blas.Upper).mat
 	if trans {
@@ -207,15 +207,15 @@ func (qr *QR) SolveTo(dst *Dense, trans bool, b Matrix) error {
 		}
 		work := []float64{0}
 		lapack64.Ormqr(blas.Left, blas.NoTrans, qr.qr.mat, qr.tau, w.mat, work, -1)
-		work = getFloats(int(work[0]), false)
+		work = getFloat64s(int(work[0]), false)
 		lapack64.Ormqr(blas.Left, blas.NoTrans, qr.qr.mat, qr.tau, w.mat, work, len(work))
-		putFloats(work)
+		putFloat64s(work)
 	} else {
 		work := []float64{0}
 		lapack64.Ormqr(blas.Left, blas.Trans, qr.qr.mat, qr.tau, w.mat, work, -1)
-		work = getFloats(int(work[0]), false)
+		work = getFloat64s(int(work[0]), false)
 		lapack64.Ormqr(blas.Left, blas.Trans, qr.qr.mat, qr.tau, w.mat, work, len(work))
-		putFloats(work)
+		putFloat64s(work)
 
 		ok := lapack64.Trtrs(blas.NoTrans, t, w.mat)
 		if !ok {
@@ -224,7 +224,7 @@ func (qr *QR) SolveTo(dst *Dense, trans bool, b Matrix) error {
 	}
 	// X was set above to be the correct size for the result.
 	dst.Copy(w)
-	putWorkspace(w)
+	putDenseWorkspace(w)
 	if qr.cond > ConditionTolerance {
 		return Condition(qr.cond)
 	}

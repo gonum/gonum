@@ -65,6 +65,8 @@ const (
 	kLT0        = "lapack: k < 0"
 	kLT1        = "lapack: k < 1"
 	kdLT0       = "lapack: kd < 0"
+	klLT0       = "lapack: kl < 0"
+	kuLT0       = "lapack: ku < 0"
 	mGTN        = "lapack: m > n"
 	mLT0        = "lapack: m < 0"
 	mmLT0       = "lapack: mm < 0"

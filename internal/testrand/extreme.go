@@ -86,7 +86,7 @@ func (e *extreme) Float64() float64 {
 		return math.NaN()
 	}
 
-	return e.Float64()
+	return e.rnd.Float64()
 }
 
 // Int returns a non-negative pseudo-random int.
@@ -94,7 +94,7 @@ func (e *extreme) Int() int {
 	if e.p() {
 		return extremeInt[e.rnd.Intn(len(extremeInt))]
 	}
-	return e.Int()
+	return e.rnd.Int()
 }
 
 // Int31 returns a non-negative pseudo-random int32.
@@ -102,7 +102,7 @@ func (e *extreme) Int31() int32 {
 	if e.p() {
 		return extremeInt31[e.rnd.Intn(len(extremeInt31))]
 	}
-	return e.Int31()
+	return e.rnd.Int31()
 }
 
 // Int31n returns a non-negative pseudo-random int32 from range [0, n).
@@ -119,7 +119,7 @@ func (e *extreme) Int31n(n int32) int32 {
 			return n - 1
 		}
 	}
-	return e.Int31n(n)
+	return e.rnd.Int31n(n)
 }
 
 // Int63 returns a non-negative pseudo-random int64.
@@ -127,7 +127,7 @@ func (e *extreme) Int63() int64 {
 	if e.p() {
 		return extremeInt63[e.rnd.Intn(len(extremeInt63))]
 	}
-	return e.Int63()
+	return e.rnd.Int63()
 }
 
 // Int63n returns a non-negative pseudo-random int from range [0, n).
@@ -144,7 +144,7 @@ func (e *extreme) Int63n(n int64) int64 {
 			return n - 1
 		}
 	}
-	return e.Int63n(n)
+	return e.rnd.Int63n(n)
 }
 
 // Int returns a non-negative pseudo-random int from range [0, n).
@@ -161,7 +161,7 @@ func (e *extreme) Intn(n int) int {
 			return n - 1
 		}
 	}
-	return e.Intn(n)
+	return e.rnd.Intn(n)
 }
 
 // NormFloat64 returns a normally distributed pseudo-random float64 in range [-math.MaxFloat64, math.MaxFloat64].
@@ -173,7 +173,7 @@ func (e *extreme) NormFloat64() float64 {
 		return math.NaN()
 	}
 
-	return e.NormFloat64()
+	return e.rnd.NormFloat64()
 }
 
 // Uint32 returns a pseudo-random uint32.
@@ -181,7 +181,7 @@ func (e *extreme) Uint32() uint32 {
 	if e.p() {
 		return extremeUint32[e.rnd.Intn(len(extremeUint32))]
 	}
-	return e.Uint32()
+	return e.rnd.Uint32()
 }
 
 // Uint32 returns a pseudo-random uint64.
@@ -189,7 +189,7 @@ func (e *extreme) Uint64() uint64 {
 	if e.p() {
 		return extremeUint64[e.rnd.Intn(len(extremeUint64))]
 	}
-	return e.Uint64()
+	return e.rnd.Uint64()
 }
 
 // Uint64n returns a pseudo-random uint64 from range [0, n).
@@ -206,5 +206,5 @@ func (e *extreme) Uint64n(n uint64) uint64 {
 			return n - 1
 		}
 	}
-	return e.Uint64n(n)
+	return e.rnd.Uint64n(n)
 }

@@ -378,6 +378,9 @@ func (p *printer) writeAttributeComplex(ca Attributers) {
 	g, n, e := ca.DOTAttributers()
 	haveWrittenBlock := false
 	for i, a := range []encoding.Attributer{g, n, e} {
+		if a == nil {
+			continue
+		}
 		attributes := a.Attributes()
 		if len(attributes) == 0 {
 			continue

@@ -139,11 +139,11 @@ func (pc *PiecewiseCubic) fitWithSecondDerivatives(xs, ys, d2ydx2s []float64) {
 		// a_0
 		pc.coeffs.Set(i, 0, ys[i])
 		// a_1.
-		pc.coeffs.Set(i, 1, (dy-d2ydx2s[i]/2-dm/6)/dx)
+		pc.coeffs.Set(i, 1, (dy-(d2ydx2s[i]/2+dm/6)*dx)/dx)
 		// a_2
-		pc.coeffs.Set(i, 2, d2ydx2s[i]/2/dx/dx)
+		pc.coeffs.Set(i, 2, d2ydx2s[i]/2)
 		// a_3
-		pc.coeffs.Set(i, 3, dm/6/dx/dx/dx)
+		pc.coeffs.Set(i, 3, dm/6/dx)
 	}
 	pc.xs = make([]float64, n)
 	copy(pc.xs, xs)

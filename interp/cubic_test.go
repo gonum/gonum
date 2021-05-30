@@ -205,6 +205,76 @@ func TestPiecewiseCubicFitWithDerivativesErrors(t *testing.T) {
 	}
 }
 
+func TestPiecewiseCubicFitWithSecondDerivatives(t *testing.T) {
+	t.Parallel()
+	const tol = 1e-14
+	xs := []float64{-2, 0, 3}
+	ys := []float64{2.5, 1, 2.5}
+	d2ydx2s := []float64{1, 2, 3}
+	var pc PiecewiseCubic
+	pc.fitWithSecondDerivatives(xs, ys, d2ydx2s)
+	m := len(xs) - 1
+	if pc.lastY != ys[m] {
+		t.Errorf("Mismatch in lastY: got %v, want %g", pc.lastY, ys[m])
+	}
+	if !floats.Equal(pc.xs, xs) {
+		t.Errorf("Mismatch in xs: got %v, want %v", pc.xs, xs)
+	}
+	for i := 0; i < len(xs); i++ {
+		yHat := pc.Predict(xs[i])
+		if math.Abs(yHat-ys[i]) > tol {
+			t.Errorf("Mismatch in predicted Y[%d]: got %v, want %g", i, yHat, ys[i])
+		}
+		var d2ydx2Hat float64
+		if i < m {
+			d2ydx2Hat = 2 * pc.coeffs.At(i, 2)
+		} else {
+			d2ydx2Hat = 2*pc.coeffs.At(m-1, 2) + 6*pc.coeffs.At(m-1, 3)*(xs[m]-xs[m-1])
+		}
+		if math.Abs(d2ydx2Hat-d2ydx2s[i]) > tol {
+			t.Errorf("Mismatch in predicted d2Y/dX2[%d]: got %v, want %g", i, d2ydx2Hat, d2ydx2s[i])
+		}
+	}
+	// Test pc.lastDyDx without copying verbatim the calculation from the tested method:
+	lastDyDx := pc.PredictDerivative(xs[m] - tol/1000)
+	if math.Abs(lastDyDx-pc.lastDyDx) > tol {
+		t.Errorf("Mismatch in lastDxDy: got %v, want %g", pc.lastDyDx, lastDyDx)
+	}
+}
+
+func TestPiecewiseCubicFitWithSecondDerivativesErrors(t *testing.T) {
+	t.Parallel()
+	for _, test := range []struct {
+		xs, ys, d2ydx2s []float64
+	}{
+		{
+			xs:      []float64{0, 1, 2},
+			ys:      []float64{10, 20},
+			d2ydx2s: []float64{0, 0, 0},
+		},
+		{
+			xs:      []float64{0, 1, 1},
+			ys:      []float64{10, 20, 30},
+			d2ydx2s: []float64{0, 0, 0, 0},
+		},
+		{
+			xs:      []float64{0},
+			ys:      []float64{0},
+			d2ydx2s: []float64{0},
+		},
+		{
+			xs:      []float64{0, 1, 1},
+			ys:      []float64{10, 20, 10},
+			d2ydx2s: []float64{0, 0, 0},
+		},
+	} {
+		var pc PiecewiseCubic
+		if !panics(func() { pc.fitWithSecondDerivatives(test.xs, test.ys, test.d2ydx2s) }) {
+			t.Errorf("expected panic for xs: %v, ys: %v and d2ydx2s: %v", test.xs, test.ys, test.d2ydx2s)
+		}
+	}
+}
+
 func TestAkimaSpline(t *testing.T) {
 	t.Parallel()
 	const (

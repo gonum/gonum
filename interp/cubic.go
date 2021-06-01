@@ -139,7 +139,7 @@ func (pc *PiecewiseCubic) fitWithSecondDerivatives(xs, ys, d2ydx2s []float64) {
 		// a_0
 		pc.coeffs.Set(i, 0, ys[i])
 		// a_1.
-		pc.coeffs.Set(i, 1, (dy-(d2ydx2s[i]/2+dm/6)*dx)/dx)
+		pc.coeffs.Set(i, 1, (dy-(d2ydx2s[i]+dm/3)*dx*dx/2)/dx)
 		// a_2
 		pc.coeffs.Set(i, 2, d2ydx2s[i]/2)
 		// a_3

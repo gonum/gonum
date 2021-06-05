@@ -11,18 +11,10 @@ import (
 )
 
 // Dgesc2 solves a system of linear equations
-//  A * x = scale * b
-// with a general n×n matrix A represented by the LU factorization with complete
-// pivoting
-//  A = P * L * U * Q
-// as computed by Dgetc2.
-//
-// On entry, rhs contains the right hand side vector b. On return, it is
-// overwritten with the solution vector x.
-//
-// Dgesc2 returns a scale factor
-//  0 <= scale <= 1
-// chosen to prevent overflow in the solution.
+//  A * X = scale * RHS
+// with a general N-by-N matrix A using the LU factorization with
+// complete pivoting computed by Dgetc2. The result is placed in
+// rhs on exit.
 //
 // Dgesc2 is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dgesc2(n int, a []float64, lda int, rhs []float64, ipiv, jpiv []int) (scale float64) {
@@ -50,8 +42,11 @@ func (impl Implementation) Dgesc2(n int, a []float64, lda int, rhs []float64, ip
 	}
 
 	const smlnum = dlamchS / dlamchP
+	if len(a) < (n-1)*lda+n {
+		panic(shortA)
+	}
 
-	// Apply permutations ipiv to rhs.
+	// Apply permutations ipiv to RHS.
 	impl.Dlaswp(1, rhs, 1, 0, n-1, ipiv[:n], 1)
 
 	// Solve for L part.
@@ -61,8 +56,11 @@ func (impl Implementation) Dgesc2(n int, a []float64, lda int, rhs []float64, ip
 		}
 	}
 
-	// Check for scaling.
+	// Solve for U part.
+
 	scale = 1.0
+
+	// Check for scaling.
 	bi := blas64.Implementation()
 	i := bi.Idamax(n, rhs, 1)
 	if 2*smlnum*math.Abs(rhs[i]) > math.Abs(a[(n-1)*lda+(n-1)]) {
@@ -71,7 +69,6 @@ func (impl Implementation) Dgesc2(n int, a []float64, lda int, rhs []float64, ip
 		scale *= temp
 	}
 
-	// Solve for U part.
 	for i := n - 1; i >= 0; i-- {
 		temp := 1.0 / a[i*lda+i]
 		rhs[i] *= temp

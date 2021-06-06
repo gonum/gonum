@@ -42,11 +42,17 @@ func (impl Implementation) Dlaswp(n int, a []float64, lda int, k1, k2 int, ipiv 
 	bi := blas64.Implementation()
 	if incX == 1 {
 		for k := k1; k <= k2; k++ {
+			if k == ipiv[k] {
+				continue
+			}
 			bi.Dswap(n, a[k*lda:], 1, a[ipiv[k]*lda:], 1)
 		}
 		return
 	}
 	for k := k2; k >= k1; k-- {
+		if k == ipiv[k] {
+			continue
+		}
 		bi.Dswap(n, a[k*lda:], 1, a[ipiv[k]*lda:], 1)
 	}
 }

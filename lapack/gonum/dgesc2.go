@@ -11,10 +11,24 @@ import (
 )
 
 // Dgesc2 solves a system of linear equations
-//   A * X = scale* RHS
+//  A * X = scale * RHS
 // with a general N-by-N matrix A using the LU factorization with
-// complete pivoting computed by Dgetc2.
+// complete pivoting computed by Dgetc2. The result is placed in
+// rhs on exit.
+//
+// Dgesc2 is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dgesc2(n int, a []float64, lda int, rhs []float64, ipiv, jpiv []int) (scale float64) {
+	switch {
+	case n < 0:
+		panic(nLT0)
+	case lda < max(1, n):
+		panic(badLdA)
+	case len(rhs) < max(1, n):
+		panic(shortWork)
+	case len(ipiv) != len(jpiv) || len(jpiv) < 1:
+		panic(badLenJpvt)
+	}
+
 	const smlnum = dlamchS / dlamchP
 	if len(a) < (n-1)*lda+n {
 		panic(shortA)
@@ -23,7 +37,7 @@ func (impl Implementation) Dgesc2(n int, a []float64, lda int, rhs []float64, ip
 	// Apply permutations ipiv to RHS.
 	impl.Dlaswp(1, rhs, lda, 1, n-1, ipiv, 1)
 
-	// solve for L part.
+	// Solve for L part.
 	for i := 0; i < n-1; i++ {
 		for j := i + 1; j < n; j++ {
 			rhs[j] -= float64(a[j*lda+i] * rhs[i])
@@ -52,6 +66,6 @@ func (impl Implementation) Dgesc2(n int, a []float64, lda int, rhs []float64, ip
 	}
 
 	// Apply permutations jpiv to the solution (rhs).
-	impl.Dlaswp(1, rhs, lda, 1, n-1, jpiv, -1)
+	impl.Dlaswp(1, rhs, 1, 0, n-1, jpiv[:n], -1)
 	return scale
 }

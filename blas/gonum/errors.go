@@ -26,9 +26,6 @@ const (
 	badLdB = "blas: bad leading dimension of B"
 	badLdC = "blas: bad leading dimension of C"
 
-	badLenIpiv = "blas: bad length of ipiv"
-	badLenJpiv = "blas: bad length of jpiv"
-
 	shortX  = "blas: insufficient length of x"
 	shortY  = "blas: insufficient length of y"
 	shortAP = "blas: insufficient length of ap"

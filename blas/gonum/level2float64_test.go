@@ -18,6 +18,10 @@ func TestDger(t *testing.T) {
 	testblas.DgerTest(t, impl)
 }
 
+func TestDgetc2(t *testing.T) {
+	testblas.Dgetc2Test(t, impl)
+}
+
 func TestDtxmv(t *testing.T) {
 	testblas.DtxmvTest(t, impl)
 }

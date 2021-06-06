@@ -21,6 +21,22 @@ const (
 	minParBlock = 4  // minimum number of blocks needed to go parallel
 )
 
+const (
+	// dlamchE is the machine epsilon. For IEEE this is 2^{-53}.
+	dlamchE = 0x1p-53
+
+	// dlamchB is the radix of the machine (the base of the number system).
+	dlamchB = 2
+
+	// dlamchP is base * eps.
+	dlamchP = dlamchB * dlamchE
+
+	// dlamchS is the "safe minimum", that is, the lowest number such that
+	// 1/dlamchS does not overflow, or also the smallest normal number.
+	// For IEEE this is 2^{-1022}.
+	dlamchS = 0x1p-1022
+)
+
 func max(a, b int) int {
 	if a > b {
 		return a

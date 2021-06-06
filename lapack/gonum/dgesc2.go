@@ -39,7 +39,7 @@ func (impl Implementation) Dgesc2(n int, a []float64, lda int, rhs []float64, ip
 	i := bi.Idamax(n, rhs, 1)
 	if 2*smlnum*math.Abs(rhs[i]) > math.Abs(a[n*lda+n]) {
 		temp := 0.5 / math.Abs(rhs[i])
-		blas64.Scal(temp, blas64.Vector{N: n, Data: rhs[0:], Inc: 1})
+		bi.Dscal(n, temp, rhs, 1)
 		scale *= temp
 	}
 

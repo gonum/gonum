@@ -23,10 +23,22 @@ func (impl Implementation) Dgesc2(n int, a []float64, lda int, rhs []float64, ip
 		panic(nLT0)
 	case lda < max(1, n):
 		panic(badLdA)
-	case len(rhs) < max(1, n):
-		panic(shortWork)
-	case len(ipiv) != len(jpiv) || len(jpiv) < 1:
-		panic(badLenJpvt)
+	}
+
+	// Quick return if possible.
+	if n == 0 {
+		return 0
+	}
+
+	switch {
+	case len(a) < (n-1)*lda+n:
+		panic(shortA)
+	case len(rhs) < n:
+		panic(shortRHS)
+	case len(ipiv) != n:
+		panic(badLenIpiv)
+	case len(jpiv) != n:
+		panic(badLenJpiv)
 	}
 
 	const smlnum = dlamchS / dlamchP
@@ -35,7 +47,7 @@ func (impl Implementation) Dgesc2(n int, a []float64, lda int, rhs []float64, ip
 	}
 
 	// Apply permutations ipiv to RHS.
-	impl.Dlaswp(1, rhs, lda, 1, n-1, ipiv, 1)
+	impl.Dlaswp(1, rhs, 1, 0, n-1, ipiv[:n], 1)
 
 	// Solve for L part.
 	for i := 0; i < n-1; i++ {
@@ -51,7 +63,7 @@ func (impl Implementation) Dgesc2(n int, a []float64, lda int, rhs []float64, ip
 	// Check for scaling.
 	bi := blas64.Implementation()
 	i := bi.Idamax(n, rhs, 1)
-	if 2*smlnum*math.Abs(rhs[i]) > math.Abs(a[n*lda+n]) {
+	if 2*smlnum*math.Abs(rhs[i]) > math.Abs(a[(n-1)*lda+(n-1)]) {
 		temp := 0.5 / math.Abs(rhs[i])
 		bi.Dscal(n, temp, rhs, 1)
 		scale *= temp
@@ -61,7 +73,7 @@ func (impl Implementation) Dgesc2(n int, a []float64, lda int, rhs []float64, ip
 		temp := 1.0 / a[i*lda+i]
 		rhs[i] *= temp
 		for j := i + 1; j < n; j++ {
-			rhs[i] -= float64(rhs[j] * a[i*lda+j] * temp)
+			rhs[i] -= float64(rhs[j] * (a[i*lda+j] * temp))
 		}
 	}
 

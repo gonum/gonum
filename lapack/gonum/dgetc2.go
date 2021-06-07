@@ -46,8 +46,6 @@ func (impl Implementation) Dgetc2(n int, a []float64, lda int, ipiv, jpiv []int)
 	const eps = dlamchP
 	const smlnum = dlamchS / eps
 
-	// Handle n==1 case by itself.
-
 	if n == 1 {
 		ipiv[0], jpiv[0] = 0, 0
 		if math.Abs(a[0]) < smlnum {
@@ -61,6 +59,7 @@ func (impl Implementation) Dgetc2(n int, a []float64, lda int, ipiv, jpiv []int)
 	// Set pivots less than SMIN to SMIN.
 	var smin float64
 	var ipv, jpv int
+	bi := blas64.Implementation()
 	for i := 0; i < n-1; i++ {
 		xmax := 0.0
 		for ip := i; ip < n; ip++ {
@@ -76,7 +75,6 @@ func (impl Implementation) Dgetc2(n int, a []float64, lda int, ipiv, jpiv []int)
 		}
 
 		// Swap rows.
-		bi := blas64.Implementation()
 		if ipv != i {
 			bi.Dswap(n, a[ipv*lda:], 1, a[i*lda:], 1)
 		}
@@ -97,7 +95,7 @@ func (impl Implementation) Dgetc2(n int, a []float64, lda int, ipiv, jpiv []int)
 		for j := i + 1; j < n; j++ {
 			a[j*lda+i] /= a[i*lda+i]
 		}
-		bi.Dger(n-i-1, n-i-1, -1.0, a[(i+1)*lda+i:], 1, a[i*lda+i+1:], 1, a[(i+1)*lda+i+1:], lda)
+		bi.Dger(n-i-1, n-i-1, -1.0, a[(i+1)*lda+i:], lda, a[i*lda+i+1:], 1, a[(i+1)*lda+i+1:], lda)
 	}
 
 	if math.Abs(a[(n-1)*lda+n-1]) < smin {
@@ -105,7 +103,7 @@ func (impl Implementation) Dgetc2(n int, a []float64, lda int, ipiv, jpiv []int)
 		a[(n-1)*lda+(n-1)] = smin
 	}
 
-	// Set last pivots to n.
+	// Set last pivots to last index.
 	ipiv[n-1], jpiv[n-1] = n-1, n-1
 	return k
 }

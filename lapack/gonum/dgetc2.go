@@ -10,7 +10,7 @@ import (
 	"gonum.org/v1/gonum/blas/blas64"
 )
 
-// DGETC2 computes an LU factorization with complete pivoting of the
+// Dgetc2 computes an LU factorization with complete pivoting of the
 // n-by-n matrix A. The factorization has the form
 //  A = P * L * U * Q,
 // where P and Q are permutation matrices, L is lower triangular with
@@ -20,8 +20,6 @@ import (
 // we try to solve for x in Ax = b. So U is perturbed to
 // avoid the overflow.
 func (impl Implementation) Dgetc2(n int, a []float64, lda int, ipiv, jpiv []int) (k int) {
-	// Negative k indicates U was not perturbed.
-	k = -1
 	switch {
 	case n < 0:
 		panic(nLT0)
@@ -29,9 +27,11 @@ func (impl Implementation) Dgetc2(n int, a []float64, lda int, ipiv, jpiv []int)
 		panic(badLdA)
 	}
 
+	// Negative k indicates U was not perturbed.
+	k = -1
 	// Quick return if possible.
 	if n == 0 {
-		return
+		return k
 	}
 
 	switch {
@@ -49,11 +49,12 @@ func (impl Implementation) Dgetc2(n int, a []float64, lda int, ipiv, jpiv []int)
 	// Handle n==1 case by itself.
 
 	if n == 1 {
-		ipiv[0], jpiv[0] = 1, 1
+		ipiv[0], jpiv[0] = 0, 0
 		if math.Abs(a[0]) < smlnum {
 			a[0] = smlnum
-			return 0
+			k = 0
 		}
+		return k
 	}
 
 	// Factorize A using complete pivoting.
@@ -77,36 +78,34 @@ func (impl Implementation) Dgetc2(n int, a []float64, lda int, ipiv, jpiv []int)
 		// Swap rows.
 		bi := blas64.Implementation()
 		if ipv != i {
-			bi.Dswap(n, a[ipv*lda:], lda, a[i*lda:], lda)
+			bi.Dswap(n, a[ipv*lda:], 1, a[i*lda:], 1)
 		}
 		ipiv[i] = ipv
 
 		// Swap columns.
-
 		if jpv != i {
 			bi.Dswap(n, a[jpv:], lda, a[i:], lda)
 		}
 		jpiv[i] = jpv
 
 		// Check for singularity.
-
-		if math.Abs(a[i*lda+1]) < smin {
+		if math.Abs(a[i*lda+i]) < smin {
 			k = i
-			a[i*lda+1] = smin
+			a[i*lda+i] = smin
 		}
 
 		for j := i + 1; j < n; j++ {
 			a[j*lda+i] /= a[i*lda+i]
 		}
-		bi.Dger(n-i, n-i, -1.0, a[(i+1)*lda+i:], 1, a[i*lda+i+1:], lda, a[(i+1)*lda+i+1:], lda)
+		bi.Dger(n-i-1, n-i-1, -1.0, a[(i+1)*lda+i:], 1, a[i*lda+i+1:], 1, a[(i+1)*lda+i+1:], lda)
 	}
 
-	if math.Abs(a[n*lda+n]) < smin {
-		k = n
-		a[n*lda+n] = smin
+	if math.Abs(a[(n-1)*lda+n-1]) < smin {
+		k = n - 1
+		a[(n-1)*lda+(n-1)] = smin
 	}
 
 	// Set last pivots to n.
-	ipiv[n-1], jpiv[n-1] = n, n
-	return
+	ipiv[n-1], jpiv[n-1] = n-1, n-1
+	return k
 }

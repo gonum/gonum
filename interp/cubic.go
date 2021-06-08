@@ -345,7 +345,7 @@ func (pc *PiecewiseCubic) fitWithSecondDerivatives(xs, ys, d2ydx2s []float64) {
 // continuous. It panics if elements of xs are not strictly increasing, or len(xs) != len(ys).
 // makeCubicSplineSecondDerivativeEquations returns a tri-diagonal matrix A and a vector b
 // defining a system of linear equations A*m = b for 2nd derivatives vector m.
-func makeCubicSplineSecondDerivativeEquations(xs, ys []float64) (*mat.Tridiag, mat.Vector) {
+func makeCubicSplineSecondDerivativeEquations(xs, ys []float64) (*mat.Tridiag, mat.MutableVector) {
 	n := len(xs)
 	if len(ys) != n {
 		panic(differentLengths)
@@ -378,4 +378,39 @@ func makeCubicSplineSecondDerivativeEquations(xs, ys []float64) (*mat.Tridiag, m
 		}
 	}
 	return mat.NewTridiag(n, dl, d, du), mat.NewVecDense(n, b)
+}
+
+// NaturalCubic is a piecewise cubic 1-dimensional interpolator with
+// continuous value, first and 2nd derivatives, which can be fitted to (X, Y)
+// value pairs without providing derivatives. See e.g. https://www.math.drexel.edu/~tolya/cubicspline.pdf
+// for details.
+type NaturalCubic struct {
+	cubic PiecewiseCubic
+}
+
+// Predict returns the interpolation value at x.
+func (nc *NaturalCubic) Predict(x float64) float64 {
+	return nc.cubic.Predict(x)
+}
+
+// PredictDerivative returns the predicted derivative at x.
+func (nc *NaturalCubic) PredictDerivative(x float64) float64 {
+	return nc.cubic.PredictDerivative(x)
+}
+
+// Fit fits a predictor to (X, Y) value pairs provided as two slices.
+// It panics if len(xs) < 2, elements of xs are not strictly increasing
+// or len(xs) != len(ys). Always returns nil.
+func (nc *NaturalCubic) Fit(xs, ys []float64) error {
+	A, b := makeCubicSplineSecondDerivativeEquations(xs, ys)
+	// Add boundary conditions:
+	n := len(xs)
+	b.SetVec(0, 0)
+	b.SetVec(n-1, 0)
+	A.SetBand(0, 0, 1)
+	A.SetBand(n-1, n-1, 1)
+	x := mat.NewVecDense(n, nil)
+	A.SolveVecTo(x, false, b)
+	nc.cubic.fitWithSecondDerivatives(xs, ys, x.RawVector().Data)
+	return nil
 }

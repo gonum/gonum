@@ -769,3 +769,14 @@ func TestMakeCubicSplineSecondDerivativeEquations(t *testing.T) {
 		t.Errorf("Mismatch in A values: got %v, want %v", A, expectedA)
 	}
 }
+
+func TestNaturalCubicFit(t *testing.T) {
+	t.Parallel()
+	xs := []float64{-1, 0, 2}
+	ys := []float64{2, 0, 2}
+	var nc NaturalCubic
+	err := nc.Fit(xs, ys)
+	if err != nil {
+		t.Errorf("Error when fitting NaturalCubic: %v", err)
+	}
+}

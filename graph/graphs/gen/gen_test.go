@@ -699,3 +699,206 @@ func TestCheck(t *testing.T) {
 		}
 	}
 }
+
+func TestTree(t *testing.T) {
+	tests := []struct {
+		name   string
+		dst    func() nodeIDGraphBuilder
+		nodes  IDer
+		fanout int
+		want   string
+		panics string
+	}{
+		{
+			name:   "empty_tree",
+			dst:    undirected,
+			nodes:  empty{},
+			fanout: 2,
+			want: `strict graph empty_tree {
+}`,
+		},
+		{
+			name:   "singleton_tree",
+			dst:    undirected,
+			nodes:  IDSet{0},
+			fanout: 0,
+			want: `strict graph singleton_tree {
+ // Node definitions.
+ 0;
+}`,
+		},
+		{
+			name:   "full_binary_tree_undirected",
+			dst:    undirected,
+			nodes:  IDRange{First: 0, Last: 14},
+			fanout: 2,
+			want: `strict graph full_binary_tree_undirected {
+ // Node definitions.
+ 0;
+ 1;
+ 2;
+ 3;
+ 4;
+ 5;
+ 6;
+ 7;
+ 8;
+ 9;
+ 10;
+ 11;
+ 12;
+ 13;
+ 14;
+
+ // Edge definitions.
+ 0 -- 1;
+ 0 -- 2;
+ 1 -- 3;
+ 1 -- 4;
+ 2 -- 5;
+ 2 -- 6;
+ 3 -- 7;
+ 3 -- 8;
+ 4 -- 9;
+ 4 -- 10;
+ 5 -- 11;
+ 5 -- 12;
+ 6 -- 13;
+ 6 -- 14;
+}`,
+		},
+		{
+			name:   "partial_ternary_tree_undirected",
+			dst:    undirected,
+			nodes:  IDRange{First: 0, Last: 17},
+			fanout: 3,
+			want: `strict graph partial_ternary_tree_undirected {
+ // Node definitions.
+ 0;
+ 1;
+ 2;
+ 3;
+ 4;
+ 5;
+ 6;
+ 7;
+ 8;
+ 9;
+ 10;
+ 11;
+ 12;
+ 13;
+ 14;
+ 15;
+ 16;
+ 17;
+
+ // Edge definitions.
+ 0 -- 1;
+ 0 -- 2;
+ 0 -- 3;
+ 1 -- 4;
+ 1 -- 5;
+ 1 -- 6;
+ 2 -- 7;
+ 2 -- 8;
+ 2 -- 9;
+ 3 -- 10;
+ 3 -- 11;
+ 3 -- 12;
+ 4 -- 13;
+ 4 -- 14;
+ 4 -- 15;
+ 5 -- 16;
+ 5 -- 17;
+}`,
+		},
+		{
+			name:   "linear_graph_undirected",
+			dst:    undirected,
+			nodes:  IDRange{First: 0, Last: 4},
+			fanout: 1,
+			want: `strict graph linear_graph_undirected {
+ // Node definitions.
+ 0;
+ 1;
+ 2;
+ 3;
+ 4;
+
+ // Edge definitions.
+ 0 -- 1;
+ 1 -- 2;
+ 2 -- 3;
+ 3 -- 4;
+}`,
+		},
+		{
+			name:   "full_ternary_tree_directed",
+			dst:    directed,
+			nodes:  IDRange{First: 0, Last: 12},
+			fanout: 3,
+			want: `strict digraph full_ternary_tree_directed {
+ // Node definitions.
+ 0;
+ 1;
+ 2;
+ 3;
+ 4;
+ 5;
+ 6;
+ 7;
+ 8;
+ 9;
+ 10;
+ 11;
+ 12;
+
+ // Edge definitions.
+ 0 -> 1;
+ 0 -> 2;
+ 0 -> 3;
+ 1 -> 4;
+ 1 -> 5;
+ 1 -> 6;
+ 2 -> 7;
+ 2 -> 8;
+ 2 -> 9;
+ 3 -> 10;
+ 3 -> 11;
+ 3 -> 12;
+}`,
+		},
+		{
+			name:   "bad_fanout",
+			dst:    undirected,
+			nodes:  IDSet{0, 1, 2, 3},
+			fanout: -1,
+			panics: "gen: invalid fan-out",
+		},
+		{
+			name:   "collision",
+			dst:    undirected,
+			nodes:  IDSet{0, 1, 2, 3, 2},
+			fanout: 2,
+			panics: "gen: node ID collision i=2 j=4: id=2",
+		},
+	}
+	for _, test := range tests {
+		dst := test.dst()
+		panicked, msg := panics(func() { Tree(dst, test.fanout, test.nodes) })
+		if msg != test.panics {
+			t.Errorf("unexpected panic message for %q: got:%q want:%q", test.name, msg, test.panics)
+		}
+		if panicked {
+			continue
+		}
+		got, err := dot.Marshal(dst, test.name, "", " ")
+		if err != nil {
+			t.Errorf("unexpected error marshaling graph: %v", err)
+		}
+		if !bytes.Equal(got, []byte(test.want)) {
+			t.Errorf("unexpected result for test %s:\ngot:\n%s\nwant:\n%s", test.name, got, test.want)
+		}
+	}
+}

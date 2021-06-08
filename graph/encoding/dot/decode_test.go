@@ -532,7 +532,13 @@ type dotDirectedGraph struct {
 // newDotDirectedGraph returns a new directed capable of creating user-defined
 // nodes and edges.
 func newDotDirectedGraph() *dotDirectedGraph {
-	return &dotDirectedGraph{DirectedGraph: simple.NewDirectedGraph()}
+	return &dotDirectedGraph{
+		DirectedGraph: simple.NewDirectedGraph(),
+
+		graph: &encoding.Attributes{},
+		node:  &encoding.Attributes{},
+		edge:  &encoding.Attributes{},
+	}
 }
 
 // NewNode returns a new node with a unique node ID for the graph.
@@ -552,7 +558,7 @@ func (g *dotDirectedGraph) DOTAttributers() (graph, node, edge encoding.Attribut
 
 // DOTAttributeSetters implements the dot.AttributeSetters interface.
 func (g *dotDirectedGraph) DOTAttributeSetters() (graph, node, edge encoding.AttributeSetter) {
-	return &g.graph, &g.node, &g.edge
+	return g.graph, g.node, g.edge
 }
 
 // SetDOTID sets the DOT ID of the graph.
@@ -579,7 +585,13 @@ type dotUndirectedGraph struct {
 // newDotUndirectedGraph returns a new undirected capable of creating user-
 // defined nodes and edges.
 func newDotUndirectedGraph() *dotUndirectedGraph {
-	return &dotUndirectedGraph{UndirectedGraph: simple.NewUndirectedGraph()}
+	return &dotUndirectedGraph{
+		UndirectedGraph: simple.NewUndirectedGraph(),
+
+		graph: &encoding.Attributes{},
+		node:  &encoding.Attributes{},
+		edge:  &encoding.Attributes{},
+	}
 }
 
 // NewNode adds a new node with a unique node ID to the graph.
@@ -599,7 +611,7 @@ func (g *dotUndirectedGraph) DOTAttributers() (graph, node, edge encoding.Attrib
 
 // DOTUnmarshalerAttrs implements the dot.UnmarshalerAttrs interface.
 func (g *dotUndirectedGraph) DOTAttributeSetters() (graph, node, edge encoding.AttributeSetter) {
-	return &g.graph, &g.node, &g.edge
+	return g.graph, g.node, g.edge
 }
 
 // SetDOTID sets the DOT ID of the graph.
@@ -705,15 +717,9 @@ func (e *dotEdge) ToPort() (port, compass string) {
 	return e.ToPortLabels.Port, e.ToPortLabels.Compass
 }
 
-// attributes is a helper for global attributes.
-type attributes []encoding.Attribute
-
-func (a attributes) Attributes() []encoding.Attribute {
-	return []encoding.Attribute(a)
-}
-func (a *attributes) SetAttribute(attr encoding.Attribute) error {
-	*a = append(*a, attr)
-	return nil
+type attributes interface {
+	encoding.Attributer
+	encoding.AttributeSetter
 }
 
 const undirectedSelfLoopGraph = `graph {

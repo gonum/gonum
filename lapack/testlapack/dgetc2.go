@@ -6,6 +6,7 @@ package testlapack
 
 import (
 	"fmt"
+	"sort"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -37,25 +38,28 @@ func dgetc2Test(t *testing.T, impl Dgetc2er, rnd *rand.Rand, n, lda int) {
 	// ipib and jpiv are outputs.
 	ipiv := make([]int, n)
 	jpiv := make([]int, n)
+	for i := 0; i < n; i++ {
+		ipiv[i], jpiv[i] = -1, -1 // set them to non-indices
+	}
 	copy(aout, ap.Data)
 	k := impl.Dgetc2(n, aout, lda, ipiv, jpiv)
 	if k >= 0 {
 		t.Fatalf("%v: matrix was perturbed at %d", name, k)
 	}
 
-	// Check uniqueness of pivot indices.
-	// This is done using an int as storage for
-	// an int tuple
-	pivmap := make(map[int]struct{})
-
+	// sort pivot indices and verify all indices up to n-1 are present
+	sort.Ints(ipiv)
+	sort.Ints(jpiv)
 	errcount := 0
-	for i := range ipiv {
-		tuple := ipiv[i]<<16 | jpiv[i]
-		if _, present := pivmap[tuple]; present {
-			t.Errorf("%v: ipiv repeated value found (%d,%d)", name, ipiv[i], jpiv[i])
+	for i := 0; i < n; i++ {
+		if ipiv[i] != i {
+			t.Errorf("%v: ipiv[%d] does not correspond", name, i)
 			errcount++
 		}
-		pivmap[tuple] = struct{}{}
+		if jpiv[i] != i {
+			t.Errorf("%v: jpiv[%d] does not correspond", name, i)
+			errcount++
+		}
 	}
 	if errcount > 0 {
 		t.Errorf("ipiv:%d", ipiv)

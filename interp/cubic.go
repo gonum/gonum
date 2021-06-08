@@ -400,7 +400,8 @@ func (nc *NaturalCubic) PredictDerivative(x float64) float64 {
 
 // Fit fits a predictor to (X, Y) value pairs provided as two slices.
 // It panics if len(xs) < 2, elements of xs are not strictly increasing
-// or len(xs) != len(ys). Always returns nil.
+// or len(xs) != len(ys). Returns an error if solving the required system
+// of linear equations fails.
 func (nc *NaturalCubic) Fit(xs, ys []float64) error {
 	A, b := makeCubicSplineSecondDerivativeEquations(xs, ys)
 	// Add boundary conditions y''(left) = y''(right) = 0:
@@ -410,7 +411,9 @@ func (nc *NaturalCubic) Fit(xs, ys []float64) error {
 	A.SetBand(0, 0, 1)
 	A.SetBand(n-1, n-1, 1)
 	x := mat.NewVecDense(n, nil)
-	A.SolveVecTo(x, false, b)
-	nc.cubic.fitWithSecondDerivatives(xs, ys, x.RawVector().Data)
-	return nil
+	err := A.SolveVecTo(x, false, b)
+	if err == nil {
+		nc.cubic.fitWithSecondDerivatives(xs, ys, x.RawVector().Data)
+	}
+	return err
 }

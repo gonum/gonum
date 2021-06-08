@@ -772,11 +772,33 @@ func TestMakeCubicSplineSecondDerivativeEquations(t *testing.T) {
 
 func TestNaturalCubicFit(t *testing.T) {
 	t.Parallel()
-	xs := []float64{-1, 0, 2}
-	ys := []float64{2, 0, 2}
+	xs := []float64{-1, 0, 2, 3.5}
+	ys := []float64{2, 0, 2, 1.5}
 	var nc NaturalCubic
 	err := nc.Fit(xs, ys)
 	if err != nil {
 		t.Errorf("Error when fitting NaturalCubic: %v", err)
 	}
+	testXs := []float64{-1, -0.99, -0.5, 0, 0.5, 1, 1.5, 2, 2.5, 3, 3.49, 3.5}
+	// From scipy.interpolate.CubicSpline:
+	want := []float64{
+		2.0,
+		1.9737725526315788,
+		0.7664473684210527,
+		0.0,
+		0.027960526315789477,
+		0.6184210526315789,
+		1.3996710526315788,
+		2.0,
+		2.1403508771929824,
+		1.9122807017543857,
+		1.508859403508772,
+		1.5}
+	for i := 0; i < len(testXs); i++ {
+		got := nc.Predict(testXs[i])
+		if math.Abs(got-want[i]) > 1e-14 {
+			t.Errorf("Mismatch in predicted Y value for x = %g: got %v, want %g", testXs[i], got, want[i])
+		}
+	}
+
 }

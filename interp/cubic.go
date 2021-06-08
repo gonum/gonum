@@ -403,7 +403,7 @@ func (nc *NaturalCubic) PredictDerivative(x float64) float64 {
 // or len(xs) != len(ys). Always returns nil.
 func (nc *NaturalCubic) Fit(xs, ys []float64) error {
 	A, b := makeCubicSplineSecondDerivativeEquations(xs, ys)
-	// Add boundary conditions:
+	// Add boundary conditions y''(left) = y''(right) = 0:
 	n := len(xs)
 	b.SetVec(0, 0)
 	b.SetVec(n-1, 0)

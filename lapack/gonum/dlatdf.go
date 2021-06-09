@@ -1,6 +1,11 @@
 package gonum
 
-import "gonum.org/v1/gonum/blas/blas64"
+import (
+	"math"
+
+	"gonum.org/v1/gonum/blas/blas64"
+	"gonum.org/v1/gonum/lapack"
+)
 
 // Dlatdf uses the LU factorization of the n-by-n matrix Z computed by
 // Dgetc2 and computes a contribution to the reciprocal Dif-estimate
@@ -9,12 +14,14 @@ import "gonum.org/v1/gonum/blas/blas64"
 // and choosing the r.h.s. b such that
 // the norm of x is as large as possible. On entry RHS = b holds the
 // contribution from earlier solved sub-systems, and on return RHS = x.
-
+//
 // The factorization of Z returned by Dgetc2 has the form
 //  Z = P*L*U*Q,
 // where P and Q are permutation matrices. L is lower triangular with
 // unit diagonal elements and U is upper triangular.
-func (Implementation) Dlatdf(ijob, n int, z []float64, ldz int, rhs []float64, rdsum, rdscal float64, ipiv, jpiv []int) (sumout, scalout float64) {
+//
+// Dlatdf is an internal routine. It is exported for testing purposes.
+func (impl Implementation) Dlatdf(ijob, n int, z []float64, ldz int, rhs []float64, rdsum, rdscal float64, ipiv, jpiv []int) (sum, scale float64) {
 	// ijob info:
 	// IJOB = 2: First compute an approximative null-vector e
 	// of Z using DGECON, e is normalized and solve for
@@ -46,10 +53,92 @@ func (Implementation) Dlatdf(ijob, n int, z []float64, ldz int, rhs []float64, r
 		panic(badLdA)
 	}
 
-	// Compute approximate nullvector XM of Z.
 	bi := blas64.Implementation()
+	var temp float64
+	xp := make([]float64, n)
+	// Compute approximate nullvector XM of Z.
 	if ijob == 2 {
+		xm := make([]float64, n)
+		work := make([]float64, 4*n)
+		impl.Dgecon(lapack.MaxRowSum, n, z, 1, 1.0, work, make([]int, n))
+		bi.Dcopy(n, work[n:], 1, xm, 1)
 
-		Dgecon
+		// Compute RHS.
+		impl.Dlaswp(1, xm, n, 0, n-2, ipiv, -1)
+		temp = 1.0 / math.Sqrt(bi.Ddot(n, xm, 1, xm, 1))
+		bi.Dscal(n, temp, xm, 1)
+		bi.Dcopy(n, xm, 1, xp, 1)
+		bi.Daxpy(n, 1.0, rhs, 1, xp, 1)
+		bi.Daxpy(n, -1.0, xm, 1, rhs, 1)
+		// temp = impl.Dgesc2(n, z, 1, rhs, ipiv, jpiv ) // TODO implement Dgesc2
+		// temp = impl.Dgesc2(n, z, 1, xp, ipiv, jpiv )
+		if bi.Dasum(n, xp, 1) > bi.Dasum(n, rhs, 1) {
+			bi.Dcopy(n, xp, 1, rhs, 1)
+		}
+
+		// Compute sum of squares.
+		rdscal, rdsum = impl.Dlassq(n, rhs, 1, rdscal, rdsum)
+		return rdsum, rdscal
 	}
+
+	// Solve for L-part choosing RHS either to +1 or -1.
+	var bp, bm, splus, sminu float64
+	pmone := -1.0
+	for j := 0; j < n-2; j++ {
+		bp = rhs[j] + 1.0
+		bm = rhs[j] - 1.0
+		// Look-ahead for L-part RHS(1:N-1) = + or -1, SPLUS and
+		// SMIN computed more efficiently than in BSOLVE [1].
+		splus = 2.0 + bi.Ddot(n-j-1, z[(j+1)*ldz+j:], ldz, z[(j+1)*ldz+j:], ldz)
+		sminu = bi.Ddot(n-j-1, z[(j+1)*ldz+j:], ldz, rhs[j+1:], 1)
+		splus *= rhs[j]
+		switch {
+		case splus > sminu:
+			rhs[j] = bp
+		case sminu > splus:
+			rhs[j] = bm
+		default:
+			// In this case the updating sums are equal and we can
+			// choose RHS(J) +1 or -1. The first time this happens
+			// we choose -1, thereafter +1. This is a simple way to
+			// get good estimates of matrices like Byers well-known
+			// example (see [1]). (Not done in BSOLVE.)
+			rhs[j] += pmone
+			pmone = 1.0
+		}
+
+		// Compute remaining RHS.
+		temp = -rhs[j]
+		bi.Daxpy(n-j-1, temp, z[(j+1)*ldz+j:], ldz, rhs[j+1:], 1)
+	}
+
+	// Solve for U-part, look-ahead for RHS(N) = +-1. This is not done
+	// in BSOLVE and will hopefully give us a better estimate because
+	// any ill-conditioning of the original matrix is transferred to U
+	// and not to L. U(N, N) is an approximation to sigma_min(LU).
+	bi.Dcopy(n-2, rhs, 1, xp, 1)
+	xp[n-1] = rhs[n-1] + 1.0
+	rhs[n-1] -= 1.0
+	splus = 0
+	sminu = 0
+	for i := n - 1; i >= 0; i-- {
+		temp = 1.0 / z[i*ldz+i]
+		xp[i] *= temp
+		rhs[i] *= temp
+		for k := i + 1; k < n; k++ {
+			xp[i] -= float64(xp[k] * (z[i*ldz+k] * temp))
+			rhs[i] -= float64(rhs[k] * (z[i*ldz+k] * temp))
+		}
+		splus += math.Abs(xp[i])
+		sminu += math.Abs(rhs[i])
+	}
+	if splus > sminu {
+		bi.Dcopy(n, xp, 1, rhs, 1)
+	}
+
+	// Apply the permutations JPIV to the computed solution (RHS)
+	impl.Dlaswp(1, rhs, n, 0, n-2, jpiv, -1)
+	// Compute the sum of squares
+	rdscal, rdsum = impl.Dlassq(n, rhs, 1, rdscal, rdsum)
+	return rdsum, rdscal
 }

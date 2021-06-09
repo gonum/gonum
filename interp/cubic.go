@@ -104,8 +104,7 @@ func (pc *PiecewiseCubic) FitWithDerivatives(xs, ys, dydxs []float64) {
 		pc.coeffs.Set(i, 2, (3*dy-(2*dydxs[i]+dydxs[i+1])*dx)/dx/dx)
 		pc.coeffs.Set(i, 3, (-2*dy+(dydxs[i]+dydxs[i+1])*dx)/dx/dx/dx)
 	}
-	pc.xs = make([]float64, n)
-	copy(pc.xs, xs)
+	pc.xs = append(pc.xs[:0], xs...)
 	pc.lastY = ys[m]
 	pc.lastDyDx = dydxs[m]
 }
@@ -332,8 +331,7 @@ func (pc *PiecewiseCubic) fitWithSecondDerivatives(xs, ys, d2ydx2s []float64) {
 		pc.coeffs.Set(i, 2, d2ydx2s[i]/2)                      // a_2
 		pc.coeffs.Set(i, 3, dm/6/dx)                           // a_3
 	}
-	pc.xs = make([]float64, n)
-	copy(pc.xs, xs)
+	pc.xs = append(pc.xs[:0], xs...)
 	pc.lastY = ys[m]
 	lastDx := xs[m] - xs[m-1]
 	pc.lastDyDx = pc.coeffs.At(m-1, 1) + 2*pc.coeffs.At(m-1, 2)*lastDx + 3*pc.coeffs.At(m-1, 3)*lastDx*lastDx

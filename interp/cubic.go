@@ -300,9 +300,12 @@ func fritschButlandEdgeDerivative(xs, ys, slopes []float64, leftEdge bool) float
 
 // fitWithSecondDerivatives fits a piecewise cubic predictor to (X, Y, d^2Y/dX^2) value
 // triples provided as three slices.
-// It panics if len(xs) < 2, elements of xs are not strictly increasing,
-// len(xs) != len(ys) or len(xs) != len(d2ydx2s).
-// Note: this method does not guarantee on its own the continuity of 1st derivatives.
+// It panics if any of these is true:
+// - len(xs) < 2,
+// - elements of xs are not strictly increasing,
+// - len(xs) != len(ys),
+// - len(xs) != len(d2ydx2s).
+// Note that this method does not guarantee on its own the continuity of first derivatives.
 func (pc *PiecewiseCubic) fitWithSecondDerivatives(xs, ys, d2ydx2s []float64) {
 	n := len(xs)
 	if len(ys) != n {
@@ -324,14 +327,10 @@ func (pc *PiecewiseCubic) fitWithSecondDerivatives(xs, ys, d2ydx2s []float64) {
 		}
 		dy := ys[i+1] - ys[i]
 		dm := d2ydx2s[i+1] - d2ydx2s[i]
-		// a_0
-		pc.coeffs.Set(i, 0, ys[i])
-		// a_1.
-		pc.coeffs.Set(i, 1, (dy-(d2ydx2s[i]+dm/3)*dx*dx/2)/dx)
-		// a_2
-		pc.coeffs.Set(i, 2, d2ydx2s[i]/2)
-		// a_3
-		pc.coeffs.Set(i, 3, dm/6/dx)
+		pc.coeffs.Set(i, 0, ys[i])                             // a_0
+		pc.coeffs.Set(i, 1, (dy-(d2ydx2s[i]+dm/3)*dx*dx/2)/dx) // a_1
+		pc.coeffs.Set(i, 2, d2ydx2s[i]/2)                      // a_2
+		pc.coeffs.Set(i, 3, dm/6/dx)                           // a_3
 	}
 	pc.xs = make([]float64, n)
 	copy(pc.xs, xs)
@@ -341,8 +340,9 @@ func (pc *PiecewiseCubic) fitWithSecondDerivatives(xs, ys, d2ydx2s []float64) {
 }
 
 // makeCubicSplineSecondDerivativeEquations generates the basic system of linear equations
-// which have to be satisfied by 2nd derivatives to make the 1st derivatives of a cubic spline
-// continuous. It panics if elements of xs are not strictly increasing, or len(xs) != len(ys).
+// which have to be satisfied by the second derivatives to make the first derivatives of a
+// cubic spline continuous. It panics if elements of xs are not strictly increasing, or
+// len(xs) != len(ys).
 // makeCubicSplineSecondDerivativeEquations returns a tri-diagonal matrix A and a vector b
 // defining a system of linear equations A*m = b for 2nd derivatives vector m.
 func makeCubicSplineSecondDerivativeEquations(xs, ys []float64) (*mat.Tridiag, mat.MutableVector) {
@@ -400,18 +400,18 @@ func (nc *NaturalCubic) PredictDerivative(x float64) float64 {
 
 // Fit fits a predictor to (X, Y) value pairs provided as two slices.
 // It panics if len(xs) < 2, elements of xs are not strictly increasing
-// or len(xs) != len(ys). Returns an error if solving the required system
+// or len(xs) != len(ys). It returns an error if solving the required system
 // of linear equations fails.
 func (nc *NaturalCubic) Fit(xs, ys []float64) error {
-	A, b := makeCubicSplineSecondDerivativeEquations(xs, ys)
+	a, b := makeCubicSplineSecondDerivativeEquations(xs, ys)
 	// Add boundary conditions y''(left) = y''(right) = 0:
 	n := len(xs)
 	b.SetVec(0, 0)
 	b.SetVec(n-1, 0)
-	A.SetBand(0, 0, 1)
-	A.SetBand(n-1, n-1, 1)
+	a.SetBand(0, 0, 1)
+	a.SetBand(n-1, n-1, 1)
 	x := mat.NewVecDense(n, nil)
-	err := A.SolveVecTo(x, false, b)
+	err := a.SolveVecTo(x, false, b)
 	if err == nil {
 		nc.cubic.fitWithSecondDerivatives(xs, ys, x.RawVector().Data)
 	}

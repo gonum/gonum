@@ -21,7 +21,7 @@ type Dgetc2er interface {
 func Dgetc2Test(t *testing.T, impl Dgetc2er) {
 	const tol = 1e-12
 	rnd := rand.New(rand.NewSource(1))
-	for _, n := range []int{2} { // []int{0, 1, 2, 3, 4, 5, 10, 20}
+	for _, n := range []int{0, 1, 2, 3, 4, 5, 10, 20} {
 		for _, lda := range []int{n} {
 			dgetc2Test(t, impl, rnd, n, lda, tol)
 		}
@@ -96,16 +96,6 @@ func dgetc2Test(t *testing.T, impl Dgetc2er, rnd *rand.Rand, n, lda int, tol flo
 		}
 	}
 	bi := blas64.Implementation()
-
-	// Reconstruct P and Q permutation matrices from ipiv and jpiv, respectively.
-	P := make([]float64, n*n)
-	Q := make([]float64, n*n)
-	for i := 0; i < n; i++ {
-		ipv, jpv := ipiv[i], jpiv[i]
-		// ipiv/jpiv indicates column set to one (one per row, see Permutation Matrix).
-		P[i*n+ipv] = 1.0
-		Q[i*n+jpv] = 1.0
-	}
 	// Construct L and U triangular matrices from Dgetc2 output.
 	L := make([]float64, n*n) //
 	U := make([]float64, n*n)
@@ -123,11 +113,21 @@ func dgetc2Test(t *testing.T, impl Dgetc2er, rnd *rand.Rand, n, lda int, tol flo
 		}
 	}
 	// results for multiplication matrix for P * L * U * Q stored in first half of work
-	work := make([]float64, 2*n*n)
+	work := make([]float64, n*n)
 	// Dgemm does  C = alpha * A * B + beta * C
-	bi.Dgemm(blas.NoTrans, blas.NoTrans, n, n, n, 1, P, lda, L, lda, 0, work, lda)
-	bi.Dgemm(blas.NoTrans, blas.NoTrans, n, n, n, 1, work, lda, U, lda, 0, work[n*n:], lda)
-	bi.Dgemm(blas.NoTrans, blas.NoTrans, n, n, n, 1, work[n*n:], lda, Q, lda, 0, work, lda)
+	bi.Dgemm(blas.NoTrans, blas.NoTrans, n, n, n, 1, L, lda, U, lda, 0, work, lda)
+
+	// apply Permutations to  P and Q to L*U
+	for i := n - 1; i >= 0; i-- {
+		ipv, jpv := ipiv[i], jpiv[i]
+		if ipv != i {
+			bi.Dswap(n, work[i*lda:], 1, work[ipv*lda:], 1)
+		}
+		if jpv != i {
+			bi.Dswap(n, work[i:], lda, work[jpv:], lda)
+		}
+	}
+
 	// result1 should now be equal to A
 	for i := range lu {
 		if math.Abs(work[i]-a.Data[i]) > tol {

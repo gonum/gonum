@@ -27,42 +27,6 @@ func Dgetc2Test(t *testing.T, impl Dgetc2er) {
 			dgetc2Test(t, impl, rnd, n, lda, tol)
 		}
 	}
-	// Specific matrix cases.
-	for _, tc := range []struct {
-		name       string
-		a, expect  blas64.General
-		ipiv, jpiv []int
-	}{
-		{name: "identity", a: eye(3, 3), expect: eye(3, 3), ipiv: []int{2, 2, 2}, jpiv: []int{2, 2, 2}},
-		{
-			name:   "small",
-			a:      blas64.General{Rows: 3, Cols: 3, Stride: 3, Data: []float64{1, 2, 3, 2, 1, 6, 3, 6, 0}},
-			expect: blas64.General{Rows: 3, Cols: 3, Stride: 3, Data: []float64{6, 0, 3, 1. / 6., 6, 1.5, 1. / 3., 0.5, -0.75}},
-			ipiv:   []int{2, 1, 2},
-			jpiv:   []int{1, 2, 2},
-		},
-	} {
-		name := fmt.Sprintf("%s %dx%d", tc.name, tc.a.Rows, tc.a.Cols)
-		n := len(tc.jpiv)
-		ipiv, jpiv := make([]int, n), make([]int, n)
-		impl.Dgetc2(n, tc.a.Data, tc.a.Stride, ipiv, jpiv)
-		for i := 0; i < len(tc.a.Data); i++ {
-			got := tc.a.Data[i]
-			expect := tc.expect.Data[i]
-			if math.Abs(got-expect) > tol {
-				t.Errorf("%s: expected %.8g in A matrix. got %g", name, expect, got)
-			}
-		}
-		for i := 0; i < n; i++ {
-			if ipiv[i] != tc.ipiv[i] {
-				t.Errorf("%s: expected %d in ipiv pivots. got %d", name, tc.ipiv[i], ipiv[i])
-			}
-			if jpiv[i] != tc.jpiv[i] {
-				t.Errorf("%s: expected %d in jpiv pivots. got %d", name, tc.jpiv[i], jpiv[i])
-			}
-		}
-	}
-
 }
 
 func dgetc2Test(t *testing.T, impl Dgetc2er, rnd *rand.Rand, n, lda int, tol float64) {

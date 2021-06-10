@@ -16,9 +16,9 @@ import (
 // where P and Q are permutation matrices, L is lower triangular with
 // unit diagonal elements and U is upper triangular.
 //
-// Outputs are A, ipiv, jpiv and k. k is non-negative if U(k, k) is likely to produce overflow if
-// we try to solve for x in Ax = b. So U is perturbed to
-// avoid the overflow.
+// Outputs are A, ipiv, jpiv and k. k is non-negative if U(k, k)
+// is likely to produce overflow when  e try to solve for x in Ax = b.
+// So U is perturbed to avoid the overflow.
 func (impl Implementation) Dgetc2(n int, a []float64, lda int, ipiv, jpiv []int) (k int) {
 	switch {
 	case n < 0:
@@ -64,7 +64,7 @@ func (impl Implementation) Dgetc2(n int, a []float64, lda int, ipiv, jpiv []int)
 		xmax := 0.0
 		for ip := i; ip < n; ip++ {
 			for jp := i; jp < n; jp++ {
-				if math.Abs(a[ip*lda+jp]) > xmax {
+				if math.Abs(a[ip*lda+jp]) >= xmax {
 					xmax = math.Abs(a[ip*lda+jp])
 					ipv, jpv = ip, jp
 				}

@@ -72,11 +72,11 @@ func dgetc2Test(t *testing.T, impl Dgetc2er, rnd *rand.Rand, n, lda int, tol flo
 	// Generate a random general matrix A.
 	a := randomGeneral(n, n, lda, rnd)
 
-	// ipib and jpiv are outputs.
+	// ipiv and jpiv are outputs.
 	ipiv := make([]int, n)
 	jpiv := make([]int, n)
 	for i := 0; i < n; i++ {
-		ipiv[i], jpiv[i] = -1, -1 // set them to non-indices
+		ipiv[i], jpiv[i] = -1, -1 // Set to non-indices.
 	}
 	// Copy to store output (LU decomposition)
 	lu := make([]float64, len(a.Data))
@@ -102,22 +102,21 @@ func dgetc2Test(t *testing.T, impl Dgetc2er, rnd *rand.Rand, n, lda int, tol flo
 	for i := 0; i < n; i++ {
 		for j := 0; j < n; j++ {
 			idx := i*n + j
-			if j >= i { // on upper triangle and setting of L's unit diagonal elements
+			if j >= i { // On upper triangle and setting of L's unit diagonal elements.
 				U[idx] = lu[idx]
 				if j == i {
 					L[idx] = 1.0
 				}
-			} else if i > j { // on diagonal or lower triangle
+			} else if i > j { // On diagonal or lower triangle.
 				L[idx] = lu[idx]
 			}
 		}
 	}
-	// results for multiplication matrix for P * L * U * Q stored in first half of work
+
 	work := make([]float64, n*n)
-	// Dgemm does  C = alpha * A * B + beta * C
 	bi.Dgemm(blas.NoTrans, blas.NoTrans, n, n, n, 1, L, lda, U, lda, 0, work, lda)
 
-	// apply Permutations to  P and Q to L*U
+	// Apply Permutations P and Q to L*U.
 	for i := n - 1; i >= 0; i-- {
 		ipv, jpv := ipiv[i], jpiv[i]
 		if ipv != i {
@@ -128,7 +127,7 @@ func dgetc2Test(t *testing.T, impl Dgetc2er, rnd *rand.Rand, n, lda int, tol flo
 		}
 	}
 
-	// result1 should now be equal to A
+	// A should be reconstructed by now.
 	for i := range lu {
 		if math.Abs(work[i]-a.Data[i]) > tol {
 			t.Errorf("%v: matrix %d idx not equal after reconstruction. got %g, expected %g", name, i, work[i], a.Data[i])

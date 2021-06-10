@@ -342,7 +342,7 @@ func (pc *PiecewiseCubic) fitWithSecondDerivatives(xs, ys, d2ydx2s []float64) {
 // cubic spline continuous. It panics if elements of xs are not strictly increasing, or
 // len(xs) != len(ys).
 // makeCubicSplineSecondDerivativeEquations returns a tri-diagonal matrix A and a vector b
-// defining a system of linear equations A*m = b for 2nd derivatives vector m.
+// defining a system of linear equations A*m = b for second derivatives vector m.
 func makeCubicSplineSecondDerivativeEquations(xs, ys []float64) (*mat.Tridiag, mat.MutableVector) {
 	n := len(xs)
 	if len(ys) != n {
@@ -379,7 +379,7 @@ func makeCubicSplineSecondDerivativeEquations(xs, ys []float64) (*mat.Tridiag, m
 }
 
 // NaturalCubic is a piecewise cubic 1-dimensional interpolator with
-// continuous value, first and 2nd derivatives, which can be fitted to (X, Y)
+// continuous value, first and second derivatives, which can be fitted to (X, Y)
 // value pairs without providing derivatives. See e.g. https://www.math.drexel.edu/~tolya/cubicspline.pdf
 // for details.
 type NaturalCubic struct {

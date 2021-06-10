@@ -1,4 +1,4 @@
-// Copyright ©2015 The Gonum Authors. All rights reserved.
+// Copyright ©2021 The Gonum Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"golang.org/x/exp/rand"
+
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
 )
@@ -26,7 +27,7 @@ func Dgetc2Test(t *testing.T, impl Dgetc2er) {
 			dgetc2Test(t, impl, rnd, n, lda, tol)
 		}
 	}
-	// specific matrix cases
+	// Specific matrix cases.
 	for _, tc := range []struct {
 		name       string
 		a, expect  blas64.General
@@ -78,7 +79,7 @@ func dgetc2Test(t *testing.T, impl Dgetc2er, rnd *rand.Rand, n, lda int, tol flo
 	for i := 0; i < n; i++ {
 		ipiv[i], jpiv[i] = -1, -1 // Set to non-indices.
 	}
-	// Copy to store output (LU decomposition)
+	// Copy to store output (LU decomposition).
 	lu := make([]float64, len(a.Data))
 	copy(lu, a.Data)
 	k := impl.Dgetc2(n, lu, lda, ipiv, jpiv)

@@ -321,10 +321,6 @@ type graphAttributer struct {
 	edge  encoding.Attributer
 }
 
-type attributer []encoding.Attribute
-
-func (a attributer) Attributes() []encoding.Attribute { return a }
-
 func (g graphAttributer) DOTAttributers() (graph, node, edge encoding.Attributer) {
 	return g.graph, g.node, g.edge
 }
@@ -1192,8 +1188,8 @@ var encodeTests = []struct {
 				{from: 2, to: 4}: {},
 				{from: 3, to: 4}: {{Key: "color", Value: "red"}},
 			}),
-			graph: attributer{{Key: "rankdir", Value: `"LR"`}},
-			node:  attributer{{Key: "fontsize", Value: "16"}, {Key: "shape", Value: "ellipse"}},
+			graph: &encoding.Attributes{{Key: "rankdir", Value: `"LR"`}},
+			node:  &encoding.Attributes{{Key: "fontsize", Value: "16"}, {Key: "shape", Value: "ellipse"}},
 			edge:  nil,
 		},
 

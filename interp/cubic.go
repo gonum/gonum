@@ -307,13 +307,10 @@ func fritschButlandEdgeDerivative(xs, ys, slopes []float64, leftEdge bool) float
 // Note that this method does not guarantee on its own the continuity of first derivatives.
 func (pc *PiecewiseCubic) fitWithSecondDerivatives(xs, ys, d2ydx2s []float64) {
 	n := len(xs)
-	if len(ys) != n {
+	switch {
+	case len(ys) != n, len(d2ydx2s) != n:
 		panic(differentLengths)
-	}
-	if len(d2ydx2s) != n {
-		panic(differentLengths)
-	}
-	if n < 2 {
+	case n < 2:
 		panic(tooFewPoints)
 	}
 	m := n - 1

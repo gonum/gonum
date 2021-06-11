@@ -759,13 +759,13 @@ func TestMakeCubicSplineSecondDerivativeEquations(t *testing.T) {
 	expectedB := mat.NewVecDense(3, []float64{0, 3, 0})
 	var diffB mat.VecDense
 	diffB.SubVec(b, expectedB)
-	if math.Abs(diffB.Norm(math.Inf(1))) > tol {
+	if diffB.Norm(math.Inf(1)) > tol {
 		t.Errorf("Mismatch in b values: got %v, want %v", b, expectedB)
 	}
 	expectedA := mat.NewDense(3, 3, []float64{0, 0, 0, 1 / 6., 1, 2 / 6., 0, 0, 0})
 	var diffA mat.Dense
 	diffA.Sub(A, expectedA)
-	if math.Abs(diffA.Norm(math.Inf(1))) > tol {
+	if diffA.Norm(math.Inf(1)) > tol {
 		t.Errorf("Mismatch in A values: got %v, want %v", A, expectedA)
 	}
 }

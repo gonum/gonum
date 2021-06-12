@@ -809,7 +809,7 @@ func TestClampedCubicFit(t *testing.T) {
 	var cc ClampedCubic
 	err := cc.Fit(xs, ys)
 	if err != nil {
-		t.Errorf("Error when fitting NaturalCubic: %v", err)
+		t.Errorf("Error when fitting ClampedCubic: %v", err)
 	}
 	testXs := []float64{-1, -0.99, -0.5, 0, 0.5, 1, 1.5, 2, 2.5, 3, 3.49, 3.5}
 	// From scipy.interpolate.CubicSpline:

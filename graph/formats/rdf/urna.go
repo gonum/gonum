@@ -12,7 +12,6 @@ import (
 	"fmt"
 	"hash"
 	"sort"
-	"strings"
 
 	"gonum.org/v1/gonum/stat/combin"
 )
@@ -112,7 +111,7 @@ func (u *urna) relabel(dst, src []*Statement) ([]*Statement, error) {
 			s.Object.Value,
 			s.Label.Value,
 		} {
-			if !strings.HasPrefix(t, "_:") {
+			if !isBlank(t) {
 				continue
 			}
 			for _, e := range u.statementsFor[t] {
@@ -258,7 +257,7 @@ func (u *urna) hashFirstDegreeQuads(b string) string {
 // replaceBlank implements 3.1 of the algorithm described at
 // https://json-ld.github.io/rdf-dataset-canonicalization/spec/index.html#algorithm-1.
 func replaceBlank(b, matching, label string) string {
-	if !strings.HasPrefix(b, "_:") { // 3,1
+	if !isBlank(b) { // 3.1
 		return b
 	}
 	if label != "" { // URGNA2012 modification.
@@ -372,7 +371,7 @@ func (u *urna) hashToRelatedURDNA2015(b string, names *issuer) map[string][]stri
 			s.Object.Value,
 			s.Label.Value,
 		} {
-			if !strings.HasPrefix(term, "_:") || term == b {
+			if !isBlank(term) || term == b {
 				continue
 			}
 
@@ -404,10 +403,10 @@ func (u *urna) hashToRelatedURGNA2012(b string, names *issuer) map[string][]stri
 			pos  byte
 		)
 		switch {
-		case strings.HasPrefix(s.Subject.Value, "_:") && s.Subject.Value != b: // 1.1
+		case isBlank(s.Subject.Value) && s.Subject.Value != b: // 1.1
 			term = s.Subject.Value
 			pos = 'p'
-		case strings.HasPrefix(s.Object.Value, "_:") && s.Object.Value != b: // 1.2
+		case isBlank(s.Object.Value) && s.Object.Value != b: // 1.2
 			term = s.Object.Value
 			pos = 'r'
 		default:

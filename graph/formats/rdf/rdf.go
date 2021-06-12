@@ -75,7 +75,13 @@ func NewBlankTerm(label string) (Term, error) {
 	if err != nil {
 		return Term{}, err
 	}
-	return Term{Value: "_:" + label}, nil
+	return Term{Value: blankPrefix + label}, nil
+}
+
+const blankPrefix = "_:"
+
+func isBlank(s string) bool {
+	return strings.HasPrefix(s, blankPrefix)
 }
 
 // NewIRITerm returns a Term based on the provided IRI which must
@@ -87,6 +93,10 @@ func NewIRITerm(iri string) (Term, error) {
 		return Term{}, err
 	}
 	return Term{Value: escape("<", iri, ">")}, nil
+}
+
+func isIRI(s string) bool {
+	return strings.HasPrefix(s, "<") && strings.HasSuffix(s, ">")
 }
 
 // NewLiteralTerm returns a Term based on the literal text and an

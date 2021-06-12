@@ -123,6 +123,11 @@ func TestDgesvd(t *testing.T) {
 	testlapack.DgesvdTest(t, impl, tol)
 }
 
+func TestDgetc2(t *testing.T) {
+	t.Parallel()
+	testlapack.Dgetc2Test(t, impl)
+}
+
 func TestDgetri(t *testing.T) {
 	t.Parallel()
 	testlapack.DgetriTest(t, impl)

@@ -51,6 +51,9 @@ type RawBander interface {
 // A MutableBanded can set elements of a band matrix.
 type MutableBanded interface {
 	Banded
+
+	// SetBand sets the element at row i, column j to the value v.
+	// It panics if the location is outside the appropriate region of the matrix.
 	SetBand(i, j int, v float64)
 }
 

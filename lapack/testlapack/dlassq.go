@@ -19,13 +19,6 @@ type Dlassqer interface {
 }
 
 func DlassqTest(t *testing.T, impl Dlassqer) {
-	const (
-		safmin = dlamchS
-		safmax = 1 / safmin
-		ulp    = dlamchP
-		smlnum = safmin / ulp
-		bignum = safmax * ulp
-	)
 	values := []float64{
 		0,
 		2 * safmin,

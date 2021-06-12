@@ -257,8 +257,8 @@ func (s *SymBandDense) Norm(norm float64) float64 {
 	}
 	lnorm := normLapack(norm, false)
 	if lnorm == lapack.MaxColumnSum || lnorm == lapack.MaxRowSum {
-		work := getFloats(s.mat.N, false)
-		defer putFloats(work)
+		work := getFloat64s(s.mat.N, false)
+		defer putFloat64s(work)
 		return lapack64.Lansb(lnorm, s.mat, work)
 	}
 	return lapack64.Lansb(lnorm, s.mat, nil)
@@ -293,15 +293,15 @@ func (s *SymBandDense) MulVecTo(dst *VecDense, _ bool, x Vector) {
 			dst.checkOverlap(xVec.mat)
 			blas64.Sbmv(1, s.mat, xVec.mat, 0, dst.mat)
 		} else {
-			xCopy := getWorkspaceVec(n, false)
+			xCopy := getVecDenseWorkspace(n, false)
 			xCopy.CloneFromVec(xVec)
 			blas64.Sbmv(1, s.mat, xCopy.mat, 0, dst.mat)
-			putWorkspaceVec(xCopy)
+			putVecDenseWorkspace(xCopy)
 		}
 	} else {
-		xCopy := getWorkspaceVec(n, false)
+		xCopy := getVecDenseWorkspace(n, false)
 		xCopy.CloneFromVec(x)
 		blas64.Sbmv(1, s.mat, xCopy.mat, 0, dst.mat)
-		putWorkspaceVec(xCopy)
+		putVecDenseWorkspace(xCopy)
 	}
 }

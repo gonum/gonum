@@ -226,10 +226,10 @@ func (m *CDense) isolatedWorkspace(a CMatrix) (w *CDense, restore func()) {
 	if r == 0 || c == 0 {
 		panic(ErrZeroLength)
 	}
-	w = getWorkspaceCmplx(r, c, false)
+	w = getCDenseWorkspace(r, c, false)
 	return w, func() {
 		m.Copy(w)
-		putWorkspaceCmplx(w)
+		putCDenseWorkspace(w)
 	}
 }
 

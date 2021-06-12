@@ -1397,6 +1397,16 @@ func TestCDF(t *testing.T) {
 		weights []float64
 	}{
 		{
+			name: "x == nil",
+			kind: Empirical,
+			x:    nil,
+		},
+		{
+			name: "len(x) == 0",
+			kind: Empirical,
+			x:    []float64{},
+		},
+		{
 			name:    "len(x) != len(weights)",
 			q:       1.5,
 			kind:    Empirical,
@@ -1429,11 +1439,33 @@ func TestQuantile(t *testing.T) {
 		LinInterp,
 	}
 	for i, test := range []struct {
-		p   []float64
-		x   []float64
-		w   []float64
-		ans [][]float64
+		p      []float64
+		x      []float64
+		w      []float64
+		ans    [][]float64
+		panics bool
 	}{
+		{
+			p:      []float64{0, 0.05, 0.1, 0.15, 0.45, 0.5, 0.55, 0.85, 0.9, 0.95, 1},
+			x:      nil,
+			w:      nil,
+			panics: true,
+		},
+		{
+			p:      []float64{0, 0.05, 0.1, 0.15, 0.45, 0.5, 0.55, 0.85, 0.9, 0.95, 1},
+			x:      []float64{},
+			w:      nil,
+			panics: true,
+		},
+		{
+			p: []float64{0, 0.05, 0.1, 0.15, 0.45, 0.5, 0.55, 0.85, 0.9, 0.95, 1},
+			x: []float64{1},
+			w: nil,
+			ans: [][]float64{
+				{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+				{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+			},
+		},
 		{
 			p: []float64{0, 0.05, 0.1, 0.15, 0.45, 0.5, 0.55, 0.85, 0.9, 0.95, 1},
 			x: []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
@@ -1479,12 +1511,18 @@ func TestQuantile(t *testing.T) {
 		}
 		for j, p := range test.p {
 			for k, kind := range cumulantKinds {
-				v := Quantile(p, kind, test.x, test.w)
+				var v float64
+				if test.panics != panics(func() { v = Quantile(p, kind, test.x, test.w) }) {
+					t.Errorf("Quantile did not panic when expected: test %d", j)
+				}
 				if !floats.Same(copyX, test.x) {
 					t.Errorf("x changed for case %d kind %d percentile %v", i, k, p)
 				}
 				if !floats.Same(copyW, test.w) {
 					t.Errorf("x changed for case %d kind %d percentile %v", i, k, p)
+				}
+				if test.panics {
+					continue
 				}
 				if v != test.ans[k][j] && !(math.IsNaN(v) && math.IsNaN(test.ans[k][j])) {
 					t.Errorf("mismatch case %d kind %d percentile %v. Expected: %v, found: %v", i, k, p, test.ans[k][j], v)

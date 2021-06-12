@@ -166,10 +166,10 @@ func (m *Dense) isolatedWorkspace(a Matrix) (w *Dense, restore func()) {
 	if r == 0 || c == 0 {
 		panic(ErrZeroLength)
 	}
-	w = getWorkspace(r, c, false)
+	w = getDenseWorkspace(r, c, false)
 	return w, func() {
 		m.Copy(w)
-		putWorkspace(w)
+		putDenseWorkspace(w)
 	}
 }
 
@@ -606,8 +606,8 @@ func (m *Dense) Norm(norm float64) float64 {
 	}
 	lnorm := normLapack(norm, false)
 	if lnorm == lapack.MaxColumnSum {
-		work := getFloats(m.mat.Cols, false)
-		defer putFloats(work)
+		work := getFloat64s(m.mat.Cols, false)
+		defer putFloat64s(work)
 		return lapack64.Lange(lnorm, m.mat, work)
 	}
 	return lapack64.Lange(lnorm, m.mat, nil)

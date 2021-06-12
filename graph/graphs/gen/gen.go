@@ -175,6 +175,44 @@ func Wheel(dst NodeIDGraphBuilder, center int64, cycle IDer) {
 	cycleNoCheck(dst, cycle)
 }
 
+// Tree constructs an n-ary tree breadth-first in dst with the given fan-out, n.
+// If the number of nodes does not equal \sum_{i=0}^h n^i, where h is an integer
+// indicating the height of the tree, a partial tree will be constructed with not
+// all nodes having zero or n children, and not all leaves being h from the root.
+// If the number of nodes is greater than one, n must be non-zero and
+// less than the number of nodes, otherwise Tree will panic.
+// If dst is a directed graph, edges are directed from the root to the leaves.
+// If any ID appears more than once in nodes, Tree will panic.
+func Tree(dst NodeIDGraphBuilder, n int, nodes IDer) {
+	switch nodes.Len() {
+	case 0:
+		return
+	case 1:
+		if u, new := dst.NodeWithID(nodes.ID(0)); new {
+			dst.AddNode(u)
+		}
+		return
+	}
+
+	if n < 1 || nodes.Len() <= n {
+		panic("gen: invalid fan-out")
+	}
+
+	err := check(nodes)
+	if err != nil {
+		panic(err)
+	}
+
+	j := 0
+	for i := 0; j < nodes.Len(); i++ {
+		u, _ := dst.NodeWithID(nodes.ID(i))
+		for j = n*i + 1; j <= n*i+n && j < nodes.Len(); j++ {
+			v, _ := dst.NodeWithID(nodes.ID(j))
+			dst.SetEdge(dst.NewEdge(u, v))
+		}
+	}
+}
+
 // check confirms that no node ID exists more than once in ids and extra.
 func check(ids IDer, extra ...int64) error {
 	seen := make(map[int64]int, ids.Len()+len(extra))

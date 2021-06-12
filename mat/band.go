@@ -51,6 +51,9 @@ type RawBander interface {
 // A MutableBanded can set elements of a band matrix.
 type MutableBanded interface {
 	Banded
+
+	// SetBand sets the element at row i, column j to the value v.
+	// It panics if the location is outside the appropriate region of the matrix.
 	SetBand(i, j int, v float64)
 }
 
@@ -347,15 +350,15 @@ func (b *BandDense) MulVecTo(dst *VecDense, trans bool, x Vector) {
 			dst.checkOverlap(xVec.mat)
 			blas64.Gbmv(t, 1, b.mat, xVec.mat, 0, dst.mat)
 		} else {
-			xCopy := getWorkspaceVec(n, false)
+			xCopy := getVecDenseWorkspace(n, false)
 			xCopy.CloneFromVec(xVec)
 			blas64.Gbmv(t, 1, b.mat, xCopy.mat, 0, dst.mat)
-			putWorkspaceVec(xCopy)
+			putVecDenseWorkspace(xCopy)
 		}
 	} else {
-		xCopy := getWorkspaceVec(n, false)
+		xCopy := getVecDenseWorkspace(n, false)
 		xCopy.CloneFromVec(x)
 		blas64.Gbmv(t, 1, b.mat, xCopy.mat, 0, dst.mat)
-		putWorkspaceVec(xCopy)
+		putVecDenseWorkspace(xCopy)
 	}
 }

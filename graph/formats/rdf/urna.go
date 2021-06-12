@@ -27,6 +27,11 @@ import (
 //
 // See https://json-ld.github.io/rdf-dataset-canonicalization/spec/index.html for details.
 func URGNA2012(dst, src []*Statement) ([]*Statement, error) {
+	if dst == nil {
+		dst = make([]*Statement, len(src))
+	} else if len(dst) != len(src) {
+		return dst, errors.New("rdf: slice length mismatch")
+	}
 	// 1. https://json-ld.github.io/rdf-dataset-canonicalization/spec/index.html#algorithm
 	u := &urna{
 		canon:         newIssuer("_:c14n"),
@@ -46,6 +51,11 @@ func URGNA2012(dst, src []*Statement) ([]*Statement, error) {
 //
 // See https://json-ld.github.io/rdf-dataset-canonicalization/spec/index.html for details.
 func URDNA2015(dst, src []*Statement) ([]*Statement, error) {
+	if dst == nil {
+		dst = make([]*Statement, len(src))
+	} else if len(dst) != len(src) {
+		return dst, errors.New("rdf: slice length mismatch")
+	}
 	// 1. https://json-ld.github.io/rdf-dataset-canonicalization/spec/index.html#algorithm
 	u := &urna{
 		canon:         newIssuer("_:c14n"),
@@ -167,11 +177,6 @@ func (u *urna) relabel(dst, src []*Statement) ([]*Statement, error) {
 	}
 
 	// 7.
-	if dst == nil {
-		dst = make([]*Statement, len(src))
-	} else if len(dst) != len(src) {
-		return dst, errors.New("rdf: slice length mismatch")
-	}
 	for i, s := range src {
 		if dst[i] == nil {
 			dst[i] = &Statement{}

@@ -92,6 +92,11 @@ func TestDgerq2(t *testing.T) {
 	testlapack.Dgerq2Test(t, impl)
 }
 
+func TestDgesc2(t *testing.T) {
+	t.Parallel()
+	testlapack.Dgesc2Test(t, impl)
+}
+
 func TestDgeqp3(t *testing.T) {
 	t.Parallel()
 	testlapack.Dgeqp3Test(t, impl)
@@ -116,6 +121,11 @@ func TestDgesvd(t *testing.T) {
 	t.Parallel()
 	const tol = 1e-13
 	testlapack.DgesvdTest(t, impl, tol)
+}
+
+func TestDgetc2(t *testing.T) {
+	t.Parallel()
+	testlapack.Dgetc2Test(t, impl)
 }
 
 func TestDgetri(t *testing.T) {

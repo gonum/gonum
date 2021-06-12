@@ -15,23 +15,21 @@ type Dlartger interface {
 }
 
 func DlartgTest(t *testing.T, impl Dlartger) {
-	const tol = 20 * dlamchP
+	const tol = 20 * ulp
 
-	safmin := dlamchS
-	safmax := 1 / safmin
 	values := []float64{
 		-safmax,
-		-1 / dlamchP,
+		-1 / ulp,
 		-1,
 		-1.0 / 3,
-		-dlamchP,
+		-ulp,
 		-safmin,
 		0,
 		safmin,
-		dlamchP,
+		ulp,
 		1.0 / 3,
 		1,
-		1 / dlamchP,
+		1 / ulp,
 		safmax,
 		math.Inf(-1),
 		math.Inf(1),

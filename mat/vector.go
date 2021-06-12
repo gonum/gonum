@@ -773,10 +773,10 @@ func (v *VecDense) isolatedWorkspace(a Vector) (n *VecDense, restore func()) {
 	if l == 0 {
 		panic(ErrZeroLength)
 	}
-	n = getWorkspaceVec(l, false)
+	n = getVecDenseWorkspace(l, false)
 	return n, func() {
 		v.CopyVec(n)
-		putWorkspaceVec(n)
+		putVecDenseWorkspace(n)
 	}
 }
 

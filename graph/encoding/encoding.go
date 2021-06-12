@@ -34,3 +34,36 @@ type Attributer interface {
 type Attribute struct {
 	Key, Value string
 }
+
+// Attributes is a helper type providing simple attribute handling.
+type Attributes []Attribute
+
+// Attributes returns all of the receiver's attributes.
+func (a *Attributes) Attributes() []Attribute {
+	return *a
+}
+
+// SetAttribute sets attr in the receiver. Calling SetAttribute with an
+// Attribute with a Key that is in the collection replaces the existing
+// value and calling with an empty Value removes the attribute from the
+// collection if it exists. SetAttribute always returns nil.
+func (a *Attributes) SetAttribute(attr Attribute) error {
+	if attr.Key == "" {
+		return nil
+	}
+	for i, v := range *a {
+		if v.Key == attr.Key {
+			if attr.Value == "" {
+				(*a)[i] = (*a)[len(*a)-1]
+				*a = (*a)[:len(*a)-1]
+				return nil
+			}
+			(*a)[i].Value = attr.Value
+			return nil
+		}
+	}
+	if attr.Value != "" {
+		*a = append(*a, attr)
+	}
+	return nil
+}

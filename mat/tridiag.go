@@ -216,10 +216,10 @@ func (a *Tridiag) MulVecTo(dst *VecDense, trans bool, x Vector) {
 		dst.checkOverlap(xVec.mat)
 		lapack64.Lagtm(t, 1, a.mat, xVec.asGeneral(), 0, dst.asGeneral())
 	} else {
-		xCopy := getWorkspaceVec(n, false)
+		xCopy := getVecDenseWorkspace(n, false)
 		xCopy.CloneFromVec(x)
 		lapack64.Lagtm(t, 1, a.mat, xCopy.asGeneral(), 0, dst.asGeneral())
-		putWorkspaceVec(xCopy)
+		putVecDenseWorkspace(xCopy)
 	}
 }
 

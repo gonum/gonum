@@ -134,9 +134,12 @@ func dlatbsResidual(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag, n, kd 
 		}
 	}
 
+	const (
+		eps  = dlamchE
+		tiny = safmin
+	)
+
 	bi := blas64.Implementation()
-	eps := dlamchE
-	smlnum := dlamchS
 
 	ix := bi.Idamax(n, x, 1)
 	xNorm := math.Max(1, math.Abs(x[ix]))
@@ -150,14 +153,14 @@ func dlatbsResidual(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag, n, kd 
 
 	ix = bi.Idamax(n, resid, 1)
 	residNorm := math.Abs(resid[ix])
-	if residNorm*smlnum <= xNorm {
+	if residNorm*tiny <= xNorm {
 		if xNorm > 0 {
 			residNorm /= xNorm
 		}
 	} else if residNorm > 0 {
 		residNorm = 1 / eps
 	}
-	if residNorm*smlnum <= tnorm {
+	if residNorm*tiny <= tnorm {
 		if tnorm > 0 {
 			residNorm /= tnorm
 		}

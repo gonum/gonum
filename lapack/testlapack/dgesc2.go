@@ -1,4 +1,4 @@
-// Copyright ©2016 The Gonum Authors. All rights reserved.
+// Copyright ©2021 The Gonum Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 package testlapack
@@ -12,14 +12,13 @@ import (
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/floats"
 )
 
 type Dgesc2er interface {
 	Dgetc2er
 	// Dgesc2 solves a system of linear equations
 	//  A * X = scale * RHS
-	// with a general N-by-N matrix A using the LU factorization with
+	// with a general n×n matrix A using the LU factorization with
 	// complete pivoting computed by Dgetc2. The result is placed in
 	// rhs on exit.
 	Dgesc2(n int, a []float64, lda int, rhs []float64, ipiv, jpiv []int) (scale float64)
@@ -47,11 +46,11 @@ func testSolveDgesc2(t *testing.T, impl Dgesc2er, rnd *rand.Rand, n, lda int, to
 	}
 	// Generate random general matrix.
 	a := randomGeneral(n, n, lda, rnd)
-	anorm := floats.Norm(a.Data, 1)
+	// anorm := floats.Norm(a.Data, 1)
 
 	// Generate a random solution.
 	xWant := randomGeneral(n, 1, 1, rnd)
-	xnorm := floats.Norm(xWant.Data, 1)
+	// xnorm := floats.Norm(xWant.Data, 1)
 
 	// Compute RHS vector that solves for X such that  A*X = scale * RHS
 	rhs := zeros(n, 1, 1)
@@ -80,13 +79,13 @@ func testSolveDgesc2(t *testing.T, impl Dgesc2er, rnd *rand.Rand, n, lda int, to
 		t.Errorf("%v: unexpected result, diff=%v", name, diff)
 	}
 	// |A*X - scale*RHS| / |A| / |X| is an indicator that solution is good
-	AxResult := zeros(n, 1, 1)
-	blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, a, x, 1, AxResult)
-	blas64.Scal(scale, blas64.Vector{N: n, Data: rhsCopy.Data, Inc: 1})
-	floats.Sub(AxResult.Data, rhsCopy.Data)
+	// AxResult := zeros(n, 1, 1)
+	// blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, a, x, 1, AxResult)
+	// blas64.Scal(scale, blas64.Vector{N: n, Data: rhsCopy.Data, Inc: 1})
+	// floats.Sub(AxResult.Data, rhsCopy.Data)
 
-	residualNorm := floats.Norm(rhsCopy.Data, 1) / anorm / xnorm
-	if residualNorm > tol {
-		// t.Errorf("%v: |A*X - scale*RHS| / |A| / |X| = %g is greater than permissible tol", name, residualNorm)
-	}
+	// residualNorm := floats.Norm(rhsCopy.Data, 1) / anorm / xnorm
+	// if residualNorm > tol {
+	// 	t.Errorf("%v: |A*X - scale*RHS| / |A| / |X| = %g is greater than permissible tol", name, residualNorm)
+	// }
 }

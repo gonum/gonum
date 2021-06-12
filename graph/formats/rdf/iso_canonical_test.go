@@ -14,7 +14,6 @@ import (
 	"path/filepath"
 	"reflect"
 	"sort"
-	"strings"
 	"testing"
 	"text/tabwriter"
 	"time"
@@ -287,7 +286,7 @@ func permuteBlanks(s []*Statement, src rand.Source) ([]*Statement, map[string]st
 
 	var blanks []string
 	for t := range terms {
-		if strings.HasPrefix(t, "_:") {
+		if isBlank(t) {
 			blanks = append(blanks, t)
 		}
 	}
@@ -309,7 +308,7 @@ func hashBlanks(s []*Statement, h hash.Hash) ([]*Statement, map[string]string) {
 			e.Object.Value,
 			e.Label.Value,
 		} {
-			if !strings.HasPrefix(t, "_:") {
+			if !isBlank(t) {
 				continue
 			}
 			h.Reset()
@@ -331,7 +330,7 @@ func mangleFirstIL(s []*Statement, h hash.Hash) ([]*Statement, map[string]string
 			e.Object.Value,
 			e.Label.Value,
 		} {
-			if strings.HasPrefix(t, "_:") {
+			if isBlank(t) {
 				continue
 			}
 			h.Reset()
@@ -354,7 +353,7 @@ func mergeFirst2B(s []*Statement) ([]*Statement, map[string]string) {
 			e.Object.Value,
 			e.Label.Value,
 		} {
-			if !strings.HasPrefix(t, "_:") {
+			if !isBlank(t) {
 				continue
 			}
 			terms[t] = t
@@ -444,7 +443,7 @@ func TestLexicalStatements(t *testing.T) {
 func termsFor(hashes map[string][]byte, hash hash.Hash) map[string]string {
 	terms := make(map[string]string)
 	for t, h := range hashes {
-		if strings.HasPrefix(t, "_:") {
+		if isBlank(t) {
 			terms[t] = fmt.Sprintf("_:%0*x", 2*hash.Size(), h)
 		}
 	}

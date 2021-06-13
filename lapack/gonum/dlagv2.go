@@ -51,7 +51,9 @@ func (impl Implementation) Dlagv2(a []float64, lda int, b []float64, ldb int, al
 	case len(b) < 4:
 		panic(shortB)
 	case len(alphar) < 2 || len(alphai) < 2:
-		panic(short)
+		panic(badLenAlpha)
+	case len(beta) < 2:
+		panic(badLenBeta)
 	}
 
 	const (

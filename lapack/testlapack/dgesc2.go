@@ -80,13 +80,13 @@ func testSolveDgesc2(t *testing.T, impl Dgesc2er, rnd *rand.Rand, n, lda int, to
 		t.Errorf("%v: unexpected result, diff=%v", name, diff)
 	}
 	// |A*X - scale*RHS| / |A| / |X| is an indicator that solution is good
-	AxResult := zeros(n, 1, 1)
-	blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, a, x, 1, AxResult)
-	blas64.Scal(scale, blas64.Vector{N: n, Data: rhsCopy.Data, Inc: 1})
-	floats.Sub(AxResult.Data, rhsCopy.Data)
+	// AxResult := zeros(n, 1, 1)
+	// blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, a, x, 1, AxResult)
+	// blas64.Scal(scale, blas64.Vector{N: n, Data: rhsCopy.Data, Inc: 1})
+	// floats.Sub(AxResult.Data, rhsCopy.Data)
 
-	residualNorm := floats.Norm(rhsCopy.Data, 1) / anorm / xnorm
-	if residualNorm > tol {
-		// t.Errorf("%v: |A*X - scale*RHS| / |A| / |X| = %g is greater than permissible tol", name, residualNorm)
-	}
+	// residualNorm := floats.Norm(rhsCopy.Data, 1) / anorm / xnorm
+	// if residualNorm > tol {
+	// 	t.Errorf("%v: |A*X - scale*RHS| / |A| / |X| = %g is greater than permissible tol", name, residualNorm)
+	// }
 }

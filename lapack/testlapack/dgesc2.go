@@ -12,7 +12,6 @@ import (
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/floats"
 )
 
 type Dgesc2er interface {
@@ -47,11 +46,11 @@ func testSolveDgesc2(t *testing.T, impl Dgesc2er, rnd *rand.Rand, n, lda int, to
 	}
 	// Generate random general matrix.
 	a := randomGeneral(n, n, lda, rnd)
-	anorm := floats.Norm(a.Data, 1)
+	// anorm := floats.Norm(a.Data, 1)
 
 	// Generate a random solution.
 	xWant := randomGeneral(n, 1, 1, rnd)
-	xnorm := floats.Norm(xWant.Data, 1)
+	// xnorm := floats.Norm(xWant.Data, 1)
 
 	// Compute RHS vector that solves for X such that  A*X = scale * RHS
 	rhs := zeros(n, 1, 1)

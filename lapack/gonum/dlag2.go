@@ -6,7 +6,7 @@ package gonum
 
 import "math"
 
-// DLAG2 computes the eigenvalues of a 2 x 2 generalized eigenvalue
+// DLAG2 computes the eigenvalues of a 2×2 generalized eigenvalue
 // problem
 //  A - w B,
 // with scaling as necessary to avoid over-/underflow.
@@ -15,8 +15,62 @@ import "math"
 // where  s  is a non-negative scaling factor chosen so that  w,  w B,
 // and  s A  do not overflow and, if possible, do not underflow, either.
 //
+// B is an upper triangular ldb×2 matrix
+// On entry, the 2 x 2 upper triangular matrix B.  It is
+// assumed that the one-norm of B is less than 1/dlamchS.  The
+// diagonals should be at least sqrt(dlamchS) times the largest
+// element of B (in absolute value); if a diagonal is smaller
+// than that, then  +/- sqrt(dlamchS) will be used instead of
+// that diagonal.
+//
+// It is assumed that A's 1-norm is less than 1/SAFMIN.  Entries less than
+// sqrt(SAFMIN)*norm(A) are subject to being treated as zero.
+//
 // Dlag2 is an internal routine. It is exported for testing purposes.
-func (Implementation) Dlag2(a []float64, lda int, b []float64, ldb int, safmin float64) (scale1, scale2, wr1, wr2, wi float64) {
+func (Implementation) Dlag2(a []float64, lda int, b []float64, ldb int) (scale1, scale2, wr1, wr2, wi float64) {
+	// scale1 is used to avoid over-/underflow in the
+	// eigenvalue equation which defines the first eigenvalue.  If
+	// the eigenvalues are complex, then the eigenvalues are
+	// ( WR1  +/-  WI i ) / scale1  (which may lie outside the
+	// exponent range of the machine), scale1=scale2, and scale1
+	// will always be positive.  If the eigenvalues are real, then
+	// the first (real) eigenvalue is  wr1 / scale1 , but this may
+	// overflow or underflow, and in fact, scale1 may be zero or
+	// less than the underflow threshold if the exact eigenvalue
+	// is sufficiently large.
+	//
+	// scale2 is used to avoid over-/underflow in the
+	// eigenvalue equation which defines the second eigenvalue.  If
+	// the eigenvalues are complex, then SCALE2=SCALE1.  If the
+	// eigenvalues are real, then the second (real) eigenvalue is
+	// WR2 / SCALE2 , but this may overflow or underflow, and in
+	// fact, SCALE2 may be zero or less than the underflow
+	// threshold if the exact eigenvalue is sufficiently large.
+	//
+	// If the eigenvalue is real, then WR1 is SCALE1 times the
+	// eigenvalue closest to the (2,2) element of A B**(-1).  If the
+	// eigenvalue is complex, then WR1=WR2 is SCALE1 times the real
+	// part of the eigenvalues.
+	//
+	// If the eigenvalue is real, then WR2 is SCALE2 times the
+	// other eigenvalue.  If the eigenvalue is complex, then
+	// WR1=WR2 is SCALE1 times the real part of the eigenvalues.
+	//
+	// If the eigenvalue is real, then WI is zero.  If the
+	// eigenvalue is complex, then WI is SCALE1 times the imaginary
+	// part of the eigenvalues.  WI will always be non-negative.
+	switch {
+	case lda < 2:
+		panic(badLdA)
+	case ldb < 2:
+		panic(badLdB)
+	case len(a) < 4:
+		panic(shortA)
+	case len(b) < 4:
+		panic(shortB)
+	}
+
+	const safmin = dlamchS
 	const fuzzy1 = 1. + 1e-5
 	rtmin := math.Sqrt(safmin)
 	rtmax := 1. / rtmin

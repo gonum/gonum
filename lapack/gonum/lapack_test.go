@@ -182,7 +182,10 @@ func TestDlaexc(t *testing.T) {
 	t.Parallel()
 	testlapack.DlaexcTest(t, impl)
 }
-
+func TestDlag2(t *testing.T) {
+	t.Parallel()
+	testlapack.Dlag2Test(t, impl)
+}
 func TestDlags2(t *testing.T) {
 	t.Parallel()
 	testlapack.Dlags2Test(t, impl)

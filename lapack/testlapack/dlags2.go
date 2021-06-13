@@ -116,4 +116,7 @@ func Dlags2Test(t *testing.T, impl Dlags2er) {
 	}
 }
 
-func det2x2(a, b, c, d float64) float64 { return a*d - b*c }
+// Solves determinant of
+//  |a11 a12|
+//  |a21 a22|
+func det2x2(a11, a12, a21, a22 float64) float64 { return a11*a22 - a12*a21 }

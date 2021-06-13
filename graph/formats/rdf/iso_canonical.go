@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"hash"
 	"sort"
-	"strings"
 )
 
 // See "Canonical Forms for Isomorphic and Equivalent RDF Graphs: Algorithms
@@ -160,7 +159,7 @@ func C14n(dst, src []*Statement, terms map[string]map[string]bool) ([]*Statement
 			s.Object.Value,
 			s.Label.Value,
 		} {
-			if !strings.HasPrefix(t, "_:") {
+			if !isBlank(t) {
 				continue
 			}
 			need[t] = true
@@ -172,7 +171,7 @@ func C14n(dst, src []*Statement, terms map[string]map[string]bool) ([]*Statement
 	for h, m := range terms {
 		var ok bool
 		for t := range m {
-			if strings.HasPrefix(t, "_:") {
+			if isBlank(t) {
 				ok = true
 				break
 			}
@@ -194,7 +193,7 @@ func C14n(dst, src []*Statement, terms map[string]map[string]bool) ([]*Statement
 			return nil, fmt.Errorf("rdf: no term for blank with hash %x", b)
 		}
 		for t := range terms[b] {
-			if !strings.HasPrefix(t, "_:") {
+			if !isBlank(t) {
 				continue
 			}
 			if _, exists := c14n[t]; exists {
@@ -275,13 +274,13 @@ func hashBNodes(statements []*Statement, h hash.Hash, zero []byte, hash0 map[str
 			switch {
 			case i == 3 && t == "":
 				continue
-			case strings.HasPrefix(t, "_:"):
+			case isBlank(t):
 				if hash0 == nil {
 					curr.set(t, zero)
 				} else {
 					curr.set(t, hash0[t])
 				}
-			case strings.HasPrefix(t, "<") && strings.HasSuffix(t, ">"):
+			case isIRI(t):
 				h.Reset()
 				h.Write([]byte(t[1 : len(t)-1])) //nolint:errcheck
 				curr.set(t, h.Sum(nil))
@@ -298,7 +297,7 @@ func hashBNodes(statements []*Statement, h hash.Hash, zero []byte, hash0 map[str
 	for {
 		curr, last = last, curr
 		for _, s := range statements {
-			if strings.HasPrefix(s.Subject.Value, "_:") {
+			if isBlank(s.Subject.Value) {
 				var lab []byte
 				if s.Label.Value != "" {
 					lab = last.hashOf[s.Label.Value]
@@ -307,7 +306,7 @@ func hashBNodes(statements []*Statement, h hash.Hash, zero []byte, hash0 map[str
 				bag.add(s.Subject.Value, c)
 			}
 
-			if strings.HasPrefix(s.Object.Value, "_:") {
+			if isBlank(s.Object.Value) {
 				var lab []byte
 				if s.Label.Value != "" {
 					lab = last.hashOf[s.Label.Value]
@@ -320,7 +319,7 @@ func hashBNodes(statements []*Statement, h hash.Hash, zero []byte, hash0 map[str
 			// required for RDF dataset hashing as described in
 			// https://doi.org/10.5281/zenodo.3154322 v1.0
 			// Readme.md#adaptation-of-the-algorithms-to-handle-datasets.
-			if strings.HasPrefix(s.Label.Value, "_:") {
+			if isBlank(s.Label.Value) {
 				c := hashTuple(h, last.hashOf[s.Subject.Value], last.hashOf[s.Predicate.Value], last.hashOf[s.Object.Value], []byte{'.'})
 				bag.add(s.Label.Value, c)
 			}
@@ -430,7 +429,7 @@ func (t *table) set(term string, hash []byte) {
 		t.termsFor[string(hash)] = map[string]bool{term: true}
 	}
 
-	if !t.wasCloned() && strings.HasPrefix(term, "_:") {
+	if !t.wasCloned() && isBlank(term) {
 		// We are in the original table, so note
 		// any blank node label that we see.
 		t.isBlank[term] = true
@@ -571,7 +570,7 @@ func appendOrdered(parts byLengthHash, partSets map[string]map[string]bool) byLe
 	for h, s := range partSets {
 		var p []string
 		for e := range s {
-			if strings.HasPrefix(e, "_:") {
+			if isBlank(e) {
 				p = append(p, e)
 			}
 		}
@@ -631,7 +630,7 @@ func split(statements []*Statement) [][]*Statement {
 	for _, s := range statements {
 		ds.add(s.Subject.Value)
 		ds.add(s.Object.Value)
-		if strings.HasPrefix(s.Subject.Value, "_:") && strings.HasPrefix(s.Object.Value, "_:") {
+		if isBlank(s.Subject.Value) && isBlank(s.Object.Value) {
 			ds.union(ds.find(s.Subject.Value), ds.find(s.Object.Value))
 		}
 	}
@@ -644,9 +643,9 @@ func split(statements []*Statement) [][]*Statement {
 	for _, s := range statements {
 		var t string
 		switch {
-		case strings.HasPrefix(s.Subject.Value, "_:"):
+		case isBlank(s.Subject.Value):
 			t = s.Subject.Value
-		case strings.HasPrefix(s.Object.Value, "_:"):
+		case isBlank(s.Object.Value):
 			t = s.Object.Value
 		default:
 			ground = append(ground, s)
@@ -929,15 +928,15 @@ type relabeledTerm struct {
 }
 
 func (a relabeledTerm) less(b relabeledTerm) bool {
-	aBlank := strings.HasPrefix(a.term.Value, "_:")
-	bBlank := strings.HasPrefix(b.term.Value, "_:")
+	aIsBlank := isBlank(a.term.Value)
+	bIsBlank := isBlank(b.term.Value)
 	switch {
-	case aBlank && bBlank:
+	case aIsBlank && bIsBlank:
 		return bytes.Compare(a.labels[a.term.Value], b.labels[b.term.Value]) < 0
-	case aBlank:
-		return "_:" < unquoteIRI(b.term.Value)
-	case bBlank:
-		return unquoteIRI(a.term.Value) < "_:"
+	case aIsBlank:
+		return blankPrefix < unquoteIRI(b.term.Value)
+	case bIsBlank:
+		return unquoteIRI(a.term.Value) < blankPrefix
 	default:
 		return unquoteIRI(a.term.Value) < unquoteIRI(b.term.Value)
 	}
@@ -951,7 +950,7 @@ func unquoteIRI(s string) string {
 }
 
 func (t relabeledTerm) String() string {
-	if !strings.HasPrefix(t.term.Value, "_:") {
+	if !isBlank(t.term.Value) {
 		return t.term.Value
 	}
 	h, ok := t.labels[t.term.Value]

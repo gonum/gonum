@@ -6,7 +6,7 @@ package gonum
 
 import "math"
 
-// DLAG2 computes the eigenvalues of a 2×2 generalized eigenvalue
+// Dlag2 computes the eigenvalues of a 2×2 generalized eigenvalue
 // problem
 //  A - w B,
 // with scaling as necessary to avoid over-/underflow.
@@ -16,7 +16,7 @@ import "math"
 // and  s A  do not overflow and, if possible, do not underflow, either.
 //
 // B is an upper triangular ldb×2 matrix
-// On entry, the 2 x 2 upper triangular matrix B.  It is
+// On entry, the 2×2 upper triangular matrix B.  It is
 // assumed that the one-norm of B is less than 1/dlamchS.  The
 // diagonals should be at least sqrt(dlamchS) times the largest
 // element of B (in absolute value); if a diagonal is smaller
@@ -48,7 +48,7 @@ func (Implementation) Dlag2(a []float64, lda int, b []float64, ldb int) (scale1,
 	// threshold if the exact eigenvalue is sufficiently large.
 	//
 	// If the eigenvalue is real, then WR1 is SCALE1 times the
-	// eigenvalue closest to the (2,2) element of A B**(-1).  If the
+	// eigenvalue closest to the (1,1) element of A B**(-1).  If the
 	// eigenvalue is complex, then WR1=WR2 is SCALE1 times the real
 	// part of the eigenvalues.
 	//
@@ -70,57 +70,53 @@ func (Implementation) Dlag2(a []float64, lda int, b []float64, ldb int) (scale1,
 		panic(shortB)
 	}
 
-	const safmin = dlamchS
-	const fuzzy1 = 1. + 1e-5
-	rtmin := math.Sqrt(safmin)
-	rtmax := 1. / rtmin
-	safmax := 1. / safmin
-	// Double precision shorthand function names.
-	var (
-		mmax = math.Max
-		mmin = math.Min
-		fabs = math.Abs
-		sign = math.Copysign
+	const (
+		safmin = dlamchS
+		fuzzy1 = 1 + 1e-5
 	)
+	rtmin := math.Sqrt(safmin)
+	rtmax := 1 / rtmin
+	safmax := 1 / safmin
 
 	// Scale a.
-	anorm := mmax(fabs(a[0*lda+0])+fabs(a[1*lda+0]),
-		fabs(a[0*lda+1])+fabs(a[1*lda+1]))
-	anorm = mmax(anorm, safmin)
-	ascale := 1. / anorm
-	a11 := ascale * a[0*lda+0]
-	a21 := ascale * a[1*lda+0]
-	a12 := ascale * a[0*lda+1]
-	a22 := ascale * a[1*lda+1]
+	anorm := math.Max(math.Abs(a[0])+math.Abs(a[lda]),
+		math.Abs(a[1])+math.Abs(a[lda+1]))
+	anorm = math.Max(anorm, safmin)
+	ascale := 1 / anorm
+	a11 := ascale * a[0]
+	a21 := ascale * a[lda]
+	a12 := ascale * a[1]
+	a22 := ascale * a[lda+1]
 
 	// Perturb b if necessary to insure non-singularity.
-	b11 := b[0*ldb+0]
-	b12 := b[0*ldb+1]
-	b22 := b[1*ldb+1]
-	bmin := rtmin * mmax(mmax(fabs(b11), fabs(b12)), mmax(fabs(b22), rtmin))
-	if fabs(b11) < bmin {
-		b11 = sign(bmin, b11)
+	b11 := b[0]
+	b12 := b[1]
+	b22 := b[ldb+1]
+	bmin := rtmin * math.Max(math.Max(math.Abs(b11), math.Abs(b12)),
+		math.Max(math.Abs(b22), rtmin))
+	if math.Abs(b11) < bmin {
+		b11 = math.Copysign(bmin, b11)
 	}
-	if fabs(b22) < bmin {
-		b22 = sign(bmin, b22)
+	if math.Abs(b22) < bmin {
+		b22 = math.Copysign(bmin, b22)
 	}
 
 	// Scale B.
-	bnorm := mmax(mmax(fabs(b11), fabs(b12)+fabs(b22)), safmin)
-	bsize := mmax(fabs(b11), fabs(b22))
-	bscale := 1. / bsize
+	bnorm := math.Max(math.Max(math.Abs(b11), math.Abs(b12)+math.Abs(b22)), safmin)
+	bsize := math.Max(math.Abs(b11), math.Abs(b22))
+	bscale := 1 / bsize
 	b11 = bscale * b11
 	b12 = bscale * b12
 	b22 = bscale * b22
 
 	// Compute larger eigenvalue by method described by C. van Loan.
-	binv11 := 1. / b11
-	binv22 := 1. / b22
+	binv11 := 1 / b11
+	binv22 := 1 / b22
 	s1 := a11 * binv11
 	s2 := a22 * binv22
 	var as11, as12, as22, abi22, shift float64
 	var qq, ss, pp, discr, r float64
-	if fabs(s1) <= fabs(s2) {
+	if math.Abs(s1) <= math.Abs(s2) {
 		as12 = a12 - s1*b12
 		as22 = a22 - s1*b22
 		ss = a21 * (binv11 * binv22)
@@ -136,16 +132,16 @@ func (Implementation) Dlag2(a []float64, lda int, b []float64, ldb int) (scale1,
 		shift = s2
 	}
 	qq = ss * as12
-	if fabs(pp*rtmin) >= 1 {
+	if math.Abs(pp*rtmin) >= 1 {
 		discr = math.Pow(rtmin*pp, 2) + qq*safmin
-		r = math.Sqrt(fabs(discr)) * rtmax
+		r = math.Sqrt(math.Abs(discr)) * rtmax
 	} else {
-		if math.Pow(pp, 2)+fabs(qq) <= safmin {
+		if math.Pow(pp, 2)+math.Abs(qq) <= safmin {
 			discr = math.Pow(rtmax*pp, 2) + qq*safmax
-			r = math.Sqrt(fabs(discr)) * rtmin
+			r = math.Sqrt(math.Abs(discr)) * rtmin
 		} else {
 			discr = math.Pow(pp, 2) + qq
-			r = math.Sqrt(fabs(discr))
+			r = math.Sqrt(math.Abs(discr))
 		}
 	}
 
@@ -156,24 +152,24 @@ func (Implementation) Dlag2(a []float64, lda int, b []float64, ldb int) (scale1,
 	// threshold correctly, it would not be necessary.
 	if discr >= 0 || r == 0 {
 		var diff, sum float64
-		sum = pp + sign(r, pp)
-		diff = pp - sign(r, pp)
+		sum = pp + math.Copysign(r, pp)
+		diff = pp - math.Copysign(r, pp)
 		wbig := shift + sum
 
 		// Compute smaller eigenvalue.
 		var wsmall, wdet float64
 		wsmall = shift + diff
-		if 0.5*fabs(wbig) > mmax(fabs(wsmall), safmin) {
+		if 0.5*math.Abs(wbig) > math.Max(math.Abs(wsmall), safmin) {
 			wdet = (a11*a22 - a12*a21) * (binv11 * binv22)
 			wsmall = wdet / wbig
 		}
 		// Choose (real) eigenvalue closest to 2,2 element of A*B**(-1) for WR1.
 		if pp > abi22 {
-			wr1 = mmin(wbig, wsmall)
-			wr2 = mmax(wbig, wsmall)
+			wr1 = math.Min(wbig, wsmall)
+			wr2 = math.Max(wbig, wsmall)
 		} else {
-			wr1 = mmax(wbig, wsmall)
-			wr2 = mmin(wbig, wsmall)
+			wr1 = math.Max(wbig, wsmall)
+			wr2 = math.Min(wbig, wsmall)
 		}
 		wi = 0.0
 	} else {
@@ -194,25 +190,25 @@ func (Implementation) Dlag2(a []float64, lda int, b []float64, ldb int) (scale1,
 	//    c4 implements the condition  s    should not underflow.
 	//    c5 implements the condition  max(s,|w|) should be at least 2.
 	var c1, c2, c3, c4, c5, wscale float64
-	c1 = bsize * (safmin * mmax(1, ascale))
-	c2 = safmin * mmax(1, bnorm)
+	c1 = bsize * (safmin * math.Max(1, ascale))
+	c2 = safmin * math.Max(1, bnorm)
 	c3 = bsize * safmin
 	c4, c5 = 1, 1
 	if ascale <= 1 || bsize <= 1 {
-		c5 = mmin(1, ascale*bsize)
+		c5 = math.Min(1, ascale*bsize)
 		if ascale <= 1 && bsize <= 1 {
-			c4 = mmin(1, (ascale/safmin)*bsize)
+			c4 = math.Min(1, (ascale/safmin)*bsize)
 		}
 	}
 
 	// Scale first eigenvalue.
-	wabs := fabs(wr1) + fabs(wi)
-	wsize := mmax(mmax(safmin, c1), mmax(fuzzy1*(wabs*c2+c3),
-		mmin(c4, 0.5*mmax(wabs, c5))))
-	maxABsize := mmax(ascale, bsize)
-	minABsize := mmin(ascale, bsize)
+	wabs := math.Abs(wr1) + math.Abs(wi)
+	wsize := math.Max(math.Max(safmin, c1), math.Max(fuzzy1*(wabs*c2+c3),
+		math.Min(c4, 0.5*math.Max(wabs, c5))))
+	maxABsize := math.Max(ascale, bsize)
+	minABsize := math.Min(ascale, bsize)
 	if wsize != 1 {
-		wscale = 1. / wsize
+		wscale = 1 / wsize
 		if wsize > 1 {
 			scale1 = (maxABsize * wscale) * minABsize
 		} else {
@@ -231,10 +227,10 @@ func (Implementation) Dlag2(a []float64, lda int, b []float64, ldb int) (scale1,
 
 	// Scale second eigenvalue if real.
 	if wi == 0 {
-		wsize = mmax(mmax(safmin, c1), mmax(fuzzy1*(fabs(wr2)*c2+c3),
-			mmin(c4, 0.5*mmax(wr2, c5))))
+		wsize = math.Max(math.Max(safmin, c1), math.Max(fuzzy1*(math.Abs(wr2)*c2+c3),
+			math.Min(c4, 0.5*math.Max(wr2, c5))))
 		if wsize != 1 {
-			wscale = 1. / wsize
+			wscale = 1 / wsize
 			if wsize > 1 {
 				scale2 = (maxABsize * wscale) * minABsize
 			} else {

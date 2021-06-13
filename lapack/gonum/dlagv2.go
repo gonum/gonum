@@ -41,6 +41,19 @@ import (
 //
 // Dlagv2 is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dlagv2(a []float64, lda int, b []float64, ldb int, alphar, alphai, beta []float64) (csl, snl, csr, snr float64) {
+	switch {
+	case lda < 2:
+		panic(badLdA)
+	case ldb < 2:
+		panic(badLdB)
+	case len(a) < 4:
+		panic(shortA)
+	case len(b) < 4:
+		panic(shortB)
+	case len(alphar) < 2 || len(alphai) < 2:
+		panic(short)
+	}
+
 	const (
 		safmin = dlamchS
 		ulp    = dlamchP

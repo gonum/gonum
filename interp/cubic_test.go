@@ -799,6 +799,11 @@ func TestNaturalCubicFit(t *testing.T) {
 		if math.Abs(got-want[i]) > 1e-14 {
 			t.Errorf("Mismatch in predicted Y value for x = %g: got %v, want %g", testXs[i], got, want[i])
 		}
+		got = nc.PredictDerivative(testXs[i])
+		want := discrDerivPredict(&nc, xs[0], xs[len(xs)-1], testXs[i], 1e-9)
+		if math.Abs(got-want) > 1e-6 {
+			t.Errorf("Mismatch in predicted dY/dX value for x = %g: got %v, want %g", testXs[i], got, want)
+		}
 	}
 }
 
@@ -831,6 +836,11 @@ func TestClampedCubicFit(t *testing.T) {
 		got := cc.Predict(testXs[i])
 		if math.Abs(got-want[i]) > 1e-14 {
 			t.Errorf("Mismatch in predicted Y value for x = %g: got %v, want %g", testXs[i], got, want[i])
+		}
+		got = cc.PredictDerivative(testXs[i])
+		want := discrDerivPredict(&cc, xs[0], xs[len(xs)-1], testXs[i], 1e-9)
+		if math.Abs(got-want) > 1e-6 {
+			t.Errorf("Mismatch in predicted dY/dX value for x = %g: got %v, want %g", testXs[i], got, want)
 		}
 	}
 }

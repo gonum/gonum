@@ -38,12 +38,14 @@ var (
 var newTests = []struct {
 	data   []Comparable
 	effort int
+	seed   uint64
 }{
-	{data: wpData, effort: 0},
-	{data: wpData, effort: 1},
-	{data: wpData, effort: 2},
-	{data: wpData, effort: 4},
-	{data: wpData, effort: 8},
+	{data: wpData, effort: 0, seed: 1},
+	{data: wpData, effort: 1, seed: 1},
+	{data: wpData, effort: 2, seed: 1},
+	{data: wpData, effort: 4, seed: 1},
+	{data: wpData, effort: 8, seed: 1},
+	{data: []Comparable{Point{2, 3}, Point{5, 4}, Point{9, 6}, Point{5, 4}, Point{8, 1}, Point{7, 2}}, effort: 3, seed: 5555},
 }
 
 func TestNew(t *testing.T) {
@@ -57,7 +59,7 @@ func TestNew(t *testing.T) {
 					panicked = true
 				}
 			}()
-			tree, err = New(test.data, test.effort, rand.NewSource(1))
+			tree, err = New(test.data, test.effort, rand.NewSource(test.seed))
 		}()
 		if panicked {
 			t.Errorf("unexpected panic for test %d", i)

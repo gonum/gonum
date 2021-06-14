@@ -130,7 +130,7 @@ func (b *builder) selectVantage(s []Comparable, effort int) Comparable {
 		effort = len(s)
 	}
 	var best Comparable
-	var bestVar float64
+	bestVar := -1.0
 	b.work = b.work[:effort]
 	choices := b.random(effort, s)
 	for _, p := range choices {

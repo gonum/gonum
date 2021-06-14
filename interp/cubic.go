@@ -458,3 +458,38 @@ func (cc *ClampedCubic) Fit(xs, ys []float64) error {
 	}
 	return err
 }
+
+// NotAKnotCubic is a piecewise cubic 1-dimensional interpolator with
+// continuous value, first and second derivatives, which can be fitted to (X, Y)
+// value pairs without providing derivatives. It imposes the condition that
+// the third derivative of the interpolant is continuous in the first and
+// last interior node.
+type NotAKnotCubic struct {
+	cubic PiecewiseCubic
+}
+
+// Predict returns the interpolation value at x.
+func (nak *NotAKnotCubic) Predict(x float64) float64 {
+	return nak.cubic.Predict(x)
+}
+
+// PredictDerivative returns the predicted derivative at x.
+func (nak *NotAKnotCubic) PredictDerivative(x float64) float64 {
+	return nak.cubic.PredictDerivative(x)
+}
+
+// Fit fits a predictor to (X, Y) value pairs provided as two slices.
+// It panics if len(xs) < 2, elements of xs are not strictly increasing
+// or len(xs) != len(ys). It returns an error if solving the required system
+// of linear equations fails.
+func (nak *NotAKnotCubic) Fit(xs, ys []float64) error {
+	a, b := makeCubicSplineSecondDerivativeEquations(xs, ys)
+	// Add boundary conditions:
+	n := len(xs)
+	x := mat.NewVecDense(n, nil)
+	err := a.SolveVecTo(x, false, b)
+	if err == nil {
+		nak.cubic.fitWithSecondDerivatives(xs, ys, x.RawVector().Data)
+	}
+	return err
+}

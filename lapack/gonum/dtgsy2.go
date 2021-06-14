@@ -33,7 +33,7 @@ import (
 //  Aᵀ * R  + Dᵀ * L   = scale * C           (3)
 //  R  * Bᵀ + L  * Eᵀ  = scale * -F
 // This case is used to compute an estimate of Dif[(A, D), (B, E)] =
-// sigma_min(Z) using reverse communication with DLACON.
+// sigma_min(Z) using reverse communication with Dlacon.
 // Dtgsy2 also (ijob >= 1) contributes to the computation in Dtgsyl
 // of an upper bound on the separation between to matrix pairs. Then
 // the input (A, D), (B, E) are sub-pencils of the matrix pair in
@@ -107,282 +107,585 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 	//  D(I, I) * R(I, J) - L(I, J) * E(J, J) = F(I, J)
 	// for I = P-1, P - 2, ..., 0; J = 0, 1, ..., Q - 1
 	// NO TRANS PART
-	// if trans == blas.NoTrans
 	scale = 1
 	scaloc := 1.0
-	var alpha float64
-	for j := p + 2; j < q; {
-		js := iwork[j]
-		jsp1 := js + 1
-		je := iwork[j+1] - 1
-		nb := je - js + 1
-		for i := p; i >= 0; i-- {
+	if trans == blas.NoTrans {
+		var alpha float64
+		for j := p + 2; j < q; {
+			js := iwork[j]
+			jsp1 := js + 1
+			je := iwork[j+1] - 1
+			nb := je - js + 1
+			for i := p; i >= 0; i-- {
+				is := iwork[i]
+				isp1 := is + 1
+				ie := iwork[i+1] - 1
+				mb := ie - is + 1
+				zdim := mb * nb * 2
+				if mb == 1 && nb == 1 {
+					// Build a 2×2 system Z * x = RHS.
+					z[0] = a[is*lda+is]
+					z[ldz] = d[is*ldd+is]
+					z[1] = -b[js*ldb+js]
+					z[ldz+1] = -e[js*lde+js]
+					// Set up right hand side(s).
+					rhs[0] = c[is*ldc+js]
+					rhs[1] = f[is*ldf+js]
+
+					// Solve Z * x = RHS.
+					k := impl.Dgetc2(zdim, z, ldz, ipiv, jpiv)
+					if k >= 0 {
+						info = k
+					}
+					if ijob == 0 {
+						scaloc = impl.Dgesc2(zdim, z, ldz, rhs, ipiv, jpiv)
+						if scaloc != 1 {
+							for k = 0; k < n; k++ {
+								bi.Dscal(m, scaloc, c[k:], ldc)
+								bi.Dscal(m, scaloc, f[k:], ldf)
+							}
+							scale *= scaloc
+						}
+					} else {
+						rdsum, rdscal = impl.Dlatdf(ijob, zdim, z, ldz, rhs, rdsum, rdscal, ipiv, jpiv)
+					}
+					// Unpack solution vector(s).
+					c[is*ldc+js] = rhs[0]
+					f[is*ldf+js] = rhs[1]
+
+					// Substitute R(I, J) and L(I, J) into remaining equation.
+					if i > 0 {
+						alpha = -rhs[0]
+						bi.Daxpy(is, alpha, a[is:], lda, c[js:], ldc)
+						bi.Daxpy(is, alpha, d[is:], ldd, f[js:], ldf)
+					}
+					if j < q {
+						bi.Daxpy(n-je, rhs[1], b[js*ldb+je+1:], 1, c[is*ldc+je+1:], 1)
+						bi.Daxpy(n-je, rhs[1], e[js*lde+je+1:], 1, f[is*ldf+je+1:], 1)
+					}
+				} else if mb == 1 && nb == 2 {
+					// Build a 4×4 system Z * x = RHS
+					z[0] = a[is*lda+is]
+					z[ldz] = 0
+					z[2*ldz] = d[is*ldd+is]
+					z[3*ldz] = 0
+
+					z[1] = 0
+					z[ldz+1] = a[is*lda+is]
+					z[2*ldz+1] = 0
+					z[3*ldz+1] = d[is*ldd+is]
+
+					z[2] = -b[js*ldb+js]
+					z[ldz+2] = -b[js*ldb+jsp1]
+					z[2*ldz+2] = -e[js*lde+js]
+					z[3*ldz+2] = -e[js*lde+jsp1]
+
+					z[3] = -b[jsp1*ldb+js]
+					z[ldz+3] = -b[jsp1*ldb+jsp1]
+					z[2*ldz+3] = 0
+					z[3*ldz+3] = -e[jsp1*lde+jsp1]
+
+					// Set up right hand side(s)
+					rhs[0] = c[is*ldc+js]
+					rhs[1] = c[is*ldc+jsp1]
+					rhs[2] = f[is*ldf+js]
+					rhs[3] = f[is*ldf+jsp1]
+
+					// Solve Z * x = RHS
+					k := impl.Dgetc2(zdim, z, ldz, ipiv, jpiv)
+					if k >= 0 {
+						info = k
+					}
+					if ijob == 0 {
+						scaloc = impl.Dgesc2(zdim, z, ldz, rhs, ipiv, jpiv)
+						if scaloc != 1 {
+							for k = 0; k < n; k++ {
+								bi.Dscal(m, scaloc, c[k:], ldc)
+								bi.Dscal(m, scaloc, f[k:], ldf)
+							}
+							scale *= scaloc
+						}
+					} else {
+						rdsum, rdscal = impl.Dlatdf(ijob, zdim, z, ldz, rhs, rdsum, rdscal, ipiv, jpiv)
+					}
+
+					// Unpack solution vector(s).
+					c[is*ldc+js] = rhs[0]
+					c[is*ldc+jsp1] = rhs[1]
+					f[is*ldf+js] = rhs[2]
+					f[is*ldf+jsp1] = rhs[3]
+
+					// Substitute R(i,j) and L(i,j) into remaining equation.
+					if i > 0 {
+						bi.Dger(is, nb, -1, a[is:], lda, rhs, 1, c[js:], 1)
+						bi.Dger(is, nb, -1, d[is:], ldd, rhs, 1, f[js:], 1)
+					}
+					if j < q {
+						bi.Daxpy(n-je, rhs[2], b[js*ldb+je+1:], 1, c[is*ldc+je+1:], 1)
+						bi.Daxpy(n-je, rhs[2], e[js*lde+je+1:], 1, f[is*ldf+je+1:], 1)
+						bi.Daxpy(n-je, rhs[3], b[jsp1*ldb+je+1:], 1, c[is*ldc+je+1:], 1)
+						bi.Daxpy(n-je, rhs[3], e[jsp1*lde+je+1:], 1, f[is*ldf+je+1:], 1)
+					}
+				} else if mb == 2 && nb == 1 {
+					// Build a 4×4 system Z * x = RHS.
+					z[0] = a[is*lda+is]
+					z[ldz] = a[isp1*lda+is]
+					z[2*ldz] = d[is*ldd+is]
+					z[3*ldz] = 0
+
+					z[1] = a[is*lda+isp1]
+					z[ldz+1] = a[isp1*lda+isp1]
+					z[2*ldz+1] = d[is*ldd+isp1]
+					z[3*ldz+1] = d[isp1*ldd+isp1]
+
+					z[2] = -b[js*ldb+js]
+					z[ldz+2] = 0
+					z[2*ldz+2] = -e[js*lde+js]
+					z[3*ldz+2] = 0
+
+					z[3] = 0
+					z[ldz+3] = -b[js*ldb+js]
+					z[2*ldz+3] = 0
+					z[3*ldz+3] = -e[js*lde+js]
+
+					// Set up right hand side(s).
+					rhs[0] = c[is*ldc+js]
+					rhs[1] = c[isp1*ldc+js]
+					rhs[2] = f[is*ldf+js]
+					rhs[3] = f[isp1*ldf+js]
+
+					// Solve Z * x = RHS
+					k := impl.Dgetc2(zdim, z, ldz, ipiv, jpiv)
+					if k >= 0 {
+						info = k
+					}
+					if ijob == 0 {
+						scaloc = impl.Dgesc2(zdim, z, ldz, rhs, ipiv, jpiv)
+						if scaloc != 1 {
+							for k = 0; k < n; k++ {
+								bi.Dscal(m, scaloc, c[k:], ldc)
+								bi.Dscal(m, scaloc, f[k:], ldf)
+							}
+							scale *= scaloc
+						}
+					} else {
+						rdsum, rdscal = impl.Dlatdf(ijob, zdim, z, ldz, rhs, rdsum, rdscal, ipiv, jpiv)
+					}
+
+					// Unpack solution vectors
+					c[is*ldc+js] = rhs[0]
+					c[isp1*ldc+js] = rhs[1]
+					f[is*ldf+js] = rhs[2]
+					f[isp1*ldf+js] = rhs[3]
+
+					// Substitute R(I, J) and L(I, J) into remaining equation.
+					if i > 0 {
+						bi.Dgemv(blas.NoTrans, is, mb, -1, a[is:], lda, rhs, 1, 1, c[js:], ldc)
+						bi.Dgemv(blas.NoTrans, is, mb, -1, d[is:], ldd, rhs, 1, 1, f[js:], ldf)
+					}
+					if j < q {
+						bi.Dger(mb, n-je, 1, rhs[2:], 1, b[js*ldb+je+1:], 1,
+							c[is*ldc+je+1:], ldc)
+						bi.Dger(mb, n-je, 1, rhs[2:], 1, e[js*lde+je+1:], 1,
+							f[is*ldf+je+1:], ldf)
+					}
+				} else if mb == 2 && nb == 2 {
+					// Build 8×8 system Z * x = RHS
+					impl.Dlaset(blas.All, ldz, ldz, 0, 0, z, ldz)
+
+					z[0] = a[is*lda+is]
+					z[ldz] = a[isp1*lda+is]
+					z[4*ldz] = d[is*ldd+is]
+
+					z[1] = a[is*lda+isp1]
+					z[ldz+1] = a[isp1*lda+isp1]
+					z[4*ldz+1] = d[is*ldd+isp1]
+					z[5*ldz+1] = d[isp1*ldd+isp1]
+
+					z[2*ldz+2] = a[is*lda+is]
+					z[3*ldz+2] = a[isp1*lda+is]
+					z[6*ldz+2] = d[is*ldd+is]
+
+					z[2*ldz+3] = a[is*lda+isp1]
+					z[3*ldz+3] = a[isp1*lda+isp1]
+					z[6*ldz+3] = d[is*ldd+isp1]
+					z[7*ldz+3] = d[isp1*ldd+isp1]
+
+					z[4] = -b[js*ldb+js]
+					z[2*ldz+4] = -b[js*ldb+jsp1]
+					z[4*ldz+4] = -e[js*lde+js]
+					z[6*ldz+4] = -e[js*lde+jsp1]
+
+					z[ldz+5] = -b[js*ldb+js]
+					z[3*ldz+5] = -b[js*ldb+jsp1]
+					z[5*ldz+5] = -e[js*lde+js]
+					z[7*ldz+5] = -e[js*lde+jsp1]
+
+					z[6] = -b[jsp1*ldb+js]
+					z[2*ldz+6] = -b[jsp1*ldb+jsp1]
+					z[6*ldz+6] = -e[jsp1*lde+jsp1]
+
+					z[ldz+7] = -b[jsp1*ldb+js]
+					z[3*ldz+7] = -b[jsp1*ldb+jsp1]
+					z[7*ldz+7] = -e[jsp1*lde+jsp1]
+
+					// Set up right hand side(s).
+					k := 0
+					ii := mb*nb + 1
+					for jj := 0; jj < nb-1; jj++ {
+						bi.Dcopy(mb, c[is*ldc+js+jj:], ldc, rhs[k:], 1)
+						bi.Dcopy(mb, f[is*ldf+js+jj:], ldf, rhs[ii:], 1)
+						k += mb
+						ii += mb
+					}
+
+					// Solve Z * x = RHS
+					k = impl.Dgetc2(zdim, z, ldz, ipiv, jpiv)
+					if k >= 0 {
+						info = k
+					}
+					if ijob == 0 {
+						scaloc = impl.Dgesc2(zdim, z, ldz, rhs, ipiv, jpiv)
+						if scaloc != 1 {
+							for k = 0; k < n; k++ {
+								bi.Dscal(m, scaloc, c[k:], ldc)
+								bi.Dscal(m, scaloc, f[k:], ldf)
+							}
+							scale *= scaloc
+						}
+					} else {
+						rdsum, rdscal = impl.Dlatdf(ijob, zdim, z, ldz, rhs, rdsum, rdscal, ipiv, jpiv)
+					}
+
+					// Unpack solution vectors(s).
+					k = 0
+					ii = mb*nb + 1
+					for jj := 0; jj < nb-1; jj++ {
+						bi.Dcopy(mb, rhs[k:], 1, c[is*ldc+js+jj:], ldc)
+						bi.Dcopy(mb, rhs[ii:], 1, f[is*ldf+js+jj:], ldf)
+						k += mb
+						ii += mb
+					}
+
+					// Substitute R(I, J) and L(I, J) into remaining equation.
+					if i > 1 {
+						bi.Dgemm(blas.NoTrans, blas.NoTrans, is, nb, mb, -1,
+							a[is:], lda, rhs, mb, 1, c[js:], ldc)
+						bi.Dgemm(blas.NoTrans, blas.NoTrans, is, nb, mb, -1,
+							d[is:], ldd, rhs, mb, 1, f[js:], ldf)
+					}
+					if j < q {
+						k = mb * nb
+						bi.Dgemm(blas.NoTrans, blas.NoTrans, mb, n-je, nb, 1,
+							rhs[k:], mb, b[js*ldb+je+1:], ldb, 1, c[is*ldc+je+1:], ldc)
+						bi.Dgemm(blas.NoTrans, blas.NoTrans, mb, n-je, nb, 1,
+							rhs[k:], mb, e[js*lde+je+1:], lde, 1, f[is*ldf+je+1:], ldf)
+					}
+				}
+			}
+		}
+	} else {
+
+		// trans == blas.Transpose
+
+		//
+
+		//
+
+		//
+
+		//
+
+		//
+
+		//
+
+		//
+
+		//
+
+		//
+
+		//
+
+		//
+
+		//
+		var alpha float64
+		for i := 0; i < p; {
 			is := iwork[i]
 			isp1 := is + 1
 			ie := iwork[i+1] - 1
 			mb := ie - is + 1
-			zdim := mb * nb * 2
-			if mb == 1 && nb == 1 {
-				// Build a 2×2 system Z * x = RHS.
-				z[0] = a[is*lda+is]
-				z[ldz] = d[is*ldd+is]
-				z[1] = -b[js*ldb+js]
-				z[ldz+1] = -e[js*lde+js]
-				// Set up right hand side(s).
-				rhs[0] = c[is*ldc+js]
-				rhs[1] = f[is*ldf+js]
+			for j := q; j < p+2; j-- {
+				js := iwork[j]
+				jsp1 := js + 1
+				je := iwork[j+1] - 1
+				nb := je - js + 1
+				zdim := nb * mb * 2
+				if nb == 1 && mb == 1 {
+					// Build a 2×2 system Zᵀ * x = RHS.
+					z[0] = a[is*lda+is]
+					z[ldz] = -b[js*ldb+js]
+					z[1] = d[is*ldd+is]
+					z[ldz+1] = -e[js*lde+js]
+					// Set up right hand side(s).
+					rhs[0] = c[js*ldc+is]
+					rhs[1] = f[js*ldf+is]
 
-				// Solve Z * x = RHS.
-				k := impl.Dgetc2(zdim, z, ldz, ipiv, jpiv)
-				if k >= 0 {
-					info = k
-				}
-				if ijob == 0 {
-					scaloc = impl.Dgesc2(zdim, z, ldz, rhs, ipiv, jpiv)
-					if scaloc != 1 {
-						for k = 0; k < n; k++ {
-							bi.Dscal(m, scaloc, c[k:], ldc)
-							bi.Dscal(m, scaloc, f[k:], ldf)
-						}
-						scale *= scaloc
+					// Solve Zᵀ * x = RHS.
+					k := impl.Dgetc2(zdim, z, ldz, ipiv, jpiv)
+					if k >= 0 {
+						info = k
 					}
-				} else {
-					rdsum, rdscal = impl.Dlatdf(ijob, zdim, z, ldz, rhs, rdsum, rdscal, ipiv, jpiv)
-				}
-				// Unpack solution vector(s).
-				c[is*ldc+js] = rhs[0]
-				f[is*ldf+js] = rhs[1]
-
-				// Substitute R(I, J) and L(I, J) into remaining equation.
-				if i > 0 {
-					alpha = -rhs[0]
-					bi.Daxpy(is, alpha, a[is:], lda, c[js:], ldc)
-					bi.Daxpy(is, alpha, d[is:], ldd, f[js:], ldf)
-				}
-				if j < q {
-					bi.Daxpy(n-je, rhs[1], b[js*ldb+je+1:], 1, c[is*ldc+je+1:], 1)
-					bi.Daxpy(n-je, rhs[1], e[js*lde+je+1:], 1, f[is*ldf+je+1:], 1)
-				}
-			} else if mb == 1 && nb == 2 {
-				// Build a 4×4 system Z * x = RHS
-				z[0] = a[is*lda+is]
-				z[ldz] = 0
-				z[2*ldz] = d[is*ldd+is]
-				z[3*ldz] = 0
-
-				z[1] = 0
-				z[ldz+1] = a[is*lda+is]
-				z[2*ldz+1] = 0
-				z[3*ldz+1] = d[is*ldd+is]
-
-				z[2] = -b[js*ldb+js]
-				z[ldz+2] = -b[js*ldb+jsp1]
-				z[2*ldz+2] = -e[js*lde+js]
-				z[3*ldz+2] = -e[js*lde+jsp1]
-
-				z[3] = -b[jsp1*ldb+js]
-				z[ldz+3] = -b[jsp1*ldb+jsp1]
-				z[2*ldz+3] = 0
-				z[3*ldz+3] = -e[jsp1*lde+jsp1]
-
-				// Set up right hand side(s)
-				rhs[0] = c[is*ldc+js]
-				rhs[1] = c[is*ldc+jsp1]
-				rhs[2] = f[is*ldf+js]
-				rhs[3] = f[is*ldf+jsp1]
-
-				// Solve Z * x = RHS
-				k := impl.Dgetc2(zdim, z, ldz, ipiv, jpiv)
-				if k >= 0 {
-					info = k
-				}
-				if ijob == 0 {
-					scaloc = impl.Dgesc2(zdim, z, ldz, rhs, ipiv, jpiv)
-					if scaloc != 1 {
-						for k = 0; k < n; k++ {
-							bi.Dscal(m, scaloc, c[k:], ldc)
-							bi.Dscal(m, scaloc, f[k:], ldf)
+					if ijob == 0 {
+						scaloc = impl.Dgesc2(zdim, z, ldz, rhs, ipiv, jpiv)
+						if scaloc != 1 {
+							for k = 0; k < n; k++ {
+								bi.Dscal(m, scaloc, c[k:], ldc)
+								bi.Dscal(m, scaloc, f[k:], ldf)
+							}
+							scale *= scaloc
 						}
-						scale *= scaloc
+					} else {
+						rdsum, rdscal = impl.Dlatdf(ijob, zdim, z, ldz, rhs, rdsum, rdscal, ipiv, jpiv)
 					}
-				} else {
-					rdsum, rdscal = impl.Dlatdf(ijob, zdim, z, ldz, rhs, rdsum, rdscal, ipiv, jpiv)
-				}
+					// Unpack solution vector(s).
+					c[js*ldc+is] = rhs[0]
+					f[js*ldf+is] = rhs[1]
 
-				// Unpack solution vector(s).
-				c[is*ldc+js] = rhs[0]
-				c[is*ldc+jsp1] = rhs[1]
-				f[is*ldf+js] = rhs[2]
-				f[is*ldf+jsp1] = rhs[3]
+					// Substitute R(I, J) and L(I, J) into remaining equation.
+					if j > 0 {
+						alpha = -rhs[0]
+						bi.Daxpy(js, alpha, a[js:], lda, c[is:], ldc)
+						bi.Daxpy(js, alpha, d[js:], ldd, f[is:], ldf)
+					}
+					if i < q {
+						bi.Daxpy(n-ie, rhs[1], b[is*ldb+ie+1:], 1, c[js*ldc+ie+1:], 1)
+						bi.Daxpy(n-ie, rhs[1], e[is*lde+ie+1:], 1, f[js*ldf+ie+1:], 1)
+					}
+				} else if nb == 1 && mb == 2 {
+					// Build a 4×4 system Zᵀ * x = RHS
+					z[0] = a[js*lda+js]
+					z[ldz] = 0
+					z[2*ldz] = d[js*ldd+js]
+					z[3*ldz] = 0
 
-				// Substitute R(i,j) and L(i,j) into remaining equation.
-				if i > 0 {
-					bi.Dger(is, nb, -1, a[is:], lda, rhs, 1, c[js:], 1)
-					bi.Dger(is, nb, -1, d[is:], ldd, rhs, 1, f[js:], 1)
-				}
-				if j < q {
-					bi.Daxpy(n-je, rhs[2], b[js*ldb+je+1:], 1, c[is*ldc+je+1:], 1)
-					bi.Daxpy(n-je, rhs[2], e[js*lde+je+1:], 1, f[is*ldf+je+1:], 1)
-					bi.Daxpy(n-je, rhs[3], b[jsp1*ldb+je+1:], 1, c[is*ldc+je+1:], 1)
-					bi.Daxpy(n-je, rhs[3], e[jsp1*lde+je+1:], 1, f[is*ldf+je+1:], 1)
-				}
-			} else if mb == 2 && nb == 1 {
-				// Build a 4×4 system Z * x = RHS.
-				z[0] = a[is*lda+is]
-				z[ldz] = a[isp1*lda+is]
-				z[2*ldz] = d[is*ldd+is]
-				z[3*ldz] = 0
+					z[1] = 0
+					z[ldz+1] = a[js*lda+js]
+					z[2*ldz+1] = 0
+					z[3*ldz+1] = d[js*ldd+js]
 
-				z[1] = a[is*lda+isp1]
-				z[ldz+1] = a[isp1*lda+isp1]
-				z[2*ldz+1] = d[is*ldd+isp1]
-				z[3*ldz+1] = d[isp1*ldd+isp1]
+					z[2] = -b[is*ldb+is]
+					z[ldz+2] = -b[is*ldb+isp1]
+					z[2*ldz+2] = -e[is*lde+is]
+					z[3*ldz+2] = -e[is*lde+isp1]
 
-				z[2] = -b[js*ldb+js]
-				z[ldz+2] = 0
-				z[2*ldz+2] = -e[js*lde+js]
-				z[3*ldz+2] = 0
+					z[3] = -b[isp1*ldb+is]
+					z[ldz+3] = -b[isp1*ldb+isp1]
+					z[2*ldz+3] = 0
+					z[3*ldz+3] = -e[isp1*lde+isp1]
 
-				z[3] = 0
-				z[ldz+3] = -b[js*ldb+js]
-				z[2*ldz+3] = 0
-				z[3*ldz+3] = -e[js*lde+js]
+					// Set up right hand side(s)
+					rhs[0] = c[js*ldc+is]
+					rhs[1] = c[js*ldc+isp1]
+					rhs[2] = f[js*ldf+is]
+					rhs[3] = f[js*ldf+isp1]
 
-				// Set up right hand side(s).
-				rhs[0] = c[is*ldc+js]
-				rhs[1] = c[isp1*ldc+js]
-				rhs[2] = f[is*ldf+js]
-				rhs[3] = f[isp1*ldf+js]
-
-				// Solve Z * x = RHS
-				k := impl.Dgetc2(zdim, z, ldz, ipiv, jpiv)
-				if k >= 0 {
-					info = k
-				}
-				if ijob == 0 {
-					scaloc = impl.Dgesc2(zdim, z, ldz, rhs, ipiv, jpiv)
-					if scaloc != 1 {
-						for k = 0; k < n; k++ {
-							bi.Dscal(m, scaloc, c[k:], ldc)
-							bi.Dscal(m, scaloc, f[k:], ldf)
+					// Solve Zᵀ * x = RHS
+					k := impl.Dgetc2(zdim, z, ldz, ipiv, jpiv)
+					if k >= 0 {
+						info = k
+					}
+					if ijob == 0 {
+						scaloc = impl.Dgesc2(zdim, z, ldz, rhs, ipiv, jpiv)
+						if scaloc != 1 {
+							for k = 0; k < n; k++ {
+								bi.Dscal(m, scaloc, c[k:], ldc)
+								bi.Dscal(m, scaloc, f[k:], ldf)
+							}
+							scale *= scaloc
 						}
-						scale *= scaloc
+					} else {
+						rdsum, rdscal = impl.Dlatdf(ijob, zdim, z, ldz, rhs, rdsum, rdscal, ipiv, jpiv)
 					}
-				} else {
-					rdsum, rdscal = impl.Dlatdf(ijob, zdim, z, ldz, rhs, rdsum, rdscal, ipiv, jpiv)
-				}
 
-				// Unpack solution vectors
-				c[is*ldc+js] = rhs[0]
-				c[isp1*ldc+js] = rhs[1]
-				f[is*ldf+js] = rhs[2]
-				f[isp1*ldf+js] = rhs[3]
+					// Unpack solution vector(s).
+					c[js*ldc+is] = rhs[0]
+					c[js*ldc+isp1] = rhs[1]
+					f[js*ldf+is] = rhs[2]
+					f[js*ldf+isp1] = rhs[3]
 
-				// Substitute R(I, J) and L(I, J) into remaining equation.
-				if i > 0 {
-					bi.Dgemv(blas.NoTrans, is, mb, -1, a[is:], lda, rhs, 1, 1, c[js:], ldc)
-					bi.Dgemv(blas.NoTrans, is, mb, -1, d[is:], ldd, rhs, 1, 1, f[js:], ldf)
-				}
-				if j < q {
-					bi.Dger(mb, n-je, 1, rhs[2:], 1, b[js*ldb+je+1:], 1,
-						c[is*ldc+je+1:], ldc)
-					bi.Dger(mb, n-je, 1, rhs[2:], 1, e[js*lde+je+1:], 1,
-						f[is*ldf+je+1:], ldf)
-				}
-			} else if mb == 2 && nb == 2 {
-				// Build 8×8 system Z * x = RHS
-				impl.Dlaset(blas.All, ldz, ldz, 0, 0, z, ldz)
+					// Substitute R(i,j) and L(i,j) into remaining equation.
+					if j > 0 {
+						bi.Dger(js, mb, -1, a[js:], lda, rhs, 1, c[is:], 1)
+						bi.Dger(js, mb, -1, d[js:], ldd, rhs, 1, f[is:], 1)
+					}
+					if i < q {
+						bi.Daxpy(n-ie, rhs[2], b[is*ldb+ie+1:], 1, c[js*ldc+ie+1:], 1)
+						bi.Daxpy(n-ie, rhs[2], e[is*lde+ie+1:], 1, f[js*ldf+ie+1:], 1)
+						bi.Daxpy(n-ie, rhs[3], b[isp1*ldb+ie+1:], 1, c[js*ldc+ie+1:], 1)
+						bi.Daxpy(n-ie, rhs[3], e[isp1*lde+ie+1:], 1, f[js*ldf+ie+1:], 1)
+					}
+				} else if nb == 2 && mb == 1 {
+					// Build a 4×4 system Zᵀ * x = RHS.
+					z[0] = a[js*lda+js]
+					z[ldz] = a[jsp1*lda+js]
+					z[2*ldz] = d[js*ldd+js]
+					z[3*ldz] = 0
 
-				z[0] = a[is*lda+is]
-				z[ldz] = a[isp1*lda+is]
-				z[4*ldz] = d[is*ldd+is]
+					z[1] = a[js*lda+jsp1]
+					z[ldz+1] = a[jsp1*lda+jsp1]
+					z[2*ldz+1] = d[js*ldd+jsp1]
+					z[3*ldz+1] = d[jsp1*ldd+jsp1]
 
-				z[1] = a[is*lda+isp1]
-				z[ldz+1] = a[isp1*lda+isp1]
-				z[4*ldz+1] = d[is*ldd+isp1]
-				z[5*ldz+1] = d[isp1*ldd+isp1]
+					z[2] = -b[is*ldb+is]
+					z[ldz+2] = 0
+					z[2*ldz+2] = -e[is*lde+is]
+					z[3*ldz+2] = 0
 
-				z[2*ldz+2] = a[is*lda+is]
-				z[3*ldz+2] = a[isp1*lda+is]
-				z[6*ldz+2] = d[is*ldd+is]
+					z[3] = 0
+					z[ldz+3] = -b[is*ldb+is]
+					z[2*ldz+3] = 0
+					z[3*ldz+3] = -e[is*lde+is]
 
-				z[2*ldz+3] = a[is*lda+isp1]
-				z[3*ldz+3] = a[isp1*lda+isp1]
-				z[6*ldz+3] = d[is*ldd+isp1]
-				z[7*ldz+3] = d[isp1*ldd+isp1]
+					// Set up right hand side(s).
+					rhs[0] = c[js*ldc+is]
+					rhs[1] = c[jsp1*ldc+is]
+					rhs[2] = f[js*ldf+is]
+					rhs[3] = f[jsp1*ldf+is]
 
-				z[4] = -b[js*ldb+js]
-				z[2*ldz+4] = -b[js*ldb+jsp1]
-				z[4*ldz+4] = -e[js*lde+js]
-				z[6*ldz+4] = -e[js*lde+jsp1]
-
-				z[ldz+5] = -b[js*ldb+js]
-				z[3*ldz+5] = -b[js*ldb+jsp1]
-				z[5*ldz+5] = -e[js*lde+js]
-				z[7*ldz+5] = -e[js*lde+jsp1]
-
-				z[6] = -b[jsp1*ldb+js]
-				z[2*ldz+6] = -b[jsp1*ldb+jsp1]
-				z[6*ldz+6] = -e[jsp1*lde+jsp1]
-
-				z[ldz+7] = -b[jsp1*ldb+js]
-				z[3*ldz+7] = -b[jsp1*ldb+jsp1]
-				z[7*ldz+7] = -e[jsp1*lde+jsp1]
-
-				// Set up right hand side(s).
-				k := 0
-				ii := mb*nb + 1
-				for jj := 0; jj < nb-1; jj++ {
-					bi.Dcopy(mb, c[is*ldc+js+jj:], ldc, rhs[k:], 1)
-					bi.Dcopy(mb, f[is*ldf+js+jj:], ldf, rhs[ii:], 1)
-					k += mb
-					ii += mb
-				}
-
-				// Solve Z * x = RHS
-				k = impl.Dgetc2(zdim, z, ldz, ipiv, jpiv)
-				if k >= 0 {
-					info = k
-				}
-				if ijob == 0 {
-					scaloc = impl.Dgesc2(zdim, z, ldz, rhs, ipiv, jpiv)
-					if scaloc != 1 {
-						for k = 0; k < n; k++ {
-							bi.Dscal(m, scaloc, c[k:], ldc)
-							bi.Dscal(m, scaloc, f[k:], ldf)
+					// Solve Zᵀ * x = RHS
+					k := impl.Dgetc2(zdim, z, ldz, ipiv, jpiv)
+					if k >= 0 {
+						info = k
+					}
+					if ijob == 0 {
+						scaloc = impl.Dgesc2(zdim, z, ldz, rhs, ipiv, jpiv)
+						if scaloc != 1 {
+							for k = 0; k < n; k++ {
+								bi.Dscal(m, scaloc, c[k:], ldc)
+								bi.Dscal(m, scaloc, f[k:], ldf)
+							}
+							scale *= scaloc
 						}
-						scale *= scaloc
+					} else {
+						rdsum, rdscal = impl.Dlatdf(ijob, zdim, z, ldz, rhs, rdsum, rdscal, ipiv, jpiv)
 					}
-				} else {
-					rdsum, rdscal = impl.Dlatdf(ijob, zdim, z, ldz, rhs, rdsum, rdscal, ipiv, jpiv)
-				}
 
-				// Unpack solution vectors(s).
-				k = 0
-				ii = mb*nb + 1
-				for jj := 0; jj < nb-1; jj++ {
-					bi.Dcopy(mb, rhs[k:], 1, c[is*ldc+js+jj:], ldc)
-					bi.Dcopy(mb, rhs[ii:], 1, f[is*ldf+js+jj:], ldf)
-					k += mb
-					ii += mb
-				}
+					// Unpack solution vectors
+					c[js*ldc+is] = rhs[0]
+					c[jsp1*ldc+is] = rhs[1]
+					f[js*ldf+is] = rhs[2]
+					f[jsp1*ldf+is] = rhs[3]
 
-				// Substitute R(I, J) and L(I, J) into remaining equation.
-				if i > 1 {
-					bi.Dgemm(blas.NoTrans, blas.NoTrans, is, nb, mb, -1,
-						a[is:], lda, rhs, mb, 1, c[js:], ldc)
-					bi.Dgemm(blas.NoTrans, blas.NoTrans, is, nb, mb, -1,
-						d[is:], ldd, rhs, mb, 1, f[js:], ldf)
-				}
-				if j < q {
-					k = mb * nb
-					bi.Dgemm(blas.NoTrans, blas.NoTrans, mb, n-je, nb, 1,
-						rhs[k:], mb, b[js*ldb+je+1:], ldb, 1, c[is*ldc+je+1:], ldc)
-					bi.Dgemm(blas.NoTrans, blas.NoTrans, mb, n-je, nb, 1,
-						rhs[k:], mb, e[js*lde+je+1:], lde, 1, f[is*ldf+je+1:], ldf)
+					// Substitute R(I, J) and L(I, J) into remaining equation.
+					if j > 0 {
+						bi.Dgemv(blas.NoTrans, js, nb, -1, a[js:], lda, rhs, 1, 1, c[is:], ldc)
+						bi.Dgemv(blas.NoTrans, js, nb, -1, d[js:], ldd, rhs, 1, 1, f[is:], ldf)
+					}
+					if i < q {
+						bi.Dger(nb, n-ie, 1, rhs[2:], 1, b[is*ldb+ie+1:], 1,
+							c[js*ldc+ie+1:], ldc)
+						bi.Dger(nb, n-ie, 1, rhs[2:], 1, e[is*lde+ie+1:], 1,
+							f[js*ldf+ie+1:], ldf)
+					}
+				} else if nb == 2 && mb == 2 {
+					// Build 8×8 system Zᵀ * x = RHS
+					impl.Dlaset(blas.All, ldz, ldz, 0, 0, z, ldz)
+
+					z[0] = a[js*lda+js]
+					z[ldz] = a[jsp1*lda+js]
+					z[4*ldz] = d[js*ldd+js]
+
+					z[1] = a[js*lda+jsp1]
+					z[ldz+1] = a[jsp1*lda+jsp1]
+					z[4*ldz+1] = d[js*ldd+jsp1]
+					z[5*ldz+1] = d[jsp1*ldd+jsp1]
+
+					z[2*ldz+2] = a[js*lda+js]
+					z[3*ldz+2] = a[jsp1*lda+js]
+					z[6*ldz+2] = d[js*ldd+js]
+
+					z[2*ldz+3] = a[js*lda+jsp1]
+					z[3*ldz+3] = a[jsp1*lda+jsp1]
+					z[6*ldz+3] = d[js*ldd+jsp1]
+					z[7*ldz+3] = d[jsp1*ldd+jsp1]
+
+					z[4] = -b[is*ldb+is]
+					z[2*ldz+4] = -b[is*ldb+isp1]
+					z[4*ldz+4] = -e[is*lde+is]
+					z[6*ldz+4] = -e[is*lde+isp1]
+
+					z[ldz+5] = -b[is*ldb+is]
+					z[3*ldz+5] = -b[is*ldb+isp1]
+					z[5*ldz+5] = -e[is*lde+is]
+					z[7*ldz+5] = -e[is*lde+isp1]
+
+					z[6] = -b[isp1*ldb+is]
+					z[2*ldz+6] = -b[isp1*ldb+isp1]
+					z[6*ldz+6] = -e[isp1*lde+isp1]
+
+					z[ldz+7] = -b[isp1*ldb+is]
+					z[3*ldz+7] = -b[isp1*ldb+isp1]
+					z[7*ldz+7] = -e[isp1*lde+isp1]
+
+					// Set up right hand side(s).
+					k := 0
+					ii := nb*mb + 1
+					for jj := 0; jj < mb-1; jj++ {
+						bi.Dcopy(nb, c[js*ldc+is+jj:], ldc, rhs[k:], 1)
+						bi.Dcopy(nb, f[js*ldf+is+jj:], ldf, rhs[ii:], 1)
+						k += nb
+						ii += nb
+					}
+
+					// Solve Z * x = RHS
+					k = impl.Dgetc2(zdim, z, ldz, ipiv, jpiv)
+					if k >= 0 {
+						info = k
+					}
+					if ijob == 0 {
+						scaloc = impl.Dgesc2(zdim, z, ldz, rhs, ipiv, jpiv)
+						if scaloc != 1 {
+							for k = 0; k < n; k++ {
+								bi.Dscal(m, scaloc, c[k:], ldc)
+								bi.Dscal(m, scaloc, f[k:], ldf)
+							}
+							scale *= scaloc
+						}
+					} else {
+						rdsum, rdscal = impl.Dlatdf(ijob, zdim, z, ldz, rhs, rdsum, rdscal, ipiv, jpiv)
+					}
+
+					// Unpack solution vectors(s).
+					k = 0
+					ii = nb*mb + 1
+					for jj := 0; jj < mb-1; jj++ {
+						bi.Dcopy(nb, rhs[k:], 1, c[js*ldc+is+jj:], ldc)
+						bi.Dcopy(nb, rhs[ii:], 1, f[js*ldf+is+jj:], ldf)
+						k += nb
+						ii += nb
+					}
+
+					// Substitute R(I, J) and L(I, J) into remaining equation.
+					if j > 1 {
+						bi.Dgemm(blas.NoTrans, blas.NoTrans, js, mb, nb, -1,
+							a[js:], lda, rhs, nb, 1, c[is:], ldc)
+						bi.Dgemm(blas.NoTrans, blas.NoTrans, js, mb, nb, -1,
+							d[js:], ldd, rhs, nb, 1, f[is:], ldf)
+					}
+					if i < q {
+						k = nb * mb
+						bi.Dgemm(blas.NoTrans, blas.NoTrans, nb, n-ie, mb, 1,
+							rhs[k:], nb, b[is*ldb+ie+1:], ldb, 1, c[js*ldc+ie+1:], ldc)
+						bi.Dgemm(blas.NoTrans, blas.NoTrans, nb, n-ie, mb, 1,
+							rhs[k:], nb, e[is*lde+ie+1:], lde, 1, f[js*ldf+ie+1:], ldf)
+					}
 				}
 			}
 		}
+
 	}
 
 	return scale, rdsum, rdscal, pq, info

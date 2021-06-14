@@ -9,7 +9,7 @@ import (
 	"gonum.org/v1/gonum/blas/blas64"
 )
 
-// DTGSY2 solves the generalized Sylvester equation:
+// Dtgsy2 solves the generalized Sylvester equation:
 //  A * R - L * B = scale * C                (1)
 //  D * R - L * E = scale * F,
 // using Level 1 and 2 BLAS. where R and L are unknown m×n matrices,
@@ -22,23 +22,25 @@ import (
 //
 // In matrix notation solving equation (1) corresponds to solve
 // Z*x = scale*b, where Z is defined as
-//  Z = [ kron(In, A)  -kron(B**T, Im) ]             (2)
-//      [ kron(In, D)  -kron(E**T, Im) ],
-// Ik is the identity matrix of size k and X**T is the transpose of X.
+//  Z = [ kron(In, A)  -kron(Bᵀ, Im) ]             (2)
+//      [ kron(In, D)  -kron(Eᵀ, Im) ],
+// Ik is the identity matrix of size k and Xᵀ is the transpose of X.
 // kron(X, Y) is the Kronecker product between the matrices X and Y.
 // In the process of solving (1), we solve a number of such systems
 // where Dim(In), Dim(In) = 1 or 2.
-// If TRANS = 'T', solve the transposed system Z**T*y = scale*b for y,
+// If trans = blas.Trans, solve the transposed system Zᵀ*y = scale*b for y,
 // which is equivalent to solve for R and L in
-//  A**T * R  + D**T * L   = scale * C           (3)
-//  R  * B**T + L  * E**T  = scale * -F
+//  Aᵀ * R  + Dᵀ * L   = scale * C           (3)
+//  R  * Bᵀ + L  * Eᵀ  = scale * -F
 // This case is used to compute an estimate of Dif[(A, D), (B, E)] =
 // sigma_min(Z) using reverse communication with DLACON.
-// Dtgsy2 also (IJOB >= 1) contributes to the computation in Dtgsyl
+// Dtgsy2 also (ijob >= 1) contributes to the computation in Dtgsyl
 // of an upper bound on the separation between to matrix pairs. Then
 // the input (A, D), (B, E) are sub-pencils of the matrix pair in
 // Dtgsyl. See Dtgsyl for details.
-func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []float64, lda int, b []float64, ldb int, c []float64, ldc int, d []float64, ldd int, e []float64, lde int, f []float64, ldf int, rdsum, rdscal float64, iwork []int) (scale, sumout, scalout float64, pq int) {
+//
+// Dtgsy2 is an internal routine. It is exported for testing purposes.
+func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []float64, lda int, b []float64, ldb int, c []float64, ldc int, d []float64, ldd int, e []float64, lde int, f []float64, ldf int, rdsum, rdscal float64, iwork []int) (scale, sumout, scalout float64, pq, info int) {
 	switch {
 	case trans != blas.NoTrans && trans != blas.Trans:
 		panic(badTrans)
@@ -67,9 +69,9 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 	z := make([]float64, ldz*ldz)
 	ipiv, jpiv := make([]int, ldz), make([]int, ldz)
 	rhs := make([]float64, ldz)
+
 	// Determine block structure of A.
 	p := 0
-
 	for i := 0; i < m; p++ {
 		iwork[p] = i
 		if i == m-1 {
@@ -81,9 +83,9 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 			i++
 		}
 	}
-	iwork[p+1] = m + 1
+	iwork[p+1] = m
 
-	// determine block structure of B.
+	// Determine block structure of B.
 	q := p + 1
 	for j := 0; j < n; {
 		q++
@@ -97,7 +99,7 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 			j++
 		}
 	}
-	iwork[q+1] = n
+	iwork[q+1] = n - 1
 	pq = p * (q - p - 1)
 	bi := blas64.Implementation()
 	// Solve (I, J) - subsystem
@@ -107,8 +109,7 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 	// NO TRANS PART
 	// if trans == blas.NoTrans
 	scale = 1
-	scaloc := 1.
-	var info int
+	scaloc := 1.0
 	var alpha float64
 	for j := p + 2; j < q; {
 		js := iwork[j]
@@ -118,22 +119,22 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 		for i := p; i >= 0; i-- {
 			is := iwork[i]
 			isp1 := is + 1
-			ie := iwork[1] - 1
+			ie := iwork[i+1] - 1
 			mb := ie - is + 1
 			zdim := mb * nb * 2
 			if mb == 1 && nb == 1 {
-				// Build a 2-by-2 system Z * x = RHS.
+				// Build a 2×2 system Z * x = RHS.
 				z[0] = a[is*lda+is]
 				z[ldz] = d[is*ldd+is]
 				z[1] = -b[js*ldb+js]
 				z[ldz+1] = -e[js*lde+js]
 				// Set up right hand side(s).
 				rhs[0] = c[is*ldc+js]
-				rhs[1] = f[is*ldc+js]
+				rhs[1] = f[is*ldf+js]
 
 				// Solve Z * x = RHS.
 				k := impl.Dgetc2(zdim, z, ldz, ipiv, jpiv)
-				if k > -1 {
+				if k >= 0 {
 					info = k
 				}
 				if ijob == 0 {
@@ -163,7 +164,7 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 					bi.Daxpy(n-je, rhs[1], e[js*lde+je+1:], 1, f[is*ldf+je+1:], 1)
 				}
 			} else if mb == 1 && nb == 2 {
-				// Build a 4-by-4 system Z * x = RHS
+				// Build a 4×4 system Z * x = RHS
 				z[0] = a[is*lda+is]
 				z[ldz] = 0
 				z[2*ldz] = d[is*ldd+is]
@@ -192,7 +193,7 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 
 				// Solve Z * x = RHS
 				k := impl.Dgetc2(zdim, z, ldz, ipiv, jpiv)
-				if k > -1 {
+				if k >= 0 {
 					info = k
 				}
 				if ijob == 0 {
@@ -215,20 +216,18 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 				f[is*ldf+jsp1] = rhs[3]
 
 				// Substitute R(i,j) and L(i,j) into remaining equation.
-				if i > 1 {
+				if i > 0 {
 					bi.Dger(is, nb, -1, a[is:], lda, rhs, 1, c[js:], 1)
 					bi.Dger(is, nb, -1, d[is:], ldd, rhs, 1, f[js:], 1)
 				}
-
 				if j < q {
-					bi.Daxpy(n-je, rhs[3], b[js*ldb+je+1:], 1, c[is*ldc+je+1:], 1)
-					bi.Daxpy(n-je, rhs[3], e[js*lde+je+1:], 1, f[is*ldf+je+1:], 1)
-
-					bi.Daxpy(n-je, rhs[4], b[jsp1*ldb+je+1:], 1, c[is*ldc+je+1:], 1)
-					bi.Daxpy(n-je, rhs[4], e[jsp1*lde+je+1:], 1, f[is*ldf+je+1:], 1)
+					bi.Daxpy(n-je, rhs[2], b[js*ldb+je+1:], 1, c[is*ldc+je+1:], 1)
+					bi.Daxpy(n-je, rhs[2], e[js*lde+je+1:], 1, f[is*ldf+je+1:], 1)
+					bi.Daxpy(n-je, rhs[3], b[jsp1*ldb+je+1:], 1, c[is*ldc+je+1:], 1)
+					bi.Daxpy(n-je, rhs[3], e[jsp1*lde+je+1:], 1, f[is*ldf+je+1:], 1)
 				}
 			} else if mb == 2 && nb == 1 {
-				// Build a 4x4 system Z * x = RHS.
+				// Build a 4×4 system Z * x = RHS.
 				z[0] = a[is*lda+is]
 				z[ldz] = a[isp1*lda+is]
 				z[2*ldz] = d[is*ldd+is]
@@ -257,10 +256,9 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 
 				// Solve Z * x = RHS
 				k := impl.Dgetc2(zdim, z, ldz, ipiv, jpiv)
-				if k > -1 {
+				if k >= 0 {
 					info = k
 				}
-
 				if ijob == 0 {
 					scaloc = impl.Dgesc2(zdim, z, ldz, rhs, ipiv, jpiv)
 					if scaloc != 1 {
@@ -285,10 +283,15 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 					bi.Dgemv(blas.NoTrans, is, mb, -1, a[is:], lda, rhs, 1, 1, c[js:], ldc)
 					bi.Dgemv(blas.NoTrans, is, mb, -1, d[is:], ldd, rhs, 1, 1, f[js:], ldf)
 				}
-
+				if j < q {
+					bi.Dger(mb, n-je, 1, rhs[2:], 1, b[js*ldb+je+1:], 1,
+						c[is*ldc+je+1:], ldc)
+					bi.Dger(mb, n-je, 1, rhs[2:], 1, e[js*lde+je+1:], 1,
+						f[is*ldf+je+1:], ldf)
+				}
 			} else if mb == 2 && nb == 2 {
-				// Build 8x8 system Z * x = RHS
-				impl.Dlaset('F', ldz, ldz, 0, 0, z, ldz)
+				// Build 8×8 system Z * x = RHS
+				impl.Dlaset(blas.All, ldz, ldz, 0, 0, z, ldz)
 
 				z[0] = a[is*lda+is]
 				z[ldz] = a[isp1*lda+is]
@@ -326,6 +329,7 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 				z[3*ldz+7] = -b[jsp1*ldb+jsp1]
 				z[7*ldz+7] = -e[jsp1*lde+jsp1]
 
+				// Set up right hand side(s).
 				k := 0
 				ii := mb*nb + 1
 				for jj := 0; jj < nb-1; jj++ {
@@ -337,7 +341,7 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 
 				// Solve Z * x = RHS
 				k = impl.Dgetc2(zdim, z, ldz, ipiv, jpiv)
-				if k > -1 {
+				if k >= 0 {
 					info = k
 				}
 				if ijob == 0 {
@@ -370,9 +374,8 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 					bi.Dgemm(blas.NoTrans, blas.NoTrans, is, nb, mb, -1,
 						d[is:], ldd, rhs, mb, 1, f[js:], ldf)
 				}
-
 				if j < q {
-					k = mb*nb + 1
+					k = mb * nb
 					bi.Dgemm(blas.NoTrans, blas.NoTrans, mb, n-je, nb, 1,
 						rhs[k:], mb, b[js*ldb+je+1:], ldb, 1, c[is*ldc+je+1:], ldc)
 					bi.Dgemm(blas.NoTrans, blas.NoTrans, mb, n-je, nb, 1,
@@ -382,9 +385,5 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 		}
 	}
 
-	// Solve (I, J) - subsystem
-	//  A(I, I) * R(I, J) - L(I, J) * B(J, J) = C(I, J)
-	//  D(I, I) * R(I, J) - L(I, J) * E(J, J) = F(I, J)
-	// for I = P - 1, P - 2, ..., 0; J = 0, 1, ..., Q - 1
-	return scale, rdsum, rdscal, pq
+	return scale, rdsum, rdscal, pq, info
 }

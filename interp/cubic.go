@@ -377,8 +377,9 @@ func makeCubicSplineSecondDerivativeEquations(xs, ys []float64) (*mat.Tridiag, m
 
 // NaturalCubic is a piecewise cubic 1-dimensional interpolator with
 // continuous value, first and second derivatives, which can be fitted to (X, Y)
-// value pairs without providing derivatives. See e.g. https://www.math.drexel.edu/~tolya/cubicspline.pdf
-// for details.
+// value pairs without providing derivatives. It uses the boundary conditions
+// Y''(left end ) = Y''(right end) = 0.
+// See e.g. https://www.math.drexel.edu/~tolya/cubicspline.pdf for details.
 type NaturalCubic struct {
 	cubic PiecewiseCubic
 }
@@ -409,6 +410,51 @@ func (nc *NaturalCubic) Fit(xs, ys []float64) error {
 	err := a.SolveVecTo(x, false, b)
 	if err == nil {
 		nc.cubic.fitWithSecondDerivatives(xs, ys, x.RawVector().Data)
+	}
+	return err
+}
+
+// ClampedCubic is a piecewise cubic 1-dimensional interpolator with
+// continuous value, first and second derivatives, which can be fitted to (X, Y)
+// value pairs without providing derivatives. It uses the boundary conditions
+// Y'(left end ) = Y'(right end) = 0.
+type ClampedCubic struct {
+	cubic PiecewiseCubic
+}
+
+// Predict returns the interpolation value at x.
+func (cc *ClampedCubic) Predict(x float64) float64 {
+	return cc.cubic.Predict(x)
+}
+
+// PredictDerivative returns the predicted derivative at x.
+func (cc *ClampedCubic) PredictDerivative(x float64) float64 {
+	return cc.cubic.PredictDerivative(x)
+}
+
+// Fit fits a predictor to (X, Y) value pairs provided as two slices.
+// It panics if len(xs) < 2, elements of xs are not strictly increasing
+// or len(xs) != len(ys). It returns an error if solving the required system
+// of linear equations fails.
+func (cc *ClampedCubic) Fit(xs, ys []float64) error {
+	a, b := makeCubicSplineSecondDerivativeEquations(xs, ys)
+	// Add boundary conditions y''(left) = y''(right) = 0:
+	n := len(xs)
+	// Condition Y'(left end) = 0:
+	dxL := xs[1] - xs[0]
+	b.SetVec(0, (ys[1]-ys[0])/dxL)
+	a.SetBand(0, 0, dxL/3)
+	a.SetBand(0, 1, dxL/6)
+	// Condition Y'(right end) = 0:
+	m := n - 1
+	dxR := xs[m] - xs[m-1]
+	b.SetVec(m, (ys[m]-ys[m-1])/dxR)
+	a.SetBand(m, m, -dxR/3)
+	a.SetBand(m, m-1, -dxR/6)
+	x := mat.NewVecDense(n, nil)
+	err := a.SolveVecTo(x, false, b)
+	if err == nil {
+		cc.cubic.fitWithSecondDerivatives(xs, ys, x.RawVector().Data)
 	}
 	return err
 }

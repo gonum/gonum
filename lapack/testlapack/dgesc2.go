@@ -12,80 +12,92 @@ import (
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
+	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/lapack"
 )
 
 type Dgesc2er interface {
-	Dgetc2er
-	// Dgesc2 solves a system of linear equations
-	//  A * X = scale * RHS
-	// with a general n×n matrix A using the LU factorization with
-	// complete pivoting computed by Dgetc2. The result is placed in
-	// rhs on exit.
 	Dgesc2(n int, a []float64, lda int, rhs []float64, ipiv, jpiv []int) (scale float64)
+
+	Dgetc2er
 }
 
 func Dgesc2Test(t *testing.T, impl Dgesc2er) {
-	const tol = 1e-12
 	rnd := rand.New(rand.NewSource(1))
-	for _, test := range []struct {
-		n, lda int
-	}{
-		{3, 0},
-		{5, 0},
-		{20, 30},
-		{200, 0},
-	} {
-		testSolveDgesc2(t, impl, rnd, test.n, test.lda, tol)
+	for _, n := range []int{0, 1, 2, 3, 4, 5, 10, 20, 50} {
+		for _, lda := range []int{n, n + 3} {
+			testDgesc2(t, impl, rnd, n, lda, false)
+			testDgesc2(t, impl, rnd, n, lda, true)
+		}
 	}
 }
 
-func testSolveDgesc2(t *testing.T, impl Dgesc2er, rnd *rand.Rand, n, lda int, tol float64) {
-	name := fmt.Sprintf("n=%v,lda=%v", n, lda)
-	if lda == 0 {
-		lda = n
-	}
+func testDgesc2(t *testing.T, impl Dgesc2er, rnd *rand.Rand, n, lda int, big bool) {
+	const tol = 1e-14
+
+	name := fmt.Sprintf("n=%v,lda=%v,big=%v", n, lda, big)
+
 	// Generate random general matrix.
-	a := randomGeneral(n, n, lda, rnd)
-	// anorm := floats.Norm(a.Data, 1)
+	a := randomGeneral(n, n, max(1, lda), rnd)
 
-	// Generate a random solution.
-	xWant := randomGeneral(n, 1, 1, rnd)
-	// xnorm := floats.Norm(xWant.Data, 1)
+	// Generate a random right hand side vector.
+	b := randomGeneral(n, 1, 1, rnd)
+	if big {
+		for i := 0; i < n; i++ {
+			b.Data[i] *= bignum
+		}
+	}
 
-	// Compute RHS vector that solves for X such that  A*X = scale * RHS
-	rhs := zeros(n, 1, 1)
-	blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, a, xWant, 1, rhs)
-	rhsCopy := zeros(n, 1, 1) // Will contain A*x result.
-	copyGeneral(rhsCopy, rhs)
-	// Compute LU factorization with full pivoting.
-	lu := zeros(n, n, lda)
-	copyGeneral(lu, a)
+	// Compute the LU factorization of A with full pivoting.
+	lu := cloneGeneral(a)
 	ipiv := make([]int, n)
 	jpiv := make([]int, n)
 	impl.Dgetc2(n, lu.Data, lu.Stride, ipiv, jpiv)
 
-	// Solve using lu factorization.
-	scale := impl.Dgesc2(lu.Rows, lu.Data, lu.Stride, rhs.Data, ipiv, jpiv)
-	x := rhs
-	if scale < 0 || scale > 1 {
-		t.Errorf("%v: resulting scale out of bounds [0,1]", name)
+	// Make copies of const input to Dgesc2.
+	luCopy := cloneGeneral(lu)
+	ipivCopy := make([]int, len(ipiv))
+	copy(ipivCopy, ipiv)
+	jpivCopy := make([]int, len(jpiv))
+	copy(jpivCopy, jpiv)
+
+	// Call Dgesc2 to solve A*x = scale*b.
+	x := cloneGeneral(b)
+	scale := impl.Dgesc2(n, lu.Data, lu.Stride, x.Data, ipiv, jpiv)
+
+	if n == 0 {
+		return
 	}
 
-	var diff float64
-	for i := range x.Data {
-		diff = math.Max(diff, math.Abs(xWant.Data[i]-x.Data[i]))
+	// Check that const input to Dgesc2 hasn't been modified.
+	if !floats.Same(lu.Data, luCopy.Data) {
+		t.Errorf("%v: unexpected modification in lu", name)
 	}
-	if diff > tol {
-		t.Errorf("%v: unexpected result, diff=%v", name, diff)
+	if !intsEqual(ipiv, ipivCopy) {
+		t.Errorf("%v: unexpected modification in ipiv", name)
 	}
-	// |A*X - scale*RHS| / |A| / |X| is an indicator that solution is good
-	// AxResult := zeros(n, 1, 1)
-	// blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, a, x, 1, AxResult)
-	// blas64.Scal(scale, blas64.Vector{N: n, Data: rhsCopy.Data, Inc: 1})
-	// floats.Sub(AxResult.Data, rhsCopy.Data)
+	if !intsEqual(jpiv, jpivCopy) {
+		t.Errorf("%v: unexpected modification in ipiv", name)
+	}
 
-	// residualNorm := floats.Norm(rhsCopy.Data, 1) / anorm / xnorm
-	// if residualNorm > tol {
-	// 	t.Errorf("%v: |A*X - scale*RHS| / |A| / |X| = %g is greater than permissible tol", name, residualNorm)
-	// }
+	if scale <= 0 || 1 < scale {
+		t.Errorf("%v: scale %v out of bounds (0,1]", name, scale)
+	}
+	if !big && scale != 1 {
+		t.Errorf("%v: unexpected scaling, scale=%v", name, scale)
+	}
+
+	// Compute the difference rhs := A*x - scale*b.
+	diff := b
+	for i := 0; i < n; i++ {
+		diff.Data[i] *= scale
+	}
+	blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, a, x, -1, diff)
+
+	// Compute the residual |A*x - scale*b| / |x|.
+	xnorm := dlange(lapack.MaxColumnSum, n, 1, x.Data, 1)
+	resid := dlange(lapack.MaxColumnSum, n, 1, diff.Data, 1) / xnorm
+	if resid > tol || math.IsNaN(resid) {
+		t.Errorf("%v: unexpected result; resid=%v, want<=%v", name, resid, tol)
+	}
 }

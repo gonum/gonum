@@ -976,6 +976,18 @@ func equalApproxGeneral(a, b blas64.General, tol float64) bool {
 	return true
 }
 
+func intsEqual(a, b []int) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i, ai := range a {
+		if b[i] != ai {
+			return false
+		}
+	}
+	return true
+}
+
 // randSymBand returns an n×n random symmetric positive definite band matrix
 // with kd diagonals.
 func randSymBand(uplo blas.Uplo, n, kd, ldab int, rnd *rand.Rand) []float64 {

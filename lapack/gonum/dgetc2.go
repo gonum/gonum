@@ -10,18 +10,21 @@ import (
 	"gonum.org/v1/gonum/blas/blas64"
 )
 
-// Dgetc2 computes an LU factorization with complete pivoting of the
-// n×n matrix A. The factorization has the form
+// Dgetc2 computes an LU factorization with complete pivoting of the n×n matrix
+// A. The factorization has the form
 //  A = P * L * U * Q,
-// where P and Q are permutation matrices, L is lower triangular with
-// unit diagonal elements and U is upper triangular.
+// where P and Q are permutation matrices, L is lower triangular with unit
+// diagonal elements and U is upper triangular.
 //
-// a is modified to the information to construct L and U.
-// The lower triangle of a contains the matrix L (not including diagonal).
-// The upper triangle contains the matrix U. The matrices P and Q can
-// be constructed from ipiv and jpiv, respectively. k is non-negative if U(k, k)
-// is likely to produce overflow when we try to solve for x in Ax = b.
-// U is perturbed in this case to avoid the overflow.
+// On entry, a contains the matrix A to be factored. On return, a is overwritten
+// with the factors L and U. The unit diagonal elements of L are not stored.
+//
+// On return, ipiv and jpiv contain the pivot indices: row i has been
+// interchanged with row ipiv[i] and column j has been interchanged with column
+// jpiv[j]. ipiv and jpiv must have length n, otherwise Dgetc2 will panic.
+//
+// If k is non-negative, then U[k,k] is likely to produce overflow when solving
+// for x in A*x=b and U has been perturbed to avoid the overflow.
 //
 // Dgetc2 is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dgetc2(n int, a []float64, lda int, ipiv, jpiv []int) (k int) {
@@ -34,6 +37,7 @@ func (impl Implementation) Dgetc2(n int, a []float64, lda int, ipiv, jpiv []int)
 
 	// Negative k indicates U was not perturbed.
 	k = -1
+
 	// Quick return if possible.
 	if n == 0 {
 		return k
@@ -52,22 +56,23 @@ func (impl Implementation) Dgetc2(n int, a []float64, lda int, ipiv, jpiv []int)
 		eps    = dlamchP
 		smlnum = dlamchS / eps
 	)
+
 	if n == 1 {
 		ipiv[0], jpiv[0] = 0, 0
 		if math.Abs(a[0]) < smlnum {
-			a[0] = smlnum
 			k = 0
+			a[0] = smlnum
 		}
 		return k
 	}
 
 	// Factorize A using complete pivoting.
-	// Set pivots less than lc to lc.
-	var lc float64
+	// Set pivots less than smin to smin.
+	var smin float64
 	var ipv, jpv int
 	bi := blas64.Implementation()
 	for i := 0; i < n-1; i++ {
-		xmax := 0.0
+		var xmax float64
 		for ip := i; ip < n; ip++ {
 			for jp := i; jp < n; jp++ {
 				if math.Abs(a[ip*lda+jp]) >= xmax {
@@ -78,7 +83,7 @@ func (impl Implementation) Dgetc2(n int, a []float64, lda int, ipiv, jpiv []int)
 			}
 		}
 		if i == 0 {
-			lc = math.Max(eps*xmax, smlnum)
+			smin = math.Max(eps*xmax, smlnum)
 		}
 
 		// Swap rows.
@@ -94,9 +99,9 @@ func (impl Implementation) Dgetc2(n int, a []float64, lda int, ipiv, jpiv []int)
 		jpiv[i] = jpv
 
 		// Check for singularity.
-		if math.Abs(a[i*lda+i]) < lc {
+		if math.Abs(a[i*lda+i]) < smin {
 			k = i
-			a[i*lda+i] = lc
+			a[i*lda+i] = smin
 		}
 
 		for j := i + 1; j < n; j++ {
@@ -105,13 +110,14 @@ func (impl Implementation) Dgetc2(n int, a []float64, lda int, ipiv, jpiv []int)
 		bi.Dger(n-i-1, n-i-1, -1, a[(i+1)*lda+i:], lda, a[i*lda+i+1:], 1, a[(i+1)*lda+i+1:], lda)
 	}
 
-	if math.Abs(a[(n-1)*lda+n-1]) < lc {
+	if math.Abs(a[(n-1)*lda+n-1]) < smin {
 		k = n - 1
-		a[(n-1)*lda+(n-1)] = lc
+		a[(n-1)*lda+(n-1)] = smin
 	}
 
 	// Set last pivots to last index.
 	ipiv[n-1] = n - 1
 	jpiv[n-1] = n - 1
+
 	return k
 }

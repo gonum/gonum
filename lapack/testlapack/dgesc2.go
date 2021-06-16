@@ -1,4 +1,4 @@
-// Copyright ©2016 The Gonum Authors. All rights reserved.
+// Copyright ©2021 The Gonum Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 package testlapack
@@ -18,7 +18,7 @@ type Dgesc2er interface {
 	Dgetc2er
 	// Dgesc2 solves a system of linear equations
 	//  A * X = scale * RHS
-	// with a general N-by-N matrix A using the LU factorization with
+	// with a general n×n matrix A using the LU factorization with
 	// complete pivoting computed by Dgetc2. The result is placed in
 	// rhs on exit.
 	Dgesc2(n int, a []float64, lda int, rhs []float64, ipiv, jpiv []int) (scale float64)

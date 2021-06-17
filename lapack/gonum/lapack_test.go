@@ -398,6 +398,11 @@ func TestDlatbs(t *testing.T) {
 	testlapack.DlatbsTest(t, impl)
 }
 
+func TestDlatdf(t *testing.T) {
+	t.Parallel()
+	testlapack.DlatdfTest(t, impl)
+}
+
 func TestDlatrd(t *testing.T) {
 	t.Parallel()
 	testlapack.DlatrdTest(t, impl)

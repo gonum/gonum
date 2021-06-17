@@ -77,7 +77,7 @@ func testDgesc2(t *testing.T, impl Dgesc2er, rnd *rand.Rand, n, lda int, big boo
 		t.Errorf("%v: unexpected modification in ipiv", name)
 	}
 	if !intsEqual(jpiv, jpivCopy) {
-		t.Errorf("%v: unexpected modification in ipiv", name)
+		t.Errorf("%v: unexpected modification in jpiv", name)
 	}
 
 	if scale <= 0 || 1 < scale {

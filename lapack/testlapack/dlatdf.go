@@ -76,7 +76,7 @@ func testDlatdf(t *testing.T, impl Dlatdfer, rnd *rand.Rand, ijob, n int, ldz in
 	diff := b
 	blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, z, x, -1, diff)
 
-	// Compute the residual |A*x - scale*b| / |x|.
+	// Compute the residual |Z*x - b| / |x|.
 	xnorm := dlange(lapack.MaxColumnSum, n, 1, x.Data, 1)
 	resid := dlange(lapack.MaxColumnSum, n, 1, diff.Data, 1) / xnorm
 	if resid > tol || math.IsNaN(resid) {

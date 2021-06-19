@@ -5,6 +5,7 @@
 package testlapack
 
 import (
+	"fmt"
 	"math"
 	"testing"
 
@@ -40,20 +41,22 @@ func Dlag2Test(t *testing.T, impl Dlag2er) {
 		// Generate randomly the elements of a 2×2 matrix A
 		//  [ a11 a12 ]
 		//  [ a21 a22 ]
-
 		a11, a12, a21, a22 := rnd.Float64(), rnd.Float64(), rnd.Float64(), rnd.Float64()
+
 		// Generate randomly the elements of a 2×2 upper-triangular matrix B.
 		//  [ b11 b12 ]
 		//  [ 0   b22 ]
 		b11, b12, b22 := rnd.Float64(), rnd.Float64(), rnd.Float64()
+		name := fmt.Sprintf("a11=%.4v,a12=%.4v,a21=%.4v,a22=%.4v,b11=%.4v,b12=%.4v,b22=%.4v", a11, a12, a21, a22, b11, b12, b22)
+
 		scale1, scale2, wr1, wr2, wi := impl.Dlag2([]float64{a11, a12, a21, a22}, 2, []float64{b11, b12, 0, b22}, 2)
 		if wi < 0 {
-			t.Errorf("wi can not be negative wi=%v", wi)
+			t.Errorf("%v: wi can not be negative wi=%v", name, wi)
 		}
 		// Complex eigenvalue solution.
 		if wi > 0 {
 			if wr1 != wr2 {
-				t.Errorf("wr1 should equal wr2 for complex eigenvalues. got %v!=%v", wr1, wr2)
+				t.Errorf("%v: wr1 should equal wr2 for complex eigenvalues. got %v!=%v", name, wr1, wr2)
 			}
 			idet1 := cmplxdet2x2(complex(scale1*a11-wr1*b11, -wi*b11), complex(scale1*a12-wr1*b12, -wi*b12),
 				complex(scale1*a21, 0), complex(scale1*a22-wr1*b22, -wi*b22))
@@ -61,9 +64,7 @@ func Dlag2Test(t *testing.T, impl Dlag2er) {
 				complex(scale1*a21, 0), complex(scale1*a22-wr1*b22, wi*b22))
 
 			if math.Abs(real(idet1))+math.Abs(imag(idet1)) > tol || math.Abs(real(idet2))+math.Abs(imag(idet2)) > tol {
-				t.Errorf(`I thought imag eigenvalue %v (scaled %v) solved 
-			[%.6v  %.6v]    [%.6v  %.6v]
-			[%.6v  %.6v] - w[    0   %.6v]`, complex(wr1, wi), scale1, a11, a12, b11, b12, a21, a22, b22)
+				t.Errorf("%v: (%.4v±%.4vi)/%.4v did not solve eigenvalue problem", name, wr1, wi, scale1)
 			}
 			continue // End complex branch.
 		}
@@ -74,19 +75,14 @@ func Dlag2Test(t *testing.T, impl Dlag2er) {
 		res1 := det2x2(scale1*a11-wr1*b11, scale1*a12-wr1*b12,
 			scale1*a21, scale1*a22-wr1*b22)
 		if math.Abs(res1) > tol {
-			t.Errorf("got a residual from |%0.2g*A - w1*B| > tol: %v", scale1, res1)
+			t.Errorf("%v: got a residual from |%0.4v*A - w1*B| > tol: %v", name, scale1, res1)
 			cerr++
 		}
 		res2 := det2x2(scale2*a11-wr2*b11, scale2*a12-wr2*b12,
 			scale2*a21, scale2*a22-wr2*b22)
 		if math.Abs(res2) > tol {
-			t.Errorf("got a residual from |s*A - w2*B| > tol: %v", res1)
+			t.Errorf("%v: got a residual from |s*A - w2*B| > tol: %v", name, res1)
 			cerr++
-		}
-		if cerr > 0 {
-			t.Errorf(`I thought the eigenvalues %v, %v (scaled %v, %v) solved 
-[%.6v  %.6v]    [%.6v  %.6v]
-[%.6v  %.6v] - w[    0   %.6v]`, wr1, wr2, scale1, scale2, a11, a12, b11, b12, a21, a22, b22)
 		}
 	}
 }

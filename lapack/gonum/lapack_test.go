@@ -92,6 +92,11 @@ func TestDgerq2(t *testing.T) {
 	testlapack.Dgerq2Test(t, impl)
 }
 
+func TestDgesc2(t *testing.T) {
+	t.Parallel()
+	testlapack.Dgesc2Test(t, impl)
+}
+
 func TestDgeqp3(t *testing.T) {
 	t.Parallel()
 	testlapack.Dgeqp3Test(t, impl)

@@ -261,7 +261,7 @@ func (impl Implementation) Dlasy2(tranl, tranr bool, isgn, n1, n2 int, tl []floa
 
 		maxbtmp := math.Max(math.Abs(btmp[0]), math.Abs(btmp[1]))
 		maxbtmp = math.Max(maxbtmp, math.Max(math.Abs(btmp[2]), math.Abs(btmp[3])))
-		scale = 1 / 8 / maxbtmp
+		scale = (1.0 / 8.0) / maxbtmp
 		btmp[0] *= scale
 		btmp[1] *= scale
 		btmp[2] *= scale

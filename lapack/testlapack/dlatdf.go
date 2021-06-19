@@ -20,6 +20,7 @@ type Dlatdfer interface {
 	Dlatdf(ijob, n int, z []float64, ldz int, rhs []float64, rdsum, rdscal float64, ipiv, jpiv []int) (sum, scale float64)
 
 	Dgetc2er
+	Dgesc2er
 }
 
 func DlatdfTest(t *testing.T, impl Dlatdfer) {
@@ -36,31 +37,37 @@ func DlatdfTest(t *testing.T, impl Dlatdfer) {
 
 func testDlatdf(t *testing.T, impl Dlatdfer, rnd *rand.Rand, ijob, n int, ldz int, tol float64) {
 	name := fmt.Sprintf("n=%v,ldz=%v", n, ldz)
-
+	// Random general matrix for Z
 	z := randomGeneral(n, n, max(1, ldz), rnd)
-	lu := cloneGeneral(z)
+	// Generate a random right hand side vector.
+	b := randomGeneral(n, 1, 1, rnd)
 
 	// Compute the LU part of the factorization of the n×n
 	// matrix Z with Dgetc2:  Z = P * L * U * Q
 	ipiv := make([]int, n)
 	jpiv := make([]int, n)
-	_ = impl.Dgetc2(n, lu.Data, lu.Stride, ipiv, jpiv)
+	lu := cloneGeneral(z)
+	k := impl.Dgetc2(n, lu.Data, lu.Stride, ipiv, jpiv)
+	if k > 0 {
+		t.Errorf("%v: %d index of U was perturbed in Dgetc2", name, k)
+	}
+	rhs := cloneGeneral(b)
 	ipivCopy := make([]int, len(ipiv))
 	copy(ipivCopy, ipiv)
 	jpivCopy := make([]int, len(jpiv))
 	copy(jpivCopy, jpiv)
-
-	// Generate a random right hand side vector.
-	b := randomGeneral(n, 1, 1, rnd)
-
+	scal := 1.
+	if ijob == 0 {
+		scal = impl.Dgesc2(n, z.Data, z.Stride, rhs.Data, ipiv, jpiv)
+	}
 	// From reference: rdscal (and rdsum) only makes
 	// sense when Dtgsy2 is called by Dtgsyl.
 	rdsum := 0.
-	rdscal := 1.
+	rdscal := scal
 	// Call Dlatdf to solve Z*x = scale*b.
-	x := cloneGeneral(b)
+	x := cloneGeneral(rhs)
 	luCopy := cloneGeneral(lu)
-	sum, scal := impl.Dlatdf(ijob, n, lu.Data, lu.Stride, x.Data, rdsum, rdscal, ipiv, jpiv)
+	sum, _ := impl.Dlatdf(ijob, n, lu.Data, lu.Stride, x.Data, rdsum, rdscal, ipiv, jpiv)
 	if n == 0 {
 		return
 	}
@@ -76,14 +83,14 @@ func testDlatdf(t *testing.T, impl Dlatdfer, rnd *rand.Rand, ijob, n int, ldz in
 		t.Errorf("%v: unexpected modification in jpiv", name)
 	}
 
-	blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, z, x, -1, b)
+	blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, z, x, -scal, b)
 	diff := b
 
 	// Compute the residual |Z*x - b| / |x|.
 	xnorm := dlange(lapack.MaxColumnSum, n, 1, x.Data, 1)
 	resid := dlange(lapack.MaxColumnSum, n, 1, diff.Data, 1) / xnorm
 	if resid > tol || math.IsNaN(resid) {
-		t.Errorf("%v: unexpected result; resid=%v, want<=%v", name, resid, tol)
+		t.Errorf("%v: unexpected result;scal=%v, resid=%v, want<=%v", name, scal, resid, tol)
 	}
 
 }

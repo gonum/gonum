@@ -461,6 +461,7 @@ func (cc *ClampedCubic) Fit(xs, ys []float64) error {
 // value pairs without providing derivatives. It imposes the condition that
 // the third derivative of the interpolant is continuous in the first and
 // last interior node.
+// See http://www.cs.tau.ac.il/~turkel/notes/numeng/spline_note.pdf for details.
 type NotAKnotCubic struct {
 	cubic PiecewiseCubic
 }

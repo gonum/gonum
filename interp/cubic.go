@@ -476,15 +476,33 @@ func (nak *NotAKnotCubic) PredictDerivative(x float64) float64 {
 }
 
 // Fit fits a predictor to (X, Y) value pairs provided as two slices.
-// It panics if len(xs) < 2, elements of xs are not strictly increasing
-// or len(xs) != len(ys). It returns an error if solving the required system
-// of linear equations fails.
+// It panics if len(xs) < 3 (because at least one interior node is required),
+// elements of xs are not strictly increasing or len(xs) != len(ys).
+// It returns an error if solving the required system of linear equations fails.
 func (nak *NotAKnotCubic) Fit(xs, ys []float64) error {
 	n := len(xs)
+	if n < 3 {
+		panic(tooFewPoints)
+	}
 	a := mat.NewBandDense(n, n, 2, 2, nil)
 	b := mat.NewVecDense(n, nil)
 	makeCubicSplineSecondDerivativeEquations(a, b, xs, ys)
-	// Add boundary conditions:
+	// Add boundary conditions.
+	// First interior node:
+	dxOuter := xs[1] - xs[0]
+	dxInner := xs[2] - xs[1]
+	a.SetBand(0, 0, 1/dxOuter)
+	a.SetBand(0, 1, -1/dxOuter-1/dxInner)
+	a.SetBand(0, 2, 1/dxInner)
+	if n > 3 {
+		// Last interior node:
+		m := n - 1
+		dxOuter = xs[m] - xs[m-1]
+		dxInner = xs[m-1] - xs[m-2]
+		a.SetBand(m, m, 1/dxOuter)
+		a.SetBand(m, m-1, -1/dxOuter-1/dxInner)
+		a.SetBand(m, m-2, 1/dxInner)
+	}
 	x := mat.NewVecDense(n, nil)
 	err := x.SolveVec(a, b)
 	if err == nil {

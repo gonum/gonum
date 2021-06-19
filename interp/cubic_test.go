@@ -748,11 +748,13 @@ func TestMakeCubicSplineSecondDerivativeEquations(t *testing.T) {
 	xs := []float64{-1, 0, 2}
 	ys := []float64{2, 0, 2}
 	n := len(xs)
-	A, b := makeCubicSplineSecondDerivativeEquations(xs, ys)
+	a := mat.NewTridiag(n, nil, nil, nil)
+	b := mat.NewVecDense(n, nil)
+	makeCubicSplineSecondDerivativeEquations(a, b, xs, ys)
 	if b.Len() != n {
 		t.Errorf("Mismatch in b size: got %v, want %d", b.Len(), n)
 	}
-	r, c := A.Dims()
+	r, c := a.Dims()
 	if r != n || c != n {
 		t.Errorf("Mismatch in A size: got %d x %d, want %d x %d", r, c, n, n)
 	}
@@ -764,9 +766,9 @@ func TestMakeCubicSplineSecondDerivativeEquations(t *testing.T) {
 	}
 	expectedA := mat.NewDense(3, 3, []float64{0, 0, 0, 1 / 6., 1, 2 / 6., 0, 0, 0})
 	var diffA mat.Dense
-	diffA.Sub(A, expectedA)
+	diffA.Sub(a, expectedA)
 	if diffA.Norm(math.Inf(1)) > tol {
-		t.Errorf("Mismatch in A values: got %v, want %v", A, expectedA)
+		t.Errorf("Mismatch in A values: got %v, want %v", a, expectedA)
 	}
 }
 

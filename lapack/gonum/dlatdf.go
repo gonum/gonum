@@ -50,6 +50,11 @@ func (impl Implementation) Dlatdf(ijob, n int, z []float64, ldz int, rhs []float
 	// If TRANS = 'T', RDSCAL is not touched.
 	// NOTE: RDSCAL only makes sense when DTGSY2 is called by
 	// DTGSYL.
+	//
+	// [1] Bo Kagstrom and Lars Westin,
+	// Generalized Schur Methods with Condition Estimators for
+	// Solving the Generalized Sylvester Equation, IEEE Transactions
+	// on Automatic Control, Vol. 34, No. 7, July 1989, pp 745-751.
 	switch {
 	case n < 0:
 		panic(nLT0)
@@ -66,7 +71,7 @@ func (impl Implementation) Dlatdf(ijob, n int, z []float64, ldz int, rhs []float
 	bi := blas64.Implementation()
 	var temp float64
 	xp := make([]float64, n)
-	// Compute approximate nullvector xm of Z.
+	// Compute approximate nullvector xm of Z when ijob == 2.
 	if ijob == 2 {
 		xm := make([]float64, n)
 		work := make([]float64, 4*n)
@@ -74,7 +79,7 @@ func (impl Implementation) Dlatdf(ijob, n int, z []float64, ldz int, rhs []float
 		bi.Dcopy(n, work[n:], 1, xm, 1)
 
 		// Compute rhs.
-		impl.Dlaswp(1, xm, n, 0, n-2, ipiv, -1)
+		impl.Dlaswp(1, xm, 1, 0, n-1, ipiv, -1)
 		temp = 1.0 / math.Sqrt(bi.Ddot(n, xm, 1, xm, 1))
 		bi.Dscal(n, temp, xm, 1)
 		bi.Dcopy(n, xm, 1, xp, 1)

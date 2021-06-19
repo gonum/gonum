@@ -138,3 +138,32 @@ func (r Rotation) isIdentity() bool {
 func raise(p Vec) quat.Number {
 	return quat.Number{Imag: p.X, Jmag: p.Y, Kmag: p.Z}
 }
+
+// RotationMatrix represents a rotation in 3D space
+// in 3 separate steps.
+type RotationMatrix struct {
+	c1, c2, c3 float64
+	s1, s2, s3 float64
+}
+
+// TaitBryanXYZ rotates a vector around the X axis, then around the new Y axis,
+// and lastly around the Z axis.
+type TaitBryanXYZ RotationMatrix
+
+// NewTaitBryanXYZ
+func NewTaitBryanXYZ(q, r, s float64) TaitBryanXYZ {
+	return TaitBryanXYZ{
+		c1: math.Cos(q), c2: math.Cos(r), c3: math.Cos(s),
+		s1: math.Sin(q), s2: math.Sin(r), s3: math.Sin(s),
+	}
+}
+
+// Rotate performs the TaitBryan rotation around X, Y and Z axis in order.
+//
+// This equation can be found in Prof. Hubert Hahn's Rigid Body Dynamics
+// as Eq (2.56).
+func (t *TaitBryanXYZ) Rotate(p Vec) Vec {
+	return Vec{p.X*t.c2*t.c3 - p.Y*t.c2*t.s3 + p.Z*t.s2,
+		p.X*(t.c1*t.s3+t.s1*t.s2*t.c3) + p.Y*(t.c1*t.c3-t.s1*t.s2*t.s3) - p.Z*t.c2*t.s1,
+		p.X*(t.s1*t.s3-t.c1*t.c3*t.s2) + p.Y*(t.c3*t.s1+t.c1*t.s2*t.s3) + p.Z*t.c1*t.c2}
+}

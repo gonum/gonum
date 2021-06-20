@@ -5,6 +5,7 @@ package testlapack
 
 import (
 	"fmt"
+	"math"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -48,20 +49,21 @@ type Dtgsy2er interface {
 }
 
 func Dtgsy2Test(t *testing.T, impl Dtgsy2er) {
+	const ldAdd = 5
 	rnd := rand.New(rand.NewSource(1))
 	// outer:
-	for _, n := range []int{3, 9} {
-		for _, m := range []int{3} {
-			for _, lda := range []int{m, m + 1, m + 12} {
-				for _, ldb := range []int{n, n + 2, n + 1} {
-					for _, ldc := range []int{n, n + 3, n + 2} {
-						for _, ldd := range []int{m, m + 4, m + 3} {
-							for _, lde := range []int{n, n + 5, n + 2} {
-								for _, ldf := range []int{n, n + 6, n + 1} {
-									for _, ijob := range []int{0, 2} {
+	for _, n := range []int{4, 9, 20} {
+		for _, m := range []int{4, 9, 20} {
+			for _, lda := range []int{m, m + ldAdd} {
+				for _, ldb := range []int{n, n + ldAdd} {
+					for _, ldc := range []int{n, n + ldAdd} {
+						for _, ldd := range []int{m, m + ldAdd} {
+							for _, lde := range []int{n, n + ldAdd} {
+								for _, ldf := range []int{n, n + ldAdd} {
+									for _, ijob := range []int{0, 1, 2} {
 										// First attempt to pass blas.Trans case which does not use untested Dlatdf routine
 										testSolveDtgsy2(t, impl, rnd, blas.Trans, ijob, m, n, lda, ldb, ldc, ldd, lde, ldf)
-										// testSolveDtgsy2(t, impl, rnd, blas.NoTrans, ijob, m, n, lda, ldb, ldc, ldd, lde, ldf)
+										testSolveDtgsy2(t, impl, rnd, blas.NoTrans, ijob, m, n, lda, ldb, ldc, ldd, lde, ldf)
 										// break outer // weed out 3×3 bugs first. Small systems pass tests(1×2,2×2)
 									}
 								}
@@ -92,8 +94,12 @@ func testSolveDtgsy2(t *testing.T, impl Dtgsy2er, rnd *rand.Rand, trans blas.Tra
 	// This means that T is block upper triangular with 1-by1 and 2-by-2 blocks on the diagonal.
 	// Its eigenvalues are the eigenvalues of the diagonal blocks. The 1-by-1 blocks correspond to real eigenvalues,
 	// and the 2-by-2 blocks to complex conjugate pairs. From Wikipedia https://en.wikipedia.org/wiki/Talk%3ATriangular_matrix#Quasi-triangular_matrices
-	a, _, _ = randomSchurCanonical(m, lda, false, rnd)
-	b, _, _ = randomSchurCanonical(n, ldb, false, rnd)
+	// a, _, _ = randomSchurCanonical(m, lda, false, rnd)
+	// b, _, _ = randomSchurCanonical(n, ldb, false, rnd)
+	// a = randomUpperQuasiTriangular(m, m, lda, m-max(1, m/2), rnd)
+	// b = randomUpperQuasiTriangular(n, n, ldb, n-max(1, n/2), rnd)
+	a = randomUpperTriangular(m, lda, rnd)
+	b = randomUpperTriangular(n, ldb, rnd)
 
 	d = randomUpperTriangular(m, ldd, rnd)
 	e = randomUpperTriangular(n, lde, rnd)
@@ -103,6 +109,13 @@ func testSolveDtgsy2(t *testing.T, impl Dtgsy2er, rnd *rand.Rand, trans blas.Tra
 	f = randomGeneral(m, n, ldf, rnd)
 	cCopy := cloneGeneral(c)
 	fCopy := cloneGeneral(f)
+	// Calculate norms
+	anorm := dlange(lapack.MaxColumnSum, a.Rows, a.Cols, a.Data, a.Stride)
+	bnorm := dlange(lapack.MaxColumnSum, b.Rows, b.Cols, b.Data, b.Stride)
+	cnorm := dlange(lapack.MaxColumnSum, c.Rows, c.Cols, c.Data, c.Stride)
+	dnorm := dlange(lapack.MaxColumnSum, d.Rows, d.Cols, d.Data, d.Stride)
+	enorm := dlange(lapack.MaxColumnSum, e.Rows, e.Cols, e.Data, e.Stride)
+	fnorm := dlange(lapack.MaxColumnSum, f.Rows, f.Cols, f.Data, f.Stride)
 	// rdsum and rdscal only makes sense when Dtgsy2 is called by Dtgsyl.
 	rdsum, rdscal := 0., 0.
 	iwork := make([]int, m+n+2)
@@ -121,12 +134,15 @@ func testSolveDtgsy2(t *testing.T, impl Dtgsy2er, rnd *rand.Rand, trans blas.Tra
 	// solutions are overwritten (R,L)->(C,F).
 	r := c
 	l := f
+	rnorm := dlange(lapack.MaxColumnSum, r.Rows, r.Cols, r.Data, r.Stride)
+	lnorm := dlange(lapack.MaxColumnSum, l.Rows, l.Cols, l.Data, l.Stride)
+	rlnormmax := math.Max(rnorm, lnorm)
 	if trans == blas.NoTrans {
 		// Calculate residuals
 		// | A * R - L * B - scale * C |  from (1)
 		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, a, r, -scale, cCopy)
 		blas64.Gemm(blas.NoTrans, blas.NoTrans, -1, l, b, 1, cCopy)
-		res := dlange(lapack.MaxColumnSum, m, n, cCopy.Data, cCopy.Stride)
+		res := dlange(lapack.MaxColumnSum, m, n, cCopy.Data, cCopy.Stride) / math.Max(math.Max(anorm, rlnormmax), math.Max(bnorm, cnorm))
 		if res > tol {
 			t.Errorf("%v: | A * R - L * B - scale * C | residual large %v", name, res)
 		}
@@ -134,7 +150,7 @@ func testSolveDtgsy2(t *testing.T, impl Dtgsy2er, rnd *rand.Rand, trans blas.Tra
 		// | D * R - L * E - scale * F |  from (1)
 		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, d, r, -scale, fCopy)
 		blas64.Gemm(blas.NoTrans, blas.NoTrans, -1, l, e, 1, fCopy)
-		res = dlange(lapack.MaxColumnSum, m, n, fCopy.Data, fCopy.Stride)
+		res = dlange(lapack.MaxColumnSum, m, n, fCopy.Data, fCopy.Stride) / math.Max(math.Max(dnorm, rlnormmax), math.Max(enorm, fnorm))
 		if res > tol {
 			t.Errorf("%v: | D * R - L * E - scale * F | residual large %v", name, res)
 		}
@@ -143,7 +159,7 @@ func testSolveDtgsy2(t *testing.T, impl Dtgsy2er, rnd *rand.Rand, trans blas.Tra
 		// | Aᵀ * R + Dᵀ * L - scale * C |  from (3)
 		blas64.Gemm(trans, blas.NoTrans, 1, a, r, -scale, cCopy)
 		blas64.Gemm(trans, blas.NoTrans, 1, d, l, 1, cCopy)
-		res := dlange(lapack.MaxColumnSum, m, n, cCopy.Data, cCopy.Stride)
+		res := dlange(lapack.MaxColumnSum, m, n, cCopy.Data, cCopy.Stride) / math.Max(math.Max(anorm, rlnormmax), math.Max(dnorm, cnorm))
 		if res > tol {
 			t.Errorf("%v: | Aᵀ * R + Dᵀ * L - scale * C | residual large %v", name, res)
 		}
@@ -151,7 +167,8 @@ func testSolveDtgsy2(t *testing.T, impl Dtgsy2er, rnd *rand.Rand, trans blas.Tra
 		// | R * Bᵀ + L * Eᵀ - scale * -F |  from (3)
 		blas64.Gemm(blas.NoTrans, trans, 1, r, b, scale, fCopy)
 		blas64.Gemm(blas.NoTrans, trans, 1, l, e, 1, fCopy)
-		res = dlange(lapack.MaxColumnSum, m, n, fCopy.Data, fCopy.Stride)
+		res = dlange(lapack.MaxColumnSum, m, n, fCopy.Data, fCopy.Stride) / math.Max(math.Max(bnorm, rlnormmax), math.Max(enorm, fnorm))
+
 		if res > tol {
 			t.Errorf("%v: | R * Bᵀ + L * Eᵀ - scale * -F | residual large %v", name, res)
 		}
@@ -163,7 +180,7 @@ func testSolveDtgsy2(t *testing.T, impl Dtgsy2er, rnd *rand.Rand, trans blas.Tra
 func randomUpperQuasiTriangular(r, c, stride, k int, rnd *rand.Rand) blas64.General {
 	ans := randomGeneral(r, c, stride, rnd)
 	for i := k; i < r; i++ {
-		for j := 0; j < 0; j-- {
+		for j := 0; j < c-k; j++ {
 			ans.Data[i*ans.Stride+j] = 0
 		}
 	}

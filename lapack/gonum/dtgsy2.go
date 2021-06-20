@@ -153,7 +153,7 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 							scale *= scaloc
 						}
 					} else {
-						rdsum, rdscal = impl.Dlatdf(ijob, zdim, z, ldz, rhs, rdsum, rdscal, ipiv, jpiv)
+						rdsum, rdscal = impl.Dlatdf(ijob, zdim, z, ldz, rhs, rdsum, rdscal, ipiv[:zdim], jpiv[:zdim])
 					}
 					// Unpack solution vector(s).
 					c[is*ldc+js] = rhs[0]
@@ -261,7 +261,7 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 					rhs[3] = f[isp1*ldf+js]
 
 					// Solve Z * x = RHS
-					k = impl.Dgetc2(zdim, z, ldz, ipiv, jpiv)
+					k = impl.Dgetc2(zdim, z, ldz, ipiv[:zdim], jpiv[:zdim])
 					if k >= 0 {
 						info = k
 					}

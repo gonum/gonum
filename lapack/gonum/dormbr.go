@@ -145,7 +145,7 @@ func (impl Implementation) Dormbr(vect lapack.ApplyOrtho, side blas.Side, trans 
 				i1 = 1
 				i2 = 0
 			}
-			impl.Dormqr(side, trans, mi, ni, nq-1, a[1*lda:], lda, tau[:nq-1], c[i1*ldc+i2:], ldc, work, lwork)
+			impl.Dormqr(side, trans, mi, ni, nq-1, a[lda:], lda, tau[:nq-1], c[i1*ldc+i2:], ldc, work, lwork)
 		}
 		work[0] = float64(lworkopt)
 		return

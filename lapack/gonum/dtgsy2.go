@@ -81,8 +81,10 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 	rhs := make([]float64, ldz)
 
 	var p, q, k int // Index variables.
+	p = -1
 	// Determine block structure of A.
-	for i := 0; i < m; p++ {
+	for i := 0; i < m; {
+		p++
 		iwork[p] = i
 		if i == m-1 {
 			break

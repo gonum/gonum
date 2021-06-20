@@ -94,12 +94,8 @@ func testSolveDtgsy2(t *testing.T, impl Dtgsy2er, rnd *rand.Rand, trans blas.Tra
 	// This means that T is block upper triangular with 1-by1 and 2-by-2 blocks on the diagonal.
 	// Its eigenvalues are the eigenvalues of the diagonal blocks. The 1-by-1 blocks correspond to real eigenvalues,
 	// and the 2-by-2 blocks to complex conjugate pairs. From Wikipedia https://en.wikipedia.org/wiki/Talk%3ATriangular_matrix#Quasi-triangular_matrices
-	// a, _, _ = randomSchurCanonical(m, lda, false, rnd)
-	// b, _, _ = randomSchurCanonical(n, ldb, false, rnd)
-	// a = randomUpperQuasiTriangular(m, m, lda, m-max(1, m/2), rnd)
-	// b = randomUpperQuasiTriangular(n, n, ldb, n-max(1, n/2), rnd)
-	a = randomUpperTriangular(m, lda, rnd)
-	b = randomUpperTriangular(n, ldb, rnd)
+	a, _, _ = randomSchurCanonical(m, lda, false, rnd)
+	b, _, _ = randomSchurCanonical(n, ldb, false, rnd)
 
 	d = randomUpperTriangular(m, ldd, rnd)
 	e = randomUpperTriangular(n, lde, rnd)
@@ -126,6 +122,17 @@ func testSolveDtgsy2(t *testing.T, impl Dtgsy2er, rnd *rand.Rand, trans blas.Tra
 	}
 	if m == 0 || n == 0 {
 		return
+	}
+	// Compare block structure calculation with legacy algorithm.
+	expectAIwork := calcBlockStructure(a)
+	expectBIwork := calcBlockStructure(b)
+	iworka := iwork[:len(expectAIwork)]
+	iworkb := iwork[len(expectAIwork) : len(expectAIwork)+len(expectBIwork)]
+	if !intsEqual(expectAIwork, iworka) {
+		t.Errorf("%v: iwork calculation does not match expected for A. expect %d\ngot:%d", name, expectAIwork, iworka)
+	}
+	if !intsEqual(expectBIwork, iworkb) {
+		t.Errorf("%v: iwork calculation does not match expected for B. expect %d\ngot:%d", name, expectBIwork, iworkb)
 	}
 	if scale == 0 {
 		t.Errorf("%v: unexpected homogenous system solution", name)
@@ -175,16 +182,43 @@ func testSolveDtgsy2(t *testing.T, impl Dtgsy2er, rnd *rand.Rand, trans blas.Tra
 	}
 }
 
-// randomUpperQuasiTriangular returns a random, upper quasi triangular matrix, which is
-// to say this is a random matrix with zeros in the subarray A[k:m, 0:k].
-func randomUpperQuasiTriangular(r, c, stride, k int, rnd *rand.Rand) blas64.General {
-	ans := randomGeneral(r, c, stride, rnd)
-	for i := k; i < r; i++ {
-		for j := 0; j < c-k; j++ {
-			ans.Data[i*ans.Stride+j] = 0
+// calcBlockStructure returns an array of indices which indicate the row
+// at which a block begins of a Schur Canonical a matrix. The last entry is
+// always the size of the matrix. len(iwork) <= m+1
+//
+// Consider the following 4×4 matrix:
+//  [ -1   3   2  8]
+//  [ -4  -12  1  1]
+//  [ 0   0    2  8]
+//  [ 0   0    0  1]
+// The above matrix would return iwork of
+//  [0  2  3  4]
+// The routine was copied from the LAPACK Dtgsy2 implementation.
+func calcBlockStructure(a blas64.General) (iwork []int) {
+	if a.Cols != a.Rows {
+		panic("block structure must be calculated for a square, quasitriangular matrix")
+	}
+	m := a.Cols
+	p := -1
+	iwork = make([]int, m+1)
+	// Determine block structure of A.
+	for i := 0; i < m; {
+		p++
+		iwork[p] = i
+		if i == m-1 {
+			break
+		}
+		if a.Data[(i+1)*a.Stride+i] != 0 {
+			i += 2
+			if i+2 < m && a.Data[(i+2)*a.Stride+i] != 0 {
+				panic("matrix is not schur canonical")
+			}
+		} else {
+			i++
 		}
 	}
-	return ans
+	iwork[p+1] = m
+	return iwork[:p+2]
 }
 
 func randomUpperTriangular(n, stride int, rnd *rand.Rand) blas64.General {

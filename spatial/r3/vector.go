@@ -67,7 +67,7 @@ func Norm(p Vec) float64 {
 	return math.Hypot(p.X, math.Hypot(p.Y, p.Z))
 }
 
-// Norm returns the Euclidean squared norm of p
+// Norm2 returns the Euclidean squared norm of p
 //  |p|^2 = p_x^2 + p_y^2 + p_z^2.
 func Norm2(p Vec) float64 {
 	return p.X*p.X + p.Y*p.Y + p.Z*p.Z
@@ -121,7 +121,8 @@ func NewRotation(alpha float64, axis Vec) Rotation {
 	return Rotation(q)
 }
 
-// Rotate returns the rotated vector according to the definition of rot.
+// Rotate returns p rotated according to the parameters used to construct
+// the receiver.
 func (r Rotation) Rotate(p Vec) Vec {
 	if r.isIdentity() {
 		return p

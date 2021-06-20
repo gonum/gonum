@@ -799,6 +799,48 @@ func TestNaturalCubicFit(t *testing.T) {
 		if math.Abs(got-want[i]) > 1e-14 {
 			t.Errorf("Mismatch in predicted Y value for x = %g: got %v, want %g", testXs[i], got, want[i])
 		}
+		got = nc.PredictDerivative(testXs[i])
+		want := discrDerivPredict(&nc, xs[0], xs[len(xs)-1], testXs[i], 1e-9)
+		if math.Abs(got-want) > 1e-6 {
+			t.Errorf("Mismatch in predicted dY/dX value for x = %g: got %v, want %g", testXs[i], got, want)
+		}
 	}
+}
 
+func TestClampedCubicFit(t *testing.T) {
+	t.Parallel()
+	xs := []float64{-1, 0, 2, 3.5}
+	ys := []float64{2, 0, 2, 1.5}
+	var cc ClampedCubic
+	err := cc.Fit(xs, ys)
+	if err != nil {
+		t.Errorf("Error when fitting ClampedCubic: %v", err)
+	}
+	testXs := []float64{-1, -0.99, -0.5, 0, 0.5, 1, 1.5, 2, 2.5, 3, 3.49, 3.5}
+	// From scipy.interpolate.CubicSpline:
+	want := []float64{
+		2.0,
+		1.999564111111111,
+		1.2021604938271606,
+		0.0,
+		-0.20833333333333343,
+		0.41975308641975284,
+		1.337962962962962,
+		2.0,
+		2.026748971193416,
+		1.7078189300411522,
+		1.5001129711934151,
+		1.4999999999999996,
+	}
+	for i := 0; i < len(testXs); i++ {
+		got := cc.Predict(testXs[i])
+		if math.Abs(got-want[i]) > 1e-14 {
+			t.Errorf("Mismatch in predicted Y value for x = %g: got %v, want %g", testXs[i], got, want[i])
+		}
+		got = cc.PredictDerivative(testXs[i])
+		want := discrDerivPredict(&cc, xs[0], xs[len(xs)-1], testXs[i], 1e-9)
+		if math.Abs(got-want) > 1e-6 {
+			t.Errorf("Mismatch in predicted dY/dX value for x = %g: got %v, want %g", testXs[i], got, want)
+		}
+	}
 }

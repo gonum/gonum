@@ -397,12 +397,12 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 		// 		R(i, i)  * B(j, j) + L(i, j)  * E(j, j)  = -F(i, j)
 		//    for i = 0, 1, ..., P-1, j = Q-1, Q - 2, ..., 0
 		var alpha float64
-		for i := 0; i < p; i++ {
+		for i := 0; i <= p; i++ {
 			is := iwork[i]
 			isp1 := is + 1
 			ie := iwork[i+1] - 1
 			mb = ie - is + 1 // mb is a length variable
-			for j := q; j < p+2; j-- {
+			for j := q; j >= p+2; j-- {
 				js := iwork[j]
 				jsp1 := js + 1
 				je := iwork[j+1] - 1
@@ -559,13 +559,13 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 
 					// Substitute R(i, j) and L(i, j) into remaining equation.
 					if j > p+2 {
-						bi.Dger(mb, js, 1, rhs, 1, b[js:], ldb, f[is*ldf:], 1)
-						bi.Dger(mb, js, 1, rhs[2:], 1, e[js:], lde, f[is*ldf:], 1)
+						bi.Dger(mb, js, 1, rhs, 1, b[js:], ldb, f[is*ldf:], ldf)
+						bi.Dger(mb, js, 1, rhs[2:], 1, e[js:], lde, f[is*ldf:], ldf)
 					}
 					if i < p {
-						bi.Dgemv(blas.Trans, mb, m-ie-1, -1, a[is*lda+ie+1:], 1, rhs, 1,
+						bi.Dgemv(blas.Trans, mb, m-ie-1, -1, a[is*lda+ie+1:], lda, rhs, 1,
 							1, c[(ie+1)*lda+js:], ldc)
-						bi.Dgemv(blas.Trans, mb, m-ie-1, -1, d[is*ldd+ie+1:], 1, rhs[2:], 1,
+						bi.Dgemv(blas.Trans, mb, m-ie-1, -1, d[is*ldd+ie+1:], ldd, rhs[2:], 1,
 							1, c[(ie+1)*lda+js:], ldc)
 					}
 

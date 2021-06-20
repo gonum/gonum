@@ -54,13 +54,13 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 		panic(badLdA)
 	case ldb < max(1, n):
 		panic(badLdB)
-	case ldc < max(1, m):
+	case ldc < max(1, n):
 		panic(badLdC)
 	case ldd < max(1, m):
 		panic(badLdD)
 	case lde < max(1, n):
 		panic(badLdE)
-	case ldf < max(1, m):
+	case ldf < max(1, n):
 		panic(badLdF)
 	case len(iwork) < m+n+2:
 		panic(badLWork)

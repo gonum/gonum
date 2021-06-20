@@ -50,7 +50,7 @@ type Dtgsy2er interface {
 func Dtgsy2Test(t *testing.T, impl Dtgsy2er) {
 	rnd := rand.New(rand.NewSource(1))
 	for _, n := range []int{5} {
-		for _, m := range []int{5} {
+		for _, m := range []int{6} {
 			for _, lda := range []int{m} {
 				for _, ldb := range []int{n} {
 					for _, ldc := range []int{n} {
@@ -75,12 +75,12 @@ func Dtgsy2Test(t *testing.T, impl Dtgsy2er) {
 func testSolveDtgsy2(t *testing.T, impl Dtgsy2er, rnd *rand.Rand, trans blas.Transpose, ijob, m, n, lda, ldb, ldc, ldd, lde, ldf int) {
 	const tol = 1e-12
 	name := fmt.Sprintf("trans=%v,ijob=%v,n=%v,m=%v,lda=%v,ldb=%v,ldc=%v,ldd=%v,lde=%v,ldf=%v", string(trans), ijob, n, m, lda, ldb, ldc, ldd, lde, ldf)
-	lda = max(lda, m)
-	ldb = max(ldb, n)
-	ldc = max(ldc, n)
-	ldd = max(ldd, m)
-	lde = max(lde, n)
-	ldf = max(ldf, n)
+	lda = max(lda, max(1, m))
+	ldb = max(ldb, max(1, n))
+	ldc = max(ldc, max(1, n))
+	ldd = max(ldd, max(1, m))
+	lde = max(lde, max(1, n))
+	ldf = max(ldf, max(1, n))
 	// Generate random matrices (A, D) and (B, E) which must be
 	// in generalized Schur canonical form, i.e. A, B are upper
 	// quasi triangular and D, E are upper triangular.

@@ -46,9 +46,9 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 		panic(badTrans)
 	case trans == blas.NoTrans && (ijob < 0 || ijob > 2):
 		panic(badIjob)
-	case m <= 0:
+	case m < 0:
 		panic(mLT0)
-	case n <= 0:
+	case n < 0:
 		panic(nLT0)
 	case lda < max(1, m):
 		panic(badLdA)
@@ -65,6 +65,12 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 	case len(iwork) < m+n+2:
 		panic(badLWork)
 	}
+
+	// Quick return if possible.
+	if m == 0 || n == 0 {
+		return
+	}
+
 	ldz := 8
 	z := make([]float64, ldz*ldz)
 	ipiv, jpiv := make([]int, ldz), make([]int, ldz)
@@ -223,8 +229,8 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 
 					// Substitute R(i,j) and L(i,j) into remaining equation.
 					if i > 0 {
-						bi.Dger(is, nb, -1, a[is:], lda, rhs, 1, c[js:], 1)
-						bi.Dger(is, nb, -1, d[is:], ldd, rhs, 1, f[js:], 1)
+						bi.Dger(is, nb, -1, a[is:], lda, rhs, 1, c[js:], ldc)
+						bi.Dger(is, nb, -1, d[is:], ldd, rhs, 1, f[js:], ldf)
 					}
 					if j < q {
 						bi.Daxpy(n-je-1, rhs[2], b[js*ldb+je+1:], 1, c[is*ldc+je+1:], 1)
@@ -447,7 +453,7 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 						alpha = -rhs[0]
 						bi.Daxpy(m-ie-1, alpha, a[is*lda+ie+1:], 1, c[(ie+1)*ldc+js:], ldc)
 						alpha = -rhs[1]
-						bi.Daxpy(m-ie-1, alpha, d[is*ldd+ie+1:], 1, c[(ie+1)*ldf+js:], ldc)
+						bi.Daxpy(m-ie-1, alpha, d[is*ldd+ie+1:], 1, c[(ie+1)*ldc+js:], ldc)
 					}
 
 				} else if mb == 1 && nb == 2 {
@@ -506,8 +512,8 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 						bi.Daxpy(js, rhs[3], e[jsp1:], lde, f[is*ldf:], 1)
 					}
 					if i < p {
-						bi.Dger(m-ie-1, nb, -1, a[is*lda+ie+1:], 1, rhs, 1, c[(ie+1)*ldc+js:], 1)
-						bi.Dger(m-ie-1, nb, -1, d[is*ldd+ie+1:], 1, rhs[2:], 1, c[(ie+1)*ldc+js:], 1)
+						bi.Dger(m-ie-1, nb, -1, a[is*lda+ie+1:], 1, rhs, 1, c[(ie+1)*ldc+js:], ldc)
+						bi.Dger(m-ie-1, nb, -1, d[is*ldd+ie+1:], 1, rhs[2:], 1, c[(ie+1)*ldc+js:], ldc)
 					}
 				} else if mb == 2 && nb == 1 {
 					// Build a 4×4 system Zᵀ * x = RHS.
@@ -527,7 +533,7 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 					z[3*ldz+2] = 0
 
 					z[3] = 0
-					z[ldz+3] = d[isp1*ldb+isp1]
+					z[ldz+3] = d[isp1*ldd+isp1]
 					z[2*ldz+3] = 0
 					z[3*ldz+3] = -e[js*lde+js]
 
@@ -564,9 +570,9 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 					}
 					if i < p {
 						bi.Dgemv(blas.Trans, mb, m-ie-1, -1, a[is*lda+ie+1:], lda, rhs, 1,
-							1, c[(ie+1)*lda+js:], ldc)
+							1, c[(ie+1)*ldc+js:], ldc)
 						bi.Dgemv(blas.Trans, mb, m-ie-1, -1, d[is*ldd+ie+1:], ldd, rhs[2:], 1,
-							1, c[(ie+1)*lda+js:], ldc)
+							1, c[(ie+1)*ldc+js:], ldc)
 					}
 
 				} else if mb == 2 && nb == 2 {

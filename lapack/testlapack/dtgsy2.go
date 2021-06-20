@@ -49,18 +49,20 @@ type Dtgsy2er interface {
 
 func Dtgsy2Test(t *testing.T, impl Dtgsy2er) {
 	rnd := rand.New(rand.NewSource(1))
-	for _, n := range []int{5} {
-		for _, m := range []int{6} {
-			for _, lda := range []int{m} {
-				for _, ldb := range []int{n} {
-					for _, ldc := range []int{n} {
-						for _, ldd := range []int{m} {
-							for _, lde := range []int{n} {
-								for _, ldf := range []int{n} {
-									for _, ijob := range []int{0} {
+	// outer:
+	for _, n := range []int{3, 9} {
+		for _, m := range []int{3} {
+			for _, lda := range []int{m, m + 1, m + 12} {
+				for _, ldb := range []int{n, n + 2, n + 1} {
+					for _, ldc := range []int{n, n + 3, n + 2} {
+						for _, ldd := range []int{m, m + 4, m + 3} {
+							for _, lde := range []int{n, n + 5, n + 2} {
+								for _, ldf := range []int{n, n + 6, n + 1} {
+									for _, ijob := range []int{0, 2} {
 										// First attempt to pass blas.Trans case which does not use untested Dlatdf routine
 										testSolveDtgsy2(t, impl, rnd, blas.Trans, ijob, m, n, lda, ldb, ldc, ldd, lde, ldf)
 										// testSolveDtgsy2(t, impl, rnd, blas.NoTrans, ijob, m, n, lda, ldb, ldc, ldd, lde, ldf)
+										// break outer // weed out 3×3 bugs first. Small systems pass tests(1×2,2×2)
 									}
 								}
 							}
@@ -81,29 +83,36 @@ func testSolveDtgsy2(t *testing.T, impl Dtgsy2er, rnd *rand.Rand, trans blas.Tra
 	ldd = max(ldd, max(1, m))
 	lde = max(lde, max(1, n))
 	ldf = max(ldf, max(1, n))
+
 	// Generate random matrices (A, D) and (B, E) which must be
 	// in generalized Schur canonical form, i.e. A, B are upper
 	// quasi triangular and D, E are upper triangular.
-	a := randomUpperQuasiTriangular(m, m, lda, max(1, m/2), rnd)
-	b := randomUpperQuasiTriangular(n, n, ldb, max(1, n/2), rnd)
-	d := randomUpperTriangular(m, ldd, rnd)
-	e := randomUpperTriangular(n, lde, rnd)
-	// a, _, _ := randomSchurCanonical(m, lda, false, rnd)
-	// b, _, _ := randomSchurCanonical(n, ldb, false, rnd)
-	// d, _, _ := randomSchurCanonical(m, ldd, false, rnd)
-	// e, _, _ := randomSchurCanonical(n, lde, false, rnd)
+	var a, b, c, d, e, f blas64.General
+	// Real Schur canonical form. IF A is real, there exists a real orthogonal matrix V such that V^T A V = T is quasi-upper triangular.
+	// This means that T is block upper triangular with 1-by1 and 2-by-2 blocks on the diagonal.
+	// Its eigenvalues are the eigenvalues of the diagonal blocks. The 1-by-1 blocks correspond to real eigenvalues,
+	// and the 2-by-2 blocks to complex conjugate pairs. From Wikipedia https://en.wikipedia.org/wiki/Talk%3ATriangular_matrix#Quasi-triangular_matrices
+	a, _, _ = randomSchurCanonical(m, lda, false, rnd)
+	b, _, _ = randomSchurCanonical(n, ldb, false, rnd)
+
+	d = randomUpperTriangular(m, ldd, rnd)
+	e = randomUpperTriangular(n, lde, rnd)
+
 	// Generate random general matrix.
-	c := randomGeneral(m, n, ldc, rnd)
-	f := randomGeneral(m, n, ldf, rnd)
+	c = randomGeneral(m, n, ldc, rnd)
+	f = randomGeneral(m, n, ldf, rnd)
 	cCopy := cloneGeneral(c)
 	fCopy := cloneGeneral(f)
-	// rdsum and rdscal only makes sense when Dtgsy2 is called by	Dtgsyl.
+	// rdsum and rdscal only makes sense when Dtgsy2 is called by Dtgsyl.
 	rdsum, rdscal := 0., 0.
 	iwork := make([]int, m+n+2)
-	scale, sum, scalout, pq, info := impl.Dtgsy2(trans, ijob, m, n, a.Data, lda, b.Data, ldb, c.Data, ldc, d.Data, ldd,
-		e.Data, lde, f.Data, ldf, rdsum, rdscal, iwork)
+	scale, sum, scalout, pq, info := impl.Dtgsy2(trans, ijob, m, n, a.Data, lda, b.Data, ldb,
+		c.Data, ldc, d.Data, ldd, e.Data, lde, f.Data, ldf, rdsum, rdscal, iwork)
 	if info != 0 {
 		t.Errorf("%v: got non-zero exit number. info=%d", name, info)
+	}
+	if m == 0 || n == 0 {
+		return
 	}
 	if scale == 0 {
 		t.Errorf("%v: unexpected homogenous system solution", name)
@@ -154,7 +163,7 @@ func testSolveDtgsy2(t *testing.T, impl Dtgsy2er, rnd *rand.Rand, trans blas.Tra
 func randomUpperQuasiTriangular(r, c, stride, k int, rnd *rand.Rand) blas64.General {
 	ans := randomGeneral(r, c, stride, rnd)
 	for i := k; i < r; i++ {
-		for j := k - 1; j >= 0; j-- {
+		for j := 0; j < 0; j-- {
 			ans.Data[i*ans.Stride+j] = 0
 		}
 	}

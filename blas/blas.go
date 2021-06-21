@@ -281,3 +281,12 @@ type Complex128Level3 interface {
 	Zherk(ul Uplo, t Transpose, n, k int, alpha float64, a []complex128, lda int, beta float64, c []complex128, ldc int)
 	Zher2k(ul Uplo, t Transpose, n, k int, alpha complex128, a []complex128, lda int, b []complex128, ldb int, beta float64, c []complex128, ldc int)
 }
+
+// UsFloat64Level1 implements the double precision unstructured sparse BLAS Level 1 routines.
+type UsFloat64Level1 interface {
+	Dusdot(nz int, x []float64, index []int, y []float64, incY int) (w float64)
+	Dusaxpy(nz int, alpha float64, x []float64, index []int, y []float64, incY int)
+	Dusga(nz int, y []float64, incY int, x []float64, index []int)
+	Dusgz(nz int, y []float64, incY int, x []float64, index []int)
+	Dussc(nz int, x []float64, y []float64, incY int, index []int)
+}

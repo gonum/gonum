@@ -32,4 +32,6 @@ const (
 	shortA  = "blas: insufficient length of a"
 	shortB  = "blas: insufficient length of b"
 	shortC  = "blas: insufficient length of c"
+
+	badXIndexLen = "blas: x length mismatch with index"
 )

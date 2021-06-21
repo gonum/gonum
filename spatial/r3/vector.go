@@ -7,6 +7,7 @@ package r3
 import (
 	"math"
 
+	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/num/quat"
 )
 
@@ -96,7 +97,6 @@ type Box struct {
 //  - create rotations from Euler angles (NewRotationFromEuler?)
 //  - create rotations from rotation matrices (NewRotationFromMatrix?)
 //  - return the equivalent Euler angles from a Rotation
-//  - return the equivalent rotation matrix from a Rotation
 //
 // Euler angles have issues (see [1] for a discussion).
 // We should think carefully before adding them in.
@@ -138,4 +138,26 @@ func (r Rotation) isIdentity() bool {
 
 func raise(p Vec) quat.Number {
 	return quat.Number{Imag: p.X, Jmag: p.Y, Kmag: p.Z}
+}
+
+// Matrix returns a 3×3 rotation matrix corresponding to the receiver. It
+// may be used to perform rotations on a 3-vector or to apply the rotation
+// to a 3×n matrix of column vectors. If the receiver is not a unit
+// quaternion, the returned matrix will not be a pure rotation.
+func (r Rotation) Matrix() mat.Matrix {
+	re, im, jm, km := r.Real, r.Imag, r.Jmag, r.Kmag
+	im2 := im * im
+	jm2 := jm * jm
+	km2 := km * km
+	rim := re * im
+	rjm := re * jm
+	rkm := re * km
+	ijm := im * jm
+	jkm := jm * km
+	kim := km * im
+	return mat.NewDense(3, 3, []float64{
+		1 - 2*(jm2+km2), 2 * (ijm - rkm), 2 * (kim + rjm),
+		2 * (ijm + rkm), 1 - 2*(im2+km2), 2 * (jkm - rim),
+		2 * (kim - rjm), 2 * (jkm + rim), 1 - 2*(im2+jm2),
+	})
 }

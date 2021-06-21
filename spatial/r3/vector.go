@@ -7,7 +7,6 @@ package r3
 import (
 	"math"
 
-	"gonum.org/v1/gonum/blas/blas64"
 	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/num/quat"
 )
@@ -156,32 +155,9 @@ func (r Rotation) Matrix() mat.Matrix {
 	ijm := im * jm
 	jkm := jm * km
 	kim := km * im
-	return &matrix{
+	return mat.NewDense(3, 3, []float64{
 		1 - 2*(jm2+km2), 2 * (ijm - rkm), 2 * (kim + rjm),
 		2 * (ijm + rkm), 1 - 2*(im2+km2), 2 * (jkm - rim),
 		2 * (kim - rjm), 2 * (jkm + rim), 1 - 2*(im2+jm2),
-	}
-}
-
-// matrix is a 3×3 rotation matrix.
-type matrix [9]float64
-
-var (
-	_ mat.Matrix      = (*matrix)(nil)
-	_ mat.RawMatrixer = (*matrix)(nil)
-)
-
-func (m *matrix) At(i, j int) float64 {
-	if uint(i) >= 3 {
-		panic(mat.ErrRowAccess)
-	}
-	if uint(j) >= 3 {
-		panic(mat.ErrColAccess)
-	}
-	return m[i*3+j]
-}
-func (m *matrix) Dims() (r, c int) { return 3, 3 }
-func (m *matrix) T() mat.Matrix    { return mat.Transpose{Matrix: m} }
-func (m *matrix) RawMatrix() blas64.General {
-	return blas64.General{Rows: 3, Cols: 3, Data: m[:], Stride: 3}
+	})
 }

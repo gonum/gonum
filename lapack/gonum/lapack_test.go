@@ -463,6 +463,11 @@ func TestDorgqr(t *testing.T) {
 	testlapack.DorgqrTest(t, impl)
 }
 
+func TestDorgr2(t *testing.T) {
+	t.Parallel()
+	testlapack.Dorgr2Test(t, impl)
+}
+
 func TestDorgtr(t *testing.T) {
 	t.Parallel()
 	testlapack.DorgtrTest(t, impl)

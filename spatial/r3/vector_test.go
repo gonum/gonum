@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"gonum.org/v1/gonum/floats/scalar"
+	"gonum.org/v1/gonum/mat"
 )
 
 func TestAdd(t *testing.T) {
@@ -236,11 +237,32 @@ func TestRotate(t *testing.T) {
 		got := Rotate(test.v, test.alpha, test.axis)
 		if !vecApproxEqual(got, test.want, tol) {
 			t.Errorf(
-				"rotate(%v, %v, %v)= %v, want=%v",
+				"quat rotate(%v, %v, %v)= %v, want=%v",
+				test.v, test.alpha, test.axis, got, test.want,
+			)
+		}
+
+		var gotv mat.VecDense
+		gotv.MulVec(NewRotation(test.alpha, test.axis).Matrix(), vecDense(test.v))
+		got = vec(gotv)
+		if !vecApproxEqual(got, test.want, tol) {
+			t.Errorf(
+				"matrix rotate(%v, %v, %v)= %v, want=%v",
 				test.v, test.alpha, test.axis, got, test.want,
 			)
 		}
 	}
+}
+
+func vecDense(v Vec) *mat.VecDense {
+	return mat.NewVecDense(3, []float64{v.X, v.Y, v.Z})
+}
+
+func vec(v mat.VecDense) Vec {
+	if v.Len() != 3 {
+		panic(mat.ErrShape)
+	}
+	return Vec{v.AtVec(0), v.AtVec(1), v.AtVec(2)}
 }
 
 func vecIsNaN(v Vec) bool {

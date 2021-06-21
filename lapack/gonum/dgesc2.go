@@ -82,5 +82,6 @@ func (impl Implementation) Dgesc2(n int, a []float64, lda int, rhs []float64, ip
 
 	// Apply permutations jpiv to the solution (rhs).
 	impl.Dlaswp(1, rhs, 1, 0, n-1, jpiv[:n], -1)
+	
 	return scale
 }

@@ -346,7 +346,7 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 					// Set up right hand side(s).
 					k = 0
 					ii := mb * nb
-					for jj := 0; jj < nb-1; jj++ {
+					for jj := 0; jj <= nb-1; jj++ {
 						bi.Dcopy(mb, c[is*ldc+js+jj:], ldc, rhs[k:], 1)
 						bi.Dcopy(mb, f[is*ldf+js+jj:], ldf, rhs[ii:], 1)
 						k += mb
@@ -374,7 +374,7 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 					// Unpack solution vectors(s).
 					k = 0
 					ii = mb * nb
-					for jj := 0; jj < nb-1; jj++ {
+					for jj := 0; jj <= nb-1; jj++ {
 						bi.Dcopy(mb, rhs[k:], 1, c[is*ldc+js+jj:], ldc)
 						bi.Dcopy(mb, rhs[ii:], 1, f[is*ldf+js+jj:], ldf)
 						k += mb
@@ -560,7 +560,7 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 					}
 
 					// Unpack solution vectors
-					c[i*ldc+js] = rhs[0]
+					c[is*ldc+js] = rhs[0]
 					c[isp1*ldc+js] = rhs[1]
 					f[is*ldf+js] = rhs[2]
 					f[isp1*ldf+js] = rhs[3]
@@ -620,7 +620,7 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 					// Set up right hand side(s).
 					k = 0
 					ii := nb * mb
-					for jj := 0; jj < nb-1; jj++ {
+					for jj := 0; jj <= nb-1; jj++ {
 						bi.Dcopy(mb, c[is*ldc+js+jj:], ldc, rhs[k:], 1)
 						bi.Dcopy(mb, f[is*ldf+js+jj:], ldf, rhs[ii:], 1)
 						k += nb
@@ -644,7 +644,7 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 					// Unpack solution vectors(s).
 					k = 0
 					ii = mb * nb
-					for jj := 0; jj < nb-1; jj++ {
+					for jj := 0; jj <= nb-1; jj++ {
 						bi.Dcopy(mb, rhs[k:], 1, c[is*ldc+js+jj:], ldc)
 						bi.Dcopy(mb, rhs[ii:], 1, f[is*ldf+js+jj:], ldf)
 						k += mb

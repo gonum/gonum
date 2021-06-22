@@ -61,10 +61,8 @@ func Dtgsy2Test(t *testing.T, impl Dtgsy2er) {
 							for _, lde := range []int{n, n + ldAdd} {
 								for _, ldf := range []int{n, n + ldAdd} {
 									for _, ijob := range []int{0, 1, 2} {
-										// First attempt to pass blas.Trans case which does not use untested Dlatdf routine
 										testSolveDtgsy2(t, impl, rnd, blas.Trans, ijob, m, n, lda, ldb, ldc, ldd, lde, ldf)
 										testSolveDtgsy2(t, impl, rnd, blas.NoTrans, ijob, m, n, lda, ldb, ldc, ldd, lde, ldf)
-										// break outer // weed out 3×3 bugs first. Small systems pass tests(1×2,2×2)
 									}
 								}
 							}

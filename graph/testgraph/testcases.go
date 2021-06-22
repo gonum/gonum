@@ -369,4 +369,15 @@ var testCases = []struct {
 		self:     0,
 		absent:   math.Inf(1),
 	},
+	{
+		name:  "issue 1686",
+		nodes: []graph.Node{node(0), node(1), node(2)},
+		edges: []WeightedLine{
+			line{F: node(0), T: node(1), UID: 0, W: 0.5},
+			line{F: node(1), T: node(2), UID: 0, W: 0.5},
+		},
+		nonexist: []graph.Node{node(-1), node(4)},
+		self:     0,
+		absent:   math.Inf(1),
+	},
 }

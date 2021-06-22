@@ -82,26 +82,28 @@ func (g *WeightedUndirectedGraph) Edges() graph.Edges {
 		return graph.Empty
 	}
 	var edges []graph.Edge
-	seen := make(map[int64]struct{})
-	for _, u := range g.lines {
-		for _, e := range u {
-			var lines []graph.WeightedLine
+	for xid, u := range g.lines {
+		for yid, e := range u {
+			if yid < xid {
+				// Do not consider lines when the To node ID is
+				// before the From node ID. Both orientations
+				// are stored.
+				continue
+			}
+			// TODO(kortschak): Add iterator.WeightedLines and use that here.
+			if len(e) == 0 {
+				continue
+			}
+			lines := make([]graph.WeightedLine, 0, len(e))
 			for _, l := range e {
-				lid := l.ID()
-				if _, ok := seen[lid]; ok {
-					continue
-				}
-				seen[lid] = struct{}{}
 				lines = append(lines, l)
 			}
-			if len(lines) != 0 {
-				edges = append(edges, WeightedEdge{
-					F:             g.Node(lines[0].From().ID()),
-					T:             g.Node(lines[0].To().ID()),
-					WeightedLines: iterator.NewOrderedWeightedLines(lines),
-					WeightFunc:    g.EdgeWeightFunc,
-				})
-			}
+			edges = append(edges, WeightedEdge{
+				F:             g.Node(xid),
+				T:             g.Node(yid),
+				WeightedLines: iterator.NewOrderedWeightedLines(lines),
+				WeightFunc:    g.EdgeWeightFunc,
+			})
 		}
 	}
 	if len(edges) == 0 {
@@ -345,26 +347,28 @@ func (g *WeightedUndirectedGraph) WeightedEdges() graph.WeightedEdges {
 		return graph.Empty
 	}
 	var edges []graph.WeightedEdge
-	seen := make(map[int64]struct{})
-	for _, u := range g.lines {
-		for _, e := range u {
-			var lines []graph.WeightedLine
+	for xid, u := range g.lines {
+		for yid, e := range u {
+			if yid < xid {
+				// Do not consider lines when the To node ID is
+				// before the From node ID. Both orientations
+				// are stored.
+				continue
+			}
+			// TODO(kortschak): Add iterator.WeightedLines and use that here.
+			if len(e) == 0 {
+				continue
+			}
+			lines := make([]graph.WeightedLine, 0, len(e))
 			for _, l := range e {
-				lid := l.ID()
-				if _, ok := seen[lid]; ok {
-					continue
-				}
-				seen[lid] = struct{}{}
 				lines = append(lines, l)
 			}
-			if len(lines) != 0 {
-				edges = append(edges, WeightedEdge{
-					F:             g.Node(lines[0].From().ID()),
-					T:             g.Node(lines[0].To().ID()),
-					WeightedLines: iterator.NewOrderedWeightedLines(lines),
-					WeightFunc:    g.EdgeWeightFunc,
-				})
-			}
+			edges = append(edges, WeightedEdge{
+				F:             g.Node(xid),
+				T:             g.Node(yid),
+				WeightedLines: iterator.NewOrderedWeightedLines(lines),
+				WeightFunc:    g.EdgeWeightFunc,
+			})
 		}
 	}
 	if len(edges) == 0 {

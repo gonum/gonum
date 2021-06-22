@@ -59,7 +59,7 @@ func (g *UndirectedGraph) AddNode(n graph.Node) {
 // The returned graph.Edge is a multi.Edge if an edge exists.
 func (g *UndirectedGraph) Edge(uid, vid int64) graph.Edge {
 	l := g.LinesBetween(uid, vid)
-	if l == nil {
+	if l == graph.Empty {
 		return nil
 	}
 	return Edge{F: g.Node(uid), T: g.Node(vid), Lines: l}

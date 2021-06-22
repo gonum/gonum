@@ -76,32 +76,30 @@ func (g *WeightedUndirectedGraph) EdgeBetween(xid, yid int64) graph.Edge {
 }
 
 // Edges returns all the edges in the graph. Each edge in the returned slice
-// is a multi.Edge.
+// is a multi.WeightedEdge.
+//
+// The returned graph.Edges is only valid until the next mutation of
+// the receiver.
 func (g *WeightedUndirectedGraph) Edges() graph.Edges {
 	if len(g.lines) == 0 {
 		return graph.Empty
 	}
 	var edges []graph.Edge
 	for xid, u := range g.lines {
-		for yid, e := range u {
+		for yid, lines := range u {
 			if yid < xid {
 				// Do not consider lines when the To node ID is
 				// before the From node ID. Both orientations
 				// are stored.
 				continue
 			}
-			// TODO(kortschak): Add iterator.WeightedLines and use that here.
-			if len(e) == 0 {
+			if len(lines) == 0 {
 				continue
-			}
-			lines := make([]graph.WeightedLine, 0, len(e))
-			for _, l := range e {
-				lines = append(lines, l)
 			}
 			edges = append(edges, WeightedEdge{
 				F:             g.Node(xid),
 				T:             g.Node(yid),
-				WeightedLines: iterator.NewOrderedWeightedLines(lines),
+				WeightedLines: iterator.NewWeightedLines(lines),
 				WeightFunc:    g.EdgeWeightFunc,
 			})
 		}
@@ -341,32 +339,30 @@ func (g *WeightedUndirectedGraph) WeightedEdgeBetween(xid, yid int64) graph.Weig
 }
 
 // WeightedEdges returns all the edges in the graph. Each edge in the returned slice
-// is a multi.Edge.
+// is a multi.WeightedEdge.
+//
+// The returned graph.WeightedEdges is only valid until the next mutation of
+// the receiver.
 func (g *WeightedUndirectedGraph) WeightedEdges() graph.WeightedEdges {
 	if len(g.lines) == 0 {
 		return graph.Empty
 	}
 	var edges []graph.WeightedEdge
 	for xid, u := range g.lines {
-		for yid, e := range u {
+		for yid, lines := range u {
 			if yid < xid {
 				// Do not consider lines when the To node ID is
 				// before the From node ID. Both orientations
 				// are stored.
 				continue
 			}
-			// TODO(kortschak): Add iterator.WeightedLines and use that here.
-			if len(e) == 0 {
+			if len(lines) == 0 {
 				continue
-			}
-			lines := make([]graph.WeightedLine, 0, len(e))
-			for _, l := range e {
-				lines = append(lines, l)
 			}
 			edges = append(edges, WeightedEdge{
 				F:             g.Node(xid),
 				T:             g.Node(yid),
-				WeightedLines: iterator.NewOrderedWeightedLines(lines),
+				WeightedLines: iterator.NewWeightedLines(lines),
 				WeightFunc:    g.EdgeWeightFunc,
 			})
 		}

@@ -28,31 +28,44 @@ type emptyInterface struct {
 }
 
 // newMapIterNodes returns a range iterator for a map of nodes.
+// The returned mapIter must not have its line or weightedLine methods called.
 func newMapIterNodes(m map[int64]graph.Node) *mapIter {
 	return &mapIter{m: eface(m)}
 }
 
 // newMapIterEdges returns a range iterator for a map of edges.
-// The returned mapIter must not have its node method called.
+// The returned mapIter must not have its node, line or weightedLine methods called.
 func newMapIterEdges(m map[int64]graph.Edge) *mapIter {
 	return &mapIter{m: eface(m)}
 }
 
-// newMapIterWeightedEdges returns a range iterator for a map of edges.
-// The returned mapIter must not have its node method called.
-func newMapIterWeightedEdges(m map[int64]graph.WeightedEdge) *mapIter {
+// newMapIterLines returns a range iterator for a map of line.
+// The returned mapIter must not have its node or weightedLine method called.
+func newMapIterLines(m map[int64]graph.Line) *mapIter {
 	return &mapIter{m: eface(m)}
 }
 
-// newMapIterLines returns a range iterator for a map of edges.
-// The returned mapIter must not have its node method called.
-func newMapIterLines(m map[int64]map[int64]graph.Line) *mapIter {
+// newMapIterWeightedLines returns a range iterator for a map of line.
+// The returned mapIter must not have its node, line or weightedLine methods called.
+func newMapIterWeightedLines(m map[int64]graph.WeightedLine) *mapIter {
 	return &mapIter{m: eface(m)}
 }
 
-// newMapIterWeightedLines returns a range iterator for a map of edges.
-// The returned mapIter must not have its node method called.
-func newMapIterWeightedLines(m map[int64]map[int64]graph.WeightedLine) *mapIter {
+// newMapIterByWeightedEdges returns a range iterator for a map of edges.
+// The returned mapIter must not have its node, line or weightedLine methods called.
+func newMapIterByWeightedEdges(m map[int64]graph.WeightedEdge) *mapIter {
+	return &mapIter{m: eface(m)}
+}
+
+// newMapIterByLines returns a range iterator for a map of edges.
+// The returned mapIter must not have its node, line or weightedLine methods called.
+func newMapIterByLines(m map[int64]map[int64]graph.Line) *mapIter {
+	return &mapIter{m: eface(m)}
+}
+
+// newMapIterByWeightedLines returns a range iterator for a map of edges.
+// The returned mapIter must not have its node, line or weightedLine methods called.
+func newMapIterByWeightedLines(m map[int64]map[int64]graph.WeightedLine) *mapIter {
 	return &mapIter{m: eface(m)}
 }
 
@@ -80,6 +93,28 @@ func (it *mapIter) node() graph.Node {
 		panic("mapIter.node called on exhausted iterator")
 	}
 	return *(*graph.Node)(mapiterelem(it.it))
+}
+
+// line returns the value of the iterator's current map entry.
+func (it *mapIter) line() graph.Line {
+	if it.it == nil {
+		panic("mapIter.line called before next")
+	}
+	if mapiterkey(it.it) == nil {
+		panic("mapIter.line called on exhausted iterator")
+	}
+	return *(*graph.Line)(mapiterelem(it.it))
+}
+
+// weightedLine returns the value of the iterator's current map entry.
+func (it *mapIter) weightedLine() graph.WeightedLine {
+	if it.it == nil {
+		panic("mapIter.weightedLine called before next")
+	}
+	if mapiterkey(it.it) == nil {
+		panic("mapIter.weightedLine called on exhausted iterator")
+	}
+	return *(*graph.WeightedLine)(mapiterelem(it.it))
 }
 
 // next advances the map iterator and reports whether there is another

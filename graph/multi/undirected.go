@@ -72,31 +72,29 @@ func (g *UndirectedGraph) EdgeBetween(xid, yid int64) graph.Edge {
 
 // Edges returns all the edges in the graph. Each edge in the returned slice
 // is a multi.Edge.
+//
+// The returned graph.Edges is only valid until the next mutation of
+// the receiver.
 func (g *UndirectedGraph) Edges() graph.Edges {
 	if len(g.lines) == 0 {
 		return graph.Empty
 	}
 	var edges []graph.Edge
 	for xid, u := range g.lines {
-		for yid, e := range u {
+		for yid, lines := range u {
 			if yid < xid {
 				// Do not consider lines when the To node ID is
 				// before the From node ID. Both orientations
 				// are stored.
 				continue
 			}
-			// TODO(kortschak): Add iterator.Lines and use that here.
-			if len(e) == 0 {
+			if len(lines) == 0 {
 				continue
-			}
-			lines := make([]graph.Line, 0, len(e))
-			for _, l := range e {
-				lines = append(lines, l)
 			}
 			edges = append(edges, Edge{
 				F:     g.Node(xid),
 				T:     g.Node(yid),
-				Lines: iterator.NewOrderedLines(lines),
+				Lines: iterator.NewLines(lines),
 			})
 		}
 	}

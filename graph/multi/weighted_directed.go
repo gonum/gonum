@@ -74,25 +74,25 @@ func (g *WeightedDirectedGraph) Edge(uid, vid int64) graph.Edge {
 
 // Edges returns all the edges in the graph. Each edge in the returned slice
 // is a multi.WeightedEdge.
+//
+// The returned graph.Edges is only valid until the next mutation of
+// the receiver.
 func (g *WeightedDirectedGraph) Edges() graph.Edges {
 	if len(g.nodes) == 0 {
 		return graph.Empty
 	}
 	var edges []graph.Edge
-	for _, u := range g.nodes {
-		for _, e := range g.from[u.ID()] {
-			var lines []graph.WeightedLine
-			for _, l := range e {
-				lines = append(lines, l)
+	for uid, u := range g.nodes {
+		for vid, lines := range g.from[u.ID()] {
+			if len(lines) == 0 {
+				continue
 			}
-			if len(lines) != 0 {
-				edges = append(edges, WeightedEdge{
-					F:             g.Node(u.ID()),
-					T:             g.Node(lines[0].To().ID()),
-					WeightedLines: iterator.NewOrderedWeightedLines(lines),
-					WeightFunc:    g.EdgeWeightFunc,
-				})
-			}
+			edges = append(edges, WeightedEdge{
+				F:             g.Node(uid),
+				T:             g.Node(vid),
+				WeightedLines: iterator.NewWeightedLines(lines),
+				WeightFunc:    g.EdgeWeightFunc,
+			})
 		}
 	}
 	if len(edges) == 0 {
@@ -334,25 +334,25 @@ func (g *WeightedDirectedGraph) WeightedEdge(uid, vid int64) graph.WeightedEdge 
 
 // WeightedEdges returns all the edges in the graph. Each edge in the returned slice
 // is a multi.WeightedEdge.
+//
+// The returned graph.WeightedEdges is only valid until the next mutation of
+// the receiver.
 func (g *WeightedDirectedGraph) WeightedEdges() graph.WeightedEdges {
 	if len(g.nodes) == 0 {
 		return graph.Empty
 	}
 	var edges []graph.WeightedEdge
-	for _, u := range g.nodes {
-		for _, e := range g.from[u.ID()] {
-			var lines []graph.WeightedLine
-			for _, l := range e {
-				lines = append(lines, l)
+	for uid, u := range g.nodes {
+		for vid, lines := range g.from[u.ID()] {
+			if len(lines) == 0 {
+				continue
 			}
-			if len(lines) != 0 {
-				edges = append(edges, WeightedEdge{
-					F:             g.Node(u.ID()),
-					T:             g.Node(lines[0].To().ID()),
-					WeightedLines: iterator.NewOrderedWeightedLines(lines),
-					WeightFunc:    g.EdgeWeightFunc,
-				})
-			}
+			edges = append(edges, WeightedEdge{
+				F:             g.Node(uid),
+				T:             g.Node(vid),
+				WeightedLines: iterator.NewWeightedLines(lines),
+				WeightFunc:    g.EdgeWeightFunc,
+			})
 		}
 	}
 	if len(edges) == 0 {

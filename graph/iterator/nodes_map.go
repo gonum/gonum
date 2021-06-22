@@ -107,7 +107,7 @@ func NewNodesByEdge(nodes map[int64]graph.Node, edges map[int64]graph.Edge) *Nod
 // Behavior of the NodesByEdge is unspecified if nodes or edges
 // is mutated after the call the NewNodes.
 func NewNodesByWeightedEdge(nodes map[int64]graph.Node, edges map[int64]graph.WeightedEdge) *NodesByEdge {
-	return &NodesByEdge{nodes: nodes, edges: len(edges), iter: newMapIterWeightedEdges(edges)}
+	return &NodesByEdge{nodes: nodes, edges: len(edges), iter: newMapIterByWeightedEdges(edges)}
 }
 
 // NewNodesByLines returns a NodesByEdge initialized with the
@@ -120,7 +120,7 @@ func NewNodesByWeightedEdge(nodes map[int64]graph.Node, edges map[int64]graph.We
 // Behavior of the NodesByEdge is unspecified if nodes or lines
 // is mutated after the call the NewNodes.
 func NewNodesByLines(nodes map[int64]graph.Node, lines map[int64]map[int64]graph.Line) *NodesByEdge {
-	return &NodesByEdge{nodes: nodes, edges: len(lines), iter: newMapIterLines(lines)}
+	return &NodesByEdge{nodes: nodes, edges: len(lines), iter: newMapIterByLines(lines)}
 }
 
 // NewNodesByWeightedLines returns a NodesByEdge initialized with the
@@ -133,7 +133,7 @@ func NewNodesByLines(nodes map[int64]graph.Node, lines map[int64]map[int64]graph
 // Behavior of the NodesByEdge is unspecified if nodes or lines
 // is mutated after the call the NewNodes.
 func NewNodesByWeightedLines(nodes map[int64]graph.Node, lines map[int64]map[int64]graph.WeightedLine) *NodesByEdge {
-	return &NodesByEdge{nodes: nodes, edges: len(lines), iter: newMapIterWeightedLines(lines)}
+	return &NodesByEdge{nodes: nodes, edges: len(lines), iter: newMapIterByWeightedLines(lines)}
 }
 
 // Len returns the remaining number of nodes to be iterated over.

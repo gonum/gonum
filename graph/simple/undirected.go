@@ -74,16 +74,14 @@ func (g *UndirectedGraph) Edges() graph.Edges {
 		return graph.Empty
 	}
 	var edges []graph.Edge
-	seen := make(map[[2]int64]struct{})
-	for _, u := range g.edges {
-		for _, e := range u {
-			uid := e.From().ID()
-			vid := e.To().ID()
-			if _, ok := seen[[2]int64{uid, vid}]; ok {
+	for xid, u := range g.edges {
+		for yid, e := range u {
+			if yid < xid {
+				// Do not consider edges when the To node ID is
+				// before the From node ID. Both orientations
+				// are stored.
 				continue
 			}
-			seen[[2]int64{uid, vid}] = struct{}{}
-			seen[[2]int64{vid, uid}] = struct{}{}
 			edges = append(edges, e)
 		}
 	}

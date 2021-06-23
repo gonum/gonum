@@ -124,7 +124,7 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 	var alpha float64
 	var nb, mb int // Length variables.
 	if trans == blas.NoTrans {
-		for j := p + 2; j < q; j++ {
+		for j := p + 2; j <= q; j++ {
 			js := iwork[j]
 			jsp1 := js + 1
 			je := iwork[j+1] - 1
@@ -404,7 +404,6 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 		// 		A(i, i)ᵀ * R(i, j) + D(i, i)ᵀ * L(j, j)  =  C(i, j)
 		// 		R(i, i)  * B(j, j) + L(i, j)  * E(j, j)  = -F(i, j)
 		//    for i = 0, 1, ..., P-1, j = Q-1, Q - 2, ..., 0
-		var alpha float64
 		for i := 0; i <= p; i++ {
 			is := iwork[i]
 			isp1 := is + 1
@@ -667,7 +666,6 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 				}
 			}
 		}
-
 	}
 
 	return scale, rdsum, rdscal, pq, info

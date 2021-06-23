@@ -27,7 +27,7 @@ type Nodes struct {
 // match the graph.Node IDs, and the map keys are not used.
 //
 // Behavior of the Nodes is unspecified if nodes is mutated after
-// the call the NewNodes.
+// the call to NewNodes.
 func NewNodes(nodes map[int64]graph.Node) *Nodes {
 	rv := reflect.ValueOf(nodes)
 	return &Nodes{nodes: rv, iter: rv.MapRange()}
@@ -97,7 +97,7 @@ type NodesByEdge struct {
 // and the map keys are not used.
 //
 // Behavior of the NodesByEdge is unspecified if nodes or edges
-// is mutated after the call the NewNodes.
+// is mutated after the call to NewNodes.
 func NewNodesByEdge(nodes map[int64]graph.Node, edges map[int64]graph.Edge) *NodesByEdge {
 	rv := reflect.ValueOf(edges)
 	return &NodesByEdge{nodes: nodes, edges: rv, iter: rv.MapRange()}
@@ -111,7 +111,7 @@ func NewNodesByEdge(nodes map[int64]graph.Node, edges map[int64]graph.Edge) *Nod
 // and the map keys are not used.
 //
 // Behavior of the NodesByEdge is unspecified if nodes or edges
-// is mutated after the call the NewNodes.
+// is mutated after the call to NewNodes.
 func NewNodesByWeightedEdge(nodes map[int64]graph.Node, edges map[int64]graph.WeightedEdge) *NodesByEdge {
 	rv := reflect.ValueOf(edges)
 	return &NodesByEdge{nodes: nodes, edges: rv, iter: rv.MapRange()}
@@ -125,7 +125,7 @@ func NewNodesByWeightedEdge(nodes map[int64]graph.Node, edges map[int64]graph.We
 // and the map keys are not used.
 //
 // Behavior of the NodesByEdge is unspecified if nodes or lines
-// is mutated after the call the NewNodes.
+// is mutated after the call to NewNodes.
 func NewNodesByLines(nodes map[int64]graph.Node, lines map[int64]map[int64]graph.Line) *NodesByEdge {
 	rv := reflect.ValueOf(lines)
 	return &NodesByEdge{nodes: nodes, edges: rv, iter: rv.MapRange()}
@@ -139,7 +139,7 @@ func NewNodesByLines(nodes map[int64]graph.Node, lines map[int64]map[int64]graph
 // and the map keys are not used.
 //
 // Behavior of the NodesByEdge is unspecified if nodes or lines
-// is mutated after the call the NewNodes.
+// is mutated after the call to NewNodes.
 func NewNodesByWeightedLines(nodes map[int64]graph.Node, lines map[int64]map[int64]graph.WeightedLine) *NodesByEdge {
 	rv := reflect.ValueOf(lines)
 	return &NodesByEdge{nodes: nodes, edges: rv, iter: rv.MapRange()}

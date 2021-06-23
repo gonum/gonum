@@ -748,11 +748,13 @@ func TestMakeCubicSplineSecondDerivativeEquations(t *testing.T) {
 	xs := []float64{-1, 0, 2}
 	ys := []float64{2, 0, 2}
 	n := len(xs)
-	A, b := makeCubicSplineSecondDerivativeEquations(xs, ys)
+	a := mat.NewTridiag(n, nil, nil, nil)
+	b := mat.NewVecDense(n, nil)
+	makeCubicSplineSecondDerivativeEquations(a, b, xs, ys)
 	if b.Len() != n {
 		t.Errorf("Mismatch in b size: got %v, want %d", b.Len(), n)
 	}
-	r, c := A.Dims()
+	r, c := a.Dims()
 	if r != n || c != n {
 		t.Errorf("Mismatch in A size: got %d x %d, want %d x %d", r, c, n, n)
 	}
@@ -764,9 +766,9 @@ func TestMakeCubicSplineSecondDerivativeEquations(t *testing.T) {
 	}
 	expectedA := mat.NewDense(3, 3, []float64{0, 0, 0, 1 / 6., 1, 2 / 6., 0, 0, 0})
 	var diffA mat.Dense
-	diffA.Sub(A, expectedA)
+	diffA.Sub(a, expectedA)
 	if diffA.Norm(math.Inf(1)) > tol {
-		t.Errorf("Mismatch in A values: got %v, want %v", A, expectedA)
+		t.Errorf("Mismatch in A values: got %v, want %v", a, expectedA)
 	}
 }
 
@@ -839,6 +841,44 @@ func TestClampedCubicFit(t *testing.T) {
 		}
 		got = cc.PredictDerivative(testXs[i])
 		want := discrDerivPredict(&cc, xs[0], xs[len(xs)-1], testXs[i], 1e-9)
+		if math.Abs(got-want) > 1e-6 {
+			t.Errorf("Mismatch in predicted dY/dX value for x = %g: got %v, want %g", testXs[i], got, want)
+		}
+	}
+}
+
+func TestNotAKnotCubicFit(t *testing.T) {
+	t.Parallel()
+	xs := []float64{-1, 0, 2, 3.5}
+	ys := []float64{2, 0, 2, 1.5}
+	var nak NotAKnotCubic
+	err := nak.Fit(xs, ys)
+	if err != nil {
+		t.Errorf("Error when fitting NotAKnotCubic: %v", err)
+	}
+	testXs := []float64{-1, -0.99, -0.5, 0, 0.5, 1, 1.5, 2, 2.5, 3, 3.49, 3.5}
+	// From scipy.interpolate.CubicSpline:
+	want := []float64{
+		2.0,
+		1.961016095238095,
+		0.5582010582010581,
+		0.0,
+		0.09523809523809526,
+		0.6137566137566137,
+		1.3253968253968258,
+		2.0,
+		2.407407407407407,
+		2.3174603174603177,
+		1.5249675026455023,
+		1.5000000000000004,
+	}
+	for i := 0; i < len(testXs); i++ {
+		got := nak.Predict(testXs[i])
+		if math.Abs(got-want[i]) > 1e-14 {
+			t.Errorf("Mismatch in predicted Y value for x = %g: got %v, want %g", testXs[i], got, want[i])
+		}
+		got = nak.PredictDerivative(testXs[i])
+		want := discrDerivPredict(&nak, xs[0], xs[len(xs)-1], testXs[i], 1e-9)
 		if math.Abs(got-want) > 1e-6 {
 			t.Errorf("Mismatch in predicted dY/dX value for x = %g: got %v, want %g", testXs[i], got, want)
 		}

@@ -119,9 +119,9 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 	//  D(i, i) * R(i, j) - L(i, j) * E(j, j) = F(i, j)
 	// for i = p-1, p - 2, ..., 0; j = 0, 1, ..., q - 1
 	bi := blas64.Implementation()
+	var alpha, scaloc float64
+	scaloc = 1
 	scale = 1
-	scaloc := 1.0
-	var alpha float64
 	var nb, mb int // Length variables.
 	if trans == blas.NoTrans {
 		for j := p + 2; j <= q; j++ {

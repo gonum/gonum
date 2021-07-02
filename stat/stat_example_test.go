@@ -34,12 +34,12 @@ func ExampleLinearRegression() {
 	alpha, beta := stat.LinearRegression(xs, ys, weights, origin)
 	r2 := stat.RSquared(xs, ys, weights, alpha, beta)
 
-	fmt.Printf("Estimated slope is:  %.6f\n", alpha)
-	fmt.Printf("Estimated offset is: %.6f\n", beta)
+	fmt.Printf("Estimated offset is: %.6f\n", alpha)
+	fmt.Printf("Estimated slope is:  %.6f\n", beta)
 	fmt.Printf("R^2: %.6f\n", r2)
 
 	// Output:
-	// Estimated slope is:  0.988572
-	// Estimated offset is: 3.000154
+	// Estimated offset is: 0.988572
+	// Estimated slope is:  3.000154
 	// R^2: 0.999999
 }

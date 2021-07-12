@@ -80,8 +80,7 @@ func (impl Implementation) Dlange(norm lapack.MatrixNorm, m, n int, a []float64,
 		scale := 0.0
 		sum := 1.0
 		for i := 0; i < m; i++ {
-			rowscale, rowsum := impl.Dlassq(n, a[i*lda:], 1, 0, 1)
-			scale, sum = impl.Dcombssq(scale, sum, rowscale, rowsum)
+			scale, sum = impl.Dlassq(n, a[i*lda:], 1, scale, sum)
 		}
 		return scale * math.Sqrt(sum)
 	}

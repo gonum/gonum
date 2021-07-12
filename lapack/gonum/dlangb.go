@@ -74,15 +74,14 @@ func (impl Implementation) Dlangb(norm lapack.MatrixNorm, m, n, kl, ku int, ab [
 		}
 	case lapack.Frobenius:
 		scale := 0.0
-		ssq := 1.0
+		sum := 1.0
 		for i := 0; i < min(m, n+kl); i++ {
 			l := max(0, kl-i)
 			u := min(n+kl-i, ncol)
 			ilen := u - l
-			rowscale, rowssq := impl.Dlassq(ilen, ab[i*ldab+l:], 1, 0, 1)
-			scale, ssq = impl.Dcombssq(scale, ssq, rowscale, rowssq)
+			scale, sum = impl.Dlassq(ilen, ab[i*ldab+l:], 1, scale, sum)
 		}
-		value = scale * math.Sqrt(ssq)
+		value = scale * math.Sqrt(sum)
 	}
 	return value
 }

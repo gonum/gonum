@@ -101,6 +101,21 @@ func dlassqTest(t *testing.T, impl Dlassqer, rnd *rand.Rand, n, incx, cas int, v
 		panic("bad cas")
 	}
 
+	const (
+		dtsml = 0x1p-511
+		dtbig = 0x1p486
+		dssml = 0x1p537
+		dsbig = 0x1p-538
+	)
+	if scale*math.Sqrt(ssq) > dtbig && scale < math.Sqrt(math.SmallestNonzeroFloat64/ulp)/dsbig {
+		// The scaled sum is big but the scale itself is small.
+		return
+	}
+	if scale*math.Sqrt(ssq) < dtsml && scale > math.Sqrt(math.MaxFloat64)/dssml {
+		// The scaled sum is small but the scale itself is big.
+		return
+	}
+
 	// Compute the expected value of the sum of squares using the (n+1)-vector z.
 	z0 := z[0]
 	var z1n float64

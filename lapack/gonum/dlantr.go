@@ -221,36 +221,32 @@ func (impl Implementation) Dlantr(norm lapack.MatrixNorm, uplo blas.Uplo, diag b
 		}
 	default:
 		// lapack.Frobenius:
-		var scale, ssq float64
+		var scale, sum float64
 		if diag == blas.Unit {
 			scale = 1
-			ssq = float64(min(m, n))
+			sum = float64(min(m, n))
 			if uplo == blas.Upper {
 				for i := 0; i < min(m, n); i++ {
-					rowscale, rowssq := impl.Dlassq(n-i-1, a[i*lda+i+1:], 1, 0, 1)
-					scale, ssq = impl.Dcombssq(scale, ssq, rowscale, rowssq)
+					scale, sum = impl.Dlassq(n-i-1, a[i*lda+i+1:], 1, scale, sum)
 				}
 			} else {
 				for i := 1; i < m; i++ {
-					rowscale, rowssq := impl.Dlassq(min(i, n), a[i*lda:], 1, 0, 1)
-					scale, ssq = impl.Dcombssq(scale, ssq, rowscale, rowssq)
+					scale, sum = impl.Dlassq(min(i, n), a[i*lda:], 1, scale, sum)
 				}
 			}
 		} else {
 			scale = 0
-			ssq = 1
+			sum = 1
 			if uplo == blas.Upper {
 				for i := 0; i < min(m, n); i++ {
-					rowscale, rowssq := impl.Dlassq(n-i, a[i*lda+i:], 1, 0, 1)
-					scale, ssq = impl.Dcombssq(scale, ssq, rowscale, rowssq)
+					scale, sum = impl.Dlassq(n-i, a[i*lda+i:], 1, scale, sum)
 				}
 			} else {
 				for i := 0; i < m; i++ {
-					rowscale, rowssq := impl.Dlassq(min(i+1, n), a[i*lda:], 1, 0, 1)
-					scale, ssq = impl.Dcombssq(scale, ssq, rowscale, rowssq)
+					scale, sum = impl.Dlassq(min(i+1, n), a[i*lda:], 1, scale, sum)
 				}
 			}
 		}
-		return scale * math.Sqrt(ssq)
+		return scale * math.Sqrt(sum)
 	}
 }

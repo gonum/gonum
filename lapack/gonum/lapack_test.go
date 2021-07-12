@@ -17,11 +17,6 @@ func TestDbdsqr(t *testing.T) {
 	testlapack.DbdsqrTest(t, impl)
 }
 
-func TestDcombssq(t *testing.T) {
-	t.Parallel()
-	testlapack.DcombssqTest(t, impl)
-}
-
 func TestDhseqr(t *testing.T) {
 	t.Parallel()
 	testlapack.DhseqrTest(t, impl)

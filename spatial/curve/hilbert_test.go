@@ -110,30 +110,35 @@ func testCurveCase(t *testing.T, c SpaceFilling, order int, expected []Point) {
 	}
 }
 
-func BenchmarkHilbert2D(b *testing.B) {
-	b.Run("Curve", func(b *testing.B) {
-		for ord := 1; ord <= 10; ord++ {
-			b.Run(fmt.Sprintf("Order %d", ord), func(b *testing.B) {
-				h := Hilbert2D{Order: ord}
-				x, y := rand.Intn(ord), rand.Intn(ord)
-				for n := 0; n < b.N; n++ {
-					h.Curve(x, y)
-				}
-			})
-		}
-	})
+func BenchmarkHilbert(b *testing.B) {
+	for N := 2; N <= 4; N++ {
+		b.Run(fmt.Sprintf("%dD/Curve", N), func(b *testing.B) {
+			for ord := 1; ord <= 10; ord++ {
+				b.Run(fmt.Sprintf("Order %d", ord), func(b *testing.B) {
+					h := NewHilbert(ord, N)
+					v := make([]int, N)
+					for i := range v {
+						v[i] = rand.Intn(1 << ord)
+					}
+					for n := 0; n < b.N; n++ {
+						h.Curve(v...)
+					}
+				})
+			}
+		})
 
-	b.Run("Space", func(b *testing.B) {
-		for ord := 1; ord <= 10; ord++ {
-			b.Run(fmt.Sprintf("Order %d", ord), func(b *testing.B) {
-				h := Hilbert2D{Order: ord}
-				d := Point(rand.Intn(1 << ord))
-				for n := 0; n < b.N; n++ {
-					h.Space2D(d)
-				}
-			})
-		}
-	})
+		b.Run(fmt.Sprintf("%dD/Space", N), func(b *testing.B) {
+			for ord := 1; ord <= 10; ord++ {
+				b.Run(fmt.Sprintf("Order %d", ord), func(b *testing.B) {
+					h := NewHilbert(ord, N)
+					d := Point(rand.Intn(1 << (ord * N)))
+					for n := 0; n < b.N; n++ {
+						h.Space(d)
+					}
+				})
+			}
+		})
+	}
 }
 
 func TestHilbert2D(t *testing.T) {

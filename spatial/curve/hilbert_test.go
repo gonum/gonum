@@ -2,11 +2,11 @@ package curve
 
 import (
 	"fmt"
-	"math/rand"
+	"reflect"
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"golang.org/x/exp/rand"
 )
 
 type Dim int
@@ -52,12 +52,25 @@ func adjacent(v, u []int) bool {
 }
 
 func testCurve(t *testing.T, c SpaceFilling) {
+	var errc int
+	fail := func() {
+		if errc < 10 {
+			errc++
+			t.Fail()
+		} else {
+			t.FailNow()
+		}
+	}
+
 	size := c.Size()
 	m := map[Point][]int{}
 	Dim(len(size)).Run(size, func(v []int) {
 		d := c.Curve(v...)
 		u := c.Space(d)
-		require.Equal(t, v, u)
+		if !reflect.DeepEqual(v, u) {
+			t.Logf("Space is not the inverse of Curve for d=%d %v", d, v)
+			fail()
+		}
 
 		m[d] = dup(v)
 	})
@@ -66,19 +79,33 @@ func testCurve(t *testing.T, c SpaceFilling) {
 	for _, v := range c.Size() {
 		D *= Point(v)
 	}
-	var errc int
 	for d := Point(0); d < D-1; d++ {
 		v, u := m[d], m[d+1]
 		if !adjacent(v, u) {
 			t.Logf("points %x and %x are not adjacent", d, d+1)
 			t.Logf("    %v -> %v", v, u)
+			fail()
+		}
+	}
+}
 
-			if errc < 10 {
-				errc++
-				t.Fail()
-			} else {
-				t.FailNow()
-			}
+func testCurveCase(t *testing.T, c SpaceFilling, order int, expected []Point) {
+	dim := len(c.Size())
+	actual := make([]Point, len(expected))
+	for i := range expected {
+		v := vec(i, order, dim)
+		actual[i] = c.Curve(v...)
+	}
+	if !reflect.DeepEqual(expected, actual) {
+		t.Logf("expected %v", expected)
+		t.Logf("got      %v", expected)
+		t.FailNow()
+	}
+
+	for i, d := range expected {
+		v := vec(i, order, dim)
+		if !reflect.DeepEqual(v, c.Space(d)) {
+			t.Fatalf("[%d] expected %v for d = %d", i, v, d)
 		}
 	}
 }
@@ -141,21 +168,8 @@ func TestHilbert2D(t *testing.T) {
 
 	for order, expected := range cases {
 		t.Run(fmt.Sprintf("Case/%d", order), func(t *testing.T) {
-			h := Hilbert2D{Order: order}
-
-			actual := make([]Point, len(expected))
-			for i := range expected {
-				v := vec(i, order, 2)
-				actual[i] = h.Curve(v...)
-			}
-			require.Equal(t, expected, actual, "expected curves to equal")
-
-			for i, v := range expected {
-				u := vec(i, order, 2)
-				require.Equal(t, u, h.Space(v), "[%d] expected (%d, %d) for d = %d", i, u[0], u[1], v)
-			}
+			testCurveCase(t, Hilbert2D{Order: order}, order, expected)
 		})
-
 	}
 }
 
@@ -199,19 +213,7 @@ func TestHilbert3D(t *testing.T) {
 
 	for order, expected := range cases {
 		t.Run(fmt.Sprintf("Case/%d", order), func(t *testing.T) {
-			h := Hilbert3D{Order: order}
-
-			actual := make([]Point, len(expected))
-			for i := range expected {
-				v := vec(i, order, 3)
-				actual[i] = h.Curve(v...)
-			}
-			require.Equal(t, expected, actual, "expected curves to equal")
-
-			for i, v := range expected {
-				u := vec(i, order, 3)
-				require.Equal(t, u, h.Space(v), "[%d] expected (%d, %d, %d) for d = %d", i, u[0], u[1], u[2], v)
-			}
+			testCurveCase(t, Hilbert3D{Order: order}, order, expected)
 		})
 	}
 }
@@ -336,5 +338,4 @@ func ExampleHilbert4D_Curve() {
 	// 72  73  60  61 ║ 7D  7C  67  66 ║ 82  83  98  99 ║ 8D  8C  9F  9E
 	// 4D  4E  5F  5E ║ 4A  49  58  59 ║ B5  B6  A7  A6 ║ B2  B1  A0  A1
 	// 4C  4F  50  51 ║ 4B  48  57  56 ║ B4  B7  A8  A9 ║ B3  B0  AF  AE
-
 }

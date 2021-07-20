@@ -1,0 +1,171 @@
+// Copyright ©2019 The Gonum Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+package optimize
+
+import "math"
+
+const (
+	phi   = math.Phi
+	tiny  = 1e-21
+	limit = 110.0
+)
+
+type brentIterType int
+
+var (
+	_ Method = (*Brent)(nil)
+)
+
+const (
+	brentGo brentIterType = iota
+	brentBrakA
+	brentBrakB
+	brentBrakC
+	brentBrak1
+	brentBrak2
+	brentBrak3
+	brentBrak4
+	brentBrak5 // noop
+)
+
+// Brent is an optimization method from Richard Brent's "Algorithms for Minimization without Derivatives" (page 79)
+type Brent struct {
+	Min, Max, Limit float64 // brackets of absiccas
+
+	x              float64
+	a, b, c        float64
+	fa, fb, fc, fw float64
+	denom, w, wlim float64
+	iter           brentIterType
+
+	status Status
+	err    error
+}
+
+func (b *Brent) Status() (Status, error) {
+	return b.status, b.err
+}
+
+func (*Brent) Uses(has Available) (uses Available, err error) {
+	return has.function()
+}
+
+func (b *Brent) Init(dim, tasks int) int {
+	b.status = NotTerminated
+	b.err = nil
+	return 1
+}
+
+func (b *Brent) Run(operation chan<- Task, result <-chan Task, tasks []Task) {
+	b.status, b.err = localOptimizer{}.run(b, math.NaN(), operation, result, tasks)
+	close(operation)
+	return
+}
+
+func (b *Brent) initLocal(loc *Location) (Operation, error) {
+	if len(loc.X) != 1 {
+		panic("optimize: Brent expects only 1 parameter")
+	}
+	if b.Max <= b.Min && b.Max == 0 {
+		b.Max = 1
+	}
+	if b.Limit == 0 {
+		b.Limit = limit // FIXME: is that correct?
+	}
+
+	b.a = b.Min
+	b.b = b.Max
+	b.x = loc.X[0]
+
+	loc.X[0] = b.Min
+	b.iter = brentBrakA
+	return FuncEvaluation, nil
+}
+
+func (b *Brent) iterateLocal(loc *Location) (Operation, error) {
+	switch b.iter {
+	case brentBrakA, brentBrakB, brentBrakC:
+		return b.bracket(b.iter, loc)
+	case brentBrak1, brentBrak2, brentBrak3, brentBrak4, brentBrak5:
+		return b.bracketLoop(loc)
+	case brentGo:
+		return MajorIteration, nil
+	}
+	return FuncEvaluation, nil
+}
+
+func (*Brent) needs() struct {
+	Gradient bool
+	Hessian  bool
+} {
+	return struct {
+		Gradient bool
+		Hessian  bool
+	}{false, false}
+}
+
+func (b *Brent) bracket(iter brentIterType, loc *Location) (Operation, error) {
+	switch iter {
+	case brentBrakA:
+		b.fa = loc.F
+		loc.X[0] = b.b
+		b.iter = brentBrakB
+		return FuncEvaluation, nil
+	case brentBrakB:
+		b.fb = loc.F
+		if b.fa < b.fb {
+			b.a, b.b = b.b, b.a
+			b.fa, b.fb = b.fb, b.fa
+		}
+		loc.X[0] = b.b + phi*(b.b-b.a)
+		b.iter = brentBrakC
+		return FuncEvaluation, nil
+	case brentBrakC:
+		b.fc = loc.F
+		return b.bracketLoop(loc)
+	}
+	panic("optimize: impossible")
+}
+
+func (b *Brent) bracketLoop(loc *Location) (Operation, error) {
+	if b.fc > b.fb {
+		loc.X[0] = b.x // FIXME: shouldn't this be b.w instead?
+		b.iter = brentGo
+		return FuncEvaluation, nil
+	}
+	tmp1 := (b.b - b.a) * (b.fb - b.fc)
+	tmp2 := (b.b - b.c) * (b.fb - b.fa)
+	tmp3 := tmp2 - tmp1
+
+	b.denom = 2 * tmp3
+	if math.Abs(tmp3) < tiny {
+		b.denom = 2 * tiny
+	}
+
+	b.w = b.b - ((b.b-b.c)*tmp2-(b.b-b.a)*tmp1)/b.denom
+	b.wlim = b.b + b.Limit*(b.c-b.b)
+
+	switch {
+	case (b.w-b.c)*(b.b-b.w) > 0:
+		loc.X[0] = b.w
+		b.iter = brentBrak1
+		return FuncEvaluation, nil
+	case (b.w-b.wlim)*(b.wlim-b.c) >= 0:
+		b.w = b.wlim
+		loc.X[0] = b.w
+		b.iter = brentBrak2
+		return FuncEvaluation, nil
+	case (b.w-b.wlim)*(b.c-b.w) > 0:
+		loc.X[0] = b.w
+		b.iter = brentBrak3
+		return FuncEvaluation, nil
+	default:
+		b.w = b.c + phi*(b.c-b.b)
+		loc.X[0] = b.w
+		b.iter = brentBrak4
+		return FuncEvaluation, nil
+	}
+
+}

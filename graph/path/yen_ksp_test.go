@@ -147,6 +147,30 @@ var yenShortestPathTests = []struct {
 			{-1, 2, 1},
 		},
 	},
+	{
+		name:  "waterfall", // This is the failing case in gonum/gonum#1700.
+		graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedDirectedGraph(0, math.Inf(1)) },
+		edges: []simple.WeightedEdge{
+			{F: simple.Node(0), T: simple.Node(1), W: 1},
+			{F: simple.Node(1), T: simple.Node(2), W: 1},
+			{F: simple.Node(1), T: simple.Node(3), W: 1},
+			{F: simple.Node(1), T: simple.Node(5), W: 1},
+			{F: simple.Node(2), T: simple.Node(4), W: 1},
+			{F: simple.Node(2), T: simple.Node(5), W: 1},
+			{F: simple.Node(3), T: simple.Node(6), W: 1},
+			{F: simple.Node(4), T: simple.Node(6), W: 1},
+			{F: simple.Node(5), T: simple.Node(6), W: 1},
+			{F: simple.Node(5), T: simple.Node(6), W: 1},
+		},
+		query: simple.Edge{F: simple.Node(0), T: simple.Node(6)},
+		k:     4,
+		wantPaths: [][]int64{
+			{0, 1, 3, 6},
+			{0, 1, 5, 6},
+			{0, 1, 2, 4, 6},
+			{0, 1, 2, 5, 6},
+		},
+	},
 }
 
 func bipartite(n int, weight, inc float64) []simple.WeightedEdge {

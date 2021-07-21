@@ -25,7 +25,6 @@ func ExampleHilbert2D_Curve() {
 		}
 		fmt.Println()
 	}
-
 	// Output:
 	// 00  01  0E  0F  10  13  14  15
 	// 03  02  0D  0C  11  12  17  16
@@ -39,7 +38,6 @@ func ExampleHilbert2D_Curve() {
 
 func ExampleHilbert3D_Curve() {
 	h := Hilbert3D{Order: 2}
-	// h := Hilbert{Order: 2, Dimension: 3}
 
 	for z := 0; z < 1<<h.Order; z++ {
 		for y := 0; y < 1<<h.Order; y++ {
@@ -53,7 +51,6 @@ func ExampleHilbert3D_Curve() {
 		}
 		fmt.Println()
 	}
-
 	// Output:
 	// 00  07  08  0B
 	// 01  06  0F  0C
@@ -100,7 +97,6 @@ func ExampleHilbert4D_Curve() {
 			fmt.Println()
 		}
 	}
-
 	// Output:
 	// 00  0F  10  13 ║ 03  0C  11  12 ║ FC  F3  EE  ED ║ FF  F0  EF  EC
 	// 01  0E  1F  1C ║ 02  0D  1E  1D ║ FD  F2  E1  E2 ║ FE  F1  E0  E3
@@ -130,7 +126,7 @@ func TestHilbert2D(t *testing.T) {
 		})
 	}
 
-	cases := map[int][]uint64{
+	cases := map[int][]int{
 		1: {
 			0, 1,
 			3, 2,
@@ -167,7 +163,7 @@ func TestHilbert3D(t *testing.T) {
 		})
 	}
 
-	cases := map[int][]uint64{
+	cases := map[int][]int{
 		1: {
 			0, 1,
 			3, 2,
@@ -240,7 +236,7 @@ func BenchmarkHilbert(b *testing.B) {
 			for ord := 1; ord <= 10; ord++ {
 				b.Run(fmt.Sprintf("Order %d", ord), func(b *testing.B) {
 					h := newCurve(ord, N)
-					d := uint64(rand.Intn(1 << (ord * N)))
+					d := rand.Intn(1 << (ord * N))
 					for n := 0; n < b.N; n++ {
 						h.Space(d)
 					}
@@ -251,9 +247,10 @@ func BenchmarkHilbert(b *testing.B) {
 }
 
 type curve interface {
-	Size() []int
-	Curve(v []int) uint64
-	Space(d uint64) []int
+	Dims() []int
+	Len() int
+	Curve(v []int) int
+	Space(d int) []int
 }
 
 func newCurve(order, dim int) curve {
@@ -279,7 +276,7 @@ func testCurve(t *testing.T, c curve) {
 		}
 	}
 
-	m := map[uint64][]int{}
+	m := map[int][]int{}
 	curveRange(c, func(v []int) {
 		d := c.Curve(dup(v))
 		u := c.Space(d)
@@ -291,11 +288,11 @@ func testCurve(t *testing.T, c curve) {
 		m[d] = dup(v)
 	})
 
-	D := uint64(1)
-	for _, v := range c.Size() {
-		D *= uint64(v)
+	D := 1
+	for _, v := range c.Dims() {
+		D *= v
 	}
-	for d := uint64(0); d < D-1; d++ {
+	for d := 0; d < D-1; d++ {
 		v, u := m[d], m[d+1]
 		if !adjacent(v, u) {
 			t.Logf("points %x and %x are not adjacent", d, d+1)
@@ -306,7 +303,7 @@ func testCurve(t *testing.T, c curve) {
 }
 
 func curveRange(c curve, fn func([]int)) {
-	size := c.Size()
+	size := c.Dims()
 	dimRange(len(size), size, make([]int, len(size)), fn)
 }
 
@@ -344,9 +341,9 @@ func adjacent(v, u []int) bool {
 	return n == 1
 }
 
-func testCurveCase(t *testing.T, c curve, order int, expected []uint64) {
-	dim := len(c.Size())
-	actual := make([]uint64, len(expected))
+func testCurveCase(t *testing.T, c curve, order int, expected []int) {
+	dim := len(c.Dims())
+	actual := make([]int, len(expected))
 	for i := range expected {
 		v := vec(i, order, dim)
 		actual[i] = c.Curve(dup(v))

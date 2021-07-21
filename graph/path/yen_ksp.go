@@ -14,6 +14,9 @@ import (
 // YenKShortestPaths returns the k-shortest loopless paths from s to t in g.
 // YenKShortestPaths will panic if g contains a negative edge weight.
 func YenKShortestPaths(g graph.Graph, k int, s, t graph.Node) [][]graph.Node {
+	// See https://en.wikipedia.org/wiki/Yen's_algorithm and
+	// the paper at https://doi.org/10.1090%2Fqam%2F253822.
+
 	_, isDirected := g.(graph.Directed)
 	yk := yenKSPAdjuster{
 		Graph:      g,
@@ -38,7 +41,7 @@ func YenKShortestPaths(g graph.Graph, k int, s, t graph.Node) [][]graph.Node {
 	var pot []yenShortest
 	var root []graph.Node
 	for i := int64(1); i < int64(k); i++ {
-		for n := 0; n < len(paths[i-1])-1; n++ {
+		for n := 0; n < len(paths[i-1])-2; n++ {
 			yk.reset()
 
 			spur := paths[i-1][n]

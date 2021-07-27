@@ -61,7 +61,7 @@ func (g *DirectedGraph) AddNode(n graph.Node) {
 // The returned graph.Edge is a multi.Edge if an edge exists.
 func (g *DirectedGraph) Edge(uid, vid int64) graph.Edge {
 	l := g.Lines(uid, vid)
-	if l == nil {
+	if l == graph.Empty {
 		return nil
 	}
 	return Edge{F: g.Node(uid), T: g.Node(vid), Lines: l}
@@ -69,24 +69,24 @@ func (g *DirectedGraph) Edge(uid, vid int64) graph.Edge {
 
 // Edges returns all the edges in the graph. Each edge in the returned slice
 // is a multi.Edge.
+//
+// The returned graph.Edges is only valid until the next mutation of
+// the receiver.
 func (g *DirectedGraph) Edges() graph.Edges {
 	if len(g.nodes) == 0 {
 		return graph.Empty
 	}
 	var edges []graph.Edge
-	for _, u := range g.nodes {
-		for _, e := range g.from[u.ID()] {
-			var lines []graph.Line
-			for _, l := range e {
-				lines = append(lines, l)
+	for uid, u := range g.nodes {
+		for vid, lines := range g.from[u.ID()] {
+			if len(lines) == 0 {
+				continue
 			}
-			if len(lines) != 0 {
-				edges = append(edges, Edge{
-					F:     g.Node(u.ID()),
-					T:     g.Node(lines[0].To().ID()),
-					Lines: iterator.NewOrderedLines(lines),
-				})
-			}
+			edges = append(edges, Edge{
+				F:     g.Node(uid),
+				T:     g.Node(vid),
+				Lines: iterator.NewLines(lines),
+			})
 		}
 	}
 	if len(edges) == 0 {

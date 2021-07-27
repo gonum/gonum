@@ -59,7 +59,7 @@ func (g *UndirectedGraph) AddNode(n graph.Node) {
 // The returned graph.Edge is a multi.Edge if an edge exists.
 func (g *UndirectedGraph) Edge(uid, vid int64) graph.Edge {
 	l := g.LinesBetween(uid, vid)
-	if l == nil {
+	if l == graph.Empty {
 		return nil
 	}
 	return Edge{F: g.Node(uid), T: g.Node(vid), Lines: l}
@@ -72,30 +72,30 @@ func (g *UndirectedGraph) EdgeBetween(xid, yid int64) graph.Edge {
 
 // Edges returns all the edges in the graph. Each edge in the returned slice
 // is a multi.Edge.
+//
+// The returned graph.Edges is only valid until the next mutation of
+// the receiver.
 func (g *UndirectedGraph) Edges() graph.Edges {
 	if len(g.lines) == 0 {
 		return graph.Empty
 	}
 	var edges []graph.Edge
-	seen := make(map[int64]struct{})
-	for _, u := range g.lines {
-		for _, e := range u {
-			var lines []graph.Line
-			for _, l := range e {
-				lid := l.ID()
-				if _, ok := seen[lid]; ok {
-					continue
-				}
-				seen[lid] = struct{}{}
-				lines = append(lines, l)
+	for xid, u := range g.lines {
+		for yid, lines := range u {
+			if yid < xid {
+				// Do not consider lines when the To node ID is
+				// before the From node ID. Both orientations
+				// are stored.
+				continue
 			}
-			if len(lines) != 0 {
-				edges = append(edges, Edge{
-					F:     g.Node(lines[0].From().ID()),
-					T:     g.Node(lines[0].To().ID()),
-					Lines: iterator.NewOrderedLines(lines),
-				})
+			if len(lines) == 0 {
+				continue
 			}
+			edges = append(edges, Edge{
+				F:     g.Node(xid),
+				T:     g.Node(yid),
+				Lines: iterator.NewLines(lines),
+			})
 		}
 	}
 	if len(edges) == 0 {

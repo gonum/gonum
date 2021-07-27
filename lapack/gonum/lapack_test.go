@@ -117,6 +117,11 @@ func TestDgerqf(t *testing.T) {
 	testlapack.DgerqfTest(t, impl)
 }
 
+func TestDgesv(t *testing.T) {
+	t.Parallel()
+	testlapack.DgesvTest(t, impl)
+}
+
 func TestDgesvd(t *testing.T) {
 	t.Parallel()
 	const tol = 1e-13

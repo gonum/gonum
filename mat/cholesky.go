@@ -617,7 +617,7 @@ func (c *Cholesky) SymRankOne(orig *Cholesky, alpha float64, x Vector) (ok bool)
 			c, s, r, _ := blas64.Rotg(umat.Data[i*stride+i], work[i])
 			if r < 0 {
 				// Multiply by -1 to have positive diagonal
-				// elemnts.
+				// elements.
 				r *= -1
 				c *= -1
 				s *= -1

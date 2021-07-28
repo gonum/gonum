@@ -14,7 +14,7 @@ func (h Hilbert2D) Dims() []int { return []int{1 << h.Order, 1 << h.Order} }
 // Len returns the length of the curve, which is 2ⁿᵏ, where n is the dimension
 // (2) and k is the order.
 //
-// Curve will overflow on a 32-bit architecture if the order is ≥ 16.
+// Len will overflow on a 32-bit architecture if the order is ≥ 16.
 func (h Hilbert2D) Len() int { return 1 << (2 * h.Order) }
 
 func (h Hilbert2D) rot(n int, v []int, d int) {

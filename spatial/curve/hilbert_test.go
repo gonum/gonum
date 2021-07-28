@@ -266,6 +266,8 @@ func newCurve(order, dim int) curve {
 }
 
 func testCurve(t *testing.T, c curve) {
+	t.Helper()
+
 	var errc int
 	fail := func() {
 		if errc < 10 {
@@ -319,20 +321,27 @@ func dimRange(dim int, size []int, v []int, fn func([]int)) {
 	}
 }
 
-// V may get mangled by Curve, so copy it
+// v may get mangled by Curve, so copy it.
 func dup(v []int) []int {
 	u := make([]int, len(v))
 	copy(u, v)
 	return u
 }
 
+// adjacent returns true if the euclidean distance between v and u is
+// exactly one. v and u must be the same length.
+//
+// In other words, given d(i) = abs(v[i] - u[i]), adjacent returns false if
+// d(i) > 1 for any i or if d(i) == 1 for more than a single i, or if d(i)
+// == 0 for all i.
 func adjacent(v, u []int) bool {
 	n := 0
 	for i := range v {
 		x := v[i] - u[i]
 		if x == 0 {
 			continue
-		} else if x > 1 || x < -1 {
+		}
+		if x < -1 || 1 < x {
 			return false
 		}
 		n++
@@ -342,6 +351,8 @@ func adjacent(v, u []int) bool {
 }
 
 func testCurveCase(t *testing.T, c curve, order int, expected []int) {
+	t.Helper()
+
 	dim := len(c.Dims())
 	actual := make([]int, len(expected))
 	for i := range expected {
@@ -350,7 +361,7 @@ func testCurveCase(t *testing.T, c curve, order int, expected []int) {
 	}
 	if !reflect.DeepEqual(expected, actual) {
 		t.Logf("expected %v", expected)
-		t.Logf("got      %v", expected)
+		t.Logf("got      %v", actual)
 		t.FailNow()
 	}
 

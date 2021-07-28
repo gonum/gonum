@@ -26,7 +26,7 @@ func (h Hilbert2D) rot(n int, v []int, d int) {
 	}
 }
 
-// Curve returns the curve coordinate of V. Curve modifies V.
+// Curve returns the curve coordinate of v. Curve modifies v.
 //
 // Curve will overflow on a 32-bit architecture if the order is ≥ 16.
 func (h Hilbert2D) Curve(v []int) int {
@@ -41,7 +41,7 @@ func (h Hilbert2D) Curve(v []int) int {
 	return d
 }
 
-// Space2D returns the spatial coordinates of D.
+// Space2D returns the spatial coordinates of d.
 func (h Hilbert2D) Space2D(d int) [2]int {
 	var v [2]int
 	for n := 0; n < h.Order; n++ {
@@ -57,7 +57,7 @@ func (h Hilbert2D) Space2D(d int) [2]int {
 	return v
 }
 
-// Space returns Space2D as a slice.
+// Space returns the spatial coordinates of d as a slice.
 func (h Hilbert2D) Space(d int) []int {
 	xy := h.Space2D(d)
 	return xy[:]
@@ -91,7 +91,7 @@ func (h Hilbert3D) rot(reverse bool, n int, v []int, d int) {
 	}
 }
 
-// Curve returns the curve coordinate of V. Curve modifies V.
+// Curve returns the curve coordinate of v. Curve modifies v.
 //
 // Curve will overflow on a 32-bit architecture if the order is ≥ 11.
 func (h Hilbert3D) Curve(v []int) int {
@@ -107,7 +107,7 @@ func (h Hilbert3D) Curve(v []int) int {
 	return d
 }
 
-// Space3D returns the spatial coordinates of D.
+// Space3D returns the spatial coordinates of d.
 func (h Hilbert3D) Space3D(d int) [3]int {
 	var v [3]int
 	for n := 0; n < h.Order; n++ {
@@ -125,7 +125,7 @@ func (h Hilbert3D) Space3D(d int) [3]int {
 	return v
 }
 
-// Space returns Space3D as a slice.
+// Space returns the spatial coordinates of d as a slice.
 func (h Hilbert3D) Space(v int) []int {
 	xy := h.Space3D(v)
 	return xy[:]
@@ -167,7 +167,7 @@ func (h Hilbert4D) rot(reverse bool, n int, v []int, d int) {
 	}
 }
 
-// Curve returns the curve coordinate of V. Curve modifies V.
+// Curve returns the curve coordinate of v. Curve modifies v.
 //
 // Curve will overflow on a 32-bit architecture if the order is ≥ 8.
 func (h Hilbert4D) Curve(v []int) int {
@@ -186,7 +186,7 @@ func (h Hilbert4D) Curve(v []int) int {
 	return d
 }
 
-// Space returns the spatial coordinates of D.
+// Space returns the spatial coordinates of d as a slice.
 func (h Hilbert4D) Space(d int) []int {
 	N := 4
 	v := make([]int, N)

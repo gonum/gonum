@@ -16,13 +16,13 @@
 // The implementation of Hilbert3D and Hilbert4D are extrapolated from
 // Hilbert2D.
 //
-// For the first-order n-dimensional Hilbert curve, a spatial point V is
-// mapped to a point on the curve D by XOR - each dimension of V is expected
+// For the first-order n-dimensional Hilbert curve, a spatial point v is
+// mapped to a point on the curve d by XOR - each dimension of v is expected
 // to be 0 or 1:
 //
 //     func map1stOrder(n int, v []int) (d int) {
-//         for i := n - 1; i >= 0; i-- {
-//             d = d<<1 | (d^v[i])&1
+//         for n -= 1; n >= 0; n-- {
+//             d = d<<1 | (d^v[n])&1
 //         }
 //         return d
 //     }
@@ -37,8 +37,8 @@
 //
 // An n-dimensional, k-order Hilbert curve will not be fully usable if 2ⁿᵏ
 // overflows int (which is dependent on architecture). Len will overflow if
-// n∙k ≥ BitSize-1 (where BitSize is the size of an integer in bits). Curve
-// may overflow if n∙k ≥ BitSize, depending on V. Space will not overflow,
-// but it cannot be called with values that do not fit in a signed integer,
-// thus only a subset of the curve can be utilized.
+// n∙k ≥ bits.UintSize-1. Curve will overflow if n∙k > bits.UintSize-1 for
+// some values of v. Space will not overflow, but it cannot be called with
+// values that do not fit in a signed integer, thus only a subset of the
+// curve can be utilized.
 package curve

@@ -350,22 +350,20 @@ func adjacent(v, u []int) bool {
 	return n == 1
 }
 
-func testCurveCase(t *testing.T, c curve, order int, expected []int) {
+func testCurveCase(t *testing.T, c curve, order int, want []int) {
 	t.Helper()
 
 	dim := len(c.Dims())
-	actual := make([]int, len(expected))
-	for i := range expected {
+	got := make([]int, len(want))
+	for i := range want {
 		v := vec(i, order, dim)
-		actual[i] = c.Curve(dup(v))
+		got[i] = c.Curve(dup(v))
 	}
-	if !reflect.DeepEqual(expected, actual) {
-		t.Logf("expected %v", expected)
-		t.Logf("got      %v", actual)
-		t.FailNow()
+	if !reflect.DeepEqual(want, got) {
+		t.Fatalf("unexpected result:\ngot:  %v\nwant: %v", got, want)
 	}
 
-	for i, d := range expected {
+	for i, d := range want {
 		v := vec(i, order, dim)
 		if !reflect.DeepEqual(v, c.Space(d)) {
 			t.Fatalf("[%d] expected %v for d = %d", i, v, d)

@@ -318,7 +318,7 @@ func (d *DiagDense) IsEmpty() bool {
 
 // Trace returns the trace of the matrix.
 //
-// Trace will panic with with ErrZeroLength if the matrix has zero size.
+// Trace will panic with ErrZeroLength if the matrix has zero size.
 func (d *DiagDense) Trace() float64 {
 	if d.IsEmpty() {
 		panic(ErrZeroLength)

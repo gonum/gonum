@@ -287,8 +287,8 @@ outer:
 		// Now i0:n0 is unreduced.
 		// PP = 0 for ping, PP = 1 for pong.
 		// PP = 2 indicates that flipping was applied to the Z array and
-		// 		and that the tests for deflation upon entry in Dlasq3
-		// 		should not be performed.
+		// 		that the tests for deflation upon entry in Dlasq3 should
+		// 		not be performed.
 		nbig := 100 * (n0 - i0 + 1)
 		for iwhilb := 0; iwhilb < nbig; iwhilb++ {
 			if i0 > n0 {

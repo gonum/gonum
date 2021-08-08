@@ -553,7 +553,7 @@ func PermutationIndex(perm []int, n, k int) int {
 
 	// The permutation index is found by finding the combination index and the
 	// equalPermutation index. The combination index is found by just sorting
-	// the elements, and the the permutation index is the ordering of the size
+	// the elements, and the permutation index is the ordering of the size
 	// of the elements.
 	tmp := make([]int, len(perm))
 	copy(tmp, perm)

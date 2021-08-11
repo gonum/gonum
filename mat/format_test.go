@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"math"
 	"testing"
+
+	"golang.org/x/exp/rand"
 )
 
 func TestFormat(t *testing.T) {
@@ -238,3 +240,16 @@ func TestFormat(t *testing.T) {
 		}
 	}
 }
+
+func benchmarkFormat(b *testing.B, size int) {
+	src := rand.NewSource(1)
+	a, _ := randDense(size, 1.0, src)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = fmt.Sprintf("%v", Formatted(a))
+	}
+}
+
+func BenchmarkFormat10(b *testing.B)   { benchmarkFormat(b, 10) }
+func BenchmarkFormat100(b *testing.B)  { benchmarkFormat(b, 100) }
+func BenchmarkFormat1000(b *testing.B) { benchmarkFormat(b, 1000) }

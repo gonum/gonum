@@ -32,6 +32,8 @@ type formatter struct {
 	format func(m Matrix, prefix string, margin int, dot byte, squeeze bool, fs fmt.State, c rune)
 }
 
+var _ fmt.Formatter = (*formatter)(nil)
+
 // FormatOption is a functional option for matrix formatting.
 type FormatOption func(*formatter)
 
@@ -507,10 +509,14 @@ type widther interface {
 
 type uniformWidth int
 
+var _ widther = (*uniformWidth)(nil)
+
 func (u *uniformWidth) width(_ int) int   { return int(*u) }
 func (u *uniformWidth) setWidth(_, w int) { *u = uniformWidth(w) }
 
 type columnWidth []int
+
+var _ widther = (*columnWidth)(nil)
 
 func (c columnWidth) width(i int) int   { return c[i] }
 func (c columnWidth) setWidth(i, w int) { c[i] = w }

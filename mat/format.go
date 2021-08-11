@@ -19,7 +19,7 @@ func Formatted(m Matrix, options ...FormatOption) fmt.Formatter {
 	for _, o := range options {
 		o(&f)
 	}
-	return f
+	return &f
 }
 
 type formatter struct {

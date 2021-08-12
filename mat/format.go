@@ -173,25 +173,25 @@ func format(m formattable, prefix string, margin int, dot byte, squeeze bool, fs
 		fmt.Fprintf(fs, "Dims(%d, %d)\n", rows, cols)
 	}
 
+	var buf = make([]byte, 0, 4)
 	for i := 0; i < rows; i++ {
 		if !first {
 			fmt.Fprint(fs, prefix)
 		}
 		first = false
-		var el string
 		switch {
 		case rows == 1:
 			fmt.Fprint(fs, "[")
-			el = "]"
+			buf = append(buf[:0], []byte("]")...)
 		case i == 0:
 			fmt.Fprint(fs, "⎡")
-			el = "⎤\n"
+			buf = append(buf[:0], []byte("⎤\n")...)
 		case i < rows-1:
 			fmt.Fprint(fs, "⎢")
-			el = "⎥\n"
+			buf = append(buf[:0], []byte("⎥\n")...)
 		default:
 			fmt.Fprint(fs, "⎣")
-			el = "⎦"
+			buf = append(buf[:0], []byte("⎦")...)
 		}
 
 		for j := 0; j < cols; j++ {
@@ -213,7 +213,7 @@ func format(m formattable, prefix string, margin int, dot byte, squeeze bool, fs
 			}
 		}
 
-		fmt.Fprint(fs, el)
+		fs.Write(buf)
 
 		if i >= printed-1 && i < rows-printed && 2*printed < rows {
 			i = rows - printed - 1
@@ -274,21 +274,21 @@ func formatMATLAB(m formattable, prefix string, _ int, _ byte, squeeze bool, fs 
 		return
 	}
 
+	var buf = make([]byte, 0, 4)
 	for i := 0; i < rows; i++ {
-		var el string
 		switch {
 		case rows == 1:
 			fmt.Fprint(fs, "[")
-			el = "]"
+			buf = append(buf[:0], []byte("]")...)
 		case i == 0:
 			fmt.Fprint(fs, "[\n"+prefix+" ")
-			el = "\n"
+			buf = append(buf[:0], []byte("\n")...)
 		case i < rows-1:
 			fmt.Fprint(fs, prefix+" ")
-			el = "\n"
+			buf = append(buf[:0], []byte("\n")...)
 		default:
 			fmt.Fprint(fs, prefix+" ")
-			el = "\n" + prefix + "]"
+			buf = append(buf[:0], []byte("\n"+prefix+"]")...)
 		}
 
 		for j := 0; j < cols; j++ {
@@ -300,7 +300,7 @@ func formatMATLAB(m formattable, prefix string, _ int, _ byte, squeeze bool, fs 
 			}
 		}
 
-		fmt.Fprint(fs, el)
+		fs.Write(buf)
 	}
 }
 
@@ -361,24 +361,24 @@ func formatPython(m formattable, prefix string, _ int, _ byte, squeeze bool, fs 
 		return
 	}
 
+	var buf = make([]byte, 0, 4)
 	for i := 0; i < rows; i++ {
 		if i != 0 {
 			fmt.Fprint(fs, prefix)
 		}
-		var el string
 		switch {
 		case rows == 1:
 			fmt.Fprint(fs, "[")
-			el = "]"
+			buf = append(buf[:0], []byte("]")...)
 		case i == 0:
 			fmt.Fprint(fs, "[[")
-			el = "],\n"
+			buf = append(buf[:0], []byte("],\n")...)
 		case i < rows-1:
 			fmt.Fprint(fs, " [")
-			el = "],\n"
+			buf = append(buf[:0], []byte("],\n")...)
 		default:
 			fmt.Fprint(fs, " [")
-			el = "]]"
+			buf = append(buf[:0], []byte("]]")...)
 		}
 
 		for j := 0; j < cols; j++ {
@@ -390,7 +390,7 @@ func formatPython(m formattable, prefix string, _ int, _ byte, squeeze bool, fs 
 			}
 		}
 
-		fmt.Fprint(fs, el)
+		fs.Write(buf)
 	}
 }
 

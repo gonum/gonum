@@ -21,6 +21,19 @@ func Formatted(m Matrix, options ...FormatOption) fmt.Formatter {
 	return &f
 }
 
+// CFormatted returns a fmt.Formatter for the complex-valued matrix m using the
+// given options.
+func CFormatted(m CMatrix, options ...FormatOption) fmt.Formatter {
+	f := formatter{
+		matrix: formattableCMatrix{mat: m},
+		dot:    '.',
+	}
+	for _, o := range options {
+		o(&f)
+	}
+	return &f
+}
+
 // formatter is a matrix formatter that satisfies the fmt.Formatter interface
 type formatter struct {
 	matrix  formattable
@@ -122,6 +135,25 @@ func (m formattableMatrix) RevalueFormatter(f fmt.Formatter, i, j int) fmt.Forma
 }
 func (m formattableMatrix) ValueFormatter(i, j int, options ...vFormatOption) fmt.Formatter {
 	return formattedFloat(m.mat.At(i, j), options...)
+}
+
+// formattableCMatrix is a formattable for complex-valued matrices, those that
+// satisfy the CMatrix interface
+type formattableCMatrix struct{ mat CMatrix }
+
+var _ formattable = (*formattableCMatrix)(nil)
+
+func (m formattableCMatrix) Dims() (r, c int) { return m.mat.Dims() }
+func (m formattableCMatrix) Mat() tabular     { return m.mat }
+func (m formattableCMatrix) NewValueFormatter(options ...vFormatOption) fmt.Formatter {
+	return formattedComplex(0, options...)
+}
+func (m formattableCMatrix) RevalueFormatter(f fmt.Formatter, i, j int) fmt.Formatter {
+	f.(*complexFormatter).value = m.mat.At(i, j)
+	return f
+}
+func (m formattableCMatrix) ValueFormatter(i, j int, options ...vFormatOption) fmt.Formatter {
+	return formattedComplex(m.mat.At(i, j), options...)
 }
 
 // tabular type is a two-dimensional array having rows and columns with table

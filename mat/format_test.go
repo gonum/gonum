@@ -7,9 +7,12 @@ package mat
 import (
 	"fmt"
 	"math"
+	"math/cmplx"
 	"testing"
 
 	"golang.org/x/exp/rand"
+
+	"gonum.org/v1/gonum/blas/cblas128"
 )
 
 func TestFormat(t *testing.T) {
@@ -241,6 +244,269 @@ func TestFormat(t *testing.T) {
 	}
 }
 
+func TestCFormat(t *testing.T) {
+	t.Parallel()
+	type rp struct {
+		format string
+		output string
+	}
+	for i, test := range []struct {
+		m   fmt.Formatter
+		rep []rp
+	}{
+		// Dense matrix representation with complex data
+		{
+			m: CFormatted(NewCDense(3, 3, []complex128{0, 0, 0, 0, 0, 0, 0, 0, 0})),
+			rep: []rp{
+				{"%v", "⎡0i  0i  0i⎤\n⎢0i  0i  0i⎥\n⎣0i  0i  0i⎦"},
+				{"% f", "⎡.  .  .⎤\n⎢.  .  .⎥\n⎣.  .  .⎦"},
+				{"%#v", fmt.Sprintf("%#v", NewCDense(3, 3, nil))},
+				{"%s", "%!s(*mat.CDense=Dims(3, 3))"},
+			},
+		},
+		{
+			m: CFormatted(NewCDense(3, 3, []complex128{1, 1, 1, 1, 1, 1, 1, 1, 1})),
+			rep: []rp{
+				{"%v", "⎡1+0i  1+0i  1+0i⎤\n⎢1+0i  1+0i  1+0i⎥\n⎣1+0i  1+0i  1+0i⎦"},
+				{"% f", "⎡1+0i  1+0i  1+0i⎤\n⎢1+0i  1+0i  1+0i⎥\n⎣1+0i  1+0i  1+0i⎦"},
+				{"%#v", fmt.Sprintf("%#v", NewCDense(3, 3, []complex128{1, 1, 1, 1, 1, 1, 1, 1, 1}))},
+			},
+		},
+		{
+			m: CFormatted(NewCDense(3, 3, []complex128{1, 1, 1, 1, 1, 1, 1, 1, 1}), Prefix("\t")),
+			rep: []rp{
+				{"%v", "⎡1+0i  1+0i  1+0i⎤\n\t⎢1+0i  1+0i  1+0i⎥\n\t⎣1+0i  1+0i  1+0i⎦"},
+				{"% f", "⎡1+0i  1+0i  1+0i⎤\n\t⎢1+0i  1+0i  1+0i⎥\n\t⎣1+0i  1+0i  1+0i⎦"},
+				{"%#v", fmt.Sprintf("%#v", NewCDense(3, 3, []complex128{1, 1, 1, 1, 1, 1, 1, 1, 1}))},
+			},
+		},
+		{
+			m: CFormatted(NewCDense(3, 3, []complex128{1, 0, 0, 0, 1, 0, 0, 0, 1})),
+			rep: []rp{
+				{"%v", "⎡1+0i    0i    0i⎤\n⎢  0i  1+0i    0i⎥\n⎣  0i    0i  1+0i⎦"},
+				{"% f", "⎡1+0i     .     .⎤\n⎢   .  1+0i     .⎥\n⎣   .     .  1+0i⎦"},
+				{"%#v", fmt.Sprintf("%#v", NewCDense(3, 3, []complex128{1, 0, 0, 0, 1, 0, 0, 0, 1}))},
+			},
+		},
+		{
+			m: CFormatted(NewCDense(2, 3, []complex128{1 + 2i, 3 + 4i, 5 + 6i, 7 + 8i, 9 + 10i, 11 + 12i})),
+			rep: []rp{
+				{"%v", "⎡  1+2i    3+4i    5+6i⎤\n⎣  7+8i   9+10i  11+12i⎦"},
+				{"% f", "⎡  1+2i    3+4i    5+6i⎤\n⎣  7+8i   9+10i  11+12i⎦"},
+				{"%#v", fmt.Sprintf("%#v", NewCDense(2, 3, []complex128{1 + 2i, 3 + 4i, 5 + 6i, 7 + 8i, 9 + 10i, 11 + 12i}))},
+			},
+		},
+		{
+			m: CFormatted(NewCDense(3, 2, []complex128{1 + 2i, 3 + 4i, 5 + 6i, 7 + 8i, 9 + 10i, 11 + 12i})),
+			rep: []rp{
+				{"%v", "⎡  1+2i    3+4i⎤\n⎢  5+6i    7+8i⎥\n⎣ 9+10i  11+12i⎦"},
+				{"% f", "⎡  1+2i    3+4i⎤\n⎢  5+6i    7+8i⎥\n⎣ 9+10i  11+12i⎦"},
+				{"%#v", fmt.Sprintf("%#v", NewCDense(3, 2, []complex128{1 + 2i, 3 + 4i, 5 + 6i, 7 + 8i, 9 + 10i, 11 + 12i}))},
+			},
+		},
+		{
+			m: func() fmt.Formatter {
+				M, N := 2, 3
+				m := NewCDense(M, N, []complex128{0 + 0i, 1 + 2i, 3 + 4i, 5 + 6i, 7 + 8i, 9 + 10i})
+				for i := 0; i < M; i++ {
+					for j := 0; j < N; j++ {
+						m.Set(i, j, cmplx.Sqrt(m.At(i, j)))
+					}
+				}
+				return CFormatted(m)
+			}(),
+			rep: []rp{
+				{"%v", "⎡                                   0i  1.272019649514069+0.7861513777574233i                                   2+1i⎤\n⎣2.5308348104831593+1.185379617655596i   2.9690188457413544+1.34724641634978i  3.350643523793132+1.4922506570736884i⎦"},
+				{"%.2f", "⎡     0.00i  1.27+0.79i  2.00+1.00i⎤\n⎣2.53+1.19i  2.97+1.35i  3.35+1.49i⎦"},
+				{"% f", "⎡                                    .  1.272019649514069+0.7861513777574233i                                   2+1i⎤\n⎣2.5308348104831593+1.185379617655596i   2.9690188457413544+1.34724641634978i  3.350643523793132+1.4922506570736884i⎦"},
+				{"%#v", fmt.Sprintf("%#v", NewCDense(2, 3, []complex128{
+					(0 + 0i), (1.272019649514069 + 0.7861513777574233i),
+					(2 + 1i), (2.5308348104831593 + 1.185379617655596i),
+					(2.9690188457413544 + 1.34724641634978i), (3.350643523793132 + 1.4922506570736884i),
+				}))},
+			},
+		},
+		{
+			m: func() fmt.Formatter {
+				M, N := 3, 2
+				m := NewCDense(M, N, []complex128{0 + 0i, 1 + 2i, 3 + 4i, 5 + 6i, 7 + 8i, 9 + 10i})
+				for i := 0; i < M; i++ {
+					for j := 0; j < N; j++ {
+						m.Set(i, j, cmplx.Sqrt(m.At(i, j)))
+					}
+				}
+				return CFormatted(m)
+			}(),
+			rep: []rp{
+				{"%v", "⎡                                   0i  1.272019649514069+0.7861513777574233i⎤\n⎢                                 2+1i  2.5308348104831593+1.185379617655596i⎥\n⎣ 2.9690188457413544+1.34724641634978i  3.350643523793132+1.4922506570736884i⎦"},
+				{"%.2f", "⎡     0.00i  1.27+0.79i⎤\n⎢2.00+1.00i  2.53+1.19i⎥\n⎣2.97+1.35i  3.35+1.49i⎦"},
+				{"% f", "⎡                                    .  1.272019649514069+0.7861513777574233i⎤\n⎢                                 2+1i  2.5308348104831593+1.185379617655596i⎥\n⎣ 2.9690188457413544+1.34724641634978i  3.350643523793132+1.4922506570736884i⎦"},
+				{"%#v", fmt.Sprintf("%#v", NewCDense(3, 2, []complex128{
+					(0 + 0i), (1.272019649514069 + 0.7861513777574233i),
+					(2 + 1i), (2.5308348104831593 + 1.185379617655596i),
+					(2.9690188457413544 + 1.34724641634978i), (3.350643523793132 + 1.4922506570736884i),
+				}))},
+			},
+		},
+		{
+			m: func() fmt.Formatter {
+				M, N := 2, 3
+				m := NewCDense(M, N, []complex128{0 + 0i, 1 + 2i, 3 + 4i, 5 + 6i, 7 + 8i, 9 + 10i})
+				for i := 0; i < M; i++ {
+					for j := 0; j < N; j++ {
+						m.Set(i, j, cmplx.Sqrt(m.At(i, j)))
+					}
+				}
+				return CFormatted(m, Squeeze())
+			}(),
+			rep: []rp{
+				{"%v", "⎡                                   0i  1.272019649514069+0.7861513777574233i                                   2+1i⎤\n⎣2.5308348104831593+1.185379617655596i   2.9690188457413544+1.34724641634978i  3.350643523793132+1.4922506570736884i⎦"},
+				{"%.2f", "⎡     0.00i  1.27+0.79i  2.00+1.00i⎤\n⎣2.53+1.19i  2.97+1.35i  3.35+1.49i⎦"},
+				{"% f", "⎡                                    .  1.272019649514069+0.7861513777574233i                                   2+1i⎤\n⎣2.5308348104831593+1.185379617655596i   2.9690188457413544+1.34724641634978i  3.350643523793132+1.4922506570736884i⎦"},
+				{"%#v", fmt.Sprintf("%#v", NewCDense(2, 3, []complex128{
+					(0 + 0i), (1.272019649514069 + 0.7861513777574233i),
+					(2 + 1i), (2.5308348104831593 + 1.185379617655596i),
+					(2.9690188457413544 + 1.34724641634978i), (3.350643523793132 + 1.4922506570736884i),
+				}))},
+			},
+		},
+		{
+			m: func() fmt.Formatter {
+				M, N := 1, 10
+				m := NewCDense(M, N, nil)
+				for i := 0; i < M*N; i++ {
+					m.Set(i%M, int(i/M), complex(float64(1+i*2), float64(2+i*2)))
+				}
+				return CFormatted(m, Excerpt(3))
+			}(),
+			rep: []rp{
+				{"%v", "Dims(1, 10)\n[  1+2i    3+4i    5+6i  ...  ...  15+16i  17+18i  19+20i]"},
+			},
+		},
+		{
+			m: func() fmt.Formatter {
+				M, N := 10, 1
+				m := NewCDense(M, N, nil)
+				for i := 0; i < M*N; i++ {
+					m.Set(i%M, int(i/M), complex(float64(1+i*2), float64(2+i*2)))
+				}
+				return CFormatted(m, Excerpt(3))
+			}(),
+			rep: []rp{
+				{"%v", "Dims(10, 1)\n⎡  1+2i⎤\n⎢  3+4i⎥\n⎢  5+6i⎥\n .\n .\n .\n⎢15+16i⎥\n⎢17+18i⎥\n⎣19+20i⎦"},
+			},
+		},
+		{
+			m: func() fmt.Formatter {
+				M, N := 10, 10
+				m := NewCDense(M, N, nil)
+				for i := 0; i < M*N; i++ {
+					m.Set(i%M, int(i/M), complex(float64(i%10), float64(i%10)))
+				}
+				return CFormatted(m, Excerpt(1))
+			}(),
+			rep: []rp{
+				{"%v", "Dims(10, 10)\n⎡  0i  ...  ...    0i⎤\n .\n .\n .\n⎣9+9i  ...  ...  9+9i⎦"},
+			},
+		},
+		{
+			m: CFormatted(NewCDense(4, 1, []complex128{1 + 2i, 3 + 4i, 5 + 6i, 7 + 8i}), FormatMATLAB()),
+			rep: []rp{
+				{"%v", "[1+2i; 3+4i; 5+6i; 7+8i]"},
+				{"%#v", "[\n 1+2i\n 3+4i\n 5+6i\n 7+8i\n]"},
+				{"%s", "%!s(*mat.CDense=Dims(4, 1))"},
+				{"%#s", "%!s(*mat.CDense=Dims(4, 1))"},
+			},
+		},
+		{
+			m: CFormatted(NewCDense(1, 4, []complex128{1 + 2i, 3 + 4i, 5 + 6i, 7 + 8i}), FormatMATLAB()),
+			rep: []rp{
+				{"%v", "[1+2i 3+4i 5+6i 7+8i]"},
+				{"%#v", "[1+2i 3+4i 5+6i 7+8i]"},
+			},
+		},
+		{
+			m: CFormatted(NewCDense(2, 2, []complex128{1 + 2i, 3 + 4i, 5 + 6i, 7 + 8i}), FormatMATLAB()),
+			rep: []rp{
+				{"%v", "[1+2i 3+4i; 5+6i 7+8i]"},
+				{"%#v", "[\n 1+2i 3+4i\n 5+6i 7+8i\n]"},
+			},
+		},
+		{
+			m: CFormatted(NewCDense(4, 1, []complex128{1 + 2i, -3 + 4i, 5 + 6i, 7 + 8i}), FormatMATLAB()),
+			rep: []rp{
+				{"%v", "[1+2i; -3+4i; 5+6i; 7+8i]"},
+				{"%#v", "[\n  1+2i\n -3+4i\n  5+6i\n  7+8i\n]"},
+			},
+		},
+		{
+			m: CFormatted(NewCDense(1, 4, []complex128{1 + 2i, -3 + 4i, 5 + 6i, 7 + 8i}), FormatMATLAB()),
+			rep: []rp{
+				{"%v", "[1+2i -3+4i 5+6i 7+8i]"},
+				{"%#v", "[ 1+2i -3+4i  5+6i  7+8i]"},
+			},
+		},
+		{
+			m: CFormatted(NewCDense(2, 2, []complex128{1 + 2i, -3 + 4i, 5 + 6i, 7 + 8i}), FormatMATLAB()),
+			rep: []rp{
+				{"%v", "[1+2i -3+4i; 5+6i 7+8i]"},
+				{"%#v", "[\n  1+2i -3+4i\n  5+6i  7+8i\n]"},
+			},
+		},
+		{
+			m: CFormatted(NewCDense(4, 1, []complex128{1 + 2i, 3 + 4i, 5 + 6i, 7 + 8i}), FormatPython()),
+			rep: []rp{
+				{"%v", "[[1+2j], [3+4j], [5+6j], [7+8j]]"},
+				{"%#v", "[[1+2j],\n [3+4j],\n [5+6j],\n [7+8j]]"},
+				{"%s", "%!s(*mat.CDense=Dims(4, 1))"},
+				{"%#s", "%!s(*mat.CDense=Dims(4, 1))"},
+			},
+		},
+		{
+			m: CFormatted(NewCDense(1, 4, []complex128{1 + 2i, 3 + 4i, 5 + 6i, 7 + 8i}), FormatPython()),
+			rep: []rp{
+				{"%v", "[1+2j, 3+4j, 5+6j, 7+8j]"},
+				{"%#v", "[1+2j, 3+4j, 5+6j, 7+8j]"},
+			},
+		},
+		{
+			m: CFormatted(NewCDense(2, 2, []complex128{1 + 2i, 3 + 4i, 5 + 6i, 7 + 8i}), FormatPython()),
+			rep: []rp{
+				{"%v", "[[1+2j, 3+4j], [5+6j, 7+8j]]"},
+				{"%#v", "[[1+2j, 3+4j],\n [5+6j, 7+8j]]"},
+			},
+		},
+		{
+			m: CFormatted(NewCDense(4, 1, []complex128{1 + 2i, -3 + 4i, 5 + 6i, 7 + 8i}), FormatPython()),
+			rep: []rp{
+				{"%v", "[[1+2j], [-3+4j], [5+6j], [7+8j]]"},
+				{"%#v", "[[ 1+2j],\n [-3+4j],\n [ 5+6j],\n [ 7+8j]]"},
+			},
+		},
+		{
+			m: CFormatted(NewCDense(1, 4, []complex128{1 + 2i, -3 + 4i, 5 + 6i, 7 + 8i}), FormatPython()),
+			rep: []rp{
+				{"%v", "[1+2j, -3+4j, 5+6j, 7+8j]"},
+				{"%#v", "[ 1+2j, -3+4j,  5+6j,  7+8j]"},
+			},
+		},
+		{
+			m: CFormatted(NewCDense(2, 2, []complex128{1 + 2i, -3 + 4i, 5 + 6i, 7 + 8i}), FormatPython()),
+			rep: []rp{
+				{"%v", "[[1+2j, -3+4j], [5+6j, 7+8j]]"},
+				{"%#v", "[[ 1+2j, -3+4j],\n [ 5+6j,  7+8j]]"},
+			},
+		},
+	} {
+		for j, rp := range test.rep {
+			got := fmt.Sprintf(rp.format, test.m)
+			if got != rp.output {
+				t.Errorf("unexpected format result test %d part %d:\ngot:\n%s\nwant:\n%s", i, j, got, rp.output)
+			}
+		}
+	}
+}
+
 func benchmarkFormat(b *testing.B, size int) {
 	src := rand.NewSource(1)
 	a, _ := randDense(size, 1.0, src)
@@ -253,3 +519,31 @@ func benchmarkFormat(b *testing.B, size int) {
 func BenchmarkFormat10(b *testing.B)   { benchmarkFormat(b, 10) }
 func BenchmarkFormat100(b *testing.B)  { benchmarkFormat(b, 100) }
 func BenchmarkFormat1000(b *testing.B) { benchmarkFormat(b, 1000) }
+
+func benchmarkCFormat(b *testing.B, size int) {
+	a := &CDense{
+		mat: cblas128.General{
+			Rows:   size,
+			Cols:   size,
+			Stride: size,
+			Data:   make([]complex128, size*size),
+		},
+		capRows: size,
+		capCols: size,
+	}
+	src := rand.NewSource(1)
+	rnd := rand.New(src)
+	for i := 0; i < size; i++ {
+		for j := 0; j < size; j++ {
+			a.set(i, j, complex(rnd.Float64(), rnd.Float64()))
+		}
+	}
+	b.ResetTimer()
+	for k := 0; k < b.N; k++ {
+		_ = fmt.Sprintf("%v", CFormatted(a))
+	}
+}
+
+func BenchmarkCFormat10(b *testing.B)   { benchmarkCFormat(b, 10) }
+func BenchmarkCFormat100(b *testing.B)  { benchmarkCFormat(b, 100) }
+func BenchmarkCFormat1000(b *testing.B) { benchmarkCFormat(b, 1000) }

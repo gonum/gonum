@@ -6,7 +6,7 @@ package gexf12
 
 import (
 	"encoding/xml"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -430,7 +430,7 @@ var gexfExampleTests = []struct {
 
 func TestUnmarshal(t *testing.T) {
 	for _, test := range gexfExampleTests {
-		data, err := ioutil.ReadFile(filepath.Join("testdata", test.path))
+		data, err := os.ReadFile(filepath.Join("testdata", test.path))
 		if err != nil {
 			t.Errorf("failed to read %q: %v", test.path, err)
 			continue

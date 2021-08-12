@@ -6,7 +6,7 @@ package sigmajs
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -253,7 +253,7 @@ var sigmajsExampleTests = []struct {
 
 func TestUnmarshal(t *testing.T) {
 	for _, test := range sigmajsExampleTests {
-		data, err := ioutil.ReadFile(filepath.Join("testdata", test.path))
+		data, err := os.ReadFile(filepath.Join("testdata", test.path))
 		if err != nil {
 			t.Errorf("failed to read %q: %v", test.path, err)
 			continue
@@ -305,7 +305,7 @@ func attrPaths(dst []string, prefix string, m map[string]interface{}) []string {
 
 func TestMarshal(t *testing.T) {
 	for _, test := range sigmajsExampleTests {
-		data, err := ioutil.ReadFile(filepath.Join("testdata", test.path))
+		data, err := os.ReadFile(filepath.Join("testdata", test.path))
 		if err != nil {
 			t.Errorf("failed to read %q: %v", test.path, err)
 			continue

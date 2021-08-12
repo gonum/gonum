@@ -13,7 +13,6 @@ import (
 	"go/format"
 	"go/parser"
 	"go/token"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -65,7 +64,7 @@ func main() {
 		if strings.Contains(fn, "_test") {
 			continue
 		}
-		b, err := ioutil.ReadFile(fn)
+		b, err := os.ReadFile(fn)
 		if bytes.Contains(b, []byte("+build ignore")) {
 			continue
 		}

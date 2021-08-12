@@ -5,15 +5,14 @@
 package mat
 
 import (
+	"bytes"
 	"fmt"
-	"strconv"
-	"strings"
 )
 
 // Formatted returns a fmt.Formatter for the matrix m using the given options.
 func Formatted(m Matrix, options ...FormatOption) fmt.Formatter {
 	f := formatter{
-		matrix: m,
+		matrix: formattableMatrix{mat: m},
 		dot:    '.',
 	}
 	for _, o := range options {
@@ -22,14 +21,15 @@ func Formatted(m Matrix, options ...FormatOption) fmt.Formatter {
 	return &f
 }
 
+// formatter is a matrix formatter that satisfies the fmt.Formatter interface
 type formatter struct {
-	matrix  Matrix
+	matrix  formattable
 	prefix  string
 	margin  int
 	dot     byte
 	squeeze bool
 
-	format func(m Matrix, prefix string, margin int, dot byte, squeeze bool, fs fmt.State, c rune)
+	format func(m formattable, prefix string, margin int, dot byte, squeeze bool, fs fmt.State, c rune)
 }
 
 var _ fmt.Formatter = (*formatter)(nil)
@@ -78,7 +78,7 @@ func FormatPython() FormatOption {
 // Format satisfies the fmt.Formatter interface.
 func (f formatter) Format(fs fmt.State, c rune) {
 	if c == 'v' && fs.Flag('#') && f.format == nil {
-		fmt.Fprintf(fs, "%#v", f.matrix)
+		fmt.Fprintf(fs, "%#v", f.matrix.Mat())
 		return
 	}
 	if f.format == nil {
@@ -86,6 +86,52 @@ func (f formatter) Format(fs fmt.State, c rune) {
 	}
 	f.format(f.matrix, f.prefix, f.margin, f.dot, f.squeeze, fs, c)
 }
+
+// formattable holds a matrix and provides methods for formatting values.
+type formattable interface {
+	tabular
+
+	// NewValueFormatter returns a new, zero-valued fmt.Formatter
+	NewValueFormatter(options ...vFormatOption) fmt.Formatter
+
+	// RevalueFormatter sets the value of a formatter to element i, j.
+	// A use is to recycle an existing value formatter for efficiency.
+	RevalueFormatter(f fmt.Formatter, i, j int) fmt.Formatter
+
+	// ValueFormatter returns a new fmt.Formatter for element i, j
+	ValueFormatter(i, j int, options ...vFormatOption) fmt.Formatter
+
+	// Matrix returns the source matrix
+	Mat() tabular
+}
+
+// formattableMatrix is a formattable for floating point-valued matrices, those
+// that satisfy the Matrix interface.
+type formattableMatrix struct{ mat Matrix }
+
+var _ formattable = (*formattableMatrix)(nil)
+
+func (m formattableMatrix) Dims() (r, c int) { return m.mat.Dims() }
+func (m formattableMatrix) Mat() tabular     { return m.mat }
+func (m formattableMatrix) NewValueFormatter(options ...vFormatOption) fmt.Formatter {
+	return formattedFloat(0, options...)
+}
+func (m formattableMatrix) RevalueFormatter(f fmt.Formatter, i, j int) fmt.Formatter {
+	f.(*floatFormatter).value = m.mat.At(i, j)
+	return f
+}
+func (m formattableMatrix) ValueFormatter(i, j int, options ...vFormatOption) fmt.Formatter {
+	return formattedFloat(m.mat.At(i, j), options...)
+}
+
+// tabular type is a two-dimensional array having rows and columns with table
+// elements accessible by a formattable. Details regarding value type and
+// methods for element access are left to the formattable.
+type tabular interface {
+	Dims() (r, c int)
+}
+
+var _ tabular = (Matrix)(nil)
 
 // format prints a pretty representation of m to the fs io.Writer. The format character c
 // specifies the numerical representation of elements; valid values are those for float64
@@ -96,8 +142,11 @@ func (f formatter) Format(fs fmt.State, c rune) {
 // are output. If squeeze is true, column widths are determined on a per-column basis.
 //
 // format will not provide Go syntax output.
-func format(m Matrix, prefix string, margin int, dot byte, squeeze bool, fs fmt.State, c rune) {
-	rows, cols := m.Dims()
+func format(m formattable, prefix string, margin int, dot byte, squeeze bool, fs fmt.State, c rune) {
+	var (
+		f          = m.NewValueFormatter(vDotByte(dot))
+		rows, cols = m.Dims()
+	)
 
 	var printed int
 	if margin <= 0 {
@@ -109,37 +158,13 @@ func format(m Matrix, prefix string, margin int, dot byte, squeeze bool, fs fmt.
 		printed = margin
 	}
 
-	prec, pOk := fs.Precision()
-	if !pOk {
-		prec = -1
-	}
-
-	var (
-		maxWidth int
-		widths   widther
-		buf, pad []byte
-	)
-	if squeeze {
-		widths = make(columnWidth, cols)
-	} else {
-		widths = new(uniformWidth)
-	}
+	var ws = newState(fs)
 	switch c {
 	case 'v', 'e', 'E', 'f', 'F', 'g', 'G':
-		if c == 'v' {
-			buf, maxWidth = maxCellWidth(m, 'g', printed, prec, widths)
-		} else {
-			buf, maxWidth = maxCellWidth(m, c, printed, prec, widths)
-		}
+		ws.fit(m, printed, squeeze, fs, c, f)
 	default:
-		fmt.Fprintf(fs, "%%!%c(%T=Dims(%d, %d))", c, m, rows, cols)
+		fmt.Fprintf(fs, "%%!%c(%T=Dims(%d, %d))", c, m.Mat(), rows, cols)
 		return
-	}
-	width, _ := fs.Width()
-	width = max(width, maxWidth)
-	pad = make([]byte, max(width, 2))
-	for i := range pad {
-		pad[i] = ' '
 	}
 
 	first := true
@@ -148,7 +173,6 @@ func format(m Matrix, prefix string, margin int, dot byte, squeeze bool, fs fmt.
 		fmt.Fprintf(fs, "Dims(%d, %d)\n", rows, cols)
 	}
 
-	skipZero := fs.Flag(' ')
 	for i := 0; i < rows; i++ {
 		if !first {
 			fmt.Fprint(fs, prefix)
@@ -181,27 +205,11 @@ func format(m Matrix, prefix string, margin int, dot byte, squeeze bool, fs fmt.
 				continue
 			}
 
-			v := m.At(i, j)
-			if v == 0 && skipZero {
-				buf = buf[:1]
-				buf[0] = dot
-			} else {
-				if c == 'v' {
-					buf = strconv.AppendFloat(buf[:0], v, 'g', prec, 64)
-				} else {
-					buf = strconv.AppendFloat(buf[:0], v, byte(c), prec, 64)
-				}
-			}
-			if fs.Flag('-') {
-				fs.Write(buf)
-				fs.Write(pad[:widths.width(j)-len(buf)])
-			} else {
-				fs.Write(pad[:widths.width(j)-len(buf)])
-				fs.Write(buf)
-			}
+			f = m.RevalueFormatter(f, i, j)
+			f.Format(ws.At(j), c)
 
 			if j < cols-1 {
-				fs.Write(pad[:2])
+				fmt.Fprintf(fs, "  ")
 			}
 		}
 
@@ -222,19 +230,19 @@ func format(m Matrix, prefix string, margin int, dot byte, squeeze bool, fs fmt.
 // If squeeze is true, column widths are determined on a per-column basis.
 //
 // formatMATLAB will not provide Go syntax output.
-func formatMATLAB(m Matrix, prefix string, _ int, _ byte, squeeze bool, fs fmt.State, c rune) {
-	rows, cols := m.Dims()
+func formatMATLAB(m formattable, prefix string, _ int, _ byte, squeeze bool, fs fmt.State, c rune) {
+	var (
+		f          = m.NewValueFormatter(vFormatMATLAB())
+		rows, cols = m.Dims()
+	)
 
-	prec, pOk := fs.Precision()
-	width, _ := fs.Width()
 	if !fs.Flag('#') {
 		switch c {
 		case 'v', 'e', 'E', 'f', 'F', 'g', 'G':
 		default:
-			fmt.Fprintf(fs, "%%!%c(%T=Dims(%d, %d))", c, m, rows, cols)
+			fmt.Fprintf(fs, "%%!%c(%T=Dims(%d, %d))", c, m.Mat(), rows, cols)
 			return
 		}
-		format := fmtString(fs, c, prec, width)
 		fs.Write([]byte{'['})
 		for i := 0; i < rows; i++ {
 			if i != 0 {
@@ -244,15 +252,12 @@ func formatMATLAB(m Matrix, prefix string, _ int, _ byte, squeeze bool, fs fmt.S
 				if j != 0 {
 					fs.Write([]byte{' '})
 				}
-				fmt.Fprintf(fs, format, m.At(i, j))
+				f = m.RevalueFormatter(f, i, j)
+				f.Format(fs, c)
 			}
 		}
 		fs.Write([]byte{']'})
 		return
-	}
-
-	if !pOk {
-		prec = -1
 	}
 
 	printed := rows
@@ -260,31 +265,13 @@ func formatMATLAB(m Matrix, prefix string, _ int, _ byte, squeeze bool, fs fmt.S
 		printed = cols
 	}
 
-	var (
-		maxWidth int
-		widths   widther
-		buf, pad []byte
-	)
-	if squeeze {
-		widths = make(columnWidth, cols)
-	} else {
-		widths = new(uniformWidth)
-	}
+	var ws = newState(fs)
 	switch c {
 	case 'v', 'e', 'E', 'f', 'F', 'g', 'G':
-		if c == 'v' {
-			buf, maxWidth = maxCellWidth(m, 'g', printed, prec, widths)
-		} else {
-			buf, maxWidth = maxCellWidth(m, c, printed, prec, widths)
-		}
+		ws.fit(m, printed, squeeze, fs, c, f)
 	default:
-		fmt.Fprintf(fs, "%%!%c(%T=Dims(%d, %d))", c, m, rows, cols)
+		fmt.Fprintf(fs, "%%!%c(%T=Dims(%d, %d))", c, m.Mat(), rows, cols)
 		return
-	}
-	width = max(width, maxWidth)
-	pad = make([]byte, max(width, 1))
-	for i := range pad {
-		pad[i] = ' '
 	}
 
 	for i := 0; i < rows; i++ {
@@ -305,22 +292,11 @@ func formatMATLAB(m Matrix, prefix string, _ int, _ byte, squeeze bool, fs fmt.S
 		}
 
 		for j := 0; j < cols; j++ {
-			v := m.At(i, j)
-			if c == 'v' {
-				buf = strconv.AppendFloat(buf[:0], v, 'g', prec, 64)
-			} else {
-				buf = strconv.AppendFloat(buf[:0], v, byte(c), prec, 64)
-			}
-			if fs.Flag('-') {
-				fs.Write(buf)
-				fs.Write(pad[:widths.width(j)-len(buf)])
-			} else {
-				fs.Write(pad[:widths.width(j)-len(buf)])
-				fs.Write(buf)
-			}
+			f = m.RevalueFormatter(f, i, j)
+			f.Format(ws.At(j), c)
 
 			if j < cols-1 {
-				fs.Write(pad[:1])
+				fmt.Fprint(fs, " ")
 			}
 		}
 
@@ -335,19 +311,19 @@ func formatMATLAB(m Matrix, prefix string, _ int, _ byte, squeeze bool, fs fmt.S
 // If squeeze is true, column widths are determined on a per-column basis.
 //
 // formatPython will not provide Go syntax output.
-func formatPython(m Matrix, prefix string, _ int, _ byte, squeeze bool, fs fmt.State, c rune) {
-	rows, cols := m.Dims()
+func formatPython(m formattable, prefix string, _ int, _ byte, squeeze bool, fs fmt.State, c rune) {
+	var (
+		f          = m.NewValueFormatter(vFormatPython())
+		rows, cols = m.Dims()
+	)
 
-	prec, pOk := fs.Precision()
-	width, _ := fs.Width()
 	if !fs.Flag('#') {
 		switch c {
 		case 'v', 'e', 'E', 'f', 'F', 'g', 'G':
 		default:
-			fmt.Fprintf(fs, "%%!%c(%T=Dims(%d, %d))", c, m, rows, cols)
+			fmt.Fprintf(fs, "%%!%c(%T=Dims(%d, %d))", c, m.Mat(), rows, cols)
 			return
 		}
-		format := fmtString(fs, c, prec, width)
 		fs.Write([]byte{'['})
 		if rows > 1 {
 			fs.Write([]byte{'['})
@@ -360,7 +336,8 @@ func formatPython(m Matrix, prefix string, _ int, _ byte, squeeze bool, fs fmt.S
 				if j != 0 {
 					fs.Write([]byte(", "))
 				}
-				fmt.Fprintf(fs, format, m.At(i, j))
+				f = m.RevalueFormatter(f, i, j)
+				f.Format(fs, c)
 			}
 		}
 		if rows > 1 {
@@ -370,40 +347,18 @@ func formatPython(m Matrix, prefix string, _ int, _ byte, squeeze bool, fs fmt.S
 		return
 	}
 
-	if !pOk {
-		prec = -1
-	}
-
 	printed := rows
 	if cols > printed {
 		printed = cols
 	}
 
-	var (
-		maxWidth int
-		widths   widther
-		buf, pad []byte
-	)
-	if squeeze {
-		widths = make(columnWidth, cols)
-	} else {
-		widths = new(uniformWidth)
-	}
+	var ws = newState(fs)
 	switch c {
 	case 'v', 'e', 'E', 'f', 'F', 'g', 'G':
-		if c == 'v' {
-			buf, maxWidth = maxCellWidth(m, 'g', printed, prec, widths)
-		} else {
-			buf, maxWidth = maxCellWidth(m, c, printed, prec, widths)
-		}
+		ws.fit(m, printed, squeeze, fs, c, f)
 	default:
-		fmt.Fprintf(fs, "%%!%c(%T=Dims(%d, %d))", c, m, rows, cols)
+		fmt.Fprintf(fs, "%%!%c(%T=Dims(%d, %d))", c, m.Mat(), rows, cols)
 		return
-	}
-	width = max(width, maxWidth)
-	pad = make([]byte, max(width, 1))
-	for i := range pad {
-		pad[i] = ' '
 	}
 
 	for i := 0; i < rows; i++ {
@@ -427,23 +382,11 @@ func formatPython(m Matrix, prefix string, _ int, _ byte, squeeze bool, fs fmt.S
 		}
 
 		for j := 0; j < cols; j++ {
-			v := m.At(i, j)
-			if c == 'v' {
-				buf = strconv.AppendFloat(buf[:0], v, 'g', prec, 64)
-			} else {
-				buf = strconv.AppendFloat(buf[:0], v, byte(c), prec, 64)
-			}
-			if fs.Flag('-') {
-				fs.Write(buf)
-				fs.Write(pad[:widths.width(j)-len(buf)])
-			} else {
-				fs.Write(pad[:widths.width(j)-len(buf)])
-				fs.Write(buf)
-			}
+			f = m.RevalueFormatter(f, i, j)
+			f.Format(ws.At(j), c)
 
 			if j < cols-1 {
-				fs.Write([]byte{','})
-				fs.Write(pad[:1])
+				fmt.Fprint(fs, ", ")
 			}
 		}
 
@@ -451,34 +394,51 @@ func formatPython(m Matrix, prefix string, _ int, _ byte, squeeze bool, fs fmt.S
 	}
 }
 
-// This is horrible, but it's what we have.
-func fmtString(fs fmt.State, c rune, prec, width int) string {
-	var b strings.Builder
-	b.WriteByte('%')
-	for _, f := range "0+- " {
-		if fs.Flag(int(f)) {
-			b.WriteByte(byte(f))
-		}
-	}
-	if width >= 0 {
-		fmt.Fprint(&b, width)
-	}
-	if prec >= 0 {
-		b.WriteByte('.')
-		if prec > 0 {
-			fmt.Fprint(&b, prec)
-		}
-	}
-	b.WriteRune(c)
-	return b.String()
+// state satisfies fmt.State and may varies its responses to Width.
+type state struct {
+	write     func(b []byte) (n int, err error)
+	width     func() (wid int, ok bool)
+	precision func() (prec int, ok bool)
+	flag      func(c int) bool
+
+	w widther
+	p int
 }
 
-func maxCellWidth(m Matrix, c rune, printed, prec int, w widther) ([]byte, int) {
-	var (
-		buf        = make([]byte, 0, 64)
-		rows, cols = m.Dims()
-		max        int
-	)
+var _ fmt.State = (*state)(nil)
+
+// newState return a new state, shadowing given fmt.State fs.
+func newState(fs fmt.State) *state {
+	ws := state{
+		write:     fs.Write,
+		width:     fs.Width,
+		precision: fs.Precision,
+		flag:      fs.Flag,
+	}
+	return &ws
+}
+
+// fit fits a state to formattable m, storing a single width for the
+// formattable or, if squeeze is true, individual widths are stored for each
+// column in the formattable. After fitment, the state responds to Width calls
+// with the value in p, which may be updated for a new column by calling At.
+//
+// The fitted state is not safe for concurrent use.
+func (ws *state) fit(m formattable, printed int, squeeze bool, fs fmt.State, c rune, f fmt.Formatter) *state {
+	rows, cols := m.Dims()
+
+	// assign appropriate widther
+	if squeeze {
+		ws.w = make(columnWidth, cols)
+	} else {
+		ws.w = new(uniformWidth)
+	}
+
+	// set state to temporarily write to a buffer instead of fs.Write
+	var buf bytes.Buffer
+	ws.write = buf.Write
+
+	// fit state to m
 	for i := 0; i < rows; i++ {
 		if i >= printed-1 && i < rows-printed && 2*printed < rows {
 			i = rows - printed - 1
@@ -489,17 +449,54 @@ func maxCellWidth(m Matrix, c rune, printed, prec int, w widther) ([]byte, int) 
 				continue
 			}
 
-			buf = strconv.AppendFloat(buf, m.At(i, j), byte(c), prec, 64)
-			if len(buf) > max {
-				max = len(buf)
+			f = m.RevalueFormatter(f, i, j)
+			f.Format(ws, c)
+
+			if buf.Len() > ws.w.width(j) {
+				ws.w.setWidth(j, buf.Len())
 			}
-			if len(buf) > w.width(j) {
-				w.setWidth(j, len(buf))
-			}
-			buf = buf[:0]
+
+			buf.Reset()
 		}
 	}
-	return buf, max
+
+	// restore writes by the state to fs
+	ws.write = fs.Write
+
+	// state should now response to width with p, defaulting to fs.Width
+	ws.width = func() (wid int, ok bool) { return ws.p, true }
+	if p, ok := fs.Width(); ok {
+		ws.p = p
+	}
+
+	return ws
+}
+
+// Write carries the same meaning as in fmt.State
+func (ws state) Write(b []byte) (n int, err error) {
+	return ws.write(b)
+}
+
+// Width carries the same meaning as in fmt.State
+func (ws state) Width() (wid int, ok bool) {
+	return ws.width()
+}
+
+// Precision carries the same meaning as in fmt.State
+func (ws state) Precision() (prec int, ok bool) {
+	return ws.precision()
+}
+
+// Flag carries the same meaning as in fmt.State
+func (ws state) Flag(c int) bool {
+	return ws.flag(c)
+}
+
+// At will provide a copy of the state that responds to subsequent Width calls
+// with the widther value for column i.
+func (ws *state) At(i int) *state {
+	ws.p = ws.w.width(i)
+	return ws
 }
 
 type widther interface {

@@ -243,20 +243,20 @@ func formatMATLAB(m formattable, prefix string, _ int, _ byte, squeeze bool, fs 
 			fmt.Fprintf(fs, "%%!%c(%T=Dims(%d, %d))", c, m.Mat(), rows, cols)
 			return
 		}
-		fs.Write([]byte{'['})
+		fmt.Fprint(fs, "[")
 		for i := 0; i < rows; i++ {
 			if i != 0 {
-				fs.Write([]byte("; "))
+				fmt.Fprint(fs, "; ")
 			}
 			for j := 0; j < cols; j++ {
 				if j != 0 {
-					fs.Write([]byte{' '})
+					fmt.Fprint(fs, " ")
 				}
 				f = m.RevalueFormatter(f, i, j)
 				f.Format(fs, c)
 			}
 		}
-		fs.Write([]byte{']'})
+		fmt.Fprint(fs, "]")
 		return
 	}
 
@@ -324,26 +324,26 @@ func formatPython(m formattable, prefix string, _ int, _ byte, squeeze bool, fs 
 			fmt.Fprintf(fs, "%%!%c(%T=Dims(%d, %d))", c, m.Mat(), rows, cols)
 			return
 		}
-		fs.Write([]byte{'['})
+		fmt.Fprint(fs, "[")
 		if rows > 1 {
-			fs.Write([]byte{'['})
+			fmt.Fprint(fs, "[")
 		}
 		for i := 0; i < rows; i++ {
 			if i != 0 {
-				fs.Write([]byte("], ["))
+				fmt.Fprint(fs, "], [")
 			}
 			for j := 0; j < cols; j++ {
 				if j != 0 {
-					fs.Write([]byte(", "))
+					fmt.Fprint(fs, ", ")
 				}
 				f = m.RevalueFormatter(f, i, j)
 				f.Format(fs, c)
 			}
 		}
 		if rows > 1 {
-			fs.Write([]byte{']'})
+			fmt.Fprint(fs, "]")
 		}
-		fs.Write([]byte{']'})
+		fmt.Fprint(fs, "]")
 		return
 	}
 

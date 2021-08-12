@@ -16,7 +16,6 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 )
@@ -43,13 +42,13 @@ func main() {
 			return nil
 		}
 
-		content, err := ioutil.ReadFile(path)
+		content, err := os.ReadFile(path)
 		if err != nil {
 			return err
 		}
 
 		content = bytes.Replace(content, location, copyright, 1)
-		return ioutil.WriteFile(path, content, info.Mode())
+		return os.WriteFile(path, content, info.Mode())
 	})
 
 	if err != nil {

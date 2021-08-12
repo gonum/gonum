@@ -9,7 +9,6 @@ import (
 	"encoding"
 	"encoding/binary"
 	"io"
-	"io/ioutil"
 	"math"
 	"testing"
 
@@ -639,7 +638,7 @@ func marshalBinaryToBenchDense(b *testing.B, size int) {
 		data[i] = float64(i)
 	}
 	m := NewDense(1, size, data)
-	w := ioutil.Discard
+	w := io.Discard
 	b.ResetTimer()
 
 	for n := 0; n < b.N; n++ {
@@ -749,7 +748,7 @@ func marshalBinaryToBenchVecDense(b *testing.B, size int) {
 		data[i] = float64(i)
 	}
 	vec := NewVecDense(size, data)
-	w := ioutil.Discard
+	w := io.Discard
 	b.ResetTimer()
 
 	for n := 0; n < b.N; n++ {

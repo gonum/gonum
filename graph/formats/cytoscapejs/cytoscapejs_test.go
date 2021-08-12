@@ -6,7 +6,7 @@ package cytoscapejs
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -50,7 +50,7 @@ var cytoscapejsElementsTests = []struct {
 
 func TestUnmarshalElements(t *testing.T) {
 	for _, test := range cytoscapejsElementsTests {
-		data, err := ioutil.ReadFile(filepath.Join("testdata", test.path))
+		data, err := os.ReadFile(filepath.Join("testdata", test.path))
 		if err != nil {
 			t.Errorf("failed to read %q: %v", test.path, err)
 			continue
@@ -89,7 +89,7 @@ func TestUnmarshalElements(t *testing.T) {
 
 func TestMarshalElements(t *testing.T) {
 	for _, test := range cytoscapejsElementsTests {
-		data, err := ioutil.ReadFile(filepath.Join("testdata", test.path))
+		data, err := os.ReadFile(filepath.Join("testdata", test.path))
 		if err != nil {
 			t.Errorf("failed to read %q: %v", test.path, err)
 			continue
@@ -267,7 +267,7 @@ var cytoscapejsNodeEdgeTests = []struct {
 
 func TestUnmarshalNodeEdge(t *testing.T) {
 	for _, test := range cytoscapejsNodeEdgeTests {
-		data, err := ioutil.ReadFile(filepath.Join("testdata", test.path))
+		data, err := os.ReadFile(filepath.Join("testdata", test.path))
 		if err != nil {
 			t.Errorf("failed to read %q: %v", test.path, err)
 			continue
@@ -328,7 +328,7 @@ func TestUnmarshalNodeEdge(t *testing.T) {
 
 func TestMarshalNodeEdge(t *testing.T) {
 	for _, test := range cytoscapejsNodeEdgeTests {
-		data, err := ioutil.ReadFile(filepath.Join("testdata", test.path))
+		data, err := os.ReadFile(filepath.Join("testdata", test.path))
 		if err != nil {
 			t.Errorf("failed to read %q: %v", test.path, err)
 			continue

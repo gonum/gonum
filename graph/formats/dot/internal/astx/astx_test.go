@@ -12,7 +12,7 @@ package astx_test
 
 import (
 	"bytes"
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"gonum.org/v1/gonum/graph/formats/dot"
@@ -72,7 +72,7 @@ func TestParseFile(t *testing.T) {
 		if len(g.out) > 0 {
 			out = g.out
 		}
-		buf, err := ioutil.ReadFile(out)
+		buf, err := os.ReadFile(out)
 		if err != nil {
 			t.Errorf("%q: unable to read file; %v", g.in, err)
 			continue

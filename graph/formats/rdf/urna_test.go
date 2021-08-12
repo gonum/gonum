@@ -8,7 +8,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -40,7 +39,7 @@ func TestURNA(t *testing.T) {
 			for _, path := range glob {
 				name := filepath.Base(path)
 				golden := strings.TrimSuffix(path, "-in.nq") + test.truth
-				want, err := ioutil.ReadFile(golden)
+				want, err := os.ReadFile(golden)
 				if err != nil {
 					if !os.IsNotExist(err) {
 						t.Errorf("Failed to read golden data: %v", err)

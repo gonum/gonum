@@ -7,7 +7,6 @@ package flow
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"math"
 	"os"
 	"path/filepath"
@@ -30,7 +29,7 @@ var slta = flag.Bool("slta", false, "specify DominatorsSLT benchmark")
 func BenchmarkDominators(b *testing.B) {
 	testdata := filepath.FromSlash("./testdata/flow")
 
-	fis, err := ioutil.ReadDir(testdata)
+	fis, err := os.ReadDir(testdata)
 	if err != nil {
 		if os.IsNotExist(err) {
 			b.Skipf("no control flow testdata: %v", err)
@@ -45,7 +44,7 @@ func BenchmarkDominators(b *testing.B) {
 		}
 		test := name[:len(name)-len(ext)]
 
-		data, err := ioutil.ReadFile(filepath.Join(testdata, name))
+		data, err := os.ReadFile(filepath.Join(testdata, name))
 		if err != nil {
 			b.Errorf("failed to open control flow case: %v", err)
 			continue

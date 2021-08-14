@@ -7,7 +7,6 @@ package mat
 import (
 	"fmt"
 	"strconv"
-	"sync"
 )
 
 const (
@@ -27,31 +26,31 @@ type valueFormatter interface {
 	setSyntax(s int)
 }
 
-// vFormatOption is a functional option for value formatting.
-type vFormatOption func(valueFormatter)
+// valueFormatOption is a functional option for value formatting.
+type valueFormatOption func(valueFormatter)
 
-// vDotByte sets the dot character to b. The dot character is used to replace a
-// value if the result is printed with the fmt ' ' verb flag. Without a DotByte
-// option, the default dot character is '.'.
-func vDotByte(b byte) vFormatOption {
+// valueDotByte sets the dot character to b. The dot character is used to
+// replace a value if the result is printed with the fmt ' ' verb flag. Without
+// a valueDotByte option, the default dot character is '.'.
+func valueDotByte(b byte) valueFormatOption {
 	return func(f valueFormatter) { f.setDotByte(b) }
 }
 
-// vFormatMATLAB sets the printing behavior to output MATLAB syntax. If MATLAB
-// syntax is specified, the ' ' verb flag is ignored.
-func vFormatMATLAB() vFormatOption {
+// valueFormatMATLAB sets the printing behavior to output MATLAB syntax. If
+// MATLAB syntax is specified, the ' ' verb flag is ignored.
+func valueFormatMATLAB() valueFormatOption {
 	return func(f valueFormatter) { f.setSyntax(syntaxMATLAB) }
 }
 
-// vFormatPython sets the printing behavior to output Python syntax. If Python
-// syntax is specified, the ' ' verb flag is ignored.
-func vFormatPython() vFormatOption {
+// valueFormatPython sets the printing behavior to output Python syntax. If
+// Python syntax is specified, the ' ' verb flag is ignored.
+func valueFormatPython() valueFormatOption {
 	return func(f valueFormatter) { f.setSyntax(syntaxPython) }
 }
 
 // formattedFloat returns a fmt.Formatter for the floating point value v using
 // the given options.
-func formattedFloat(v float64, options ...vFormatOption) fmt.Formatter {
+func formattedFloat(v float64, options ...valueFormatOption) fmt.Formatter {
 	f := floatFormatter{
 		value:  v,
 		buf:    make([]byte, 0, 64),
@@ -61,17 +60,13 @@ func formattedFloat(v float64, options ...vFormatOption) fmt.Formatter {
 	for _, o := range options {
 		o(&f)
 	}
-	return &f
+	return f
 }
 
-// floatFormatter formats 64-bit a floating point value and satifies the
+// floatFormatter formats 64-bit a floating point value and satisfies the
 // valueFormatter interface. A floatFormatter utilizes an internal buffer while
 // generating formatting output and this buffer persists with the formatter.
-// For this reason, and because a floatFormatter might be reused or revalued,
-// the floatFormatter embeds an exclusion lock.
 type floatFormatter struct {
-	sync.Mutex
-
 	value  float64
 	buf    []byte
 	dot    byte
@@ -83,10 +78,7 @@ type floatFormatter struct {
 var _ valueFormatter = (*floatFormatter)(nil)
 
 // Format satisfies the fmt.Formatter interface.
-func (f *floatFormatter) Format(fs fmt.State, c rune) {
-	f.Lock()
-	defer f.Unlock()
-
+func (f floatFormatter) Format(fs fmt.State, c rune) {
 	if f.format == nil {
 		f.format = formatFloat
 	}
@@ -102,7 +94,7 @@ func (f *floatFormatter) setSyntax(s int)   { f.syntax = s }
 // addition to this, a space preceding a verb indicates that zero values should
 // be represented by the dot character.
 //
-// formatFloat will not provide Go syntax output
+// formatFloat will not provide Go syntax output.
 func formatFloat(v float64, buf []byte, dot byte, syntax int, fs fmt.State, c rune) {
 	buf = buf[:0]
 
@@ -127,15 +119,14 @@ func formatFloat(v float64, buf []byte, dot byte, syntax int, fs fmt.State, c ru
 
 	width, ok := fs.Width()
 	if ok && (width > len(buf)) {
-		if fs.Flag('-') {
-			fs.Write(buf)
-			for i := 0; i < width-len(buf); i++ {
-				fmt.Fprintf(fs, " ")
-			}
-			return
+		l := len(buf) // l is the length in bytes of unpadded content.
+		for i := 0; i < width-l; i++ {
+			buf = append(buf, ' ')
 		}
-		for i := 0; i < width-len(buf); i++ {
-			fmt.Fprintf(fs, " ")
+
+		if !fs.Flag('-') {
+			fs.Write(buf[l:])
+			buf = buf[:l]
 		}
 	}
 
@@ -144,7 +135,7 @@ func formatFloat(v float64, buf []byte, dot byte, syntax int, fs fmt.State, c ru
 
 // formattedComplex returns a fmt.Formatter for the complex value v using
 // the given options.
-func formattedComplex(v complex128, options ...vFormatOption) fmt.Formatter {
+func formattedComplex(v complex128, options ...valueFormatOption) fmt.Formatter {
 	f := complexFormatter{
 		value:  v,
 		buf:    make([]byte, 0, 128),
@@ -154,17 +145,13 @@ func formattedComplex(v complex128, options ...vFormatOption) fmt.Formatter {
 	for _, o := range options {
 		o(&f)
 	}
-	return &f
+	return f
 }
 
-// floatComplex formats 128-bit complex value and satifies the valueFormatter
+// floatComplex formats 128-bit complex value and satisfies the valueFormatter
 // interface. A complexFormatter utilizes an internal buffer while generating
-// formatting output and this buffer persists with the formatter. For this
-// reason, and because a complexFormatter might be reused or revalued,
-// the complexFormatter embeds an exclusion lock.
+// formatting output and this buffer persists with the formatter.
 type complexFormatter struct {
-	sync.Mutex
-
 	value  complex128
 	buf    []byte
 	dot    byte
@@ -176,10 +163,7 @@ type complexFormatter struct {
 var _ valueFormatter = (*complexFormatter)(nil)
 
 // Format satisfies the fmt.Formatter interface.
-func (f *complexFormatter) Format(fs fmt.State, c rune) {
-	f.Lock()
-	defer f.Unlock()
-
+func (f complexFormatter) Format(fs fmt.State, c rune) {
 	if f.format == nil {
 		f.format = formatComplex
 	}
@@ -195,7 +179,7 @@ func (f *complexFormatter) setSyntax(s int)   { f.syntax = s }
 // addition to this, a space preceding a verb indicates that zero values should
 // be represented by the dot character.
 //
-// formatComplex will not provide Go syntax output
+// formatComplex will not provide Go syntax output.
 func formatComplex(v complex128, buf []byte, dot byte, syntax int, fs fmt.State, c rune) {
 	buf = buf[:0]
 
@@ -215,7 +199,7 @@ func formatComplex(v complex128, buf []byte, dot byte, syntax int, fs fmt.State,
 			buf = append(buf, '+')
 		}
 
-		// append real component
+		// Append real component.
 		if real(v) != 0 {
 			buf = strconv.AppendFloat(buf, real(v), byte(c), prec, 64)
 		}
@@ -224,10 +208,10 @@ func formatComplex(v complex128, buf []byte, dot byte, syntax int, fs fmt.State,
 			buf = append(buf, '+')
 		}
 
-		// append imaginary component
+		// Append imaginary component.
 		buf = strconv.AppendFloat(buf, imag(v), byte(c), prec, 64)
 
-		// append notation for imaginary component
+		// Append notation for imaginary component.
 		if syntax == syntaxPython {
 			buf = append(buf, 'j')
 		} else {
@@ -237,15 +221,14 @@ func formatComplex(v complex128, buf []byte, dot byte, syntax int, fs fmt.State,
 
 	width, ok := fs.Width()
 	if ok && (width > len(buf)) {
-		if fs.Flag('-') {
-			fs.Write(buf)
-			for i := 0; i < width-len(buf); i++ {
-				fmt.Fprintf(fs, " ")
-			}
-			return
+		l := len(buf) // l is the length in bytes of unpadded content.
+		for i := 0; i < width-l; i++ {
+			buf = append(buf, ' ')
 		}
-		for i := 0; i < width-len(buf); i++ {
-			fmt.Fprintf(fs, " ")
+
+		if !fs.Flag('-') {
+			fs.Write(buf[l:])
+			buf = buf[:l]
 		}
 	}
 

@@ -507,43 +507,82 @@ func TestCFormat(t *testing.T) {
 	}
 }
 
-func benchmarkFormat(b *testing.B, size int) {
-	src := rand.NewSource(1)
-	a, _ := randDense(size, 1.0, src)
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		_ = fmt.Sprintf("%v", Formatted(a))
+func BenchmarkFormat(b *testing.B) {
+	formats := []struct {
+		name string
+		form string
+		fopt FormatOption
+	}{
+		{"General", "%v", nil},
+		{"DotByte", "% f", DotByte('*')},
+		{"Excerpt", "%v", Excerpt(3)},
+		{"Prefix", "%v", Prefix("\t")},
+		{"Squeeze", "%v", Squeeze()},
+		{"MATLAB", "%v", FormatMATLAB()},
+		{"MATLAB#", "%#v", FormatMATLAB()},
+		{"Python", "%v", FormatPython()},
+		{"Python#", "%#v", FormatPython()},
+	}
+	for i := 10; i <= 1000; i *= 10 {
+		src := rand.NewSource(1)
+		a, _ := randDense(i, 0.95, src)
+		for _, j := range formats {
+			b.Run(fmt.Sprintf("%d/%s", i, j.name), func(b *testing.B) {
+				for k := 0; k < b.N; k++ {
+					_ = fmt.Sprintf(j.form, Formatted(a), j.fopt)
+				}
+			})
+		}
 	}
 }
 
-func BenchmarkFormat10(b *testing.B)   { benchmarkFormat(b, 10) }
-func BenchmarkFormat100(b *testing.B)  { benchmarkFormat(b, 100) }
-func BenchmarkFormat1000(b *testing.B) { benchmarkFormat(b, 1000) }
-
-func benchmarkCFormat(b *testing.B, size int) {
+func randCDense(size int, rho float64, src rand.Source) (*CDense, error) {
+	if size == 0 {
+		return nil, ErrZeroLength
+	}
 	a := &CDense{
 		mat: cblas128.General{
-			Rows:   size,
-			Cols:   size,
-			Stride: size,
-			Data:   make([]complex128, size*size),
+			Rows: size, Cols: size, Stride: size,
+			Data: make([]complex128, size*size),
 		},
-		capRows: size,
-		capCols: size,
+		capRows: size, capCols: size,
 	}
-	src := rand.NewSource(1)
 	rnd := rand.New(src)
 	for i := 0; i < size; i++ {
 		for j := 0; j < size; j++ {
-			a.set(i, j, complex(rnd.Float64(), rnd.Float64()))
+			if rnd.Float64() < rho {
+				a.set(i, j, complex(rnd.NormFloat64(), rnd.NormFloat64()))
+			}
 		}
 	}
-	b.ResetTimer()
-	for k := 0; k < b.N; k++ {
-		_ = fmt.Sprintf("%v", CFormatted(a))
-	}
+	return a, nil
 }
 
-func BenchmarkCFormat10(b *testing.B)   { benchmarkCFormat(b, 10) }
-func BenchmarkCFormat100(b *testing.B)  { benchmarkCFormat(b, 100) }
-func BenchmarkCFormat1000(b *testing.B) { benchmarkCFormat(b, 1000) }
+func BenchmarkCFormat(b *testing.B) {
+	formats := []struct {
+		name string
+		form string
+		fopt FormatOption
+	}{
+		{"General", "%v", nil},
+		{"DotByte", "% f", DotByte('*')},
+		{"Excerpt", "%v", Excerpt(3)},
+		{"Prefix", "%v", Prefix("\t")},
+		{"Squeeze", "%v", Squeeze()},
+		{"MATLAB", "%v", FormatMATLAB()},
+		{"MATLAB#", "%#v", FormatMATLAB()},
+		{"Python", "%v", FormatPython()},
+		{"Python#", "%#v", FormatPython()},
+	}
+	for i := 10; i <= 1000; i *= 10 {
+		src := rand.NewSource(1)
+		a, _ := randCDense(i, 0.95, src)
+		for _, j := range formats {
+			b.Run(fmt.Sprintf("%d/%s", i, j.name), func(b *testing.B) {
+				for k := 0; k < b.N; k++ {
+					_ = fmt.Sprintf(j.form, CFormatted(a), j.fopt)
+				}
+			})
+		}
+	}
+}

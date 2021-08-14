@@ -70,6 +70,40 @@ func DirectedCyclesIn(g graph.Directed) [][]graph.Node {
 	return j.result
 }
 
+// DirectedCyclesContaining returns the set of elementary cycles in the graph g containing the node with ID vid.
+// This is a slight deviation from Johnson's.
+func DirectedCyclesContaining(g graph.Directed, vid int64) [][]graph.Node {
+	jg := johnsonGraphFrom(g)
+	j := johnson{
+		adjacent: jg,
+		b:        make([]set.Ints, len(jg.orig)),
+		blocked:  make([]bool, len(jg.orig)),
+	}
+
+	j.s = j.adjacent.indexOf(vid)
+	// We use the entire SCC adjacency to find all cycles, not just those with least vertex >= s.
+	sccs := TarjanSCC(j.adjacent)
+	// A_k = adjacency structure of (maximal) strong component K containing s
+	j.adjacent = j.adjacent.sccSubGraph(sccs, 2) // Only allow SCCs with >= 2 vertices.
+	if j.adjacent.order() == 0 {
+		return j.result
+	}
+
+	for i, v := range j.adjacent.orig {
+		if !j.adjacent.nodes.Has(v.ID()) {
+			continue
+		}
+		if len(j.adjacent.succ[v.ID()]) > 0 {
+			j.blocked[i] = false
+			j.b[i] = make(set.Ints)
+		}
+	}
+	//L3:
+	_ = j.circuit(j.s)
+
+	return j.result
+}
+
 // circuit is the CIRCUIT sub-procedure in the paper.
 func (j *johnson) circuit(v int) bool {
 	f := false

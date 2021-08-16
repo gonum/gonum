@@ -360,7 +360,7 @@ type wantInstance struct {
 
 var cyclesOfMaxLenContainingTests = []struct {
 	g    []intset
-	w []wantInstance
+	w    []wantInstance
 	want [][][]int64
 }{
 	{
@@ -376,28 +376,28 @@ var cyclesOfMaxLenContainingTests = []struct {
 		w: []wantInstance{
 			{
 				maxLen: 3,
-				vid: 3,
-				want: nil,
+				vid:    3,
+				want:   nil,
 			},
 			{
 				maxLen: 4,
-				vid: 3,
-				want: [][]int64{{3, 4, 2, 3}},
+				vid:    3,
+				want:   [][]int64{{3, 4, 2, 3}},
 			},
 			{
 				maxLen: 5,
-				vid: 3,
-				want: [][]int64{{3, 4, 2, 3}, {3, 4, 2, 6, 3}},
+				vid:    3,
+				want:   [][]int64{{3, 4, 2, 3}, {3, 4, 2, 6, 3}},
 			},
 			{
 				maxLen: 4,
-				vid: 6,
-				want: nil,
+				vid:    6,
+				want:   nil,
 			},
 			{
 				maxLen: 5,
-				vid: 6,
-				want: [][]int64{{6, 3, 4, 2, 6}},
+				vid:    6,
+				want:   [][]int64{{6, 3, 4, 2, 6}},
 			},
 		},
 	},
@@ -411,18 +411,18 @@ var cyclesOfMaxLenContainingTests = []struct {
 		w: []wantInstance{
 			{
 				maxLen: 3,
-				vid: 1,
-				want: nil,
+				vid:    1,
+				want:   nil,
 			},
 			{
 				maxLen: 4,
-				vid: 1,
-				want: [][]int64{{1, 2, 3, 1}},
+				vid:    1,
+				want:   [][]int64{{1, 2, 3, 1}},
 			},
 			{
 				maxLen: 5,
-				vid: 1,
-				want: [][]int64{{1, 2, 3, 1}},
+				vid:    1,
+				want:   [][]int64{{1, 2, 3, 1}},
 			},
 		},
 	},
@@ -435,18 +435,18 @@ var cyclesOfMaxLenContainingTests = []struct {
 		w: []wantInstance{
 			{
 				maxLen: 2,
-				vid: 0,
-				want: nil,
+				vid:    0,
+				want:   nil,
 			},
 			{
 				maxLen: 3,
-				vid: 0,
-				want: [][]int64{{0, 1, 0}},
+				vid:    0,
+				want:   [][]int64{{0, 1, 0}},
 			},
 			{
 				maxLen: 3,
-				vid: 1,
-				want: [][]int64{{1, 0, 1}, {1, 2, 1}},
+				vid:    1,
+				want:   [][]int64{{1, 0, 1}, {1, 2, 1}},
 			},
 		},
 	},
@@ -461,23 +461,23 @@ var cyclesOfMaxLenContainingTests = []struct {
 		w: []wantInstance{
 			{
 				maxLen: 3,
-				vid: 2,
-				want: nil,
+				vid:    2,
+				want:   nil,
 			},
 			{
 				maxLen: 4,
-				vid: 2,
-				want: [][]int64{{2, 0, 1, 2}},
+				vid:    2,
+				want:   [][]int64{{2, 0, 1, 2}},
 			},
 			{
 				maxLen: 3,
-				vid: 3,
-				want: [][]int64{{3, 4, 3}},
+				vid:    3,
+				want:   [][]int64{{3, 4, 3}},
 			},
 			{
 				maxLen: 6,
-				vid: 3,
-				want: [][]int64{{3, 4, 3}},
+				vid:    3,
+				want:   [][]int64{{3, 4, 3}},
 			},
 		},
 	},

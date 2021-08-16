@@ -219,7 +219,7 @@ func (j *johnson) circuit(v int) bool {
 func (j *johnson) circuitMaxLen(v int, maxLen int) bool {
 	f := false
 	// TODO: can we replace the "+ 2" with "+ 3" or "+ 4"?
-	if len(j.stack) + 2 > maxLen {
+	if len(j.stack)+2 > maxLen {
 		return f
 	}
 	n := j.adjacent.orig[v]

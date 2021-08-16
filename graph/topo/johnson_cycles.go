@@ -104,6 +104,47 @@ func DirectedCyclesContaining(g graph.Directed, vid int64) [][]graph.Node {
 	return j.result
 }
 
+// DirectedCyclesOfMaxLen returns the set of elementary cycles in the graph g.
+func DirectedCyclesOfMaxLen(g graph.Directed, maxLen int) [][]graph.Node {
+	jg := johnsonGraphFrom(g)
+	j := johnson{
+		adjacent: jg,
+		b:        make([]set.Ints, len(jg.orig)),
+		blocked:  make([]bool, len(jg.orig)),
+	}
+
+	// len(j.nodes) is the order of g.
+	for j.s < len(j.adjacent.orig)-1 {
+		// We use the previous SCC adjacency to reduce the work needed.
+		sccs := TarjanSCC(j.adjacent.subgraph(j.s))
+		// A_k = adjacency structure of strong component K with least
+		//       vertex in subgraph of G induced by {s, s+1, ... ,n}.
+		j.adjacent = j.adjacent.sccSubGraph(sccs, 2) // Only allow SCCs with >= 2 vertices.
+		if j.adjacent.order() == 0 {
+			break
+		}
+
+		// s = least vertex in V_k
+		if s := j.adjacent.leastVertexIndex(); s < j.s {
+			j.s = s
+		}
+		for i, v := range j.adjacent.orig {
+			if !j.adjacent.nodes.Has(v.ID()) {
+				continue
+			}
+			if len(j.adjacent.succ[v.ID()]) > 0 {
+				j.blocked[i] = false
+				j.b[i] = make(set.Ints)
+			}
+		}
+		//L3:
+		_ = j.circuitMaxLen(j.s, maxLen)
+		j.s++
+	}
+
+	return j.result
+}
+
 // circuit is the CIRCUIT sub-procedure in the paper.
 func (j *johnson) circuit(v int) bool {
 	f := false
@@ -123,6 +164,47 @@ func (j *johnson) circuit(v int) bool {
 			f = true
 		} else if !j.blocked[w] {
 			if j.circuit(w) {
+				f = true
+			}
+		}
+	}
+
+	//L2:
+	if f {
+		j.unblock(v)
+	} else {
+		for w := range j.adjacent.succ[n.ID()] {
+			j.b[j.adjacent.indexOf(w)].Add(v)
+		}
+	}
+	j.stack = j.stack[:len(j.stack)-1]
+
+	return f
+}
+
+// circuitMaxLen is the CIRCUIT sub-procedure in the paper but produces circuits up to a maximum length.
+func (j *johnson) circuitMaxLen(v int, maxLen int) bool {
+	f := false
+	// TODO: can we replace the "+ 2" with "+ 3" or "+ 4"?
+	if len(j.stack) + 2 > maxLen {
+		return f
+	}
+	n := j.adjacent.orig[v]
+	j.stack = append(j.stack, n)
+	j.blocked[v] = true
+
+	//L1:
+	for w := range j.adjacent.succ[n.ID()] {
+		w := j.adjacent.indexOf(w)
+		if w == j.s {
+			// Output circuit composed of stack followed by s.
+			r := make([]graph.Node, len(j.stack)+1)
+			copy(r, j.stack)
+			r[len(r)-1] = j.adjacent.orig[j.s]
+			j.result = append(j.result, r)
+			f = true
+		} else if !j.blocked[w] {
+			if j.circuitMaxLen(w, maxLen) {
 				f = true
 			}
 		}

@@ -2,7 +2,7 @@ build: off
 
 image: Visual Studio 2019
 
-stack: go 1.15
+stack: go 1.16
 
 clone_folder: c:\gopath\src\gonum.org\v1\gonum
 

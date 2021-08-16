@@ -351,3 +351,170 @@ func TestDirectedCyclesOfMaxLen(t *testing.T) {
 		}
 	}
 }
+
+type wantInstance struct {
+	maxLen int
+	vid    int64
+	want   [][]int64
+}
+
+var cyclesOfMaxLenContainingTests = []struct {
+	g    []intset
+	w []wantInstance
+	want [][][]int64
+}{
+	{
+		g: []intset{
+			0: linksTo(1),
+			1: linksTo(2, 7),
+			2: linksTo(3, 6),
+			3: linksTo(4),
+			4: linksTo(2, 5),
+			6: linksTo(3, 5),
+			7: linksTo(0, 6),
+		},
+		w: []wantInstance{
+			{
+				maxLen: 3,
+				vid: 3,
+				want: nil,
+			},
+			{
+				maxLen: 4,
+				vid: 3,
+				want: [][]int64{{3, 4, 2, 3}},
+			},
+			{
+				maxLen: 5,
+				vid: 3,
+				want: [][]int64{{3, 4, 2, 3}, {3, 4, 2, 6, 3}},
+			},
+			{
+				maxLen: 4,
+				vid: 6,
+				want: nil,
+			},
+			{
+				maxLen: 5,
+				vid: 6,
+				want: [][]int64{{6, 3, 4, 2, 6}},
+			},
+		},
+	},
+	{
+		g: []intset{
+			0: linksTo(1, 2, 3),
+			1: linksTo(2),
+			2: linksTo(3),
+			3: linksTo(1),
+		},
+		w: []wantInstance{
+			{
+				maxLen: 3,
+				vid: 1,
+				want: nil,
+			},
+			{
+				maxLen: 4,
+				vid: 1,
+				want: [][]int64{{1, 2, 3, 1}},
+			},
+			{
+				maxLen: 5,
+				vid: 1,
+				want: [][]int64{{1, 2, 3, 1}},
+			},
+		},
+	},
+	{
+		g: []intset{
+			0: linksTo(1),
+			1: linksTo(0, 2),
+			2: linksTo(1),
+		},
+		w: []wantInstance{
+			{
+				maxLen: 2,
+				vid: 0,
+				want: nil,
+			},
+			{
+				maxLen: 3,
+				vid: 0,
+				want: [][]int64{{0, 1, 0}},
+			},
+			{
+				maxLen: 3,
+				vid: 1,
+				want: [][]int64{{1, 0, 1}, {1, 2, 1}},
+			},
+		},
+	},
+	{
+		g: []intset{
+			0: linksTo(1),
+			1: linksTo(2, 3, 4),
+			2: linksTo(0, 3),
+			3: linksTo(4),
+			4: linksTo(3),
+		},
+		w: []wantInstance{
+			{
+				maxLen: 3,
+				vid: 2,
+				want: nil,
+			},
+			{
+				maxLen: 4,
+				vid: 2,
+				want: [][]int64{{2, 0, 1, 2}},
+			},
+			{
+				maxLen: 3,
+				vid: 3,
+				want: [][]int64{{3, 4, 3}},
+			},
+			{
+				maxLen: 6,
+				vid: 3,
+				want: [][]int64{{3, 4, 3}},
+			},
+		},
+	},
+}
+
+func TestDirectedCyclesOfMaxLenContaining(t *testing.T) {
+	for i, test := range cyclesOfMaxLenContainingTests {
+		g := simple.NewDirectedGraph()
+		g.AddNode(simple.Node(-10)) // Make sure we test graphs with sparse IDs.
+		for u, e := range test.g {
+			// Add nodes that are not defined by an edge.
+			if g.Node(int64(u)) == nil {
+				g.AddNode(simple.Node(u))
+			}
+			for v := range e {
+				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v)})
+			}
+		}
+		for _, tu := range test.w {
+			cycles := DirectedCyclesOfMaxLenContaining(g, tu.maxLen, tu.vid)
+			var got [][]int64
+			if cycles != nil {
+				got = make([][]int64, len(cycles))
+			}
+			// johnson.circuit does range iteration over maps,
+			// so sort to ensure consistent ordering.
+			for j, c := range cycles {
+				ids := make([]int64, len(c))
+				for k, n := range c {
+					ids[k] = n.ID()
+				}
+				got[j] = ids
+			}
+			sort.Sort(ordered.BySliceValues(got))
+			if !reflect.DeepEqual(got, tu.want) {
+				t.Errorf("unexpected johnson result for %d:\n\tgot:%#v\n\twant:%#v", i, got, tu.want)
+			}
+		}
+	}
+}

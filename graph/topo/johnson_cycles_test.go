@@ -5,7 +5,6 @@
 package topo
 
 import (
-	"fmt"
 	"reflect"
 	"sort"
 	"testing"
@@ -238,7 +237,6 @@ func TestDirectedCyclesContaining(t *testing.T) {
 				got[j] = ids
 			}
 			sort.Sort(ordered.BySliceValues(got))
-			fmt.Println(got, test.want[k])
 			if !reflect.DeepEqual(got, test.want[k]) {
 				t.Errorf("unexpected johnson result for %d:\n\tgot:%#v\n\twant:%#v", i, got, test.want)
 			}

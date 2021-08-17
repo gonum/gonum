@@ -56,7 +56,7 @@ func (n *Nodes) Node() graph.Node {
 func (n *Nodes) Reset() {
 	n.curr = nil
 	n.pos = 0
-	n.iter.it = nil
+	n.iter.hiter = hiter{}
 }
 
 // NodeSlice returns all the remaining nodes in the iterator and advances
@@ -164,7 +164,7 @@ func (n *NodesByEdge) Node() graph.Node {
 func (n *NodesByEdge) Reset() {
 	n.curr = nil
 	n.pos = 0
-	n.iter.it = nil
+	n.iter.hiter = hiter{}
 }
 
 // NodeSlice returns all the remaining nodes in the iterator and advances

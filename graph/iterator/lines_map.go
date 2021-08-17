@@ -56,7 +56,7 @@ func (l *Lines) Line() graph.Line {
 func (l *Lines) Reset() {
 	l.curr = nil
 	l.pos = 0
-	l.iter.it = nil
+	l.iter.hiter = hiter{}
 }
 
 // LineSlice returns all the remaining lines in the iterator and advances
@@ -121,7 +121,7 @@ func (l *WeightedLines) WeightedLine() graph.WeightedLine {
 func (l *WeightedLines) Reset() {
 	l.curr = nil
 	l.pos = 0
-	l.iter.it = nil
+	l.iter.hiter = hiter{}
 }
 
 // WeightedLineSlice returns all the remaining lines in the iterator and advances

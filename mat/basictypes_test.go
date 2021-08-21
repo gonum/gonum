@@ -28,7 +28,7 @@ type rawMatrix struct {
 }
 
 func (a *rawMatrix) RawMatrix() blas64.General {
-	return a.basicMatrix.mat
+	return a.mat
 }
 
 type basicVector VecDense
@@ -46,7 +46,7 @@ type rawVector struct {
 }
 
 func (v *rawVector) RawVector() blas64.Vector {
-	return v.basicVector.mat
+	return v.mat
 }
 
 type basicSymmetric SymDense

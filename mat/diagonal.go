@@ -43,27 +43,14 @@ type Diagonal interface {
 	// Diag returns the number of rows/columns in the matrix.
 	Diag() int
 
-	// Bandwidth and TBand are included in the Diagonal interface
-	// to allow the use of Diagonal types in banded functions.
-	// Bandwidth will always return (0, 0).
-	Bandwidth() (kl, ku int)
-	TBand() Banded
-
-	// Triangle and TTri are included in the Diagonal interface
-	// to allow the use of Diagonal types in triangular functions.
-	Triangle() (int, TriKind)
-	TTri() Triangular
-
-	// SymmetricDim and SymBand are included in the Diagonal interface
-	// to allow the use of Diagonal types in symmetric and banded symmetric
-	// functions respectively.
-	SymmetricDim() int
-	SymBand() (n, k int)
-
-	// TriBand and TTriBand are included in the Diagonal interface
-	// to allow the use of Diagonal types in triangular banded functions.
-	TriBand() (n, k int, kind TriKind)
-	TTriBand() TriBanded
+	// The following interfaces are included in the Diagonal
+	// interface to allow the use of Diagonal types in
+	// functions operating on these types.
+	Banded
+	SymBanded
+	Symmetric
+	Triangular
+	TriBanded
 }
 
 // MutableDiagonal is a Diagonal matrix whose elements can be set.

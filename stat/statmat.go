@@ -29,7 +29,7 @@ func CovarianceMatrix(dst *mat.SymDense, x mat.Matrix, weights []float64) {
 
 	if dst.IsEmpty() {
 		*dst = *(dst.GrowSym(c).(*mat.SymDense))
-	} else if n := dst.Symmetric(); n != c {
+	} else if n := dst.SymmetricDim(); n != c {
 		panic(mat.ErrShape)
 	}
 
@@ -86,7 +86,7 @@ func CorrelationMatrix(dst *mat.SymDense, x mat.Matrix, weights []float64) {
 
 // covToCorr converts a covariance matrix to a correlation matrix.
 func covToCorr(c *mat.SymDense) {
-	r := c.Symmetric()
+	r := c.SymmetricDim()
 
 	s := make([]float64, r)
 	for i := 0; i < r; i++ {

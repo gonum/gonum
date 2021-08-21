@@ -399,7 +399,7 @@ func TestCovarianceMatrix(t *testing.T) {
 		if !mat.EqualApprox(&cov, test.sigma, 1e-14) {
 			t.Errorf("Covariance mismatch with nil input")
 		}
-		dim := test.sigma.Symmetric()
+		dim := test.sigma.SymmetricDim()
 		cov = *mat.NewSymDense(dim, nil)
 		normal.CovarianceMatrix(&cov)
 		if !mat.EqualApprox(&cov, test.sigma, 1e-14) {

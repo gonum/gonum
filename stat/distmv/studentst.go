@@ -55,7 +55,7 @@ func NewStudentsT(mu []float64, sigma mat.Symmetric, nu float64, src rand.Source
 	if len(mu) == 0 {
 		panic(badZeroDimension)
 	}
-	dim := sigma.Symmetric()
+	dim := sigma.SymmetricDim()
 	if dim != len(mu) {
 		panic(badSizeMismatch)
 	}
@@ -231,7 +231,7 @@ func findUnob(observed []int, dim int) (unobserved []int) {
 func (st *StudentsT) CovarianceMatrix(dst *mat.SymDense) {
 	if dst.IsEmpty() {
 		*dst = *(dst.GrowSym(st.dim).(*mat.SymDense))
-	} else if dst.Symmetric() != st.dim {
+	} else if dst.SymmetricDim() != st.dim {
 		panic("studentst: input matrix size mismatch")
 	}
 	dst.CopySym(&st.sigma)

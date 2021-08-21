@@ -77,7 +77,7 @@ type Cover interface {
 func checkCov(t *testing.T, cas int, x *mat.Dense, c Cover, tol float64) {
 	var cov mat.SymDense
 	c.CovarianceMatrix(&cov)
-	n := cov.Symmetric()
+	n := cov.SymmetricDim()
 	cov2 := mat.NewSymDense(n, nil)
 	c.CovarianceMatrix(cov2)
 	if !mat.Equal(&cov, cov2) {

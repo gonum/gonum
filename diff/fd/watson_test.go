@@ -86,7 +86,7 @@ func (Watson) Grad(grad, x []float64) {
 
 func (Watson) Hess(hess mat.MutableSymmetric, x []float64) {
 	dim := len(x)
-	if dim != hess.Symmetric() {
+	if dim != hess.SymmetricDim() {
 		panic("incorrect size of the Hessian")
 	}
 

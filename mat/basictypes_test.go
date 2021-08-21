@@ -56,7 +56,7 @@ var _ Symmetric = &basicSymmetric{}
 func (m *basicSymmetric) At(r, c int) float64 { return (*SymDense)(m).At(r, c) }
 func (m *basicSymmetric) Dims() (r, c int)    { return (*SymDense)(m).Dims() }
 func (m *basicSymmetric) T() Matrix           { return m }
-func (m *basicSymmetric) Symmetric() int      { return (*SymDense)(m).Symmetric() }
+func (m *basicSymmetric) SymmetricDim() int   { return (*SymDense)(m).SymmetricDim() }
 
 type basicTriangular TriDense
 
@@ -87,7 +87,7 @@ func (m *basicSymBanded) Dims() (r, c int)        { return (*SymBandDense)(m).Di
 func (m *basicSymBanded) T() Matrix               { return m }
 func (m *basicSymBanded) Bandwidth() (kl, ku int) { return (*SymBandDense)(m).Bandwidth() }
 func (m *basicSymBanded) TBand() Banded           { return m }
-func (m *basicSymBanded) Symmetric() int          { return (*SymBandDense)(m).Symmetric() }
+func (m *basicSymBanded) SymmetricDim() int       { return (*SymBandDense)(m).SymmetricDim() }
 func (m *basicSymBanded) SymBand() (n, k int)     { return (*SymBandDense)(m).SymBand() }
 
 type basicTriBanded TriBandDense
@@ -112,7 +112,7 @@ func (m *basicDiagonal) At(r, c int) float64               { return (*DiagDense)
 func (m *basicDiagonal) Dims() (r, c int)                  { return (*DiagDense)(m).Dims() }
 func (m *basicDiagonal) T() Matrix                         { return Transpose{m} }
 func (m *basicDiagonal) Diag() int                         { return (*DiagDense)(m).Diag() }
-func (m *basicDiagonal) Symmetric() int                    { return (*DiagDense)(m).Symmetric() }
+func (m *basicDiagonal) SymmetricDim() int                 { return (*DiagDense)(m).SymmetricDim() }
 func (m *basicDiagonal) SymBand() (n, k int)               { return (*DiagDense)(m).SymBand() }
 func (m *basicDiagonal) Bandwidth() (kl, ku int)           { return (*DiagDense)(m).Bandwidth() }
 func (m *basicDiagonal) TBand() Banded                     { return TransposeBand{m} }

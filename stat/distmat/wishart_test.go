@@ -111,7 +111,7 @@ func TestWishartRand(t *testing.T) {
 		},
 	} {
 		rnd := rand.New(rand.NewSource(1))
-		dim := test.v.Symmetric()
+		dim := test.v.SymmetricDim()
 		w, ok := NewWishart(test.v, test.nu, rnd)
 		if !ok {
 			panic("bad test")

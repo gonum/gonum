@@ -107,7 +107,7 @@ func (g *UndirectedMatrix) From(id int64) graph.Nodes {
 		return graph.Empty
 	}
 	var nodes []graph.Node
-	r := g.mat.Symmetric()
+	r := g.mat.SymmetricDim()
 	for i := 0; i < r; i++ {
 		if int64(i) == id {
 			continue
@@ -161,7 +161,7 @@ func (g *UndirectedMatrix) Nodes() graph.Nodes {
 		copy(nodes, g.nodes)
 		return iterator.NewOrderedNodes(nodes)
 	}
-	r := g.mat.Symmetric()
+	r := g.mat.SymmetricDim()
 	// Matrix graphs must have at least one node.
 	return iterator.NewImplicitNodes(0, r, newSimpleNode)
 }
@@ -263,6 +263,6 @@ func (g *UndirectedMatrix) WeightedEdges() graph.WeightedEdges {
 }
 
 func (g *UndirectedMatrix) has(id int64) bool {
-	r := g.mat.Symmetric()
+	r := g.mat.SymmetricDim()
 	return 0 <= id && id < int64(r)
 }

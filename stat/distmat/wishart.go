@@ -44,7 +44,7 @@ type Wishart struct {
 //
 // NewWishart panics if nu <= d - 1 where d is the order of v.
 func NewWishart(v mat.Symmetric, nu float64, src rand.Source) (*Wishart, bool) {
-	dim := v.Symmetric()
+	dim := v.SymmetricDim()
 	if nu <= float64(dim-1) {
 		panic("wishart: nu must be greater than dim-1")
 	}
@@ -75,7 +75,7 @@ func NewWishart(v mat.Symmetric, nu float64, src rand.Source) (*Wishart, bool) {
 func (w *Wishart) MeanSymTo(dst *mat.SymDense) {
 	if dst.IsEmpty() {
 		dst.ReuseAsSym(w.dim)
-	} else if dst.Symmetric() != w.dim {
+	} else if dst.SymmetricDim() != w.dim {
 		panic(badDim)
 	}
 	w.setV()
@@ -94,7 +94,7 @@ func (w *Wishart) ProbSym(x mat.Symmetric) float64 {
 // LogProbSym returns -∞ if the input matrix is not positive definite (the Cholesky
 // decomposition fails).
 func (w *Wishart) LogProbSym(x mat.Symmetric) float64 {
-	dim := x.Symmetric()
+	dim := x.SymmetricDim()
 	if dim != w.dim {
 		panic(badDim)
 	}
@@ -109,7 +109,7 @@ func (w *Wishart) LogProbSym(x mat.Symmetric) float64 {
 // LogProbSymChol returns the log of the probability of the input symmetric matrix
 // given its Cholesky decomposition.
 func (w *Wishart) LogProbSymChol(cholX *mat.Cholesky) float64 {
-	dim := cholX.Symmetric()
+	dim := cholX.SymmetricDim()
 	if dim != w.dim {
 		panic(badDim)
 	}

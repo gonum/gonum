@@ -54,10 +54,10 @@ type Diagonal interface {
 	Triangle() (int, TriKind)
 	TTri() Triangular
 
-	// Symmetric and SymBand are included in the Diagonal interface
+	// SymmetricDim and SymBand are included in the Diagonal interface
 	// to allow the use of Diagonal types in symmetric and banded symmetric
 	// functions respectively.
-	Symmetric() int
+	SymmetricDim() int
 	SymBand() (n, k int)
 
 	// TriBand and TTriBand are included in the Diagonal interface
@@ -137,8 +137,8 @@ func (d *DiagDense) Bandwidth() (kl, ku int) {
 	return 0, 0
 }
 
-// Symmetric implements the Symmetric interface.
-func (d *DiagDense) Symmetric() int {
+// SymmetricDim implements the Symmetric interface.
+func (d *DiagDense) SymmetricDim() int {
 	return d.mat.N
 }
 

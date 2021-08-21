@@ -24,7 +24,7 @@ import (
 func TorgersonScaling(dst *mat.Dense, eigdst []float64, dis mat.Symmetric) (k int, eig []float64) {
 	// https://doi.org/10.1007/0-387-28981-X_12
 
-	n := dis.Symmetric()
+	n := dis.SymmetricDim()
 	if dst.IsEmpty() {
 		dst.ReuseAs(n, n)
 	} else {

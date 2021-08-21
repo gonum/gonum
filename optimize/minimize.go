@@ -447,7 +447,7 @@ func getInitLocation(dim int, initX []float64, initValues *Location) (Operation,
 		op |= GradEvaluation
 	}
 	if initValues.Hessian != nil {
-		if initValues.Hessian.Symmetric() != dim {
+		if initValues.Hessian.SymmetricDim() != dim {
 			panic("optimize: initial Hessian does not match problem dimension")
 		}
 		loc.Hessian = initValues.Hessian

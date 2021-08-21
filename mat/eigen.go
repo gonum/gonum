@@ -38,7 +38,7 @@ func (e *EigenSym) Factorize(a Symmetric, vectors bool) (ok bool) {
 	e.vectorsComputed = false
 	e.values = e.values[:]
 
-	n := a.Symmetric()
+	n := a.SymmetricDim()
 	sd := NewSymDense(n, nil)
 	sd.CopySym(a)
 

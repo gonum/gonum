@@ -37,8 +37,8 @@ type SymDense struct {
 // the element at {j, i}). Symmetric matrices are always square.
 type Symmetric interface {
 	Matrix
-	// Symmetric returns the number of rows/columns in the matrix.
-	Symmetric() int
+	// SymmetricDim returns the number of rows/columns in the matrix.
+	SymmetricDim() int
 }
 
 // A RawSymmetricer can return a view of itself as a BLAS Symmetric matrix.
@@ -100,9 +100,9 @@ func (s *SymDense) T() Matrix {
 	return s
 }
 
-// Symmetric implements the Symmetric interface and returns the number of rows
+// SymmetricDim implements the Symmetric interface and returns the number of rows
 // and columns in the matrix.
-func (s *SymDense) Symmetric() int {
+func (s *SymDense) SymmetricDim() int {
 	return s.mat.N
 }
 
@@ -234,7 +234,7 @@ func (s *SymDense) reuseAsZeroed(n int) {
 }
 
 func (s *SymDense) isolatedWorkspace(a Symmetric) (w *SymDense, restore func()) {
-	n := a.Symmetric()
+	n := a.SymmetricDim()
 	if n == 0 {
 		panic(ErrZeroLength)
 	}
@@ -258,8 +258,8 @@ func (s *SymDense) DiagView() Diagonal {
 }
 
 func (s *SymDense) AddSym(a, b Symmetric) {
-	n := a.Symmetric()
-	if n != b.Symmetric() {
+	n := a.SymmetricDim()
+	if n != b.SymmetricDim() {
 		panic(ErrShape)
 	}
 	s.reuseAsNonZeroed(n)
@@ -295,7 +295,7 @@ func (s *SymDense) AddSym(a, b Symmetric) {
 }
 
 func (s *SymDense) CopySym(a Symmetric) int {
-	n := a.Symmetric()
+	n := a.SymmetricDim()
 	n = min(n, s.mat.N)
 	if n == 0 {
 		return 0
@@ -325,7 +325,7 @@ func (s *SymDense) CopySym(a Symmetric) int {
 //  s = a + alpha * x * xᵀ
 func (s *SymDense) SymRankOne(a Symmetric, alpha float64, x Vector) {
 	n := x.Len()
-	if a.Symmetric() != n {
+	if a.SymmetricDim() != n {
 		panic(ErrShape)
 	}
 	s.reuseAsNonZeroed(n)
@@ -357,7 +357,7 @@ func (s *SymDense) SymRankOne(a Symmetric, alpha float64, x Vector) {
 // result into the receiver. If a is zero, see SymOuterK.
 //  s = a + alpha * x * x'
 func (s *SymDense) SymRankK(a Symmetric, alpha float64, x Matrix) {
-	n := a.Symmetric()
+	n := a.SymmetricDim()
 	r, _ := x.Dims()
 	if r != n {
 		panic(ErrShape)
@@ -495,7 +495,7 @@ func (s *SymDense) RankTwo(a Symmetric, alpha float64, x, y Vector) {
 
 // ScaleSym multiplies the elements of a by f, placing the result in the receiver.
 func (s *SymDense) ScaleSym(f float64, a Symmetric) {
-	n := a.Symmetric()
+	n := a.SymmetricDim()
 	s.reuseAsNonZeroed(n)
 	if a, ok := a.(RawSymmetricer); ok {
 		amat := a.RawSymmetric()
@@ -523,7 +523,7 @@ func (s *SymDense) ScaleSym(f float64, a Symmetric) {
 // have to be a strict subset, dimension repeats are allowed.
 func (s *SymDense) SubsetSym(a Symmetric, set []int) {
 	n := len(set)
-	na := a.Symmetric()
+	na := a.SymmetricDim()
 	s.reuseAsNonZeroed(n)
 	var restore func()
 	if a == s {
@@ -663,7 +663,7 @@ func (s *SymDense) GrowSym(n int) Symmetric {
 // PowPSD returns an error if the matrix is not positive symmetric definite
 // or the Eigen decomposition is not successful.
 func (s *SymDense) PowPSD(a Symmetric, pow float64) error {
-	dim := a.Symmetric()
+	dim := a.SymmetricDim()
 	s.reuseAsNonZeroed(dim)
 
 	var eigen EigenSym

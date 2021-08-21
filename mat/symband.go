@@ -36,8 +36,8 @@ type SymBandDense struct {
 type SymBanded interface {
 	Banded
 
-	// Symmetric returns the number of rows/columns in the matrix.
-	Symmetric() int
+	// SymmetricDim returns the number of rows/columns in the matrix.
+	SymmetricDim() int
 
 	// SymBand returns the number of rows/columns in the matrix, and the size of
 	// the bandwidth.
@@ -115,8 +115,8 @@ func (s *SymBandDense) Dims() (r, c int) {
 	return s.mat.N, s.mat.N
 }
 
-// Symmetric returns the size of the receiver.
-func (s *SymBandDense) Symmetric() int {
+// SymmetricDim returns the size of the receiver.
+func (s *SymBandDense) SymmetricDim() int {
 	return s.mat.N
 }
 

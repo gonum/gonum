@@ -244,7 +244,7 @@ func TestCorrCov(t *testing.T) {
 		CorrelationMatrix(&corr, test.data, test.weights)
 		CovarianceMatrix(&cov, test.data, test.weights)
 
-		r := cov.Symmetric()
+		r := cov.SymmetricDim()
 
 		// Get the diagonal elements from cov to determine the sigmas.
 		sigmas := make([]float64, r)
@@ -252,11 +252,11 @@ func TestCorrCov(t *testing.T) {
 			sigmas[i] = math.Sqrt(cov.At(i, i))
 		}
 
-		covFromCorr := mat.NewSymDense(corr.Symmetric(), nil)
+		covFromCorr := mat.NewSymDense(corr.SymmetricDim(), nil)
 		covFromCorr.CopySym(&corr)
 		corrToCov(covFromCorr, sigmas)
 
-		corrFromCov := mat.NewSymDense(cov.Symmetric(), nil)
+		corrFromCov := mat.NewSymDense(cov.SymmetricDim(), nil)
 		corrFromCov.CopySym(&cov)
 		covToCorr(corrFromCov)
 
@@ -450,7 +450,7 @@ func BenchmarkCovToCorr(b *testing.B) {
 	m := randMat(small, small)
 	var cov mat.SymDense
 	CovarianceMatrix(&cov, m, nil)
-	cc := mat.NewSymDense(cov.Symmetric(), nil)
+	cc := mat.NewSymDense(cov.SymmetricDim(), nil)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		b.StopTimer()
@@ -465,7 +465,7 @@ func BenchmarkCorrToCov(b *testing.B) {
 	m := randMat(small, small)
 	var corr mat.SymDense
 	CorrelationMatrix(&corr, m, nil)
-	cc := mat.NewSymDense(corr.Symmetric(), nil)
+	cc := mat.NewSymDense(corr.SymmetricDim(), nil)
 	sigma := make([]float64, small)
 	for i := range sigma {
 		sigma[i] = 2

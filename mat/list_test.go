@@ -765,7 +765,7 @@ func makeCopyOf(a Matrix) Matrix {
 		m.CloneFrom(a)
 		return returnAs(&m, t)
 	case *SymDense, *basicSymmetric:
-		n := t.(Symmetric).Symmetric()
+		n := t.(Symmetric).SymmetricDim()
 		m := NewSymDense(n, nil)
 		m.CopySym(t.(Symmetric))
 		return returnAs(m, t)

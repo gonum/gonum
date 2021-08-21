@@ -173,7 +173,7 @@ type ProposalNormal struct {
 //
 // NewProposalNormal returns {nil, false} if the covariance matrix is not positive-definite.
 func NewProposalNormal(sigma *mat.SymDense, src rand.Source) (*ProposalNormal, bool) {
-	mu := make([]float64, sigma.Symmetric())
+	mu := make([]float64, sigma.SymmetricDim())
 	normal, ok := distmv.NewNormal(mu, sigma, src)
 	if !ok {
 		return nil, false

@@ -66,7 +66,7 @@ func NewDirichlet(alpha []float64, src rand.Source) *Dirichlet {
 func (d *Dirichlet) CovarianceMatrix(dst *mat.SymDense) {
 	if dst.IsEmpty() {
 		*dst = *(dst.GrowSym(d.dim).(*mat.SymDense))
-	} else if dst.Symmetric() != d.dim {
+	} else if dst.SymmetricDim() != d.dim {
 		panic("dirichelet: input matrix size mismatch")
 	}
 	scale := 1 / (d.sumAlpha * d.sumAlpha * (d.sumAlpha + 1))

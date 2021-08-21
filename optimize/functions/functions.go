@@ -60,7 +60,7 @@ func (Beale) Hess(dst *mat.SymDense, x []float64) {
 	if len(x) != 2 {
 		panic("dimension of the problem must be 2")
 	}
-	if len(x) != dst.Symmetric() {
+	if len(x) != dst.SymmetricDim() {
 		panic("incorrect size of the Hessian")
 	}
 
@@ -562,7 +562,7 @@ func (BrownBadlyScaled) Hess(dst *mat.SymDense, x []float64) {
 	if len(x) != 2 {
 		panic("dimension of the problem must be 2")
 	}
-	if len(x) != dst.Symmetric() {
+	if len(x) != dst.SymmetricDim() {
 		panic("incorrect size of the Hessian")
 	}
 
@@ -639,7 +639,7 @@ func (BrownAndDennis) Hess(dst *mat.SymDense, x []float64) {
 	if len(x) != 4 {
 		panic("dimension of the problem must be 4")
 	}
-	if len(x) != dst.Symmetric() {
+	if len(x) != dst.SymmetricDim() {
 		panic("incorrect size of the Hessian")
 	}
 
@@ -1274,7 +1274,7 @@ func (PowellBadlyScaled) Hess(dst *mat.SymDense, x []float64) {
 	if len(x) != 2 {
 		panic("dimension of the problem must be 2")
 	}
-	if len(x) != dst.Symmetric() {
+	if len(x) != dst.SymmetricDim() {
 		panic("incorrect size of the Hessian")
 	}
 
@@ -1522,7 +1522,7 @@ func (Watson) Grad(grad, x []float64) {
 
 func (Watson) Hess(dst *mat.SymDense, x []float64) {
 	dim := len(x)
-	if len(x) != dst.Symmetric() {
+	if len(x) != dst.SymmetricDim() {
 		panic("incorrect size of the Hessian")
 	}
 
@@ -1644,7 +1644,7 @@ func (Wood) Hess(dst *mat.SymDense, x []float64) {
 	if len(x) != 4 {
 		panic("dimension of the problem must be 4")
 	}
-	if len(x) != dst.Symmetric() {
+	if len(x) != dst.SymmetricDim() {
 		panic("incorrect size of the Hessian")
 	}
 

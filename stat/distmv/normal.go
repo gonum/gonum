@@ -43,7 +43,7 @@ func NewNormal(mu []float64, sigma mat.Symmetric, src rand.Source) (*Normal, boo
 	if len(mu) == 0 {
 		panic(badZeroDimension)
 	}
-	dim := sigma.Symmetric()
+	dim := sigma.SymmetricDim()
 	if dim != len(mu) {
 		panic(badSizeMismatch)
 	}
@@ -69,7 +69,7 @@ func NewNormal(mu []float64, sigma mat.Symmetric, src rand.Source) (*Normal, boo
 // panics if len(mu) is not equal to chol.Size().
 func NewNormalChol(mu []float64, chol *mat.Cholesky, src rand.Source) *Normal {
 	dim := len(mu)
-	if dim != chol.Symmetric() {
+	if dim != chol.SymmetricDim() {
 		panic(badSizeMismatch)
 	}
 	n := &Normal{
@@ -93,7 +93,7 @@ func NewNormalPrecision(mu []float64, prec *mat.SymDense, src rand.Source) (norm
 	if len(mu) == 0 {
 		panic(badZeroDimension)
 	}
-	dim := prec.Symmetric()
+	dim := prec.SymmetricDim()
 	if dim != len(mu) {
 		panic(badSizeMismatch)
 	}
@@ -161,7 +161,7 @@ func (n *Normal) ConditionNormal(observed []int, values []float64, src rand.Sour
 func (n *Normal) CovarianceMatrix(dst *mat.SymDense) {
 	if dst.IsEmpty() {
 		*dst = *(dst.GrowSym(n.dim).(*mat.SymDense))
-	} else if dst.Symmetric() != n.dim {
+	} else if dst.SymmetricDim() != n.dim {
 		panic("normal: input matrix size mismatch")
 	}
 	dst.CopySym(&n.sigma)
@@ -197,7 +197,7 @@ func NormalLogProb(x, mu []float64, chol *mat.Cholesky) float64 {
 	if len(x) != dim {
 		panic(badSizeMismatch)
 	}
-	if chol.Symmetric() != dim {
+	if chol.SymmetricDim() != dim {
 		panic(badSizeMismatch)
 	}
 	logSqrtDet := 0.5 * chol.LogDet()
@@ -301,7 +301,7 @@ func (n *Normal) Rand(x []float64) []float64 {
 // available. Otherwise, the NewNormal function should be used.
 func NormalRand(x, mean []float64, chol *mat.Cholesky, src rand.Source) []float64 {
 	x = reuseAs(x, len(mean))
-	if len(mean) != chol.Symmetric() {
+	if len(mean) != chol.SymmetricDim() {
 		panic(badInputLength)
 	}
 	if src == nil {

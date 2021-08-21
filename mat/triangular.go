@@ -659,7 +659,7 @@ func (t *TriDense) Trace() float64 {
 // copySymIntoTriangle copies a symmetric matrix into a TriDense
 func copySymIntoTriangle(t *TriDense, s Symmetric) {
 	n, upper := t.Triangle()
-	ns := s.Symmetric()
+	ns := s.SymmetricDim()
 	if n != ns {
 		panic("mat: triangle size mismatch")
 	}

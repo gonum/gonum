@@ -659,7 +659,7 @@ func TestViewGrowSquare(t *testing.T) {
 
 		// Grow the matrix back to the original view
 		gn := n - start1 - start2
-		g := v2.GrowSym(gn - v2.Symmetric()).(*SymDense)
+		g := v2.GrowSym(gn - v2.SymmetricDim()).(*SymDense)
 		g.SetSym(1, 1, 2.2)
 
 		for i := 0; i < gn; i++ {

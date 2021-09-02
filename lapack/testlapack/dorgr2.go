@@ -6,12 +6,14 @@ package testlapack
 
 import (
 	"fmt"
+	"math"
 	"testing"
 
 	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
+	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/lapack"
 )
 
@@ -26,7 +28,7 @@ func Dorgr2Test(t *testing.T, impl Dorgr2er) {
 	for _, k := range []int{0, 1, 2, 5} {
 		for _, m := range []int{k, k + 1, k + 2, k + 4} {
 			for _, n := range []int{m, m + 1, m + 2, m + 4, m + 7} {
-				for _, lda := range []int{n, n + 5} {
+				for _, lda := range []int{max(1, n), n + 5} {
 					dorgr2Test(t, impl, rnd, m, n, k, lda)
 				}
 			}
@@ -35,60 +37,72 @@ func Dorgr2Test(t *testing.T, impl Dorgr2er) {
 }
 
 func dorgr2Test(t *testing.T, impl Dorgr2er, rnd *rand.Rand, m, n, k, lda int) {
-	const tol = 1e-12
+	const tol = 1e-14
+
 	name := fmt.Sprintf("m=%v,n=%v,k=%v,lda=%v", m, n, k, lda)
 
-	if lda == 0 {
-		lda = n
-	}
-
+	// Generate a random m×n matrix A.
 	a := randomGeneral(m, n, lda, rnd)
-	aCopy := cloneGeneral(a)
+
 	// Compute the RQ decomposition of A.
+	rq := cloneGeneral(a)
 	tau := make([]float64, m)
 	work := make([]float64, 1)
-	impl.Dgerqf(m, n, a.Data, a.Stride, tau, work, -1)
+	impl.Dgerqf(m, n, rq.Data, rq.Stride, tau, work, -1)
 	work = make([]float64, int(work[0]))
-	impl.Dgerqf(m, n, a.Data, a.Stride, tau, work, len(work))
+	impl.Dgerqf(m, n, rq.Data, rq.Stride, tau, work, len(work))
 
-	// Generate the upper triangular matrix R from subarray A[m-k:m, n-m:n]
-	r := zeros(k, m, m)
-	for i := 0; i < k; i++ {
-		for j := 0; j < k; j++ {
-			ia := i + a.Rows - k
-			ja := j + a.Cols - k
-			jr := j + r.Cols - k
-			if i <= j {
-				r.Data[i*r.Stride+jr] = a.Data[ia*a.Stride+ja]
-			}
-		}
-	}
+	tauCopy := make([]float64, len(tau))
+	copy(tauCopy, tau)
+
 	// Compute the matrix Q using Dorg2r.
-	impl.Dorgr2(m, n, k, a.Data, a.Stride, tau[m-k:m], work)
+	q := cloneGeneral(rq)
+	impl.Dorgr2(m, n, k, q.Data, q.Stride, tau[m-k:m], work)
+
 	if m == 0 {
 		return
 	}
-	q := a
-	// Test Q orthogonality.
-	res := residualOrthogonal(q, true)
-	if res > tol {
-		t.Errorf("%v: |I - Q * Qᵀ| residual too large (%g)", name, res)
+
+	// Check that tau hasn't been modified.
+	if !floats.Equal(tau, tauCopy) {
+		t.Errorf("%v: unexpected modification in tau", name)
 	}
+
+	// Check that Q has orthonormal rows.
+	res := residualOrthogonal(q, true)
+	if res > tol || math.IsNaN(res) {
+		t.Errorf("%v: residual |I - Q*Qᵀ| too large, got %v, want <= %v", name, res, tol)
+	}
+
 	if k == 0 {
 		return
 	}
 
-	// Reconstruct last rows of A.
+	// Extract the k×m upper triangular matrix R from RQ[m-k:m,n-k:n].
+	r := zeros(k, m, m)
+	for i := 0; i < k; i++ {
+		for j := 0; j < k; j++ {
+			ii := rq.Rows - k + i
+			jj := rq.Cols - k + j
+			jr := r.Cols - k + j
+			if i <= j {
+				r.Data[i*r.Stride+jr] = rq.Data[ii*rq.Stride+jj]
+			}
+		}
+	}
+
+	// Construct a view A[m-k:m,0:n] of the last k rows of A.
 	aRec := blas64.General{
 		Rows:   k,
-		Cols:   aCopy.Cols,
-		Data:   aCopy.Data[(a.Rows-k)*lda:],
-		Stride: lda,
+		Cols:   n,
+		Data:   a.Data[(m-k)*a.Stride:],
+		Stride: a.Stride,
 	}
-	// Test |A[m-k:m,0:n] - R[m-k:m,0:m] * Q| is small
-	blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, r, q, -1, aRec)
+	// Compute A - R*Q.
+	blas64.Gemm(blas.NoTrans, blas.NoTrans, -1, r, q, 1, aRec)
+	// Check that |A - R*Q| is small.
 	res = dlange(lapack.MaxColumnSum, aRec.Rows, aRec.Cols, aRec.Data, aRec.Stride)
-	if res > tol {
-		t.Errorf("%v: |A[m-k:m,0:n] - R[m-k:m,0:m] * Q| residual too large (%g)", name, res)
+	if res > tol || math.IsNaN(res) {
+		t.Errorf("%v: residual |A - R*Q| too large, got %v, want <= %v", name, res, tol)
 	}
 }

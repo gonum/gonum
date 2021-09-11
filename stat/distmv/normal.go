@@ -86,7 +86,7 @@ func NewNormalChol(mu []float64, chol *mat.Cholesky, src rand.Source) *Normal {
 
 // NewNormalPrecision creates a new Normal distribution with the given mean and
 // precision matrix (inverse of the covariance matrix). NewNormalPrecision
-// panics if len(mu) is not equal to prec.Symmetric(). If the precision matrix
+// panics if len(mu) is not equal to prec.SymmetricDim(). If the precision matrix
 // is not positive-definite, NewNormalPrecision returns nil for norm and false
 // for ok.
 func NewNormalPrecision(mu []float64, prec *mat.SymDense, src rand.Source) (norm *Normal, ok bool) {

@@ -49,7 +49,7 @@ type StudentsT struct {
 // NewStudentsT creates a new StudentsT with the given nu, mu, and sigma
 // parameters.
 //
-// NewStudentsT panics if len(mu) == 0, or if len(mu) != sigma.Symmetric(). If
+// NewStudentsT panics if len(mu) == 0, or if len(mu) != sigma.SymmetricDim(). If
 // the covariance matrix is not positive-definite, nil is returned and ok is false.
 func NewStudentsT(mu []float64, sigma mat.Symmetric, nu float64, src rand.Source) (dist *StudentsT, ok bool) {
 	if len(mu) == 0 {

@@ -477,7 +477,7 @@ func (c *Cholesky) Scale(f float64, orig *Cholesky) {
 // that k > w' A^-1 w. If this condition does not hold then ExtendVecSym will
 // return false and the receiver will not be updated.
 //
-// ExtendVecSym will panic if v.Len() != a.Symmetric()+1 or if a does not contain
+// ExtendVecSym will panic if v.Len() != a.SymmetricDim()+1 or if a does not contain
 // a valid decomposition.
 func (c *Cholesky) ExtendVecSym(a *Cholesky, v Vector) (ok bool) {
 	n := a.SymmetricDim()

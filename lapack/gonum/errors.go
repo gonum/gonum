@@ -104,6 +104,7 @@ const (
 	badLenJpiv     = "lapack: bad length of jpiv"
 	badLenJpvt     = "lapack: bad length of jpvt"
 	badLenK        = "lapack: bad length of k"
+	badLenPiv      = "lapack: bad length of piv"
 	badLenSelected = "lapack: bad length of selected"
 	badLenSi       = "lapack: bad length of si"
 	badLenSr       = "lapack: bad length of sr"

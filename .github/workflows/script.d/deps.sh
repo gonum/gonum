@@ -15,7 +15,6 @@ go get gonum.org/v1/tools/cmd/check-imports
 go get gonum.org/v1/tools/cmd/check-copyright
 # Required for coverage.
 go get golang.org/x/tools/cmd/cover
-go get github.com/mattn/goveralls
 # Required for dot parser checks.
 go get github.com/goccmack/gocc@66c61e9
 # Required for rdf parser checks.

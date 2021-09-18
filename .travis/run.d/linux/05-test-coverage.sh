@@ -1,1 +1,0 @@
-../../../.github/workflows/script.d/travis-test-coverage.sh

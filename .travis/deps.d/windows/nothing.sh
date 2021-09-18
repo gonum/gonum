@@ -1,1 +1,0 @@
-../../../.github/workflows/script.d/nothing.sh

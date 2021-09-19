@@ -204,3 +204,11 @@ func TestParetoNotExists(t *testing.T) {
 		t.Errorf("Expected standard deviation == +Inf for Alpha == 1, got %v", stdDev)
 	}
 }
+
+func BenchmarkParetoRand(b *testing.B) {
+	src := rand.New(rand.NewSource(1))
+	p := Pareto{1, 1, src}
+	for i := 0; i < b.N; i++ {
+		p.Rand()
+	}
+}

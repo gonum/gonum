@@ -104,7 +104,7 @@ func (p Pareto) Rand() float64 {
 	} else {
 		rnd = rand.New(p.Src).ExpFloat64()
 	}
-	return math.Exp(math.Log(p.Xm) + 1/p.Alpha*rnd)
+	return p.Xm * math.Exp(rnd/p.Alpha)
 }
 
 // StdDev returns the standard deviation of the probability distribution.

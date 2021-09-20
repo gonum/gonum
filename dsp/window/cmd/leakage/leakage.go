@@ -293,14 +293,16 @@ func funcCharacteristics(fn func([]float64) []float64, n, m int, symm bool) (c *
 	for i, c := range fft.Coefficients(nil, t) {
 		a := db(cmplx.Abs(c))
 		t[i] = a
-
-		if math.IsInf(a, -1) {
-			a = min
-		} else if a < min {
+		if !math.IsInf(a, -1) && a < min {
 			min = a
 		}
 		if i == 0 {
 			max = a
+		}
+	}
+	for i, a := range t[:m/2+1] {
+		if math.IsInf(a, -1) {
+			a = min
 		}
 		xy[i] = plotter.XY{X: float64(i) * float64(n) / float64(m), Y: a - max}
 	}

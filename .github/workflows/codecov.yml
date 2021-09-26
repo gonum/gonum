@@ -36,23 +36,27 @@ jobs:
       with:
         go-version: ${{ matrix.go-version }}
 
-    - name: Cache-Go
-      uses: actions/cache@v1
-      with:
-        path: |
-            ~/go/pkg/mod              # Module download cache
-            ~/.cache/go-build         # Build cache (Linux)
-            ~/Library/Caches/go-build # Build cache (Mac)
-            '%LocalAppData%\go-build' # Build cache (Windows)
-
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-
     - name: Checkout code
       uses: actions/checkout@v2
       with:
-          path: ${{ env.GOPATH }}/src/gonum.org/v1/gonum
+        path: ${{ env.GOPATH }}/src/gonum.org/v1/gonum
+
+    - name: Cache-Go
+      uses: actions/cache@v2
+      with:
+        # In order:
+        # * Module download cache
+        # * Build cache (Linux)
+        # * Build cache (Mac)
+        # * Build cache (Windows)
+        path: |
+          ~/go/pkg/mod
+          ~/.cache/go-build
+          ~/Library/Caches/go-build
+          '%LocalAppData%\go-build'
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
 
     - name: Coverage
       if: matrix.platform == 'ubuntu-latest'

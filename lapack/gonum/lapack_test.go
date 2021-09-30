@@ -558,6 +558,11 @@ func TestDpstf2(t *testing.T) {
 	testlapack.Dpstf2Test(t, impl)
 }
 
+func TestDpstrf(t *testing.T) {
+	t.Parallel()
+	testlapack.DpstrfTest(t, impl)
+}
+
 func TestDrscl(t *testing.T) {
 	t.Parallel()
 	testlapack.DrsclTest(t, impl)

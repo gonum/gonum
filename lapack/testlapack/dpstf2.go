@@ -13,7 +13,6 @@ import (
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/lapack"
 )
 
 type Dpstf2er interface {
@@ -76,90 +75,9 @@ func dpstf2Test(t *testing.T, impl Dpstf2er, rnd *rand.Rand, uplo blas.Uplo, n, 
 		return
 	}
 
-	// Reconstruct the symmetric positive semi-definite matrix A from its L or U
-	// factors and the permutation matrix P.
-	perm := zeros(n, n, n)
-	if uplo == blas.Upper {
-		// Change notation.
-		u, ldu := aFac, lda
-		// Zero out last n-rank rows of the factor U.
-		for i := rank; i < n; i++ {
-			for j := i; j < n; j++ {
-				u[i*ldu+j] = 0
-			}
-		}
-		// Extract U to aRec.
-		aRec := zeros(n, n, n)
-		for i := 0; i < n; i++ {
-			for j := i; j < n; j++ {
-				aRec.Data[i*aRec.Stride+j] = u[i*ldu+j]
-			}
-		}
-		// Multiply U by Uᵀ from the left.
-		bi.Dtrmm(blas.Left, blas.Upper, blas.Trans, blas.NonUnit, n, n,
-			1, u, ldu, aRec.Data, aRec.Stride)
-		// Form P * Uᵀ * U * Pᵀ.
-		for i := 0; i < n; i++ {
-			for j := 0; j < n; j++ {
-				if piv[i] > piv[j] {
-					// Don't set the lower triangle.
-					continue
-				}
-				if i <= j {
-					perm.Data[piv[i]*perm.Stride+piv[j]] = aRec.Data[i*aRec.Stride+j]
-				} else {
-					perm.Data[piv[i]*perm.Stride+piv[j]] = aRec.Data[j*aRec.Stride+i]
-				}
-			}
-		}
-		// Compute the difference P*Uᵀ*U*Pᵀ - A.
-		for i := 0; i < n; i++ {
-			for j := i; j < n; j++ {
-				perm.Data[i*perm.Stride+j] -= a[i*lda+j]
-			}
-		}
-	} else {
-		// Change notation.
-		l, ldl := aFac, lda
-		// Zero out last n-rank columns of the factor L.
-		for i := rank; i < n; i++ {
-			for j := rank; j <= i; j++ {
-				l[i*ldl+j] = 0
-			}
-		}
-		// Extract L to aRec.
-		aRec := zeros(n, n, n)
-		for i := 0; i < n; i++ {
-			for j := 0; j <= i; j++ {
-				aRec.Data[i*aRec.Stride+j] = l[i*ldl+j]
-			}
-		}
-		// Multiply L by Lᵀ from the right.
-		bi.Dtrmm(blas.Right, blas.Lower, blas.Trans, blas.NonUnit, n, n,
-			1, l, ldl, aRec.Data, aRec.Stride)
-		// Form P * L * Lᵀ * Pᵀ.
-		for i := 0; i < n; i++ {
-			for j := 0; j < n; j++ {
-				if piv[i] < piv[j] {
-					// Don't set the upper triangle.
-					continue
-				}
-				if i >= j {
-					perm.Data[piv[i]*perm.Stride+piv[j]] = aRec.Data[i*aRec.Stride+j]
-				} else {
-					perm.Data[piv[i]*perm.Stride+piv[j]] = aRec.Data[j*aRec.Stride+i]
-				}
-			}
-		}
-		// Compute the difference P*L*Lᵀ*Pᵀ - A.
-		for i := 0; i < n; i++ {
-			for j := 0; j <= i; j++ {
-				perm.Data[i*perm.Stride+j] -= a[i*lda+j]
-			}
-		}
-	}
-	// Compute |P*Uᵀ*U*Pᵀ - A| / n or |P*L*Lᵀ*Pᵀ - A| / n.
-	resid := dlansy(lapack.MaxColumnSum, uplo, n, perm.Data, perm.Stride) / float64(n)
+	// Check that the residual |P*Uᵀ*U*Pᵀ - A| / n or |P*L*Lᵀ*Pᵀ - A| / n is
+	// sufficiently small.
+	resid := residualDpstrf(uplo, n, a, aFac, lda, rank, piv)
 	if resid > tol || math.IsNaN(resid) {
 		t.Errorf("%v: residual too large; got %v, want<=%v", name, resid, tol)
 	}

@@ -69,6 +69,7 @@ type NelderMead struct {
 	Contraction     float64 // Contraction parameter (>0, <1)
 	Shrink          float64 // Shrink parameter (>0, <1)
 	SimplexSize     float64 // size of auto-constructed initial simplex
+	Bounds          []Bound // Bounds parameter if not nil, Bounds must have length equal to dim
 
 	status Status
 	err    error
@@ -86,6 +87,10 @@ type NelderMead struct {
 	lastIter       nmIterType // Last iteration
 	reflectedPoint []float64  // Storage of the reflected point location
 	reflectedValue float64    // Value at the last reflection point
+}
+
+type Bound struct {
+	Min, Max float64
 }
 
 func (n *NelderMead) Status() (Status, error) {
@@ -170,6 +175,12 @@ func (n *NelderMead) initLocal(loc *Location) (Operation, error) {
 		sort.Sort(nmVertexSorter{n.vertices, n.values})
 		computeCentroid(n.vertices, n.centroid)
 		return n.returnNext(nmMajor, loc)
+	}
+
+	if n.Bounds != nil {
+		if len(n.Bounds) != dim {
+			panic("neldermead: incorrect number of bounds")
+		}
 	}
 
 	// No simplex provided. Begin initializing initial simplex. First simplex
@@ -297,6 +308,9 @@ func (n *NelderMead) returnNext(iter nmIterType, loc *Location) (Operation, erro
 		floats.SubTo(loc.X, n.centroid, n.vertices[dim])
 		floats.Scale(scale, loc.X)
 		floats.Add(loc.X, n.centroid)
+		if n.Bounds != nil {
+			n.applyBounds(loc.X)
+		}
 		if iter == nmReflected {
 			copy(n.reflectedPoint, loc.X)
 		}
@@ -309,6 +323,17 @@ func (n *NelderMead) returnNext(iter nmIterType, loc *Location) (Operation, erro
 		return FuncEvaluation, nil
 	default:
 		panic("unreachable")
+	}
+}
+
+func (n *NelderMead) applyBounds(x []float64) {
+	for i := range x {
+		if x[i] < n.Bounds[i].Min {
+			x[i] = n.Bounds[i].Min
+		}
+		if x[i] > n.Bounds[i].Max {
+			x[i] = n.Bounds[i].Max
+		}
 	}
 }
 

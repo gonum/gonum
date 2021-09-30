@@ -35,7 +35,8 @@ import (
 
 func main() {
 	v := blas64.Vector{Inc: 1, Data: []float64{1, 1, 1}}
-	fmt.Println("v has length:", blas64.Nrm2(len(v.Data), v))
+	v.N = len(v.Data)
+	fmt.Println("v has length:", blas64.Nrm2(v))
 }
 ```
 

@@ -321,7 +321,6 @@ func dimRange(dim int, size []int, v []int, fn func([]int)) {
 	}
 }
 
-// v may get mangled by Curve, so copy it.
 func dup(v []int) []int {
 	u := make([]int, len(v))
 	copy(u, v)
@@ -337,14 +336,14 @@ func dup(v []int) []int {
 func adjacent(v, u []int) bool {
 	n := 0
 	for i := range v {
-		x := v[i] - u[i]
-		if x == 0 {
-			continue
-		}
-		if x < -1 || 1 < x {
+		switch v[i] - u[i] {
+		case 0:
+		case 1, -1:
+			n++
+		default:
 			return false
 		}
-		n++
+
 	}
 
 	return n == 1

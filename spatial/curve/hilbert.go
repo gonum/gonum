@@ -17,15 +17,6 @@ func (h Hilbert2D) Dims() []int { return []int{1 << h.Order, 1 << h.Order} }
 // Len will overflow on a 32-bit architecture if the order is ≥ 16.
 func (h Hilbert2D) Len() int { return 1 << (2 * h.Order) }
 
-func (h Hilbert2D) rot(n int, v []int, d int) {
-	switch d {
-	case 0:
-		swap{0, 1}.do(n, v)
-	case 3:
-		flip{0, 1}.do(n, v)
-	}
-}
-
 // Curve returns the curve coordinate of v. Curve modifies v.
 //
 // Curve will overflow on a 32-bit architecture if the order is ≥ 16.
@@ -39,6 +30,15 @@ func (h Hilbert2D) Curve(v []int) int {
 		h.rot(h.Order, v, rd)
 	}
 	return d
+}
+
+func (h Hilbert2D) rot(n int, v []int, d int) {
+	switch d {
+	case 0:
+		swap{0, 1}.do(n, v)
+	case 3:
+		flip{0, 1}.do(n, v)
+	}
 }
 
 // Space2D returns the spatial coordinates of d.
@@ -76,21 +76,6 @@ func (h Hilbert3D) Dims() []int { return []int{1 << h.Order, 1 << h.Order, 1 << 
 // Len will overflow on a 32-bit architecture if the order is ≥ 11.
 func (h Hilbert3D) Len() int { return 1 << (3 * h.Order) }
 
-func (h Hilbert3D) rot(reverse bool, n int, v []int, d int) {
-	switch d {
-	case 0:
-		ops{swap{1, 2}, swap{0, 2}}.do(reverse, n, v)
-	case 1, 2:
-		ops{swap{0, 2}, swap{1, 2}}.do(reverse, n, v)
-	case 3, 4:
-		invert{0, 1}.do(n, v)
-	case 5, 6:
-		ops{flip{0, 2}, flip{1, 2}}.do(reverse, n, v)
-	case 7:
-		ops{flip{1, 2}, flip{0, 2}}.do(reverse, n, v)
-	}
-}
-
 // Curve returns the curve coordinate of v. Curve modifies v.
 //
 // Curve will overflow on a 32-bit architecture if the order is ≥ 11.
@@ -105,6 +90,21 @@ func (h Hilbert3D) Curve(v []int) int {
 		h.rot(false, h.Order, v, rd)
 	}
 	return d
+}
+
+func (h Hilbert3D) rot(reverse bool, n int, v []int, d int) {
+	switch d {
+	case 0:
+		ops{swap{1, 2}, swap{0, 2}}.do(reverse, n, v)
+	case 1, 2:
+		ops{swap{0, 2}, swap{1, 2}}.do(reverse, n, v)
+	case 3, 4:
+		invert{0, 1}.do(n, v)
+	case 5, 6:
+		ops{flip{0, 2}, flip{1, 2}}.do(reverse, n, v)
+	case 7:
+		ops{flip{1, 2}, flip{0, 2}}.do(reverse, n, v)
+	}
 }
 
 // Space3D returns the spatial coordinates of d.
@@ -144,6 +144,25 @@ func (h Hilbert4D) Dims() []int { return []int{1 << h.Order, 1 << h.Order, 1 << 
 // Len will overflow on a 32-bit architecture if the order is ≥ 8.
 func (h Hilbert4D) Len() int { return 1 << (4 * h.Order) }
 
+// Curve returns the curve coordinate of v. Curve modifies v.
+//
+// Curve will overflow on a 32-bit architecture if the order is ≥ 8.
+func (h Hilbert4D) Curve(v []int) int {
+	var d int
+	N := 4
+	for n := h.Order - 1; n >= 0; n-- {
+		var e int
+		for i := N - 1; i >= 0; i-- {
+			v := v[i] >> n & 1
+			e = e<<1 | (e^v)&1
+		}
+
+		d += e << (N * n)
+		h.rot(false, h.Order, v, e)
+	}
+	return d
+}
+
 func (h Hilbert4D) rot(reverse bool, n int, v []int, d int) {
 	switch d {
 	case 0:
@@ -165,25 +184,6 @@ func (h Hilbert4D) rot(reverse bool, n int, v []int, d int) {
 	case 15:
 		ops{flip{1, 3}, flip{0, 3}}.do(reverse, n, v)
 	}
-}
-
-// Curve returns the curve coordinate of v. Curve modifies v.
-//
-// Curve will overflow on a 32-bit architecture if the order is ≥ 8.
-func (h Hilbert4D) Curve(v []int) int {
-	var d int
-	N := 4
-	for n := h.Order - 1; n >= 0; n-- {
-		var e int
-		for i := N - 1; i >= 0; i-- {
-			v := v[i] >> n & 1
-			e = e<<1 | (e^v)&1
-		}
-
-		d += e << (N * n)
-		h.rot(false, h.Order, v, e)
-	}
-	return d
 }
 
 // Space returns the spatial coordinates of d as a slice.

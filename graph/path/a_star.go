@@ -5,11 +5,10 @@
 package path
 
 import (
-	"container/heap"
-
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/set"
 	"gonum.org/v1/gonum/graph/traverse"
+	"gonum.org/v1/gonum/internal/heap"
 )
 
 // AStar finds the A*-shortest path from s to t in g using the heuristic h. The path and
@@ -49,10 +48,10 @@ func AStar(s, t graph.Node, g traverse.Graph, h Heuristic) (path Shortest, expan
 
 	visited := make(set.Int64s)
 	open := &aStarQueue{indexOf: make(map[int64]int)}
-	heap.Push(open, aStarNode{node: s, gscore: 0, fscore: h(s, t)})
+	heap.Push[aStarNode](open, aStarNode{node: s, gscore: 0, fscore: h(s, t)})
 
 	for open.Len() != 0 {
-		u := heap.Pop(open).(aStarNode)
+		u := heap.Pop[aStarNode](open)
 		uid := u.node.ID()
 		i := path.indexOf[uid]
 		expanded++
@@ -84,7 +83,7 @@ func AStar(s, t graph.Node, g traverse.Graph, h Heuristic) (path Shortest, expan
 			g := u.gscore + w
 			if n, ok := open.node(vid); !ok {
 				path.set(j, g, i)
-				heap.Push(open, aStarNode{node: v, gscore: g, fscore: g + h(v, t)})
+				heap.Push[aStarNode](open, aStarNode{node: v, gscore: g, fscore: g + h(v, t)})
 			} else if g < n.gscore {
 				path.set(j, g, i)
 				open.update(vid, g, g+h(v, t))
@@ -127,13 +126,13 @@ func (q *aStarQueue) Len() int {
 	return len(q.nodes)
 }
 
-func (q *aStarQueue) Push(x interface{}) {
-	n := x.(aStarNode)
+func (q *aStarQueue) Push(x aStarNode) {
+	n := x
 	q.indexOf[n.node.ID()] = len(q.nodes)
 	q.nodes = append(q.nodes, n)
 }
 
-func (q *aStarQueue) Pop() interface{} {
+func (q *aStarQueue) Pop() aStarNode {
 	n := q.nodes[len(q.nodes)-1]
 	q.nodes = q.nodes[:len(q.nodes)-1]
 	delete(q.indexOf, n.node.ID())
@@ -147,7 +146,7 @@ func (q *aStarQueue) update(id int64, g, f float64) {
 	}
 	q.nodes[i].gscore = g
 	q.nodes[i].fscore = f
-	heap.Fix(q, i)
+	heap.Fix[aStarNode](q, i)
 }
 
 func (q *aStarQueue) node(id int64) (aStarNode, bool) {

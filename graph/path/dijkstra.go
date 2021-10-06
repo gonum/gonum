@@ -5,10 +5,9 @@
 package path
 
 import (
-	"container/heap"
-
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/traverse"
+	"gonum.org/v1/gonum/internal/heap"
 )
 
 // DijkstraFrom returns a shortest-path tree for a shortest path from u to all nodes in
@@ -52,7 +51,7 @@ func DijkstraFrom(u graph.Node, g traverse.Graph) Shortest {
 	// http://www.cs.utexas.edu/ftp/techreports/tr07-54.pdf
 	Q := priorityQueue{{node: u, dist: 0}}
 	for Q.Len() != 0 {
-		mid := heap.Pop(&Q).(distanceNode)
+		mid := heap.Pop[distanceNode](&Q)
 		k := path.indexOf[mid.node.ID()]
 		if mid.dist > path.dist[k] {
 			continue
@@ -75,7 +74,7 @@ func DijkstraFrom(u graph.Node, g traverse.Graph) Shortest {
 			}
 			joint := path.dist[k] + w
 			if joint < path.dist[j] {
-				heap.Push(&Q, distanceNode{node: v, dist: joint})
+				heap.Push[distanceNode](&Q, distanceNode{node: v, dist: joint})
 				path.set(j, joint, k)
 			}
 		}
@@ -125,7 +124,7 @@ func DijkstraAllFrom(u graph.Node, g traverse.Graph) ShortestAlts {
 	// http://www.cs.utexas.edu/ftp/techreports/tr07-54.pdf
 	Q := priorityQueue{{node: u, dist: 0}}
 	for Q.Len() != 0 {
-		mid := heap.Pop(&Q).(distanceNode)
+		mid := heap.Pop[distanceNode](&Q)
 		k := path.indexOf[mid.node.ID()]
 		if mid.dist > path.dist[k] {
 			continue
@@ -146,7 +145,7 @@ func DijkstraAllFrom(u graph.Node, g traverse.Graph) ShortestAlts {
 			}
 			joint := path.dist[k] + w
 			if joint < path.dist[j] {
-				heap.Push(&Q, distanceNode{node: v, dist: joint})
+				heap.Push[distanceNode](&Q, distanceNode{node: v, dist: joint})
 				path.set(j, joint, k)
 			} else if joint == path.dist[j] {
 				path.addPath(j, k)
@@ -190,9 +189,9 @@ func dijkstraAllPaths(g graph.Graph, paths AllShortest) {
 		// http://www.cs.utexas.edu/ftp/techreports/tr07-54.pdf
 
 		// Q must be empty at this point.
-		heap.Push(&Q, distanceNode{node: u, dist: 0})
+		heap.Push[distanceNode](&Q, distanceNode{node: u, dist: 0})
 		for Q.Len() != 0 {
-			mid := heap.Pop(&Q).(distanceNode)
+			mid := heap.Pop[distanceNode](&Q)
 			k := paths.indexOf[mid.node.ID()]
 			if mid.dist < paths.dist.At(i, k) {
 				paths.dist.Set(i, k, mid.dist)
@@ -212,7 +211,7 @@ func dijkstraAllPaths(g graph.Graph, paths AllShortest) {
 				}
 				joint := paths.dist.At(i, k) + w
 				if joint < paths.dist.At(i, j) {
-					heap.Push(&Q, distanceNode{node: v, dist: joint})
+					heap.Push[distanceNode](&Q, distanceNode{node: v, dist: joint})
 					paths.set(i, j, joint, k)
 				} else if joint == paths.dist.At(i, j) {
 					paths.add(i, j, k)
@@ -233,10 +232,10 @@ type priorityQueue []distanceNode
 func (q priorityQueue) Len() int            { return len(q) }
 func (q priorityQueue) Less(i, j int) bool  { return q[i].dist < q[j].dist }
 func (q priorityQueue) Swap(i, j int)       { q[i], q[j] = q[j], q[i] }
-func (q *priorityQueue) Push(n interface{}) { *q = append(*q, n.(distanceNode)) }
-func (q *priorityQueue) Pop() interface{} {
+func (q *priorityQueue) Push(n distanceNode) { *q = append(*q, n) }
+func (q *priorityQueue) Pop() distanceNode {
 	t := *q
-	var n interface{}
+	var n distanceNode
 	n, *q = t[len(t)-1], t[:len(t)-1]
 	return n
 }

@@ -5,13 +5,13 @@
 package dynamic
 
 import (
-	"container/heap"
 	"fmt"
 	"math"
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/path"
 	"gonum.org/v1/gonum/graph/simple"
+	"gonum.org/v1/gonum/internal/heap"
 )
 
 // DStarLite implements the D* Lite dynamic re-planning path search algorithm.
@@ -478,13 +478,13 @@ func (q dStarLiteQueue) Len() int {
 	return len(q)
 }
 
-func (q *dStarLiteQueue) Push(x interface{}) {
-	n := x.(*dStarLiteNode)
+func (q *dStarLiteQueue) Push(x *dStarLiteNode) {
+	n := x
 	n.idx = len(*q)
 	*q = append(*q, n)
 }
 
-func (q *dStarLiteQueue) Pop() interface{} {
+func (q *dStarLiteQueue) Pop() *dStarLiteNode {
 	n := (*q)[len(*q)-1]
 	n.idx = -1
 	*q = (*q)[:len(*q)-1]
@@ -501,18 +501,18 @@ func (q dStarLiteQueue) top() *dStarLiteNode {
 // insert puts the node u into the queue with the key k.
 func (q *dStarLiteQueue) insert(u *dStarLiteNode, k key) {
 	u.key = k
-	heap.Push(q, u)
+	heap.Push[*dStarLiteNode](q, u)
 }
 
 // update updates the node in the queue identified by id with the key k.
 func (q *dStarLiteQueue) update(n *dStarLiteNode, k key) {
 	n.key = k
-	heap.Fix(q, n.idx)
+	heap.Fix[*dStarLiteNode](q, n.idx)
 }
 
 // remove removes the node identified by id from the queue.
 func (q *dStarLiteQueue) remove(n *dStarLiteNode) {
-	heap.Remove(q, n.idx)
+	heap.Remove[*dStarLiteNode](q, n.idx)
 	n.key = badKey
 	n.idx = -1
 }

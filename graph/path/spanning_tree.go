@@ -5,12 +5,12 @@
 package path
 
 import (
-	"container/heap"
 	"math"
 	"sort"
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/simple"
+	"gonum.org/v1/gonum/internal/heap"
 )
 
 // WeightedBuilder is a type that can add nodes and weighted edges.
@@ -44,7 +44,7 @@ func Prim(dst WeightedBuilder, g graph.WeightedUndirected) float64 {
 	dst.AddNode(nodes[0])
 	for _, u := range nodes[1:] {
 		dst.AddNode(u)
-		heap.Push(q, simple.WeightedEdge{F: u, W: math.Inf(1)})
+		heap.Push[simple.WeightedEdge](q, simple.WeightedEdge{F: u, W: math.Inf(1)})
 	}
 
 	u := nodes[0]
@@ -59,7 +59,7 @@ func Prim(dst WeightedBuilder, g graph.WeightedUndirected) float64 {
 
 	var w float64
 	for q.Len() > 0 {
-		e := heap.Pop(q).(simple.WeightedEdge)
+		e := heap.Pop[simple.WeightedEdge](q)
 		if e.To() != nil && g.HasEdgeBetween(e.From().ID(), e.To().ID()) {
 			dst.SetWeightedEdge(g.WeightedEdge(e.From().ID(), e.To().ID()))
 			w += e.Weight()
@@ -105,13 +105,13 @@ func (q *primQueue) Len() int {
 	return len(q.nodes)
 }
 
-func (q *primQueue) Push(x interface{}) {
-	n := x.(simple.WeightedEdge)
+func (q *primQueue) Push(x simple.WeightedEdge) {
+	n := x
 	q.indexOf[n.From().ID()] = len(q.nodes)
 	q.nodes = append(q.nodes, n)
 }
 
-func (q *primQueue) Pop() interface{} {
+func (q *primQueue) Pop() simple.WeightedEdge {
 	n := q.nodes[len(q.nodes)-1]
 	q.nodes = q.nodes[:len(q.nodes)-1]
 	delete(q.indexOf, n.From().ID())
@@ -139,7 +139,7 @@ func (q *primQueue) update(u, v graph.Node, key float64) {
 	}
 	q.nodes[i].T = v
 	q.nodes[i].W = key
-	heap.Fix(q, i)
+	heap.Fix[simple.WeightedEdge](q, i)
 }
 
 // UndirectedWeightLister is an undirected graph that returns edge weights and

@@ -29,17 +29,17 @@ import "sort"
 // Note that Push and Pop in this interface are for package heap's
 // implementation to call. To add and remove things from the heap,
 // use heap.Push and heap.Pop.
-type Interface interface {
+type Interface[T any] interface {
 	sort.Interface
-	Push(x interface{}) // add x as element Len()
-	Pop() interface{}   // remove and return element Len() - 1.
+	Push(x T) // add x as element Len()
+	Pop() T   // remove and return element Len() - 1.
 }
 
 // Init establishes the heap invariants required by the other routines in this package.
 // Init is idempotent with respect to the heap invariants
 // and may be called whenever the heap invariants may have been invalidated.
 // The complexity is O(n) where n = h.Len().
-func Init(h Interface) {
+func Init[T any](h Interface[T]) {
 	// heapify
 	n := h.Len()
 	for i := n/2 - 1; i >= 0; i-- {
@@ -49,7 +49,7 @@ func Init(h Interface) {
 
 // Push pushes the element x onto the heap.
 // The complexity is O(log n) where n = h.Len().
-func Push(h Interface, x interface{}) {
+func Push[T any](h Interface[T], x T) {
 	h.Push(x)
 	up(h, h.Len()-1)
 }
@@ -57,7 +57,7 @@ func Push(h Interface, x interface{}) {
 // Pop removes and returns the minimum element (according to Less) from the heap.
 // The complexity is O(log n) where n = h.Len().
 // Pop is equivalent to Remove(h, 0).
-func Pop(h Interface) interface{} {
+func Pop[T any](h Interface[T]) T {
 	n := h.Len() - 1
 	h.Swap(0, n)
 	down(h, 0, n)
@@ -66,7 +66,7 @@ func Pop(h Interface) interface{} {
 
 // Remove removes and returns the element at index i from the heap.
 // The complexity is O(log n) where n = h.Len().
-func Remove(h Interface, i int) interface{} {
+func Remove[T any](h Interface[T], i int) T {
 	n := h.Len() - 1
 	if n != i {
 		h.Swap(i, n)
@@ -81,13 +81,13 @@ func Remove(h Interface, i int) interface{} {
 // Changing the value of the element at index i and then calling Fix is equivalent to,
 // but less expensive than, calling Remove(h, i) followed by a Push of the new value.
 // The complexity is O(log n) where n = h.Len().
-func Fix(h Interface, i int) {
+func Fix[T any](h Interface[T], i int) {
 	if !down(h, i, h.Len()) {
 		up(h, i)
 	}
 }
 
-func up(h Interface, j int) {
+func up[T any](h Interface[T], j int) {
 	for {
 		i := (j - 1) / 2 // parent
 		if i == j || !h.Less(j, i) {
@@ -98,7 +98,7 @@ func up(h Interface, j int) {
 	}
 }
 
-func down(h Interface, i0, n int) bool {
+func down[T any](h Interface[T], i0, n int) bool {
 	i := i0
 	for {
 		j1 := 2*i + 1

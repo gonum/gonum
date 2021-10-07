@@ -105,8 +105,7 @@ func (q *primQueue) Len() int {
 	return len(q.nodes)
 }
 
-func (q *primQueue) Push(x simple.WeightedEdge) {
-	n := x
+func (q *primQueue) Push(n simple.WeightedEdge) {
 	q.indexOf[n.From().ID()] = len(q.nodes)
 	q.nodes = append(q.nodes, n)
 }

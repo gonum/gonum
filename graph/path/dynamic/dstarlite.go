@@ -478,8 +478,7 @@ func (q dStarLiteQueue) Len() int {
 	return len(q)
 }
 
-func (q *dStarLiteQueue) Push(x *dStarLiteNode) {
-	n := x
+func (q *dStarLiteQueue) Push(n *dStarLiteNode) {
 	n.idx = len(*q)
 	*q = append(*q, n)
 }

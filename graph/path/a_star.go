@@ -126,8 +126,7 @@ func (q *aStarQueue) Len() int {
 	return len(q.nodes)
 }
 
-func (q *aStarQueue) Push(x aStarNode) {
-	n := x
+func (q *aStarQueue) Push(n aStarNode) {
 	q.indexOf[n.node.ID()] = len(q.nodes)
 	q.nodes = append(q.nodes, n)
 }

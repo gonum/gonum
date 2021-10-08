@@ -5,6 +5,7 @@
 package optimize
 
 import (
+	"fmt"
 	"math"
 	"sort"
 
@@ -69,7 +70,7 @@ type NelderMead struct {
 	Contraction     float64 // Contraction parameter (>0, <1)
 	Shrink          float64 // Shrink parameter (>0, <1)
 	SimplexSize     float64 // size of auto-constructed initial simplex
-	Bounds          []Bound // Bounds parameter if not nil, Bounds must have length equal to dim
+	Bounds          []Bound // Bounds parameter if not nil, must have length equal to dim: len(Bounds) == len(Location.X)
 
 	status Status
 	err    error
@@ -177,10 +178,8 @@ func (n *NelderMead) initLocal(loc *Location) (Operation, error) {
 		return n.returnNext(nmMajor, loc)
 	}
 
-	if n.Bounds != nil {
-		if len(n.Bounds) != dim {
-			panic("neldermead: incorrect number of bounds")
-		}
+	if n.Bounds != nil && len(n.Bounds) != dim {
+		return 0, fmt.Errorf("neldermead: incorrect number of bounds, (got %d expected %d)", len(n.Bounds), dim)
 	}
 
 	// No simplex provided. Begin initializing initial simplex. First simplex

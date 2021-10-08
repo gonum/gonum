@@ -5,7 +5,6 @@
 package optimize
 
 import (
-	"fmt"
 	"math"
 	"sort"
 
@@ -179,7 +178,7 @@ func (n *NelderMead) initLocal(loc *Location) (Operation, error) {
 	}
 
 	if n.Bounds != nil && len(n.Bounds) != dim {
-		return 0, fmt.Errorf("neldermead: incorrect number of bounds, (got %d expected %d)", len(n.Bounds), dim)
+		panic("neldermead: incorrect number of bounds")
 	}
 
 	// No simplex provided. Begin initializing initial simplex. First simplex

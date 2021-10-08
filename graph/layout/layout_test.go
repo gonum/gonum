@@ -11,7 +11,6 @@ import (
 	"image/png"
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 	"testing"
 
@@ -30,13 +29,13 @@ type orderedGraph struct {
 
 func (g orderedGraph) Nodes() graph.Nodes {
 	n := graph.NodesOf(g.Graph.Nodes())
-	sort.Sort(ordered.ByID(n))
+	ordered.ByID(n)
 	return iterator.NewOrderedNodes(n)
 }
 
 func (g orderedGraph) From(id int64) graph.Nodes {
 	n := graph.NodesOf(g.Graph.From(id))
-	sort.Sort(ordered.ByID(n))
+	ordered.ByID(n)
 	return iterator.NewOrderedNodes(n)
 }
 

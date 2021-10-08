@@ -6,7 +6,6 @@ package topo
 
 import (
 	"fmt"
-	"sort"
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/ordered"
@@ -30,7 +29,7 @@ func (e Unorderable) Error() string {
 	return fmt.Sprintf("topo: no topological ordering: cyclic components: %v", [][]graph.Node(e))
 }
 
-func lexical(nodes []graph.Node) { sort.Sort(ordered.ByID(nodes)) }
+func lexical(nodes []graph.Node) { ordered.ByID(nodes) }
 
 // Sort performs a topological sort of the directed graph g returning the 'from' to 'to'
 // sort order. If a topological ordering is not possible, an Unorderable error is returned

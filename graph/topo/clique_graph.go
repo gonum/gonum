@@ -5,8 +5,6 @@
 package topo
 
 import (
-	"sort"
-
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/internal/set"
@@ -28,9 +26,9 @@ func CliqueGraph(dst Builder, g graph.Undirected) {
 	// Construct a consistent view of cliques in g. Sorting costs
 	// us a little, but not as much as the cliques themselves.
 	for _, c := range cliques {
-		sort.Sort(ordered.ByID(c))
+		ordered.ByID(c)
 	}
-	sort.Sort(ordered.BySliceIDs(cliques))
+	ordered.BySliceIDs(cliques)
 
 	cliqueNodes := make(cliqueNodeSets, len(cliques))
 	for id, c := range cliques {
@@ -61,7 +59,7 @@ func CliqueGraph(dst Builder, g graph.Undirected) {
 					for _, n := range set.IntersectionOfNodes(uc.nodes, vc.nodes) {
 						edgeNodes = append(edgeNodes, n)
 					}
-					sort.Sort(ordered.ByID(edgeNodes))
+					ordered.ByID(edgeNodes)
 				}
 
 				dst.SetEdge(CliqueGraphEdge{from: uc.Clique, to: vc.Clique, nodes: edgeNodes})

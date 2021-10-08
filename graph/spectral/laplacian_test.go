@@ -5,7 +5,6 @@
 package spectral
 
 import (
-	"sort"
 	"testing"
 
 	"gonum.org/v1/gonum/floats/scalar"
@@ -129,7 +128,7 @@ type sortedNodeGraph struct {
 
 func (g sortedNodeGraph) Nodes() graph.Nodes {
 	n := graph.NodesOf(g.Graph.Nodes())
-	sort.Sort(ordered.ByID(n))
+	ordered.ByID(n)
 	return iterator.NewOrderedNodes(n)
 }
 

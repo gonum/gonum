@@ -6,7 +6,6 @@ package iterator_test
 
 import (
 	"reflect"
-	"sort"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
@@ -741,7 +740,7 @@ func TestNodeSlicers(t *testing.T) {
 				t.Errorf("test %d: unexpected total node count: got:%d want:%d", k, gotLen, wantLen)
 			}
 			got := append(gotIter, gotSlice...)
-			sort.Sort(ordered.ByID(got))
+			ordered.ByID(got)
 			if !reflect.DeepEqual(got, test.want) {
 				t.Errorf("test %d: unexpected node slice:\ngot: %v\nwant:%v", k, got, test.want)
 			}

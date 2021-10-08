@@ -5,8 +5,6 @@
 package topo
 
 import (
-	"sort"
-
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/traverse"
@@ -82,8 +80,8 @@ func Equal(a, b graph.Graph) bool {
 
 	aNodeSlice := graph.NodesOf(aNodes)
 	bNodeSlice := graph.NodesOf(bNodes)
-	sort.Sort(ordered.ByID(aNodeSlice))
-	sort.Sort(ordered.ByID(bNodeSlice))
+	ordered.ByID(aNodeSlice)
+	ordered.ByID(bNodeSlice)
 	for i, aU := range aNodeSlice {
 		id := aU.ID()
 		if id != bNodeSlice[i].ID() {
@@ -98,8 +96,8 @@ func Equal(a, b graph.Graph) bool {
 
 		aAdjacent := graph.NodesOf(toA)
 		bAdjacent := graph.NodesOf(toB)
-		sort.Sort(ordered.ByID(aAdjacent))
-		sort.Sort(ordered.ByID(bAdjacent))
+		ordered.ByID(aAdjacent)
+		ordered.ByID(bAdjacent)
 		for i, aV := range aAdjacent {
 			id := aV.ID()
 			if id != bAdjacent[i].ID() {

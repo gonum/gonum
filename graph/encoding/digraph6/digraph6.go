@@ -8,7 +8,6 @@ package digraph6 // import "gonum.org/v1/gonum/graph/encoding/digraph6"
 import (
 	"fmt"
 	"math/big"
-	"sort"
 	"strings"
 
 	"gonum.org/v1/gonum/graph"
@@ -38,7 +37,7 @@ var (
 func Encode(g graph.Graph) Graph {
 	nodes := graph.NodesOf(g.Nodes())
 	n := len(nodes)
-	sort.Sort(ordered.ByID(nodes))
+	ordered.ByID(nodes)
 	indexOf := make(map[int64]int, n)
 	for i, n := range nodes {
 		indexOf[n.ID()] = i

@@ -6,7 +6,6 @@ package simple_test
 
 import (
 	"math"
-	"sort"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -22,7 +21,7 @@ func isZeroContiguousSet(nodes []graph.Node) bool {
 	t := make([]graph.Node, len(nodes))
 	copy(t, nodes)
 	nodes = t
-	sort.Sort(ordered.ByID(nodes))
+	ordered.ByID(nodes)
 	for i, n := range nodes {
 		if int64(i) != n.ID() {
 			return false
@@ -642,7 +641,7 @@ func TestDenseLists(t *testing.T) {
 		t.Fatalf("Wrong number of nodes: got:%v want:%v", len(nodes), 15)
 	}
 
-	sort.Sort(ordered.ByID(nodes))
+	ordered.ByID(nodes)
 
 	for i, node := range graph.NodesOf(dg.Nodes()) {
 		if int64(i) != node.ID() {

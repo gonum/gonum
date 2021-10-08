@@ -5,7 +5,6 @@
 package graph_test
 
 import (
-	"sort"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
@@ -264,8 +263,8 @@ func TestCopyWeighted(t *testing.T) {
 func same(a, b graph.Graph) bool {
 	aNodes := graph.NodesOf(a.Nodes())
 	bNodes := graph.NodesOf(b.Nodes())
-	sort.Sort(ordered.ByID(aNodes))
-	sort.Sort(ordered.ByID(bNodes))
+	ordered.ByID(aNodes)
+	ordered.ByID(bNodes)
 	for i, na := range aNodes {
 		nb := bNodes[i]
 		if na != nb {
@@ -278,8 +277,8 @@ func same(a, b graph.Graph) bool {
 		if len(aFromU) != len(bFromU) {
 			return false
 		}
-		sort.Sort(ordered.ByID(aFromU))
-		sort.Sort(ordered.ByID(bFromU))
+		ordered.ByID(aFromU)
+		ordered.ByID(bFromU)
 		for i, va := range aFromU {
 			vb := bFromU[i]
 			if va != vb {

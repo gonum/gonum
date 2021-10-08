@@ -7,7 +7,6 @@ package community_test
 import (
 	"fmt"
 	"log"
-	"sort"
 
 	"golang.org/x/exp/rand"
 
@@ -52,9 +51,9 @@ func ExampleProfile_simple() {
 	for _, d := range p {
 		comm := d.Communities()
 		for _, c := range comm {
-			sort.Sort(ordered.ByID(c))
+			ordered.ByID(c)
 		}
-		sort.Sort(ordered.BySliceIDs(comm))
+		ordered.BySliceIDs(comm)
 		fmt.Printf("Low:%.2v High:%.2v Score:%v Communities:%v Q=%.3v\n",
 			d.Low, d.High, d.Score, comm, community.Q(g, comm, d.Low))
 	}
@@ -200,9 +199,9 @@ func ExampleProfile_multiplex() {
 	for _, d := range p {
 		comm := d.Communities()
 		for _, c := range comm {
-			sort.Sort(ordered.ByID(c))
+			ordered.ByID(c)
 		}
-		sort.Sort(ordered.BySliceIDs(comm))
+		ordered.BySliceIDs(comm)
 		fmt.Printf("Low:%.2v High:%.2v Score:%v Communities:%v Q=%.3v\n",
 			d.Low, d.High, d.Score, comm, community.QMultiplex(g, comm, weights, []float64{d.Low}))
 	}

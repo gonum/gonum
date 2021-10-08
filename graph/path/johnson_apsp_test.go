@@ -7,7 +7,6 @@ package path
 import (
 	"math"
 	"reflect"
-	"sort"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
@@ -88,7 +87,7 @@ func TestJohnsonAllPaths(t *testing.T) {
 				got[i] = append(got[i], v.ID())
 			}
 		}
-		sort.Sort(ordered.BySliceValues(got))
+		ordered.BySliceValues(got)
 		if !reflect.DeepEqual(got, test.WantPaths) {
 			t.Errorf("testing %q: unexpected shortest paths:\ngot: %v\nwant:%v",
 				test.Name, got, test.WantPaths)

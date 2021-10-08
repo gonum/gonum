@@ -7,7 +7,6 @@ package community
 import (
 	"fmt"
 	"reflect"
-	"sort"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
@@ -126,9 +125,9 @@ func TestKCliqueCommunities(t *testing.T) {
 		got := KCliqueCommunities(test.k, g)
 
 		for _, c := range got {
-			sort.Sort(ordered.ByID(c))
+			ordered.ByID(c)
 		}
-		sort.Sort(ordered.BySliceIDs(got))
+		ordered.BySliceIDs(got)
 
 		if !reflect.DeepEqual(got, test.want) {
 			t.Errorf("unexpected k-connected components for %q k=%d:\ngot: %v\nwant:%v", test.name, test.k, got, test.want)

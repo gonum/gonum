@@ -6,7 +6,6 @@ package topo
 
 import (
 	"reflect"
-	"sort"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
@@ -164,10 +163,10 @@ func TestConnectedComponents(t *testing.T) {
 			for k, n := range c {
 				ids[k] = n.ID()
 			}
-			sort.Sort(ordered.Int64s(ids))
+			ordered.Int64s(ids)
 			got[j] = ids
 		}
-		sort.Sort(ordered.BySliceValues(got))
+		ordered.BySliceValues(got)
 		if !reflect.DeepEqual(got, test.want) {
 			t.Errorf("unexpected connected components for test %d %T:\ngot: %v\nwant:%v", i, g, got, test.want)
 		}

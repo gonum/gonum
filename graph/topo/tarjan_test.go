@@ -6,7 +6,6 @@ package topo
 
 import (
 	"reflect"
-	"sort"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
@@ -179,11 +178,11 @@ func TestTarjanSCC(t *testing.T) {
 			for j, id := range scc {
 				gotIDs[i][j] = id.ID()
 			}
-			sort.Sort(ordered.Int64s(gotIDs[i]))
+			ordered.Int64s(gotIDs[i])
 		}
 		for _, iv := range test.ambiguousOrder {
-			sort.Sort(ordered.BySliceValues(test.want[iv.start:iv.end]))
-			sort.Sort(ordered.BySliceValues(gotIDs[iv.start:iv.end]))
+			ordered.BySliceValues(test.want[iv.start:iv.end])
+			ordered.BySliceValues(gotIDs[iv.start:iv.end])
 		}
 		if !reflect.DeepEqual(gotIDs, test.want) {
 			t.Errorf("unexpected Tarjan scc result for %d:\n\tgot:%v\n\twant:%v", i, gotIDs, test.want)

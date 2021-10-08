@@ -7,7 +7,6 @@ package path
 import (
 	"math"
 	"reflect"
-	"sort"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
@@ -164,7 +163,7 @@ func TestBellmanFordAllFrom(t *testing.T) {
 						test.Name, tg.typ, gotPaths)
 				}
 			} else {
-				sort.Sort(ordered.BySliceValues(gotPaths))
+				ordered.BySliceValues(gotPaths)
 				if !reflect.DeepEqual(gotPaths, test.WantPaths) {
 					t.Errorf("testing %q %s: unexpected shortest paths:\ngot: %v\nwant:%v",
 						test.Name, tg.typ, gotPaths, test.WantPaths)

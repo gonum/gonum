@@ -6,7 +6,6 @@ package topo
 
 import (
 	"reflect"
-	"sort"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
@@ -67,12 +66,12 @@ func TestDegeneracyOrdering(t *testing.T) {
 		}
 		var offset int
 		for k, want := range test.wantCore {
-			sort.Sort(ordered.Int64s(want))
+			ordered.Int64s(want)
 			got := make([]int64, len(want))
 			for j, n := range order[len(order)-len(want)-offset : len(order)-offset] {
 				got[j] = n.ID()
 			}
-			sort.Sort(ordered.Int64s(got))
+			ordered.Int64s(got)
 			if !reflect.DeepEqual(got, want) {
 				t.Errorf("unexpected %d-core for test %d:\ngot: %v\nwant:%v", k, i, got, want)
 			}
@@ -80,7 +79,7 @@ func TestDegeneracyOrdering(t *testing.T) {
 			for j, n := range core[k] {
 				got[j] = n.ID()
 			}
-			sort.Sort(ordered.Int64s(got))
+			ordered.Int64s(got)
 			if !reflect.DeepEqual(got, want) {
 				t.Errorf("unexpected %d-core for test %d:\ngot: %v\nwant:%v", k, i, got, want)
 			}
@@ -117,8 +116,8 @@ func TestKCore(t *testing.T) {
 			for _, n := range core {
 				got = append(got, n.ID())
 			}
-			sort.Sort(ordered.Int64s(got))
-			sort.Sort(ordered.Int64s(want))
+			ordered.Int64s(got)
+			ordered.Int64s(want)
 			if !reflect.DeepEqual(got, want) {
 				t.Errorf("unexpected %d-core for test %d:\ngot: %v\nwant:%v", k, i, got, want)
 			}
@@ -193,10 +192,10 @@ func TestBronKerbosch(t *testing.T) {
 			for k, n := range c {
 				ids[k] = n.ID()
 			}
-			sort.Sort(ordered.Int64s(ids))
+			ordered.Int64s(ids)
 			got[j] = ids
 		}
-		sort.Sort(ordered.BySliceValues(got))
+		ordered.BySliceValues(got)
 		if !reflect.DeepEqual(got, test.want) {
 			t.Errorf("unexpected cliques for test %q:\ngot: %v\nwant:%v", test.name, got, test.want)
 		}

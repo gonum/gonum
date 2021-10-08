@@ -6,7 +6,6 @@ package topo
 
 import (
 	"reflect"
-	"sort"
 	"testing"
 
 	"gonum.org/v1/gonum/graph/internal/ordered"
@@ -109,7 +108,7 @@ func TestDirectedCyclesIn(t *testing.T) {
 			}
 			got[j] = ids
 		}
-		sort.Sort(ordered.BySliceValues(got))
+		ordered.BySliceValues(got)
 		if !reflect.DeepEqual(got, test.want) {
 			t.Errorf("unexpected johnson result for %d:\n\tgot:%#v\n\twant:%#v", i, got, test.want)
 		}

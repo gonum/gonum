@@ -126,8 +126,8 @@ func ReturnAllNodes(t *testing.T, b Builder, useEmpty bool) {
 			got = append(got, it.Node())
 		}
 
-		sort.Sort(ordered.ByID(got))
-		sort.Sort(ordered.ByID(want))
+		ordered.ByID(got)
+		ordered.ByID(want)
 
 		if !reflect.DeepEqual(got, want) {
 			t.Errorf("unexpected nodes result for test %q:\ngot: %v\nwant:%v", test.name, got, want)
@@ -165,8 +165,8 @@ func ReturnNodeSlice(t *testing.T, b Builder, useEmpty bool) {
 		}
 		got := s.NodeSlice()
 
-		sort.Sort(ordered.ByID(got))
-		sort.Sort(ordered.ByID(want))
+		ordered.ByID(got)
+		ordered.ByID(want)
 
 		if !reflect.DeepEqual(got, want) {
 			t.Errorf("unexpected nodes result for test %q:\ngot: %v\nwant:%v", test.name, got, want)
@@ -1409,9 +1409,9 @@ func AddNodes(t *testing.T, g NodeAdder, n int) {
 		}
 	}
 
-	sort.Sort(ordered.ByID(addedNodes))
+	ordered.ByID(addedNodes)
 	graphNodes := graph.NodesOf(g.Nodes())
-	sort.Sort(ordered.ByID(graphNodes))
+	ordered.ByID(graphNodes)
 	if !reflect.DeepEqual(addedNodes, graphNodes) {
 		if n > 20 {
 			t.Errorf("unexpected node set after node addition: got len:%v want len:%v", len(graphNodes), len(addedNodes))
@@ -1486,9 +1486,9 @@ func AddArbitraryNodes(t *testing.T, g NodeAdder, add graph.Nodes) {
 
 	add.Reset()
 	addedNodes := graph.NodesOf(add)
-	sort.Sort(ordered.ByID(addedNodes))
+	ordered.ByID(addedNodes)
 	graphNodes := graph.NodesOf(g.Nodes())
-	sort.Sort(ordered.ByID(graphNodes))
+	ordered.ByID(graphNodes)
 	if !reflect.DeepEqual(addedNodes, graphNodes) {
 		t.Errorf("unexpected node set after node addition: got:\n %v\nwant:\n%v", graphNodes, addedNodes)
 	}

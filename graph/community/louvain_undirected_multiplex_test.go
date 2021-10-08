@@ -277,7 +277,7 @@ func TestCommunityQUndirectedMultiplex(t *testing.T) {
 			got := floats.Sum(q)
 			if !scalar.EqualWithinAbsOrRel(got, structure.want, structure.tol, structure.tol) && !math.IsNaN(structure.want) {
 				for _, c := range communities {
-					sort.Sort(ordered.ByID(c))
+					ordered.ByID(c)
 				}
 				t.Errorf("unexpected Q value for %q %v: got: %v %.3v want: %v",
 					test.name, communities, got, q, structure.want)
@@ -305,7 +305,7 @@ tests:
 					communityOf[n] = i
 					communities[i] = append(communities[i], simple.Node(n))
 				}
-				sort.Sort(ordered.ByID(communities[i]))
+				ordered.ByID(communities[i])
 			}
 			resolution := []float64{structure.resolution}
 
@@ -326,7 +326,7 @@ tests:
 
 			// This is done to avoid run-to-run
 			// variation due to map iteration order.
-			sort.Sort(ordered.ByID(l.nodes))
+			ordered.ByID(l.nodes)
 
 			l.shuffle(rnd)
 
@@ -343,7 +343,7 @@ tests:
 						}
 						migrated[i] = append(migrated[i], simple.Node(n))
 					}
-					sort.Sort(ordered.ByID(migrated[i]))
+					ordered.ByID(migrated[i])
 				}
 
 				for i, c := range structure.memberships {
@@ -421,7 +421,7 @@ tests:
 				for n := range c {
 					communities[i] = append(communities[i], simple.Node(n))
 				}
-				sort.Sort(ordered.ByID(communities[i]))
+				ordered.ByID(communities[i])
 			}
 
 			gQ := QMultiplex(g, communities, weights, []float64{structure.resolution})
@@ -507,7 +507,7 @@ func TestMoveLocalUndirectedMultiplex(t *testing.T) {
 				for n := range c {
 					communities[i] = append(communities[i], simple.Node(n))
 				}
-				sort.Sort(ordered.ByID(communities[i]))
+				ordered.ByID(communities[i])
 			}
 
 			r := reduceUndirectedMultiplex(reduceUndirectedMultiplex(g, nil, weights), communities, weights)
@@ -547,9 +547,9 @@ func TestLouvainMultiplex(t *testing.T) {
 			for n := range c {
 				want[i] = append(want[i], simple.Node(n))
 			}
-			sort.Sort(ordered.ByID(want[i]))
+			ordered.ByID(want[i])
 		}
-		sort.Sort(ordered.BySliceIDs(want))
+		ordered.BySliceIDs(want)
 
 		var (
 			got   *ReducedUndirectedMultiplex
@@ -583,9 +583,9 @@ func TestLouvainMultiplex(t *testing.T) {
 
 		gotCommunities := got.Communities()
 		for _, c := range gotCommunities {
-			sort.Sort(ordered.ByID(c))
+			ordered.ByID(c)
 		}
-		sort.Sort(ordered.BySliceIDs(gotCommunities))
+		ordered.BySliceIDs(gotCommunities)
 		if !reflect.DeepEqual(gotCommunities, want) {
 			t.Errorf("unexpected community membership for %s Q=%.4v:\n\tgot: %v\n\twant:%v",
 				test.name, bestQ, gotCommunities, want)
@@ -598,9 +598,9 @@ func TestLouvainMultiplex(t *testing.T) {
 			if p.parent != nil {
 				communities = p.parent.Communities()
 				for _, c := range communities {
-					sort.Sort(ordered.ByID(c))
+					ordered.ByID(c)
 				}
-				sort.Sort(ordered.BySliceIDs(communities))
+				ordered.BySliceIDs(communities)
 			} else {
 				communities = reduceUndirectedMultiplex(g, nil, weights).Communities()
 			}

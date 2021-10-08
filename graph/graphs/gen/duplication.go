@@ -7,7 +7,6 @@ package gen
 import (
 	"fmt"
 	"math"
-	"sort"
 
 	"golang.org/x/exp/rand"
 
@@ -57,7 +56,7 @@ func Duplication(dst UndirectedMutator, n int, delta, alpha, sigma float64, src 
 	}
 
 	nodes := graph.NodesOf(dst.Nodes())
-	sort.Sort(ordered.ByID(nodes))
+	ordered.ByID(nodes)
 	if len(nodes) == 0 {
 		n--
 		u := dst.NewNode()
@@ -77,7 +76,7 @@ func Duplication(dst UndirectedMutator, n int, delta, alpha, sigma float64, src 
 		for {
 			// Add edges to parent's neighbours.
 			to := graph.NodesOf(dst.From(u.ID()))
-			sort.Sort(ordered.ByID(to))
+			ordered.ByID(to)
 			for _, v := range to {
 				vid := v.ID()
 				if rnd() < delta || dst.HasEdgeBetween(vid, did) {

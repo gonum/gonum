@@ -307,7 +307,7 @@ func testCommunityQUndirected(t *testing.T, test communityUndirectedQTest, g gra
 		got := Q(g, communities, structure.resolution)
 		if !scalar.EqualWithinAbsOrRel(got, structure.want, structure.tol, structure.tol) && !math.IsNaN(structure.want) {
 			for _, c := range communities {
-				sort.Sort(ordered.ByID(c))
+				ordered.ByID(c)
 			}
 			t.Errorf("unexpected Q value for %q %v: got: %v want: %v",
 				test.name, communities, got, structure.want)
@@ -360,7 +360,7 @@ func testCommunityDeltaQUndirected(t *testing.T, test communityUndirectedQTest, 
 				communityOf[n] = i
 				communities[i] = append(communities[i], simple.Node(n))
 			}
-			sort.Sort(ordered.ByID(communities[i]))
+			ordered.ByID(communities[i])
 		}
 
 		before := Q(g, communities, structure.resolution)
@@ -375,7 +375,7 @@ func testCommunityDeltaQUndirected(t *testing.T, test communityUndirectedQTest, 
 
 		// This is done to avoid run-to-run
 		// variation due to map iteration order.
-		sort.Sort(ordered.ByID(l.nodes))
+		ordered.ByID(l.nodes)
 
 		l.shuffle(rnd)
 
@@ -392,7 +392,7 @@ func testCommunityDeltaQUndirected(t *testing.T, test communityUndirectedQTest, 
 					}
 					migrated[i] = append(migrated[i], simple.Node(n))
 				}
-				sort.Sort(ordered.ByID(migrated[i]))
+				ordered.ByID(migrated[i])
 			}
 
 			for i, c := range structure.memberships {
@@ -485,7 +485,7 @@ func testReduceQConsistencyUndirected(t *testing.T, test communityUndirectedQTes
 			for n := range c {
 				communities[i] = append(communities[i], simple.Node(n))
 			}
-			sort.Sort(ordered.ByID(communities[i]))
+			ordered.ByID(communities[i])
 		}
 
 		gQ := Q(g, communities, structure.resolution)
@@ -599,7 +599,7 @@ func testMoveLocalUndirected(t *testing.T, test localUndirectedMoveTest, g graph
 			for n := range c {
 				communities[i] = append(communities[i], simple.Node(n))
 			}
-			sort.Sort(ordered.ByID(communities[i]))
+			ordered.ByID(communities[i])
 		}
 
 		r := reduceUndirected(reduceUndirected(g, nil), communities)
@@ -665,9 +665,9 @@ func testModularizeUndirected(t *testing.T, test communityUndirectedQTest, g gra
 		for n := range c {
 			want[i] = append(want[i], simple.Node(n))
 		}
-		sort.Sort(ordered.ByID(want[i]))
+		ordered.ByID(want[i])
 	}
-	sort.Sort(ordered.BySliceIDs(want))
+	ordered.BySliceIDs(want)
 
 	var (
 		got   *ReducedUndirected
@@ -701,9 +701,9 @@ func testModularizeUndirected(t *testing.T, test communityUndirectedQTest, g gra
 
 	gotCommunities := got.Communities()
 	for _, c := range gotCommunities {
-		sort.Sort(ordered.ByID(c))
+		ordered.ByID(c)
 	}
-	sort.Sort(ordered.BySliceIDs(gotCommunities))
+	ordered.BySliceIDs(gotCommunities)
 	if !reflect.DeepEqual(gotCommunities, want) {
 		t.Errorf("unexpected community membership for %s Q=%.4v:\n\tgot: %v\n\twant:%v",
 			test.name, bestQ, gotCommunities, want)
@@ -716,9 +716,9 @@ func testModularizeUndirected(t *testing.T, test communityUndirectedQTest, g gra
 		if p.parent != nil {
 			communities = p.parent.Communities()
 			for _, c := range communities {
-				sort.Sort(ordered.ByID(c))
+				ordered.ByID(c)
 			}
-			sort.Sort(ordered.BySliceIDs(communities))
+			ordered.BySliceIDs(communities)
 		} else {
 			communities = reduceUndirected(g, nil).Communities()
 		}

@@ -6,7 +6,6 @@ package topo
 
 import (
 	"reflect"
-	"sort"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
@@ -98,7 +97,7 @@ func TestUndirectedCyclesIn(t *testing.T) {
 			ids[len(ids)-1] = ids[0]
 			got[j] = ids
 		}
-		sort.Sort(ordered.BySliceValues(got))
+		ordered.BySliceValues(got)
 		var matched bool
 		for _, want := range test.want {
 			if reflect.DeepEqual(got, want) {

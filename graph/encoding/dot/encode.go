@@ -9,7 +9,6 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
-	"sort"
 	"strconv"
 	"strings"
 
@@ -167,7 +166,7 @@ func (p *simpleGraphPrinter) print(g graph.Graph, name string, needsIndent, isSu
 	}
 
 	nodes := graph.NodesOf(g.Nodes())
-	sort.Sort(ordered.ByID(nodes))
+	ordered.ByID(nodes)
 
 	havePrintedNodeHeader := false
 	for _, n := range nodes {
@@ -207,7 +206,7 @@ func (p *simpleGraphPrinter) print(g graph.Graph, name string, needsIndent, isSu
 	for _, n := range nodes {
 		nid := n.ID()
 		to := graph.NodesOf(g.From(nid))
-		sort.Sort(ordered.ByID(to))
+		ordered.ByID(to)
 		for _, t := range to {
 			tid := t.ID()
 			f := edge{inGraph: name, from: nid, to: tid}
@@ -466,7 +465,7 @@ func (p *multiGraphPrinter) print(g graph.Multigraph, name string, needsIndent, 
 	}
 
 	nodes := graph.NodesOf(g.Nodes())
-	sort.Sort(ordered.ByID(nodes))
+	ordered.ByID(nodes)
 
 	havePrintedNodeHeader := false
 	for _, n := range nodes {
@@ -506,13 +505,13 @@ func (p *multiGraphPrinter) print(g graph.Multigraph, name string, needsIndent, 
 	for _, n := range nodes {
 		nid := n.ID()
 		to := graph.NodesOf(g.From(nid))
-		sort.Sort(ordered.ByID(to))
+		ordered.ByID(to)
 
 		for _, t := range to {
 			tid := t.ID()
 
 			lines := graph.LinesOf(g.Lines(nid, tid))
-			sort.Sort(ordered.LinesByIDs(lines))
+			ordered.LinesByIDs(lines)
 
 			for _, l := range lines {
 				lid := l.ID()

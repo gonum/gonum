@@ -232,11 +232,11 @@ func TestYenKSP(t *testing.T) {
 				if w == last {
 					continue
 				}
-				sort.Sort(ordered.BySliceValues(gotIDs[first:i]))
+				ordered.BySliceValues(gotIDs[first:i])
 				first = i
 				last = w
 			}
-			sort.Sort(ordered.BySliceValues(gotIDs[first:]))
+			ordered.BySliceValues(gotIDs[first:])
 		}
 
 		if !reflect.DeepEqual(test.wantPaths, gotIDs) {

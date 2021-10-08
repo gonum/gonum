@@ -7,7 +7,6 @@ package community
 import (
 	"fmt"
 	"math"
-	"sort"
 
 	"golang.org/x/exp/rand"
 
@@ -295,7 +294,7 @@ func reduceUndirectedMultiplex(g UndirectedMultiplex, communities [][]graph.Node
 		// community provided by the user for a Q calculation.
 		// Probably we should use a function to map the
 		// communities in the test sets to the remapped order.
-		sort.Sort(ordered.ByID(nodes))
+		ordered.ByID(nodes)
 		communities = make([][]graph.Node, len(nodes))
 		for i := range nodes {
 			communities[i] = []graph.Node{node(i)}

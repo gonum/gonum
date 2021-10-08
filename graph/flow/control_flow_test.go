@@ -6,7 +6,6 @@ package flow
 
 import (
 	"reflect"
-	"sort"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
@@ -172,7 +171,7 @@ func TestDominators(t *testing.T) {
 				}
 
 				for _, nodes := range got.dominatedBy {
-					sort.Sort(ordered.ByID(nodes))
+					ordered.ByID(nodes)
 				}
 
 				if !reflect.DeepEqual(got.dominatedBy, test.want.dominatedBy) {

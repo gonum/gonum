@@ -5,8 +5,6 @@
 package simple
 
 import (
-	"sort"
-
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/iterator"
@@ -62,7 +60,7 @@ func NewUndirectedMatrix(n int, init, self, absent float64) *UndirectedMatrix {
 // specifies the cost of self connection, and absent specifies the weight
 // returned for absent edges.
 func NewUndirectedMatrixFrom(nodes []graph.Node, init, self, absent float64) *UndirectedMatrix {
-	sort.Sort(ordered.ByID(nodes))
+	ordered.ByID(nodes)
 	for i, n := range nodes {
 		if int64(i) != n.ID() {
 			panic("simple: non-contiguous node IDs")

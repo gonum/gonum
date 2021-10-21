@@ -77,33 +77,36 @@ func (impl Implementation) Dlatdf(job lapack.MaximizeNormXJob, n int, z []float6
 
 	const maxdim = 8
 	var (
-		xp    [maxdim]float64
-		xm    [maxdim]float64
+		xps   [maxdim]float64
+		xms   [maxdim]float64
 		work  [4 * maxdim]float64
 		iwork [maxdim]int
 	)
 	bi := blas64.Implementation()
+	xp := xps[:n]
+	xm := xms[:n]
 	if job == lapack.NormalizedNullVector {
 		// Compute approximate nullvector xm of Z.
 		_ = impl.Dgecon(lapack.MaxRowSum, n, z, ldz, 1, work[:], iwork[:])
 		// This relies on undocumented content in work[n:2*n] stored by Dgecon.
-		bi.Dcopy(n, work[n:], 1, xm[:], 1)
+		bi.Dcopy(n, work[n:], 1, xm, 1)
 
 		// Compute rhs.
-		impl.Dlaswp(1, xm[:], 1, 0, n-2, ipiv[:n-1], -1)
-		tmp := 1 / math.Sqrt(bi.Ddot(n, xm[:], 1, xm[:], 1))
-		bi.Dscal(n, tmp, xm[:], 1)
-		bi.Dcopy(n, xm[:], 1, xp[:], 1)
-		bi.Daxpy(n, 1.0, rhs, 1, xp[:], 1)
-		bi.Daxpy(n, -1.0, xm[:], 1, rhs, 1)
-		impl.Dgesc2(n, z, ldz, rhs, ipiv, jpiv)
-		impl.Dgesc2(n, z, ldz, xp[:], ipiv, jpiv)
-		if bi.Dasum(n, xp[:], 1) > bi.Dasum(n, rhs, 1) {
-			bi.Dcopy(n, xp[:], 1, rhs, 1)
+		impl.Dlaswp(1, xm, 1, 0, n-2, ipiv[:n-1], -1)
+		tmp := 1 / math.Sqrt(bi.Ddot(n, xm, 1, xm, 1))
+		bi.Dscal(n, tmp, xm, 1)
+		bi.Dcopy(n, xm, 1, xp, 1)
+		bi.Daxpy(n, 1.0, rhs, 1, xp, 1)
+		bi.Daxpy(n, -1.0, xm, 1, rhs, 1)
+		_ = impl.Dgesc2(n, z, ldz, rhs, ipiv, jpiv)
+		_ = impl.Dgesc2(n, z, ldz, xp, ipiv, jpiv)
+		if bi.Dasum(n, xp, 1) > bi.Dasum(n, rhs, 1) {
+			bi.Dcopy(n, xp, 1, rhs, 1)
 		}
 
 		// Compute the sum of squares.
-		return impl.Dlassq(n, rhs, 1, rdscal, rdsum)
+		scale, sum = impl.Dlassq(n, rhs, 1, rdscal, rdsum)
+		return sum, scale
 	}
 
 	// Apply permutations ipiv to rhs
@@ -142,7 +145,7 @@ func (impl Implementation) Dlatdf(job lapack.MaximizeNormXJob, n int, z []float6
 	// Bsolve and will hopefully give us a better estimate because any
 	// ill-conditioning of the original matrix is transferred to U and not to L.
 	// U[n-1,n-1] is an approximation to sigma_min(LU).
-	bi.Dcopy(n-1, rhs, 1, xp[:], 1)
+	bi.Dcopy(n-1, rhs, 1, xp, 1)
 	xp[n-1] = rhs[n-1] + 1
 	rhs[n-1] -= 1
 	splus := 0.0
@@ -159,12 +162,13 @@ func (impl Implementation) Dlatdf(job lapack.MaximizeNormXJob, n int, z []float6
 		sminu += math.Abs(rhs[i])
 	}
 	if splus > sminu {
-		bi.Dcopy(n, xp[:], 1, rhs, 1)
+		bi.Dcopy(n, xp, 1, rhs, 1)
 	}
 
 	// Apply the permutations jpiv to the computed solution (rhs).
 	impl.Dlaswp(1, rhs, 1, 0, n-2, jpiv[:n-1], -1)
 
 	// Compute the sum of squares.
-	return impl.Dlassq(n, rhs, 1, rdscal, rdsum)
+	scale, sum = impl.Dlassq(n, rhs, 1, rdscal, rdsum)
+	return sum, scale
 }

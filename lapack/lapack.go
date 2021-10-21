@@ -215,3 +215,12 @@ const (
 	EVAllMulQ  EVHowMany = 'B' // Compute all right and/or left eigenvectors multiplied by an input matrix.
 	EVSelected EVHowMany = 'S' // Compute selected right and/or left eigenvectors.
 )
+
+// MaximizeNormX specifies the heuristic method for computing a contribution to
+// the reciprocal Dif-estimate in Dlatdf.
+type MaximizeNormXJob byte
+
+const (
+	LocalLookAhead       MaximizeNormXJob = 0 // Solve Z*x=h-f where h is a vector of ±1.
+	NormalizedNullVector MaximizeNormXJob = 2 // Compute an approximate null-vector e of Z, normalize e and solve Z*x=±e-f.
+)

@@ -93,10 +93,10 @@ func (impl Implementation) Dlatdf(job lapack.MaximizeNormXJob, n int, z []float6
 
 		// Compute rhs.
 		impl.Dlaswp(1, xm, 1, 0, n-2, ipiv[:n-1], -1)
-		tmp := 1 / math.Sqrt(bi.Ddot(n, xm, 1, xm, 1))
+		tmp := 1 / bi.Dnrm2(n, xm, 1)
 		bi.Dscal(n, tmp, xm, 1)
 		bi.Dcopy(n, xm, 1, xp, 1)
-		bi.Daxpy(n, 1.0, rhs, 1, xp, 1)
+		bi.Daxpy(n, 1, rhs, 1, xp, 1)
 		bi.Daxpy(n, -1.0, xm, 1, rhs, 1)
 		_ = impl.Dgesc2(n, z, ldz, rhs, ipiv, jpiv)
 		_ = impl.Dgesc2(n, z, ldz, xp, ipiv, jpiv)
@@ -134,7 +134,7 @@ func (impl Implementation) Dlatdf(job lapack.MaximizeNormXJob, n int, z []float6
 			// +1. This is a simple way to get good estimates of matrices like
 			// Byers well-known example (see https://doi.org/10.1109/9.29404).
 			rhs[j] += pmone
-			pmone = 1.0
+			pmone = 1
 		}
 
 		// Compute remaining rhs.
@@ -148,8 +148,7 @@ func (impl Implementation) Dlatdf(job lapack.MaximizeNormXJob, n int, z []float6
 	bi.Dcopy(n-1, rhs, 1, xp, 1)
 	xp[n-1] = rhs[n-1] + 1
 	rhs[n-1] -= 1
-	splus := 0.0
-	sminu := 0.0
+	var splus, sminu float64
 	for i := n - 1; i >= 0; i-- {
 		tmp := 1 / z[i*ldz+i]
 		xp[i] *= tmp

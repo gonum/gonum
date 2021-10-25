@@ -1,6 +1,6 @@
 Test suite license
 
-This document refers to nquad_tests.tar.gz, ntriple_tests.tar.gz and normalization tests in testdata. The original files can be obtained here:
+This document refers to nquad_tests.tar.gz, ntriple_tests.tar.gz and normalization tests in this directory. The original files can be obtained here:
 
 - [nquad_tests.tar.gz](https://w3c.github.io/rdf-tests/nquads/TESTS.tar.gz)
 - [ntriple_tests.tar.gz](https://w3c.github.io/rdf-tests/ntriples/TESTS.tar.gz)

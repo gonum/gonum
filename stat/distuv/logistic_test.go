@@ -6,6 +6,8 @@ import (
 )
 
 func TestLogisticParameters(t *testing.T) {
+	t.Parallel()
+
 	l := Logistic{Mu: 0, S: 0}
 
 	if l.NumParameters() != 2 {
@@ -34,6 +36,8 @@ func TestLogisticParameters(t *testing.T) {
 }
 
 func TestLogisticStdDev(t *testing.T) {
+	t.Parallel()
+
 	const sq3 = 1.732050807568877293527446341505872366942805253810380 // sqrt(3)
 
 	l := Logistic{Mu: 0, S: sq3 / math.Pi}
@@ -47,6 +51,8 @@ func TestLogisticStdDev(t *testing.T) {
 }
 
 func TestLogisticCDF(t *testing.T) {
+	t.Parallel()
+
 	// edge case of zero in denominator
 	l := Logistic{Mu: 0, S: 0}
 
@@ -66,6 +72,8 @@ func TestLogisticCDF(t *testing.T) {
 }
 
 func TestLogisticSurvival(t *testing.T) {
+	t.Parallel()
+
 	l := Logistic{Mu: 0, S: 1}
 
 	if l.Survival(0) != 0.5 {
@@ -74,6 +82,8 @@ func TestLogisticSurvival(t *testing.T) {
 }
 
 func TestLogisticProb(t *testing.T) {
+	t.Parallel()
+
 	// edge case of zero in denominator
 	l := Logistic{Mu: 0, S: 0}
 
@@ -97,6 +107,8 @@ func TestLogisticProb(t *testing.T) {
 }
 
 func TestQuantile(t *testing.T) {
+	t.Parallel()
+
 	l := Logistic{Mu: 0, S: 0}
 
 	if !math.IsNaN(l.Quantile(0)) {

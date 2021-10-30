@@ -4,7 +4,7 @@ import (
 	"math"
 )
 
-// Logistic implements the Logistic distribution. It is two-parameter distribution.
+// Logistic implements the Logistic distribution, a two-parameter distribution with support on the real axis.
 // Its cumulative distribution function is the logistic function.
 //
 // General form of probability density fuction for Logistic distribution is

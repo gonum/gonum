@@ -59,7 +59,7 @@ func lexicalHashes(dst [][]byte, hashes map[string][]byte) {
 // IsoCanonicalHashes returns a mapping between the nodes of the RDF graph
 // dataset described by the given statements using the provided hash
 // function. If decomp is true, the graphs are decomposed before hashing.
-// If dist is and the input graph is decomposed into identical splits, the
+// If dist is true the input graph is decomposed into identical splits, the
 // entire graph will be hashed to distinguish nodes. If decomp is false,
 // dist has no effect.
 // Blank node hashes are initially set to the value of zero. Hash values

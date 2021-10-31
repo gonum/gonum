@@ -28,7 +28,7 @@ func (l Logistic) CDF(x float64) float64 {
 
 // ExKurtosis returns the excess kurtosis of the distribution.
 func (l Logistic) ExKurtosis() float64 {
-	return 6 / 5
+	return 6.0 / 5.0
 }
 
 // LogProb computes the natural logarithm of the value of the probability

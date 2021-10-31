@@ -7,35 +7,45 @@ package distuv
 import (
 	"math"
 	"testing"
+
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 func TestLogisticParameters(t *testing.T) {
 	t.Parallel()
 
-	l := Logistic{Mu: 0, S: 0}
+	var want float64
 
-	if l.NumParameters() != 2 {
-		t.Fail()
+	l := Logistic{Mu: 1, S: 0}
+
+	want = 2
+	if result := l.NumParameters(); result != int(want) {
+		t.Errorf("Wrong number of parameters: %d != %.0f", result, want)
 	}
 
-	if l.ExKurtosis() != 6/5 {
-		t.Fail()
+	want = 6.0 / 5.0
+	if result := l.ExKurtosis(); result != want {
+		t.Errorf("Wrong excess kurtosis: %f != %f", result, want)
 	}
 
-	if l.Skewness() != 0 {
-		t.Fail()
+	want = 0.0
+	if result := l.Skewness(); result != want {
+		t.Errorf("Wrong skewness: %f != %f", result, want)
 	}
 
-	if l.Mean() != l.Mu {
-		t.Fail()
+	want = l.Mu
+	if result := l.Mean(); result != want {
+		t.Errorf("Wrong mean value: %f != %f", result, want)
 	}
 
-	if l.Mean() != l.Median() {
-		t.Fail()
+	want = l.Mu
+	if result := l.Median(); result != want {
+		t.Errorf("Wrong median value: %f != %f", result, want)
 	}
 
-	if l.Mean() != l.Mode() {
-		t.Fail()
+	want = l.Mu
+	if result := l.Mode(); result != want {
+		t.Errorf("Wrong mode value: %f != %f", result, want)
 	}
 }
 
@@ -45,87 +55,120 @@ func TestLogisticStdDev(t *testing.T) {
 	const sq3 = 1.732050807568877293527446341505872366942805253810380 // sqrt(3)
 
 	l := Logistic{Mu: 0, S: sq3 / math.Pi}
-	if l.StdDev() != 1 {
-		t.Fail()
+
+	want := 1.0
+	if result := l.StdDev(); result != want {
+		t.Errorf("Wrong StdDev with Mu=%f, S=%f: %f != %f", l.Mu, l.S, result, want)
 	}
 
-	if l.Variance() != 1 {
-		t.Fail()
+	want = 1.0
+	if result := l.Variance(); result != want {
+		t.Errorf("Wrong Variance with Mu=%f, S=%f: %f != %f", l.Mu, l.S, result, want)
 	}
 }
 
 func TestLogisticCDF(t *testing.T) {
 	t.Parallel()
 
+	// values for "want" are taken from WolframAlpha: CDF[LogisticDistribution[mu,s], input] to 10 digits
+	for _, v := range []struct {
+		mu, s, input, want float64
+	}{
+		{0.0, 0.0, 1.0, 1.0},
+		{0.0, 1.0, 0.0, 0.5},
+		{-0.5, 1.0, 0.0, 0.6224593312},
+		{69.0, 420.0, 42.0, 0.4839341039},
+	} {
+		l := Logistic{Mu: v.mu, S: v.s}
+		if result := l.CDF(v.input); !scalar.EqualWithinAbs(result, v.want, 1e-10) {
+			t.Errorf("Wrong CDF(%f) with Mu=%f, S=%f: %f != %f", v.input, l.Mu, l.S, result, v.want)
+		}
+	}
+
 	// edge case of zero in denominator
 	l := Logistic{Mu: 0, S: 0}
 
-	if !math.IsNaN(l.CDF(0)) {
-		t.Fail()
-	}
-
-	if l.CDF(1) != 1 {
-		t.Fail()
-	}
-
-	l = Logistic{Mu: 0, S: 1}
-
-	if l.CDF(0) != 0.5 {
-		t.Fail()
+	input := 0.0
+	if result := l.CDF(input); !math.IsNaN(result) {
+		t.Errorf("Wrong CDF(%f) with Mu=%f, S=%f: %f is not NaN", input, l.Mu, l.S, result)
 	}
 }
 
+// TestLogisticSurvival doesn't need excessive testing since it's just 1-CDF
 func TestLogisticSurvival(t *testing.T) {
 	t.Parallel()
 
 	l := Logistic{Mu: 0, S: 1}
 
-	if l.Survival(0) != 0.5 {
-		t.Fail()
+	input, want := 0.0, 0.5
+	if result := l.Survival(input); result != want {
+		t.Errorf("Wrong Survival(%f) with Mu=%f, S=%f: %f != %f", input, l.Mu, l.S, result, want)
 	}
 }
 
 func TestLogisticProb(t *testing.T) {
 	t.Parallel()
 
+	// values for "want" are taken from WolframAlpha: PDF[LogisticDistribution[mu,s], input] to 10 digits
+	for _, v := range []struct {
+		mu, s, input, want float64
+	}{
+		{0.0, 1.0, 0.0, 0.25},
+		{-0.5, 1.0, 0.0, 0.2350037122},
+		{69.0, 420.0, 42.0, 0.0005946235404},
+	} {
+		l := Logistic{Mu: v.mu, S: v.s}
+		if result := l.Prob(v.input); !scalar.EqualWithinAbs(result, v.want, 1e-9) {
+			t.Errorf("Wrong Prob(%f) with Mu=%f, S=%f: %.09f != %.09f", v.input, l.Mu, l.S, result, v.want)
+		}
+	}
+
 	// edge case of zero in denominator
 	l := Logistic{Mu: 0, S: 0}
 
-	if !math.IsNaN(l.Prob(0)) {
-		t.Fail()
+	input := 0.0
+	if result := l.Prob(input); !math.IsNaN(result) {
+		t.Errorf("Wrong Prob(%f) with Mu=%f, S=%f: %f is not NaN", input, l.Mu, l.S, result)
 	}
 
-	if !math.IsNaN(l.Prob(1)) {
-		t.Fail()
+	input = 1.0
+	if result := l.Prob(input); !math.IsNaN(result) {
+		t.Errorf("Wrong Prob(%f) with Mu=%f, S=%f: %f is not NaN", input, l.Mu, l.S, result)
 	}
+}
 
-	l = Logistic{Mu: 0, S: 1}
+func TestLogisticLogProb(t *testing.T) {
+	t.Parallel()
 
-	if l.Prob(0) != 0.25 {
-		t.Fail()
-	}
+	l := Logistic{Mu: 0, S: 1}
 
-	if l.LogProb(0) != -math.Log(4) {
-		t.Fail()
+	input, want := 0.0, -math.Log(4)
+	if result := l.LogProb(input); result != want {
+		t.Errorf("Wrong LogProb(%f) with Mu=%f, S=%f: %f != %f", input, l.Mu, l.S, result, want)
 	}
 }
 
 func TestQuantile(t *testing.T) {
 	t.Parallel()
 
+	for _, v := range []struct {
+		mu, s, input, want float64
+	}{
+		{0.0, 1.0, 0.5, 0.0},
+		{0.0, 1.0, 0.0, math.Inf(-1)},
+		{0.0, 1.0, 1.0, math.Inf(+1)},
+	} {
+		l := Logistic{Mu: v.mu, S: v.s}
+		if result := l.Quantile(v.input); result != v.want {
+			t.Errorf("Wrong Quantile(%f) with Mu=%f, S=%f: %f != %f", v.input, l.Mu, l.S, result, v.want)
+		}
+	}
+
+	// edge case with NaN
 	l := Logistic{Mu: 0, S: 0}
 
-	if !math.IsNaN(l.Quantile(0)) {
-		t.Fail()
-	}
-
-	l = Logistic{Mu: 0, S: 1}
-
-	if !math.IsInf(l.Quantile(0), -1) {
-		t.Fail()
-	}
-
-	if !math.IsInf(l.Quantile(1), 1) {
-		t.Fail()
+	input := 0.0
+	if result := l.Quantile(input); !math.IsNaN(result) {
+		t.Errorf("Wrong Quantile(%f) with Mu=%f, S=%f: %f is not NaN", input, l.Mu, l.S, result)
 	}
 }

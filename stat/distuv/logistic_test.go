@@ -52,17 +52,15 @@ func TestLogisticParameters(t *testing.T) {
 func TestLogisticStdDev(t *testing.T) {
 	t.Parallel()
 
-	const sq3 = 1.732050807568877293527446341505872366942805253810380 // sqrt(3)
-
-	l := Logistic{Mu: 0, S: sq3 / math.Pi}
+	l := Logistic{Mu: 0, S: sqrt3 / math.Pi}
 
 	want := 1.0
-	if result := l.StdDev(); result != want {
+	if result := l.StdDev(); !scalar.EqualWithinAbs(result, want, 1e-10) {
 		t.Errorf("Wrong StdDev with Mu=%f, S=%f: %f != %f", l.Mu, l.S, result, want)
 	}
 
 	want = 1.0
-	if result := l.Variance(); result != want {
+	if result := l.Variance(); !scalar.EqualWithinAbs(result, want, 1e-10) {
 		t.Errorf("Wrong Variance with Mu=%f, S=%f: %f != %f", l.Mu, l.S, result, want)
 	}
 }

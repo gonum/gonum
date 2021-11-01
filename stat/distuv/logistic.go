@@ -83,8 +83,7 @@ func (l Logistic) Skewness() float64 {
 
 // StdDev returns the standard deviation of the probability distribution.
 func (l Logistic) StdDev() float64 {
-	const pisq3 = math.Pi / 1.732050807568877293527446341505872366942805253810380 // π/sqrt(3)
-	return l.S * pisq3
+	return l.S * math.Pi / sqrt3
 }
 
 // Survival returns the survival function (complementary CDF) at x.
@@ -94,5 +93,5 @@ func (l Logistic) Survival(x float64) float64 {
 
 // Variance returns the variance of the probability distribution.
 func (l Logistic) Variance() float64 {
-	return math.Pow(l.StdDev(), 2)
+	return l.S * l.S * math.Pi * math.Pi / 3
 }

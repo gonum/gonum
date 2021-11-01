@@ -49,7 +49,7 @@ type hiter struct {
 	checkBucket uintptr
 }
 
-func (h hiter) initialized() bool {
+func (h *hiter) initialized() bool {
 	return h.t != nil
 }
 

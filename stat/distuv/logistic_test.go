@@ -70,7 +70,7 @@ func TestLogisticStdDev(t *testing.T) {
 func TestLogisticCDF(t *testing.T) {
 	t.Parallel()
 
-	// values for "want" are taken from WolframAlpha: CDF[LogisticDistribution[mu,s], input] to 10 digits
+	// Values for "want" are taken from WolframAlpha: CDF[LogisticDistribution[mu,s], input] to 10 digits.
 	for _, v := range []struct {
 		mu, s, input, want float64
 	}{
@@ -85,7 +85,7 @@ func TestLogisticCDF(t *testing.T) {
 		}
 	}
 
-	// edge case of zero in denominator
+	// Edge case of zero in denominator.
 	l := Logistic{Mu: 0, S: 0}
 
 	input := 0.0
@@ -94,7 +94,7 @@ func TestLogisticCDF(t *testing.T) {
 	}
 }
 
-// TestLogisticSurvival doesn't need excessive testing since it's just 1-CDF
+// TestLogisticSurvival doesn't need excessive testing since it's just 1-CDF.
 func TestLogisticSurvival(t *testing.T) {
 	t.Parallel()
 
@@ -109,7 +109,7 @@ func TestLogisticSurvival(t *testing.T) {
 func TestLogisticProb(t *testing.T) {
 	t.Parallel()
 
-	// values for "want" are taken from WolframAlpha: PDF[LogisticDistribution[mu,s], input] to 10 digits
+	// Values for "want" are taken from WolframAlpha: PDF[LogisticDistribution[mu,s], input] to 10 digits.
 	for _, v := range []struct {
 		mu, s, input, want float64
 	}{
@@ -123,7 +123,7 @@ func TestLogisticProb(t *testing.T) {
 		}
 	}
 
-	// edge case of zero in denominator
+	// Edge case of zero in denominator.
 	l := Logistic{Mu: 0, S: 0}
 
 	input := 0.0
@@ -164,7 +164,7 @@ func TestQuantile(t *testing.T) {
 		}
 	}
 
-	// edge case with NaN
+	// Edge case with NaN.
 	l := Logistic{Mu: 0, S: 0}
 
 	input := 0.0

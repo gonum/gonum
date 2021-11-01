@@ -15,7 +15,7 @@ import (
 //  E(x) / (s * (1 + E(x))^2)
 //  where E(x) = exp(-(x-μ)/s)
 //
-// For more information, see https://en.wikipedia.org/wiki/Logistic_distribution
+// For more information, see https://en.wikipedia.org/wiki/Logistic_distribution.
 type Logistic struct {
 	Mu float64 // Mean value
 	S  float64 // Scale parameter proportional to standard deviation
@@ -44,21 +44,21 @@ func (l Logistic) Mean() float64 {
 
 // Mode returns the mode of the distribution.
 //
-// It is same as Mean for Logistic distribution
+// It is same as Mean for Logistic distribution.
 func (l Logistic) Mode() float64 {
 	return l.Mu
 }
 
 // Median returns the median of the distribution.
 //
-// It is same as Mean for Logistic distribution
+// It is same as Mean for Logistic distribution.
 func (l Logistic) Median() float64 {
 	return l.Mu
 }
 
 // NumParameters returns the number of parameters in the distribution.
 //
-// Always returns 2
+// Always returns 2.
 func (l Logistic) NumParameters() int {
 	return 2
 }
@@ -76,7 +76,7 @@ func (l Logistic) Quantile(p float64) float64 {
 
 // Skewness returns the skewness of the distribution.
 //
-// Always 0 for Logistic distribution
+// Always 0 for Logistic distribution.
 func (l Logistic) Skewness() float64 {
 	return 0
 }

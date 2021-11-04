@@ -116,7 +116,7 @@ func TestLogisticProb(t *testing.T) {
 		{69.0, 420.0, 42.0, 0.0005946235404},
 	} {
 		l := Logistic{Mu: v.mu, S: v.s}
-		if result := l.Prob(v.input); !scalar.EqualWithinAbs(result, v.want, 1e-9) {
+		if result := l.Prob(v.input); !scalar.EqualWithinAbs(result, v.want, 1e-10) {
 			t.Errorf("Wrong Prob(%f) with Mu=%f, S=%f: %.09f != %.09f", v.input, l.Mu, l.S, result, v.want)
 		}
 	}

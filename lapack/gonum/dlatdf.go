@@ -47,7 +47,7 @@ import (
 // updated with the contributions from the current sub-system.
 //
 // Dlatdf is an internal routine. It is exported for testing purposes.
-func (impl Implementation) Dlatdf(job lapack.MaximizeNormXJob, n int, z []float64, ldz int, rhs []float64, rdsum, rdscal float64, ipiv, jpiv []int) (sum, scale float64) {
+func (impl Implementation) Dlatdf(job lapack.MaximizeNormXJob, n int, z []float64, ldz int, rhs []float64, rdsum, rdscal float64, ipiv, jpiv []int) (scale, sum float64) {
 	switch {
 	case job != lapack.LocalLookAhead && job != lapack.NormalizedNullVector:
 		panic(badMaximizeNormXJob)
@@ -104,9 +104,8 @@ func (impl Implementation) Dlatdf(job lapack.MaximizeNormXJob, n int, z []float6
 			bi.Dcopy(n, xp, 1, rhs, 1)
 		}
 
-		// Compute the sum of squares.
-		scale, sum = impl.Dlassq(n, rhs, 1, rdscal, rdsum)
-		return sum, scale
+		// Compute and return the updated sum of squares.
+		return impl.Dlassq(n, rhs, 1, rdscal, rdsum)
 	}
 
 	// Apply permutations ipiv to rhs
@@ -167,7 +166,6 @@ func (impl Implementation) Dlatdf(job lapack.MaximizeNormXJob, n int, z []float6
 	// Apply the permutations jpiv to the computed solution (rhs).
 	impl.Dlaswp(1, rhs, 1, 0, n-2, jpiv[:n-1], -1)
 
-	// Compute the sum of squares.
-	scale, sum = impl.Dlassq(n, rhs, 1, rdscal, rdsum)
-	return sum, scale
+	// Compute and return the updated sum of squares.
+	return impl.Dlassq(n, rhs, 1, rdscal, rdsum)
 }

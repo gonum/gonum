@@ -175,7 +175,7 @@ func dtrexcTest(t *testing.T, impl Dtrexcer, rnd *rand.Rand, n, ifst, ilst, extr
 			if modMin <= j && j < modMax {
 				continue
 			}
-			if q.Data[i*q.Stride+j]-qCopy.Data[i*qCopy.Stride+j] != 0 {
+			if q.Data[i*q.Stride+j] != qCopy.Data[i*qCopy.Stride+j] {
 				t.Errorf("%v: unexpected modification of Q[%v,%v]", name, i, j)
 			}
 		}

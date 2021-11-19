@@ -218,10 +218,6 @@ func (j *johnson) circuit(v int) bool {
 // circuitMaxLen is the CIRCUIT sub-procedure in the paper but produces circuits up to a maximum length.
 func (j *johnson) circuitMaxLen(v int, maxLen int) bool {
 	f := false
-	// TODO: can we replace the "+ 2" with "+ 3" or "+ 4"?
-	if len(j.stack)+2 > maxLen {
-		return f
-	}
 	n := j.adjacent.orig[v]
 	j.stack = append(j.stack, n)
 	j.blocked[v] = true
@@ -230,11 +226,13 @@ func (j *johnson) circuitMaxLen(v int, maxLen int) bool {
 	for w := range j.adjacent.succ[n.ID()] {
 		w := j.adjacent.indexOf(w)
 		if w == j.s {
-			// Output circuit composed of stack followed by s.
-			r := make([]graph.Node, len(j.stack)+1)
-			copy(r, j.stack)
-			r[len(r)-1] = j.adjacent.orig[j.s]
-			j.result = append(j.result, r)
+			if len(j.stack) + 1 <= maxLen {
+				// Output circuit composed of stack followed by s.
+				r := make([]graph.Node, len(j.stack)+1)
+				copy(r, j.stack)
+				r[len(r)-1] = j.adjacent.orig[j.s]
+				j.result = append(j.result, r)
+			}
 			f = true
 		} else if !j.blocked[w] {
 			if j.circuitMaxLen(w, maxLen) {

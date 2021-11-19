@@ -226,9 +226,8 @@ func (j *johnson) circuit(v int) bool {
 // circuitMaxLen is the CIRCUIT sub-procedure in the paper but produces circuits up to a maximum length.
 func (j *johnson) circuitMaxLen(v int, maxLen int) bool {
 	f := false
-	// TODO: can we replace the "+ 2" with "+ 3" or "+ 4"?
 	if len(j.stack)+2 > maxLen {
-		return f
+		return true
 	}
 	n := j.adjacent.orig[v]
 	j.stack = append(j.stack, n)

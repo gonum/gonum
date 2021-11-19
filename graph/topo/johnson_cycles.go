@@ -147,6 +147,11 @@ func DirectedCyclesOfMaxLen(g graph.Directed, maxLen int) [][]graph.Node {
 
 // DirectedCyclesOfMaxLenContaining returns the set of elementary cycles of max length maxLen containing the node with ID vid in the graph g.
 func DirectedCyclesOfMaxLenContaining(g graph.Directed, maxLen int, vid int64) [][]graph.Node {
+	return DirectedCyclesOfMaxLenContainingAnyOf(g, maxLen, []int64{vid})
+}
+
+// DirectedCyclesOfMaxLenContainingAnyOf returns the set of elementary cycles in the graph g of max length maxLen containing at least one of the nodes with ID in vids.
+func DirectedCyclesOfMaxLenContainingAnyOf(g graph.Directed, maxLen int, vids []int64) [][]graph.Node {
 	jg := johnsonGraphFrom(g)
 	j := johnson{
 		adjacent: jg,
@@ -154,26 +159,29 @@ func DirectedCyclesOfMaxLenContaining(g graph.Directed, maxLen int, vid int64) [
 		blocked:  make([]bool, len(jg.orig)),
 	}
 
-	j.s = j.adjacent.indexOf(vid)
-	// We use the entire SCC adjacency to find all cycles, not just those with least vertex >= s.
-	sccs := TarjanSCC(j.adjacent)
-	// A_k = adjacency structure of (maximal) strong component K containing s
-	j.adjacent = j.adjacent.sccSubGraph(sccs, 2) // Only allow SCCs with >= 2 vertices.
-	if j.adjacent.order() == 0 {
-		return j.result
-	}
+	for vi, vid := range vids {
+		j.s = j.adjacent.indexOf(vid)
+		// We use the previous SCC adjacency to reduce the work needed.
+		sccs := TarjanSCC(j.adjacent.subgraphComplement(vids[:vi]))
+		// A_k = adjacency structure of strong component K with least
+		//       vertex in subgraph of G induced by complementing vids[:vi].
+		j.adjacent = j.adjacent.sccSubGraph(sccs, 2) // Only allow SCCs with >= 2 vertices
+		if j.adjacent.order() == 0 {
+			break
+		}
 
-	for i, v := range j.adjacent.orig {
-		if !j.adjacent.nodes.Has(v.ID()) {
-			continue
+		for i, v := range j.adjacent.orig {
+			if !j.adjacent.nodes.Has(v.ID()) {
+				continue
+			}
+			if len(j.adjacent.succ[v.ID()]) > 0 {
+				j.blocked[i] = false
+				j.b[i] = make(set.Ints)
+			}
 		}
-		if len(j.adjacent.succ[v.ID()]) > 0 {
-			j.blocked[i] = false
-			j.b[i] = make(set.Ints)
-		}
+		//L3:
+		_ = j.circuitMaxLen(j.s, maxLen)
 	}
-	//L3:
-	_ = j.circuitMaxLen(j.s, maxLen)
 
 	return j.result
 }
@@ -226,7 +234,7 @@ func (j *johnson) circuitMaxLen(v int, maxLen int) bool {
 	for w := range j.adjacent.succ[n.ID()] {
 		w := j.adjacent.indexOf(w)
 		if w == j.s {
-			if len(j.stack) + 1 <= maxLen {
+			if len(j.stack)+1 <= maxLen {
 				// Output circuit composed of stack followed by s.
 				r := make([]graph.Node, len(j.stack)+1)
 				copy(r, j.stack)
@@ -322,6 +330,32 @@ func (g johnsonGraph) leastVertexIndex() int {
 		}
 	}
 	panic("johnsonCycles: empty set")
+}
+
+// subgraphComplement returns a subgraph of g induced by g - c. The
+// subgraph is destructively generated in g.
+func (g johnsonGraph) subgraphComplement(c []int64) johnsonGraph {
+	// Remove nodes in c
+	for _, sn := range c {
+		// Remove node sn
+		g.nodes.Remove(sn)
+		// Remove edges from sn
+		delete(g.succ, sn)
+	}
+	// Remove edges to c
+	for _, sn := range c {
+		// Remove edges to sn
+		for u, e := range g.succ {
+			// Remove edge from u -> sn if it exists
+			for v := range e {
+				if v == sn {
+					g.succ[u].Remove(v)
+					break // early exit
+				}
+			}
+		}
+	}
+	return g
 }
 
 // subgraph returns a subgraph of g induced by {s, s+1, ... , n}. The

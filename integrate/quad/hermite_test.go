@@ -63,6 +63,12 @@ func TestHermite(t *testing.T) {
 			ev:  math.SqrtPi * math.Exp(4),
 			tol: 1e-12,
 		},
+		{
+			n: 1000,
+			f:   func(x float64) float64 { return math.Exp(-2 * 2 * x) },
+			ev:  math.SqrtPi * math.Exp(4),
+			tol: 1e-12,
+		},
 	} {
 		ev := Fixed(test.f, math.Inf(-1), math.Inf(1), test.n, Hermite{}, 0)
 		if !scalar.EqualWithinAbsOrRel(test.ev, ev, test.tol, test.tol) {

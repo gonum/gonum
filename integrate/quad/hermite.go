@@ -273,7 +273,7 @@ func (h Hermite) hermiteInitialGuess(i, n int) float64 {
 	}
 
 	// Use Gatteschi guesses in the second half where x is nearer to sqrt(n+0.5)
-	i = m - i - 1
+	i = m - (i + 1)
 	var ar float64
 	if i < len(airyRtsExact) {
 		ar = airyRtsExact[i]

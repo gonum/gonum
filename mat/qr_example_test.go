@@ -28,8 +28,7 @@ func ExampleQR_solveTo() {
 	var qr mat.QR
 	qr.Factorize(a)
 
-	const trans = false
-	err := qr.SolveTo(x, trans, b)
+	err := qr.SolveTo(x, false, b)
 	if err != nil {
 		log.Fatalf("could not solve QR: %+v", err)
 	}

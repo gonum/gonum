@@ -17,10 +17,19 @@ import (
 // The factorization has the form
 //  Pᵀ * A * P = Uᵀ * U ,  if uplo = blas.Upper,
 //  Pᵀ * A * P = L  * Lᵀ,  if uplo = blas.Lower,
-// where U is an upper triangular matrix and L is lower triangular, and P is
-// stored as vector piv.
+// where U is an upper triangular matrix, L is lower triangular, and P is a
+// permutation matrix.
 //
-// Dpstrf does not attempt to check that A is positive semidefinite.
+// tol is a user-defined tolerance. The algorithm terminates if the pivot is
+// less than or equal to tol. If tol is negative, then n*eps*max(A[k,k]) will be
+// used instead.
+//
+// On return, A contains the factor U or L from the Cholesky factorization and
+// piv contains P stored such that P[piv[k],k] = 1.
+//
+// Dpstrf returns the computed rank of A and whether the algorithm completed
+// successfully. If ok is false, the matrix A is either rank deficient or is not
+// positive semidefinite.
 //
 // The length of piv must be n and the length of work must be at least 2*n,
 // otherwise Dpstrf will panic.

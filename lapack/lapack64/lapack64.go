@@ -128,6 +128,39 @@ func Pbtrs(t blas64.TriangularBand, b blas64.General) {
 	lapack64.Dpbtrs(t.Uplo, t.N, t.K, b.Cols, t.Data, max(1, t.Stride), b.Data, max(1, b.Stride))
 }
 
+// Pstrf computes the Cholesky factorization with complete pivoting of an n×n
+// symmetric positive semidefinite matrix A.
+//
+// The factorization has the form
+//  Pᵀ * A * P = Uᵀ * U ,  if a.Uplo = blas.Upper,
+//  Pᵀ * A * P = L  * Lᵀ,  if a.Uplo = blas.Lower,
+// where U is an upper triangular matrix, L is lower triangular, and P is a
+// permutation matrix.
+//
+// tol is a user-defined tolerance. The algorithm terminates if the pivot is
+// less than or equal to tol. If tol is negative, then n*eps*max(A[k,k]) will be
+// used instead.
+//
+// The triangular factor U or L from the Cholesky factorization is returned in t
+// and the underlying data between a and t is shared. P is stored on return in
+// vector piv such that P[piv[k],k] = 1.
+//
+// Pstrf also returns the computed rank of A and whether the algorithm completed
+// successfully. If ok is false, the matrix A is either rank deficient or is not
+// positive semidefinite.
+//
+// The length of piv must be n and the length of work must be at least 2*n,
+// otherwise Pstrf will panic.
+func Pstrf(a blas64.Symmetric, piv []int, tol float64, work []float64) (t blas64.Triangular, rank int, ok bool) {
+	rank, ok = lapack64.Dpstrf(a.Uplo, a.N, a.Data, max(1, a.Stride), piv, tol, work)
+	t.Uplo = a.Uplo
+	t.Diag = blas.NonUnit
+	t.N = a.N
+	t.Data = a.Data
+	t.Stride = a.Stride
+	return t, rank, ok
+}
+
 // Gecon estimates the reciprocal of the condition number of the n×n matrix A
 // given the LU decomposition of the matrix. The condition number computed may
 // be based on the 1-norm or the ∞-norm.

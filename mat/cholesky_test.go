@@ -924,3 +924,187 @@ func TestBandCholeskyDet(t *testing.T) {
 		}
 	}
 }
+
+func TestPivotedCholesky(t *testing.T) {
+	t.Parallel()
+
+	const tol = 1e-14
+	src := rand.NewSource(1)
+	for _, n := range []int{1, 2, 3, 4, 5, 10} {
+		for _, rank := range []int{int(0.3 * float64(n)), int(0.7 * float64(n)), n} {
+			name := fmt.Sprintf("n=%d, rank=%d", n, rank)
+
+			// Generate a random symmetric semi-definite matrix A with the given rank.
+			a := NewSymDense(n, nil)
+			for i := 0; i < rank; i++ {
+				x := randVecDense(n, 1, 1, src)
+				a.SymRankOne(a, 1, x)
+			}
+
+			// Compute the pivoted Cholesky factorization of A.
+			var chol PivotedCholesky
+			ok := chol.Factorize(a, -1)
+
+			// Check that the ok return matches the rank of A.
+			if !ok && rank == n {
+				t.Errorf("%s: unexpected factorization failure with full rank", name)
+			}
+			if ok && rank != n {
+				t.Errorf("%s: unexpected factorization success with deficit rank", name)
+			}
+
+			// Check that the computed rank matches the rank of A.
+			if chol.Rank() != rank {
+				t.Errorf("%s: unexpected computed rank, got %d", name, chol.Rank())
+			}
+
+			// Check the size.
+			r, c := chol.Dims()
+			if r != n || c != n {
+				t.Errorf("n=%d, rank=%d: unexpected dims: r=%d, c=%d", n, rank, r, c)
+			}
+			if chol.SymmetricDim() != n {
+				t.Errorf("n=%d, rank=%d: unexpected symmetric dim: dim=%d", n, rank, chol.SymmetricDim())
+			}
+
+			// Compute the norm of the difference |P*Uᵀ*U*Pᵀ - A|.
+			diff := NewDense(n, n, nil)
+			for i := 0; i < n; i++ {
+				for j := 0; j < n; j++ {
+					diff.Set(i, j, chol.At(i, j)-a.At(i, j))
+				}
+			}
+			res := Norm(diff, 1)
+			if res > tol {
+				t.Errorf("n=%d, rank=%d: unexpected result (|diff|=%v)\ndiff = %.4g", n, rank, res, Formatted(diff, Prefix("       ")))
+			}
+		}
+	}
+}
+
+func TestPivotedCholeskySolveTo(t *testing.T) {
+	t.Parallel()
+
+	const (
+		nrhs = 4
+		tol  = 1e-14
+	)
+	rnd := rand.New(rand.NewSource(1))
+	for _, n := range []int{1, 2, 3, 5, 10} {
+		a := NewSymDense(n, nil)
+		for i := 0; i < n; i++ {
+			a.SetSym(i, i, rnd.Float64()+float64(n))
+			for j := i + 1; j < n; j++ {
+				a.SetSym(i, j, rnd.Float64())
+			}
+		}
+
+		want := NewDense(n, nrhs, nil)
+		for i := 0; i < n; i++ {
+			for j := 0; j < nrhs; j++ {
+				want.Set(i, j, rnd.NormFloat64())
+			}
+		}
+
+		var b Dense
+		b.Mul(a, want)
+
+		for _, typ := range []Symmetric{a, asBasicSymmetric(a)} {
+			name := fmt.Sprintf("Case n=%d,type=%T,nrhs=%d", n, typ, nrhs)
+
+			var chol PivotedCholesky
+			ok := chol.Factorize(typ, -1)
+			if !ok {
+				t.Fatalf("%v: matrix not positive definite", name)
+			}
+
+			var got Dense
+			err := chol.SolveTo(&got, &b)
+			if err != nil {
+				t.Errorf("%v: unexpected error from SolveTo: %v", name, err)
+				continue
+			}
+
+			var resid Dense
+			resid.Sub(want, &got)
+			diff := Norm(&resid, math.Inf(1))
+			if diff > tol {
+				t.Errorf("%v: unexpected solution; diff=%v", name, diff)
+			}
+
+			got.Copy(&b)
+			err = chol.SolveTo(&got, &got)
+			if err != nil {
+				t.Errorf("%v: unexpected error from SolveTo when dst==b: %v", name, err)
+				continue
+			}
+
+			resid.Sub(want, &got)
+			diff = Norm(&resid, math.Inf(1))
+			if diff > tol {
+				t.Errorf("%v: unexpected solution when dst==b; diff=%v", name, diff)
+			}
+		}
+	}
+}
+
+func TestPivotedCholeskySolveVecTo(t *testing.T) {
+	t.Parallel()
+
+	const tol = 1e-14
+	rnd := rand.New(rand.NewSource(1))
+	for _, n := range []int{1, 2, 3, 5, 10} {
+
+		a := NewSymDense(n, nil)
+		for i := 0; i < n; i++ {
+			a.SetSym(i, i, rnd.Float64()+float64(n))
+			for j := i + 1; j < n; j++ {
+				a.SetSym(i, j, rnd.Float64())
+			}
+		}
+
+		want := NewVecDense(n, nil)
+		for i := 0; i < n; i++ {
+			want.SetVec(i, rnd.NormFloat64())
+		}
+		var b VecDense
+		b.MulVec(a, want)
+
+		for _, typ := range []Symmetric{a, asBasicSymmetric(a)} {
+			name := fmt.Sprintf("Case n=%d,type=%T", n, typ)
+
+			var chol PivotedCholesky
+			ok := chol.Factorize(typ, -1)
+			if !ok {
+				t.Fatalf("%v: matrix not positive definite", name)
+			}
+
+			var got VecDense
+			err := chol.SolveVecTo(&got, &b)
+			if err != nil {
+				t.Errorf("%v: unexpected error from SolveVecTo: %v", name, err)
+				continue
+			}
+
+			var resid VecDense
+			resid.SubVec(want, &got)
+			diff := Norm(&resid, math.Inf(1))
+			if diff > tol {
+				t.Errorf("%v: unexpected solution; diff=%v", name, diff)
+			}
+
+			got.CopyVec(&b)
+			err = chol.SolveVecTo(&got, &got)
+			if err != nil {
+				t.Errorf("%v: unexpected error from SolveVecTo when dst==b: %v", name, err)
+				continue
+			}
+
+			resid.SubVec(want, &got)
+			diff = Norm(&resid, math.Inf(1))
+			if diff > tol {
+				t.Errorf("%v: unexpected solution when dst==b; diff=%v", name, diff)
+			}
+		}
+	}
+}

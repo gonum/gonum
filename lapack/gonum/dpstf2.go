@@ -27,9 +27,10 @@ import (
 // On return, A contains the factor U or L from the Cholesky factorization and
 // piv contains P stored such that P[piv[k],k] = 1.
 //
-// Dpstf2 returns the computed rank of A and whether the algorithm completed
-// successfully. If ok is false, the matrix A is either rank deficient or is not
-// positive semidefinite.
+// Dpstf2 returns the computed rank of A and whether the factorization can be
+// used to solve a system. Dpstf2 does not attempt to check that A is positive
+// semi-definite, so if ok is false, the matrix A is either rank deficient or is
+// not positive semidefinite.
 //
 // The length of piv must be n and the length of work must be at least 2*n,
 // otherwise Dpstf2 will panic.

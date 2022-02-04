@@ -145,9 +145,10 @@ func Pbtrs(t blas64.TriangularBand, b blas64.General) {
 // and the underlying data between a and t is shared. P is stored on return in
 // vector piv such that P[piv[k],k] = 1.
 //
-// Pstrf also returns the computed rank of A and whether the algorithm completed
-// successfully. If ok is false, the matrix A is either rank deficient or is not
-// positive semidefinite.
+// Pstrf returns the computed rank of A and whether the factorization can be
+// used to solve a system. Pstrf does not attempt to check that A is positive
+// semi-definite, so if ok is false, the matrix A is either rank deficient or is
+// not positive semidefinite.
 //
 // The length of piv must be n and the length of work must be at least 2*n,
 // otherwise Pstrf will panic.

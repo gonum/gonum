@@ -16,6 +16,37 @@ import (
 	"gonum.org/v1/gonum/stat/combin"
 )
 
+// Deduplicate removes duplicate statements in s, working in place, and returns
+// the deduplicated slice with statements sorted in lexical order. Term UID
+// fields are not considered and their values may be lost during deduplication.
+func Deduplicate(s []*Statement) []*Statement {
+	if len(s) < 2 {
+		return s
+	}
+	sort.Sort(c14nStatements(s))
+	curr := 0
+	for i, e := range s {
+		if isSameStatement(e, s[curr]) {
+			continue
+		}
+		curr++
+		if curr < i {
+			s[curr], s[i] = s[i], nil
+		}
+	}
+	return s[:curr+1]
+}
+
+func isSameStatement(a, b *Statement) bool {
+	if a == b {
+		return true
+	}
+	return a.Subject.Value == b.Subject.Value &&
+		a.Predicate.Value == b.Predicate.Value &&
+		a.Object.Value == b.Object.Value &&
+		a.Label.Value == b.Label.Value
+}
+
 // Note on implementation details: The comment numbering in the code relates the
 // implementation to the steps of the algorithm described in the specification.
 

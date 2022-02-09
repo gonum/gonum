@@ -12,7 +12,81 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
+
+var deduplicateTests = []struct {
+	statements string
+	want       string
+}{
+	{},
+	{
+		statements: `
+_:1 <p:a> _:2 .
+`,
+		want: `_:1 <p:a> _:2 .
+`,
+	},
+	{
+		statements: `
+_:1 <p:a> _:2 .
+_:1 <p:a> _:2 .
+`,
+		want: `_:1 <p:a> _:2 .
+`,
+	},
+	{
+		statements: `
+_:1 <p:a> _:2 .
+_:2 <p:a> _:1 .
+_:1 <p:a> _:2 .
+`,
+		want: `_:1 <p:a> _:2 .
+_:2 <p:a> _:1 .
+`,
+	},
+	{
+		statements: `
+_:1 <p:a> _:2 .
+_:2 <p:a> _:1 .
+_:1 <p:a> _:2 .
+_:1 <p:a> _:2 .
+`,
+		want: `_:1 <p:a> _:2 .
+_:2 <p:a> _:1 .
+`,
+	},
+}
+
+func TestDeduplicate(t *testing.T) {
+tests:
+	for i, test := range deduplicateTests {
+		var statements []*Statement
+		dec := NewDecoder(strings.NewReader(test.statements))
+		for {
+			s, err := dec.Unmarshal()
+			if err != nil {
+				if err != io.EOF {
+					t.Errorf("error during decoding: %v", err)
+					continue tests
+				}
+				break
+			}
+			statements = append(statements, s)
+		}
+
+		var buf strings.Builder
+		for _, s := range Deduplicate(statements) {
+			fmt.Fprintln(&buf, s)
+		}
+
+		got := buf.String()
+		if got != test.want {
+			t.Errorf("unexpected result for test %d:\n%s", i, cmp.Diff(got, test.want))
+		}
+	}
+}
 
 func TestURNA(t *testing.T) {
 	glob, err := filepath.Glob(filepath.Join("testdata", *tests))

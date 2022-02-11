@@ -63,6 +63,85 @@ func (q Query) In(fn func(s *Statement) bool) Query {
 	return r
 }
 
+// HasAllOut returns a query holding nodes from the receiver's
+// initial set where all outgoing statements satisfy fn. The
+// query short circuits, so fn is not called after the first
+// failure to match.
+func (q Query) HasAllOut(fn func(s *Statement) bool) Query {
+	r := Query{g: q.g}
+	notFn := not(fn)
+loop:
+	for _, s := range q.terms {
+		it := q.g.From(s.ID())
+		for it.Next() {
+			if ConnectedByAny(q.g.Edge(s.ID(), it.Node().ID()), notFn) {
+				continue loop
+			}
+		}
+		r.terms = append(r.terms, s)
+	}
+	return r
+}
+
+// HasAllIn returns a query holding nodes from the receiver's
+// initial set where all incoming statements satisfy fn. The
+// query short circuits, so fn is not called after the first
+// failure to match.
+func (q Query) HasAllIn(fn func(s *Statement) bool) Query {
+	r := Query{g: q.g}
+	notFn := not(fn)
+loop:
+	for _, s := range q.terms {
+		it := q.g.To(s.ID())
+		for it.Next() {
+			if ConnectedByAny(q.g.Edge(it.Node().ID(), s.ID()), notFn) {
+				continue loop
+			}
+		}
+		r.terms = append(r.terms, s)
+	}
+	return r
+}
+
+// HasAnyOut returns a query holding nodes from the receiver's
+// initial set where any outgoing statements satisfies fn. The
+// query short circuits, so fn is not called after the first match.
+func (q Query) HasAnyOut(fn func(s *Statement) bool) Query {
+	r := Query{g: q.g}
+	for _, s := range q.terms {
+		it := q.g.From(s.ID())
+		for it.Next() {
+			if ConnectedByAny(q.g.Edge(s.ID(), it.Node().ID()), fn) {
+				r.terms = append(r.terms, s)
+				break
+			}
+		}
+	}
+	return r
+}
+
+// HasAnyIn returns a query holding nodes from the receiver's
+// initial set where any incoming statements satisfies fn. The
+// query short circuits, so fn is not called after the first match.
+func (q Query) HasAnyIn(fn func(s *Statement) bool) Query {
+	r := Query{g: q.g}
+	for _, s := range q.terms {
+		it := q.g.To(s.ID())
+		for it.Next() {
+			if ConnectedByAny(q.g.Edge(it.Node().ID(), s.ID()), fn) {
+				r.terms = append(r.terms, s)
+				break
+			}
+		}
+	}
+	return r
+}
+
+// not returns the negation of fn.
+func not(fn func(s *Statement) bool) func(s *Statement) bool {
+	return func(s *Statement) bool { return !fn(s) }
+}
+
 // And returns a query that holds the conjunction of q and p.
 func (q Query) And(p Query) Query {
 	if q.g != p.g {

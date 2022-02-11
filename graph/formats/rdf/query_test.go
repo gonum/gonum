@@ -5,7 +5,9 @@
 package rdf
 
 import (
+	"io"
 	"reflect"
+	"strings"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -217,6 +219,377 @@ func TestQueryUnique(t *testing.T) {
 			}
 		}
 	}
+}
+
+// filterTestGraph is used to test Has*Out and Has*In. It has a symmetry
+// that means that the in an out tests have the same form, just with opposite
+// directions.
+const filterTestGraph = `
+<ex:a> <p:1> <ex:d> .
+<ex:a> <p:2> <ex:f> .
+<ex:b> <p:2> <ex:d> .
+<ex:c> <p:2> <ex:d> .
+<ex:a> <o:n> <ex:d> .
+# symmetry line.
+<ex:e> <p:1> <ex:a> .
+<ex:g> <p:2> <ex:a> .
+<ex:e> <p:2> <ex:b> .
+<ex:e> <p:2> <ex:c> .
+<ex:e> <o:n> <ex:a> .
+`
+
+var hasOutTests = []struct {
+	name    string
+	in      []Term
+	fn      func(*Statement) bool
+	cons    func(q Query) Query
+	wantAll []Term
+	wantAny []Term
+}{
+	{
+		name: "all",
+		in:   []Term{{Value: "<ex:a>"}, {Value: "<ex:b>"}, {Value: "<ex:c>"}},
+		fn:   func(s *Statement) bool { return true },
+		cons: func(q Query) Query {
+			cond := func(s *Statement) bool { return true }
+			return q.Out(cond).In(cond).Unique()
+		},
+		wantAll: []Term{{Value: "<ex:a>"}, {Value: "<ex:b>"}, {Value: "<ex:c>"}},
+		wantAny: []Term{{Value: "<ex:a>"}, {Value: "<ex:b>"}, {Value: "<ex:c>"}},
+	},
+	{
+		name: "none",
+		in:   []Term{{Value: "<ex:a>", UID: 1}, {Value: "<ex:b>", UID: 2}, {Value: "<ex:c>", UID: 3}},
+		fn:   func(s *Statement) bool { return false },
+		cons: func(q Query) Query {
+			cond := func(s *Statement) bool { return false }
+			return q.Out(cond).In(cond).Unique()
+		},
+		wantAll: nil,
+		wantAny: nil,
+	},
+	{
+		name: ". <p:1> .",
+		in:   []Term{{Value: "<ex:a>", UID: 1}, {Value: "<ex:b>", UID: 2}, {Value: "<ex:c>", UID: 3}},
+		fn:   func(s *Statement) bool { return s.Predicate.Value == "<p:1>" },
+		cons: func(q Query) Query {
+			cond1 := func(s *Statement) bool { return s.Predicate.Value == "<p:1>" }
+			cond2 := func(s *Statement) bool { return s.Predicate.Value != "<p:1>" }
+			return q.Out(cond1).In(cond1).Not(q.Out(cond2).In(cond2)).Unique()
+		},
+		wantAll: nil,
+		wantAny: []Term{{Value: "<ex:a>"}},
+	},
+	{
+		name: "!(. <p:1> .)",
+		in:   []Term{{Value: "<ex:a>", UID: 1}, {Value: "<ex:b>", UID: 2}, {Value: "<ex:c>", UID: 3}},
+		fn:   func(s *Statement) bool { return s.Predicate.Value != "<p:1>" },
+		cons: func(q Query) Query {
+			cond1 := func(s *Statement) bool { return s.Predicate.Value != "<p:1>" }
+			cond2 := func(s *Statement) bool { return s.Predicate.Value == "<p:1>" }
+			return q.Out(cond1).In(cond1).Not(q.Out(cond2).In(cond2)).Unique()
+		},
+		wantAll: []Term{{Value: "<ex:b>"}, {Value: "<ex:c>"}},
+		wantAny: []Term{{Value: "<ex:a>"}, {Value: "<ex:b>"}, {Value: "<ex:c>"}},
+	},
+	{
+		name: "!(. <p:2> .)",
+		in:   []Term{{Value: "<ex:a>", UID: 1}, {Value: "<ex:b>", UID: 2}, {Value: "<ex:c>", UID: 3}},
+		fn:   func(s *Statement) bool { return s.Predicate.Value != "<p:2>" },
+		cons: func(q Query) Query {
+			cond1 := func(s *Statement) bool { return s.Predicate.Value != "<p:2>" }
+			cond2 := func(s *Statement) bool { return s.Predicate.Value == "<p:2>" }
+			return q.Out(cond1).In(cond1).Not(q.Out(cond2).In(cond2)).Unique()
+		},
+		wantAll: nil,
+		wantAny: []Term{{Value: "<ex:a>"}},
+	},
+	{
+		name: "!(. <p:2>  <ex:f>)",
+		in:   []Term{{Value: "<ex:a>", UID: 1}, {Value: "<ex:b>", UID: 2}, {Value: "<ex:c>", UID: 3}},
+		fn: func(s *Statement) bool {
+			return s.Predicate.Value != "<p:2>" || (s.Predicate.Value == "<p:2>" && s.Object.Value != "<ex:f>")
+		},
+		cons: func(q Query) Query {
+			cond := func(s *Statement) bool {
+				return s.Predicate.Value == "<p:2>" && s.Object.Value != "<ex:f>"
+			}
+			return q.Out(cond).In(cond).Unique()
+		},
+		wantAll: []Term{{Value: "<ex:b>"}, {Value: "<ex:c>"}},
+		wantAny: []Term{{Value: "<ex:a>"}, {Value: "<ex:b>"}, {Value: "<ex:c>"}},
+	},
+	{
+		name: "!(. <p:2>  !<ex:f>)",
+		in:   []Term{{Value: "<ex:a>", UID: 1}, {Value: "<ex:b>", UID: 2}, {Value: "<ex:c>", UID: 3}},
+		fn: func(s *Statement) bool {
+			return s.Predicate.Value != "<p:2>" || (s.Predicate.Value == "<p:2>" && s.Object.Value == "<ex:f>")
+		},
+		cons: func(q Query) Query {
+			cond := func(s *Statement) bool {
+				return s.Predicate.Value == "<p:2>" && s.Object.Value == "<ex:f>"
+			}
+			return q.Out(cond).In(cond).Unique()
+		},
+		wantAll: []Term{{Value: "<ex:a>"}},
+		wantAny: []Term{{Value: "<ex:a>"}},
+	},
+}
+
+func TestQueryHasAllOut(t *testing.T) {
+	g, err := graphFromStatements(filterTestGraph)
+	if err != nil {
+		t.Fatalf("unexpected error constructing graph: %v", err)
+	}
+	for _, test := range hasOutTests {
+		ids := make(map[string]int64)
+		for i, v := range test.in {
+			term, ok := g.TermFor(v.Value)
+			if !ok {
+				t.Fatalf("unexpected error constructing graph: could not get UID for term: %v", v.Value)
+			}
+			test.in[i].UID = term.UID
+			ids[term.Value] = term.UID
+		}
+		for i, v := range test.wantAll {
+			test.wantAll[i].UID = ids[v.Value]
+		}
+
+		a := Query{g: g, terms: test.in}
+
+		got := a.HasAllOut(test.fn).Result()
+		sortByID(got)
+		sortByID(test.wantAll)
+
+		if !reflect.DeepEqual(got, test.wantAll) {
+			t.Errorf("unexpected result for test %q:\ngot: %v\nwant:%v",
+				test.name, got, test.wantAll)
+		}
+
+		cons := test.cons(a).Result()
+		sortByID(cons)
+		if !reflect.DeepEqual(got, cons) {
+			t.Errorf("unexpected construction result for test %q:\ngot: %v\nwant:%v",
+				test.name, got, cons)
+		}
+	}
+}
+
+func TestQueryHasAnyOut(t *testing.T) {
+	g, err := graphFromStatements(filterTestGraph)
+	if err != nil {
+		t.Fatalf("unexpected error constructing graph: %v", err)
+	}
+	for _, test := range hasOutTests {
+		ids := make(map[string]int64)
+		for i, v := range test.in {
+			term, ok := g.TermFor(v.Value)
+			if !ok {
+				t.Fatalf("unexpected error constructing graph: could not get UID for term: %v", v.Value)
+			}
+			test.in[i].UID = term.UID
+			ids[term.Value] = term.UID
+		}
+		for i, v := range test.wantAny {
+			test.wantAny[i].UID = ids[v.Value]
+		}
+
+		a := Query{g: g, terms: test.in}
+
+		got := a.HasAnyOut(test.fn).Result()
+		sortByID(got)
+		sortByID(test.wantAny)
+
+		if !reflect.DeepEqual(got, test.wantAny) {
+			t.Errorf("unexpected result for test %q:\ngot: %v\nwant:%v",
+				test.name, got, test.wantAny)
+		}
+	}
+}
+
+var hasInTests = []struct {
+	name    string
+	in      []Term
+	fn      func(*Statement) bool
+	cons    func(q Query) Query
+	wantAll []Term
+	wantAny []Term
+}{
+	{
+		name: "all",
+		in:   []Term{{Value: "<ex:a>"}, {Value: "<ex:b>"}, {Value: "<ex:c>"}},
+		fn:   func(s *Statement) bool { return true },
+		cons: func(q Query) Query {
+			cond := func(s *Statement) bool { return true }
+			return q.In(cond).Out(cond).Unique()
+		},
+		wantAll: []Term{{Value: "<ex:a>"}, {Value: "<ex:b>"}, {Value: "<ex:c>"}},
+		wantAny: []Term{{Value: "<ex:a>"}, {Value: "<ex:b>"}, {Value: "<ex:c>"}},
+	},
+	{
+		name: "none",
+		in:   []Term{{Value: "<ex:a>", UID: 1}, {Value: "<ex:b>", UID: 2}, {Value: "<ex:c>", UID: 3}},
+		fn:   func(s *Statement) bool { return false },
+		cons: func(q Query) Query {
+			cond := func(s *Statement) bool { return false }
+			return q.In(cond).Out(cond).Unique()
+		},
+		wantAll: nil,
+		wantAny: nil,
+	},
+	{
+		name: ". <p:1> .",
+		in:   []Term{{Value: "<ex:a>", UID: 1}, {Value: "<ex:b>", UID: 2}, {Value: "<ex:c>", UID: 3}},
+		fn:   func(s *Statement) bool { return s.Predicate.Value == "<p:1>" },
+		cons: func(q Query) Query {
+			cond1 := func(s *Statement) bool { return s.Predicate.Value == "<p:1>" }
+			cond2 := func(s *Statement) bool { return s.Predicate.Value != "<p:1>" }
+			return q.In(cond1).Out(cond1).Not(q.In(cond2).Out(cond2)).Unique()
+		},
+		wantAll: nil,
+		wantAny: []Term{{Value: "<ex:a>"}},
+	},
+	{
+		name: "!(. <p:1> .)",
+		in:   []Term{{Value: "<ex:a>", UID: 1}, {Value: "<ex:b>", UID: 2}, {Value: "<ex:c>", UID: 3}},
+		fn:   func(s *Statement) bool { return s.Predicate.Value != "<p:1>" },
+		cons: func(q Query) Query {
+			cond1 := func(s *Statement) bool { return s.Predicate.Value != "<p:1>" }
+			cond2 := func(s *Statement) bool { return s.Predicate.Value == "<p:1>" }
+			return q.In(cond1).Out(cond1).Not(q.In(cond2).Out(cond2)).Unique()
+		},
+		wantAll: []Term{{Value: "<ex:b>"}, {Value: "<ex:c>"}},
+		wantAny: []Term{{Value: "<ex:a>"}, {Value: "<ex:b>"}, {Value: "<ex:c>"}},
+	},
+	{
+		name: "!(. <p:2> .)",
+		in:   []Term{{Value: "<ex:a>", UID: 1}, {Value: "<ex:b>", UID: 2}, {Value: "<ex:c>", UID: 3}},
+		fn:   func(s *Statement) bool { return s.Predicate.Value != "<p:2>" },
+		cons: func(q Query) Query {
+			cond1 := func(s *Statement) bool { return s.Predicate.Value != "<p:2>" }
+			cond2 := func(s *Statement) bool { return s.Predicate.Value == "<p:2>" }
+			return q.In(cond1).Out(cond1).Not(q.In(cond2).Out(cond2)).Unique()
+		},
+		wantAll: nil,
+		wantAny: []Term{{Value: "<ex:a>"}},
+	},
+	{
+		name: "!(<ex:f> <p:2>  .)",
+		in:   []Term{{Value: "<ex:a>", UID: 1}, {Value: "<ex:b>", UID: 2}, {Value: "<ex:c>", UID: 3}},
+		fn: func(s *Statement) bool {
+			return s.Predicate.Value != "<p:2>" || (s.Predicate.Value == "<p:2>" && s.Subject.Value != "<ex:g>")
+		},
+		cons: func(q Query) Query {
+			cond := func(s *Statement) bool {
+				return s.Predicate.Value == "<p:2>" && s.Subject.Value != "<ex:g>"
+			}
+			return q.In(cond).Out(cond).Unique()
+		},
+		wantAll: []Term{{Value: "<ex:b>"}, {Value: "<ex:c>"}},
+		wantAny: []Term{{Value: "<ex:a>"}, {Value: "<ex:b>"}, {Value: "<ex:c>"}},
+	},
+	{
+		name: "!(!<ex:f> <p:2>  .)",
+		in:   []Term{{Value: "<ex:a>", UID: 1}, {Value: "<ex:b>", UID: 2}, {Value: "<ex:c>", UID: 3}},
+		fn: func(s *Statement) bool {
+			return s.Predicate.Value != "<p:2>" || (s.Predicate.Value == "<p:2>" && s.Subject.Value == "<ex:g>")
+		},
+		cons: func(q Query) Query {
+			cond := func(s *Statement) bool {
+				return s.Predicate.Value == "<p:2>" && s.Subject.Value == "<ex:g>"
+			}
+			return q.In(cond).Out(cond).Unique()
+		},
+		wantAll: []Term{{Value: "<ex:a>"}},
+		wantAny: []Term{{Value: "<ex:a>"}},
+	},
+}
+
+func TestQueryHasAllIn(t *testing.T) {
+	g, err := graphFromStatements(filterTestGraph)
+	if err != nil {
+		t.Fatalf("unexpected error constructing graph: %v", err)
+	}
+	for _, test := range hasInTests {
+		ids := make(map[string]int64)
+		for i, v := range test.in {
+			term, ok := g.TermFor(v.Value)
+			if !ok {
+				t.Fatalf("unexpected error constructing graph: could not get UID for term: %v", v.Value)
+			}
+			test.in[i].UID = term.UID
+			ids[term.Value] = term.UID
+		}
+		for i, v := range test.wantAll {
+			test.wantAll[i].UID = ids[v.Value]
+		}
+
+		a := Query{g: g, terms: test.in}
+
+		got := a.HasAllIn(test.fn).Result()
+		sortByID(got)
+		sortByID(test.wantAll)
+
+		if !reflect.DeepEqual(got, test.wantAll) {
+			t.Errorf("unexpected result for test %q:\ngot: %v\nwant:%v",
+				test.name, got, test.wantAll)
+		}
+
+		cons := test.cons(a).Result()
+		sortByID(cons)
+		if !reflect.DeepEqual(got, cons) {
+			t.Errorf("unexpected construction result for test %q:\ngot: %v\nwant:%v",
+				test.name, got, cons)
+		}
+	}
+}
+
+func TestQueryHasAnyIn(t *testing.T) {
+	g, err := graphFromStatements(filterTestGraph)
+	if err != nil {
+		t.Fatalf("unexpected error constructing graph: %v", err)
+	}
+	for _, test := range hasInTests {
+		ids := make(map[string]int64)
+		for i, v := range test.in {
+			term, ok := g.TermFor(v.Value)
+			if !ok {
+				t.Fatalf("unexpected error constructing graph: could not get UID for term: %v", v.Value)
+			}
+			test.in[i].UID = term.UID
+			ids[term.Value] = term.UID
+		}
+		for i, v := range test.wantAny {
+			test.wantAny[i].UID = ids[v.Value]
+		}
+
+		a := Query{g: g, terms: test.in}
+
+		got := a.HasAnyIn(test.fn).Result()
+		sortByID(got)
+		sortByID(test.wantAny)
+
+		if !reflect.DeepEqual(got, test.wantAny) {
+			t.Errorf("unexpected result for test %q:\ngot: %v\nwant:%v",
+				test.name, got, test.wantAny)
+		}
+	}
+}
+
+func graphFromStatements(s string) (*Graph, error) {
+	g := NewGraph()
+	dec := NewDecoder(strings.NewReader(s))
+	for {
+		s, err := dec.Unmarshal()
+		if err != nil {
+			if err != io.EOF {
+				return nil, err
+			}
+			break
+		}
+		g.AddStatement(s)
+	}
+	return g, nil
 }
 
 func permutedTerms(t []Term, src rand.Source) []Term {

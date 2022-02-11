@@ -454,15 +454,25 @@ func TestDsatur(t *testing.T) {
 }
 
 func TestDsaturExact(t *testing.T) {
-	timeout := time.Microsecond
 	for _, test := range coloringTests {
 		for _, useTimeout := range []bool{false, true} {
 			if test.long && !*runLong && !useTimeout {
 				continue
 			}
+			// Set a backstop to safeguard against occasional long running
+			// cases crashing the entire test set. One minute appears to be
+			// reasonable.
+			timeout := time.Minute
+			if test.long && *runLong {
+				// Allow explicitly long tests all the time they need.
+				timeout = 0
+			}
+			if useTimeout {
+				timeout = time.Microsecond
+			}
 			var term Terminator
 			cancel := func() {}
-			if useTimeout {
+			if timeout != 0 {
 				term, cancel = context.WithTimeout(context.Background(), timeout)
 			}
 			k, colors, err := DsaturExact(term, test.g)

@@ -232,6 +232,29 @@ func (q Query) Not(p Query) Query {
 	return r
 }
 
+// Repeat repeatedly calls fn on q until the set of results is empty or
+// ok is false, and then returns the result. If the last non-empty result
+// is wanted, fn should return its input and false when the partial
+// traversal returns an empty result.
+//
+// 	result := start.Repeat(func(q rdf.Query) (rdf.Query, bool) {
+// 		r := q.Out(condition)
+// 		if r.Len() == 0 {
+// 			return q, false
+// 		}
+// 		return r, true
+// 	}).Result()
+//
+func (q Query) Repeat(fn func(Query) (q Query, ok bool)) Query {
+	for {
+		var ok bool
+		q, ok = fn(q)
+		if !ok || len(q.terms) == 0 {
+			return q
+		}
+	}
+}
+
 // Unique returns a copy of the receiver that contains only one instance
 // of each term.
 func (q Query) Unique() Query {
@@ -243,6 +266,11 @@ func (q Query) Unique() Query {
 		}
 	}
 	return r
+}
+
+// Len returns the number of terms held by the query.
+func (q Query) Len() int {
+	return len(q.terms)
 }
 
 // Result returns the terms held by the query.

@@ -181,6 +181,72 @@ func TestQueryNot(t *testing.T) {
 	}
 }
 
+func TestQueryRepeat(t *testing.T) {
+	const filterTestGraph = `
+<ex:a> <p:1> <ex:b> .
+<ex:b> <p:1> <ex:c> .
+<ex:c> <p:1> <ex:d> .
+<ex:d> <p:1> <ex:e> .
+<ex:e> <p:1> <ex:f> .
+<ex:a> <p:2> <ex:_b> .
+<ex:b> <p:2> <ex:_c> .
+<ex:c> <p:2> <ex:_d> .
+<ex:d> <p:2> <ex:_e> .
+<ex:e> <p:2> <ex:_f> .
+`
+
+	want := []string{"<ex:a>", "<ex:b>", "<ex:c>", "<ex:d>", "<ex:e>", "<ex:f>"}
+
+	g, err := graphFromStatements(filterTestGraph)
+	if err != nil {
+		t.Fatalf("unexpected error constructing graph: %v", err)
+	}
+	start, ok := g.TermFor("<ex:a>")
+	if !ok {
+		t.Fatal("could not get start term")
+	}
+	for _, limit := range []int{0, 1, 2, 5, 100} {
+		got := []string{}
+		var i int
+		result := g.Query(start).Repeat(func(q Query) (Query, bool) {
+			if i >= limit {
+				return q, false
+			}
+			i++
+			q = q.Out(func(s *Statement) bool {
+				ok := s.Predicate.Value == "<p:1>"
+				if ok {
+					got = append(got, s.Object.Value)
+				}
+				return ok
+			})
+			return q, true
+		}).Unique().Result()
+
+		n := limit
+		if n >= len(want) {
+			n = len(want) - 1
+		}
+		if !reflect.DeepEqual(got, want[1:n+1]) {
+			t.Errorf("unexpected capture for limit=%d: got:%v want:%v",
+				limit, got, want[:n])
+		}
+
+		switch {
+		case limit < len(want):
+			if len(result) == 0 || result[0].Value != want[i] {
+				t.Errorf("unexpected result for limit=%d: got:%v want:%v",
+					limit, result[0], want[i])
+			}
+		default:
+			if len(result) != 0 {
+				t.Errorf("unexpected result for limit=%d: got: %v want:none",
+					limit, result[0])
+			}
+		}
+	}
+}
+
 var uniqueTests = []struct {
 	name string
 	in   []Term

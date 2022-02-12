@@ -154,17 +154,15 @@ func ExampleQuery() {
 	}
 
 	// g.V().has('name', 'heracles').repeat(out('father')).emit().values('name')
-	q := heracles
-	for i := 0; ; i++ {
+	var i int
+	heracles.Repeat(func(q rdf.Query) (rdf.Query, bool) {
 		q = q.Out(father)
-		results := q.Out(name).Result()
-		if len(results) == 0 {
-			break
-		}
-		for _, r := range results {
+		for _, r := range q.Out(name).Result() {
 			fmt.Printf("Heracles' lineage %d: %s\n", i, r.Value)
 		}
-	}
+		i++
+		return q, true
+	})
 
 	// parents and typ are helper filters for queries below.
 	parents := func(s *rdf.Statement) bool {

@@ -454,26 +454,32 @@ func TestDsatur(t *testing.T) {
 }
 
 func TestDsaturExact(t *testing.T) {
+	timeout := time.Microsecond
 	for _, test := range coloringTests {
 		for _, useTimeout := range []bool{false, true} {
 			if test.long && !*runLong && !useTimeout {
 				continue
 			}
-			// Set a backstop to safeguard against occasional long running
-			// cases crashing the entire test set. One minute appears to be
-			// reasonable.
-			timeout := time.Minute
-			if test.long && *runLong {
-				// Allow explicitly long tests all the time they need.
-				timeout = 0
-			}
+			var (
+				term   Terminator
+				cancel func()
+			)
 			if useTimeout {
-				timeout = time.Microsecond
-			}
-			var term Terminator
-			cancel := func() {}
-			if timeout != 0 {
 				term, cancel = context.WithTimeout(context.Background(), timeout)
+			} else {
+				// Set a backstop to safeguard against occasional long running
+				// cases crashing the entire test set so get as much time as we can.
+				deadline, ok := t.Deadline()
+				if ok {
+					// But make sure we are faster than the watchdog.
+					deadline = deadline.Add(-10 * time.Second)
+					if deadline.Before(time.Now()) {
+						t.Errorf("we ran out of time by %q", test.name)
+					}
+					term, cancel = context.WithDeadline(context.Background(), deadline)
+				} else {
+					cancel = func() {}
+				}
 			}
 			k, colors, err := DsaturExact(term, test.g)
 			cancel()
@@ -492,7 +498,11 @@ func TestDsaturExact(t *testing.T) {
 					test.name, xid, yid, colors)
 			}
 			if err != nil && !useTimeout {
-				t.Errorf("unexpected error: %v", err)
+				if err != context.DeadlineExceeded {
+					t.Errorf("unexpected error for %q: %v", test.name, err)
+				} else {
+					t.Logf("test ran too long for %q", test.name)
+				}
 			}
 		}
 	}

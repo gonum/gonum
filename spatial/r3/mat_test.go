@@ -5,11 +5,13 @@
 package r3
 
 import (
+	"math"
 	"testing"
 
 	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/mat"
+	"gonum.org/v1/gonum/num/quat"
 )
 
 func TestMatAdd(t *testing.T) {
@@ -153,4 +155,73 @@ func randomVec(rnd *rand.Rand) (v Vec) {
 	v.Y = (rnd.Float64() - 0.5) * 20
 	v.Z = (rnd.Float64() - 0.5) * 20
 	return v
+}
+
+func TestDet(t *testing.T) {
+	const tol = 1e-11
+	rnd := rand.New(rand.NewSource(1))
+	for tc := 0; tc < 20; tc++ {
+		m := randomMat(rnd)
+		got := m.Det()
+		want := mat.Det(m)
+		if math.Abs(got-want) > tol {
+			t.Errorf("r3.Mat.Det() not equal to mat.Det(). got %f, want %f", got, want)
+		}
+	}
+}
+
+func TestOuter(t *testing.T) {
+	rnd := rand.New(rand.NewSource(1))
+	for tc := 0; tc < 20; tc++ {
+		alpha := rnd.Float64()
+		d := mat.NewDense(3, 3, nil)
+		n := NewMat(nil)
+		v1 := randomVec(rnd)
+		v2 := randomVec(rnd)
+		d1 := mat.NewVecDense(3, []float64{v1.X, v1.Y, v1.Z})
+		d2 := mat.NewVecDense(3, []float64{v2.X, v2.Y, v2.Z})
+		d.Outer(alpha, d1, d2)
+		n.Outer(alpha, v1, v2)
+		if !mat.Equal(d, n) {
+			t.Error("matrices not equal")
+		}
+	}
+}
+
+func TestRotationFromQuat(t *testing.T) {
+	const tol = 1e-11
+	rnd := rand.New(rand.NewSource(1))
+	var backing [9]float64 // reuse memory.
+	for tc := 0; tc < 20; tc++ {
+		q := quat.Number{Real: rnd.Float64(), Imag: rnd.Float64(), Jmag: rnd.Float64(), Kmag: rnd.Float64()}
+		qabs := quat.Abs(q)
+		q = quat.Scale(1/qabs, q)
+		m := NewMat(backing[:])
+		m.RotationFromQuat(q)
+		w, x, y, z := q.Real, q.Imag, q.Jmag, q.Kmag
+		x2, y2, z2 := x*x, y*y, z*z
+		norm := math.Sqrt(w*w + x2 + y2 + z2)
+		_ = norm
+		expect := NewMat([]float64{ // From https://en.wikipedia.org/wiki/Rotation_matrix#Quaternion
+			1 - 2*y2 - 2*z2, 2*x*y - 2*z*w, 2*x*z + 2*y*w,
+			2*x*y + 2*z*w, 1 - 2*x2 - 2*z2, 2*y*z - 2*x*w,
+			2*x*z - 2*y*w, 2*y*z + 2*x*w, 1 - 2*x2 - 2*y2,
+		})
+		if !mat.EqualApprox(m, expect, tol) {
+			t.Errorf("Out of tolerance.")
+		}
+		det := m.Det()
+		if math.Abs(det-1) > tol {
+			t.Errorf("determinant expected to be 1. got %f", det)
+		}
+	}
+}
+
+func BenchmarkQuat(b *testing.B) {
+	rnd := rand.New(rand.NewSource(1))
+	m := NewMat(nil)
+	for i := 0; i < b.N; i++ {
+		q := quat.Number{Real: rnd.Float64(), Imag: rnd.Float64(), Jmag: rnd.Float64(), Kmag: rnd.Float64()}
+		m.RotationFromQuat(q)
+	}
 }

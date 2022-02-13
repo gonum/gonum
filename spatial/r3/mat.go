@@ -4,7 +4,10 @@
 
 package r3
 
-import "gonum.org/v1/gonum/mat"
+import (
+	"gonum.org/v1/gonum/mat"
+	"gonum.org/v1/gonum/num/quat"
+)
 
 // Mat represents a 3×3 matrix. Useful for rotation matrices and such.
 // The zero value is usable as the 3×3 zero matrix.
@@ -162,4 +165,62 @@ func (m *Mat) VecCol(j int) Vec {
 		return Vec{}
 	}
 	return Vec{X: m.At(0, j), Y: m.At(1, j), Z: m.At(2, j)}
+}
+
+// Outer calculates the outer product of the vectors x and y,
+// where x and y are treated as column vectors, and stores the result in the receiver.
+//  m = alpha * x * yᵀ
+func (m *Mat) Outer(alpha float64, x, y Vec) {
+	ax := alpha * x.X
+	ay := alpha * x.Y
+	az := alpha * x.Z
+	m.Set(0, 0, ax*y.X)
+	m.Set(0, 1, ax*y.Y)
+	m.Set(0, 2, ax*y.Z)
+
+	m.Set(1, 0, ay*y.X)
+	m.Set(1, 1, ay*y.Y)
+	m.Set(1, 2, ay*y.Z)
+
+	m.Set(2, 0, az*y.X)
+	m.Set(2, 1, az*y.Y)
+	m.Set(2, 2, az*y.Z)
+}
+
+// Sets the rotation component of this matrix to the rotation specified by q,
+// as outlined at https://en.wikipedia.org/wiki/Rotation_matrix#Quaternion.
+//
+// RotationFromQuat requires a normalized quaternion q to perform a non-scaling rotation.
+// Example:
+//  q = quat.Scale(1/quat.Abs(q), q)
+func (m *Mat) RotationFromQuat(q quat.Number) {
+	w, x, y, z := q.Real, q.Imag, q.Jmag, q.Kmag
+	x2, y2, z2 := x*x, y*y, z*z
+	xw, xy, xz := x*w, x*y, x*z
+	yw, zw, yz := y*w, z*w, y*z
+	m.Set(0, 0, 1-2*y2-2*z2)
+	m.Set(0, 1, 2*xy-2*zw)
+	m.Set(0, 2, 2*xz+2*yw)
+	m.Set(1, 0, 2*xy+2*zw)
+	m.Set(1, 1, 1-2*x2-2*z2)
+	m.Set(1, 2, 2*yz-2*xw)
+	m.Set(2, 0, 2*xz-2*yw)
+	m.Set(2, 1, 2*yz+2*xw)
+	m.Set(2, 2, 1-2*x2-2*y2)
+}
+
+// Det calculates the determinant of the receiver using the following formula
+//      ⎡a b c⎤
+//  m = ⎢d e f⎥
+//      ⎣g h i⎦
+//  det(m) = a(ei − fh) − b(di − fg) + c(dh − eg)
+func (m *Mat) Det() float64 {
+	a := m.At(0, 0)
+	b := m.At(0, 1)
+	c := m.At(0, 2)
+
+	deta := m.At(1, 1)*m.At(2, 2) - m.At(1, 2)*m.At(2, 1)
+	detb := m.At(1, 0)*m.At(2, 2) - m.At(1, 2)*m.At(2, 0)
+	detc := m.At(1, 0)*m.At(2, 1) - m.At(1, 1)*m.At(2, 0)
+	return a*deta - b*detb + c*detc
 }

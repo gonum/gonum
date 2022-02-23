@@ -55,8 +55,7 @@ func (m *Mat) Scale(f float64, a mat.Matrix) {
 	}
 }
 
-// Performs matrix multiplication on v:
-//  result = M * v
+// MulVec returns the matrix-vector product M⋅v.
 func (m *Mat) MulVec(v Vec) Vec {
 	if m.data == nil {
 		return Vec{}
@@ -68,8 +67,7 @@ func (m *Mat) MulVec(v Vec) Vec {
 	}
 }
 
-// Performs transposed matrix multiplication on v:
-//  result = Mᵀ * v
+// MulVecTrans returns the matrix-vector product Mᵀ⋅v.
 func (m *Mat) MulVecTrans(v Vec) Vec {
 	if m.data == nil {
 		return Vec{}
@@ -187,12 +185,12 @@ func (m *Mat) Outer(alpha float64, x, y Vec) {
 	m.Set(2, 2, az*y.Z)
 }
 
-// Sets the rotation component of this matrix to the rotation specified by q,
-// as outlined at https://en.wikipedia.org/wiki/Rotation_matrix#Quaternion.
+// RotationFromQuat converts the quaternion q to the corresponding orthogonal
+// matrix and stores the result in the receiver. q should be normalized but this
+// assumption is not checked.
 //
-// RotationFromQuat requires a normalized quaternion q to perform a non-scaling rotation.
-// Example:
-//  q = quat.Scale(1/quat.Abs(q), q)
+// See https://en.wikipedia.org/wiki/Rotation_matrix#Quaternion for more
+// details.
 func (m *Mat) RotationFromQuat(q quat.Number) {
 	w, x, y, z := q.Real, q.Imag, q.Jmag, q.Kmag
 	x2, y2, z2 := x*x, y*y, z*z

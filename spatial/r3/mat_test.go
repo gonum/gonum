@@ -189,30 +189,35 @@ func TestOuter(t *testing.T) {
 }
 
 func TestRotationFromQuat(t *testing.T) {
-	const tol = 1e-11
+	const tol = 1e-14
 	rnd := rand.New(rand.NewSource(1))
-	var backing [9]float64 // reuse memory.
+
 	for tc := 0; tc < 20; tc++ {
-		q := quat.Number{Real: rnd.Float64(), Imag: rnd.Float64(), Jmag: rnd.Float64(), Kmag: rnd.Float64()}
-		qabs := quat.Abs(q)
-		q = quat.Scale(1/qabs, q)
-		m := NewMat(backing[:])
-		m.RotationFromQuat(q)
-		w, x, y, z := q.Real, q.Imag, q.Jmag, q.Kmag
-		x2, y2, z2 := x*x, y*y, z*z
-		norm := math.Sqrt(w*w + x2 + y2 + z2)
-		_ = norm
-		expect := NewMat([]float64{ // From https://en.wikipedia.org/wiki/Rotation_matrix#Quaternion
-			1 - 2*y2 - 2*z2, 2*x*y - 2*z*w, 2*x*z + 2*y*w,
-			2*x*y + 2*z*w, 1 - 2*x2 - 2*z2, 2*y*z - 2*x*w,
-			2*x*z - 2*y*w, 2*y*z + 2*x*w, 1 - 2*x2 - 2*y2,
-		})
-		if !mat.EqualApprox(m, expect, tol) {
-			t.Errorf("Out of tolerance.")
+		// Generate a random unit quaternion.
+		q := quat.Number{Real: rnd.NormFloat64(), Imag: rnd.NormFloat64(), Jmag: rnd.NormFloat64(), Kmag: rnd.NormFloat64()}
+		q = quat.Scale(1/quat.Abs(q), q)
+
+		// Convert it to a rotation matrix R.
+		var r Mat
+		r.RotationFromQuat(q)
+
+		// Check that the matrix has the determinant approximately equal to 1.
+		diff := math.Abs(r.Det() - 1)
+		if diff > tol {
+			t.Errorf("case %d: unexpected determinant of R; got=%f, want=1 (diff=%v)", tc, r.Det(), diff)
+			continue
 		}
-		det := m.Det()
-		if math.Abs(det-1) > tol {
-			t.Errorf("determinant expected to be 1. got %f", det)
+
+		// Generate a random point.
+		v := Vec{X: rnd.NormFloat64(), Y: rnd.NormFloat64(), Z: rnd.NormFloat64()}
+		// Rotate it using the formula q*v*conj(q).
+		want := Rotation(q).Rotate(v)
+		// Rotate it using the rotation matrix R.
+		got := r.MulVec(v)
+		// Check that |got-want| is small.
+		diff = Norm(Sub(got, want))
+		if diff > tol {
+			t.Errorf("case %d: unexpected result; got=%f, want=%f, (diff=%v)", tc, got, want, diff)
 		}
 	}
 }

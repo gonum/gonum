@@ -4,13 +4,7 @@
 
 package r3
 
-import (
-	"math"
-
-	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/mat"
-	"gonum.org/v1/gonum/num/quat"
-)
+import "math"
 
 // Vec is a 3D vector.
 type Vec struct {
@@ -92,96 +86,4 @@ func Cos(p, q Vec) float64 {
 // Box is a 3D bounding box.
 type Box struct {
 	Min, Max Vec
-}
-
-// TODO: possibly useful additions to the current rotation API:
-//  - create rotations from Euler angles (NewRotationFromEuler?)
-//  - create rotations from rotation matrices (NewRotationFromMatrix?)
-//  - return the equivalent Euler angles from a Rotation
-//
-// Euler angles have issues (see [1] for a discussion).
-// We should think carefully before adding them in.
-// [1]: http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/
-
-// Rotation describes a rotation in space.
-type Rotation quat.Number
-
-// NewRotation creates a rotation by alpha, around axis.
-func NewRotation(alpha float64, axis Vec) Rotation {
-	if alpha == 0 {
-		return Rotation{Real: 1}
-	}
-	q := raise(axis)
-	sin, cos := math.Sincos(0.5 * alpha)
-	q = quat.Scale(sin/quat.Abs(q), q)
-	q.Real += cos
-	if len := quat.Abs(q); len != 1 {
-		q = quat.Scale(1/len, q)
-	}
-
-	return Rotation(q)
-}
-
-// Rotate returns p rotated according to the parameters used to construct
-// the receiver.
-func (r Rotation) Rotate(p Vec) Vec {
-	if r.isIdentity() {
-		return p
-	}
-	qq := quat.Number(r)
-	pp := quat.Mul(quat.Mul(qq, raise(p)), quat.Conj(qq))
-	return Vec{X: pp.Imag, Y: pp.Jmag, Z: pp.Kmag}
-}
-
-func (r Rotation) isIdentity() bool {
-	return r == Rotation{Real: 1}
-}
-
-func raise(p Vec) quat.Number {
-	return quat.Number{Imag: p.X, Jmag: p.Y, Kmag: p.Z}
-}
-
-// Matrix returns a 3×3 rotation matrix corresponding to the receiver. It
-// may be used to perform rotations on a 3-vector or to apply the rotation
-// to a 3×n matrix of column vectors. If the receiver is not a unit
-// quaternion, the returned matrix will not be a pure rotation.
-func (r Rotation) Matrix() mat.Matrix {
-	re, im, jm, km := r.Real, r.Imag, r.Jmag, r.Kmag
-	im2 := im * im
-	jm2 := jm * jm
-	km2 := km * km
-	rim := re * im
-	rjm := re * jm
-	rkm := re * km
-	ijm := im * jm
-	jkm := jm * km
-	kim := km * im
-	return &matrix{
-		1 - 2*(jm2+km2), 2 * (ijm - rkm), 2 * (kim + rjm),
-		2 * (ijm + rkm), 1 - 2*(im2+km2), 2 * (jkm - rim),
-		2 * (kim - rjm), 2 * (jkm + rim), 1 - 2*(im2+jm2),
-	}
-}
-
-// matrix is a 3×3 rotation matrix.
-type matrix [9]float64
-
-var (
-	_ mat.Matrix      = (*matrix)(nil)
-	_ mat.RawMatrixer = (*matrix)(nil)
-)
-
-func (m *matrix) At(i, j int) float64 {
-	if uint(i) >= 3 {
-		panic(mat.ErrRowAccess)
-	}
-	if uint(j) >= 3 {
-		panic(mat.ErrColAccess)
-	}
-	return m[i*3+j]
-}
-func (m *matrix) Dims() (r, c int) { return 3, 3 }
-func (m *matrix) T() mat.Matrix    { return mat.Transpose{Matrix: m} }
-func (m *matrix) RawMatrix() blas64.General {
-	return blas64.General{Rows: 3, Cols: 3, Data: m[:], Stride: 3}
 }

@@ -243,7 +243,7 @@ func TestRotate(t *testing.T) {
 		}
 
 		var gotv mat.VecDense
-		gotv.MulVec(NewRotation(test.alpha, test.axis).Matrix(), vecDense(test.v))
+		gotv.MulVec(NewRotation(test.alpha, test.axis).Mat(), vecDense(test.v))
 		got = vec(gotv)
 		if !vecApproxEqual(got, test.want, tol) {
 			t.Errorf(

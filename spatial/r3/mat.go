@@ -4,10 +4,7 @@
 
 package r3
 
-import (
-	"gonum.org/v1/gonum/mat"
-	"gonum.org/v1/gonum/num/quat"
-)
+import "gonum.org/v1/gonum/mat"
 
 // Mat represents a 3×3 matrix. Useful for rotation matrices and such.
 // The zero value is usable as the 3×3 zero matrix.
@@ -183,28 +180,6 @@ func (m *Mat) Outer(alpha float64, x, y Vec) {
 	m.Set(2, 0, az*y.X)
 	m.Set(2, 1, az*y.Y)
 	m.Set(2, 2, az*y.Z)
-}
-
-// RotationFromQuat converts the quaternion q to the corresponding orthogonal
-// matrix and stores the result in the receiver. q should be normalized but this
-// assumption is not checked.
-//
-// See https://en.wikipedia.org/wiki/Rotation_matrix#Quaternion for more
-// details.
-func (m *Mat) RotationFromQuat(q quat.Number) {
-	w, x, y, z := q.Real, q.Imag, q.Jmag, q.Kmag
-	x2, y2, z2 := x*x, y*y, z*z
-	xw, xy, xz := x*w, x*y, x*z
-	yw, zw, yz := y*w, z*w, y*z
-	m.Set(0, 0, 1-2*y2-2*z2)
-	m.Set(0, 1, 2*xy-2*zw)
-	m.Set(0, 2, 2*xz+2*yw)
-	m.Set(1, 0, 2*xy+2*zw)
-	m.Set(1, 1, 1-2*x2-2*z2)
-	m.Set(1, 2, 2*yz-2*xw)
-	m.Set(2, 0, 2*xz-2*yw)
-	m.Set(2, 1, 2*yz+2*xw)
-	m.Set(2, 2, 1-2*x2-2*y2)
 }
 
 // Det calculates the determinant of the receiver using the following formula

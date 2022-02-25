@@ -188,7 +188,7 @@ func TestOuter(t *testing.T) {
 	}
 }
 
-func TestRotationFromQuat(t *testing.T) {
+func TestRotationMat(t *testing.T) {
 	const tol = 1e-14
 	rnd := rand.New(rand.NewSource(1))
 
@@ -198,8 +198,7 @@ func TestRotationFromQuat(t *testing.T) {
 		q = quat.Scale(1/quat.Abs(q), q)
 
 		// Convert it to a rotation matrix R.
-		var r Mat
-		r.RotationFromQuat(q)
+		r := Rotation(q).Mat()
 
 		// Check that the matrix has the determinant approximately equal to 1.
 		diff := math.Abs(r.Det() - 1)
@@ -224,9 +223,10 @@ func TestRotationFromQuat(t *testing.T) {
 
 func BenchmarkQuat(b *testing.B) {
 	rnd := rand.New(rand.NewSource(1))
-	m := NewMat(nil)
 	for i := 0; i < b.N; i++ {
 		q := quat.Number{Real: rnd.Float64(), Imag: rnd.Float64(), Jmag: rnd.Float64(), Kmag: rnd.Float64()}
-		m.RotationFromQuat(q)
+		if Rotation(q).Mat() == nil {
+			b.Fatal("nil return")
+		}
 	}
 }

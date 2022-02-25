@@ -117,6 +117,28 @@ func (m *Mat) RawMatrix() blas64.General {
 	return blas64.General{Rows: 3, Cols: 3, Data: m.slice(), Stride: 3}
 }
 
+// Mat returns a 3×3 rotation matrix corresponding to the receiver. It
+// may be used to perform rotations on a 3-vector or to apply the rotation
+// to a 3×n matrix of column vectors. If the receiver is not a unit
+// quaternion, the returned matrix will not be a pure rotation.
+func (r Rotation) Mat() *Mat {
+	w, i, j, k := r.Real, r.Imag, r.Jmag, r.Kmag
+	ii := 2 * i * i
+	jj := 2 * j * j
+	kk := 2 * k * k
+	wi := 2 * w * i
+	wj := 2 * w * j
+	wk := 2 * w * k
+	ij := 2 * i * j
+	jk := 2 * j * k
+	ki := 2 * k * i
+	return &Mat{&array{
+		{1 - (jj + kk), ij - wk, ki + wj},
+		{ij + wk, 1 - (ii + kk), jk - wi},
+		{ki - wj, jk + wi, 1 - (ii + jj)},
+	}}
+}
+
 func arrayFrom(vals []float64) *array {
 	// TODO(kortschak): Use array conversion when go1.16 is no longer supported.
 	return (*array)(unsafe.Pointer(&vals[0]))

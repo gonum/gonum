@@ -140,7 +140,6 @@ func (r Rotation) Mat() *Mat {
 }
 
 func arrayFrom(vals []float64) *array {
-	// TODO(kortschak): Use array conversion when go1.16 is no longer supported.
 	return (*array)(unsafe.Pointer(&vals[0]))
 }
 

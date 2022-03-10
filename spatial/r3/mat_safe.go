@@ -127,14 +127,8 @@ func (m *Mat) RawMatrix() blas64.General {
 	return blas64.General{Rows: 3, Cols: 3, Data: m.data[:], Stride: 3}
 }
 
-// BUG(kortschak): Implementing NewMat without unsafe conversion or slice to
-// array pointer conversion leaves it with semantics that do not match the
-// sharing semantics that exist in the mat package.
 func arrayFrom(vals []float64) *array {
-	// TODO(kortschak): Use array conversion when go1.16 is no longer supported.
-	var a array
-	copy(a[:], vals)
-	return &a
+	return (*array)(vals)
 }
 
 // Mat returns a 3×3 rotation matrix corresponding to the receiver. It

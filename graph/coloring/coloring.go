@@ -89,7 +89,7 @@ func DsaturExact(term Terminator, g graph.Undirected) (k int, colors map[int64]i
 	// Brélaz Dsatur coloring, using the result if the recurrence is
 	// cancelled.
 	// We also use the initial maximum clique as a starting point for
-	// the exact search. If there is more than one maxumum clique, we
+	// the exact search. If there is more than one maximum clique, we
 	// need to ensure that we pick the one that will lead us down the
 	// easiest branch of the search tree. This will be the maximum
 	// clique with the lowest degree into the remainder of the graph.
@@ -174,7 +174,7 @@ func (c dSaturColoring) uncolor(id int64) {
 	c.uncolored.Add(id)
 }
 
-// dSaturExact recursively searches for an exact mimimum vertex coloring of the
+// dSaturExact recursively searches for an exact minimum vertex coloring of the
 // full graph in cand. If no chromatic number lower than ub is found, colors is
 // returned as nil.
 func dSaturExact(term Terminator, selector *saturationDegree, cand dSaturColoring, k, ub int, best map[int64]int) (newK int, colors map[int64]int, err error) {

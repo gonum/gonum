@@ -36,7 +36,7 @@ func Dlags2Test(t *testing.T, impl Dlags2er) {
 			b2 := rnd.Float64()
 			b3 := rnd.Float64()
 
-			// Compute orthogal matrices U, V, Q
+			// Compute orthogonal matrices U, V, Q
 			//  U = [  csu  snu ], V = [  csv snv ], Q = [  csq   snq ]
 			//      [ -snu  csu ]      [ -snv csv ]      [ -snq   csq ]
 			// that transform A and B.

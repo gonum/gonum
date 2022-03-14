@@ -155,10 +155,10 @@ var ErrRejection = errors.New("rejection: acceptance ratio above 1")
 //
 // The number of proposed locations during sampling can be found with a call to
 // Proposed. If there was an error during sampling, all elements of samples are
-// set to NaN and the error can be accesssed with the Err method. If src != nil,
+// set to NaN and the error can be accessed with the Err method. If src != nil,
 // it will be used to generate random numbers, otherwise rand.Float64 will be used.
 //
-// Target may return the true (log of) the probablity of the location, or it may return
+// Target may return the true (log of) the probability of the location, or it may return
 // a value that is proportional to the probability (logprob + constant). This is
 // useful for cases where the probability distribution is only known up to a normalization
 // constant.

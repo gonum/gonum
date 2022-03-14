@@ -1556,7 +1556,7 @@ func (Implementation) Ssbmv(ul blas.Uplo, n, k int, alpha float32, a []float32, 
 		return
 	}
 
-	// Casses where a has bands below the diagonal.
+	// Cases where a has bands below the diagonal.
 	if incX == 1 {
 		iy := ky
 		for i := 0; i < n; i++ {

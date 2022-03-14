@@ -190,7 +190,7 @@ func NewProposalNormal(sigma *mat.SymDense, src rand.Source) (*ProposalNormal, b
 // ConditionalLogProb panics if the input slices are not the same length or
 // are not equal to the dimension of the covariance matrix.
 func (p *ProposalNormal) ConditionalLogProb(x, y []float64) (prob float64) {
-	// Either SetMean or LogProb will panic if the slice lengths are innaccurate.
+	// Either SetMean or LogProb will panic if the slice lengths are inaccurate.
 	p.normal.SetMean(y)
 	return p.normal.LogProb(x)
 }

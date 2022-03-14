@@ -400,7 +400,7 @@ func verifyInputs(initialBasic []int, c []float64, A mat.Matrix, b []float64) er
 
 	// Do some sanity checks so that ab does not become singular during the
 	// simplex solution. If the ZeroRow checks are removed then the code for
-	// finding a set of linearly indepent columns must be improved.
+	// finding a set of linearly independent columns must be improved.
 
 	// Check that if a row of A only has zero elements that corresponding
 	// element in b is zero, otherwise the problem is infeasible.

@@ -16,8 +16,8 @@ import (
 
 const (
 	Closed  = '*' // Closed is the closed grid node representation.
-	Open    = '.' // Open is the open grid node repesentation.
-	Unknown = '?' // Unknown is the unknown grid node repesentation.
+	Open    = '.' // Open is the open grid node representation.
+	Unknown = '?' // Unknown is the unknown grid node representation.
 )
 
 // Grid is a 2D grid planar undirected graph.

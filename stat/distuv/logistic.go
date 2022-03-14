@@ -11,7 +11,7 @@ import (
 // Logistic implements the Logistic distribution, a two-parameter distribution with support on the real axis.
 // Its cumulative distribution function is the logistic function.
 //
-// General form of probability density fuction for Logistic distribution is
+// General form of probability density function for Logistic distribution is
 //  E(x) / (s * (1 + E(x))^2)
 //  where E(x) = exp(-(x-μ)/s)
 //

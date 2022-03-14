@@ -106,7 +106,7 @@ func (pl PiecewiseLinear) Predict(x float64) float64 {
 	return pl.ys[i] + pl.slopes[i]*(x-xI)
 }
 
-// PiecewiseConstant is a left-continous, piecewise constant
+// PiecewiseConstant is a left-continuous, piecewise constant
 // 1-dimensional interpolator.
 type PiecewiseConstant struct {
 	// Interpolated X values.

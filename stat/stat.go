@@ -562,7 +562,7 @@ func Histogram(count, dividers, x, weights []float64) []float64 {
 // p and q. The Jensen-Shannon divergence is defined as
 //  m = 0.5 * (p + q)
 //  JS(p, q) = 0.5 ( KL(p, m) + KL(q, m) )
-// Unlike Kullback-Liebler, the Jensen-Shannon distance is symmetric. The value
+// Unlike Kullback-Leibler, the Jensen-Shannon distance is symmetric. The value
 // is between 0 and ln(2).
 func JensenShannon(p, q []float64) float64 {
 	if len(p) != len(q) {

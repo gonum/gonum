@@ -473,7 +473,7 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 							work[itauq:], work[iwork:], lwork-iwork)
 						iwork = ie + n
 
-						// Perform bidiagonal QR iteration, compuing left singular
+						// Perform bidiagonal QR iteration, computing left singular
 						// vectors of R in work[ir:].
 						ok = impl.Dbdsqr(blas.Upper, n, 0, n, 0, s, work[ie:], work, 1,
 							work[ir:], ldworkr, work, 1, work[iwork:])

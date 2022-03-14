@@ -35,7 +35,7 @@ type StudentsT struct {
 	// standard deviation by std = Sigma * sqrt(Nu/(Nu-2))
 	Sigma float64
 
-	// Nu is the shape prameter of the distribution, representing the number of
+	// Nu is the shape parameter of the distribution, representing the number of
 	// degrees of the distribution, and one less than the number of observations
 	// from a Normal distribution.
 	Nu float64

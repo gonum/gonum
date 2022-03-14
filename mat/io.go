@@ -287,7 +287,7 @@ func (v VecDense) MarshalBinary() ([]byte, error) {
 // MarshalBinaryTo encodes the receiver into a binary form, writes it to w and
 // returns the number of bytes written and an error if any.
 //
-// See MarshalBainry for the on-disk format.
+// See MarshalBinary for the on-disk format.
 func (v VecDense) MarshalBinaryTo(w io.Writer) (int, error) {
 	header := storage{
 		Form: 'G', Packing: 'F', Uplo: 'A',

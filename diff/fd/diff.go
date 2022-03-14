@@ -87,7 +87,7 @@ var Central = Formula{
 	Step:       6e-6,
 }
 
-// Central2nd represents a secord-order accurate centered approximation
+// Central2nd represents a second-order accurate centered approximation
 // to the second derivative.
 var Central2nd = Formula{
 	Stencil:    []Point{{Loc: -1, Coeff: 1}, {Loc: 0, Coeff: -2}, {Loc: 1, Coeff: 1}},

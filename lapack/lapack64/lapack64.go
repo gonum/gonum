@@ -465,7 +465,7 @@ func Ggsvd3(jobU, jobV, jobQ lapack.GSVDJob, a, b blas64.General, alpha, beta []
 // On entry, b contains the n×nrhs right-hand side matrix B. On return, it will
 // be overwritten. If ok is true, it will be overwritten by the solution matrix X.
 //
-// Gtsv returns whether the solution X has been successfuly computed.
+// Gtsv returns whether the solution X has been successfully computed.
 //
 // Dgtsv is not part of the lapack.Float64 interface and so calls to Gtsv are
 // always executed by the Gonum implementation.
@@ -621,7 +621,7 @@ func Ormqr(side blas.Side, trans blas.Transpose, a blas64.General, tau []float64
 }
 
 // Pocon estimates the reciprocal of the condition number of a positive-definite
-// matrix A given the Cholesky decmposition of A. The condition number computed
+// matrix A given the Cholesky decomposition of A. The condition number computed
 // is based on the 1-norm and the ∞-norm.
 //
 // anorm is the 1-norm and the ∞-norm of the original matrix A.

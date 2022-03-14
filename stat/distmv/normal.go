@@ -97,7 +97,7 @@ func NewNormalPrecision(mu []float64, prec *mat.SymDense, src rand.Source) (norm
 	if dim != len(mu) {
 		panic(badSizeMismatch)
 	}
-	// TODO(btracey): Computing a matrix inverse is generally numerically instable.
+	// TODO(btracey): Computing a matrix inverse is generally numerically unstable.
 	// This only has to compute the inverse of a positive definite matrix, which
 	// is much better, but this still loses precision. It is worth considering if
 	// instead the precision matrix should be stored explicitly and used instead

@@ -742,7 +742,7 @@ func EdgeExistence(t *testing.T, b Builder, reversedEdge bool) {
 
 // LineExistence tests the constructed graph for the ability to correctly
 // return the existence of lines within the graph. This is a check of the
-// Line methods of graph.MultiGraph, the EdgeBetween method of graph.Undirected
+// Line methods of graph.Multigraph, the EdgeBetween method of graph.Undirected
 // and the EdgeFromTo method of graph.Directed. LineExistence also checks
 // that the nodes and traversed edges exist within the graph, checking the
 // Node, Edge, EdgeBetween and HasEdgeBetween methods of graph.Graph, the

@@ -413,7 +413,7 @@ func Cond(a Matrix, norm float64) float64 {
 	return lq.Cond()
 }
 
-// Det returns the determinant of the quare matrix a. In many expressions using
+// Det returns the determinant of the square matrix a. In many expressions using
 // LogDet will be more numerically stable.
 //
 // Det panics with ErrSquare if a is not square and with ErrZeroLength if a has

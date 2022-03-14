@@ -255,7 +255,7 @@ func EqualFunc(s1, s2 []complex128, f func(complex128, complex128) bool) bool {
 }
 
 // EqualLengths returns true when all of the slices have equal length,
-// and false otherwise. It also eturns true when there are no input slices.
+// and false otherwise. It also returns true when there are no input slices.
 func EqualLengths(slices ...[]complex128) bool {
 	// This length check is needed: http://play.golang.org/p/sdty6YiLhM
 	if len(slices) == 0 {

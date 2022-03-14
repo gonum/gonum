@@ -30,7 +30,7 @@ var (
 
 // WeightedUndirectedGraph implements a generalized undirected graph.
 type WeightedUndirectedGraph struct {
-	// EdgeWEightFunc is used to provide
+	// EdgeWeightFunc is used to provide
 	// the WeightFunc function for WeightedEdge
 	// values returned by the graph.
 	// WeightFunc must accept a nil input.

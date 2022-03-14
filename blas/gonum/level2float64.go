@@ -1534,7 +1534,7 @@ func (Implementation) Dsbmv(ul blas.Uplo, n, k int, alpha float64, a []float64, 
 		return
 	}
 
-	// Casses where a has bands below the diagonal.
+	// Cases where a has bands below the diagonal.
 	if incX == 1 {
 		iy := ky
 		for i := 0; i < n; i++ {

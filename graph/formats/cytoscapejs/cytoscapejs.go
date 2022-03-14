@@ -44,7 +44,7 @@ const (
 )
 
 // Type returns the element type of the receiver. It returns an error if the Element Group
-// is invalid or does not match the Element Data, or if the Elelement Data is an incomplete
+// is invalid or does not match the Element Data, or if the Element Data is an incomplete
 // edge.
 func (e Element) Type() (ElemType, error) {
 	et := InvalidElement

@@ -2,25 +2,15 @@
 
 set -ex
 
-# Avoid contaminating the go.mod/go.sum files.
-# TODO(kortschak): Remove when golang/go#30515 is resolved
-WORK=$(mktemp -d)
-pushd $WORK
-
 # Required for format check.
-go get golang.org/x/tools/cmd/goimports
+go install golang.org/x/tools/cmd/goimports@latest
 # Required for imports check.
-go get gonum.org/v1/tools/cmd/check-imports
+go install gonum.org/v1/tools/cmd/check-imports@latest
 # Required for copyright header check.
-go get gonum.org/v1/tools/cmd/check-copyright
+go install gonum.org/v1/tools/cmd/check-copyright@latest
 # Required for coverage.
-go get golang.org/x/tools/cmd/cover
+go install golang.org/x/tools/cmd/cover@latest
 # Required for dot parser checks.
-go get github.com/goccmack/gocc@66c61e9
+go install github.com/goccmack/gocc@66c61e9
 # Required for rdf parser checks.
-go get golang.org/x/tools/cmd/stringer
-
-# Clean up.
-# TODO(kortschak): Remove when golang/go#30515 is resolved.
-popd
-rm -rf $WORK
+go install golang.org/x/tools/cmd/stringer@latest

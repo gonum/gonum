@@ -551,6 +551,19 @@ func Lantb(norm lapack.MatrixNorm, a blas64.TriangularBand, work []float64) floa
 	return gonum.Implementation{}.Dlantb(norm, a.Uplo, a.Diag, a.N, a.K, a.Data, max(1, a.Stride), work)
 }
 
+// Lapmr rearranges the rows of the m×n matrix X as specified by the permutation
+// k[0],k[1],...,k[m-1] of the integers 0,...,m-1.
+//
+// If forward is true, a forward permutation is applied:
+//  X[k[i],0:n] is moved to X[i,0:n] for i=0,1,...,m-1.
+// If forward is false, a backward permutation is applied:
+//  X[i,0:n] is moved to X[k[i],0:n] for i=0,1,...,m-1.
+//
+// k must have length m, otherwise Lapmr will panic.
+func Lapmr(forward bool, x blas64.General, k []int) {
+	lapack64.Dlapmr(forward, x.Rows, x.Cols, x.Data, max(1, x.Stride), k)
+}
+
 // Lapmt rearranges the columns of the m×n matrix X as specified by the
 // permutation k_0, k_1, ..., k_{n-1} of the integers 0, ..., n-1.
 //

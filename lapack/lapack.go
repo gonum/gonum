@@ -24,6 +24,7 @@ type Float64 interface {
 	Dlantr(norm MatrixNorm, uplo blas.Uplo, diag blas.Diag, m, n int, a []float64, lda int, work []float64) float64
 	Dlange(norm MatrixNorm, m, n int, a []float64, lda int, work []float64) float64
 	Dlansy(norm MatrixNorm, uplo blas.Uplo, n int, a []float64, lda int, work []float64) float64
+	Dlapmr(forward bool, m, n int, x []float64, ldx int, k []int)
 	Dlapmt(forward bool, m, n int, x []float64, ldx int, k []int)
 	Dormqr(side blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int, tau, c []float64, ldc int, work []float64, lwork int)
 	Dormlq(side blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int, tau, c []float64, ldc int, work []float64, lwork int)

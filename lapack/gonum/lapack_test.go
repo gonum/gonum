@@ -248,6 +248,11 @@ func TestDlapll(t *testing.T) {
 	testlapack.DlapllTest(t, impl)
 }
 
+func TestDlapmr(t *testing.T) {
+	t.Parallel()
+	testlapack.DlapmrTest(t, impl)
+}
+
 func TestDlapmt(t *testing.T) {
 	t.Parallel()
 	testlapack.DlapmtTest(t, impl)

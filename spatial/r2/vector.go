@@ -76,11 +76,6 @@ func Cos(p, q Vec) float64 {
 	return Dot(p, q) / (Norm(p) * Norm(q))
 }
 
-// Box is a 2D bounding box.
-type Box struct {
-	Min, Max Vec
-}
-
 // Rotation describes a rotation in 2D.
 type Rotation struct {
 	sin, cos float64
@@ -111,4 +106,49 @@ func (r Rotation) Rotate(p Vec) Vec {
 
 func (r Rotation) isIdentity() bool {
 	return r.sin == 0 && r.cos == 1
+}
+
+// minElem returns a vector with the element-wise
+// minimum components of vectors a and b.
+func minElem(a, b Vec) Vec {
+	return Vec{
+		X: math.Min(a.X, b.X),
+		Y: math.Min(a.Y, b.Y),
+	}
+}
+
+// maxElem returns a vector with the element-wise
+// maximum components of vectors a and b.
+func maxElem(a, b Vec) Vec {
+	return Vec{
+		X: math.Max(a.X, b.X),
+		Y: math.Max(a.Y, b.Y),
+	}
+}
+
+// absElem returns the vector with components set to their absolute value.
+func absElem(a Vec) Vec {
+	return Vec{
+		X: math.Abs(a.X),
+		Y: math.Abs(a.Y),
+	}
+}
+
+// mulElem returns the Hadamard product between vectors a and b.
+//  v = {a.X*b.X, a.Y*b.Y, a.Z*b.Z}
+func mulElem(a, b Vec) Vec {
+	return Vec{
+		X: a.X * b.X,
+		Y: a.Y * b.Y,
+	}
+}
+
+// divElem returns the Hadamard product between vector a
+// and the inverse components of vector b.
+//  v = {a.X/b.X, a.Y/b.Y, a.Z/b.Z}
+func divElem(a, b Vec) Vec {
+	return Vec{
+		X: a.X / b.X,
+		Y: a.Y / b.Y,
+	}
 }

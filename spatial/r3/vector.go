@@ -83,7 +83,50 @@ func Cos(p, q Vec) float64 {
 	return Dot(p, q) / (Norm(p) * Norm(q))
 }
 
-// Box is a 3D bounding box.
-type Box struct {
-	Min, Max Vec
+// minElem return a vector with the minimum components of two vectors.
+func minElem(a, b Vec) Vec {
+	return Vec{
+		X: math.Min(a.X, b.X),
+		Y: math.Min(a.Y, b.Y),
+		Z: math.Min(a.Z, b.Z),
+	}
+}
+
+// maxElem return a vector with the maximum components of two vectors.
+func maxElem(a, b Vec) Vec {
+	return Vec{
+		X: math.Max(a.X, b.X),
+		Y: math.Max(a.Y, b.Y),
+		Z: math.Max(a.Z, b.Z),
+	}
+}
+
+// absElem returns the vector with components set to their absolute value.
+func absElem(a Vec) Vec {
+	return Vec{
+		X: math.Abs(a.X),
+		Y: math.Abs(a.Y),
+		Z: math.Abs(a.Z),
+	}
+}
+
+// mulElem returns the Hadamard product between vectors a and b.
+//  v = {a.X*b.X, a.Y*b.Y, a.Z*b.Z}
+func mulElem(a, b Vec) Vec {
+	return Vec{
+		X: a.X * b.X,
+		Y: a.Y * b.Y,
+		Z: a.Z * b.Z,
+	}
+}
+
+// divElem returns the Hadamard product between vector a
+// and the inverse components of vector b.
+//  v = {a.X/b.X, a.Y/b.Y, a.Z/b.Z}
+func divElem(a, b Vec) Vec {
+	return Vec{
+		X: a.X / b.X,
+		Y: a.Y / b.Y,
+		Z: a.Z / b.Z,
+	}
 }

@@ -12,7 +12,7 @@ type Mat struct {
 	data *array
 }
 
-var _ mat.Matrix = (*Mat)(nil)
+var _ mat.MatrixT = (*Mat)(nil)
 
 // NewMat returns a new 3×3 matrix Mat type and populates its elements
 // with values passed as argument in row-major form. If val argument
@@ -32,12 +32,12 @@ func NewMat(val []float64) *Mat {
 func (m *Mat) Dims() (r, c int) { return 3, 3 }
 
 // T returns the transpose of Mat. Changes in the receiver will be reflected in the returned matrix.
-func (m *Mat) T() mat.Matrix { return mat.Transpose{Matrix: m} }
+func (m *Mat) T() mat.MatrixT { return mat.Transpose{MatrixT: m} }
 
 // Scale multiplies the elements of a by f, placing the result in the receiver.
 //
 // See the mat.Scaler interface for more information.
-func (m *Mat) Scale(f float64, a mat.Matrix) {
+func (m *Mat) Scale(f float64, a mat.MatrixT) {
 	r, c := a.Dims()
 	if r != 3 || c != 3 {
 		panic(mat.ErrShape)
@@ -78,7 +78,7 @@ func (m *Mat) MulVecTrans(v Vec) Vec {
 
 // CloneFrom makes a copy of a into the receiver m.
 // Mat expects a 3×3 input matrix.
-func (m *Mat) CloneFrom(a mat.Matrix) {
+func (m *Mat) CloneFrom(a mat.MatrixT) {
 	r, c := a.Dims()
 	if r != 3 || c != 3 {
 		panic(mat.ErrShape)
@@ -95,7 +95,7 @@ func (m *Mat) CloneFrom(a mat.Matrix) {
 
 // Sub subtracts the matrix b from a, placing the result in the receiver.
 // Sub will panic if the two matrices do not have the same shape.
-func (m *Mat) Sub(a, b mat.Matrix) {
+func (m *Mat) Sub(a, b mat.MatrixT) {
 	if r, c := a.Dims(); r != 3 || c != 3 {
 		panic(mat.ErrShape)
 	}
@@ -118,7 +118,7 @@ func (m *Mat) Sub(a, b mat.Matrix) {
 }
 
 // Add adds a and b element-wise, placing the result in the receiver. Add will panic if the two matrices do not have the same shape.
-func (m *Mat) Add(a, b mat.Matrix) {
+func (m *Mat) Add(a, b mat.MatrixT) {
 	if r, c := a.Dims(); r != 3 || c != 3 {
 		panic(mat.ErrShape)
 	}

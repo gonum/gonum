@@ -30,7 +30,7 @@ import (
 //
 // Weighted Getis-Ord G*i is not currently implemented and GetisOrdGStar will
 // panic if weights is not nil.
-func GetisOrdGStar(i int, data, weights []float64, locality mat.Matrix) float64 {
+func GetisOrdGStar(i int, data, weights []float64, locality mat.MatrixT) float64 {
 	if weights != nil {
 		panic("spatial: weighted data not yet implemented")
 	}
@@ -71,7 +71,7 @@ func GetisOrdGStar(i int, data, weights []float64, locality mat.Matrix) float64 
 //
 // Weighted Global Moran's I is not currently implemented and GlobalMoransI will
 // panic if weights is not nil.
-func GlobalMoransI(data, weights []float64, locality mat.Matrix) (i, v, z float64) {
+func GlobalMoransI(data, weights []float64, locality mat.MatrixT) (i, v, z float64) {
 	if weights != nil {
 		panic("spatial: weighted data not yet implemented")
 	}

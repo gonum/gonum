@@ -21,7 +21,7 @@ func TestSimplex(t *testing.T) {
 	// during randomized testing.
 	// TODO(btracey): Test specific problems with known solutions.
 	for _, test := range []struct {
-		A            mat.Matrix
+		A            mat.MatrixT
 		b            []float64
 		c            []float64
 		tol          float64
@@ -174,7 +174,7 @@ func testRandomSimplex(t *testing.T, nTest int, pZero float64, maxN int, rnd *ra
 	}
 }
 
-func testSimplex(t *testing.T, initialBasic []int, c []float64, a mat.Matrix, b []float64, convergenceTol float64) {
+func testSimplex(t *testing.T, initialBasic []int, c []float64, a mat.MatrixT, b []float64, convergenceTol float64) {
 	primalOpt, primalX, _, errPrimal := simplex(initialBasic, c, a, b, convergenceTol)
 	if errPrimal == nil {
 		// No error solving the simplex, check that the solution is feasible.

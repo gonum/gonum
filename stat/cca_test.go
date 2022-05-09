@@ -15,8 +15,8 @@ import (
 func TestCanonicalCorrelations(t *testing.T) {
 tests:
 	for i, test := range []struct {
-		xdata     mat.Matrix
-		ydata     mat.Matrix
+		xdata     mat.MatrixT
+		ydata     mat.MatrixT
 		weights   []float64
 		wantCorrs []float64
 		wantpVecs *mat.Dense

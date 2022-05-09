@@ -111,7 +111,7 @@ func TestCol(t *testing.T) {
 		return ans
 	}
 
-	f := func(a Matrix) interface{} {
+	f := func(a MatrixT) interface{} {
 		_, c := a.Dims()
 		ans := make([][]float64, c)
 		for j := range ans {
@@ -121,7 +121,7 @@ func TestCol(t *testing.T) {
 	}
 	testOneInputFunc(t, "Col", f, denseComparison, sameAnswerF64SliceOfSlice, isAnyType, isAnySize)
 
-	f = func(a Matrix) interface{} {
+	f = func(a MatrixT) interface{} {
 		r, c := a.Dims()
 		ans := make([][]float64, c)
 		for j := range ans {
@@ -180,7 +180,7 @@ func TestRow(t *testing.T) {
 		return ans
 	}
 
-	f := func(a Matrix) interface{} {
+	f := func(a MatrixT) interface{} {
 		r, _ := a.Dims()
 		ans := make([][]float64, r)
 		for i := range ans {
@@ -190,7 +190,7 @@ func TestRow(t *testing.T) {
 	}
 	testOneInputFunc(t, "Row", f, denseComparison, sameAnswerF64SliceOfSlice, isAnyType, isAnySize)
 
-	f = func(a Matrix) interface{} {
+	f = func(a MatrixT) interface{} {
 		r, c := a.Dims()
 		ans := make([][]float64, r)
 		for i := range ans {
@@ -282,7 +282,7 @@ func TestCond(t *testing.T) {
 			norm: math.Inf(1),
 		},
 	} {
-		f := func(a Matrix) interface{} {
+		f := func(a MatrixT) interface{} {
 			return Cond(a, test.norm)
 		}
 		denseComparison := func(a *Dense) interface{} {
@@ -333,7 +333,7 @@ func TestDet(t *testing.T) {
 		}
 	}
 	// Perform the normal list test to ensure it works for all types.
-	f := func(a Matrix) interface{} {
+	f := func(a MatrixT) interface{} {
 		return Det(a)
 	}
 	denseComparison := func(a *Dense) interface{} {
@@ -346,7 +346,7 @@ func TestDet(t *testing.T) {
 	isWide := func(ar, ac int) bool {
 		return ar <= ac
 	}
-	f = func(a Matrix) interface{} {
+	f = func(a MatrixT) interface{} {
 		ar, ac := a.Dims()
 		if !isWide(ar, ac) {
 			panic(ErrShape)
@@ -374,7 +374,7 @@ func TestDet(t *testing.T) {
 
 func TestDot(t *testing.T) {
 	t.Parallel()
-	f := func(a, b Matrix) interface{} {
+	f := func(a, b MatrixT) interface{} {
 		return Dot(a.(Vector), b.(Vector))
 	}
 	denseComparison := func(a, b *Dense) interface{} {
@@ -396,7 +396,7 @@ func TestDot(t *testing.T) {
 
 func TestEqual(t *testing.T) {
 	t.Parallel()
-	f := func(a, b Matrix) interface{} {
+	f := func(a, b MatrixT) interface{} {
 		return Equal(a, b)
 	}
 	denseComparison := func(a, b *Dense) interface{} {
@@ -408,7 +408,7 @@ func TestEqual(t *testing.T) {
 func TestMax(t *testing.T) {
 	t.Parallel()
 	// A direct test of Max with *Dense arguments is in TestNewDense.
-	f := func(a Matrix) interface{} {
+	f := func(a MatrixT) interface{} {
 		return Max(a)
 	}
 	denseComparison := func(a *Dense) interface{} {
@@ -420,7 +420,7 @@ func TestMax(t *testing.T) {
 func TestMin(t *testing.T) {
 	t.Parallel()
 	// A direct test of Min with *Dense arguments is in TestNewDense.
-	f := func(a Matrix) interface{} {
+	f := func(a MatrixT) interface{} {
 		return Min(a)
 	}
 	denseComparison := func(a *Dense) interface{} {
@@ -476,7 +476,7 @@ func TestNorm(t *testing.T) {
 		{"NormTwo", 2},
 		{"NormInf", math.Inf(1)},
 	} {
-		f := func(a Matrix) interface{} {
+		f := func(a MatrixT) interface{} {
 			return Norm(a, test.norm)
 		}
 		denseComparison := func(a *Dense) interface{} {
@@ -488,7 +488,7 @@ func TestNorm(t *testing.T) {
 
 func TestNormZero(t *testing.T) {
 	t.Parallel()
-	for _, a := range []Matrix{
+	for _, a := range []MatrixT{
 		&Dense{},
 		&SymDense{},
 		&SymDense{mat: blas64.Symmetric{Uplo: blas.Upper}},
@@ -511,7 +511,7 @@ func TestNormZero(t *testing.T) {
 
 func TestSum(t *testing.T) {
 	t.Parallel()
-	f := func(a Matrix) interface{} {
+	f := func(a MatrixT) interface{} {
 		return Sum(a)
 	}
 	denseComparison := func(a *Dense) interface{} {
@@ -536,7 +536,7 @@ func TestTrace(t *testing.T) {
 			t.Errorf("Trace mismatch. Want %v, got %v", test.trace, trace)
 		}
 	}
-	f := func(a Matrix) interface{} {
+	f := func(a MatrixT) interface{} {
 		return Trace(a)
 	}
 	denseComparison := func(a *Dense) interface{} {
@@ -590,7 +590,7 @@ func TestTracer(t *testing.T) {
 func TestDoer(t *testing.T) {
 	t.Parallel()
 	type MatrixDoer interface {
-		Matrix
+		MatrixT
 		NonZeroDoer
 		RowNonZeroDoer
 		ColNonZeroDoer
@@ -699,7 +699,7 @@ func TestMulVecToer(t *testing.T) {
 	}
 
 	type mulVecToer interface {
-		Matrix
+		MatrixT
 		MulVecTo(*VecDense, bool, Vector)
 	}
 	for _, a := range []mulVecToer{

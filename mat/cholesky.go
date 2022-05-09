@@ -18,10 +18,10 @@ const (
 )
 
 var (
-	_ Matrix    = (*Cholesky)(nil)
+	_ MatrixT   = (*Cholesky)(nil)
 	_ Symmetric = (*Cholesky)(nil)
 
-	_ Matrix    = (*BandCholesky)(nil)
+	_ MatrixT   = (*BandCholesky)(nil)
 	_ Symmetric = (*BandCholesky)(nil)
 	_ Banded    = (*BandCholesky)(nil)
 	_ SymBanded = (*BandCholesky)(nil)
@@ -106,7 +106,7 @@ func (c *Cholesky) At(i, j int) float64 {
 }
 
 // T returns the receiver, the transpose of a symmetric matrix.
-func (c *Cholesky) T() Matrix {
+func (c *Cholesky) T() MatrixT {
 	return c
 }
 
@@ -227,7 +227,7 @@ func (c *Cholesky) LogDet() float64 {
 // by the Cholesky decomposition. The result is stored in-place into dst.
 // If the Cholesky decomposition is singular or near-singular a Condition error
 // is returned. See the documentation for Condition for more information.
-func (c *Cholesky) SolveTo(dst *Dense, b Matrix) error {
+func (c *Cholesky) SolveTo(dst *Dense, b MatrixT) error {
 	if !c.valid() {
 		panic(badCholesky)
 	}
@@ -765,7 +765,7 @@ func (ch *BandCholesky) Factorize(a SymBanded) (ok bool) {
 // the Cholesky decomposition. The result is stored in-place into dst.
 // If the Cholesky decomposition is singular or near-singular a Condition error
 // is returned. See the documentation for Condition for more information.
-func (ch *BandCholesky) SolveTo(dst *Dense, b Matrix) error {
+func (ch *BandCholesky) SolveTo(dst *Dense, b MatrixT) error {
 	if !ch.valid() {
 		panic(badCholesky)
 	}
@@ -863,7 +863,7 @@ func (ch *BandCholesky) At(i, j int) float64 {
 }
 
 // T returns the receiver, the transpose of a symmetric matrix.
-func (ch *BandCholesky) T() Matrix {
+func (ch *BandCholesky) T() MatrixT {
 	return ch
 }
 

@@ -305,7 +305,7 @@ func TestMahalanobis(t *testing.T) {
 
 // benchmarks
 
-func randMat(r, c int) mat.Matrix {
+func randMat(r, c int) mat.MatrixT {
 	x := make([]float64, r*c)
 	for i := range x {
 		x[i] = rand.Float64()
@@ -313,7 +313,7 @@ func randMat(r, c int) mat.Matrix {
 	return mat.NewDense(r, c, x)
 }
 
-func benchmarkCovarianceMatrix(b *testing.B, m mat.Matrix) {
+func benchmarkCovarianceMatrix(b *testing.B, m mat.MatrixT) {
 	var res mat.SymDense
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -321,7 +321,7 @@ func benchmarkCovarianceMatrix(b *testing.B, m mat.Matrix) {
 		CovarianceMatrix(&res, m, nil)
 	}
 }
-func benchmarkCovarianceMatrixWeighted(b *testing.B, m mat.Matrix) {
+func benchmarkCovarianceMatrixWeighted(b *testing.B, m mat.MatrixT) {
 	r, _ := m.Dims()
 	wts := make([]float64, r)
 	for i := range wts {
@@ -334,7 +334,7 @@ func benchmarkCovarianceMatrixWeighted(b *testing.B, m mat.Matrix) {
 		CovarianceMatrix(&res, m, wts)
 	}
 }
-func benchmarkCovarianceMatrixInPlace(b *testing.B, m mat.Matrix) {
+func benchmarkCovarianceMatrixInPlace(b *testing.B, m mat.MatrixT) {
 	_, c := m.Dims()
 	res := mat.NewSymDense(c, nil)
 	b.ResetTimer()

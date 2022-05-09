@@ -14,7 +14,7 @@ import (
 )
 
 // Matrix is the basic matrix interface type.
-type Matrix interface {
+type MatrixT interface {
 	// Dims returns the dimensions of a Matrix.
 	Dims() (r, c int)
 
@@ -26,7 +26,7 @@ type Matrix interface {
 	// underlying data is implementation dependent.
 	// This method may be implemented using the Transpose type, which
 	// provides an implicit matrix transpose.
-	T() Matrix
+	T() MatrixT
 }
 
 // allMatrix represents the extra set of methods that all mat Matrix types
@@ -48,38 +48,38 @@ type denseMatrix interface {
 }
 
 var (
-	_ Matrix       = Transpose{}
+	_ MatrixT      = Transpose{}
 	_ Untransposer = Transpose{}
 )
 
 // Transpose is a type for performing an implicit matrix transpose. It implements
 // the Matrix interface, returning values from the transpose of the matrix within.
 type Transpose struct {
-	Matrix Matrix
+	MatrixT MatrixT
 }
 
 // At returns the value of the element at row i and column j of the transposed
 // matrix, that is, row j and column i of the Matrix field.
 func (t Transpose) At(i, j int) float64 {
-	return t.Matrix.At(j, i)
+	return t.MatrixT.At(j, i)
 }
 
 // Dims returns the dimensions of the transposed matrix. The number of rows returned
 // is the number of columns in the Matrix field, and the number of columns is
 // the number of rows in the Matrix field.
 func (t Transpose) Dims() (r, c int) {
-	c, r = t.Matrix.Dims()
+	c, r = t.MatrixT.Dims()
 	return r, c
 }
 
 // T performs an implicit transpose by returning the Matrix field.
-func (t Transpose) T() Matrix {
-	return t.Matrix
+func (t Transpose) T() MatrixT {
+	return t.MatrixT
 }
 
 // Untranspose returns the Matrix field.
-func (t Transpose) Untranspose() Matrix {
-	return t.Matrix
+func (t Transpose) Untranspose() MatrixT {
+	return t.MatrixT
 }
 
 // Untransposer is a type that can undo an implicit transpose.
@@ -91,7 +91,7 @@ type Untransposer interface {
 	// triangular matrix.
 
 	// Untranspose returns the underlying Matrix stored for the implicit transpose.
-	Untranspose() Matrix
+	Untranspose() MatrixT
 }
 
 // UntransposeBander is a type that can undo an implicit band transpose.
@@ -119,7 +119,7 @@ type Mutable interface {
 	// It will panic if i or j are out of bounds for the matrix.
 	Set(i, j int, v float64)
 
-	Matrix
+	MatrixT
 }
 
 // A RowViewer can return a Vector reflecting a row that is backed by the matrix
@@ -150,7 +150,7 @@ type RawColViewer interface {
 // receiver. The clone operation does not make any restriction on shape and will not cause
 // shadowing.
 type ClonerFrom interface {
-	CloneFrom(a Matrix)
+	CloneFrom(a MatrixT)
 }
 
 // A Reseter can reset the matrix so that it can be reused as the receiver of a dimensionally
@@ -171,7 +171,7 @@ type Reseter interface {
 // an aliasing transpose copy will panic with the exception for a special case when
 // the source data has a unitary increment or stride.
 type Copier interface {
-	Copy(a Matrix) (r, c int)
+	Copy(a MatrixT) (r, c int)
 }
 
 // A Grower can grow the size of the represented matrix by the given number of rows and columns.
@@ -180,7 +180,7 @@ type Copier interface {
 // panic with ErrIndexOutOfRange.
 type Grower interface {
 	Caps() (r, c int)
-	Grow(r, c int) Matrix
+	Grow(r, c int) MatrixT
 }
 
 // A RawMatrixSetter can set the underlying blas64.General used by the receiver. There is no restriction
@@ -222,7 +222,7 @@ type ColNonZeroDoer interface {
 // untranspose untransposes a matrix if applicable. If a is an Untransposer, then
 // untranspose returns the underlying matrix and true. If it is not, then it returns
 // the input matrix and false.
-func untranspose(a Matrix) (Matrix, bool) {
+func untranspose(a MatrixT) (MatrixT, bool) {
 	if ut, ok := a.(Untransposer); ok {
 		return ut.Untranspose(), true
 	}
@@ -235,7 +235,7 @@ func untranspose(a Matrix) (Matrix, bool) {
 // Otherwise, if it implements a Raw method, an appropriate built-in type value
 // is returned holding the raw matrix value of the input. If neither of these
 // is possible, the untransposed matrix is returned.
-func untransposeExtract(a Matrix) (Matrix, bool) {
+func untransposeExtract(a MatrixT) (MatrixT, bool) {
 	ut, trans := untranspose(a)
 	switch m := ut.(type) {
 	case *DiagDense, *SymBandDense, *TriBandDense, *BandDense, *TriDense, *SymDense, *Dense, *VecDense, *Tridiag:
@@ -301,7 +301,7 @@ func untransposeExtract(a Matrix) (Matrix, bool) {
 // Col copies the elements in the jth column of the matrix into the slice dst.
 // The length of the provided slice must equal the number of rows, unless the
 // slice is nil in which case a new slice is first allocated.
-func Col(dst []float64, j int, a Matrix) []float64 {
+func Col(dst []float64, j int, a MatrixT) []float64 {
 	r, c := a.Dims()
 	if j < 0 || j >= c {
 		panic(ErrColAccess)
@@ -334,7 +334,7 @@ func Col(dst []float64, j int, a Matrix) []float64 {
 // Row copies the elements in the ith row of the matrix into the slice dst.
 // The length of the provided slice must equal the number of columns, unless the
 // slice is nil in which case a new slice is first allocated.
-func Row(dst []float64, i int, a Matrix) []float64 {
+func Row(dst []float64, i int, a MatrixT) []float64 {
 	r, c := a.Dims()
 	if i < 0 || i >= r {
 		panic(ErrColAccess)
@@ -373,7 +373,7 @@ func Row(dst []float64, i int, a Matrix) []float64 {
 // https://github.com/xianyi/OpenBLAS/issues/636. While the value returned will
 // change with the resolution of this bug, the result from Cond will match the
 // condition number used internally.
-func Cond(a Matrix, norm float64) float64 {
+func Cond(a MatrixT, norm float64) float64 {
 	m, n := a.Dims()
 	if m == 0 || n == 0 {
 		panic(ErrZeroLength)
@@ -418,7 +418,7 @@ func Cond(a Matrix, norm float64) float64 {
 //
 // Det panics with ErrSquare if a is not square and with ErrZeroLength if a has
 // zero size.
-func Det(a Matrix) float64 {
+func Det(a MatrixT) float64 {
 	det, sign := LogDet(a)
 	return math.Exp(det) * sign
 }
@@ -450,7 +450,7 @@ func Dot(a, b Vector) float64 {
 
 // Equal returns whether the matrices a and b have the same size
 // and are element-wise equal.
-func Equal(a, b Matrix) bool {
+func Equal(a, b MatrixT) bool {
 	ar, ac := a.Dims()
 	br, bc := b.Dims()
 	if ar != br || ac != bc {
@@ -522,7 +522,7 @@ func Equal(a, b Matrix) bool {
 // EqualApprox returns whether the matrices a and b have the same size and contain all equal
 // elements with tolerance for element-wise equality specified by epsilon. Matrices
 // with non-equal shapes are not equal.
-func EqualApprox(a, b Matrix, epsilon float64) bool {
+func EqualApprox(a, b MatrixT, epsilon float64) bool {
 	ar, ac := a.Dims()
 	br, bc := b.Dims()
 	if ar != br || ac != bc {
@@ -597,7 +597,7 @@ func EqualApprox(a, b Matrix, epsilon float64) bool {
 //
 // LogDet panics with ErrSquare is a is not square and with ErrZeroLength if a
 // has zero size.
-func LogDet(a Matrix) (det float64, sign float64) {
+func LogDet(a MatrixT) (det float64, sign float64) {
 	// TODO(btracey): Add specialized routines for TriDense, etc.
 	var lu LU
 	lu.Factorize(a)
@@ -607,7 +607,7 @@ func LogDet(a Matrix) (det float64, sign float64) {
 // Max returns the largest element value of the matrix A.
 //
 // Max will panic with ErrZeroLength if the matrix has zero size.
-func Max(a Matrix) float64 {
+func Max(a MatrixT) float64 {
 	r, c := a.Dims()
 	if r == 0 || c == 0 {
 		panic(ErrZeroLength)
@@ -683,7 +683,7 @@ func Max(a Matrix) float64 {
 // Min returns the smallest element value of the matrix A.
 //
 // Min will panic with ErrZeroLength if the matrix has zero size.
-func Min(a Matrix) float64 {
+func Min(a MatrixT) float64 {
 	r, c := a.Dims()
 	if r == 0 || c == 0 {
 		panic(ErrZeroLength)
@@ -773,7 +773,7 @@ type Normer interface {
 //
 // Norm will panic with ErrNormOrder if an illegal norm is specified and with
 // ErrShape if the matrix has zero size.
-func Norm(a Matrix, norm float64) float64 {
+func Norm(a MatrixT, norm float64) float64 {
 	r, c := a.Dims()
 	if r == 0 || c == 0 {
 		panic(ErrZeroLength)
@@ -854,7 +854,7 @@ func normLapack(norm float64, aTrans bool) lapack.MatrixNorm {
 // Sum returns the sum of the elements of the matrix.
 //
 // Sum will panic with ErrZeroLength if the matrix has zero size.
-func Sum(a Matrix) float64 {
+func Sum(a MatrixT) float64 {
 	r, c := a.Dims()
 	if r == 0 || c == 0 {
 		panic(ErrZeroLength)
@@ -930,7 +930,7 @@ type Tracer interface {
 //
 // Trace will panic with ErrSquare if the matrix is not square and with
 // ErrZeroLength if the matrix has zero size.
-func Trace(a Matrix) float64 {
+func Trace(a MatrixT) float64 {
 	r, c := a.Dims()
 	if r == 0 || c == 0 {
 		panic(ErrZeroLength)

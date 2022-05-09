@@ -76,7 +76,7 @@ func (gsvd *GSVD) succFact() bool {
 //
 // Factorize returns whether the decomposition succeeded. If the decomposition
 // failed, routines that require a successful factorization will panic.
-func (gsvd *GSVD) Factorize(a, b Matrix, kind GSVDKind) (ok bool) {
+func (gsvd *GSVD) Factorize(a, b MatrixT, kind GSVDKind) (ok bool) {
 	// kill the previous decomposition
 	gsvd.r = 0
 	gsvd.kind = 0

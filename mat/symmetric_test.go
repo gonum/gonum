@@ -225,7 +225,7 @@ func TestSymAdd(t *testing.T) {
 		}
 	}
 
-	method := func(receiver, a, b Matrix) {
+	method := func(receiver, a, b MatrixT) {
 		type addSymer interface {
 			AddSym(a, b Symmetric)
 		}
@@ -345,7 +345,7 @@ func TestSymRankOne(t *testing.T) {
 	}
 
 	alpha := 3.0
-	method := func(receiver, a, b Matrix) {
+	method := func(receiver, a, b MatrixT) {
 		type SymRankOner interface {
 			SymRankOne(a Symmetric, alpha float64, x Vector)
 		}
@@ -358,7 +358,7 @@ func TestSymRankOne(t *testing.T) {
 		tmp.Scale(alpha, &tmp)
 		receiver.Add(a, &tmp)
 	}
-	legalTypes := func(a, b Matrix) bool {
+	legalTypes := func(a, b MatrixT) bool {
 		_, ok := a.(Symmetric)
 		if !ok {
 			return false
@@ -450,9 +450,9 @@ func TestRankTwo(t *testing.T) {
 func TestSymRankK(t *testing.T) {
 	t.Parallel()
 	alpha := 3.0
-	method := func(receiver, a, b Matrix) {
+	method := func(receiver, a, b MatrixT) {
 		type SymRankKer interface {
-			SymRankK(a Symmetric, alpha float64, x Matrix)
+			SymRankK(a Symmetric, alpha float64, x MatrixT)
 		}
 		rd := receiver.(SymRankKer)
 		rd.SymRankK(a.(Symmetric), alpha, b)
@@ -463,7 +463,7 @@ func TestSymRankK(t *testing.T) {
 		tmp.Scale(alpha, &tmp)
 		receiver.Add(a, &tmp)
 	}
-	legalTypes := func(a, b Matrix) bool {
+	legalTypes := func(a, b MatrixT) bool {
 		_, ok := a.(Symmetric)
 		return ok
 	}
@@ -479,9 +479,9 @@ func TestSymRankK(t *testing.T) {
 func TestSymOuterK(t *testing.T) {
 	t.Parallel()
 	for _, f := range []float64{0.5, 1, 3} {
-		method := func(receiver, x Matrix) {
+		method := func(receiver, x MatrixT) {
 			type SymOuterKer interface {
-				SymOuterK(alpha float64, x Matrix)
+				SymOuterK(alpha float64, x MatrixT)
 			}
 			rd := receiver.(SymOuterKer)
 			rd.SymOuterK(f, x)
@@ -509,7 +509,7 @@ func TestIssue250SymOuterK(t *testing.T) {
 func TestScaleSym(t *testing.T) {
 	t.Parallel()
 	for _, f := range []float64{0.5, 1, 3} {
-		method := func(receiver, a Matrix) {
+		method := func(receiver, a MatrixT) {
 			type ScaleSymer interface {
 				ScaleSym(f float64, a Symmetric)
 			}
@@ -582,7 +582,7 @@ func TestSubsetSym(t *testing.T) {
 			maxDim = v
 		}
 	}
-	method := func(receiver, a Matrix) {
+	method := func(receiver, a MatrixT) {
 		type SubsetSymer interface {
 			SubsetSym(a Symmetric, set []int)
 		}

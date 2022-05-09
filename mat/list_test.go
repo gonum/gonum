@@ -124,29 +124,29 @@ func sameAnswerBool(a, b interface{}) bool {
 }
 
 // isAnyType returns true for all Matrix types.
-func isAnyType(Matrix) bool {
+func isAnyType(MatrixT) bool {
 	return true
 }
 
 // legalTypesAll returns true for all Matrix types.
-func legalTypesAll(a, b Matrix) bool {
+func legalTypesAll(a, b MatrixT) bool {
 	return true
 }
 
 // legalTypeSym returns whether a is a Symmetric.
-func legalTypeSym(a Matrix) bool {
+func legalTypeSym(a MatrixT) bool {
 	_, ok := a.(Symmetric)
 	return ok
 }
 
 // legalTypeTri returns whether a is a Triangular.
-func legalTypeTri(a Matrix) bool {
+func legalTypeTri(a MatrixT) bool {
 	_, ok := a.(Triangular)
 	return ok
 }
 
 // legalTypeTriLower returns whether a is a Triangular with kind == Lower.
-func legalTypeTriLower(a Matrix) bool {
+func legalTypeTriLower(a MatrixT) bool {
 	t, ok := a.(Triangular)
 	if !ok {
 		return false
@@ -156,7 +156,7 @@ func legalTypeTriLower(a Matrix) bool {
 }
 
 // legalTypeTriUpper returns whether a is a Triangular with kind == Upper.
-func legalTypeTriUpper(a Matrix) bool {
+func legalTypeTriUpper(a MatrixT) bool {
 	t, ok := a.(Triangular)
 	if !ok {
 		return false
@@ -166,7 +166,7 @@ func legalTypeTriUpper(a Matrix) bool {
 }
 
 // legalTypesSym returns whether both input arguments are Symmetric.
-func legalTypesSym(a, b Matrix) bool {
+func legalTypesSym(a, b MatrixT) bool {
 	if _, ok := a.(Symmetric); !ok {
 		return false
 	}
@@ -177,19 +177,19 @@ func legalTypesSym(a, b Matrix) bool {
 }
 
 // legalTypeVector returns whether v is a Vector.
-func legalTypeVector(v Matrix) bool {
+func legalTypeVector(v MatrixT) bool {
 	_, ok := v.(Vector)
 	return ok
 }
 
 // legalTypeVec returns whether v is a *VecDense.
-func legalTypeVecDense(v Matrix) bool {
+func legalTypeVecDense(v MatrixT) bool {
 	_, ok := v.(*VecDense)
 	return ok
 }
 
 // legalTypesVectorVector returns whether both inputs are Vector
-func legalTypesVectorVector(a, b Matrix) bool {
+func legalTypesVectorVector(a, b MatrixT) bool {
 	if _, ok := a.(Vector); !ok {
 		return false
 	}
@@ -200,7 +200,7 @@ func legalTypesVectorVector(a, b Matrix) bool {
 }
 
 // legalTypesVecDenseVecDense returns whether both inputs are *VecDense.
-func legalTypesVecDenseVecDense(a, b Matrix) bool {
+func legalTypesVecDenseVecDense(a, b MatrixT) bool {
 	if _, ok := a.(*VecDense); !ok {
 		return false
 	}
@@ -212,20 +212,20 @@ func legalTypesVecDenseVecDense(a, b Matrix) bool {
 
 // legalTypesMatrixVector returns whether the first input is an arbitrary Matrix
 // and the second input is a Vector.
-func legalTypesMatrixVector(a, b Matrix) bool {
+func legalTypesMatrixVector(a, b MatrixT) bool {
 	_, ok := b.(Vector)
 	return ok
 }
 
 // legalTypesMatrixVecDense returns whether the first input is an arbitrary Matrix
 // and the second input is a *VecDense.
-func legalTypesMatrixVecDense(a, b Matrix) bool {
+func legalTypesMatrixVecDense(a, b MatrixT) bool {
 	_, ok := b.(*VecDense)
 	return ok
 }
 
 // legalDims returns whether {m,n} is a valid dimension of the given matrix type.
-func legalDims(a Matrix, m, n int) bool {
+func legalDims(a MatrixT, m, n int) bool {
 	switch t := a.(type) {
 	default:
 		panic("legal dims type not coded")
@@ -253,7 +253,7 @@ func legalDims(a Matrix, m, n int) bool {
 
 // returnAs returns the matrix a with the type of t. Used for making a concrete
 // type and changing to the basic form.
-func returnAs(a, t Matrix) Matrix {
+func returnAs(a, t MatrixT) MatrixT {
 	switch mat := a.(type) {
 	default:
 		panic("unknown type for a")
@@ -332,7 +332,7 @@ func returnAs(a, t Matrix) Matrix {
 
 // retranspose returns the matrix m inside an Untransposer of the type
 // of a.
-func retranspose(a, m Matrix) Matrix {
+func retranspose(a, m MatrixT) MatrixT {
 	switch a.(type) {
 	case TransposeTriBand:
 		return TransposeTriBand{m.(TriBanded)}
@@ -350,9 +350,9 @@ func retranspose(a, m Matrix) Matrix {
 }
 
 // makeRandOf returns a new randomly filled m×n matrix of the underlying matrix type.
-func makeRandOf(a Matrix, m, n int, src rand.Source) Matrix {
+func makeRandOf(a MatrixT, m, n int, src rand.Source) MatrixT {
 	rnd := rand.New(src)
-	var rMatrix Matrix
+	var rMatrix MatrixT
 	switch t := a.(type) {
 	default:
 		panic("unknown type for make rand of")
@@ -558,8 +558,8 @@ func makeRandOf(a Matrix, m, n int, src rand.Source) Matrix {
 }
 
 // makeNaNOf returns a new m×n matrix of the underlying matrix type filled with NaN values.
-func makeNaNOf(a Matrix, m, n int) Matrix {
-	var rMatrix Matrix
+func makeNaNOf(a MatrixT, m, n int) MatrixT {
+	var rMatrix MatrixT
 	switch t := a.(type) {
 	default:
 		panic("unknown type for makeNaNOf")
@@ -754,7 +754,7 @@ func makeNaNOf(a Matrix, m, n int) Matrix {
 }
 
 // makeCopyOf returns a copy of the matrix.
-func makeCopyOf(a Matrix) Matrix {
+func makeCopyOf(a MatrixT) MatrixT {
 	switch t := a.(type) {
 	default:
 		panic("unknown type in makeCopyOf")
@@ -874,13 +874,13 @@ func makeCopyOf(a Matrix) Matrix {
 }
 
 // sameType returns true if a and b have the same underlying type.
-func sameType(a, b Matrix) bool {
+func sameType(a, b MatrixT) bool {
 	return reflect.ValueOf(a).Type() == reflect.ValueOf(b).Type()
 }
 
 // maybeSame returns true if the two matrices could be represented by the same
 // pointer.
-func maybeSame(receiver, a Matrix) bool {
+func maybeSame(receiver, a MatrixT) bool {
 	rr, rc := receiver.Dims()
 	u, trans := a.(Untransposer)
 	if trans {
@@ -906,7 +906,7 @@ func maybeSame(receiver, a Matrix) bool {
 
 // equalApprox returns whether the elements of a and b are the same to within
 // the tolerance. If ignoreNaN is true the test is relaxed such that NaN == NaN.
-func equalApprox(a, b Matrix, tol float64, ignoreNaN bool) bool {
+func equalApprox(a, b MatrixT, tol float64, ignoreNaN bool) bool {
 	ar, ac := a.Dims()
 	br, bc := b.Dims()
 	if ar != br {
@@ -929,7 +929,7 @@ func equalApprox(a, b Matrix, tol float64, ignoreNaN bool) bool {
 }
 
 // equal returns true if the matrices have equal entries.
-func equal(a, b Matrix) bool {
+func equal(a, b MatrixT) bool {
 	ar, ac := a.Dims()
 	br, bc := b.Dims()
 	if ar != br {
@@ -949,7 +949,7 @@ func equal(a, b Matrix) bool {
 }
 
 // isDiagonal returns whether a is a diagonal matrix.
-func isDiagonal(a Matrix) bool {
+func isDiagonal(a MatrixT) bool {
 	r, c := a.Dims()
 	for i := 0; i < r; i++ {
 		for j := 0; j < c; j++ {
@@ -962,7 +962,7 @@ func isDiagonal(a Matrix) bool {
 }
 
 // equalDiagonal returns whether a and b are equal on the diagonal.
-func equalDiagonal(a, b Matrix) bool {
+func equalDiagonal(a, b MatrixT) bool {
 	ar, ac := a.Dims()
 	br, bc := a.Dims()
 	if min(ar, ac) != min(br, bc) {
@@ -977,7 +977,7 @@ func equalDiagonal(a, b Matrix) bool {
 }
 
 // underlyingData extracts the underlying data of the matrix a.
-func underlyingData(a Matrix) []float64 {
+func underlyingData(a MatrixT) []float64 {
 	switch t := a.(type) {
 	default:
 		panic("matrix type not implemented for extracting underlying data")
@@ -999,7 +999,7 @@ func underlyingData(a Matrix) []float64 {
 // corrupt the value of Uplo when they are empty. This test will fail
 // if that changes (and some mechanism will need to be used to force the
 // correct TriKind to be read).
-var testMatrices = []Matrix{
+var testMatrices = []MatrixT{
 	&Dense{},
 	&basicMatrix{},
 	Transpose{&Dense{}},
@@ -1103,7 +1103,7 @@ func testOneInputFunc(t *testing.T,
 	name string,
 
 	// f is the function being tested.
-	f func(a Matrix) interface{},
+	f func(a MatrixT) interface{},
 
 	// denseComparison performs the same operation, but using Dense matrices for
 	// comparison.
@@ -1117,7 +1117,7 @@ func testOneInputFunc(t *testing.T,
 
 	// legalType returns true if the type of the input is a legal type for the
 	// input of the function.
-	legalType func(a Matrix) bool,
+	legalType func(a MatrixT) bool,
 
 	// legalSize returns true if the size is valid for the function.
 	legalSize func(r, c int) bool,
@@ -1268,7 +1268,7 @@ func testTwoInputFunc(t *testing.T,
 	name string,
 
 	// f is the function being tested.
-	f func(a, b Matrix) interface{},
+	f func(a, b MatrixT) interface{},
 
 	// denseComparison performs the same operation, but using Dense matrices for
 	// comparison.
@@ -1282,7 +1282,7 @@ func testTwoInputFunc(t *testing.T,
 
 	// legalType returns true if the types of the inputs are legal for the
 	// input of the function.
-	legalType func(a, b Matrix) bool,
+	legalType func(a, b MatrixT) bool,
 
 	// legalSize returns true if the sizes are valid for the function.
 	legalSize func(ar, ac, br, bc int) bool,
@@ -1355,10 +1355,10 @@ func testOneInput(t *testing.T,
 	name string,
 
 	// receiver is a value of the receiver type.
-	receiver Matrix,
+	receiver MatrixT,
 
 	// method is the generalized receiver.Method(a).
-	method func(receiver, a Matrix),
+	method func(receiver, a MatrixT),
 
 	// denseComparison performs the same operation as method, but with dense
 	// matrices for comparison with the result.
@@ -1366,7 +1366,7 @@ func testOneInput(t *testing.T,
 
 	// legalTypes returns whether the concrete types in Matrix are valid for
 	// the method.
-	legalType func(a Matrix) bool,
+	legalType func(a MatrixT) bool,
 
 	// legalSize returns whether the matrix sizes are valid for the method.
 	legalSize func(ar, ac int) bool,
@@ -1514,10 +1514,10 @@ func testTwoInput(t *testing.T,
 	name string,
 
 	// receiver is a value of the receiver type.
-	receiver Matrix,
+	receiver MatrixT,
 
 	// method is the generalized receiver.Method(a, b).
-	method func(receiver, a, b Matrix),
+	method func(receiver, a, b MatrixT),
 
 	// denseComparison performs the same operation as method, but with dense
 	// matrices for comparison with the result.
@@ -1525,7 +1525,7 @@ func testTwoInput(t *testing.T,
 
 	// legalTypes returns whether the concrete types in Matrix are valid for
 	// the method.
-	legalTypes func(a, b Matrix) bool,
+	legalTypes func(a, b MatrixT) bool,
 
 	// legalSize returns whether the matrix sizes are valid for the method.
 	legalSize func(ar, ac, br, bc int) bool,

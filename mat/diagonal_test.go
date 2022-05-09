@@ -162,7 +162,7 @@ func TestDiagonalStride(t *testing.T) {
 func TestDiagFrom(t *testing.T) {
 	t.Parallel()
 	for i, test := range []struct {
-		mat  Matrix
+		mat  MatrixT
 		want *Dense
 	}{
 		{
@@ -395,7 +395,7 @@ func TestDiagFrom(t *testing.T) {
 // diagDenseViewer takes the view of the Diagonal with the underlying Diagonal
 // as the DiagDense type.
 type diagDenseViewer interface {
-	Matrix
+	MatrixT
 	DiagView() Diagonal
 }
 

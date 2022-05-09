@@ -219,9 +219,9 @@ func TestVecDenseZero(t *testing.T) {
 
 func TestVecDenseMul(t *testing.T) {
 	t.Parallel()
-	method := func(receiver, a, b Matrix) {
+	method := func(receiver, a, b MatrixT) {
 		type mulVecer interface {
-			MulVec(a Matrix, b Vector)
+			MulVec(a MatrixT, b Vector)
 		}
 		rd := receiver.(mulVecer)
 		rd.MulVec(a, b.(Vector))
@@ -302,7 +302,7 @@ func TestVecDenseScale(t *testing.T) {
 	}
 
 	for _, alpha := range []float64{0, 1, -1, 2.3, -2.3} {
-		method := func(receiver, a Matrix) {
+		method := func(receiver, a MatrixT) {
 			type scaleVecer interface {
 				ScaleVec(float64, Vector)
 			}
@@ -346,7 +346,7 @@ func TestCopyVec(t *testing.T) {
 func TestVecDenseAddScaled(t *testing.T) {
 	t.Parallel()
 	for _, alpha := range []float64{0, 1, -1, 2.3, -2.3} {
-		method := func(receiver, a, b Matrix) {
+		method := func(receiver, a, b MatrixT) {
 			type addScaledVecer interface {
 				AddScaledVec(Vector, float64, Vector)
 			}

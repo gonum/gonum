@@ -99,7 +99,7 @@ type weightedEdgeLister interface {
 // matrixer is a graph that can return an adjacency matrix.
 type matrixer interface {
 	// Matrix returns the graph's adjacency matrix.
-	Matrix() mat.Matrix
+	Matrix() mat.MatrixT
 }
 
 // ReturnAllNodes tests the constructed graph for the ability to return all

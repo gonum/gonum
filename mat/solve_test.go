@@ -233,9 +233,9 @@ func TestSolve(t *testing.T) {
 	}
 
 	// Use testTwoInput.
-	method := func(receiver, a, b Matrix) {
+	method := func(receiver, a, b MatrixT) {
 		type Solver interface {
-			Solve(a, b Matrix) error
+			Solve(a, b MatrixT) error
 		}
 		rd := receiver.(Solver)
 		_ = rd.Solve(a, b)
@@ -293,9 +293,9 @@ func TestSolveVec(t *testing.T) {
 	}
 
 	// Use testTwoInput
-	method := func(receiver, a, b Matrix) {
+	method := func(receiver, a, b MatrixT) {
 		type SolveVecer interface {
-			SolveVec(a Matrix, b Vector) error
+			SolveVec(a MatrixT, b Vector) error
 		}
 		rd := receiver.(SolveVecer)
 		_ = rd.SolveVec(a, b.(Vector))

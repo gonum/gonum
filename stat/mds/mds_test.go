@@ -149,12 +149,12 @@ func TestTorgersonScaling(t *testing.T) {
 // colAbs returns the value of columns reflected
 // such that the first row is positive.
 type colAbs struct {
-	mat.Matrix
+	mat.MatrixT
 }
 
 func (m colAbs) At(i, j int) float64 {
-	if m.Matrix.At(0, j) < 0 {
-		return -m.Matrix.At(i, j)
+	if m.MatrixT.At(0, j) < 0 {
+		return -m.MatrixT.At(i, j)
 	}
-	return m.Matrix.At(i, j)
+	return m.MatrixT.At(i, j)
 }

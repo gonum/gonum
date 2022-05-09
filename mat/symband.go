@@ -13,7 +13,7 @@ import (
 
 var (
 	symBandDense *SymBandDense
-	_            Matrix           = symBandDense
+	_            MatrixT          = symBandDense
 	_            allMatrix        = symBandDense
 	_            denseMatrix      = symBandDense
 	_            Symmetric        = symBandDense
@@ -133,7 +133,7 @@ func (s *SymBandDense) SymBand() (n, k int) {
 
 // T implements the Matrix interface. Symmetric matrices, by definition, are
 // equal to their transpose, and this is a no-op.
-func (s *SymBandDense) T() Matrix {
+func (s *SymBandDense) T() MatrixT {
 	return s
 }
 

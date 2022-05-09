@@ -45,7 +45,7 @@ func (gsvd *HOGSVD) succFact() bool {
 //
 // Factorize returns whether the decomposition succeeded. If the decomposition
 // failed, routines that require a successful factorization will panic.
-func (gsvd *HOGSVD) Factorize(m ...Matrix) (ok bool) {
+func (gsvd *HOGSVD) Factorize(m ...MatrixT) (ok bool) {
 	// Factorize performs the HOGSVD factorisation
 	// essentially as described by Ponnapalli et al.
 	// https://doi.org/10.1371/journal.pone.0028072

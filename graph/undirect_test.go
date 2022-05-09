@@ -27,7 +27,7 @@ var weightedDirectedGraphs = []struct {
 	absent float64
 	merge  func(x, y float64, xe, ye graph.Edge) float64
 
-	want mat.Matrix
+	want mat.MatrixT
 }{
 	{
 		g: func() weightedDirectedBuilder { return simple.NewWeightedDirectedGraph(0, 0) },
@@ -166,11 +166,11 @@ func TestUndirectWeighted(t *testing.T) {
 }
 
 type unit struct {
-	mat.Matrix
+	mat.MatrixT
 }
 
 func (m unit) At(i, j int) float64 {
-	v := m.Matrix.At(i, j)
+	v := m.MatrixT.At(i, j)
 	if v == 0 {
 		return 0
 	}

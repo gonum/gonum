@@ -19,7 +19,7 @@ import (
 // the operation works for any matrix A.
 //
 // Inner panics if x.Len != m or y.Len != n when A is an m x n matrix.
-func Inner(x Vector, a Matrix, y Vector) float64 {
+func Inner(x Vector, a MatrixT, y Vector) float64 {
 	m, n := a.Dims()
 	if x.Len() != m {
 		panic(ErrShape)

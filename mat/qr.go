@@ -46,11 +46,11 @@ func (qr *QR) updateCond(norm lapack.MatrixNorm) {
 // The QR decomposition is a factorization of the matrix A such that A = Q * R.
 // The matrix Q is an orthonormal m×m matrix, and R is an m×n upper triangular matrix.
 // Q and R can be extracted using the QTo and RTo methods.
-func (qr *QR) Factorize(a Matrix) {
+func (qr *QR) Factorize(a MatrixT) {
 	qr.factorize(a, CondNorm)
 }
 
-func (qr *QR) factorize(a Matrix, norm lapack.MatrixNorm) {
+func (qr *QR) factorize(a MatrixT, norm lapack.MatrixNorm) {
 	m, n := a.Dims()
 	if m < n {
 		panic(ErrShape)
@@ -169,7 +169,7 @@ func (qr *QR) QTo(dst *Dense) {
 //  If trans == true, find the minimum norm solution of Aᵀ * X = B.
 // The solution matrix, X, is stored in place into dst.
 // SolveTo will panic if the receiver does not contain a factorization.
-func (qr *QR) SolveTo(dst *Dense, trans bool, b Matrix) error {
+func (qr *QR) SolveTo(dst *Dense, trans bool, b MatrixT) error {
 	if !qr.isValid() {
 		panic(badQR)
 	}
@@ -247,7 +247,7 @@ func (qr *QR) SolveVecTo(dst *VecDense, trans bool, b Vector) error {
 
 	// The Solve implementation is non-trivial, so rather than duplicate the code,
 	// instead recast the VecDenses as Dense and call the matrix code.
-	bm := Matrix(b)
+	bm := MatrixT(b)
 	if rv, ok := b.(RawVectorer); ok {
 		bmat := rv.RawVector()
 		if dst != b {

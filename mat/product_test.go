@@ -106,7 +106,7 @@ func TestProduct(t *testing.T) {
 			dimensions[0].r = test.product.r
 			dimensions[test.n-1].c = test.product.c
 		}
-		factors := make([]Matrix, test.n)
+		factors := make([]MatrixT, test.n)
 		for i, d := range dimensions {
 			data := make([]float64, d.r*d.c)
 			for i := range data {

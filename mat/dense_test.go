@@ -542,9 +542,9 @@ func TestDenseAdd(t *testing.T) {
 		t.Errorf("unexpected panic message: got: %q want: %q", message, regionOverlap)
 	}
 
-	method := func(receiver, a, b Matrix) {
+	method := func(receiver, a, b MatrixT) {
 		type Adder interface {
-			Add(a, b Matrix)
+			Add(a, b MatrixT)
 		}
 		rd := receiver.(Adder)
 		rd.Add(a, b)
@@ -630,9 +630,9 @@ func TestDenseSub(t *testing.T) {
 		t.Errorf("unexpected panic message: got: %q want: %q", message, regionOverlap)
 	}
 
-	method := func(receiver, a, b Matrix) {
+	method := func(receiver, a, b MatrixT) {
 		type Suber interface {
-			Sub(a, b Matrix)
+			Sub(a, b MatrixT)
 		}
 		rd := receiver.(Suber)
 		rd.Sub(a, b)
@@ -718,9 +718,9 @@ func TestDenseMulElem(t *testing.T) {
 		t.Errorf("unexpected panic message: got: %q want: %q", message, regionOverlap)
 	}
 
-	method := func(receiver, a, b Matrix) {
+	method := func(receiver, a, b MatrixT) {
 		type ElemMuler interface {
-			MulElem(a, b Matrix)
+			MulElem(a, b MatrixT)
 		}
 		rd := receiver.(ElemMuler)
 		rd.MulElem(a, b)
@@ -732,7 +732,7 @@ func TestDenseMulElem(t *testing.T) {
 }
 
 // A comparison that treats NaNs as equal, for testing.
-func (m *Dense) same(b Matrix) bool {
+func (m *Dense) same(b MatrixT) bool {
 	br, bc := b.Dims()
 	if br != m.mat.Rows || bc != m.mat.Cols {
 		return false
@@ -822,9 +822,9 @@ func TestDenseDivElem(t *testing.T) {
 		t.Errorf("unexpected panic message: got: %q want: %q", message, regionOverlap)
 	}
 
-	method := func(receiver, a, b Matrix) {
+	method := func(receiver, a, b MatrixT) {
 		type ElemDiver interface {
-			DivElem(a, b Matrix)
+			DivElem(a, b MatrixT)
 		}
 		rd := receiver.(ElemDiver)
 		rd.DivElem(a, b)
@@ -913,9 +913,9 @@ func TestDenseMul(t *testing.T) {
 		t.Errorf("unexpected panic message: got: %q want: %q", message, regionOverlap)
 	}
 
-	method := func(receiver, a, b Matrix) {
+	method := func(receiver, a, b MatrixT) {
 		type Muler interface {
-			Mul(a, b Matrix)
+			Mul(a, b MatrixT)
 		}
 		rd := receiver.(Muler)
 		rd.Mul(a, b)
@@ -1097,7 +1097,7 @@ func TestDensePow(t *testing.T) {
 func TestDenseKronecker(t *testing.T) {
 	t.Parallel()
 	for i, test := range []struct {
-		a, b Matrix
+		a, b MatrixT
 		want *Dense
 	}{
 		{
@@ -1198,9 +1198,9 @@ func TestDenseKronecker(t *testing.T) {
 func TestDenseScale(t *testing.T) {
 	t.Parallel()
 	for _, f := range []float64{0.5, 1, 3} {
-		method := func(receiver, a Matrix) {
+		method := func(receiver, a MatrixT) {
 			type Scaler interface {
-				Scale(f float64, a Matrix)
+				Scale(f float64, a MatrixT)
 			}
 			rd := receiver.(Scaler)
 			rd.Scale(f, a)
@@ -1246,7 +1246,7 @@ func TestDensePowN(t *testing.T) {
 	}
 }
 
-func (m *Dense) iterativePow(a Matrix, n int) {
+func (m *Dense) iterativePow(a MatrixT, n int) {
 	m.CloneFrom(a)
 	for i := 1; i < n; i++ {
 		m.Mul(m, a)
@@ -1520,9 +1520,9 @@ func TestDenseApply(t *testing.T) {
 		func(_, _ int, v float64) float64 { return v * v },
 		func(_, _ int, v float64) float64 { return -v },
 	} {
-		method := func(receiver, x Matrix) {
+		method := func(receiver, x MatrixT) {
 			type Applier interface {
-				Apply(func(r, c int, v float64) float64, Matrix)
+				Apply(func(r, c int, v float64) float64, MatrixT)
 			}
 			rd := receiver.(Applier)
 			rd.Apply(fn, x)
@@ -1619,9 +1619,9 @@ func TestDenseStack(t *testing.T) {
 		}
 	}
 
-	method := func(receiver, a, b Matrix) {
+	method := func(receiver, a, b MatrixT) {
 		type Stacker interface {
-			Stack(a, b Matrix)
+			Stack(a, b MatrixT)
 		}
 		rd := receiver.(Stacker)
 		rd.Stack(a, b)
@@ -1664,9 +1664,9 @@ func TestDenseAugment(t *testing.T) {
 		}
 	}
 
-	method := func(receiver, a, b Matrix) {
+	method := func(receiver, a, b MatrixT) {
 		type Augmenter interface {
-			Augment(a, b Matrix)
+			Augment(a, b MatrixT)
 		}
 		rd := receiver.(Augmenter)
 		rd.Augment(a, b)
@@ -1808,7 +1808,7 @@ func TestDenseOuter(t *testing.T) {
 	}
 
 	for _, alpha := range []float64{0, 1, -1, 2.3, -2.3} {
-		method := func(receiver, x, y Matrix) {
+		method := func(receiver, x, y MatrixT) {
 			type outerer interface {
 				Outer(alpha float64, x, y Vector)
 			}
@@ -1826,8 +1826,8 @@ func TestDenseOuter(t *testing.T) {
 func TestDenseInverse(t *testing.T) {
 	t.Parallel()
 	for i, test := range []struct {
-		a    Matrix
-		want Matrix // nil indicates that a is singular.
+		a    MatrixT
+		want MatrixT // nil indicates that a is singular.
 		tol  float64
 	}{
 		{
@@ -2098,7 +2098,7 @@ func TestDenseInverse(t *testing.T) {
 					data[i] = rnd.NormFloat64()
 				}
 
-				var a Matrix
+				var a MatrixT
 				var aInv Dense
 				if recvSameAsA {
 					aInv = *NewDense(n, n, data)

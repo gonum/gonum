@@ -55,7 +55,7 @@ func (m *Dense) checkOverlap(a blas64.General) bool {
 	return checkOverlap(m.RawMatrix(), a)
 }
 
-func (m *Dense) checkOverlapMatrix(a Matrix) bool {
+func (m *Dense) checkOverlapMatrix(a MatrixT) bool {
 	if m == a {
 		return false
 	}
@@ -82,7 +82,7 @@ func (s *SymDense) checkOverlap(a blas64.General) bool {
 	return checkOverlap(generalFromSymmetric(s.RawSymmetric()), a)
 }
 
-func (s *SymDense) checkOverlapMatrix(a Matrix) bool {
+func (s *SymDense) checkOverlapMatrix(a MatrixT) bool {
 	if s == a {
 		return false
 	}
@@ -120,7 +120,7 @@ func (t *TriDense) checkOverlap(a blas64.General) bool {
 	return checkOverlap(generalFromTriangular(t.RawTriangular()), a)
 }
 
-func (t *TriDense) checkOverlapMatrix(a Matrix) bool {
+func (t *TriDense) checkOverlapMatrix(a MatrixT) bool {
 	if t == a {
 		return false
 	}
@@ -207,7 +207,7 @@ func (s *SymBandDense) checkOverlap(a blas64.General) bool {
 	return checkOverlap(generalFromSymmetricBand(s.RawSymBand()), a)
 }
 
-func (s *SymBandDense) checkOverlapMatrix(a Matrix) bool {
+func (s *SymBandDense) checkOverlapMatrix(a MatrixT) bool {
 	if s == a {
 		return false
 	}

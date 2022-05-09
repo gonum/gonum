@@ -360,7 +360,7 @@ func TestTridiagSolveTo(t *testing.T) {
 							continue
 						}
 
-						var b Matrix
+						var b MatrixT
 						switch bType {
 						case denseB:
 							b = NewDense(n, nrhs, random(n*nrhs))

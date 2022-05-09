@@ -83,12 +83,12 @@ const (
 //  Strang, Gilbert. "Linear Algebra and Applications." Academic, New York (1976).
 // For a detailed video introduction, see lectures 11-13 of UC Math 352
 //  https://www.youtube.com/watch?v=ESzYPFkY3og&index=11&list=PLh464gFUoJWOmBYla3zbZbc4nv2AXez6X.
-func Simplex(c []float64, A mat.Matrix, b []float64, tol float64, initialBasic []int) (optF float64, optX []float64, err error) {
+func Simplex(c []float64, A mat.MatrixT, b []float64, tol float64, initialBasic []int) (optF float64, optX []float64, err error) {
 	ans, x, _, err := simplex(initialBasic, c, A, b, tol)
 	return ans, x, err
 }
 
-func simplex(initialBasic []int, c []float64, A mat.Matrix, b []float64, tol float64) (float64, []float64, []int, error) {
+func simplex(initialBasic []int, c []float64, A mat.MatrixT, b []float64, tol float64) (float64, []float64, []int, error) {
 	err := verifyInputs(initialBasic, c, A, b)
 	if err != nil {
 		if err == ErrUnbounded {
@@ -301,7 +301,7 @@ func simplex(initialBasic []int, c []float64, A mat.Matrix, b []float64, tol flo
 
 // computeMove computes how far can be moved replacing each index. The results
 // are stored into move.
-func computeMove(move []float64, minIdx int, A mat.Matrix, ab *mat.Dense, xb []float64, nonBasicIdx []int) error {
+func computeMove(move []float64, minIdx int, A mat.MatrixT, ab *mat.Dense, xb []float64, nonBasicIdx []int) error {
 	// Find ae.
 	col := mat.Col(nil, nonBasicIdx[minIdx], A)
 	aCol := mat.NewVecDense(len(col), col)
@@ -342,7 +342,7 @@ func computeMove(move []float64, minIdx int, A mat.Matrix, ab *mat.Dense, xb []f
 // replaceBland uses the Bland rule to find the indices to swap if the minimum
 // move is 0. The indices to be swapped are replace and minIdx (following the
 // nomenclature in the main routine).
-func replaceBland(A mat.Matrix, ab *mat.Dense, xb []float64, basicIdxs, nonBasicIdx []int, r, move []float64) (replace, minIdx int, err error) {
+func replaceBland(A mat.MatrixT, ab *mat.Dense, xb []float64, basicIdxs, nonBasicIdx []int, r, move []float64) (replace, minIdx int, err error) {
 	m, _ := A.Dims()
 	// Use the traditional bland rule, except don't replace a constraint which
 	// causes the new ab to be singular.
@@ -380,7 +380,7 @@ func replaceBland(A mat.Matrix, ab *mat.Dense, xb []float64, basicIdxs, nonBasic
 	return -1, -1, ErrBland
 }
 
-func verifyInputs(initialBasic []int, c []float64, A mat.Matrix, b []float64) error {
+func verifyInputs(initialBasic []int, c []float64, A mat.MatrixT, b []float64) error {
 	m, n := A.Dims()
 	if m > n {
 		panic("lp: more equality constraints than variables")
@@ -472,7 +472,7 @@ func initializeFromBasic(xb []float64, ab *mat.Dense, b []float64) error {
 }
 
 // extractColumns copies the columns specified by cols into the columns of dst.
-func extractColumns(dst *mat.Dense, A mat.Matrix, cols []int) {
+func extractColumns(dst *mat.Dense, A mat.MatrixT, cols []int) {
 	r, c := dst.Dims()
 	ra, _ := A.Dims()
 	if ra != r {
@@ -490,7 +490,7 @@ func extractColumns(dst *mat.Dense, A mat.Matrix, cols []int) {
 
 // findInitialBasic finds an initial basic solution, and returns the basic
 // indices, ab, and xb.
-func findInitialBasic(A mat.Matrix, b []float64) ([]int, *mat.Dense, []float64, error) {
+func findInitialBasic(A mat.MatrixT, b []float64) ([]int, *mat.Dense, []float64, error) {
 	m, n := A.Dims()
 	basicIdxs := findLinearlyIndependent(A)
 	if len(basicIdxs) != m {
@@ -609,7 +609,7 @@ func findInitialBasic(A mat.Matrix, b []float64) ([]int, *mat.Dense, []float64, 
 
 // findLinearlyIndependnt finds a set of linearly independent columns of A, and
 // returns the column indexes of the linearly independent columns.
-func findLinearlyIndependent(A mat.Matrix) []int {
+func findLinearlyIndependent(A mat.MatrixT) []int {
 	m, n := A.Dims()
 	idxs := make([]int, 0, m)
 	columns := mat.NewDense(m, m, nil)

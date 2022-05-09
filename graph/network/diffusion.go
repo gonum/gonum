@@ -76,7 +76,7 @@ func DiffuseToEquilibrium(dst, h map[int64]float64, by spectral.Laplacian, tol f
 			break
 		}
 		lastV, v = v, lastV
-		tmp.MulVec(by.Matrix, lastV)
+		tmp.MulVec(by.MatrixT, lastV)
 		v.SubVec(lastV, &tmp)
 		if normDiff(heat, last) < tol {
 			ok = true

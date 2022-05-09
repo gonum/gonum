@@ -14,7 +14,7 @@ import (
 var (
 	dense *Dense
 
-	_ Matrix      = dense
+	_ MatrixT     = dense
 	_ allMatrix   = dense
 	_ denseMatrix = dense
 	_ Mutable     = dense
@@ -161,7 +161,7 @@ func (m *Dense) Zero() {
 // isolatedWorkspace returns a new dense matrix w with the size of a and
 // returns a callback to defer which performs cleanup at the return of the call.
 // This should be used when a method receiver is the same pointer as an input argument.
-func (m *Dense) isolatedWorkspace(a Matrix) (w *Dense, restore func()) {
+func (m *Dense) isolatedWorkspace(a MatrixT) (w *Dense, restore func()) {
 	r, c := a.Dims()
 	if r == 0 || c == 0 {
 		panic(ErrZeroLength)
@@ -210,7 +210,7 @@ func (m *Dense) asTriDense(n int, diag blas.Diag, uplo blas.Uplo) *TriDense {
 }
 
 // DenseCopyOf returns a newly allocated copy of the elements of a.
-func DenseCopyOf(a Matrix) *Dense {
+func DenseCopyOf(a MatrixT) *Dense {
 	d := &Dense{}
 	d.CloneFrom(a)
 	return d
@@ -236,7 +236,7 @@ func (m *Dense) Dims() (r, c int) { return m.mat.Rows, m.mat.Cols }
 func (m *Dense) Caps() (r, c int) { return m.capRows, m.capCols }
 
 // T performs an implicit transpose by returning the receiver inside a Transpose.
-func (m *Dense) T() Matrix {
+func (m *Dense) T() MatrixT {
 	return Transpose{m}
 }
 
@@ -319,7 +319,7 @@ func (m *Dense) DiagView() Diagonal {
 // final column is l-1.
 // Slice panics with ErrIndexOutOfRange if the slice is outside the capacity
 // of the receiver.
-func (m *Dense) Slice(i, k, j, l int) Matrix {
+func (m *Dense) Slice(i, k, j, l int) MatrixT {
 	return m.slice(i, k, j, l)
 }
 
@@ -344,7 +344,7 @@ func (m *Dense) slice(i, k, j, l int) *Dense {
 // of the expanded matrix are outside the capacities of the receiver a new
 // allocation is made, otherwise not. Note the receiver itself is not modified
 // during the call to Grow.
-func (m *Dense) Grow(r, c int) Matrix {
+func (m *Dense) Grow(r, c int) MatrixT {
 	if r < 0 || c < 0 {
 		panic(ErrIndexOutOfRange)
 	}
@@ -410,7 +410,7 @@ func (m *Dense) Grow(r, c int) Matrix {
 // will not cause shadowing.
 //
 // See the ClonerFrom interface for more information.
-func (m *Dense) CloneFrom(a Matrix) {
+func (m *Dense) CloneFrom(a MatrixT) {
 	r, c := a.Dims()
 	mat := blas64.General{
 		Rows:   r,
@@ -461,7 +461,7 @@ func (m *Dense) CloneFrom(a Matrix) {
 // panic.
 //
 // See the Copier interface for more information.
-func (m *Dense) Copy(a Matrix) (r, c int) {
+func (m *Dense) Copy(a MatrixT) (r, c int) {
 	r, c = a.Dims()
 	if a == m {
 		return r, c
@@ -541,7 +541,7 @@ func (m *Dense) Copy(a Matrix) (r, c int) {
 // receiver with b placed in the greater indexed rows. Stack will panic if the
 // two input matrices do not have the same number of columns or the constructed
 // stacked matrix is not the same shape as the receiver.
-func (m *Dense) Stack(a, b Matrix) {
+func (m *Dense) Stack(a, b MatrixT) {
 	ar, ac := a.Dims()
 	br, bc := b.Dims()
 	if ac != bc || m == a || m == b {
@@ -559,7 +559,7 @@ func (m *Dense) Stack(a, b Matrix) {
 // greater indexed columns. Augment will panic if the two input matrices do
 // not have the same number of rows or the constructed augmented matrix is
 // not the same shape as the receiver.
-func (m *Dense) Augment(a, b Matrix) {
+func (m *Dense) Augment(a, b MatrixT) {
 	ar, ac := a.Dims()
 	br, bc := b.Dims()
 	if ar != br || m == a || m == b {

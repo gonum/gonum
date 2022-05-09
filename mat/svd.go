@@ -72,7 +72,7 @@ func (svd *SVD) succFact() bool {
 //
 // Factorize returns whether the decomposition succeeded. If the decomposition
 // failed, routines that require a successful factorization will panic.
-func (svd *SVD) Factorize(a Matrix, kind SVDKind) (ok bool) {
+func (svd *SVD) Factorize(a MatrixT, kind SVDKind) (ok bool) {
 	// kill previous factorization
 	svd.s = svd.s[:0]
 	svd.kind = kind
@@ -290,7 +290,7 @@ func (svd *SVD) VTo(dst *Dense) {
 // SolveTo returns the residuals calculated from the complete SVD. For this
 // value to be valid the factorization must have been performed with at least
 // SVDFullU.
-func (svd *SVD) SolveTo(dst *Dense, b Matrix, rank int) []float64 {
+func (svd *SVD) SolveTo(dst *Dense, b MatrixT, rank int) []float64 {
 	if !svd.succFact() {
 		panic(badFact)
 	}
@@ -350,7 +350,7 @@ func (m repVector) At(i, j int) float64 {
 	}
 	return m.vec[i]
 }
-func (m repVector) T() Matrix { return Transpose{m} }
+func (m repVector) T() MatrixT { return Transpose{m} }
 
 // SolveVecTo calculates the minimum-norm solution to a linear least squares problem
 //  minimize over n-element vectors x: |b - A*x|_2 and |x|_2

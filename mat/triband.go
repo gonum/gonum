@@ -19,7 +19,7 @@ var (
 	_       Triangular = triBand
 
 	triBandDense *TriBandDense
-	_            Matrix           = triBandDense
+	_            MatrixT          = triBandDense
 	_            allMatrix        = triBandDense
 	_            denseMatrix      = triBandDense
 	_            Triangular       = triBandDense
@@ -66,7 +66,7 @@ type MutableTriBanded interface {
 
 var (
 	tTriBand TransposeTriBand
-	_        Matrix               = tTriBand
+	_        MatrixT              = tTriBand
 	_        TriBanded            = tTriBand
 	_        Untransposer         = tTriBand
 	_        UntransposeTrier     = tTriBand
@@ -95,7 +95,7 @@ func (t TransposeTriBand) Dims() (r, c int) {
 }
 
 // T performs an implicit transpose by returning the TriBand field.
-func (t TransposeTriBand) T() Matrix {
+func (t TransposeTriBand) T() MatrixT {
 	return t.TriBanded
 }
 
@@ -134,7 +134,7 @@ func (t TransposeTriBand) TTriBand() TriBanded {
 }
 
 // Untranspose returns the Triangular field.
-func (t TransposeTriBand) Untranspose() Matrix {
+func (t TransposeTriBand) Untranspose() MatrixT {
 	return t.TriBanded
 }
 
@@ -239,7 +239,7 @@ func (t *TriBandDense) Dims() (r, c int) {
 }
 
 // T performs an implicit transpose by returning the receiver inside a Transpose.
-func (t *TriBandDense) T() Matrix {
+func (t *TriBandDense) T() MatrixT {
 	return Transpose{t}
 }
 
@@ -492,7 +492,7 @@ func (t *TriBandDense) Trace() float64 {
 // n×nrhs matrix. If T is non-singular, the result will be stored into dst and
 // nil will be returned. If T is singular, the contents of dst will be undefined
 // and a Condition error will be returned.
-func (t *TriBandDense) SolveTo(dst *Dense, trans bool, b Matrix) error {
+func (t *TriBandDense) SolveTo(dst *Dense, trans bool, b MatrixT) error {
 	n, nrhs := b.Dims()
 	if n != t.mat.N {
 		panic(ErrShape)

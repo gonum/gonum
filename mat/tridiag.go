@@ -15,7 +15,7 @@ import (
 
 var (
 	tridiagDense *Tridiag
-	_            Matrix           = tridiagDense
+	_            MatrixT          = tridiagDense
 	_            allMatrix        = tridiagDense
 	_            denseMatrix      = tridiagDense
 	_            Banded           = tridiagDense
@@ -80,7 +80,7 @@ func (a *Tridiag) Bandwidth() (kl, ku int) {
 }
 
 // T performs an implicit transpose by returning the receiver inside a Transpose.
-func (a *Tridiag) T() Matrix {
+func (a *Tridiag) T() MatrixT {
 	// An alternative would be to return the receiver with DL,DU swapped; the
 	// untranspose function would then always return false. With Transpose the
 	// diagonal swapping will be done in tridiagonal routines in lapack like
@@ -228,7 +228,7 @@ func (a *Tridiag) MulVecTo(dst *VecDense, trans bool, x Vector) {
 // matrix. If A is non-singular, the result will be stored into dst and nil will
 // be returned. If A is singular, the contents of dst will be undefined and a
 // Condition error will be returned.
-func (a *Tridiag) SolveTo(dst *Dense, trans bool, b Matrix) error {
+func (a *Tridiag) SolveTo(dst *Dense, trans bool, b MatrixT) error {
 	n, nrhs := b.Dims()
 	if n != a.mat.N {
 		panic(ErrShape)

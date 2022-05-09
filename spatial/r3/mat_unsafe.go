@@ -57,7 +57,7 @@ func Skew(v Vec) (M *Mat) {
 
 // Mul takes the matrix product of a and b, placing the result in the receiver.
 // If the number of columns in a does not equal 3, Mul will panic.
-func (m *Mat) Mul(a, b mat.Matrix) {
+func (m *Mat) Mul(a, b mat.MatrixT) {
 	ra, ca := a.Dims()
 	rb, cb := b.Dims()
 	switch {

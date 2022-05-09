@@ -14,7 +14,7 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-func simpleAdjacency(n, wide int, diag bool) mat.Matrix {
+func simpleAdjacency(n, wide int, diag bool) mat.MatrixT {
 	m := mat.NewDense(n, n, nil)
 	for i := 0; i < n; i++ {
 		for j := 1; j <= wide; j++ {
@@ -31,7 +31,7 @@ func simpleAdjacency(n, wide int, diag bool) mat.Matrix {
 	return m
 }
 
-func simpleAdjacencyBand(n, wide int, diag bool) mat.Matrix {
+func simpleAdjacencyBand(n, wide int, diag bool) mat.MatrixT {
 	m := mat.NewBandDense(n, n, wide, wide, nil)
 	for i := 0; i < n; i++ {
 		for j := 1; j <= wide; j++ {
@@ -52,7 +52,7 @@ var spatialTests = []struct {
 	from, to float64
 	n, wide  int
 	fn       func(float64, int, *rand.Rand) float64
-	locality func(n, wide int, diag bool) mat.Matrix
+	locality func(n, wide int, diag bool) mat.MatrixT
 
 	// Values for MoranI and z-score are obtained from
 	// an R reference implementation.
@@ -242,7 +242,7 @@ func TestGetisOrd(t *testing.T) {
 // getisOrdSegments returns the number of contiguously significant G*i segemtns in
 // data. This allows an intuitive validation of the function in lieu of a reference
 // implementation.
-func getisOrdSegments(data, weight []float64, locality mat.Matrix) int {
+func getisOrdSegments(data, weight []float64, locality mat.MatrixT) int {
 	const thresh = 2
 	var nseg int
 	segstart := -1

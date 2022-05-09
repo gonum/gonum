@@ -32,7 +32,7 @@ func (s symView) At(i, j int) float64 {
 	return s.sym.At(s.i+i, s.j+j)
 }
 
-func (s symView) T() mat.Matrix { return mat.Transpose{Matrix: s} }
+func (s symView) T() mat.MatrixT { return mat.Transpose{MatrixT: s} }
 
 func ExampleCC() {
 	// This example is directly analogous to Example 3.5 on page 87 of

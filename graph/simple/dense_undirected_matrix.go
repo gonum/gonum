@@ -134,7 +134,7 @@ func (g *UndirectedMatrix) HasEdgeBetween(uid, vid int64) bool {
 }
 
 // Matrix returns the mat.Matrix representation of the graph.
-func (g *UndirectedMatrix) Matrix() mat.Matrix {
+func (g *UndirectedMatrix) Matrix() mat.MatrixT {
 	// Prevent alteration of dimensions of the returned matrix.
 	m := *g.mat
 	return &m

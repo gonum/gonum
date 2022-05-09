@@ -147,7 +147,7 @@ func (g *DirectedMatrix) HasEdgeFromTo(uid, vid int64) bool {
 // Matrix returns the mat.Matrix representation of the graph. The orientation
 // of the matrix is such that the matrix entry at G_{ij} is the weight of the edge
 // from node i to node j.
-func (g *DirectedMatrix) Matrix() mat.Matrix {
+func (g *DirectedMatrix) Matrix() mat.MatrixT {
 	// Prevent alteration of dimensions of the returned matrix.
 	m := *g.mat
 	return &m

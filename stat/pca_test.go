@@ -17,7 +17,7 @@ func TestPrincipalComponents(t *testing.T) {
 	const epsilon = 1e-15
 tests:
 	for i, test := range []struct {
-		data     mat.Matrix
+		data     mat.MatrixT
 		weights  []float64
 		wantVecs *mat.Dense
 		wantVars []float64

@@ -10,7 +10,7 @@ import "fmt"
 // the receiver. The order of multiplication operations is optimized to minimize
 // the number of floating point operations on the basis that all matrix
 // multiplications are general.
-func (m *Dense) Product(factors ...Matrix) {
+func (m *Dense) Product(factors ...MatrixT) {
 	// The operation order optimisation is the naive O(n^3) dynamic
 	// programming approach and does not take into consideration
 	// finer-grained optimisations that might be available.
@@ -55,7 +55,7 @@ const debugProductWalk = false
 type multiplier struct {
 	// factors is the ordered set of
 	// factors to multiply.
-	factors []Matrix
+	factors []MatrixT
 	// dims is the chain of factor
 	// dimensions.
 	dims []int
@@ -66,7 +66,7 @@ type multiplier struct {
 	table table
 }
 
-func newMultiplier(m *Dense, factors []Matrix) *multiplier {
+func newMultiplier(m *Dense, factors []MatrixT) *multiplier {
 	// Check size early, but don't yet
 	// allocate data for m.
 	r, c := m.Dims()
@@ -133,7 +133,7 @@ func (p *multiplier) multiply() *Dense {
 	return result.(*Dense)
 }
 
-func (p *multiplier) multiplySubchain(i, j int) (m Matrix, intermediate bool) {
+func (p *multiplier) multiplySubchain(i, j int) (m MatrixT, intermediate bool) {
 	if i == j {
 		return p.factors[i], false
 	}

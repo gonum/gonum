@@ -16,7 +16,7 @@ import (
 var (
 	symDense *SymDense
 
-	_ Matrix           = symDense
+	_ MatrixT          = symDense
 	_ allMatrix        = symDense
 	_ denseMatrix      = symDense
 	_ Symmetric        = symDense
@@ -36,7 +36,7 @@ type SymDense struct {
 // Symmetric represents a symmetric matrix (where the element at {i, j} equals
 // the element at {j, i}). Symmetric matrices are always square.
 type Symmetric interface {
-	Matrix
+	MatrixT
 	// SymmetricDim returns the number of rows/columns in the matrix.
 	SymmetricDim() int
 }
@@ -96,7 +96,7 @@ func (s *SymDense) Caps() (r, c int) {
 }
 
 // T returns the receiver, the transpose of a symmetric matrix.
-func (s *SymDense) T() Matrix {
+func (s *SymDense) T() MatrixT {
 	return s
 }
 
@@ -356,7 +356,7 @@ func (s *SymDense) SymRankOne(a Symmetric, alpha float64, x Vector) {
 // SymRankK performs a symmetric rank-k update to the matrix a and stores the
 // result into the receiver. If a is zero, see SymOuterK.
 //  s = a + alpha * x * x'
-func (s *SymDense) SymRankK(a Symmetric, alpha float64, x Matrix) {
+func (s *SymDense) SymRankK(a Symmetric, alpha float64, x MatrixT) {
 	n := a.SymmetricDim()
 	r, _ := x.Dims()
 	if r != n {
@@ -389,7 +389,7 @@ func (s *SymDense) SymRankK(a Symmetric, alpha float64, x Matrix) {
 // multiplication
 //  s = alpha * x * x'.
 // In order to update an existing matrix, see SymRankOne.
-func (s *SymDense) SymOuterK(alpha float64, x Matrix) {
+func (s *SymDense) SymOuterK(alpha float64, x MatrixT) {
 	n, _ := x.Dims()
 	switch {
 	case s.IsEmpty():

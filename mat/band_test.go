@@ -441,7 +441,7 @@ func (b bandImplicit) Dims() (r, c int) {
 	return b.r, b.c
 }
 
-func (b bandImplicit) T() Matrix {
+func (b bandImplicit) T() MatrixT {
 	return Transpose{b}
 }
 

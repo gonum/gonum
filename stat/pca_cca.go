@@ -33,7 +33,7 @@ type PC struct {
 // must match the number of observations or PrincipalComponents will panic.
 //
 // PrincipalComponents returns whether the analysis was successful.
-func (c *PC) PrincipalComponents(a mat.Matrix, weights []float64) (ok bool) {
+func (c *PC) PrincipalComponents(a mat.MatrixT, weights []float64) (ok bool) {
 	c.n, c.d = a.Dims()
 	if weights != nil && len(weights) != c.n {
 		panic("stat: len(weights) != observations")
@@ -165,7 +165,7 @@ type CC struct {
 // or in Chapter 3 of
 // Koch, Inge. Analysis of multivariate and high-dimensional data.
 // Vol. 32. Cambridge University Press, 2013. ISBN: 9780521887939
-func (c *CC) CanonicalCorrelations(x, y mat.Matrix, weights []float64) error {
+func (c *CC) CanonicalCorrelations(x, y mat.MatrixT, weights []float64) error {
 	var yn int
 	c.n, c.xd = x.Dims()
 	yn, c.yd = y.Dims()
@@ -286,7 +286,7 @@ func (c *CC) RightTo(dst *mat.Dense, spheredSpace bool) {
 	dst.Scale(math.Sqrt(float64(c.n-1)), dst)
 }
 
-func svdFactorizeCentered(work *mat.SVD, m mat.Matrix, weights []float64) (svd *mat.SVD, ok bool) {
+func svdFactorizeCentered(work *mat.SVD, m mat.MatrixT, weights []float64) (svd *mat.SVD, ok bool) {
 	n, d := m.Dims()
 	centered := mat.NewDense(n, d, nil)
 	col := make([]float64, n)

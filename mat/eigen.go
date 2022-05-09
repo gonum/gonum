@@ -167,7 +167,7 @@ func (e *Eigen) succFact() bool {
 //
 // Factorize returns whether the decomposition succeeded. If the decomposition
 // failed, methods that require a successful factorization will panic.
-func (e *Eigen) Factorize(a Matrix, kind EigenKind) (ok bool) {
+func (e *Eigen) Factorize(a MatrixT, kind EigenKind) (ok bool) {
 	// kill previous factorization.
 	e.n = 0
 	e.kind = 0

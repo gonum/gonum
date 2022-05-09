@@ -13,7 +13,7 @@ import (
 
 var (
 	bandDense *BandDense
-	_         Matrix      = bandDense
+	_         MatrixT     = bandDense
 	_         allMatrix   = bandDense
 	_         denseMatrix = bandDense
 	_         Banded      = bandDense
@@ -31,7 +31,7 @@ type BandDense struct {
 
 // Banded is a band matrix representation.
 type Banded interface {
-	Matrix
+	MatrixT
 	// Bandwidth returns the lower and upper bandwidth values for
 	// the matrix. The total bandwidth of the matrix is kl+ku+1.
 	Bandwidth() (kl, ku int)
@@ -58,7 +58,7 @@ type MutableBanded interface {
 }
 
 var (
-	_ Matrix            = TransposeBand{}
+	_ MatrixT           = TransposeBand{}
 	_ Banded            = TransposeBand{}
 	_ UntransposeBander = TransposeBand{}
 )
@@ -83,7 +83,7 @@ func (t TransposeBand) Dims() (r, c int) {
 }
 
 // T performs an implicit transpose by returning the Banded field.
-func (t TransposeBand) T() Matrix {
+func (t TransposeBand) T() MatrixT {
 	return t.Banded
 }
 
@@ -100,7 +100,7 @@ func (t TransposeBand) TBand() Banded {
 }
 
 // Untranspose returns the Banded field.
-func (t TransposeBand) Untranspose() Matrix {
+func (t TransposeBand) Untranspose() MatrixT {
 	return t.Banded
 }
 
@@ -180,7 +180,7 @@ func (b *BandDense) Bandwidth() (kl, ku int) {
 }
 
 // T performs an implicit transpose by returning the receiver inside a Transpose.
-func (b *BandDense) T() Matrix {
+func (b *BandDense) T() MatrixT {
 	return Transpose{b}
 }
 

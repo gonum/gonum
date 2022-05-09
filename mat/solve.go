@@ -29,7 +29,7 @@ import (
 //
 // If A does not have full rank, a Condition error is returned. See the
 // documentation for Condition for more information.
-func (m *Dense) Solve(a, b Matrix) error {
+func (m *Dense) Solve(a, b MatrixT) error {
 	ar, ac := a.Dims()
 	br, bc := b.Dims()
 	if ar != br {
@@ -131,7 +131,7 @@ func (m *Dense) Solve(a, b Matrix) error {
 //
 // If A does not have full rank, a Condition error is returned. See the
 // documentation for Condition for more information.
-func (v *VecDense) SolveVec(a Matrix, b Vector) error {
+func (v *VecDense) SolveVec(a MatrixT, b Vector) error {
 	if _, bc := b.Dims(); bc != 1 {
 		panic(ErrShape)
 	}

@@ -11,7 +11,7 @@ import (
 )
 
 // Formatted returns a fmt.Formatter for the matrix m using the given options.
-func Formatted(m Matrix, options ...FormatOption) fmt.Formatter {
+func Formatted(m MatrixT, options ...FormatOption) fmt.Formatter {
 	f := formatter{
 		matrix: m,
 		dot:    '.',
@@ -23,13 +23,13 @@ func Formatted(m Matrix, options ...FormatOption) fmt.Formatter {
 }
 
 type formatter struct {
-	matrix  Matrix
+	matrix  MatrixT
 	prefix  string
 	margin  int
 	dot     byte
 	squeeze bool
 
-	format func(m Matrix, prefix string, margin int, dot byte, squeeze bool, fs fmt.State, c rune)
+	format func(m MatrixT, prefix string, margin int, dot byte, squeeze bool, fs fmt.State, c rune)
 }
 
 // FormatOption is a functional option for matrix formatting.
@@ -94,7 +94,7 @@ func (f formatter) Format(fs fmt.State, c rune) {
 // are output. If squeeze is true, column widths are determined on a per-column basis.
 //
 // format will not provide Go syntax output.
-func format(m Matrix, prefix string, margin int, dot byte, squeeze bool, fs fmt.State, c rune) {
+func format(m MatrixT, prefix string, margin int, dot byte, squeeze bool, fs fmt.State, c rune) {
 	rows, cols := m.Dims()
 
 	var printed int
@@ -220,7 +220,7 @@ func format(m Matrix, prefix string, margin int, dot byte, squeeze bool, fs fmt.
 // If squeeze is true, column widths are determined on a per-column basis.
 //
 // formatMATLAB will not provide Go syntax output.
-func formatMATLAB(m Matrix, prefix string, _ int, _ byte, squeeze bool, fs fmt.State, c rune) {
+func formatMATLAB(m MatrixT, prefix string, _ int, _ byte, squeeze bool, fs fmt.State, c rune) {
 	rows, cols := m.Dims()
 
 	prec, pOk := fs.Precision()
@@ -333,7 +333,7 @@ func formatMATLAB(m Matrix, prefix string, _ int, _ byte, squeeze bool, fs fmt.S
 // If squeeze is true, column widths are determined on a per-column basis.
 //
 // formatPython will not provide Go syntax output.
-func formatPython(m Matrix, prefix string, _ int, _ byte, squeeze bool, fs fmt.State, c rune) {
+func formatPython(m MatrixT, prefix string, _ int, _ byte, squeeze bool, fs fmt.State, c rune) {
 	rows, cols := m.Dims()
 
 	prec, pOk := fs.Precision()
@@ -471,7 +471,7 @@ func fmtString(fs fmt.State, c rune, prec, width int) string {
 	return b.String()
 }
 
-func maxCellWidth(m Matrix, c rune, printed, prec int, w widther) ([]byte, int) {
+func maxCellWidth(m MatrixT, c rune, printed, prec int, w widther) ([]byte, int) {
 	var (
 		buf        = make([]byte, 0, 64)
 		rows, cols = m.Dims()

@@ -20,7 +20,7 @@ import (
 // must not contain negative elements.
 // The dst matrix must either be empty or have the same number of
 // columns as the input data matrix.
-func CovarianceMatrix(dst *mat.SymDense, x mat.Matrix, weights []float64) {
+func CovarianceMatrix(dst *mat.SymDense, x mat.MatrixT, weights []float64) {
 	// This is the matrix version of the two-pass algorithm. It doesn't use the
 	// additional floating point error correction that the Covariance function uses
 	// to reduce the impact of rounding during centering.
@@ -78,7 +78,7 @@ func CovarianceMatrix(dst *mat.SymDense, x mat.Matrix, weights []float64) {
 // must not contain negative elements.
 // The dst matrix must either be empty or have the same number of
 // columns as the input data matrix.
-func CorrelationMatrix(dst *mat.SymDense, x mat.Matrix, weights []float64) {
+func CorrelationMatrix(dst *mat.SymDense, x mat.MatrixT, weights []float64) {
 	// This will panic if the sizes don't match, or if weights is the wrong size.
 	CovarianceMatrix(dst, x, weights)
 	covToCorr(dst)

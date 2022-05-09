@@ -166,7 +166,7 @@ type matComp struct {
 	data []float64
 }
 
-func testMul(t *testing.T, a, b Matrix, c *Dense, acomp, bcomp, ccomp matComp, cvecApprox bool, name string) {
+func testMul(t *testing.T, a, b MatrixT, c *Dense, acomp, bcomp, ccomp matComp, cvecApprox bool, name string) {
 	c.Mul(a, b)
 	var aDense *Dense
 	switch t := a.(type) {

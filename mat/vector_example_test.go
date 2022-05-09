@@ -36,7 +36,7 @@ type row []float64
 // Dims, At and T minimally satisfy the mat.Matrix interface.
 func (v row) Dims() (r, c int)    { return 1, len(v) }
 func (v row) At(_, j int) float64 { return v[j] }
-func (v row) T() mat.Matrix       { return column(v) }
+func (v row) T() mat.MatrixT      { return column(v) }
 
 // RawVector allows fast path computation with the vector.
 func (v row) RawVector() blas64.Vector {
@@ -49,7 +49,7 @@ type column []float64
 // Dims, At and T minimally satisfy the mat.Matrix interface.
 func (v column) Dims() (r, c int)    { return len(v), 1 }
 func (v column) At(i, _ int) float64 { return v[i] }
-func (v column) T() mat.Matrix       { return row(v) }
+func (v column) T() mat.MatrixT      { return row(v) }
 
 // RawVector allows fast path computation with the vector.
 func (v column) RawVector() blas64.Vector {

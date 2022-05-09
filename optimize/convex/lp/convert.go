@@ -27,7 +27,7 @@ import (
 //  s.t      aNew * x = bNew
 //           x >= 0
 // If there are no constraints of the given type, the inputs may be nil.
-func Convert(c []float64, g mat.Matrix, h []float64, a mat.Matrix, b []float64) (cNew []float64, aNew *mat.Dense, bNew []float64) {
+func Convert(c []float64, g mat.MatrixT, h []float64, a mat.MatrixT, b []float64) (cNew []float64, aNew *mat.Dense, bNew []float64) {
 	nVar := len(c)
 	nIneq := len(h)
 

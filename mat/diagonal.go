@@ -13,7 +13,7 @@ import (
 
 var (
 	diagDense *DiagDense
-	_         Matrix          = diagDense
+	_         MatrixT         = diagDense
 	_         allMatrix       = diagDense
 	_         denseMatrix     = diagDense
 	_         Diagonal        = diagDense
@@ -27,7 +27,7 @@ var (
 	_         RawSymBander    = diagDense
 
 	diag Diagonal
-	_    Matrix     = diag
+	_    MatrixT    = diag
 	_    Diagonal   = diag
 	_    Triangular = diag
 	_    TriBanded  = diag
@@ -39,7 +39,7 @@ var (
 // Diagonal represents a diagonal matrix, that is a square matrix that only
 // has non-zero terms on the diagonal.
 type Diagonal interface {
-	Matrix
+	MatrixT
 	// Diag returns the number of rows/columns in the matrix.
 	Diag() int
 
@@ -96,7 +96,7 @@ func (d *DiagDense) Dims() (r, c int) {
 }
 
 // T returns the transpose of the matrix.
-func (d *DiagDense) T() Matrix {
+func (d *DiagDense) T() MatrixT {
 	return d
 }
 
@@ -174,7 +174,7 @@ func (d *DiagDense) DiagView() Diagonal {
 
 // DiagFrom copies the diagonal of m into the receiver. The receiver must
 // be min(r, c) long or empty, otherwise DiagFrom will panic.
-func (d *DiagDense) DiagFrom(m Matrix) {
+func (d *DiagDense) DiagFrom(m MatrixT) {
 	n := min(m.Dims())
 	d.reuseAsNonZeroed(n)
 

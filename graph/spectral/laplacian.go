@@ -14,7 +14,7 @@ import (
 // Laplacian is a graph Laplacian matrix.
 type Laplacian struct {
 	// Matrix holds the Laplacian matrix.
-	mat.Matrix
+	mat.MatrixT
 
 	// Nodes holds the input graph nodes.
 	Nodes []graph.Node
@@ -52,7 +52,7 @@ func NewLaplacian(g graph.Undirected) Laplacian {
 		}
 	}
 
-	return Laplacian{Matrix: l, Nodes: nodes, Index: indexOf}
+	return Laplacian{MatrixT: l, Nodes: nodes, Index: indexOf}
 }
 
 // NewSymNormLaplacian returns a symmetric normalized Laplacian matrix for the
@@ -94,7 +94,7 @@ func NewSymNormLaplacian(g graph.Undirected) Laplacian {
 		}
 	}
 
-	return Laplacian{Matrix: l, Nodes: nodes, Index: indexOf}
+	return Laplacian{MatrixT: l, Nodes: nodes, Index: indexOf}
 }
 
 // NewRandomWalkLaplacian returns a damp-scaled random walk Laplacian matrix for
@@ -129,5 +129,5 @@ func NewRandomWalkLaplacian(g graph.Graph, damp float64) Laplacian {
 		}
 	}
 
-	return Laplacian{Matrix: l, Nodes: nodes, Index: indexOf}
+	return Laplacian{MatrixT: l, Nodes: nodes, Index: indexOf}
 }

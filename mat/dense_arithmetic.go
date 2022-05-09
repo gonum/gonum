@@ -14,7 +14,7 @@ import (
 
 // Add adds a and b element-wise, placing the result in the receiver. Add
 // will panic if the two matrices do not have the same shape.
-func (m *Dense) Add(a, b Matrix) {
+func (m *Dense) Add(a, b MatrixT) {
 	ar, ac := a.Dims()
 	br, bc := b.Dims()
 	if ar != br || ac != bc {
@@ -63,7 +63,7 @@ func (m *Dense) Add(a, b Matrix) {
 
 // Sub subtracts the matrix b from a, placing the result in the receiver. Sub
 // will panic if the two matrices do not have the same shape.
-func (m *Dense) Sub(a, b Matrix) {
+func (m *Dense) Sub(a, b MatrixT) {
 	ar, ac := a.Dims()
 	br, bc := b.Dims()
 	if ar != br || ac != bc {
@@ -113,7 +113,7 @@ func (m *Dense) Sub(a, b Matrix) {
 // MulElem performs element-wise multiplication of a and b, placing the result
 // in the receiver. MulElem will panic if the two matrices do not have the same
 // shape.
-func (m *Dense) MulElem(a, b Matrix) {
+func (m *Dense) MulElem(a, b MatrixT) {
 	ar, ac := a.Dims()
 	br, bc := b.Dims()
 	if ar != br || ac != bc {
@@ -163,7 +163,7 @@ func (m *Dense) MulElem(a, b Matrix) {
 // DivElem performs element-wise division of a by b, placing the result
 // in the receiver. DivElem will panic if the two matrices do not have the same
 // shape.
-func (m *Dense) DivElem(a, b Matrix) {
+func (m *Dense) DivElem(a, b MatrixT) {
 	ar, ac := a.Dims()
 	br, bc := b.Dims()
 	if ar != br || ac != bc {
@@ -214,7 +214,7 @@ func (m *Dense) DivElem(a, b Matrix) {
 // receiver. If a is ill-conditioned, a Condition error will be returned.
 // Note that matrix inversion is numerically unstable, and should generally
 // be avoided where possible, for example by using the Solve routines.
-func (m *Dense) Inverse(a Matrix) error {
+func (m *Dense) Inverse(a MatrixT) error {
 	// TODO(btracey): Special case for RawTriangular, etc.
 	r, c := a.Dims()
 	if r != c {
@@ -275,7 +275,7 @@ func (m *Dense) Inverse(a Matrix) error {
 
 // Mul takes the matrix product of a and b, placing the result in the receiver.
 // If the number of columns in a does not equal the number of rows in b, Mul will panic.
-func (m *Dense) Mul(a, b Matrix) {
+func (m *Dense) Mul(a, b MatrixT) {
 	ar, ac := a.Dims()
 	br, bc := b.Dims()
 
@@ -458,7 +458,7 @@ func (m *Dense) Mul(a, b Matrix) {
 }
 
 // strictCopy copies a into m panicking if the shape of a and m differ.
-func strictCopy(m *Dense, a Matrix) {
+func strictCopy(m *Dense, a MatrixT) {
 	r, c := m.Copy(a)
 	if r != m.mat.Rows || c != m.mat.Cols {
 		// Panic with a string since this
@@ -469,7 +469,7 @@ func strictCopy(m *Dense, a Matrix) {
 
 // Exp calculates the exponential of the matrix a, e^a, placing the result
 // in the receiver. Exp will panic with ErrShape if a is not square.
-func (m *Dense) Exp(a Matrix) {
+func (m *Dense) Exp(a MatrixT) {
 	// The implementation used here is from Functions of Matrices: Theory and Computation
 	// Chapter 10, Algorithm 10.20. https://doi.org/10.1137/1.9780898717778.ch10
 
@@ -631,7 +631,7 @@ func (m *Dense) Exp(a Matrix) {
 
 // Pow calculates the integral power of the matrix a to n, placing the result
 // in the receiver. Pow will panic if n is negative or if a is not square.
-func (m *Dense) Pow(a Matrix, n int) {
+func (m *Dense) Pow(a MatrixT, n int) {
 	if n < 0 {
 		panic("mat: illegal power")
 	}
@@ -682,7 +682,7 @@ func (m *Dense) Pow(a Matrix, n int) {
 
 // Kronecker calculates the Kronecker product of a and b, placing the result in
 // the receiver.
-func (m *Dense) Kronecker(a, b Matrix) {
+func (m *Dense) Kronecker(a, b MatrixT) {
 	ra, ca := a.Dims()
 	rb, cb := b.Dims()
 
@@ -697,7 +697,7 @@ func (m *Dense) Kronecker(a, b Matrix) {
 // Scale multiplies the elements of a by f, placing the result in the receiver.
 //
 // See the Scaler interface for more information.
-func (m *Dense) Scale(f float64, a Matrix) {
+func (m *Dense) Scale(f float64, a MatrixT) {
 	ar, ac := a.Dims()
 
 	m.reuseAsNonZeroed(ar, ac)
@@ -737,7 +737,7 @@ func (m *Dense) Scale(f float64, a Matrix) {
 // Apply applies the function fn to each of the elements of a, placing the
 // resulting matrix in the receiver. The function fn takes a row/column
 // index and element value and returns some function of that tuple.
-func (m *Dense) Apply(fn func(i, j int, v float64) float64, a Matrix) {
+func (m *Dense) Apply(fn func(i, j int, v float64) float64, a MatrixT) {
 	ar, ac := a.Dims()
 
 	m.reuseAsNonZeroed(ar, ac)
@@ -778,7 +778,7 @@ func (m *Dense) Apply(fn func(i, j int, v float64) float64, a Matrix) {
 // y, where x and y are treated as column vectors. The result is stored in the
 // receiver. The Outer method can be used instead of RankOne if a is not needed.
 //  m = a + alpha * x * yᵀ
-func (m *Dense) RankOne(a Matrix, alpha float64, x, y Vector) {
+func (m *Dense) RankOne(a MatrixT, alpha float64, x, y Vector) {
 	ar, ac := a.Dims()
 	if x.Len() != ar {
 		panic(ErrShape)

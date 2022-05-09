@@ -18,7 +18,7 @@ type ListSearch struct {
 	// Locs is the list of locations to optimize. Each row of Locs is a location
 	// to optimize. The number of columns of Locs must match the dimensions
 	// passed to InitGlobal, and Locs must have at least one row.
-	Locs mat.Matrix
+	Locs mat.MatrixT
 
 	eval    int
 	rows    int

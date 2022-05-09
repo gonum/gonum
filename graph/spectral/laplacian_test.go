@@ -110,7 +110,7 @@ func TestRandomWalkLaplacian(t *testing.T) {
 		l := NewRandomWalkLaplacian(g, test.damp)
 		_, c := l.Dims()
 		for j := 0; j < c; j++ {
-			if got := mat.Sum(l.Matrix.(*mat.Dense).ColView(j)); !scalar.EqualWithinAbsOrRel(got, 0, tol, tol) {
+			if got := mat.Sum(l.MatrixT.(*mat.Dense).ColView(j)); !scalar.EqualWithinAbsOrRel(got, 0, tol, tol) {
 				t.Errorf("unexpected column sum for test %d, column %d: got:%v want:0", i, j, got)
 			}
 		}

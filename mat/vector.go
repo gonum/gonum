@@ -15,7 +15,7 @@ import (
 var (
 	vector *VecDense
 
-	_ Matrix        = vector
+	_ MatrixT       = vector
 	_ allMatrix     = vector
 	_ Vector        = vector
 	_ Reseter       = vector
@@ -24,7 +24,7 @@ var (
 
 // Vector is a vector.
 type Vector interface {
-	Matrix
+	MatrixT
 	AtVec(int) float64
 	Len() int
 }
@@ -60,7 +60,7 @@ func (t TransposeVec) Dims() (r, c int) {
 }
 
 // T performs an implicit transpose by returning the Vector field.
-func (t TransposeVec) T() Matrix {
+func (t TransposeVec) T() MatrixT {
 	return t.Vector
 }
 
@@ -75,7 +75,7 @@ func (t TransposeVec) TVec() Vector {
 }
 
 // Untranspose returns the Vector field.
-func (t TransposeVec) Untranspose() Matrix {
+func (t TransposeVec) Untranspose() MatrixT {
 	return t.Vector
 }
 
@@ -171,7 +171,7 @@ func (v *VecDense) Cap() int {
 }
 
 // T performs an implicit transpose by returning the receiver inside a Transpose.
-func (v *VecDense) T() Matrix {
+func (v *VecDense) T() MatrixT {
 	return Transpose{v}
 }
 
@@ -579,7 +579,7 @@ func (v *VecDense) DivElemVec(a, b Vector) {
 // MulVec computes a * b. The result is stored into the receiver.
 // MulVec panics if the number of columns in a does not equal the number of rows in b
 // or if the number of columns in b does not equal 1.
-func (v *VecDense) MulVec(a Matrix, b Vector) {
+func (v *VecDense) MulVec(a MatrixT, b Vector) {
 	r, c := a.Dims()
 	br, bc := b.Dims()
 	if c != br || bc != 1 {

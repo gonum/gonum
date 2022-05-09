@@ -46,11 +46,11 @@ func (lq *LQ) updateCond(norm lapack.MatrixNorm) {
 // The LQ decomposition is a factorization of the matrix A such that A = L * Q.
 // The matrix Q is an orthonormal n×n matrix, and L is an m×n lower triangular matrix.
 // L and Q can be extracted using the LTo and QTo methods.
-func (lq *LQ) Factorize(a Matrix) {
+func (lq *LQ) Factorize(a MatrixT) {
 	lq.factorize(a, CondNorm)
 }
 
-func (lq *LQ) factorize(a Matrix, norm lapack.MatrixNorm) {
+func (lq *LQ) factorize(a MatrixT, norm lapack.MatrixNorm) {
 	m, n := a.Dims()
 	if m > n {
 		panic(ErrShape)
@@ -174,7 +174,7 @@ func (lq *LQ) QTo(dst *Dense) {
 //  If trans == true, find X such that ||A*X - B||_2 is minimized.
 // The solution matrix, X, is stored in place into dst.
 // SolveTo will panic if the receiver does not contain a factorization.
-func (lq *LQ) SolveTo(dst *Dense, trans bool, b Matrix) error {
+func (lq *LQ) SolveTo(dst *Dense, trans bool, b MatrixT) error {
 	if !lq.isValid() {
 		panic(badLQ)
 	}
@@ -251,7 +251,7 @@ func (lq *LQ) SolveVecTo(dst *VecDense, trans bool, b Vector) error {
 
 	// The Solve implementation is non-trivial, so rather than duplicate the code,
 	// instead recast the VecDenses as Dense and call the matrix code.
-	bm := Matrix(b)
+	bm := MatrixT(b)
 	if rv, ok := b.(RawVectorer); ok {
 		bmat := rv.RawVector()
 		if dst != b {

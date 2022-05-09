@@ -15,7 +15,7 @@ import (
 
 var (
 	triDense *TriDense
-	_        Matrix            = triDense
+	_        MatrixT           = triDense
 	_        allMatrix         = triDense
 	_        denseMatrix       = triDense
 	_        Triangular        = triDense
@@ -36,7 +36,7 @@ type TriDense struct {
 
 // Triangular represents a triangular matrix. Triangular matrices are always square.
 type Triangular interface {
-	Matrix
+	MatrixT
 	// Triangle returns the number of rows/columns in the matrix and its
 	// orientation.
 	Triangle() (n int, kind TriKind)
@@ -60,7 +60,7 @@ type MutableTriangular interface {
 }
 
 var (
-	_ Matrix           = TransposeTri{}
+	_ MatrixT          = TransposeTri{}
 	_ Triangular       = TransposeTri{}
 	_ UntransposeTrier = TransposeTri{}
 )
@@ -86,7 +86,7 @@ func (t TransposeTri) Dims() (r, c int) {
 }
 
 // T performs an implicit transpose by returning the Triangular field.
-func (t TransposeTri) T() Matrix {
+func (t TransposeTri) T() MatrixT {
 	return t.Triangular
 }
 
@@ -102,7 +102,7 @@ func (t TransposeTri) TTri() Triangular {
 }
 
 // Untranspose returns the Triangular field.
-func (t TransposeTri) Untranspose() Matrix {
+func (t TransposeTri) Untranspose() MatrixT {
 	return t.Triangular
 }
 
@@ -194,7 +194,7 @@ func (t *TriDense) asSymBlas() blas64.Symmetric {
 }
 
 // T performs an implicit transpose by returning the receiver inside a Transpose.
-func (t *TriDense) T() Matrix {
+func (t *TriDense) T() MatrixT {
 	return Transpose{t}
 }
 
@@ -394,7 +394,7 @@ func (t *TriDense) DiagView() Diagonal {
 // receiver's non-zero triangle are set.
 //
 // See the Copier interface for more information.
-func (t *TriDense) Copy(a Matrix) (r, c int) {
+func (t *TriDense) Copy(a MatrixT) (r, c int) {
 	r, c = a.Dims()
 	r = min(r, t.mat.N)
 	c = min(c, t.mat.N)

@@ -59,11 +59,11 @@ func (lu *LU) updateCond(anorm float64, norm lapack.MatrixNorm) {
 // is a PLU decomposition where P is a permutation matrix. The individual matrix
 // factors can be extracted from the factorization using the Permutation method
 // on Dense, and the LU.LTo and LU.UTo methods.
-func (lu *LU) Factorize(a Matrix) {
+func (lu *LU) Factorize(a MatrixT) {
 	lu.factorize(a, CondNorm)
 }
 
-func (lu *LU) factorize(a Matrix, norm lapack.MatrixNorm) {
+func (lu *LU) factorize(a MatrixT, norm lapack.MatrixNorm) {
 	r, c := a.Dims()
 	if r != c {
 		panic(ErrSquare)
@@ -342,7 +342,7 @@ func (m *Dense) Permutation(r int, swaps []int) {
 // If A is singular or near-singular a Condition error is returned. See
 // the documentation for Condition for more information.
 // SolveTo will panic if the receiver does not contain a factorization.
-func (lu *LU) SolveTo(dst *Dense, trans bool, b Matrix) error {
+func (lu *LU) SolveTo(dst *Dense, trans bool, b MatrixT) error {
 	if !lu.isValid() {
 		panic(badLU)
 	}

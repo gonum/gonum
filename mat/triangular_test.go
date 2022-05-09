@@ -222,7 +222,7 @@ func TestTriDenseCopy(t *testing.T) {
 		u := NewTriDense(size, true, nil)
 		l := NewTriDense(size, false, nil)
 
-		for _, typ := range []Matrix{r, (*basicMatrix)(r)} {
+		for _, typ := range []MatrixT{r, (*basicMatrix)(r)} {
 			for j := range u.mat.Data {
 				u.mat.Data[j] = math.NaN()
 				l.mat.Data[j] = math.NaN()
@@ -338,7 +338,7 @@ func TestTriInverse(t *testing.T) {
 
 func TestTriMul(t *testing.T) {
 	t.Parallel()
-	method := func(receiver, a, b Matrix) {
+	method := func(receiver, a, b MatrixT) {
 		type MulTrier interface {
 			MulTri(a, b Triangular)
 		}
@@ -354,7 +354,7 @@ func TestTriMul(t *testing.T) {
 
 	// The legal types are triangles with the same TriKind.
 	// legalTypesTri returns whether both input arguments are Triangular.
-	legalTypes := func(a, b Matrix) bool {
+	legalTypes := func(a, b MatrixT) bool {
 		at, ok := a.(Triangular)
 		if !ok {
 			return false
@@ -367,7 +367,7 @@ func TestTriMul(t *testing.T) {
 		_, bk := bt.Triangle()
 		return ak == bk
 	}
-	legalTypesLower := func(a, b Matrix) bool {
+	legalTypesLower := func(a, b MatrixT) bool {
 		legal := legalTypes(a, b)
 		if !legal {
 			return false
@@ -379,7 +379,7 @@ func TestTriMul(t *testing.T) {
 	receiver := NewTriDense(3, Lower, nil)
 	testTwoInput(t, "TriMul", receiver, method, denseComparison, legalTypesLower, legalSizeTriMul, 1e-14)
 
-	legalTypesUpper := func(a, b Matrix) bool {
+	legalTypesUpper := func(a, b MatrixT) bool {
 		legal := legalTypes(a, b)
 		if !legal {
 			return false
@@ -395,7 +395,7 @@ func TestTriMul(t *testing.T) {
 func TestScaleTri(t *testing.T) {
 	t.Parallel()
 	for _, f := range []float64{0.5, 1, 3} {
-		method := func(receiver, a Matrix) {
+		method := func(receiver, a MatrixT) {
 			type ScaleTrier interface {
 				ScaleTri(f float64, a Triangular)
 			}

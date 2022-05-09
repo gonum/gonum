@@ -28,7 +28,7 @@ func TestHOGSVD(t *testing.T) {
 		r := test.r
 		c := test.c
 		for n := 3; n < 6; n++ {
-			data := make([]Matrix, n)
+			data := make([]MatrixT, n)
 			dataCopy := make([]*Dense, n)
 			for trial := 0; trial < 10; trial++ {
 				for i := range data {

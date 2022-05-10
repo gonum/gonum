@@ -324,6 +324,7 @@ func (t *TriBandDense) reuseAsZeroed(n, k int, kind TriKind) {
 // with the given bandwidth and orientation. If the receiver is not empty,
 // reuseAsZeroed checks that the receiver has the correct size, bandwidth and
 // orientation.
+//lint:ignore U1000 This will be used later.
 func (t *TriBandDense) reuseAsNonZeroed(n, k int, kind TriKind) {
 	// reuseAsNonZeroed must be kept in sync with reuseAsZeroed.
 	if n == 0 {

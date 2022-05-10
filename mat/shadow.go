@@ -207,6 +207,7 @@ func (s *SymBandDense) checkOverlap(a blas64.General) bool {
 	return checkOverlap(generalFromSymmetricBand(s.RawSymBand()), a)
 }
 
+//lint:ignore U1000 This will be used when we do shadow checks for banded matrices.
 func (s *SymBandDense) checkOverlapMatrix(a Matrix) bool {
 	if s == a {
 		return false

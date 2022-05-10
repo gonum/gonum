@@ -319,15 +319,6 @@ func (t *TriBandDense) SetTriBand(i, j int, v float64) {
 	t.mat.Data[i*t.mat.Stride+pj] = v
 }
 
-func (t *TriBandDense) setTriBand(i, j int, v float64) {
-	var kl int
-	if !t.isUpper() {
-		kl = t.mat.K
-	}
-	pj := j + kl - i
-	t.mat.Data[i*t.mat.Stride+pj] = v
-}
-
 // At returns the element at row i, column j.
 func (d *DiagDense) At(i, j int) float64 {
 	if uint(i) >= uint(d.mat.N) {

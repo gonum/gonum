@@ -368,7 +368,7 @@ func (u *urna) hashNDegreeQuads(b string, names *issuer) ([]byte, *issuer) {
 		// 5.5
 		final = append(final, chosenPath...)
 		u.hash.Reset()
-		u.hash.Write(final) //nolint:errcheck
+		u.hash.Write(final)
 
 		names = chosenIssuer // 5.6
 	}
@@ -468,23 +468,23 @@ func (u *urna) hashRelatedBlank(term string, s *Statement, names *issuer, pos by
 
 	// 2.
 	u.hash.Reset()
-	u.hash.Write([]byte{pos}) //nolint:errcheck
+	u.hash.Write([]byte{pos})
 
 	if pos != 'g' { // 3.
 		if u.label == "" {
 			// URDNA2015: Term.Value retained the angle quotes
 			// so we don't need to add them.
-			u.hash.Write([]byte(s.Predicate.Value)) //nolint:errcheck
+			u.hash.Write([]byte(s.Predicate.Value))
 		} else {
 			// URGNA2012 does not delimit predicate by < and >.
 			// https://json-ld.github.io/rdf-dataset-canonicalization/spec/index.html#urgna2012
 			// with reference to 4.7.
-			u.hash.Write([]byte(unquoteIRI(s.Predicate.Value))) //nolint:errcheck
+			u.hash.Write([]byte(unquoteIRI(s.Predicate.Value)))
 		}
 	}
 
 	// 4. and 5.
-	u.hash.Write([]byte(b)) //nolint:errcheck
+	u.hash.Write([]byte(b))
 	return hex(u.hash.Sum(nil))
 }
 

@@ -460,7 +460,7 @@ func TestCholeskySymRankOne(t *testing.T) {
 				0, 0, 6, 10,
 				0, 0, 0, 20,
 			}),
-			alpha:  -1 / 2,
+			alpha:  -0.5,
 			x:      []float64{0, 0, 0, 1},
 			wantOk: true,
 		},

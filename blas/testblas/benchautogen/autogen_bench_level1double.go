@@ -292,14 +292,14 @@ type errFile struct {
 	err  error
 }
 
-func (f errFile) Write(b []byte) {
+func (f *errFile) Write(b []byte) {
 	if f.err != nil {
 		return
 	}
 	_, f.err = f.file.Write(b)
 }
 
-func (f errFile) WriteString(s string) {
+func (f *errFile) WriteString(s string) {
 	if f.err != nil {
 		return
 	}

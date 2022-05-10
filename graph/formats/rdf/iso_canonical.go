@@ -282,11 +282,11 @@ func hashBNodes(statements []*Statement, h hash.Hash, zero []byte, hash0 map[str
 				}
 			case isIRI(t):
 				h.Reset()
-				h.Write([]byte(t[1 : len(t)-1])) //nolint:errcheck
+				h.Write([]byte(t[1 : len(t)-1]))
 				curr.set(t, h.Sum(nil))
 			default:
 				h.Reset()
-				h.Write([]byte(t)) //nolint:errcheck
+				h.Write([]byte(t))
 				curr.set(t, h.Sum(nil))
 			}
 		}
@@ -515,7 +515,7 @@ func (b lexical) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
 func hashTuple(h hash.Hash, t ...[]byte) []byte {
 	h.Reset()
 	for _, b := range t {
-		h.Write(b) //nolint:errcheck
+		h.Write(b)
 	}
 	return h.Sum(nil)
 }

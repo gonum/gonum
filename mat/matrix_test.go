@@ -612,6 +612,14 @@ func TestDoer(t *testing.T) {
 		NewSymBandDense(3, 1, ones(3*(1+1))),
 		NewSymBandDense(6, 1, ones(6*(1+1))),
 		NewSymBandDense(6, 2, ones(6*(2+1))),
+		NewTriBandDense(3, 0, Upper, ones(3)),
+		NewTriBandDense(3, 1, Upper, ones(3*(1+1))),
+		NewTriBandDense(6, 1, Upper, ones(6*(1+1))),
+		NewTriBandDense(6, 2, Upper, ones(6*(2+1))),
+		NewTriBandDense(3, 0, Lower, ones(3)),
+		NewTriBandDense(3, 1, Lower, ones(3*(1+1))),
+		NewTriBandDense(6, 1, Lower, ones(6*(1+1))),
+		NewTriBandDense(6, 2, Lower, ones(6*(2+1))),
 		NewTridiag(1, nil, ones(1), nil),
 		NewTridiag(2, ones(1), ones(2), ones(1)),
 		NewTridiag(3, ones(2), ones(3), ones(2)),
@@ -639,6 +647,8 @@ func TestDoer(t *testing.T) {
 				m.SetBand(i, j, v)
 			case MutableSymBanded:
 				m.SetSymBand(i, j, v)
+			case MutableTriBanded:
+				m.SetTriBand(i, j, v)
 			default:
 				panic("bad test: need mutable type")
 			}

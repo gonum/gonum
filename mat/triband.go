@@ -353,6 +353,76 @@ func (t *TriBandDense) reuseAsNonZeroed(n, k int, kind TriKind) {
 	}
 }
 
+// DoNonZero calls the function fn for each of the non-zero elements of t. The function fn
+// takes a row/column index and the element value of t at (i, j).
+func (t *TriBandDense) DoNonZero(fn func(i, j int, v float64)) {
+	if t.isUpper() {
+		for i := 0; i < t.mat.N; i++ {
+			for j := i; j < min(i+t.mat.K+1, t.mat.N); j++ {
+				v := t.at(i, j)
+				if v != 0 {
+					fn(i, j, v)
+				}
+			}
+		}
+	} else {
+		for i := 0; i < t.mat.N; i++ {
+			for j := max(0, i-t.mat.K); j <= i; j++ {
+				v := t.at(i, j)
+				if v != 0 {
+					fn(i, j, v)
+				}
+			}
+		}
+	}
+}
+
+// DoRowNonZero calls the function fn for each of the non-zero elements of row i of t. The function fn
+// takes a row/column index and the element value of t at (i, j).
+func (t *TriBandDense) DoRowNonZero(i int, fn func(i, j int, v float64)) {
+	if i < 0 || t.mat.N <= i {
+		panic(ErrRowAccess)
+	}
+	if t.isUpper() {
+		for j := i; j < min(i+t.mat.K+1, t.mat.N); j++ {
+			v := t.at(i, j)
+			if v != 0 {
+				fn(i, j, v)
+			}
+		}
+	} else {
+		for j := max(0, i-t.mat.K); j <= i; j++ {
+			v := t.at(i, j)
+			if v != 0 {
+				fn(i, j, v)
+			}
+		}
+	}
+}
+
+// DoColNonZero calls the function fn for each of the non-zero elements of column j of t. The function fn
+// takes a row/column index and the element value of t at (i, j).
+func (t *TriBandDense) DoColNonZero(j int, fn func(i, j int, v float64)) {
+	if j < 0 || t.mat.N <= j {
+		panic(ErrColAccess)
+	}
+	if t.isUpper() {
+		for i := 0; i < t.mat.N; i++ {
+			v := t.at(i, j)
+			if v != 0 {
+				fn(i, j, v)
+			}
+		}
+	} else {
+		for i := 0; i < t.mat.N; i++ {
+			v := t.at(i, j)
+			if v != 0 {
+				fn(i, j, v)
+			}
+		}
+	}
+}
+
 // Zero sets all of the matrix elements to zero.
 func (t *TriBandDense) Zero() {
 	if t.isUpper() {

@@ -74,26 +74,21 @@ func (pc *PiecewiseCubic) PredictDerivative(x float64) float64 {
 
 // FitWithDerivatives fits a piecewise cubic predictor to (X, Y, dY/dX) value
 // triples provided as three slices.
-// It panics if len(xs) < 2, elements of xs are not strictly increasing,
+// It errors if len(xs) < 2, elements of xs are not strictly increasing,
 // len(xs) != len(ys) or len(xs) != len(dydxs).
-func (pc *PiecewiseCubic) FitWithDerivatives(xs, ys, dydxs []float64) {
+func (pc *PiecewiseCubic) FitWithDerivatives(xs, ys, dydxs []float64) error {
+	if err := validate(2, xs, ys, dydxs); err != nil {
+		return err
+	}
+
 	n := len(xs)
-	if len(ys) != n {
-		panic(differentLengths)
-	}
-	if len(dydxs) != n {
-		panic(differentLengths)
-	}
-	if n < 2 {
-		panic(tooFewPoints)
-	}
 	m := n - 1
 	pc.coeffs.Reset()
 	pc.coeffs.ReuseAs(m, 4)
 	for i := 0; i < m; i++ {
 		dx := xs[i+1] - xs[i]
 		if dx <= 0 {
-			panic(xsNotStrictlyIncreasing)
+			return newNotIncreasingError(xs[i+1], xs[i])
 		}
 		dy := ys[i+1] - ys[i]
 		// a_0
@@ -107,6 +102,8 @@ func (pc *PiecewiseCubic) FitWithDerivatives(xs, ys, dydxs []float64) {
 	pc.xs = append(pc.xs[:0], xs...)
 	pc.lastY = ys[m]
 	pc.lastDyDx = dydxs[m]
+
+	return nil
 }
 
 // AkimaSpline is a piecewise cubic 1-dimensional interpolator with
@@ -128,13 +125,14 @@ func (as *AkimaSpline) PredictDerivative(x float64) float64 {
 }
 
 // Fit fits a predictor to (X, Y) value pairs provided as two slices.
-// It panics if len(xs) < 2, elements of xs are not strictly increasing
-// or len(xs) != len(ys). Always returns nil.
+// It errors if len(xs) < 2, elements of xs are not strictly increasing
+// or len(xs) != len(ys).
 func (as *AkimaSpline) Fit(xs, ys []float64) error {
-	n := len(xs)
-	if len(ys) != n {
-		panic(differentLengths)
+	if err := validate(2, xs, ys); err != nil {
+		return err
 	}
+
+	n := len(xs)
 	dydxs := make([]float64, n)
 
 	if n == 2 {
@@ -142,36 +140,37 @@ func (as *AkimaSpline) Fit(xs, ys []float64) error {
 		slope := (ys[1] - ys[0]) / dx
 		dydxs[0] = slope
 		dydxs[1] = slope
-		as.cubic.FitWithDerivatives(xs, ys, dydxs)
-		return nil
+		return as.cubic.FitWithDerivatives(xs, ys, dydxs)
 	}
-	slopes := akimaSlopes(xs, ys)
+	slopes, err := akimaSlopes(xs, ys)
+	if err != nil {
+		return err
+	}
+
 	for i := 0; i < n; i++ {
 		wLeft, wRight := akimaWeights(slopes, i)
 		dydxs[i] = akimaWeightedAverage(slopes[i+1], slopes[i+2], wLeft, wRight)
 	}
-	as.cubic.FitWithDerivatives(xs, ys, dydxs)
-	return nil
+
+	return as.cubic.FitWithDerivatives(xs, ys, dydxs)
 }
 
 // akimaSlopes returns slopes for Akima spline method, including the approximations
 // of slopes outside the data range (two on each side).
-// It panics if len(xs) <= 2, elements of xs are not strictly increasing
+// It errors if len(xs) < 3, elements of xs are not strictly increasing
 // or len(xs) != len(ys).
-func akimaSlopes(xs, ys []float64) []float64 {
+func akimaSlopes(xs, ys []float64) ([]float64, error) {
+	if err := validate(3, xs, ys); err != nil {
+		return nil, err
+	}
+
 	n := len(xs)
-	if n <= 2 {
-		panic(tooFewPoints)
-	}
-	if len(ys) != n {
-		panic(differentLengths)
-	}
 	m := n + 3
 	slopes := make([]float64, m)
 	for i := 2; i < m-2; i++ {
 		dx := xs[i-1] - xs[i-2]
 		if dx <= 0 {
-			panic(xsNotStrictlyIncreasing)
+			return nil, newNotIncreasingError(xs[i-1], xs[i-2])
 		}
 		slopes[i] = (ys[i-1] - ys[i-2]) / dx
 	}
@@ -179,7 +178,7 @@ func akimaSlopes(xs, ys []float64) []float64 {
 	slopes[1] = 2*slopes[2] - slopes[3]
 	slopes[m-2] = 2*slopes[m-3] - slopes[m-4]
 	slopes[m-1] = 3*slopes[m-3] - 2*slopes[m-4]
-	return slopes
+	return slopes, nil
 }
 
 // akimaWeightedAverage returns (v1 * w1 + v2 * w2) / (w1 + w2) for w1, w2 >= 0 (not checked).
@@ -224,16 +223,14 @@ func (fb *FritschButland) PredictDerivative(x float64) float64 {
 }
 
 // Fit fits a predictor to (X, Y) value pairs provided as two slices.
-// It panics if len(xs) < 2, elements of xs are not strictly increasing
-// or len(xs) != len(ys). Always returns nil.
+// It errors if len(xs) < 2, elements of xs are not strictly increasing
+// or len(xs) != len(ys).
 func (fb *FritschButland) Fit(xs, ys []float64) error {
+	if err := validate(2, xs, ys); err != nil {
+		return err
+	}
+
 	n := len(xs)
-	if n < 2 {
-		panic(tooFewPoints)
-	}
-	if len(ys) != n {
-		panic(differentLengths)
-	}
 	dydxs := make([]float64, n)
 
 	if n == 2 {
@@ -241,10 +238,13 @@ func (fb *FritschButland) Fit(xs, ys []float64) error {
 		slope := (ys[1] - ys[0]) / dx
 		dydxs[0] = slope
 		dydxs[1] = slope
-		fb.cubic.FitWithDerivatives(xs, ys, dydxs)
-		return nil
+		return fb.cubic.FitWithDerivatives(xs, ys, dydxs)
 	}
-	slopes := calculateSlopes(xs, ys)
+	slopes, err := calculateSlopes(xs, ys)
+	if err != nil {
+		return err
+	}
+
 	m := len(slopes)
 	prevSlope := slopes[0]
 	for i := 1; i < m; i++ {
@@ -259,8 +259,8 @@ func (fb *FritschButland) Fit(xs, ys []float64) error {
 	}
 	dydxs[0] = fritschButlandEdgeDerivative(xs, ys, slopes, true)
 	dydxs[m] = fritschButlandEdgeDerivative(xs, ys, slopes, false)
-	fb.cubic.FitWithDerivatives(xs, ys, dydxs)
-	return nil
+
+	return fb.cubic.FitWithDerivatives(xs, ys, dydxs)
 }
 
 // fritschButlandEdgeDerivative calculates dy/dx approximation for the
@@ -299,27 +299,25 @@ func fritschButlandEdgeDerivative(xs, ys, slopes []float64, leftEdge bool) float
 
 // fitWithSecondDerivatives fits a piecewise cubic predictor to (X, Y, d^2Y/dX^2) value
 // triples provided as three slices.
-// It panics if any of these is true:
+// It errors if any of these is true:
 // - len(xs) < 2,
 // - elements of xs are not strictly increasing,
 // - len(xs) != len(ys),
 // - len(xs) != len(d2ydx2s).
 // Note that this method does not guarantee on its own the continuity of first derivatives.
-func (pc *PiecewiseCubic) fitWithSecondDerivatives(xs, ys, d2ydx2s []float64) {
-	n := len(xs)
-	switch {
-	case len(ys) != n, len(d2ydx2s) != n:
-		panic(differentLengths)
-	case n < 2:
-		panic(tooFewPoints)
+func (pc *PiecewiseCubic) fitWithSecondDerivatives(xs, ys, d2ydx2s []float64) error {
+	if err := validate(2, xs, ys, d2ydx2s); err != nil {
+		return err
 	}
+
+	n := len(xs)
 	m := n - 1
 	pc.coeffs.Reset()
 	pc.coeffs.ReuseAs(m, 4)
 	for i := 0; i < m; i++ {
 		dx := xs[i+1] - xs[i]
 		if dx <= 0 {
-			panic(xsNotStrictlyIncreasing)
+			return newNotIncreasingError(xs[i+1], xs[i])
 		}
 		dy := ys[i+1] - ys[i]
 		dm := d2ydx2s[i+1] - d2ydx2s[i]
@@ -332,26 +330,29 @@ func (pc *PiecewiseCubic) fitWithSecondDerivatives(xs, ys, d2ydx2s []float64) {
 	pc.lastY = ys[m]
 	lastDx := xs[m] - xs[m-1]
 	pc.lastDyDx = pc.coeffs.At(m-1, 1) + 2*pc.coeffs.At(m-1, 2)*lastDx + 3*pc.coeffs.At(m-1, 3)*lastDx*lastDx
+
+	return nil
 }
 
 // makeCubicSplineSecondDerivativeEquations generates the basic system of linear equations
 // which have to be satisfied by the second derivatives to make the first derivatives of a
-// cubic spline continuous. It panics if elements of xs are not strictly increasing, or
+// cubic spline continuous. It errors if elements of xs are not strictly increasing, or
 // len(xs) != len(ys).
 // makeCubicSplineSecondDerivativeEquations fills a banded matrix a and a vector b
 // defining a system of linear equations a*m = b for second derivatives vector m.
 // Parameters a and b are assumed to have correct dimensions and initialised to zero.
-func makeCubicSplineSecondDerivativeEquations(a mat.MutableBanded, b mat.MutableVector, xs, ys []float64) {
-	n := len(xs)
-	if len(ys) != n {
-		panic(differentLengths)
+func makeCubicSplineSecondDerivativeEquations(a mat.MutableBanded, b mat.MutableVector, xs, ys []float64) error {
+	if err := validate(2, xs, ys); err != nil {
+		return err
 	}
+
+	n := len(xs)
 	m := n - 1
-	if n > 2 {
+	if n > 2 { // TODO(steve): can this be removed
 		for i := 0; i < m; i++ {
 			dx := xs[i+1] - xs[i]
 			if dx <= 0 {
-				panic(xsNotStrictlyIncreasing)
+				return newNotIncreasingError(xs[i+1], xs[i])
 			}
 			slope := (ys[i+1] - ys[i]) / dx
 			if i > 0 {
@@ -366,6 +367,8 @@ func makeCubicSplineSecondDerivativeEquations(a mat.MutableBanded, b mat.Mutable
 			}
 		}
 	}
+
+	return nil
 }
 
 // NaturalCubic is a piecewise cubic 1-dimensional interpolator with
@@ -388,7 +391,7 @@ func (nc *NaturalCubic) PredictDerivative(x float64) float64 {
 }
 
 // Fit fits a predictor to (X, Y) value pairs provided as two slices.
-// It panics if len(xs) < 2, elements of xs are not strictly increasing
+// It errors if len(xs) < 2, elements of xs are not strictly increasing
 // or len(xs) != len(ys). It returns an error if solving the required system
 // of linear equations fails.
 func (nc *NaturalCubic) Fit(xs, ys []float64) error {
@@ -402,11 +405,11 @@ func (nc *NaturalCubic) Fit(xs, ys []float64) error {
 	a.SetBand(0, 0, 1)
 	a.SetBand(n-1, n-1, 1)
 	x := mat.NewVecDense(n, nil)
-	err := a.SolveVecTo(x, false, b)
-	if err == nil {
-		nc.cubic.fitWithSecondDerivatives(xs, ys, x.RawVector().Data)
+	if err := a.SolveVecTo(x, false, b); err != nil {
+		return err
 	}
-	return err
+
+	return nc.cubic.fitWithSecondDerivatives(xs, ys, x.RawVector().Data)
 }
 
 // ClampedCubic is a piecewise cubic 1-dimensional interpolator with
@@ -428,7 +431,7 @@ func (cc *ClampedCubic) PredictDerivative(x float64) float64 {
 }
 
 // Fit fits a predictor to (X, Y) value pairs provided as two slices.
-// It panics if len(xs) < 2, elements of xs are not strictly increasing
+// It returns an error if len(xs) < 2, elements of xs are not strictly increasing
 // or len(xs) != len(ys). It returns an error if solving the required system
 // of linear equations fails.
 func (cc *ClampedCubic) Fit(xs, ys []float64) error {
@@ -449,11 +452,11 @@ func (cc *ClampedCubic) Fit(xs, ys []float64) error {
 	a.SetBand(m, m, -dxR/3)
 	a.SetBand(m, m-1, -dxR/6)
 	x := mat.NewVecDense(n, nil)
-	err := a.SolveVecTo(x, false, b)
-	if err == nil {
-		cc.cubic.fitWithSecondDerivatives(xs, ys, x.RawVector().Data)
+	if err := a.SolveVecTo(x, false, b); err != nil {
+		return err
 	}
-	return err
+
+	return cc.cubic.fitWithSecondDerivatives(xs, ys, x.RawVector().Data)
 }
 
 // NotAKnotCubic is a piecewise cubic 1-dimensional interpolator with
@@ -477,14 +480,16 @@ func (nak *NotAKnotCubic) PredictDerivative(x float64) float64 {
 }
 
 // Fit fits a predictor to (X, Y) value pairs provided as two slices.
-// It panics if len(xs) < 3 (because at least one interior node is required),
+// It returns an error if len(xs) < 3 (because at least one interior node is required),
 // elements of xs are not strictly increasing or len(xs) != len(ys).
-// It returns an error if solving the required system of linear equations fails.
+// or if solving the required system of linear equations fails.
 func (nak *NotAKnotCubic) Fit(xs, ys []float64) error {
-	n := len(xs)
-	if n < 3 {
-		panic(tooFewPoints)
+	// TODO(Steve): what about non equal lengths?
+	if err := validate(3, xs, ys); err != nil {
+		return err
 	}
+
+	n := len(xs)
 	a := mat.NewBandDense(n, n, 2, 2, nil)
 	b := mat.NewVecDense(n, nil)
 	makeCubicSplineSecondDerivativeEquations(a, b, xs, ys)
@@ -505,9 +510,9 @@ func (nak *NotAKnotCubic) Fit(xs, ys []float64) error {
 		a.SetBand(m, m-2, 1/dxInner)
 	}
 	x := mat.NewVecDense(n, nil)
-	err := x.SolveVec(a, b)
-	if err == nil {
-		nak.cubic.fitWithSecondDerivatives(xs, ys, x.RawVector().Data)
+	if err := x.SolveVec(a, b); err != nil {
+		return err
 	}
-	return err
+
+	return nak.cubic.fitWithSecondDerivatives(xs, ys, x.RawVector().Data)
 }

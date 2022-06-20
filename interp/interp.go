@@ -4,13 +4,44 @@
 
 package interp
 
-import "sort"
-
-const (
-	differentLengths        = "interp: input slices have different lengths"
-	tooFewPoints            = "interp: too few points for interpolation"
-	xsNotStrictlyIncreasing = "interp: xs values not strictly increasing"
+import (
+	"fmt"
+	"sort"
 )
+
+// notIncreasingError represents an error where v1 <= v2.
+type notIncreasingError struct {
+	v1 float64
+	v2 float64
+}
+
+// newNotIncreasingError returns a new notIncreasingError.
+func newNotIncreasingError(v1, v2 float64) *notIncreasingError {
+	return &notIncreasingError{v1: v1, v2: v2}
+}
+
+// Error implements error.
+func (e notIncreasingError) Error() string {
+	return fmt.Sprintf("interp: xs values not strictly increasing: %f <= %f", e.v1, e.v2)
+}
+
+// validate returns and error if:
+// * len(xs) < min
+// * len(xs) != len of any of slices
+// otherwise it returns nil
+func validate(min int, xs []float64, slices ...[]float64) error {
+	if len(xs) < min {
+		return fmt.Errorf("interp: xs has too few points %d for interpolation need %d", len(xs), min)
+	}
+
+	for _, s := range slices {
+		if len(xs) != len(s) {
+			return fmt.Errorf("interp: input slices have different lengths: %d != %d", len(xs), len(s))
+		}
+	}
+
+	return nil
+}
 
 // Predictor predicts the value of a function. It handles both
 // interpolation and extrapolation.
@@ -22,8 +53,8 @@ type Predictor interface {
 // Fitter fits a predictor to data.
 type Fitter interface {
 	// Fit fits a predictor to (X, Y) value pairs provided as two slices.
-	// It panics if len(xs) < 2, elements of xs are not strictly increasing
-	// or len(xs) != len(ys). Returns an error if fitting fails.
+	// It returns and error if len(xs) < 2, elements of xs are not strictly increasing,
+	// len(xs) != len(ys) or if fitting fails.
 	Fit(xs, ys []float64) error
 }
 
@@ -71,19 +102,16 @@ type PiecewiseLinear struct {
 }
 
 // Fit fits a predictor to (X, Y) value pairs provided as two slices.
-// It panics if len(xs) < 2, elements of xs are not strictly increasing
-// or len(xs) != len(ys). Always returns nil.
-func (pl *PiecewiseLinear) Fit(xs, ys []float64) error {
-	n := len(xs)
-	if len(ys) != n {
-		panic(differentLengths)
+// It returns an error if len(xs) < 2, elements of xs are not strictly increasing,
+// len(xs) != len(ys).
+func (pl *PiecewiseLinear) Fit(xs, ys []float64) (err error) {
+	pl.slopes, err = calculateSlopes(xs, ys)
+	if err != nil {
+		return err
 	}
-	if n < 2 {
-		panic(tooFewPoints)
-	}
-	pl.slopes = calculateSlopes(xs, ys)
-	pl.xs = make([]float64, n)
-	pl.ys = make([]float64, n)
+
+	pl.xs = make([]float64, len(xs))
+	pl.ys = make([]float64, len(ys))
 	copy(pl.xs, xs)
 	copy(pl.ys, ys)
 	return nil
@@ -117,19 +145,17 @@ type PiecewiseConstant struct {
 }
 
 // Fit fits a predictor to (X, Y) value pairs provided as two slices.
-// It panics if len(xs) < 2, elements of xs are not strictly increasing
-// or len(xs) != len(ys). Always returns nil.
+// It returns an error if len(xs) < 2, elements of xs are not strictly increasing,
+// len(xs) != len(ys).
 func (pc *PiecewiseConstant) Fit(xs, ys []float64) error {
+	if err := validate(2, xs, ys); err != nil {
+		return err
+	}
+
 	n := len(xs)
-	if len(ys) != n {
-		panic(differentLengths)
-	}
-	if n < 2 {
-		panic(tooFewPoints)
-	}
 	for i := 1; i < n; i++ {
 		if xs[i] <= xs[i-1] {
-			panic(xsNotStrictlyIncreasing)
+			return newNotIncreasingError(xs[i], xs[i-1])
 		}
 	}
 	pc.xs = make([]float64, n)
@@ -163,16 +189,14 @@ func findSegment(xs []float64, x float64) int {
 }
 
 // calculateSlopes calculates slopes (ys[i+1] - ys[i]) / (xs[i+1] - xs[i]).
-// It panics if len(xs) < 2, elements of xs are not strictly increasing
+// It returns an error if len(xs) < 2, elements of xs are not strictly increasing
 // or len(xs) != len(ys).
-func calculateSlopes(xs, ys []float64) []float64 {
+func calculateSlopes(xs, ys []float64) ([]float64, error) {
+	if err := validate(2, xs, ys); err != nil {
+		return nil, err
+	}
+
 	n := len(xs)
-	if n < 2 {
-		panic(tooFewPoints)
-	}
-	if len(ys) != n {
-		panic(differentLengths)
-	}
 	m := n - 1
 	slopes := make([]float64, m)
 	prevX := xs[0]
@@ -182,11 +206,11 @@ func calculateSlopes(xs, ys []float64) []float64 {
 		y := ys[i+1]
 		dx := x - prevX
 		if dx <= 0 {
-			panic(xsNotStrictlyIncreasing)
+			return nil, newNotIncreasingError(x, prevX)
 		}
 		slopes[i] = (y - prevY) / dx
 		prevX = x
 		prevY = y
 	}
-	return slopes
+	return slopes, nil
 }

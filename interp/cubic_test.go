@@ -50,7 +50,9 @@ func TestPiecewiseCubic(t *testing.T) {
 		ys := applyFunc(test.xs, test.f)
 		dydxs := applyFunc(test.xs, test.df)
 		var pc PiecewiseCubic
-		pc.FitWithDerivatives(test.xs, ys, dydxs)
+		if err := pc.FitWithDerivatives(test.xs, ys, dydxs); err != nil {
+			t.Errorf("Unexpected error from FitWithDerivatives: %s", err)
+		}
 		n := len(test.xs)
 		m := n - 1
 		x0 := test.xs[0]
@@ -154,7 +156,9 @@ func TestPiecewiseCubicFitWithDerivatives(t *testing.T) {
 	dydxs[1] = leftPolyDerivative(xs[1])
 	dydxs[2] = rightPolyDerivative(xs[2])
 	var pc PiecewiseCubic
-	pc.FitWithDerivatives(xs, ys, dydxs)
+	if err := pc.FitWithDerivatives(xs, ys, dydxs); err != nil {
+		t.Errorf("Unexpected error from FitWithDerivatives: %s", err)
+	}
 	lastY := rightPoly(xs[2])
 	if pc.lastY != lastY {
 		t.Errorf("Mismatch in lastY: got %v, want %g", pc.lastY, lastY)
@@ -199,8 +203,8 @@ func TestPiecewiseCubicFitWithDerivativesErrors(t *testing.T) {
 		},
 	} {
 		var pc PiecewiseCubic
-		if !panics(func() { pc.FitWithDerivatives(test.xs, test.ys, test.dydxs) }) {
-			t.Errorf("expected panic for xs: %v, ys: %v and dydxs: %v", test.xs, test.ys, test.dydxs)
+		if err := pc.FitWithDerivatives(test.xs, test.ys, test.dydxs); err == nil {
+			t.Errorf("expected error for xs: %v, ys: %v and dydxs: %v", test.xs, test.ys, test.dydxs)
 		}
 	}
 }
@@ -323,8 +327,8 @@ func TestAkimaSplineFitErrors(t *testing.T) {
 		},
 	} {
 		var as AkimaSpline
-		if !panics(func() { _ = as.Fit(test.xs, test.ys) }) {
-			t.Errorf("expected panic for xs: %v and ys: %v", test.xs, test.ys)
+		if err := as.Fit(test.xs, test.ys); err == nil {
+			t.Errorf("expected error for xs: %v and ys: %v", test.xs, test.ys)
 		}
 	}
 }
@@ -412,8 +416,10 @@ func TestAkimaSlopes(t *testing.T) {
 			want: []float64{0, 1. / 3, 2. / 3, 1, 0.125, 0, 1.5, 1, 1. / 3, 6, 12 - 1./3, 18 - 2./3},
 		},
 	} {
-		got := akimaSlopes(test.xs, test.ys)
-		if !floats.EqualApprox(got, test.want, 1e-14) {
+		got, err := akimaSlopes(test.xs, test.ys)
+		if err != nil {
+			t.Errorf("Unexpected error %s", err)
+		} else if !floats.EqualApprox(got, test.want, 1e-14) {
 			t.Errorf("Mismatch in test case %d: got %v, want %v", i, got, test.want)
 		}
 	}
@@ -453,8 +459,8 @@ func TestAkimaSlopesErrors(t *testing.T) {
 			ys: []float64{-1, 2},
 		},
 	} {
-		if !panics(func() { akimaSlopes(test.xs, test.ys) }) {
-			t.Errorf("expected panic for xs: %v and ys: %v", test.xs, test.ys)
+		if _, err := akimaSlopes(test.xs, test.ys); err == nil {
+			t.Errorf("expected error for xs: %v and ys: %v", test.xs, test.ys)
 		}
 	}
 }
@@ -666,8 +672,8 @@ func TestFritschButlandErrors(t *testing.T) {
 		},
 	} {
 		var fb FritschButland
-		if !panics(func() { _ = fb.Fit(test.xs, test.ys) }) {
-			t.Errorf("expected panic for xs: %v and ys: %v", test.xs, test.ys)
+		if err := fb.Fit(test.xs, test.ys); err == nil {
+			t.Errorf("expected error for xs: %v and ys: %v", test.xs, test.ys)
 		}
 	}
 }
@@ -679,7 +685,9 @@ func TestPiecewiseCubicFitWithSecondDerivatives(t *testing.T) {
 	ys := []float64{2.5, 1, 2.5}
 	d2ydx2s := []float64{1, 2, 3}
 	var pc PiecewiseCubic
-	pc.fitWithSecondDerivatives(xs, ys, d2ydx2s)
+	if err := pc.fitWithSecondDerivatives(xs, ys, d2ydx2s); err != nil {
+		t.Errorf("Unexpected error from fitWithSecondDerivatives: %s", err)
+	}
 	m := len(xs) - 1
 	if pc.lastY != ys[m] {
 		t.Errorf("Mismatch in lastY: got %v, want %g", pc.lastY, ys[m])
@@ -736,8 +744,8 @@ func TestPiecewiseCubicFitWithSecondDerivativesErrors(t *testing.T) {
 		},
 	} {
 		var pc PiecewiseCubic
-		if !panics(func() { pc.fitWithSecondDerivatives(test.xs, test.ys, test.d2ydx2s) }) {
-			t.Errorf("expected panic for xs: %v, ys: %v and d2ydx2s: %v", test.xs, test.ys, test.d2ydx2s)
+		if err := pc.fitWithSecondDerivatives(test.xs, test.ys, test.d2ydx2s); err == nil {
+			t.Errorf("expected error for xs: %v, ys: %v and d2ydx2s: %v", test.xs, test.ys, test.d2ydx2s)
 		}
 	}
 }

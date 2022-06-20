@@ -79,8 +79,8 @@ func testPiecewiseInterpolatorCreation(t *testing.T, fp FittablePredictor) {
 		{[]float64{0.3, -0.3}, []float64{0, 0}},
 	}
 	for _, params := range errorParamSets {
-		if !panics(func() { _ = fp.Fit(params.xs, params.ys) }) {
-			t.Errorf("expected panic for xs: %v and ys: %v", params.xs, params.ys)
+		if err := fp.Fit(params.xs, params.ys); err == nil {
+			t.Errorf("expected error for xs: %v and ys: %v", params.xs, params.ys)
 		}
 	}
 }
@@ -211,8 +211,8 @@ func TestCalculateSlopesErrors(t *testing.T) {
 			ys: []float64{0, 0, 0},
 		},
 	} {
-		if !panics(func() { calculateSlopes(test.xs, test.ys) }) {
-			t.Errorf("expected panic for xs: %v and ys: %v", test.xs, test.ys)
+		if _, err := calculateSlopes(test.xs, test.ys); err == nil {
+			t.Errorf("expected error for xs: %v and ys: %v", test.xs, test.ys)
 		}
 	}
 }
@@ -233,8 +233,10 @@ func TestCalculateSlopes(t *testing.T) {
 			want: []float64{5},
 		},
 	} {
-		got := calculateSlopes(test.xs, test.ys)
-		if !floats.EqualApprox(got, test.want, 1e-14) {
+		got, err := calculateSlopes(test.xs, test.ys)
+		if err != nil {
+			t.Errorf("Unexpected error %s", err)
+		} else if !floats.EqualApprox(got, test.want, 1e-14) {
 			t.Errorf("Mismatch in calculated slopes in case %d: got %v, want %v", i, got, test.want)
 		}
 	}
@@ -246,17 +248,6 @@ func applyFunc(xs []float64, f func(x float64) float64) []float64 {
 		ys[i] = f(x)
 	}
 	return ys
-}
-
-func panics(fun func()) (b bool) {
-	defer func() {
-		err := recover()
-		if err != nil {
-			b = true
-		}
-	}()
-	fun()
-	return
 }
 
 func discrDerivPredict(p Predictor, x0, x1, x, h float64) float64 {

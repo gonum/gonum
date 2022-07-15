@@ -20,6 +20,8 @@ go get -u gonum.org/v1/gonum/...
 
 Gonum supports and tests using the gc compiler on the [two most recent Go releases](https://github.com/gonum/gonum/blob/master/.github/workflows/ci.yml#L14-L15) on Linux (386, amd64 and arm64), macOS and Windows (both on amd64).
 
+Note that floating point behavior may differ between compiler versions and between architectures due to differences in floating point operation implementations.
+
 ## Release schedule
 
 The Gonum modules are released on a six-month release schedule, aligned with the Go releases.

@@ -197,3 +197,52 @@ func (m *Mat) Det() float64 {
 	detc := m.At(1, 0)*m.At(2, 1) - m.At(1, 1)*m.At(2, 0)
 	return a*deta - b*detb + c*detc
 }
+
+// Hessian sets the receiver to the hessian matrix of a spatial scalar field
+// evaluated at point p. Additional points evaluated to calculate hessian
+// are spaced at most tol away from p.
+func (m *Mat) Hessian(p, tol Vec, f func(Vec) float64) {
+	dx := Vec{X: tol.X}
+	dy := Vec{Y: tol.Y}
+	dz := Vec{Z: tol.Z}
+	fp := f(p)
+	fxp := f(Add(p, dx))
+	fxm := f(Sub(p, dx))
+	fxx := (fxp - 2*fp + fxm) / (tol.X * tol.X)
+
+	fyp := f(Add(p, dy))
+	fym := f(Sub(p, dy))
+	fyy := (fyp - 2*fp + fym) / (tol.Y * tol.Y)
+
+	var aux Vec
+	aux = Add(dx, dy)
+	fxyp := f(Add(p, aux))
+	fxym := f(Sub(p, aux))
+	fxy := (fxyp - fxp - fyp + 2*fp - fxm - fym + fxym) / (2 * tol.X * tol.Y)
+
+	fzp := f(Add(p, dz))
+	fzm := f(Sub(p, dz))
+	fzz := (fzp - 2*fp + fzm) / (tol.Z * tol.Z)
+
+	aux = Add(dx, dz)
+	fxzp := f(Add(p, aux))
+	fxzm := f(Sub(p, aux))
+	fxz := (fxzp - fxp - fzp + 2*fp - fxm - fzm + fxzm) / (2 * tol.X * tol.Z)
+
+	aux = Add(dy, dz)
+	fyzp := f(Add(p, aux))
+	fyzm := f(Sub(p, aux))
+	fyz := (fyzp - fyp - fzp + 2*fp - fym - fzm + fyzm) / (2 * tol.Y * tol.Z)
+
+	m.Set(0, 0, fxx)
+	m.Set(0, 1, fxy)
+	m.Set(0, 2, fxz)
+
+	m.Set(1, 0, fxy)
+	m.Set(1, 1, fyy)
+	m.Set(1, 2, fyz)
+
+	m.Set(2, 0, fxz)
+	m.Set(2, 1, fyz)
+	m.Set(2, 2, fzz)
+}

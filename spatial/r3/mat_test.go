@@ -234,21 +234,21 @@ func BenchmarkQuat(b *testing.B) {
 func TestMatHessian(t *testing.T) {
 	const (
 		tol = 1e-3
-		h   = 5e-5
+		h   = 5e-5 // Best results for cases around ~5e-5.
 	)
 	step := Vec{X: h, Y: h, Z: h}
 	rnd := rand.New(rand.NewSource(1))
 	for _, Case := range []struct {
-		f      func(p Vec) float64
-		expect func(p Vec) *Mat
+		fn   func(p Vec) float64
+		want func(p Vec) *Mat
 	}{
 		{
-			f: func(p Vec) float64 {
+			fn: func(p Vec) float64 {
 				// 4*x^3 + 5*y^2 + 3*z^4
 				z2 := p.Z * p.Z
 				return 4*p.X*p.X*p.X + 5*p.Y*p.Y + 3*z2*z2
 			},
-			expect: func(p Vec) *Mat {
+			want: func(p Vec) *Mat {
 				return NewMat([]float64{
 					24 * p.X, 0, 0,
 					0, 10, 0,
@@ -257,12 +257,12 @@ func TestMatHessian(t *testing.T) {
 			},
 		},
 		{
-			f: func(p Vec) float64 {
-				// 4*x^3 + 5*y^2 + 3*z^4
+			fn: func(p Vec) float64 {
+				// cos(x) * sin(z) * y^4
 				y2 := p.Y * p.Y
 				return math.Cos(p.X) * math.Sin(p.Z) * y2 * y2
 			},
-			expect: func(p Vec) *Mat {
+			want: func(p Vec) *Mat {
 				y3 := p.Y * p.Y * p.Y
 				y4 := y3 * p.Y
 				sx, cx := math.Sincos(p.X)
@@ -277,11 +277,11 @@ func TestMatHessian(t *testing.T) {
 	} {
 		for i := 0; i < 30; i++ {
 			p := randomVec(rnd)
-			m := NewMat(nil)
-			m.Hessian(p, step, Case.f)
-			expect := Case.expect(p)
-			if !mat.EqualApprox(m, expect, tol) {
-				t.Error("matrices not equal within tol\n", mat.Formatted(m), "\n", mat.Formatted(expect))
+			got := NewMat(nil)
+			got.Hessian(p, step, Case.fn)
+			want := Case.want(p)
+			if !mat.EqualApprox(got, want, tol) {
+				t.Error("matrices not equal within tol\n", mat.Formatted(got), "\n", mat.Formatted(want))
 			}
 		}
 	}

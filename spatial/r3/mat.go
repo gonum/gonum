@@ -198,41 +198,40 @@ func (m *Mat) Det() float64 {
 	return a*deta - b*detb + c*detc
 }
 
-// Hessian sets the receiver to the hessian matrix of a spatial scalar field
+// Hessian sets the receiver to the Hessian matrix of a scalar field
 // evaluated at point p. Additional points evaluated to calculate hessian
 // are spaced at most tol away from p.
-func (m *Mat) Hessian(p, tol Vec, f func(Vec) float64) {
-	dx := Vec{X: tol.X}
-	dy := Vec{Y: tol.Y}
-	dz := Vec{Z: tol.Z}
-	fp := f(p)
-	fxp := f(Add(p, dx))
-	fxm := f(Sub(p, dx))
-	fxx := (fxp - 2*fp + fxm) / (tol.X * tol.X)
+func (m *Mat) Hessian(p, step Vec, fn func(Vec) float64) {
+	dx := Vec{X: step.X}
+	dy := Vec{Y: step.Y}
+	dz := Vec{Z: step.Z}
+	fp := fn(p)
+	fxp := fn(Add(p, dx))
+	fxm := fn(Sub(p, dx))
+	fxx := (fxp - 2*fp + fxm) / (step.X * step.X)
 
-	fyp := f(Add(p, dy))
-	fym := f(Sub(p, dy))
-	fyy := (fyp - 2*fp + fym) / (tol.Y * tol.Y)
+	fyp := fn(Add(p, dy))
+	fym := fn(Sub(p, dy))
+	fyy := (fyp - 2*fp + fym) / (step.Y * step.Y)
 
-	var aux Vec
-	aux = Add(dx, dy)
-	fxyp := f(Add(p, aux))
-	fxym := f(Sub(p, aux))
-	fxy := (fxyp - fxp - fyp + 2*fp - fxm - fym + fxym) / (2 * tol.X * tol.Y)
+	aux := Add(dx, dy)
+	fxyp := fn(Add(p, aux))
+	fxym := fn(Sub(p, aux))
+	fxy := (fxyp - fxp - fyp + 2*fp - fxm - fym + fxym) / (2 * step.X * step.Y)
 
-	fzp := f(Add(p, dz))
-	fzm := f(Sub(p, dz))
-	fzz := (fzp - 2*fp + fzm) / (tol.Z * tol.Z)
+	fzp := fn(Add(p, dz))
+	fzm := fn(Sub(p, dz))
+	fzz := (fzp - 2*fp + fzm) / (step.Z * step.Z)
 
 	aux = Add(dx, dz)
-	fxzp := f(Add(p, aux))
-	fxzm := f(Sub(p, aux))
-	fxz := (fxzp - fxp - fzp + 2*fp - fxm - fzm + fxzm) / (2 * tol.X * tol.Z)
+	fxzp := fn(Add(p, aux))
+	fxzm := fn(Sub(p, aux))
+	fxz := (fxzp - fxp - fzp + 2*fp - fxm - fzm + fxzm) / (2 * step.X * step.Z)
 
 	aux = Add(dy, dz)
-	fyzp := f(Add(p, aux))
-	fyzm := f(Sub(p, aux))
-	fyz := (fyzp - fyp - fzp + 2*fp - fym - fzm + fyzm) / (2 * tol.Y * tol.Z)
+	fyzp := fn(Add(p, aux))
+	fyzm := fn(Sub(p, aux))
+	fyz := (fyzp - fyp - fzp + 2*fp - fym - fzm + fyzm) / (2 * step.Y * step.Z)
 
 	m.Set(0, 0, fxx)
 	m.Set(0, 1, fxy)

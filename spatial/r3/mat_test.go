@@ -233,8 +233,8 @@ func BenchmarkQuat(b *testing.B) {
 
 func TestMatHessian(t *testing.T) {
 	const (
-		tol = 1e-3
-		h   = 5e-5 // Best results for cases around ~5e-5.
+		tol = 1e-5
+		h   = 8e-4
 	)
 	step := Vec{X: h, Y: h, Z: h}
 	rnd := rand.New(rand.NewSource(1))
@@ -281,7 +281,8 @@ func TestMatHessian(t *testing.T) {
 			got.Hessian(p, step, Case.fn)
 			want := Case.want(p)
 			if !mat.EqualApprox(got, want, tol) {
-				t.Error("matrices not equal within tol\n", mat.Formatted(got), "\n", mat.Formatted(want))
+				t.Errorf("matrices not equal within tol\ngot:  %v\nwant:  %v",
+					mat.Formatted(got), mat.Formatted(want))
 			}
 		}
 	}

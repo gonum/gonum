@@ -198,39 +198,40 @@ func (m *Mat) Det() float64 {
 	return a*deta - b*detb + c*detc
 }
 
-// Hessian sets the receiver to the Hessian matrix of a scalar field
-// evaluated at point p. Additional points evaluated to calculate hessian
-// are spaced at most tol away from p.
-func (m *Mat) Hessian(p, step Vec, fn func(Vec) float64) {
+// Hessian sets the receiver to the Hessian matrix at point p of a scalar
+// field. The field is also evaluated at points in the area surrounding p by adding
+// at most 2 components of step to p. Hessian expects the field's second partial
+// derivatives are all continuous for correct results.
+func (m *Mat) Hessian(p, step Vec, field func(Vec) float64) {
 	dx := Vec{X: step.X}
 	dy := Vec{Y: step.Y}
 	dz := Vec{Z: step.Z}
-	fp := fn(p)
-	fxp := fn(Add(p, dx))
-	fxm := fn(Sub(p, dx))
+	fp := field(p)
+	fxp := field(Add(p, dx))
+	fxm := field(Sub(p, dx))
 	fxx := (fxp - 2*fp + fxm) / (step.X * step.X)
 
-	fyp := fn(Add(p, dy))
-	fym := fn(Sub(p, dy))
+	fyp := field(Add(p, dy))
+	fym := field(Sub(p, dy))
 	fyy := (fyp - 2*fp + fym) / (step.Y * step.Y)
 
 	aux := Add(dx, dy)
-	fxyp := fn(Add(p, aux))
-	fxym := fn(Sub(p, aux))
+	fxyp := field(Add(p, aux))
+	fxym := field(Sub(p, aux))
 	fxy := (fxyp - fxp - fyp + 2*fp - fxm - fym + fxym) / (2 * step.X * step.Y)
 
-	fzp := fn(Add(p, dz))
-	fzm := fn(Sub(p, dz))
+	fzp := field(Add(p, dz))
+	fzm := field(Sub(p, dz))
 	fzz := (fzp - 2*fp + fzm) / (step.Z * step.Z)
 
 	aux = Add(dx, dz)
-	fxzp := fn(Add(p, aux))
-	fxzm := fn(Sub(p, aux))
+	fxzp := field(Add(p, aux))
+	fxzm := field(Sub(p, aux))
 	fxz := (fxzp - fxp - fzp + 2*fp - fxm - fzm + fxzm) / (2 * step.X * step.Z)
 
 	aux = Add(dy, dz)
-	fyzp := fn(Add(p, aux))
-	fyzm := fn(Sub(p, aux))
+	fyzp := field(Add(p, aux))
+	fyzm := field(Sub(p, aux))
 	fyz := (fyzp - fyp - fzp + 2*fp - fym - fzm + fyzm) / (2 * step.Y * step.Z)
 
 	m.Set(0, 0, fxx)

@@ -103,9 +103,10 @@ func TestSkew(t *testing.T) {
 	const tol = 1e-16
 	rnd := rand.New(rand.NewSource(1))
 	for tc := 0; tc < 20; tc++ {
+		sk := NewMat(nil)
 		v1 := randomVec(rnd)
 		v2 := randomVec(rnd)
-		sk := Skew(v1)
+		sk.Skew(v1)
 		want := Cross(v1, v2)
 		got := sk.MulVec(v2)
 		if d := want.Sub(got); d.Dot(d) > tol {

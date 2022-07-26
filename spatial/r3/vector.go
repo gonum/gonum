@@ -83,6 +83,18 @@ func Cos(p, q Vec) float64 {
 	return Dot(p, q) / (Norm(p) * Norm(q))
 }
 
+// Divergence returns the divergence of the vector field at the point p,
+// approximated using finite differences with the given step sizes.
+func Divergence(p, step Vec, field func(Vec) Vec) float64 {
+	sx := Vec{X: step.X}
+	divx := (field(Add(p, sx)).X - field(Sub(p, sx)).X) / step.X
+	sy := Vec{Y: step.Y}
+	divy := (field(Add(p, sy)).Y - field(Sub(p, sy)).Y) / step.Y
+	sz := Vec{Z: step.Z}
+	divz := (field(Add(p, sz)).Z - field(Sub(p, sz)).Z) / step.Z
+	return 0.5 * (divx + divy + divz)
+}
+
 // minElem return a vector with the minimum components of two vectors.
 func minElem(a, b Vec) Vec {
 	return Vec{

@@ -230,3 +230,63 @@ func BenchmarkQuat(b *testing.B) {
 		}
 	}
 }
+
+var scalarFields = []struct {
+	// This is the scalar field function.
+	field   func(p Vec) float64
+	hessian func(p Vec) *Mat
+}{
+	{
+		field: func(p Vec) float64 {
+			// 4*x^3 + 5*y^2 + 3*z^4
+			z2 := p.Z * p.Z
+			return 4*p.X*p.X*p.X + 5*p.Y*p.Y + 3*z2*z2
+		},
+		hessian: func(p Vec) *Mat {
+			return NewMat([]float64{
+				24 * p.X, 0, 0,
+				0, 10, 0,
+				0, 0, 36 * p.Z * p.Z,
+			})
+		},
+	},
+	{
+		field: func(p Vec) float64 {
+			// cos(x) * sin(z) * y^4
+			y2 := p.Y * p.Y
+			return math.Cos(p.X) * math.Sin(p.Z) * y2 * y2
+		},
+		hessian: func(p Vec) *Mat {
+			y3 := p.Y * p.Y * p.Y
+			y4 := y3 * p.Y
+			sx, cx := math.Sincos(p.X)
+			sz, cz := math.Sincos(p.Z)
+			return NewMat([]float64{
+				-y4 * cx * sz, -4 * y3 * sx * sz, -y4 * sx * cz,
+				-4 * y3 * sx * sz, 12 * p.Y * p.Y * cx * sz, 4 * y3 * cx * cz,
+				-y4 * sx * cz, 4 * y3 * cx * cz, -y4 * cx * sz,
+			})
+		},
+	},
+}
+
+func TestMatHessian(t *testing.T) {
+	const (
+		tol = 1e-5
+		h   = 8e-4
+	)
+	step := Vec{X: h, Y: h, Z: h}
+	rnd := rand.New(rand.NewSource(1))
+	for _, test := range scalarFields {
+		for i := 0; i < 30; i++ {
+			p := randomVec(rnd)
+			got := NewMat(nil)
+			got.Hessian(p, step, test.field)
+			want := test.hessian(p)
+			if !mat.EqualApprox(got, want, tol) {
+				t.Errorf("matrices not equal within tol\ngot:  %v\nwant:  %v",
+					mat.Formatted(got), mat.Formatted(want))
+			}
+		}
+	}
+}

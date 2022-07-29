@@ -277,12 +277,12 @@ func TestMatHessian(t *testing.T) {
 	)
 	step := Vec{X: h, Y: h, Z: h}
 	rnd := rand.New(rand.NewSource(1))
-	for _, Case := range scalarFields {
+	for _, test := range scalarFields {
 		for i := 0; i < 30; i++ {
 			p := randomVec(rnd)
 			got := NewMat(nil)
-			got.Hessian(p, step, Case.field)
-			want := Case.hessian(p)
+			got.Hessian(p, step, test.field)
+			want := test.hessian(p)
 			if !mat.EqualApprox(got, want, tol) {
 				t.Errorf("matrices not equal within tol\ngot:  %v\nwant:  %v",
 					mat.Formatted(got), mat.Formatted(want))

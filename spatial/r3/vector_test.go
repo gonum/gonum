@@ -8,6 +8,8 @@ import (
 	"math"
 	"testing"
 
+	"golang.org/x/exp/rand"
+
 	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/mat"
 )
@@ -250,6 +252,54 @@ func TestRotate(t *testing.T) {
 				"matrix rotate(%v, %v, %v)= %v, want=%v",
 				test.v, test.alpha, test.axis, got, test.want,
 			)
+		}
+	}
+}
+
+var vectorFields = []struct {
+	field      func(Vec) Vec
+	divergence func(Vec) float64
+}{
+	{
+		field: func(v Vec) Vec {
+			return Vec{X: v.X * v.Y * v.Z, Y: v.Y * v.Z, Z: v.Z * v.X}
+		},
+		divergence: func(v Vec) float64 {
+			return v.X + v.Y*v.Z + v.Z
+		},
+	},
+	{
+		field: func(v Vec) Vec {
+			sx := math.Sin(v.X)
+			sy, cy := math.Sincos(v.Y)
+			return Vec{
+				X: v.X * v.Y * v.Z * cy,
+				Y: v.Y*v.Z + sx,
+				Z: v.Z * v.X / sy,
+			}
+		},
+		divergence: func(v Vec) float64 {
+			sy, cy := math.Sincos(v.Y)
+			return v.X/sy + v.Y*v.Z*cy + v.Z
+		},
+	},
+}
+
+func TestDivergence(t *testing.T) {
+	const (
+		tol = 1e-10
+		h   = 1e-2
+	)
+	step := Vec{X: h, Y: h, Z: h}
+	rnd := rand.New(rand.NewSource(1))
+	for _, test := range vectorFields {
+		for i := 0; i < 30; i++ {
+			p := randomVec(rnd)
+			got := Divergence(p, step, test.field)
+			want := test.divergence(p)
+			if math.Abs(got-want) > tol {
+				t.Errorf("result out of tolerance. got %v, want %v", got, want)
+			}
 		}
 	}
 }

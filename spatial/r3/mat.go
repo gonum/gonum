@@ -214,3 +214,53 @@ func (m *Mat) Skew(v Vec) {
 	m.Set(2, 1, v.X)
 	m.Set(2, 2, 0)
 }
+
+// Hessian sets the receiver to the Hessian matrix of the scalar field at the point p,
+// approximated using finite differences with the given step sizes.
+// The field is evaluated at points in the area surrounding p by adding
+// at most 2 components of step to p. Hessian expects the field's second partial
+// derivatives are all continuous for correct results.
+func (m *Mat) Hessian(p, step Vec, field func(Vec) float64) {
+	dx := Vec{X: step.X}
+	dy := Vec{Y: step.Y}
+	dz := Vec{Z: step.Z}
+	fp := field(p)
+	fxp := field(Add(p, dx))
+	fxm := field(Sub(p, dx))
+	fxx := (fxp - 2*fp + fxm) / (step.X * step.X)
+
+	fyp := field(Add(p, dy))
+	fym := field(Sub(p, dy))
+	fyy := (fyp - 2*fp + fym) / (step.Y * step.Y)
+
+	aux := Add(dx, dy)
+	fxyp := field(Add(p, aux))
+	fxym := field(Sub(p, aux))
+	fxy := (fxyp - fxp - fyp + 2*fp - fxm - fym + fxym) / (2 * step.X * step.Y)
+
+	fzp := field(Add(p, dz))
+	fzm := field(Sub(p, dz))
+	fzz := (fzp - 2*fp + fzm) / (step.Z * step.Z)
+
+	aux = Add(dx, dz)
+	fxzp := field(Add(p, aux))
+	fxzm := field(Sub(p, aux))
+	fxz := (fxzp - fxp - fzp + 2*fp - fxm - fzm + fxzm) / (2 * step.X * step.Z)
+
+	aux = Add(dy, dz)
+	fyzp := field(Add(p, aux))
+	fyzm := field(Sub(p, aux))
+	fyz := (fyzp - fyp - fzp + 2*fp - fym - fzm + fyzm) / (2 * step.Y * step.Z)
+
+	m.Set(0, 0, fxx)
+	m.Set(0, 1, fxy)
+	m.Set(0, 2, fxz)
+
+	m.Set(1, 0, fxy)
+	m.Set(1, 1, fyy)
+	m.Set(1, 2, fyz)
+
+	m.Set(2, 0, fxz)
+	m.Set(2, 1, fyz)
+	m.Set(2, 2, fzz)
+}

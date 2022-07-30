@@ -304,6 +304,25 @@ func TestDivergence(t *testing.T) {
 	}
 }
 
+func TestGradient(t *testing.T) {
+	const (
+		tol = 1e-12
+		h   = 1e-4
+	)
+	step := Vec{X: h, Y: h, Z: h}
+	rnd := rand.New(rand.NewSource(1))
+	for _, test := range scalarFields {
+		for i := 0; i < 30; i++ {
+			p := randomVec(rnd)
+			got := Gradient(p, step, test.field)
+			want := test.gradient(p)
+			if vecApproxEqual(got, want, tol) {
+				t.Errorf("result out of tolerance. got %v, want %v", got, want)
+			}
+		}
+	}
+}
+
 func vecDense(v Vec) *mat.VecDense {
 	return mat.NewVecDense(3, []float64{v.X, v.Y, v.Z})
 }

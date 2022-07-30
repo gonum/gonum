@@ -198,6 +198,23 @@ func (m *Mat) Det() float64 {
 	return a*deta - b*detb + c*detc
 }
 
+// Skew sets the receiver to the 3×3 skew symmetric matrix
+// (right hand system) of v.
+//                  ⎡ 0 -z  y⎤
+//  Skew({x,y,z}) = ⎢ z  0 -x⎥
+//                  ⎣-y  x  0⎦
+func (m *Mat) Skew(v Vec) {
+	m.Set(0, 0, 0)
+	m.Set(0, 1, -v.Z)
+	m.Set(0, 2, v.Y)
+	m.Set(1, 0, v.Z)
+	m.Set(1, 1, 0)
+	m.Set(1, 2, -v.X)
+	m.Set(2, 0, -v.Y)
+	m.Set(2, 1, v.X)
+	m.Set(2, 2, 0)
+}
+
 // Hessian sets the receiver to the Hessian matrix of the scalar field at the point p,
 // approximated using finite differences with the given step sizes.
 // The field is evaluated at points in the area surrounding p by adding

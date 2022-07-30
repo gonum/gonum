@@ -95,6 +95,19 @@ func Divergence(p, step Vec, field func(Vec) Vec) float64 {
 	return 0.5 * (divx + divy + divz)
 }
 
+// Gradient returns the gradient of the scalar field at the point p,
+// approximated using finite differences with the given step sizes.
+func Gradient(p, step Vec, field func(Vec) float64) Vec {
+	dx := Vec{X: step.X}
+	dy := Vec{Y: step.Y}
+	dz := Vec{Z: step.Z}
+	return Vec{
+		X: field(Add(p, dx)) - field(Sub(p, dx)),
+		Y: field(Add(p, dy)) - field(Sub(p, dy)),
+		Z: field(Add(p, dz)) - field(Sub(p, dz)),
+	}
+}
+
 // minElem return a vector with the minimum components of two vectors.
 func minElem(a, b Vec) Vec {
 	return Vec{

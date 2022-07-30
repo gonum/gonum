@@ -234,14 +234,18 @@ func BenchmarkQuat(b *testing.B) {
 
 var scalarFields = []struct {
 	// This is the scalar field function.
-	field   func(p Vec) float64
-	hessian func(p Vec) *Mat
+	field    func(p Vec) float64
+	gradient func(p Vec) Vec
+	hessian  func(p Vec) *Mat
 }{
 	{
 		field: func(p Vec) float64 {
 			// 4*x^3 + 5*y^2 + 3*z^4
 			z2 := p.Z * p.Z
 			return 4*p.X*p.X*p.X + 5*p.Y*p.Y + 3*z2*z2
+		},
+		gradient: func(p Vec) Vec {
+			return Vec{X: 12 * p.X * p.X, Y: 10 * p.Y, Z: 12 * p.Z * p.Z * p.Z}
 		},
 		hessian: func(p Vec) *Mat {
 			return NewMat([]float64{
@@ -256,6 +260,13 @@ var scalarFields = []struct {
 			// cos(x) * sin(z) * y^4
 			y2 := p.Y * p.Y
 			return math.Cos(p.X) * math.Sin(p.Z) * y2 * y2
+		},
+		gradient: func(p Vec) Vec {
+			y3 := p.Y * p.Y * p.Y
+			y4 := p.Y * y3
+			sx, cx := math.Sincos(p.X)
+			sz, cz := math.Sincos(p.Z)
+			return Vec{X: -y4 * sx * sz, Y: 4 * y3 * cx * sz, Z: y4 * cx * cz}
 		},
 		hessian: func(p Vec) *Mat {
 			y3 := p.Y * p.Y * p.Y

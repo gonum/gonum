@@ -259,17 +259,27 @@ func TestRotate(t *testing.T) {
 var vectorFields = []struct {
 	field      func(Vec) Vec
 	divergence func(Vec) float64
+	jacobian   func(Vec) *Mat
 }{
 	{
 		field: func(v Vec) Vec {
+			// (x*y*z, y*z, z*x)
 			return Vec{X: v.X * v.Y * v.Z, Y: v.Y * v.Z, Z: v.Z * v.X}
 		},
 		divergence: func(v Vec) float64 {
 			return v.X + v.Y*v.Z + v.Z
 		},
+		jacobian: func(v Vec) *Mat {
+			return NewMat([]float64{
+				v.Y * v.Z, v.X * v.Z, v.X * v.Y,
+				0, v.Z, v.Y,
+				v.Z, 0, v.X,
+			})
+		},
 	},
 	{
 		field: func(v Vec) Vec {
+			// (x*y*z*cos(y), y*z+sin(x), z*x/sin(y))
 			sx := math.Sin(v.X)
 			sy, cy := math.Sincos(v.Y)
 			return Vec{
@@ -281,6 +291,15 @@ var vectorFields = []struct {
 		divergence: func(v Vec) float64 {
 			sy, cy := math.Sincos(v.Y)
 			return v.X/sy + v.Y*v.Z*cy + v.Z
+		},
+		jacobian: func(v Vec) *Mat {
+			cx := math.Cos(v.X)
+			sy, cy := math.Sincos(v.Y)
+			return NewMat([]float64{
+				v.Y * v.Z * cy, v.X*v.Z*cy - v.X*v.Y*v.Z*sy, v.X * v.Y * cy,
+				cx, v.Z, v.Y,
+				v.Z / sy, -v.X * v.Z * cy / (sy * sy), v.X / sy,
+			})
 		},
 	},
 }

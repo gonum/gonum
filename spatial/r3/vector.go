@@ -104,9 +104,9 @@ func Gradient(p, step Vec, field func(Vec) float64) Vec {
 	dy := Vec{Y: step.Y}
 	dz := Vec{Z: step.Z}
 	return Vec{
-		X: field(Add(p, dx)) - field(Sub(p, dx)),
-		Y: field(Add(p, dy)) - field(Sub(p, dy)),
-		Z: field(Add(p, dz)) - field(Sub(p, dz)),
+		X: (field(Add(p, dx)) - field(Sub(p, dx))) / (2 * step.X),
+		Y: (field(Add(p, dy)) - field(Sub(p, dy))) / (2 * step.Y),
+		Z: (field(Add(p, dz)) - field(Sub(p, dz))) / (2 * step.Z),
 	}
 }
 

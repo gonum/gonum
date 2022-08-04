@@ -279,18 +279,18 @@ var vectorFields = []struct {
 	},
 	{
 		field: func(v Vec) Vec {
-			// (x*y*z*cos(y), y*z+sin(x), z*x/sin(y))
+			// (x*y*z*cos(y), y*z+sin(x), z*x*sin(y))
 			sx := math.Sin(v.X)
 			sy, cy := math.Sincos(v.Y)
 			return Vec{
 				X: v.X * v.Y * v.Z * cy,
 				Y: v.Y*v.Z + sx,
-				Z: v.Z * v.X / sy,
+				Z: v.Z * v.X * sy,
 			}
 		},
 		divergence: func(v Vec) float64 {
 			sy, cy := math.Sincos(v.Y)
-			return v.X/sy + v.Y*v.Z*cy + v.Z
+			return v.X*sy + v.Y*v.Z*cy + v.Z
 		},
 		jacobian: func(v Vec) *Mat {
 			cx := math.Cos(v.X)
@@ -298,7 +298,7 @@ var vectorFields = []struct {
 			return NewMat([]float64{
 				v.Y * v.Z * cy, v.X*v.Z*cy - v.X*v.Y*v.Z*sy, v.X * v.Y * cy,
 				cx, v.Z, v.Y,
-				v.Z / sy, -v.X * v.Z * cy / (sy * sy), v.X / sy,
+				v.Z * sy, v.X * v.Z * cy, v.X * sy,
 			})
 		},
 	},

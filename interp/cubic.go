@@ -371,7 +371,7 @@ func makeCubicSplineSecondDerivativeEquations(a mat.MutableBanded, b mat.Mutable
 // NaturalCubic is a piecewise cubic 1-dimensional interpolator with
 // continuous value, first and second derivatives, which can be fitted to (X, Y)
 // value pairs without providing derivatives. It uses the boundary conditions
-// Y''(left end ) = Y''(right end) = 0.
+// Y′′(left end ) = Y′′(right end) = 0.
 // See e.g. https://www.math.drexel.edu/~tolya/cubicspline.pdf for details.
 type NaturalCubic struct {
 	cubic PiecewiseCubic
@@ -396,7 +396,7 @@ func (nc *NaturalCubic) Fit(xs, ys []float64) error {
 	a := mat.NewTridiag(n, nil, nil, nil)
 	b := mat.NewVecDense(n, nil)
 	makeCubicSplineSecondDerivativeEquations(a, b, xs, ys)
-	// Add boundary conditions y''(left) = y''(right) = 0:
+	// Add boundary conditions y′′(left) = y′′(right) = 0:
 	b.SetVec(0, 0)
 	b.SetVec(n-1, 0)
 	a.SetBand(0, 0, 1)
@@ -412,7 +412,7 @@ func (nc *NaturalCubic) Fit(xs, ys []float64) error {
 // ClampedCubic is a piecewise cubic 1-dimensional interpolator with
 // continuous value, first and second derivatives, which can be fitted to (X, Y)
 // value pairs without providing derivatives. It uses the boundary conditions
-// Y'(left end ) = Y'(right end) = 0.
+// Y′(left end ) = Y′(right end) = 0.
 type ClampedCubic struct {
 	cubic PiecewiseCubic
 }
@@ -436,13 +436,13 @@ func (cc *ClampedCubic) Fit(xs, ys []float64) error {
 	a := mat.NewTridiag(n, nil, nil, nil)
 	b := mat.NewVecDense(n, nil)
 	makeCubicSplineSecondDerivativeEquations(a, b, xs, ys)
-	// Add boundary conditions y''(left) = y''(right) = 0:
-	// Condition Y'(left end) = 0:
+	// Add boundary conditions y′′(left) = y′′(right) = 0:
+	// Condition Y′(left end) = 0:
 	dxL := xs[1] - xs[0]
 	b.SetVec(0, (ys[1]-ys[0])/dxL)
 	a.SetBand(0, 0, dxL/3)
 	a.SetBand(0, 1, dxL/6)
-	// Condition Y'(right end) = 0:
+	// Condition Y′(right end) = 0:
 	m := n - 1
 	dxR := xs[m] - xs[m-1]
 	b.SetVec(m, (ys[m]-ys[m-1])/dxR)

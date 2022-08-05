@@ -36,8 +36,10 @@ func max(a, b int) int {
 
 // Potrf computes the Cholesky factorization of a.
 // The factorization has the form
-//  A = Uᵀ * U  if a.Uplo == blas.Upper, or
-//  A = L * Lᵀ  if a.Uplo == blas.Lower,
+//
+//	A = Uᵀ * U  if a.Uplo == blas.Upper, or
+//	A = L * Lᵀ  if a.Uplo == blas.Lower,
+//
 // where U is an upper triangular matrix and L is lower triangular.
 // The triangular matrix is returned in t, and the underlying data between
 // a and t is shared. The returned bool indicates whether a is positive
@@ -84,11 +86,14 @@ func Potrs(t blas64.Triangular, b blas64.General) {
 // Pbcon returns an estimate of the reciprocal of the condition number (in the
 // 1-norm) of an n×n symmetric positive definite band matrix using the Cholesky
 // factorization
-//  A = Uᵀ*U  if uplo == blas.Upper
-//  A = L*Lᵀ  if uplo == blas.Lower
+//
+//	A = Uᵀ*U  if uplo == blas.Upper
+//	A = L*Lᵀ  if uplo == blas.Lower
+//
 // computed by Pbtrf. The estimate is obtained for norm(inv(A)), and the
 // reciprocal of the condition number is computed as
-//  rcond = 1 / (anorm * norm(inv(A))).
+//
+//	rcond = 1 / (anorm * norm(inv(A))).
 //
 // The length of work must be at least 3*n and the length of iwork must be at
 // least n.
@@ -98,8 +103,10 @@ func Pbcon(a blas64.SymmetricBand, anorm float64, work []float64, iwork []int) f
 
 // Pbtrf computes the Cholesky factorization of an n×n symmetric positive
 // definite band matrix
-//  A = Uᵀ * U  if a.Uplo == blas.Upper
-//  A = L * Lᵀ  if a.Uplo == blas.Lower
+//
+//	A = Uᵀ * U  if a.Uplo == blas.Upper
+//	A = L * Lᵀ  if a.Uplo == blas.Lower
+//
 // where U and L are upper, respectively lower, triangular band matrices.
 //
 // The triangular matrix U or L is returned in t, and the underlying data
@@ -118,8 +125,10 @@ func Pbtrf(a blas64.SymmetricBand) (t blas64.TriangularBand, ok bool) {
 
 // Pbtrs solves a system of linear equations A*X = B with an n×n symmetric
 // positive definite band matrix A using the Cholesky factorization
-//  A = Uᵀ * U  if t.Uplo == blas.Upper
-//  A = L * Lᵀ  if t.Uplo == blas.Lower
+//
+//	A = Uᵀ * U  if t.Uplo == blas.Upper
+//	A = L * Lᵀ  if t.Uplo == blas.Lower
+//
 // t contains the corresponding triangular factor as returned by Pbtrf.
 //
 // On entry, b contains the right hand side matrix B. On return, it is
@@ -132,8 +141,10 @@ func Pbtrs(t blas64.TriangularBand, b blas64.General) {
 // symmetric positive semidefinite matrix A.
 //
 // The factorization has the form
-//  Pᵀ * A * P = Uᵀ * U ,  if a.Uplo = blas.Upper,
-//  Pᵀ * A * P = L  * Lᵀ,  if a.Uplo = blas.Lower,
+//
+//	Pᵀ * A * P = Uᵀ * U ,  if a.Uplo = blas.Upper,
+//	Pᵀ * A * P = L  * Lᵀ,  if a.Uplo = blas.Lower,
+//
 // where U is an upper triangular matrix, L is lower triangular, and P is a
 // permutation matrix.
 //
@@ -191,6 +202,7 @@ func Gecon(norm lapack.MatrixNorm, a blas64.General, anorm float64, work []float
 //     Aᵀ * X = B.
 //  4. If m < n and trans == blas.Trans, Gels finds X such that || A*X - B||_2
 //     is minimized.
+//
 // Note that the least-squares solutions (cases 1 and 3) perform the minimization
 // per column of B. This is not the same as finding the minimum-norm matrix.
 //
@@ -219,9 +231,11 @@ func Gels(trans blas.Transpose, a blas64.General, b blas64.General, work []float
 //
 // The ith elementary reflector can be explicitly constructed by first extracting
 // the
-//  v[j] = 0           j < i
-//  v[j] = 1           j == i
-//  v[j] = a[j*lda+i]  j > i
+//
+//	v[j] = 0           j < i
+//	v[j] = 1           j == i
+//	v[j] = a[j*lda+i]  j > i
+//
 // and computing H_i = I - tau[i] * v * vᵀ.
 //
 // The orthonormal matrix Q can be constucted from a product of these elementary
@@ -259,7 +273,9 @@ func Gelqf(a blas64.General, tau, work []float64, lwork int) {
 // Gesvd computes the singular value decomposition of the input matrix A.
 //
 // The singular value decomposition is
-//  A = U * Sigma * Vᵀ
+//
+//	A = U * Sigma * Vᵀ
+//
 // where Sigma is an m×n diagonal matrix containing the singular values of A,
 // U is an m×m orthogonal matrix and V is an n×n orthogonal matrix. The first
 // min(m,n) columns of U and V are the left and right singular vectors of A
@@ -267,10 +283,12 @@ func Gelqf(a blas64.General, tau, work []float64, lwork int) {
 //
 // jobU and jobVT are options for computing the singular vectors. The behavior
 // is as follows
-//  jobU == lapack.SVDAll       All m columns of U are returned in u
-//  jobU == lapack.SVDStore     The first min(m,n) columns are returned in u
-//  jobU == lapack.SVDOverwrite The first min(m,n) columns of U are written into a
-//  jobU == lapack.SVDNone      The columns of U are not computed.
+//
+//	jobU == lapack.SVDAll       All m columns of U are returned in u
+//	jobU == lapack.SVDStore     The first min(m,n) columns are returned in u
+//	jobU == lapack.SVDOverwrite The first min(m,n) columns of U are written into a
+//	jobU == lapack.SVDNone      The columns of U are not computed.
+//
 // The behavior is the same for jobVT and the rows of Vᵀ. At most one of jobU
 // and jobVT can equal lapack.SVDOverwrite, and Gesvd will panic otherwise.
 //
@@ -304,7 +322,9 @@ func Gesvd(jobU, jobVT lapack.SVDJob, a, u, vt blas64.General, s, work []float64
 
 // Getrf computes the LU decomposition of the m×n matrix A.
 // The LU decomposition is a factorization of A into
-//  A = P * L * U
+//
+//	A = P * L * U
+//
 // where P is a permutation matrix, L is a unit lower triangular matrix, and
 // U is a (usually) non-unit upper triangular matrix. On exit, L and U are stored
 // in place into a.
@@ -341,8 +361,10 @@ func Getri(a blas64.General, ipiv []int, work []float64, lwork int) (ok bool) {
 
 // Getrs solves a system of equations using an LU factorization.
 // The system of equations solved is
-//  A * X = B   if trans == blas.Trans
-//  Aᵀ * X = B  if trans == blas.NoTrans
+//
+//	A * X = B   if trans == blas.Trans
+//	Aᵀ * X = B  if trans == blas.NoTrans
+//
 // A is a general n×n matrix with stride lda. B is a general matrix of size n×nrhs.
 //
 // On entry b contains the elements of the matrix B. On exit, b contains the
@@ -356,9 +378,11 @@ func Getrs(trans blas.Transpose, a blas64.General, b blas64.General, ipiv []int)
 
 // Ggsvd3 computes the generalized singular value decomposition (GSVD)
 // of an m×n matrix A and p×n matrix B:
-//  Uᵀ*A*Q = D1*[ 0 R ]
 //
-//  Vᵀ*B*Q = D2*[ 0 R ]
+//	Uᵀ*A*Q = D1*[ 0 R ]
+//
+//	Vᵀ*B*Q = D2*[ 0 R ]
+//
 // where U, V and Q are orthogonal matrices.
 //
 // Ggsvd3 returns k and l, the dimensions of the sub-blocks. k+l
@@ -369,62 +393,69 @@ func Getrs(trans blas.Transpose, a blas64.General, b blas64.General, ipiv []int)
 //
 // If m-k-l >= 0,
 //
-//                    k  l
-//       D1 =     k [ I  0 ]
-//                l [ 0  C ]
-//            m-k-l [ 0  0 ]
+//	                  k  l
+//	     D1 =     k [ I  0 ]
+//	              l [ 0  C ]
+//	          m-k-l [ 0  0 ]
 //
-//                  k  l
-//       D2 = l   [ 0  S ]
-//            p-l [ 0  0 ]
+//	                k  l
+//	     D2 = l   [ 0  S ]
+//	          p-l [ 0  0 ]
 //
-//               n-k-l  k    l
-//  [ 0 R ] = k [  0   R11  R12 ] k
-//            l [  0    0   R22 ] l
+//	             n-k-l  k    l
+//	[ 0 R ] = k [  0   R11  R12 ] k
+//	          l [  0    0   R22 ] l
 //
 // where
 //
-//  C = diag( alpha_k, ... , alpha_{k+l} ),
-//  S = diag( beta_k,  ... , beta_{k+l} ),
-//  C^2 + S^2 = I.
+//	C = diag( alpha_k, ... , alpha_{k+l} ),
+//	S = diag( beta_k,  ... , beta_{k+l} ),
+//	C^2 + S^2 = I.
 //
 // R is stored in
-//  A[0:k+l, n-k-l:n]
+//
+//	A[0:k+l, n-k-l:n]
+//
 // on exit.
 //
 // If m-k-l < 0,
 //
-//                 k m-k k+l-m
-//      D1 =   k [ I  0    0  ]
-//           m-k [ 0  C    0  ]
+//	               k m-k k+l-m
+//	    D1 =   k [ I  0    0  ]
+//	         m-k [ 0  C    0  ]
 //
-//                   k m-k k+l-m
-//      D2 =   m-k [ 0  S    0  ]
-//           k+l-m [ 0  0    I  ]
-//             p-l [ 0  0    0  ]
+//	                 k m-k k+l-m
+//	    D2 =   m-k [ 0  S    0  ]
+//	         k+l-m [ 0  0    I  ]
+//	           p-l [ 0  0    0  ]
 //
-//                 n-k-l  k   m-k  k+l-m
-//  [ 0 R ] =    k [ 0    R11  R12  R13 ]
-//             m-k [ 0     0   R22  R23 ]
-//           k+l-m [ 0     0    0   R33 ]
+//	               n-k-l  k   m-k  k+l-m
+//	[ 0 R ] =    k [ 0    R11  R12  R13 ]
+//	           m-k [ 0     0   R22  R23 ]
+//	         k+l-m [ 0     0    0   R33 ]
 //
 // where
-//  C = diag( alpha_k, ... , alpha_m ),
-//  S = diag( beta_k,  ... , beta_m ),
-//  C^2 + S^2 = I.
 //
-//  R = [ R11 R12 R13 ] is stored in A[1:m, n-k-l+1:n]
-//      [  0  R22 R23 ]
+//	C = diag( alpha_k, ... , alpha_m ),
+//	S = diag( beta_k,  ... , beta_m ),
+//	C^2 + S^2 = I.
+//
+//	R = [ R11 R12 R13 ] is stored in A[1:m, n-k-l+1:n]
+//	    [  0  R22 R23 ]
+//
 // and R33 is stored in
-//  B[m-k:l, n+m-k-l:n] on exit.
+//
+//	B[m-k:l, n+m-k-l:n] on exit.
 //
 // Ggsvd3 computes C, S, R, and optionally the orthogonal transformation
 // matrices U, V and Q.
 //
 // jobU, jobV and jobQ are options for computing the orthogonal matrices. The behavior
 // is as follows
-//  jobU == lapack.GSVDU        Compute orthogonal matrix U
-//  jobU == lapack.GSVDNone     Do not compute orthogonal matrix.
+//
+//	jobU == lapack.GSVDU        Compute orthogonal matrix U
+//	jobU == lapack.GSVDNone     Do not compute orthogonal matrix.
+//
 // The behavior is the same for jobV and jobQ with the exception that instead of
 // lapack.GSVDU these accept lapack.GSVDV and lapack.GSVDQ respectively.
 // The matrices U, V and Q must be m×m, p×p and n×n respectively unless the
@@ -432,17 +463,24 @@ func Getrs(trans blas.Transpose, a blas64.General, b blas64.General, ipiv []int)
 //
 // alpha and beta must have length n or Ggsvd3 will panic. On exit, alpha and
 // beta contain the generalized singular value pairs of A and B
-//   alpha[0:k] = 1,
-//   beta[0:k]  = 0,
+//
+//	alpha[0:k] = 1,
+//	beta[0:k]  = 0,
+//
 // if m-k-l >= 0,
-//   alpha[k:k+l] = diag(C),
-//   beta[k:k+l]  = diag(S),
+//
+//	alpha[k:k+l] = diag(C),
+//	beta[k:k+l]  = diag(S),
+//
 // if m-k-l < 0,
-//   alpha[k:m]= C, alpha[m:k+l]= 0
-//   beta[k:m] = S, beta[m:k+l] = 1.
+//
+//	alpha[k:m]= C, alpha[m:k+l]= 0
+//	beta[k:m] = S, beta[m:k+l] = 1.
+//
 // if k+l < n,
-//   alpha[k+l:n] = 0 and
-//   beta[k+l:n]  = 0.
+//
+//	alpha[k+l:n] = 0 and
+//	beta[k+l:n]  = 0.
 //
 // On exit, iwork contains the permutation required to sort alpha descending.
 //
@@ -455,8 +493,10 @@ func Ggsvd3(jobU, jobV, jobQ lapack.GSVDJob, a, b blas64.General, alpha, beta []
 }
 
 // Gtsv solves one of the equations
-//  A * X = B   if trans == blas.NoTrans
-//  Aᵀ * X = B  if trans == blas.Trans or blas.ConjTrans
+//
+//	A * X = B   if trans == blas.NoTrans
+//	Aᵀ * X = B  if trans == blas.Trans or blas.ConjTrans
+//
 // where A is an n×n tridiagonal matrix. It uses Gaussian elimination with
 // partial pivoting.
 //
@@ -477,8 +517,10 @@ func Gtsv(trans blas.Transpose, a Tridiagonal, b blas64.General) (ok bool) {
 }
 
 // Lagtm performs one of the matrix-matrix operations
-//  C = alpha * A * B + beta * C   if trans == blas.NoTrans
-//  C = alpha * Aᵀ * B + beta * C  if trans == blas.Trans or blas.ConjTrans
+//
+//	C = alpha * A * B + beta * C   if trans == blas.NoTrans
+//	C = alpha * Aᵀ * B + beta * C  if trans == blas.Trans or blas.ConjTrans
+//
 // where A is an m×m tridiagonal matrix represented by its diagonals dl, d, du,
 // B and C are m×n dense matrices, and alpha and beta are scalars.
 //
@@ -490,10 +532,12 @@ func Lagtm(trans blas.Transpose, alpha float64, a Tridiagonal, b blas64.General,
 
 // Lange computes the matrix norm of the general m×n matrix A. The input norm
 // specifies the norm computed.
-//  lapack.MaxAbs: the maximum absolute value of an element.
-//  lapack.MaxColumnSum: the maximum column sum of the absolute values of the entries.
-//  lapack.MaxRowSum: the maximum row sum of the absolute values of the entries.
-//  lapack.Frobenius: the square root of the sum of the squares of the entries.
+//
+//	lapack.MaxAbs: the maximum absolute value of an element.
+//	lapack.MaxColumnSum: the maximum column sum of the absolute values of the entries.
+//	lapack.MaxRowSum: the maximum row sum of the absolute values of the entries.
+//	lapack.Frobenius: the square root of the sum of the squares of the entries.
+//
 // If norm == lapack.MaxColumnSum, work must be of length n, and this function will panic otherwise.
 // There are no restrictions on work for the other matrix norms.
 func Lange(norm lapack.MatrixNorm, a blas64.General, work []float64) float64 {
@@ -555,9 +599,12 @@ func Lantb(norm lapack.MatrixNorm, a blas64.TriangularBand, work []float64) floa
 // k[0],k[1],...,k[m-1] of the integers 0,...,m-1.
 //
 // If forward is true, a forward permutation is applied:
-//  X[k[i],0:n] is moved to X[i,0:n] for i=0,1,...,m-1.
+//
+//	X[k[i],0:n] is moved to X[i,0:n] for i=0,1,...,m-1.
+//
 // If forward is false, a backward permutation is applied:
-//  X[i,0:n] is moved to X[k[i],0:n] for i=0,1,...,m-1.
+//
+//	X[i,0:n] is moved to X[k[i],0:n] for i=0,1,...,m-1.
 //
 // k must have length m, otherwise Lapmr will panic.
 func Lapmr(forward bool, x blas64.General, k []int) {
@@ -569,11 +616,11 @@ func Lapmr(forward bool, x blas64.General, k []int) {
 //
 // If forward is true a forward permutation is performed:
 //
-//  X[0:m, k[j]] is moved to X[0:m, j] for j = 0, 1, ..., n-1.
+//	X[0:m, k[j]] is moved to X[0:m, j] for j = 0, 1, ..., n-1.
 //
 // otherwise a backward permutation is performed:
 //
-//  X[0:m, j] is moved to X[0:m, k[j]] for j = 0, 1, ..., n-1.
+//	X[0:m, j] is moved to X[0:m, k[j]] for j = 0, 1, ..., n-1.
 //
 // k must have length n, otherwise Lapmt will panic. k is zero-indexed.
 func Lapmt(forward bool, x blas64.General, k []int) {
@@ -582,10 +629,12 @@ func Lapmt(forward bool, x blas64.General, k []int) {
 
 // Ormlq multiplies the matrix C by the othogonal matrix Q defined by
 // A and tau. A and tau are as returned from Gelqf.
-//  C = Q * C   if side == blas.Left and trans == blas.NoTrans
-//  C = Qᵀ * C  if side == blas.Left and trans == blas.Trans
-//  C = C * Q   if side == blas.Right and trans == blas.NoTrans
-//  C = C * Qᵀ  if side == blas.Right and trans == blas.Trans
+//
+//	C = Q * C   if side == blas.Left and trans == blas.NoTrans
+//	C = Qᵀ * C  if side == blas.Left and trans == blas.Trans
+//	C = C * Q   if side == blas.Right and trans == blas.NoTrans
+//	C = C * Qᵀ  if side == blas.Right and trans == blas.Trans
+//
 // If side == blas.Left, A is a matrix of side k×m, and if side == blas.Right
 // A is of size k×n. This uses a blocked algorithm.
 //
@@ -603,12 +652,15 @@ func Ormlq(side blas.Side, trans blas.Transpose, a blas64.General, tau []float64
 }
 
 // Ormqr multiplies an m×n matrix C by an orthogonal matrix Q as
-//  C = Q * C   if side == blas.Left  and trans == blas.NoTrans,
-//  C = Qᵀ * C  if side == blas.Left  and trans == blas.Trans,
-//  C = C * Q   if side == blas.Right and trans == blas.NoTrans,
-//  C = C * Qᵀ  if side == blas.Right and trans == blas.Trans,
+//
+//	C = Q * C   if side == blas.Left  and trans == blas.NoTrans,
+//	C = Qᵀ * C  if side == blas.Left  and trans == blas.Trans,
+//	C = C * Q   if side == blas.Right and trans == blas.NoTrans,
+//	C = C * Qᵀ  if side == blas.Right and trans == blas.Trans,
+//
 // where Q is defined as the product of k elementary reflectors
-//  Q = H_0 * H_1 * ... * H_{k-1}.
+//
+//	Q = H_0 * H_1 * ... * H_{k-1}.
 //
 // If side == blas.Left, A is an m×k matrix and 0 <= k <= m.
 // If side == blas.Right, A is an n×k matrix and 0 <= k <= n.
@@ -666,8 +718,10 @@ func Syev(jobz lapack.EVJob, a blas64.Symmetric, w, work []float64, lwork int) (
 }
 
 // Tbtrs solves a triangular system of the form
-//  A * X = B   if trans == blas.NoTrans
-//  Aᵀ * X = B  if trans == blas.Trans or blas.ConjTrans
+//
+//	A * X = B   if trans == blas.NoTrans
+//	Aᵀ * X = B  if trans == blas.Trans or blas.ConjTrans
+//
 // where A is an n×n triangular band matrix, and B is an n×nrhs matrix.
 //
 // Tbtrs returns whether A is non-singular. If A is singular, no solutions X
@@ -706,22 +760,30 @@ func Trtrs(trans blas.Transpose, a blas64.Triangular, b blas64.General) (ok bool
 //
 // The right eigenvector v_j of A corresponding to an eigenvalue λ_j
 // is defined by
-//  A v_j = λ_j v_j,
+//
+//	A v_j = λ_j v_j,
+//
 // and the left eigenvector u_j corresponding to an eigenvalue λ_j is defined by
-//  u_jᴴ A = λ_j u_jᴴ,
+//
+//	u_jᴴ A = λ_j u_jᴴ,
+//
 // where u_jᴴ is the conjugate transpose of u_j.
 //
 // On return, A will be overwritten and the left and right eigenvectors will be
 // stored, respectively, in the columns of the n×n matrices VL and VR in the
 // same order as their eigenvalues. If the j-th eigenvalue is real, then
-//  u_j = VL[:,j],
-//  v_j = VR[:,j],
+//
+//	u_j = VL[:,j],
+//	v_j = VR[:,j],
+//
 // and if it is not real, then j and j+1 form a complex conjugate pair and the
 // eigenvectors can be recovered as
-//  u_j     = VL[:,j] + i*VL[:,j+1],
-//  u_{j+1} = VL[:,j] - i*VL[:,j+1],
-//  v_j     = VR[:,j] + i*VR[:,j+1],
-//  v_{j+1} = VR[:,j] - i*VR[:,j+1],
+//
+//	u_j     = VL[:,j] + i*VL[:,j+1],
+//	u_{j+1} = VL[:,j] - i*VL[:,j+1],
+//	v_j     = VR[:,j] + i*VR[:,j+1],
+//	v_{j+1} = VR[:,j] - i*VR[:,j+1],
+//
 // where i is the imaginary unit. The computed eigenvectors are normalized to
 // have Euclidean norm equal to 1 and largest component real.
 //

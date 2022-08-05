@@ -105,6 +105,7 @@ func Mul(x, y Number) Number {
 // Inv returns the hyperdual inverse of d.
 //
 // Special cases are:
+//
 //	Inv(±Inf) = ±0-0ϵ₁-0ϵ₂±0ϵ₁ϵ₂
 //	Inv(±0) = ±Inf-Infϵ₁-Infϵ₂±Infϵ₁ϵ₂
 func Inv(d Number) Number {

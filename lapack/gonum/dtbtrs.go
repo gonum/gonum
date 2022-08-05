@@ -10,8 +10,10 @@ import (
 )
 
 // Dtbtrs solves a triangular system of the form
-//  A * X = B   if trans == blas.NoTrans
-//  Aᵀ * X = B  if trans == blas.Trans or blas.ConjTrans
+//
+//	A * X = B   if trans == blas.NoTrans
+//	Aᵀ * X = B  if trans == blas.Trans or blas.ConjTrans
+//
 // where A is an n×n triangular band matrix with kd super- or subdiagonals, and
 // B is an n×nrhs matrix.
 //

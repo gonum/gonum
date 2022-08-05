@@ -20,7 +20,9 @@ import (
 // definite matrix V.
 //
 // The Wishart PDF is given by
-//  p(X) = [|X|^((ν-d-1)/2) * exp(-tr(V^-1 * X)/2)] / [2^(ν*d/2) * |V|^(ν/2) * Γ_d(ν/2)]
+//
+//	p(X) = [|X|^((ν-d-1)/2) * exp(-tr(V^-1 * X)/2)] / [2^(ν*d/2) * |V|^(ν/2) * Γ_d(ν/2)]
+//
 // where X is a d×d PSD matrix, ν > d-1, |·| denotes the determinant, tr is the
 // trace and Γ_d is the multivariate gamma function.
 //

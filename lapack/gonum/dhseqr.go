@@ -13,14 +13,17 @@ import (
 
 // Dhseqr computes the eigenvalues of an n×n Hessenberg matrix H and,
 // optionally, the matrices T and Z from the Schur decomposition
-//  H = Z T Zᵀ,
+//
+//	H = Z T Zᵀ,
+//
 // where T is an n×n upper quasi-triangular matrix (the Schur form), and Z is
 // the n×n orthogonal matrix of Schur vectors.
 //
 // Optionally Z may be postmultiplied into an input orthogonal matrix Q so that
 // this routine can give the Schur factorization of a matrix A which has been
 // reduced to the Hessenberg form H by the orthogonal matrix Q:
-//  A = Q H Qᵀ = (QZ) T (QZ)ᵀ.
+//
+//	A = Q H Qᵀ = (QZ) T (QZ)ᵀ.
 //
 // If job == lapack.EigenvaluesOnly, only the eigenvalues will be computed.
 // If job == lapack.EigenvaluesAndSchur, the eigenvalues and the Schur form T will
@@ -38,13 +41,16 @@ import (
 // ilo and ihi determine the block of H on which Dhseqr operates. It is assumed
 // that H is already upper triangular in rows and columns [0:ilo] and [ihi+1:n],
 // although it will be only checked that the block is isolated, that is,
-//  ilo == 0   or H[ilo,ilo-1] == 0,
-//  ihi == n-1 or H[ihi+1,ihi] == 0,
+//
+//	ilo == 0   or H[ilo,ilo-1] == 0,
+//	ihi == n-1 or H[ihi+1,ihi] == 0,
+//
 // and Dhseqr will panic otherwise. ilo and ihi are typically set by a previous
 // call to Dgebal, otherwise they should be set to 0 and n-1, respectively. It
 // must hold that
-//  0 <= ilo <= ihi < n     if n > 0,
-//  ilo == 0 and ihi == -1  if n == 0.
+//
+//	0 <= ilo <= ihi < n     if n > 0,
+//	ilo == 0 and ihi == -1  if n == 0.
 //
 // wr and wi must have length n.
 //
@@ -69,15 +75,22 @@ import (
 // contain the upper quasi-triangular matrix T from the Schur decomposition (the
 // Schur form). 2×2 diagonal blocks (corresponding to complex conjugate pairs of
 // eigenvalues) will be returned in standard form, with
-//  H[i,i] == H[i+1,i+1],
+//
+//	H[i,i] == H[i+1,i+1],
+//
 // and
-//  H[i+1,i]*H[i,i+1] < 0.
+//
+//	H[i+1,i]*H[i,i+1] < 0.
+//
 // The eigenvalues will be stored in wr and wi in the same order as on the
 // diagonal of the Schur form returned in H, with
-//  wr[i] = H[i,i],
+//
+//	wr[i] = H[i,i],
+//
 // and, if H[i:i+2,i:i+2] is a 2×2 diagonal block,
-//  wi[i]   = sqrt(-H[i+1,i]*H[i,i+1]),
-//  wi[i+1] = -wi[i].
+//
+//	wi[i]   = sqrt(-H[i+1,i]*H[i,i+1]),
+//	wi[i+1] = -wi[i].
 //
 // If unconverged == 0 and job == lapack.EigenvaluesOnly, the contents of h
 // on return is unspecified.
@@ -92,30 +105,37 @@ import (
 //
 // If unconverged > 0 and job == lapack.EigenvaluesAndSchur, then on
 // return
-//  (initial H) U = U (final H),   (*)
+//
+//	(initial H) U = U (final H),   (*)
+//
 // where U is an orthogonal matrix. The final H is upper Hessenberg and
 // H[unconverged:ihi+1,unconverged:ihi+1] is upper quasi-triangular.
 //
 // If unconverged > 0 and compz == lapack.SchurOrig, then on return
-//  (final Z) = (initial Z) U,
+//
+//	(final Z) = (initial Z) U,
+//
 // where U is the orthogonal matrix in (*) regardless of the value of job.
 //
 // If unconverged > 0 and compz == lapack.SchurHess, then on return
-//  (final Z) = U,
+//
+//	(final Z) = U,
+//
 // where U is the orthogonal matrix in (*) regardless of the value of job.
 //
 // References:
-//  [1] R. Byers. LAPACK 3.1 xHSEQR: Tuning and Implementation Notes on the
-//      Small Bulge Multi-Shift QR Algorithm with Aggressive Early Deflation.
-//      LAPACK Working Note 187 (2007)
-//      URL: http://www.netlib.org/lapack/lawnspdf/lawn187.pdf
-//  [2] K. Braman, R. Byers, R. Mathias. The Multishift QR Algorithm. Part I:
-//      Maintaining Well-Focused Shifts and Level 3 Performance. SIAM J. Matrix
-//      Anal. Appl. 23(4) (2002), pp. 929—947
-//      URL: http://dx.doi.org/10.1137/S0895479801384573
-//  [3] K. Braman, R. Byers, R. Mathias. The Multishift QR Algorithm. Part II:
-//      Aggressive Early Deflation. SIAM J. Matrix Anal. Appl. 23(4) (2002), pp. 948—973
-//      URL: http://dx.doi.org/10.1137/S0895479801384585
+//
+//	[1] R. Byers. LAPACK 3.1 xHSEQR: Tuning and Implementation Notes on the
+//	    Small Bulge Multi-Shift QR Algorithm with Aggressive Early Deflation.
+//	    LAPACK Working Note 187 (2007)
+//	    URL: http://www.netlib.org/lapack/lawnspdf/lawn187.pdf
+//	[2] K. Braman, R. Byers, R. Mathias. The Multishift QR Algorithm. Part I:
+//	    Maintaining Well-Focused Shifts and Level 3 Performance. SIAM J. Matrix
+//	    Anal. Appl. 23(4) (2002), pp. 929—947
+//	    URL: http://dx.doi.org/10.1137/S0895479801384573
+//	[3] K. Braman, R. Byers, R. Mathias. The Multishift QR Algorithm. Part II:
+//	    Aggressive Early Deflation. SIAM J. Matrix Anal. Appl. 23(4) (2002), pp. 948—973
+//	    URL: http://dx.doi.org/10.1137/S0895479801384585
 //
 // Dhseqr is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dhseqr(job lapack.SchurJob, compz lapack.SchurComp, n, ilo, ihi int, h []float64, ldh int, wr, wi []float64, z []float64, ldz int, work []float64, lwork int) (unconverged int) {

@@ -25,7 +25,8 @@ const (
 )
 
 // bhattacharyyaCoeff computes the Bhattacharyya Coefficient for probability distributions given by:
-//  \sum_i \sqrt{p_i q_i}
+//
+//	\sum_i \sqrt{p_i q_i}
 //
 // It is assumed that p and q have equal length.
 func bhattacharyyaCoeff(p, q []float64) float64 {
@@ -37,7 +38,8 @@ func bhattacharyyaCoeff(p, q []float64) float64 {
 }
 
 // Bhattacharyya computes the distance between the probability distributions p and q given by:
-//  -\ln ( \sum_i \sqrt{p_i q_i} )
+//
+//	-\ln ( \sum_i \sqrt{p_i q_i} )
 //
 // The lengths of p and q must be equal. It is assumed that p and q sum to 1.
 func Bhattacharyya(p, q []float64) float64 {
@@ -59,8 +61,8 @@ func Bhattacharyya(p, q []float64) float64 {
 // CDF will panic if the length of x is zero.
 //
 // CumulantKind behaviors:
-//  - Empirical: Returns the lowest fraction for which q is greater than or equal
-//  to that fraction of samples
+//   - Empirical: Returns the lowest fraction for which q is greater than or equal
+//     to that fraction of samples
 func CDF(q float64, c CumulantKind, x, weights []float64) float64 {
 	if weights != nil && len(x) != len(weights) {
 		panic("stat: slice length mismatch")
@@ -112,7 +114,8 @@ func CDF(q float64, c CumulantKind, x, weights []float64) float64 {
 
 // ChiSquare computes the chi-square distance between the observed frequencies 'obs' and
 // expected frequencies 'exp' given by:
-//  \sum_i (obs_i-exp_i)^2 / exp_i
+//
+//	\sum_i (obs_i-exp_i)^2 / exp_i
 //
 // The lengths of obs and exp must be equal.
 func ChiSquare(obs, exp []float64) float64 {
@@ -131,7 +134,9 @@ func ChiSquare(obs, exp []float64) float64 {
 }
 
 // CircularMean returns the circular mean of the dataset.
+//
 //	atan2(\sum_i w_i * sin(alpha_i), \sum_i w_i * cos(alpha_i))
+//
 // If weights is nil then all of the weights are 1. If weights is not nil, then
 // len(x) must equal len(weights).
 func CircularMean(x, weights []float64) float64 {
@@ -157,7 +162,9 @@ func CircularMean(x, weights []float64) float64 {
 
 // Correlation returns the weighted correlation between the samples of x and y
 // with the given means.
-//  sum_i {w_i (x_i - meanX) * (y_i - meanY)} / (stdX * stdY)
+//
+//	sum_i {w_i (x_i - meanX) * (y_i - meanY)} / (stdX * stdY)
+//
 // The lengths of x and y must be equal. If weights is nil then all of the
 // weights are 1. If weights is not nil, then len(x) must equal len(weights).
 func Correlation(x, y, weights []float64) float64 {
@@ -277,7 +284,9 @@ func Kendall(x, y, weights []float64) float64 {
 }
 
 // Covariance returns the weighted covariance between the samples of x and y.
-//  sum_i {w_i (x_i - meanX) * (y_i - meanY)} / (sum_j {w_j} - 1)
+//
+//	sum_i {w_i (x_i - meanX) * (y_i - meanY)} / (sum_j {w_j} - 1)
+//
 // The lengths of x and y must be equal. If weights is nil then all of the
 // weights are 1. If weights is not nil, then len(x) must equal len(weights).
 func Covariance(x, y, weights []float64) float64 {
@@ -353,7 +362,7 @@ func CrossEntropy(p, q []float64) float64 {
 
 // Entropy computes the Shannon entropy of a distribution or the distance between
 // two distributions. The natural logarithm is used.
-//  - sum_i (p_i * log_e(p_i))
+//   - sum_i (p_i * log_e(p_i))
 func Entropy(p []float64) float64 {
 	var e float64
 	for _, v := range p {
@@ -402,7 +411,9 @@ func kurtosisCorrection(n float64) (mul, offset float64) {
 }
 
 // GeometricMean returns the weighted geometric mean of the dataset
-//  \prod_i {x_i ^ w_i}
+//
+//	\prod_i {x_i ^ w_i}
+//
 // This only applies with positive x and positive weights. If weights is nil
 // then all of the weights are 1. If weights is not nil, then len(x) must equal
 // len(weights).
@@ -431,7 +442,9 @@ func GeometricMean(x, weights []float64) float64 {
 }
 
 // HarmonicMean returns the weighted harmonic mean of the dataset
-//  \sum_i {w_i} / ( sum_i {w_i / x_i} )
+//
+//	\sum_i {w_i} / ( sum_i {w_i / x_i} )
+//
 // This only applies with positive x and positive weights.
 // If weights is nil then all of the weights are 1. If weights is not nil, then
 // len(x) must equal len(weights).
@@ -463,7 +476,8 @@ func HarmonicMean(x, weights []float64) float64 {
 }
 
 // Hellinger computes the distance between the probability distributions p and q given by:
-//  \sqrt{ 1 - \sum_i \sqrt{p_i q_i} }
+//
+//	\sqrt{ 1 - \sum_i \sqrt{p_i q_i} }
 //
 // The lengths of p and q must be equal. It is assumed that p and q sum to 1.
 func Hellinger(p, q []float64) float64 {
@@ -480,11 +494,11 @@ func Hellinger(p, q []float64) float64 {
 // with bin creation.
 //
 // The following conditions on the inputs apply:
-//  - The count variable must either be nil or have length of one less than dividers.
-//  - The values in dividers must be sorted (use the sort package).
-//  - The x values must be sorted.
-//  - If weights is nil then all of the weights are 1.
-//  - If weights is not nil, then len(x) must equal len(weights).
+//   - The count variable must either be nil or have length of one less than dividers.
+//   - The values in dividers must be sorted (use the sort package).
+//   - The x values must be sorted.
+//   - If weights is nil then all of the weights are 1.
+//   - If weights is not nil, then len(x) must equal len(weights).
 func Histogram(count, dividers, x, weights []float64) []float64 {
 	if weights != nil && len(x) != len(weights) {
 		panic("stat: slice length mismatch")
@@ -560,8 +574,10 @@ func Histogram(count, dividers, x, weights []float64) []float64 {
 
 // JensenShannon computes the JensenShannon divergence between the distributions
 // p and q. The Jensen-Shannon divergence is defined as
-//  m = 0.5 * (p + q)
-//  JS(p, q) = 0.5 ( KL(p, m) + KL(q, m) )
+//
+//	m = 0.5 * (p + q)
+//	JS(p, q) = 0.5 ( KL(p, m) + KL(q, m) )
+//
 // Unlike Kullback-Leibler, the Jensen-Shannon distance is symmetric. The value
 // is between 0 and ln(2).
 func JensenShannon(p, q []float64) float64 {
@@ -592,8 +608,9 @@ func JensenShannon(p, q []float64) float64 {
 // len(y) must equal len(yWeights). Both x and y must be sorted.
 //
 // Special cases are:
-//  = 0 if len(x) == len(y) == 0
-//  = 1 if len(x) == 0, len(y) != 0 or len(x) != 0 and len(y) == 0
+//
+//	= 0 if len(x) == len(y) == 0
+//	= 1 if len(x) == 0, len(y) != 0 or len(x) != 0 and len(y) == 0
 func KolmogorovSmirnov(x, xWeights, y, yWeights []float64) float64 {
 	if xWeights != nil && len(x) != len(xWeights) {
 		panic("stat: slice length mismatch")
@@ -722,7 +739,9 @@ func updateKS(idx int, cdf, sum float64, values, weights []float64, isNil bool) 
 
 // KullbackLeibler computes the Kullback-Leibler distance between the
 // distributions p and q. The natural logarithm is used.
-//  sum_i(p_i * log(p_i / q_i))
+//
+//	sum_i(p_i * log(p_i / q_i))
+//
 // Note that the Kullback-Leibler distance is not symmetric;
 // KullbackLeibler(p,q) != KullbackLeibler(q,p)
 func KullbackLeibler(p, q []float64) float64 {
@@ -739,13 +758,17 @@ func KullbackLeibler(p, q []float64) float64 {
 }
 
 // LinearRegression computes the best-fit line
-//  y = alpha + beta*x
+//
+//	y = alpha + beta*x
+//
 // to the data in x and y with the given weights. If origin is true, the
 // regression is forced to pass through the origin.
 //
 // Specifically, LinearRegression computes the values of alpha and
 // beta such that the total residual
-//  \sum_i w[i]*(y[i] - alpha - beta*x[i])^2
+//
+//	\sum_i w[i]*(y[i] - alpha - beta*x[i])^2
+//
 // is minimized. If origin is true, then alpha is forced to be zero.
 //
 // The lengths of x and y must be equal. If weights is nil then all of the
@@ -783,9 +806,13 @@ func LinearRegression(x, y, weights []float64, origin bool) (alpha, beta float64
 }
 
 // RSquared returns the coefficient of determination defined as
-//  R^2 = 1 - \sum_i w[i]*(y[i] - alpha - beta*x[i])^2 / \sum_i w[i]*(y[i] - mean(y))^2
+//
+//	R^2 = 1 - \sum_i w[i]*(y[i] - alpha - beta*x[i])^2 / \sum_i w[i]*(y[i] - mean(y))^2
+//
 // for the line
-//  y = alpha + beta*x
+//
+//	y = alpha + beta*x
+//
 // and the data in x and y with the given weights.
 //
 // The lengths of x and y must be equal. If weights is nil then all of the
@@ -816,7 +843,9 @@ func RSquared(x, y, weights []float64, alpha, beta float64) float64 {
 }
 
 // RSquaredFrom returns the coefficient of determination defined as
-//  R^2 = 1 - \sum_i w[i]*(estimate[i] - value[i])^2 / \sum_i w[i]*(value[i] - mean(values))^2
+//
+//	R^2 = 1 - \sum_i w[i]*(estimate[i] - value[i])^2 / \sum_i w[i]*(value[i] - mean(values))^2
+//
 // and the data in estimates and values with the given weights.
 //
 // The lengths of estimates and values must be equal. If weights is nil then
@@ -846,9 +875,13 @@ func RSquaredFrom(estimates, values, weights []float64) float64 {
 }
 
 // RNoughtSquared returns the coefficient of determination defined as
-//  R₀^2 = \sum_i w[i]*(beta*x[i])^2 / \sum_i w[i]*y[i]^2
+//
+//	R₀^2 = \sum_i w[i]*(beta*x[i])^2 / \sum_i w[i]*y[i]^2
+//
 // for the line
-//  y = beta*x
+//
+//	y = beta*x
+//
 // and the data in x and y with the given weights. RNoughtSquared should
 // only be used for best-fit lines regressed through the origin.
 //
@@ -877,7 +910,9 @@ func RNoughtSquared(x, y, weights []float64, beta float64) float64 {
 }
 
 // Mean computes the weighted mean of the data set.
-//  sum_i {w_i * x_i} / sum_i {w_i}
+//
+//	sum_i {w_i * x_i} / sum_i {w_i}
+//
 // If weights is nil then all of the weights are 1. If weights is not nil, then
 // len(x) must equal len(weights).
 func Mean(x, weights []float64) float64 {
@@ -932,7 +967,9 @@ func Mode(x, weights []float64) (val float64, count float64) {
 }
 
 // BivariateMoment computes the weighted mixed moment between the samples x and y.
-//  E[(x - μ_x)^r*(y - μ_y)^s]
+//
+//	E[(x - μ_x)^r*(y - μ_y)^s]
+//
 // No degrees of freedom correction is done.
 // The lengths of x and y must be equal. If weights is nil then all of the
 // weights are 1. If weights is not nil, then len(x) must equal len(weights).
@@ -967,7 +1004,9 @@ func BivariateMoment(r, s float64, x, y, weights []float64) float64 {
 }
 
 // Moment computes the weighted n^th moment of the samples,
-//  E[(x - μ)^N]
+//
+//	E[(x - μ)^N]
+//
 // No degrees of freedom correction is done.
 // If weights is nil then all of the weights are 1. If weights is not nil, then
 // len(x) must equal len(weights).
@@ -995,7 +1034,9 @@ func Moment(moment float64, x, weights []float64) float64 {
 
 // MomentAbout computes the weighted n^th weighted moment of the samples about
 // the given mean \mu,
-//  E[(x - μ)^N]
+//
+//	E[(x - μ)^N]
+//
 // No degrees of freedom correction is done.
 // If weights is nil then all of the weights are 1. If weights is not nil, then
 // len(x) must equal len(weights).
@@ -1033,9 +1074,9 @@ func MomentAbout(moment float64, x []float64, mean float64, weights []float64) f
 // Quantile will panic if the length of x is zero.
 //
 // CumulantKind behaviors:
-//  - Empirical: Returns the lowest value q for which q is greater than or equal
-//  to the fraction p of samples
-//  - LinInterp: Returns the linearly interpolated value
+//   - Empirical: Returns the lowest value q for which q is greater than or equal
+//     to the fraction p of samples
+//   - LinInterp: Returns the linearly interpolated value
 func Quantile(p float64, c CumulantKind, x, weights []float64) float64 {
 	if !(p >= 0 && p <= 1) {
 		panic("stat: percentile out of bounds")
@@ -1246,13 +1287,16 @@ func StdErr(std, sampleSize float64) float64 {
 
 // StdScore returns the standard score (a.k.a. z-score, z-value) for the value x
 // with the given mean and standard deviation, i.e.
-//  (x - mean) / std
+//
+//	(x - mean) / std
 func StdScore(x, mean, std float64) float64 {
 	return (x - mean) / std
 }
 
 // Variance computes the unbiased weighted sample variance:
-//  \sum_i w_i (x_i - mean)^2 / (sum_i w_i - 1)
+//
+//	\sum_i w_i (x_i - mean)^2 / (sum_i w_i - 1)
+//
 // If weights is nil then all of the weights are 1. If weights is not nil, then
 // len(x) must equal len(weights).
 // When weights sum to 1 or less, a biased variance estimator should be used.
@@ -1262,8 +1306,10 @@ func Variance(x, weights []float64) float64 {
 }
 
 // MeanVariance computes the sample mean and unbiased variance, where the mean and variance are
-//  \sum_i w_i * x_i / (sum_i w_i)
-//  \sum_i w_i (x_i - mean)^2 / (sum_i w_i - 1)
+//
+//	\sum_i w_i * x_i / (sum_i w_i)
+//	\sum_i w_i (x_i - mean)^2 / (sum_i w_i - 1)
+//
 // respectively.
 // If weights is nil then all of the weights are 1. If weights is not nil, then
 // len(x) must equal len(weights).
@@ -1279,8 +1325,10 @@ func MeanVariance(x, weights []float64) (mean, variance float64) {
 
 // PopMeanVariance computes the sample mean and biased variance (also known as
 // "population variance"), where the mean and variance are
-//  \sum_i w_i * x_i / (sum_i w_i)
-//  \sum_i w_i (x_i - mean)^2 / (sum_i w_i)
+//
+//	\sum_i w_i * x_i / (sum_i w_i)
+//	\sum_i w_i (x_i - mean)^2 / (sum_i w_i)
+//
 // respectively.
 // If weights is nil then all of the weights are 1. If weights is not nil, then
 // len(x) must equal len(weights).
@@ -1308,7 +1356,9 @@ func PopStdDev(x, weights []float64) float64 {
 }
 
 // PopVariance computes the unbiased weighted sample variance:
-//  \sum_i w_i (x_i - mean)^2 / (sum_i w_i)
+//
+//	\sum_i w_i (x_i - mean)^2 / (sum_i w_i)
+//
 // If weights is nil then all of the weights are 1. If weights is not nil, then
 // len(x) must equal len(weights).
 func PopVariance(x, weights []float64) float64 {

@@ -13,7 +13,9 @@ import (
 
 // Hessian approximates the Hessian matrix of the multivariate function f at
 // the location x. That is
-//  H_{i,j} = ∂^2 f(x)/∂x_i ∂x_j
+//
+//	H_{i,j} = ∂^2 f(x)/∂x_i ∂x_j
+//
 // The resulting H will be stored in dst. Finite difference formula and other
 // options are specified by settings. If settings is nil, the Hessian will be
 // estimated using the Forward formula and a default step size.

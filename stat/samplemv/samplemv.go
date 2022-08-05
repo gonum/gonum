@@ -158,7 +158,9 @@ var ErrRejection = errors.New("rejection: acceptance ratio above 1")
 // Rejection sampling generates points from the target distribution by using
 // the proposal distribution. At each step of the algorithm, the proposed point
 // is accepted with probability
-//  p = target(x) / (proposal(x) * c)
+//
+//	p = target(x) / (proposal(x) * c)
+//
 // where target(x) is the probability of the point according to the target distribution
 // and proposal(x) is the probability according to the proposal distribution.
 // The constant c must be chosen such that target(x) < proposal(x) * c for all x.

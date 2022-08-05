@@ -11,7 +11,9 @@ import (
 
 // Dlabrd reduces the first NB rows and columns of a real general m×n matrix
 // A to upper or lower bidiagonal form by an orthogonal transformation
-//  Q**T * A * P
+//
+//	Q**T * A * P
+//
 // If m >= n, A is reduced to upper bidiagonal form and upon exit the elements
 // on and below the diagonal in the first nb columns represent the elementary
 // reflectors, and the elements above the diagonal in the first nb rows represent
@@ -22,29 +24,37 @@ import (
 // elements, and e are the off-diagonal elements.
 //
 // The matrices Q and P are products of elementary reflectors
-//  Q = H_0 * H_1 * ... * H_{nb-1}
-//  P = G_0 * G_1 * ... * G_{nb-1}
+//
+//	Q = H_0 * H_1 * ... * H_{nb-1}
+//	P = G_0 * G_1 * ... * G_{nb-1}
+//
 // where
-//  H_i = I - tauQ[i] * v_i * v_iᵀ
-//  G_i = I - tauP[i] * u_i * u_iᵀ
+//
+//	H_i = I - tauQ[i] * v_i * v_iᵀ
+//	G_i = I - tauP[i] * u_i * u_iᵀ
 //
 // As an example, on exit the entries of A when m = 6, n = 5, and nb = 2
-//  [ 1   1  u1  u1  u1]
-//  [v1   1   1  u2  u2]
-//  [v1  v2   a   a   a]
-//  [v1  v2   a   a   a]
-//  [v1  v2   a   a   a]
-//  [v1  v2   a   a   a]
+//
+//	[ 1   1  u1  u1  u1]
+//	[v1   1   1  u2  u2]
+//	[v1  v2   a   a   a]
+//	[v1  v2   a   a   a]
+//	[v1  v2   a   a   a]
+//	[v1  v2   a   a   a]
+//
 // and when m = 5, n = 6, and nb = 2
-//  [ 1  u1  u1  u1  u1  u1]
-//  [ 1   1  u2  u2  u2  u2]
-//  [v1   1   a   a   a   a]
-//  [v1  v2   a   a   a   a]
-//  [v1  v2   a   a   a   a]
+//
+//	[ 1  u1  u1  u1  u1  u1]
+//	[ 1   1  u2  u2  u2  u2]
+//	[v1   1   a   a   a   a]
+//	[v1  v2   a   a   a   a]
+//	[v1  v2   a   a   a   a]
 //
 // Dlabrd also returns the matrices X and Y which are used with U and V to
 // apply the transformation to the unreduced part of the matrix
-//  A := A - V*Yᵀ - X*Uᵀ
+//
+//	A := A - V*Yᵀ - X*Uᵀ
+//
 // and returns the matrices X and Y which are needed to apply the
 // transformation to the unreduced part of A.
 //

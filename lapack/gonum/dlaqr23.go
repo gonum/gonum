@@ -29,20 +29,28 @@ import (
 //
 // ktop and kbot determine a block [ktop:kbot+1,ktop:kbot+1] along the diagonal
 // of H. It must hold that
-//  0 <= ilo <= ihi < n     if n > 0,
-//  ilo == 0 and ihi == -1  if n == 0,
+//
+//	0 <= ilo <= ihi < n     if n > 0,
+//	ilo == 0 and ihi == -1  if n == 0,
+//
 // and the block must be isolated, that is, it must hold that
-//  ktop == 0   or H[ktop,ktop-1] == 0,
-//  kbot == n-1 or H[kbot+1,kbot] == 0,
+//
+//	ktop == 0   or H[ktop,ktop-1] == 0,
+//	kbot == n-1 or H[kbot+1,kbot] == 0,
+//
 // otherwise Dlaqr23 will panic.
 //
 // nw is the deflation window size. It must hold that
-//  0 <= nw <= kbot-ktop+1,
+//
+//	0 <= nw <= kbot-ktop+1,
+//
 // otherwise Dlaqr23 will panic.
 //
 // iloz and ihiz specify the rows of the n×n matrix Z to which transformations
 // will be applied if wantz is true. It must hold that
-//  0 <= iloz <= ktop,  and  kbot <= ihiz < n,
+//
+//	0 <= iloz <= ktop,  and  kbot <= ihiz < n,
+//
 // otherwise Dlaqr23 will panic.
 //
 // sr and si must have length kbot+1, otherwise Dlaqr23 will panic.
@@ -74,10 +82,10 @@ import (
 // stored respectively in sr[kbot-nd+1:kbot+1] and si[kbot-nd+1:kbot+1].
 //
 // References:
-//  [1] K. Braman, R. Byers, R. Mathias. The Multishift QR Algorithm. Part II:
-//      Aggressive Early Deflation. SIAM J. Matrix Anal. Appl 23(4) (2002), pp. 948—973
-//      URL: http://dx.doi.org/10.1137/S0895479801384585
 //
+//	[1] K. Braman, R. Byers, R. Mathias. The Multishift QR Algorithm. Part II:
+//	    Aggressive Early Deflation. SIAM J. Matrix Anal. Appl 23(4) (2002), pp. 948—973
+//	    URL: http://dx.doi.org/10.1137/S0895479801384585
 func (impl Implementation) Dlaqr23(wantt, wantz bool, n, ktop, kbot, nw int, h []float64, ldh int, iloz, ihiz int, z []float64, ldz int, sr, si []float64, v []float64, ldv int, nh int, t []float64, ldt int, nv int, wv []float64, ldwv int, work []float64, lwork int, recur int) (ns, nd int) {
 	switch {
 	case n < 0:

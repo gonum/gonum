@@ -10,12 +10,15 @@ import (
 )
 
 // Dormqr multiplies an m×n matrix C by an orthogonal matrix Q as
-//  C = Q * C   if side == blas.Left  and trans == blas.NoTrans,
-//  C = Qᵀ * C  if side == blas.Left  and trans == blas.Trans,
-//  C = C * Q   if side == blas.Right and trans == blas.NoTrans,
-//  C = C * Qᵀ  if side == blas.Right and trans == blas.Trans,
+//
+//	C = Q * C   if side == blas.Left  and trans == blas.NoTrans,
+//	C = Qᵀ * C  if side == blas.Left  and trans == blas.Trans,
+//	C = C * Q   if side == blas.Right and trans == blas.NoTrans,
+//	C = C * Qᵀ  if side == blas.Right and trans == blas.Trans,
+//
 // where Q is defined as the product of k elementary reflectors
-//  Q = H_0 * H_1 * ... * H_{k-1}.
+//
+//	Q = H_0 * H_1 * ... * H_{k-1}.
 //
 // If side == blas.Left, A is an m×k matrix and 0 <= k <= m.
 // If side == blas.Right, A is an n×k matrix and 0 <= k <= n.

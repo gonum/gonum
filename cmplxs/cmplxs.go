@@ -117,7 +117,9 @@ func Complex(dst []complex128, real, imag []float64) []complex128 {
 
 // CumProd finds the cumulative product of elements of s and store it in
 // place into dst so that
-//  dst[i] = s[i] * s[i-1] * s[i-2] * ... * s[0]
+//
+//	dst[i] = s[i] * s[i-1] * s[i-2] * ... * s[0]
+//
 // It panics if the argument lengths do not match.
 func CumProd(dst, s []complex128) []complex128 {
 	if len(dst) != len(s) {
@@ -131,7 +133,9 @@ func CumProd(dst, s []complex128) []complex128 {
 
 // CumSum finds the cumulative sum of elements of s and stores it in place
 // into dst so that
-//  dst[i] = s[i] + s[i-1] + s[i-2] + ... + s[0]
+//
+//	dst[i] = s[i] + s[i-1] + s[i-2] + ... + s[0]
+//
 // It panics if the argument lengths do not match.
 func CumSum(dst, s []complex128) []complex128 {
 	if len(dst) != len(s) {
@@ -348,7 +352,7 @@ func Imag(dst []float64, src []complex128) []float64 {
 // will return all zeros if l or u is zero.
 // Also returns the mutated slice dst, so that it can be used in range, like:
 //
-//     for i, x := range LogSpan(dst, l, u) { ... }
+//	for i, x := range LogSpan(dst, l, u) { ... }
 func LogSpan(dst []complex128, l, u complex128) []complex128 {
 	Span(dst, cmplx.Log(l), cmplx.Log(u))
 	for i := range dst {
@@ -627,7 +631,7 @@ func ScaleTo(dst []complex128, c complex128, s []complex128) []complex128 {
 // Span also returns the mutated slice dst, so that it can be used in range expressions,
 // like:
 //
-//     for i, x := range Span(dst, l, u) { ... }
+//	for i, x := range Span(dst, l, u) { ... }
 func Span(dst []complex128, l, u complex128) []complex128 {
 	n := len(dst)
 	if n < 2 {

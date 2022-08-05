@@ -11,10 +11,13 @@ import (
 )
 
 // Solve solves the linear least squares problem
-//  minimize over x |b - A*x|_2
+//
+//	minimize over x |b - A*x|_2
+//
 // where A is an m×n matrix A, b is a given m element vector and x is n element
 // solution vector. Solve assumes that A has full rank, that is
-//  rank(A) = min(m,n)
+//
+//	rank(A) = min(m,n)
 //
 // If m >= n, Solve finds the unique least squares solution of an overdetermined
 // system.
@@ -115,10 +118,13 @@ func (m *Dense) Solve(a, b Matrix) error {
 }
 
 // SolveVec solves the linear least squares problem
-//  minimize over x |b - A*x|_2
+//
+//	minimize over x |b - A*x|_2
+//
 // where A is an m×n matrix A, b is a given m element vector and x is n element
 // solution vector. Solve assumes that A has full rank, that is
-//  rank(A) = min(m,n)
+//
+//	rank(A) = min(m,n)
 //
 // If m >= n, Solve finds the unique least squares solution of an overdetermined
 // system.

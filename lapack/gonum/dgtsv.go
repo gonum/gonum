@@ -7,7 +7,9 @@ package gonum
 import "math"
 
 // Dgtsv solves the equation
-//  A * X = B
+//
+//	A * X = B
+//
 // where A is an n×n tridiagonal matrix. It uses Gaussian elimination with
 // partial pivoting. The equation Aᵀ * X = B may be solved by swapping the
 // arguments for du and dl.

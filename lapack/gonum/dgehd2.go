@@ -11,9 +11,13 @@ import "gonum.org/v1/gonum/blas"
 //
 // The matrix Q is represented as a product of (ihi-ilo) elementary
 // reflectors
-//  Q = H_{ilo} H_{ilo+1} ... H_{ihi-1}.
+//
+//	Q = H_{ilo} H_{ilo+1} ... H_{ihi-1}.
+//
 // Each H_i has the form
-//  H_i = I - tau[i] * v * vᵀ
+//
+//	H_i = I - tau[i] * v * vᵀ
+//
 // where v is a real vector with v[0:i+1] = 0, v[i+1] = 1 and v[ihi+1:n] = 0.
 // v[i+2:ihi+1] is stored on exit in A[i+2:ihi+1,i].
 //
@@ -26,21 +30,25 @@ import "gonum.org/v1/gonum/blas"
 // The contents of A are illustrated by the following example, with n = 7, ilo =
 // 1 and ihi = 5.
 // On entry,
-//  [ a   a   a   a   a   a   a ]
-//  [     a   a   a   a   a   a ]
-//  [     a   a   a   a   a   a ]
-//  [     a   a   a   a   a   a ]
-//  [     a   a   a   a   a   a ]
-//  [     a   a   a   a   a   a ]
-//  [                         a ]
+//
+//	[ a   a   a   a   a   a   a ]
+//	[     a   a   a   a   a   a ]
+//	[     a   a   a   a   a   a ]
+//	[     a   a   a   a   a   a ]
+//	[     a   a   a   a   a   a ]
+//	[     a   a   a   a   a   a ]
+//	[                         a ]
+//
 // on return,
-//  [ a   a   h   h   h   h   a ]
-//  [     a   h   h   h   h   a ]
-//  [     h   h   h   h   h   h ]
-//  [     v1  h   h   h   h   h ]
-//  [     v1  v2  h   h   h   h ]
-//  [     v1  v2  v3  h   h   h ]
-//  [                         a ]
+//
+//	[ a   a   h   h   h   h   a ]
+//	[     a   h   h   h   h   a ]
+//	[     h   h   h   h   h   h ]
+//	[     v1  h   h   h   h   h ]
+//	[     v1  v2  h   h   h   h ]
+//	[     v1  v2  v3  h   h   h ]
+//	[                         a ]
+//
 // where a denotes an element of the original matrix A, h denotes a
 // modified element of the upper Hessenberg matrix H, and vi denotes an
 // element of the vector defining H_i.

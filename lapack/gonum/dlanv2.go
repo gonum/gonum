@@ -7,8 +7,10 @@ package gonum
 import "math"
 
 // Dlanv2 computes the Schur factorization of a real 2×2 matrix:
-//  [ a b ] = [ cs -sn ] * [ aa bb ] * [ cs sn ]
-//  [ c d ]   [ sn  cs ]   [ cc dd ] * [-sn cs ]
+//
+//	[ a b ] = [ cs -sn ] * [ aa bb ] * [ cs sn ]
+//	[ c d ]   [ sn  cs ]   [ cc dd ] * [-sn cs ]
+//
 // If cc is zero, aa and dd are real eigenvalues of the matrix. Otherwise it
 // holds that aa = dd and bb*cc < 0, and aa ± sqrt(bb*cc) are complex conjugate
 // eigenvalues. The real and imaginary parts of the eigenvalues are returned in

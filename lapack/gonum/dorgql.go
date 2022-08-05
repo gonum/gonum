@@ -11,10 +11,13 @@ import (
 
 // Dorgql generates the m×n matrix Q with orthonormal columns defined as the
 // last n columns of a product of k elementary reflectors of order m
-//  Q = H_{k-1} * ... * H_1 * H_0.
+//
+//	Q = H_{k-1} * ... * H_1 * H_0.
 //
 // It must hold that
-//  0 <= k <= n <= m,
+//
+//	0 <= k <= n <= m,
+//
 // and Dorgql will panic otherwise.
 //
 // On entry, the (n-k+i)-th column of A must contain the vector which defines

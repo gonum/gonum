@@ -12,7 +12,9 @@ import (
 // CrossLaplacian computes a Laplacian-like quantity for a function of two vectors
 // at the locations x and y.
 // It computes
-//  ∇_y · ∇_x f(x,y) = \sum_i ∂^2 f(x,y)/∂x_i ∂y_i
+//
+//	∇_y · ∇_x f(x,y) = \sum_i ∂^2 f(x,y)/∂x_i ∂y_i
+//
 // The two input vector lengths must be the same.
 //
 // Finite difference formula and other options are specified by settings. If

@@ -21,7 +21,8 @@ const minNormalFloat64 = 0x1p-1022
 
 // EqualWithinRel returns true when the difference between a and b
 // is not greater than tol times the greater absolute value of a and b,
-//  abs(a-b) <= tol * max(abs(a), abs(b)).
+//
+//	abs(a-b) <= tol * max(abs(a), abs(b)).
 func EqualWithinRel(a, b, tol float64) bool {
 	if a == b {
 		return true
@@ -105,9 +106,10 @@ func ParseWithNA(s, missing string) (value, weight float64, err error) {
 // Round returns the half away from zero rounded value of x with prec precision.
 //
 // Special cases are:
-// 	Round(±0) = +0
-// 	Round(±Inf) = ±Inf
-// 	Round(NaN) = NaN
+//
+//	Round(±0) = +0
+//	Round(±Inf) = ±Inf
+//	Round(NaN) = NaN
 func Round(x float64, prec int) float64 {
 	if x == 0 {
 		// Make sure zero is returned
@@ -135,9 +137,10 @@ func Round(x float64, prec int) float64 {
 // RoundEven returns the half even rounded value of x with prec precision.
 //
 // Special cases are:
-// 	RoundEven(±0) = +0
-// 	RoundEven(±Inf) = ±Inf
-// 	RoundEven(NaN) = NaN
+//
+//	RoundEven(±0) = +0
+//	RoundEven(±Inf) = ±Inf
+//	RoundEven(NaN) = NaN
 func RoundEven(x float64, prec int) float64 {
 	if x == 0 {
 		// Make sure zero is returned

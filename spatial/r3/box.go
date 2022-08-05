@@ -45,11 +45,12 @@ func (a Box) Center() Vec {
 // for X and Y values and maximum Z value.
 //
 // Edges for the box can be constructed with the following indices:
-//  edges := [12][2]int{
-//   {0, 1}, {1, 2}, {2, 3}, {3, 0},
-//   {4, 5}, {5, 6}, {6, 7}, {7, 4},
-//   {0, 4}, {1, 5}, {2, 6}, {3, 7},
-//  }
+//
+//	edges := [12][2]int{
+//	 {0, 1}, {1, 2}, {2, 3}, {3, 0},
+//	 {4, 5}, {5, 6}, {6, 7}, {7, 4},
+//	 {0, 4}, {1, 5}, {2, 6}, {3, 7},
+//	}
 func (a Box) Vertices() []Vec {
 	return []Vec{
 		0: a.Min,

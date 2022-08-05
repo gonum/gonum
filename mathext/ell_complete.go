@@ -10,7 +10,7 @@ import (
 
 // CompleteK computes the complete elliptic integral of the 1st kind, 0≤m≤1. It returns math.NaN() if m is not in [0,1].
 //
-//  K(m) = \int_{0}^{π/2} 1/{\sqrt{1-m{\sin^2θ}}} dθ
+//	K(m) = \int_{0}^{π/2} 1/{\sqrt{1-m{\sin^2θ}}} dθ
 func CompleteK(m float64) float64 {
 	// Reference:
 	// Toshio Fukushima, Precise and fast computation of complete elliptic integrals
@@ -100,7 +100,7 @@ func CompleteK(m float64) float64 {
 
 // CompleteE computes the complete elliptic integral of the 2nd kind, 0≤m≤1. It returns math.NaN() if m is not in [0,1].
 //
-//  E(m) = \int_{0}^{π/2} {\sqrt{1-m{\sin^2θ}}} dθ
+//	E(m) = \int_{0}^{π/2} {\sqrt{1-m{\sin^2θ}}} dθ
 func CompleteE(m float64) float64 {
 	// Reference:
 	// Toshio Fukushima, Precise and fast computation of complete elliptic integrals
@@ -183,7 +183,7 @@ func CompleteE(m float64) float64 {
 
 // CompleteB computes an associate complete elliptic integral of the 2nd kind, 0≤m≤1. It returns math.NaN() if m is not in [0,1].
 //
-//  B(m) = \int_{0}^{π/2} {\cos^2θ} / {\sqrt{1-m{\sin^2θ}}} dθ
+//	B(m) = \int_{0}^{π/2} {\cos^2θ} / {\sqrt{1-m{\sin^2θ}}} dθ
 func CompleteB(m float64) float64 {
 	// Reference:
 	// Toshio Fukushima, Precise and fast computation of complete elliptic integrals
@@ -266,7 +266,7 @@ func CompleteB(m float64) float64 {
 
 // CompleteD computes an associate complete elliptic integral of the 2nd kind, 0≤m≤1. It returns math.NaN() if m is not in [0,1].
 //
-//  D(m) = \int_{0}^{π/2} {\sin^2θ} / {\sqrt{1-m{\sin^2θ}}} dθ
+//	D(m) = \int_{0}^{π/2} {\sin^2θ} / {\sqrt{1-m{\sin^2θ}}} dθ
 func CompleteD(m float64) float64 {
 	// Reference:
 	// Toshio Fukushima, Precise and fast computation of complete elliptic integrals

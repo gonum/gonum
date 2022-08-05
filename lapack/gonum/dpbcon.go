@@ -14,11 +14,14 @@ import (
 // Dpbcon returns an estimate of the reciprocal of the condition number (in the
 // 1-norm) of an n×n symmetric positive definite band matrix using the Cholesky
 // factorization
-//  A = Uᵀ*U  if uplo == blas.Upper
-//  A = L*Lᵀ  if uplo == blas.Lower
+//
+//	A = Uᵀ*U  if uplo == blas.Upper
+//	A = L*Lᵀ  if uplo == blas.Lower
+//
 // computed by Dpbtrf. The estimate is obtained for norm(inv(A)), and the
 // reciprocal of the condition number is computed as
-//  rcond = 1 / (anorm * norm(inv(A))).
+//
+//	rcond = 1 / (anorm * norm(inv(A))).
 //
 // The length of work must be at least 3*n and the length of iwork must be at
 // least n.

@@ -7,7 +7,9 @@ package gonum
 import "gonum.org/v1/gonum/lapack"
 
 // Dtrexc reorders the real Schur factorization of a n×n real matrix
-//  A = Q*T*Qᵀ
+//
+//	A = Q*T*Qᵀ
+//
 // so that the diagonal block of T with row index ifst is moved to row ilst.
 //
 // On entry, T must be in Schur canonical form, that is, block upper triangular
@@ -34,7 +36,9 @@ import "gonum.org/v1/gonum/lapack"
 // is true, ilstOut may differ from ilst by +1 or -1.
 //
 // It must hold that
-//  0 <= ifst < n, and  0 <= ilst < n,
+//
+//	0 <= ifst < n, and  0 <= ilst < n,
+//
 // otherwise Dtrexc will panic.
 //
 // If ok is false, two adjacent blocks were too close to swap because the

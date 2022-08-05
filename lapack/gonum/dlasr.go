@@ -17,40 +17,48 @@ import (
 // The exact value of P depends on the value of pivot, but in all cases P is
 // implicitly represented by a series of 2×2 rotation matrices. The entries of
 // rotation matrix k are defined by s[k] and c[k]
-//  R(k) = [ c[k] s[k]]
-//         [-s[k] s[k]]
+//
+//	R(k) = [ c[k] s[k]]
+//	       [-s[k] s[k]]
+//
 // If direct == lapack.Forward, the rotation matrices are applied as
 // P = P(z-1) * ... * P(2) * P(1), while if direct == lapack.Backward they are
 // applied as P = P(1) * P(2) * ... * P(n).
 //
 // pivot defines the mapping of the elements in R(k) to P(k).
 // If pivot == lapack.Variable, the rotation is performed for the (k, k+1) plane.
-//  P(k) = [1                    ]
-//         [    ...              ]
-//         [     1               ]
-//         [       c[k] s[k]     ]
-//         [      -s[k] c[k]     ]
-//         [                 1   ]
-//         [                ...  ]
-//         [                    1]
+//
+//	P(k) = [1                    ]
+//	       [    ...              ]
+//	       [     1               ]
+//	       [       c[k] s[k]     ]
+//	       [      -s[k] c[k]     ]
+//	       [                 1   ]
+//	       [                ...  ]
+//	       [                    1]
+//
 // if pivot == lapack.Top, the rotation is performed for the (1, k+1) plane,
-//  P(k) = [c[k]        s[k]     ]
-//         [    1                ]
-//         [     ...             ]
-//         [         1           ]
-//         [-s[k]       c[k]     ]
-//         [                 1   ]
-//         [                ...  ]
-//         [                    1]
+//
+//	P(k) = [c[k]        s[k]     ]
+//	       [    1                ]
+//	       [     ...             ]
+//	       [         1           ]
+//	       [-s[k]       c[k]     ]
+//	       [                 1   ]
+//	       [                ...  ]
+//	       [                    1]
+//
 // and if pivot == lapack.Bottom, the rotation is performed for the (k, z) plane.
-//  P(k) = [1                    ]
-//         [  ...                ]
-//         [      1              ]
-//         [        c[k]     s[k]]
-//         [           1         ]
-//         [            ...      ]
-//         [              1      ]
-//         [       -s[k]     c[k]]
+//
+//	P(k) = [1                    ]
+//	       [  ...                ]
+//	       [      1              ]
+//	       [        c[k]     s[k]]
+//	       [           1         ]
+//	       [            ...      ]
+//	       [              1      ]
+//	       [       -s[k]     c[k]]
+//
 // s and c have length m - 1 if side == blas.Left, and n - 1 if side == blas.Right.
 //
 // Dlasr is an internal routine. It is exported for testing purposes.

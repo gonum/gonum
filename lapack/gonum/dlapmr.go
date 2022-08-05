@@ -10,9 +10,12 @@ import "gonum.org/v1/gonum/blas/blas64"
 // k[0],k[1],...,k[m-1] of the integers 0,...,m-1.
 //
 // If forward is true, a forward permutation is applied:
-//  X[k[i],0:n] is moved to X[i,0:n] for i=0,1,...,m-1.
+//
+//	X[k[i],0:n] is moved to X[i,0:n] for i=0,1,...,m-1.
+//
 // If forward is false, a backward permutation is applied:
-//  X[i,0:n] is moved to X[k[i],0:n] for i=0,1,...,m-1.
+//
+//	X[i,0:n] is moved to X[k[i],0:n] for i=0,1,...,m-1.
 //
 // k must have length m, otherwise Dlapmr will panic.
 func (impl Implementation) Dlapmr(forward bool, m, n int, x []float64, ldx int, k []int) {

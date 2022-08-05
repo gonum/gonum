@@ -13,18 +13,18 @@ import (
 
 // Dggsvp3 computes orthogonal matrices U, V and Q such that
 //
-//                  n-k-l  k    l
-//  Uᵀ*A*Q =     k [ 0    A12  A13 ] if m-k-l >= 0;
-//               l [ 0     0   A23 ]
-//           m-k-l [ 0     0    0  ]
+//	                n-k-l  k    l
+//	Uᵀ*A*Q =     k [ 0    A12  A13 ] if m-k-l >= 0;
+//	             l [ 0     0   A23 ]
+//	         m-k-l [ 0     0    0  ]
 //
-//                  n-k-l  k    l
-//  Uᵀ*A*Q =     k [ 0    A12  A13 ] if m-k-l < 0;
-//             m-k [ 0     0   A23 ]
+//	                n-k-l  k    l
+//	Uᵀ*A*Q =     k [ 0    A12  A13 ] if m-k-l < 0;
+//	           m-k [ 0     0   A23 ]
 //
-//                  n-k-l  k    l
-//  Vᵀ*B*Q =     l [ 0     0   B13 ]
-//             p-l [ 0     0    0  ]
+//	                n-k-l  k    l
+//	Vᵀ*B*Q =     l [ 0     0   B13 ]
+//	           p-l [ 0     0    0  ]
 //
 // where the k×k matrix A12 and l×l matrix B13 are non-singular
 // upper triangular. A23 is l×l upper triangular if m-k-l >= 0,
@@ -35,8 +35,10 @@ import (
 //
 // jobU, jobV and jobQ are options for computing the orthogonal matrices. The behavior
 // is as follows
-//  jobU == lapack.GSVDU        Compute orthogonal matrix U
-//  jobU == lapack.GSVDNone     Do not compute orthogonal matrix.
+//
+//	jobU == lapack.GSVDU        Compute orthogonal matrix U
+//	jobU == lapack.GSVDNone     Do not compute orthogonal matrix.
+//
 // The behavior is the same for jobV and jobQ with the exception that instead of
 // lapack.GSVDU these accept lapack.GSVDV and lapack.GSVDQ respectively.
 // The matrices U, V and Q must be m×m, p×p and n×n respectively unless the
@@ -45,8 +47,10 @@ import (
 // tola and tolb are the convergence criteria for the Jacobi-Kogbetliantz
 // iteration procedure. Generally, they are the same as used in the preprocessing
 // step, for example,
-//  tola = max(m, n)*norm(A)*eps,
-//  tolb = max(p, n)*norm(B)*eps.
+//
+//	tola = max(m, n)*norm(A)*eps,
+//	tolb = max(p, n)*norm(B)*eps.
+//
 // Where eps is the machine epsilon.
 //
 // iwork must have length n, work must have length at least max(1, lwork), and

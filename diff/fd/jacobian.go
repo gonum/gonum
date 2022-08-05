@@ -28,13 +28,16 @@ type JacobianSettings struct {
 // The Jacobian matrix J is the matrix of all first-order partial derivatives of f.
 // If f maps an n-dimensional vector x to an m-dimensional vector y = f(x), J is
 // an m×n matrix whose elements are given as
-//  J_{i,j} = ∂f_i/∂x_j,
+//
+//	J_{i,j} = ∂f_i/∂x_j,
+//
 // or expanded out
-//      [ ∂f_1/∂x_1 ... ∂f_1/∂x_n ]
-//      [     .  .          .     ]
-//  J = [     .      .      .     ]
-//      [     .          .  .     ]
-//      [ ∂f_m/∂x_1 ... ∂f_m/∂x_n ]
+//
+//	    [ ∂f_1/∂x_1 ... ∂f_1/∂x_n ]
+//	    [     .  .          .     ]
+//	J = [     .      .      .     ]
+//	    [     .          .  .     ]
+//	    [ ∂f_m/∂x_1 ... ∂f_m/∂x_n ]
 //
 // dst must be non-nil, the number of its columns must equal the length of x, and
 // the derivative order of the formula must be 1, otherwise Jacobian will panic.

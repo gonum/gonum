@@ -15,7 +15,9 @@ import (
 // Dbdsqr performs a singular value decomposition of a real n×n bidiagonal matrix.
 //
 // The SVD of the bidiagonal matrix B is
-//  B = Q * S * Pᵀ
+//
+//	B = Q * S * Pᵀ
+//
 // where S is a diagonal matrix of singular values, Q is an orthogonal matrix of
 // left singular vectors, and P is an orthogonal matrix of right singular vectors.
 //
@@ -25,7 +27,8 @@ import (
 //
 // Frequently Dbdsqr is used in conjunction with Dgebrd which reduces a general
 // matrix A into bidiagonal form. In this case, the SVD of A is
-//  A = (U * Q) * S * (Pᵀ * VT)
+//
+//	A = (U * Q) * S * (Pᵀ * VT)
 //
 // This routine may also compute Qᵀ * C.
 //

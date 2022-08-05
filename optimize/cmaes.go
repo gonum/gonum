@@ -23,10 +23,12 @@ var _ Method = (*CmaEsChol)(nil)
 
 // CmaEsChol implements the covariance matrix adaptation evolution strategy (CMA-ES)
 // based on the Cholesky decomposition. The full algorithm is described in
-//  Krause, Oswin, Dídac Rodríguez Arbonès, and Christian Igel. "CMA-ES with
-//  optimal covariance update and storage complexity." Advances in Neural
-//  Information Processing Systems. 2016.
-//  https://papers.nips.cc/paper/6457-cma-es-with-optimal-covariance-update-and-storage-complexity.pdf
+//
+//	Krause, Oswin, Dídac Rodríguez Arbonès, and Christian Igel. "CMA-ES with
+//	optimal covariance update and storage complexity." Advances in Neural
+//	Information Processing Systems. 2016.
+//	https://papers.nips.cc/paper/6457-cma-es-with-optimal-covariance-update-and-storage-complexity.pdf
+//
 // CMA-ES is a global optimization method that progressively adapts a population
 // of samples. CMA-ES combines techniques from local optimization with global
 // optimization. Specifically, the CMA-ES algorithm uses an initial multivariate
@@ -50,8 +52,9 @@ var _ Method = (*CmaEsChol)(nil)
 // CMA-ES algorithm, but the covariance update equation is not identical.
 //
 // For more information about the CMA-ES algorithm, see
-//  https://en.wikipedia.org/wiki/CMA-ES
-//  https://arxiv.org/pdf/1604.00772.pdf
+//
+//	https://en.wikipedia.org/wiki/CMA-ES
+//	https://arxiv.org/pdf/1604.00772.pdf
 type CmaEsChol struct {
 	// InitStepSize sets the initial size of the covariance matrix adaptation.
 	// If InitStepSize is 0, a default value of 0.5 is used. InitStepSize cannot

@@ -16,7 +16,8 @@ import (
 // with support over the positive real numbers.
 //
 // The gamma distribution has density function
-//  β^α / Γ(α) x^(α-1)e^(-βx)
+//
+//	β^α / Γ(α) x^(α-1)e^(-βx)
 //
 // For more information, see https://en.wikipedia.org/wiki/Gamma_distribution
 type Gamma struct {

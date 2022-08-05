@@ -16,7 +16,9 @@ import (
 // with support over the positive real numbers.
 //
 // The F-distribution has density function
-//  sqrt(((d1*x)^d1) * d2^d2 / ((d1*x+d2)^(d1+d2))) / (x * B(d1/2,d2/2))
+//
+//	sqrt(((d1*x)^d1) * d2^d2 / ((d1*x+d2)^(d1+d2))) / (x * B(d1/2,d2/2))
+//
 // where B is the beta function.
 //
 // For more information, see https://en.wikipedia.org/wiki/F-distribution

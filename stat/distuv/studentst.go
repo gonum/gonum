@@ -18,7 +18,8 @@ const logPi = 1.1447298858494001741 // http://oeis.org/A053510
 // over the real numbers.
 //
 // The Student's T distribution has density function
-//  Γ((ν+1)/2) / (sqrt(νπ) Γ(ν/2) σ) (1 + 1/ν * ((x-μ)/σ)^2)^(-(ν+1)/2)
+//
+//	Γ((ν+1)/2) / (sqrt(νπ) Γ(ν/2) σ) (1 + 1/ν * ((x-μ)/σ)^2)^(-(ν+1)/2)
 //
 // The Student's T distribution approaches the normal distribution as ν → ∞.
 //

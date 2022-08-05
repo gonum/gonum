@@ -13,10 +13,12 @@ import (
 )
 
 // Dgemm performs one of the matrix-matrix operations
-//  C = alpha * A * B + beta * C
-//  C = alpha * Aᵀ * B + beta * C
-//  C = alpha * A * Bᵀ + beta * C
-//  C = alpha * Aᵀ * Bᵀ + beta * C
+//
+//	C = alpha * A * B + beta * C
+//	C = alpha * Aᵀ * B + beta * C
+//	C = alpha * A * Bᵀ + beta * C
+//	C = alpha * Aᵀ * Bᵀ + beta * C
+//
 // where A is an m×k or k×m dense matrix, B is an n×k or k×n dense matrix, C is
 // an m×n matrix, and alpha and beta are scalars. tA and tB specify whether A or
 // B are transposed.

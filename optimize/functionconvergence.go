@@ -34,9 +34,13 @@ func (NeverTerminate) Converged(loc *Location) Status {
 // over the last iterations. A FunctionConvergence status is returned if
 // there is no significant decrease for FunctionConverge.Iterations. A
 // significant decrease is considered if
-//   f < f_best
+//
+//	f < f_best
+//
 // and
-//  f_best - f > FunctionConverge.Relative * maxabs(f, f_best) + FunctionConverge.Absolute
+//
+//	f_best - f > FunctionConverge.Relative * maxabs(f, f_best) + FunctionConverge.Absolute
+//
 // If the decrease is significant, then the iteration counter is reset and
 // f_best is updated.
 //

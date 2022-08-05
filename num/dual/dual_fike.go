@@ -33,6 +33,7 @@ import "math"
 // PowReal returns x**p, the base-x exponential of p.
 //
 // Special cases are (in order):
+//
 //	PowReal(NaN+xϵ, ±0) = 1+NaNϵ for any x
 //	PowReal(x, ±0) = 1 for any x
 //	PowReal(1+xϵ, y) = 1+xyϵ for any y
@@ -83,6 +84,7 @@ func Pow(d, p Number) Number {
 // Sqrt returns the square root of d.
 //
 // Special cases are:
+//
 //	Sqrt(+Inf) = +Inf
 //	Sqrt(±0) = (±0+Infϵ)
 //	Sqrt(x < 0) = NaN
@@ -106,8 +108,10 @@ func Sqrt(d Number) Number {
 // Exp returns e**q, the base-e exponential of d.
 //
 // Special cases are:
+//
 //	Exp(+Inf) = +Inf
 //	Exp(NaN) = NaN
+//
 // Very large values overflow to 0 or +Inf.
 // Very small values underflow to 1.
 func Exp(d Number) Number {
@@ -121,6 +125,7 @@ func Exp(d Number) Number {
 // Log returns the natural logarithm of d.
 //
 // Special cases are:
+//
 //	Log(+Inf) = (+Inf+0ϵ)
 //	Log(0) = (-Inf±Infϵ)
 //	Log(x < 0) = NaN
@@ -153,6 +158,7 @@ func Log(d Number) Number {
 // Sin returns the sine of d.
 //
 // Special cases are:
+//
 //	Sin(±0) = (±0+Nϵ)
 //	Sin(±Inf) = NaN
 //	Sin(NaN) = NaN
@@ -174,6 +180,7 @@ func Sin(d Number) Number {
 // Cos returns the cosine of d.
 //
 // Special cases are:
+//
 //	Cos(±Inf) = NaN
 //	Cos(NaN) = NaN
 func Cos(d Number) Number {
@@ -188,6 +195,7 @@ func Cos(d Number) Number {
 // Tan returns the tangent of d.
 //
 // Special cases are:
+//
 //	Tan(±0) = (±0+Nϵ)
 //	Tan(±Inf) = NaN
 //	Tan(NaN) = NaN
@@ -209,6 +217,7 @@ func Tan(d Number) Number {
 // Asin returns the inverse sine of d.
 //
 // Special cases are:
+//
 //	Asin(±0) = (±0+Nϵ)
 //	Asin(±1) = (±Inf+Infϵ)
 //	Asin(x) = NaN if x < -1 or x > 1
@@ -241,6 +250,7 @@ func Asin(d Number) Number {
 // Acos returns the inverse cosine of d.
 //
 // Special cases are:
+//
 //	Acos(-1) = (Pi-Infϵ)
 //	Acos(1) = (0-Infϵ)
 //	Acos(x) = NaN if x < -1 or x > 1
@@ -268,6 +278,7 @@ func Acos(d Number) Number {
 // Atan returns the inverse tangent of d.
 //
 // Special cases are:
+//
 //	Atan(±0) = (±0+Nϵ)
 //	Atan(±Inf) = (±Pi/2+0ϵ)
 func Atan(d Number) Number {

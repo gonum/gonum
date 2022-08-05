@@ -17,13 +17,15 @@ import (
 // Dlatm1 computes the entries of dst as specified by mode, cond and rsign.
 //
 // mode describes how dst will be computed:
-//  |mode| == 1: dst[0] = 1 and dst[1:n] = 1/cond
-//  |mode| == 2: dst[:n-1] = 1/cond and dst[n-1] = 1
-//  |mode| == 3: dst[i] = cond^{-i/(n-1)}, i=0,...,n-1
-//  |mode| == 4: dst[i] = 1 - i*(1-1/cond)/(n-1)
-//  |mode| == 5: dst[i] = random number in the range (1/cond, 1) such that
-//                    their logarithms are uniformly distributed
-//  |mode| == 6: dst[i] = random number from the distribution given by dist
+//
+//	|mode| == 1: dst[0] = 1 and dst[1:n] = 1/cond
+//	|mode| == 2: dst[:n-1] = 1/cond and dst[n-1] = 1
+//	|mode| == 3: dst[i] = cond^{-i/(n-1)}, i=0,...,n-1
+//	|mode| == 4: dst[i] = 1 - i*(1-1/cond)/(n-1)
+//	|mode| == 5: dst[i] = random number in the range (1/cond, 1) such that
+//	                  their logarithms are uniformly distributed
+//	|mode| == 6: dst[i] = random number from the distribution given by dist
+//
 // If mode is negative, the order of the elements of dst will be reversed.
 // For other values of mode Dlatm1 will panic.
 //
@@ -31,9 +33,11 @@ import (
 // or -1 with probability 0.5
 //
 // dist specifies the type of distribution to be used when mode == ±6:
-//  dist == 1: Uniform[0,1)
-//  dist == 2: Uniform[-1,1)
-//  dist == 3: Normal(0,1)
+//
+//	dist == 1: Uniform[0,1)
+//	dist == 2: Uniform[-1,1)
+//	dist == 3: Normal(0,1)
+//
 // For other values of dist Dlatm1 will panic.
 //
 // rnd is used as a source of random numbers.
@@ -124,12 +128,14 @@ func Dlatm1(dst []float64, mode int, cond float64, rsign bool, dist int, rnd *ra
 
 // Dlagsy generates an n×n symmetric matrix A, by pre- and post- multiplying a
 // real diagonal matrix D with a random orthogonal matrix:
-//  A = U * D * Uᵀ.
+//
+//	A = U * D * Uᵀ.
 //
 // work must have length at least 2*n, otherwise Dlagsy will panic.
 //
 // The parameter k is unused but it must satisfy
-//  0 <= k <= n-1.
+//
+//	0 <= k <= n-1.
 func Dlagsy(n, k int, d []float64, a []float64, lda int, rnd *rand.Rand, work []float64) {
 	checkMatrix(n, n, a, lda)
 	if k < 0 || max(0, n-1) < k {
@@ -193,14 +199,16 @@ func Dlagsy(n, k int, d []float64, a []float64, lda int, rnd *rand.Rand, work []
 
 // Dlagge generates a real general m×n matrix A, by pre- and post-multiplying
 // a real diagonal matrix D with random orthogonal matrices:
-//  A = U*D*V.
+//
+//	A = U*D*V.
 //
 // d must have length min(m,n), and work must have length m+n, otherwise Dlagge
 // will panic.
 //
 // The parameters ku and kl are unused but they must satisfy
-//  0 <= kl <= m-1,
-//  0 <= ku <= n-1.
+//
+//	0 <= kl <= m-1,
+//	0 <= ku <= n-1.
 func Dlagge(m, n, kl, ku int, d []float64, a []float64, lda int, rnd *rand.Rand, work []float64) {
 	checkMatrix(m, n, a, lda)
 	if kl < 0 || max(0, m-1) < kl {
@@ -287,9 +295,11 @@ func Dlagge(m, n, kl, ku int, d []float64, a []float64, lda int, rnd *rand.Rand,
 
 // dlarnv fills dst with random numbers from a uniform or normal distribution
 // specified by dist:
-//  dist=1: uniform(0,1),
-//  dist=2: uniform(-1,1),
-//  dist=3: normal(0,1).
+//
+//	dist=1: uniform(0,1),
+//	dist=2: uniform(-1,1),
+//	dist=3: normal(0,1).
+//
 // For other values of dist dlarnv will panic.
 func dlarnv(dst []float64, dist int, rnd *rand.Rand) {
 	switch dist {

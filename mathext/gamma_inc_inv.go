@@ -24,7 +24,9 @@ func gammaIncReg(x float64, params []float64) float64 {
 
 // gammaIncRegInv is the inverse of the regularized incomplete Gamma integral. That is, it
 // returns x such that:
-//  Igam(a, x) = y
+//
+//	Igam(a, x) = y
+//
 // The input argument a must be positive and y must be between 0 and 1
 // inclusive or gammaIncRegInv will panic. gammaIncRegInv should return a
 // positive number, but can return NaN if there is a failure to converge.

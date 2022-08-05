@@ -19,9 +19,11 @@ import "gonum.org/v1/gonum/blas"
 //
 // The ith elementary reflector can be explicitly constructed by first extracting
 // the
-//  v[j] = 0           j < i
-//  v[j] = 1           j == i
-//  v[j] = a[j*lda+i]  j > i
+//
+//	v[j] = 0           j < i
+//	v[j] = 1           j == i
+//	v[j] = a[j*lda+i]  j > i
+//
 // and computing H_i = I - tau[i] * v * vᵀ.
 //
 // The orthonormal matrix Q can be constructed from a product of these elementary

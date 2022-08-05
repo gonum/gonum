@@ -14,8 +14,10 @@ import (
 // Dpbtf2 computes the Cholesky factorization of a symmetric positive banded
 // matrix ab. The matrix ab is n×n with kd diagonal bands. The Cholesky
 // factorization computed is
-//  A = Uᵀ * U  if ul == blas.Upper
-//  A = L * Lᵀ  if ul == blas.Lower
+//
+//	A = Uᵀ * U  if ul == blas.Upper
+//	A = L * Lᵀ  if ul == blas.Lower
+//
 // ul also specifies the storage of ab. If ul == blas.Upper, then
 // ab is stored as an upper-triangular banded matrix with kd super-diagonals,
 // and if ul == blas.Lower, ab is stored as a lower-triangular banded matrix
@@ -27,21 +29,21 @@ import (
 // The resulting Cholesky decomposition is stored in the same elements as the
 // input band matrix (a11 becomes u11 or l11, etc.).
 //
-//  ul = blas.Upper
-//  a11 a12 a13
-//  a22 a23 a24
-//  a33 a34 a35
-//  a44 a45 a46
-//  a55 a56  *
-//  a66  *   *
+//	ul = blas.Upper
+//	a11 a12 a13
+//	a22 a23 a24
+//	a33 a34 a35
+//	a44 a45 a46
+//	a55 a56  *
+//	a66  *   *
 //
-//  ul = blas.Lower
-//   *   *  a11
-//   *  a21 a22
-//  a31 a32 a33
-//  a42 a43 a44
-//  a53 a54 a55
-//  a64 a65 a66
+//	ul = blas.Lower
+//	 *   *  a11
+//	 *  a21 a22
+//	a31 a32 a33
+//	a42 a43 a44
+//	a53 a54 a55
+//	a64 a65 a66
 //
 // Dpbtf2 is the unblocked version of the algorithm, see Dpbtrf for the blocked
 // version.

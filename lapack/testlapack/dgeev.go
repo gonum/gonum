@@ -729,7 +729,9 @@ func dgeevTestForAntisymRandom(n int, rnd *rand.Rand) dgeevTest {
 }
 
 // residualRightEV returns the residual
-//  | A E - E W|_1 / ( |A|_1 |E|_1 )
+//
+//	| A E - E W|_1 / ( |A|_1 |E|_1 )
+//
 // where the columns of E contain the right eigenvectors of A and W is a block diagonal matrix with
 // a 1×1 block for each real eigenvalue and a 2×2 block for each complex conjugate pair.
 func residualRightEV(a, e blas64.General, wr, wi []float64) float64 {
@@ -783,7 +785,9 @@ func residualRightEV(a, e blas64.General, wr, wi []float64) float64 {
 }
 
 // residualLeftEV returns the residual
-//  | Aᵀ E - E Wᵀ|_1 / ( |Aᵀ|_1 |E|_1 )
+//
+//	| Aᵀ E - E Wᵀ|_1 / ( |Aᵀ|_1 |E|_1 )
+//
 // where the columns of E contain the left eigenvectors of A and W is a block diagonal matrix with
 // a 1×1 block for each real eigenvalue and a 2×2 block for each complex conjugate pair.
 func residualLeftEV(a, e blas64.General, wr, wi []float64) float64 {

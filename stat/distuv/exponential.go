@@ -138,7 +138,9 @@ func (e Exponential) Rand() float64 {
 // Score returns the score function with respect to the parameters of the
 // distribution at the input location x. The score function is the derivative
 // of the log-likelihood at x with respect to the parameters
-//  (∂/∂θ) log(p(x;θ))
+//
+//	(∂/∂θ) log(p(x;θ))
+//
 // If deriv is non-nil, len(deriv) must equal the number of parameters otherwise
 // Score will panic, and the derivative is stored in-place into deriv. If deriv
 // is nil a new slice will be allocated and returned.
@@ -148,7 +150,8 @@ func (e Exponential) Rand() float64 {
 // For more information, see https://en.wikipedia.org/wiki/Score_%28statistics%29.
 //
 // Special cases:
-//  Score(0) = [NaN]
+//
+//	Score(0) = [NaN]
 func (e Exponential) Score(deriv []float64, x float64) []float64 {
 	if deriv == nil {
 		deriv = make([]float64, e.NumParameters())
@@ -171,9 +174,12 @@ func (e Exponential) Score(deriv []float64, x float64) []float64 {
 // ScoreInput returns the score function with respect to the input of the
 // distribution at the input location specified by x. The score function is the
 // derivative of the log-likelihood
-//  (d/dx) log(p(x)) .
+//
+//	(d/dx) log(p(x)) .
+//
 // Special cases:
-//  ScoreInput(0) = NaN
+//
+//	ScoreInput(0) = NaN
 func (e Exponential) ScoreInput(x float64) float64 {
 	if x > 0 {
 		return -e.Rate

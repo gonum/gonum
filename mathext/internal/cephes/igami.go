@@ -13,7 +13,9 @@ import "math"
 
 // IgamI computes the inverse of the incomplete Gamma function. That is, it
 // returns the x such that:
-//  IgamC(a, x) = p
+//
+//	IgamC(a, x) = p
+//
 // The input argument a must be positive and p must be between 0 and 1
 // inclusive or IgamI will panic. IgamI should return a positive number, but
 // can return 0 even with non-zero y due to underflow.

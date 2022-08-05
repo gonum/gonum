@@ -15,8 +15,10 @@ import (
 // symmetric positive semidefinite matrix A.
 //
 // The factorization has the form
-//  Pᵀ * A * P = Uᵀ * U ,  if uplo = blas.Upper,
-//  Pᵀ * A * P = L  * Lᵀ,  if uplo = blas.Lower,
+//
+//	Pᵀ * A * P = Uᵀ * U ,  if uplo = blas.Upper,
+//	Pᵀ * A * P = L  * Lᵀ,  if uplo = blas.Lower,
+//
 // where U is an upper triangular matrix, L is lower triangular, and P is a
 // permutation matrix.
 //

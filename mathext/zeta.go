@@ -7,7 +7,9 @@ package mathext
 import "gonum.org/v1/gonum/mathext/internal/cephes"
 
 // Zeta computes the Riemann zeta function of two arguments.
-//  Zeta(x,q) = \sum_{k=0}^{\infty} (k+q)^{-x}
+//
+//	Zeta(x,q) = \sum_{k=0}^{\infty} (k+q)^{-x}
+//
 // Note that Zeta returns +Inf if x is 1 and will panic if x is less than 1,
 // q is either zero or a negative integer, or q is negative and x is not an
 // integer.

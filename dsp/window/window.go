@@ -16,7 +16,9 @@ import "math"
 // limited length sequence of values without any modification.
 //
 // The sequence weights are
-//  w[k] = 1,
+//
+//	w[k] = 1,
+//
 // for k=0,1,...,N-1 where N is the length of the window.
 //
 // Spectral leakage parameters: ΔF_0 = 2, ΔF_0.5 = 0.89, K = 1, ɣ_max = -13, β = 0.
@@ -31,7 +33,9 @@ func Rectangular(seq []float64) []float64 {
 // Sine window is a high-resolution window.
 //
 // The sequence weights are
-//  w[k] = sin(π*k/(N-1)),
+//
+//	w[k] = sin(π*k/(N-1)),
+//
 // for k=0,1,...,N-1 where N is the length of the window.
 //
 // Spectral leakage parameters: ΔF_0 = 3, ΔF_0.5 = 1.23, K = 1.5, ɣ_max = -23, β = -3.93.
@@ -50,7 +54,9 @@ func Sine(seq []float64) []float64 {
 // The Lanczos window is a high-resolution window.
 //
 // The sequence weights are
-//  w[k] = sinc(2*k/(N-1) - 1),
+//
+//	w[k] = sinc(2*k/(N-1) - 1),
+//
 // for k=0,1,...,N-1 where N is the length of the window.
 //
 // Spectral leakage parameters: ΔF_0 = 3.24, ΔF_0.5 = 1.3, K = 1.62, ɣ_max = -26.4, β = -4.6.
@@ -75,7 +81,9 @@ func Lanczos(seq []float64) []float64 {
 // The Triangular window is a high-resolution window.
 //
 // The sequence weights are
-//  w[k] = 1 - |k/A -1|, A=(N-1)/2,
+//
+//	w[k] = 1 - |k/A -1|, A=(N-1)/2,
+//
 // for k=0,1,...,N-1 where N is the length of the window.
 //
 // Spectral leakage parameters: ΔF_0 = 4, ΔF_0.5 = 1.33, K = 2, ɣ_max = -26.5, β = -6.
@@ -94,7 +102,9 @@ func Triangular(seq []float64) []float64 {
 // The Hann window is a high-resolution window.
 //
 // The sequence weights are
-//  w[k] = 0.5*(1 - cos(2*π*k/(N-1))),
+//
+//	w[k] = 0.5*(1 - cos(2*π*k/(N-1))),
+//
 // for k=0,1,...,N-1 where N is the length of the window.
 //
 // Spectral leakage parameters: ΔF_0 = 4, ΔF_0.5 = 1.5, K = 2, ɣ_max = -31.5, β = -6.
@@ -114,7 +124,9 @@ func Hann(seq []float64) []float64 {
 // The Bartlett-Hann window is a high-resolution window.
 //
 // The sequence weights are
-//  w[k] = 0.62 - 0.48*|k/(N-1)-0.5| - 0.38*cos(2*π*k/(N-1)),
+//
+//	w[k] = 0.62 - 0.48*|k/(N-1)-0.5| - 0.38*cos(2*π*k/(N-1)),
+//
 // for k=0,1,...,N-1 where N is the length of the window.
 //
 // Spectral leakage parameters: ΔF_0 = 4, ΔF_0.5 = 1.45, K = 2, ɣ_max = -35.9, β = -6.
@@ -140,7 +152,9 @@ func BartlettHann(seq []float64) []float64 {
 // the highest ɣ_max.
 //
 // The sequence weights are
-//  w[k] = 25/46 - 21/46 * cos(2*π*k/(N-1)),
+//
+//	w[k] = 25/46 - 21/46 * cos(2*π*k/(N-1)),
+//
 // for k=0,1,...,N-1 where N is the length of the window.
 //
 // Spectral leakage parameters: ΔF_0 = 4, ΔF_0.5 = 1.33, K = 2, ɣ_max = -42, β = -5.37.
@@ -165,7 +179,9 @@ func Hamming(seq []float64) []float64 {
 // The Blackman window is a high-resolution window.
 //
 // The sequence weights are
-//  w[k] = 0.42 - 0.5*cos(2*π*k/(N-1)) + 0.08*cos(4*π*k/(N-1)),
+//
+//	w[k] = 0.42 - 0.5*cos(2*π*k/(N-1)) + 0.08*cos(4*π*k/(N-1)),
+//
 // for k=0,1,...,N-1 where N is the length of the window.
 //
 // Spectral leakage parameters: ΔF_0 = 6, ΔF_0.5 = 1.7, K = 3, ɣ_max = -58, β = -7.54.
@@ -192,8 +208,10 @@ func Blackman(seq []float64) []float64 {
 // The Blackman-Harris window is a low-resolution window.
 //
 // The sequence weights are
-//  w[k] = 0.35875 - 0.48829*cos(2*π*k/(N-1)) +
-//         0.14128*cos(4*π*k/(N-1)) - 0.01168*cos(6*π*k/(N-1)),
+//
+//	w[k] = 0.35875 - 0.48829*cos(2*π*k/(N-1)) +
+//	       0.14128*cos(4*π*k/(N-1)) - 0.01168*cos(6*π*k/(N-1)),
+//
 // for k=0,1,...,N-1 where N is the length of the window.
 //
 // Spectral leakage parameters:  ΔF_0 = 8, ΔF_0.5 = 1.97, K = 4, ɣ_max = -92, β = -8.91.
@@ -220,8 +238,10 @@ func BlackmanHarris(seq []float64) []float64 {
 // The Nuttall window is a low-resolution window.
 //
 // The sequence weights are
-//  w[k] = 0.355768 - 0.487396*cos(2*π*k/(N-1)) + 0.144232*cos(4*π*k/(N-1)) -
-//         0.012604*cos(6*π*k/(N-1)),
+//
+//	w[k] = 0.355768 - 0.487396*cos(2*π*k/(N-1)) + 0.144232*cos(4*π*k/(N-1)) -
+//	       0.012604*cos(6*π*k/(N-1)),
+//
 // for k=0,1,...,N-1 where N is the length of the window.
 //
 // Spectral leakage parameters: ΔF_0 = 8, ΔF_0.5 = 1.98, K = 4, ɣ_max = -93, β = -9.
@@ -249,8 +269,10 @@ func Nuttall(seq []float64) []float64 {
 // The Blackman-Nuttall window is a low-resolution window.
 //
 // The sequence weights are
-//  w[k] = 0.3635819 - 0.4891775*cos(2*π*k/(N-1)) + 0.1365995*cos(4*π*k/(N-1)) -
-//         0.0106411*cos(6*π*k/(N-1)),
+//
+//	w[k] = 0.3635819 - 0.4891775*cos(2*π*k/(N-1)) + 0.1365995*cos(4*π*k/(N-1)) -
+//	       0.0106411*cos(6*π*k/(N-1)),
+//
 // for k=0,1,...,N-1 where N is the length of the window.
 //
 // Spectral leakage parameters: ΔF_0 = 8, ΔF_0.5 = 1.94, K = 4, ɣ_max = -98, β = -8.8.
@@ -278,9 +300,11 @@ func BlackmanNuttall(seq []float64) []float64 {
 // The Flat Top window is a low-resolution window.
 //
 // The sequence weights are
-//  w[k] = 0.21557895 - 0.41663158*cos(2*π*k/(N-1)) +
-//         0.277263158*cos(4*π*k/(N-1)) - 0.083578947*cos(6*π*k/(N-1)) +
-//         0.006947368*cos(4*π*k/(N-1)),
+//
+//	w[k] = 0.21557895 - 0.41663158*cos(2*π*k/(N-1)) +
+//	       0.277263158*cos(4*π*k/(N-1)) - 0.083578947*cos(6*π*k/(N-1)) +
+//	       0.006947368*cos(4*π*k/(N-1)),
+//
 // for k=0,1,...,N-1 where N is the length of the window.
 //
 // Spectral leakage parameters: ΔF_0 = 10, ΔF_0.5 = 3.72, K = 5, ɣ_max = -93.0, β = -13.34.

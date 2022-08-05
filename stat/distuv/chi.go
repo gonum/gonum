@@ -16,7 +16,8 @@ import (
 // with support on the positive numbers.
 //
 // The density function is given by
-//  1/(2^{k/2-1} * Γ(k/2)) * x^{k - 1} * e^{-x^2/2}
+//
+//	1/(2^{k/2-1} * Γ(k/2)) * x^{k - 1} * e^{-x^2/2}
 //
 // For more information, see https://en.wikipedia.org/wiki/Chi_distribution.
 type Chi struct {

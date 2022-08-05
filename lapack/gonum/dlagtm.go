@@ -7,8 +7,10 @@ package gonum
 import "gonum.org/v1/gonum/blas"
 
 // Dlagtm performs one of the matrix-matrix operations
-//  C = alpha * A * B + beta * C   if trans == blas.NoTrans
-//  C = alpha * Aᵀ * B + beta * C  if trans == blas.Trans or blas.ConjTrans
+//
+//	C = alpha * A * B + beta * C   if trans == blas.NoTrans
+//	C = alpha * Aᵀ * B + beta * C  if trans == blas.Trans or blas.ConjTrans
+//
 // where A is an m×m tridiagonal matrix represented by its diagonals dl, d, du,
 // B and C are m×n dense matrices, and alpha and beta are scalars.
 func (impl Implementation) Dlagtm(trans blas.Transpose, m, n int, alpha float64, dl, d, du []float64, b []float64, ldb int, beta float64, c []float64, ldc int) {

@@ -12,12 +12,16 @@ import (
 )
 
 // Dlatdf computes a contribution to the reciprocal Dif-estimate by solving
-//  Z * x = h - f
+//
+//	Z * x = h - f
+//
 // and choosing the vector h such that the norm of x is as large as possible.
 //
 // The n×n matrix Z is represented by its LU factorization as computed by Dgetc2
 // and has the form
-//  Z = P * L * U * Q
+//
+//	Z = P * L * U * Q
+//
 // where P and Q are permutation matrices, L is lower triangular with unit
 // diagonal elements and U is upper triangular.
 //

@@ -25,8 +25,10 @@ var (
 // Newton iteratively forms a quadratic model to the objective function f and
 // tries to minimize this approximate model. It generates a sequence of
 // locations x_k by means of
-//  solve H_k d_k = -∇f_k for d_k,
-//  x_{k+1} = x_k + α_k d_k,
+//
+//	solve H_k d_k = -∇f_k for d_k,
+//	x_{k+1} = x_k + α_k d_k,
+//
 // where H_k is the Hessian matrix of f at x_k and α_k is a step size found by
 // a line search.
 //

@@ -22,7 +22,7 @@ func IsNaN(x complex64) bool {
 	return false
 }
 
-// NaN returns a complex ``not-a-number'' value.
+// NaN returns a complex “not-a-number” value.
 func NaN() complex64 {
 	nan := math.NaN()
 	return complex(nan, nan)

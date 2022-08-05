@@ -9,7 +9,7 @@
 // when performing a Fourier transform on a signal of limited length.
 // See https://en.wikipedia.org/wiki/Window_function for more details.
 //
-// Spectral leakage parameters
+// # Spectral leakage parameters
 //
 // Application of window functions to an input will result in changes
 // to the frequency content of the signal in an effect called spectral
@@ -23,7 +23,8 @@
 // constant component of the spectrum resulting from use of the window
 // compared to that produced using the rectangular window, expressed in
 // a logarithmic scale.
-//  β_w = 20 log10(A_w / A_rect) dB
+//
+//	β_w = 20 log10(A_w / A_rect) dB
 //
 // The ΔF_0 parameter describes the normalized width of the main lobe of
 // the frequency spectrum at zero amplitude.
@@ -34,7 +35,9 @@
 // The K parameter describes the relative width of the main lobe of the
 // frequency spectrum produced by the window compared with the rectangular
 // window. The rectangular window has the lowest ΔF_0 at a value of 2.
-//  K_w = ΔF_0_w/ΔF_0_rect.
+//
+//	K_w = ΔF_0_w/ΔF_0_rect.
+//
 // The value of K divides windows into high resolution windows (K≤3) and
 // low resolution windows (K>3).
 //

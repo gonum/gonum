@@ -123,7 +123,9 @@ func corrToCov(c *mat.SymDense, sigma []float64) {
 }
 
 // Mahalanobis computes the Mahalanobis distance
-//  D = sqrt((x-y)ᵀ * Σ^-1 * (x-y))
+//
+//	D = sqrt((x-y)ᵀ * Σ^-1 * (x-y))
+//
 // between the column vectors x and y given the cholesky decomposition of Σ.
 // Mahalanobis returns NaN if the linear solve fails.
 //

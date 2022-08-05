@@ -33,12 +33,12 @@ func (gsvd *HOGSVD) succFact() bool {
 // of the n input r_i×c column tall matrices in m. HOGSV extends the GSVD case from 2 to n
 // input matrices.
 //
-//  M_0 = U_0 * Σ_0 * Vᵀ
-//  M_1 = U_1 * Σ_1 * Vᵀ
-//  .
-//  .
-//  .
-//  M_{n-1} = U_{n-1} * Σ_{n-1} * Vᵀ
+//	M_0 = U_0 * Σ_0 * Vᵀ
+//	M_1 = U_1 * Σ_1 * Vᵀ
+//	.
+//	.
+//	.
+//	M_{n-1} = U_{n-1} * Σ_{n-1} * Vᵀ
 //
 // where U_i are r_i×c matrices of singular vectors, Σ are c×c matrices singular values, and V
 // is a c×c matrix of singular vectors.

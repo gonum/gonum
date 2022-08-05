@@ -636,11 +636,11 @@ var (
 //
 // An ID is one of the following:
 //
-// 1. Any string of alphabetic ([a-zA-Z\200-\377]) characters, underscores ('_')
-//    or digits ([0-9]), not beginning with a digit;
-// 2. a numeral [-]?(.[0-9]+ | [0-9]+(.[0-9]*)? );
-// 3. any double-quoted string ("...") possibly containing escaped quotes (\");
-// 4. an HTML string (<...>).
+//  1. Any string of alphabetic ([a-zA-Z\200-\377]) characters, underscores ('_')
+//     or digits ([0-9]), not beginning with a digit;
+//  2. a numeral [-]?(.[0-9]+ | [0-9]+(.[0-9]*)? );
+//  3. any double-quoted string ("...") possibly containing escaped quotes (\");
+//  4. an HTML string (<...>).
 func isID(s string) bool {
 	// 1. an identifier.
 	if reIdent.MatchString(s) {

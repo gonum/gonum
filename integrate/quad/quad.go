@@ -12,7 +12,8 @@ import (
 // FixedLocationer computes a set of quadrature locations and weights and stores
 // them in-place into x and weight respectively. The number of points generated is equal to
 // the len(x). The weights and locations should be chosen such that
-//  int_min^max f(x) dx ≈ \sum_i w_i f(x_i)
+//
+//	int_min^max f(x) dx ≈ \sum_i w_i f(x_i)
 type FixedLocationer interface {
 	FixedLocations(x, weight []float64, min, max float64)
 }
@@ -26,7 +27,9 @@ type FixedLocationSingler interface {
 // Fixed approximates the integral of the function f from min to max using a fixed
 // n-point quadrature rule. During evaluation, f will be evaluated n times using
 // the weights and locations specified by rule. That is, Fixed estimates
-//  int_min^max f(x) dx ≈ \sum_i w_i f(x_i)
+//
+//	int_min^max f(x) dx ≈ \sum_i w_i f(x_i)
+//
 // If rule is nil, an acceptable default is chosen, otherwise it is
 // assumed that the properties of the integral match the assumptions of rule.
 // For example, Legendre assumes that the integration bounds are finite. If

@@ -22,13 +22,14 @@ import (
 // symmetric tridiagonal to which it is similar.
 //
 // info returns a status error. The return codes mean as follows:
-//  0: The algorithm completed successfully.
-//  1: A split was marked by a positive value in e.
-//  2: Current block of Z not diagonalized after 100*n iterations (in inner
-//     while loop). On exit Z holds a qd array with the same eigenvalues as
-//     the given Z.
-//  3: Termination criterion of outer while loop not met (program created more
-//     than N unreduced blocks).
+//
+//	0: The algorithm completed successfully.
+//	1: A split was marked by a positive value in e.
+//	2: Current block of Z not diagonalized after 100*n iterations (in inner
+//	   while loop). On exit Z holds a qd array with the same eigenvalues as
+//	   the given Z.
+//	3: Termination criterion of outer while loop not met (program created more
+//	   than N unreduced blocks).
 //
 // z must have length at least 4*n, and must not contain any negative elements.
 // Dlasq2 will panic otherwise.

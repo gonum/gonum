@@ -171,13 +171,12 @@ func Equal(a, b Nodes) bool {
 // The union of two sets, a and b, is the set containing all the
 // elements of each, for instance:
 //
-//     {a,b,c} UNION {d,e,f} = {a,b,c,d,e,f}
+//	{a,b,c} UNION {d,e,f} = {a,b,c,d,e,f}
 //
 // Since sets may not have repetition, unions of two sets that overlap
 // do not contain repeat elements, that is:
 //
-//     {a,b,c} UNION {b,c,d} = {a,b,c,d}
-//
+//	{a,b,c} UNION {b,c,d} = {a,b,c,d}
 func UnionOfNodes(a, b Nodes) Nodes {
 	if same(a, b) {
 		return CloneNodes(a)
@@ -199,18 +198,17 @@ func UnionOfNodes(a, b Nodes) Nodes {
 // The intersection of two sets, a and b, is the set containing all
 // the elements shared between the two sets, for instance:
 //
-//     {a,b,c} INTERSECT {b,c,d} = {b,c}
+//	{a,b,c} INTERSECT {b,c,d} = {b,c}
 //
 // The intersection between a set and itself is itself, and thus
 // effectively a copy operation:
 //
-//     {a,b,c} INTERSECT {a,b,c} = {a,b,c}
+//	{a,b,c} INTERSECT {a,b,c} = {a,b,c}
 //
 // The intersection between two sets that share no elements is the empty
 // set:
 //
-//     {a,b,c} INTERSECT {d,e,f} = {}
-//
+//	{a,b,c} INTERSECT {d,e,f} = {}
 func IntersectionOfNodes(a, b Nodes) Nodes {
 	if same(a, b) {
 		return CloneNodes(a)

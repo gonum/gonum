@@ -43,7 +43,9 @@ var (
 // CG implements the nonlinear conjugate gradient method for solving nonlinear
 // unconstrained optimization problems. It is a line search method that
 // generates the search directions d_k according to the formula
-//  d_{k+1} = -∇f_{k+1} + β_k*d_k,   d_0 = -∇f_0.
+//
+//	d_{k+1} = -∇f_{k+1} + β_k*d_k,   d_0 = -∇f_0.
+//
 // Variants of the conjugate gradient method differ in the choice of the
 // parameter β_k. The conjugate gradient method usually requires fewer function
 // evaluations than the gradient descent method and no matrix storage, but
@@ -52,13 +54,13 @@ var (
 // CG implements a restart strategy that takes the steepest descent direction
 // (i.e., d_{k+1} = -∇f_{k+1}) whenever any of the following conditions holds:
 //
-//  - A certain number of iterations has elapsed without a restart. This number
-//    is controllable via IterationRestartFactor and if equal to 0, it is set to
-//    a reasonable default based on the problem dimension.
-//  - The angle between the gradients at two consecutive iterations ∇f_k and
-//    ∇f_{k+1} is too large.
-//  - The direction d_{k+1} is not a descent direction.
-//  - β_k returned from CGVariant.Beta is equal to zero.
+//   - A certain number of iterations has elapsed without a restart. This number
+//     is controllable via IterationRestartFactor and if equal to 0, it is set to
+//     a reasonable default based on the problem dimension.
+//   - The angle between the gradients at two consecutive iterations ∇f_k and
+//     ∇f_{k+1} is too large.
+//   - The direction d_{k+1} is not a descent direction.
+//   - β_k returned from CGVariant.Beta is equal to zero.
 //
 // The line search for CG must yield step sizes that satisfy the strong Wolfe
 // conditions at every iteration, otherwise the generated search direction
@@ -263,7 +265,8 @@ func (*CG) needs() struct {
 
 // FletcherReeves implements the Fletcher-Reeves variant of the CG method that
 // computes the scaling parameter β_k according to the formula
-//  β_k = |∇f_{k+1}|^2 / |∇f_k|^2.
+//
+//	β_k = |∇f_{k+1}|^2 / |∇f_k|^2.
 type FletcherReeves struct {
 	prevNorm float64
 }
@@ -281,7 +284,9 @@ func (fr *FletcherReeves) Beta(grad, _, _ []float64) (beta float64) {
 
 // PolakRibierePolyak implements the Polak-Ribiere-Polyak variant of the CG
 // method that computes the scaling parameter β_k according to the formula
-//  β_k = max(0, ∇f_{k+1}·y_k / |∇f_k|^2),
+//
+//	β_k = max(0, ∇f_{k+1}·y_k / |∇f_k|^2),
+//
 // where y_k = ∇f_{k+1} - ∇f_k.
 type PolakRibierePolyak struct {
 	prevNorm float64
@@ -301,7 +306,9 @@ func (pr *PolakRibierePolyak) Beta(grad, gradPrev, _ []float64) (beta float64) {
 
 // HestenesStiefel implements the Hestenes-Stiefel variant of the CG method
 // that computes the scaling parameter β_k according to the formula
-//  β_k = max(0, ∇f_{k+1}·y_k / d_k·y_k),
+//
+//	β_k = max(0, ∇f_{k+1}·y_k / d_k·y_k),
+//
 // where y_k = ∇f_{k+1} - ∇f_k.
 type HestenesStiefel struct {
 	y []float64
@@ -319,7 +326,9 @@ func (hs *HestenesStiefel) Beta(grad, gradPrev, dirPrev []float64) (beta float64
 
 // DaiYuan implements the Dai-Yuan variant of the CG method that computes the
 // scaling parameter β_k according to the formula
-//  β_k = |∇f_{k+1}|^2 / d_k·y_k,
+//
+//	β_k = |∇f_{k+1}|^2 / d_k·y_k,
+//
 // where y_k = ∇f_{k+1} - ∇f_k.
 type DaiYuan struct {
 	y []float64
@@ -337,7 +346,9 @@ func (dy *DaiYuan) Beta(grad, gradPrev, dirPrev []float64) (beta float64) {
 
 // HagerZhang implements the Hager-Zhang variant of the CG method that computes the
 // scaling parameter β_k according to the formula
-//  β_k = (y_k - 2 d_k |y_k|^2/(d_k·y_k))·∇f_{k+1} / (d_k·y_k),
+//
+//	β_k = (y_k - 2 d_k |y_k|^2/(d_k·y_k))·∇f_{k+1} / (d_k·y_k),
+//
 // where y_k = ∇f_{k+1} - ∇f_k.
 type HagerZhang struct {
 	y []float64

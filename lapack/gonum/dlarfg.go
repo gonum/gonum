@@ -12,11 +12,15 @@ import (
 
 // Dlarfg generates an elementary reflector for a Householder matrix. It creates
 // a real elementary reflector of order n such that
-//  H * (alpha) = (beta)
-//      (    x)   (   0)
-//  Hᵀ * H = I
+//
+//	H * (alpha) = (beta)
+//	    (    x)   (   0)
+//	Hᵀ * H = I
+//
 // H is represented in the form
-//  H = 1 - tau * (1; v) * (1 vᵀ)
+//
+//	H = 1 - tau * (1; v) * (1 vᵀ)
+//
 // where tau is a real scalar.
 //
 // On entry, x contains the vector x, on exit it contains v.

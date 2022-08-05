@@ -11,7 +11,9 @@ import (
 
 // Dorgr2 generates an m×n real matrix Q with orthonormal rows, which is defined
 // as the last m rows of a product of k elementary reflectors of order n
-//  Q = H_0 * H_1 * ... * H_{k-1}
+//
+//	Q = H_0 * H_1 * ... * H_{k-1}
+//
 // as returned by Dgerqf.
 //
 // On entry, the (m-k+i)-th row of A must contain the vector which defines the
@@ -22,7 +24,9 @@ import (
 // reflector H_i, as returned by Dgerqf.
 //
 // It must hold that
-//  n >= m >= k >= 0,
+//
+//	n >= m >= k >= 0,
+//
 // the length of tau must be k and the length of work must be m, otherwise
 // Dorgr2 will panic.
 //

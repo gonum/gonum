@@ -11,7 +11,9 @@ import (
 )
 
 // Integral is a definite integral
-//  ∫_a^b f(x)dx
+//
+//	∫_a^b f(x)dx
+//
 // with a known value.
 type Integral struct {
 	Name  string
@@ -21,7 +23,8 @@ type Integral struct {
 }
 
 // Constant returns the integral of a constant function
-//  ∫_{-1}^2 alpha dx
+//
+//	∫_{-1}^2 alpha dx
 func Constant(alpha float64) Integral {
 	return Integral{
 		Name: fmt.Sprintf("∫_{-1}^{2} %vdx", alpha),
@@ -35,7 +38,8 @@ func Constant(alpha float64) Integral {
 }
 
 // Poly returns the integral of a polynomial
-//  ∫_{-1}^2 x^degree dx
+//
+//	∫_{-1}^2 x^degree dx
 func Poly(degree int) Integral {
 	d := float64(degree)
 	return Integral{
@@ -50,7 +54,8 @@ func Poly(degree int) Integral {
 }
 
 // Sin returns the integral
-//  ∫_0^1 sin(x)dx
+//
+//	∫_0^1 sin(x)dx
 func Sin() Integral {
 	return Integral{
 		Name: "∫_0^1 sin(x)dx",
@@ -64,7 +69,8 @@ func Sin() Integral {
 }
 
 // XExpMinusX returns the integral
-//  ∫_0^1 x*exp(-x)dx
+//
+//	∫_0^1 x*exp(-x)dx
 func XExpMinusX() Integral {
 	return Integral{
 		Name: "∫_0^1 x*exp(-x)dx",
@@ -78,7 +84,8 @@ func XExpMinusX() Integral {
 }
 
 // Sqrt returns the integral
-//  ∫_0^1 sqrt(x)dx
+//
+//	∫_0^1 sqrt(x)dx
 func Sqrt() Integral {
 	return Integral{
 		Name: "∫_0^1 sqrt(x)dx",
@@ -92,7 +99,8 @@ func Sqrt() Integral {
 }
 
 // ExpOverX2Plus1 returns the integral
-//  ∫_0^1 exp(x)/(x*x+1)dx
+//
+//	∫_0^1 exp(x)/(x*x+1)dx
 func ExpOverX2Plus1() Integral {
 	return Integral{
 		Name: "∫_0^1 exp(x)/(x*x+1)dx",

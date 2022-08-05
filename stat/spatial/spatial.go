@@ -16,12 +16,12 @@ import (
 // GetisOrdGStar returns the Local Getis-Ord G*i statistic for element of the
 // weighted data using the provided locality matrix. The returned value is a z-score.
 //
-//  G^*_i = num_i / den_i
+//	G^*_i = num_i / den_i
 //
-//  num_i = \sum_j (w_{ij} x_j) - \bar X \sum_j w_{ij}
-//  den_i = S \sqrt(((n \sum_j w_{ij}^2 - (\sum_j w_{ij})^2))/(n - 1))
-//  \bar X = (\sum_j x_j) / n
-//  S = \sqrt((\sum_j x_j^2)/n - (\bar X)^2)
+//	num_i = \sum_j (w_{ij} x_j) - \bar X \sum_j w_{ij}
+//	den_i = S \sqrt(((n \sum_j w_{ij}^2 - (\sum_j w_{ij})^2))/(n - 1))
+//	\bar X = (\sum_j x_j) / n
+//	S = \sqrt((\sum_j x_j^2)/n - (\bar X)^2)
 //
 // GetisOrdGStar will panic if locality is not a square matrix with dimensions the
 // same as the length of data or if i is not a valid index into data.

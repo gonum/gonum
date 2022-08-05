@@ -19,21 +19,25 @@ import (
 //
 // kacc22 specifies the computation mode of far-from-diagonal orthogonal
 // updates. Permitted values are:
-//  0: Dlaqr5 will not accumulate reflections and will not use matrix-matrix
-//     multiply to update far-from-diagonal matrix entries.
-//  1: Dlaqr5 will accumulate reflections and use matrix-matrix multiply to
-//     update far-from-diagonal matrix entries.
-//  2: Dlaqr5 will accumulate reflections, use matrix-matrix multiply to update
-//     far-from-diagonal matrix entries, and take advantage of 2×2 block
-//     structure during matrix multiplies.
+//
+//	0: Dlaqr5 will not accumulate reflections and will not use matrix-matrix
+//	   multiply to update far-from-diagonal matrix entries.
+//	1: Dlaqr5 will accumulate reflections and use matrix-matrix multiply to
+//	   update far-from-diagonal matrix entries.
+//	2: Dlaqr5 will accumulate reflections, use matrix-matrix multiply to update
+//	   far-from-diagonal matrix entries, and take advantage of 2×2 block
+//	   structure during matrix multiplies.
+//
 // For other values of kacc2 Dlaqr5 will panic.
 //
 // n is the order of the Hessenberg matrix H.
 //
 // ktop and kbot are indices of the first and last row and column of an isolated
 // diagonal block upon which the QR sweep will be applied. It must hold that
-//  ktop == 0,   or 0 < ktop <= n-1 and H[ktop, ktop-1] == 0, and
-//  kbot == n-1, or 0 <= kbot < n-1 and H[kbot+1, kbot] == 0,
+//
+//	ktop == 0,   or 0 < ktop <= n-1 and H[ktop, ktop-1] == 0, and
+//	kbot == n-1, or 0 <= kbot < n-1 and H[kbot+1, kbot] == 0,
+//
 // otherwise Dlaqr5 will panic.
 //
 // nshfts is the number of simultaneous shifts. It must be positive and even,

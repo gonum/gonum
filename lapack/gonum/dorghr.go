@@ -6,7 +6,8 @@ package gonum
 
 // Dorghr generates an n×n orthogonal matrix Q which is defined as the product
 // of ihi-ilo elementary reflectors:
-//  Q = H_{ilo} H_{ilo+1} ... H_{ihi-1}.
+//
+//	Q = H_{ilo} H_{ilo+1} ... H_{ihi-1}.
 //
 // a and lda represent an n×n matrix that contains the elementary reflectors, as
 // returned by Dgehrd. On return, a is overwritten by the n×n orthogonal matrix
@@ -15,8 +16,9 @@ package gonum
 //
 // ilo and ihi must have the same values as in the previous call of Dgehrd. It
 // must hold that
-//  0 <= ilo <= ihi < n  if n > 0,
-//  ilo = 0, ihi = -1    if n == 0.
+//
+//	0 <= ilo <= ihi < n  if n > 0,
+//	ilo = 0, ihi = -1    if n == 0.
 //
 // tau contains the scalar factors of the elementary reflectors, as returned by
 // Dgehrd. tau must have length n-1.

@@ -12,8 +12,9 @@ import (
 // Its cumulative distribution function is the logistic function.
 //
 // General form of probability density function for Logistic distribution is
-//  E(x) / (s * (1 + E(x))^2)
-//  where E(x) = exp(-(x-μ)/s)
+//
+//	E(x) / (s * (1 + E(x))^2)
+//	where E(x) = exp(-(x-μ)/s)
 //
 // For more information, see https://en.wikipedia.org/wiki/Logistic_distribution.
 type Logistic struct {

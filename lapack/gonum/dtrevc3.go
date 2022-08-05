@@ -15,14 +15,19 @@ import (
 // Dtrevc3 computes some or all of the right and/or left eigenvectors of an n×n
 // upper quasi-triangular matrix T in Schur canonical form. Matrices of this
 // type are produced by the Schur factorization of a real general matrix A
-//  A = Q T Qᵀ,
+//
+//	A = Q T Qᵀ,
+//
 // as computed by Dhseqr.
 //
 // The right eigenvector x of T corresponding to an
 // eigenvalue λ is defined by
-//  T x = λ x,
+//
+//	T x = λ x,
+//
 // and the left eigenvector y is defined by
-//  yᵀ T = λ yᵀ.
+//
+//	yᵀ T = λ yᵀ.
 //
 // The eigenvalues are read directly from the diagonal blocks of T.
 //
@@ -68,22 +73,26 @@ import (
 //
 // On return, if side is lapack.EVLeft or lapack.EVBoth,
 // VL will contain:
-//  if howmny == lapack.EVAll,      the matrix Y of left eigenvectors of T,
-//  if howmny == lapack.EVAllMulQ,  the matrix Q*Y,
-//  if howmny == lapack.EVSelected, the left eigenvectors of T specified by
-//                                  selected, stored consecutively in the
-//                                  columns of VL, in the same order as their
-//                                  eigenvalues.
+//
+//	if howmny == lapack.EVAll,      the matrix Y of left eigenvectors of T,
+//	if howmny == lapack.EVAllMulQ,  the matrix Q*Y,
+//	if howmny == lapack.EVSelected, the left eigenvectors of T specified by
+//	                                selected, stored consecutively in the
+//	                                columns of VL, in the same order as their
+//	                                eigenvalues.
+//
 // VL is not referenced if side == lapack.EVRight.
 //
 // On return, if side is lapack.EVRight or lapack.EVBoth,
 // VR will contain:
-//  if howmny == lapack.EVAll,      the matrix X of right eigenvectors of T,
-//  if howmny == lapack.EVAllMulQ,  the matrix Q*X,
-//  if howmny == lapack.EVSelected, the left eigenvectors of T specified by
-//                                  selected, stored consecutively in the
-//                                  columns of VR, in the same order as their
-//                                  eigenvalues.
+//
+//	if howmny == lapack.EVAll,      the matrix X of right eigenvectors of T,
+//	if howmny == lapack.EVAllMulQ,  the matrix Q*X,
+//	if howmny == lapack.EVSelected, the left eigenvectors of T specified by
+//	                                selected, stored consecutively in the
+//	                                columns of VR, in the same order as their
+//	                                eigenvalues.
+//
 // VR is not referenced if side == lapack.EVLeft.
 //
 // Complex eigenvectors corresponding to a complex eigenvalue are stored in VL

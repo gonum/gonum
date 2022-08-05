@@ -10,17 +10,18 @@ import "gonum.org/v1/gonum/mat"
 // http://dx.doi.org/10.1016/0095-0696(78)90006-2
 // http://lib.stat.cmu.edu/datasets/boston
 // Columns are;
-//  per capita crime rate by town,
-//  proportion of non-retail business acres per town,
-//  nitric oxide concentration (parts per 10 million),
-//  weighted distances to Boston employment centers,
-//  index of accessibility to radial highways,
-//  pupil-teacher ratio by town,
-//  proportion of blacks by town,
-//  average number of rooms per dwelling,
-//  proportion of owner-occupied units built prior to 1940,
-//  full-value property-tax rate per $10000,
-//  median value of owner-occupied homes in $1000s.
+//
+//	per capita crime rate by town,
+//	proportion of non-retail business acres per town,
+//	nitric oxide concentration (parts per 10 million),
+//	weighted distances to Boston employment centers,
+//	index of accessibility to radial highways,
+//	pupil-teacher ratio by town,
+//	proportion of blacks by town,
+//	average number of rooms per dwelling,
+//	proportion of owner-occupied units built prior to 1940,
+//	full-value property-tax rate per $10000,
+//	median value of owner-occupied homes in $1000s.
 var bostonData = mat.NewDense(506, 11, []float64{
 	0.00632, 2.31000, 0.53800, 4.09000, 1.00000, 15.30000, 396.90000, 6.57500, 65.20000, 296.00000, 24.00000,
 	0.02731, 7.07000, 0.46900, 4.96710, 2.00000, 17.80000, 396.90000, 6.42100, 78.90000, 242.00000, 21.60000,

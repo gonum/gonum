@@ -14,7 +14,8 @@ import (
 // with support above the scale parameter.
 //
 // The density function is given by
-//  (α x_m^{α})/(x^{α+1}) for x >= x_m.
+//
+//	(α x_m^{α})/(x^{α+1}) for x >= x_m.
 //
 // For more information, see https://en.wikipedia.org/wiki/Pareto_distribution.
 type Pareto struct {

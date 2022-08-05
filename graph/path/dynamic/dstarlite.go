@@ -16,8 +16,7 @@ import (
 
 // DStarLite implements the D* Lite dynamic re-planning path search algorithm.
 //
-//  doi:10.1109/tro.2004.838026 and ISBN:0-262-51129-0 pp476-483
-//
+//	doi:10.1109/tro.2004.838026 and ISBN:0-262-51129-0 pp476-483
 type DStarLite struct {
 	s, t *dStarLiteNode
 	last *dStarLiteNode
@@ -426,8 +425,7 @@ func (k key) isBadKey() bool { return k != k }
 
 // less returns whether k is less than other. From ISBN:0-262-51129-0 pp476-483:
 //
-//  k ≤ k' iff k₁ < k'₁ OR (k₁ == k'₁ AND k₂ ≤ k'₂)
-//
+//	k ≤ k' iff k₁ < k'₁ OR (k₁ == k'₁ AND k₂ ≤ k'₂)
 func (k key) less(other key) bool {
 	if k.isBadKey() || other.isBadKey() {
 		panic("D* Lite: poisoned key")

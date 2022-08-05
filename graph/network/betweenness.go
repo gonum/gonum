@@ -14,7 +14,7 @@ import (
 
 // Betweenness returns the non-zero betweenness centrality for nodes in the unweighted graph g.
 //
-//  C_B(v) = \sum_{s ≠ v ≠ t ∈ V} (\sigma_{st}(v) / \sigma_{st})
+//	C_B(v) = \sum_{s ≠ v ≠ t ∈ V} (\sigma_{st}(v) / \sigma_{st})
 //
 // where \sigma_{st} and \sigma_{st}(v) are the number of shortest paths from s to t,
 // and the subset of those paths containing v respectively.
@@ -52,7 +52,7 @@ func Betweenness(g graph.Graph) map[int64]float64 {
 // EdgeBetweenness returns the non-zero betweenness centrality for edges in the
 // unweighted graph g. For an edge e the centrality C_B is computed as
 //
-//  C_B(e) = \sum_{s ≠ t ∈ V} (\sigma_{st}(e) / \sigma_{st}),
+//	C_B(e) = \sum_{s ≠ t ∈ V} (\sigma_{st}(e) / \sigma_{st}),
 //
 // where \sigma_{st} and \sigma_{st}(e) are the number of shortest paths from s
 // to t, and the subset of those paths containing e, respectively.
@@ -146,7 +146,7 @@ func brandes(g graph.Graph, accumulate func(s graph.Node, stack linear.NodeStack
 // BetweennessWeighted returns the non-zero betweenness centrality for nodes in the weighted
 // graph g used to construct the given shortest paths.
 //
-//  C_B(v) = \sum_{s ≠ v ≠ t ∈ V} (\sigma_{st}(v) / \sigma_{st})
+//	C_B(v) = \sum_{s ≠ v ≠ t ∈ V} (\sigma_{st}(v) / \sigma_{st})
 //
 // where \sigma_{st} and \sigma_{st}(v) are the number of shortest paths from s to t,
 // and the subset of those paths containing v respectively.
@@ -196,7 +196,7 @@ func BetweennessWeighted(g graph.Weighted, p path.AllShortest) map[int64]float64
 // EdgeBetweennessWeighted returns the non-zero betweenness centrality for edges in
 // the weighted graph g. For an edge e the centrality C_B is computed as
 //
-//  C_B(e) = \sum_{s ≠ t ∈ V} (\sigma_{st}(e) / \sigma_{st}),
+//	C_B(e) = \sum_{s ≠ t ∈ V} (\sigma_{st}(e) / \sigma_{st}),
 //
 // where \sigma_{st} and \sigma_{st}(e) are the number of shortest paths from s
 // to t, and the subset of those paths containing e, respectively.

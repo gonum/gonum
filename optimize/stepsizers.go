@@ -134,7 +134,9 @@ func (q *QuadraticStepSize) StepSize(loc *Location, dir []float64) (stepSize flo
 // assumption that the first-order change in the function will be the same as
 // that obtained at the previous iteration. That is, the initial step size s^0_k
 // is chosen so that
-//   s^0_k ∇f_k⋅p_k = s_{k-1} ∇f_{k-1}⋅p_{k-1}
+//
+//	s^0_k ∇f_k⋅p_k = s_{k-1} ∇f_{k-1}⋅p_{k-1}
+//
 // This is useful for line search methods that do not produce well-scaled
 // descent directions, such as gradient descent or conjugate gradient methods.
 type FirstOrderStepSize struct {

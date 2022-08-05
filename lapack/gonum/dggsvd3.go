@@ -13,9 +13,11 @@ import (
 
 // Dggsvd3 computes the generalized singular value decomposition (GSVD)
 // of an m×n matrix A and p×n matrix B:
-//  Uᵀ*A*Q = D1*[ 0 R ]
 //
-//  Vᵀ*B*Q = D2*[ 0 R ]
+//	Uᵀ*A*Q = D1*[ 0 R ]
+//
+//	Vᵀ*B*Q = D2*[ 0 R ]
+//
 // where U, V and Q are orthogonal matrices.
 //
 // Dggsvd3 returns k and l, the dimensions of the sub-blocks. k+l
@@ -26,62 +28,69 @@ import (
 //
 // If m-k-l >= 0,
 //
-//                    k  l
-//       D1 =     k [ I  0 ]
-//                l [ 0  C ]
-//            m-k-l [ 0  0 ]
+//	                  k  l
+//	     D1 =     k [ I  0 ]
+//	              l [ 0  C ]
+//	          m-k-l [ 0  0 ]
 //
-//                  k  l
-//       D2 = l   [ 0  S ]
-//            p-l [ 0  0 ]
+//	                k  l
+//	     D2 = l   [ 0  S ]
+//	          p-l [ 0  0 ]
 //
-//               n-k-l  k    l
-//  [ 0 R ] = k [  0   R11  R12 ] k
-//            l [  0    0   R22 ] l
+//	             n-k-l  k    l
+//	[ 0 R ] = k [  0   R11  R12 ] k
+//	          l [  0    0   R22 ] l
 //
 // where
 //
-//  C = diag( alpha_k, ... , alpha_{k+l} ),
-//  S = diag( beta_k,  ... , beta_{k+l} ),
-//  C^2 + S^2 = I.
+//	C = diag( alpha_k, ... , alpha_{k+l} ),
+//	S = diag( beta_k,  ... , beta_{k+l} ),
+//	C^2 + S^2 = I.
 //
 // R is stored in
-//  A[0:k+l, n-k-l:n]
+//
+//	A[0:k+l, n-k-l:n]
+//
 // on exit.
 //
 // If m-k-l < 0,
 //
-//                 k m-k k+l-m
-//      D1 =   k [ I  0    0  ]
-//           m-k [ 0  C    0  ]
+//	               k m-k k+l-m
+//	    D1 =   k [ I  0    0  ]
+//	         m-k [ 0  C    0  ]
 //
-//                   k m-k k+l-m
-//      D2 =   m-k [ 0  S    0  ]
-//           k+l-m [ 0  0    I  ]
-//             p-l [ 0  0    0  ]
+//	                 k m-k k+l-m
+//	    D2 =   m-k [ 0  S    0  ]
+//	         k+l-m [ 0  0    I  ]
+//	           p-l [ 0  0    0  ]
 //
-//                 n-k-l  k   m-k  k+l-m
-//  [ 0 R ] =    k [ 0    R11  R12  R13 ]
-//             m-k [ 0     0   R22  R23 ]
-//           k+l-m [ 0     0    0   R33 ]
+//	               n-k-l  k   m-k  k+l-m
+//	[ 0 R ] =    k [ 0    R11  R12  R13 ]
+//	           m-k [ 0     0   R22  R23 ]
+//	         k+l-m [ 0     0    0   R33 ]
 //
 // where
-//  C = diag( alpha_k, ... , alpha_m ),
-//  S = diag( beta_k,  ... , beta_m ),
-//  C^2 + S^2 = I.
 //
-//  R = [ R11 R12 R13 ] is stored in A[1:m, n-k-l+1:n]
-//      [  0  R22 R23 ]
+//	C = diag( alpha_k, ... , alpha_m ),
+//	S = diag( beta_k,  ... , beta_m ),
+//	C^2 + S^2 = I.
+//
+//	R = [ R11 R12 R13 ] is stored in A[1:m, n-k-l+1:n]
+//	    [  0  R22 R23 ]
+//
 // and R33 is stored in
-//  B[m-k:l, n+m-k-l:n] on exit.
+//
+//	B[m-k:l, n+m-k-l:n] on exit.
 //
 // Dggsvd3 computes C, S, R, and optionally the orthogonal transformation
 // matrices U, V and Q.
 //
 // jobU, jobV and jobQ are options for computing the orthogonal matrices. The behavior
 // is as follows
-//  jobU == lapack.GSVDU        Compute orthogonal matrix U
-//  jobU == lapack.GSVDNone     Do not compute orthogonal matrix.
+//
+//	jobU == lapack.GSVDU        Compute orthogonal matrix U
+//	jobU == lapack.GSVDNone     Do not compute orthogonal matrix.
+//
 // The behavior is the same for jobV and jobQ with the exception that instead of
 // lapack.GSVDU these accept lapack.GSVDV and lapack.GSVDQ respectively.
 // The matrices U, V and Q must be m×m, p×p and n×n respectively unless the
@@ -89,17 +98,24 @@ import (
 //
 // alpha and beta must have length n or Dggsvd3 will panic. On exit, alpha and
 // beta contain the generalized singular value pairs of A and B
-//   alpha[0:k] = 1,
-//   beta[0:k]  = 0,
+//
+//	alpha[0:k] = 1,
+//	beta[0:k]  = 0,
+//
 // if m-k-l >= 0,
-//   alpha[k:k+l] = diag(C),
-//   beta[k:k+l]  = diag(S),
+//
+//	alpha[k:k+l] = diag(C),
+//	beta[k:k+l]  = diag(S),
+//
 // if m-k-l < 0,
-//   alpha[k:m]= C, alpha[m:k+l]= 0
-//   beta[k:m] = S, beta[m:k+l] = 1.
+//
+//	alpha[k:m]= C, alpha[m:k+l]= 0
+//	beta[k:m] = S, beta[m:k+l] = 1.
+//
 // if k+l < n,
-//   alpha[k+l:n] = 0 and
-//   beta[k+l:n]  = 0.
+//
+//	alpha[k+l:n] = 0 and
+//	beta[k+l:n]  = 0.
 //
 // On exit, iwork contains the permutation required to sort alpha descending.
 //

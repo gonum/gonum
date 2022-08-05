@@ -7,7 +7,8 @@ package quad
 import "math"
 
 // Legendre integrates an unweighted function over finite bounds
-//  int_min^max f(x) dx
+//
+//	int_min^max f(x) dx
 type Legendre struct{}
 
 func (l Legendre) FixedLocations(x, weight []float64, min, max float64) {

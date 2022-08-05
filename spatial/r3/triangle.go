@@ -41,9 +41,9 @@ func (t Triangle) IsDegenerate(tol float64) bool {
 
 // longIdx returns index of the longest side. The sides
 // of the triangles are are as follows:
-//  - Side 0 formed by vertices 0 and 1
-//  - Side 1 formed by vertices 1 and 2
-//  - Side 2 formed by vertices 0 and 2
+//   - Side 0 formed by vertices 0 and 1
+//   - Side 1 formed by vertices 1 and 2
+//   - Side 2 formed by vertices 0 and 2
 func (t Triangle) longIdx() int {
 	sides := [3]Vec{Sub(t[1], t[0]), Sub(t[2], t[1]), Sub(t[0], t[2])}
 	len2 := [3]float64{Norm2(sides[0]), Norm2(sides[1]), Norm2(sides[2])}
@@ -101,8 +101,9 @@ type line [2]Vec
 
 // vecOnLine takes a value between 0 and 1 to linearly
 // interpolate a point on the line.
-//  vecOnLine(0) returns l[0]
-//  vecOnLine(1) returns l[1]
+//
+//	vecOnLine(0) returns l[0]
+//	vecOnLine(1) returns l[1]
 func (l line) vecOnLine(t float64) Vec {
 	lineDir := Sub(l[1], l[0])
 	return Add(l[0], Scale(t, lineDir))

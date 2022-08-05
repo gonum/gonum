@@ -38,7 +38,7 @@ type UndirectedMultiplex interface {
 // qUndirectedMultiplex will panic if the graph has any layer weight-scaled edge with
 // negative edge weight.
 //
-//  Q_{layer} = w_{layer} \sum_{ij} [ A_{layer}*_{ij} - (\gamma_{layer} k_i k_j)/2m ] \delta(c_i,c_j)
+//	Q_{layer} = w_{layer} \sum_{ij} [ A_{layer}*_{ij} - (\gamma_{layer} k_i k_j)/2m ] \delta(c_i,c_j)
 //
 // Note that Q values for multiplex graphs are not scaled by the total layer edge weight.
 //

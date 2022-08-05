@@ -19,8 +19,10 @@ import (
 
 // StudentsT is a multivariate Student's T distribution. It is a distribution over
 // ℝ^n with the probability density
-//  p(y) = (Γ((ν+n)/2) / Γ(ν/2)) * (νπ)^(-n/2) * |Ʃ|^(-1/2) *
-//             (1 + 1/ν * (y-μ)ᵀ * Ʃ^-1 * (y-μ))^(-(ν+n)/2)
+//
+//	p(y) = (Γ((ν+n)/2) / Γ(ν/2)) * (νπ)^(-n/2) * |Ʃ|^(-1/2) *
+//	           (1 + 1/ν * (y-μ)ᵀ * Ʃ^-1 * (y-μ))^(-(ν+n)/2)
+//
 // where ν is a scalar greater than 2, μ is a vector in ℝ^n, and Ʃ is an n×n
 // symmetric positive definite matrix.
 //
@@ -224,7 +226,9 @@ func findUnob(observed []int, dim int) (unobserved []int) {
 // CovarianceMatrix calculates the covariance matrix of the distribution,
 // storing the result in dst. Upon return, the value at element {i, j} of the
 // covariance matrix is equal to the covariance of the i^th and j^th variables.
-//  covariance(i, j) = E[(x_i - E[x_i])(x_j - E[x_j])]
+//
+//	covariance(i, j) = E[(x_i - E[x_i])(x_j - E[x_j])]
+//
 // If the dst matrix is empty it will be resized to the correct dimensions,
 // otherwise dst must match the dimension of the receiver or CovarianceMatrix
 // will panic.
@@ -264,7 +268,9 @@ func (s *StudentsT) LogProb(y []float64) float64 {
 // MarginalStudentsT returns the marginal distribution of the given input variables,
 // and the success of the operation.
 // That is, MarginalStudentsT returns
-//  p(x_i) = \int_{x_o} p(x_i | x_o) p(x_o) dx_o
+//
+//	p(x_i) = \int_{x_o} p(x_i | x_o) p(x_o) dx_o
+//
 // where x_i are the dimensions in the input, and x_o are the remaining dimensions.
 // See https://en.wikipedia.org/wiki/Marginal_distribution for more information.
 //
@@ -285,7 +291,9 @@ func (s *StudentsT) MarginalStudentsT(vars []int, src rand.Source) (dist *Studen
 
 // MarginalStudentsTSingle returns the marginal distribution of the given input variable.
 // That is, MarginalStudentsTSingle returns
-//  p(x_i) = \int_{x_o} p(x_i | x_o) p(x_o) dx_o
+//
+//	p(x_i) = \int_{x_o} p(x_i | x_o) p(x_o) dx_o
+//
 // where i is the input index, and x_o are the remaining dimensions.
 // See https://en.wikipedia.org/wiki/Marginal_distribution for more information.
 //

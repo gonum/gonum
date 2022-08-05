@@ -11,8 +11,10 @@ import (
 
 // Dgetrs solves a system of equations using an LU factorization.
 // The system of equations solved is
-//  A * X = B  if trans == blas.Trans
-//  Aᵀ * X = B if trans == blas.NoTrans
+//
+//	A * X = B  if trans == blas.Trans
+//	Aᵀ * X = B if trans == blas.NoTrans
+//
 // A is a general n×n matrix with stride lda. B is a general matrix of size n×nrhs.
 //
 // On entry b contains the elements of the matrix B. On exit, b contains the

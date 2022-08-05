@@ -41,7 +41,9 @@ type MHProposal interface {
 // chain implicitly defined by the proposal distribution. At each
 // iteration, a proposal point is generated randomly from the current location.
 // This proposal point is accepted with probability
-//  p = min(1, (target(new) * proposal(current|new)) / (target(current) * proposal(new|current)))
+//
+//	p = min(1, (target(new) * proposal(current|new)) / (target(current) * proposal(new|current)))
+//
 // If the new location is accepted, it becomes the new current location.
 // If it is rejected, the current location remains. This is the sample stored in
 // batch, ignoring BurnIn and Rate (discussed below).
@@ -186,7 +188,9 @@ func NewProposalNormal(sigma *mat.SymDense, src rand.Source) (*ProposalNormal, b
 
 // ConditionalLogProb returns the probability of the first argument conditioned on
 // being at the second argument.
-//  p(x|y)
+//
+//	p(x|y)
+//
 // ConditionalLogProb panics if the input slices are not the same length or
 // are not equal to the dimension of the covariance matrix.
 func (p *ProposalNormal) ConditionalLogProb(x, y []float64) (prob float64) {

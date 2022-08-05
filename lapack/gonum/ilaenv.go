@@ -6,20 +6,21 @@ package gonum
 
 // Ilaenv returns algorithm tuning parameters for the algorithm given by the
 // input string. ispec specifies the parameter to return:
-//  1: The optimal block size for a blocked algorithm.
-//  2: The minimum block size for a blocked algorithm.
-//  3: The block size of unprocessed data at which a blocked algorithm should
-//     crossover to an unblocked version.
-//  4: The number of shifts.
-//  5: The minimum column dimension for blocking to be used.
-//  6: The crossover point for SVD (to use QR factorization or not).
-//  7: The number of processors.
-//  8: The crossover point for multi-shift in QR and QZ methods for non-symmetric eigenvalue problems.
-//  9: Maximum size of the subproblems in divide-and-conquer algorithms.
-//  10: ieee infinity and NaN arithmetic can be trusted not to trap.
-//  11: ieee infinity arithmetic can be trusted not to trap.
-//  12...16: parameters for Dhseqr and related functions. See Iparmq for more
-//           information.
+//
+//	1: The optimal block size for a blocked algorithm.
+//	2: The minimum block size for a blocked algorithm.
+//	3: The block size of unprocessed data at which a blocked algorithm should
+//	   crossover to an unblocked version.
+//	4: The number of shifts.
+//	5: The minimum column dimension for blocking to be used.
+//	6: The crossover point for SVD (to use QR factorization or not).
+//	7: The number of processors.
+//	8: The crossover point for multi-shift in QR and QZ methods for non-symmetric eigenvalue problems.
+//	9: Maximum size of the subproblems in divide-and-conquer algorithms.
+//	10: ieee infinity and NaN arithmetic can be trusted not to trap.
+//	11: ieee infinity arithmetic can be trusted not to trap.
+//	12...16: parameters for Dhseqr and related functions. See Iparmq for more
+//	         information.
 //
 // Ilaenv is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Ilaenv(ispec int, name string, opts string, n1, n2, n3, n4 int) int {

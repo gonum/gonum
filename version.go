@@ -16,7 +16,9 @@ const root = "gonum.org/v1/gonum"
 //
 // If a replace directive exists in the Gonum go.mod, the replace will
 // be reported in the version in the following format:
-//  "version=>[replace-path] [replace-version]"
+//
+//	"version=>[replace-path] [replace-version]"
+//
 // and the replace sum will be returned in place of the original sum.
 //
 // The exact version format returned by Version may change in future.

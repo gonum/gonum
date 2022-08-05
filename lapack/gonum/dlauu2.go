@@ -10,8 +10,10 @@ import (
 )
 
 // Dlauu2 computes the product
-//  U * Uᵀ  if uplo is blas.Upper
-//  Lᵀ * L  if uplo is blas.Lower
+//
+//	U * Uᵀ  if uplo is blas.Upper
+//	Lᵀ * L  if uplo is blas.Lower
+//
 // where U or L is stored in the upper or lower triangular part of A.
 // Only the upper or lower triangle of the result is stored, overwriting
 // the corresponding factor in A.

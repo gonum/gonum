@@ -97,6 +97,7 @@ func Mul(x, y Number) Number {
 // Inv returns the dual inverse of d.
 //
 // Special cases are:
+//
 //	Inv(±Inf) = ±0-0ϵ
 //	Inv(±0) = ±Inf-Infϵ
 func Inv(d Number) Number {

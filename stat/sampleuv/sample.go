@@ -147,7 +147,9 @@ var ErrRejection = errors.New("rejection: acceptance ratio above 1")
 // Rejection sampling generates points from the target distribution by using
 // the proposal distribution. At each step of the algorithm, the proposed point
 // is accepted with probability
-//  p = target(x) / (proposal(x) * c)
+//
+//	p = target(x) / (proposal(x) * c)
+//
 // where target(x) is the probability of the point according to the target distribution
 // and proposal(x) is the probability according to the proposal distribution.
 // The constant c must be chosen such that target(x) < proposal(x) * c for all x.
@@ -254,7 +256,9 @@ type MHProposal interface {
 // chain implicitly defined by the proposal distribution. At each
 // iteration, a proposal point is generated randomly from the current location.
 // This proposal point is accepted with probability
-//  p = min(1, (target(new) * proposal(current|new)) / (target(current) * proposal(new|current)))
+//
+//	p = min(1, (target(new) * proposal(current|new)) / (target(current) * proposal(new|current)))
+//
 // If the new location is accepted, it becomes the new current location.
 // If it is rejected, the current location remains. This is the sample stored in
 // batch, ignoring BurnIn and Rate (discussed below).

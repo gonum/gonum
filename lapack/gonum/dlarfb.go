@@ -13,36 +13,48 @@ import (
 // Dlarfb applies a block reflector to a matrix.
 //
 // In the call to Dlarfb, the mxn c is multiplied by the implicitly defined matrix h as follows:
-//  c = h * c   if side == Left and trans == NoTrans
-//  c = c * h   if side == Right and trans == NoTrans
-//  c = hᵀ * c  if side == Left and trans == Trans
-//  c = c * hᵀ  if side == Right and trans == Trans
+//
+//	c = h * c   if side == Left and trans == NoTrans
+//	c = c * h   if side == Right and trans == NoTrans
+//	c = hᵀ * c  if side == Left and trans == Trans
+//	c = c * hᵀ  if side == Right and trans == Trans
+//
 // h is a product of elementary reflectors. direct sets the direction of multiplication
-//  h = h_1 * h_2 * ... * h_k    if direct == Forward
-//  h = h_k * h_k-1 * ... * h_1  if direct == Backward
+//
+//	h = h_1 * h_2 * ... * h_k    if direct == Forward
+//	h = h_k * h_k-1 * ... * h_1  if direct == Backward
+//
 // The combination of direct and store defines the orientation of the elementary
 // reflectors. In all cases the ones on the diagonal are implicitly represented.
 //
 // If direct == lapack.Forward and store == lapack.ColumnWise
-//  V = [ 1        ]
-//      [v1   1    ]
-//      [v1  v2   1]
-//      [v1  v2  v3]
-//      [v1  v2  v3]
+//
+//	V = [ 1        ]
+//	    [v1   1    ]
+//	    [v1  v2   1]
+//	    [v1  v2  v3]
+//	    [v1  v2  v3]
+//
 // If direct == lapack.Forward and store == lapack.RowWise
-//  V = [ 1  v1  v1  v1  v1]
-//      [     1  v2  v2  v2]
-//      [         1  v3  v3]
+//
+//	V = [ 1  v1  v1  v1  v1]
+//	    [     1  v2  v2  v2]
+//	    [         1  v3  v3]
+//
 // If direct == lapack.Backward and store == lapack.ColumnWise
-//  V = [v1  v2  v3]
-//      [v1  v2  v3]
-//      [ 1  v2  v3]
-//      [     1  v3]
-//      [         1]
+//
+//	V = [v1  v2  v3]
+//	    [v1  v2  v3]
+//	    [ 1  v2  v3]
+//	    [     1  v3]
+//	    [         1]
+//
 // If direct == lapack.Backward and store == lapack.RowWise
-//  V = [v1  v1   1        ]
-//      [v2  v2  v2   1    ]
-//      [v3  v3  v3  v3   1]
+//
+//	V = [v1  v1   1        ]
+//	    [v2  v2  v2   1    ]
+//	    [v3  v3  v3  v3   1]
+//
 // An elementary reflector can be explicitly constructed by extracting the
 // corresponding elements of v, placing a 1 where the diagonal would be, and
 // placing zeros in the remaining elements.

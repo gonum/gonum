@@ -316,7 +316,9 @@ func (c *Cholesky) RawU() Triangular {
 
 // UTo stores into dst the n×n upper triangular matrix U from a Cholesky
 // decomposition
-//  A = Uᵀ * U.
+//
+//	A = Uᵀ * U.
+//
 // If dst is empty, it is resized to be an n×n upper triangular matrix. When dst
 // is non-empty, UTo panics if dst is not n×n or not Upper. UTo will also panic
 // if the receiver does not contain a successful factorization.
@@ -341,7 +343,9 @@ func (c *Cholesky) UTo(dst *TriDense) {
 
 // LTo stores into dst the n×n lower triangular matrix L from a Cholesky
 // decomposition
-//  A = L * Lᵀ.
+//
+//	A = L * Lᵀ.
+//
 // If dst is empty, it is resized to be an n×n lower triangular matrix. When dst
 // is non-empty, LTo panics if dst is not n×n or not Lower. LTo will also panic
 // if the receiver does not contain a successful factorization.
@@ -446,9 +450,13 @@ func (c *Cholesky) InverseTo(dst *SymDense) error {
 // Scale multiplies the original matrix A by a positive constant using
 // its Cholesky decomposition, storing the result in-place into the receiver.
 // That is, if the original Cholesky factorization is
-//  Uᵀ * U = A
+//
+//	Uᵀ * U = A
+//
 // the updated factorization is
-//  U'ᵀ * U' = f A = A'
+//
+//	U'ᵀ * U' = f A = A'
+//
 // Scale panics if the constant is non-positive, or if the receiver is non-empty
 // and is of a different size from the input.
 func (c *Cholesky) Scale(f float64, orig *Cholesky) {
@@ -470,8 +478,10 @@ func (c *Cholesky) Scale(f float64, orig *Cholesky) {
 
 // ExtendVecSym computes the Cholesky decomposition of the original matrix A,
 // whose Cholesky decomposition is in a, extended by a the n×1 vector v according to
-//  [A  w]
-//  [w' k]
+//
+//	[A  w]
+//	[w' k]
+//
 // where k = v[n-1] and w = v[:n-1]. The result is stored into the receiver.
 // In order for the updated matrix to be positive definite, it must be the case
 // that k > w' A^-1 w. If this condition does not hold then ExtendVecSym will
@@ -533,9 +543,12 @@ func (c *Cholesky) ExtendVecSym(a *Cholesky, v Vector) (ok bool) {
 // SymRankOne performs a rank-1 update of the original matrix A and refactorizes
 // its Cholesky factorization, storing the result into the receiver. That is, if
 // in the original Cholesky factorization
-//  Uᵀ * U = A,
+//
+//	Uᵀ * U = A,
+//
 // in the updated factorization
-//  U'ᵀ * U' = A + alpha * x * xᵀ = A'.
+//
+//	U'ᵀ * U' = A + alpha * x * xᵀ = A'.
 //
 // Note that when alpha is negative, the updating problem may be ill-conditioned
 // and the results may be inaccurate, or the updated matrix A' may not be

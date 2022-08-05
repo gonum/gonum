@@ -16,7 +16,8 @@ import (
 // with support between 0 and 1.
 //
 // The beta distribution has density function
-//  x^(α-1) * (1-x)^(β-1) * Γ(α+β) / (Γ(α)*Γ(β))
+//
+//	x^(α-1) * (1-x)^(β-1) * Γ(α+β) / (Γ(α)*Γ(β))
 //
 // For more information, see https://en.wikipedia.org/wiki/Beta_distribution
 type Beta struct {

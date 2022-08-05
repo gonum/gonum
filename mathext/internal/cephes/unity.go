@@ -24,9 +24,13 @@ const (
 )
 
 // Coefficients for
-//  log(1+x) = x - \frac{x^2}{2} + \frac{x^3 lP(x)}{lQ(x)}
+//
+//	log(1+x) = x - \frac{x^2}{2} + \frac{x^3 lP(x)}{lQ(x)}
+//
 // for
-//  \frac{1}{\sqrt{2}} <= x < \sqrt{2}
+//
+//	\frac{1}{\sqrt{2}} <= x < \sqrt{2}
+//
 // Theoretical peak relative error = 2.32e-20
 var lP = [...]float64{
 	4.5270000862445199635215e-5,
@@ -48,7 +52,8 @@ var lQ = [...]float64{
 }
 
 // log1p computes
-//  log(1 + x)
+//
+//	log(1 + x)
 func log1p(x float64) float64 {
 	z := 1 + x
 	if z < invSqrt2 || z > math.Sqrt2 {
@@ -60,7 +65,8 @@ func log1p(x float64) float64 {
 }
 
 // log1pmx computes
-//  log(1 + x) - x
+//
+//	log(1 + x) - x
 func log1pmx(x float64) float64 {
 	if math.Abs(x) < 0.5 {
 		xfac := x
@@ -81,9 +87,12 @@ func log1pmx(x float64) float64 {
 }
 
 // Coefficients for
-//  e^x = 1 + \frac{2x eP(x^2)}{eQ(x^2) - eP(x^2)}
+//
+//	e^x = 1 + \frac{2x eP(x^2)}{eQ(x^2) - eP(x^2)}
+//
 // for
-//  -0.5 <= x <= 0.5
+//
+//	-0.5 <= x <= 0.5
 var eP = [...]float64{
 	1.2617719307481059087798e-4,
 	3.0299440770744196129956e-2,
@@ -98,7 +107,8 @@ var eQ = [...]float64{
 }
 
 // expm1 computes
-//  expm1(x) = e^x - 1
+//
+//	expm1(x) = e^x - 1
 func expm1(x float64) float64 {
 	if math.IsInf(x, 0) {
 		if math.IsNaN(x) || x > 0 {
@@ -126,7 +136,8 @@ var coscof = [...]float64{
 }
 
 // cosm1 computes
-//  cosm1(x) = cos(x) - 1
+//
+//	cosm1(x) = cos(x) - 1
 func cosm1(x float64) float64 {
 	if x < -pi4 || x > pi4 {
 		return math.Cos(x) - 1
@@ -137,8 +148,10 @@ func cosm1(x float64) float64 {
 }
 
 // lgam1pTayler computes
-//  lgam(x + 1)
-//around x = 0 using its Taylor series.
+//
+//	lgam(x + 1)
+//
+// around x = 0 using its Taylor series.
 func lgam1pTaylor(x float64) float64 {
 	if x == 0 {
 		return 0
@@ -159,7 +172,8 @@ func lgam1pTaylor(x float64) float64 {
 }
 
 // lgam1p computes
-//  lgam(x + 1)
+//
+//	lgam(x + 1)
 func lgam1p(x float64) float64 {
 	if math.Abs(x) <= 0.5 {
 		return lgam1pTaylor(x)

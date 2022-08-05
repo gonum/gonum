@@ -50,9 +50,10 @@ func (w Weibull) gammaIPow(i, pow float64) float64 {
 //
 // Special cases occur when x == 0, and the result depends on the shape
 // parameter as follows:
-//  If 0 < K < 1, LogProb returns +Inf.
-//  If K == 1, LogProb returns 0.
-//  If K > 1, LogProb returns -Inf.
+//
+//	If 0 < K < 1, LogProb returns +Inf.
+//	If K == 1, LogProb returns 0.
+//	If K > 1, LogProb returns -Inf.
 func (w Weibull) LogProb(x float64) float64 {
 	if x < 0 {
 		return math.Inf(-1)
@@ -127,7 +128,9 @@ func (w Weibull) Rand() float64 {
 // Score returns the score function with respect to the parameters of the
 // distribution at the input location x. The score function is the derivative
 // of the log-likelihood at x with respect to the parameters
-//  (∂/∂θ) log(p(x;θ))
+//
+//	(∂/∂θ) log(p(x;θ))
+//
 // If deriv is non-nil, len(deriv) must equal the number of parameters otherwise
 // Score will panic, and the derivative is stored in-place into deriv. If deriv
 // is nil a new slice will be allocated and returned.
@@ -137,7 +140,8 @@ func (w Weibull) Rand() float64 {
 // For more information, see https://en.wikipedia.org/wiki/Score_%28statistics%29.
 //
 // Special cases:
-//  Score(x) = [NaN, NaN] for x <= 0
+//
+//	Score(x) = [NaN, NaN] for x <= 0
 func (w Weibull) Score(deriv []float64, x float64) []float64 {
 	if deriv == nil {
 		deriv = make([]float64, w.NumParameters())
@@ -158,10 +162,12 @@ func (w Weibull) Score(deriv []float64, x float64) []float64 {
 // ScoreInput returns the score function with respect to the input of the
 // distribution at the input location specified by x. The score function is the
 // derivative of the log-likelihood
-//  (d/dx) log(p(x)) .
+//
+//	(d/dx) log(p(x)) .
 //
 // Special cases:
-//  ScoreInput(x) = NaN for x <= 0
+//
+//	ScoreInput(x) = NaN for x <= 0
 func (w Weibull) ScoreInput(x float64) float64 {
 	if x > 0 {
 		return (-w.K*math.Pow(x/w.Lambda, w.K) + w.K - 1) / x

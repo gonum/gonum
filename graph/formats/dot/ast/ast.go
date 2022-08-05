@@ -21,12 +21,12 @@ import (
 //
 // Examples.
 //
-//    digraph G {
-//       A -> B
-//    }
-//    graph H {
-//       C - D
-//    }
+//	digraph G {
+//	   A -> B
+//	}
+//	graph H {
+//	   C - D
+//	}
 type File struct {
 	// Graphs.
 	Graphs []*Graph
@@ -50,10 +50,10 @@ func (f *File) String() string {
 //
 // Examples.
 //
-//    digraph G {
-//       A -> {B C}
-//       B -> C
-//    }
+//	digraph G {
+//	   A -> {B C}
+//	   B -> C
+//	}
 type Graph struct {
 	// Strict graph; multi-edges forbidden.
 	Strict bool
@@ -91,11 +91,11 @@ func (g *Graph) String() string {
 
 // A Stmt represents a statement, and has one of the following underlying types.
 //
-//    *NodeStmt
-//    *EdgeStmt
-//    *AttrStmt
-//    *Attr
-//    *Subgraph
+//	*NodeStmt
+//	*EdgeStmt
+//	*AttrStmt
+//	*Attr
+//	*Subgraph
 type Stmt interface {
 	fmt.Stringer
 	// isStmt ensures that only statements can be assigned to the Stmt interface.
@@ -108,7 +108,7 @@ type Stmt interface {
 //
 // Examples.
 //
-//    A [color=blue]
+//	A [color=blue]
 type NodeStmt struct {
 	// Node.
 	Node *Node
@@ -139,9 +139,9 @@ func (e *NodeStmt) String() string {
 //
 // Examples.
 //
-//    A -> B
-//    A -> {B C}
-//    A -> B -> C
+//	A -> B
+//	A -> {B C}
+//	A -> B -> C
 type EdgeStmt struct {
 	// Source vertex.
 	From Vertex
@@ -196,9 +196,9 @@ func (e *Edge) String() string {
 //
 // Examples.
 //
-//    graph [rankdir=LR]
-//    node [color=blue fillcolor=red]
-//    edge [minlen=1]
+//	graph [rankdir=LR]
+//	node [color=blue fillcolor=red]
+//	edge [minlen=1]
 type AttrStmt struct {
 	// Graph component kind to which the attributes are assigned.
 	Kind Kind
@@ -250,7 +250,7 @@ func (k Kind) String() string {
 //
 // Examples.
 //
-//    rank=same
+//	rank=same
 type Attr struct {
 	// Attribute key.
 	Key string
@@ -269,7 +269,7 @@ func (a *Attr) String() string {
 //
 // Examples.
 //
-//    subgraph S {A B C}
+//	subgraph S {A B C}
 type Subgraph struct {
 	// Subgraph ID; or empty if none.
 	ID string
@@ -305,8 +305,8 @@ func (*Subgraph) isStmt() {}
 
 // A Vertex represents a vertex, and has one of the following underlying types.
 //
-//    *Node
-//    *Subgraph
+//	*Node
+//	*Subgraph
 type Vertex interface {
 	fmt.Stringer
 	// isVertex ensures that only vertices can be assigned to the Vertex
@@ -320,8 +320,8 @@ type Vertex interface {
 //
 // Examples.
 //
-//    A
-//    A:nw
+//	A
+//	A:nw
 type Node struct {
 	// Node ID.
 	ID string

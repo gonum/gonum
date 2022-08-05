@@ -49,7 +49,7 @@ var _ Method = (*NelderMead)(nil)
 // simplex algorithm for linear programming). The implementation follows the
 // algorithm described in
 //
-//  http://epubs.siam.org/doi/pdf/10.1137/S1052623496303470
+//	http://epubs.siam.org/doi/pdf/10.1137/S1052623496303470
 //
 // If an initial simplex is provided, it is used and initLoc is ignored. If
 // InitialVertices and InitialValues are both nil, an initial simplex will be
@@ -60,7 +60,7 @@ var _ Method = (*NelderMead)(nil)
 // are zero, they will be set automatically based on the dimension according to
 // the recommendations in
 //
-//  http://www.webpages.uidaho.edu/~fuchang/res/ANMS.pdf
+//	http://www.webpages.uidaho.edu/~fuchang/res/ANMS.pdf
 type NelderMead struct {
 	InitialVertices [][]float64
 	InitialValues   []float64

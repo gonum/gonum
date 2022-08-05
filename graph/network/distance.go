@@ -14,7 +14,7 @@ import (
 // Closeness returns the closeness centrality for nodes in the graph g used to
 // construct the given shortest paths.
 //
-//  C(v) = 1 / \sum_u d(u,v)
+//	C(v) = 1 / \sum_u d(u,v)
 //
 // For directed graphs the incoming paths are used. Infinite distances are
 // not considered.
@@ -43,7 +43,7 @@ func Closeness(g graph.Graph, p path.AllShortest) map[int64]float64 {
 // Farness returns the farness for nodes in the graph g used to construct
 // the given shortest paths.
 //
-//  F(v) = \sum_u d(u,v)
+//	F(v) = \sum_u d(u,v)
 //
 // For directed graphs the incoming paths are used. Infinite distances are
 // not considered.
@@ -72,7 +72,7 @@ func Farness(g graph.Graph, p path.AllShortest) map[int64]float64 {
 // Harmonic returns the harmonic centrality for nodes in the graph g used to
 // construct the given shortest paths.
 //
-//  H(v)= \sum_{u ≠ v} 1 / d(u,v)
+//	H(v)= \sum_{u ≠ v} 1 / d(u,v)
 //
 // For directed graphs the incoming paths are used. Infinite distances are
 // not considered.
@@ -103,7 +103,7 @@ func Harmonic(g graph.Graph, p path.AllShortest) map[int64]float64 {
 // Residual returns the Dangalchev's residual closeness for nodes in the graph
 // g used to construct the given shortest paths.
 //
-//  C(v)= \sum_{u ≠ v} 1 / 2^d(u,v)
+//	C(v)= \sum_{u ≠ v} 1 / 2^d(u,v)
 //
 // For directed graphs the incoming paths are used. Infinite distances are
 // not considered.

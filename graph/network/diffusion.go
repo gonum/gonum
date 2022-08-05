@@ -14,7 +14,9 @@ import (
 // h, according to the Laplacian with a diffusion time of t.
 // The resulting heat distribution is returned, written into the map dst and
 // returned,
-//  d = exp(-Lt)×h
+//
+//	d = exp(-Lt)×h
+//
 // where L is the graph Laplacian. Indexing into h and dst is defined by the
 // Laplacian Index field. If dst is nil, a new map is created.
 //
@@ -45,7 +47,9 @@ func Diffuse(dst, h map[int64]float64, by spectral.Laplacian, t float64) map[int
 // DiffuseToEquilibrium performs a heat diffusion across nodes of the
 // graph described by the given Laplacian using the initial heat
 // distribution, h, according to the Laplacian until the update function
-//  h_{n+1} = h_n - L×h_n
+//
+//	h_{n+1} = h_n - L×h_n
+//
 // results in a 2-norm update difference within tol, or iters updates have
 // been made.
 // The resulting heat distribution is returned as eq, written into the map dst,

@@ -11,11 +11,11 @@ import "gonum.org/v1/gonum/blas/blas64"
 //
 // If forward is true a forward permutation is performed:
 //
-//  X[0:m, k[j]] is moved to X[0:m, j] for j = 0, 1, ..., n-1.
+//	X[0:m, k[j]] is moved to X[0:m, j] for j = 0, 1, ..., n-1.
 //
 // otherwise a backward permutation is performed:
 //
-//  X[0:m, j] is moved to X[0:m, k[j]] for j = 0, 1, ..., n-1.
+//	X[0:m, j] is moved to X[0:m, k[j]] for j = 0, 1, ..., n-1.
 //
 // k must have length n, otherwise Dlapmt will panic. k is zero-indexed.
 func (impl Implementation) Dlapmt(forward bool, m, n int, x []float64, ldx int, k []int) {

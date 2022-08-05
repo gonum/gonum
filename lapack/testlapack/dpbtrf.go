@@ -65,8 +65,10 @@ func dpbtrfTest(t *testing.T, impl Dpbtrfer, uplo blas.Uplo, n, kd int, ldab int
 }
 
 // dsbmm computes a symmetric band matrix A
-//  A = Uᵀ*U  if uplo == blas.Upper,
-//  A = L*Lᵀ  if uplo == blas.Lower,
+//
+//	A = Uᵀ*U  if uplo == blas.Upper,
+//	A = L*Lᵀ  if uplo == blas.Lower,
+//
 // where U and L is an upper, respectively lower, triangular band matrix
 // stored on entry in ab. The result is stored in-place into ab.
 func dsbmm(uplo blas.Uplo, n, kd int, ab []float64, ldab int) {

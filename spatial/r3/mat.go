@@ -164,7 +164,8 @@ func (m *Mat) VecCol(j int) Vec {
 
 // Outer calculates the outer product of the vectors x and y,
 // where x and y are treated as column vectors, and stores the result in the receiver.
-//  m = alpha * x * yᵀ
+//
+//	m = alpha * x * yᵀ
 func (m *Mat) Outer(alpha float64, x, y Vec) {
 	ax := alpha * x.X
 	ay := alpha * x.Y
@@ -183,10 +184,11 @@ func (m *Mat) Outer(alpha float64, x, y Vec) {
 }
 
 // Det calculates the determinant of the receiver using the following formula
-//      ⎡a b c⎤
-//  m = ⎢d e f⎥
-//      ⎣g h i⎦
-//  det(m) = a(ei − fh) − b(di − fg) + c(dh − eg)
+//
+//	    ⎡a b c⎤
+//	m = ⎢d e f⎥
+//	    ⎣g h i⎦
+//	det(m) = a(ei − fh) − b(di − fg) + c(dh − eg)
 func (m *Mat) Det() float64 {
 	a := m.At(0, 0)
 	b := m.At(0, 1)
@@ -200,9 +202,10 @@ func (m *Mat) Det() float64 {
 
 // Skew sets the receiver to the 3×3 skew symmetric matrix
 // (right hand system) of v.
-//                  ⎡ 0 -z  y⎤
-//  Skew({x,y,z}) = ⎢ z  0 -x⎥
-//                  ⎣-y  x  0⎦
+//
+//	                ⎡ 0 -z  y⎤
+//	Skew({x,y,z}) = ⎢ z  0 -x⎥
+//	                ⎣-y  x  0⎦
 func (m *Mat) Skew(v Vec) {
 	m.Set(0, 0, 0)
 	m.Set(0, 1, -v.Z)

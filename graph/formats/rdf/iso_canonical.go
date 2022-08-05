@@ -692,11 +692,12 @@ func split(statements []*Statement) [][]*Statement {
 //
 // The correspondence between the parameters for the function in the paper
 // with the implementation here is as follows:
-//  - G = statements
-//  - hash = hash
-//  - P = parts (already sorted by hashBNodesPerSplit)
-//  - G⊥ = lowest
-//  - B = hash.blanks
+//   - G = statements
+//   - hash = hash
+//   - P = parts (already sorted by hashBNodesPerSplit)
+//   - G⊥ = lowest
+//   - B = hash.blanks
+//
 // The additional parameter dist specifies that distinguish should treat
 // coequal trivial parts as a coarse of intermediate part and distinguish
 // the nodes in that merged part.

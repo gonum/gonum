@@ -11,7 +11,9 @@ import (
 
 // Dorglq generates an m×n matrix Q with orthonormal columns defined by the
 // product of elementary reflectors as computed by Dgelqf.
-//  Q = H_0 * H_1 * ... * H_{k-1}
+//
+//	Q = H_0 * H_1 * ... * H_{k-1}
+//
 // Dorglq is the blocked version of Dorgl2 that makes greater use of level-3 BLAS
 // routines.
 //

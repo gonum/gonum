@@ -7,15 +7,17 @@ package gonum
 import "math"
 
 // Dlartg generates a plane rotation so that
-//  [ cs sn] * [f] = [r]
-//  [-sn cs]   [g] = [0]
+//
+//	[ cs sn] * [f] = [r]
+//	[-sn cs]   [g] = [0]
+//
 // where cs*cs + sn*sn = 1.
 //
 // This is a more accurate version of BLAS Drotg, with the other differences
 // that
-//  - if g = 0, then cs = 1 and sn = 0
-//  - if f = 0 and g != 0, then cs = 0 and sn = 1
-//  - r takes the sign of f and so cs is always non-negative
+//   - if g = 0, then cs = 1 and sn = 0
+//   - if f = 0 and g != 0, then cs = 0 and sn = 1
+//   - r takes the sign of f and so cs is always non-negative
 //
 // Dlartg is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dlartg(f, g float64) (cs, sn, r float64) {

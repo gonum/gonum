@@ -51,20 +51,21 @@ var (
 // MarshalBinary encodes the receiver into a binary form and returns the result.
 //
 // Dense is little-endian encoded as follows:
-//   0 -  3  Version = 1          (uint32)
-//   4       'G'                  (byte)
-//   5       'F'                  (byte)
-//   6       'A'                  (byte)
-//   7       0                    (byte)
-//   8 - 15  number of rows       (int64)
-//  16 - 23  number of columns    (int64)
-//  24 - 31  0                    (int64)
-//  32 - 39  0                    (int64)
-//  40 - ..  matrix data elements (float64)
-//           [0,0] [0,1] ... [0,ncols-1]
-//           [1,0] [1,1] ... [1,ncols-1]
-//           ...
-//           [nrows-1,0] ... [nrows-1,ncols-1]
+//
+//	 0 -  3  Version = 1          (uint32)
+//	 4       'G'                  (byte)
+//	 5       'F'                  (byte)
+//	 6       'A'                  (byte)
+//	 7       0                    (byte)
+//	 8 - 15  number of rows       (int64)
+//	16 - 23  number of columns    (int64)
+//	24 - 31  0                    (int64)
+//	32 - 39  0                    (int64)
+//	40 - ..  matrix data elements (float64)
+//	         [0,0] [0,1] ... [0,ncols-1]
+//	         [1,0] [1,1] ... [1,ncols-1]
+//	         ...
+//	         [nrows-1,0] ... [nrows-1,ncols-1]
 func (m Dense) MarshalBinary() ([]byte, error) {
 	bufLen := int64(headerSize) + int64(m.mat.Rows)*int64(m.mat.Cols)*int64(sizeFloat64)
 	if bufLen <= 0 {
@@ -132,10 +133,11 @@ func (m Dense) MarshalBinaryTo(w io.Writer) (int, error) {
 // See MarshalBinary for the on-disk layout.
 //
 // Limited checks on the validity of the binary input are performed:
-//  - ErrShape is returned if the number of rows or columns is negative,
-//  - an error is returned if the resulting Dense matrix is too
-//  big for the current architecture (e.g. a 16GB matrix written by a
-//  64b application and read back from a 32b application.)
+//   - ErrShape is returned if the number of rows or columns is negative,
+//   - an error is returned if the resulting Dense matrix is too
+//     big for the current architecture (e.g. a 16GB matrix written by a
+//     64b application and read back from a 32b application.)
+//
 // UnmarshalBinary does not limit the size of the unmarshaled matrix, and so
 // it should not be used on untrusted data.
 func (m *Dense) UnmarshalBinary(data []byte) error {
@@ -191,10 +193,11 @@ func (m *Dense) UnmarshalBinary(data []byte) error {
 // See MarshalBinary for the on-disk layout.
 //
 // Limited checks on the validity of the binary input are performed:
-//  - ErrShape is returned if the number of rows or columns is negative,
-//  - an error is returned if the resulting Dense matrix is too
-//  big for the current architecture (e.g. a 16GB matrix written by a
-//  64b application and read back from a 32b application.)
+//   - ErrShape is returned if the number of rows or columns is negative,
+//   - an error is returned if the resulting Dense matrix is too
+//     big for the current architecture (e.g. a 16GB matrix written by a
+//     64b application and read back from a 32b application.)
+//
 // UnmarshalBinary does not limit the size of the unmarshaled matrix, and so
 // it should not be used on untrusted data.
 func (m *Dense) UnmarshalBinaryFrom(r io.Reader) (int, error) {
@@ -247,16 +250,16 @@ func (m *Dense) UnmarshalBinaryFrom(r io.Reader) (int, error) {
 //
 // VecDense is little-endian encoded as follows:
 //
-//   0 -  3  Version = 1            (uint32)
-//   4       'G'                    (byte)
-//   5       'F'                    (byte)
-//   6       'A'                    (byte)
-//   7       0                      (byte)
-//   8 - 15  number of elements     (int64)
-//  16 - 23  1                      (int64)
-//  24 - 31  0                      (int64)
-//  32 - 39  0                      (int64)
-//  40 - ..  vector's data elements (float64)
+//	 0 -  3  Version = 1            (uint32)
+//	 4       'G'                    (byte)
+//	 5       'F'                    (byte)
+//	 6       'A'                    (byte)
+//	 7       0                      (byte)
+//	 8 - 15  number of elements     (int64)
+//	16 - 23  1                      (int64)
+//	24 - 31  0                      (int64)
+//	32 - 39  0                      (int64)
+//	40 - ..  vector's data elements (float64)
 func (v VecDense) MarshalBinary() ([]byte, error) {
 	bufLen := int64(headerSize) + int64(v.mat.N)*int64(sizeFloat64)
 	if bufLen <= 0 {
@@ -318,10 +321,11 @@ func (v VecDense) MarshalBinaryTo(w io.Writer) (int, error) {
 // See MarshalBinary for the on-disk layout.
 //
 // Limited checks on the validity of the binary input are performed:
-//  - ErrShape is returned if the number of rows is negative,
-//  - an error is returned if the resulting VecDense is too
-//  big for the current architecture (e.g. a 16GB vector written by a
-//  64b application and read back from a 32b application.)
+//   - ErrShape is returned if the number of rows is negative,
+//   - an error is returned if the resulting VecDense is too
+//     big for the current architecture (e.g. a 16GB vector written by a
+//     64b application and read back from a 32b application.)
+//
 // UnmarshalBinary does not limit the size of the unmarshaled vector, and so
 // it should not be used on untrusted data.
 func (v *VecDense) UnmarshalBinary(data []byte) error {

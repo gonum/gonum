@@ -7,12 +7,16 @@ package gonum
 import "math"
 
 // Dlag2 computes the eigenvalues of a 2×2 generalized eigenvalue problem
-//  A - w*B
+//
+//	A - w*B
+//
 // where B is an upper triangular matrix.
 //
 // Dlag2 uses scaling as necessary to avoid over-/underflow. Scaling results in
 // a modified eigenvalue problem
-//  s*A - w*B
+//
+//	s*A - w*B
+//
 // where s is a non-negative scaling factor chosen so that w, w*B, and s*A do
 // not overflow and, if possible, do not underflow, either.
 //
@@ -22,14 +26,14 @@ import "math"
 // the corresponding exact eigenvalue is sufficiently large.
 //
 // If the eigenvalues are real, then:
-//  - wi is zero,
-//  - the eigenvalues are wr1/scale1 and wr2/scale2.
+//   - wi is zero,
+//   - the eigenvalues are wr1/scale1 and wr2/scale2.
 //
 // If the eigenvalues are complex, then:
-//  - wi is non-negative,
-//  - the eigenvalues are (wr1 ± wi*i)/scale1,
-//  - wr1 = wr2,
-//  - scale1 = scale2.
+//   - wi is non-negative,
+//   - the eigenvalues are (wr1 ± wi*i)/scale1,
+//   - wr1 = wr2,
+//   - scale1 = scale2.
 //
 // Dlag2 assumes that the one-norm of A and B is less than 1/dlamchS. Entries of
 // A less than sqrt(dlamchS)*norm(A) are subject to being treated as zero. The

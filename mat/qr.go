@@ -165,8 +165,10 @@ func (qr *QR) QTo(dst *Dense) {
 // See the documentation for Condition for more information.
 //
 // The minimization problem solved depends on the input parameters.
-//  If trans == false, find X such that ||A*X - B||_2 is minimized.
-//  If trans == true, find the minimum norm solution of Aᵀ * X = B.
+//
+//	If trans == false, find X such that ||A*X - B||_2 is minimized.
+//	If trans == true, find the minimum norm solution of Aᵀ * X = B.
+//
 // The solution matrix, X, is stored in place into dst.
 // SolveTo will panic if the receiver does not contain a factorization.
 func (qr *QR) SolveTo(dst *Dense, trans bool, b Matrix) error {
@@ -232,7 +234,9 @@ func (qr *QR) SolveTo(dst *Dense, trans bool, b Matrix) error {
 }
 
 // SolveVecTo finds a minimum-norm solution to a system of linear equations,
-//  Ax = b.
+//
+//	Ax = b.
+//
 // See QR.SolveTo for the full documentation.
 // SolveVecTo will panic if the receiver does not contain a factorization.
 func (qr *QR) SolveVecTo(dst *VecDense, trans bool, b Vector) error {

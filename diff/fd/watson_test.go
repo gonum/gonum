@@ -14,10 +14,10 @@ import "gonum.org/v1/gonum/mat"
 // derivative methods.
 //
 // References:
-//  - Kowalik, J.S., Osborne, M.R.: Methods for Unconstrained Optimization
-//    Problems. Elsevier North-Holland, New York, 1968
-//  - More, J., Garbow, B.S., Hillstrom, K.E.: Testing unconstrained
-//    optimization software. ACM Trans Math Softw 7 (1981), 17-41
+//   - Kowalik, J.S., Osborne, M.R.: Methods for Unconstrained Optimization
+//     Problems. Elsevier North-Holland, New York, 1968
+//   - More, J., Garbow, B.S., Hillstrom, K.E.: Testing unconstrained
+//     optimization software. ACM Trans Math Softw 7 (1981), 17-41
 type Watson struct{}
 
 func (Watson) Func(x []float64) (sum float64) {

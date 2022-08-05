@@ -19,9 +19,13 @@ import (
 // quasi-triangular, although this is not checked.
 //
 // It must hold that
-//  0 <= ilo <= max(0,ihi), and ihi < n,
+//
+//	0 <= ilo <= max(0,ihi), and ihi < n,
+//
 // and that
-//  H[ilo,ilo-1] == 0,  if ilo > 0,
+//
+//	H[ilo,ilo-1] == 0,  if ilo > 0,
+//
 // otherwise Dlahqr will panic.
 //
 // If unconverged is zero on return, wr[ilo:ihi+1] and wi[ilo:ihi+1] will contain
@@ -37,7 +41,9 @@ import (
 //
 // z and ldz represent an n×n matrix Z. If wantz is true, the transformations
 // will be applied to the submatrix Z[iloz:ihiz+1,ilo:ihi+1] and it must hold that
-//  0 <= iloz <= ilo, and ihi <= ihiz < n.
+//
+//	0 <= iloz <= ilo, and ihi <= ihiz < n.
+//
 // If wantz is false, z is not referenced.
 //
 // unconverged indicates whether Dlahqr computed all the eigenvalues ilo to ihi
@@ -58,7 +64,9 @@ import (
 // which have been successfully computed.
 //
 // If unconverged is positive and wantt is true, then on return
-//  (initial H)*U = U*(final H),   (*)
+//
+//	(initial H)*U = U*(final H),   (*)
+//
 // where U is an orthogonal matrix. The final H is upper Hessenberg and
 // H[unconverged:ihi+1,unconverged:ihi+1] is upper quasi-triangular.
 //
@@ -67,7 +75,9 @@ import (
 // H[ilo:unconverged,ilo:unconverged].
 //
 // If unconverged is positive and wantz is true, then on return
-//  (final Z) = (initial Z)*U,
+//
+//	(final Z) = (initial Z)*U,
+//
 // where U is the orthogonal matrix in (*) regardless of the value of wantt.
 //
 // Dlahqr is an internal routine. It is exported for testing purposes.

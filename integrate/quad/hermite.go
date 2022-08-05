@@ -13,7 +13,8 @@ import (
 
 // Hermite generates sample locations and weights for performing quadrature with
 // a squared-exponential weight
-//  int_-inf^inf e^(-x^2) f(x) dx .
+//
+//	int_-inf^inf e^(-x^2) f(x) dx .
 type Hermite struct{}
 
 func (h Hermite) FixedLocations(x, weight []float64, min, max float64) {

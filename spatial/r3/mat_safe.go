@@ -57,9 +57,10 @@ func Eye() *Mat {
 }
 
 // Skew returns the 3×3 skew symmetric matrix (right hand system) of v.
-//                  ⎡ 0 -z  y⎤
-//  Skew({x,y,z}) = ⎢ z  0 -x⎥
-//                  ⎣-y  x  0⎦
+//
+//	                ⎡ 0 -z  y⎤
+//	Skew({x,y,z}) = ⎢ z  0 -x⎥
+//	                ⎣-y  x  0⎦
 //
 // DEPRECATED: use Mat.Skew()
 func Skew(v Vec) (M *Mat) {

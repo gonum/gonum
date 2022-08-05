@@ -22,8 +22,7 @@ import (
 // is γ as defined in Reichardt and Bornholdt doi:10.1103/PhysRevE.74.016110.
 // qDirected will panic if g has any edge with negative edge weight.
 //
-//  Q = 1/m \sum_{ij} [ A_{ij} - (\gamma k_i^in k_j^out)/m ] \delta(c_i,c_j)
-//
+//	Q = 1/m \sum_{ij} [ A_{ij} - (\gamma k_i^in k_j^out)/m ] \delta(c_i,c_j)
 func qDirected(g graph.Directed, communities [][]graph.Node, resolution float64) float64 {
 	nodes := graph.NodesOf(g.Nodes())
 	weight := positiveWeightFuncFor(g)

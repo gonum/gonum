@@ -22,7 +22,7 @@ const (
 // The binomial coefficient, C(n,k), is the number of unordered combinations of
 // k elements in a set that is n elements big, and is defined as
 //
-//  C(n,k) = n!/((n-k)!k!)
+//	C(n,k) = n!/((n-k)!k!)
 //
 // n and k must be non-negative with n >= k, otherwise Binomial will panic.
 // No check is made for overflow.
@@ -46,7 +46,9 @@ func Binomial(n, k int) int {
 
 // GeneralizedBinomial returns the generalized binomial coefficient of (n, k),
 // defined as
-//  Γ(n+1) / (Γ(k+1) Γ(n-k+1))
+//
+//	Γ(n+1) / (Γ(k+1) Γ(n-k+1))
+//
 // where Γ is the Gamma function. GeneralizedBinomial is useful for continuous
 // relaxations of the binomial coefficient, or when the binomial coefficient value
 // may overflow int. In the latter case, one may use math/big for an exact
@@ -274,14 +276,18 @@ func IndexToCombination(dst []int, idx, n, k int) []int {
 // Cartesian returns the Cartesian product of the slices in data. The Cartesian
 // product of two sets is the set of all combinations of the items. For example,
 // given the input
-//  []int{2, 3, 1}
+//
+//	[]int{2, 3, 1}
+//
 // the returned matrix will be
-//  [ 0 0 0 ]
-//  [ 0 1 0 ]
-//  [ 0 2 0 ]
-//  [ 1 0 0 ]
-//  [ 1 1 0 ]
-//  [ 1 2 0 ]
+//
+//	[ 0 0 0 ]
+//	[ 0 1 0 ]
+//	[ 0 2 0 ]
+//	[ 1 0 0 ]
+//	[ 1 1 0 ]
+//	[ 1 2 0 ]
+//
 // Cartesian panics if any of the provided lengths are less than 1.
 func Cartesian(lens []int) [][]int {
 	rows := Card(lens)

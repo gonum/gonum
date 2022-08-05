@@ -12,7 +12,9 @@ package cephes
 import "math"
 
 // polevl evaluates a polynomial of degree N
-//  y = c_0 + c_1 x_1 + c_2 x_2^2 ...
+//
+//	y = c_0 + c_1 x_1 + c_2 x_2^2 ...
+//
 // where the coefficients are stored in reverse order, i.e. coef[0] = c_n and
 // coef[n] = c_0.
 func polevl(x float64, coef []float64, n int) float64 {

@@ -15,11 +15,14 @@ import "math"
 // Ackley implements the Ackley function, a function of arbitrary dimension that
 // has many local minima. It has a single global minimum of 0 at 0. Its typical
 // domain is the hypercube of [-32.768, 32.768]^d.
-//  f(x) = -20 * exp(-0.2 sqrt(1/d sum_i x_i^2)) - exp(1/d sum_i cos(2π x_i)) + 20 + exp(1)
+//
+//	f(x) = -20 * exp(-0.2 sqrt(1/d sum_i x_i^2)) - exp(1/d sum_i cos(2π x_i)) + 20 + exp(1)
+//
 // where d is the input dimension.
 //
 // Reference:
-//  https://www.sfu.ca/~ssurjano/ackley.html (obtained June 2017)
+//
+//	https://www.sfu.ca/~ssurjano/ackley.html (obtained June 2017)
 type Ackley struct{}
 
 func (Ackley) Func(x []float64) float64 {
@@ -35,9 +38,12 @@ func (Ackley) Func(x []float64) float64 {
 // Bukin6 implements Bukin's 6th function. The function is two-dimensional, with
 // the typical domain as x_0 ∈ [-15, -5], x_1 ∈ [-3, 3]. The function has a unique
 // global minimum at [-10, 1], and many local minima.
-//  f(x) = 100 * sqrt(|x_1 - 0.01*x_0^2|) + 0.01*|x_0+10|
+//
+//	f(x) = 100 * sqrt(|x_1 - 0.01*x_0^2|) + 0.01*|x_0+10|
+//
 // Reference:
-//  https://www.sfu.ca/~ssurjano/bukin6.html (obtained June 2017)
+//
+//	https://www.sfu.ca/~ssurjano/bukin6.html (obtained June 2017)
 type Bukin6 struct{}
 
 func (Bukin6) Func(x []float64) float64 {
@@ -50,13 +56,18 @@ func (Bukin6) Func(x []float64) float64 {
 // CamelThree implements the three-hump camel function, a two-dimensional function
 // with three local minima, one of which is global.
 // The function is given by
-//  f(x) = 2*x_0^2 - 1.05*x_0^4 + x_0^6/6 + x_0*x_1 + x_1^2
+//
+//	f(x) = 2*x_0^2 - 1.05*x_0^4 + x_0^6/6 + x_0*x_1 + x_1^2
+//
 // with the global minimum at
-//  x^* = (0, 0)
-//  f(x^*) = 0
+//
+//	x^* = (0, 0)
+//	f(x^*) = 0
+//
 // The typical domain is x_i ∈ [-5, 5] for all i.
 // Reference:
-//  https://www.sfu.ca/~ssurjano/camel3.html (obtained December 2017)
+//
+//	https://www.sfu.ca/~ssurjano/camel3.html (obtained December 2017)
 type CamelThree struct{}
 
 func (c CamelThree) Func(x []float64) float64 {
@@ -73,13 +84,18 @@ func (c CamelThree) Func(x []float64) float64 {
 // CamelSix implements the six-hump camel function, a two-dimensional function.
 // with six local minima, two of which are global.
 // The function is given by
-//  f(x) = (4 - 2.1*x_0^2 + x_0^4/3)*x_0^2 + x_0*x_1 + (-4 + 4*x_1^2)*x_1^2
+//
+//	f(x) = (4 - 2.1*x_0^2 + x_0^4/3)*x_0^2 + x_0*x_1 + (-4 + 4*x_1^2)*x_1^2
+//
 // with the global minima at
-//  x^* = (0.0898, -0.7126), (-0.0898, 0.7126)
-//  f(x^*) = -1.0316
+//
+//	x^* = (0.0898, -0.7126), (-0.0898, 0.7126)
+//	f(x^*) = -1.0316
+//
 // The typical domain is x_0 ∈ [-3, 3], x_1 ∈ [-2, 2].
 // Reference:
-//  https://www.sfu.ca/~ssurjano/camel6.html (obtained December 2017)
+//
+//	https://www.sfu.ca/~ssurjano/camel6.html (obtained December 2017)
 type CamelSix struct{}
 
 func (c CamelSix) Func(x []float64) float64 {
@@ -97,9 +113,12 @@ func (c CamelSix) Func(x []float64) float64 {
 // is a two-dimensional function with many local minima, and four global minima
 // at (±1.3491, ±1.3491). The function is typically evaluated in the square
 // [-10,10]^2.
-//  f(x) = -0.001(|sin(x_0)sin(x_1)exp(|100-sqrt((x_0^2+x_1^2)/π)|)|+1)^0.1
+//
+//	f(x) = -0.001(|sin(x_0)sin(x_1)exp(|100-sqrt((x_0^2+x_1^2)/π)|)|+1)^0.1
+//
 // Reference:
-//  https://www.sfu.ca/~ssurjano/crossit.html (obtained June 2017)
+//
+//	https://www.sfu.ca/~ssurjano/crossit.html (obtained June 2017)
 type CrossInTray struct{}
 
 func (CrossInTray) Func(x []float64) float64 {
@@ -115,13 +134,18 @@ func (CrossInTray) Func(x []float64) float64 {
 // DixonPrice implements the DixonPrice function, a function of arbitrary dimension
 // Its typical domain is the hypercube of [-10, 10]^d.
 // The function is given by
-//  f(x) = (x_0-1)^2 + \sum_{i=1}^{d-1} (i+1) * (2*x_i^2-x_{i-1})^2
+//
+//	f(x) = (x_0-1)^2 + \sum_{i=1}^{d-1} (i+1) * (2*x_i^2-x_{i-1})^2
+//
 // where d is the input dimension. There is a single global minimum, which has
 // a location and value of
-//  x_i^* = 2^{-(2^{i+1}-2)/(2^{i+1})} for i = 0, ..., d-1.
-//  f(x^*) = 0
+//
+//	x_i^* = 2^{-(2^{i+1}-2)/(2^{i+1})} for i = 0, ..., d-1.
+//	f(x^*) = 0
+//
 // Reference:
-//  https://www.sfu.ca/~ssurjano/dixonpr.html (obtained June 2017)
+//
+//	https://www.sfu.ca/~ssurjano/dixonpr.html (obtained June 2017)
 type DixonPrice struct{}
 
 func (DixonPrice) Func(x []float64) float64 {
@@ -139,9 +163,12 @@ func (DixonPrice) Func(x []float64) float64 {
 // DropWave implements the drop-wave function, a two-dimensional function with
 // many local minima and one global minimum at 0. The function is typically evaluated
 // in the square [-5.12, 5.12]^2.
-//  f(x) = - (1+cos(12*sqrt(x0^2+x1^2))) / (0.5*(x0^2+x1^2)+2)
+//
+//	f(x) = - (1+cos(12*sqrt(x0^2+x1^2))) / (0.5*(x0^2+x1^2)+2)
+//
 // Reference:
-//  https://www.sfu.ca/~ssurjano/drop.html (obtained June 2017)
+//
+//	https://www.sfu.ca/~ssurjano/drop.html (obtained June 2017)
 type DropWave struct{}
 
 func (DropWave) Func(x []float64) float64 {
@@ -158,9 +185,12 @@ func (DropWave) Func(x []float64) float64 {
 // Eggholder implements the Eggholder function, a two-dimensional function with
 // many local minima and one global minimum at [512, 404.2319]. The function
 // is typically evaluated in the square [-512, 512]^2.
-//  f(x) = -(x_1+47)*sin(sqrt(|x_1+x_0/2+47|))-x_1*sin(sqrt(|x_0-(x_1+47)|))
+//
+//	f(x) = -(x_1+47)*sin(sqrt(|x_1+x_0/2+47|))-x_1*sin(sqrt(|x_0-(x_1+47)|))
+//
 // Reference:
-//  https://www.sfu.ca/~ssurjano/egg.html (obtained June 2017)
+//
+//	https://www.sfu.ca/~ssurjano/egg.html (obtained June 2017)
 type Eggholder struct{}
 
 func (Eggholder) Func(x []float64) float64 {
@@ -175,9 +205,12 @@ func (Eggholder) Func(x []float64) float64 {
 
 // GramacyLee implements the Gramacy-Lee function, a one-dimensional function
 // with many local minima. The function is typically evaluated on the domain [0.5, 2.5].
-//  f(x) = sin(10πx)/(2x) + (x-1)^4
+//
+//	f(x) = sin(10πx)/(2x) + (x-1)^4
+//
 // Reference:
-//  https://www.sfu.ca/~ssurjano/grlee12.html (obtained June 2017)
+//
+//	https://www.sfu.ca/~ssurjano/grlee12.html (obtained June 2017)
 type GramacyLee struct{}
 
 func (GramacyLee) Func(x []float64) float64 {
@@ -191,11 +224,14 @@ func (GramacyLee) Func(x []float64) float64 {
 // Griewank implements the Griewank function, a function of arbitrary dimension that
 // has many local minima. It has a single global minimum of 0 at 0. Its typical
 // domain is the hypercube of [-600, 600]^d.
-//  f(x) = \sum_i x_i^2/4000 - \prod_i cos(x_i/sqrt(i)) + 1
+//
+//	f(x) = \sum_i x_i^2/4000 - \prod_i cos(x_i/sqrt(i)) + 1
+//
 // where d is the input dimension.
 //
 // Reference:
-//  https://www.sfu.ca/~ssurjano/griewank.html (obtained June 2017)
+//
+//	https://www.sfu.ca/~ssurjano/griewank.html (obtained June 2017)
 type Griewank struct{}
 
 func (Griewank) Func(x []float64) float64 {
@@ -211,9 +247,12 @@ func (Griewank) Func(x []float64) float64 {
 // HolderTable implements the Holder table function. The Holder table function
 // is a two-dimensional function with many local minima, and four global minima
 // at (±8.05502, ±9.66459). The function is typically evaluated in the square [-10,10]^2.
-//  f(x) = -|sin(x_0)cos(x1)exp(|1-sqrt(x_0^2+x1^2)/π|)|
+//
+//	f(x) = -|sin(x_0)cos(x1)exp(|1-sqrt(x_0^2+x1^2)/π|)|
+//
 // Reference:
-//  https://www.sfu.ca/~ssurjano/holder.html (obtained June 2017)
+//
+//	https://www.sfu.ca/~ssurjano/holder.html (obtained June 2017)
 type HolderTable struct{}
 
 func (HolderTable) Func(x []float64) float64 {
@@ -228,11 +267,14 @@ func (HolderTable) Func(x []float64) float64 {
 // Langermann2 implements the two-dimensional version of the Langermann function.
 // The Langermann function has many local minima. The function is typically
 // evaluated in the square [0,10]^2.
-//  f(x) = \sum_1^5 c_i exp(-(1/π)\sum_{j=1}^2(x_j-A_{ij})^2) * cos(π\sum_{j=1}^2 (x_j - A_{ij})^2)
-//  c = [5]float64{1,2,5,2,3}
-//  A = [5][2]float64{{3,5},{5,2},{2,1},{1,4},{7,9}}
+//
+//	f(x) = \sum_1^5 c_i exp(-(1/π)\sum_{j=1}^2(x_j-A_{ij})^2) * cos(π\sum_{j=1}^2 (x_j - A_{ij})^2)
+//	c = [5]float64{1,2,5,2,3}
+//	A = [5][2]float64{{3,5},{5,2},{2,1},{1,4},{7,9}}
+//
 // Reference:
-//  https://www.sfu.ca/~ssurjano/langer.html (obtained June 2017)
+//
+//	https://www.sfu.ca/~ssurjano/langer.html (obtained June 2017)
 type Langermann2 struct{}
 
 func (Langermann2) Func(x []float64) float64 {
@@ -258,13 +300,16 @@ func (Langermann2) Func(x []float64) float64 {
 // Levy implements the Levy function, a function of arbitrary dimension that
 // has many local minima. It has a single global minimum of 0 at 1. Its typical
 // domain is the hypercube of [-10, 10]^d.
-//  f(x) = sin^2(π*w_0) + \sum_{i=0}^{d-2}(w_i-1)^2*[1+10sin^2(π*w_i+1)] +
-//            (w_{d-1}-1)^2*[1+sin^2(2π*w_{d-1})]
-//   w_i = 1 + (x_i-1)/4
+//
+//	f(x) = sin^2(π*w_0) + \sum_{i=0}^{d-2}(w_i-1)^2*[1+10sin^2(π*w_i+1)] +
+//	          (w_{d-1}-1)^2*[1+sin^2(2π*w_{d-1})]
+//	 w_i = 1 + (x_i-1)/4
+//
 // where d is the input dimension.
 //
 // Reference:
-//  https://www.sfu.ca/~ssurjano/levy.html (obtained June 2017)
+//
+//	https://www.sfu.ca/~ssurjano/levy.html (obtained June 2017)
 type Levy struct{}
 
 func (Levy) Func(x []float64) float64 {
@@ -284,9 +329,12 @@ func (Levy) Func(x []float64) float64 {
 // Levy13 implements the Levy-13 function, a two-dimensional function
 // with many local minima. It has a single global minimum of 0 at 1. Its typical
 // domain is the square [-10, 10]^2.
-//  f(x) = sin^2(3π*x_0) + (x_0-1)^2*[1+sin^2(3π*x_1)] + (x_1-1)^2*[1+sin^2(2π*x_1)]
+//
+//	f(x) = sin^2(3π*x_0) + (x_0-1)^2*[1+sin^2(3π*x_1)] + (x_1-1)^2*[1+sin^2(2π*x_1)]
+//
 // Reference:
-//  https://www.sfu.ca/~ssurjano/levy13.html (obtained June 2017)
+//
+//	https://www.sfu.ca/~ssurjano/levy13.html (obtained June 2017)
 type Levy13 struct{}
 
 func (Levy13) Func(x []float64) float64 {
@@ -304,11 +352,14 @@ func (Levy13) Func(x []float64) float64 {
 // Rastrigin implements the Rastrigen function, a function of arbitrary dimension
 // that has many local minima. It has a single global minimum of 0 at 0. Its typical
 // domain is the hypercube of [-5.12, 5.12]^d.
-//  f(x) = 10d + \sum_i [x_i^2 - 10cos(2π*x_i)]
+//
+//	f(x) = 10d + \sum_i [x_i^2 - 10cos(2π*x_i)]
+//
 // where d is the input dimension.
 //
 // Reference:
-//  https://www.sfu.ca/~ssurjano/rastr.html (obtained June 2017)
+//
+//	https://www.sfu.ca/~ssurjano/rastr.html (obtained June 2017)
 type Rastrigin struct{}
 
 func (Rastrigin) Func(x []float64) float64 {
@@ -322,9 +373,12 @@ func (Rastrigin) Func(x []float64) float64 {
 // Schaffer2 implements the second Schaffer function, a two-dimensional function
 // with many local minima. It has a single global minimum of 0 at 0. Its typical
 // domain is the square [-100, 100]^2.
-//  f(x) = 0.5 + (sin^2(x_0^2-x_1^2)-0.5) / (1+0.001*(x_0^2+x_1^2))^2
+//
+//	f(x) = 0.5 + (sin^2(x_0^2-x_1^2)-0.5) / (1+0.001*(x_0^2+x_1^2))^2
+//
 // Reference:
-//  https://www.sfu.ca/~ssurjano/schaffer2.html (obtained June 2017)
+//
+//	https://www.sfu.ca/~ssurjano/schaffer2.html (obtained June 2017)
 type Schaffer2 struct{}
 
 func (Schaffer2) Func(x []float64) float64 {
@@ -340,9 +394,12 @@ func (Schaffer2) Func(x []float64) float64 {
 
 // Schaffer4 implements the fourth Schaffer function, a two-dimensional function
 // with many local minima. Its typical domain is the square [-100, 100]^2.
-//  f(x) = 0.5 + (cos(sin(|x_0^2-x_1^2|))-0.5) / (1+0.001*(x_0^2+x_1^2))^2
+//
+//	f(x) = 0.5 + (cos(sin(|x_0^2-x_1^2|))-0.5) / (1+0.001*(x_0^2+x_1^2))^2
+//
 // Reference:
-//  https://www.sfu.ca/~ssurjano/schaffer4.html (obtained June 2017)
+//
+//	https://www.sfu.ca/~ssurjano/schaffer4.html (obtained June 2017)
 type Schaffer4 struct{}
 
 func (Schaffer4) Func(x []float64) float64 {
@@ -357,11 +414,14 @@ func (Schaffer4) Func(x []float64) float64 {
 
 // Schwefel implements the Schwefel function, a function of arbitrary dimension
 // that has many local minima. Its typical domain is the hypercube of [-500, 500]^d.
-//  f(x) = 418.9829*d - \sum_i x_i*sin(sqrt(|x_i|))
+//
+//	f(x) = 418.9829*d - \sum_i x_i*sin(sqrt(|x_i|))
+//
 // where d is the input dimension.
 //
 // Reference:
-//  https://www.sfu.ca/~ssurjano/schwef.html (obtained June 2017)
+//
+//	https://www.sfu.ca/~ssurjano/schwef.html (obtained June 2017)
 type Schwefel struct{}
 
 func (Schwefel) Func(x []float64) float64 {
@@ -375,9 +435,12 @@ func (Schwefel) Func(x []float64) float64 {
 // Shubert implements the Shubert function, a two-dimensional function
 // with many local minima and many global minima. Its typical domain is the
 // square [-10, 10]^2.
-//  f(x) = (sum_{i=1}^5 i cos((i+1)*x_0+i)) * (\sum_{i=1}^5 i cos((i+1)*x_1+i))
+//
+//	f(x) = (sum_{i=1}^5 i cos((i+1)*x_0+i)) * (\sum_{i=1}^5 i cos((i+1)*x_1+i))
+//
 // Reference:
-//  https://www.sfu.ca/~ssurjano/shubert.html (obtained June 2017)
+//
+//	https://www.sfu.ca/~ssurjano/shubert.html (obtained June 2017)
 type Shubert struct{}
 
 func (Shubert) Func(x []float64) float64 {

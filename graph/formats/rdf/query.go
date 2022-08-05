@@ -237,14 +237,13 @@ func (q Query) Not(p Query) Query {
 // is wanted, fn should return its input and false when the partial
 // traversal returns an empty result.
 //
-// 	result := start.Repeat(func(q rdf.Query) (rdf.Query, bool) {
-// 		r := q.Out(condition)
-// 		if r.Len() == 0 {
-// 			return q, false
-// 		}
-// 		return r, true
-// 	}).Result()
-//
+//	result := start.Repeat(func(q rdf.Query) (rdf.Query, bool) {
+//		r := q.Out(condition)
+//		if r.Len() == 0 {
+//			return q, false
+//		}
+//		return r, true
+//	}).Result()
 func (q Query) Repeat(fn func(Query) (q Query, ok bool)) Query {
 	for {
 		var ok bool

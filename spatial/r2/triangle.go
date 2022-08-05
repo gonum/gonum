@@ -79,8 +79,9 @@ type line [2]Vec
 
 // vecOnLine takes a value between 0 and 1 to linearly
 // interpolate a point on the line.
-//  vecOnLine(0) returns l[0]
-//  vecOnLine(1) returns l[1]
+//
+//	vecOnLine(0) returns l[0]
+//	vecOnLine(1) returns l[1]
 func (l line) vecOnLine(t float64) Vec {
 	lineDir := Sub(l[1], l[0])
 	return Add(l[0], Scale(t, lineDir))

@@ -319,9 +319,10 @@ func (d *DiagDense) Trace() float64 {
 }
 
 // Norm returns the specified norm of the receiver. Valid norms are:
-//  1 or Inf - The maximum diagonal element magnitude
-//  2 - The Frobenius norm, the square root of the sum of the squares of
-//      the diagonal elements
+//
+//	1 or Inf - The maximum diagonal element magnitude
+//	2 - The Frobenius norm, the square root of the sum of the squares of
+//	    the diagonal elements
 //
 // Norm will panic with ErrNormOrder if an illegal norm is specified and with
 // ErrZeroLength if the receiver has zero size.

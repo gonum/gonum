@@ -11,7 +11,9 @@ import (
 
 // Dsytd2 reduces a symmetric n×n matrix A to symmetric tridiagonal form T by
 // an orthogonal similarity transformation
-//  Qᵀ * A * Q = T
+//
+//	Qᵀ * A * Q = T
+//
 // On entry, the matrix is contained in the specified triangle of a. On exit,
 // if uplo == blas.Upper, the diagonal and first super-diagonal of a are
 // overwritten with the elements of T. The elements above the first super-diagonal
@@ -24,28 +26,37 @@ import (
 //
 // Q is represented as a product of elementary reflectors.
 // If uplo == blas.Upper
-//  Q = H_{n-2} * ... * H_1 * H_0
+//
+//	Q = H_{n-2} * ... * H_1 * H_0
+//
 // and if uplo == blas.Lower
-//  Q = H_0 * H_1 * ... * H_{n-2}
+//
+//	Q = H_0 * H_1 * ... * H_{n-2}
+//
 // where
-//  H_i = I - tau * v * vᵀ
+//
+//	H_i = I - tau * v * vᵀ
+//
 // where tau is stored in tau[i], and v is stored in a.
 //
 // If uplo == blas.Upper, v[0:i-1] is stored in A[0:i-1,i+1], v[i] = 1, and
 // v[i+1:] = 0. The elements of a are
-//  [ d   e  v2  v3  v4]
-//  [     d   e  v3  v4]
-//  [         d   e  v4]
-//  [             d   e]
-//  [                 d]
+//
+//	[ d   e  v2  v3  v4]
+//	[     d   e  v3  v4]
+//	[         d   e  v4]
+//	[             d   e]
+//	[                 d]
+//
 // If uplo == blas.Lower, v[0:i+1] = 0, v[i+1] = 1, and v[i+2:] is stored in
 // A[i+2:n,i].
 // The elements of a are
-//  [ d                ]
-//  [ e   d            ]
-//  [v1   e   d        ]
-//  [v1  v2   e   d    ]
-//  [v1  v2  v3   e   d]
+//
+//	[ d                ]
+//	[ e   d            ]
+//	[v1   e   d        ]
+//	[v1  v2   e   d    ]
+//	[v1  v2  v3   e   d]
 //
 // Dsytd2 is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dsytd2(uplo blas.Uplo, n int, a []float64, lda int, d, e, tau []float64) {

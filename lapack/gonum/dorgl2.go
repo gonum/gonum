@@ -11,7 +11,9 @@ import (
 
 // Dorgl2 generates an m×n matrix Q with orthonormal rows defined by the
 // first m rows product of elementary reflectors as computed by Dgelqf.
-//  Q = H_0 * H_1 * ... * H_{k-1}
+//
+//	Q = H_0 * H_1 * ... * H_{k-1}
+//
 // len(tau) >= k, 0 <= k <= m, 0 <= m <= n, len(work) >= m.
 // Dorgl2 will panic if these conditions are not met.
 //

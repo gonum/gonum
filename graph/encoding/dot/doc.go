@@ -11,7 +11,7 @@
 //
 // DOT grammar: http://www.graphviz.org/doc/info/lang.html
 //
-// Attribute quoting
+// # Attribute quoting
 //
 // Attributes and IDs are quoted if needed during marshalling, to conform with
 // valid DOT syntax. Quoted IDs and attributes are unquoted during unmarshaling,

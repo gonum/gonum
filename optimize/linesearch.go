@@ -181,9 +181,9 @@ func (ls *LinesearchMethod) initNextLinesearch(loc *Location) (Operation, error)
 // ArmijoConditionMet returns true if the Armijo condition (aka sufficient
 // decrease) has been met. Under normal conditions, the following should be
 // true, though this is not enforced:
-//  - initGrad < 0
-//  - step > 0
-//  - 0 < decrease < 1
+//   - initGrad < 0
+//   - step > 0
+//   - 0 < decrease < 1
 func ArmijoConditionMet(currObj, initObj, initGrad, step, decrease float64) bool {
 	return currObj <= initObj+decrease*step*initGrad
 }
@@ -193,9 +193,9 @@ func ArmijoConditionMet(currObj, initObj, initGrad, step, decrease float64) bool
 // value, and sufficient decrease in the magnitude of the projected gradient.
 // Under normal conditions, the following should be true, though this is not
 // enforced:
-//  - initGrad < 0
-//  - step > 0
-//  - 0 <= decrease < curvature < 1
+//   - initGrad < 0
+//   - step > 0
+//   - 0 <= decrease < curvature < 1
 func StrongWolfeConditionsMet(currObj, currGrad, initObj, initGrad, step, decrease, curvature float64) bool {
 	if currObj > initObj+decrease*step*initGrad {
 		return false
@@ -207,9 +207,9 @@ func StrongWolfeConditionsMet(currObj, currGrad, initObj, initGrad, step, decrea
 // The weak Wolfe conditions ensure sufficient decrease in the function value,
 // and sufficient decrease in the value of the projected gradient. Under normal
 // conditions, the following should be true, though this is not enforced:
-//  - initGrad < 0
-//  - step > 0
-//  - 0 <= decrease < curvature< 1
+//   - initGrad < 0
+//   - step > 0
+//   - 0 <= decrease < curvature< 1
 func WeakWolfeConditionsMet(currObj, currGrad, initObj, initGrad, step, decrease, curvature float64) bool {
 	if currObj > initObj+decrease*step*initGrad {
 		return false

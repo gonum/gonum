@@ -13,8 +13,10 @@ import (
 
 // Dlatrs solves a triangular system of equations scaled to prevent overflow. It
 // solves
-//  A * x = scale * b if trans == blas.NoTrans
-//  Aᵀ * x = scale * b if trans == blas.Trans
+//
+//	A * x = scale * b if trans == blas.NoTrans
+//	Aᵀ * x = scale * b if trans == blas.Trans
+//
 // where the scale s is set for numeric stability.
 //
 // A is an n×n triangular matrix. On entry, the slice x contains the values of

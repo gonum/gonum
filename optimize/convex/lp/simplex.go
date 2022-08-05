@@ -57,9 +57,11 @@ const (
 
 // Simplex solves a linear program in standard form using Danzig's Simplex
 // algorithm. The standard form of a linear program is:
-//  minimize	cᵀ x
-//  s.t. 		A*x = b
-//  			x >= 0 .
+//
+//	minimize	cᵀ x
+//	s.t. 		A*x = b
+//				x >= 0 .
+//
 // The input tol sets how close to the optimal solution is found (specifically,
 // when the maximal reduced cost is below tol). An error will be returned if the
 // problem is infeasible or unbounded. In rare cases, numeric errors can cause
@@ -80,9 +82,12 @@ const (
 // Simplex will panic.
 //
 // A description of the Simplex algorithm can be found in Ch. 8 of
-//  Strang, Gilbert. "Linear Algebra and Applications." Academic, New York (1976).
+//
+//	Strang, Gilbert. "Linear Algebra and Applications." Academic, New York (1976).
+//
 // For a detailed video introduction, see lectures 11-13 of UC Math 352
-//  https://www.youtube.com/watch?v=ESzYPFkY3og&index=11&list=PLh464gFUoJWOmBYla3zbZbc4nv2AXez6X.
+//
+//	https://www.youtube.com/watch?v=ESzYPFkY3og&index=11&list=PLh464gFUoJWOmBYla3zbZbc4nv2AXez6X.
 func Simplex(c []float64, A mat.Matrix, b []float64, tol float64, initialBasic []int) (optF float64, optX []float64, err error) {
 	ans, x, _, err := simplex(initialBasic, c, A, b, tol)
 	return ans, x, err

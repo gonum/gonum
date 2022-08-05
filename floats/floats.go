@@ -361,7 +361,7 @@ func HasNaN(s []float64) bool {
 // will return all zeros if l or u is zero.
 // Also returns the mutated slice dst, so that it can be used in range, like:
 //
-//     for i, x := range LogSpan(dst, l, u) { ... }
+//	for i, x := range LogSpan(dst, l, u) { ... }
 func LogSpan(dst []float64, l, u float64) []float64 {
 	Span(dst, math.Log(l), math.Log(u))
 	for i := range dst {
@@ -681,7 +681,7 @@ func ScaleTo(dst []float64, c float64, s []float64) []float64 {
 // Span also returns the mutated slice dst, so that it can be used in range expressions,
 // like:
 //
-//     for i, x := range Span(dst, l, u) { ... }
+//	for i, x := range Span(dst, l, u) { ... }
 func Span(dst []float64, l, u float64) []float64 {
 	n := len(dst)
 	if n < 2 {
@@ -765,8 +765,8 @@ func Sum(s []float64) float64 {
 }
 
 // Within returns the first index i where s[i] <= v < s[i+1]. Within panics if:
-//  - len(s) < 2
-//  - s is not sorted
+//   - len(s) < 2
+//   - s is not sorted
 func Within(s []float64, v float64) int {
 	if len(s) < 2 {
 		panic(shortSpan)

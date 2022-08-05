@@ -107,7 +107,8 @@ func dlatbsTest(t *testing.T, impl Dlatbser, rnd *rand.Rand, kind int, uplo blas
 // dlatbsResidual returns the residual for the solution to a scaled triangular
 // system of equations  A*x = s*b  or  Aᵀ*x = s*b  when A is an n×n triangular
 // band matrix with kd super- or sub-diagonals. The residual is computed as
-//  norm( op(A)*x - scale*b ) / ( norm(op(A)) * norm(x) ).
+//
+//	norm( op(A)*x - scale*b ) / ( norm(op(A)) * norm(x) ).
 //
 // This function corresponds to DTBT03 in Reference LAPACK.
 func dlatbsResidual(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag, n, kd int, ab []float64, ldab int, scale float64, cnorm, b, x []float64) float64 {

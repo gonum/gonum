@@ -51,13 +51,15 @@ func Rotate(p Vec, alpha float64, q Vec) Vec {
 }
 
 // Norm returns the Euclidean norm of p
-//  |p| = sqrt(p_x^2 + p_y^2).
+//
+//	|p| = sqrt(p_x^2 + p_y^2).
 func Norm(p Vec) float64 {
 	return math.Hypot(p.X, p.Y)
 }
 
 // Norm2 returns the Euclidean squared norm of p
-//  |p|^2 = p_x^2 + p_y^2.
+//
+//	|p|^2 = p_x^2 + p_y^2.
 func Norm2(p Vec) float64 {
 	return p.X*p.X + p.Y*p.Y
 }
@@ -135,7 +137,8 @@ func absElem(a Vec) Vec {
 }
 
 // mulElem returns the Hadamard product between vectors a and b.
-//  v = {a.X*b.X, a.Y*b.Y, a.Z*b.Z}
+//
+//	v = {a.X*b.X, a.Y*b.Y, a.Z*b.Z}
 func mulElem(a, b Vec) Vec {
 	return Vec{
 		X: a.X * b.X,
@@ -145,7 +148,8 @@ func mulElem(a, b Vec) Vec {
 
 // divElem returns the Hadamard product between vector a
 // and the inverse components of vector b.
-//  v = {a.X/b.X, a.Y/b.Y, a.Z/b.Z}
+//
+//	v = {a.X/b.X, a.Y/b.Y, a.Z/b.Z}
 func divElem(a, b Vec) Vec {
 	return Vec{
 		X: a.X / b.X,

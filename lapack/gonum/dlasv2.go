@@ -7,8 +7,10 @@ package gonum
 import "math"
 
 // Dlasv2 computes the singular value decomposition of a 2×2 matrix.
-//  [ csl snl] [f g] [csr -snr] = [ssmax     0]
-//  [-snl csl] [0 h] [snr  csr] = [    0 ssmin]
+//
+//	[ csl snl] [f g] [csr -snr] = [ssmax     0]
+//	[-snl csl] [0 h] [snr  csr] = [    0 ssmin]
+//
 // ssmax is the larger absolute singular value, and ssmin is the smaller absolute
 // singular value. [cls, snl] and [csr, snr] are the left and right singular vectors.
 //

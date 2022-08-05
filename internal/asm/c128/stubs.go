@@ -10,9 +10,10 @@ import (
 )
 
 // Add is
-//  for i, v := range s {
-//  	dst[i] += v
-//  }
+//
+//	for i, v := range s {
+//		dst[i] += v
+//	}
 func Add(dst, s []complex128) {
 	for i, v := range s {
 		dst[i] += v
@@ -20,9 +21,10 @@ func Add(dst, s []complex128) {
 }
 
 // AddConst is
-//  for i := range x {
-//  	x[i] += alpha
-//  }
+//
+//	for i := range x {
+//		x[i] += alpha
+//	}
 func AddConst(alpha complex128, x []complex128) {
 	for i := range x {
 		x[i] += alpha
@@ -30,14 +32,15 @@ func AddConst(alpha complex128, x []complex128) {
 }
 
 // CumSum is
-//  if len(s) == 0 {
-//  	return dst
-//  }
-//  dst[0] = s[0]
-//  for i, v := range s[1:] {
-//  	dst[i+1] = dst[i] + v
-//  }
-//  return dst
+//
+//	if len(s) == 0 {
+//		return dst
+//	}
+//	dst[0] = s[0]
+//	for i, v := range s[1:] {
+//		dst[i+1] = dst[i] + v
+//	}
+//	return dst
 func CumSum(dst, s []complex128) []complex128 {
 	if len(s) == 0 {
 		return dst
@@ -50,14 +53,15 @@ func CumSum(dst, s []complex128) []complex128 {
 }
 
 // CumProd is
-//  if len(s) == 0 {
-//  	return dst
-//  }
-//  dst[0] = s[0]
-//  for i, v := range s[1:] {
-//  	dst[i+1] = dst[i] * v
-//  }
-//  return dst
+//
+//	if len(s) == 0 {
+//		return dst
+//	}
+//	dst[0] = s[0]
+//	for i, v := range s[1:] {
+//		dst[i+1] = dst[i] * v
+//	}
+//	return dst
 func CumProd(dst, s []complex128) []complex128 {
 	if len(s) == 0 {
 		return dst
@@ -70,9 +74,10 @@ func CumProd(dst, s []complex128) []complex128 {
 }
 
 // Div is
-//  for i, v := range s {
-//  	dst[i] /= v
-//  }
+//
+//	for i, v := range s {
+//		dst[i] /= v
+//	}
 func Div(dst, s []complex128) {
 	for i, v := range s {
 		dst[i] /= v
@@ -80,10 +85,11 @@ func Div(dst, s []complex128) {
 }
 
 // DivTo is
-//  for i, v := range s {
-//  	dst[i] = v / t[i]
-//  }
-//  return dst
+//
+//	for i, v := range s {
+//		dst[i] = v / t[i]
+//	}
+//	return dst
 func DivTo(dst, s, t []complex128) []complex128 {
 	for i, v := range s {
 		dst[i] = v / t[i]
@@ -92,10 +98,11 @@ func DivTo(dst, s, t []complex128) []complex128 {
 }
 
 // DotUnitary is
-//  for i, v := range x {
-//  	sum += cmplx.Conj(v) * y[i]
-//  }
-//  return sum
+//
+//	for i, v := range x {
+//		sum += cmplx.Conj(v) * y[i]
+//	}
+//	return sum
 func DotUnitary(x, y []complex128) (sum complex128) {
 	for i, v := range x {
 		sum += cmplx.Conj(v) * y[i]
@@ -159,10 +166,11 @@ func L2NormUnitary(x []complex128) (norm float64) {
 }
 
 // Sum is
-//  var sum complex128
-//  for i := range x {
-//      sum += x[i]
-//  }
+//
+//	var sum complex128
+//	for i := range x {
+//	    sum += x[i]
+//	}
 func Sum(x []complex128) complex128 {
 	var sum complex128
 	for _, v := range x {

@@ -31,19 +31,22 @@ const (
 // falsePosition uses a combination of bisection and false position to find a
 // root of a function within a given interval. This is guaranteed to converge,
 // and always keeps a bounding interval, unlike Newton's method. Inputs are:
-//  x1, x2:   initial bounding interval
-//  f1, f2: value of f() at x1 and x2
-//  absErr, relErr: absolute and relative errors on the bounding interval
-//  bisectTil: if > 0.0, perform bisection until the width of the bounding
-//             interval is less than this
-//  f, fExtra: function to find root of is f(x, fExtra)
+//
+//	x1, x2:   initial bounding interval
+//	f1, f2: value of f() at x1 and x2
+//	absErr, relErr: absolute and relative errors on the bounding interval
+//	bisectTil: if > 0.0, perform bisection until the width of the bounding
+//	           interval is less than this
+//	f, fExtra: function to find root of is f(x, fExtra)
+//
 // Returns:
-//  result: whether an exact root was found, the process converged to a
-//          bounding interval small than the required error, or the max number
-//          of iterations was hit
-//  bestX: best root approximation
-//  bestF: function value at bestX
-//  errEst: error estimation
+//
+//	result: whether an exact root was found, the process converged to a
+//	        bounding interval small than the required error, or the max number
+//	        of iterations was hit
+//	bestX: best root approximation
+//	bestF: function value at bestX
+//	errEst: error estimation
 func falsePosition(x1, x2, f1, f2, absErr, relErr, bisectTil float64, f objectiveFunc, fExtra []float64) (fSolveResult, float64, float64, float64) {
 	// The false position steps are either unmodified, or modified with the
 	// Anderson-Bjorck method as appropriate. Theoretically, this has a "speed of

@@ -148,7 +148,9 @@ func DsteqrTest(t *testing.T, impl Dsteqrer) {
 
 // eigenDecompCorrect returns whether the eigen decomposition is correct.
 // It checks if
-//  A * v ≈ λ * v
+//
+//	A * v ≈ λ * v
+//
 // where the eigenvalues λ are stored in values, and the eigenvectors are stored
 // in the columns of v.
 func eigenDecompCorrect(values []float64, A, V blas64.General) bool {

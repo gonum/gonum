@@ -301,13 +301,13 @@ func TestHyperdual(t *testing.T) {
 				t.Errorf("unexpected %s(%v): got:%v want:%v", test.name, x, fxHyperdual.Real, fx)
 			}
 			if !same(fxHyperdual.E1mag, dFx, tol) {
-				t.Errorf("unexpected %s'(%v) (ϵ₁): got:%v want:%v", test.name, x, fxHyperdual.E1mag, dFx)
+				t.Errorf("unexpected %s′(%v) (ϵ₁): got:%v want:%v", test.name, x, fxHyperdual.E1mag, dFx)
 			}
 			if !same(fxHyperdual.E1mag, fxHyperdual.E2mag, tol) {
 				t.Errorf("mismatched ϵ₁ and ϵ₂ for %s(%v): ϵ₁:%v ϵ₂:%v", test.name, x, fxHyperdual.E1mag, fxHyperdual.E2mag)
 			}
 			if !same(fxHyperdual.E1E2mag, d2Fx, tol) {
-				t.Errorf("unexpected %s''(%v): got:%v want:%v", test.name, x, fxHyperdual.E1E2mag, d2Fx)
+				t.Errorf("unexpected %s′′(%v): got:%v want:%v", test.name, x, fxHyperdual.E1E2mag, d2Fx)
 			}
 		}
 	}

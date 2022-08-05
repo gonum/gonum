@@ -15,20 +15,20 @@ import "math"
 // tabulation of the trigonometric functions are computed and
 // stored in work.
 //
-// Input parameter
+//	Input parameter:
 //
-// n       The length of the sequence to be transformed. the method
-//         is most efficient when n+1 is a product of small primes.
+//	n       The length of the sequence to be transformed. the method
+//	        is most efficient when n+1 is a product of small primes.
 //
-// Output parameters
+//	Output parameters:
 //
-// work    A work array which must be dimensioned at least 3*n.
-//         The same work array can be used for both Cosqf and Cosqb
-//         as long as n remains unchanged. Different work arrays
-//         are required for different values of n. The contents of
-//         work must not be changed between calls of Cosqf or Cosqb.
+//	work    A work array which must be dimensioned at least 3*n.
+//	        The same work array can be used for both Cosqf and Cosqb
+//	        as long as n remains unchanged. Different work arrays
+//	        are required for different values of n. The contents of
+//	        work must not be changed between calls of Cosqf or Cosqb.
 //
-// ifac    An integer work array of length at least 15.
+//	ifac    An integer work array of length at least 15.
 func Cosqi(n int, work []float64, ifac []int) {
 	if len(work) < 3*n {
 		panic("fourier: short work")
@@ -55,36 +55,36 @@ func Cosqi(n int, work []float64, ifac []int) {
 // The array work which is used by subroutine Cosqf must be
 // initialized by calling subroutine Cosqi(n,work).
 //
-// Input parameters
+//	Input parameters:
 //
-// n       The length of the array x to be transformed. The method
-//         is most efficient when n is a product of small primes.
+//	n       The length of the array x to be transformed. The method
+//	        is most efficient when n is a product of small primes.
 //
-// x       An array which contains the sequence to be transformed.
+//	x       An array which contains the sequence to be transformed.
 //
-// work    A work array which must be dimensioned at least 3*n
-//         in the program that calls Cosqf. The work array must be
-//         initialized by calling subroutine Cosqi(n,work) and a
-//         different work array must be used for each different
-//         value of n. This initialization does not have to be
-//         repeated so long as n remains unchanged thus subsequent
-//         transforms can be obtained faster than the first.
+//	work    A work array which must be dimensioned at least 3*n
+//	        in the program that calls Cosqf. The work array must be
+//	        initialized by calling subroutine Cosqi(n,work) and a
+//	        different work array must be used for each different
+//	        value of n. This initialization does not have to be
+//	        repeated so long as n remains unchanged thus subsequent
+//	        transforms can be obtained faster than the first.
 //
-// ifac    An integer work array of length at least 15.
+//	ifac    An integer work array of length at least 15.
 //
-// Output parameters
+//	Output parameters:
 //
-// x       for i=0, ..., n-1
-//           x[i] = x[i] + the sum from k=0 to k=n-2 of
-//               2*x[k]*cos((2*i+1)*k*pi/(2*n))
+//	x       for i=0, ..., n-1
+//	          x[i] = x[i] + the sum from k=0 to k=n-2 of
+//	              2*x[k]*cos((2*i+1)*k*pi/(2*n))
 //
-//         A call of Cosqf followed by a call of
-//         Cosqb will multiply the sequence x by 4*n.
-//         Therefore Cosqb is the unnormalized inverse
-//         of Cosqf.
+//	        A call of Cosqf followed by a call of
+//	        Cosqb will multiply the sequence x by 4*n.
+//	        Therefore Cosqb is the unnormalized inverse
+//	        of Cosqf.
 //
-// work    Contains initialization calculations which must not
-//         be destroyed between calls of Cosqf or Cosqb.
+//	work    Contains initialization calculations which must not
+//	        be destroyed between calls of Cosqf or Cosqb.
 func Cosqf(n int, x, work []float64, ifac []int) {
 	if len(x) < n {
 		panic("fourier: short sequence")
@@ -142,37 +142,36 @@ func cosqf1(n int, x, w, xh []float64, ifac []int) {
 // The array work which is used by subroutine Cosqb must be
 // initialized by calling subroutine Cosqi(n,work).
 //
+//	Input parameters:
 //
-// Input parameters
+//	n       The length of the array x to be transformed. The method
+//	        is most efficient when n is a product of small primes.
 //
-// n       The length of the array x to be transformed. The method
-//         is most efficient when n is a product of small primes.
+//	x       An array which contains the sequence to be transformed.
 //
-// x       An array which contains the sequence to be transformed.
+//	work    A work array which must be dimensioned at least 3*n
+//	        in the program that calls Cosqb. The work array must be
+//	        initialized by calling subroutine Cosqi(n,work) and a
+//	        different work array must be used for each different
+//	        value of n. This initialization does not have to be
+//	        repeated so long as n remains unchanged thus subsequent
+//	        transforms can be obtained faster than the first.
 //
-// work    A work array which must be dimensioned at least 3*n
-//         in the program that calls Cosqb. The work array must be
-//         initialized by calling subroutine Cosqi(n,work) and a
-//         different work array must be used for each different
-//         value of n. This initialization does not have to be
-//         repeated so long as n remains unchanged thus subsequent
-//         transforms can be obtained faster than the first.
+//	ifac    An integer work array of length at least 15.
 //
-// ifac    An integer work array of length at least 15.
+//	Output parameters:
 //
-// Output parameters
+//	x       for i=0, ..., n-1
+//	          x[i]= the sum from k=0 to k=n-1 of
+//	            4*x[k]*cos((2*k+1)*i*pi/(2*n))
 //
-// x       for i=0, ..., n-1
-//           x[i]= the sum from k=0 to k=n-1 of
-//             4*x[k]*cos((2*k+1)*i*pi/(2*n))
+//	        A call of Cosqb followed by a call of
+//	        Cosqf will multiply the sequence x by 4*n.
+//	        Therefore Cosqf is the unnormalized inverse
+//	        of Cosqb.
 //
-//         A call of Cosqb followed by a call of
-//         Cosqf will multiply the sequence x by 4*n.
-//         Therefore Cosqf is the unnormalized inverse
-//         of Cosqb.
-//
-// work    Contains initialization calculations which must not
-//         be destroyed between calls of Cosqb or Cosqf.
+//	work    Contains initialization calculations which must not
+//	        be destroyed between calls of Cosqb or Cosqf.
 func Cosqb(n int, x, work []float64, ifac []int) {
 	if len(x) < n {
 		panic("fourier: short sequence")

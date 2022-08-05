@@ -37,7 +37,7 @@ func Gravity3(_, _ Particle3, m1, m2 float64, v r3.Vec) r3.Vec {
 	if d2 == 0 {
 		return r3.Vec{}
 	}
-	return v.Scale((m1 * m2) / (d2 * math.Sqrt(d2)))
+	return r3.Scale((m1*m2)/(d2*math.Sqrt(d2)), v)
 }
 
 // Volume implements Barnes-Hut force approximation calculations.
@@ -141,7 +141,7 @@ func (q *Volume) ForceOn(p Particle3, theta float64, f Force3) (force r3.Vec) {
 	m := p.Mass()
 	pv := p.Coord3()
 	for _, e := range q.Particles {
-		v = v.Add(f(p, e, m, e.Mass(), e.Coord3().Sub(pv)))
+		v = r3.Add(v, f(p, e, m, e.Mass(), r3.Sub(e.Coord3(), pv)))
 	}
 	return v
 }
@@ -311,7 +311,7 @@ func (b *bucket) forceOn(p Particle3, pt r3.Vec, m, theta float64, f Force3) (ve
 	s := ((b.bounds.Max.X - b.bounds.Min.X) + (b.bounds.Max.Y - b.bounds.Min.Y) + (b.bounds.Max.Z - b.bounds.Min.Z)) / 3
 	d := math.Hypot(math.Hypot(pt.X-b.center.X, pt.Y-b.center.Y), pt.Z-b.center.Z)
 	if s/d < theta || b.particle != nil {
-		return f(p, b.particle, m, b.mass, b.center.Sub(pt))
+		return f(p, b.particle, m, b.mass, r3.Sub(b.center, pt))
 	}
 
 	var v r3.Vec
@@ -319,7 +319,7 @@ func (b *bucket) forceOn(p Particle3, pt r3.Vec, m, theta float64, f Force3) (ve
 		if d == nil {
 			continue
 		}
-		v = v.Add(d.forceOn(p, pt, m, theta, f))
+		v = r3.Add(v, d.forceOn(p, pt, m, theta, f))
 	}
 	return v
 }

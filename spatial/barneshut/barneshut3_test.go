@@ -424,9 +424,9 @@ func TestVolumeForceOn(t *testing.T) {
 			m := p.Mass()
 			pv := p.Coord3()
 			for _, e := range particles {
-				v = v.Add(Gravity3(p, e, m, e.Mass(), e.Coord3().Sub(pv)))
+				v = r3.Add(v, Gravity3(p, e, m, e.Mass(), r3.Sub(e.Coord3(), pv)))
 			}
-			moved[i] = p.Coord3().Add(v)
+			moved[i] = r3.Add(p.Coord3(), v)
 		}
 
 		volume, err := NewVolume(particles)
@@ -445,8 +445,8 @@ func TestVolumeForceOn(t *testing.T) {
 						calls++
 						return Gravity3(p1, p2, m1, m2, v)
 					})
-					pos := p.Coord3().Add(v)
-					d := moved[i].Sub(pos)
+					pos := r3.Add(p.Coord3(), v)
+					d := r3.Sub(moved[i], pos)
 					ssd += d.X*d.X + d.Y*d.Y + d.Z*d.Z
 					sd += math.Hypot(math.Hypot(d.X, d.Y), d.Z)
 				}

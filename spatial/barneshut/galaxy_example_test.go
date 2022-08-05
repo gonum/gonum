@@ -22,8 +22,8 @@ type mass struct {
 func (m *mass) Coord2() r2.Vec { return m.d }
 func (m *mass) Mass() float64  { return m.m }
 func (m *mass) move(f r2.Vec) {
-	m.v = m.v.Add(f.Scale(1 / m.m))
-	m.d = m.d.Add(m.v)
+	m.v = r2.Add(m.v, r2.Scale(1/m.m, f))
+	m.d = r2.Add(m.d, m.v)
 }
 
 func Example_galaxy() {
@@ -69,7 +69,7 @@ func Example_galaxy() {
 		// and an imaginary gravitational constant.
 		const G = 10
 		for j, s := range stars {
-			vectors[j] = plane.ForceOn(s, theta, barneshut.Gravity2).Scale(G)
+			vectors[j] = r2.Scale(G, plane.ForceOn(s, theta, barneshut.Gravity2))
 		}
 
 		// Update positions.

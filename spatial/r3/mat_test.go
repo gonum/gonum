@@ -109,7 +109,7 @@ func TestSkew(t *testing.T) {
 		sk.Skew(v1)
 		want := Cross(v1, v2)
 		got := sk.MulVec(v2)
-		if d := want.Sub(got); d.Dot(d) > tol {
+		if d := Sub(want, got); Dot(d, d) > tol {
 			t.Errorf("r3.Cross(v1,v2) does not agree with r3.Skew(v1)*v2: got:%v want:%v", got, want)
 		}
 	}
@@ -135,7 +135,7 @@ func TestTranspose(t *testing.T) {
 		vd.MulVec(dt, vd)
 		want := Vec{X: vd.AtVec(0), Y: vd.AtVec(1), Z: vd.AtVec(2)}
 		got := m.MulVecTrans(v)
-		if d := want.Sub(got); d.Dot(d) > tol {
+		if d := Sub(want, got); Dot(d, d) > tol {
 			t.Errorf("VecDense.MulVec(dense.T()) not agree with r3.Mat.MulVec(r3.Vec): got:%v want:%v", got, want)
 		}
 	}

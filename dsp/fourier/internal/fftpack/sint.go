@@ -14,19 +14,19 @@ import "math"
 // The prime factorization of n together with a tabulation of the
 // trigonometric functions are computed and stored in work.
 //
-// Input parameter
+//	Input parameter:
 //
-// n       The length of the sequence to be transformed. The method
-//         is most efficient when n+1 is a product of small primes.
+//	n       The length of the sequence to be transformed. The method
+//	        is most efficient when n+1 is a product of small primes.
 //
-// Output parameter
+//	Output parameter:
 //
-// work    A work array with at least ceil(2.5*n) locations.
-//         Different work arrays are required for different values
-//         of n. The contents of work must not be changed between
-//         calls of Sint.
+//	work    A work array with at least ceil(2.5*n) locations.
+//	        Different work arrays are required for different values
+//	        of n. The contents of work must not be changed between
+//	        calls of Sint.
 //
-// ifac    An integer work array of length at least 15.
+//	ifac    An integer work array of length at least 15.
 func Sinti(n int, work []float64, ifac []int) {
 	if len(work) < 5*(n+1)/2 {
 		panic("fourier: short work")
@@ -54,39 +54,39 @@ func Sinti(n int, work []float64, ifac []int) {
 // The array work which is used by subroutine Sint must be
 // initialized by calling subroutine Sinti(n,work).
 //
-// Input parameters
+//	Input parameters:
 //
-// n       The length of the sequence to be transformed. The method
-//         is most efficient when n+1 is the product of small primes.
+//	n       The length of the sequence to be transformed. The method
+//	        is most efficient when n+1 is the product of small primes.
 //
-// x       An array which contains the sequence to be transformed.
+//	x       An array which contains the sequence to be transformed.
 //
 //
-// work    A work array with dimension at least ceil(2.5*n)
-//         in the program that calls Sint. The work array must be
-//         initialized by calling subroutine Sinti(n,work) and a
-//         different work array must be used for each different
-//         value of n. This initialization does not have to be
-//         repeated so long as n remains unchanged thus subsequent
-//         transforms can be obtained faster than the first.
+//	work    A work array with dimension at least ceil(2.5*n)
+//	        in the program that calls Sint. The work array must be
+//	        initialized by calling subroutine Sinti(n,work) and a
+//	        different work array must be used for each different
+//	        value of n. This initialization does not have to be
+//	        repeated so long as n remains unchanged thus subsequent
+//	        transforms can be obtained faster than the first.
 //
-// ifac    An integer work array of length at least 15.
+//	ifac    An integer work array of length at least 15.
 //
-// Output parameters
+//	Output parameters:
 //
-// x       for i=1,...,n
-//           x(i)= the sum from k=1 to k=n
-//             2*x(k)*sin(k*i*pi/(n+1))
+//	x       for i=1,...,n
+//	          x(i)= the sum from k=1 to k=n
+//	            2*x(k)*sin(k*i*pi/(n+1))
 //
-//         A call of Sint followed by another call of
-//         Sint will multiply the sequence x by 2*(n+1).
-//         Hence Sint is the unnormalized inverse
-//         of itself.
+//	        A call of Sint followed by another call of
+//	        Sint will multiply the sequence x by 2*(n+1).
+//	        Hence Sint is the unnormalized inverse
+//	        of itself.
 //
-// work    Contains initialization calculations which must not be
-//         destroyed between calls of Sint.
-// ifac    Contains initialization calculations which must not be
-//         destroyed between calls of Sint.
+//	work    Contains initialization calculations which must not be
+//	        destroyed between calls of Sint.
+//	ifac    Contains initialization calculations which must not be
+//	        destroyed between calls of Sint.
 func Sint(n int, x, work []float64, ifac []int) {
 	if len(x) < n {
 		panic("fourier: short sequence")

@@ -14,20 +14,20 @@ import "math"
 // Sinqb. The prime factorization of n together with a tabulation
 // of the trigonometric functions are computed and stored in work.
 //
-// Input parameter
+//	Input parameter:
 //
-// n       The length of the sequence to be transformed. The method
-//         is most efficient when n+1 is a product of small primes.
+//	n       The length of the sequence to be transformed. The method
+//	        is most efficient when n+1 is a product of small primes.
 //
-// Output parameter
+//	Output parameter:
 //
-// work    A work array which must be dimensioned at least 3*n.
-//         The same work array can be used for both Sinqf and Sinqb
-//         as long as n remains unchanged. Different work arrays
-//         are required for different values of n. The contents of
-//         work must not be changed between calls of Sinqf or Sinqb.
+//	work    A work array which must be dimensioned at least 3*n.
+//	        The same work array can be used for both Sinqf and Sinqb
+//	        as long as n remains unchanged. Different work arrays
+//	        are required for different values of n. The contents of
+//	        work must not be changed between calls of Sinqf or Sinqb.
 //
-// ifac    An integer work array of length at least 15.
+//	ifac    An integer work array of length at least 15.
 func Sinqi(n int, work []float64, ifac []int) {
 	if len(work) < 3*n {
 		panic("fourier: short work")
@@ -54,37 +54,37 @@ func Sinqi(n int, work []float64, ifac []int) {
 // The array work which is used by subroutine Sinqf must be
 // initialized by calling subroutine Sinqi(n,work).
 //
-// Input parameters
+//	Input parameters:
 //
-// n       The length of the array x to be transformed. The method
-//         is most efficient when n is a product of small primes.
+//	n       The length of the array x to be transformed. The method
+//	        is most efficient when n is a product of small primes.
 //
-// x       An array which contains the sequence to be transformed.
+//	x       An array which contains the sequence to be transformed.
 //
-// work    A work array which must be dimensioned at least 3*n.
-//         in the program that calls Sinqf. The work array must be
-//         initialized by calling subroutine Sinqi(n,work) and a
-//         different work array must be used for each different
-//         value of n. This initialization does not have to be
-//         repeated so long as n remains unchanged thus subsequent
-//         transforms can be obtained faster than the first.
+//	work    A work array which must be dimensioned at least 3*n.
+//	        in the program that calls Sinqf. The work array must be
+//	        initialized by calling subroutine Sinqi(n,work) and a
+//	        different work array must be used for each different
+//	        value of n. This initialization does not have to be
+//	        repeated so long as n remains unchanged thus subsequent
+//	        transforms can be obtained faster than the first.
 //
-// ifac    An integer work array of length at least 15.
+//	ifac    An integer work array of length at least 15.
 //
-// Output parameters
+//	Output parameters:
 //
-// x       for i=0, ..., n-1
-//           x[i] = (-1)^(i)*x[n-1]
-//             + the sum from k=0 to k=n-2 of
-//               2*x[k]*sin((2*i+1)*k*pi/(2*n))
+//	x       for i=0, ..., n-1
+//	          x[i] = (-1)^(i)*x[n-1]
+//	            + the sum from k=0 to k=n-2 of
+//	              2*x[k]*sin((2*i+1)*k*pi/(2*n))
 //
-//         A call of Sinqf followed by a call of
-//         Sinqb will multiply the sequence x by 4*n.
-//         Therefore Sinqb is the unnormalized inverse
-//         of Sinqf.
+//	        A call of Sinqf followed by a call of
+//	        Sinqb will multiply the sequence x by 4*n.
+//	        Therefore Sinqb is the unnormalized inverse
+//	        of Sinqf.
 //
-// work    Contains initialization calculations which must not
-//         be destroyed between calls of Sinqf or Sinqb.
+//	work    Contains initialization calculations which must not
+//	        be destroyed between calls of Sinqf or Sinqb.
 func Sinqf(n int, x, work []float64, ifac []int) {
 	if len(x) < n {
 		panic("fourier: short sequence")
@@ -120,36 +120,36 @@ func Sinqf(n int, x, work []float64, ifac []int) {
 // The array work which is used by subroutine Sinqb must be
 // initialized by calling subroutine Sinqi(n,work).
 //
-// Input parameters
+//	Input parameters:
 //
-// n       The length of the array x to be transformed. The method
-//         is most efficient when n is a product of small primes.
+//	n       The length of the array x to be transformed. The method
+//	        is most efficient when n is a product of small primes.
 //
-// x       An array which contains the sequence to be transformed.
+//	x       An array which contains the sequence to be transformed.
 //
-// work    A work array which must be dimensioned at least 3*n.
-//         in the program that calls Sinqb. The work array must be
-//         initialized by calling subroutine Sinqi(n,work) and a
-//         different work array must be used for each different
-//         value of n. This initialization does not have to be
-//         repeated so long as n remains unchanged thus subsequent
-//         transforms can be obtained faster than the first.
+//	work    A work array which must be dimensioned at least 3*n.
+//	        in the program that calls Sinqb. The work array must be
+//	        initialized by calling subroutine Sinqi(n,work) and a
+//	        different work array must be used for each different
+//	        value of n. This initialization does not have to be
+//	        repeated so long as n remains unchanged thus subsequent
+//	        transforms can be obtained faster than the first.
 //
-// ifac    An integer work array of length at least 15.
+//	ifac    An integer work array of length at least 15.
 //
-// Output parameters
+//	Output parameters:
 //
-// x       for i=0, ..., n-1
-//           x[i]= the sum from k=0 to k=n-1 of
-//             4*x[k]*sin((2*k+1)*i*pi/(2*n))
+//	x       for i=0, ..., n-1
+//	          x[i]= the sum from k=0 to k=n-1 of
+//	            4*x[k]*sin((2*k+1)*i*pi/(2*n))
 //
-//         A call of Sinqb followed by a call of
-//         Sinqf will multiply the sequence x by 4*n.
-//         Therefore Sinqf is the unnormalized inverse
-//         of Sinqb.
+//	        A call of Sinqb followed by a call of
+//	        Sinqf will multiply the sequence x by 4*n.
+//	        Therefore Sinqf is the unnormalized inverse
+//	        of Sinqb.
 //
-// work    Contains initialization calculations which must not
-//         be destroyed between calls of Sinqb or Sinqf.
+//	work    Contains initialization calculations which must not
+//	        be destroyed between calls of Sinqb or Sinqf.
 func Sinqb(n int, x, work []float64, ifac []int) {
 	if len(x) < n {
 		panic("fourier: short sequence")

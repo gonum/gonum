@@ -18,20 +18,20 @@ import (
 // tabulation of the trigonometric functions are computed and
 // stored in work.
 //
-//  input parameter
+//	Input parameter:
 //
-//  n      The length of the sequence to be transformed.
+//	n      The length of the sequence to be transformed.
 //
-//  Output parameters:
+//	Output parameters:
 //
-//  work   A work array which must be dimensioned at least 4*n.
-//         the same work array can be used for both Cfftf and Cfftb
-//         as long as n remains unchanged. Different work arrays
-//         are required for different values of n. The contents of
-//         work must not be changed between calls of Cfftf or Cfftb.
+//	work   A work array which must be dimensioned at least 4*n.
+//	       the same work array can be used for both Cfftf and Cfftb
+//	       as long as n remains unchanged. Different work arrays
+//	       are required for different values of n. The contents of
+//	       work must not be changed between calls of Cfftf or Cfftb.
 //
-//  ifac   A work array containing the factors of n. ifac must have
-//         length 15.
+//	ifac   A work array containing the factors of n. ifac must have
+//	       length 15.
 func Cffti(n int, work []float64, ifac []int) {
 	if len(work) < 4*n {
 		panic("fourier: short work")
@@ -121,46 +121,46 @@ outer:
 // Fourier coefficients of a complex periodic sequence. The
 // transform is defined below at output parameter c.
 //
-//  Input parameters:
+//	Input parameters:
 //
-//  n      The length of the array c to be transformed. The method
-//         is most efficient when n is a product of small primes.
-//         n may change so long as different work arrays are provided.
+//	n      The length of the array c to be transformed. The method
+//	       is most efficient when n is a product of small primes.
+//	       n may change so long as different work arrays are provided.
 //
-//  c      A complex array of length n which contains the sequence
-//         to be transformed.
+//	c      A complex array of length n which contains the sequence
+//	       to be transformed.
 //
-//  work   A real work array which must be dimensioned at least 4*n.
-//         in the program that calls Cfftf. The work array must be
-//         initialized by calling subroutine Cffti(n,work,ifac) and a
-//         different work array must be used for each different
-//         value of n. This initialization does not have to be
-//         repeated so long as n remains unchanged thus subsequent
-//         transforms can be obtained faster than the first.
-//         the same work array can be used by Cfftf and Cfftb.
+//	work   A real work array which must be dimensioned at least 4*n.
+//	       in the program that calls Cfftf. The work array must be
+//	       initialized by calling subroutine Cffti(n,work,ifac) and a
+//	       different work array must be used for each different
+//	       value of n. This initialization does not have to be
+//	       repeated so long as n remains unchanged thus subsequent
+//	       transforms can be obtained faster than the first.
+//	       the same work array can be used by Cfftf and Cfftb.
 //
-//  ifac   A work array containing the factors of n. ifac must have
-//         length of at least 15.
+//	ifac   A work array containing the factors of n. ifac must have
+//	       length of at least 15.
 //
-//  Output parameters:
+//	Output parameters:
 //
-//   c     for j=0, ..., n-1
-//           c[j]=the sum from k=0, ..., n-1 of
-//             c[k]*exp(-i*j*k*2*pi/n)
+//	 c     for j=0, ..., n-1
+//	         c[j]=the sum from k=0, ..., n-1 of
+//	           c[k]*exp(-i*j*k*2*pi/n)
 //
-//         where i=sqrt(-1)
+//	       where i=sqrt(-1)
 //
-//  This transform is unnormalized since a call of Cfftf
-//  followed by a call of Cfftb will multiply the input
-//  sequence by n.
+//	This transform is unnormalized since a call of Cfftf
+//	followed by a call of Cfftb will multiply the input
+//	sequence by n.
 //
-//  The n elements of c are represented in n pairs of real
-//  values in r where c[j] = r[j*2]+r[j*2+1]i.
+//	The n elements of c are represented in n pairs of real
+//	values in r where c[j] = r[j*2]+r[j*2+1]i.
 //
-//  work   Contains results which must not be destroyed between
-//         calls of Cfftf or Cfftb.
-//  ifac   Contains results which must not be destroyed between
-//         calls of Cfftf or Cfftb.
+//	work   Contains results which must not be destroyed between
+//	       calls of Cfftf or Cfftb.
+//	ifac   Contains results which must not be destroyed between
+//	       calls of Cfftf or Cfftb.
 func Cfftf(n int, r, work []float64, ifac []int) {
 	if len(r) < 2*n {
 		panic("fourier: short sequence")
@@ -182,46 +182,46 @@ func Cfftf(n int, r, work []float64, ifac []int) {
 // a complex periodic sequence from its Fourier coefficients. The
 // transform is defined below at output parameter c.
 //
-//  Input parameters:
+//	Input parameters:
 //
-//  n      The length of the array c to be transformed. The method
-//         is most efficient when n is a product of small primes.
-//         n may change so long as different work arrays are provided.
+//	n      The length of the array c to be transformed. The method
+//	       is most efficient when n is a product of small primes.
+//	       n may change so long as different work arrays are provided.
 //
-//  c      A complex array of length n which contains the sequence
-//         to be transformed.
+//	c      A complex array of length n which contains the sequence
+//	       to be transformed.
 //
-//  work   A real work array which must be dimensioned at least 4*n.
-//         in the program that calls Cfftb. The work array must be
-//         initialized by calling subroutine Cffti(n,work,ifac) and a
-//         different work array must be used for each different
-//         value of n. This initialization does not have to be
-//         repeated so long as n remains unchanged thus subsequent
-//         transforms can be obtained faster than the first.
-//         The same work array can be used by Cfftf and Cfftb.
+//	work   A real work array which must be dimensioned at least 4*n.
+//	       in the program that calls Cfftb. The work array must be
+//	       initialized by calling subroutine Cffti(n,work,ifac) and a
+//	       different work array must be used for each different
+//	       value of n. This initialization does not have to be
+//	       repeated so long as n remains unchanged thus subsequent
+//	       transforms can be obtained faster than the first.
+//	       The same work array can be used by Cfftf and Cfftb.
 //
-//  ifac   A work array containing the factors of n. ifac must have
-//         length of at least 15.
+//	ifac   A work array containing the factors of n. ifac must have
+//	       length of at least 15.
 //
-//  Output parameters:
+//	Output parameters:
 //
-//  c      for j=0, ..., n-1
-//           c[j]=the sum from k=0, ..., n-1 of
-//             c[k]*exp(i*j*k*2*pi/n)
+//	c      for j=0, ..., n-1
+//	         c[j]=the sum from k=0, ..., n-1 of
+//	           c[k]*exp(i*j*k*2*pi/n)
 //
-//         where i=sqrt(-1)
+//	       where i=sqrt(-1)
 //
-//  This transform is unnormalized since a call of Cfftf
-//  followed by a call of Cfftb will multiply the input
-//  sequence by n.
+//	This transform is unnormalized since a call of Cfftf
+//	followed by a call of Cfftb will multiply the input
+//	sequence by n.
 //
-//  The n elements of c are represented in n pairs of real
-//  values in r where c[j] = r[j*2]+r[j*2+1]i.
+//	The n elements of c are represented in n pairs of real
+//	values in r where c[j] = r[j*2]+r[j*2+1]i.
 //
-//  work   Contains results which must not be destroyed between
-//         calls of Cfftf or Cfftb.
-//  ifac   Contains results which must not be destroyed between
-//         calls of Cfftf or Cfftb.
+//	work   Contains results which must not be destroyed between
+//	       calls of Cfftf or Cfftb.
+//	ifac   Contains results which must not be destroyed between
+//	       calls of Cfftf or Cfftb.
 func Cfftb(n int, c, work []float64, ifac []int) {
 	if len(c) < 2*n {
 		panic("fourier: short sequence")

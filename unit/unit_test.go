@@ -185,20 +185,19 @@ func TestDimensionEquality(t *testing.T) {
 	}
 }
 
-var operationTests = []struct {
-	recvOp func(Uniter) *Unit
-	param  Uniter
-	want   Uniter
-}{
-	{Dimless(1).Unit().Add, Dimless(2), Dimless(3)},
-	{Dimless(1).Unit().Mul, Dimless(2), Dimless(2)},
-	{Dimless(1).Unit().Mul, Length(2), Length(2)},
-	{Length(1).Unit().Mul, Dimless(2), Length(2)},
-	{Dimless(1).Unit().Div, Length(2), New(0.5, Dimensions{LengthDim: -1})},
-	{Length(1).Unit().Div, Dimless(2), Length(0.5)},
-}
-
 func TestOperations(t *testing.T) {
+	operationTests := []struct {
+		recvOp func(Uniter) *Unit
+		param  Uniter
+		want   Uniter
+	}{
+		{Dimless(1).Unit().Add, Dimless(2), Dimless(3)},
+		{Dimless(1).Unit().Mul, Dimless(2), Dimless(2)},
+		{Dimless(1).Unit().Mul, Length(2), Length(2)},
+		{Length(1).Unit().Mul, Dimless(2), Length(2)},
+		{Dimless(1).Unit().Div, Length(2), New(0.5, Dimensions{LengthDim: -1})},
+		{Length(1).Unit().Div, Dimless(2), Length(0.5)},
+	}
 	t.Parallel()
 	for i, test := range operationTests {
 		var got Uniter

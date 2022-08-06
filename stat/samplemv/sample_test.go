@@ -163,11 +163,12 @@ func TestMetropolisHastings(t *testing.T) {
 	compareNormal(t, target, batch, nil, 5e-1, 5e-1)
 }
 
-// randomNormal constructs a random Normal distribution.
+// randomNormal constructs a random Normal distribution using the provided
+// random source.
 func randomNormal(dim int, src *rand.Rand) (*distmv.Normal, bool) {
 	data := make([]float64, dim*dim)
 	for i := range data {
-		data[i] = rand.Float64()
+		data[i] = src.Float64()
 	}
 	a := mat.NewDense(dim, dim, data)
 	var sigma mat.SymDense
@@ -180,6 +181,8 @@ func randomNormal(dim int, src *rand.Rand) (*distmv.Normal, bool) {
 }
 
 func compareNormal(t *testing.T, want *distmv.Normal, batch *mat.Dense, weights []float64, meanTol, covTol float64) {
+	t.Helper()
+
 	dim := want.Dim()
 	mu := want.Mean(nil)
 	var sigma mat.SymDense
@@ -224,10 +227,11 @@ func TestMetropolisHastingser(t *testing.T) {
 		{3, 103, 11, 51},
 		{3, 103, 51, 11},
 	} {
+		src := rand.New(rand.NewSource(1))
 		dim := test.dim
 
 		initial := make([]float64, dim)
-		target, ok := randomNormal(dim, nil)
+		target, ok := randomNormal(dim, src)
 		if !ok {
 			t.Fatal("bad test, sigma not pos def")
 		}
@@ -239,7 +243,7 @@ func TestMetropolisHastingser(t *testing.T) {
 
 		// Test the Metropolis Hastingser by generating all the samples, then generating
 		// the same samples with a burnin and rate.
-		src := rand.New(rand.NewSource(1))
+		src = rand.New(rand.NewSource(1))
 		proposal, ok := NewProposalNormal(sigmaImp, src)
 		if !ok {
 			t.Fatal("bad test, sigma not pos def")

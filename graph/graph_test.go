@@ -17,113 +17,113 @@ type graphBuilder interface {
 	graph.Builder
 }
 
-var copyTests = []struct {
-	desc string
-
-	src graph.Graph
-	dst graphBuilder
-
-	// If want is nil, compare to src.
-	want graph.Graph
-}{
-	{
-		desc: "undirected to undirected",
-		src: func() graph.Graph {
-			g := simple.NewUndirectedGraph()
-			g.AddNode(simple.Node(-1))
-			for _, e := range []simple.Edge{
-				{F: simple.Node(0), T: simple.Node(1)},
-				{F: simple.Node(0), T: simple.Node(3)},
-				{F: simple.Node(1), T: simple.Node(2)},
-			} {
-				g.SetEdge(e)
-			}
-			return g
-		}(),
-		dst: simple.NewUndirectedGraph(),
-	},
-	{
-		desc: "undirected to directed",
-		src: func() graph.Graph {
-			g := simple.NewUndirectedGraph()
-			g.AddNode(simple.Node(-1))
-			for _, e := range []simple.Edge{
-				{F: simple.Node(0), T: simple.Node(1)},
-				{F: simple.Node(0), T: simple.Node(3)},
-				{F: simple.Node(1), T: simple.Node(2)},
-			} {
-				g.SetEdge(e)
-			}
-			return g
-		}(),
-		dst: simple.NewDirectedGraph(),
-
-		want: func() graph.Graph {
-			g := simple.NewDirectedGraph()
-			g.AddNode(simple.Node(-1))
-			for _, e := range []simple.Edge{
-				{F: simple.Node(0), T: simple.Node(1)},
-				{F: simple.Node(0), T: simple.Node(3)},
-				{F: simple.Node(1), T: simple.Node(2)},
-			} {
-				// want is a directed graph copied from
-				// an undirected graph so we need to have
-				// all edges in both directions.
-				g.SetEdge(e)
-				e.T, e.F = e.F, e.T
-				g.SetEdge(e)
-			}
-			return g
-		}(),
-	},
-	{
-		desc: "directed to undirected",
-		src: func() graph.Graph {
-			g := simple.NewDirectedGraph()
-			g.AddNode(simple.Node(-1))
-			for _, e := range []simple.Edge{
-				{F: simple.Node(0), T: simple.Node(1)},
-				{F: simple.Node(0), T: simple.Node(3)},
-				{F: simple.Node(1), T: simple.Node(2)},
-			} {
-				g.SetEdge(e)
-			}
-			return g
-		}(),
-		dst: simple.NewUndirectedGraph(),
-
-		want: func() graph.Graph {
-			g := simple.NewUndirectedGraph()
-			g.AddNode(simple.Node(-1))
-			for _, e := range []simple.Edge{
-				{F: simple.Node(0), T: simple.Node(1)},
-				{F: simple.Node(0), T: simple.Node(3)},
-				{F: simple.Node(1), T: simple.Node(2)},
-			} {
-				g.SetEdge(e)
-			}
-			return g
-		}(),
-	},
-	{
-		desc: "directed to directed",
-		src: func() graph.Graph {
-			g := simple.NewDirectedGraph()
-			g.AddNode(simple.Node(-1))
-			for _, e := range []simple.Edge{
-				{F: simple.Node(0), T: simple.Node(1)},
-				{F: simple.Node(0), T: simple.Node(3)},
-				{F: simple.Node(1), T: simple.Node(2)},
-			} {
-				g.SetEdge(e)
-			}
-			return g
-		}(),
-		dst: simple.NewDirectedGraph(),
-	},
-}
-
 func TestCopy(t *testing.T) {
+	copyTests := []struct {
+		desc string
+
+		src graph.Graph
+		dst graphBuilder
+
+		// If want is nil, compare to src.
+		want graph.Graph
+	}{
+		{
+			desc: "undirected to undirected",
+			src: func() graph.Graph {
+				g := simple.NewUndirectedGraph()
+				g.AddNode(simple.Node(-1))
+				for _, e := range []simple.Edge{
+					{F: simple.Node(0), T: simple.Node(1)},
+					{F: simple.Node(0), T: simple.Node(3)},
+					{F: simple.Node(1), T: simple.Node(2)},
+				} {
+					g.SetEdge(e)
+				}
+				return g
+			}(),
+			dst: simple.NewUndirectedGraph(),
+		},
+		{
+			desc: "undirected to directed",
+			src: func() graph.Graph {
+				g := simple.NewUndirectedGraph()
+				g.AddNode(simple.Node(-1))
+				for _, e := range []simple.Edge{
+					{F: simple.Node(0), T: simple.Node(1)},
+					{F: simple.Node(0), T: simple.Node(3)},
+					{F: simple.Node(1), T: simple.Node(2)},
+				} {
+					g.SetEdge(e)
+				}
+				return g
+			}(),
+			dst: simple.NewDirectedGraph(),
+
+			want: func() graph.Graph {
+				g := simple.NewDirectedGraph()
+				g.AddNode(simple.Node(-1))
+				for _, e := range []simple.Edge{
+					{F: simple.Node(0), T: simple.Node(1)},
+					{F: simple.Node(0), T: simple.Node(3)},
+					{F: simple.Node(1), T: simple.Node(2)},
+				} {
+					// want is a directed graph copied from
+					// an undirected graph so we need to have
+					// all edges in both directions.
+					g.SetEdge(e)
+					e.T, e.F = e.F, e.T
+					g.SetEdge(e)
+				}
+				return g
+			}(),
+		},
+		{
+			desc: "directed to undirected",
+			src: func() graph.Graph {
+				g := simple.NewDirectedGraph()
+				g.AddNode(simple.Node(-1))
+				for _, e := range []simple.Edge{
+					{F: simple.Node(0), T: simple.Node(1)},
+					{F: simple.Node(0), T: simple.Node(3)},
+					{F: simple.Node(1), T: simple.Node(2)},
+				} {
+					g.SetEdge(e)
+				}
+				return g
+			}(),
+			dst: simple.NewUndirectedGraph(),
+
+			want: func() graph.Graph {
+				g := simple.NewUndirectedGraph()
+				g.AddNode(simple.Node(-1))
+				for _, e := range []simple.Edge{
+					{F: simple.Node(0), T: simple.Node(1)},
+					{F: simple.Node(0), T: simple.Node(3)},
+					{F: simple.Node(1), T: simple.Node(2)},
+				} {
+					g.SetEdge(e)
+				}
+				return g
+			}(),
+		},
+		{
+			desc: "directed to directed",
+			src: func() graph.Graph {
+				g := simple.NewDirectedGraph()
+				g.AddNode(simple.Node(-1))
+				for _, e := range []simple.Edge{
+					{F: simple.Node(0), T: simple.Node(1)},
+					{F: simple.Node(0), T: simple.Node(3)},
+					{F: simple.Node(1), T: simple.Node(2)},
+				} {
+					g.SetEdge(e)
+				}
+				return g
+			}(),
+			dst: simple.NewDirectedGraph(),
+		},
+	}
+
 	for _, test := range copyTests {
 		graph.Copy(test.dst, test.src)
 		want := test.want
@@ -141,113 +141,113 @@ type graphWeightedBuilder interface {
 	graph.WeightedBuilder
 }
 
-var copyWeightedTests = []struct {
-	desc string
-
-	src graph.Weighted
-	dst graphWeightedBuilder
-
-	// If want is nil, compare to src.
-	want graph.Graph
-}{
-	{
-		desc: "undirected to undirected",
-		src: func() graph.Weighted {
-			g := simple.NewWeightedUndirectedGraph(0, 0)
-			g.AddNode(simple.Node(-1))
-			for _, e := range []simple.WeightedEdge{
-				{F: simple.Node(0), T: simple.Node(1), W: 1},
-				{F: simple.Node(0), T: simple.Node(3), W: 1},
-				{F: simple.Node(1), T: simple.Node(2), W: 1},
-			} {
-				g.SetWeightedEdge(e)
-			}
-			return g
-		}(),
-		dst: simple.NewWeightedUndirectedGraph(0, 0),
-	},
-	{
-		desc: "undirected to directed",
-		src: func() graph.Weighted {
-			g := simple.NewWeightedUndirectedGraph(0, 0)
-			g.AddNode(simple.Node(-1))
-			for _, e := range []simple.WeightedEdge{
-				{F: simple.Node(0), T: simple.Node(1), W: 1},
-				{F: simple.Node(0), T: simple.Node(3), W: 1},
-				{F: simple.Node(1), T: simple.Node(2), W: 1},
-			} {
-				g.SetWeightedEdge(e)
-			}
-			return g
-		}(),
-		dst: simple.NewWeightedDirectedGraph(0, 0),
-
-		want: func() graph.Graph {
-			g := simple.NewWeightedDirectedGraph(0, 0)
-			g.AddNode(simple.Node(-1))
-			for _, e := range []simple.WeightedEdge{
-				{F: simple.Node(0), T: simple.Node(1), W: 1},
-				{F: simple.Node(0), T: simple.Node(3), W: 1},
-				{F: simple.Node(1), T: simple.Node(2), W: 1},
-			} {
-				// want is a directed graph copied from
-				// an undirected graph so we need to have
-				// all edges in both directions.
-				g.SetWeightedEdge(e)
-				e.T, e.F = e.F, e.T
-				g.SetWeightedEdge(e)
-			}
-			return g
-		}(),
-	},
-	{
-		desc: "directed to undirected",
-		src: func() graph.Weighted {
-			g := simple.NewWeightedDirectedGraph(0, 0)
-			g.AddNode(simple.Node(-1))
-			for _, e := range []simple.WeightedEdge{
-				{F: simple.Node(0), T: simple.Node(1), W: 1},
-				{F: simple.Node(0), T: simple.Node(3), W: 1},
-				{F: simple.Node(1), T: simple.Node(2), W: 1},
-			} {
-				g.SetWeightedEdge(e)
-			}
-			return g
-		}(),
-		dst: simple.NewWeightedUndirectedGraph(0, 0),
-
-		want: func() graph.Weighted {
-			g := simple.NewWeightedUndirectedGraph(0, 0)
-			g.AddNode(simple.Node(-1))
-			for _, e := range []simple.WeightedEdge{
-				{F: simple.Node(0), T: simple.Node(1), W: 1},
-				{F: simple.Node(0), T: simple.Node(3), W: 1},
-				{F: simple.Node(1), T: simple.Node(2), W: 1},
-			} {
-				g.SetWeightedEdge(e)
-			}
-			return g
-		}(),
-	},
-	{
-		desc: "directed to directed",
-		src: func() graph.Weighted {
-			g := simple.NewWeightedDirectedGraph(0, 0)
-			g.AddNode(simple.Node(-1))
-			for _, e := range []simple.WeightedEdge{
-				{F: simple.Node(0), T: simple.Node(1), W: 1},
-				{F: simple.Node(0), T: simple.Node(3), W: 1},
-				{F: simple.Node(1), T: simple.Node(2), W: 1},
-			} {
-				g.SetWeightedEdge(e)
-			}
-			return g
-		}(),
-		dst: simple.NewWeightedDirectedGraph(0, 0),
-	},
-}
-
 func TestCopyWeighted(t *testing.T) {
+	copyWeightedTests := []struct {
+		desc string
+
+		src graph.Weighted
+		dst graphWeightedBuilder
+
+		// If want is nil, compare to src.
+		want graph.Graph
+	}{
+		{
+			desc: "undirected to undirected",
+			src: func() graph.Weighted {
+				g := simple.NewWeightedUndirectedGraph(0, 0)
+				g.AddNode(simple.Node(-1))
+				for _, e := range []simple.WeightedEdge{
+					{F: simple.Node(0), T: simple.Node(1), W: 1},
+					{F: simple.Node(0), T: simple.Node(3), W: 1},
+					{F: simple.Node(1), T: simple.Node(2), W: 1},
+				} {
+					g.SetWeightedEdge(e)
+				}
+				return g
+			}(),
+			dst: simple.NewWeightedUndirectedGraph(0, 0),
+		},
+		{
+			desc: "undirected to directed",
+			src: func() graph.Weighted {
+				g := simple.NewWeightedUndirectedGraph(0, 0)
+				g.AddNode(simple.Node(-1))
+				for _, e := range []simple.WeightedEdge{
+					{F: simple.Node(0), T: simple.Node(1), W: 1},
+					{F: simple.Node(0), T: simple.Node(3), W: 1},
+					{F: simple.Node(1), T: simple.Node(2), W: 1},
+				} {
+					g.SetWeightedEdge(e)
+				}
+				return g
+			}(),
+			dst: simple.NewWeightedDirectedGraph(0, 0),
+
+			want: func() graph.Graph {
+				g := simple.NewWeightedDirectedGraph(0, 0)
+				g.AddNode(simple.Node(-1))
+				for _, e := range []simple.WeightedEdge{
+					{F: simple.Node(0), T: simple.Node(1), W: 1},
+					{F: simple.Node(0), T: simple.Node(3), W: 1},
+					{F: simple.Node(1), T: simple.Node(2), W: 1},
+				} {
+					// want is a directed graph copied from
+					// an undirected graph so we need to have
+					// all edges in both directions.
+					g.SetWeightedEdge(e)
+					e.T, e.F = e.F, e.T
+					g.SetWeightedEdge(e)
+				}
+				return g
+			}(),
+		},
+		{
+			desc: "directed to undirected",
+			src: func() graph.Weighted {
+				g := simple.NewWeightedDirectedGraph(0, 0)
+				g.AddNode(simple.Node(-1))
+				for _, e := range []simple.WeightedEdge{
+					{F: simple.Node(0), T: simple.Node(1), W: 1},
+					{F: simple.Node(0), T: simple.Node(3), W: 1},
+					{F: simple.Node(1), T: simple.Node(2), W: 1},
+				} {
+					g.SetWeightedEdge(e)
+				}
+				return g
+			}(),
+			dst: simple.NewWeightedUndirectedGraph(0, 0),
+
+			want: func() graph.Weighted {
+				g := simple.NewWeightedUndirectedGraph(0, 0)
+				g.AddNode(simple.Node(-1))
+				for _, e := range []simple.WeightedEdge{
+					{F: simple.Node(0), T: simple.Node(1), W: 1},
+					{F: simple.Node(0), T: simple.Node(3), W: 1},
+					{F: simple.Node(1), T: simple.Node(2), W: 1},
+				} {
+					g.SetWeightedEdge(e)
+				}
+				return g
+			}(),
+		},
+		{
+			desc: "directed to directed",
+			src: func() graph.Weighted {
+				g := simple.NewWeightedDirectedGraph(0, 0)
+				g.AddNode(simple.Node(-1))
+				for _, e := range []simple.WeightedEdge{
+					{F: simple.Node(0), T: simple.Node(1), W: 1},
+					{F: simple.Node(0), T: simple.Node(3), W: 1},
+					{F: simple.Node(1), T: simple.Node(2), W: 1},
+				} {
+					g.SetWeightedEdge(e)
+				}
+				return g
+			}(),
+			dst: simple.NewWeightedDirectedGraph(0, 0),
+		},
+	}
+
 	for _, test := range copyWeightedTests {
 		graph.CopyWeighted(test.dst, test.src)
 		want := test.want

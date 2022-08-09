@@ -175,7 +175,6 @@ func DsterfTest(t *testing.T, impl Dsterfer) {
 			ok = impl.Dsteqr(lapack.EVTridiag, n, dWant, e, z.Data, z.Stride, make([]float64, 2*n))
 			if !ok {
 				t.Fatalf("%v: computing reference solution using Dsteqr failed", name)
-				continue
 			}
 
 			if resid := residualOrthogonal(z, false); resid > tol*float64(n) {

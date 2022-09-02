@@ -268,10 +268,23 @@ func (m *Mat) Hessian(p, step Vec, field func(Vec) float64) {
 	m.Set(2, 2, fzz)
 }
 
-// Jacobian sets the receiver to the Jacobian matrix of the vector field at the point p,
-// approximated using finite differences with the given step sizes.
-// Jacobian expects the field's first order partial
-// derivatives are all continuous for correct results.
+// Jacobian sets the receiver to the Jacobian matrix of the vector field at
+// the point p, approximated using finite differences with the given step sizes.
+//
+// The Jacobian matrix J is the matrix of all first-order partial derivatives of f.
+// If f maps an 3-dimensional vector x to an 3-dimensional vector y = f(x), J is
+// a 3×3 matrix whose elements are given as
+//
+//	J_{i,j} = ∂f_i/∂x_j,
+//
+// or expanded out
+//
+//	    [ ∂f_1/∂x_1 ∂f_1/∂x_2 ∂f_1/∂x_3 ]
+//	J = [ ∂f_2/∂x_1 ∂f_2/∂x_2 ∂f_2/∂x_3 ]
+//	    [ ∂f_3/∂x_1 ∂f_3/∂x_2 ∂f_3/∂x_3 ]
+//
+// Jacobian expects the field's first order partial derivatives are all
+// continuous for correct results.
 func (m *Mat) Jacobian(p, step Vec, field func(Vec) Vec) {
 	dx := Vec{X: step.X}
 	dy := Vec{Y: step.Y}

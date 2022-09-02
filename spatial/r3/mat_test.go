@@ -302,3 +302,24 @@ func TestMatHessian(t *testing.T) {
 		}
 	}
 }
+
+func TestMatJacobian(t *testing.T) {
+	const (
+		tol = 1e-5
+		h   = 8e-4
+	)
+	step := Vec{X: h, Y: h, Z: h}
+	rnd := rand.New(rand.NewSource(1))
+	for _, test := range vectorFields {
+		for i := 0; i < 1; i++ {
+			p := randomVec(rnd)
+			got := NewMat(nil)
+			got.Jacobian(p, step, test.field)
+			want := test.jacobian(p)
+			if !mat.EqualApprox(got, want, tol) {
+				t.Errorf("matrices not equal within tol\ngot:  %v\nwant:  %v",
+					mat.Formatted(got), mat.Formatted(want))
+			}
+		}
+	}
+}

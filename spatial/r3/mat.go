@@ -267,3 +267,28 @@ func (m *Mat) Hessian(p, step Vec, field func(Vec) float64) {
 	m.Set(2, 1, fyz)
 	m.Set(2, 2, fzz)
 }
+
+// Jacobian sets the receiver to the Jacobian matrix of the vector field at the point p,
+// approximated using finite differences with the given step sizes.
+// Jacobian expects the field's first order partial
+// derivatives are all continuous for correct results.
+func (m *Mat) Jacobian(p, step Vec, field func(Vec) Vec) {
+	dx := Vec{X: step.X}
+	dy := Vec{Y: step.Y}
+	dz := Vec{Z: step.Z}
+
+	dfdx := Scale(0.5/step.X, Sub(field(Add(p, dx)), field(Sub(p, dx))))
+	dfdy := Scale(0.5/step.Y, Sub(field(Add(p, dy)), field(Sub(p, dy))))
+	dfdz := Scale(0.5/step.Z, Sub(field(Add(p, dz)), field(Sub(p, dz))))
+	m.Set(0, 0, dfdx.X)
+	m.Set(0, 1, dfdy.X)
+	m.Set(0, 2, dfdz.X)
+
+	m.Set(1, 0, dfdx.Y)
+	m.Set(1, 1, dfdy.Y)
+	m.Set(1, 2, dfdz.Y)
+
+	m.Set(2, 0, dfdx.Z)
+	m.Set(2, 1, dfdy.Z)
+	m.Set(2, 2, dfdz.Z)
+}

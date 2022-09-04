@@ -62,7 +62,7 @@ func Eye() *Mat {
 //	Skew({x,y,z}) = ⎢ z  0 -x⎥
 //	                ⎣-y  x  0⎦
 //
-// DEPRECATED: use Mat.Skew()
+// Deprecated: use Mat.Skew()
 func Skew(v Vec) (M *Mat) {
 	return &Mat{&array{
 		0, -v.Z, v.Y,

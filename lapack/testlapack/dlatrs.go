@@ -30,6 +30,9 @@ func DlatrsTest(t *testing.T, impl Dlatrser) {
 					if n < 6 {
 						imats = append(imats, 19)
 					}
+					if n == 3 {
+						imats = append(imats, -1)
+					}
 					for _, imat := range imats {
 						testDlatrs(t, impl, imat, uplo, trans, n, lda, rnd)
 					}
@@ -46,11 +49,29 @@ func testDlatrs(t *testing.T, impl Dlatrser, imat int, uplo blas.Uplo, trans bla
 	b := nanSlice(n)
 	work := make([]float64, 3*n)
 
-	// Generate triangular test matrix and right hand side.
-	diag := dlattr(imat, uplo, trans, n, a, lda, b, work, rnd)
-	if imat <= 10 {
-		// b has not been generated.
-		dlarnv(b, 3, rnd)
+	var diag blas.Diag
+	switch imat {
+	default:
+		// Generate triangular test matrix and right hand side.
+		diag = dlattr(imat, uplo, trans, n, a, lda, b, work, rnd)
+		if imat <= 10 {
+			// b has not been generated.
+			dlarnv(b, 3, rnd)
+		}
+	case -1:
+		// Test case from https://github.com/Reference-LAPACK/lapack/issues/714
+		diag = blas.NonUnit
+		v := math.MaxFloat64
+		if uplo == blas.Upper {
+			a[0], a[1], a[2] = v, v, v
+			a[lda+1], a[lda+2] = v, v
+			a[2*lda+2] = v
+		} else {
+			a[0] = v
+			a[lda], a[lda+1] = v, v
+			a[2*lda], a[2*lda+1], a[2*lda+2] = v, v, v
+		}
+		b[0], b[1], b[2] = v, 0, v
 	}
 
 	cnorm := nanSlice(n)

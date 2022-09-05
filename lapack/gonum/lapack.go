@@ -4,7 +4,11 @@
 
 package gonum
 
-import "gonum.org/v1/gonum/lapack"
+import (
+	"math"
+
+	"gonum.org/v1/gonum/lapack"
+)
 
 // Implementation is the native Go implementation of LAPACK routines. It
 // is built on top of calls to the return of blas64.Implementation(), so while
@@ -48,6 +52,10 @@ const (
 	// 1/dlamchS does not overflow, or also the smallest normal number.
 	// For IEEE this is 2^{-1022}.
 	dlamchS = 0x1p-1022
+
+	// dlamchO is the overflow threshold, the largest number that is not
+	// an infinity.
+	dlamchO = math.MaxFloat64
 
 	// (rtmin,rtmax) is a range of well-scaled numbers whose square
 	// or sum of squares is also safe.

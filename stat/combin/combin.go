@@ -192,7 +192,7 @@ func nextCombination(s []int, n, k int) {
 // CombinationIndex returns the inverse of IndexToCombination.
 //
 // CombinationIndex panics if comb is not a sorted combination of the first
-// [0,n) integers, if n or k are non-negative, or if k is greater than n.
+// [0,n) integers, if n or k are negative, or if k is greater than n.
 func CombinationIndex(comb []int, n, k int) int {
 	if n < 0 || k < 0 {
 		panic(errNegInput)
@@ -238,7 +238,7 @@ func CombinationIndex(comb []int, n, k int) int {
 // The combination is stored in-place into dst if dst is non-nil, otherwise
 // a new slice is allocated and returned.
 //
-// IndexToCombination panics if n or k are non-negative, if k is greater than n,
+// IndexToCombination panics if n or k are negative, if k is greater than n,
 // or if idx is not in [0, Binomial(n,k)-1]. IndexToCombination will also panic
 // if dst is non-nil and len(dst) is not k.
 func IndexToCombination(dst []int, idx, n, k int) []int {
@@ -531,7 +531,7 @@ func (p *PermutationGenerator) Permutation(dst []int) []int {
 // PermutationIndex returns the inverse of IndexToPermutation.
 //
 // PermutationIndex panics if perm is not a permutation of k of the first
-// [0,n) integers, if n or k are non-negative, or if k is greater than n.
+// [0,n) integers, if n or k are negative, or if k is greater than n.
 func PermutationIndex(perm []int, n, k int) int {
 	if n < 0 || k < 0 {
 		panic(errNegInput)
@@ -605,7 +605,7 @@ func (s sortInts) Swap(i, j int) {
 // The permutation is stored in-place into dst if dst is non-nil, otherwise
 // a new slice is allocated and returned.
 //
-// IndexToPermutation panics if n or k are non-negative, if k is greater than n,
+// IndexToPermutation panics if n or k are negative, if k is greater than n,
 // or if idx is not in [0, NumPermutations(n,k)-1]. IndexToPermutation will also panic
 // if dst is non-nil and len(dst) is not k.
 func IndexToPermutation(dst []int, idx, n, k int) []int {

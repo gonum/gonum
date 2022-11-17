@@ -14,7 +14,7 @@ import (
 //
 //	minimize over x |b - A*x|_2
 //
-// where A is an m×n matrix A, b is a given m element vector and x is n element
+// where A is an m×n matrix, b is a given m element vector and x is n element
 // solution vector. Solve assumes that A has full rank, that is
 //
 //	rank(A) = min(m,n)
@@ -121,7 +121,7 @@ func (m *Dense) Solve(a, b Matrix) error {
 //
 //	minimize over x |b - A*x|_2
 //
-// where A is an m×n matrix A, b is a given m element vector and x is n element
+// where A is an m×n matrix, b is a given m element vector and x is n element
 // solution vector. Solve assumes that A has full rank, that is
 //
 //	rank(A) = min(m,n)

@@ -171,6 +171,21 @@ var yenShortestPathTests = []struct {
 			{0, 1, 2, 5, 6},
 		},
 	},
+	{
+		name:  "clean_root", // This is the failing case in gonum/gonum#1778.
+		graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedUndirectedGraph(0, math.Inf(1)) },
+		edges: []simple.WeightedEdge{
+			{F: simple.Node(1), T: simple.Node(2), W: 4},
+			{F: simple.Node(1), T: simple.Node(3), W: 1},
+			{F: simple.Node(2), T: simple.Node(3), W: 4},
+		},
+		query: simple.Edge{F: simple.Node(1), T: simple.Node(2)},
+		k:     3,
+		wantPaths: [][]int64{
+			{1, 2},
+			{1, 3, 2},
+		},
+	},
 }
 
 func bipartite(n int, weight, inc float64) []simple.WeightedEdge {

@@ -12,9 +12,11 @@ import (
 	"gonum.org/v1/gonum/graph/iterator"
 )
 
-// YenKShortestPaths returns the k-shortest loopless paths from s to t in g.
-// YenKShortestPaths will panic if g contains a negative edge weight.
-func YenKShortestPaths(g graph.Graph, k int, s, t graph.Node) [][]graph.Node {
+// YenKShortestPaths returns the k-shortest loopless paths from s to t in g
+// with path costs no greater than cost beyond the shortest path.
+// If k is negative, only path cost will be used to limit the set of returned
+// paths. YenKShortestPaths will panic if g contains a negative edge weight.
+func YenKShortestPaths(g graph.Graph, k int, cost float64, s, t graph.Node) [][]graph.Node {
 	// See https://en.wikipedia.org/wiki/Yen's_algorithm and
 	// the paper at https://doi.org/10.1090%2Fqam%2F253822.
 
@@ -30,7 +32,8 @@ func YenKShortestPaths(g graph.Graph, k int, s, t graph.Node) [][]graph.Node {
 		yk.weight = UniformCost(g)
 	}
 
-	shortest, _ := DijkstraFrom(s, yk).To(t.ID())
+	shortest, weight := DijkstraFrom(s, yk).To(t.ID())
+	cost += weight // Set cost to absolute cost limit.
 	switch len(shortest) {
 	case 0:
 		return nil
@@ -41,7 +44,7 @@ func YenKShortestPaths(g graph.Graph, k int, s, t graph.Node) [][]graph.Node {
 
 	var pot []yenShortest
 	var root []graph.Node
-	for i := int64(1); i < int64(k); i++ {
+	for i := int64(1); k < 0 || i < int64(k); i++ {
 		// The spur node ranges from the first node to the next
 		// to last node in the previous k-shortest path.
 		for n := 0; n < len(paths[i-1])-1; n++ {
@@ -70,7 +73,7 @@ func YenKShortestPaths(g graph.Graph, k int, s, t graph.Node) [][]graph.Node {
 			}
 
 			spath, weight := DijkstraFrom(spur, yk).To(t.ID())
-			if math.IsInf(weight, 1) {
+			if weight > cost || math.IsInf(weight, 1) {
 				continue
 			}
 			if len(root) > 1 {
@@ -90,11 +93,11 @@ func YenKShortestPaths(g graph.Graph, k int, s, t graph.Node) [][]graph.Node {
 		}
 
 		sort.Sort(byPathWeight(pot))
-		best := pot[0].path
-		if len(best) <= 1 {
+		best := pot[0]
+		if len(best.path) <= 1 || best.weight > cost {
 			break
 		}
-		paths = append(paths, best)
+		paths = append(paths, best.path)
 		pot = pot[1:]
 	}
 

@@ -17,7 +17,8 @@ import (
 // Unmarshal parses the JSON-encoded data and stores the result in dst.
 // Node IDs are obtained from the JSON fields identified by the uid parameter.
 // UIDs obtained from the JSON encoding must map to unique node ID values
-// consistently across the JSON-encoded spanning tree.
+// consistently across the JSON-encoded spanning tree. graph.Node values
+// returned by dst.NewNode must satisfy StringIDSetter.
 func Unmarshal(data []byte, uid string, dst encoding.Builder) error {
 	if uid == "" {
 		return errors.New("graphql: invalid UID field name")

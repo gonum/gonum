@@ -170,6 +170,41 @@ func TestBellmanFordAllFrom(t *testing.T) {
 				}
 			}
 
+			paths = paths[:0]
+			pt.AllToFunc(test.Query.To().ID(), func(path []graph.Node) {
+				paths = append(paths, append([]graph.Node(nil), path...))
+			})
+			if weight != test.Weight {
+				t.Errorf("%q %s: unexpected weight from AllTo: got:%f want:%f",
+					test.Name, tg.typ, weight, test.Weight)
+			}
+			if weight := pt.WeightTo(test.Query.To().ID()); !math.IsInf(test.Weight, -1) && weight != test.Weight {
+				t.Errorf("%q %s: unexpected weight from Weight: got:%f want:%f",
+					test.Name, tg.typ, weight, test.Weight)
+			}
+
+			gotPaths = nil
+			if len(paths) != 0 {
+				gotPaths = make([][]int64, len(paths))
+			}
+			for i, p := range paths {
+				for _, v := range p {
+					gotPaths[i] = append(gotPaths[i], v.ID())
+				}
+			}
+			if test.HasNegativeCycleInPath {
+				if gotPaths != nil {
+					t.Errorf("testing %q %s: unexpected shortest paths:\ngot: %v\nwant: []",
+						test.Name, tg.typ, gotPaths)
+				}
+			} else {
+				ordered.BySliceValues(gotPaths)
+				if !reflect.DeepEqual(gotPaths, test.WantPaths) {
+					t.Errorf("testing %q %s: unexpected shortest paths:\ngot: %v\nwant:%v",
+						test.Name, tg.typ, gotPaths, test.WantPaths)
+				}
+			}
+
 			// Test absent paths.
 			np, weight, unique := pt.To(test.NoPathFor.To().ID())
 			if pt.From().ID() == test.NoPathFor.From().ID() && !(np == nil && math.IsInf(weight, 1) && !unique) {

@@ -36,7 +36,7 @@ Where possible, the source of algorithms should be referenced in the comments.
 
 Here are the current repositories for the Gonum project.
 If code you want to contribute doesn't quite fit in any of them, then please start a discussion on the [mailing list](https://groups.google.com/forum/#!forum/gonum-dev).
-Code can be found at [github.com/gonum/](https://github.com/gonum/)\<repo\>, and documentation at godoc.org/github.com/gonum/\<repo\>.
+Code can be found at [github.com/gonum/](https://github.com/gonum/)\<repo\>, and documentation at gonum.org/v1/\<repo\>.
 
 * [gonum](https://github.com/gonum/gonum) — The gonum repository contains the majority of Gonum packages
 * [plot](https://github.com/gonum/plot) — A repository for plotting and visualizing data
@@ -80,7 +80,7 @@ Pull requests should include tests for any new code before merging.
 It is ok to start a pull request on partially implemented code to get feedback, and see if your approach to a problem is sound.
 You don't need to have tests, or even have code that compiles to open a pull request, although both will be needed before merge.
 When tests use magic numbers, please include a comment explaining the source of the number.
-Benchmarks are optional for new features, but if you are submitting a pull request justified by performance improvement, you will need benchmarks to measure the impact of your change, and the pull request should include a report from [benchcmp](https://godoc.org/golang.org/x/tools/cmd/benchcmp) or, preferably, [benchstat](https://github.com/rsc/benchstat).
+Benchmarks are optional for new features, but if you are submitting a pull request justified by performance improvement, you will need benchmarks to measure the impact of your change, and the pull request should include a report from [benchcmp](https://pkg.go.dev/golang.org/x/tools/cmd/benchcmp) or, preferably, [benchstat](https://github.com/rsc/benchstat).
 
 ### Code Review
 

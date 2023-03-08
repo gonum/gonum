@@ -1,4 +1,4 @@
-Gonum LAPACK [![GoDoc](https://godoc.org/gonum.org/v1/gonum/lapack?status.svg)](https://godoc.org/gonum.org/v1/gonum/lapack)
+Gonum LAPACK [![GoDoc](https://godocs.io/gonum.org/v1/gonum/lapack?status.svg)](https://godocs.io/gonum.org/v1/gonum/lapack)
 ======
 
 A collection of packages to provide LAPACK functionality for the Go programming

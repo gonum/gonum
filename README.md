@@ -4,7 +4,7 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/valslkp8sr50eepn/branch/master?svg=true)](https://ci.appveyor.com/project/Gonum/gonum/branch/master)
 [![codecov.io](https://codecov.io/gh/gonum/gonum/branch/master/graph/badge.svg)](https://codecov.io/gh/gonum/gonum)
 [![go.dev reference](https://pkg.go.dev/badge/gonum.org/v1/gonum)](https://pkg.go.dev/gonum.org/v1/gonum)
-[![GoDoc](https://godoc.org/gonum.org/v1/gonum?status.svg)](https://godoc.org/gonum.org/v1/gonum)
+[![GoDoc](https://godocs.io/gonum.org/v1/gonum?status.svg)](https://godocs.io/gonum.org/v1/gonum)
 [![Go Report Card](https://goreportcard.com/badge/github.com/gonum/gonum)](https://goreportcard.com/report/github.com/gonum/gonum)
 [![stability-unstable](https://img.shields.io/badge/stability-unstable-yellow.svg)](https://github.com/emersion/stability-badges#unstable)
 

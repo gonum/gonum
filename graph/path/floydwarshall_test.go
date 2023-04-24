@@ -93,6 +93,25 @@ func TestFloydWarshall(t *testing.T) {
 				test.Name, got, test.WantPaths)
 		}
 
+		paths = paths[:0]
+		pt.AllBetweenFunc(test.Query.From().ID(), test.Query.To().ID(), func(path []graph.Node) {
+			paths = append(paths, append([]graph.Node(nil), path...))
+		})
+		got = nil
+		if len(paths) != 0 {
+			got = make([][]int64, len(paths))
+		}
+		for i, p := range paths {
+			for _, v := range p {
+				got[i] = append(got[i], v.ID())
+			}
+		}
+		ordered.BySliceValues(got)
+		if !reflect.DeepEqual(got, test.WantPaths) {
+			t.Errorf("testing %q: unexpected shortest paths:\ngot: %v\nwant:%v",
+				test.Name, got, test.WantPaths)
+		}
+
 		nps, weight := pt.AllBetween(test.NoPathFor.From().ID(), test.NoPathFor.To().ID())
 		if nps != nil || !math.IsInf(weight, 1) {
 			t.Errorf("%q: unexpected path:\ngot: paths=%v weight=%f\nwant:path=<nil> weight=+Inf",

@@ -174,10 +174,6 @@ func TestBellmanFordAllFrom(t *testing.T) {
 			pt.AllToFunc(test.Query.To().ID(), func(path []graph.Node) {
 				paths = append(paths, append([]graph.Node(nil), path...))
 			})
-			if weight != test.Weight {
-				t.Errorf("%q %s: unexpected weight from AllTo: got:%f want:%f",
-					test.Name, tg.typ, weight, test.Weight)
-			}
 			if weight := pt.WeightTo(test.Query.To().ID()); !math.IsInf(test.Weight, -1) && weight != test.Weight {
 				t.Errorf("%q %s: unexpected weight from Weight: got:%f want:%f",
 					test.Name, tg.typ, weight, test.Weight)

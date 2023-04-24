@@ -428,7 +428,7 @@ func (p ShortestAlts) AllTo(vid int64) (paths [][]graph.Node, weight float64) {
 	return paths, weight
 }
 
-// AllToFunc calls fn all shortest paths to v. Paths containing zero-weight
+// AllToFunc calls fn on all shortest paths to v. Paths containing zero-weight
 // cycles are not considered. If a negative cycle exists between u and v, no
 // path is considered. The fn closure must not retain the path parameter.
 func (p ShortestAlts) AllToFunc(vid int64, fn func(path []graph.Node)) {

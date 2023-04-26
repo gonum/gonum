@@ -65,6 +65,9 @@ func Bhattacharyya(p, q []float64) float64 {
 //     to that fraction of samples
 func CDF(q float64, c CumulantKind, domain, weights []float64) float64 {
 	domainSize := len(domain)
+	if domainSize == 0 {
+		panic("stat: zero length slice")
+	}
 	if weights != nil && domainSize != len(weights) {
 		panic("stat: slice length mismatch")
 	}

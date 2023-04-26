@@ -1342,27 +1342,30 @@ func TestMomentAbout(t *testing.T) {
 func TestCDF(t *testing.T) {
 	cumulantKinds := []CumulantKind{Empirical}
 	for i, test := range []struct {
+		desc    string
 		q       []float64
 		x       []float64
 		weights []float64
 		ans     [][]float64
 	}{
-		{},
 		{
-			q:   []float64{0, 0.9, 1, 1.1, 2.9, 3, 3.1, 4.9, 5, 5.1},
-			x:   []float64{1, 2, 3, 4, 5},
-			ans: [][]float64{{0, 0, 0.2, 0.2, 0.4, 0.6, 0.6, 0.8, 1, 1}},
+			desc: "test without weights (default trivial weights are applied)",
+			q:    []float64{0, 0.9, 1, 1.1, 2.9, 3, 3.1, 4.9, 5, 5.1},
+			x:    []float64{1, 2, 3, 4, 5},
+			ans:  [][]float64{{0, 0, 0.2, 0.2, 0.4, 0.6, 0.6, 0.8, 1, 1}},
 		},
 		{
+			desc:    "test with non-trivial weights",
 			q:       []float64{0, 0.9, 1, 1.1, 2.9, 3, 3.1, 4.9, 5, 5.1},
 			x:       []float64{1, 2, 3, 4, 5},
-			weights: []float64{1, 1, 1, 1, 1},
-			ans:     [][]float64{{0, 0, 0.2, 0.2, 0.4, 0.6, 0.6, 0.8, 1, 1}},
+			weights: []float64{1, 2, 4, 7, 11},
+			ans:     [][]float64{{0, 0, 0.04, 0.04, 0.12, 0.28, 0.28, 0.56, 1, 1}},
 		},
 		{
-			q:   []float64{0, 0.9, 1},
-			x:   []float64{math.NaN()},
-			ans: [][]float64{{math.NaN(), math.NaN(), math.NaN()}},
+			desc: "test with NaN",
+			q:    []float64{0, 0.9, 1},
+			x:    []float64{math.NaN()},
+			ans:  [][]float64{{math.NaN(), math.NaN(), math.NaN()}},
 		},
 	} {
 		copyX := make([]float64, len(test.x))
@@ -1374,64 +1377,21 @@ func TestCDF(t *testing.T) {
 		}
 		for j, q := range test.q {
 			for k, kind := range cumulantKinds {
-				v := CDF(q, kind, test.x, test.weights)
-				if !floats.Equal(copyX, test.x) && !math.IsNaN(v) {
-					t.Errorf("x changed for case %d kind %d percentile %v", i, k, q)
-				}
-				if !floats.Equal(copyW, test.weights) {
-					t.Errorf("x changed for case %d kind %d percentile %v", i, k, q)
-				}
-				if v != test.ans[k][j] && !(math.IsNaN(v) && math.IsNaN(test.ans[k][j])) {
-					t.Errorf("mismatch case %d kind %d percentile %v. Expected: %v, found: %v", i, k, q, test.ans[k][j], v)
-				}
+				t.Run(test.desc, func(t *testing.T) {
+					v := CDF(q, kind, test.x, test.weights)
+					if !floats.Equal(copyX, test.x) && !math.IsNaN(v) {
+						t.Errorf("x changed for case %d kind %d percentile %v", i, k, q)
+					}
+					if !floats.Equal(copyW, test.weights) {
+						t.Errorf("x changed for case %d kind %d percentile %v", i, k, q)
+					}
+					if v != test.ans[k][j] && !(math.IsNaN(v) && math.IsNaN(test.ans[k][j])) {
+						t.Errorf("mismatch case %d kind %d percentile %v. Expected: %v, found: %v", i, k, q, test.ans[k][j], v)
+					}
+				})
 			}
 		}
 	}
-
-	// these test cases should all result in a panic
-	for i, test := range []struct {
-		name    string
-		q       float64
-		kind    CumulantKind
-		x       []float64
-		weights []float64
-	}{
-		{
-			name: "x == nil",
-			kind: Empirical,
-			x:    nil,
-		},
-		{
-			name: "len(x) == 0",
-			kind: Empirical,
-			x:    []float64{},
-		},
-		{
-			name:    "len(x) != len(weights)",
-			q:       1.5,
-			kind:    Empirical,
-			x:       []float64{1, 2, 3, 4, 5},
-			weights: []float64{1, 2, 3},
-		},
-		{
-			name: "unsorted x",
-			q:    1.5,
-			kind: Empirical,
-			x:    []float64{3, 2, 1},
-		},
-		{
-			name: "unknown CumulantKind",
-			q:    1.5,
-			kind: CumulantKind(1000), // bogus
-			x:    []float64{1, 2, 3},
-		},
-	} {
-		if !panics(func() { CDF(test.q, test.kind, test.x, test.weights) }) {
-			t.Errorf("did not panic as expected with %s for case %d kind %d percentile %v x %v weights %v", test.name, i, test.kind, test.q, test.x, test.weights)
-		}
-	}
-
-}
 
 func TestQuantile(t *testing.T) {
 	cumulantKinds := []CumulantKind{

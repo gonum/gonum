@@ -63,50 +63,43 @@ func Bhattacharyya(p, q []float64) float64 {
 // CumulantKind behaviors:
 //   - Empirical: Returns the lowest fraction for which q is greater than or equal
 //     to that fraction of samples
-func CDF(q float64, c CumulantKind, x, weights []float64) float64 {
-	if weights != nil && len(x) != len(weights) {
+func CDF(q float64, c CumulantKind, domain, weights []float64) float64 {
+	domainSize := len(domain)
+	if weights != nil && domainSize != len(weights) {
 		panic("stat: slice length mismatch")
 	}
-	if floats.HasNaN(x) {
+	if floats.HasNaN(domain) {
 		return math.NaN()
 	}
-	if len(x) == 0 {
-		panic("stat: zero length slice")
-	}
-	if !sort.Float64sAreSorted(x) {
+	if !sort.Float64sAreSorted(domain) {
 		panic("x data are not sorted")
 	}
 
-	if q < x[0] {
+	if q < domain[0] {
 		return 0
 	}
-	if q >= x[len(x)-1] {
+	if q >= domain[domainSize-1] {
 		return 1
-	}
-
-	var sumWeights float64
-	if weights == nil {
-		sumWeights = float64(len(x))
-	} else {
-		sumWeights = floats.Sum(weights)
 	}
 
 	// Calculate the index
 	switch c {
 	case Empirical:
 		// Find the smallest value that is greater than that percent of the samples
-		var w float64
-		for i, v := range x {
-			if v > q {
-				return w / sumWeights
-			}
-			if weights == nil {
-				w++
+		// by binary search
+		lo, hi := 0, domainSize-1
+		for lo != hi {
+			mid := (lo + hi) / 2
+			if domain[mid] <= q {
+				lo = mid + 1
 			} else {
-				w += weights[i]
+				hi = mid
 			}
 		}
-		panic("impossible")
+		if weights == nil {
+			return float64(lo) / float64(domainSize)
+		}
+		return floats.Sum(weights[:lo]) / floats.Sum(weights)
 	default:
 		panic("stat: bad cumulant kind")
 	}

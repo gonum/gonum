@@ -3,6 +3,7 @@ module gonum.org/v1/gonum
 go 1.18
 
 require (
+	github.com/goccmack/gocc v0.0.0-20230228185258-2292f9e40198
 	github.com/google/go-cmp v0.5.8
 	golang.org/x/exp v0.0.0-20230321023759-10a507213a29
 	golang.org/x/tools v0.7.0
@@ -17,6 +18,7 @@ require (
 	github.com/go-pdf/fpdf v0.6.0 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	golang.org/x/image v0.6.0 // indirect
+	golang.org/x/mod v0.9.0 // indirect
 	golang.org/x/text v0.8.0 // indirect
 	rsc.io/pdf v0.1.1 // indirect
 )

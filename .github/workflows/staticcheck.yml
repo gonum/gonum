@@ -10,9 +10,9 @@ jobs:
     env:
         GO111MODULE: on
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         fetch-depth: 1
-    - uses: dominikh/staticcheck-action@v1.2.0
+    - uses: dominikh/staticcheck-action@v1
       with:
-        version: "2022.1"
+        version: "2023.1"

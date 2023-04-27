@@ -1,6 +1,6 @@
 module gonum.org/v1/gonum
 
-go 1.18
+go 1.19
 
 require (
 	github.com/google/go-cmp v0.5.8

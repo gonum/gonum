@@ -13,7 +13,7 @@
 package lexer
 
 import (
-	"io/ioutil"
+	"os"
 	"unicode/utf8"
 
 	"gonum.org/v1/gonum/graph/formats/dot/internal/token"
@@ -26,35 +26,50 @@ const (
 )
 
 type Lexer struct {
-	src    []byte
-	pos    int
-	line   int
-	column int
+	src     []byte
+	pos     int
+	line    int
+	column  int
+	Context token.Context
 }
 
 func NewLexer(src []byte) *Lexer {
 	lexer := &Lexer{
-		src:    src,
-		pos:    0,
-		line:   1,
-		column: 1,
+		src:     src,
+		pos:     0,
+		line:    1,
+		column:  1,
+		Context: nil,
 	}
 	return lexer
 }
 
+// SourceContext is a simple instance of a token.Context which
+// contains the name of the source file.
+type SourceContext struct {
+	Filepath string
+}
+
+func (s *SourceContext) Source() string {
+	return s.Filepath
+}
+
 func NewLexerFile(fpath string) (*Lexer, error) {
-	src, err := ioutil.ReadFile(fpath)
+	src, err := os.ReadFile(fpath)
 	if err != nil {
 		return nil, err
 	}
-	return NewLexer(src), nil
+	lexer := NewLexer(src)
+	lexer.Context = &SourceContext{Filepath: fpath}
+	return lexer, nil
 }
 
 func (l *Lexer) Scan() (tok *token.Token) {
-	tok = new(token.Token)
+	tok = &token.Token{}
 	if l.pos >= len(l.src) {
 		tok.Type = token.EOF
 		tok.Pos.Offset, tok.Pos.Line, tok.Pos.Column = l.pos, l.line, l.column
+		tok.Pos.Context = l.Context
 		return
 	}
 	start, startLine, startColumn, end := l.pos, l.line, l.column, 0
@@ -113,6 +128,7 @@ func (l *Lexer) Scan() (tok *token.Token) {
 		tok.Lit = []byte{}
 	}
 	tok.Pos.Offset, tok.Pos.Line, tok.Pos.Column = start, startLine, startColumn
+	tok.Pos.Context = l.Context
 
 	return
 }

@@ -6,8 +6,6 @@ package sampleuv
 
 import (
 	"golang.org/x/exp/rand"
-
-	"gonum.org/v1/gonum/floats/scalar"
 )
 
 // Weighted provides sampling without replacement from a collection of items with
@@ -54,70 +52,89 @@ func NewWeighted(w []float64, src rand.Source) Weighted {
 // already taken.
 func (s Weighted) Len() int { return len(s.weights) }
 
+func (s Weighted) findIndex(r float64) int {
+	i := 0
+
+	for {
+		r -= s.weights[i]
+		if r < 0 {
+			break // Fall within item i.
+		}
+
+		ni := i<<1 + 1 // Move to left child.
+		// Left node should exist, because r is non-negative, but there are could be floating point errors,
+		// so we check index explicitly.
+		if ni >= len(s.heap) {
+			break
+		}
+
+		i = ni
+
+		d := s.heap[i]
+		if r >= d {
+			// If enough r to pass left child try to move to the right child.
+			r -= d
+			ni := i + 1
+
+			if ni >= len(s.heap) {
+				break
+			}
+
+			i = ni
+		}
+	}
+
+	return i
+}
+
 // Take returns an index from the Weighted with probability proportional
 // to the weight of the item. The weight of the item is then set to zero.
 // Take returns false if there are no items remaining.
 func (s Weighted) Take() (idx int, ok bool) {
-	const small = 1e-12
-	if scalar.EqualWithinAbsOrRel(s.heap[0], 0, small, small) {
+	if s.heap[0] == 0 {
 		return -1, false
 	}
 
 	var r float64
 	if s.rnd == nil {
-		r = s.heap[0] * rand.Float64()
+		r = rand.Float64()
 	} else {
-		r = s.heap[0] * s.rnd.Float64()
-	}
-	i := 1
-	last := -1
-	left := len(s.weights)
-	for {
-		if r -= s.weights[i-1]; r <= 0 {
-			break // Fall within item i-1.
-		}
-		i <<= 1 // Move to left child.
-		if d := s.heap[i-1]; r > d {
-			r -= d
-			// If enough r to pass left child
-			// move to right child state will
-			// be caught at break above.
-			i++
-		}
-		if i == last || left < 0 {
-			// No progression.
-			return -1, false
-		}
-		last = i
-		left--
+		r = s.rnd.Float64()
 	}
 
-	w, idx := s.weights[i-1], i-1
+	i := s.findIndex(s.heap[0] * r)
 
-	s.weights[i-1] = 0
-	for i > 0 {
-		s.heap[i-1] -= w
-		// The following condition is necessary to
-		// handle floating point error. If we see
-		// a heap value below zero, we know we need
-		// to rebuild it.
-		if s.heap[i-1] < 0 {
-			s.reset()
-			return idx, true
-		}
-		i >>= 1
-	}
+	s.Reweight(i, 0)
 
-	return idx, true
+	return i, true
 }
 
 // Reweight sets the weight of item idx to w.
 func (s Weighted) Reweight(idx int, w float64) {
-	w, s.weights[idx] = s.weights[idx]-w, w
-	idx++
-	for idx > 0 {
-		s.heap[idx-1] -= w
-		idx >>= 1
+	s.weights[idx] = w
+
+	for {
+		w = s.weights[idx]
+		// We want to keep heap state here like after reset call.
+		// Therefore, we sum weights in such order, because floating point sum not associative.
+
+		ri := idx*2 + 2
+		if ri < len(s.heap) {
+			w += s.heap[ri]
+		}
+
+		li := ri - 1
+		if li < len(s.heap) {
+			w += s.heap[li]
+		}
+
+		s.heap[idx] = w
+
+		if idx == 0 {
+			break
+		}
+
+		idx = (idx - 1) / 2
 	}
 }
 

@@ -266,3 +266,48 @@ func TestWeightedNoResample(t *testing.T) {
 		}
 	}
 }
+
+func calculateNonZeroWeights(weights []float64) int {
+	count := 0
+	for _, w := range weights {
+		if w != 0 {
+			count++
+		}
+	}
+
+	return count
+}
+
+func FuzzWeighted_Take(f *testing.F) {
+	f.Add(0.000001, 0.000000012)
+
+	f.Fuzz(func(t *testing.T, w1 float64, w2 float64) {
+		if w1 < 0 || w2 < 0 {
+			t.Skip()
+		}
+
+		weights := []float64{w1, w2}
+
+		weighted := NewWeighted(weights, rand.NewSource(0))
+
+		expectedTakenSize := calculateNonZeroWeights(weights)
+		takenSet := make(map[int]struct{}, len(weights))
+		for {
+			taken, ok := weighted.Take()
+			if !ok {
+				break
+			}
+
+			takenSet[taken] = struct{}{}
+		}
+
+		if expectedTakenSize != len(takenSet) {
+			t.Errorf(
+				"unexpected taken set size: expected=%d, actual=%d, taken=%v",
+				expectedTakenSize,
+				len(takenSet),
+				takenSet,
+			)
+		}
+	})
+}

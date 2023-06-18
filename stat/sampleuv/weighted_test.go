@@ -267,18 +267,37 @@ func TestWeightedNoResample(t *testing.T) {
 	}
 }
 
-func calculateNonZeroWeights(weights []float64) int {
-	count := 0
-	for _, w := range weights {
-		if w != 0 {
-			count++
-		}
-	}
-
-	return count
+var issue1866Tests = []struct {
+	weights []float64
+	seed    uint64
+}{
+	{weights: []float64{72000, 166.66666666666666}, seed: 202},
+	{weights: []float64{0.6666666666666666, 20412, 0}, seed: 0},
 }
 
-func FuzzWeighted_Take(f *testing.F) {
+// See https://github.com/gonum/gonum/issues/1866
+func TestIssue1866(t *testing.T) {
+	for i, test := range issue1866Tests {
+		w := NewWeighted(test.weights, rand.NewSource(test.seed))
+		for j := 0; j < len(test.weights)+1; j++ {
+			if panicked(func() { w.Take() }) {
+				t.Errorf("unexpected panic for test %d iteration %d", i, j)
+			}
+		}
+	}
+}
+
+func panicked(fn func()) (yes bool) {
+	defer func() {
+		if recover() != nil {
+			yes = true
+		}
+	}()
+	fn()
+	return false
+}
+
+func FuzzWeightedTake(f *testing.F) {
 	f.Add(0.000001, 0.000000012)
 
 	f.Fuzz(func(t *testing.T, w1 float64, w2 float64) {
@@ -290,24 +309,29 @@ func FuzzWeighted_Take(f *testing.F) {
 
 		weighted := NewWeighted(weights, rand.NewSource(0))
 
-		expectedTakenSize := calculateNonZeroWeights(weights)
-		takenSet := make(map[int]struct{}, len(weights))
+		want := calculateNonZeroWeights(weights)
+		var got int
 		for {
-			taken, ok := weighted.Take()
+			_, ok := weighted.Take()
 			if !ok {
 				break
 			}
-
-			takenSet[taken] = struct{}{}
+			got++
 		}
 
-		if expectedTakenSize != len(takenSet) {
-			t.Errorf(
-				"unexpected taken set size: expected=%d, actual=%d, taken=%v",
-				expectedTakenSize,
-				len(takenSet),
-				takenSet,
-			)
+		if got != want {
+			t.Errorf("unexpected taken set size: got=%d, want=%d", got, want)
 		}
 	})
+}
+
+func calculateNonZeroWeights(weights []float64) int {
+	count := 0
+	for _, w := range weights {
+		if w != 0 {
+			count++
+		}
+	}
+
+	return count
 }

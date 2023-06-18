@@ -4,9 +4,7 @@
 
 package sampleuv
 
-import (
-	"golang.org/x/exp/rand"
-)
+import "golang.org/x/exp/rand"
 
 // Weighted provides sampling without replacement from a collection of items with
 // non-uniform probability.
@@ -52,41 +50,6 @@ func NewWeighted(w []float64, src rand.Source) Weighted {
 // already taken.
 func (s Weighted) Len() int { return len(s.weights) }
 
-func (s Weighted) findIndex(r float64) int {
-	i := 0
-
-	for {
-		r -= s.weights[i]
-		if r < 0 {
-			break // Fall within item i.
-		}
-
-		ni := i<<1 + 1 // Move to left child.
-		// Left node should exist, because r is non-negative, but there are could be floating point errors,
-		// so we check index explicitly.
-		if ni >= len(s.heap) {
-			break
-		}
-
-		i = ni
-
-		d := s.heap[i]
-		if r >= d {
-			// If enough r to pass left child try to move to the right child.
-			r -= d
-			ni := i + 1
-
-			if ni >= len(s.heap) {
-				break
-			}
-
-			i = ni
-		}
-	}
-
-	return i
-}
-
 // Take returns an index from the Weighted with probability proportional
 // to the weight of the item. The weight of the item is then set to zero.
 // Take returns false if there are no items remaining.
@@ -102,7 +65,38 @@ func (s Weighted) Take() (idx int, ok bool) {
 		r = s.rnd.Float64()
 	}
 
-	i := s.findIndex(s.heap[0] * r)
+	r *= s.heap[0]
+	i := 0
+	for {
+		r -= s.weights[i]
+		if r < 0 {
+			break // Fall within item i.
+		}
+
+		li := i*2 + 1 // Move to left child.
+		// Left node should exist, because r is non-negative,
+		// but there could be floating point errors, so we
+		// check index explicitly.
+		if li >= len(s.heap) {
+			break
+		}
+
+		i = li
+
+		d := s.heap[i]
+		if r >= d {
+			// If there is enough r to pass left child try to
+			// move to the right child.
+			r -= d
+			ri := i + 1
+
+			if ri >= len(s.heap) {
+				break
+			}
+
+			i = ri
+		}
+	}
 
 	s.Reweight(i, 0)
 
@@ -113,10 +107,12 @@ func (s Weighted) Take() (idx int, ok bool) {
 func (s Weighted) Reweight(idx int, w float64) {
 	s.weights[idx] = w
 
+	// We want to keep the heap state here consistent
+	// with the result of a reset call. So we sum
+	// weights in the same order, since floating point
+	// addition is not associative.
 	for {
 		w = s.weights[idx]
-		// We want to keep heap state here like after reset call.
-		// Therefore, we sum weights in such order, because floating point sum not associative.
 
 		ri := idx*2 + 2
 		if ri < len(s.heap) {

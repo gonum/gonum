@@ -9,6 +9,7 @@ import (
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
+	"gonum.org/v1/gonum/lapack"
 )
 
 // Dlatrs solves a triangular system of equations scaled to prevent overflow. It
@@ -81,13 +82,61 @@ func (impl Implementation) Dlatrs(uplo blas.Uplo, trans blas.Transpose, diag bla
 	}
 	// Scale the column norms by tscal if the maximum element in cnorm is greater than bignum.
 	imax := bi.Idamax(n, cnorm, 1)
-	tmax := cnorm[imax]
 	var tscal float64
-	if tmax <= bignum {
+	if cnorm[imax] <= bignum {
 		tscal = 1
 	} else {
-		tscal = 1 / (smlnum * tmax)
-		bi.Dscal(n, tscal, cnorm, 1)
+		tmax := cnorm[imax]
+		// Avoid NaN generation if entries in cnorm exceed the overflow
+		// threshold.
+		if tmax <= math.MaxFloat64 {
+			// Case 1: All entries in cnorm are valid floating-point numbers.
+			tscal = 1 / (smlnum * tmax)
+			bi.Dscal(n, tscal, cnorm, 1)
+		} else {
+			// Case 2: At least one column norm of A cannot be represented as
+			// floating-point number. Find the offdiagonal entry A[i,j] with the
+			// largest absolute value. If this entry is not +/- Infinity, use
+			// this value as tscal.
+			tmax = 0
+			if upper {
+				// A is upper triangular.
+				for j := 1; j < n; j++ {
+					tmax = math.Max(impl.Dlange(lapack.MaxAbs, j, 1, a[j:], lda, nil), tmax)
+				}
+			} else {
+				// A is lower triangular.
+				for j := 0; j < n-1; j++ {
+					tmax = math.Max(impl.Dlange(lapack.MaxAbs, n-j-1, 1, a[(j+1)*lda+j:], lda, nil), tmax)
+				}
+			}
+			if tmax <= math.MaxFloat64 {
+				tscal = 1 / (smlnum * tmax)
+				for j := 0; j < n; j++ {
+					if cnorm[j] <= math.MaxFloat64 {
+						cnorm[j] *= tscal
+					} else {
+						// Recompute the 1-norm without introducing Infinity in
+						// the summation.
+						cnorm[j] = 0
+						if upper {
+							for i := 0; i < j; i++ {
+								cnorm[j] += tscal * math.Abs(a[i*lda+j])
+							}
+						} else {
+							for i := j + 1; i < n; i++ {
+								cnorm[j] += tscal * math.Abs(a[i*lda+j])
+							}
+						}
+					}
+				}
+			} else {
+				// At least one entry of A is not a valid floating-point entry.
+				// Rely on Dtrsv to propagate Inf and NaN.
+				bi.Dtrsv(uplo, trans, diag, n, a, lda, x, 1)
+				return
+			}
+		}
 	}
 
 	// Compute a bound on the computed solution vector to see if bi.Dtrsv can be used.

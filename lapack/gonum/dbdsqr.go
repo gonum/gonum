@@ -146,7 +146,7 @@ func (impl Implementation) Dbdsqr(uplo blas.Uplo, n, ncvt, nru, ncc int, d, e, v
 			smax = math.Max(smax, math.Abs(e[i]))
 		}
 
-		var sminl float64
+		var smin float64
 		var thresh float64
 		if tol >= 0 {
 			sminoa := math.Abs(d[0])
@@ -189,7 +189,6 @@ func (impl Implementation) Dbdsqr(uplo blas.Uplo, n, ncvt, nru, ncc int, d, e, v
 				d[m-1] = 0
 			}
 			smax = math.Abs(d[m-1])
-			smin := smax
 			var l2 int
 			var broke bool
 			for l3 := 0; l3 < m-1; l3++ {
@@ -203,7 +202,6 @@ func (impl Implementation) Dbdsqr(uplo blas.Uplo, n, ncvt, nru, ncc int, d, e, v
 					broke = true
 					break
 				}
-				smin = math.Min(smin, abss)
 				smax = math.Max(math.Max(smax, abss), abse)
 			}
 			if broke {
@@ -257,14 +255,14 @@ func (impl Implementation) Dbdsqr(uplo blas.Uplo, n, ncvt, nru, ncc int, d, e, v
 				if tol >= 0 {
 					// If relative accuracy desired, apply convergence criterion forward.
 					mu := math.Abs(d[l2])
-					sminl = mu
+					smin = mu
 					for l3 := l2; l3 < m-1; l3++ {
 						if math.Abs(e[l3]) <= tol*mu {
 							e[l3] = 0
 							continue Outer
 						}
 						mu = math.Abs(d[l3+1]) * (mu / (mu + math.Abs(e[l3])))
-						sminl = math.Min(sminl, mu)
+						smin = math.Min(smin, mu)
 					}
 				}
 			} else {
@@ -277,14 +275,14 @@ func (impl Implementation) Dbdsqr(uplo blas.Uplo, n, ncvt, nru, ncc int, d, e, v
 				if tol >= 0 {
 					// If relative accuracy desired, apply convergence criterion backward.
 					mu := math.Abs(d[m-1])
-					sminl = mu
+					smin = mu
 					for l3 := m - 2; l3 >= l2; l3-- {
 						if math.Abs(e[l3]) <= tol*mu {
 							e[l3] = 0
 							continue Outer
 						}
 						mu = math.Abs(d[l3]) * (mu / (mu + math.Abs(e[l3])))
-						sminl = math.Min(sminl, mu)
+						smin = math.Min(smin, mu)
 					}
 				}
 			}
@@ -293,7 +291,7 @@ func (impl Implementation) Dbdsqr(uplo blas.Uplo, n, ncvt, nru, ncc int, d, e, v
 			// Compute shift. First, test if shifting would ruin relative accuracy,
 			// and if so set the shift to zero.
 			var shift float64
-			if tol >= 0 && float64(n)*tol*(sminl/smax) <= math.Max(eps, (1.0/100)*tol) {
+			if tol >= 0 && float64(n)*tol*(smin/smax) <= math.Max(eps, (1.0/100)*tol) {
 				shift = 0
 			} else {
 				var sl2 float64

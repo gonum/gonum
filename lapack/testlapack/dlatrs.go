@@ -26,7 +26,7 @@ func DlatrsTest(t *testing.T, impl Dlatrser) {
 			for _, n := range []int{0, 1, 2, 3, 4, 5, 6, 7, 10, 20, 50, 100} {
 				for _, lda := range []int{n, 2*n + 1} {
 					lda = max(1, lda)
-					imats := []int{7, 11, 12, 13, 14, 15, 16, 17, 18}
+					imats := []int{7, 11, 12, 13, 14, 15, 16, 17, 18, 19}
 					if n < 6 {
 						imats = append(imats, 19)
 					}

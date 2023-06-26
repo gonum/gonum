@@ -45,7 +45,7 @@ func (impl Implementation) Dlatrs(uplo blas.Uplo, trans blas.Transpose, diag bla
 
 	// Quick return if possible.
 	if n == 0 {
-		return 0
+		return 1
 	}
 
 	switch {

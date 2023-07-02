@@ -66,7 +66,7 @@
 //
 // The unit package also provides the Unit type, a representation of a general
 // dimensional value. Unit can be used to help prevent errors of dimensionality
-// when multiplying or dividing dimensional numbers defined a run time. New
+// when multiplying or dividing dimensional numbers defined at run time. New
 // variables of type Unit can be created with the New function and the
 // Dimensions map. For example, the code
 //

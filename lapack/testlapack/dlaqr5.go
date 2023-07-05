@@ -40,11 +40,18 @@ func testDlaqr5(t *testing.T, impl Dlaqr5er, n, extra, kacc22 int, rnd *rand.Ran
 	nshfts := 2 * n
 	sr := make([]float64, nshfts)
 	si := make([]float64, nshfts)
-	for i := 0; i < n; i++ {
+	for i := 0; i < nshfts; {
+		if i == nshfts-1 || rnd.Float64() < 0.5 {
+			re := rnd.NormFloat64()
+			sr[i], si[i] = re, 0
+			i++
+			continue
+		}
 		re := rnd.NormFloat64()
 		im := rnd.NormFloat64()
-		sr[2*i], sr[2*i+1] = re, re
-		si[2*i], si[2*i+1] = im, -im
+		sr[i], sr[i+1] = re, re
+		si[i], si[i+1] = im, -im
+		i += 2
 	}
 	ktop := rnd.Intn(n)
 	kbot := rnd.Intn(n)

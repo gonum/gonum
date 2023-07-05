@@ -63,11 +63,11 @@ func Dlaqr5Benchmark(b *testing.B, impl Dlaqr5er) {
 				i += 2
 			}
 			v := zeros(nshifts/2, 3, 3)
-			u := zeros(3*nshifts-3, 3*nshifts-3, 3*nshifts-3)
+			u := zeros(2*nshifts, 2*nshifts, 2*nshifts)
 			nh := n
-			wh := zeros(3*nshifts-3, n, n)
+			wh := zeros(2*nshifts, n, n)
 			nv := n
-			wv := zeros(n, 3*nshifts-3, 3*nshifts-3)
+			wv := zeros(n, 2*nshifts, 2*nshifts)
 			z := eye(n, n)
 			b.Run(name, func(b *testing.B) {
 				for i := 0; i < b.N; i++ {

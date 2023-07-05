@@ -60,11 +60,11 @@ func testDlaqr5(t *testing.T, impl Dlaqr5er, n, extra, kacc22 int, rnd *rand.Ran
 	}
 
 	v := randomGeneral(nshfts/2, 3, 3+extra, rnd)
-	u := randomGeneral(3*nshfts-3, 3*nshfts-3, 3*nshfts-3+extra, rnd)
+	u := randomGeneral(2*nshfts, 2*nshfts, 2*nshfts+extra, rnd)
 	nh := n
-	wh := randomGeneral(3*nshfts-3, n, n+extra, rnd)
+	wh := randomGeneral(2*nshfts, n, n+extra, rnd)
 	nv := n
-	wv := randomGeneral(n, 3*nshfts-3, 3*nshfts-3+extra, rnd)
+	wv := randomGeneral(n, 2*nshfts, 2*nshfts+extra, rnd)
 
 	h := randomHessenberg(n, n+extra, rnd)
 	if ktop > 0 {

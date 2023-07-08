@@ -21,7 +21,7 @@ func TestDnrm2(t *testing.T)  { testblas.Dnrm2Test(t, impl) }
 func TestIdamax(t *testing.T) { testblas.IdamaxTest(t, impl) }
 func TestDswap(t *testing.T)  { testblas.DswapTest(t, impl) }
 func TestDcopy(t *testing.T)  { testblas.DcopyTest(t, impl) }
-func TestDrotg(t *testing.T)  { testblas.DrotgTest(t, impl) }
+func TestDrotg(t *testing.T)  { testblas.DrotgTest(t, impl, false) }
 func TestDrotmg(t *testing.T) { testblas.DrotmgTest(t, impl) }
 func TestDrot(t *testing.T)   { testblas.DrotTest(t, impl) }
 func TestDrotm(t *testing.T)  { testblas.DrotmTest(t, impl) }

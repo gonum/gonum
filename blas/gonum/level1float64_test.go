@@ -41,7 +41,7 @@ func TestDcopy(t *testing.T) {
 }
 
 func TestDrotg(t *testing.T) {
-	testblas.DrotgTest(t, impl)
+	testblas.DrotgTest(t, impl, false)
 }
 
 func TestDrotmg(t *testing.T) {

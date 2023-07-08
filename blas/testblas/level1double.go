@@ -1623,7 +1623,7 @@ type Drotger interface {
 	Drotg(a, b float64) (c, s, r, z float64)
 }
 
-func DrotgTest(t *testing.T, d Drotger) {
+func DrotgTest(t *testing.T, d Drotger, skipExtreme bool) {
 	drotg := d.Drotg
 	for _, test := range DrotgTests {
 		c, s, r, z := drotg(test.A, test.B)
@@ -1648,22 +1648,21 @@ func DrotgTest(t *testing.T, d Drotger) {
 		tol    = 20 * ulp
 	)
 	values := []float64{
-		-safmax,
 		-1 / ulp,
 		-1,
 		-1.0 / 3,
 		-ulp,
-		-safmin,
 		0,
-		safmin,
 		ulp,
 		1.0 / 3,
 		1,
 		1 / ulp,
-		safmax,
 		math.Inf(-1),
 		math.Inf(1),
 		math.NaN(),
+	}
+	if !skipExtreme {
+		values = append(values, -safmax, -safmin, safmin, safmax)
 	}
 	for _, f := range values {
 		for _, g := range values {

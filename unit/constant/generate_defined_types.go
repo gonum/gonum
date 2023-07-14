@@ -70,7 +70,7 @@ func main() {
 		}
 		f, err := parser.ParseFile(fset, fn, nil, 0)
 		if err != nil {
-			log.Fatal("failed to parse %q: %v", fn, err) // parse error
+			log.Fatalf("failed to parse %q: %v", fn, err) // parse error
 		}
 		if f.Name.Name != "unit" {
 			log.Fatalf("not parsing unit package: %q", f.Name.Name)

@@ -20,7 +20,7 @@ func TestIsPath(t *testing.T) {
 	}
 	p := []graph.Node{simple.Node(0)}
 	if IsPathIn(dg, p) {
-		t.Error("IsPath returns true on nonexistant node")
+		t.Error("IsPath returns true on nonexistent node")
 	}
 	dg.AddNode(p[0])
 	if !IsPathIn(dg, p) {

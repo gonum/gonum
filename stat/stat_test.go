@@ -1116,7 +1116,7 @@ func TestBhattacharyya(t *testing.T) {
 			t.Errorf("Bhattacharyya distance mismatch in case %d. Expected %v, Found %v", i, test.res, resultpq)
 		}
 		if math.Abs(resultpq-resultqp) > 1e-10 {
-			t.Errorf("Bhattacharyya distance is assymmetric in case %d.", i)
+			t.Errorf("Bhattacharyya distance is asymmetric in case %d.", i)
 		}
 	}
 	// Bhattacharyya should panic if the inputs have different length
@@ -1154,7 +1154,7 @@ func TestHellinger(t *testing.T) {
 			t.Errorf("Hellinger distance mismatch in case %d. Expected %v, Found %v", i, test.res, resultpq)
 		}
 		if math.Abs(resultpq-resultqp) > 1e-10 {
-			t.Errorf("Hellinger distance is assymmetric in case %d.", i)
+			t.Errorf("Hellinger distance is asymmetric in case %d.", i)
 		}
 	}
 	if !panics(func() { Hellinger(make([]float64, 2), make([]float64, 3)) }) {

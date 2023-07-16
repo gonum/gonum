@@ -238,7 +238,7 @@ func Gels(trans blas.Transpose, a blas64.General, b blas64.General, work []float
 //
 // and computing H_i = I - tau[i] * v * vᵀ.
 //
-// The orthonormal matrix Q can be constucted from a product of these elementary
+// The orthonormal matrix Q can be constructed from a product of these elementary
 // reflectors, Q = H_0 * H_1 * ... * H_{k-1}, where k = min(m,n).
 //
 // Work is temporary storage, and lwork specifies the usable memory length.
@@ -804,7 +804,7 @@ func Trtrs(trans blas.Transpose, a blas64.Triangular, b blas64.General) (ok bool
 // larger. On return, optimal value of lwork will be stored in work[0].
 //
 // If lwork == -1, instead of performing Geev, the function only calculates the
-// optimal vaule of lwork and stores it into work[0].
+// optimal value of lwork and stores it into work[0].
 //
 // On return, first will be the index of the first valid eigenvalue.
 // If first == 0, all eigenvalues and eigenvectors have been computed.

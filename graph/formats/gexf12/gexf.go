@@ -182,7 +182,7 @@ type Edge struct {
 	Weight float64 `xml:"weight,attr,omitempty"`
 }
 
-// AttVlues holds a collection of attribute values.
+// AttValues holds a collection of attribute values.
 type AttValues struct {
 	AttValues []AttValue `xml:"attvalue,omitempty"`
 }

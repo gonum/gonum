@@ -612,7 +612,7 @@ func findInitialBasic(A mat.Matrix, b []float64) ([]int, *mat.Dense, []float64, 
 	return nil, nil, nil, ErrInfeasible
 }
 
-// findLinearlyIndependnt finds a set of linearly independent columns of A, and
+// findLinearlyIndependent finds a set of linearly independent columns of A, and
 // returns the column indexes of the linearly independent columns.
 func findLinearlyIndependent(A mat.Matrix) []int {
 	m, n := A.Dims()

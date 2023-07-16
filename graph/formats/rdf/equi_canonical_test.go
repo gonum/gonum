@@ -504,7 +504,7 @@ func TestJoin(t *testing.T) {
 		want       []map[string]string
 	}{
 		{
-			name: "Indentity",
+			name: "Identity",
 			q:    `_:a <ex:p> _:b .`,
 			statements: `
 _:a <ex:p> _:b .

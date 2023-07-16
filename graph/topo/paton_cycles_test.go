@@ -115,7 +115,7 @@ func TestUndirectedCyclesIn(t *testing.T) {
 // the first element has the lowest ID and then conditionally
 // reversed so that the second element has the lowest possible
 // neighbouring ID.
-// c lists each node only onces - the final node must not be a
+// c lists each node only once - the final node must not be a
 // reiteration of the first node.
 func canonicalise(c []graph.Node) []graph.Node {
 	if len(c) < 2 {

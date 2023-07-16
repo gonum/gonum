@@ -17,7 +17,7 @@ import (
 // UnitNormal is an instantiation of the normal distribution with Mu = 0 and Sigma = 1.
 var UnitNormal = Normal{Mu: 0, Sigma: 1}
 
-// Normal respresents a normal (Gaussian) distribution (https://en.wikipedia.org/wiki/Normal_distribution).
+// Normal represents a normal (Gaussian) distribution (https://en.wikipedia.org/wiki/Normal_distribution).
 type Normal struct {
 	Mu    float64 // Mean of the normal distribution
 	Sigma float64 // Standard deviation of the normal distribution

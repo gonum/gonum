@@ -140,7 +140,7 @@ func (b Binomial) Rand() float64 {
 	// appropriate expected value. However, the Poisson approximation is
 	// asymptotic such that the absolute deviation in probability is O(1/n).
 	// Rejection sampling produces exact variates with at worst less than 3%
-	// rejection with miminal additional computation.
+	// rejection with minimal additional computation.
 
 	// Use rejection method with Cauchy proposal.
 	g, _ := math.Lgamma(b.N + 1)

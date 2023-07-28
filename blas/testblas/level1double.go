@@ -11,6 +11,7 @@ import (
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 type DoubleOneVectorCase struct {
@@ -1731,461 +1732,466 @@ func DrotgTest(t *testing.T, d Drotger, skipExtreme bool) {
 	}
 }
 
-type DrotmgTestStruct struct {
-	Name           string
-	D1, D2, X1, Y1 float64
-	P              *blas.DrotmParams
-	Rd1, Rd2, Rx1  float64
-}
-
-var DrotmgTests = []DrotmgTestStruct{
-	{
-		Name: "NegD1",
-		P: &blas.DrotmParams{
-			Flag: blas.Rescaling,
-		},
-		D1: -4,
-		D2: 6,
-		X1: 8,
-		Y1: -4,
-	},
-	{
-		Name: "ZeroD2",
-		P: &blas.DrotmParams{
-			Flag: blas.Identity,
-		},
-		D1:  4,
-		X1:  8,
-		Y1:  -5,
-		Rd1: 4,
-		Rx1: 8,
-	},
-	{
-		Name: "ZeroY1",
-		P: &blas.DrotmParams{
-			Flag: blas.Identity,
-		},
-		D1:  4,
-		D2:  -6,
-		X1:  8,
-		Rd1: 4,
-		Rd2: -6,
-		Rx1: 8,
-	},
-	{
-		Name: "NegQ2_and_AQ1_LT_AQ2",
-		P: &blas.DrotmParams{
-			Flag: blas.Rescaling,
-		},
-		D1:  8,
-		D2:  -6,
-		X1:  4,
-		Y1:  8,
-		Rd1: 0,
-		Rd2: 0,
-		Rx1: 0,
-	},
-	{
-		Name: "ZeroD1",
-		P: &blas.DrotmParams{
-			Flag: blas.Diagonal,
-			H:    [4]float64{0, 0, 0, 0},
-		},
-		D1:  0,
-		D2:  2,
-		X1:  8,
-		Y1:  4,
-		Rd1: 2,
-		Rd2: 0,
-		Rx1: 4,
-	},
-	{
-		Name: "AbsQ1_GT_AbsQU__D2_Pos",
-		P: &blas.DrotmParams{
-			Flag: blas.OffDiagonal,
-			H:    [4]float64{0, -0.625, 0.9375, 0},
-		},
-		D1:  2,
-		D2:  3,
-		X1:  8,
-		Y1:  5,
-		Rd1: 1.2610837438423645,
-		Rd2: 1.8916256157635467,
-		Rx1: 12.6875,
-	},
-	{
-		Name: "AbsQ1_GT_AbsQU__D2_Neg",
-		P: &blas.DrotmParams{
-			Flag: blas.OffDiagonal,
-			H:    [4]float64{0, -0.625, -0.9375, 0},
-		},
-		D1:  2,
-		D2:  -3,
-		X1:  8,
-		Y1:  5,
-		Rd1: 4.830188679245283,
-		Rd2: -7.245283018867925,
-		Rx1: 3.3125,
-	},
-	{
-		Name: "AbsQ1_LT_AbsQU__D2_Pos",
-		P: &blas.DrotmParams{
-			Flag: blas.Diagonal,
-			H:    [4]float64{5.0 / 12, 0, 0, 0.625},
-		},
-		D1:  2,
-		D2:  3,
-		X1:  5,
-		Y1:  8,
-		Rd1: 2.3801652892561984,
-		Rd2: 1.586776859504132,
-		Rx1: 121.0 / 12,
-	},
-	{
-		Name: "D1=D2_X1=X2",
-		P: &blas.DrotmParams{
-			Flag: blas.Diagonal,
-			H:    [4]float64{1, 0, 0, 1},
-		},
-		D1:  2,
-		D2:  2,
-		X1:  8,
-		Y1:  8,
-		Rd1: 1,
-		Rd2: 1,
-		Rx1: 16,
-	},
-	{
-		Name: "RD1_Big_RD2_Big_Flag_0",
-		P: &blas.DrotmParams{
-			Flag: blas.Rescaling,
-			H:    [4]float64{4096, -3584, 1792, 4096},
-		},
-		D1:  1600000000,
-		D2:  800000000,
-		X1:  8,
-		Y1:  7,
-		Rd1: 68.96627824858757,
-		Rd2: 34.483139124293785,
-		Rx1: 45312,
-	},
-	{
-		Name: "RD1_Big_RD2_Big_Flag_1",
-		P: &blas.DrotmParams{
-			Flag: blas.Rescaling,
-			H:    [4]float64{2340.5714285714284, -4096, 4096, 4681.142857142857},
-		},
-		D1:  800000000,
-		D2:  1600000000,
-		X1:  8,
-		Y1:  7,
-		Rd1: 57.6914092640818,
-		Rd2: 28.8457046320409,
-		Rx1: 47396.57142857142,
-	},
-	{
-		Name: "RD1_Big_RD2_Med_Flag_0",
-		P: &blas.DrotmParams{
-			Flag: blas.Rescaling,
-			H:    [4]float64{4096, -1, 0.0004096, 1},
-		},
-		D1:  20000000,
-		D2:  2,
-		X1:  8,
-		Y1:  8,
-		Rd1: 1.1920927762985347,
-		Rd2: 1.9999998000000199,
-		Rx1: 32768.0032768,
-	},
-	{
-		Name: "RD1_Big_RD2_Med_Flag_1",
-		P: &blas.DrotmParams{
-			Flag: blas.Rescaling,
-			H:    [4]float64{4.096e-17, -1, 4096, 1e-10},
-		},
-		D1:  2,
-		D2:  20000000000,
-		X1:  8,
-		Y1:  80000000000,
-		Rd1: 1192.0928955078125,
-		Rd2: 2,
-		Rx1: 3.2768e+14,
-	},
-
-	// TODO: Add D1 big, D2 small, Flag = 0
-	{
-		Name: "D1_Big_D2_Small_Flag_1",
-		P: &blas.DrotmParams{
-			Flag: blas.Rescaling,
-			H:    [4]float64{2.8671999999999997e-26, -0.000244140625, 4096, 2.44140625e-16},
-		},
-		D1:  0.000000014,
-		D2:  2000000000,
-		X1:  0.000008,
-		Y1:  8000000,
-		Rd1: 119.20928955078125,
-		Rd2: 0.234881024,
-		Rx1: 3.2768e+10,
-	},
-
-	{
-		Name: "RD1_Med_RD2_Big_Flag_0",
-		P: &blas.DrotmParams{
-			Flag: blas.Rescaling,
-			H:    [4]float64{1, -0.0004096, 1000, 4096},
-		},
-		D1:  2,
-		D2:  20000000000,
-		X1:  80000000,
-		Y1:  8,
-		Rd1: 1.9998000199980002,
-		Rd2: 1191.9736981379988,
-		Rx1: 8.0008e+07,
-	},
-	{
-		Name: "D1_Med_D2_Big_Flag_1",
-		P: &blas.DrotmParams{
-			Flag: blas.Rescaling,
-			H:    [4]float64{50, -4096, 1, 4.096e-06},
-		},
-		D1:  20000000000,
-		D2:  0.4,
-		X1:  80000000,
-		Y1:  80000000000000000,
-		Rd1: 0.39999998000000103,
-		Rd2: 1192.092835903171,
-		Rx1: 8.0000004e+16,
-	},
-	{
-		Name: "RD1_Med_RD2_Small_Flag_0",
-		P: &blas.DrotmParams{
-			Flag: blas.Rescaling,
-			H:    [4]float64{1, -0.0007233796296296296, 1.1111111111111111e-10, 0.000244140625},
-		},
-		D1:  1.2,
-		D2:  0.000000000045,
-		X1:  2.7,
-		Y1:  8,
-		Rd1: 1.1999999996049382,
-		Rd2: 0.0007549747197514486,
-		Rx1: 2.700000000888889,
-	},
-	{
-		Name: "RD1_Med_RD2_Small_Flag_1",
-		P: &blas.DrotmParams{
-			Flag: blas.Rescaling,
-			H:    [4]float64{0.0002197265625, -1, 0.000244140625, 3.375e-11},
-		},
-		D1:  1.2,
-		D2:  0.000000000045,
-		X1:  2.7,
-		Y1:  80000000000,
-		Rd1: 0.0007549747199770676,
-		Rd2: 1.19999999996355,
-		Rx1: 1.9531250000593264e+07,
-	},
-	// TODO: Add Small, Big, 0 case
-	{
-		Name: "D1_Small_D2_Big_Flag_1",
-		P: &blas.DrotmParams{
-			Flag: blas.Rescaling,
-			H:    [4]float64{2.3731773997569866e+10, -1.6777216e+07, 0.000244140625, 1.6777216e-07},
-		},
-		D1:  120000000000000000,
-		D2:  0.000000000012345,
-		X1:  0.08,
-		Y1:  8000000000000,
-		Rd1: 0.00010502490698765249,
-		Rd2: 216.1836123957717,
-		Rx1: 3.8516669198055897e+09,
-	},
-	{
-		Name: "RD1_Small_RD2_Med_Flag_0",
-		P: &blas.DrotmParams{
-			Flag: blas.Rescaling,
-			H:    [4]float64{0.000244140625, -1e-08, 0.24414062499999997, 1},
-		},
-		D1:  0.0000000002,
-		D2:  20,
-		X1:  0.8,
-		Y1:  0.000000008,
-		Rd1: 0.003355409645903541,
-		Rd2: 19.99980000199998,
-		Rx1: 0.000195314453125,
-	},
-	{
-		Name: "RD1_Small_RD2_Med_Flag_1",
-		P: &blas.DrotmParams{
-			Flag: blas.Rescaling,
-			H:    [4]float64{0.0012207031250000002, -1, 0.000244140625, 1e-09},
-		},
-		D1:  0.02,
-		D2:  0.000000000004,
-		X1:  0.008,
-		Y1:  8000000,
-		Rd1: 6.710886366445568e-05,
-		Rd2: 0.019999999900000003,
-		Rx1: 1953.125009765625,
-	},
-	{
-		// Values consistent with the low precision output posted at the  OpenBLAS issue.
-		// See https://github.com/xianyi/OpenBLAS/issues/1452.
-		Name: "OpenBLAS#1452",
-		P: &blas.DrotmParams{
-			Flag: blas.Rescaling,
-			H:    [4]float64{1.6110934624105326e-06, -0.000244140625, 0.000244140625, 1.6276041666666668e-06},
-		},
-		D1:  5.9e-8,
-		D2:  5.960464e-8,
-		X1:  1,
-		Y1:  150,
-		Rd1: 0.9999559282289687,
-		Rd2: 0.9898121986058326,
-		Rx1: 0.03662270484346241,
-	},
-	{
-		Name: "netlib/BLAS/TESTING#1",
-		P: &blas.DrotmParams{
-			Flag: blas.OffDiagonal,
-			H:    [4]float64{0, -0.16666666666666669, 0.5, 0},
-		},
-		D1:  0.10000000000000001,
-		D2:  0.29999999999999999,
-		X1:  1.2000000000000000,
-		Y1:  0.20000000000000001,
-		Rd1: 9.2307692307692313e-2,
-		Rd2: 0.27692307692307694,
-		Rx1: 1.2999999999999998,
-	},
-	{
-		Name: "netlib/BLAS/TESTING#2",
-		P: &blas.DrotmParams{
-			Flag: blas.Diagonal,
-			H:    [4]float64{0.5, 0, 0, 0.14285714285714285},
-		},
-		D1:  0.69999999999999996,
-		D2:  0.20000000000000001,
-		X1:  0.59999999999999998,
-		Y1:  4.2000000000000002,
-		Rd1: 0.18666666666666668,
-		Rd2: 0.65333333333333332,
-		Rx1: 4.5000000000000000,
-	},
-	{
-		Name: "netlib/BLAS/TESTING#3",
-		P: &blas.DrotmParams{
-			Flag: blas.Identity,
-			H:    [4]float64{0, 0, 0, 0},
-		},
-		D1:  0,
-		D2:  0,
-		X1:  0,
-		Y1:  0,
-		Rd1: 0,
-		Rd2: 0,
-		Rx1: 0,
-	},
-	{
-		Name: "netlib/BLAS/TESTING#4",
-		P: &blas.DrotmParams{
-			Flag: blas.Rescaling,
-			H:    [4]float64{0, 0, 0, 0},
-		},
-		D1:  4,
-		D2:  -1,
-		X1:  2,
-		Y1:  4,
-		Rd1: 0,
-		Rd2: 0,
-		Rx1: 0,
-	},
-	{
-		Name: "netlib/BLAS/TESTING#5",
-		P: &blas.DrotmParams{
-			Flag: blas.Rescaling,
-			H:    [4]float64{0.244140625e-03, -0.1e-3, 0.8138020833333334, 1},
-		},
-		D1:  6e-10,
-		D2:  2e-2,
-		X1:  100000,
-		Y1:  10,
-		Rd1: 7.5497471999999991e-3,
-		Rd2: 1.4999999999999999e-2,
-		Rx1: 32.552083333333336,
-	},
-	{
-		Name: "netlib/BLAS/TESTING#6",
-		P: &blas.DrotmParams{
-			Flag: blas.Rescaling,
-			H:    [4]float64{4096, -999999.99999999988, 2.0479999999999999e-3, 1},
-		},
-		D1:  40000000000,
-		D2:  2e-2,
-		X1:  1.0000000000000001e-5,
-		Y1:  10,
-		Rd1: 1589.4571940104167,
-		Rd2: 1.3333333333333334e-2,
-		Rx1: 6.1440000000000008e-2,
-	},
-	{
-		Name: "netlib/BLAS/TESTING#7",
-		P: &blas.DrotmParams{
-			Flag: blas.Rescaling,
-			H:    [4]float64{0.5e-4, -0.2441406250e-3, 1, 2.441406250},
-		},
-		D1:  2.0000000000000001e-10,
-		D2:  4.0000000000000001e-2,
-		X1:  100000,
-		Y1:  10,
-		Rd1: 2.6666666666666668e-2,
-		Rd2: 2.2369621333333334e-3,
-		Rx1: 15,
-	},
-	{
-		Name: "netlib/BLAS/TESTING#8",
-		P: &blas.DrotmParams{
-			Flag: blas.Rescaling,
-			H:    [4]float64{500000, -4096, 1, 4.096e-3},
-		},
-		D1:  20000000000,
-		D2:  4.0000000000000001e-2,
-		X1:  1.0000000000000001e-5,
-		Y1:  10,
-		Rd1: 2.6666666666666668e-2,
-		Rd2: 794.72859700520837,
-		Rx1: 15,
-	},
-	// TODO: Add Small, Small, 0 case
-	// TODO: Add Small, Small, 1 case
-}
-
 type Drotmger interface {
 	Drotmg(d1, d2, x1, y1 float64) (p blas.DrotmParams, rd1, rd2, rx1 float64)
 	Drotmer
 }
 
 func DrotmgTest(t *testing.T, d Drotmger) {
-	for _, test := range DrotmgTests {
+	const tol = 1e-14
 
-		p, rd1, rd2, rx1 := d.Drotmg(test.D1, test.D2, test.X1, test.Y1)
+	var tests = []struct {
+		name                   string
+		d1, d2, x1, y1         float64
+		d1Want, d2Want, x1Want float64
+		pWant                  blas.DrotmParams
+	}{
+		{
+			name:   "NegD1",
+			d1:     -4,
+			d2:     6,
+			x1:     8,
+			y1:     -4,
+			d1Want: 0,
+			d2Want: 0,
+			x1Want: 0,
+			pWant: blas.DrotmParams{
+				Flag: blas.Rescaling,
+				H:    [4]float64{0, 0, 0, 0},
+			},
+		},
+		{
+			name:   "ZeroD2",
+			d1:     4,
+			d2:     0,
+			x1:     8,
+			y1:     -5,
+			d1Want: 4,
+			d2Want: 0,
+			x1Want: 8,
+			pWant: blas.DrotmParams{
+				Flag: blas.Identity,
+				H:    [4]float64{0, 0, 0, 0},
+			},
+		},
+		{
+			name:   "ZeroY1",
+			d1:     4,
+			d2:     -6,
+			x1:     8,
+			y1:     0,
+			d1Want: 4,
+			d2Want: -6,
+			x1Want: 8,
+			pWant: blas.DrotmParams{
+				Flag: blas.Identity,
+				H:    [4]float64{0, 0, 0, 0},
+			},
+		},
+		{
+			name:   "NegQ2_and_AQ1_LT_AQ2",
+			d1:     8,
+			d2:     -6,
+			x1:     4,
+			y1:     8,
+			d1Want: 0,
+			d2Want: 0,
+			x1Want: 0,
+			pWant: blas.DrotmParams{
+				Flag: blas.Rescaling,
+				H:    [4]float64{0, 0, 0, 0},
+			},
+		},
+		{
+			name:   "ZeroD1",
+			d1:     0,
+			d2:     2,
+			x1:     8,
+			y1:     4,
+			d1Want: 2,
+			d2Want: 0,
+			x1Want: 4,
+			pWant: blas.DrotmParams{
+				Flag: blas.Diagonal,
+				H:    [4]float64{0, 0, 0, 0},
+			},
+		},
+		{
+			name:   "AbsQ1_GT_AbsQU__D2_Pos",
+			d1:     2,
+			d2:     3,
+			x1:     8,
+			y1:     5,
+			d1Want: 1.2610837438423645,
+			d2Want: 1.8916256157635467,
+			x1Want: 12.6875,
+			pWant: blas.DrotmParams{
+				Flag: blas.OffDiagonal,
+				H:    [4]float64{0, -0.625, 0.9375, 0},
+			},
+		},
+		{
+			name:   "AbsQ1_GT_AbsQU__D2_Neg",
+			d1:     2,
+			d2:     -3,
+			x1:     8,
+			y1:     5,
+			d1Want: 4.830188679245283,
+			d2Want: -7.245283018867925,
+			x1Want: 3.3125,
+			pWant: blas.DrotmParams{
+				Flag: blas.OffDiagonal,
+				H:    [4]float64{0, -0.625, -0.9375, 0},
+			},
+		},
+		{
+			name:   "AbsQ1_LT_AbsQU__D2_Pos",
+			d1:     2,
+			d2:     3,
+			x1:     5,
+			y1:     8,
+			d1Want: 2.3801652892561984,
+			d2Want: 1.586776859504132,
+			x1Want: 121.0 / 12,
+			pWant: blas.DrotmParams{
+				Flag: blas.Diagonal,
+				H:    [4]float64{5.0 / 12, 0, 0, 0.625},
+			},
+		},
+		{
+			name:   "D1=D2_X1=X2",
+			d1:     2,
+			d2:     2,
+			x1:     8,
+			y1:     8,
+			d1Want: 1,
+			d2Want: 1,
+			x1Want: 16,
+			pWant: blas.DrotmParams{
+				Flag: blas.Diagonal,
+				H:    [4]float64{1, 0, 0, 1},
+			},
+		},
+		{
+			name:   "RD1_Big_RD2_Big_Flag_0",
+			d1:     1600000000,
+			d2:     800000000,
+			x1:     8,
+			y1:     7,
+			d1Want: 68.96627824858757,
+			d2Want: 34.483139124293785,
+			x1Want: 45312,
+			pWant: blas.DrotmParams{
+				Flag: blas.Rescaling,
+				H:    [4]float64{4096, -3584, 1792, 4096},
+			},
+		},
+		{
+			name:   "RD1_Big_RD2_Big_Flag_1",
+			d1:     800000000,
+			d2:     1600000000,
+			x1:     8,
+			y1:     7,
+			d1Want: 57.6914092640818,
+			d2Want: 28.8457046320409,
+			x1Want: 47396.57142857142,
+			pWant: blas.DrotmParams{
+				Flag: blas.Rescaling,
+				H:    [4]float64{2340.5714285714284, -4096, 4096, 4681.142857142857},
+			},
+		},
+		{
+			name:   "RD1_Big_RD2_Med_Flag_0",
+			d1:     20000000,
+			d2:     2,
+			x1:     8,
+			y1:     8,
+			d1Want: 1.1920927762985347,
+			d2Want: 1.9999998000000199,
+			x1Want: 32768.0032768,
+			pWant: blas.DrotmParams{
+				Flag: blas.Rescaling,
+				H:    [4]float64{4096, -1, 0.0004096, 1},
+			},
+		},
+		{
+			name:   "RD1_Big_RD2_Med_Flag_1",
+			d1:     2,
+			d2:     20000000000,
+			x1:     8,
+			y1:     80000000000,
+			d1Want: 1192.0928955078125,
+			d2Want: 2,
+			x1Want: 3.2768e+14,
+			pWant: blas.DrotmParams{
+				Flag: blas.Rescaling,
+				H:    [4]float64{4.096e-17, -1, 4096, 1e-10},
+			},
+		},
+		{
+			name:   "D1_Big_D2_Small_Flag_1",
+			d1:     0.000000014,
+			d2:     2000000000,
+			x1:     0.000008,
+			y1:     8000000,
+			d1Want: 119.20928955078125,
+			d2Want: 0.234881024,
+			x1Want: 3.2768e+10,
+			pWant: blas.DrotmParams{
+				Flag: blas.Rescaling,
+				H:    [4]float64{2.8671999999999997e-26, -0.000244140625, 4096, 2.44140625e-16},
+			},
+		},
+		{
+			name:   "RD1_Med_RD2_Big_Flag_0",
+			d1:     2,
+			d2:     20000000000,
+			x1:     80000000,
+			y1:     8,
+			d1Want: 1.9998000199980002,
+			d2Want: 1191.9736981379988,
+			x1Want: 8.0008e+07,
+			pWant: blas.DrotmParams{
+				Flag: blas.Rescaling,
+				H:    [4]float64{1, -0.0004096, 1000, 4096},
+			},
+		},
+		{
+			name:   "D1_Med_D2_Big_Flag_1",
+			d1:     20000000000,
+			d2:     0.4,
+			x1:     80000000,
+			y1:     80000000000000000,
+			d1Want: 0.39999998000000103,
+			d2Want: 1192.092835903171,
+			x1Want: 8.0000004e+16,
+			pWant: blas.DrotmParams{
+				Flag: blas.Rescaling,
+				H:    [4]float64{50, -4096, 1, 4.096e-06},
+			},
+		},
+		{
+			name:   "RD1_Med_RD2_Small_Flag_0",
+			d1:     1.2,
+			d2:     0.000000000045,
+			x1:     2.7,
+			y1:     8,
+			d1Want: 1.1999999996049382,
+			d2Want: 0.0007549747197514486,
+			x1Want: 2.700000000888889,
+			pWant: blas.DrotmParams{
+				Flag: blas.Rescaling,
+				H:    [4]float64{1, -0.0007233796296296296, 1.1111111111111111e-10, 0.000244140625},
+			},
+		},
+		{
+			name:   "RD1_Med_RD2_Small_Flag_1",
+			d1:     1.2,
+			d2:     0.000000000045,
+			x1:     2.7,
+			y1:     80000000000,
+			d1Want: 0.0007549747199770676,
+			d2Want: 1.19999999996355,
+			x1Want: 1.9531250000593264e+07,
+			pWant: blas.DrotmParams{
+				Flag: blas.Rescaling,
+				H:    [4]float64{0.0002197265625, -1, 0.000244140625, 3.375e-11},
+			},
+		},
+		{
+			name:   "D1_Small_D2_Big_Flag_1",
+			d1:     120000000000000000,
+			d2:     0.000000000012345,
+			x1:     0.08,
+			y1:     8000000000000,
+			d1Want: 0.00010502490698765249,
+			d2Want: 216.1836123957717,
+			x1Want: 3.8516669198055897e+09,
+			pWant: blas.DrotmParams{
+				Flag: blas.Rescaling,
+				H:    [4]float64{2.3731773997569866e+10, -1.6777216e+07, 0.000244140625, 1.6777216e-07},
+			},
+		},
+		{
+			name:   "RD1_Small_RD2_Med_Flag_0",
+			d1:     0.0000000002,
+			d2:     20,
+			x1:     0.8,
+			y1:     0.000000008,
+			d1Want: 0.003355409645903541,
+			d2Want: 19.99980000199998,
+			x1Want: 0.000195314453125,
+			pWant: blas.DrotmParams{
+				Flag: blas.Rescaling,
+				H:    [4]float64{0.000244140625, -1e-08, 0.24414062499999997, 1},
+			},
+		},
+		{
+			name:   "RD1_Small_RD2_Med_Flag_1",
+			d1:     0.02,
+			d2:     0.000000000004,
+			x1:     0.008,
+			y1:     8000000,
+			d1Want: 6.710886366445568e-05,
+			d2Want: 0.019999999900000003,
+			x1Want: 1953.125009765625,
+			pWant: blas.DrotmParams{
+				Flag: blas.Rescaling,
+				H:    [4]float64{0.0012207031250000002, -1, 0.000244140625, 1e-09},
+			},
+		},
+		{
+			// Values consistent with the low precision output posted at the  OpenBLAS issue.
+			// See https://github.com/xianyi/OpenBLAS/issues/1452.
+			name:   "OpenBLAS#1452",
+			d1:     5.9e-8,
+			d2:     5.960464e-8,
+			x1:     1,
+			y1:     150,
+			d1Want: 0.9999559282289687,
+			d2Want: 0.9898121986058326,
+			x1Want: 0.03662270484346241,
+			pWant: blas.DrotmParams{
+				Flag: blas.Rescaling,
+				H:    [4]float64{1.6110934624105326e-06, -0.000244140625, 0.000244140625, 1.6276041666666668e-06},
+			},
+		},
 
-		if p.Flag != test.P.Flag {
-			t.Errorf("drotmg flag mismatch %v: expected %v, found %v", test.Name, test.P.Flag, p.Flag)
+		// Test cases with values taken from BLAS/TESTING/dblat1.f in the reference.
+		{
+			name:   "netlib/BLAS/TESTING#1",
+			d1:     0.1,
+			d2:     0.3,
+			x1:     1.2,
+			y1:     0.2,
+			d1Want: 12 / 130.0,
+			d2Want: 36 / 130.0,
+			x1Want: 1.3,
+			pWant: blas.DrotmParams{
+				Flag: blas.OffDiagonal,
+				H:    [4]float64{0, -1 / 6.0, 0.5, 0},
+			},
+		},
+		{
+			name:   "netlib/BLAS/TESTING#2",
+			d1:     0.7,
+			d2:     0.2,
+			x1:     0.6,
+			y1:     4.2,
+			d1Want: 14 / 75.0,
+			d2Want: 49 / 75.0,
+			x1Want: 4.5,
+			pWant: blas.DrotmParams{
+				Flag: blas.Diagonal,
+				H:    [4]float64{0.5, 0, 0, 1 / 7.0},
+			},
+		},
+		{
+			name:   "netlib/BLAS/TESTING#3",
+			d1:     0,
+			d2:     0,
+			x1:     0,
+			y1:     0,
+			d1Want: 0,
+			d2Want: 0,
+			x1Want: 0,
+			pWant: blas.DrotmParams{
+				Flag: blas.Identity,
+				H:    [4]float64{0, 0, 0, 0},
+			},
+		},
+		{
+			name:   "netlib/BLAS/TESTING#4",
+			d1:     4,
+			d2:     -1,
+			x1:     2,
+			y1:     4,
+			d1Want: 0,
+			d2Want: 0,
+			x1Want: 0,
+			pWant: blas.DrotmParams{
+				Flag: blas.Rescaling,
+				H:    [4]float64{0, 0, 0, 0},
+			},
+		},
+		{
+			name:   "netlib/BLAS/TESTING#5",
+			d1:     6e-10,
+			d2:     2e-2,
+			x1:     1e5,
+			y1:     10,
+			d1Want: 45e-11 * 4096 * 4096,
+			d2Want: 15e-3,
+			x1Want: 4e5 / (3 * 4096),
+			pWant: blas.DrotmParams{
+				Flag: blas.Rescaling,
+				H:    [4]float64{1 / 4096.0, -1e-4, 1e4 / (3 * 4096), 1},
+			},
+		},
+		{
+			name:   "netlib/BLAS/TESTING#6",
+			d1:     4e10,
+			d2:     2e-2,
+			x1:     1e-5,
+			y1:     10,
+			d1Want: 4e10 / (1.5 * 4096 * 4096),
+			d2Want: 2e-2 / 1.5,
+			x1Want: 6.144e-2,
+			pWant: blas.DrotmParams{
+				Flag: blas.Rescaling,
+				H:    [4]float64{4096, -1e6, 5e-7 * 4096, 1},
+			},
+		},
+		{
+			name:   "netlib/BLAS/TESTING#7",
+			d1:     2e-10,
+			d2:     4e-2,
+			x1:     1e5,
+			y1:     10,
+			d1Want: 4 / 150.0,
+			d2Want: (2e-10 / 1.5) * 4096 * 4096,
+			x1Want: 15,
+			pWant: blas.DrotmParams{
+				Flag: blas.Rescaling,
+				H:    [4]float64{5e-5, -1 / 4096.0, 1, 1e4 / 4096},
+			},
+		},
+		{
+			name:   "netlib/BLAS/TESTING#8",
+			d1:     2e10,
+			d2:     4e-2,
+			x1:     1e-5,
+			y1:     10,
+			d1Want: 4 / 150.0,
+			d2Want: 2e10 / (1.5 * 4096 * 4096),
+			x1Want: 15,
+			pWant: blas.DrotmParams{
+				Flag: blas.Rescaling,
+				H:    [4]float64{5e5, -4096, 1, 4.096e-3},
+			},
+		},
+	}
+
+	for _, test := range tests {
+		p, d1, d2, x1 := d.Drotmg(test.d1, test.d2, test.x1, test.y1)
+
+		if p.Flag != test.pWant.Flag {
+			t.Errorf("%v: unexpected flag, want %v, got %v", test.name, test.pWant.Flag, p.Flag)
 		}
-		for i, val := range p.H {
-			if !dTolEqual(test.P.H[i], val) {
-				t.Errorf("drotmg H mismatch %v: expected %v, found %v", test.Name, test.P.H, p.H)
+		for i, hi := range p.H {
+			if !scalar.EqualWithinAbsOrRel(test.pWant.H[i], hi, tol, tol) {
+				t.Errorf("%v: unexpected H, want %v, got %v", test.name, test.pWant.H, p.H)
 				break
 			}
 		}
-		if !dTolEqual(rd1, test.Rd1) {
-			t.Errorf("drotmg rd1 mismatch %v: expected %v, found %v", test.Name, test.Rd1, rd1)
+		if !scalar.EqualWithinAbsOrRel(d1, test.d1Want, tol, tol) {
+			t.Errorf("%v: unexpected d1, want %v, got %v", test.name, test.d1Want, d1)
 		}
-		if !dTolEqual(rd2, test.Rd2) {
-			t.Errorf("drotmg rd2 mismatch %v: expected %v, found %v", test.Name, test.Rd2, rd2)
+		if !scalar.EqualWithinAbsOrRel(d2, test.d2Want, tol, tol) {
+			t.Errorf("%v: unexpected d2, want %v, got %v", test.name, test.d2Want, d2)
 		}
-		if !dTolEqual(rx1, test.Rx1) {
-			t.Errorf("drotmg rx1 mismatch %v: expected %v, found %v", test.Name, test.Rx1, rx1)
+		if !scalar.EqualWithinAbsOrRel(x1, test.x1Want, tol, tol) {
+			t.Errorf("%v: unexpected x1, want %v, got %v", test.name, test.x1Want, x1)
 		}
 
 		// Drotmg routines compute the components of a modified Givens transformation
@@ -2196,15 +2202,13 @@ func DrotmgTest(t *testing.T, d Drotmger) {
 		// Drotm performs a modified Givens rotation of points in the plane,
 		//
 		//  [x1; y1] := H[x1; y1].
-		y := []float64{test.Y1}
-		d.Drotm(1, []float64{test.X1}, 1, y, 1, p)
-		for i, v := range y {
-			if rd2 >= 0 {
-				v *= math.Sqrt(rd2)
-			}
-			if !dTolEqual(v, 0) {
-				t.Errorf("drotm y_%d mismatch %v: expected 0, found %v", i, test.Name, v)
-			}
+		y := []float64{test.y1}
+		d.Drotm(1, []float64{test.x1}, 1, y, 1, p)
+		if d2 >= 0 {
+			y[0] *= math.Sqrt(d2)
+		}
+		if !scalar.EqualWithinAbs(y[0], 0, 1e-10) {
+			t.Errorf("%v: y1 not zeroed out, got %v", test.name, y[0])
 		}
 	}
 }

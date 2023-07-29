@@ -32,17 +32,17 @@ jobs:
 
     steps:
     - name: Install Go
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v4
       with:
         go-version: ${{ matrix.go-version }}
 
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         path: ${{ env.GOPATH }}/src/gonum.org/v1/gonum
 
     - name: Cache-Go
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         # In order:
         # * Module download cache
@@ -65,7 +65,7 @@ jobs:
 
     - name: Upload-Coverage
       if: matrix.platform == 'ubuntu-latest'
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v3
       with:
         override_pr: ${{ github.event.pull_request.number }}
         override_commit: ${{ github.event.pull_request.merge_commit_sha }}

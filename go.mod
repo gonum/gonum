@@ -1,6 +1,6 @@
 module gonum.org/v1/gonum
 
-go 1.18
+go 1.20
 
 require (
 	github.com/goccmack/gocc v0.0.0-20230228185258-2292f9e40198

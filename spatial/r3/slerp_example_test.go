@@ -18,9 +18,11 @@ func slerp(r0, r1 r3.Rotation, t float64) r3.Rotation {
 	q0 := quat.Number(r0)
 	q1 := quat.Number(r1)
 	// Based on Simo Särkkä "Notes on Quaternions" Eq. 35
+	//  p(t) = (q1 ∗ q0^−1) ^ t ∗ q0
 	// https://users.aalto.fi/~ssarkka/pub/quat.pdf
 	q1 = quat.Mul(q1, quat.Inv(q0))
-	return r3.Rotation(quat.Mul(quat.Exp(quat.Scale(t, quat.Log(q1))), q0))
+	q1 = quat.PowReal(q1, t)
+	return r3.Rotation(quat.Mul(q1, q0))
 }
 
 // Spherically interpolate between two quaternions to obtain a rotation.

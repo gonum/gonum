@@ -22,18 +22,18 @@ type Dtgsy2er interface {
 func Dtgsy2Test(t *testing.T, impl Dtgsy2er) {
 	const ldAdd = 5
 	rnd := rand.New(rand.NewSource(1))
-	// testSolveDtgsy2(t, impl, rnd, blas.NoTrans, 0, 2, 2, 2, 2, 2, 2, 2, 2)
-	for _, n := range []int{4, 9, 20} {
-		for _, m := range []int{4, 9, 20} {
+	for _, n := range []int{2, 4, 9, 20} {
+		for _, m := range []int{2, 4, 9, 20} {
 			for _, lda := range []int{m, m + ldAdd} {
 				for _, ldb := range []int{n, n + ldAdd} {
 					for _, ldc := range []int{n, n + ldAdd} {
 						for _, ldd := range []int{m, m + ldAdd} {
 							for _, lde := range []int{n, n + ldAdd} {
 								for _, ldf := range []int{n, n + ldAdd} {
+									noTransIjob := 0
+									testSolveDtgsy2(t, impl, rnd, blas.NoTrans, noTransIjob, m, n, lda, ldb, ldc, ldd, lde, ldf)
 									for _, ijob := range []int{0, 1, 2} {
 										testSolveDtgsy2(t, impl, rnd, blas.Trans, ijob, m, n, lda, ldb, ldc, ldd, lde, ldf)
-										testSolveDtgsy2(t, impl, rnd, blas.NoTrans, ijob, m, n, lda, ldb, ldc, ldd, lde, ldf) // Does not pass for m,n != 2
 									}
 								}
 							}
@@ -157,12 +157,16 @@ func testSolveDtgsy2(t *testing.T, impl Dtgsy2er, rnd *rand.Rand, trans blas.Tra
 // always the size of the matrix. len(iwork) <= m+1
 //
 // Consider the following 4×4 matrix:
-//  [ -1   3   2  8]
-//  [ -4  -12  1  1]
-//  [ 0   0    2  8]
-//  [ 0   0    0  1]
+//
+//	[ -1   3   2  8]
+//	[ -4  -12  1  1]
+//	[ 0   0    2  8]
+//	[ 0   0    0  1]
+//
 // The above matrix would return iwork of
-//  [0  2  3  4]
+//
+//	[0  2  3  4]
+//
 // The routine was copied from the LAPACK Dtgsy2 implementation.
 func calcBlockStructure(a blas64.General) (iwork []int) {
 	if a.Cols != a.Rows {

@@ -10,8 +10,10 @@ import (
 )
 
 // Dtgsy2 solves the generalized Sylvester equation:
-//  A * R - L * B = scale * C                (1)
-//  D * R - L * E = scale * F,
+//
+//	A * R - L * B = scale * C                (1)
+//	D * R - L * E = scale * F,
+//
 // where R and L are unknown m×n matrices which on return are
 // written into C and F, respectively.
 //
@@ -31,16 +33,20 @@ import (
 //
 // In matrix notation solving equation (1) corresponds to solve
 // Z*x = scale*b, where Z is defined as
-//  Z = [ kron(I_{n}, A)  -kron(Bᵀ, I_{m}) ]             (2)
-//      [ kron(I_{n}, D)  -kron(Eᵀ, I_{m}) ],
+//
+//	Z = [ kron(I_{n}, A)  -kron(Bᵀ, I_{m}) ]             (2)
+//	    [ kron(I_{n}, D)  -kron(Eᵀ, I_{m}) ],
+//
 // I_{k} is the identity matrix of size k and Xᵀ is the transpose of X.
 // kron(X, Y) is the Kronecker product between the matrices X and Y.
 // In the process of solving (1), we solve a number of such systems
 // where Dim(In), Dim(In) = 1 or 2.
 // If trans = blas.Trans, solve the transposed system Zᵀ*y = scale*b for y,
 // which is equivalent to solve for R and L in
-//  Aᵀ * R  + Dᵀ * L   = scale * C           (3)
-//  R  * Bᵀ + L  * Eᵀ  = scale * -F
+//
+//	Aᵀ * R  + Dᵀ * L   = scale * C           (3)
+//	R  * Bᵀ + L  * Eᵀ  = scale * -F
+//
 // This case is used to compute an estimate of Dif[(A, D), (B, E)] =
 // sigma_min(Z) using reverse communication with Dlacon.
 // Dtgsy2 also (ijob >= 1) contributes to the computation in Dtgsyl

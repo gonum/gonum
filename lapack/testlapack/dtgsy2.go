@@ -120,16 +120,16 @@ func testSolveDtgsy2(t *testing.T, impl Dtgsy2er, rnd *rand.Rand, trans blas.Tra
 		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, a, r, -scale, cCopy)
 		blas64.Gemm(blas.NoTrans, blas.NoTrans, -1, l, b, 1, cCopy)
 		res := dlange(lapack.MaxColumnSum, m, n, cCopy.Data, cCopy.Stride) / math.Max(math.Max(anorm, rlnormmax), math.Max(bnorm, cnorm))
-		if res > tol {
-			t.Errorf("%v: | A * R - L * B - scale * C | residual large %v", name, res)
+		if res > tol || math.IsNaN(res) {
+			t.Errorf("%v: | A * R - L * B - scale * C | residual large or NaN %v", name, res)
 		}
 
 		// | D * R - L * E - scale * F |  from (1)
 		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, d, r, -scale, fCopy)
 		blas64.Gemm(blas.NoTrans, blas.NoTrans, -1, l, e, 1, fCopy)
 		res = dlange(lapack.MaxColumnSum, m, n, fCopy.Data, fCopy.Stride) / math.Max(math.Max(dnorm, rlnormmax), math.Max(enorm, fnorm))
-		if res > tol {
-			t.Errorf("%v: | D * R - L * E - scale * F | residual large %v", name, res)
+		if res > tol || math.IsNaN(res) {
+			t.Errorf("%v: | D * R - L * E - scale * F | residual large or NaN %v", name, res)
 		}
 	} else {
 		// Calculate residuals
@@ -137,8 +137,8 @@ func testSolveDtgsy2(t *testing.T, impl Dtgsy2er, rnd *rand.Rand, trans blas.Tra
 		blas64.Gemm(trans, blas.NoTrans, 1, a, r, -scale, cCopy)
 		blas64.Gemm(trans, blas.NoTrans, 1, d, l, 1, cCopy)
 		res := dlange(lapack.MaxColumnSum, m, n, cCopy.Data, cCopy.Stride) / math.Max(math.Max(anorm, rlnormmax), math.Max(dnorm, cnorm))
-		if res > tol {
-			t.Errorf("%v: | Aᵀ * R + Dᵀ * L - scale * C | residual large %v", name, res)
+		if res > tol || math.IsNaN(res) {
+			t.Errorf("%v: | Aᵀ * R + Dᵀ * L - scale * C | residual large or NaN %v", name, res)
 		}
 
 		// | R * Bᵀ + L * Eᵀ - scale * -F |  from (3)
@@ -146,8 +146,8 @@ func testSolveDtgsy2(t *testing.T, impl Dtgsy2er, rnd *rand.Rand, trans blas.Tra
 		blas64.Gemm(blas.NoTrans, trans, 1, l, e, 1, fCopy)
 		res = dlange(lapack.MaxColumnSum, m, n, fCopy.Data, fCopy.Stride) / math.Max(math.Max(bnorm, rlnormmax), math.Max(enorm, fnorm))
 
-		if res > tol {
-			t.Errorf("%v: | R * Bᵀ + L * Eᵀ - scale * -F | residual large %v", name, res)
+		if res > tol || math.IsNaN(res) {
+			t.Errorf("%v: | R * Bᵀ + L * Eᵀ - scale * -F | residual large or NaN %v", name, res)
 		}
 	}
 }

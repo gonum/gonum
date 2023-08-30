@@ -29,7 +29,7 @@ import (
 // factor used to prevent overflow in rdsum. Dtgsy2 returns this sum of squares
 // updated with the contributions from the current sub-system as scalout and sumout.
 //
-// if info is non-negative then Z (see below) was perturbed to avoid underflow during a call to Dgetc2.
+// if info is non-negative, non-zero then Z (see below) was perturbed to avoid underflow during a call to Dgetc2.
 //
 // In matrix notation solving equation (1) corresponds to solve
 // Z*x = scale*b, where Z is defined as

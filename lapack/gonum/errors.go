@@ -21,6 +21,7 @@ const (
 	badMatrixType       = "lapack: bad MatrixType"
 	badMaximizeNormXJob = "lapack: bad MaximizeNormXJob"
 	badNorm             = "lapack: bad Norm"
+	badOrthoComp        = "lapack: bad OrthoComp"
 	badPivot            = "lapack: bad Pivot"
 	badRightEVJob       = "lapack: bad RightEVJob"
 	badSVDJob           = "lapack: bad SVDJob"

@@ -20,7 +20,7 @@ func Use(b blas.Float64) {
 
 // Implementation returns the current BLAS float64 implementation.
 //
-// Implementation allows direct calls to the current the BLAS float64 implementation
+// Implementation allows direct calls to the current BLAS float64 implementation
 // giving finer control of parameters.
 func Implementation() blas.Float64 {
 	return blas64

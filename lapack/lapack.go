@@ -226,3 +226,11 @@ const (
 	LocalLookAhead       MaximizeNormXJob = 0 // Solve Z*x=h-f where h is a vector of ±1.
 	NormalizedNullVector MaximizeNormXJob = 2 // Compute an approximate null-vector e of Z, normalize e and solve Z*x=±e-f.
 )
+
+type OrthoComp byte
+
+const (
+	OrthoNone  OrthoComp = 'N' // Do not compute orthogonal matrix.
+	OrthoUnit  OrthoComp = 'I' // Argument is initialized to the unit matrix and the orthogonal matrix is returned.
+	OrthoEntry OrthoComp = 'V' // Argument Q contains orthogonal matrix on entry and the product Q1*Q is returned.
+)

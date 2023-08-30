@@ -76,14 +76,22 @@ func testSolveDtgsyl(t *testing.T, impl Dtgsyler, rnd *rand.Rand, trans blas.Tra
 	if lwork < 1 {
 		t.Fatalf("%v: bad workspace query lwork=%d", name, lwork)
 	}
+	lworkMin := 1
 	if notrans && (ijob == 1 || ijob == 2) {
-		if lwork < 2*m*n {
-			t.Fatalf("%v: bad workspace query lwork=%d, expected >=%d", name, lwork, 2*m*n)
-		}
+		lworkMin = 2 * m * n
+	}
+	if lwork < lworkMin {
+		t.Fatalf("%v: bad workspace query lwork=%d, expected >=%d", name, lwork, lworkMin)
 	}
 	iwork := make([]int, m+n+6)
 	work := make([]float64, lwork)
 	dif, scale, info := impl.Dtgsyl(trans, ijob, m, n, a.Data, a.Stride, b.Data, b.Stride, c.Data, c.Stride, d.Data, d.Stride, e.Data, e.Stride, f.Data, f.Stride, work, iwork, false)
 
-	t.Error(name, dif, scale, info)
+	// Debugging below.
+	fmt.Print("f=")
+	printRowise(f.Data, f.Rows, f.Cols, f.Stride, false)
+	fmt.Print("\nc=")
+	printRowise(c.Data, c.Rows, c.Cols, c.Stride, false)
+	fmt.Println()
+	fmt.Println("dif=", dif, "scale=", scale, "info=", info)
 }

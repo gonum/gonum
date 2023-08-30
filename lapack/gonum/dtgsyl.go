@@ -55,6 +55,7 @@ import (
 //
 // Dtgsyl is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dtgsyl(trans blas.Transpose, ijob, m, n int, a []float64, lda int, b []float64, ldb int, c []float64, ldc int, d []float64, ldd int, e []float64, lde int, f []float64, ldf int, work []float64, iwork []int, workspaceQuery bool) (difOut, scaleOut float64, infoOut int) {
+	infoOut = -1
 	lwork := len(work)
 	notran := trans == blas.NoTrans
 
@@ -86,7 +87,7 @@ func (impl Implementation) Dtgsyl(trans blas.Transpose, ijob, m, n int, a []floa
 		panic(badLWork)
 	case workspaceQuery:
 		work[0] = float64(lwmin)
-		return 0, 0, 0
+		return 0, 0, infoOut
 	}
 
 	work[0] = float64(lwmin)
@@ -166,13 +167,13 @@ func (impl Implementation) Dtgsyl(trans blas.Transpose, ijob, m, n int, a []floa
 
 	bi := blas64.Implementation()
 	var ppqq, linfo int
-	var dscale, dsum, scaloc float64
+	var dscale, dsum, scaloc, scale2 float64
 	if notran {
 		// Solve (I, J)-subsystem
 		//     A(I, I) * R(I, J) - L(I, J) * B(J, J) = C(I, J)
 		//     D(I, I) * R(I, J) - L(I, J) * E(J, J) = F(I, J)
 		// for I = P, P - 1,..., 1; J = 1, 2,..., Q
-		for iround := 0; iround < isolve; iround++ {
+		for iround := 1; iround <= isolve; iround++ {
 			dsum = 1
 			pq = 0
 			scaleOut = 1
@@ -186,7 +187,7 @@ func (impl Implementation) Dtgsyl(trans blas.Transpose, ijob, m, n int, a []floa
 					mb := ie - is + 1
 					scaloc, dscale, dsum, ppqq, linfo = impl.Dtgsy2(trans, ifunc, mb, nb, a[is*lda+is:], lda,
 						b[js*ldb+js:], ldb, c[is*ldc+js:], ldc, d[is*ldd+is:], ldd,
-						e[js*lde+js:], lde, f[is*ldf+js:], ldf, dsum, dscale, iwork)
+						e[js*lde+js:], lde, f[is*ldf+js:], ldf, dsum, dscale, iwork[q+2:])
 					if linfo > 0 {
 						infoOut = linfo
 					}
@@ -218,12 +219,12 @@ func (impl Implementation) Dtgsyl(trans blas.Transpose, ijob, m, n int, a []floa
 						bi.Dgemm(blas.NoTrans, blas.NoTrans, is, nb, mb, -1,
 							a[is:], lda, c[is*ldc+js:], ldc, 1, c[js:], ldc)
 						bi.Dgemm(blas.NoTrans, blas.NoTrans, is, nb, mb, -1,
-							d[js:], ldd, c[is*ldc+js:], ldc, 1, f[js:], ldf)
+							d[is:], ldd, c[is*ldc+js:], ldc, 1, f[js:], ldf)
 					}
 					if j < q {
-						bi.Dgemm(blas.NoTrans, blas.NoTrans, mb, n-je, nb, 1,
+						bi.Dgemm(blas.NoTrans, blas.NoTrans, mb, n-je-1, nb, 1,
 							f[is*ldf+js:], ldf, b[js*ldb+je+1:], ldb, 1, c[is*ldc+je+1:], ldc)
-						bi.Dgemm(blas.NoTrans, blas.NoTrans, mb, n-je, nb, 1,
+						bi.Dgemm(blas.NoTrans, blas.NoTrans, mb, n-je-1, nb, 1,
 							f[is*ldf+js:], ldf, e[js*lde+je+1:], lde, 1, f[is*ldf+je+1:], ldf)
 					}
 				}
@@ -241,12 +242,13 @@ func (impl Implementation) Dtgsyl(trans blas.Transpose, ijob, m, n int, a []floa
 				if notran {
 					ifunc = ijob
 				}
+				scale2 = scaleOut
 				impl.Dlacpy(blas.All, m, n, c, ldc, work, m)
 				impl.Dlacpy(blas.All, m, n, f, ldf, work[m*n:], m)
 				impl.Dlaset(blas.All, m, n, 0, 0, c, ldc)
 				impl.Dlaset(blas.All, m, n, 0, 0, f, ldf)
 			} else if isolve == 2 && iround == 2 {
-				// scale = scale2 // scale2 is undefined?
+				scaleOut = scale2
 				impl.Dlacpy(blas.All, m, n, work, m, c, ldc)
 				impl.Dlacpy(blas.All, m, n, work[m*n:], m, f, ldf)
 			}
@@ -255,9 +257,10 @@ func (impl Implementation) Dtgsyl(trans blas.Transpose, ijob, m, n int, a []floa
 		// End of notran code.
 		return difOut, scaleOut, infoOut
 	}
+
 	// Solve transposed (I, J)-subsystem
-	//      A(I, I)**T * R(I, J)  + D(I, I)**T * L(I, J)  =  C(I, J)
-	//      R(I, J)  * B(J, J)**T + L(I, J)  * E(J, J)**T = -F(I, J)
+	//      A(I, I)ᵀ * R(I, J)  + D(I, I)ᵀ * L(I, J)  =  C(I, J)
+	//      R(I, J)  * B(J, J)ᵀ + L(I, J)  * E(J, J)ᵀ = -F(I, J)
 	// for I = 1,2,..., P; J = Q, Q-1,..., 1
 	scaleOut = 1
 	for i := 0; i <= p; i++ {

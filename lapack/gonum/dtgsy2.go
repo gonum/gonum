@@ -104,40 +104,14 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob, m, n int, a []floa
 		jpiv[i] = -1
 	}
 
-	// Determine block structure of A.
-	var p, q, k int // Index variables.
-	p = -1
-	for i := 0; i < m; {
-		p++
-		iwork[p] = i
-		if i == m-1 {
-			break
-		}
-		if a[(i+1)*lda+i] != 0 {
-			i += 2
-		} else {
-			i++
-		}
-	}
-	iwork[p+1] = m
-
-	// Determine block structure of B.
-	q = p + 1
-	for j := 0; j < n; {
-		q++
-		iwork[q] = j
-		if j == n-1 {
-			break
-		}
-		if b[(j+1)*ldb+j] != 0 {
-			j += 2
-		} else {
-			j++
-		}
-	}
-	iwork[q+1] = n
+	// Determine block structure of A and B.
+	p := blockStructure(iwork, 2, m, a, lda)
+	q := blockStructure(iwork[p:], 2, n, b, ldb)
+	p -= 2
+	q += p
 	pq = (p + 1) * (q - p - 1)
 
+	var k int // Index variables.
 	alpha := 0.0
 	var nb, mb int // Length variables.
 	if trans == blas.NoTrans {

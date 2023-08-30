@@ -150,44 +150,20 @@ func (impl Implementation) Dtgsyl(trans blas.Transpose, ijob, m, n int, a []floa
 		return difOut, scaleOut, infoOut
 	}
 
-	// Determine block structure of A.
-
-	var p, q int // Index variables.
-	p = -1
-	for i := 0; i < m; {
-		p++
-		iwork[p] = i
-		if i == m-1 {
-			break
-		}
-		if a[(i+1)*lda+i] != 0 {
-			i += 2
-		} else {
-			i++
-		}
-	}
-	iwork[p+1] = m
-	if iwork[p] == iwork[p+1] {
+	// Determine block structure of A and B.
+	p := blockStructureL(iwork, mb, m, a, lda)
+	if iwork[p-2] == iwork[p-1] {
 		p--
 	}
-	// Determine block structure of B.
-	q = p + 1
-	for j := 0; j < n; {
-		q++
-		iwork[q] = j
-		if j == n-1 {
-			break
-		}
-		if b[(j+1)*ldb+j] != 0 {
-			j += 2
-		} else {
-			j++
-		}
-	}
-	iwork[q+1] = n
-	if iwork[q] == iwork[q+1] {
+
+	q := blockStructureL(iwork[p:], nb, n, b, ldb)
+	if iwork[p:][q-2] == iwork[p:][q-1] {
 		q--
 	}
+
+	p -= 2
+	q += p
+
 	bi := blas64.Implementation()
 	var ppqq, linfo int
 	var dscale, dsum, scaloc float64
@@ -200,7 +176,7 @@ func (impl Implementation) Dtgsyl(trans blas.Transpose, ijob, m, n int, a []floa
 			dsum = 1
 			pq = 0
 			scaleOut = 1
-			for j := p + 2; j < q; j++ {
+			for j := p + 2; j <= q; j++ {
 				js := iwork[j]
 				je := iwork[j+1] - 1
 				nb := je - js + 1
@@ -217,15 +193,15 @@ func (impl Implementation) Dtgsyl(trans blas.Transpose, ijob, m, n int, a []floa
 
 					pq = pq + ppqq
 					if scaloc != 1 {
-						for k := 0; k < js-1; k++ {
+						for k := 0; k <= js-1; k++ {
 							bi.Dscal(m, scaloc, c[k:], 1)
 							bi.Dscal(m, scaloc, f[k:], 1)
 						}
-						for k := js; k < je; k++ {
+						for k := js; k <= je; k++ {
 							bi.Dscal(is, scaloc, c[k:], 1)
 							bi.Dscal(is, scaloc, f[k:], 1)
 						}
-						for k := js; k < je; k++ {
+						for k := js; k <= je; k++ {
 							bi.Dscal(m-ie-1, scaloc, c[(ie+1)*ldc+k:], 1)
 							bi.Dscal(m-ie-1, scaloc, f[(ie+1)*ldf+k:], 1)
 						}
@@ -284,11 +260,11 @@ func (impl Implementation) Dtgsyl(trans blas.Transpose, ijob, m, n int, a []floa
 	//      R(I, J)  * B(J, J)**T + L(I, J)  * E(J, J)**T = -F(I, J)
 	// for I = 1,2,..., P; J = Q, Q-1,..., 1
 	scaleOut = 1
-	for i := 0; i < p; i++ {
+	for i := 0; i <= p; i++ {
 		is := iwork[i]
 		ie := iwork[i+1] - 1
 		mb := ie - is + 1
-		for j := q; j < p+2; j-- {
+		for j := q; j <= p+2; j-- {
 			js := iwork[j]
 			je := iwork[j+1] - 1
 			nb := je - js + 1
@@ -299,15 +275,15 @@ func (impl Implementation) Dtgsyl(trans blas.Transpose, ijob, m, n int, a []floa
 				infoOut = linfo
 			}
 			if scaloc != 1 {
-				for k := 0; k < js-1; k++ {
+				for k := 0; k <= js-1; k++ {
 					bi.Dscal(m, scaloc, c[k:], 1)
 					bi.Dscal(m, scaloc, f[k:], 1)
 				}
-				for k := js; k < je; k++ {
+				for k := js; k <= je; k++ {
 					bi.Dscal(is, scaloc, c[k:], 1)
 					bi.Dscal(is, scaloc, f[k:], 1)
 				}
-				for k := js; k < je; k++ {
+				for k := js; k <= je; k++ {
 					bi.Dscal(m-ie-1, scaloc, c[(ie+1)*ldc+k:], 1)
 					bi.Dscal(m-ie-1, scaloc, f[(ie+1)*ldf+k:], 1)
 				}
@@ -336,4 +312,43 @@ func (impl Implementation) Dtgsyl(trans blas.Transpose, ijob, m, n int, a []floa
 	}
 	work[0] = float64(lwmin)
 	return difOut, scaleOut, infoOut
+}
+
+// blockStructure computes the block structure of a matrix A for Dtgsy2.
+// On exit, the block ranges are stored in dst[0:p] and the number of
+// blocks is returned, which is equal to p, the return value of blockStructure.
+func blockStructure(dst []int, blocksize, cols int, a []float64, lda int) int {
+	p := -1
+	for i := 0; i < cols; {
+		p++
+		dst[p] = i
+		if i == cols-1 {
+			break
+		}
+		if a[(i+1)*lda+i] != 0 {
+			i += blocksize
+		} else {
+			i++
+		}
+	}
+	dst[p+1] = cols
+	return p + 2
+}
+
+// blockStructureL is like blockStructure but for Dtgsyl.
+func blockStructureL(dst []int, blocksize, cols int, a []float64, lda int) int {
+	p := -1
+	for i := 0; i < cols; {
+		p++
+		dst[p] = i
+		i += blocksize
+		if i >= cols-1 {
+			break
+		}
+		if a[i*lda+i-1] != 0 {
+			i++
+		}
+	}
+	dst[p+1] = cols
+	return p + 2
 }

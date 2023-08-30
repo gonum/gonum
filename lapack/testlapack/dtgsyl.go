@@ -62,6 +62,13 @@ func testSolveDtgsyl(t *testing.T, impl Dtgsyler, rnd *rand.Rand, trans blas.Tra
 	// Generate random general matrix.
 	c = randomGeneral(m, n, ldc, rnd)
 	f = randomGeneral(m, n, ldf, rnd)
+	// printFortranReshape("a", a.Data, true, a.Rows, a.Cols)
+	// printFortranReshape("b", b.Data, true, b.Rows, b.Cols)
+	// printFortranReshape("c", c.Data, true, c.Rows, c.Cols)
+	// printFortranReshape("d", d.Data, true, d.Rows, d.Cols)
+	// printFortranReshape("e", e.Data, true, e.Rows, e.Cols)
+	// printFortranReshape("f", f.Data, true, f.Rows, f.Cols)
+
 	// Query for optimum workspace size.
 	var query [1]float64
 	impl.Dtgsyl(trans, ijob, m, n, a.Data, a.Stride, b.Data, b.Stride, c.Data, c.Stride, d.Data, d.Stride, e.Data, e.Stride, f.Data, f.Stride, query[:], nil, true)

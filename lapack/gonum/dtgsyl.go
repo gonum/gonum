@@ -267,7 +267,7 @@ func (impl Implementation) Dtgsyl(trans blas.Transpose, ijob, m, n int, a []floa
 		is := iwork[i]
 		ie := iwork[i+1] - 1
 		mb := ie - is + 1
-		for j := q; j <= p+2; j-- {
+		for j := q; j >= p+2; j-- {
 			js := iwork[j]
 			je := iwork[j+1] - 1
 			nb := je - js + 1
@@ -308,7 +308,7 @@ func (impl Implementation) Dtgsyl(trans blas.Transpose, ijob, m, n int, a []floa
 			if i < p {
 				bi.Dgemm(blas.Trans, blas.NoTrans, m-ie-1, nb, mb, -1, a[is*lda+ie+1:], lda,
 					c[is*ldc+js:], ldc, 1, c[(ie+1)*ldc+js:], ldc)
-				bi.Dgemm(blas.Trans, blas.Trans, m-ie-1, nb, mb, -1, d[is*ldd+ie+1:], ldd,
+				bi.Dgemm(blas.Trans, blas.NoTrans, m-ie-1, nb, mb, -1, d[is*ldd+ie+1:], ldd,
 					f[is*ldf+js:], ldf, 1, c[(ie+1)*ldc+js:], ldc)
 			}
 		}

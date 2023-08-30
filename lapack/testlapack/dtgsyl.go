@@ -25,7 +25,7 @@ func DtgsylTest(t *testing.T, impl Dtgsyler) {
 							for _, lde := range []int{n, n + ldAdd} {
 								for _, ldf := range []int{n, n + ldAdd} {
 									for _, ijob := range []int{2, 1, 0} {
-										testSolveDtgsyl(t, impl, rnd, blas.NoTrans, ijob, m, n, lda, ldb, ldc, ldd, lde, ldf)
+										testSolveDtgsyl(t, impl, rnd, blas.Trans, ijob, m, n, lda, ldb, ldc, ldd, lde, ldf)
 										return
 										testSolveDtgsyl(t, impl, rnd, blas.Trans, ijob, m, n, lda, ldb, ldc, ldd, lde, ldf)
 									}
@@ -94,4 +94,5 @@ func testSolveDtgsyl(t *testing.T, impl Dtgsyler, rnd *rand.Rand, trans blas.Tra
 	printRowise(c.Data, c.Rows, c.Cols, c.Stride, false)
 	fmt.Println()
 	fmt.Println("dif=", dif, "scale=", scale, "info=", info)
+	fmt.Println()
 }

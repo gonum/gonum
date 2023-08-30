@@ -2,11 +2,13 @@ package testlapack
 
 import (
 	"fmt"
+	"math"
 	"testing"
 
 	"golang.org/x/exp/rand"
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
+	"gonum.org/v1/gonum/lapack"
 )
 
 type Dtgsyler interface {
@@ -25,8 +27,7 @@ func DtgsylTest(t *testing.T, impl Dtgsyler) {
 							for _, lde := range []int{n, n + ldAdd} {
 								for _, ldf := range []int{n, n + ldAdd} {
 									for _, ijob := range []int{2, 1, 0} {
-										testSolveDtgsyl(t, impl, rnd, blas.Trans, ijob, m, n, lda, ldb, ldc, ldd, lde, ldf)
-										return
+										testSolveDtgsyl(t, impl, rnd, blas.NoTrans, ijob, m, n, lda, ldb, ldc, ldd, lde, ldf)
 										testSolveDtgsyl(t, impl, rnd, blas.Trans, ijob, m, n, lda, ldb, ldc, ldd, lde, ldf)
 									}
 								}
@@ -62,12 +63,15 @@ func testSolveDtgsyl(t *testing.T, impl Dtgsyler, rnd *rand.Rand, trans blas.Tra
 	// Generate random general matrix.
 	c = randomGeneral(m, n, ldc, rnd)
 	f = randomGeneral(m, n, ldf, rnd)
-	// printFortranReshape("a", a.Data, true, a.Rows, a.Cols)
-	// printFortranReshape("b", b.Data, true, b.Rows, b.Cols)
-	// printFortranReshape("c", c.Data, true, c.Rows, c.Cols)
-	// printFortranReshape("d", d.Data, true, d.Rows, d.Cols)
-	// printFortranReshape("e", e.Data, true, e.Rows, e.Cols)
-	// printFortranReshape("f", f.Data, true, f.Rows, f.Cols)
+	cCopy := cloneGeneral(c)
+	fCopy := cloneGeneral(f)
+	// Calculate norms
+	anorm := dlange(lapack.MaxColumnSum, a.Rows, a.Cols, a.Data, a.Stride)
+	bnorm := dlange(lapack.MaxColumnSum, b.Rows, b.Cols, b.Data, b.Stride)
+	cnorm := dlange(lapack.MaxColumnSum, c.Rows, c.Cols, c.Data, c.Stride)
+	dnorm := dlange(lapack.MaxColumnSum, d.Rows, d.Cols, d.Data, d.Stride)
+	enorm := dlange(lapack.MaxColumnSum, e.Rows, e.Cols, e.Data, e.Stride)
+	fnorm := dlange(lapack.MaxColumnSum, f.Rows, f.Cols, f.Data, f.Stride)
 
 	// Query for optimum workspace size.
 	var query [1]float64
@@ -86,13 +90,54 @@ func testSolveDtgsyl(t *testing.T, impl Dtgsyler, rnd *rand.Rand, trans blas.Tra
 	iwork := make([]int, m+n+6)
 	work := make([]float64, lwork)
 	dif, scale, info := impl.Dtgsyl(trans, ijob, m, n, a.Data, a.Stride, b.Data, b.Stride, c.Data, c.Stride, d.Data, d.Stride, e.Data, e.Stride, f.Data, f.Stride, work, iwork, false)
+	_, _ = dif, scale // untested.
+	if info >= 0 {
+		t.Errorf("%v: info>=0: matrix was perturbed", name)
+	}
+	lwork = int(work[0])
+	if lwork < 1 {
+		t.Fatalf("%v: bad workspace query lwork=%d", name, lwork)
+	}
+	// Solutions are written (R,L)->(C,F).
+	r := c
+	l := f
+	rnorm := dlange(lapack.MaxColumnSum, r.Rows, r.Cols, r.Data, r.Stride)
+	lnorm := dlange(lapack.MaxColumnSum, l.Rows, l.Cols, l.Data, l.Stride)
+	rlnormmax := math.Max(rnorm, lnorm)
+	if notrans {
+		// Calculate residuals
+		// | A * R - L * B - scale * C |  from (1)
+		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, a, r, -scale, cCopy)
+		blas64.Gemm(blas.NoTrans, blas.NoTrans, -1, l, b, 1, cCopy)
+		res := dlange(lapack.MaxColumnSum, m, n, cCopy.Data, cCopy.Stride) / math.Max(math.Max(anorm, rlnormmax), math.Max(bnorm, cnorm))
+		if res > tol || math.IsNaN(res) {
+			t.Errorf("%v: | A * R - L * B - scale * C | residual large or NaN %v", name, res)
+		}
 
-	// Debugging below.
-	fmt.Print("f=")
-	printRowise(f.Data, f.Rows, f.Cols, f.Stride, false)
-	fmt.Print("\nc=")
-	printRowise(c.Data, c.Rows, c.Cols, c.Stride, false)
-	fmt.Println()
-	fmt.Println("dif=", dif, "scale=", scale, "info=", info)
-	fmt.Println()
+		// | D * R - L * E - scale * F |  from (1)
+		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, d, r, -scale, fCopy)
+		blas64.Gemm(blas.NoTrans, blas.NoTrans, -1, l, e, 1, fCopy)
+		res = dlange(lapack.MaxColumnSum, m, n, fCopy.Data, fCopy.Stride) / math.Max(math.Max(dnorm, rlnormmax), math.Max(enorm, fnorm))
+		if res > tol || math.IsNaN(res) {
+			t.Errorf("%v: | D * R - L * E - scale * F | residual large or NaN %v", name, res)
+		}
+	} else {
+		// Calculate residuals
+		// | Aᵀ * R + Dᵀ * L - scale * C |  from (3)
+		blas64.Gemm(trans, blas.NoTrans, 1, a, r, -scale, cCopy)
+		blas64.Gemm(trans, blas.NoTrans, 1, d, l, 1, cCopy)
+		res := dlange(lapack.MaxColumnSum, m, n, cCopy.Data, cCopy.Stride) / math.Max(math.Max(anorm, rlnormmax), math.Max(dnorm, cnorm))
+		if res > tol || math.IsNaN(res) {
+			t.Errorf("%v: | Aᵀ * R + Dᵀ * L - scale * C | residual large or NaN %v", name, res)
+		}
+
+		// | R * Bᵀ + L * Eᵀ - scale * -F |  from (3)
+		blas64.Gemm(blas.NoTrans, trans, 1, r, b, scale, fCopy)
+		blas64.Gemm(blas.NoTrans, trans, 1, l, e, 1, fCopy)
+		res = dlange(lapack.MaxColumnSum, m, n, fCopy.Data, fCopy.Stride) / math.Max(math.Max(bnorm, rlnormmax), math.Max(enorm, fnorm))
+
+		if res > tol || math.IsNaN(res) {
+			t.Errorf("%v: | R * Bᵀ + L * Eᵀ - scale * -F | residual large or NaN %v", name, res)
+		}
+	}
 }

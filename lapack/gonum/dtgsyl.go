@@ -75,13 +75,13 @@ func (impl Implementation) Dtgsyl(trans blas.Transpose, ijob, m, n int, a []floa
 		panic(badLdA)
 	case ldb < max(1, n):
 		panic(badLdB)
-	case ldc < max(1, m):
+	case ldc < max(1, n): // ldc and ldf are inverted w.r.t reference due to row-major storage.
 		panic(badLdC)
 	case ldd < max(1, m):
 		panic(badLdD)
 	case lde < max(1, n):
 		panic(badLdE)
-	case ldf < max(1, m):
+	case ldf < max(1, n):
 		panic(badLdF)
 	case lwork < lwmin && !workspaceQuery:
 		panic(badLWork)

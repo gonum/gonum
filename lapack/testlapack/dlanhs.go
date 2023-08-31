@@ -18,7 +18,7 @@ type Dlanhser interface {
 }
 
 func DlanhsTest(t *testing.T, impl Dlanhser) {
-	const tol = 1e-14
+	const tol = 1e-15
 	work := make([]float64, 9)
 	rnd := rand.New(rand.NewSource(1))
 	for _, n := range []int{1, 2, 4, 9} {
@@ -34,7 +34,6 @@ func DlanhsTest(t *testing.T, impl Dlanhser) {
 					t.Errorf("Case n=%v,lda=%v,norm=%v: unexpected result. Want %v, got %v.", n, lda, normToString(norm), want, got)
 				}
 			}
-
 		}
 	}
 }

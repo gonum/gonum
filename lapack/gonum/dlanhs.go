@@ -13,6 +13,8 @@ import (
 // Dlanhs returns the value of the one norm, or the Frobenius norm, or
 // the infinity norm, or the element of largest absolute value of a
 // Hessenberg matrix A.
+//
+// On using norm=lapack.MaxRowSum, the vector work must have length n.
 func (impl Implementation) Dlanhs(norm lapack.MatrixNorm, n int, a []float64, lda int, work []float64) float64 {
 	switch {
 	case n < 0:

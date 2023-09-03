@@ -7,6 +7,7 @@ package gonum
 import (
 	"math"
 
+	"gonum.org/v1/gonum/blas/blas64"
 	"gonum.org/v1/gonum/lapack"
 )
 
@@ -28,14 +29,16 @@ func (impl Implementation) Dlanhs(norm lapack.MatrixNorm, n int, a []float64, ld
 		return 0 // Early return.
 	}
 
+	bi := blas64.Implementation()
 	var value float64
 	switch norm {
 	default:
 		panic(badNorm)
 	case lapack.MaxAbs:
 		for i := 0; i < n; i++ {
-			for j := max(0, i-1); j < n; j++ {
-				value = math.Max(value, math.Abs(a[i*lda+j]))
+			minj := max(0, i-1)
+			for _, v := range a[i*lda+minj : i*lda+n] {
+				value = math.Max(value, math.Abs(v))
 			}
 		}
 	case lapack.MaxColumnSum:
@@ -47,15 +50,13 @@ func (impl Implementation) Dlanhs(norm lapack.MatrixNorm, n int, a []float64, ld
 				work[j] += math.Abs(a[i*lda+j])
 			}
 		}
-		for j := 0; j < n; j++ {
-			value = math.Max(value, work[j])
+		for _, v := range work[:n] {
+			value = math.Max(value, v)
 		}
 	case lapack.MaxRowSum:
 		for i := 0; i < n; i++ {
-			sum := 0.0
-			for j := max(0, i-1); j < n; j++ {
-				sum += math.Abs(a[i*lda+j])
-			}
+			minj := max(0, i-1)
+			sum := bi.Dasum(n-minj, a[i*lda+minj:], 1)
 			value = math.Max(value, sum)
 		}
 	case lapack.Frobenius:

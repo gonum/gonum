@@ -20,9 +20,11 @@ import (
 // Balancing may reduce the 1-norm of the matrices, and improve the
 // accuracy of the computed eigenvalues and/or eigenvectors in the
 // generalized eigenvalue problem A*x = lambda*B*x.
-//  n is the order of matrices A and B. n >= 0
 //
-// lscale, rscale must be of size n.
+//   - n is the order of matrices A and B. n >= 0
+//   - lscale, rscale must be of size n.
+//
+// Dggbal is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dggbal(job lapack.BalanceJob, n int, a []float64, lda int, b []float64, ldb int, lscale, rscale, work []float64) (ilo, ihi int) {
 	var (
 		alpha, pgamma, t, tc, sum, cmax, cor, basl float64
@@ -326,5 +328,5 @@ end: // LABEL 350
 		bi.Dscal(ihi, rscale[j], a[j:], lda)
 		bi.Dscal(ihi, rscale[j], b[j:], ldb)
 	}
-	return
+	return ilo, ihi
 }

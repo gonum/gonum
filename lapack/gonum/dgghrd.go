@@ -80,9 +80,9 @@ func (impl Implementation) Dgghrd(compq, compz lapack.OrthoComp, n, ilo, ihi int
 	switch {
 	case n < 0:
 		panic(nLT0)
-	case ilo < 1 || ilo > ihi+1:
+	case ilo < 0:
 		panic(badIlo)
-	case ihi < ilo-1 || ihi > n:
+	case ihi < ilo-1 || ihi >= n:
 		panic(badIhi)
 	case lda < max(1, n):
 		panic(badLdA)

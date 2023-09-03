@@ -148,6 +148,11 @@ func TestDgetrs(t *testing.T) {
 	testlapack.DgetrsTest(t, impl)
 }
 
+func TestDgghrd(t *testing.T) {
+	t.Parallel()
+	testlapack.DgghrdTest(t, impl)
+}
+
 func TestDggsvd3(t *testing.T) {
 	t.Parallel()
 	testlapack.Dggsvd3Test(t, impl)

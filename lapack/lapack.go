@@ -227,10 +227,11 @@ const (
 	NormalizedNullVector MaximizeNormXJob = 2 // Compute an approximate null-vector e of Z, normalize e and solve Z*x=±e-f.
 )
 
+// OrthoComp specifies whether and how the orthogonal matrix is computed in Dgghrd.
 type OrthoComp byte
 
 const (
 	OrthoNone  OrthoComp = 'N' // Do not compute orthogonal matrix.
 	OrthoUnit  OrthoComp = 'I' // Argument is initialized to the unit matrix and the orthogonal matrix is returned.
-	OrthoEntry OrthoComp = 'V' // Argument Q contains orthogonal matrix on entry and the product Q1*Q is returned.
+	OrthoEntry OrthoComp = 'V' // Argument Q contains orthogonal matrix Q1 on entry and the product Q1*Q is returned.
 )

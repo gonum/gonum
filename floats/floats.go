@@ -605,10 +605,7 @@ func Norm(s []float64, L float64) float64 {
 	}
 	var norm float64
 	if L == 1 {
-		for _, val := range s {
-			norm += math.Abs(val)
-		}
-		return norm
+		return f64.L1Norm(s)
 	}
 	if math.IsInf(L, 1) {
 		for _, val := range s {

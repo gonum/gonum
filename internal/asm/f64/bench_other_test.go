@@ -25,17 +25,17 @@ var naiveL1Norm = func(x []float64) (sum float64) {
 	return sum
 }
 
-func BenchmarkL1Norm1(t *testing.B)      { benchL1Norm(L1Norm, 1, t) }
-func BenchmarkL1Norm2(t *testing.B)      { benchL1Norm(L1Norm, 2, t) }
-func BenchmarkL1Norm3(t *testing.B)      { benchL1Norm(L1Norm, 3, t) }
-func BenchmarkL1Norm4(t *testing.B)      { benchL1Norm(L1Norm, 4, t) }
-func BenchmarkL1Norm5(t *testing.B)      { benchL1Norm(L1Norm, 5, t) }
-func BenchmarkL1Norm10(t *testing.B)     { benchL1Norm(L1Norm, 10, t) }
-func BenchmarkL1Norm100(t *testing.B)    { benchL1Norm(L1Norm, 100, t) }
-func BenchmarkL1Norm1000(t *testing.B)   { benchL1Norm(L1Norm, 1000, t) }
-func BenchmarkL1Norm10000(t *testing.B)  { benchL1Norm(L1Norm, 10000, t) }
-func BenchmarkL1Norm100000(t *testing.B) { benchL1Norm(L1Norm, 100000, t) }
-func BenchmarkL1Norm500000(t *testing.B) { benchL1Norm(L1Norm, 500000, t) }
+func BenchmarkL1Norm1(t *testing.B)      { benchL1Norm(L1NormUnitary, 1, t) }
+func BenchmarkL1Norm2(t *testing.B)      { benchL1Norm(L1NormUnitary, 2, t) }
+func BenchmarkL1Norm3(t *testing.B)      { benchL1Norm(L1NormUnitary, 3, t) }
+func BenchmarkL1Norm4(t *testing.B)      { benchL1Norm(L1NormUnitary, 4, t) }
+func BenchmarkL1Norm5(t *testing.B)      { benchL1Norm(L1NormUnitary, 5, t) }
+func BenchmarkL1Norm10(t *testing.B)     { benchL1Norm(L1NormUnitary, 10, t) }
+func BenchmarkL1Norm100(t *testing.B)    { benchL1Norm(L1NormUnitary, 100, t) }
+func BenchmarkL1Norm1000(t *testing.B)   { benchL1Norm(L1NormUnitary, 1000, t) }
+func BenchmarkL1Norm10000(t *testing.B)  { benchL1Norm(L1NormUnitary, 10000, t) }
+func BenchmarkL1Norm100000(t *testing.B) { benchL1Norm(L1NormUnitary, 100000, t) }
+func BenchmarkL1Norm500000(t *testing.B) { benchL1Norm(L1NormUnitary, 500000, t) }
 
 func BenchmarkLL1Norm1(t *testing.B)      { benchL1Norm(naiveL1Norm, 1, t) }
 func BenchmarkLL1Norm2(t *testing.B)      { benchL1Norm(naiveL1Norm, 2, t) }

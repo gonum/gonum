@@ -63,7 +63,7 @@ func (Implementation) Dasum(n int, x []float64, incX int) float64 {
 	}
 	if incX == 1 {
 		x = x[:n]
-		return f64.L1Norm(x)
+		return f64.L1NormUnitary(x)
 	}
 	return f64.L1NormInc(x, n, incX)
 }

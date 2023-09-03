@@ -605,7 +605,7 @@ func Norm(s []float64, L float64) float64 {
 	}
 	var norm float64
 	if L == 1 {
-		return f64.L1Norm(s)
+		return f64.L1NormUnitary(s)
 	}
 	if math.IsInf(L, 1) {
 		for _, val := range s {

@@ -78,13 +78,13 @@ func DotUnitary(x, y []float32) (sum float32)
 //	return sum
 func DotInc(x, y []float32, n, incX, incY, ix, iy uintptr) (sum float32)
 
-// L1Norm is
+// L1NormUnitary is
 //
 //	for _, v := range x {
 //		sum += math.Abs(v)
 //	}
 //	return sum
-func L1Norm(x []float32) (sum float32) {
+func L1NormUnitary(x []float32) (sum float32) {
 	for _, v := range x {
 		sum += math32.Abs(v)
 	}

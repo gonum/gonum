@@ -69,7 +69,7 @@ func (Implementation) Sasum(n int, x []float32, incX int) float32 {
 	}
 	if incX == 1 {
 		x = x[:n]
-		return f32.L1Norm(x)
+		return f32.L1NormUnitary(x)
 	}
 	return f32.L1NormInc(x, n, incX)
 }

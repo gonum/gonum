@@ -33,33 +33,30 @@ func (impl Implementation) Dlanhs(norm lapack.MatrixNorm, n int, a []float64, ld
 	default:
 		panic(badNorm)
 	case lapack.MaxAbs:
-		for j := 0; j < n; j++ {
-			imax := min(n-1, j+1)
-			for i := 0; i <= imax; i++ {
+		for i := 0; i < n; i++ {
+			for j := max(0, i-1); j < n; j++ {
 				value = math.Max(value, math.Abs(a[i*lda+j]))
 			}
 		}
 	case lapack.MaxColumnSum:
-		for j := 0; j < n; j++ {
-			sum := 0.0
-			imax := min(n-1, j+1)
-			for i := 0; i <= imax; i++ {
-				sum += math.Abs(a[i*lda+j])
-			}
-			value = math.Max(value, sum)
-		}
-	case lapack.MaxRowSum:
 		for i := 0; i < n; i++ {
 			work[i] = 0
 		}
-		for j := 0; j < n; j++ {
-			imax := min(n-1, j+1)
-			for i := 0; i <= imax; i++ {
-				work[i] += math.Abs(a[i*lda+j])
+		for i := 0; i < n; i++ {
+			for j := max(0, i-1); j < n; j++ {
+				work[j] += math.Abs(a[i*lda+j])
 			}
 		}
+		for j := 0; j < n; j++ {
+			value = math.Max(value, work[j])
+		}
+	case lapack.MaxRowSum:
 		for i := 0; i < n; i++ {
-			value = math.Max(value, work[i])
+			sum := 0.0
+			for j := max(0, i-1); j < n; j++ {
+				sum += math.Abs(a[i*lda+j])
+			}
+			value = math.Max(value, sum)
 		}
 	case lapack.Frobenius:
 		scale := 0.0

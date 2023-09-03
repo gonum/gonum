@@ -104,7 +104,7 @@ func testDgghrd(t *testing.T, impl Dgghrder, rnd *rand.Rand, tol float64, compq,
 		blas64.Gemm(blas.Trans, blas.NoTrans, 1, q, b, 0, aux)
 		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, aux, z, 1, tCalc)
 		if !equalApproxGeneral(hGot, hCalc, tol) {
-			t.Errorf("Qᵀ*A*Z != H")
+			t.Errorf("Qᵀ*B*Z != T")
 		}
 	case lapack.OrthoEntry:
 		//	Q1 * A * Z1ᵀ = (Q1*Q) * H * (Z1*Z)ᵀ

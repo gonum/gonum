@@ -23,6 +23,9 @@ import (
 //
 //   - n is the order of matrices A and B. n >= 0
 //   - lscale, rscale must be of size n.
+//   - a and b of size lda*n and ldb*n respectively. On exit they are overwritten with balanced matrices.
+//   - work is at least of size max(1, 6*n) when job is Scale/PermuteScale. Otherwise at least size 1.
+//   - ilo, ihi are indices such that a(i,j) and b(i,j) are zero for j=1..ilo-1, i=ihi+1..n.
 //
 // Dggbal is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dggbal(job lapack.BalanceJob, n int, a []float64, lda int, b []float64, ldb int, lscale, rscale, work []float64) (ilo, ihi int) {
@@ -36,106 +39,111 @@ func (impl Implementation) Dggbal(job lapack.BalanceJob, n int, a []float64, lda
 		panic(badBalanceJob)
 	case n < 0:
 		panic(nLT0)
-	}
-
-	if lda < max(1, n) {
+	case lda < max(1, n):
+		panic(badLdA)
+	case len(a) < (n-1)*lda+n:
 		panic(shortA)
-	}
-	if ldb < max(1, n) {
+	case ldb < max(1, n):
+		panic(badLdB)
+	case len(b) < (n-1)*ldb+n:
 		panic(shortB)
+	case len(lscale) < n || len(rscale) < n:
+		panic(shortScale)
+	case len(work) < 1 || len(work) < 6*n && (job == lapack.Scale || job == lapack.PermuteScale):
+		panic(shortWork)
 	}
 
 	// quick return if possible
-	if n == 0 || n == 1 {
-		ilo = 1
-		ihi = n
-		if n == 1 {
-			rscale[0] = 1
-			lscale[0] = 1
-		}
-		return
-	}
-
-	bi := blas64.Implementation()
-	if job == lapack.BalanceNone {
-		ilo = 1
-		ihi = n
+	if n == 0 || n == 1 || job == lapack.BalanceNone {
+		ilo = 0
+		ihi = n - 1
 		for i = 0; i < n; i++ {
 			lscale[i] = 1
 			rscale[i] = 1
 		}
-		return
+		return ilo, ihi
 	}
 
-	k := 1
-	l := n
+	bi := blas64.Implementation()
+
+	k := 0
+	l := n - 1
 	if job == lapack.Scale {
-		goto oneNinety
+		goto OneNinety
 	}
-	goto thirty
-twenty:
-	l = lm1
-	if l == 1 {
-		rscale[0] = 1
-		lscale[0] = 1
-		goto oneNinety
-	}
+	goto Thirty
 
-thirty:
+	// Permute the matrices A and B to isolate the eigenvalues.
+	// Find row with one nonzero in columns 1..L.
+
+Twenty:
+	l = lm1
+	if l != 0 {
+		goto Thirty
+	}
+	rscale[0] = 1
+	lscale[0] = 1
+	goto OneNinety
+
+Thirty:
 	lm1 = l - 1
-eighty:
+OUTER:
 	for i = l; i >= 0; i-- {
-		for j = 1; j < lm1; j++ {
+		for j = 0; j <= lm1; j++ {
 			jp1 = j + 1
 			if a[i*lda+j] != 0 || b[i*ldb+j] != 0 {
-				goto fifty
+				goto Fifty
 			}
+			// Forty:
 		}
 		j = l
-		goto seventy
-	fifty:
-		for j = jp1; j < l; j++ {
+		goto Seventy
+	Fifty:
+		for j = jp1; j <= l; j++ {
 			if a[i*lda+j] != 0 || b[i*ldb+j] != 0 {
-				continue eighty
+				continue OUTER
 			}
+			// Sixty:
 		}
 		j = jp1 - 1
-	seventy:
+	Seventy:
 		m = l
 		iflow = 1
-		goto oneSixty
+		goto OneSixty
 	}
-	goto hundred
+
+	goto Hundred
 
 	// Find column with one nonzero in rows K through N.
-ninety:
+Ninety:
 	k++
-hundred:
-	for j = k; j < l; j++ {
-		for i = k; i < lm1; i++ {
-			ip1++
+Hundred:
+	for j = k; j <= l; j++ {
+		for i = k; i <= lm1; i++ {
+			ip1 = i + 1
 			if a[i*lda+j] != 0 || b[i*ldb+j] != 0 {
-				goto oneTwenty
+				goto OneTwenty
 			}
-		}
+		} // 110
 		i = l
-		goto oneForty
-	oneTwenty:
-		for i = ip1; i < l; i++ {
+		goto OneForty
+	OneTwenty:
+		for i = ip1; i <= l; i++ {
 			if a[i*lda+j] != 0 || b[i*lda+j] != 0 {
-				continue hundred
+				continue Hundred // goto 150.
 			}
-		}
+		} // 130
 		i = ip1 - 1
-	oneForty:
+	OneForty:
 		m = k
 		iflow = 2
-		goto oneSixty
-	}
-	goto oneNinety
+		goto OneSixty
+	} // 150
+	goto OneNinety
 
 	// Permute rows M and I
-oneSixty:
+
+OneSixty:
 	lscale[m] = float64(i)
 	if i != m {
 		bi.Dswap(n-k+1, a[i*lda+k:], 1, a[m*lda+k:], 1)
@@ -143,6 +151,7 @@ oneSixty:
 	}
 
 	// Permute columns M and J
+
 	rscale[m] = float64(j)
 	if j != m {
 		bi.Dswap(l, a[j:], lda, a[m:], lda)
@@ -150,28 +159,28 @@ oneSixty:
 	}
 	switch iflow {
 	case 1:
-		goto twenty
+		goto Twenty
 	case 2:
-		goto ninety
+		goto Ninety
 	}
 
-oneNinety:
+OneNinety:
 	ilo = k
 	ihi = l
 	if job == lapack.Permute {
-		for i := ilo; i < ihi; i++ {
+		for i := ilo; i <= ihi; i++ {
 			lscale[i] = 1
 			rscale[i] = 1
 		}
-		return
+		return ilo, ihi
 	}
 	if ilo == ihi {
-		return
+		return ilo, ihi
 	}
 
 	// Balance the submatrix in rows ILO to IHI.
 	nr := ihi - ilo + 1
-	for i = ilo; i < ihi; i++ {
+	for i = ilo; i <= ihi; i++ {
 		rscale[i] = 0
 		lscale[i] = 0
 
@@ -185,8 +194,8 @@ oneNinety:
 
 	// Compute right side vector in resulting linear equations.
 	basl = math.Log10(sclfac)
-	for i = ilo; i < ihi; i++ {
-		for j = ilo; j < ihi; j++ {
+	for i = ilo; i <= ihi; i++ {
+		for j = ilo; j <= ihi; j++ {
 			tb := b[i*ldb+j]
 			ta := a[i*lda+j]
 			if ta != 0 {
@@ -195,8 +204,8 @@ oneNinety:
 			if tb != 0 {
 				tb = math.Log10(math.Abs(tb)) / basl
 			}
-			work[i+4*n] -= ta + tb
-			work[j+5*n] -= ta + tb
+			work[i+4*n] -= (ta + tb)
+			work[j+5*n] -= (ta + tb)
 		}
 	}
 	coef := 1 / float64(2*nr)
@@ -207,17 +216,18 @@ oneNinety:
 	it := 1
 
 	// Start generalized conjugate gradient iteration
-twoFiddy:
+TwoFifty:
 	gamma := bi.Ddot(nr, work[ilo+4*n:], 1, work[ilo+4*n:], 1) +
 		bi.Ddot(nr, work[ilo+5*n:], 1, work[ilo+5*n:], 1)
 	var ew, ewc float64
-	for i = ilo; i < ihi; i++ {
+	for i = ilo; i <= ihi; i++ {
 		ew += work[i+4*n]
 		ewc += work[i+5*n]
 	}
-	gamma = coef*gamma - coef2*(math.Pow(ew, 2)+math.Pow(ewc, 2)) - coef5*math.Pow(ew-ewc, 2)
+	ewmewc := ew - ewc
+	gamma = coef*gamma - coef2*(ew*ew+ewc*ewc) - coef5*(ewmewc*ewmewc)
 	if gamma == 0 {
-		goto end
+		goto End
 	}
 	if it != 1 {
 		beta = gamma / pgamma
@@ -230,15 +240,17 @@ twoFiddy:
 	bi.Daxpy(nr, coef, work[ilo+4*n:], 1, work[ilo+n:], 1)
 	bi.Daxpy(nr, coef, work[ilo+5*n:], 1, work[ilo:], 1)
 
-	for i = ilo; i < ihi; i++ {
+	for i = ilo; i <= ihi; i++ {
 		work[i] += tc
 		work[i+n] += t
 	}
 
-	for i = ilo; i < ihi; i++ {
+	// Apply matrix to vector.
+
+	for i = ilo; i <= ihi; i++ {
 		kount = 0
 		sum = 0
-		for j = ilo; j < ihi; j++ {
+		for j = ilo; j <= ihi; j++ {
 			if a[i*lda+j] != 0 {
 				kount++
 				sum += work[j]
@@ -250,10 +262,10 @@ twoFiddy:
 		}
 		work[i+2*n] = float64(kount)*work[i+n] + sum
 	}
-	for j = ilo; j < ihi; j++ {
+	for j = ilo; j <= ihi; j++ {
 		kount = 0
 		sum = 0
-		for i = ilo; i < ihi; i++ {
+		for i = ilo; i <= ihi; i++ {
 			if a[i*lda+j] != 0 {
 				kount++
 				sum += work[i+n]
@@ -271,7 +283,7 @@ twoFiddy:
 
 	// Determine correction to current iteration.
 	cmax = 0
-	for i = ilo; i < ihi; i++ {
+	for i = ilo; i <= ihi; i++ {
 		cor = alpha * work[i+n]
 		cmax = math.Max(math.Abs(cor), cmax)
 		lscale[i] += cor
@@ -280,25 +292,26 @@ twoFiddy:
 		rscale[i] += cor
 	}
 	if cmax < 0.5 {
-		goto end
+		goto End
 	}
 	bi.Daxpy(nr, -alpha, work[ilo+2*n:], 1, work[ilo+4*n:], 1)
 	bi.Daxpy(nr, -alpha, work[ilo+3*n:], 1, work[ilo+5*n:], 1)
 	pgamma = gamma
 	it++
 	if it <= nrp2 {
-		goto twoFiddy
+		goto TwoFifty
 	}
+
 	// End generalized conjugate gradient iteration.
 
-end: // LABEL 350
+End: // LABEL 350
 	sfmin := dlamchS
 	sfmax := 1 / sfmin
 	lsfmin := int(math.Log10(sfmin)/basl) + 1
 	lsfmax := int(math.Log10(sfmax) / basl)
 	var irab, lrab, ir, icab, lcab, jc int
 	var rab, cab float64
-	for i = ilo; i < ihi; i++ {
+	for i = ilo; i <= ihi; i++ {
 		irab = bi.Idamax(n-ilo+1, a[i*lda+ilo:], 1)
 		rab = math.Abs(a[i*lda+irab+ilo-1])
 		irab = bi.Idamax(n-ilo+1, b[i*ldb+ilo:], 1)
@@ -307,6 +320,7 @@ end: // LABEL 350
 		ir = int(lscale[i] + math.Copysign(.5, lscale[i]))
 		ir = min(min(max(ir, lsfmin), lsfmax), lsfmax-lrab)
 		lscale[i] = math.Pow(sclfac, float64(ir))
+
 		icab = bi.Idamax(ihi, a[i:], lda)
 		cab = math.Abs(a[icab*lda+i])
 		icab = bi.Idamax(ihi, b[i:], ldb)
@@ -318,13 +332,13 @@ end: // LABEL 350
 	}
 
 	// Row scaling of matrices A and B.
-	for i = ilo; i < ihi; i++ {
+	for i = ilo; i <= ihi; i++ {
 		bi.Dscal(n-ilo+1, lscale[i], a[i*lda+ilo:], 1)
 		bi.Dscal(n-ilo+1, lscale[i], b[i*ldb+ilo:], 1)
 	}
 
 	// Column scaling of matrices A and B.
-	for j = ilo; j < ihi; j++ {
+	for j = ilo; j <= ihi; j++ {
 		bi.Dscal(ihi, rscale[j], a[j:], lda)
 		bi.Dscal(ihi, rscale[j], b[j:], ldb)
 	}

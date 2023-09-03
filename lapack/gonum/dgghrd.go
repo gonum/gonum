@@ -47,39 +47,14 @@ import (
 //
 // Dgghrd is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dgghrd(compq, compz lapack.OrthoComp, n, ilo, ihi int, a []float64, lda int, b []float64, ldb int, q []float64, ldq int, z []float64, ldz int) {
-	var ilq bool
-	icompq := 0
-	switch compq {
-	case lapack.OrthoNone:
-		ilq = false
-		icompq = 1
-	case lapack.OrthoEntry:
-		ilq = true
-		icompq = 2
-	case lapack.OrthoUnit:
-		ilq = true
-		icompq = 3
-	default:
-		panic(badOrthoComp)
-	}
-
-	var ilz bool
-	icompz := 0
-	switch compz {
-	case lapack.OrthoNone:
-		ilz = false
-		icompz = 1
-	case lapack.OrthoEntry:
-		ilz = true
-		icompz = 2
-	case lapack.OrthoUnit:
-		ilz = true
-		icompz = 3
-	default:
-		panic(badOrthoComp)
-	}
-
 	switch {
+	case (compq != lapack.OrthoNone && compq != lapack.OrthoEntry && compq != lapack.OrthoUnit) ||
+		(compz != lapack.OrthoNone && compz != lapack.OrthoEntry && compz != lapack.OrthoUnit):
+		panic(badOrthoComp)
+	case len(a) < (n-1)*lda+n:
+		panic(shortA)
+	case len(b) < (n-1)*ldb+n:
+		panic(shortB)
 	case n < 0:
 		panic(nLT0)
 	case ilo < 0:
@@ -90,26 +65,30 @@ func (impl Implementation) Dgghrd(compq, compz lapack.OrthoComp, n, ilo, ihi int
 		panic(badLdA)
 	case ldb < max(1, n):
 		panic(badLdB)
-	case (ilq && ldq < n) || ldq < 1:
+	case (compq != lapack.OrthoNone && ldq < n) || ldq < 1:
 		panic(badLdQ)
-	case (ilz && ldz < n) || ldz < 1:
+	case (compz != lapack.OrthoNone && ldz < n) || ldz < 1:
 		panic(badLdZ)
+	case compq != lapack.OrthoNone && len(q) < (n-1)*ldq+n:
+		panic(shortQ)
+	case compz != lapack.OrthoNone && len(z) < (n-1)*ldz+n:
+		panic(shortZ)
 	}
 
-	if icompq == 3 {
+	if compq == lapack.OrthoUnit {
 		impl.Dlaset(blas.All, n, n, 0, 1, q, ldq)
 	}
-	if icompz == 3 {
+	if compz == lapack.OrthoUnit {
 		impl.Dlaset(blas.All, n, n, 0, 1, z, ldz)
 	}
-	if n < 1 {
+	if n == 0 {
 		return // Quick return if possible.
 	}
 
 	// Zero out lower triangle of B.
-	for jcol := 0; jcol < n-1; jcol++ {
-		for jrow := jcol + 1; jrow < n; jrow++ {
-			b[jrow*ldb+jcol] = 0
+	for i := 1; i < n; i++ {
+		for j := 0; j < i-1; j++ {
+			b[i*ldb+j] = 0
 		}
 	}
 	bi := blas64.Implementation()
@@ -117,9 +96,8 @@ func (impl Implementation) Dgghrd(compq, compz lapack.OrthoComp, n, ilo, ihi int
 	for jcol := ilo; jcol <= ihi-2; jcol++ {
 		for jrow := ihi; jrow >= jcol+2; jrow-- {
 			// Step 1: rotate rows JROW-1, JROW to kill A(JROW,JCOL).
-			temp := a[(jrow-1)*lda+jcol]
 			var c, s float64
-			c, s, a[(jrow-1)*lda+jcol] = impl.Dlartg(temp, a[jrow*lda+jcol])
+			c, s, a[(jrow-1)*lda+jcol] = impl.Dlartg(a[(jrow-1)*lda+jcol], a[jrow*lda+jcol])
 			a[jrow*lda+jcol] = 0
 			bi.Drot(n-jcol-1, a[(jrow-1)*lda+jcol+1:], 1,
 				a[jrow*lda+jcol+1:], 1, c, s)
@@ -127,19 +105,18 @@ func (impl Implementation) Dgghrd(compq, compz lapack.OrthoComp, n, ilo, ihi int
 			bi.Drot(n+2-jrow-1, b[(jrow-1)*ldb+jrow-1:], 1,
 				b[jrow*ldb+jrow-1:], 1, c, s)
 
-			if ilq {
+			if compq != lapack.OrthoNone {
 				bi.Drot(n, q[jrow-1:], ldq, q[jrow:], ldq, c, s)
 			}
 
 			// Step 2: rotate columns JROW, JROW-1 to kill B(JROW,JROW-1).
-			temp = b[jrow*ldb+jrow]
-			c, s, b[jrow*ldb+jrow] = impl.Dlartg(temp, b[jrow*ldb+jrow-1])
+			c, s, b[jrow*ldb+jrow] = impl.Dlartg(b[jrow*ldb+jrow], b[jrow*ldb+jrow-1])
 			b[jrow*ldb+jrow-1] = 0
 
 			bi.Drot(ihi+1, a[jrow:], lda, a[jrow-1:], lda, c, s)
 			bi.Drot(jrow, b[jrow:], ldb, b[jrow-1:], ldb, c, s)
 
-			if ilz {
+			if compz != lapack.OrthoNone {
 				bi.Drot(n, z[jrow:], ldz, z[jrow-1:], ldz, c, s)
 			}
 		}

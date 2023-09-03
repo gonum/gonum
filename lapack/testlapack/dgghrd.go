@@ -68,6 +68,9 @@ func testDgghrd(t *testing.T, impl Dgghrder, rnd *rand.Rand, tol float64, compq,
 	if !isUpperHessenberg(hGot) {
 		t.Error("H is not upper Hessenberg")
 	}
+	if !isUpperTriangular(tGot) {
+		t.Error("T is not upper triangular")
+	}
 	if compq == lapack.OrthoNone {
 		if !isAllNaN(q.Data) {
 			t.Errorf("Q is not NaN")

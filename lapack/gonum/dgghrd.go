@@ -42,8 +42,10 @@ import (
 //	Q1 * B * Z1ᵀ = (Q1*Q) * T * (Z1*Z)ᵀ
 //
 // If Q1 is the orthogonal matrix from the QR factorization of B in the
-// original equation A*x = lambda*B*x, then DGGHRD reduces the original
+// original equation A*x = lambda*B*x, then Dgghrd reduces the original
 // problem to generalized Hessenberg form.
+//
+// Dgghrd is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dgghrd(compq, compz lapack.OrthoComp, n, ilo, ihi int, a []float64, lda int, b []float64, ldb int, q []float64, ldq int, z []float64, ldz int) {
 	var ilq bool
 	icompq := 0

@@ -29,11 +29,12 @@ import (
 //
 // Dggbal is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dggbal(job lapack.BalanceJob, n int, a []float64, lda int, b []float64, ldb int, lscale, rscale, work []float64) (ilo, ihi int) {
+	_ = column(a, lda, 0, 0)
 	var (
 		alpha, pgamma, t, tc, sum, cmax, cor, basl float64
 		i, j, kount, lm1, jp1, iflow, m, ip1       int // loop var
 	)
-	sclfac := 1.
+	sclfac := 10.
 	switch {
 	case job != lapack.BalanceNone && job != lapack.Permute && job != lapack.PermuteScale && job != lapack.Scale:
 		panic(badBalanceJob)
@@ -129,7 +130,7 @@ Hundred:
 		goto OneForty
 	OneTwenty:
 		for i = ip1; i <= l; i++ {
-			if a[i*lda+j] != 0 || b[i*lda+j] != 0 {
+			if a[i*lda+j] != 0 || b[i*ldb+j] != 0 {
 				continue Hundred // goto 150.
 			}
 		} // 130
@@ -146,16 +147,16 @@ Hundred:
 OneSixty:
 	lscale[m] = float64(i)
 	if i != m {
-		bi.Dswap(n-k+1, a[i*lda+k:], 1, a[m*lda+k:], 1)
-		bi.Dswap(n-k+1, b[i*ldb+k:], 1, b[m*ldb+k:], 1)
+		bi.Dswap(n-k, a[i*lda+k:], 1, a[m*lda+k:], 1)
+		bi.Dswap(n-k, b[i*ldb+k:], 1, b[m*ldb+k:], 1)
 	}
 
 	// Permute columns M and J
 
 	rscale[m] = float64(j)
 	if j != m {
-		bi.Dswap(l, a[j:], lda, a[m:], lda)
-		bi.Dswap(l, b[j:], ldb, b[m:], ldb)
+		bi.Dswap(l+1, a[j:], lda, a[m:], lda)
+		bi.Dswap(l+1, b[j:], ldb, b[m:], ldb)
 	}
 	switch iflow {
 	case 1:
@@ -312,18 +313,18 @@ End: // LABEL 350
 	var irab, lrab, ir, icab, lcab, jc int
 	var rab, cab float64
 	for i = ilo; i <= ihi; i++ {
-		irab = bi.Idamax(n-ilo+1, a[i*lda+ilo:], 1)
-		rab = math.Abs(a[i*lda+irab+ilo-1])
-		irab = bi.Idamax(n-ilo+1, b[i*ldb+ilo:], 1)
-		rab = math.Max(rab, math.Abs(b[i*ldb+irab+ilo-1]))
+		irab = bi.Idamax(n-ilo, a[i*lda+ilo:], 1)
+		rab = math.Abs(a[i*lda+irab+ilo])
+		irab = bi.Idamax(n-ilo, b[i*ldb+ilo:], 1)
+		rab = math.Max(rab, math.Abs(b[i*ldb+irab+ilo]))
 		lrab = int(math.Log10(rab+sfmin)/basl) + 1
 		ir = int(lscale[i] + math.Copysign(.5, lscale[i]))
 		ir = min(min(max(ir, lsfmin), lsfmax), lsfmax-lrab)
 		lscale[i] = math.Pow(sclfac, float64(ir))
 
-		icab = bi.Idamax(ihi, a[i:], lda)
+		icab = bi.Idamax(ihi+1, a[i:], lda)
 		cab = math.Abs(a[icab*lda+i])
-		icab = bi.Idamax(ihi, b[i:], ldb)
+		icab = bi.Idamax(ihi+1, b[i:], ldb)
 		cab = math.Max(cab, math.Abs(b[icab*ldb+i]))
 		lcab = int(math.Log10(cab+sfmin)/basl) + 1
 		jc = int(rscale[i] + math.Copysign(.5, rscale[i]))
@@ -333,14 +334,22 @@ End: // LABEL 350
 
 	// Row scaling of matrices A and B.
 	for i = ilo; i <= ihi; i++ {
-		bi.Dscal(n-ilo+1, lscale[i], a[i*lda+ilo:], 1)
-		bi.Dscal(n-ilo+1, lscale[i], b[i*ldb+ilo:], 1)
+		bi.Dscal(n-ilo, lscale[i], a[i*lda+ilo:], 1)
+		bi.Dscal(n-ilo, lscale[i], b[i*ldb+ilo:], 1)
 	}
 
 	// Column scaling of matrices A and B.
 	for j = ilo; j <= ihi; j++ {
-		bi.Dscal(ihi, rscale[j], a[j:], lda)
-		bi.Dscal(ihi, rscale[j], b[j:], ldb)
+		bi.Dscal(ihi+1, rscale[j], a[j:], lda)
+		bi.Dscal(ihi+1, rscale[j], b[j:], ldb)
 	}
 	return ilo, ihi
+}
+
+func column(z []float64, ldz, j, m int) []float64 {
+	v := make([]float64, m)
+	for i := range v {
+		v[i] = z[i*ldz+j]
+	}
+	return v
 }

@@ -115,7 +115,7 @@ func (impl Implementation) Dtgsyl(trans blas.Transpose, ijob, m, n int, a []floa
 	} else if notran && ijob >= 1 {
 		isolve = 2
 	}
-
+	ldw := n
 	var pq int
 	if (mb <= 1 && nb <= 1) || (mb >= m && nb >= n) {
 		for iround := 1; iround <= isolve; iround++ {
@@ -137,14 +137,14 @@ func (impl Implementation) Dtgsyl(trans blas.Transpose, ijob, m, n int, a []floa
 				if notran {
 					ifunc = ijob
 				}
-				impl.Dlacpy(blas.All, m, n, c, ldc, work, m)
-				impl.Dlacpy(blas.All, m, n, f, ldf, work[m*n:], m)
+				impl.Dlacpy(blas.All, m, n, c, ldc, work, ldw)
+				impl.Dlacpy(blas.All, m, n, f, ldf, work[m*n:], ldw)
 				impl.Dlaset(blas.All, m, n, 0, 0, c, ldc)
 				impl.Dlaset(blas.All, m, n, 0, 0, f, ldf)
 			} else if isolve == 2 && iround == 2 {
 				// scaleOut = scale2 // scale2 is undefined?
-				impl.Dlacpy(blas.All, m, n, work, m, c, ldc)
-				impl.Dlacpy(blas.All, m, n, work[m*n:], m, f, ldf)
+				impl.Dlacpy(blas.All, m, n, work, ldw, c, ldc)
+				impl.Dlacpy(blas.All, m, n, work[m*n:], ldw, f, ldf)
 			}
 		}
 		// End of unblocked level 2 solver.
@@ -195,20 +195,20 @@ func (impl Implementation) Dtgsyl(trans blas.Transpose, ijob, m, n int, a []floa
 					pq = pq + ppqq
 					if scaloc != 1 {
 						for k := 0; k <= js-1; k++ {
-							bi.Dscal(m, scaloc, c[k:], 1)
-							bi.Dscal(m, scaloc, f[k:], 1)
+							bi.Dscal(m, scaloc, c[k:], ldc)
+							bi.Dscal(m, scaloc, f[k:], ldf)
 						}
 						for k := js; k <= je; k++ {
-							bi.Dscal(is, scaloc, c[k:], 1)
-							bi.Dscal(is, scaloc, f[k:], 1)
+							bi.Dscal(is, scaloc, c[k:], ldc)
+							bi.Dscal(is, scaloc, f[k:], ldf)
 						}
 						for k := js; k <= je; k++ {
-							bi.Dscal(m-ie-1, scaloc, c[(ie+1)*ldc+k:], 1)
-							bi.Dscal(m-ie-1, scaloc, f[(ie+1)*ldf+k:], 1)
+							bi.Dscal(m-ie-1, scaloc, c[(ie+1)*ldc+k:], ldc)
+							bi.Dscal(m-ie-1, scaloc, f[(ie+1)*ldf+k:], ldf)
 						}
 						for k := je + 1; k < n; k++ {
-							bi.Dscal(m, scaloc, c[k:], 1)
-							bi.Dscal(m, scaloc, f[k:], 1)
+							bi.Dscal(m, scaloc, c[k:], ldc)
+							bi.Dscal(m, scaloc, f[k:], ldf)
 						}
 						scaleOut *= scaloc
 					}
@@ -243,14 +243,14 @@ func (impl Implementation) Dtgsyl(trans blas.Transpose, ijob, m, n int, a []floa
 					ifunc = ijob
 				}
 				scale2 = scaleOut
-				impl.Dlacpy(blas.All, m, n, c, ldc, work, m)
-				impl.Dlacpy(blas.All, m, n, f, ldf, work[m*n:], m)
+				impl.Dlacpy(blas.All, m, n, c, ldc, work, ldw)
+				impl.Dlacpy(blas.All, m, n, f, ldf, work[m*n:], ldw)
 				impl.Dlaset(blas.All, m, n, 0, 0, c, ldc)
 				impl.Dlaset(blas.All, m, n, 0, 0, f, ldf)
 			} else if isolve == 2 && iround == 2 {
 				scaleOut = scale2
-				impl.Dlacpy(blas.All, m, n, work, m, c, ldc)
-				impl.Dlacpy(blas.All, m, n, work[m*n:], m, f, ldf)
+				impl.Dlacpy(blas.All, m, n, work, ldw, c, ldc)
+				impl.Dlacpy(blas.All, m, n, work[m*n:], ldw, f, ldf)
 			}
 		}
 		work[0] = float64(lwmin)
@@ -279,20 +279,20 @@ func (impl Implementation) Dtgsyl(trans blas.Transpose, ijob, m, n int, a []floa
 			}
 			if scaloc != 1 {
 				for k := 0; k <= js-1; k++ {
-					bi.Dscal(m, scaloc, c[k:], 1)
-					bi.Dscal(m, scaloc, f[k:], 1)
+					bi.Dscal(m, scaloc, c[k:], ldc)
+					bi.Dscal(m, scaloc, f[k:], ldf)
 				}
 				for k := js; k <= je; k++ {
-					bi.Dscal(is, scaloc, c[k:], 1)
-					bi.Dscal(is, scaloc, f[k:], 1)
+					bi.Dscal(is, scaloc, c[k:], ldc)
+					bi.Dscal(is, scaloc, f[k:], ldf)
 				}
 				for k := js; k <= je; k++ {
-					bi.Dscal(m-ie-1, scaloc, c[(ie+1)*ldc+k:], 1)
-					bi.Dscal(m-ie-1, scaloc, f[(ie+1)*ldf+k:], 1)
+					bi.Dscal(m-ie-1, scaloc, c[(ie+1)*ldc+k:], ldc)
+					bi.Dscal(m-ie-1, scaloc, f[(ie+1)*ldf+k:], ldf)
 				}
 				for k := je + 1; k < n; k++ {
-					bi.Dscal(m, scaloc, c[k:], 1)
-					bi.Dscal(m, scaloc, f[k:], 1)
+					bi.Dscal(m, scaloc, c[k:], ldc)
+					bi.Dscal(m, scaloc, f[k:], ldf)
 				}
 				scaleOut *= scaloc
 			}

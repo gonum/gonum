@@ -17,6 +17,8 @@ import (
 // The higher-precision values in vc26 were used to derive the
 // input arguments vc (see also comment below). For reference
 // only (do not delete).
+//
+//lint:ignore U1000 See comment above.
 var vc26 = []complex64{
 	(4.97901192488367350108546816 + 7.73887247457810456552351752i),
 	(7.73887247457810456552351752 - 0.27688005719200159404635997i),

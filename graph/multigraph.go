@@ -177,7 +177,7 @@ type WeightedMultigraphBuilder interface {
 	WeightedLineAdder
 }
 
-// UndirectedMultgraphBuilder is an undirected multigraph builder.
+// UndirectedMultigraphBuilder is an undirected multigraph builder.
 type UndirectedMultigraphBuilder interface {
 	UndirectedMultigraph
 	MultigraphBuilder

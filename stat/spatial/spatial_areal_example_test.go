@@ -13,7 +13,7 @@ import (
 	"gonum.org/v1/gonum/stat/spatial"
 )
 
-// Euclid is a mat.Matrix whose elements refects the Euclidean
+// Euclid is a mat.Matrix whose elements reflects the Euclidean
 // distance between a series of unit-separated points strided
 // to be arranged in an x by y grid.
 type Euclid struct{ x, y int }

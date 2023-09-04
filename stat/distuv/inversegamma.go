@@ -18,7 +18,8 @@ import (
 // of a gamma distributed random variable.
 //
 // The inverse gamma distribution has density function
-//  β^α / Γ(α) x^(-α-1)e^(-β/x)
+//
+//	β^α / Γ(α) x^(-α-1)e^(-β/x)
 //
 // For more information, see https://en.wikipedia.org/wiki/Inverse-gamma_distribution
 type InverseGamma struct {

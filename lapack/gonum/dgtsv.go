@@ -7,7 +7,9 @@ package gonum
 import "math"
 
 // Dgtsv solves the equation
-//  A * X = B
+//
+//	A * X = B
+//
 // where A is an n×n tridiagonal matrix. It uses Gaussian elimination with
 // partial pivoting. The equation Aᵀ * X = B may be solved by swapping the
 // arguments for du and dl.
@@ -20,7 +22,7 @@ import "math"
 // On entry, b contains the n×nrhs right-hand side matrix B. On return, b will
 // be overwritten. If ok is true, it will be overwritten by the solution matrix X.
 //
-// Dgtsv returns whether the solution X has been successfuly computed.
+// Dgtsv returns whether the solution X has been successfully computed.
 func (impl Implementation) Dgtsv(n, nrhs int, dl, d, du []float64, b []float64, ldb int) (ok bool) {
 	switch {
 	case n < 0:

@@ -9,15 +9,19 @@ import (
 )
 
 // EllipticRF computes the symmetric elliptic integral R_F(x,y,z):
-//  R_F(x,y,z) = (1/2)\int_{0}^{\infty}{1/s(t)} dt,
-//  s(t) = \sqrt{(t+x)(t+y)(t+z)}.
+//
+//	R_F(x,y,z) = (1/2)\int_{0}^{\infty}{1/s(t)} dt,
+//	s(t) = \sqrt{(t+x)(t+y)(t+z)}.
 //
 // The arguments x, y, z must satisfy the following conditions, otherwise the function returns math.NaN():
-//  0 ≤ x,y,z ≤ upper,
-//  lower ≤ x+y,y+z,z+x,
+//
+//	0 ≤ x,y,z ≤ upper,
+//	lower ≤ x+y,y+z,z+x,
+//
 // where:
-//  lower = 5/(2^1022) = 1.112536929253601e-307,
-//  upper = (2^1022)/5 = 8.988465674311580e+306.
+//
+//	lower = 5/(2^1022) = 1.112536929253601e-307,
+//	upper = (2^1022)/5 = 8.988465674311580e+306.
 //
 // The definition of the symmetric elliptic integral R_F can be found in NIST
 // Digital Library of Mathematical Functions (http://dlmf.nist.gov/19.16.E1).
@@ -67,16 +71,20 @@ func EllipticRF(x, y, z float64) float64 {
 }
 
 // EllipticRD computes the symmetric elliptic integral R_D(x,y,z):
-//  R_D(x,y,z) = (1/2)\int_{0}^{\infty}{1/(s(t)(t+z))} dt,
-//  s(t) = \sqrt{(t+x)(t+y)(t+z)}.
+//
+//	R_D(x,y,z) = (1/2)\int_{0}^{\infty}{1/(s(t)(t+z))} dt,
+//	s(t) = \sqrt{(t+x)(t+y)(t+z)}.
 //
 // The arguments x, y, z must satisfy the following conditions, otherwise the function returns math.NaN():
-//  0 ≤ x,y ≤ upper,
-//  lower ≤ z ≤ upper,
-//  lower ≤ x+y,
+//
+//	0 ≤ x,y ≤ upper,
+//	lower ≤ z ≤ upper,
+//	lower ≤ x+y,
+//
 // where:
-//  lower = (5/(2^1022))^(1/3) = 4.809554074311679e-103,
-//  upper = ((2^1022)/5)^(1/3) = 2.079194837087086e+102.
+//
+//	lower = (5/(2^1022))^(1/3) = 4.809554074311679e-103,
+//	upper = ((2^1022)/5)^(1/3) = 2.079194837087086e+102.
 //
 // The definition of the symmetric elliptic integral R_D can be found in NIST
 // Digital Library of Mathematical Functions (http://dlmf.nist.gov/19.16.E5).
@@ -129,10 +137,12 @@ func EllipticRD(x, y, z float64) float64 {
 }
 
 // EllipticF computes the Legendre's elliptic integral of the 1st kind F(phi,m), 0≤m<1:
-//  F(\phi,m) = \int_{0}^{\phi} 1 / \sqrt{1-m\sin^2(\theta)} d\theta
+//
+//	F(\phi,m) = \int_{0}^{\phi} 1 / \sqrt{1-m\sin^2(\theta)} d\theta
 //
 // Legendre's elliptic integrals can be expressed as symmetric elliptic integrals, in this case:
-//  F(\phi,m) = \sin\phi R_F(\cos^2\phi,1-m\sin^2\phi,1)
+//
+//	F(\phi,m) = \sin\phi R_F(\cos^2\phi,1-m\sin^2\phi,1)
 //
 // The definition of F(phi,k) where k=sqrt(m) can be found in NIST Digital Library of Mathematical
 // Functions (http://dlmf.nist.gov/19.2.E4).
@@ -142,10 +152,12 @@ func EllipticF(phi, m float64) float64 {
 }
 
 // EllipticE computes the Legendre's elliptic integral of the 2nd kind E(phi,m), 0≤m<1:
-//  E(\phi,m) = \int_{0}^{\phi} \sqrt{1-m\sin^2(\theta)} d\theta
+//
+//	E(\phi,m) = \int_{0}^{\phi} \sqrt{1-m\sin^2(\theta)} d\theta
 //
 // Legendre's elliptic integrals can be expressed as symmetric elliptic integrals, in this case:
-//  E(\phi,m) = \sin\phi R_F(\cos^2\phi,1-m\sin^2\phi,1)-(m/3)\sin^3\phi R_D(\cos^2\phi,1-m\sin^2\phi,1)
+//
+//	E(\phi,m) = \sin\phi R_F(\cos^2\phi,1-m\sin^2\phi,1)-(m/3)\sin^3\phi R_D(\cos^2\phi,1-m\sin^2\phi,1)
 //
 // The definition of E(phi,k) where k=sqrt(m) can be found in NIST Digital Library of Mathematical
 // Functions (http://dlmf.nist.gov/19.2.E5).

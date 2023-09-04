@@ -19,9 +19,13 @@ import (
 // quasi-triangular, although this is not checked.
 //
 // It must hold that
-//  0 <= ilo <= max(0,ihi), and ihi < n,
+//
+//	0 <= ilo <= max(0,ihi), and ihi < n,
+//
 // and that
-//  H[ilo,ilo-1] == 0,  if ilo > 0,
+//
+//	H[ilo,ilo-1] == 0,  if ilo > 0,
+//
 // otherwise Dlahqr will panic.
 //
 // If unconverged is zero on return, wr[ilo:ihi+1] and wi[ilo:ihi+1] will contain
@@ -37,7 +41,9 @@ import (
 //
 // z and ldz represent an n×n matrix Z. If wantz is true, the transformations
 // will be applied to the submatrix Z[iloz:ihiz+1,ilo:ihi+1] and it must hold that
-//  0 <= iloz <= ilo, and ihi <= ihiz < n.
+//
+//	0 <= iloz <= ilo, and ihi <= ihiz < n.
+//
 // If wantz is false, z is not referenced.
 //
 // unconverged indicates whether Dlahqr computed all the eigenvalues ilo to ihi
@@ -58,7 +64,9 @@ import (
 // which have been successfully computed.
 //
 // If unconverged is positive and wantt is true, then on return
-//  (initial H)*U = U*(final H),   (*)
+//
+//	(initial H)*U = U*(final H),   (*)
+//
 // where U is an orthogonal matrix. The final H is upper Hessenberg and
 // H[unconverged:ihi+1,unconverged:ihi+1] is upper quasi-triangular.
 //
@@ -67,7 +75,9 @@ import (
 // H[ilo:unconverged,ilo:unconverged].
 //
 // If unconverged is positive and wantz is true, then on return
-//  (final Z) = (initial Z)*U,
+//
+//	(final Z) = (initial Z)*U,
+//
 // where U is the orthogonal matrix in (*) regardless of the value of wantt.
 //
 // Dlahqr is an internal routine. It is exported for testing purposes.
@@ -140,6 +150,9 @@ func (impl Implementation) Dlahqr(wantt, wantz bool, n, ilo, ihi int, h []float6
 
 	itmax := 30 * max(10, nh) // Total number of QR iterations allowed.
 
+	// kdefl counts the number of iterations since a deflation.
+	kdefl := 0
+
 	// The main loop begins here. i is the loop index and decreases from ihi
 	// to ilo in steps of 1 or 2. Each iteration of the loop works with the
 	// active submatrix in rows and columns l to i. Eigenvalues i+1 to ihi
@@ -197,6 +210,7 @@ func (impl Implementation) Dlahqr(wantt, wantz bool, n, ilo, ihi int, h []float6
 				converged = true
 				break
 			}
+			kdefl++
 
 			// Now the active submatrix is in rows and columns l to
 			// i. If eigenvalues only are being computed, only the
@@ -207,20 +221,21 @@ func (impl Implementation) Dlahqr(wantt, wantz bool, n, ilo, ihi int, h []float6
 			}
 
 			const (
-				dat1 = 3.0
-				dat2 = -0.4375
+				dat1  = 0.75
+				dat2  = -0.4375
+				kexsh = 10
 			)
 			var h11, h21, h12, h22 float64
-			switch its {
-			case 10: // Exceptional shift.
-				s := math.Abs(h[(l+1)*ldh+l]) + math.Abs(h[(l+2)*ldh+l+1])
-				h11 = dat1*s + h[l*ldh+l]
+			switch {
+			case kdefl%(2*kexsh) == 0: // Exceptional shift.
+				s := math.Abs(h[i*ldh+i-1]) + math.Abs(h[(i-1)*ldh+i-2])
+				h11 = dat1*s + h[i*ldh+i]
 				h12 = dat2 * s
 				h21 = s
 				h22 = h11
-			case 20: // Exceptional shift.
-				s := math.Abs(h[i*ldh+i-1]) + math.Abs(h[(i-1)*ldh+i-2])
-				h11 = dat1*s + h[i*ldh+i]
+			case kdefl%kexsh == 0: // Exceptional shift.
+				s := math.Abs(h[(l+1)*ldh+l]) + math.Abs(h[(l+2)*ldh+l+1])
+				h11 = dat1*s + h[l*ldh+l]
 				h12 = dat2 * s
 				h21 = s
 				h22 = h11
@@ -423,6 +438,9 @@ func (impl Implementation) Dlahqr(wantt, wantz bool, n, ilo, ihi int, h []float6
 				bi.Drot(nz, z[iloz*ldz+i-1:], ldz, z[iloz*ldz+i:], ldz, cs, sn)
 			}
 		}
+
+		// Reset deflation counter.
+		kdefl = 0
 
 		// Return to start of the main loop with new value of i.
 		i = l - 1

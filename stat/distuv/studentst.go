@@ -18,7 +18,8 @@ const logPi = 1.1447298858494001741 // http://oeis.org/A053510
 // over the real numbers.
 //
 // The Student's T distribution has density function
-//  Γ((ν+1)/2) / (sqrt(νπ) Γ(ν/2) σ) (1 + 1/ν * ((x-μ)/σ)^2)^(-(ν+1)/2)
+//
+//	Γ((ν+1)/2) / (sqrt(νπ) Γ(ν/2) σ) (1 + 1/ν * ((x-μ)/σ)^2)^(-(ν+1)/2)
 //
 // The Student's T distribution approaches the normal distribution as ν → ∞.
 //
@@ -35,7 +36,7 @@ type StudentsT struct {
 	// standard deviation by std = Sigma * sqrt(Nu/(Nu-2))
 	Sigma float64
 
-	// Nu is the shape prameter of the distribution, representing the number of
+	// Nu is the shape parameter of the distribution, representing the number of
 	// degrees of the distribution, and one less than the number of observations
 	// from a Normal distribution.
 	Nu float64

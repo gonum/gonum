@@ -413,7 +413,7 @@ func Cond(a Matrix, norm float64) float64 {
 	return lq.Cond()
 }
 
-// Det returns the determinant of the quare matrix a. In many expressions using
+// Det returns the determinant of the square matrix a. In many expressions using
 // LogDet will be more numerically stable.
 //
 // Det panics with ErrSquare if a is not square and with ErrZeroLength if a has
@@ -757,17 +757,19 @@ func Min(a Matrix) float64 {
 }
 
 // A Normer can compute a norm of the matrix. Valid norms are:
-//  1 - The maximum absolute column sum
-//  2 - The Frobenius norm, the square root of the sum of the squares of the elements
-//  Inf - The maximum absolute row sum
+//
+//	1 - The maximum absolute column sum
+//	2 - The Frobenius norm, the square root of the sum of the squares of the elements
+//	Inf - The maximum absolute row sum
 type Normer interface {
 	Norm(norm float64) float64
 }
 
 // Norm returns the specified norm of the matrix A. Valid norms are:
-//  1 - The maximum absolute column sum
-//  2 - The Frobenius norm, the square root of the sum of the squares of the elements
-//  Inf - The maximum absolute row sum
+//
+//	1 - The maximum absolute column sum
+//	2 - The Frobenius norm, the square root of the sum of the squares of the elements
+//	Inf - The maximum absolute row sum
 //
 // If a is a Normer, its Norm method will be used to calculate the norm.
 //

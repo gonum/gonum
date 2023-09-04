@@ -170,8 +170,10 @@ func (lq *LQ) QTo(dst *Dense) {
 // See the documentation for Condition for more information.
 //
 // The minimization problem solved depends on the input parameters.
-//  If trans == false, find the minimum norm solution of A * X = B.
-//  If trans == true, find X such that ||A*X - B||_2 is minimized.
+//
+//	If trans == false, find the minimum norm solution of A * X = B.
+//	If trans == true, find X such that ||A*X - B||_2 is minimized.
+//
 // The solution matrix, X, is stored in place into dst.
 // SolveTo will panic if the receiver does not contain a factorization.
 func (lq *LQ) SolveTo(dst *Dense, trans bool, b Matrix) error {

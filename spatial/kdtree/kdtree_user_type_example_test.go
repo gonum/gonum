@@ -91,8 +91,9 @@ type place struct {
 
 // Compare satisfies the axis comparisons method of the kdtree.Comparable interface.
 // The dimensions are:
-//  0 = lat
-//  1 = lon
+//
+//	0 = lat
+//	1 = lon
 func (p place) Compare(c kdtree.Comparable, d kdtree.Dim) float64 {
 	q := c.(place)
 	switch d {

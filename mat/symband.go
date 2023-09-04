@@ -67,19 +67,23 @@ type RawSymBander interface {
 // The data must be arranged in row-major order constructed by removing the zeros
 // from the rows outside the band and aligning the diagonals. SymBandDense matrices
 // are stored in the upper triangle. For example, the matrix
-//    1  2  3  0  0  0
-//    2  4  5  6  0  0
-//    3  5  7  8  9  0
-//    0  6  8 10 11 12
-//    0  0  9 11 13 14
-//    0  0  0 12 14 15
+//
+//	1  2  3  0  0  0
+//	2  4  5  6  0  0
+//	3  5  7  8  9  0
+//	0  6  8 10 11 12
+//	0  0  9 11 13 14
+//	0  0  0 12 14 15
+//
 // becomes (* entries are never accessed)
-//     1  2  3
-//     4  5  6
-//     7  8  9
-//    10 11 12
-//    13 14  *
-//    15  *  *
+//
+//	 1  2  3
+//	 4  5  6
+//	 7  8  9
+//	10 11 12
+//	13 14  *
+//	15  *  *
+//
 // which is passed to NewSymBandDense as []float64{1, 2, ..., 15, *, *, *} with k=2.
 // Only the values in the band portion of the matrix are used.
 func NewSymBandDense(n, k int, data []float64) *SymBandDense {
@@ -245,9 +249,10 @@ func (s *SymBandDense) DoColNonZero(j int, fn func(i, j int, v float64)) {
 }
 
 // Norm returns the specified norm of the receiver. Valid norms are:
-//  1 - The maximum absolute column sum
-//  2 - The Frobenius norm, the square root of the sum of the squares of the elements
-//  Inf - The maximum absolute row sum
+//
+//	1 - The maximum absolute column sum
+//	2 - The Frobenius norm, the square root of the sum of the squares of the elements
+//	Inf - The maximum absolute row sum
 //
 // Norm will panic with ErrNormOrder if an illegal norm is specified and with
 // ErrZeroLength if the matrix has zero size.

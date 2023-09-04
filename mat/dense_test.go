@@ -520,7 +520,7 @@ func TestDenseAdd(t *testing.T) {
 		temp.mat.Data = nil
 		panicked, message := panics(func() { temp.Add(a, b) })
 		if !panicked || !strings.HasPrefix(message, "runtime error: index out of range") {
-			t.Error("exected runtime panic for nil data slice")
+			t.Error("expected runtime panic for nil data slice")
 		}
 
 		a.Add(a, b)
@@ -608,7 +608,7 @@ func TestDenseSub(t *testing.T) {
 		temp.mat.Data = nil
 		panicked, message := panics(func() { temp.Sub(a, b) })
 		if !panicked || !strings.HasPrefix(message, "runtime error: index out of range") {
-			t.Error("exected runtime panic for nil data slice")
+			t.Error("expected runtime panic for nil data slice")
 		}
 
 		a.Sub(a, b)
@@ -696,7 +696,7 @@ func TestDenseMulElem(t *testing.T) {
 		temp.mat.Data = nil
 		panicked, message := panics(func() { temp.MulElem(a, b) })
 		if !panicked || !strings.HasPrefix(message, "runtime error: index out of range") {
-			t.Error("exected runtime panic for nil data slice")
+			t.Error("expected runtime panic for nil data slice")
 		}
 
 		a.MulElem(a, b)
@@ -800,7 +800,7 @@ func TestDenseDivElem(t *testing.T) {
 		temp.mat.Data = nil
 		panicked, message := panics(func() { temp.DivElem(a, b) })
 		if !panicked || !strings.HasPrefix(message, "runtime error: index out of range") {
-			t.Error("exected runtime panic for nil data slice")
+			t.Error("expected runtime panic for nil data slice")
 		}
 
 		a.DivElem(a, b)

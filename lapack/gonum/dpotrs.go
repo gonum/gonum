@@ -12,8 +12,10 @@ import (
 // Dpotrs solves a system of n linear equations A*X = B where A is an n×n
 // symmetric positive definite matrix and B is an n×nrhs matrix. The matrix A is
 // represented by its Cholesky factorization
-//  A = Uᵀ*U  if uplo == blas.Upper
-//  A = L*Lᵀ  if uplo == blas.Lower
+//
+//	A = Uᵀ*U  if uplo == blas.Upper
+//	A = L*Lᵀ  if uplo == blas.Lower
+//
 // as computed by Dpotrf. On entry, B contains the right-hand side matrix B, on
 // return it contains the solution matrix X.
 func (Implementation) Dpotrs(uplo blas.Uplo, n, nrhs int, a []float64, lda int, b []float64, ldb int) {

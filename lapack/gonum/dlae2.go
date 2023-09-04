@@ -7,8 +7,10 @@ package gonum
 import "math"
 
 // Dlae2 computes the eigenvalues of a 2×2 symmetric matrix
-//  [a b]
-//  [b c]
+//
+//	[a b]
+//	[b c]
+//
 // and returns the eigenvalue with the larger absolute value as rt1 and the
 // smaller as rt2.
 //

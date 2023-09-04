@@ -14,20 +14,23 @@ import "math"
 // The Gaussian window is an adjustable window.
 //
 // The sequence weights are
-//  w[k] = exp(-0.5 * ((k-M)/(σ*M))² ), M = (N-1)/2,
+//
+//	w[k] = exp(-0.5 * ((k-M)/(σ*M))² ), M = (N-1)/2,
+//
 // for k=0,1,...,N-1 where N is the length of the window.
 //
 // The properties of the window depend on the value of σ (sigma).
 // It can be used as high or low resolution window, depending of the σ value.
 //
 // Spectral leakage parameters are summarized in the table:
-//         |  σ=0.3  |  σ=0.5 |  σ=1.2 |
-//  -------|---------------------------|
-//  ΔF_0   |   8     |   3.4  |   2.2  |
-//  ΔF_0.5 |   1.82  |   1.2  |   0.94 |
-//  K      |   4     |   1.7  |   1.1  |
-//  ɣ_max  | -65     | -31.5  | -15.5  |
-//  β      |  -8.52  |  -4.48 |  -0.96 |
+//
+//	       |  σ=0.3  |  σ=0.5 |  σ=1.2 |
+//	-------|---------------------------|
+//	ΔF_0   |   8     |   3.4  |   2.2  |
+//	ΔF_0.5 |   1.82  |   1.2  |   0.94 |
+//	K      |   4     |   1.7  |   1.1  |
+//	ɣ_max  | -65     | -31.5  | -15.5  |
+//	β      |  -8.52  |  -4.48 |  -0.96 |
 type Gaussian struct {
 	Sigma float64
 }
@@ -63,18 +66,21 @@ func (g Gaussian) TransformComplex(seq []complex128) []complex128 {
 // The Tukey window is an adjustable window.
 //
 // The sequence weights are
-//  w[k] = 0.5 * (1 + cos(π*(|k - M| - αM)/((1-α) * M))), |k - M| ≥ αM
-//       = 1, |k - M| < αM
+//
+//	w[k] = 0.5 * (1 + cos(π*(|k - M| - αM)/((1-α) * M))), |k - M| ≥ αM
+//	     = 1, |k - M| < αM
+//
 // with M = (N - 1)/2 for k=0,1,...,N-1 where N is the length of the window.
 //
 // Spectral leakage parameters are summarized in the table:
-//         |  α=0.3 |  α=0.5 |  α=0.7 |
-//  -------|--------------------------|
-//  ΔF_0   |   1.33 |   1.22 |   1.13 |
-//  ΔF_0.5 |   1.28 |   1.16 |   1.04 |
-//  K      |   0.67 |   0.61 |   0.57 |
-//  ɣ_max  | -18.2  | -15.1  | -13.8  |
-//  β      |  -1.41 |  -2.50 |  -3.74 |
+//
+//	       |  α=0.3 |  α=0.5 |  α=0.7 |
+//	-------|--------------------------|
+//	ΔF_0   |   1.33 |   1.22 |   1.13 |
+//	ΔF_0.5 |   1.28 |   1.16 |   1.04 |
+//	K      |   0.67 |   0.61 |   0.57 |
+//	ɣ_max  | -18.2  | -15.1  | -13.8  |
+//	β      |  -1.41 |  -2.50 |  -3.74 |
 type Tukey struct {
 	Alpha float64
 }

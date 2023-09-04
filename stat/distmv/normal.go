@@ -19,7 +19,9 @@ const badInputLength = "distmv: input slice length mismatch"
 
 // Normal is a multivariate normal distribution (also known as the multivariate
 // Gaussian distribution). Its pdf in k dimensions is given by
-//  (2 π)^(-k/2) |Σ|^(-1/2) exp(-1/2 (x-μ)'Σ^-1(x-μ))
+//
+//	(2 π)^(-k/2) |Σ|^(-1/2) exp(-1/2 (x-μ)'Σ^-1(x-μ))
+//
 // where μ is the mean vector and Σ the covariance matrix. Σ must be symmetric
 // and positive definite. Use NewNormal to construct.
 type Normal struct {
@@ -97,7 +99,7 @@ func NewNormalPrecision(mu []float64, prec *mat.SymDense, src rand.Source) (norm
 	if dim != len(mu) {
 		panic(badSizeMismatch)
 	}
-	// TODO(btracey): Computing a matrix inverse is generally numerically instable.
+	// TODO(btracey): Computing a matrix inverse is generally numerically unstable.
 	// This only has to compute the inverse of a positive definite matrix, which
 	// is much better, but this still loses precision. It is worth considering if
 	// instead the precision matrix should be stored explicitly and used instead
@@ -119,8 +121,10 @@ func NewNormalPrecision(mu []float64, prec *mat.SymDense, src rand.Source) (norm
 // on the input evidence. The returned multivariate normal has dimension
 // n - len(observed), where n is the dimension of the original receiver. The updated
 // mean and covariance are
-//  mu = mu_un + sigma_{ob,un}ᵀ * sigma_{ob,ob}^-1 (v - mu_ob)
-//  sigma = sigma_{un,un} - sigma_{ob,un}ᵀ * sigma_{ob,ob}^-1 * sigma_{ob,un}
+//
+//	mu = mu_un + sigma_{ob,un}ᵀ * sigma_{ob,ob}^-1 (v - mu_ob)
+//	sigma = sigma_{un,un} - sigma_{ob,un}ᵀ * sigma_{ob,ob}^-1 * sigma_{ob,un}
+//
 // where mu_un and mu_ob are the original means of the unobserved and observed
 // variables respectively, sigma_{un,un} is the unobserved subset of the covariance
 // matrix, sigma_{ob,ob} is the observed subset of the covariance matrix, and
@@ -154,7 +158,9 @@ func (n *Normal) ConditionNormal(observed []int, values []float64, src rand.Sour
 // CovarianceMatrix stores the covariance matrix of the distribution in dst.
 // Upon return, the value at element {i, j} of the covariance matrix is equal
 // to the covariance of the i^th and j^th variables.
-//  covariance(i, j) = E[(x_i - E[x_i])(x_j - E[x_j])]
+//
+//	covariance(i, j) = E[(x_i - E[x_i])(x_j - E[x_j])]
+//
 // If the dst matrix is empty it will be resized to the correct dimensions,
 // otherwise dst must match the dimension of the receiver or CovarianceMatrix
 // will panic.
@@ -215,7 +221,9 @@ func normalLogProb(x, mu []float64, chol *mat.Cholesky, logSqrtDet float64) floa
 
 // MarginalNormal returns the marginal distribution of the given input variables.
 // That is, MarginalNormal returns
-//  p(x_i) = \int_{x_o} p(x_i | x_o) p(x_o) dx_o
+//
+//	p(x_i) = \int_{x_o} p(x_i | x_o) p(x_o) dx_o
+//
 // where x_i are the dimensions in the input, and x_o are the remaining dimensions.
 // See https://en.wikipedia.org/wiki/Marginal_distribution for more information.
 //
@@ -232,7 +240,9 @@ func (n *Normal) MarginalNormal(vars []int, src rand.Source) (*Normal, bool) {
 
 // MarginalNormalSingle returns the marginal of the given input variable.
 // That is, MarginalNormal returns
-//  p(x_i) = \int_{x_¬i} p(x_i | x_¬i) p(x_¬i) dx_¬i
+//
+//	p(x_i) = \int_{x_¬i} p(x_i | x_¬i) p(x_¬i) dx_¬i
+//
 // where i is the input index.
 // See https://en.wikipedia.org/wiki/Marginal_distribution for more information.
 //
@@ -320,7 +330,9 @@ func NormalRand(x, mean []float64, chol *mat.Cholesky, src rand.Source) []float6
 
 // ScoreInput returns the gradient of the log-probability with respect to the
 // input x. That is, ScoreInput computes
-//  ∇_x log(p(x))
+//
+//	∇_x log(p(x))
+//
 // If score is nil, a new slice will be allocated and returned. If score is of
 // length the dimension of Normal, then the result will be put in-place into score.
 // If neither of these is true, ScoreInput will panic.

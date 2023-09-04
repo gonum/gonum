@@ -9,7 +9,8 @@ import (
 )
 
 // Ddot computes the dot product of the two vectors
-//  \sum_i x[i]*y[i]
+//
+//	\sum_i x[i]*y[i]
 func (Implementation) Ddot(n int, x []float64, incX int, y []float64, incY int) float64 {
 	if incX == 0 {
 		panic(zeroIncX)

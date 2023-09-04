@@ -10,7 +10,9 @@ import (
 )
 
 // Dgerqf computes an RQ factorization of the m×n matrix A,
-//  A = R * Q.
+//
+//	A = R * Q.
+//
 // On exit, if m <= n, the upper triangle of the subarray
 // A[0:m, n-m:n] contains the m×m upper triangular matrix R.
 // If m >= n, the elements on and above the (m-n)-th subdiagonal
@@ -20,9 +22,13 @@ import (
 // reflectors.
 //
 // The matrix Q is represented as a product of elementary reflectors
-//  Q = H_0 H_1 . . . H_{min(m,n)-1}.
+//
+//	Q = H_0 H_1 . . . H_{min(m,n)-1}.
+//
 // Each H(i) has the form
-//  H_i = I - tau_i * v * vᵀ
+//
+//	H_i = I - tau_i * v * vᵀ
+//
 // where v is a vector with v[0:n-k+i-1] stored in A[m-k+i, 0:n-k+i-1],
 // v[n-k+i:n] = 0 and v[n-k+i] = 1.
 //

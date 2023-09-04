@@ -57,7 +57,9 @@ func (svd *SVD) succFact() bool {
 //
 // The full singular value decomposition (kind == SVDFull) is a factorization
 // of an m×n matrix A of the form
-//  A = U * Σ * Vᵀ
+//
+//	A = U * Σ * Vᵀ
+//
 // where Σ is an m×n diagonal matrix, U is an m×m orthogonal matrix, and V is an
 // n×n orthogonal matrix. The diagonal elements of Σ are the singular values of A.
 // The first min(m,n) columns of U and V are, respectively, the left and right
@@ -66,7 +68,9 @@ func (svd *SVD) succFact() bool {
 // Significant storage space can be saved by using the thin representation of
 // the SVD (kind == SVDThin) instead of the full SVD, especially if
 // m >> n or m << n. The thin SVD finds
-//  A = U~ * Σ * V~ᵀ
+//
+//	A = U~ * Σ * V~ᵀ
+//
 // where U~ is of size m×min(m,n), Σ is a diagonal matrix of size min(m,n)×min(m,n)
 // and V~ is of size n×min(m,n).
 //
@@ -273,10 +277,14 @@ func (svd *SVD) VTo(dst *Dense) {
 }
 
 // SolveTo calculates the minimum-norm solution to a linear least squares problem
-//  minimize over n-element vectors x: |b - A*x|_2 and |x|_2
+//
+//	minimize over n-element vectors x: |b - A*x|_2 and |x|_2
+//
 // where b is a given m-element vector, using the SVD of m×n matrix A stored in
 // the receiver. A may be rank-deficient, that is, the given effective rank can be
-//  rank ≤ min(m,n)
+//
+//	rank ≤ min(m,n)
+//
 // The rank can be computed using SVD.Rank.
 //
 // Several right-hand side vectors b and solution vectors x can be handled in a
@@ -353,10 +361,14 @@ func (m repVector) At(i, j int) float64 {
 func (m repVector) T() Matrix { return Transpose{m} }
 
 // SolveVecTo calculates the minimum-norm solution to a linear least squares problem
-//  minimize over n-element vectors x: |b - A*x|_2 and |x|_2
+//
+//	minimize over n-element vectors x: |b - A*x|_2 and |x|_2
+//
 // where b is a given m-element vector, using the SVD of m×n matrix A stored in
 // the receiver. A may be rank-deficient, that is, the given effective rank can be
-//  rank ≤ min(m,n)
+//
+//	rank ≤ min(m,n)
+//
 // The rank can be computed using SVD.Rank.
 //
 // The resulting vector x will be stored in dst. dst must be either empty or

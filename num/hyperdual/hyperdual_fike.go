@@ -33,6 +33,7 @@ import "math"
 // PowReal returns x**p, the base-x exponential of p.
 //
 // Special cases are (in order):
+//
 //	PowReal(NaN+xϵ₁+yϵ₂, ±0) = 1+NaNϵ₁+NaNϵ₂+NaNϵ₁ϵ₂ for any x and y
 //	PowReal(x, ±0) = 1 for any x
 //	PowReal(1+xϵ₁+yϵ₂, z) = 1+xzϵ₁+yzϵ₂+2xyzϵ₁ϵ₂ for any z
@@ -86,6 +87,7 @@ func Pow(d, p Number) Number {
 // Sqrt returns the square root of d.
 //
 // Special cases are:
+//
 //	Sqrt(+Inf) = +Inf
 //	Sqrt(±0) = (±0+Infϵ₁+Infϵ₂-Infϵ₁ϵ₂)
 //	Sqrt(x < 0) = NaN
@@ -113,8 +115,10 @@ func Sqrt(d Number) Number {
 // Exp returns e**q, the base-e exponential of d.
 //
 // Special cases are:
+//
 //	Exp(+Inf) = +Inf
 //	Exp(NaN) = NaN
+//
 // Very large values overflow to 0 or +Inf.
 // Very small values underflow to 1.
 func Exp(d Number) Number {
@@ -130,6 +134,7 @@ func Exp(d Number) Number {
 // Log returns the natural logarithm of d.
 //
 // Special cases are:
+//
 //	Log(+Inf) = (+Inf+0ϵ₁+0ϵ₂-0ϵ₁ϵ₂)
 //	Log(0) = (-Inf±Infϵ₁±Infϵ₂-Infϵ₁ϵ₂)
 //	Log(x < 0) = NaN
@@ -172,6 +177,7 @@ func Log(d Number) Number {
 // Sin returns the sine of d.
 //
 // Special cases are:
+//
 //	Sin(±0) = (±0+Nϵ₁+Nϵ₂∓0ϵ₁ϵ₂)
 //	Sin(±Inf) = NaN
 //	Sin(NaN) = NaN
@@ -197,6 +203,7 @@ func Sin(d Number) Number {
 // Cos returns the cosine of d.
 //
 // Special cases are:
+//
 //	Cos(±Inf) = NaN
 //	Cos(NaN) = NaN
 func Cos(d Number) Number {
@@ -213,6 +220,7 @@ func Cos(d Number) Number {
 // Tan returns the tangent of d.
 //
 // Special cases are:
+//
 //	Tan(±0) = (±0+Nϵ₁+Nϵ₂±0ϵ₁ϵ₂)
 //	Tan(±Inf) = NaN
 //	Tan(NaN) = NaN
@@ -238,6 +246,7 @@ func Tan(d Number) Number {
 // Asin returns the inverse sine of d.
 //
 // Special cases are:
+//
 //	Asin(±0) = (±0+Nϵ₁+Nϵ₂±0ϵ₁ϵ₂)
 //	Asin(±1) = (±Inf+Infϵ₁+Infϵ₂±Infϵ₁ϵ₂)
 //	Asin(x) = NaN if x < -1 or x > 1
@@ -279,6 +288,7 @@ func Asin(d Number) Number {
 // Acos returns the inverse cosine of d.
 //
 // Special cases are:
+//
 //	Acos(-1) = (Pi-Infϵ₁-Infϵ₂+Infϵ₁ϵ₂)
 //	Acos(1) = (0-Infϵ₁-Infϵ₂-Infϵ₁ϵ₂)
 //	Acos(x) = NaN if x < -1 or x > 1
@@ -313,6 +323,7 @@ func Acos(d Number) Number {
 // Atan returns the inverse tangent of d.
 //
 // Special cases are:
+//
 //	Atan(±0) = (±0+Nϵ₁+Nϵ₂∓0ϵ₁ϵ₂)
 //	Atan(±Inf) = (±Pi/2+0ϵ₁+0ϵ₂∓0ϵ₁ϵ₂)
 func Atan(d Number) Number {

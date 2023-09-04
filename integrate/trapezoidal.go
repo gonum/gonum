@@ -7,18 +7,26 @@ package integrate
 import "sort"
 
 // Trapezoidal returns an approximate value of the integral
-//  \int_a^b f(x) dx
+//
+//	\int_a^b f(x) dx
+//
 // computed using the trapezoidal rule. The function f is given as a slice of
 // samples evaluated at locations in x, that is,
-//  f[i] = f(x[i]), x[0] = a, x[len(x)-1] = b
+//
+//	f[i] = f(x[i]), x[0] = a, x[len(x)-1] = b
+//
 // The slice x must be sorted in strictly increasing order. x and f must be of
 // equal length and the length must be at least 2.
 //
 // The trapezoidal rule approximates f by a piecewise linear function and
 // estimates
-//  \int_x[i]^x[i+1] f(x) dx
+//
+//	\int_x[i]^x[i+1] f(x) dx
+//
 // as
-//  (x[i+1] - x[i]) * (f[i] + f[i+1])/2
+//
+//	(x[i+1] - x[i]) * (f[i] + f[i+1])/2
+//
 // More details on the trapezoidal rule can be found at:
 // https://en.wikipedia.org/wiki/Trapezoidal_rule
 func Trapezoidal(x, f []float64) float64 {

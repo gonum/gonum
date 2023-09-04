@@ -28,138 +28,138 @@ var (
 	arch string
 )
 
-var isomapR2Tests = []struct {
-	name string
-	g    graph.Graph
-}{
-	{
-		name: "line_isomap",
-		g: func() graph.Graph {
-			edges := []simple.Edge{
-				{F: simple.Node(0), T: simple.Node(1)},
-			}
-			g := simple.NewUndirectedGraph()
-			for _, e := range edges {
-				g.SetEdge(e)
-			}
-			return orderedGraph{g}
-		}(),
-	},
-	{
-		name: "square_isomap",
-		g: func() graph.Graph {
-			edges := []simple.Edge{
-				{F: simple.Node(0), T: simple.Node(1)},
-				{F: simple.Node(0), T: simple.Node(2)},
-				{F: simple.Node(1), T: simple.Node(3)},
-				{F: simple.Node(2), T: simple.Node(3)},
-			}
-			g := simple.NewUndirectedGraph()
-			for _, e := range edges {
-				g.SetEdge(e)
-			}
-			return orderedGraph{g}
-		}(),
-	},
-	{
-		name: "tetrahedron_isomap",
-		g: func() graph.Graph {
-			edges := []simple.Edge{
-				{F: simple.Node(0), T: simple.Node(1)},
-				{F: simple.Node(0), T: simple.Node(2)},
-				{F: simple.Node(0), T: simple.Node(3)},
-				{F: simple.Node(1), T: simple.Node(2)},
-				{F: simple.Node(1), T: simple.Node(3)},
-				{F: simple.Node(2), T: simple.Node(3)},
-			}
-			g := simple.NewUndirectedGraph()
-			for _, e := range edges {
-				g.SetEdge(e)
-			}
-			return orderedGraph{g}
-		}(),
-	},
-	{
-		name: "sheet_isomap",
-		g: func() graph.Graph {
-			edges := []simple.Edge{
-				{F: simple.Node(0), T: simple.Node(1)},
-				{F: simple.Node(0), T: simple.Node(3)},
-				{F: simple.Node(1), T: simple.Node(2)},
-				{F: simple.Node(1), T: simple.Node(4)},
-				{F: simple.Node(2), T: simple.Node(5)},
-				{F: simple.Node(3), T: simple.Node(4)},
-				{F: simple.Node(3), T: simple.Node(6)},
-				{F: simple.Node(4), T: simple.Node(5)},
-				{F: simple.Node(4), T: simple.Node(7)},
-				{F: simple.Node(5), T: simple.Node(8)},
-				{F: simple.Node(6), T: simple.Node(7)},
-				{F: simple.Node(7), T: simple.Node(8)},
-			}
-			g := simple.NewUndirectedGraph()
-			for _, e := range edges {
-				g.SetEdge(e)
-			}
-			return orderedGraph{g}
-		}(),
-	},
-	{
-		name: "tube_isomap",
-		g: func() graph.Graph {
-			edges := []simple.Edge{
-				{F: simple.Node(0), T: simple.Node(1)},
-				{F: simple.Node(0), T: simple.Node(2)},
-				{F: simple.Node(0), T: simple.Node(3)},
-				{F: simple.Node(1), T: simple.Node(2)},
-				{F: simple.Node(1), T: simple.Node(4)},
-				{F: simple.Node(2), T: simple.Node(5)},
-				{F: simple.Node(3), T: simple.Node(4)},
-				{F: simple.Node(3), T: simple.Node(5)},
-				{F: simple.Node(3), T: simple.Node(6)},
-				{F: simple.Node(4), T: simple.Node(5)},
-				{F: simple.Node(4), T: simple.Node(7)},
-				{F: simple.Node(5), T: simple.Node(8)},
-				{F: simple.Node(6), T: simple.Node(7)},
-				{F: simple.Node(6), T: simple.Node(8)},
-				{F: simple.Node(7), T: simple.Node(8)},
-			}
-			g := simple.NewUndirectedGraph()
-			for _, e := range edges {
-				g.SetEdge(e)
-			}
-			return orderedGraph{g}
-		}(),
-	},
-	{
-		name: "wp_page_isomap", // https://en.wikipedia.org/wiki/PageRank#/media/File:PageRanks-Example.jpg
-		g: func() graph.Graph {
-			edges := []simple.Edge{
-				{F: simple.Node(0), T: simple.Node(3)},
-				{F: simple.Node(1), T: simple.Node(2)},
-				{F: simple.Node(1), T: simple.Node(3)},
-				{F: simple.Node(1), T: simple.Node(4)},
-				{F: simple.Node(1), T: simple.Node(5)},
-				{F: simple.Node(1), T: simple.Node(6)},
-				{F: simple.Node(1), T: simple.Node(7)},
-				{F: simple.Node(1), T: simple.Node(8)},
-				{F: simple.Node(3), T: simple.Node(4)},
-				{F: simple.Node(4), T: simple.Node(5)},
-				{F: simple.Node(4), T: simple.Node(6)},
-				{F: simple.Node(4), T: simple.Node(7)},
-				{F: simple.Node(4), T: simple.Node(8)},
-				{F: simple.Node(4), T: simple.Node(9)},
-				{F: simple.Node(4), T: simple.Node(10)},
-			}
-			g := simple.NewUndirectedGraph()
-			for _, e := range edges {
-				g.SetEdge(e)
-			}
-			return orderedGraph{g}
-		}(),
-	},
-}
-
 func TestIsomapR2(t *testing.T) {
+	isomapR2Tests := []struct {
+		name string
+		g    graph.Graph
+	}{
+		{
+			name: "line_isomap",
+			g: func() graph.Graph {
+				edges := []simple.Edge{
+					{F: simple.Node(0), T: simple.Node(1)},
+				}
+				g := simple.NewUndirectedGraph()
+				for _, e := range edges {
+					g.SetEdge(e)
+				}
+				return orderedGraph{g}
+			}(),
+		},
+		{
+			name: "square_isomap",
+			g: func() graph.Graph {
+				edges := []simple.Edge{
+					{F: simple.Node(0), T: simple.Node(1)},
+					{F: simple.Node(0), T: simple.Node(2)},
+					{F: simple.Node(1), T: simple.Node(3)},
+					{F: simple.Node(2), T: simple.Node(3)},
+				}
+				g := simple.NewUndirectedGraph()
+				for _, e := range edges {
+					g.SetEdge(e)
+				}
+				return orderedGraph{g}
+			}(),
+		},
+		{
+			name: "tetrahedron_isomap",
+			g: func() graph.Graph {
+				edges := []simple.Edge{
+					{F: simple.Node(0), T: simple.Node(1)},
+					{F: simple.Node(0), T: simple.Node(2)},
+					{F: simple.Node(0), T: simple.Node(3)},
+					{F: simple.Node(1), T: simple.Node(2)},
+					{F: simple.Node(1), T: simple.Node(3)},
+					{F: simple.Node(2), T: simple.Node(3)},
+				}
+				g := simple.NewUndirectedGraph()
+				for _, e := range edges {
+					g.SetEdge(e)
+				}
+				return orderedGraph{g}
+			}(),
+		},
+		{
+			name: "sheet_isomap",
+			g: func() graph.Graph {
+				edges := []simple.Edge{
+					{F: simple.Node(0), T: simple.Node(1)},
+					{F: simple.Node(0), T: simple.Node(3)},
+					{F: simple.Node(1), T: simple.Node(2)},
+					{F: simple.Node(1), T: simple.Node(4)},
+					{F: simple.Node(2), T: simple.Node(5)},
+					{F: simple.Node(3), T: simple.Node(4)},
+					{F: simple.Node(3), T: simple.Node(6)},
+					{F: simple.Node(4), T: simple.Node(5)},
+					{F: simple.Node(4), T: simple.Node(7)},
+					{F: simple.Node(5), T: simple.Node(8)},
+					{F: simple.Node(6), T: simple.Node(7)},
+					{F: simple.Node(7), T: simple.Node(8)},
+				}
+				g := simple.NewUndirectedGraph()
+				for _, e := range edges {
+					g.SetEdge(e)
+				}
+				return orderedGraph{g}
+			}(),
+		},
+		{
+			name: "tube_isomap",
+			g: func() graph.Graph {
+				edges := []simple.Edge{
+					{F: simple.Node(0), T: simple.Node(1)},
+					{F: simple.Node(0), T: simple.Node(2)},
+					{F: simple.Node(0), T: simple.Node(3)},
+					{F: simple.Node(1), T: simple.Node(2)},
+					{F: simple.Node(1), T: simple.Node(4)},
+					{F: simple.Node(2), T: simple.Node(5)},
+					{F: simple.Node(3), T: simple.Node(4)},
+					{F: simple.Node(3), T: simple.Node(5)},
+					{F: simple.Node(3), T: simple.Node(6)},
+					{F: simple.Node(4), T: simple.Node(5)},
+					{F: simple.Node(4), T: simple.Node(7)},
+					{F: simple.Node(5), T: simple.Node(8)},
+					{F: simple.Node(6), T: simple.Node(7)},
+					{F: simple.Node(6), T: simple.Node(8)},
+					{F: simple.Node(7), T: simple.Node(8)},
+				}
+				g := simple.NewUndirectedGraph()
+				for _, e := range edges {
+					g.SetEdge(e)
+				}
+				return orderedGraph{g}
+			}(),
+		},
+		{
+			name: "wp_page_isomap", // https://en.wikipedia.org/wiki/PageRank#/media/File:PageRanks-Example.jpg
+			g: func() graph.Graph {
+				edges := []simple.Edge{
+					{F: simple.Node(0), T: simple.Node(3)},
+					{F: simple.Node(1), T: simple.Node(2)},
+					{F: simple.Node(1), T: simple.Node(3)},
+					{F: simple.Node(1), T: simple.Node(4)},
+					{F: simple.Node(1), T: simple.Node(5)},
+					{F: simple.Node(1), T: simple.Node(6)},
+					{F: simple.Node(1), T: simple.Node(7)},
+					{F: simple.Node(1), T: simple.Node(8)},
+					{F: simple.Node(3), T: simple.Node(4)},
+					{F: simple.Node(4), T: simple.Node(5)},
+					{F: simple.Node(4), T: simple.Node(6)},
+					{F: simple.Node(4), T: simple.Node(7)},
+					{F: simple.Node(4), T: simple.Node(8)},
+					{F: simple.Node(4), T: simple.Node(9)},
+					{F: simple.Node(4), T: simple.Node(10)},
+				}
+				g := simple.NewUndirectedGraph()
+				for _, e := range edges {
+					g.SetEdge(e)
+				}
+				return orderedGraph{g}
+			}(),
+		},
+	}
+
 	for _, test := range isomapR2Tests {
 		o := NewOptimizerR2(test.g, IsomapR2{}.Update)
 		var n int

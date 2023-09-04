@@ -18,7 +18,7 @@ import (
 // If g is a graph.Graph, all nodes of the graph will be stored in the shortest-path
 // tree, otherwise only nodes reachable from u will be stored.
 //
-// The time complexity of DijkstrFrom is O(|E|.log|V|).
+// The time complexity of DijkstraFrom is O(|E|.log|V|).
 func DijkstraFrom(u graph.Node, g traverse.Graph) Shortest {
 	var path Shortest
 	if h, ok := g.(graph.Graph); ok {
@@ -91,7 +91,7 @@ func DijkstraFrom(u graph.Node, g traverse.Graph) Shortest {
 // If g is a graph.Graph, all nodes of the graph will be stored in the shortest-path
 // tree, otherwise only nodes reachable from u will be stored.
 //
-// The time complexity of DijkstrAllFrom is O(|E|.log|V|).
+// The time complexity of DijkstraAllFrom is O(|E|.log|V|).
 func DijkstraAllFrom(u graph.Node, g traverse.Graph) ShortestAlts {
 	var path ShortestAlts
 	if h, ok := g.(graph.Graph); ok {
@@ -161,7 +161,7 @@ func DijkstraAllFrom(u graph.Node, g traverse.Graph) ShortestAlts {
 // If the graph does not implement graph.Weighter, UniformCost is used.
 // DijkstraAllPaths will panic if g has a negative edge weight.
 //
-// The time complexity of DijkstrAllPaths is O(|V|.|E|+|V|^2.log|V|).
+// The time complexity of DijkstraAllPaths is O(|V|.|E|+|V|^2.log|V|).
 func DijkstraAllPaths(g graph.Graph) (paths AllShortest) {
 	paths = newAllShortest(graph.NodesOf(g.Nodes()), false)
 	dijkstraAllPaths(g, paths)

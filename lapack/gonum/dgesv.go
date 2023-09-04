@@ -7,12 +7,16 @@ package gonum
 import "gonum.org/v1/gonum/blas"
 
 // Dgesv computes the solution to a real system of linear equations
-//  A * X = B
+//
+//	A * X = B
+//
 // where A is an n×n matrix and X and B are n×nrhs matrices.
 //
 // The LU decomposition with partial pivoting and row interchanges is used to
 // factor A as
-//  A = P * L * U
+//
+//	A = P * L * U
+//
 // where P is a permutation matrix, L is unit lower triangular, and U is upper
 // triangular. On return, the factors L and U are stored in a; the unit diagonal
 // elements of L are not stored. The row pivot indices that define the

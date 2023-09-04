@@ -11,24 +11,28 @@ import "math"
 //
 // If upper is true
 //
-//  Uᵀ*A*Q = Uᵀ*[ a1 a2 ]*Q = [ x  0 ]
-//              [ 0  a3 ]     [ x  x ]
+//	Uᵀ*A*Q = Uᵀ*[ a1 a2 ]*Q = [ x  0 ]
+//	            [ 0  a3 ]     [ x  x ]
+//
 // and
-//  Vᵀ*B*Q = Vᵀ*[ b1 b2 ]*Q = [ x  0 ]
-//              [ 0  b3 ]     [ x  x ]
+//
+//	Vᵀ*B*Q = Vᵀ*[ b1 b2 ]*Q = [ x  0 ]
+//	            [ 0  b3 ]     [ x  x ]
 //
 // otherwise
 //
-//  Uᵀ*A*Q = Uᵀ*[ a1 0  ]*Q = [ x  x ]
-//              [ a2 a3 ]     [ 0  x ]
+//	Uᵀ*A*Q = Uᵀ*[ a1 0  ]*Q = [ x  x ]
+//	            [ a2 a3 ]     [ 0  x ]
+//
 // and
-//  Vᵀ*B*Q = Vᵀ*[ b1 0  ]*Q = [ x  x ]
-//              [ b2 b3 ]     [ 0  x ].
+//
+//	Vᵀ*B*Q = Vᵀ*[ b1 0  ]*Q = [ x  x ]
+//	            [ b2 b3 ]     [ 0  x ].
 //
 // The rows of the transformed A and B are parallel, where
 //
-//  U = [  csu  snu ], V = [  csv snv ], Q = [  csq   snq ]
-//      [ -snu  csu ]      [ -snv csv ]      [ -snq   csq ]
+//	U = [  csu  snu ], V = [  csv snv ], Q = [  csq   snq ]
+//	    [ -snu  csu ]      [ -snv csv ]      [ -snq   csq ]
 //
 // Dlags2 is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dlags2(upper bool, a1, a2, a3, b1, b2, b3 float64) (csu, snu, csv, snv, csq, snq float64) {

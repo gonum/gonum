@@ -8,7 +8,9 @@ import "gonum.org/v1/gonum/mathext/internal/amos"
 
 // AiryAi returns the value of the Airy function at z. The Airy function here,
 // Ai(z), is one of the two linearly independent solutions to
-//  y'' - y*z = 0.
+//
+//	y′′ - y*z = 0.
+//
 // See http://mathworld.wolfram.com/AiryFunctions.html for more detailed information.
 func AiryAi(z complex128) complex128 {
 	// id specifies the order of the derivative to compute,
@@ -23,7 +25,9 @@ func AiryAi(z complex128) complex128 {
 
 // AiryAiDeriv returns the value of the derivative of the Airy function at z. The
 // Airy function here, Ai(z), is one of the two linearly independent solutions to
-//  y'' - y*z = 0.
+//
+//	y′′ - y*z = 0.
+//
 // See http://mathworld.wolfram.com/AiryFunctions.html for more detailed information.
 func AiryAiDeriv(z complex128) complex128 {
 	// id specifies the order of the derivative to compute,

@@ -34,13 +34,15 @@ func DgesvdTest(t *testing.T, impl Dgesvder, tol float64) {
 
 // dgesvdTest tests a Dgesvd implementation on an m×n matrix A generated
 // according to mtype as:
-//  - the zero matrix if mtype == 1,
-//  - the identity matrix if mtype == 2,
-//  - a random matrix with a given condition number and singular values if mtype == 3, 4, or 5.
+//   - the zero matrix if mtype == 1,
+//   - the identity matrix if mtype == 2,
+//   - a random matrix with a given condition number and singular values if mtype == 3, 4, or 5.
+//
 // It first computes the full SVD  A = U*Sigma*Vᵀ  and checks that
-//  - U has orthonormal columns, and Vᵀ has orthonormal rows,
-//  - U*Sigma*Vᵀ multiply back to A,
-//  - the singular values are non-negative and sorted in decreasing order.
+//   - U has orthonormal columns, and Vᵀ has orthonormal rows,
+//   - U*Sigma*Vᵀ multiply back to A,
+//   - the singular values are non-negative and sorted in decreasing order.
+//
 // Then all combinations of partial SVD results are computed and checked whether
 // they match the full SVD result.
 func dgesvdTest(t *testing.T, impl Dgesvder, m, n, mtype int, tol float64) {
@@ -288,7 +290,9 @@ func dgesvdTest(t *testing.T, impl Dgesvder, m, n, mtype int, tol float64) {
 }
 
 // svdFullResidual returns
-//  |A - U*D*VT| / (n * aNorm)
+//
+//	|A - U*D*VT| / (n * aNorm)
+//
 // where U, D, and VT are as computed by Dgesvd with jobU = jobVT = lapack.SVDAll.
 func svdFullResidual(m, n int, aNorm float64, a []float64, lda int, u []float64, ldu int, d []float64, vt []float64, ldvt int) float64 {
 	// The implementation follows TESTING/dbdt01.f from the reference.
@@ -341,7 +345,9 @@ func svdFullResidual(m, n int, aNorm float64, a []float64, lda int, u []float64,
 
 // svdPartialUResidual compares U and URef to see if their columns span the same
 // spaces. It returns the maximum over columns of
-//  |URef(i) - S*U(i)|
+//
+//	|URef(i) - S*U(i)|
+//
 // where URef(i) and U(i) are the i-th columns of URef and U, respectively, and
 // S is ±1 chosen to minimize the expression.
 func svdPartialUResidual(m, n int, u, uRef []float64, ldu int) float64 {
@@ -359,7 +365,9 @@ func svdPartialUResidual(m, n int, u, uRef []float64, ldu int) float64 {
 
 // svdPartialVTResidual compares VT and VTRef to see if their rows span the same
 // spaces. It returns the maximum over rows of
-//  |VTRef(i) - S*VT(i)|
+//
+//	|VTRef(i) - S*VT(i)|
+//
 // where VTRef(i) and VT(i) are the i-th columns of VTRef and VT, respectively, and
 // S is ±1 chosen to minimize the expression.
 func svdPartialVTResidual(m, n int, vt, vtRef []float64, ldvt int) float64 {

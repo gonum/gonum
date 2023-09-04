@@ -7,10 +7,14 @@ package integrate
 import "sort"
 
 // Simpsons returns an approximate value of the integral
-//  \int_a^b f(x)dx
+//
+//	\int_a^b f(x)dx
+//
 // computed using the Simpsons's method. The function f is given as a slice of
 // samples evaluated at locations in x, that is,
-//  f[i] = f(x[i]), x[0] = a, x[len(x)-1] = b
+//
+//	f[i] = f(x[i]), x[0] = a, x[len(x)-1] = b
+//
 // The slice x must be sorted in strictly increasing order. x and f must be of
 // equal length and the length must be at least 3.
 //

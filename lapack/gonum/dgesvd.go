@@ -17,7 +17,9 @@ const noSVDO = "dgesvd: not coded for overwrite"
 // Dgesvd computes the singular value decomposition of the input matrix A.
 //
 // The singular value decomposition is
-//  A = U * Sigma * Vᵀ
+//
+//	A = U * Sigma * Vᵀ
+//
 // where Sigma is an m×n diagonal matrix containing the singular values of A,
 // U is an m×m orthogonal matrix and V is an n×n orthogonal matrix. The first
 // min(m,n) columns of U and V are the left and right singular vectors of A
@@ -25,10 +27,12 @@ const noSVDO = "dgesvd: not coded for overwrite"
 //
 // jobU and jobVT are options for computing the singular vectors. The behavior
 // is as follows
-//  jobU == lapack.SVDAll       All m columns of U are returned in u
-//  jobU == lapack.SVDStore     The first min(m,n) columns are returned in u
-//  jobU == lapack.SVDOverwrite The first min(m,n) columns of U are written into a
-//  jobU == lapack.SVDNone      The columns of U are not computed.
+//
+//	jobU == lapack.SVDAll       All m columns of U are returned in u
+//	jobU == lapack.SVDStore     The first min(m,n) columns are returned in u
+//	jobU == lapack.SVDOverwrite The first min(m,n) columns of U are written into a
+//	jobU == lapack.SVDNone      The columns of U are not computed.
+//
 // The behavior is the same for jobVT and the rows of Vᵀ. At most one of jobU
 // and jobVT can equal lapack.SVDOverwrite, and Dgesvd will panic otherwise.
 //
@@ -473,7 +477,7 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 							work[itauq:], work[iwork:], lwork-iwork)
 						iwork = ie + n
 
-						// Perform bidiagonal QR iteration, compuing left singular
+						// Perform bidiagonal QR iteration, computing left singular
 						// vectors of R in work[ir:].
 						ok = impl.Dbdsqr(blas.Upper, n, 0, n, 0, s, work[ie:], work, 1,
 							work[ir:], ldworkr, work, 1, work[iwork:])

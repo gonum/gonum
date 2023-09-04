@@ -59,7 +59,7 @@ func lexicalHashes(dst [][]byte, hashes map[string][]byte) {
 // IsoCanonicalHashes returns a mapping between the nodes of the RDF graph
 // dataset described by the given statements using the provided hash
 // function. If decomp is true, the graphs are decomposed before hashing.
-// If dist is and the input graph is decomposed into identical splits, the
+// If dist is true the input graph is decomposed into identical splits, the
 // entire graph will be hashed to distinguish nodes. If decomp is false,
 // dist has no effect.
 // Blank node hashes are initially set to the value of zero. Hash values
@@ -282,11 +282,11 @@ func hashBNodes(statements []*Statement, h hash.Hash, zero []byte, hash0 map[str
 				}
 			case isIRI(t):
 				h.Reset()
-				h.Write([]byte(t[1 : len(t)-1])) //nolint:errcheck
+				h.Write([]byte(t[1 : len(t)-1]))
 				curr.set(t, h.Sum(nil))
 			default:
 				h.Reset()
-				h.Write([]byte(t)) //nolint:errcheck
+				h.Write([]byte(t))
 				curr.set(t, h.Sum(nil))
 			}
 		}
@@ -515,7 +515,7 @@ func (b lexical) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
 func hashTuple(h hash.Hash, t ...[]byte) []byte {
 	h.Reset()
 	for _, b := range t {
-		h.Write(b) //nolint:errcheck
+		h.Write(b)
 	}
 	return h.Sum(nil)
 }
@@ -692,11 +692,12 @@ func split(statements []*Statement) [][]*Statement {
 //
 // The correspondence between the parameters for the function in the paper
 // with the implementation here is as follows:
-//  - G = statements
-//  - hash = hash
-//  - P = parts (already sorted by hashBNodesPerSplit)
-//  - G⊥ = lowest
-//  - B = hash.blanks
+//   - G = statements
+//   - hash = hash
+//   - P = parts (already sorted by hashBNodesPerSplit)
+//   - G⊥ = lowest
+//   - B = hash.blanks
+//
 // The additional parameter dist specifies that distinguish should treat
 // coequal trivial parts as a coarse of intermediate part and distinguish
 // the nodes in that merged part.

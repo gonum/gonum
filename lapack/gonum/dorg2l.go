@@ -11,7 +11,9 @@ import (
 
 // Dorg2l generates an m×n matrix Q with orthonormal columns which is defined
 // as the last n columns of a product of k elementary reflectors of order m.
-//  Q = H_{k-1} * ... * H_1 * H_0
+//
+//	Q = H_{k-1} * ... * H_1 * H_0
+//
 // See Dgelqf for more information. It must be that m >= n >= k.
 //
 // tau contains the scalar reflectors computed by Dgeqlf. tau must have length

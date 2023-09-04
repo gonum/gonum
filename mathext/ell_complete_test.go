@@ -32,6 +32,7 @@ func TestCompleteKE(t *testing.T) {
 // for m=0.0001(0.0001)0.9999.
 //
 // K(m) and E(m) can be computed without cancellation problems as following:
+//
 //	K(m) = B(m) + D(m),
 //	E(m) = B(m) + (1-m)D(m).
 func TestCompleteBD(t *testing.T) {

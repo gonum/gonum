@@ -12,7 +12,9 @@ import (
 
 // Dgetf2 computes the LU decomposition of the m×n matrix A.
 // The LU decomposition is a factorization of a into
-//  A = P * L * U
+//
+//	A = P * L * U
+//
 // where P is a permutation matrix, L is a unit lower triangular matrix, and
 // U is a (usually) non-unit upper triangular matrix. On exit, L and U are stored
 // in place into a.

@@ -11,8 +11,10 @@ import (
 
 // Dpbtrs solves a system of linear equations A*X = B with an n×n symmetric
 // positive definite band matrix A using the Cholesky factorization
-//  A = Uᵀ * U  if uplo == blas.Upper
-//  A = L * Lᵀ  if uplo == blas.Lower
+//
+//	A = Uᵀ * U  if uplo == blas.Upper
+//	A = L * Lᵀ  if uplo == blas.Lower
+//
 // computed by Dpbtrf. kd is the number of super- or sub-diagonals of A. See the
 // documentation for Dpbtrf for a description of the band storage format of A.
 //

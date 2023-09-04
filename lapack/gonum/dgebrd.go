@@ -11,7 +11,9 @@ import (
 
 // Dgebrd reduces a general m×n matrix A to upper or lower bidiagonal form B by
 // an orthogonal transformation:
-//  Qᵀ * A * P = B.
+//
+//	Qᵀ * A * P = B.
+//
 // The diagonal elements of B are stored in d and the off-diagonal elements are stored
 // in e. These are additionally stored along the diagonal of A and the off-diagonal
 // of A. If m >= n B is an upper-bidiagonal matrix, and if m < n B is a
@@ -19,27 +21,33 @@ import (
 //
 // The remaining elements of A store the data needed to construct Q and P.
 // The matrices Q and P are products of elementary reflectors
-//  if m >= n, Q = H_0 * H_1 * ... * H_{n-1},
-//             P = G_0 * G_1 * ... * G_{n-2},
-//  if m < n,  Q = H_0 * H_1 * ... * H_{m-2},
-//             P = G_0 * G_1 * ... * G_{m-1},
+//
+//	if m >= n, Q = H_0 * H_1 * ... * H_{n-1},
+//	           P = G_0 * G_1 * ... * G_{n-2},
+//	if m < n,  Q = H_0 * H_1 * ... * H_{m-2},
+//	           P = G_0 * G_1 * ... * G_{m-1},
+//
 // where
-//  H_i = I - tauQ[i] * v_i * v_iᵀ,
-//  G_i = I - tauP[i] * u_i * u_iᵀ.
+//
+//	H_i = I - tauQ[i] * v_i * v_iᵀ,
+//	G_i = I - tauP[i] * u_i * u_iᵀ.
 //
 // As an example, on exit the entries of A when m = 6, and n = 5
-//  [ d   e  u1  u1  u1]
-//  [v1   d   e  u2  u2]
-//  [v1  v2   d   e  u3]
-//  [v1  v2  v3   d   e]
-//  [v1  v2  v3  v4   d]
-//  [v1  v2  v3  v4  v5]
+//
+//	[ d   e  u1  u1  u1]
+//	[v1   d   e  u2  u2]
+//	[v1  v2   d   e  u3]
+//	[v1  v2  v3   d   e]
+//	[v1  v2  v3  v4   d]
+//	[v1  v2  v3  v4  v5]
+//
 // and when m = 5, n = 6
-//  [ d  u1  u1  u1  u1  u1]
-//  [ e   d  u2  u2  u2  u2]
-//  [v1   e   d  u3  u3  u3]
-//  [v1  v2   e   d  u4  u4]
-//  [v1  v2  v3   e   d  u5]
+//
+//	[ d  u1  u1  u1  u1  u1]
+//	[ e   d  u2  u2  u2  u2]
+//	[v1   e   d  u3  u3  u3]
+//	[v1  v2   e   d  u4  u4]
+//	[v1  v2  v3   e   d  u5]
 //
 // d, tauQ, and tauP must all have length at least min(m,n), and e must have
 // length min(m,n) - 1, unless lwork is -1 when there is no check except for

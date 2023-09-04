@@ -34,9 +34,10 @@ func Log(q Number) Number {
 
 // Pow return q**r, the base-q exponential of r.
 // For generalized compatibility with math.Pow:
-//      Pow(0, ±0) returns 1+0i+0j+0k
-//      Pow(0, c) for real(c)<0 returns Inf+0i+0j+0k if imag(c), jmag(c), kmag(c) are zero,
-//          otherwise Inf+Inf i+Inf j+Inf k.
+//
+//	Pow(0, ±0) returns 1+0i+0j+0k
+//	Pow(0, c) for real(c)<0 returns Inf+0i+0j+0k if imag(c), jmag(c), kmag(c) are zero,
+//	    otherwise Inf+Inf i+Inf j+Inf k.
 func Pow(q, r Number) Number {
 	if q == zero {
 		w, uv := split(r)
@@ -55,10 +56,29 @@ func Pow(q, r Number) Number {
 	return Exp(Mul(Log(q), r))
 }
 
+// PowReal return q**r, the base-q exponential of r.
+// For generalized compatibility with math.Pow:
+//
+//	PowReal(0, ±0) returns 1+0i+0j+0k
+//	PowReal(0, c) for c<0 returns Inf+0i+0j+0k.
+func PowReal(q Number, r float64) Number {
+	if q == zero {
+		switch {
+		case r == 0:
+			return Number{Real: 1}
+		case r < 0:
+			return Inf()
+		case r > 0:
+			return zero
+		}
+	}
+	return Exp(Scale(r, Log(q)))
+}
+
 // Sqrt returns the square root of q.
 func Sqrt(q Number) Number {
 	if q == zero {
 		return zero
 	}
-	return Pow(q, Number{Real: 0.5})
+	return PowReal(q, 0.5)
 }

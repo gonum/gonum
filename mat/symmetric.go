@@ -322,7 +322,8 @@ func (s *SymDense) CopySym(a Symmetric) int {
 
 // SymRankOne performs a symmetric rank-one update to the matrix a with x,
 // which is treated as a column vector, and stores the result in the receiver
-//  s = a + alpha * x * xᵀ
+//
+//	s = a + alpha * x * xᵀ
 func (s *SymDense) SymRankOne(a Symmetric, alpha float64, x Vector) {
 	n := x.Len()
 	if a.SymmetricDim() != n {
@@ -355,7 +356,8 @@ func (s *SymDense) SymRankOne(a Symmetric, alpha float64, x Vector) {
 
 // SymRankK performs a symmetric rank-k update to the matrix a and stores the
 // result into the receiver. If a is zero, see SymOuterK.
-//  s = a + alpha * x * x'
+//
+//	s = a + alpha * x * x'
 func (s *SymDense) SymRankK(a Symmetric, alpha float64, x Matrix) {
 	n := a.SymmetricDim()
 	r, _ := x.Dims()
@@ -387,7 +389,9 @@ func (s *SymDense) SymRankK(a Symmetric, alpha float64, x Matrix) {
 // SymOuterK calculates the outer product of x with itself and stores
 // the result into the receiver. It is equivalent to the matrix
 // multiplication
-//  s = alpha * x * x'.
+//
+//	s = alpha * x * x'.
+//
 // In order to update an existing matrix, see SymRankOne.
 func (s *SymDense) SymOuterK(alpha float64, x Matrix) {
 	n, _ := x.Dims()
@@ -433,7 +437,8 @@ func (s *SymDense) SymOuterK(alpha float64, x Matrix) {
 // RankTwo performs a symmetric rank-two update to the matrix a with the
 // vectors x and y, which are treated as column vectors, and stores the
 // result in the receiver
-//  m = a + alpha * (x * yᵀ + y * xᵀ)
+//
+//	m = a + alpha * (x * yᵀ + y * xᵀ)
 func (s *SymDense) RankTwo(a Symmetric, alpha float64, x, y Vector) {
 	n := s.mat.N
 	if x.Len() != n {
@@ -580,9 +585,10 @@ func (s *SymDense) sliceSym(i, k int) *SymDense {
 }
 
 // Norm returns the specified norm of the receiver. Valid norms are:
-//  1 - The maximum absolute column sum
-//  2 - The Frobenius norm, the square root of the sum of the squares of the elements
-//  Inf - The maximum absolute row sum
+//
+//	1 - The maximum absolute column sum
+//	2 - The Frobenius norm, the square root of the sum of the squares of the elements
+//	Inf - The maximum absolute row sum
 //
 // Norm will panic with ErrNormOrder if an illegal norm is specified and with
 // ErrZeroLength if the matrix has zero size.

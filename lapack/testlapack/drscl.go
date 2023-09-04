@@ -38,7 +38,7 @@ func DrsclTest(t *testing.T, impl Drscler) {
 
 		// Cannot test the scaling directly because of floating point scaling issues
 		// (the purpose of Drscl). Instead, check that scaling and scaling back
-		// yeilds approximately x. If overflow or underflow occurs then the scaling
+		// yields approximately x. If overflow or underflow occurs then the scaling
 		// won't match.
 		impl.Drscl(len(test.x), test.a, xcopy, 1)
 		if floats.Equal(xcopy, test.x) {

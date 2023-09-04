@@ -12,7 +12,8 @@ import (
 
 // LogNormal represents a random variable whose log is normally distributed.
 // The probability density function is given by
-//  1/(x σ √2π) exp(-(ln(x)-μ)^2)/(2σ^2))
+//
+//	1/(x σ √2π) exp(-(ln(x)-μ)^2)/(2σ^2))
 type LogNormal struct {
 	Mu    float64
 	Sigma float64

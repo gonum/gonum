@@ -8,7 +8,9 @@ import "math"
 
 // Dlassq updates a sum of squares represented in scaled form. Dlassq returns
 // the values scl and smsq such that
-//  scl^2*smsq = X[0]^2 + ... + X[n-1]^2 + scale^2*sumsq
+//
+//	scl^2*smsq = X[0]^2 + ... + X[n-1]^2 + scale^2*sumsq
+//
 // The value of sumsq is assumed to be non-negative.
 //
 // Dlassq is an internal routine. It is exported for testing purposes.
@@ -89,7 +91,7 @@ func (impl Implementation) Dlassq(n int, x []float64, incx int, scale float64, s
 				asml += (v * v) * sumsq
 			}
 		default:
-			amed += ax * ax
+			amed += scale * scale * sumsq
 		}
 	}
 	// Combine abig and amed or amed and asml if more than one accumulator was

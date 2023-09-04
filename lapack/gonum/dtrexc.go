@@ -7,7 +7,9 @@ package gonum
 import "gonum.org/v1/gonum/lapack"
 
 // Dtrexc reorders the real Schur factorization of a n×n real matrix
-//  A = Q*T*Qᵀ
+//
+//	A = Q*T*Qᵀ
+//
 // so that the diagonal block of T with row index ifst is moved to row ilst.
 //
 // On entry, T must be in Schur canonical form, that is, block upper triangular
@@ -34,7 +36,9 @@ import "gonum.org/v1/gonum/lapack"
 // is true, ilstOut may differ from ilst by +1 or -1.
 //
 // It must hold that
-//  0 <= ifst < n, and  0 <= ilst < n,
+//
+//	0 <= ifst < n, and  0 <= ilst < n,
+//
 // otherwise Dtrexc will panic.
 //
 // If ok is false, two adjacent blocks were too close to swap because the
@@ -174,12 +178,12 @@ func (impl Implementation) Dtrexc(compq lapack.UpdateSchurComp, n int, t []float
 		here := ifst
 		for here > ilst {
 			// Swap block with next one above.
+			nbnext := 1
+			if here >= 2 && t[(here-1)*ldt+here-2] != 0 {
+				nbnext = 2
+			}
 			if nbf == 1 || nbf == 2 {
 				// Current block either 1×1 or 2×2.
-				nbnext := 1
-				if here-2 >= 0 && t[(here-1)*ldt+here-2] != 0 {
-					nbnext = 2
-				}
 				ok = impl.Dlaexc(wantq, n, t, ldt, q, ldq, here-nbnext, nbnext, nbf, work)
 				if !ok {
 					return ifst, here, false
@@ -194,10 +198,6 @@ func (impl Implementation) Dtrexc(compq lapack.UpdateSchurComp, n int, t []float
 
 			// Current block consists of two 1×1 blocks each of
 			// which must be swapped individually.
-			nbnext := 1
-			if here-2 >= 0 && t[(here-1)*ldt+here-2] != 0 {
-				nbnext = 2
-			}
 			ok = impl.Dlaexc(wantq, n, t, ldt, q, ldq, here-nbnext, nbnext, 1, work)
 			if !ok {
 				return ifst, here, false

@@ -8,12 +8,15 @@ import "math"
 
 // Dlaev2 computes the Eigen decomposition of a symmetric 2×2 matrix.
 // The matrix is given by
-//  [a b]
-//  [b c]
+//
+//	[a b]
+//	[b c]
+//
 // Dlaev2 returns rt1 and rt2, the eigenvalues of the matrix where |RT1| > |RT2|,
 // and [cs1, sn1] which is the unit right eigenvalue for RT1.
-//  [ cs1 sn1] [a b] [cs1 -sn1] = [rt1   0]
-//  [-sn1 cs1] [b c] [sn1  cs1]   [  0 rt2]
+//
+//	[ cs1 sn1] [a b] [cs1 -sn1] = [rt1   0]
+//	[-sn1 cs1] [b c] [sn1  cs1]   [  0 rt2]
 //
 // Dlaev2 is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dlaev2(a, b, c float64) (rt1, rt2, cs1, sn1 float64) {

@@ -12,7 +12,7 @@ import (
 	"gonum.org/v1/gonum/graph/traverse"
 )
 
-// KCliqueCommunities returns the k-clique communties of the undirected graph g for
+// KCliqueCommunities returns the k-clique communities of the undirected graph g for
 // k greater than zero. The returned communities are identified by linkage via k-clique
 // adjacency, where adjacency is defined as having k-1 common nodes. KCliqueCommunities
 // returns a single component including the full set of nodes of g when k is 1,

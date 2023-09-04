@@ -594,9 +594,10 @@ func (m *Dense) Trace() float64 {
 }
 
 // Norm returns the specified norm of the receiver. Valid norms are:
-//  1 - The maximum absolute column sum
-//  2 - The Frobenius norm, the square root of the sum of the squares of the elements
-//  Inf - The maximum absolute row sum
+//
+//	1 - The maximum absolute column sum
+//	2 - The Frobenius norm, the square root of the sum of the squares of the elements
+//	Inf - The maximum absolute row sum
 //
 // Norm will panic with ErrNormOrder if an illegal norm is specified and with
 // ErrShape if the matrix has zero size.

@@ -14,19 +14,19 @@ import "math"
 // Cost. The prime factorization of n together with a tabulation
 // of the trigonometric functions are computed and stored in work.
 //
-// Input parameter
+//	Input parameter:
 //
-// n       The length of the sequence to be transformed. The method
-//         is most efficient when n-1 is a product of small primes.
+//	n       The length of the sequence to be transformed. The method
+//	        is most efficient when n-1 is a product of small primes.
 //
-// Output parameters
+//	Output parameters:
 //
-// work    A work array which must be dimensioned at least 3*n.
-//         Different work arrays are required for different values
-//         of n. The contents of work must not be changed between
-//         calls of Cost.
+//	work    A work array which must be dimensioned at least 3*n.
+//	        Different work arrays are required for different values
+//	        of n. The contents of work must not be changed between
+//	        calls of Cost.
 //
-// ifac    An integer work array of length at least 15.
+//	ifac    An integer work array of length at least 15.
 func Costi(n int, work []float64, ifac []int) {
 	if len(work) < 3*n {
 		panic("fourier: short work")
@@ -56,40 +56,40 @@ func Costi(n int, work []float64, ifac []int) {
 // The array work which is used by subroutine Cost must be
 // initialized by calling subroutine Costi(n,work).
 //
-// Input parameters
+//	Input parameters:
 //
-// n       The length of the sequence x. n must be greater than 1.
-//         The method is most efficient when n-1 is a product of
-//         small primes.
+//	n       The length of the sequence x. n must be greater than 1.
+//	        The method is most efficient when n-1 is a product of
+//	        small primes.
 //
-// x       An array which contains the sequence to be transformed.
+//	x       An array which contains the sequence to be transformed.
 //
-// work    A work array which must be dimensioned at least 3*n
-//         in the program that calls Cost. The work array must be
-//         initialized by calling subroutine Costi(n,work) and a
-//         different work array must be used for each different
-//         value of n. This initialization does not have to be
-//         repeated so long as n remains unchanged thus subsequent
-//         transforms can be obtained faster than the first.
+//	work    A work array which must be dimensioned at least 3*n
+//	        in the program that calls Cost. The work array must be
+//	        initialized by calling subroutine Costi(n,work) and a
+//	        different work array must be used for each different
+//	        value of n. This initialization does not have to be
+//	        repeated so long as n remains unchanged thus subsequent
+//	        transforms can be obtained faster than the first.
 //
-// ifac    An integer work array of length at least 15.
+//	ifac    An integer work array of length at least 15.
 //
-// Output parameters
+//	Output parameters:
 //
-// x       for i=1,...,n
-//           x(i) = x(1)+(-1)**(i-1)*x(n)
-//             + the sum from k=2 to k=n-1
-//               2*x(k)*cos((k-1)*(i-1)*pi/(n-1))
+//	x       for i=1,...,n
+//	          x(i) = x(1)+(-1)**(i-1)*x(n)
+//	            + the sum from k=2 to k=n-1
+//	              2*x(k)*cos((k-1)*(i-1)*pi/(n-1))
 //
-//         A call of Cost followed by another call of
-//         Cost will multiply the sequence x by 2*(n-1).
-//         Hence Cost is the unnormalized inverse
-//         of itself.
+//	        A call of Cost followed by another call of
+//	        Cost will multiply the sequence x by 2*(n-1).
+//	        Hence Cost is the unnormalized inverse
+//	        of itself.
 //
-// work    Contains initialization calculations which must not be
-//         destroyed between calls of Cost.
+//	work    Contains initialization calculations which must not be
+//	        destroyed between calls of Cost.
 //
-// ifac    An integer work array of length at least 15.
+//	ifac    An integer work array of length at least 15.
 func Cost(n int, x, work []float64, ifac []int) {
 	if len(x) < n {
 		panic("fourier: short sequence")

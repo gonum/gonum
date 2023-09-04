@@ -10,10 +10,14 @@ import (
 )
 
 // Romberg returns an approximate value of the integral
-//  \int_a^b f(x)dx
+//
+//	\int_a^b f(x)dx
+//
 // computed using the Romberg's method. The function f is given
 // as a slice of equally-spaced samples, that is,
-//  f[i] = f(a + i*dx)
+//
+//	f[i] = f(a + i*dx)
+//
 // and dx is the spacing between the samples.
 //
 // The length of f must be 2^k + 1, where k is a positive integer,

@@ -16,16 +16,21 @@ import (
 // also the matrix Y = A * V * T.
 //
 // The matrix Q is represented as a product of nb elementary reflectors
-//  Q = H_0 * H_1 * ... * H_{nb-1}.
+//
+//	Q = H_0 * H_1 * ... * H_{nb-1}.
+//
 // Each H_i has the form
-//  H_i = I - tau[i] * v * vᵀ,
+//
+//	H_i = I - tau[i] * v * vᵀ,
+//
 // where v is a real vector with v[0:i+k-1] = 0 and v[i+k-1] = 1. v[i+k:n] is
 // stored on exit in A[i+k+1:n,i].
 //
 // The elements of the vectors v together form the (n-k+1)×nb matrix
 // V which is needed, with T and Y, to apply the transformation to the
 // unreduced part of the matrix, using an update of the form
-//  A = (I - V*T*Vᵀ) * (A - Y*Vᵀ).
+//
+//	A = (I - V*T*Vᵀ) * (A - Y*Vᵀ).
 //
 // On entry, a contains the n×(n-k+1) general matrix A. On return, the elements
 // on and above the k-th subdiagonal in the first nb columns are overwritten
@@ -35,13 +40,15 @@ import (
 //
 // The contents of A on exit are illustrated by the following example
 // with n = 7, k = 3 and nb = 2:
-//  [ a   a   a   a   a ]
-//  [ a   a   a   a   a ]
-//  [ a   a   a   a   a ]
-//  [ h   h   a   a   a ]
-//  [ v0  h   a   a   a ]
-//  [ v0  v1  a   a   a ]
-//  [ v0  v1  a   a   a ]
+//
+//	[ a   a   a   a   a ]
+//	[ a   a   a   a   a ]
+//	[ a   a   a   a   a ]
+//	[ h   h   a   a   a ]
+//	[ v0  h   a   a   a ]
+//	[ v0  v1  a   a   a ]
+//	[ v0  v1  a   a   a ]
+//
 // where a denotes an element of the original matrix A, h denotes a
 // modified element of the upper Hessenberg matrix H, and vi denotes an
 // element of the vector defining H_i.

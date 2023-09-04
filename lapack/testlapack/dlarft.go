@@ -80,14 +80,14 @@ func DlarftTest(t *testing.T, impl Dlarfter) {
 				tData := make([]float64, len(tm))
 				copy(tData, tm)
 				if direct == lapack.Forward {
-					// Zero out the lower traingular portion.
+					// Zero out the lower triangular portion.
 					for i := 0; i < k; i++ {
 						for j := 0; j < i; j++ {
 							tData[i*ldt+j] = 0
 						}
 					}
 				} else {
-					// Zero out the upper traingular portion.
+					// Zero out the upper triangular portion.
 					for i := 0; i < k; i++ {
 						for j := i + 1; j < k; j++ {
 							tData[i*ldt+j] = 0

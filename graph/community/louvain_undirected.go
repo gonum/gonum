@@ -22,7 +22,7 @@ import (
 // is γ as defined in Reichardt and Bornholdt doi:10.1103/PhysRevE.74.016110.
 // qUndirected will panic if g has any edge with negative edge weight.
 //
-//  Q = 1/2m \sum_{ij} [ A_{ij} - (\gamma k_i k_j)/2m ] \delta(c_i,c_j)
+//	Q = 1/2m \sum_{ij} [ A_{ij} - (\gamma k_i k_j)/2m ] \delta(c_i,c_j)
 //
 // graph.Undirect may be used as a shim to allow calculation of Q for
 // directed graphs.

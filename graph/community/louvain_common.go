@@ -21,9 +21,12 @@ import (
 // Q will panic if g has any edge with negative edge weight.
 //
 // If g is undirected, Q is calculated according to
-//  Q = 1/2m \sum_{ij} [ A_{ij} - (\gamma k_i k_j)/2m ] \delta(c_i,c_j),
+//
+//	Q = 1/2m \sum_{ij} [ A_{ij} - (\gamma k_i k_j)/2m ] \delta(c_i,c_j),
+//
 // If g is directed, it is calculated according to
-//  Q = 1/m \sum_{ij} [ A_{ij} - (\gamma k_i^in k_j^out)/m ] \delta(c_i,c_j).
+//
+//	Q = 1/m \sum_{ij} [ A_{ij} - (\gamma k_i^in k_j^out)/m ] \delta(c_i,c_j).
 //
 // graph.Undirect may be used as a shim to allow calculation of Q for
 // directed graphs with the undirected modularity function.
@@ -73,9 +76,12 @@ type ReducedGraph interface {
 // generator. Modularize will panic if g has any edge with negative edge weight.
 //
 // If g is undirected it is modularised to minimise
-//  Q = 1/2m \sum_{ij} [ A_{ij} - (\gamma k_i k_j)/2m ] \delta(c_i,c_j),
+//
+//	Q = 1/2m \sum_{ij} [ A_{ij} - (\gamma k_i k_j)/2m ] \delta(c_i,c_j),
+//
 // If g is directed it is modularised to minimise
-//  Q = 1/m \sum_{ij} [ A_{ij} - (\gamma k_i^in k_j^out)/m ] \delta(c_i,c_j).
+//
+//	Q = 1/m \sum_{ij} [ A_{ij} - (\gamma k_i^in k_j^out)/m ] \delta(c_i,c_j).
 //
 // The concrete type of the ReducedGraph will be a pointer to either a
 // ReducedUndirected or a ReducedDirected depending on the type of g.
@@ -120,9 +126,12 @@ type Multiplex interface {
 // negative edge weight.
 //
 // If g is undirected, Q is calculated according to
-//  Q_{layer} = w_{layer} \sum_{ij} [ A_{layer}*_{ij} - (\gamma_{layer} k_i k_j)/2m_{layer} ] \delta(c_i,c_j),
+//
+//	Q_{layer} = w_{layer} \sum_{ij} [ A_{layer}*_{ij} - (\gamma_{layer} k_i k_j)/2m_{layer} ] \delta(c_i,c_j),
+//
 // If g is directed, it is calculated according to
-//  Q_{layer} = w_{layer} \sum_{ij} [ A_{layer}*_{ij} - (\gamma_{layer} k_i^in k_j^out)/m_{layer} ] \delta(c_i,c_j).
+//
+//	Q_{layer} = w_{layer} \sum_{ij} [ A_{layer}*_{ij} - (\gamma_{layer} k_i^in k_j^out)/m_{layer} ] \delta(c_i,c_j).
 //
 // Note that Q values for multiplex graphs are not scaled by the total layer edge weight.
 //
@@ -183,9 +192,12 @@ type ReducedMultiplex interface {
 // edge weight that does not sign-match the layer weight.
 //
 // If g is undirected it is modularised to minimise
-//  Q = \sum w_{layer} \sum_{ij} [ A_{layer}*_{ij} - (\gamma_{layer} k_i k_j)/2m ] \delta(c_i,c_j).
+//
+//	Q = \sum w_{layer} \sum_{ij} [ A_{layer}*_{ij} - (\gamma_{layer} k_i k_j)/2m ] \delta(c_i,c_j).
+//
 // If g is directed it is modularised to minimise
-//  Q = \sum w_{layer} \sum_{ij} [ A_{layer}*_{ij} - (\gamma_{layer} k_i^in k_j^out)/m_{layer} ] \delta(c_i,c_j).
+//
+//	Q = \sum w_{layer} \sum_{ij} [ A_{layer}*_{ij} - (\gamma_{layer} k_i^in k_j^out)/m_{layer} ] \delta(c_i,c_j).
 //
 // The concrete type of the ReducedMultiplex will be a pointer to a
 // ReducedUndirectedMultiplex.

@@ -265,9 +265,10 @@ func (v *VecDense) CopyVec(a Vector) int {
 }
 
 // Norm returns the specified norm of the receiver. Valid norms are:
-//  1 - The sum of the element magnitudes
-//  2 - The Euclidean norm, the square root of the sum of the squares of the elements
-//  Inf - The maximum element magnitude
+//
+//	1 - The sum of the element magnitudes
+//	2 - The Euclidean norm, the square root of the sum of the squares of the elements
+//	Inf - The maximum element magnitude
 //
 // Norm will panic with ErrNormOrder if an illegal norm is specified and with
 // ErrZeroLength if the vector has zero size.

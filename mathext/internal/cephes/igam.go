@@ -52,7 +52,9 @@ var igamCoefs = [igamDimK][igamDimN]float64{
 }
 
 // Igam computes the incomplete Gamma integral.
-//  Igam(a,x) = (1/ Γ(a)) \int_0^x e^{-t} t^{a-1} dt
+//
+//	Igam(a,x) = (1/ Γ(a)) \int_0^x e^{-t} t^{a-1} dt
+//
 // The input argument a must be positive and x must be non-negative or Igam
 // will panic.
 func Igam(a, x float64) float64 {
@@ -87,8 +89,10 @@ func Igam(a, x float64) float64 {
 }
 
 // IgamC computes the complemented incomplete Gamma integral.
-//  IgamC(a,x) = 1 - Igam(a,x)
-//             = (1/ Γ(a)) \int_0^\infty e^{-t} t^{a-1} dt
+//
+//	IgamC(a,x) = 1 - Igam(a,x)
+//	           = (1/ Γ(a)) \int_0^\infty e^{-t} t^{a-1} dt
+//
 // The input argument a must be positive and x must be non-negative or
 // IgamC will panic.
 func IgamC(a, x float64) float64 {
@@ -135,11 +139,16 @@ func IgamC(a, x float64) float64 {
 }
 
 // igamFac computes
-//  x^a * e^{-x} / Γ(a)
+//
+//	x^a * e^{-x} / Γ(a)
+//
 // corrected from (15) and (16) in [2] by replacing
-//  e^{x - a}
+//
+//	e^{x - a}
+//
 // with
-//  e^{a - x}
+//
+//	e^{a - x}
 func igamFac(a, x float64) float64 {
 	if math.Abs(a-x) > 0.4*math.Abs(a) {
 		ax := a*math.Log(x) - x - lgam(a)

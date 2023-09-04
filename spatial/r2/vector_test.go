@@ -8,6 +8,7 @@ import (
 	"math"
 	"testing"
 
+	"golang.org/x/exp/rand"
 	"gonum.org/v1/gonum/floats/scalar"
 )
 
@@ -170,6 +171,7 @@ func TestNorm2(t *testing.T) {
 }
 
 func TestUnit(t *testing.T) {
+	const tol = 1e-14
 	for _, test := range []struct {
 		v, want Vec
 	}{
@@ -185,7 +187,7 @@ func TestUnit(t *testing.T) {
 		{Vec{1e4, math.MaxFloat32 - 1}, Vec{0, 1}},
 	} {
 		got := Unit(test.v)
-		if !vecApproxEqual(got, test.want) {
+		if !vecApproxEqual(got, test.want, tol) {
 			t.Errorf(
 				"Unit(%v) = %v, want %v",
 				test.v, got, test.want,
@@ -201,6 +203,7 @@ func TestUnit(t *testing.T) {
 }
 
 func TestCos(t *testing.T) {
+	const tol = 1e-14
 	for _, test := range []struct {
 		v1, v2 Vec
 		want   float64
@@ -211,7 +214,6 @@ func TestCos(t *testing.T) {
 		{Vec{1, 0}, Vec{0, 1}, 0},
 		{Vec{1, 0}, Vec{-1, 0}, -1},
 	} {
-		tol := 1e-14
 		got := Cos(test.v1, test.v2)
 		if !scalar.EqualWithinAbs(got, test.want, tol) {
 			t.Errorf("cos(%v, %v)= %v, want %v",
@@ -222,6 +224,7 @@ func TestCos(t *testing.T) {
 }
 
 func TestRotate(t *testing.T) {
+	const tol = 1e-14
 	for _, test := range []struct {
 		v, q  Vec
 		alpha float64
@@ -237,7 +240,7 @@ func TestRotate(t *testing.T) {
 		{Vec{2, 2}, Vec{2, 0}, math.Pi, Vec{2, -2}},
 	} {
 		got := Rotate(test.v, test.alpha, test.q)
-		if !vecApproxEqual(got, test.want) {
+		if !vecApproxEqual(got, test.want, tol) {
 			t.Errorf(
 				"rotate(%v, %v, %v)= %v, want=%v",
 				test.v, test.alpha, test.q, got, test.want,
@@ -254,12 +257,26 @@ func vecIsNaNAny(v Vec) bool {
 	return math.IsNaN(v.X) || math.IsNaN(v.Y)
 }
 
-func vecApproxEqual(a, b Vec) bool {
-	const tol = 1e-14
+func vecApproxEqual(a, b Vec, tol float64) bool {
+	if tol == 0 {
+		return vecEqual(a, b)
+	}
 	if vecIsNaNAny(a) || vecIsNaNAny(b) {
 		return vecIsNaN(a) && vecIsNaN(b)
 	}
-
 	return scalar.EqualWithinAbs(a.X, b.X, tol) &&
 		scalar.EqualWithinAbs(a.Y, b.Y, tol)
+}
+
+func randomVec(rnd *rand.Rand) (v Vec) {
+	v.X = (rnd.Float64() - 0.5) * 20
+	v.Y = (rnd.Float64() - 0.5) * 20
+	return v
+}
+
+func vecEqual(a, b Vec) bool {
+	if vecIsNaNAny(a) || vecIsNaNAny(b) {
+		return vecIsNaN(a) && vecIsNaN(b)
+	}
+	return a == b
 }

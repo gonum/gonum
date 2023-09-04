@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//nolint
 package amos
 
 import (
@@ -1381,8 +1380,8 @@ func zuchkOrig(YR, YI float64, NZ int, ASCLE, TOL float64) (YRout, YIout float64
 
 // ZACAI APPLIES THE ANALYTIC CONTINUATION FORMULA
 //
-//  K(FNU,ZN*EXP(MP))=K(FNU,ZN)*EXP(-MP*FNU) - MP*I(FNU,ZN)
-//        MP=PI*MR*CMPLX(0.0,1.0)
+//	K(FNU,ZN*EXP(MP))=K(FNU,ZN)*EXP(-MP*FNU) - MP*I(FNU,ZN)
+//	      MP=PI*MR*CMPLX(0.0,1.0)
 //
 // TO CONTINUE THE K FUNCTION FROM THE RIGHT HALF TO THE LEFT
 // HALF Z PLANE FOR USE WITH ZAIRY WHERE FNU=1/3 OR 2/3 AND N=1.

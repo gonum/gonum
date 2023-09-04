@@ -7,8 +7,10 @@ package gonum
 import "math"
 
 // Dlas2 computes the singular values of the 2×2 matrix defined by
-//  [F G]
-//  [0 H]
+//
+//	[F G]
+//	[0 H]
+//
 // The smaller and larger singular values are returned in that order.
 //
 // Dlas2 is an internal routine. It is exported for testing purposes.

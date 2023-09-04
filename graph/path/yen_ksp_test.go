@@ -22,6 +22,7 @@ var yenShortestPathTests = []struct {
 
 	query     simple.Edge
 	k         int
+	cost      float64
 	wantPaths [][]int64
 
 	relaxed bool
@@ -43,6 +44,7 @@ var yenShortestPathTests = []struct {
 		},
 		query: simple.Edge{F: simple.Node('C'), T: simple.Node('H')},
 		k:     3,
+		cost:  math.Inf(1),
 		wantPaths: [][]int64{
 			{'C', 'E', 'F', 'H'},
 			{'C', 'E', 'G', 'H'},
@@ -57,6 +59,7 @@ var yenShortestPathTests = []struct {
 		},
 		query: simple.Edge{F: simple.Node(0), T: simple.Node(1)},
 		k:     10,
+		cost:  math.Inf(1),
 		wantPaths: [][]int64{
 			{0, 1},
 		},
@@ -79,6 +82,7 @@ var yenShortestPathTests = []struct {
 		},
 		query: simple.Edge{F: simple.Node(0), T: simple.Node(1)},
 		k:     1,
+		cost:  math.Inf(1),
 		wantPaths: [][]int64{
 			{0, 1},
 		},
@@ -89,6 +93,7 @@ var yenShortestPathTests = []struct {
 		edges: bipartite(5, 3, 0),
 		query: simple.Edge{F: simple.Node(-1), T: simple.Node(1)},
 		k:     10,
+		cost:  math.Inf(1),
 		wantPaths: [][]int64{
 			{-1, 2, 1},
 			{-1, 3, 1},
@@ -103,6 +108,7 @@ var yenShortestPathTests = []struct {
 		edges: bipartite(5, 3, 0),
 		query: simple.Edge{F: simple.Node(-1), T: simple.Node(1)},
 		k:     5,
+		cost:  math.Inf(1),
 		wantPaths: [][]int64{
 			{-1, 2, 1},
 			{-1, 3, 1},
@@ -117,6 +123,7 @@ var yenShortestPathTests = []struct {
 		edges:   bipartite(10, 3, 0),
 		query:   simple.Edge{F: simple.Node(-1), T: simple.Node(1)},
 		k:       5,
+		cost:    math.Inf(1),
 		relaxed: true,
 	},
 	{
@@ -125,6 +132,7 @@ var yenShortestPathTests = []struct {
 		edges: bipartite(5, 10, 1),
 		query: simple.Edge{F: simple.Node(-1), T: simple.Node(1)},
 		k:     5,
+		cost:  math.Inf(1),
 		wantPaths: [][]int64{
 			{-1, 2, 1},
 			{-1, 3, 1},
@@ -139,6 +147,7 @@ var yenShortestPathTests = []struct {
 		edges: bipartite(5, 10, -1),
 		query: simple.Edge{F: simple.Node(-1), T: simple.Node(1)},
 		k:     5,
+		cost:  math.Inf(1),
 		wantPaths: [][]int64{
 			{-1, 6, 1},
 			{-1, 5, 1},
@@ -164,11 +173,137 @@ var yenShortestPathTests = []struct {
 		},
 		query: simple.Edge{F: simple.Node(0), T: simple.Node(6)},
 		k:     4,
+		cost:  math.Inf(1),
 		wantPaths: [][]int64{
 			{0, 1, 3, 6},
 			{0, 1, 5, 6},
 			{0, 1, 2, 4, 6},
 			{0, 1, 2, 5, 6},
+		},
+	},
+	{
+		name:  "waterfall_3",
+		graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedDirectedGraph(0, math.Inf(1)) },
+		edges: []simple.WeightedEdge{
+			{F: simple.Node(0), T: simple.Node(1), W: 1},
+			{F: simple.Node(1), T: simple.Node(2), W: 1},
+			{F: simple.Node(1), T: simple.Node(3), W: 1},
+			{F: simple.Node(1), T: simple.Node(5), W: 1},
+			{F: simple.Node(2), T: simple.Node(4), W: 1},
+			{F: simple.Node(2), T: simple.Node(5), W: 1},
+			{F: simple.Node(3), T: simple.Node(6), W: 1},
+			{F: simple.Node(4), T: simple.Node(6), W: 1},
+			{F: simple.Node(5), T: simple.Node(6), W: 1},
+			{F: simple.Node(5), T: simple.Node(6), W: 1},
+		},
+		query: simple.Edge{F: simple.Node(0), T: simple.Node(6)},
+		k:     -1,
+		cost:  0, // Find all paths equivalent to shortest.
+		wantPaths: [][]int64{
+			{0, 1, 3, 6},
+			{0, 1, 5, 6},
+		},
+	},
+	{
+		name:  "clean_root", // This is the failing case in gonum/gonum#1778.
+		graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedUndirectedGraph(0, math.Inf(1)) },
+		edges: []simple.WeightedEdge{
+			{F: simple.Node(1), T: simple.Node(2), W: 4},
+			{F: simple.Node(1), T: simple.Node(3), W: 1},
+			{F: simple.Node(2), T: simple.Node(3), W: 4},
+		},
+		query: simple.Edge{F: simple.Node(1), T: simple.Node(2)},
+		k:     3,
+		cost:  math.Inf(1),
+		wantPaths: [][]int64{
+			{1, 2},
+			{1, 3, 2},
+		},
+	},
+	{
+		name:  "clean_root_4",
+		graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedUndirectedGraph(0, math.Inf(1)) },
+		edges: []simple.WeightedEdge{
+			{F: simple.Node(1), T: simple.Node(2), W: 4},
+			{F: simple.Node(1), T: simple.Node(3), W: 1},
+			{F: simple.Node(2), T: simple.Node(3), W: 4},
+		},
+		query: simple.Edge{F: simple.Node(1), T: simple.Node(2)},
+		k:     -1,
+		cost:  0,
+		wantPaths: [][]int64{
+			{1, 2},
+		},
+	},
+	{
+		name:  "clean_root_1060",
+		graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedUndirectedGraph(0, math.Inf(1)) },
+		edges: []simple.WeightedEdge{
+			{F: simple.Node(1), T: simple.Node(2), W: 450},
+			{F: simple.Node(3), T: simple.Node(4), W: 450},
+			{F: simple.Node(3), T: simple.Node(1), W: 20},
+			{F: simple.Node(5), T: simple.Node(2), W: 450},
+			{F: simple.Node(2), T: simple.Node(4), W: 20},
+			{F: simple.Node(4), T: simple.Node(6), W: 610},
+			{F: simple.Node(5), T: simple.Node(7), W: 20},
+			{F: simple.Node(2), T: simple.Node(8), W: 610},
+			{F: simple.Node(7), T: simple.Node(3), W: 40},
+			{F: simple.Node(1), T: simple.Node(5), W: 40},
+		},
+		query: simple.Edge{F: simple.Node(8), T: simple.Node(5)},
+		k:     -1,
+		cost:  0,
+		wantPaths: [][]int64{
+			{8, 2, 5},
+		},
+	},
+	{
+		name:  "clean_root_1100",
+		graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedUndirectedGraph(0, math.Inf(1)) },
+		edges: []simple.WeightedEdge{
+			{F: simple.Node(1), T: simple.Node(2), W: 450},
+			{F: simple.Node(3), T: simple.Node(4), W: 450},
+			{F: simple.Node(3), T: simple.Node(1), W: 20},
+			{F: simple.Node(5), T: simple.Node(2), W: 450},
+			{F: simple.Node(2), T: simple.Node(4), W: 20},
+			{F: simple.Node(4), T: simple.Node(6), W: 610},
+			{F: simple.Node(5), T: simple.Node(7), W: 20},
+			{F: simple.Node(2), T: simple.Node(8), W: 610},
+			{F: simple.Node(7), T: simple.Node(3), W: 40},
+			{F: simple.Node(1), T: simple.Node(5), W: 40},
+		},
+		query: simple.Edge{F: simple.Node(8), T: simple.Node(5)},
+		k:     -1,
+		cost:  40,
+		wantPaths: [][]int64{
+			{8, 2, 5},
+			{8, 2, 1, 5},
+		},
+	},
+	{
+		name:  "clean_root_1140",
+		graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedUndirectedGraph(0, math.Inf(1)) },
+		edges: []simple.WeightedEdge{
+			{F: simple.Node(1), T: simple.Node(2), W: 450},
+			{F: simple.Node(3), T: simple.Node(4), W: 450},
+			{F: simple.Node(3), T: simple.Node(1), W: 20},
+			{F: simple.Node(5), T: simple.Node(2), W: 450},
+			{F: simple.Node(2), T: simple.Node(4), W: 20},
+			{F: simple.Node(4), T: simple.Node(6), W: 610},
+			{F: simple.Node(5), T: simple.Node(7), W: 20},
+			{F: simple.Node(2), T: simple.Node(8), W: 610},
+			{F: simple.Node(7), T: simple.Node(3), W: 40},
+			{F: simple.Node(1), T: simple.Node(5), W: 40},
+		},
+		query: simple.Edge{F: simple.Node(8), T: simple.Node(5)},
+		k:     -1,
+		cost:  80,
+		wantPaths: [][]int64{
+			{8, 2, 5},
+			{8, 2, 1, 5},
+			{8, 2, 1, 3, 7, 5},
+			{8, 2, 4, 3, 1, 5},
+			{8, 2, 4, 3, 7, 5},
 		},
 	},
 }
@@ -210,7 +345,7 @@ func TestYenKSP(t *testing.T) {
 			g.SetWeightedEdge(e)
 		}
 
-		got := YenKShortestPaths(g.(graph.Graph), test.k, test.query.From(), test.query.To())
+		got := YenKShortestPaths(g.(graph.Graph), test.k, test.cost, test.query.From(), test.query.To())
 		gotIDs := pathIDs(got)
 
 		paths := make(byPathWeight, len(gotIDs))

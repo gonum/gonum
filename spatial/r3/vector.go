@@ -4,13 +4,7 @@
 
 package r3
 
-import (
-	"math"
-
-	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/mat"
-	"gonum.org/v1/gonum/num/quat"
-)
+import "math"
 
 // Vec is a 3D vector.
 type Vec struct {
@@ -64,13 +58,15 @@ func Rotate(p Vec, alpha float64, axis Vec) Vec {
 }
 
 // Norm returns the Euclidean norm of p
-//  |p| = sqrt(p_x^2 + p_y^2 + p_z^2).
+//
+//	|p| = sqrt(p_x^2 + p_y^2 + p_z^2).
 func Norm(p Vec) float64 {
 	return math.Hypot(p.X, math.Hypot(p.Y, p.Z))
 }
 
 // Norm2 returns the Euclidean squared norm of p
-//  |p|^2 = p_x^2 + p_y^2 + p_z^2.
+//
+//	|p|^2 = p_x^2 + p_y^2 + p_z^2.
 func Norm2(p Vec) float64 {
 	return p.X*p.X + p.Y*p.Y + p.Z*p.Z
 }
@@ -89,99 +85,77 @@ func Cos(p, q Vec) float64 {
 	return Dot(p, q) / (Norm(p) * Norm(q))
 }
 
-// Box is a 3D bounding box.
-type Box struct {
-	Min, Max Vec
+// Divergence returns the divergence of the vector field at the point p,
+// approximated using finite differences with the given step sizes.
+func Divergence(p, step Vec, field func(Vec) Vec) float64 {
+	sx := Vec{X: step.X}
+	divx := (field(Add(p, sx)).X - field(Sub(p, sx)).X) / step.X
+	sy := Vec{Y: step.Y}
+	divy := (field(Add(p, sy)).Y - field(Sub(p, sy)).Y) / step.Y
+	sz := Vec{Z: step.Z}
+	divz := (field(Add(p, sz)).Z - field(Sub(p, sz)).Z) / step.Z
+	return 0.5 * (divx + divy + divz)
 }
 
-// TODO: possibly useful additions to the current rotation API:
-//  - create rotations from Euler angles (NewRotationFromEuler?)
-//  - create rotations from rotation matrices (NewRotationFromMatrix?)
-//  - return the equivalent Euler angles from a Rotation
+// Gradient returns the gradient of the scalar field at the point p,
+// approximated using finite differences with the given step sizes.
+func Gradient(p, step Vec, field func(Vec) float64) Vec {
+	dx := Vec{X: step.X}
+	dy := Vec{Y: step.Y}
+	dz := Vec{Z: step.Z}
+	return Vec{
+		X: (field(Add(p, dx)) - field(Sub(p, dx))) / (2 * step.X),
+		Y: (field(Add(p, dy)) - field(Sub(p, dy))) / (2 * step.Y),
+		Z: (field(Add(p, dz)) - field(Sub(p, dz))) / (2 * step.Z),
+	}
+}
+
+// minElem return a vector with the minimum components of two vectors.
+func minElem(a, b Vec) Vec {
+	return Vec{
+		X: math.Min(a.X, b.X),
+		Y: math.Min(a.Y, b.Y),
+		Z: math.Min(a.Z, b.Z),
+	}
+}
+
+// maxElem return a vector with the maximum components of two vectors.
+func maxElem(a, b Vec) Vec {
+	return Vec{
+		X: math.Max(a.X, b.X),
+		Y: math.Max(a.Y, b.Y),
+		Z: math.Max(a.Z, b.Z),
+	}
+}
+
+// absElem returns the vector with components set to their absolute value.
+func absElem(a Vec) Vec {
+	return Vec{
+		X: math.Abs(a.X),
+		Y: math.Abs(a.Y),
+		Z: math.Abs(a.Z),
+	}
+}
+
+// mulElem returns the Hadamard product between vectors a and b.
 //
-// Euler angles have issues (see [1] for a discussion).
-// We should think carefully before adding them in.
-// [1]: http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/
-
-// Rotation describes a rotation in space.
-type Rotation quat.Number
-
-// NewRotation creates a rotation by alpha, around axis.
-func NewRotation(alpha float64, axis Vec) Rotation {
-	if alpha == 0 {
-		return Rotation{Real: 1}
-	}
-	q := raise(axis)
-	sin, cos := math.Sincos(0.5 * alpha)
-	q = quat.Scale(sin/quat.Abs(q), q)
-	q.Real += cos
-	if len := quat.Abs(q); len != 1 {
-		q = quat.Scale(1/len, q)
-	}
-
-	return Rotation(q)
-}
-
-// Rotate returns p rotated according to the parameters used to construct
-// the receiver.
-func (r Rotation) Rotate(p Vec) Vec {
-	if r.isIdentity() {
-		return p
-	}
-	qq := quat.Number(r)
-	pp := quat.Mul(quat.Mul(qq, raise(p)), quat.Conj(qq))
-	return Vec{X: pp.Imag, Y: pp.Jmag, Z: pp.Kmag}
-}
-
-func (r Rotation) isIdentity() bool {
-	return r == Rotation{Real: 1}
-}
-
-func raise(p Vec) quat.Number {
-	return quat.Number{Imag: p.X, Jmag: p.Y, Kmag: p.Z}
-}
-
-// Matrix returns a 3×3 rotation matrix corresponding to the receiver. It
-// may be used to perform rotations on a 3-vector or to apply the rotation
-// to a 3×n matrix of column vectors. If the receiver is not a unit
-// quaternion, the returned matrix will not be a pure rotation.
-func (r Rotation) Matrix() mat.Matrix {
-	re, im, jm, km := r.Real, r.Imag, r.Jmag, r.Kmag
-	im2 := im * im
-	jm2 := jm * jm
-	km2 := km * km
-	rim := re * im
-	rjm := re * jm
-	rkm := re * km
-	ijm := im * jm
-	jkm := jm * km
-	kim := km * im
-	return &matrix{
-		1 - 2*(jm2+km2), 2 * (ijm - rkm), 2 * (kim + rjm),
-		2 * (ijm + rkm), 1 - 2*(im2+km2), 2 * (jkm - rim),
-		2 * (kim - rjm), 2 * (jkm + rim), 1 - 2*(im2+jm2),
+//	v = {a.X*b.X, a.Y*b.Y, a.Z*b.Z}
+func mulElem(a, b Vec) Vec {
+	return Vec{
+		X: a.X * b.X,
+		Y: a.Y * b.Y,
+		Z: a.Z * b.Z,
 	}
 }
 
-// matrix is a 3×3 rotation matrix.
-type matrix [9]float64
-
-var (
-	_ mat.Matrix      = (*matrix)(nil)
-	_ mat.RawMatrixer = (*matrix)(nil)
-)
-
-func (m *matrix) At(i, j int) float64 {
-	if uint(i) >= 3 {
-		panic(mat.ErrRowAccess)
+// divElem returns the Hadamard product between vector a
+// and the inverse components of vector b.
+//
+//	v = {a.X/b.X, a.Y/b.Y, a.Z/b.Z}
+func divElem(a, b Vec) Vec {
+	return Vec{
+		X: a.X / b.X,
+		Y: a.Y / b.Y,
+		Z: a.Z / b.Z,
 	}
-	if uint(j) >= 3 {
-		panic(mat.ErrColAccess)
-	}
-	return m[i*3+j]
-}
-func (m *matrix) Dims() (r, c int) { return 3, 3 }
-func (m *matrix) T() mat.Matrix    { return mat.Transpose{Matrix: m} }
-func (m *matrix) RawMatrix() blas64.General {
-	return blas64.General{Rows: 3, Cols: 3, Data: m[:], Stride: 3}
 }

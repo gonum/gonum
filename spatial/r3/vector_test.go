@@ -8,6 +8,8 @@ import (
 	"math"
 	"testing"
 
+	"golang.org/x/exp/rand"
+
 	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/mat"
 )
@@ -243,13 +245,99 @@ func TestRotate(t *testing.T) {
 		}
 
 		var gotv mat.VecDense
-		gotv.MulVec(NewRotation(test.alpha, test.axis).Matrix(), vecDense(test.v))
+		gotv.MulVec(NewRotation(test.alpha, test.axis).Mat(), vecDense(test.v))
 		got = vec(gotv)
 		if !vecApproxEqual(got, test.want, tol) {
 			t.Errorf(
 				"matrix rotate(%v, %v, %v)= %v, want=%v",
 				test.v, test.alpha, test.axis, got, test.want,
 			)
+		}
+	}
+}
+
+var vectorFields = []struct {
+	field      func(Vec) Vec
+	divergence func(Vec) float64
+	jacobian   func(Vec) *Mat
+}{
+	{
+		field: func(v Vec) Vec {
+			// (x*y*z, y*z, z*x)
+			return Vec{X: v.X * v.Y * v.Z, Y: v.Y * v.Z, Z: v.Z * v.X}
+		},
+		divergence: func(v Vec) float64 {
+			return v.X + v.Y*v.Z + v.Z
+		},
+		jacobian: func(v Vec) *Mat {
+			return NewMat([]float64{
+				v.Y * v.Z, v.X * v.Z, v.X * v.Y,
+				0, v.Z, v.Y,
+				v.Z, 0, v.X,
+			})
+		},
+	},
+	{
+		field: func(v Vec) Vec {
+			// (x*y*z*cos(y), y*z+sin(x), z*x*sin(y))
+			sx := math.Sin(v.X)
+			sy, cy := math.Sincos(v.Y)
+			return Vec{
+				X: v.X * v.Y * v.Z * cy,
+				Y: v.Y*v.Z + sx,
+				Z: v.Z * v.X * sy,
+			}
+		},
+		divergence: func(v Vec) float64 {
+			sy, cy := math.Sincos(v.Y)
+			return v.X*sy + v.Y*v.Z*cy + v.Z
+		},
+		jacobian: func(v Vec) *Mat {
+			cx := math.Cos(v.X)
+			sy, cy := math.Sincos(v.Y)
+			return NewMat([]float64{
+				v.Y * v.Z * cy, v.X*v.Z*cy - v.X*v.Y*v.Z*sy, v.X * v.Y * cy,
+				cx, v.Z, v.Y,
+				v.Z * sy, v.X * v.Z * cy, v.X * sy,
+			})
+		},
+	},
+}
+
+func TestDivergence(t *testing.T) {
+	const (
+		tol = 1e-10
+		h   = 1e-2
+	)
+	step := Vec{X: h, Y: h, Z: h}
+	rnd := rand.New(rand.NewSource(1))
+	for _, test := range vectorFields {
+		for i := 0; i < 30; i++ {
+			p := randomVec(rnd)
+			got := Divergence(p, step, test.field)
+			want := test.divergence(p)
+			if math.Abs(got-want) > tol {
+				t.Errorf("result out of tolerance. got %v, want %v", got, want)
+			}
+		}
+	}
+}
+
+func TestGradient(t *testing.T) {
+	const (
+		tol = 1e-6
+		h   = 1e-5
+	)
+	step := Vec{X: h, Y: h, Z: h}
+	rnd := rand.New(rand.NewSource(1))
+	for _, test := range scalarFields {
+		for i := 0; i < 30; i++ {
+			p := randomVec(rnd)
+			got := Gradient(p, step, test.field)
+			want := test.gradient(p)
+			if !vecApproxEqual(got, want, tol) {
+				t.Errorf("result out of tolerance. got %v, want %v", got, want)
+			}
 		}
 	}
 }

@@ -11,17 +11,23 @@ import (
 )
 
 // Dgesc2 solves a system of linear equations
-//  A * x = scale * b
+//
+//	A * x = scale * b
+//
 // with a general n×n matrix A represented by the LU factorization with complete
 // pivoting
-//  A = P * L * U * Q
+//
+//	A = P * L * U * Q
+//
 // as computed by Dgetc2.
 //
 // On entry, rhs contains the right hand side vector b. On return, it is
 // overwritten with the solution vector x.
 //
 // Dgesc2 returns a scale factor
-//  0 <= scale <= 1
+//
+//	0 <= scale <= 1
+//
 // chosen to prevent overflow in the solution.
 //
 // Dgesc2 is an internal routine. It is exported for testing purposes.

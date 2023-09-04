@@ -14,15 +14,16 @@ import (
 // Beale implements the Beale's function.
 //
 // Standard starting points:
-//  Easy: [1, 1]
-//  Hard: [1, 4]
+//
+//	Easy: [1, 1]
+//	Hard: [1, 4]
 //
 // References:
-//  - Beale, E.: On an Iterative Method for Finding a Local Minimum of a
-//    Function of More than One Variable. Technical Report 25, Statistical
-//    Techniques Research Group, Princeton University (1958)
-//  - More, J., Garbow, B.S., Hillstrom, K.E.: Testing unconstrained
-//    optimization software. ACM Trans Math Softw 7 (1981), 17-41
+//   - Beale, E.: On an Iterative Method for Finding a Local Minimum of a
+//     Function of More than One Variable. Technical Report 25, Statistical
+//     Techniques Research Group, Princeton University (1958)
+//   - More, J., Garbow, B.S., Hillstrom, K.E.: Testing unconstrained
+//     optimization software. ACM Trans Math Softw 7 (1981), 17-41
 type Beale struct{}
 
 func (Beale) Func(x []float64) float64 {
@@ -92,11 +93,13 @@ func (Beale) Minima() []Minimum {
 // BiggsEXP2 implements the Biggs' EXP2 function.
 //
 // Standard starting point:
-//  [1, 2]
+//
+//	[1, 2]
 //
 // Reference:
-//  Biggs, M.C.: Minimization algorithms making use of non-quadratic properties
-//  of the objective function. IMA J Appl Math 8 (1971), 315-327; doi:10.1093/imamat/8.3.315
+//
+//	Biggs, M.C.: Minimization algorithms making use of non-quadratic properties
+//	of the objective function. IMA J Appl Math 8 (1971), 315-327; doi:10.1093/imamat/8.3.315
 type BiggsEXP2 struct{}
 
 func (BiggsEXP2) Func(x []float64) (sum float64) {
@@ -150,11 +153,13 @@ func (BiggsEXP2) Minima() []Minimum {
 // BiggsEXP3 implements the Biggs' EXP3 function.
 //
 // Standard starting point:
-//  [1, 2, 1]
+//
+//	[1, 2, 1]
 //
 // Reference:
-//  Biggs, M.C.: Minimization algorithms making use of non-quadratic properties
-//  of the objective function. IMA J Appl Math 8 (1971), 315-327; doi:10.1093/imamat/8.3.315
+//
+//	Biggs, M.C.: Minimization algorithms making use of non-quadratic properties
+//	of the objective function. IMA J Appl Math 8 (1971), 315-327; doi:10.1093/imamat/8.3.315
 type BiggsEXP3 struct{}
 
 func (BiggsEXP3) Func(x []float64) (sum float64) {
@@ -210,11 +215,13 @@ func (BiggsEXP3) Minima() []Minimum {
 // BiggsEXP4 implements the Biggs' EXP4 function.
 //
 // Standard starting point:
-//  [1, 2, 1, 1]
+//
+//	[1, 2, 1, 1]
 //
 // Reference:
-//  Biggs, M.C.: Minimization algorithms making use of non-quadratic properties
-//  of the objective function. IMA J Appl Math 8 (1971), 315-327; doi:10.1093/imamat/8.3.315
+//
+//	Biggs, M.C.: Minimization algorithms making use of non-quadratic properties
+//	of the objective function. IMA J Appl Math 8 (1971), 315-327; doi:10.1093/imamat/8.3.315
 type BiggsEXP4 struct{}
 
 func (BiggsEXP4) Func(x []float64) (sum float64) {
@@ -272,11 +279,13 @@ func (BiggsEXP4) Minima() []Minimum {
 // BiggsEXP5 implements the Biggs' EXP5 function.
 //
 // Standard starting point:
-//  [1, 2, 1, 1, 1]
+//
+//	[1, 2, 1, 1, 1]
 //
 // Reference:
-//  Biggs, M.C.: Minimization algorithms making use of non-quadratic properties
-//  of the objective function. IMA J Appl Math 8 (1971), 315-327; doi:10.1093/imamat/8.3.315
+//
+//	Biggs, M.C.: Minimization algorithms making use of non-quadratic properties
+//	of the objective function. IMA J Appl Math 8 (1971), 315-327; doi:10.1093/imamat/8.3.315
 type BiggsEXP5 struct{}
 
 func (BiggsEXP5) Func(x []float64) (sum float64) {
@@ -336,14 +345,15 @@ func (BiggsEXP5) Minima() []Minimum {
 // BiggsEXP6 implements the Biggs' EXP6 function.
 //
 // Standard starting point:
-//  [1, 2, 1, 1, 1, 1]
+//
+//	[1, 2, 1, 1, 1, 1]
 //
 // References:
-//  - Biggs, M.C.: Minimization algorithms making use of non-quadratic
-//    properties of the objective function. IMA J Appl Math 8 (1971), 315-327;
-//    doi:10.1093/imamat/8.3.315
-//  - More, J., Garbow, B.S., Hillstrom, K.E.: Testing unconstrained
-//    optimization software. ACM Trans Math Softw 7 (1981), 17-41
+//   - Biggs, M.C.: Minimization algorithms making use of non-quadratic
+//     properties of the objective function. IMA J Appl Math 8 (1971), 315-327;
+//     doi:10.1093/imamat/8.3.315
+//   - More, J., Garbow, B.S., Hillstrom, K.E.: Testing unconstrained
+//     optimization software. ACM Trans Math Softw 7 (1981), 17-41
 type BiggsEXP6 struct{}
 
 func (BiggsEXP6) Func(x []float64) (sum float64) {
@@ -417,13 +427,14 @@ func (BiggsEXP6) Minima() []Minimum {
 // Box3D implements the Box' three-dimensional function.
 //
 // Standard starting point:
-//  [0, 10, 20]
+//
+//	[0, 10, 20]
 //
 // References:
-//  - Box, M.J.: A comparison of several current optimization methods, and the
-//    use of transformations in constrained problems. Comput J 9 (1966), 67-77
-//  - More, J., Garbow, B.S., Hillstrom, K.E.: Testing unconstrained
-//    optimization software. ACM Trans Math Softw 7 (1981), 17-41
+//   - Box, M.J.: A comparison of several current optimization methods, and the
+//     use of transformations in constrained problems. Comput J 9 (1966), 67-77
+//   - More, J., Garbow, B.S., Hillstrom, K.E.: Testing unconstrained
+//     optimization software. ACM Trans Math Softw 7 (1981), 17-41
 type Box3D struct{}
 
 func (Box3D) Func(x []float64) (sum float64) {
@@ -485,11 +496,14 @@ func (Box3D) Minima() []Minimum {
 // BraninHoo implements the Branin-Hoo function. BraninHoo is a 2-dimensional
 // test function with three global minima. It is typically evaluated in the domain
 // x_0 ∈ [-5, 10], x_1 ∈ [0, 15].
-//  f(x) = (x_1 - (5.1/(4π^2))*x_0^2 + (5/π)*x_0 - 6)^2 + 10*(1-1/(8π))cos(x_0) + 10
+//
+//	f(x) = (x_1 - (5.1/(4π^2))*x_0^2 + (5/π)*x_0 - 6)^2 + 10*(1-1/(8π))cos(x_0) + 10
+//
 // It has a minimum value of 0.397887 at x^* = {(-π, 12.275), (π, 2.275), (9.424778, 2.475)}
 //
 // Reference:
-//  https://www.sfu.ca/~ssurjano/branin.html (obtained June 2017)
+//
+//	https://www.sfu.ca/~ssurjano/branin.html (obtained June 2017)
 type BraninHoo struct{}
 
 func (BraninHoo) Func(x []float64) float64 {
@@ -525,11 +539,12 @@ func (BraninHoo) Minima() []Minimum {
 // BrownBadlyScaled implements the Brown's badly scaled function.
 //
 // Standard starting point:
-//  [1, 1]
+//
+//	[1, 1]
 //
 // References:
-//  - More, J., Garbow, B.S., Hillstrom, K.E.: Testing unconstrained
-//    optimization software. ACM Trans Math Softw 7 (1981), 17-41
+//   - More, J., Garbow, B.S., Hillstrom, K.E.: Testing unconstrained
+//     optimization software. ACM Trans Math Softw 7 (1981), 17-41
 type BrownBadlyScaled struct{}
 
 func (BrownBadlyScaled) Func(x []float64) float64 {
@@ -587,14 +602,15 @@ func (BrownBadlyScaled) Minima() []Minimum {
 // BrownAndDennis implements the Brown and Dennis function.
 //
 // Standard starting point:
-//  [25, 5, -5, -1]
+//
+//	[25, 5, -5, -1]
 //
 // References:
-//  - Brown, K.M., Dennis, J.E.: New computational algorithms for minimizing a
-//    sum of squares of nonlinear functions. Research Report Number 71-6, Yale
-//    University (1971)
-//  - More, J., Garbow, B.S., Hillstrom, K.E.: Testing unconstrained
-//    optimization software. ACM Trans Math Softw 7 (1981), 17-41
+//   - Brown, K.M., Dennis, J.E.: New computational algorithms for minimizing a
+//     sum of squares of nonlinear functions. Research Report Number 71-6, Yale
+//     University (1971)
+//   - More, J., Garbow, B.S., Hillstrom, K.E.: Testing unconstrained
+//     optimization software. ACM Trans Math Softw 7 (1981), 17-41
 type BrownAndDennis struct{}
 
 func (BrownAndDennis) Func(x []float64) (sum float64) {
@@ -689,14 +705,15 @@ func (BrownAndDennis) Minima() []Minimum {
 // Its Hessian matrix is singular at the minimizer.
 //
 // Standard starting point:
-//  [3, -1, 0, 3, 3, -1, 0, 3, ..., 3, -1, 0, 3]
+//
+//	[3, -1, 0, 3, 3, -1, 0, 3, ..., 3, -1, 0, 3]
 //
 // References:
-//  - Spedicato E.: Computational experience with quasi-Newton algorithms for
-//    minimization problems of moderatly large size. Towards Global
-//    Optimization 2 (1978), 209-219
-//  - More, J., Garbow, B.S., Hillstrom, K.E.: Testing unconstrained
-//    optimization software. ACM Trans Math Softw 7 (1981), 17-41
+//   - Spedicato E.: Computational experience with quasi-Newton algorithms for
+//     minimization problems of moderatly large size. Towards Global
+//     Optimization 2 (1978), 209-219
+//   - More, J., Garbow, B.S., Hillstrom, K.E.: Testing unconstrained
+//     optimization software. ACM Trans Math Softw 7 (1981), 17-41
 type ExtendedPowellSingular struct{}
 
 func (ExtendedPowellSingular) Func(x []float64) (sum float64) {
@@ -762,13 +779,14 @@ func (ExtendedPowellSingular) Minima() []Minimum {
 // function.
 //
 // Standard starting point:
-//  Easy: [-1.2, 1, -1.2, 1, ...]
-//  Hard: any point far from the minimum
+//
+//	Easy: [-1.2, 1, -1.2, 1, ...]
+//	Hard: any point far from the minimum
 //
 // References:
-//  - Rosenbrock, H.H.: An Automatic Method for Finding the Greatest or Least
-//    Value of a Function. Computer J 3 (1960), 175-184
-//  - http://en.wikipedia.org/wiki/Rosenbrock_function
+//   - Rosenbrock, H.H.: An Automatic Method for Finding the Greatest or Least
+//     Value of a Function. Computer J 3 (1960), 175-184
+//   - http://en.wikipedia.org/wiki/Rosenbrock_function
 type ExtendedRosenbrock struct{}
 
 func (ExtendedRosenbrock) Func(x []float64) (sum float64) {
@@ -858,11 +876,13 @@ func (ExtendedRosenbrock) Minima() []Minimum {
 // caused by the finite floating point precision.
 //
 // Standard starting point:
-//  [0.4, 1, 0]
+//
+//	[0.4, 1, 0]
 //
 // Reference:
-//  More, J., Garbow, B.S., Hillstrom, K.E.: Testing unconstrained optimization
-//  software. ACM Trans Math Softw 7 (1981), 17-41
+//
+//	More, J., Garbow, B.S., Hillstrom, K.E.: Testing unconstrained optimization
+//	software. ACM Trans Math Softw 7 (1981), 17-41
 type Gaussian struct{}
 
 func (Gaussian) y(i int) (yi float64) {
@@ -939,14 +959,15 @@ func (Gaussian) Minima() []Minimum {
 // GulfResearchAndDevelopment implements the Gulf Research and Development function.
 //
 // Standard starting point:
-//  [5, 2.5, 0.15]
+//
+//	[5, 2.5, 0.15]
 //
 // References:
-//  - Cox, R.A.: Comparison of the performance of seven optimization algorithms
-//    on twelve unconstrained minimization problems. Ref. 1335CNO4, Gulf
-//    Research and Development Company, Pittsburg (1969)
-//  - More, J., Garbow, B.S., Hillstrom, K.E.: Testing unconstrained
-//    optimization software. ACM Trans Math Softw 7 (1981), 17-41
+//   - Cox, R.A.: Comparison of the performance of seven optimization algorithms
+//     on twelve unconstrained minimization problems. Ref. 1335CNO4, Gulf
+//     Research and Development Company, Pittsburg (1969)
+//   - More, J., Garbow, B.S., Hillstrom, K.E.: Testing unconstrained
+//     optimization software. ACM Trans Math Softw 7 (1981), 17-41
 type GulfResearchAndDevelopment struct{}
 
 func (GulfResearchAndDevelopment) Func(x []float64) (sum float64) {
@@ -1016,13 +1037,14 @@ func (GulfResearchAndDevelopment) Minima() []Minimum {
 // Function is not defined at x[0] = 0.
 //
 // Standard starting point:
-//  [-1, 0, 0]
+//
+//	[-1, 0, 0]
 //
 // References:
-//  - Fletcher, R., Powell, M.J.D.: A rapidly convergent descent method for
-//    minimization. Comput J 6 (1963), 163-168
-//  - More, J., Garbow, B.S., Hillstrom, K.E.: Testing unconstrained
-//    optimization software. ACM Trans Math Softw 7 (1981), 17-41
+//   - Fletcher, R., Powell, M.J.D.: A rapidly convergent descent method for
+//     minimization. Comput J 6 (1963), 163-168
+//   - More, J., Garbow, B.S., Hillstrom, K.E.: Testing unconstrained
+//     optimization software. ACM Trans Math Softw 7 (1981), 17-41
 type HelicalValley struct{}
 
 func (HelicalValley) Func(x []float64) float64 {
@@ -1098,14 +1120,15 @@ func (Linear) Grad(grad, x []float64) []float64 {
 // PenaltyI implements the first penalty function by Gill, Murray and Pitfield.
 //
 // Standard starting point:
-//  [1, ..., n]
+//
+//	[1, ..., n]
 //
 // References:
-//  - Gill, P.E., Murray, W., Pitfield, R.A.: The implementation of two revised
-//    quasi-Newton algorithms for unconstrained optimization. Report NAC 11,
-//    National Phys Lab (1972), 82-83
-//  - More, J., Garbow, B.S., Hillstrom, K.E.: Testing unconstrained
-//    optimization software. ACM Trans Math Softw 7 (1981), 17-41
+//   - Gill, P.E., Murray, W., Pitfield, R.A.: The implementation of two revised
+//     quasi-Newton algorithms for unconstrained optimization. Report NAC 11,
+//     National Phys Lab (1972), 82-83
+//   - More, J., Garbow, B.S., Hillstrom, K.E.: Testing unconstrained
+//     optimization software. ACM Trans Math Softw 7 (1981), 17-41
 type PenaltyI struct{}
 
 func (PenaltyI) Func(x []float64) (sum float64) {
@@ -1156,14 +1179,15 @@ func (PenaltyI) Minima() []Minimum {
 // PenaltyII implements the second penalty function by Gill, Murray and Pitfield.
 //
 // Standard starting point:
-//  [0.5, ..., 0.5]
+//
+//	[0.5, ..., 0.5]
 //
 // References:
-//  - Gill, P.E., Murray, W., Pitfield, R.A.: The implementation of two revised
-//    quasi-Newton algorithms for unconstrained optimization. Report NAC 11,
-//    National Phys Lab (1972), 82-83
-//  - More, J., Garbow, B.S., Hillstrom, K.E.: Testing unconstrained
-//    optimization software. ACM Trans Math Softw 7 (1981), 17-41
+//   - Gill, P.E., Murray, W., Pitfield, R.A.: The implementation of two revised
+//     quasi-Newton algorithms for unconstrained optimization. Report NAC 11,
+//     National Phys Lab (1972), 82-83
+//   - More, J., Garbow, B.S., Hillstrom, K.E.: Testing unconstrained
+//     optimization software. ACM Trans Math Softw 7 (1981), 17-41
 type PenaltyII struct{}
 
 func (PenaltyII) Func(x []float64) (sum float64) {
@@ -1236,14 +1260,15 @@ func (PenaltyII) Minima() []Minimum {
 // that gives f(x) ≅ 1e-13.
 //
 // Standard starting point:
-//  [0, 1]
+//
+//	[0, 1]
 //
 // References:
-//  - Powell, M.J.D.: A Hybrid Method for Nonlinear Equations. Numerical
-//    Methods for Nonlinear Algebraic Equations, P. Rabinowitz (ed.), Gordon
-//    and Breach (1970)
-//  - More, J., Garbow, B.S., Hillstrom, K.E.: Testing unconstrained
-//    optimization software. ACM Trans Math Softw 7 (1981), 17-41
+//   - Powell, M.J.D.: A Hybrid Method for Nonlinear Equations. Numerical
+//     Methods for Nonlinear Algebraic Equations, P. Rabinowitz (ed.), Gordon
+//     and Breach (1970)
+//   - More, J., Garbow, B.S., Hillstrom, K.E.: Testing unconstrained
+//     optimization software. ACM Trans Math Softw 7 (1981), 17-41
 type PowellBadlyScaled struct{}
 
 func (PowellBadlyScaled) Func(x []float64) float64 {
@@ -1304,14 +1329,15 @@ func (PowellBadlyScaled) Minima() []Minimum {
 // Trigonometric implements the trigonometric function.
 //
 // Standard starting point:
-//  [1/dim, ..., 1/dim]
+//
+//	[1/dim, ..., 1/dim]
 //
 // References:
-//  - Spedicato E.: Computational experience with quasi-Newton algorithms for
-//    minimization problems of moderatly large size. Towards Global
-//    Optimization 2 (1978), 209-219
-//  - More, J., Garbow, B.S., Hillstrom, K.E.: Testing unconstrained
-//    optimization software. ACM Trans Math Softw 7 (1981), 17-41
+//   - Spedicato E.: Computational experience with quasi-Newton algorithms for
+//     minimization problems of moderatly large size. Towards Global
+//     Optimization 2 (1978), 209-219
+//   - More, J., Garbow, B.S., Hillstrom, K.E.: Testing unconstrained
+//     optimization software. ACM Trans Math Softw 7 (1981), 17-41
 type Trigonometric struct{}
 
 func (Trigonometric) Func(x []float64) (sum float64) {
@@ -1374,11 +1400,13 @@ func (Trigonometric) Minima() []Minimum {
 // VariablyDimensioned implements a variably dimensioned function.
 //
 // Standard starting point:
-//  [..., (dim-i)/dim, ...], i=1,...,dim
+//
+//	[..., (dim-i)/dim, ...], i=1,...,dim
 //
 // References:
-//  More, J., Garbow, B.S., Hillstrom, K.E.: Testing unconstrained optimization
-//  software. ACM Trans Math Softw 7 (1981), 17-41
+//
+//	More, J., Garbow, B.S., Hillstrom, K.E.: Testing unconstrained optimization
+//	software. ACM Trans Math Softw 7 (1981), 17-41
 type VariablyDimensioned struct{}
 
 func (VariablyDimensioned) Func(x []float64) (sum float64) {
@@ -1447,13 +1475,14 @@ func (VariablyDimensioned) Minima() []Minimum {
 // of minimizing the function is very ill conditioned.
 //
 // Standard starting point:
-//  [0, ..., 0]
+//
+//	[0, ..., 0]
 //
 // References:
-//  - Kowalik, J.S., Osborne, M.R.: Methods for Unconstrained Optimization
-//    Problems. Elsevier North-Holland, New York, 1968
-//  - More, J., Garbow, B.S., Hillstrom, K.E.: Testing unconstrained
-//    optimization software. ACM Trans Math Softw 7 (1981), 17-41
+//   - Kowalik, J.S., Osborne, M.R.: Methods for Unconstrained Optimization
+//     Problems. Elsevier North-Holland, New York, 1968
+//   - More, J., Garbow, B.S., Hillstrom, K.E.: Testing unconstrained
+//     optimization software. ACM Trans Math Softw 7 (1981), 17-41
 type Watson struct{}
 
 func (Watson) Func(x []float64) (sum float64) {
@@ -1597,13 +1626,14 @@ func (Watson) Minima() []Minimum {
 // Wood implements the Wood's function.
 //
 // Standard starting point:
-//  [-3, -1, -3, -1]
+//
+//	[-3, -1, -3, -1]
 //
 // References:
-//  - Colville, A.R.: A comparative study of nonlinear programming codes.
-//    Report 320-2949, IBM New York Scientific Center (1968)
-//  - More, J., Garbow, B.S., Hillstrom, K.E.: Testing unconstrained
-//    optimization software. ACM Trans Math Softw 7 (1981), 17-41
+//   - Colville, A.R.: A comparative study of nonlinear programming codes.
+//     Report 320-2949, IBM New York Scientific Center (1968)
+//   - More, J., Garbow, B.S., Hillstrom, K.E.: Testing unconstrained
+//     optimization software. ACM Trans Math Softw 7 (1981), 17-41
 type Wood struct{}
 
 func (Wood) Func(x []float64) (sum float64) {
@@ -1674,8 +1704,9 @@ func (Wood) Minima() []Minimum {
 // of the minimizer which is located at x=sqrt(2).
 //
 // References:
-//  More, J.J., and Thuente, D.J.: Line Search Algorithms with Guaranteed Sufficient Decrease.
-//  ACM Transactions on Mathematical Software 20(3) (1994), 286–307, eq. (5.1)
+//
+//	More, J.J., and Thuente, D.J.: Line Search Algorithms with Guaranteed Sufficient Decrease.
+//	ACM Transactions on Mathematical Software 20(3) (1994), 286–307, eq. (5.1)
 type ConcaveRight struct{}
 
 func (ConcaveRight) Func(x []float64) float64 {
@@ -1700,8 +1731,9 @@ func (ConcaveRight) Grad(grad, x []float64) {
 // the minimizer which is located at x=399/250=1.596.
 //
 // References:
-//  More, J.J., and Thuente, D.J.: Line Search Algorithms with Guaranteed Sufficient Decrease.
-//  ACM Transactions on Mathematical Software 20(3) (1994), 286–307, eq. (5.2)
+//
+//	More, J.J., and Thuente, D.J.: Line Search Algorithms with Guaranteed Sufficient Decrease.
+//	ACM Transactions on Mathematical Software 20(3) (1994), 286–307, eq. (5.2)
 type ConcaveLeft struct{}
 
 func (ConcaveLeft) Func(x []float64) float64 {
@@ -1729,8 +1761,9 @@ func (ConcaveLeft) Grad(grad, x []float64) {
 // on the derivative is unreliable due to the oscillations.
 //
 // References:
-//  More, J.J., and Thuente, D.J.: Line Search Algorithms with Guaranteed Sufficient Decrease.
-//  ACM Transactions on Mathematical Software 20(3) (1994), 286–307, eq. (5.3)
+//
+//	More, J.J., and Thuente, D.J.: Line Search Algorithms with Guaranteed Sufficient Decrease.
+//	ACM Transactions on Mathematical Software 20(3) (1994), 286–307, eq. (5.3)
 type Plassmann struct {
 	L    float64 // Number of oscillations for |x-1| ≥ Beta.
 	Beta float64 // Size of the derivative at zero, f'(0) = -Beta.
@@ -1783,10 +1816,10 @@ func (f Plassmann) Grad(grad, x []float64) {
 // the parameter values.
 //
 // References:
-//  - More, J.J., and Thuente, D.J.: Line Search Algorithms with Guaranteed Sufficient Decrease.
-//    ACM Transactions on Mathematical Software 20(3) (1994), 286–307, eq. (5.4)
-//  - Yanai, H., Ozawa, M., and Kaneko, S.: Interpolation methods in one dimensional
-//    optimization. Computing 27 (1981), 155–163
+//   - More, J.J., and Thuente, D.J.: Line Search Algorithms with Guaranteed Sufficient Decrease.
+//     ACM Transactions on Mathematical Software 20(3) (1994), 286–307, eq. (5.4)
+//   - Yanai, H., Ozawa, M., and Kaneko, S.: Interpolation methods in one dimensional
+//     optimization. Computing 27 (1981), 155–163
 type YanaiOzawaKaneko struct {
 	Beta1 float64
 	Beta2 float64

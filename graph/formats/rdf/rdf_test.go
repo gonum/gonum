@@ -21,7 +21,7 @@ func TestRDFWorkingGroupSuite(t *testing.T) {
 		"ntriple_tests.tar.gz",
 		"nquad_tests.tar.gz",
 	} {
-		suite, err := os.Open(file)
+		suite, err := os.Open(filepath.Join("testdata", file))
 		if err != nil {
 			t.Fatalf("Failed to open test suite in %q: %v", file, err)
 		}

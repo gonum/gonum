@@ -12,7 +12,9 @@ import (
 
 // Dlaqr04 computes the eigenvalues of a block of an n×n upper Hessenberg matrix
 // H, and optionally the matrices T and Z from the Schur decomposition
-//  H = Z T Zᵀ
+//
+//	H = Z T Zᵀ
+//
 // where T is an upper quasi-triangular matrix (the Schur form), and Z is the
 // orthogonal matrix of Schur vectors.
 //
@@ -24,23 +26,31 @@ import (
 // Z[iloz:ihiz+1,ilo:ihi+1], otherwise Z will not be referenced.
 //
 // ilo and ihi determine the block of H on which Dlaqr04 operates. It must hold that
-//  0 <= ilo <= ihi < n     if n > 0,
-//  ilo == 0 and ihi == -1  if n == 0,
+//
+//	0 <= ilo <= ihi < n     if n > 0,
+//	ilo == 0 and ihi == -1  if n == 0,
+//
 // and the block must be isolated, that is,
-//  ilo == 0   or H[ilo,ilo-1] == 0,
-//  ihi == n-1 or H[ihi+1,ihi] == 0,
+//
+//	ilo == 0   or H[ilo,ilo-1] == 0,
+//	ihi == n-1 or H[ihi+1,ihi] == 0,
+//
 // otherwise Dlaqr04 will panic.
 //
 // wr and wi must have length ihi+1.
 //
 // iloz and ihiz specify the rows of Z to which transformations will be applied
 // if wantz is true. It must hold that
-//  0 <= iloz <= ilo,  and  ihi <= ihiz < n,
+//
+//	0 <= iloz <= ilo,  and  ihi <= ihiz < n,
+//
 // otherwise Dlaqr04 will panic.
 //
 // work must have length at least lwork and lwork must be
-//  lwork >= 1  if n <= 11,
-//  lwork >= n  if n > 11,
+//
+//	lwork >= 1  if n <= 11,
+//	lwork >= n  if n > 11,
+//
 // otherwise Dlaqr04 will panic. lwork as large as 6*n may be required for
 // optimal performance. On return, work[0] will contain the optimal value of
 // lwork.
@@ -76,7 +86,9 @@ import (
 // eigenvalues which have been successfully computed. Failures are rare.
 //
 // If unconverged is positive and wantt is true, then on return
-//  (initial H)*U = U*(final H),   (*)
+//
+//	(initial H)*U = U*(final H),   (*)
+//
 // where U is an orthogonal matrix. The final H is upper Hessenberg and
 // H[unconverged:ihi+1,unconverged:ihi+1] is upper quasi-triangular.
 //
@@ -85,17 +97,20 @@ import (
 // H[ilo:unconverged,ilo:unconverged].
 //
 // If unconverged is positive and wantz is true, then on return
-//  (final Z) = (initial Z)*U,
+//
+//	(final Z) = (initial Z)*U,
+//
 // where U is the orthogonal matrix in (*) regardless of the value of wantt.
 //
 // References:
-//  [1] K. Braman, R. Byers, R. Mathias. The Multishift QR Algorithm. Part I:
-//      Maintaining Well-Focused Shifts and Level 3 Performance. SIAM J. Matrix
-//      Anal. Appl. 23(4) (2002), pp. 929—947
-//      URL: http://dx.doi.org/10.1137/S0895479801384573
-//  [2] K. Braman, R. Byers, R. Mathias. The Multishift QR Algorithm. Part II:
-//      Aggressive Early Deflation. SIAM J. Matrix Anal. Appl. 23(4) (2002), pp. 948—973
-//      URL: http://dx.doi.org/10.1137/S0895479801384585
+//
+//	[1] K. Braman, R. Byers, R. Mathias. The Multishift QR Algorithm. Part I:
+//	    Maintaining Well-Focused Shifts and Level 3 Performance. SIAM J. Matrix
+//	    Anal. Appl. 23(4) (2002), pp. 929—947
+//	    URL: http://dx.doi.org/10.1137/S0895479801384573
+//	[2] K. Braman, R. Byers, R. Mathias. The Multishift QR Algorithm. Part II:
+//	    Aggressive Early Deflation. SIAM J. Matrix Anal. Appl. 23(4) (2002), pp. 948—973
+//	    URL: http://dx.doi.org/10.1137/S0895479801384585
 //
 // Dlaqr04 is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dlaqr04(wantt, wantz bool, n, ilo, ihi int, h []float64, ldh int, wr, wi []float64, iloz, ihiz int, z []float64, ldz int, work []float64, lwork int, recur int) (unconverged int) {
@@ -103,7 +118,7 @@ func (impl Implementation) Dlaqr04(wantt, wantz bool, n, ilo, ihi int, h []float
 		// Matrices of order ntiny or smaller must be processed by
 		// Dlahqr because of insufficient subdiagonal scratch space.
 		// This is a hard limit.
-		ntiny = 11
+		ntiny = 15
 		// Exceptional deflation windows: try to cure rare slow
 		// convergence by varying the size of the deflation window after
 		// kexnw iterations.
@@ -203,20 +218,20 @@ func (impl Implementation) Dlaqr04(wantt, wantz bool, n, ilo, ihi int, h []float
 	} else {
 		fname = "DLAQR4"
 	}
-	// nwr is the recommended deflation window size. n is greater than 11,
+	// nwr is the recommended deflation window size. n is greater than ntiny,
 	// so there is enough subdiagonal workspace for nwr >= 2 as required.
-	// (In fact, there is enough subdiagonal space for nwr >= 3.)
-	// TODO(vladimir-ch): If there is enough space for nwr >= 3, should we
+	// (In fact, there is enough subdiagonal space for nwr >= 4.)
+	// TODO(vladimir-ch): If there is enough space for nwr >= 4, should we
 	// use it?
 	nwr := impl.Ilaenv(13, fname, jbcmpz, n, ilo, ihi, lwork)
 	nwr = max(2, nwr)
 	nwr = min(ihi-ilo+1, min((n-1)/3, nwr))
 
-	// nsr is the recommended number of simultaneous shifts. n is greater
-	// than 11, so there is enough subdiagonal workspace for nsr to be even
-	// and greater than or equal to two as required.
+	// nsr is the recommended number of simultaneous shifts. n is greater than
+	// ntiny, so there is enough subdiagonal workspace for nsr to be even and
+	// greater than or equal to two as required.
 	nsr := impl.Ilaenv(15, fname, jbcmpz, n, ilo, ihi, lwork)
-	nsr = min(nsr, min((n+6)/9, ihi-ilo))
+	nsr = min(nsr, min((n-3)/6, ihi-ilo))
 	nsr = max(2, nsr&^1)
 
 	// Workspace query call to Dlaqr23.
@@ -249,7 +264,7 @@ func (impl Implementation) Dlaqr04(wantt, wantz bool, n, ilo, ihi int, h []float
 
 	// nsmax is the largest number of simultaneous shifts for which there is
 	// sufficient workspace.
-	nsmax := min((n+6)/9, 2*lwork/3) &^ 1
+	nsmax := min((n-3)/6, 2*lwork/3) &^ 1
 
 	ndfl := 1 // Number of iterations since last deflation.
 	ndec := 0 // Deflation window size decrement.
@@ -455,7 +470,7 @@ func (impl Implementation) Dlaqr04(wantt, wantz bool, n, ilo, ihi int, h []float
 		//   (nhv must be at least kdu but more is better),
 		// - an nhv×kdu vertical work array WV along the left-hand-edge
 		//   (nhv must be at least kdu but more is better).
-		kdu := 3*ns - 3
+		kdu := 2 * ns
 		ku := n - kdu
 		kwh := kdu
 		kwv = kdu + 3

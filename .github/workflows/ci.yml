@@ -12,7 +12,7 @@ jobs:
       matrix:
         # Do not move this line; it is referred to by README.md.
         # Versions of Go that are explicitly supported by Gonum.
-        go-version: [1.17.x, 1.16.x]
+        go-version: [1.21.x, 1.20.x]
         platform: [ubuntu-latest, macos-latest]
         force-goarch: ["", "386"]
         tags: 
@@ -81,6 +81,8 @@ jobs:
     - name: Check copyrights+imports+formatting+generate
       if: matrix.platform == 'ubuntu-latest' && matrix.tags == ''
       run: |
+        sudo apt-get update
+        sudo apt-get install -qq ragel
         ./.github/workflows/script.d/deps.sh
         ./.github/workflows/script.d/check-copyright.sh
         ./.github/workflows/script.d/check-imports.sh

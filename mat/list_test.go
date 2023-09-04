@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//nolint:deadcode,unused
+//lint:file-ignore U1000 A number of functions are here that may be used in future.
+
 package mat
 
 import (

@@ -13,7 +13,8 @@ import (
 
 // Hermite generates sample locations and weights for performing quadrature with
 // a squared-exponential weight
-//  int_-inf^inf e^(-x^2) f(x) dx .
+//
+//	int_-inf^inf e^(-x^2) f(x) dx .
 type Hermite struct{}
 
 func (h Hermite) FixedLocations(x, weight []float64, min, max float64) {
@@ -273,7 +274,7 @@ func (h Hermite) hermiteInitialGuess(i, n int) float64 {
 	}
 
 	// Use Gatteschi guesses in the second half where x is nearer to sqrt(n+0.5)
-	i = i + 1 - m
+	i = m - (i + 1)
 	var ar float64
 	if i < len(airyRtsExact) {
 		ar = airyRtsExact[i]

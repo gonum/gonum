@@ -124,6 +124,7 @@ func Abs(d Number) float64 {
 // PowReal returns d**p, the base-d exponential of p.
 //
 // Special cases are (in order):
+//
 //	PowReal(NaN+xϵ, ±0) = 1+NaNϵ for any x
 //	Pow(0+xϵ, y) = 0+Infϵ for all y < 1.
 //	Pow(0+xϵ, y) = 0 for all y > 1.
@@ -204,6 +205,7 @@ func Pow(d, p Number) Number {
 // Sqrt returns the square root of d.
 //
 // Special cases are:
+//
 //	Sqrt(+Inf) = +Inf
 //	Sqrt(±0) = (±0+Infϵ)
 //	Sqrt(x < 0) = NaN
@@ -215,8 +217,10 @@ func Sqrt(d Number) Number {
 // Exp returns e**q, the base-e exponential of d.
 //
 // Special cases are:
+//
 //	Exp(+Inf) = +Inf
 //	Exp(NaN) = NaN
+//
 // Very large values overflow to 0 or +Inf.
 // Very small values underflow to 1.
 func Exp(d Number) Number {
@@ -234,6 +238,7 @@ func Exp(d Number) Number {
 // Log returns the natural logarithm of d.
 //
 // Special cases are:
+//
 //	Log(+Inf) = (+Inf+0ϵ)
 //	Log(0) = (-Inf±Infϵ)
 //	Log(x < 0) = NaN

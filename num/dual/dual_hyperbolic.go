@@ -9,6 +9,7 @@ import "math"
 // Sinh returns the hyperbolic sine of d.
 //
 // Special cases are:
+//
 //	Sinh(±0) = (±0+Nϵ)
 //	Sinh(±Inf) = ±Inf
 //	Sinh(NaN) = NaN
@@ -36,6 +37,7 @@ func Sinh(d Number) Number {
 // Cosh returns the hyperbolic cosine of d.
 //
 // Special cases are:
+//
 //	Cosh(±0) = 1
 //	Cosh(±Inf) = +Inf
 //	Cosh(NaN) = NaN
@@ -57,6 +59,7 @@ func Cosh(d Number) Number {
 // Tanh returns the hyperbolic tangent of d.
 //
 // Special cases are:
+//
 //	Tanh(±0) = (±0+Nϵ)
 //	Tanh(±Inf) = (±1+0ϵ)
 //	Tanh(NaN) = NaN
@@ -89,6 +92,7 @@ func Tanh(d Number) Number {
 // Asinh returns the inverse hyperbolic sine of d.
 //
 // Special cases are:
+//
 //	Asinh(±0) = (±0+Nϵ)
 //	Asinh(±Inf) = ±Inf
 //	Asinh(NaN) = NaN
@@ -110,6 +114,7 @@ func Asinh(d Number) Number {
 // Acosh returns the inverse hyperbolic cosine of d.
 //
 // Special cases are:
+//
 //	Acosh(+Inf) = +Inf
 //	Acosh(1) = (0+Infϵ)
 //	Acosh(x) = NaN if x < 1
@@ -138,6 +143,7 @@ func Acosh(d Number) Number {
 // Atanh returns the inverse hyperbolic tangent of d.
 //
 // Special cases are:
+//
 //	Atanh(1) = +Inf
 //	Atanh(±0) = (±0+Nϵ)
 //	Atanh(-1) = -Inf

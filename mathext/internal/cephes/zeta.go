@@ -13,9 +13,13 @@ import "math"
 
 // zetaCoegs are the expansion coefficients for Euler-Maclaurin summation
 // formula:
-//  \frac{(2k)!}{B_{2k}}
+//
+//	\frac{(2k)!}{B_{2k}}
+//
 // where
-//  B_{2k}
+//
+//	B_{2k}
+//
 // are Bernoulli numbers.
 var zetaCoefs = [...]float64{
 	12.0,
@@ -33,13 +37,16 @@ var zetaCoefs = [...]float64{
 }
 
 // Zeta computes the Riemann zeta function of two arguments.
-//  Zeta(x,q) = \sum_{k=0}^{\infty} (k+q)^{-x}
+//
+//	Zeta(x,q) = \sum_{k=0}^{\infty} (k+q)^{-x}
+//
 // Note that Zeta returns +Inf if x is 1 and will panic if x is less than 1,
 // q is either zero or a negative integer, or q is negative and x is not an
 // integer.
 //
 // Note that:
-//  zeta(x,1) = zetac(x) + 1
+//
+//	zeta(x,1) = zetac(x) + 1
 func Zeta(x, q float64) float64 {
 	// REFERENCE: Gradshteyn, I. S., and I. M. Ryzhik, Tables of Integrals, Series,
 	// and Products, p. 1073; Academic Press, 1980.

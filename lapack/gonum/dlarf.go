@@ -10,10 +10,14 @@ import (
 )
 
 // Dlarf applies an elementary reflector H to an m×n matrix C:
-//  C = H * C  if side == blas.Left
-//  C = C * H  if side == blas.Right
+//
+//	C = H * C  if side == blas.Left
+//	C = C * H  if side == blas.Right
+//
 // H is represented in the form
-//  H = I - tau * v * vᵀ
+//
+//	H = I - tau * v * vᵀ
+//
 // where tau is a scalar and v is a vector.
 //
 // work must have length at least m if side == blas.Left and

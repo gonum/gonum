@@ -13,9 +13,11 @@ import (
 )
 
 // A123 is the non-symmetric singular matrix
-//      [ 1 2 3 ]
-//  A = [ 4 5 6 ]
-//      [ 7 8 9 ]
+//
+//	    [ 1 2 3 ]
+//	A = [ 4 5 6 ]
+//	    [ 7 8 9 ]
+//
 // It has three distinct real eigenvalues.
 type A123 struct{}
 
@@ -89,13 +91,17 @@ func (AntisymRandom) Eigenvalues() []complex128 {
 }
 
 // Circulant is a generally non-symmetric matrix given by
-//  A[i,j] = 1 + (j-i+n)%n.
+//
+//	A[i,j] = 1 + (j-i+n)%n.
+//
 // For example, for n=5,
-//      [ 1 2 3 4 5 ]
-//      [ 5 1 2 3 4 ]
-//  A = [ 4 5 1 2 3 ]
-//      [ 3 4 5 1 2 ]
-//      [ 2 3 4 5 1 ]
+//
+//	    [ 1 2 3 4 5 ]
+//	    [ 5 1 2 3 4 ]
+//	A = [ 4 5 1 2 3 ]
+//	    [ 3 4 5 1 2 ]
+//	    [ 2 3 4 5 1 ]
+//
 // It has real and complex eigenvalues, some possibly repeated.
 type Circulant int
 
@@ -126,15 +132,19 @@ func (c Circulant) Eigenvalues() []complex128 {
 }
 
 // Clement is a generally non-symmetric matrix given by
-//  A[i,j] = i+1  if j == i+1,
-//         = n-i  if j == i-1,
-//         = 0    otherwise.
+//
+//	A[i,j] = i+1  if j == i+1,
+//	       = n-i  if j == i-1,
+//	       = 0    otherwise.
+//
 // For example, for n=5,
-//      [ . 1 . . . ]
-//      [ 4 . 2 . . ]
-//  A = [ . 3 . 3 . ]
-//      [ . . 2 . 4 ]
-//      [ . . . 1 . ]
+//
+//	    [ . 1 . . . ]
+//	    [ 4 . 2 . . ]
+//	A = [ . 3 . 3 . ]
+//	    [ . . 2 . 4 ]
+//	    [ . . . 1 . ]
+//
 // It has n distinct real eigenvalues.
 type Clement int
 
@@ -162,14 +172,18 @@ func (c Clement) Eigenvalues() []complex128 {
 }
 
 // Creation is a singular non-symmetric matrix given by
-//  A[i,j] = i  if j == i-1,
-//         = 0  otherwise.
+//
+//	A[i,j] = i  if j == i-1,
+//	       = 0  otherwise.
+//
 // For example, for n=5,
-//      [ . . . . . ]
-//      [ 1 . . . . ]
-//  A = [ . 2 . . . ]
-//      [ . . 3 . . ]
-//      [ . . . 4 . ]
+//
+//	    [ . . . . . ]
+//	    [ 1 . . . . ]
+//	A = [ . 2 . . . ]
+//	    [ . . 3 . . ]
+//	    [ . . . 4 . ]
+//
 // Zero is its only eigenvalue.
 type Creation int
 
@@ -187,14 +201,18 @@ func (c Creation) Eigenvalues() []complex128 {
 }
 
 // Diagonal is a diagonal matrix given by
-//  A[i,j] = i+1  if i == j,
-//         = 0    otherwise.
+//
+//	A[i,j] = i+1  if i == j,
+//	       = 0    otherwise.
+//
 // For example, for n=5,
-//      [ 1 . . . . ]
-//      [ . 2 . . . ]
-//  A = [ . . 3 . . ]
-//      [ . . . 4 . ]
-//      [ . . . . 5 ]
+//
+//	    [ 1 . . . . ]
+//	    [ . 2 . . . ]
+//	A = [ . . 3 . . ]
+//	    [ . . . 4 . ]
+//	    [ . . . . 5 ]
+//
 // It has n real eigenvalues {1,...,n}.
 type Diagonal int
 
@@ -217,14 +235,18 @@ func (d Diagonal) Eigenvalues() []complex128 {
 }
 
 // Downshift is a non-singular upper Hessenberg matrix given by
-//  A[i,j] = 1  if (i-j+n)%n == 1,
-//         = 0  otherwise.
+//
+//	A[i,j] = 1  if (i-j+n)%n == 1,
+//	       = 0  otherwise.
+//
 // For example, for n=5,
-//      [ . . . . 1 ]
-//      [ 1 . . . . ]
-//  A = [ . 1 . . . ]
-//      [ . . 1 . . ]
-//      [ . . . 1 . ]
+//
+//	    [ . . . . 1 ]
+//	    [ 1 . . . . ]
+//	A = [ . 1 . . . ]
+//	    [ . . 1 . . ]
+//	    [ . . . 1 . ]
+//
 // Its eigenvalues are the complex roots of unity.
 type Downshift int
 
@@ -244,11 +266,12 @@ func (d Downshift) Eigenvalues() []complex128 {
 
 // Fibonacci is an upper Hessenberg matrix with 3 distinct real eigenvalues. For
 // example, for n=5,
-//      [ . 1 . . . ]
-//      [ 1 1 . . . ]
-//  A = [ . 1 1 . . ]
-//      [ . . 1 1 . ]
-//      [ . . . 1 1 ]
+//
+//	    [ . 1 . . . ]
+//	    [ 1 1 . . . ]
+//	A = [ . 1 1 . . ]
+//	    [ . . 1 1 . ]
+//	    [ . . . 1 1 ]
 type Fibonacci int
 
 func (f Fibonacci) Matrix() blas64.General {
@@ -281,11 +304,12 @@ func (f Fibonacci) Eigenvalues() []complex128 {
 
 // Gear is a singular non-symmetric matrix with real eigenvalues. For example,
 // for n=5,
-//      [ . 1 . . 1 ]
-//      [ 1 . 1 . . ]
-//  A = [ . 1 . 1 . ]
-//      [ . . 1 . 1 ]
-//      [-1 . . 1 . ]
+//
+//	    [ . 1 . . 1 ]
+//	    [ 1 . 1 . . ]
+//	A = [ . 1 . 1 . ]
+//	    [ . . 1 . 1 ]
+//	    [-1 . . 1 . ]
 type Gear int
 
 func (g Gear) Matrix() blas64.General {
@@ -336,15 +360,19 @@ func (g Gear) Eigenvalues() []complex128 {
 }
 
 // Grcar is an upper Hessenberg matrix given by
-//  A[i,j] = -1  if i == j+1,
-//         = 1   if i <= j and j <= i+k,
-//         = 0   otherwise.
+//
+//	A[i,j] = -1  if i == j+1,
+//	       = 1   if i <= j and j <= i+k,
+//	       = 0   otherwise.
+//
 // For example, for n=5 and k=2,
-//      [  1  1  1  .  . ]
-//      [ -1  1  1  1  . ]
-//  A = [  . -1  1  1  1 ]
-//      [  .  . -1  1  1 ]
-//      [  .  .  . -1  1 ]
+//
+//	    [  1  1  1  .  . ]
+//	    [ -1  1  1  1  . ]
+//	A = [  . -1  1  1  1 ]
+//	    [  .  . -1  1  1 ]
+//	    [  .  .  . -1  1 ]
+//
 // The matrix has sensitive eigenvalues but they are not given explicitly.
 type Grcar struct {
 	N int
@@ -370,10 +398,12 @@ func (Grcar) Eigenvalues() []complex128 {
 }
 
 // Hanowa is a non-symmetric non-singular matrix of even order given by
-//  A[i,j] = alpha    if i == j,
-//         = -i-1     if i < n/2 and j == i + n/2,
-//         = i+1-n/2  if i >= n/2 and j == i - n/2,
-//         = 0        otherwise.
+//
+//	A[i,j] = alpha    if i == j,
+//	       = -i-1     if i < n/2 and j == i + n/2,
+//	       = i+1-n/2  if i >= n/2 and j == i - n/2,
+//	       = 0        otherwise.
+//
 // The matrix has complex eigenvalues.
 type Hanowa struct {
 	N     int // Order of the matrix, must be even.
@@ -412,15 +442,19 @@ func (h Hanowa) Eigenvalues() []complex128 {
 }
 
 // Lesp is a tridiagonal, generally non-symmetric matrix given by
-//  A[i,j] = -2*i-5   if i == j,
-//         = 1/(i+1)  if i == j-1,
-//         = j+1      if i == j+1.
+//
+//	A[i,j] = -2*i-5   if i == j,
+//	       = 1/(i+1)  if i == j-1,
+//	       = j+1      if i == j+1.
+//
 // For example, for n=5,
-//      [  -5    2    .    .    . ]
-//      [ 1/2   -7    3    .    . ]
-//  A = [   .  1/3   -9    4    . ]
-//      [   .    .  1/4  -11    5 ]
-//      [   .    .    .  1/5  -13 ].
+//
+//	    [  -5    2    .    .    . ]
+//	    [ 1/2   -7    3    .    . ]
+//	A = [   .  1/3   -9    4    . ]
+//	    [   .    .  1/4  -11    5 ]
+//	    [   .    .    .  1/5  -13 ].
+//
 // The matrix has sensitive eigenvalues but they are not given explicitly.
 type Lesp int
 
@@ -444,10 +478,12 @@ func (Lesp) Eigenvalues() []complex128 {
 }
 
 // Rutis is the 4×4 non-symmetric matrix
-//      [ 4 -5  0  3 ]
-//  A = [ 0  4 -3 -5 ]
-//      [ 5 -3  4  0 ]
-//      [ 3  0  5  4 ]
+//
+//	    [ 4 -5  0  3 ]
+//	A = [ 0  4 -3 -5 ]
+//	    [ 5 -3  4  0 ]
+//	    [ 3  0  5  4 ]
+//
 // It has two distinct real eigenvalues and a pair of complex eigenvalues.
 type Rutis struct{}
 
@@ -470,9 +506,11 @@ func (Rutis) Eigenvalues() []complex128 {
 }
 
 // Tris is a tridiagonal matrix given by
-//  A[i,j] = x  if i == j-1,
-//         = y  if i == j,
-//         = z  if i == j+1.
+//
+//	A[i,j] = x  if i == j-1,
+//	       = y  if i == j,
+//	       = z  if i == j+1.
+//
 // If x*z is negative, the matrix has complex eigenvalues.
 type Tris struct {
 	N       int

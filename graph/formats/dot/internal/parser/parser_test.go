@@ -126,7 +126,7 @@ func TestParseError(t *testing.T) {
 	}{
 		{
 			path: "../testdata/error.dot",
-			want: `Error in S30: INVALID(0,~), Pos(offset=13, line=2, column=7), expected one of: { } graphx ; -- -> node edge [ = subgraph : id `,
+			want: `2:7: error: expected one of "{", "}", graphx, ";", "--", "->", node, edge, "[", "=", subgraph, ":", or id; got: unknown/invalid token "~"`,
 		},
 	}
 	for _, g := range golden {
@@ -137,7 +137,7 @@ func TestParseError(t *testing.T) {
 		}
 		got := err.Error()
 		if got != g.want {
-			t.Errorf("%q: error mismatch; expected `%v`, got `%v`", g.path, g.want, got)
+			t.Errorf("%q: error mismatch; expected %#q, got %#q", g.path, g.want, got)
 			continue
 		}
 	}

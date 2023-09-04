@@ -11,7 +11,9 @@ import (
 
 // Dorglq generates an m×n matrix Q with orthonormal columns defined by the
 // product of elementary reflectors as computed by Dgelqf.
-//  Q = H_0 * H_1 * ... * H_{k-1}
+//
+//	Q = H_0 * H_1 * ... * H_{k-1}
+//
 // Dorglq is the blocked version of Dorgl2 that makes greater use of level-3 BLAS
 // routines.
 //
@@ -62,7 +64,7 @@ func (impl Implementation) Dorglq(m, n, k int, a []float64, lda int, tau, work [
 	}
 
 	nbmin := 2 // Minimum block size
-	var nx int // Crossover size from blocked to unbloked code
+	var nx int // Crossover size from blocked to unblocked code
 	iws := m   // Length of work needed
 	var ldwork int
 	if 1 < nb && nb < k {
@@ -90,7 +92,7 @@ func (impl Implementation) Dorglq(m, n, k int, a []float64, lda int, tau, work [
 		}
 	}
 	if kk < m {
-		// Perform the operation on colums kk to the end.
+		// Perform the operation on columns kk to the end.
 		impl.Dorgl2(m-kk, n-kk, k-kk, a[kk*lda+kk:], lda, tau[kk:], work)
 	}
 	if kk > 0 {

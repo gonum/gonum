@@ -5,7 +5,9 @@
 package f32
 
 // GemvN computes
-//  y = alpha * A * x + beta * y
+//
+//	y = alpha * A * x + beta * y
+//
 // where A is an m×n dense matrix, x and y are vectors, and alpha and beta are scalars.
 func GemvN(m, n uintptr, alpha float32, a []float32, lda uintptr, x []float32, incX uintptr, beta float32, y []float32, incY uintptr) {
 	var kx, ky, i uintptr
@@ -43,7 +45,9 @@ func GemvN(m, n uintptr, alpha float32, a []float32, lda uintptr, x []float32, i
 }
 
 // GemvT computes
-//  y = alpha * Aᵀ * x + beta * y
+//
+//	y = alpha * Aᵀ * x + beta * y
+//
 // where A is an m×n dense matrix, x and y are vectors, and alpha and beta are scalars.
 func GemvT(m, n uintptr, alpha float32, a []float32, lda uintptr, x []float32, incX uintptr, beta float32, y []float32, incY uintptr) {
 	var kx, ky, i uintptr

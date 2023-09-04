@@ -11,7 +11,9 @@ import (
 
 // Dlatrd reduces nb rows and columns of a real n×n symmetric matrix A to symmetric
 // tridiagonal form. It computes the orthonormal similarity transformation
-//  Qᵀ * A * Q
+//
+//	Qᵀ * A * Q
+//
 // and returns the matrices V and W to apply to the unreduced part of A. If
 // uplo == blas.Upper, the upper triangle is supplied and the last nb rows are
 // reduced. If uplo == blas.Lower, the lower triangle is supplied and the first
@@ -23,18 +25,20 @@ import (
 // set to 1, and the remaining elements contain the data to construct Q.
 //
 // If uplo == blas.Upper, with n = 5 and nb = 2 on exit a is
-//  [ a   a   a  v4  v5]
-//  [     a   a  v4  v5]
-//  [         a   1  v5]
-//  [             d   1]
-//  [                 d]
+//
+//	[ a   a   a  v4  v5]
+//	[     a   a  v4  v5]
+//	[         a   1  v5]
+//	[             d   1]
+//	[                 d]
 //
 // If uplo == blas.Lower, with n = 5 and nb = 2, on exit a is
-//  [ d                ]
-//  [ 1   d            ]
-//  [v1   1   a        ]
-//  [v1  v2   a   a    ]
-//  [v1  v2   a   a   a]
+//
+//	[ d                ]
+//	[ 1   d            ]
+//	[v1   1   a        ]
+//	[v1  v2   a   a    ]
+//	[v1  v2   a   a   a]
 //
 // e contains the superdiagonal elements of the reduced matrix. If uplo == blas.Upper,
 // e[n-nb:n-1] contains the last nb columns of the reduced matrix, while if
@@ -51,18 +55,25 @@ import (
 //
 // The matrix Q is represented as a product of elementary reflectors. Each reflector
 // H has the form
-//  I - tau * v * vᵀ
+//
+//	I - tau * v * vᵀ
+//
 // If uplo == blas.Upper,
-//  Q = H_{n-1} * H_{n-2} * ... * H_{n-nb}
+//
+//	Q = H_{n-1} * H_{n-2} * ... * H_{n-nb}
+//
 // where v[:i-1] is stored in A[:i-1,i], v[i-1] = 1, and v[i:n] = 0.
 //
 // If uplo == blas.Lower,
-//  Q = H_0 * H_1 * ... * H_{nb-1}
+//
+//	Q = H_0 * H_1 * ... * H_{nb-1}
+//
 // where v[:i+1] = 0, v[i+1] = 1, and v[i+2:n] is stored in A[i+2:n,i].
 //
 // The vectors v form the n×nb matrix V which is used with W to apply a
 // symmetric rank-2 update to the unreduced part of A
-//  A = A - V * Wᵀ - W * Vᵀ
+//
+//	A = A - V * Wᵀ - W * Vᵀ
 //
 // Dlatrd is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dlatrd(uplo blas.Uplo, n, nb int, a []float64, lda int, e, tau, w []float64, ldw int) {

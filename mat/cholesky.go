@@ -25,6 +25,9 @@ var (
 	_ Symmetric = (*BandCholesky)(nil)
 	_ Banded    = (*BandCholesky)(nil)
 	_ SymBanded = (*BandCholesky)(nil)
+
+	_ Matrix    = (*PivotedCholesky)(nil)
+	_ Symmetric = (*PivotedCholesky)(nil)
 )
 
 // Cholesky is a symmetric positive definite matrix represented by its
@@ -316,7 +319,9 @@ func (c *Cholesky) RawU() Triangular {
 
 // UTo stores into dst the n×n upper triangular matrix U from a Cholesky
 // decomposition
-//  A = Uᵀ * U.
+//
+//	A = Uᵀ * U.
+//
 // If dst is empty, it is resized to be an n×n upper triangular matrix. When dst
 // is non-empty, UTo panics if dst is not n×n or not Upper. UTo will also panic
 // if the receiver does not contain a successful factorization.
@@ -341,7 +346,9 @@ func (c *Cholesky) UTo(dst *TriDense) {
 
 // LTo stores into dst the n×n lower triangular matrix L from a Cholesky
 // decomposition
-//  A = L * Lᵀ.
+//
+//	A = L * Lᵀ.
+//
 // If dst is empty, it is resized to be an n×n lower triangular matrix. When dst
 // is non-empty, LTo panics if dst is not n×n or not Lower. LTo will also panic
 // if the receiver does not contain a successful factorization.
@@ -446,9 +453,13 @@ func (c *Cholesky) InverseTo(dst *SymDense) error {
 // Scale multiplies the original matrix A by a positive constant using
 // its Cholesky decomposition, storing the result in-place into the receiver.
 // That is, if the original Cholesky factorization is
-//  Uᵀ * U = A
+//
+//	Uᵀ * U = A
+//
 // the updated factorization is
-//  U'ᵀ * U' = f A = A'
+//
+//	U'ᵀ * U' = f A = A'
+//
 // Scale panics if the constant is non-positive, or if the receiver is non-empty
 // and is of a different size from the input.
 func (c *Cholesky) Scale(f float64, orig *Cholesky) {
@@ -470,8 +481,10 @@ func (c *Cholesky) Scale(f float64, orig *Cholesky) {
 
 // ExtendVecSym computes the Cholesky decomposition of the original matrix A,
 // whose Cholesky decomposition is in a, extended by a the n×1 vector v according to
-//  [A  w]
-//  [w' k]
+//
+//	[A  w]
+//	[w' k]
+//
 // where k = v[n-1] and w = v[:n-1]. The result is stored into the receiver.
 // In order for the updated matrix to be positive definite, it must be the case
 // that k > w' A^-1 w. If this condition does not hold then ExtendVecSym will
@@ -533,9 +546,12 @@ func (c *Cholesky) ExtendVecSym(a *Cholesky, v Vector) (ok bool) {
 // SymRankOne performs a rank-1 update of the original matrix A and refactorizes
 // its Cholesky factorization, storing the result into the receiver. That is, if
 // in the original Cholesky factorization
-//  Uᵀ * U = A,
+//
+//	Uᵀ * U = A,
+//
 // in the updated factorization
-//  U'ᵀ * U' = A + alpha * x * xᵀ = A'.
+//
+//	U'ᵀ * U' = A + alpha * x * xᵀ = A'.
 //
 // Note that when alpha is negative, the updating problem may be ill-conditioned
 // and the results may be inaccurate, or the updated matrix A' may not be
@@ -922,4 +938,205 @@ func (ch *BandCholesky) LogDet() float64 {
 
 func (ch *BandCholesky) valid() bool {
 	return ch.chol != nil && !ch.chol.IsEmpty()
+}
+
+// PivotedCholesky is a symmetric positive semi-definite matrix represented by
+// its Cholesky factorization with complete pivoting.
+//
+// The factorization has the form
+//
+//	A = P * Uᵀ * U * Pᵀ
+//
+// where U is an upper triangular matrix and P is a permutation matrix.
+//
+// Cholesky methods may only be called on a receiver that has been successfully
+// initialized by a call to Factorize. SolveTo and SolveVecTo methods may only
+// called if Factorize has returned true.
+//
+// If the matrix A is certainly positive definite, then the unpivoted Cholesky
+// could be more efficient, especially for smaller matrices.
+type PivotedCholesky struct {
+	chol          *TriDense // The factor U
+	piv, pivTrans []int     // The permutation matrices P and Pᵀ
+	rank          int       // The computed rank of A
+
+	ok   bool    // Indicates whether and the factorization can be used for solving linear systems
+	cond float64 // The condition number when ok is true
+}
+
+// Factorize computes the Cholesky factorization of the symmetric positive
+// semi-definite matrix A and returns whether the matrix is positive definite.
+// If Factorize returns false, the SolveTo methods must not be used.
+//
+// tol is a tolerance used to determine the computed rank of A. If it is
+// negative, a default value will be used.
+func (c *PivotedCholesky) Factorize(a Symmetric, tol float64) (ok bool) {
+	n := a.SymmetricDim()
+	c.reset(n)
+	copySymIntoTriangle(c.chol, a)
+
+	work := getFloat64s(3*c.chol.mat.N, false)
+	defer putFloat64s(work)
+
+	sym := c.chol.asSymBlas()
+	aNorm := lapack64.Lansy(CondNorm, sym, work)
+	_, c.rank, c.ok = lapack64.Pstrf(sym, c.piv, tol, work)
+	if c.ok {
+		iwork := getInts(n, false)
+		defer putInts(iwork)
+		c.cond = 1 / lapack64.Pocon(sym, aNorm, work, iwork)
+	}
+	for i, p := range c.piv {
+		c.pivTrans[p] = i
+	}
+
+	return c.ok
+}
+
+// reset prepares the receiver for factorization of matrices of size n.
+func (c *PivotedCholesky) reset(n int) {
+	if c.chol == nil {
+		c.chol = NewTriDense(n, Upper, nil)
+	} else {
+		c.chol.Reset()
+		c.chol.reuseAsNonZeroed(n, Upper)
+	}
+	c.piv = useInt(c.piv, n)
+	c.pivTrans = useInt(c.pivTrans, n)
+	c.rank = 0
+	c.ok = false
+	c.cond = math.Inf(1)
+}
+
+// Dims returns the dimensions of the matrix A.
+func (ch *PivotedCholesky) Dims() (r, c int) {
+	if ch.chol == nil {
+		panic(badCholesky)
+	}
+	r, c = ch.chol.Dims()
+	return r, c
+}
+
+// At returns the element of A at row i, column j.
+func (c *PivotedCholesky) At(i, j int) float64 {
+	if c.chol == nil {
+		panic(badCholesky)
+	}
+	n := c.SymmetricDim()
+	if uint(i) >= uint(n) {
+		panic(ErrRowAccess)
+	}
+	if uint(j) >= uint(n) {
+		panic(ErrColAccess)
+	}
+
+	i = c.pivTrans[i]
+	j = c.pivTrans[j]
+	minij := min(min(i+1, j+1), c.rank)
+	var val float64
+	for k := 0; k < minij; k++ {
+		val += c.chol.at(k, i) * c.chol.at(k, j)
+	}
+	return val
+}
+
+// T returns the receiver, the transpose of a symmetric matrix.
+func (c *PivotedCholesky) T() Matrix {
+	return c
+}
+
+// SymmetricDim implements the Symmetric interface and returns the number of
+// rows (or columns) in the matrix .
+func (c *PivotedCholesky) SymmetricDim() int {
+	if c.chol == nil {
+		panic(badCholesky)
+	}
+	n, _ := c.chol.Dims()
+	return n
+}
+
+// Rank returns the computed rank of the matrix A.
+func (c *PivotedCholesky) Rank() int {
+	if c.chol == nil {
+		panic(badCholesky)
+	}
+	return c.rank
+}
+
+// Cond returns the condition number of the factorized matrix.
+func (c *PivotedCholesky) Cond() float64 {
+	if !c.ok {
+		panic(badCholesky)
+	}
+	return c.cond
+}
+
+// SolveTo finds the matrix X that solves A * X = B where A is represented by
+// the Cholesky decomposition. The result is stored in-place into dst. If the
+// Cholesky decomposition is singular or near-singular, a Condition error is
+// returned. See the documentation for Condition for more information.
+//
+// If Factorize returned false, SolveTo will panic.
+func (c *PivotedCholesky) SolveTo(dst *Dense, b Matrix) error {
+	if !c.ok {
+		panic(badCholesky)
+	}
+	n := c.chol.mat.N
+	bm, bn := b.Dims()
+	if n != bm {
+		panic(ErrShape)
+	}
+
+	dst.reuseAsNonZeroed(bm, bn)
+	if dst != b {
+		dst.Copy(b)
+	}
+
+	// Permute rows of B: D = Pᵀ * B.
+	lapack64.Lapmr(true, dst.mat, c.piv)
+	// Solve Uᵀ * U * Y = D.
+	lapack64.Potrs(c.chol.mat, dst.mat)
+	// Permute rows of Y to recover the solution: X = P * Y.
+	lapack64.Lapmr(false, dst.mat, c.piv)
+
+	if c.cond > ConditionTolerance {
+		return Condition(c.cond)
+	}
+	return nil
+}
+
+// SolveVecTo finds the vector x that solves A * x = b where A is represented by
+// the Cholesky decomposition. The result is stored in-place into dst. If the
+// Cholesky decomposition is singular or near-singular, a Condition error is
+// returned. See the documentation for Condition for more information.
+//
+// If Factorize returned false, SolveVecTo will panic.
+func (c *PivotedCholesky) SolveVecTo(dst *VecDense, b Vector) error {
+	if !c.ok {
+		panic(badCholesky)
+	}
+	n := c.chol.mat.N
+	if br, bc := b.Dims(); br != n || bc != 1 {
+		panic(ErrShape)
+	}
+	if b, ok := b.(RawVectorer); ok && dst != b {
+		dst.checkOverlap(b.RawVector())
+	}
+
+	dst.reuseAsNonZeroed(n)
+	if dst != b {
+		dst.CopyVec(b)
+	}
+
+	// Permute rows of B: D = Pᵀ * B.
+	lapack64.Lapmr(true, dst.asGeneral(), c.piv)
+	// Solve Uᵀ * U * Y = D.
+	lapack64.Potrs(c.chol.mat, dst.asGeneral())
+	// Permute rows of Y to recover the solution: X = P * Y.
+	lapack64.Lapmr(false, dst.asGeneral(), c.piv)
+
+	if c.cond > ConditionTolerance {
+		return Condition(c.cond)
+	}
+	return nil
 }

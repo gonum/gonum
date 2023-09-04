@@ -240,7 +240,7 @@ var spanningTreeTests = []struct {
 	},
 }
 
-func testMinumumSpanning(mst func(dst WeightedBuilder, g spanningGraph) float64, t *testing.T) {
+func testMinimumSpanning(mst func(dst WeightedBuilder, g spanningGraph) float64, t *testing.T) {
 	for _, test := range spanningTreeTests {
 		g := test.graph()
 		for _, e := range test.edges {
@@ -283,14 +283,14 @@ func testMinumumSpanning(mst func(dst WeightedBuilder, g spanningGraph) float64,
 
 func TestKruskal(t *testing.T) {
 	t.Parallel()
-	testMinumumSpanning(func(dst WeightedBuilder, g spanningGraph) float64 {
+	testMinimumSpanning(func(dst WeightedBuilder, g spanningGraph) float64 {
 		return Kruskal(dst, g)
 	}, t)
 }
 
 func TestPrim(t *testing.T) {
 	t.Parallel()
-	testMinumumSpanning(func(dst WeightedBuilder, g spanningGraph) float64 {
+	testMinimumSpanning(func(dst WeightedBuilder, g spanningGraph) float64 {
 		return Prim(dst, g)
 	}, t)
 }

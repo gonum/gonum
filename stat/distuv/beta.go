@@ -16,7 +16,8 @@ import (
 // with support between 0 and 1.
 //
 // The beta distribution has density function
-//  x^(α-1) * (1-x)^(β-1) * Γ(α+β) / (Γ(α)*Γ(β))
+//
+//	x^(α-1) * (1-x)^(β-1) * Γ(α+β) / (Γ(α)*Γ(β))
 //
 // For more information, see https://en.wikipedia.org/wiki/Beta_distribution
 type Beta struct {
@@ -89,7 +90,7 @@ func (b Beta) Mean() float64 {
 
 // Mode returns the mode of the distribution.
 //
-// Mode returns NaN if both parametera are less than or equal to 1 as a special case,
+// Mode returns NaN if both parameters are less than or equal to 1 as a special case,
 // 0 if only Alpha <= 1 and 1 if only Beta <= 1.
 func (b Beta) Mode() float64 {
 	if b.Alpha <= 1 {

@@ -19,7 +19,7 @@ func IsNaN(q Number) bool {
 	return math.IsNaN(q.Real) || math.IsNaN(q.Imag) || math.IsNaN(q.Jmag) || math.IsNaN(q.Kmag)
 }
 
-// NaN returns a quaternion ``not-a-number'' value.
+// NaN returns a quaternion “not-a-number” value.
 func NaN() Number {
 	nan := math.NaN()
 	return Number{Real: nan, Imag: nan, Jmag: nan, Kmag: nan}

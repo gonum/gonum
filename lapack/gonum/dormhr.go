@@ -7,24 +7,29 @@ package gonum
 import "gonum.org/v1/gonum/blas"
 
 // Dormhr multiplies an m×n general matrix C with an nq×nq orthogonal matrix Q
-//  Q * C   if side == blas.Left  and trans == blas.NoTrans,
-//  Qᵀ * C  if side == blas.Left  and trans == blas.Trans,
-//  C * Q   if side == blas.Right and trans == blas.NoTrans,
-//  C * Qᵀ  if side == blas.Right and trans == blas.Trans,
+//
+//	Q * C   if side == blas.Left  and trans == blas.NoTrans,
+//	Qᵀ * C  if side == blas.Left  and trans == blas.Trans,
+//	C * Q   if side == blas.Right and trans == blas.NoTrans,
+//	C * Qᵀ  if side == blas.Right and trans == blas.Trans,
+//
 // where nq == m if side == blas.Left and nq == n if side == blas.Right.
 //
 // Q is defined implicitly as the product of ihi-ilo elementary reflectors, as
 // returned by Dgehrd:
-//  Q = H_{ilo} H_{ilo+1} ... H_{ihi-1}.
+//
+//	Q = H_{ilo} H_{ilo+1} ... H_{ihi-1}.
+//
 // Q is equal to the identity matrix except in the submatrix
 // Q[ilo+1:ihi+1,ilo+1:ihi+1].
 //
 // ilo and ihi must have the same values as in the previous call of Dgehrd. It
 // must hold that
-//  0 <= ilo <= ihi < m   if m > 0 and side == blas.Left,
-//  ilo = 0 and ihi = -1  if m = 0 and side == blas.Left,
-//  0 <= ilo <= ihi < n   if n > 0 and side == blas.Right,
-//  ilo = 0 and ihi = -1  if n = 0 and side == blas.Right.
+//
+//	0 <= ilo <= ihi < m   if m > 0 and side == blas.Left,
+//	ilo = 0 and ihi = -1  if m = 0 and side == blas.Left,
+//	0 <= ilo <= ihi < n   if n > 0 and side == blas.Right,
+//	ilo = 0 and ihi = -1  if n = 0 and side == blas.Right.
 //
 // a and lda represent an m×m matrix if side == blas.Left and an n×n matrix if
 // side == blas.Right. The matrix contains vectors which define the elementary

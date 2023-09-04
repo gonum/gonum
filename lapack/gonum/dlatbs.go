@@ -12,8 +12,10 @@ import (
 )
 
 // Dlatbs solves a triangular banded system of equations
-//  A * x = s*b    if trans == blas.NoTrans
-//  Aᵀ * x = s*b  if trans == blas.Trans or blas.ConjTrans
+//
+//	A * x = s*b    if trans == blas.NoTrans
+//	Aᵀ * x = s*b  if trans == blas.Trans or blas.ConjTrans
+//
 // where A is an upper or lower triangular band matrix, x and b are n-element
 // vectors, and s is a scaling factor chosen so that the components of x will be
 // less than the overflow threshold.
@@ -50,7 +52,7 @@ func (Implementation) Dlatbs(uplo blas.Uplo, trans blas.Transpose, diag blas.Dia
 
 	// Quick return if possible.
 	if n == 0 {
-		return 0
+		return 1
 	}
 
 	switch {

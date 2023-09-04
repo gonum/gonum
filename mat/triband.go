@@ -168,35 +168,42 @@ type TriBandDense struct {
 // The data must be arranged in row-major order constructed by removing the zeros
 // from the rows outside the band and aligning the diagonals. For example, if
 // the upper-triangular banded matrix
-//    1  2  3  0  0  0
-//    0  4  5  6  0  0
-//    0  0  7  8  9  0
-//    0  0  0 10 11 12
-//    0  0  0 0  13 14
-//    0  0  0 0  0  15
+//
+//	1  2  3  0  0  0
+//	0  4  5  6  0  0
+//	0  0  7  8  9  0
+//	0  0  0 10 11 12
+//	0  0  0 0  13 14
+//	0  0  0 0  0  15
+//
 // becomes (* entries are never accessed)
-//     1  2  3
-//     4  5  6
-//     7  8  9
-//    10 11 12
-//    13 14  *
-//    15  *  *
+//
+//	 1  2  3
+//	 4  5  6
+//	 7  8  9
+//	10 11 12
+//	13 14  *
+//	15  *  *
+//
 // which is passed to NewTriBandDense as []float64{1, 2, ..., 15, *, *, *}
 // with k=2 and kind = mat.Upper.
 // The lower triangular banded matrix
-//    1  0  0  0  0  0
-//    2  3  0  0  0  0
-//    4  5  6  0  0  0
-//    0  7  8  9  0  0
-//    0  0 10 11 12  0
-//    0  0  0 13 14 15
+//
+//	1  0  0  0  0  0
+//	2  3  0  0  0  0
+//	4  5  6  0  0  0
+//	0  7  8  9  0  0
+//	0  0 10 11 12  0
+//	0  0  0 13 14 15
+//
 // becomes (* entries are never accessed)
-//     *  *  1
-//     *  2  3
+//   - *  1
+//   - 2  3
 //     4  5  6
 //     7  8  9
-//    10 11 12
-//    13 14 15
+//     10 11 12
+//     13 14 15
+//
 // which is passed to NewTriBandDense as []float64{*, *, *, 1, 2, ..., 15}
 // with k=2 and kind = mat.Lower.
 // Only the values in the band portion of the matrix are used.
@@ -324,6 +331,8 @@ func (t *TriBandDense) reuseAsZeroed(n, k int, kind TriKind) {
 // with the given bandwidth and orientation. If the receiver is not empty,
 // reuseAsZeroed checks that the receiver has the correct size, bandwidth and
 // orientation.
+//
+//lint:ignore U1000 This will be used later.
 func (t *TriBandDense) reuseAsNonZeroed(n, k int, kind TriKind) {
 	// reuseAsNonZeroed must be kept in sync with reuseAsZeroed.
 	if n == 0 {
@@ -349,6 +358,76 @@ func (t *TriBandDense) reuseAsNonZeroed(n, k int, kind TriKind) {
 	}
 	if t.mat.Uplo != ul {
 		panic(ErrTriangle)
+	}
+}
+
+// DoNonZero calls the function fn for each of the non-zero elements of t. The function fn
+// takes a row/column index and the element value of t at (i, j).
+func (t *TriBandDense) DoNonZero(fn func(i, j int, v float64)) {
+	if t.isUpper() {
+		for i := 0; i < t.mat.N; i++ {
+			for j := i; j < min(i+t.mat.K+1, t.mat.N); j++ {
+				v := t.at(i, j)
+				if v != 0 {
+					fn(i, j, v)
+				}
+			}
+		}
+	} else {
+		for i := 0; i < t.mat.N; i++ {
+			for j := max(0, i-t.mat.K); j <= i; j++ {
+				v := t.at(i, j)
+				if v != 0 {
+					fn(i, j, v)
+				}
+			}
+		}
+	}
+}
+
+// DoRowNonZero calls the function fn for each of the non-zero elements of row i of t. The function fn
+// takes a row/column index and the element value of t at (i, j).
+func (t *TriBandDense) DoRowNonZero(i int, fn func(i, j int, v float64)) {
+	if i < 0 || t.mat.N <= i {
+		panic(ErrRowAccess)
+	}
+	if t.isUpper() {
+		for j := i; j < min(i+t.mat.K+1, t.mat.N); j++ {
+			v := t.at(i, j)
+			if v != 0 {
+				fn(i, j, v)
+			}
+		}
+	} else {
+		for j := max(0, i-t.mat.K); j <= i; j++ {
+			v := t.at(i, j)
+			if v != 0 {
+				fn(i, j, v)
+			}
+		}
+	}
+}
+
+// DoColNonZero calls the function fn for each of the non-zero elements of column j of t. The function fn
+// takes a row/column index and the element value of t at (i, j).
+func (t *TriBandDense) DoColNonZero(j int, fn func(i, j int, v float64)) {
+	if j < 0 || t.mat.N <= j {
+		panic(ErrColAccess)
+	}
+	if t.isUpper() {
+		for i := 0; i < t.mat.N; i++ {
+			v := t.at(i, j)
+			if v != 0 {
+				fn(i, j, v)
+			}
+		}
+	} else {
+		for i := 0; i < t.mat.N; i++ {
+			v := t.at(i, j)
+			if v != 0 {
+				fn(i, j, v)
+			}
+		}
 	}
 }
 
@@ -449,9 +528,10 @@ func (t *TriBandDense) DiagView() Diagonal {
 }
 
 // Norm returns the specified norm of the receiver. Valid norms are:
-//  1 - The maximum absolute column sum
-//  2 - The Frobenius norm, the square root of the sum of the squares of the elements
-//  Inf - The maximum absolute row sum
+//
+//	1 - The maximum absolute column sum
+//	2 - The Frobenius norm, the square root of the sum of the squares of the elements
+//	Inf - The maximum absolute row sum
 //
 // Norm will panic with ErrNormOrder if an illegal norm is specified and with
 // ErrZeroLength if the matrix has zero size.

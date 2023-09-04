@@ -130,7 +130,7 @@ func DsytrdTest(t *testing.T, impl Dsytrder) {
 					t.Errorf("%v: Q is not orthogonal; resid=%v, want<=%v", prefix, resid, tol*float64(n))
 				}
 
-				// Contruct symmetric tridiagonal T from d and e.
+				// Construct symmetric tridiagonal T from d and e.
 				tMat := zeros(n, n, n)
 				for i := 0; i < n; i++ {
 					tMat.Data[i*tMat.Stride+i] = d[i]

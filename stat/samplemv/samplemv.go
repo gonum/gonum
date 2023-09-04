@@ -158,7 +158,9 @@ var ErrRejection = errors.New("rejection: acceptance ratio above 1")
 // Rejection sampling generates points from the target distribution by using
 // the proposal distribution. At each step of the algorithm, the proposed point
 // is accepted with probability
-//  p = target(x) / (proposal(x) * c)
+//
+//	p = target(x) / (proposal(x) * c)
+//
 // where target(x) is the probability of the point according to the target distribution
 // and proposal(x) is the probability according to the proposal distribution.
 // The constant c must be chosen such that target(x) < proposal(x) * c for all x.
@@ -166,10 +168,10 @@ var ErrRejection = errors.New("rejection: acceptance ratio above 1")
 //
 // The number of proposed locations during sampling can be found with a call to
 // Proposed. If there was an error during sampling, all elements of samples are
-// set to NaN and the error can be accesssed with the Err method. If src != nil,
+// set to NaN and the error can be accessed with the Err method. If src != nil,
 // it will be used to generate random numbers, otherwise rand.Float64 will be used.
 //
-// Target may return the true (log of) the probablity of the location, or it may return
+// Target may return the true (log of) the probability of the location, or it may return
 // a value that is proportional to the probability (logprob + constant). This is
 // useful for cases where the probability distribution is only known up to a normalization
 // constant.

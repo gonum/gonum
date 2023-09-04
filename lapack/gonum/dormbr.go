@@ -13,15 +13,17 @@ import (
 // decomposition computed by Dgebrd.
 //
 // Dormbr overwrites the m×n matrix C with
-//  Q * C   if vect == lapack.ApplyQ, side == blas.Left, and trans == blas.NoTrans
-//  C * Q   if vect == lapack.ApplyQ, side == blas.Right, and trans == blas.NoTrans
-//  Qᵀ * C  if vect == lapack.ApplyQ, side == blas.Left, and trans == blas.Trans
-//  C * Qᵀ  if vect == lapack.ApplyQ, side == blas.Right, and trans == blas.Trans
 //
-//  P * C   if vect == lapack.ApplyP, side == blas.Left, and trans == blas.NoTrans
-//  C * P   if vect == lapack.ApplyP, side == blas.Right, and trans == blas.NoTrans
-//  Pᵀ * C  if vect == lapack.ApplyP, side == blas.Left, and trans == blas.Trans
-//  C * Pᵀ  if vect == lapack.ApplyP, side == blas.Right, and trans == blas.Trans
+//	Q * C   if vect == lapack.ApplyQ, side == blas.Left, and trans == blas.NoTrans
+//	C * Q   if vect == lapack.ApplyQ, side == blas.Right, and trans == blas.NoTrans
+//	Qᵀ * C  if vect == lapack.ApplyQ, side == blas.Left, and trans == blas.Trans
+//	C * Qᵀ  if vect == lapack.ApplyQ, side == blas.Right, and trans == blas.Trans
+//
+//	P * C   if vect == lapack.ApplyP, side == blas.Left, and trans == blas.NoTrans
+//	C * P   if vect == lapack.ApplyP, side == blas.Right, and trans == blas.NoTrans
+//	Pᵀ * C  if vect == lapack.ApplyP, side == blas.Left, and trans == blas.Trans
+//	C * Pᵀ  if vect == lapack.ApplyP, side == blas.Right, and trans == blas.Trans
+//
 // where P and Q are the orthogonal matrices determined by Dgebrd when reducing
 // a matrix A to bidiagonal form: A = Q * B * Pᵀ. See Dgebrd for the
 // definitions of Q and P.

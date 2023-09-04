@@ -17,7 +17,7 @@ import (
 // UnitNormal is an instantiation of the normal distribution with Mu = 0 and Sigma = 1.
 var UnitNormal = Normal{Mu: 0, Sigma: 1}
 
-// Normal respresents a normal (Gaussian) distribution (https://en.wikipedia.org/wiki/Normal_distribution).
+// Normal represents a normal (Gaussian) distribution (https://en.wikipedia.org/wiki/Normal_distribution).
 type Normal struct {
 	Mu    float64 // Mean of the normal distribution
 	Sigma float64 // Standard deviation of the normal distribution
@@ -149,7 +149,9 @@ func (n Normal) Rand() float64 {
 // Score returns the score function with respect to the parameters of the
 // distribution at the input location x. The score function is the derivative
 // of the log-likelihood at x with respect to the parameters
-//  (∂/∂θ) log(p(x;θ))
+//
+//	(∂/∂θ) log(p(x;θ))
+//
 // If deriv is non-nil, len(deriv) must equal the number of parameters otherwise
 // Score will panic, and the derivative is stored in-place into deriv. If deriv
 // is nil a new slice will be allocated and returned.
@@ -172,7 +174,8 @@ func (n Normal) Score(deriv []float64, x float64) []float64 {
 // ScoreInput returns the score function with respect to the input of the
 // distribution at the input location specified by x. The score function is the
 // derivative of the log-likelihood
-//  (d/dx) log(p(x)) .
+//
+//	(d/dx) log(p(x)) .
 func (n Normal) ScoreInput(x float64) float64 {
 	return -(1 / (2 * n.Sigma * n.Sigma)) * 2 * (x - n.Mu)
 }

@@ -174,7 +174,7 @@ func DsterfTest(t *testing.T, impl Dsterfer) {
 			z := nanGeneral(n, n, n)
 			ok = impl.Dsteqr(lapack.EVTridiag, n, dWant, e, z.Data, z.Stride, make([]float64, 2*n))
 			if !ok {
-				t.Fatalf("%v: computing reference solution using Dsteqr failed", name)
+				t.Errorf("%v: computing reference solution using Dsteqr failed", name)
 				continue
 			}
 

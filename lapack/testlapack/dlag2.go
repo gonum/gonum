@@ -146,9 +146,11 @@ func makeDlag2TestMatrix(rnd *rand.Rand, ld, kind int) blas64.General {
 }
 
 // residualDlag2 returns the value of
-//             | det( s*A - w*B ) |
-//  -------------------------------------------
-//  max(s*norm(A), |w|*norm(B))*norm(s*A - w*B)
+//
+//	           | det( s*A - w*B ) |
+//	-------------------------------------------
+//	max(s*norm(A), |w|*norm(B))*norm(s*A - w*B)
+//
 // that can be used to check the generalized eigenvalues computed by Dlag2 and
 // an error that indicates invalid input data.
 func residualDlag2(a, b blas64.General, s float64, w complex128) (float64, error) {
@@ -217,8 +219,9 @@ func scale(f float64, c complex128) complex128 {
 }
 
 // cmplxdet2x2 returns the determinant of
-//  |a11 a12|
-//  |a21 a22|
+//
+//	|a11 a12|
+//	|a21 a22|
 func cmplxdet2x2(a11, a12, a21, a22 complex128) complex128 {
 	return a11*a22 - a12*a21
 }

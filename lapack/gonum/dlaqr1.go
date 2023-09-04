@@ -7,7 +7,9 @@ package gonum
 import "math"
 
 // Dlaqr1 sets v to a scalar multiple of the first column of the product
-//  (H - (sr1 + i*si1)*I)*(H - (sr2 + i*si2)*I)
+//
+//	(H - (sr1 + i*si1)*I)*(H - (sr2 + i*si2)*I)
+//
 // where H is a 2×2 or 3×3 matrix, I is the identity matrix of the same size,
 // and i is the imaginary unit. Scaling is done to avoid overflows and most
 // underflows.

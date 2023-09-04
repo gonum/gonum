@@ -24,12 +24,12 @@ func ExampleNumber_fike() {
 
 	v := fn(hyperdual.Number{Real: 1.5, E1mag: 1, E2mag: 1})
 	fmt.Printf("v=%.4f\n", v)
-	fmt.Printf("fn(1.5)=%.4f\nfn'(1.5)=%.4f\nfn''(1.5)=%.4f\n", v.Real, v.E1mag, v.E1E2mag)
+	fmt.Printf("fn(1.5)=%.4f\nfn′(1.5)=%.4f\nfn′′(1.5)=%.4f\n", v.Real, v.E1mag, v.E1E2mag)
 
 	// Output:
 	//
 	// v=(4.4978+4.0534ϵ₁+4.0534ϵ₂+9.4631ϵ₁ϵ₂)
 	// fn(1.5)=4.4978
-	// fn'(1.5)=4.0534
-	// fn''(1.5)=9.4631
+	// fn′(1.5)=4.0534
+	// fn′′(1.5)=9.4631
 }

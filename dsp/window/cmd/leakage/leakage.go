@@ -7,31 +7,33 @@
 // to be used to verify window behaviour against foreign implementations.
 // For example, the behavior of a NumPy window can be captured using this
 // python code:
-//  import matplotlib.pyplot as plt
-//  import numpy as np
-//  from numpy.fft import fft
 //
-//  window = np.blackman(20)
-//  print("# beta = %f" % np.mean(window))
+//	import matplotlib.pyplot as plt
+//	import numpy as np
+//	from numpy.fft import fft
 //
-//  plt.figure()
+//	window = np.blackman(20)
+//	print("# beta = %f" % np.mean(window))
 //
-//  A = fft(window, 1000)
-//  mag = np.abs(A)
-//  with np.errstate(divide='ignore', invalid='ignore'):
-//      mag = 20 * np.log10(mag)
-//  mag -= max(mag)
-//  freq = np.linspace(0, len(window)/2, len(A)/2)
+//	plt.figure()
 //
-//  for m in mag[:len(mag)/2]:
-//  	print(m)
+//	A = fft(window, 1000)
+//	mag = np.abs(A)
+//	with np.errstate(divide='ignore', invalid='ignore'):
+//	    mag = 20 * np.log10(mag)
+//	mag -= max(mag)
+//	freq = np.linspace(0, len(window)/2, len(A)/2)
 //
-//  plt.plot(freq, mag[:len(mag)/2])
-//  plt.title("Spectral leakage")
-//  plt.ylabel("Amplitude (dB)")
-//  plt.xlabel("DFT bin")
+//	for m in mag[:len(mag)/2]:
+//		print(m)
 //
-//  plt.show()
+//	plt.plot(freq, mag[:len(mag)/2])
+//	plt.title("Spectral leakage")
+//	plt.ylabel("Amplitude (dB)")
+//	plt.xlabel("DFT bin")
+//
+//	plt.show()
+//
 // and then be exported to leakage and compared with the Gonum
 // implementation.
 package main

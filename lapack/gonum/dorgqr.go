@@ -11,7 +11,9 @@ import (
 
 // Dorgqr generates an m×n matrix Q with orthonormal columns defined by the
 // product of elementary reflectors
-//  Q = H_0 * H_1 * ... * H_{k-1}
+//
+//	Q = H_0 * H_1 * ... * H_{k-1}
+//
 // as computed by Dgeqrf.
 // Dorgqr is the blocked version of Dorg2r that makes greater use of level-3 BLAS
 // routines.
@@ -73,7 +75,7 @@ func (impl Implementation) Dorgqr(m, n, k int, a []float64, lda int, tau, work [
 	}
 
 	nbmin := 2 // Minimum block size
-	var nx int // Crossover size from blocked to unbloked code
+	var nx int // Crossover size from blocked to unblocked code
 	iws := n   // Length of work needed
 	var ldwork int
 	if 1 < nb && nb < k {
@@ -100,7 +102,7 @@ func (impl Implementation) Dorgqr(m, n, k int, a []float64, lda int, tau, work [
 		}
 	}
 	if kk < n {
-		// Perform the operation on colums kk to the end.
+		// Perform the operation on columns kk to the end.
 		impl.Dorg2r(m-kk, n-kk, k-kk, a[kk*lda+kk:], lda, tau[kk:], work)
 	}
 	if kk > 0 {

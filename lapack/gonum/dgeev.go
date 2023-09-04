@@ -17,22 +17,30 @@ import (
 //
 // The right eigenvector v_j of A corresponding to an eigenvalue λ_j
 // is defined by
-//  A v_j = λ_j v_j,
+//
+//	A v_j = λ_j v_j,
+//
 // and the left eigenvector u_j corresponding to an eigenvalue λ_j is defined by
-//  u_jᴴ A = λ_j u_jᴴ,
+//
+//	u_jᴴ A = λ_j u_jᴴ,
+//
 // where u_jᴴ is the conjugate transpose of u_j.
 //
 // On return, A will be overwritten and the left and right eigenvectors will be
 // stored, respectively, in the columns of the n×n matrices VL and VR in the
 // same order as their eigenvalues. If the j-th eigenvalue is real, then
-//  u_j = VL[:,j],
-//  v_j = VR[:,j],
+//
+//	u_j = VL[:,j],
+//	v_j = VR[:,j],
+//
 // and if it is not real, then j and j+1 form a complex conjugate pair and the
 // eigenvectors can be recovered as
-//  u_j     = VL[:,j] + i*VL[:,j+1],
-//  u_{j+1} = VL[:,j] - i*VL[:,j+1],
-//  v_j     = VR[:,j] + i*VR[:,j+1],
-//  v_{j+1} = VR[:,j] - i*VR[:,j+1],
+//
+//	u_j     = VL[:,j] + i*VL[:,j+1],
+//	u_{j+1} = VL[:,j] - i*VL[:,j+1],
+//	v_j     = VR[:,j] + i*VR[:,j+1],
+//	v_{j+1} = VR[:,j] - i*VR[:,j+1],
+//
 // where i is the imaginary unit. The computed eigenvectors are normalized to
 // have Euclidean norm equal to 1 and largest component real.
 //

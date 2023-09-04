@@ -12,8 +12,8 @@ var _ Linesearcher = (*MoreThuente)(nil)
 // sufficient decrease and curvature conditions (the strong Wolfe conditions).
 //
 // References:
-//  - More, J.J. and D.J. Thuente: Line Search Algorithms with Guaranteed Sufficient
-//    Decrease. ACM Transactions on Mathematical Software 20(3) (1994), 286-307
+//   - More, J.J. and D.J. Thuente: Line Search Algorithms with Guaranteed Sufficient
+//     Decrease. ACM Transactions on Mathematical Software 20(3) (1994), 286-307
 type MoreThuente struct {
 	// DecreaseFactor is the constant factor in the sufficient decrease
 	// (Armijo) condition.

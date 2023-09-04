@@ -312,7 +312,7 @@ func hashBlanks(s []*Statement, h hash.Hash) ([]*Statement, map[string]string) {
 				continue
 			}
 			h.Reset()
-			h.Write([]byte(t)) //nolint:errcheck
+			h.Write([]byte(t))
 			terms[t] = fmt.Sprintf("_:%0*x", 2*h.Size(), h.Sum(nil))
 		}
 	}
@@ -334,7 +334,7 @@ func mangleFirstIL(s []*Statement, h hash.Hash) ([]*Statement, map[string]string
 				continue
 			}
 			h.Reset()
-			h.Write([]byte(t)) //nolint:errcheck
+			h.Write([]byte(t))
 			terms[t] = fmt.Sprintf(`"%0*x"`, 2*h.Size(), h.Sum(nil))
 			return relabelStatements(s, terms), terms
 		}

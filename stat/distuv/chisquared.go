@@ -16,7 +16,9 @@ import (
 // with support on the positive numbers.
 //
 // The density function is given by
-//  1/(2^{k/2} * Γ(k/2)) * x^{k/2 - 1} * e^{-x/2}
+//
+//	1/(2^{k/2} * Γ(k/2)) * x^{k/2 - 1} * e^{-x/2}
+//
 // It is a special case of the Gamma distribution, Γ(k/2, 1/2).
 //
 // For more information, see https://en.wikipedia.org/wiki/Chi-squared_distribution.

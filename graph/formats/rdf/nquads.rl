@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Ragel gramar definition derived from http://www.w3.org/TR/n-quads/#sec-grammar.
+// Ragel grammar definition derived from http://www.w3.org/TR/n-quads/#sec-grammar.
 
 %%{
 	machine nquads;

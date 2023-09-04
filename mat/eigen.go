@@ -25,7 +25,9 @@ type EigenSym struct {
 
 // Factorize computes the eigenvalue decomposition of the symmetric matrix a.
 // The Eigen decomposition is defined as
-//  A = P * D * P^-1
+//
+//	A = P * D * P^-1
+//
 // where D is a diagonal matrix containing the eigenvalues of the matrix, and
 // P is a matrix of the eigenvectors of A. Factorize computes the eigenvalues
 // in ascending order. If the vectors input argument is false, the eigenvectors
@@ -150,12 +152,16 @@ func (e *Eigen) succFact() bool {
 // the eigenvectors.
 //
 // A right eigenvalue/eigenvector combination is defined by
-//  A * x_r = λ * x_r
+//
+//	A * x_r = λ * x_r
+//
 // where x_r is the column vector called an eigenvector, and λ is the corresponding
 // eigenvalue.
 //
 // Similarly, a left eigenvalue/eigenvector combination is defined by
-//  x_l * A = λ * x_l
+//
+//	x_l * A = λ * x_l
+//
 // The eigenvalues, but not the eigenvectors, are the same for both decompositions.
 //
 // Typically eigenvectors refer to right eigenvectors.
@@ -274,11 +280,15 @@ func (e *Eigen) Values(dst []complex128) []complex128 {
 // The columns of the returned n×n dense matrix contain the eigenvectors of the
 // decomposition in the same order as the eigenvalues.
 // If the j-th eigenvalue is real, then
-//  dst[:,j] = d[:,j],
+//
+//	dst[:,j] = d[:,j],
+//
 // and if it is not real, then the elements of the j-th and (j+1)-th columns of d
 // form complex conjugate pairs and the eigenvectors are recovered as
-//  dst[:,j]   = d[:,j] + i*d[:,j+1],
-//  dst[:,j+1] = d[:,j] - i*d[:,j+1],
+//
+//	dst[:,j]   = d[:,j] + i*d[:,j+1],
+//	dst[:,j+1] = d[:,j] - i*d[:,j+1],
+//
 // where i is the imaginary unit.
 func (e *Eigen) complexEigenTo(dst *CDense, d *Dense) {
 	r, c := d.Dims()

@@ -17,7 +17,9 @@ type Point struct {
 
 // Formula represents a finite difference formula on a regularly spaced grid
 // that approximates the derivative of order k of a function f at x as
-//  d^k f(x) ≈ (1 / Step^k) * \sum_i Coeff_i * f(x + Step * Loc_i).
+//
+//	d^k f(x) ≈ (1 / Step^k) * \sum_i Coeff_i * f(x + Step * Loc_i).
+//
 // Step must be positive, or the finite difference formula will panic.
 type Formula struct {
 	// Stencil is the set of sampling Points which are used to estimate the
@@ -87,7 +89,7 @@ var Central = Formula{
 	Step:       6e-6,
 }
 
-// Central2nd represents a secord-order accurate centered approximation
+// Central2nd represents a second-order accurate centered approximation
 // to the second derivative.
 var Central2nd = Formula{
 	Stencil:    []Point{{Loc: -1, Coeff: 1}, {Loc: 0, Coeff: -2}, {Loc: 1, Coeff: 1}},

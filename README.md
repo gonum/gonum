@@ -4,7 +4,7 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/valslkp8sr50eepn/branch/master?svg=true)](https://ci.appveyor.com/project/Gonum/gonum/branch/master)
 [![codecov.io](https://codecov.io/gh/gonum/gonum/branch/master/graph/badge.svg)](https://codecov.io/gh/gonum/gonum)
 [![go.dev reference](https://pkg.go.dev/badge/gonum.org/v1/gonum)](https://pkg.go.dev/gonum.org/v1/gonum)
-[![GoDoc](https://godoc.org/gonum.org/v1/gonum?status.svg)](https://godoc.org/gonum.org/v1/gonum)
+[![GoDoc](https://godocs.io/gonum.org/v1/gonum?status.svg)](https://godocs.io/gonum.org/v1/gonum)
 [![Go Report Card](https://goreportcard.com/badge/github.com/gonum/gonum)](https://goreportcard.com/report/github.com/gonum/gonum)
 [![stability-unstable](https://img.shields.io/badge/stability-unstable-yellow.svg)](https://github.com/emersion/stability-badges#unstable)
 
@@ -19,6 +19,8 @@ go get -u gonum.org/v1/gonum/...
 ## Supported Go versions
 
 Gonum supports and tests using the gc compiler on the [two most recent Go releases](https://github.com/gonum/gonum/blob/master/.github/workflows/ci.yml#L14-L15) on Linux (386, amd64 and arm64), macOS and Windows (both on amd64).
+
+Note that floating point behavior may differ between compiler versions and between architectures due to differences in floating point operation implementations.
 
 ## Release schedule
 
@@ -41,7 +43,7 @@ The current list of non-internal tags is as follows:
 - safe — do not use assembly or unsafe
 - bounds — use bounds checks even in internal calls
 - noasm — do not use assembly implementations
-- tomita — use [Tomita, Tanaka, Takahashi pivot choice](https://doi.org/10.1016%2Fj.tcs.2006.06.015) for maximimal clique calculation, otherwise use random pivot (only in [topo package](https://godoc.org/gonum.org/v1/gonum/graph/topo))
+- tomita — use [Tomita, Tanaka, Takahashi pivot choice](https://doi.org/10.1016%2Fj.tcs.2006.06.015) for maximimal clique calculation, otherwise use random pivot (only in [topo package](https://pkg.go.dev/gonum.org/v1/gonum/graph/topo))
 
 
 ## Issues [![TODOs](https://badgen.net/https/api.tickgit.com/badgen/github.com/gonum/gonum)](https://www.tickgit.com/browse?repo=github.com/gonum/gonum)

@@ -20,7 +20,9 @@ import (
 // generates elements over the probability simplex, i.e. ||x||_1 = 1. The Dirichlet
 // distribution is the conjugate prior to the categorical distribution and the
 // multivariate version of the beta distribution. The probability of a point x is
-//  1/Beta(α) \prod_i x_i^(α_i - 1)
+//
+//	1/Beta(α) \prod_i x_i^(α_i - 1)
+//
 // where Beta(α) is the multivariate Beta function (see the mathext package).
 //
 // For more information see https://en.wikipedia.org/wiki/Dirichlet_distribution
@@ -59,7 +61,9 @@ func NewDirichlet(alpha []float64, src rand.Source) *Dirichlet {
 // CovarianceMatrix calculates the covariance matrix of the distribution,
 // storing the result in dst. Upon return, the value at element {i, j} of the
 // covariance matrix is equal to the covariance of the i^th and j^th variables.
-//  covariance(i, j) = E[(x_i - E[x_i])(x_j - E[x_j])]
+//
+//	covariance(i, j) = E[(x_i - E[x_i])(x_j - E[x_j])]
+//
 // If the dst matrix is empty it will be resized to the correct dimensions,
 // otherwise dst must match the dimension of the receiver or CovarianceMatrix
 // will panic.

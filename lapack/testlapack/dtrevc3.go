@@ -362,7 +362,8 @@ func dtrevc3Test(t *testing.T, impl Dtrevc3er, side lapack.EVSide, n, extra int,
 }
 
 // residualEVNormalization returns the maximum normalization error in E:
-//  max |max-norm(E[:,j]) - 1|
+//
+//	max |max-norm(E[:,j]) - 1|
 func residualEVNormalization(emat blas64.General, wi []float64) float64 {
 	n := emat.Rows
 	if n == 0 {

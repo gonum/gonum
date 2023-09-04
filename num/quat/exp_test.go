@@ -190,6 +190,99 @@ func TestPow(t *testing.T) {
 	}
 }
 
+var powRealTests = []struct {
+	q    Number
+	r    float64
+	want Number
+}{
+	{q: Number{}, r: 0, want: Number{Real: 1}},
+	{
+		q: Number{Real: 1, Imag: 1, Jmag: 1, Kmag: 1}, r: 2,
+		want: Number{Real: -2, Imag: 2, Jmag: 2, Kmag: 2},
+	},
+	{
+		q: Number{Real: 1, Imag: 0, Jmag: 1, Kmag: 1}, r: 2,
+		want: Number{Real: -1, Imag: 0, Jmag: 2, Kmag: 2},
+	},
+	{
+		q: Number{Real: 1, Imag: 0, Jmag: 0, Kmag: 1}, r: 2,
+		want: Number{Real: 0, Imag: 0, Jmag: 0, Kmag: 2},
+	},
+	{
+		q: Number{Real: 0, Imag: 1, Jmag: 1, Kmag: 1}, r: 2,
+		want: Number{Real: -3, Imag: 0, Jmag: 0, Kmag: 0},
+	},
+	{
+		q: Number{Real: 0, Imag: 0, Jmag: 1, Kmag: 1}, r: 2,
+		want: Number{Real: -2, Imag: 0, Jmag: 0, Kmag: 0},
+	},
+	{
+		q: Number{Real: 0, Imag: 0, Jmag: 0, Kmag: 1}, r: 2,
+		want: Number{Real: -1, Imag: 0, Jmag: 0, Kmag: 0},
+	},
+
+	{
+		q: Number{Real: 1, Imag: 1, Jmag: 1, Kmag: 1}, r: math.Pi,
+		want: Number{Real: -8.728144138959564, Imag: -0.7527136547040768, Jmag: -0.7527136547040768, Kmag: -0.7527136547040768},
+	},
+	{
+		q: Number{Real: 1, Imag: 0, Jmag: 1, Kmag: 1}, r: math.Pi,
+		want: Number{Real: -5.561182514695044, Imag: 0, Jmag: 0.5556661490713818, Kmag: 0.5556661490713818},
+	},
+	{
+		q: Number{Real: 1, Imag: 0, Jmag: 0, Kmag: 1}, r: math.Pi,
+		want: Number{Real: -2.320735561810013, Imag: 0, Jmag: 0, Kmag: 1.8544983901925216},
+	},
+	{
+		q: Number{Real: 0, Imag: 1, Jmag: 1, Kmag: 1}, r: math.Pi,
+		want: Number{Real: 1.2388947209955585, Imag: -3.162774128856231, Jmag: -3.162774128856231, Kmag: -3.162774128856231},
+	},
+	{
+		q: Number{Real: 0, Imag: 0, Jmag: 1, Kmag: 1}, r: math.Pi,
+		want: Number{Real: 0.6552860151073727, Imag: 0, Jmag: -2.0488506614051922, Kmag: -2.0488506614051922},
+	},
+	{
+		q: Number{Real: 0, Imag: 0, Jmag: 0, Kmag: 1}, r: math.Pi,
+		want: Number{Real: 0.22058404074969779, Imag: 0, Jmag: 0, Kmag: -0.9753679720836315},
+	},
+
+	{
+		q: Number{Real: 1, Imag: 1, Jmag: 1, Kmag: 1}, r: 3,
+		want: Number{Real: -8, Imag: 0, Jmag: 0, Kmag: 0},
+	},
+	{
+		q: Number{Real: 1, Imag: 0, Jmag: 1, Kmag: 1}, r: 3,
+		want: Number{Real: -5, Imag: 0, Jmag: 1, Kmag: 1},
+	},
+	{
+		q: Number{Real: 1, Imag: 0, Jmag: 0, Kmag: 1}, r: 3,
+		want: Number{Real: -2, Imag: 0, Jmag: 0, Kmag: 2},
+	},
+	{
+		q: Number{Real: 0, Imag: 1, Jmag: 1, Kmag: 1}, r: 3,
+		want: Number{Real: 0, Imag: -3, Jmag: -3, Kmag: -3},
+	},
+	{
+		q: Number{Real: 0, Imag: 0, Jmag: 1, Kmag: 1}, r: 3,
+		want: Number{Real: 0, Imag: 0, Jmag: -2, Kmag: -2},
+	},
+	{
+		q: Number{Real: 0, Imag: 0, Jmag: 0, Kmag: 1}, r: 3,
+		want: Number{Real: 0, Imag: 0, Jmag: 0, Kmag: -1},
+	},
+}
+
+func TestRealPow(t *testing.T) {
+	t.Parallel()
+	const tol = 1e-14
+	for _, test := range powRealTests {
+		got := PowReal(test.q, test.r)
+		if !equalApprox(got, test.want, tol) {
+			t.Errorf("unexpected result for Pow(%v, %v): got:%v want:%v", test.q, test.r, got, test.want)
+		}
+	}
+}
+
 var sqrtTests = []struct {
 	q    Number
 	want Number

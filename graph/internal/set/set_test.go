@@ -46,10 +46,6 @@ func TestSameInt64s(t *testing.T) {
 
 func TestAddInt64s(t *testing.T) {
 	s := make(Int64s)
-	if s == nil {
-		t.Fatal("Set cannot be created successfully")
-	}
-
 	if s.Count() != 0 {
 		t.Error("Set somehow contains new elements upon creation")
 	}
@@ -183,10 +179,6 @@ func TestSameInts(t *testing.T) {
 
 func TestAddInts(t *testing.T) {
 	s := make(Ints)
-	if s == nil {
-		t.Fatal("Set cannot be created successfully")
-	}
-
 	if s.Count() != 0 {
 		t.Error("Set somehow contains new elements upon creation")
 	}

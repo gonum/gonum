@@ -69,7 +69,9 @@ type Statuser interface {
 // (approximate) minimum of the objective function along the search direction
 // dir_k starting at the most recent location x_k, i.e., it tries to minimize
 // the function
-//  φ(step) := f(x_k + step * dir_k) where step > 0.
+//
+//	φ(step) := f(x_k + step * dir_k) where step > 0.
+//
 // Typically, a Linesearcher will be used in conjunction with LinesearchMethod
 // for performing gradient-based optimization through sequential line searches.
 type Linesearcher interface {

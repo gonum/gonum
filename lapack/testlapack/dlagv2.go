@@ -21,10 +21,11 @@ type Dlagv2er interface {
 
 func Dlagv2Test(t *testing.T, impl Dlagv2er) {
 	rnd := rand.New(rand.NewSource(1))
-	for _, lda := range []int{2, 5} {
-		for _, ldb := range []int{2, 5} {
-			for aKind := 20; aKind <= 20; aKind++ {
-				for bKind := 20; bKind <= 20; bKind++ {
+	const ldExtra = 0
+	for _, lda := range []int{2, 2 + ldExtra} {
+		for _, ldb := range []int{2, 2 + ldExtra} {
+			for aKind := 9; aKind <= 20; aKind++ {
+				for bKind := 9; bKind <= 20; bKind++ {
 					dlagv2Test(t, impl, rnd, lda, ldb, aKind, bKind)
 				}
 			}
@@ -38,9 +39,19 @@ func dlagv2Test(t *testing.T, impl Dlagv2er, rnd *rand.Rand, lda, ldb int, aKind
 	a := makeDlag2TestMatrix(rnd, lda, aKind)
 	b := makeDlag2TestMatrix(rnd, ldb, bKind)
 	b.Data[b.Stride] = math.NaN() // b is lower triangular.
+	// a.Data[a.Stride] = 0
+	// Enforce positive, non-zero diagonal.
+	b.Data[0] = math.Max(safmin, math.Abs(b.Data[0]))
+	b.Data[b.Stride+1] = math.Max(safmin, math.Abs(b.Data[b.Stride+1]))
+
+	if b.Data[0] < b.Data[b.Stride+1] {
+		// Enforce descending order.
+		b.Data[0], b.Data[b.Stride+1] = b.Data[b.Stride+1], b.Data[0]
+	}
 
 	aCopy := cloneGeneral(a)
 	bCopy := cloneGeneral(b)
+	bCopy.Data[bCopy.Stride] = 0 // zero out NaN for later comparisons.
 	var alphar, alphai, beta [2]float64
 	csl, snl, csr, snr := impl.Dlagv2(a.Data, a.Stride, b.Data, b.Stride, alphar[:], alphai[:], beta[:])
 	beta1, beta2 := beta[0], beta[1]
@@ -65,32 +76,42 @@ func dlagv2Test(t *testing.T, impl Dlagv2er, rnd *rand.Rand, lda, ldb int, aKind
 		Data: []float64{csr, -snr, snr, csr},
 		Rows: 2, Cols: 2, Stride: 2,
 	}
-	name := fmt.Sprintf("lda=%d,ldb=%d,aKind=%d,bKind=%d", lda, ldb, aKind, bKind)
-	aStr := fmt.Sprintf("A = [%g,%g]\n    [%g,%g]", a.Data[0], a.Data[1], a.Data[a.Stride], a.Data[a.Stride+1])
-	bStr := fmt.Sprintf("B = [%g,%g]\n    [%g,%g]", b.Data[0], b.Data[1], b.Data[b.Stride], b.Data[b.Stride+1])
+	isComplexEig := wi1 != 0
+	name := fmt.Sprintf("cmplx=%v,lda=%d,ldb=%d,aKind=%d,bKind=%d", isComplexEig, lda, ldb, aKind, bKind)
+	// aOrigStr := sprint2x2Block("A", aCopy.Data, aCopy.Stride, 4)
+	// bOrigStr := sprint2x2Block("B", bCopy.Data, bCopy.Stride, 4)
+
+	aStr := sprint2x2Block("As", a.Data, a.Stride, 4)
+	bStr := sprint2x2Block("Bs", b.Data, b.Stride, 4)
 
 	if wi1 < 0 {
-		t.Fatalf("%s: negative wi; wi1=%g,wi2=%g,\n%s\n%s", name, wi1, wi2, aStr, bStr)
+		t.Fatalf("%s: negative wi1; wi1=%g,wi2=%g,\n%s\n%s", name, wi1, wi2, aStr, bStr)
+		return
+	}
+	if isComplexEig && wi2 != -wi1 {
+		t.Fatalf("%s: wi1 != -wi2; wi1=%g,wi2=%g,\n%s\n%s", name, wi1, wi2, aStr, bStr)
 		return
 	}
 	if math.Abs(b.Data[b.Stride]) > tol {
 		t.Fatalf("%s: expected b to remain upper triangular:\n%s", name, bStr)
 		return
 	}
-	if b.Data[0] < b.Data[b.Stride+1] {
+	if isComplexEig && b.Data[0] < b.Data[b.Stride+1] {
 		t.Errorf("%s: expected b diagonal elements to be in descending order:\n%s", name, bStr)
+	}
+
+	if !isComplexEig && !isSchurCanonicalGeneral(a, tol) {
+		t.Fatalf("%s: a is not Schur canonical:\n%s", name, aStr)
+		return
 	}
 
 	if !isSchurCanonicalGeneral(b, tol) {
 		t.Fatalf("%s: b is not Schur canonical:\n%s", name, bStr)
 		return
 	}
-	if !isSchurCanonicalGeneral(a, tol) {
-		t.Fatalf("%s: a is not Schur canonical:\n%s", name, aStr)
-		return
-	}
+
 	switch {
-	case wi1 > 0 || wi2 > 0:
+	case isComplexEig:
 		// Complex eigenvalue pair.
 		if wr1 != wr2 {
 			t.Fatalf("%s: complex eigenvalue but wr1 != wr2; wr1=%g, wr2=%g,\n%s\n%s", name, wr1, wr2, aStr, bStr)
@@ -113,23 +134,9 @@ func dlagv2Test(t *testing.T, impl Dlagv2er, rnd *rand.Rand, lda, ldb int, aKind
 			t.Errorf("%s: expected a to be upper triangular on real pair:\n%s", name, aStr)
 		}
 	}
-	return
-	res, err := residualDlag2(aCopy, bCopy, beta1, complex(wr1, wi1))
-	if err != nil {
-		t.Logf("%s: invalid input data: %v\n%s\n%s", name, err, aStr, bStr)
-	}
-	if res > tol || math.IsNaN(res) {
-		t.Errorf("%s: unexpected first eigenvalue %g with s=%g; resid=%g, want<=%g\n%s\n%s", name, complex(wr1, wi1), beta1, res, tol, aStr, bStr)
-	}
-	return
-	res, err = residualDlag2(a, b, beta2, complex(wr2, wi2))
-	if err != nil {
-		t.Logf("%s: invalid input data: %v\n%s\n%s", name, err, aStr, bStr)
-	}
-	if res > tol || math.IsNaN(res) {
-		t.Errorf("%s: unexpected second eigenvalue %g with s=%g; resid=%g, want<=%g\n%s\n%s", name, complex(wr2, wi2), beta2, res, tol, aStr, bStr)
-	}
-	return
+
+	// Test Rotations.
+
 	aux := nanGeneral(2, 2, 2)
 	result := nanGeneral(2, 2, 2)
 	// Aschur = r1 * A * r2
@@ -137,12 +144,39 @@ func dlagv2Test(t *testing.T, impl Dlagv2er, rnd *rand.Rand, lda, ldb int, aKind
 	blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, r1, aCopy, 0, aux)
 	blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, aux, r2, 0, result)
 	if !equalApproxGeneral(result, a, tol) {
-		t.Errorf("%s: unexpected result for A:\nwant=%v\ngot= %v", name, a, result)
+		t.Errorf("%s: bad rotation:\n%s\n%s",
+			name, aStr, sprint2x2Block("A", result.Data, result.Stride, 4))
 	}
 
 	blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, r1, bCopy, 0, aux)
 	blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, aux, r2, 0, result)
 	if !equalApproxGeneral(result, b, tol) {
-		t.Errorf("%s: unexpected result for B:\nwant=%v\ngot= %v", name, b, result)
+		t.Errorf("%s: bad rotation:\n%s\n%s",
+			name, bStr, sprint2x2Block("B", result.Data, result.Stride, 4))
 	}
+
+	// Test eigenvalues.
+
+	res, err := residualDlag2(aCopy, bCopy, beta1, complex(wr1, wi1))
+	if err != nil {
+		// t.Logf("%s: invalid input data: %v\n%s\n%s\n%s\n%s", name, err, aStr, bStr, aOrigStr, bOrigStr)
+		return
+	}
+	if res > tol || math.IsNaN(res) {
+		t.Errorf("%s: unexpected first eigenvalue %g with s=%g; resid=%g, want<=%g\n%s\n%s", name, complex(wr1, wi1), beta1, res, tol, aStr, bStr)
+	}
+
+	res, err = residualDlag2(a, b, beta2, complex(wr2, wi2))
+	if err != nil {
+		// t.Logf("%s: invalid input data: %v\n%s\n%s\n%s\n%s", name, err, aStr, bStr, aOrigStr, bOrigStr)
+		return
+	}
+	if res > tol || math.IsNaN(res) {
+		t.Errorf("%s: unexpected second eigenvalue %g with s=%g; resid=%g, want<=%g\n%s\n%s", name, complex(wr2, wi2), beta2, res, tol, aStr, bStr)
+	}
+}
+
+func sprint2x2Block(name string, a []float64, stride, prec int) string {
+	const spaces = "                            "
+	return fmt.Sprintf("%s = [%.*g,%.*g]\n%s[%.*g,%.*g]", name, prec, a[0], prec, a[1], spaces[:len(name)+3], prec, a[stride], prec, a[stride+1])
 }

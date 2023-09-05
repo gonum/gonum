@@ -140,7 +140,7 @@ func dtrexcTest(t *testing.T, impl Dtrexcer, rnd *rand.Rand, n, ifst, ilst, extr
 		return
 	}
 
-	if !isSchurCanonicalGeneral(tmat) {
+	if !isSchurCanonicalGeneral(tmat, 0) {
 		t.Errorf("%v: T is not in Schur canonical form", name)
 	}
 

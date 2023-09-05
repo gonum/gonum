@@ -154,7 +154,7 @@ func testDlaexc(t *testing.T, impl Dlaexcer, rnd *rand.Rand, n, extra int) {
 		}
 	}
 
-	if !isSchurCanonicalGeneral(tmat) {
+	if !isSchurCanonicalGeneral(tmat, 0) {
 		t.Errorf("%v: T is not in Schur canonical form", name)
 	}
 

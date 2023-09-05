@@ -60,7 +60,7 @@ func (impl Implementation) Dtgsy2(trans blas.Transpose, ijob lapack.MaximizeNorm
 	switch {
 	case trans != blas.NoTrans && trans != blas.Trans:
 		panic(badTrans)
-	case trans == blas.NoTrans && (ijob < 0 || ijob > 2):
+	case trans == blas.NoTrans && ijob > 2:
 		panic(badIJob)
 	case m < 0:
 		panic(mLT0)

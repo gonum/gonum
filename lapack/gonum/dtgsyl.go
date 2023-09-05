@@ -322,27 +322,6 @@ func (impl Implementation) Dtgsyl(trans blas.Transpose, ijob, m, n int, a []floa
 	return difOut, scaleOut, infoOut
 }
 
-// blockStructure computes the block structure of a matrix A for Dtgsy2.
-// On exit, the block ranges are stored in dst[0:p] and the number of
-// blocks is returned, which is equal to p, the return value of blockStructure.
-func blockStructure(dst []int, blocksize, cols int, a []float64, lda int) int {
-	p := -1
-	for i := 0; i < cols; {
-		p++
-		dst[p] = i
-		if i == cols-1 {
-			break
-		}
-		if a[(i+1)*lda+i] != 0 {
-			i += blocksize
-		} else {
-			i++
-		}
-	}
-	dst[p+1] = cols
-	return p + 2
-}
-
 // blockStructureL is like blockStructure but for Dtgsyl.
 func blockStructureL(dst []int, blocksize, cols int, a []float64, lda int) int {
 	p := -1

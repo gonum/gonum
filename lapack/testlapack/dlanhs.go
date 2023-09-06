@@ -19,13 +19,17 @@ type Dlanhser interface {
 
 func DlanhsTest(t *testing.T, impl Dlanhser) {
 	const tol = 1e-15
-	work := make([]float64, 9)
+	allwork := make([]float64, 9)
 	rnd := rand.New(rand.NewSource(1))
 	for _, n := range []int{1, 2, 4, 9} {
 		for _, lda := range []int{n, n + 5} {
 			a := randomHessenberg(n, lda, rnd)
 			for _, norm := range []lapack.MatrixNorm{lapack.MaxAbs, lapack.MaxRowSum, lapack.MaxColumnSum, lapack.Frobenius} {
-				for i := range work[:n] {
+				var work []float64
+				if norm == lapack.MaxColumnSum {
+					work = allwork[:n]
+				}
+				for i := range work {
 					work[i] = math.NaN()
 				}
 				want := dlange(norm, a.Rows, a.Cols, a.Data, a.Stride)

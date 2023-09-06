@@ -15,15 +15,19 @@ import (
 // the infinity norm, or the element of largest absolute value of a
 // Hessenberg matrix A.
 //
-// On using norm=lapack.MaxRowSum, the vector work must have length n.
+// On using norm=lapack.MaxColumnSum, the vector work must have length n.
 func (impl Implementation) Dlanhs(norm lapack.MatrixNorm, n int, a []float64, lda int, work []float64) float64 {
 	switch {
 	case n < 0:
 		panic(nLT0)
 	case lda < max(1, n):
 		panic(badLdA)
-	case norm == lapack.MaxRowSum && len(work) < n:
+	case len(a) < (n-1)*lda+n:
+		panic(shortA)
+	case norm == lapack.MaxColumnSum && len(work) < n:
 		panic(badLWork)
+	case norm != lapack.MaxRowSum && norm != lapack.MaxAbs && norm != lapack.MaxColumnSum && norm != lapack.Frobenius:
+		panic(badNorm)
 	}
 	if n == 0 {
 		return 0 // Early return.
@@ -32,8 +36,6 @@ func (impl Implementation) Dlanhs(norm lapack.MatrixNorm, n int, a []float64, ld
 	bi := blas64.Implementation()
 	var value float64
 	switch norm {
-	default:
-		panic(badNorm)
 	case lapack.MaxAbs:
 		for i := 0; i < n; i++ {
 			minj := max(0, i-1)

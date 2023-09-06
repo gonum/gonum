@@ -1201,7 +1201,20 @@ func isUpperTriangular(a blas64.General) bool {
 	n := a.Rows
 	for i := 1; i < n; i++ {
 		for j := 0; j < i; j++ {
-			if a.Data[i*a.Stride+j] != 0 {
+			v := a.Data[i*a.Stride+j]
+			if v != 0 || math.IsNaN(v) {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+// isNaNFree returns whether a does not contain NaN elements in reachable elements.
+func isNaNFree(a blas64.General) bool {
+	for i := 0; i < a.Rows; i++ {
+		for j := 0; j < a.Cols; j++ {
+			if math.IsNaN(a.Data[i*a.Stride+j]) {
 				return false
 			}
 		}

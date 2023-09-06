@@ -5,6 +5,7 @@
 package testlapack
 
 import (
+	"math"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -25,7 +26,7 @@ func DgghrdTest(t *testing.T, impl Dgghrder) {
 	comps := []lapack.OrthoComp{lapack.OrthoUnit, lapack.OrthoNone, lapack.OrthoEntry}
 	for _, compq := range comps {
 		for _, compz := range comps {
-			for _, n := range []int{0, 1, 2, 4, 15} {
+			for _, n := range []int{2, 0, 1, 4, 15} {
 				ldMin := max(1, n)
 				for _, lda := range []int{ldMin, ldMin + ldAdd} {
 					for _, ldb := range []int{ldMin, ldMin + ldAdd} {
@@ -44,7 +45,6 @@ func DgghrdTest(t *testing.T, impl Dgghrder) {
 func testDgghrd(t *testing.T, impl Dgghrder, rnd *rand.Rand, tol float64, compq, compz lapack.OrthoComp, n, ilo, ihi, lda, ldb, ldq, ldz int) {
 	a := randomGeneral(n, n, lda, rnd)
 	b := blockedUpperTriGeneral(n, n, 0, n, ldb, false, rnd)
-
 	var q, q1, z, z1 blas64.General
 	if compq == lapack.OrthoEntry {
 		q = randomOrthogonal(n, rnd)
@@ -61,12 +61,21 @@ func testDgghrd(t *testing.T, impl Dgghrder, rnd *rand.Rand, tol float64, compq,
 
 	hGot := cloneGeneral(a)
 	tGot := cloneGeneral(b)
+	for i := 1; i < n; i++ {
+		for j := 0; j < i; j++ {
+			// Set all lower tri elems to NaN to catch bad implementations.
+			tGot.Data[i*tGot.Stride+j] = math.NaN()
+		}
+	}
 	impl.Dgghrd(compq, compz, n, ilo, ihi, hGot.Data, hGot.Stride, tGot.Data, tGot.Stride, q.Data, q.Stride, z.Data, z.Stride)
 	if n == 0 {
 		return
 	}
 	if !isUpperHessenberg(hGot) {
 		t.Error("H is not upper Hessenberg")
+	}
+	if !isNaNFree(tGot) || !isNaNFree(hGot) {
+		t.Error("T or H is/or not NaN free")
 	}
 	if !isUpperTriangular(tGot) {
 		t.Error("T is not upper triangular")

@@ -48,8 +48,9 @@ import (
 // Dgghrd is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dgghrd(compq, compz lapack.OrthoComp, n, ilo, ihi int, a []float64, lda int, b []float64, ldb int, q []float64, ldq int, z []float64, ldz int) {
 	switch {
-	case (compq != lapack.OrthoNone && compq != lapack.OrthoEntry && compq != lapack.OrthoUnit) ||
-		(compz != lapack.OrthoNone && compz != lapack.OrthoEntry && compz != lapack.OrthoUnit):
+	case compq != lapack.OrthoNone && compq != lapack.OrthoEntry && compq != lapack.OrthoUnit:
+		panic(badOrthoComp)
+	case compz != lapack.OrthoNone && compz != lapack.OrthoEntry && compz != lapack.OrthoUnit:
 		panic(badOrthoComp)
 	case len(a) < (n-1)*lda+n:
 		panic(shortA)
@@ -81,13 +82,13 @@ func (impl Implementation) Dgghrd(compq, compz lapack.OrthoComp, n, ilo, ihi int
 	if compz == lapack.OrthoUnit {
 		impl.Dlaset(blas.All, n, n, 0, 1, z, ldz)
 	}
-	if n == 0 {
+	if n <= 1 {
 		return // Quick return if possible.
 	}
 
 	// Zero out lower triangle of B.
 	for i := 1; i < n; i++ {
-		for j := 0; j < i-1; j++ {
+		for j := 0; j < i; j++ {
 			b[i*ldb+j] = 0
 		}
 	}

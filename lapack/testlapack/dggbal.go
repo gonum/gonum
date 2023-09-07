@@ -38,6 +38,9 @@ func DggbalTest(t *testing.T, impl Dggbaler) {
 func testDggbal(t *testing.T, rnd *rand.Rand, impl Dggbaler, job lapack.BalanceJob, n, lda, ldb int) {
 	a := unbalancedSparseGeneral(n, n, lda, 2*n, rnd)
 	b := unbalancedSparseGeneral(n, n, ldb, 2*n, rnd)
+	// a.Data = []float64{.031119043469, .697832103742, -.914444311513, 3.000000000000e32}
+	// b.Data = []float64{1.326707504622, .000000000000, -1.372994961135, -.190511651929}
+
 	extra := a.Stride - n
 
 	var rscale, lscale []float64
@@ -52,7 +55,7 @@ func testDggbal(t *testing.T, rnd *rand.Rand, impl Dggbaler, job lapack.BalanceJ
 	work := nanSlice(lwork)
 	aCopy := cloneGeneral(a)
 	bCopy := cloneGeneral(b)
-
+	// job = 'S'
 	ilo, ihi := impl.Dggbal(job, n, a.Data, a.Stride, b.Data, b.Stride, lscale, rscale, work)
 
 	prefix := fmt.Sprintf("Case job=%c, n=%v, extra=%v", job, n, extra)
@@ -70,12 +73,13 @@ func testDggbal(t *testing.T, rnd *rand.Rand, impl Dggbaler, job lapack.BalanceJ
 		}
 		return
 	}
+	want := cloneGeneral(aCopy)
 	testMatrixBalancing(t, a, aCopy, job, ilo, ihi, lscale)
 	testMatrixBalancing(t, b, bCopy, job, ilo, ihi, rscale)
-	if job == lapack.BalanceNone {
-		return
+	if job == lapack.BalanceNone || job == lapack.PermuteScale {
+		return // TODO(soypat): Test permutescale case.
 	}
-	want := cloneGeneral(aCopy)
+
 	// LSCALE is DOUBLE PRECISION array, dimension (N)
 	// Details of the permutations and scaling factors applied
 	// to the left side of A and B.  If P(j) is the index of the
@@ -117,8 +121,7 @@ func testDggbal(t *testing.T, rnd *rand.Rand, impl Dggbaler, job lapack.BalanceJ
 	}
 
 	if job == lapack.Scale || job == lapack.PermuteScale {
-		return // TODO(soypat): Test this case!
-		// Modify want by Dl and Dl^{-1}.
+		// Modify want by Dr and Dl.
 		dl := eye(n, n)
 		dlinv := eye(n, n)
 		for i := ilo; i <= ihi; i++ {
@@ -132,10 +135,8 @@ func testDggbal(t *testing.T, rnd *rand.Rand, impl Dggbaler, job lapack.BalanceJ
 			drinv.Data[i*drinv.Stride+i] = 1 / rscale[i]
 		}
 		ad := zeros(n, n, n)
-		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, want, dl, 0, ad)
-		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, dlinv, ad, 0, want)
-		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, want, dr, 0, ad)
-		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, drinv, ad, 0, want)
+		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, dl, want, 0, ad)
+		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, ad, dr, 0, want)
 	}
 	if !equalApproxGeneral(want, a, 1e-14) {
 		t.Errorf("%v: unexpected value of A, ilo=%v, ihi=%v", prefix, ilo, ihi)

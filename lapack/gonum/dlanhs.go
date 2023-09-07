@@ -11,26 +11,30 @@ import (
 	"gonum.org/v1/gonum/lapack"
 )
 
-// Dlanhs returns the value of the one norm, or the Frobenius norm, or
-// the infinity norm, or the element of largest absolute value of a
-// Hessenberg matrix A.
+// Dlanhs returns the value of the one norm, or the Frobenius norm, or the
+// infinity norm, or the element of largest absolute value of a Hessenberg
+// matrix A.
 //
-// On using norm=lapack.MaxColumnSum, the vector work must have length n.
+// If norm is lapack.MaxColumnSum, work must have length at least n.
 func (impl Implementation) Dlanhs(norm lapack.MatrixNorm, n int, a []float64, lda int, work []float64) float64 {
 	switch {
+	case norm != lapack.MaxRowSum && norm != lapack.MaxAbs && norm != lapack.MaxColumnSum && norm != lapack.Frobenius:
+		panic(badNorm)
 	case n < 0:
 		panic(nLT0)
 	case lda < max(1, n):
 		panic(badLdA)
+	}
+
+	if n == 0 {
+		return 0
+	}
+
+	switch {
 	case len(a) < (n-1)*lda+n:
 		panic(shortA)
 	case norm == lapack.MaxColumnSum && len(work) < n:
-		panic(badLWork)
-	case norm != lapack.MaxRowSum && norm != lapack.MaxAbs && norm != lapack.MaxColumnSum && norm != lapack.Frobenius:
-		panic(badNorm)
-	}
-	if n == 0 {
-		return 0 // Early return.
+		panic(shortWork)
 	}
 
 	bi := blas64.Implementation()
@@ -64,8 +68,9 @@ func (impl Implementation) Dlanhs(norm lapack.MatrixNorm, n int, a []float64, ld
 	case lapack.Frobenius:
 		scale := 0.0
 		sum := 1.0
-		for j := 0; j < n; j++ {
-			scale, sum = impl.Dlassq(min(n, j+2), a[j:], lda, scale, sum)
+		for i := 0; i < n; i++ {
+			minj := max(0, i-1)
+			scale, sum = impl.Dlassq(n-minj, a[i*lda+minj:], 1, scale, sum)
 		}
 		value = scale * math.Sqrt(sum)
 	}

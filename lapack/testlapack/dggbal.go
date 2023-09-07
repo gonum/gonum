@@ -137,7 +137,7 @@ func testDggbal(t *testing.T, rnd *rand.Rand, impl Dggbaler, job lapack.BalanceJ
 		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, want, dr, 0, ad)
 		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, drinv, ad, 0, want)
 	}
-	if !equalApproxGeneral(want, a, 1e-5) {
+	if !equalApproxGeneral(want, a, 1e-14) {
 		t.Errorf("%v: unexpected value of A, ilo=%v, ihi=%v", prefix, ilo, ihi)
 	}
 }

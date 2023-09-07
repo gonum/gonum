@@ -324,9 +324,13 @@ func NewNKeeper(n int) *NKeeper {
 func (k *NKeeper) Keep(c ComparableDist) {
 	if c.Dist <= k.Heap[0].Dist { // Favour later finds to displace sentinel.
 		if len(k.Heap) == cap(k.Heap) {
-			heap.Pop(k)
+			// Changing the value of the element at index 0 and then calling Fix is equivalent to,
+			// but less expensive than, calling Pop() followed by a Push of the new value.
+			k.Heap[0] = c
+			heap.Fix(k, 0)
+		} else {
+			heap.Push(k, c)
 		}
-		heap.Push(k, c)
 	}
 }
 

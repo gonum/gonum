@@ -86,7 +86,7 @@ func (impl Implementation) Dhgeqz(job lapack.SchurJob, compq, compz lapack.Schur
 		iiter                                                                int
 		ilschr, ilq, ilz, ilazro, ilazr2, ilpivt                             bool
 		icompq, icompz, ifirst, istart, j, maxiter, ilast, ilastm, ifrstm    int
-		c, s, s1, s2, wr, wr2, wi, scale, temp, tempr, temp2, tempi, t2, t3  float64 // Trigonometric temporary variables.
+		c, s, s1, wr, wi, scale, temp, tempr, temp2, tempi, t2, t3           float64 // Trigonometric temporary variables.
 		b22, b11, sr, cr, sl, cl, cz, t1, szr, szi, wabs, an, bn             float64
 		a11, a21, a12, a22, c11r, c11i, c12, c21, c22r, c22i                 float64
 		cq, sqr, sqi, a1r, a1i, a2r, a2i, ad11, ad21, ad12, ad22             float64
@@ -420,14 +420,15 @@ func (impl Implementation) Dhgeqz(job lapack.SchurJob, compq, compz lapack.Schur
 			// Shifts based on the generalized eigenvalues of the
 			// bottom-right 2x2 block of A and B. The first eignevalue
 			// returned by Dlag2 is the wilkinson shift (AEP p.512).
+			var s2, wr2 float64
 			s1, s2, wr, wr2, wi = impl.Dlag2(h[(ilast-1)*ldh+ilast-1:], ldh, t[(ilast-1)*ldt+ilast-1:], ldt)
 			hlast := h[ilast*ldh+ilast]
 			tlast := t[ilast*ldt+ilast]
 			if math.Abs((wr/s1)*tlast-hlast) > math.Abs((wr2/s2)*tlast-hlast) {
-				wr, wr2 = wr2, wr
-				s1, s2 = s2, s1
+				wr = wr2
+				s1 = s2
 			}
-			temp = math.Max(s1, safmin*math.Max(1, math.Max(math.Abs(wr), math.Abs(wi))))
+			// temp = math.Max(s1, safmin*math.Max(1, math.Max(math.Abs(wr), math.Abs(wi))))
 			if wi != 0 {
 				goto TwoHundred
 			}
@@ -470,7 +471,7 @@ func (impl Implementation) Dhgeqz(job lapack.SchurJob, compq, compz lapack.Schur
 		// Initial Q.
 
 		temp = s1*h[istart*ldh+istart] - wr*t[istart*ldt+istart]
-		c, s, tempr = impl.Dlartg(temp, s1*h[(istart+1)*ldh+istart])
+		c, s, _ = impl.Dlartg(temp, s1*h[(istart+1)*ldh+istart])
 
 		// Sweep.
 		for j = istart; j <= ilast-1; j++ {

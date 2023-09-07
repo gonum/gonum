@@ -10,6 +10,7 @@ import (
 
 	"golang.org/x/exp/rand"
 
+	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
 	"gonum.org/v1/gonum/lapack"
 )
@@ -71,6 +72,74 @@ func testDggbal(t *testing.T, rnd *rand.Rand, impl Dggbaler, job lapack.BalanceJ
 	}
 	testMatrixBalancing(t, a, aCopy, job, ilo, ihi, lscale)
 	testMatrixBalancing(t, b, bCopy, job, ilo, ihi, rscale)
+	if job == lapack.BalanceNone {
+		return
+	}
+	want := cloneGeneral(aCopy)
+	// LSCALE is DOUBLE PRECISION array, dimension (N)
+	// Details of the permutations and scaling factors applied
+	// to the left side of A and B.  If P(j) is the index of the
+	// row interchanged with row j, and D(j)
+	// is the scaling factor applied to row j, then
+	//    LSCALE(j) = P(j)    for J = 1,...,ILO-1
+	//              = D(j)    for J = ILO,...,IHI
+	//              = P(j)    for J = IHI+1,...,N.
+	// The order in which the interchanges are made is N to IHI+1,
+	// then 1 to ILO-1.
+
+	if job == lapack.Permute || job == lapack.PermuteScale {
+		// Create the left permutation matrix Pl.
+		pl := eye(n, n)
+		for j := n - 1; j > ihi; j-- {
+			blas64.Swap(blas64.Vector{N: n, Data: pl.Data[j:], Inc: pl.Stride},
+				blas64.Vector{N: n, Data: pl.Data[int(lscale[j]):], Inc: pl.Stride})
+		}
+		for j := 0; j < ilo; j++ {
+			blas64.Swap(blas64.Vector{N: n, Data: pl.Data[j:], Inc: pl.Stride},
+				blas64.Vector{N: n, Data: pl.Data[int(lscale[j]):], Inc: pl.Stride})
+		}
+
+		// Create the right permutation matrix Pr.
+		pr := eye(n, n)
+		for j := n - 1; j > ihi; j-- {
+			blas64.Swap(blas64.Vector{N: n, Data: pr.Data[j:], Inc: pr.Stride},
+				blas64.Vector{N: n, Data: pr.Data[int(rscale[j]):], Inc: pr.Stride})
+		}
+		for j := 0; j < ilo; j++ {
+			blas64.Swap(blas64.Vector{N: n, Data: pr.Data[j:], Inc: pr.Stride},
+				blas64.Vector{N: n, Data: pr.Data[int(rscale[j]):], Inc: pr.Stride})
+		}
+
+		// Compute Plᵀ*A*Pl and store into want.
+		ap := zeros(n, n, n)
+		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, want, pl, 0, ap)
+		blas64.Gemm(blas.Trans, blas.NoTrans, 1, pl, ap, 0, want)
+	}
+
+	if job == lapack.Scale || job == lapack.PermuteScale {
+		return // TODO(soypat): Test this case!
+		// Modify want by Dl and Dl^{-1}.
+		dl := eye(n, n)
+		dlinv := eye(n, n)
+		for i := ilo; i <= ihi; i++ {
+			dl.Data[i*dl.Stride+i] = lscale[i]
+			dlinv.Data[i*dlinv.Stride+i] = 1 / lscale[i]
+		}
+		dr := eye(n, n)
+		drinv := eye(n, n)
+		for i := ilo; i <= ihi; i++ {
+			dr.Data[i*dr.Stride+i] = rscale[i]
+			drinv.Data[i*drinv.Stride+i] = 1 / rscale[i]
+		}
+		ad := zeros(n, n, n)
+		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, want, dl, 0, ad)
+		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, dlinv, ad, 0, want)
+		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, want, dr, 0, ad)
+		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, drinv, ad, 0, want)
+	}
+	if !equalApproxGeneral(want, a, 1e-5) {
+		t.Errorf("%v: unexpected value of A, ilo=%v, ihi=%v", prefix, ilo, ihi)
+	}
 }
 
 func testMatrixBalancing(t *testing.T, a, aBeforeBalance blas64.General, job lapack.BalanceJob, ilo, ihi int, scale []float64) {

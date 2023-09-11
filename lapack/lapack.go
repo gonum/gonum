@@ -231,7 +231,7 @@ const (
 type OrthoComp byte
 
 const (
-	OrthoNone  OrthoComp = 'N' // Do not compute orthogonal matrix.
-	OrthoUnit  OrthoComp = 'I' // Argument is initialized to the unit matrix and the orthogonal matrix is returned.
-	OrthoEntry OrthoComp = 'V' // Argument Q contains orthogonal matrix Q1 on entry and the product Q1*Q is returned.
+	OrthoNone     OrthoComp = 'N' // Do not compute the orthogonal matrix.
+	OrthoExplicit OrthoComp = 'I' // The orthogonal matrix is formed explicitly and returned in the argument.
+	OrthoPostmul  OrthoComp = 'V' // The orthogonal matrix is post-multiplied into the matrix stored in the argument on entry.
 )

@@ -222,6 +222,47 @@ func Gels(trans blas.Transpose, a blas64.General, b blas64.General, work []float
 	return lapack64.Dgels(trans, a.Rows, a.Cols, b.Cols, a.Data, max(1, a.Stride), b.Data, max(1, b.Stride), work, lwork)
 }
 
+// Geqp3 computes a QR factorization with column pivoting of the m×n matrix A:
+//
+//	A*P = Q*R
+//
+// where P is a permutation matrix, Q is an orthogonal matrix and R is a
+// min(m,n)×n upper trapezoidal matrix.
+//
+// On return, the upper triangle of A contains the matrix R. The elements below
+// the diagonal together with tau represent the matrix Q as a product of
+// elementary reflectors
+//
+//	Q = H_0 * H_1 * ... * H_{k-1}, where k = min(m,n).
+//
+// Each H_i has the form
+//
+//	H_i = I - tau * v * vᵀ
+//
+// where tau is a scalar and v is a vector with v[0:i] = 0 and v[i] = 1;
+// v[i+1:m] is stored on exit in A[i+1:m,i], and tau in tau[i].
+//
+// jpvt specifies a column pivot to be applied to A. On entry, if jpvt[j] is at
+// least zero, the jth column of A is permuted to the front of A*P (a leading
+// column), if jpvt[j] is -1 the jth column of A is a free column. If jpvt[j] <
+// -1, Geqp3 will panic. On return, jpvt holds the permutation that was applied;
+// the jth column of A*P was the jpvt[j] column of A. jpvt must have length n or
+// Geqp3 will panic.
+//
+// tau holds the scalar factors of the elementary reflectors. It must have
+// length min(m,n), otherwise Geqp3 will panic.
+//
+// work must have length at least max(1,lwork), and lwork must be at least
+// 3*n+1, otherwise Geqp3 will panic. For optimal performance lwork must be at
+// least 2*n+(n+1)*nb, where nb is the optimal blocksize. On return, work[0]
+// will contain the optimal value of lwork.
+//
+// If lwork == -1, instead of performing Geqp3, only the optimal value of lwork
+// will be stored in work[0].
+func Geqp3(a blas64.General, jpvt []int, tau, work []float64, lwork int) {
+	lapack64.Dgeqp3(a.Rows, a.Cols, a.Data, max(1, a.Stride), jpvt, tau, work, lwork)
+}
+
 // Geqrf computes the QR factorization of the m×n matrix A using a blocked
 // algorithm. A is modified to contain the information to construct Q and R.
 // The upper triangle of a contains the matrix R. The lower triangular elements

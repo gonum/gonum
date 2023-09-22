@@ -187,7 +187,7 @@ type AttValues struct {
 	AttValues []AttValue `xml:"attvalue,omitempty"`
 }
 
-// AttValues holds a single attribute value and its associated dynamics.
+// AttValue holds a single attribute value and its associated dynamics.
 type AttValue struct {
 	For       string `xml:"for,attr"`
 	Value     string `xml:"value,attr"`
@@ -197,7 +197,7 @@ type AttValue struct {
 	EndOpen   string `xml:"endopen,attr,omitempty"`
 }
 
-// EdgeShape holds the visual representation of an edge with associated
+// Edgeshape holds the visual representation of an edge with associated
 // dynamics.
 type Edgeshape struct {
 	// Shape be one of solid, dotted, dashed, double

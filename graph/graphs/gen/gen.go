@@ -23,7 +23,7 @@ func abs(a int) int {
 	return a
 }
 
-// NodeIDGraphBuild is a graph that can create new nodes with
+// NodeIDGraphBuilder is a graph that can create new nodes with
 // specified IDs.
 type NodeIDGraphBuilder interface {
 	graph.Builder

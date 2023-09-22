@@ -254,7 +254,7 @@ type LazyOrderedNodesByLines struct {
 	edges map[int64]map[int64]graph.Line
 }
 
-// NewLazyOrderedNodesByLine returns a LazyOrderedNodesByLines initialized with the
+// NewLazyOrderedNodesByLines returns a LazyOrderedNodesByLines initialized with the
 // provided nodes.
 func NewLazyOrderedNodesByLines(nodes map[int64]graph.Node, edges map[int64]map[int64]graph.Line) *LazyOrderedNodesByLines {
 	return &LazyOrderedNodesByLines{nodes: nodes, edges: edges}

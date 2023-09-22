@@ -108,7 +108,7 @@ func NewNodes() Nodes {
 	return make(Nodes)
 }
 
-// NewNodes returns a new Nodes with the given size hint, n.
+// NewNodesSize returns a new Nodes with the given size hint, n.
 func NewNodesSize(n int) Nodes {
 	return make(Nodes, n)
 }

@@ -76,7 +76,7 @@ type OrderedWeightedLines struct {
 	lines []graph.WeightedLine
 }
 
-// NewWeightedLineIterator returns an OrderedWeightedLines initialized with the provided lines.
+// NewOrderedWeightedLines returns an OrderedWeightedLines initialized with the provided lines.
 func NewOrderedWeightedLines(lines []graph.WeightedLine) *OrderedWeightedLines {
 	return &OrderedWeightedLines{idx: -1, lines: lines}
 }

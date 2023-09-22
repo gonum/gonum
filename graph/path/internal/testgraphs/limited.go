@@ -233,12 +233,12 @@ func (l *LimitedVisionGrid) Edge(uid, vid int64) graph.Edge {
 	return l.WeightedEdgeBetween(uid, vid)
 }
 
-// Edge optimistically returns the weighted edge from u to v.
+// WeightedEdge optimistically returns the weighted edge from u to v.
 func (l *LimitedVisionGrid) WeightedEdge(uid, vid int64) graph.WeightedEdge {
 	return l.WeightedEdgeBetween(uid, vid)
 }
 
-// WeightedEdgeBetween optimistically returns the edge between u and v.
+// EdgeBetween optimistically returns the edge between u and v.
 func (l *LimitedVisionGrid) EdgeBetween(uid, vid int64) graph.Edge {
 	return l.WeightedEdgeBetween(uid, vid)
 }

@@ -961,13 +961,13 @@ func TestPivotedCholesky(t *testing.T) {
 			// Check the size.
 			r, c := chol.Dims()
 			if r != n || c != n {
-				t.Errorf("n=%d, rank=%d: unexpected dims: r=%d, c=%d", n, rank, r, c)
+				t.Errorf("%s: unexpected dims: r=%d, c=%d", name, r, c)
 			}
 			if chol.SymmetricDim() != n {
-				t.Errorf("n=%d, rank=%d: unexpected symmetric dim: dim=%d", n, rank, chol.SymmetricDim())
+				t.Errorf("%s: unexpected symmetric dim: dim=%d", name, chol.SymmetricDim())
 			}
 
-			// Compute the norm of the difference |P*Uᵀ*U*Pᵀ - A|.
+			// Compute the norm of the difference |P*Uᵀ*U*Pᵀ - A| using At.
 			diff := NewDense(n, n, nil)
 			for i := 0; i < n; i++ {
 				for j := 0; j < n; j++ {
@@ -976,7 +976,30 @@ func TestPivotedCholesky(t *testing.T) {
 			}
 			res := Norm(diff, 1)
 			if res > tol {
-				t.Errorf("n=%d, rank=%d: unexpected result (|diff|=%v)\ndiff = %.4g", n, rank, res, Formatted(diff, Prefix("       ")))
+				t.Errorf("%s: unexpected result using At (|P*Uᵀ*U*Pᵀ - A|=%v)\ndiff=%.4g", name, res, Formatted(diff, Prefix("     ")))
+			}
+
+			// Compute the norm of the difference |P*Uᵀ*U*Pᵀ - A| using ColumnPivots and UTo.
+			var u TriDense
+			chol.UTo(&u)
+			diff.Product(u.T(), &u)                        // Compute Uᵀ*U.
+			diff.PermuteCols(chol.ColumnPivots(nil), true) // Multiply by Pᵀ from the right (inverse because we multiply by the transpose).
+			diff.PermuteRows(chol.ColumnPivots(nil), true) // Multiply by P from the left (inverse because we pass a column permutation).
+			diff.Sub(diff, a)
+			res = Norm(diff, 1)
+			if res > tol {
+				t.Errorf("%s: unexpected result using ColumnPivots and UTo (|P*Uᵀ*U*Pᵀ - A|=%v)\ndiff=%.4g", name, res, Formatted(diff, Prefix("     ")))
+			}
+
+			// Compute the norm of the difference |P*Uᵀ*U*Pᵀ - A| using ColumnPivots and RawU.
+			rawU := chol.RawU()
+			diff.Product(rawU.T(), rawU)
+			diff.PermuteCols(chol.ColumnPivots(nil), true)
+			diff.PermuteRows(chol.ColumnPivots(nil), true)
+			diff.Sub(diff, a)
+			res = Norm(diff, 1)
+			if res > tol {
+				t.Errorf("%s: unexpected result using ColumnPivots and RawU (|P*Uᵀ*U*Pᵀ - A|=%v)\ndiff=%.4g", name, res, Formatted(diff, Prefix("     ")))
 			}
 		}
 	}

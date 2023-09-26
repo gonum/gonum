@@ -314,22 +314,6 @@ func (lu *LU) UTo(dst *TriDense) {
 	}
 }
 
-// Permutation constructs an r×r permutation matrix with the given row swaps.
-// A permutation matrix has exactly one element equal to one in each row and column
-// and all other elements equal to zero. swaps[i] specifies the row with which
-// i will be swapped, which is equivalent to the non-zero column of row i.
-func (m *Dense) Permutation(r int, swaps []int) {
-	m.reuseAsNonZeroed(r, r)
-	for i := 0; i < r; i++ {
-		zero(m.mat.Data[i*m.mat.Stride : i*m.mat.Stride+r])
-		v := swaps[i]
-		if v < 0 || v >= r {
-			panic(ErrRowAccess)
-		}
-		m.mat.Data[i*m.mat.Stride+v] = 1
-	}
-}
-
 // SolveTo solves a system of linear equations using the LU decomposition of a matrix.
 // It computes
 //

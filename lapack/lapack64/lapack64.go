@@ -361,25 +361,27 @@ func Gesvd(jobU, jobVT lapack.SVDJob, a, u, vt blas64.General, s, work []float64
 	return lapack64.Dgesvd(jobU, jobVT, a.Rows, a.Cols, a.Data, max(1, a.Stride), s, u.Data, max(1, u.Stride), vt.Data, max(1, vt.Stride), work, lwork)
 }
 
-// Getrf computes the LU decomposition of the m×n matrix A.
+// Getrf computes the LU decomposition of an m×n matrix A using partial
+// pivoting with row interchanges.
+//
 // The LU decomposition is a factorization of A into
 //
 //	A = P * L * U
 //
-// where P is a permutation matrix, L is a unit lower triangular matrix, and
-// U is a (usually) non-unit upper triangular matrix. On exit, L and U are stored
-// in place into a.
+// where P is a permutation matrix, L is a lower triangular with unit diagonal
+// elements (lower trapezoidal if m > n), and U is upper triangular (upper
+// trapezoidal if m < n).
 //
-// ipiv is a permutation vector. It indicates that row i of the matrix was
-// changed with ipiv[i]. ipiv must have length at least min(m,n), and will panic
-// otherwise. ipiv is zero-indexed.
+// On entry, a contains the matrix A. On return, L and U are stored in place
+// into a, and P is represented by ipiv.
 //
-// Getrf is the blocked version of the algorithm.
+// ipiv contains a sequence of row swaps. It indicates that row i of the matrix
+// was interchanged with ipiv[i]. ipiv must have length min(m,n), and Getrf will
+// panic otherwise. ipiv is zero-indexed.
 //
-// Getrf returns whether the matrix A is singular. The LU decomposition will
-// be computed regardless of the singularity of A, but division by zero
-// will occur if the false is returned and the result is used to solve a
-// system of equations.
+// Getrf returns whether the matrix A is singular. The LU decomposition will be
+// computed regardless of the singularity of A, but the result should not be
+// used to solve a system of equation.
 func Getrf(a blas64.General, ipiv []int) bool {
 	return lapack64.Dgetrf(a.Rows, a.Cols, a.Data, max(1, a.Stride), ipiv)
 }

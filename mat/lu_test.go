@@ -53,16 +53,16 @@ func TestLURankOne(t *testing.T) {
 					lu.lu.Set(i, j, rnd.Float64())
 				}
 			}
-			lu.pivot = make([]int, n)
-			for i := range lu.pivot {
-				lu.pivot[i] = i
+			lu.swaps = make([]int, n)
+			for i := range lu.swaps {
+				lu.swaps[i] = i
 			}
 			if pivoting {
 				// For each row, randomly swap with itself or a row after (like is done)
 				// in the actual LU factorization.
-				for i := range lu.pivot {
+				for i := range lu.swaps {
 					idx := i + rnd.Intn(n-i)
-					lu.pivot[i], lu.pivot[idx] = lu.pivot[idx], lu.pivot[i]
+					lu.swaps[i], lu.swaps[idx] = lu.swaps[idx], lu.swaps[i]
 				}
 			}
 			// Apply a rank one update. Ensure the update magnitude is larger than

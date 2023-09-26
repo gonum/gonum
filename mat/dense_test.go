@@ -15,6 +15,7 @@ import (
 
 	"gonum.org/v1/gonum/blas/blas64"
 	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/stat/combin"
 )
 
 func TestNewDense(t *testing.T) {
@@ -2129,6 +2130,136 @@ func TestDenseInverse(t *testing.T) {
 				resid := Norm(&aaInv, 1) / (float64(n) * Norm(&aOrig, 1) * Norm(&aInv, 1))
 				if resid > tol {
 					t.Errorf("%v: A*A^{-1} is not identity, resid=%v,want<=%v", name, resid, tol)
+				}
+			}
+		}
+	}
+}
+
+func TestDensePermutation(t *testing.T) {
+	for n := 1; n <= 6; n++ {
+		for idx, perm := range combin.Permutations(n, n) {
+			want := NewDense(n, n, nil)
+			for i := 0; i < n; i++ {
+				want.Set(i, perm[i], 1)
+			}
+
+			var got Dense
+			got.Permutation(n, perm)
+			if !Equal(&got, want) {
+				t.Errorf("n=%d,idx=%d: unexpected permutation matrix\n got=%v\nwant=%v",
+					n, idx, Formatted(&got, Prefix("     ")), Formatted(want, Prefix("     ")))
+			}
+		}
+	}
+}
+
+func TestDensePermuteRows(t *testing.T) {
+	rnd := rand.New(rand.NewSource(1))
+	for m := 1; m <= 5; m++ {
+		for idx, perm := range combin.Permutations(m, m) {
+			// Construct a permutation matrix P from perm.
+			p := NewDense(m, m, nil)
+			for i := 0; i < m; i++ {
+				p.Set(i, perm[i], 1)
+			}
+
+			for n := 1; n <= 5; n++ {
+				name := fmt.Sprintf("m=%d,n=%d,idx=%d", m, n, idx)
+
+				// Generate a random m×n matrix A.
+				a := NewDense(m, n, nil)
+				for i := 0; i < m; i++ {
+					for j := 0; j < n; j++ {
+						a.Set(i, j, rnd.Float64())
+					}
+				}
+
+				// Compute P*A.
+				var want Dense
+				want.Mul(p, a)
+				// Permute rows of A by applying perm.
+				var got Dense
+				got.CloneFrom(a)
+				got.PermuteRows(perm, false)
+				if !Equal(&got, &want) {
+					t.Errorf("%s: unexpected result\n got=%v\nwant=%v",
+						name, Formatted(&got, Prefix("     ")), Formatted(&want, Prefix("     ")))
+				}
+
+				// Compute Pᵀ*A.
+				want.Mul(p.T(), a)
+				// Permute rows of A by applying inverse perm.
+				got.Copy(a)
+				got.PermuteRows(perm, true)
+				if !Equal(&got, &want) {
+					t.Errorf("%s: unexpected result with inverse permutation\n got=%v\nwant=%v",
+						name, Formatted(&got, Prefix("     ")), Formatted(&want, Prefix("     ")))
+				}
+
+				// Permute rows of A by applying perm and inverse perm.
+				got.Copy(a)
+				got.PermuteRows(perm, false)
+				got.PermuteRows(perm, true)
+				if !Equal(&got, a) {
+					t.Errorf("%s: original A not recovered\n got=%v\nwant=%v",
+						name, Formatted(&got, Prefix("     ")), Formatted(a, Prefix("     ")))
+				}
+			}
+		}
+	}
+}
+
+func TestDensePermuteCols(t *testing.T) {
+	rnd := rand.New(rand.NewSource(1))
+	for n := 1; n <= 5; n++ {
+		for idx, perm := range combin.Permutations(n, n) {
+			// Construct a permutation matrix P from perm.
+			p := NewDense(n, n, nil)
+			for j := 0; j < n; j++ {
+				p.Set(perm[j], j, 1)
+			}
+
+			for m := 1; m <= 5; m++ {
+				name := fmt.Sprintf("m=%d,n=%d,idx=%d", m, n, idx)
+
+				// Generate a random m×n matrix A.
+				a := NewDense(m, n, nil)
+				for i := 0; i < m; i++ {
+					for j := 0; j < n; j++ {
+						a.Set(i, j, rnd.Float64())
+					}
+				}
+
+				// Compute A*P.
+				var want Dense
+				want.Mul(a, p)
+				// Permute columns of A by applying perm.
+				var got Dense
+				got.CloneFrom(a)
+				got.PermuteCols(perm, false)
+				if !Equal(&got, &want) {
+					t.Errorf("%s: unexpected result\n got=%v\nwant=%v",
+						name, Formatted(&got, Prefix("     ")), Formatted(&want, Prefix("     ")))
+				}
+
+				// Compute A*Pᵀ.
+				want.Mul(a, p.T())
+				// Permute columns of A by applying inverse perm.
+				got.Copy(a)
+				got.PermuteCols(perm, true)
+				if !Equal(&got, &want) {
+					t.Errorf("%s: unexpected result with inverse permutation\n got=%v\nwant=%v",
+						name, Formatted(&got, Prefix("     ")), Formatted(&want, Prefix("     ")))
+				}
+
+				// Permute columns of A by applying perm and inverse perm.
+				got.Copy(a)
+				got.PermuteCols(perm, false)
+				got.PermuteCols(perm, true)
+				if !Equal(&got, a) {
+					t.Errorf("%s: original A not recovered\n got=%v\nwant=%v",
+						name, Formatted(&got, Prefix("     ")), Formatted(a, Prefix("     ")))
 				}
 			}
 		}

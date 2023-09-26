@@ -649,21 +649,21 @@ func Lantb(norm lapack.MatrixNorm, a blas64.TriangularBand, work []float64) floa
 //
 //	X[i,0:n] is moved to X[k[i],0:n] for i=0,1,...,m-1.
 //
-// k must have length m, otherwise Lapmr will panic.
+// k must have length m, otherwise Lapmr will panic. k is zero-indexed.
 func Lapmr(forward bool, x blas64.General, k []int) {
 	lapack64.Dlapmr(forward, x.Rows, x.Cols, x.Data, max(1, x.Stride), k)
 }
 
 // Lapmt rearranges the columns of the m×n matrix X as specified by the
-// permutation k_0, k_1, ..., k_{n-1} of the integers 0, ..., n-1.
+// permutation k[0],k[1],...,k[n-1] of the integers 0,...,n-1.
 //
-// If forward is true a forward permutation is performed:
+// If forward is true, a forward permutation is applied:
 //
-//	X[0:m, k[j]] is moved to X[0:m, j] for j = 0, 1, ..., n-1.
+//	X[0:m,k[j]] is moved to X[0:m,j] for j=0,1,...,n-1.
 //
-// otherwise a backward permutation is performed:
+// If forward is false, a backward permutation is applied:
 //
-//	X[0:m, j] is moved to X[0:m, k[j]] for j = 0, 1, ..., n-1.
+//	X[0:m,j] is moved to X[0:m,k[j]] for j=0,1,...,n-1.
 //
 // k must have length n, otherwise Lapmt will panic. k is zero-indexed.
 func Lapmt(forward bool, x blas64.General, k []int) {

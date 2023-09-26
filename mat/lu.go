@@ -22,7 +22,7 @@ const (
 // LU is a type for creating and using the LU factorization of a matrix.
 type LU struct {
 	lu    *Dense
-	pivot []int
+	swaps []int
 	cond  float64
 }
 
@@ -75,14 +75,11 @@ func (lu *LU) factorize(a Matrix, norm lapack.MatrixNorm) {
 		lu.lu.reuseAsNonZeroed(r, r)
 	}
 	lu.lu.Copy(a)
-	if cap(lu.pivot) < r {
-		lu.pivot = make([]int, r)
-	}
-	lu.pivot = lu.pivot[:r]
+	lu.swaps = useInt(lu.swaps, r)
 	work := getFloat64s(r, false)
 	anorm := lapack64.Lange(norm, lu.lu.mat, work)
 	putFloat64s(work)
-	lapack64.Getrf(lu.lu.mat, lu.pivot)
+	lapack64.Getrf(lu.lu.mat, lu.swaps)
 	lu.updateCond(anorm, norm)
 }
 
@@ -106,11 +103,11 @@ func (lu *LU) Reset() {
 	if lu.lu != nil {
 		lu.lu.Reset()
 	}
-	lu.pivot = lu.pivot[:0]
+	lu.swaps = lu.swaps[:0]
 }
 
 func (lu *LU) isZero() bool {
-	return len(lu.pivot) == 0
+	return len(lu.swaps) == 0
 }
 
 // Det returns the determinant of the matrix that has been factorized. In many
@@ -139,7 +136,7 @@ func (lu *LU) LogDet() (det float64, sign float64) {
 		if v < 0 {
 			sign *= -1
 		}
-		if lu.pivot[i] != i {
+		if lu.swaps[i] != i {
 			sign *= -1
 		}
 		logDiag[i] = math.Log(math.Abs(v))
@@ -147,33 +144,37 @@ func (lu *LU) LogDet() (det float64, sign float64) {
 	return floats.Sum(logDiag), sign
 }
 
-// Pivot returns pivot indices that enable the construction of the permutation
-// matrix P (see Dense.Permutation). If swaps == nil, then new memory will be
-// allocated, otherwise the length of the input must be equal to the size of the
-// factorized matrix.
-// Pivot will panic if the receiver does not contain a factorization.
-func (lu *LU) Pivot(swaps []int) []int {
+// Pivot returns the row permutation that represents the permutation matrix P
+// from the LU factorization
+//
+//	A = P * L * U.
+//
+// If dst is nil, a new slice is allocated and returned. If dst is not nil and
+// the length of dst does not equal the size of the factorized matrix, Pivot
+// will panic. Pivot will panic if the receiver does not contain a
+// factorization.
+func (lu *LU) Pivot(dst []int) []int {
 	if !lu.isValid() {
 		panic(badLU)
 	}
 
 	_, n := lu.lu.Dims()
-	if swaps == nil {
-		swaps = make([]int, n)
+	if dst == nil {
+		dst = make([]int, n)
 	}
-	if len(swaps) != n {
+	if len(dst) != n {
 		panic(badSliceLength)
 	}
-	// Perform the inverse of the row swaps in order to find the final
-	// row swap position.
-	for i := range swaps {
-		swaps[i] = i
+	// Perform the inverse of the row swaps in order to find the row
+	// permutation.
+	for i := range dst {
+		dst[i] = i
 	}
 	for i := n - 1; i >= 0; i-- {
-		v := lu.pivot[i]
-		swaps[i], swaps[v] = swaps[v], swaps[i]
+		v := lu.swaps[i]
+		dst[i], dst[v] = dst[v], dst[i]
 	}
-	return swaps
+	return dst
 }
 
 // RankOne updates an LU factorization as if a rank-one update had been applied to
@@ -198,19 +199,16 @@ func (lu *LU) RankOne(orig *LU, alpha float64, x, y Vector) {
 	}
 	if orig != lu {
 		if lu.isZero() {
-			if cap(lu.pivot) < n {
-				lu.pivot = make([]int, n)
-			}
-			lu.pivot = lu.pivot[:n]
+			lu.swaps = useInt(lu.swaps, n)
 			if lu.lu == nil {
 				lu.lu = NewDense(n, n, nil)
 			} else {
 				lu.lu.reuseAsNonZeroed(n, n)
 			}
-		} else if len(lu.pivot) != n {
+		} else if len(lu.swaps) != n {
 			panic(ErrShape)
 		}
-		copy(lu.pivot, orig.pivot)
+		copy(lu.swaps, orig.swaps)
 		lu.lu.Copy(orig.lu)
 	}
 
@@ -224,7 +222,7 @@ func (lu *LU) RankOne(orig *LU, alpha float64, x, y Vector) {
 	}
 
 	// Adjust for the pivoting in the LU factorization
-	for i, v := range lu.pivot {
+	for i, v := range lu.swaps {
 		xs[i], xs[v] = xs[v], xs[i]
 	}
 
@@ -375,7 +373,7 @@ func (lu *LU) SolveTo(dst *Dense, trans bool, b Matrix) error {
 	if trans {
 		t = blas.Trans
 	}
-	lapack64.Getrs(t, lu.lu.mat, dst.mat, lu.pivot)
+	lapack64.Getrs(t, lu.lu.mat, dst.mat, lu.swaps)
 	if lu.cond > ConditionTolerance {
 		return Condition(lu.cond)
 	}
@@ -434,7 +432,7 @@ func (lu *LU) SolveVecTo(dst *VecDense, trans bool, b Vector) error {
 		if trans {
 			t = blas.Trans
 		}
-		lapack64.Getrs(t, lu.lu.mat, vMat, lu.pivot)
+		lapack64.Getrs(t, lu.lu.mat, vMat, lu.swaps)
 		if lu.cond > ConditionTolerance {
 			return Condition(lu.cond)
 		}

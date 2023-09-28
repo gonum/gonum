@@ -27,8 +27,8 @@ import (
 // matrix was interchanged with ipiv[i]. ipiv must have length min(m,n), and
 // Dgetrf will panic otherwise. ipiv is zero-indexed.
 //
-// Dgetrf returns whether the matrix A is singular. The LU decomposition will be
-// computed regardless of the singularity of A, but the result should not be
+// Dgetrf returns whether the matrix A is nonsingular. The LU decomposition will
+// be computed regardless of the singularity of A, but the result should not be
 // used to solve a system of equation.
 func (impl Implementation) Dgetrf(m, n int, a []float64, lda int, ipiv []int) (ok bool) {
 	mn := min(m, n)

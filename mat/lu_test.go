@@ -10,103 +10,82 @@ import (
 	"golang.org/x/exp/rand"
 )
 
-func TestLUD(t *testing.T) {
+func TestLU(t *testing.T) {
 	t.Parallel()
+	const tol = 1e-16
 	rnd := rand.New(rand.NewSource(1))
-	for _, n := range []int{1, 5, 10, 11, 50} {
+	for _, n := range []int{1, 2, 3, 4, 5, 10, 11, 50} {
+		// Construct a random matrix A.
 		a := NewDense(n, n, nil)
-		for i := 0; i < n; i++ {
-			for j := 0; j < n; j++ {
-				a.Set(i, j, rnd.NormFloat64())
-			}
-		}
-		var want Dense
-		want.CloneFrom(a)
+		a.Apply(func(_, _ int, _ float64) float64 { return rnd.NormFloat64() }, a)
 
+		// Compute the LU factorization of A.
 		var lu LU
 		lu.Factorize(a)
 
+		// Compare A and LU using At.
+		if !EqualApprox(a, &lu, tol*float64(n)) {
+			var diff Dense
+			diff.Sub(a, &lu)
+			t.Errorf("n=%d: A and LU not equal\ndiff=%v", n, Formatted(&diff, Prefix("     ")))
+		}
+
+		// Recover A using RowPivots, LTo and UTo.
 		var l, u TriDense
 		lu.LTo(&l)
 		lu.UTo(&u)
-		var p Dense
-		pivot := lu.RowPivots(nil)
-		p.Permutation(n, pivot)
 		var got Dense
-		got.Product(&p, &l, &u)
-		if !EqualApprox(&got, &want, 1e-12) {
-			t.Errorf("PLU does not equal original matrix.\nWant: %v\n Got: %v", want, got)
+		got.Mul(&l, &u)
+		got.PermuteRows(lu.RowPivots(nil), false)
+		if !EqualApprox(&got, a, tol*float64(n)) {
+			var diff Dense
+			diff.Sub(&got, a)
+			t.Errorf("n=%d: A and P*L*U not equal\ndiff=%v", n, Formatted(&diff, Prefix("     ")))
 		}
 	}
 }
 
 func TestLURankOne(t *testing.T) {
 	t.Parallel()
+	const tol = 1e-14
 	rnd := rand.New(rand.NewSource(1))
-	for _, pivoting := range []bool{true} {
-		for _, n := range []int{3, 10, 50} {
-			// Construct a random LU factorization
-			lu := &LU{}
-			lu.lu = NewDense(n, n, nil)
-			for i := 0; i < n; i++ {
-				for j := 0; j < n; j++ {
-					lu.lu.Set(i, j, rnd.Float64())
-				}
-			}
-			lu.swaps = make([]int, n)
-			for i := range lu.swaps {
-				lu.swaps[i] = i
-			}
-			if pivoting {
-				// For each row, randomly swap with itself or a row after (like is done)
-				// in the actual LU factorization.
-				for i := range lu.swaps {
-					idx := i + rnd.Intn(n-i)
-					lu.swaps[i], lu.swaps[idx] = lu.swaps[idx], lu.swaps[i]
-				}
-			}
-			// Apply a rank one update. Ensure the update magnitude is larger than
-			// the equal tolerance.
-			alpha := rnd.Float64() + 1
-			x := NewVecDense(n, nil)
-			y := NewVecDense(n, nil)
-			for i := 0; i < n; i++ {
-				x.setVec(i, rnd.Float64()+1)
-				y.setVec(i, rnd.Float64()+1)
-			}
-			a := luReconstruct(lu)
-			a.RankOne(a, alpha, x, y)
+	for _, n := range []int{1, 2, 3, 4, 5, 10, 50} {
+		// Construct a random matrix A.
+		a := NewDense(n, n, nil)
+		a.Apply(func(_, _ int, _ float64) float64 { return rnd.NormFloat64() }, a)
 
-			var luNew LU
-			luNew.RankOne(lu, alpha, x, y)
-			lu.RankOne(lu, alpha, x, y)
+		// Compute the LU factorization of A.
+		var lu LU
+		lu.Factorize(a)
 
-			aR1New := luReconstruct(&luNew)
-			aR1 := luReconstruct(lu)
+		// Apply a rank one update to A. Ensure the update magnitude is larger than
+		// the equal tolerance.
+		alpha := rnd.Float64() + 1
+		x := NewVecDense(n, nil)
+		y := NewVecDense(n, nil)
+		for i := 0; i < n; i++ {
+			x.setVec(i, rnd.Float64()+1)
+			y.setVec(i, rnd.Float64()+1)
+		}
+		a.RankOne(a, alpha, x, y)
 
-			if !Equal(aR1, aR1New) {
-				t.Error("Different answer when new receiver")
-			}
-			if !EqualApprox(aR1, a, 1e-10) {
-				t.Errorf("Rank one mismatch, pivot %v.\nWant: %v\nGot:%v\n", pivoting, a, aR1)
-			}
+		// Apply the same rank one update to the LU factorization of A.
+		var luNew LU
+		luNew.RankOne(&lu, alpha, x, y)
+		lu.RankOne(&lu, alpha, x, y)
+
+		if !EqualApprox(&lu, a, tol*float64(n)) {
+			var diff Dense
+			diff.Sub(&lu, a)
+			t.Errorf("n=%d: rank one mismatch\ndiff=%v", n, Formatted(&diff, Prefix("     ")))
+		}
+
+		if !Equal(&lu, &luNew) {
+			var diff Dense
+			diff.Sub(&lu, &luNew)
+			t.Errorf("n=%d: rank one mismatch with new receiver\ndiff=%v", n, Formatted(&diff, Prefix("     ")))
 		}
 	}
-}
-
-// luReconstruct reconstructs the original A matrix from an LU decomposition.
-func luReconstruct(lu *LU) *Dense {
-	var L, U TriDense
-	lu.LTo(&L)
-	lu.UTo(&U)
-	var P Dense
-	pivot := lu.RowPivots(nil)
-	P.Permutation(len(pivot), pivot)
-
-	var a Dense
-	a.Mul(&L, &U)
-	a.Mul(&P, &a)
-	return &a
 }
 
 func TestLUSolveTo(t *testing.T) {

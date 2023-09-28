@@ -379,8 +379,8 @@ func Gesvd(jobU, jobVT lapack.SVDJob, a, u, vt blas64.General, s, work []float64
 // was interchanged with ipiv[i]. ipiv must have length min(m,n), and Getrf will
 // panic otherwise. ipiv is zero-indexed.
 //
-// Getrf returns whether the matrix A is singular. The LU decomposition will be
-// computed regardless of the singularity of A, but the result should not be
+// Getrf returns whether the matrix A is nonsingular. The LU decomposition will
+// be computed regardless of the singularity of A, but the result should not be
 // used to solve a system of equation.
 func Getrf(a blas64.General, ipiv []int) bool {
 	return lapack64.Dgetrf(a.Rows, a.Cols, a.Data, max(1, a.Stride), ipiv)

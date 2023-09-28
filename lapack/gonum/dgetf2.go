@@ -28,8 +28,8 @@ import (
 // matrix was interchanged with ipiv[i]. ipiv must have length min(m,n), and
 // Dgetf2 will panic otherwise. ipiv is zero-indexed.
 //
-// Dgetf2 returns whether the matrix A is singular. The LU decomposition will be
-// computed regardless of the singularity of A, but the result should not be
+// Dgetf2 returns whether the matrix A is nonsingular. The LU decomposition will
+// be computed regardless of the singularity of A, but the result should not be
 // used to solve a system of equation.
 //
 // Dgetf2 is an internal routine. It is exported for testing purposes.

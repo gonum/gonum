@@ -19,11 +19,62 @@ const (
 	badLU          = "mat: invalid LU factorization"
 )
 
-// LU is a type for creating and using the LU factorization of a matrix.
+// LU is a square n×n matrix represented by its LU factorization with partial
+// pivoting.
+//
+// The factorization has the form
+//
+//	A = P * L * U
+//
+// where P is a permutation matrix, L is lower triangular with unit diagonal
+// elements, and U is upper triangular.
+//
+// Note that this matrix representation is useful for certain operations, in
+// particular for solving linear systems of equations. It is very inefficient at
+// other operations, in particular At is slow.
 type LU struct {
 	lu    *Dense
 	swaps []int
+	piv   []int
 	cond  float64
+	ok    bool // Whether A is nonsingular
+}
+
+var _ Matrix = (*LU)(nil)
+
+// Dims returns the dimensions of the matrix A.
+func (lu *LU) Dims() (r, c int) {
+	if lu.lu == nil {
+		return 0, 0
+	}
+	return lu.lu.Dims()
+}
+
+// At returns the element of A at row i, column j.
+func (lu *LU) At(i, j int) float64 {
+	n, _ := lu.Dims()
+	if uint(i) >= uint(n) {
+		panic(ErrRowAccess)
+	}
+	if uint(j) >= uint(n) {
+		panic(ErrColAccess)
+	}
+
+	i = lu.piv[i]
+	var val float64
+	for k := 0; k < min(i, j+1); k++ {
+		val += lu.lu.at(i, k) * lu.lu.at(k, j)
+	}
+	if i <= j {
+		val += lu.lu.at(i, j)
+	}
+	return val
+}
+
+// T performs an implicit transpose by returning the receiver inside a
+// Transpose.
+func (lu *LU) T() Matrix {
+	return Transpose{lu}
 }
 
 // updateCond updates the stored condition number of the matrix. anorm is the
@@ -52,35 +103,49 @@ func (lu *LU) updateCond(anorm float64, norm lapack.MatrixNorm) {
 	lu.cond = 1 / v
 }
 
-// Factorize computes the LU factorization of the square matrix a and stores the
-// result. The LU decomposition will complete regardless of the singularity of a.
+// Factorize computes the LU factorization of the square matrix A and stores the
+// result in the receiver. The LU decomposition will complete regardless of the
+// singularity of a.
 //
-// The LU factorization is computed with pivoting, and so really the decomposition
-// is a PLU decomposition where P is a permutation matrix. The individual matrix
-// factors can be extracted from the factorization using the Permutation method
-// on Dense, and the LU.LTo and LU.UTo methods.
+// The L and U matrix factors can be extracted from the factorization using the
+// LTo and UTo methods. The matrix P can be extracted as a row permutation using
+// the RowPivots method and applied using Dense.PermuteRows.
 func (lu *LU) Factorize(a Matrix) {
 	lu.factorize(a, CondNorm)
 }
 
 func (lu *LU) factorize(a Matrix, norm lapack.MatrixNorm) {
-	r, c := a.Dims()
-	if r != c {
+	m, n := a.Dims()
+	if m != n {
 		panic(ErrSquare)
 	}
 	if lu.lu == nil {
-		lu.lu = NewDense(r, r, nil)
+		lu.lu = NewDense(n, n, nil)
 	} else {
 		lu.lu.Reset()
-		lu.lu.reuseAsNonZeroed(r, r)
+		lu.lu.reuseAsNonZeroed(n, n)
 	}
 	lu.lu.Copy(a)
-	lu.swaps = useInt(lu.swaps, r)
-	work := getFloat64s(r, false)
+	lu.swaps = useInt(lu.swaps, n)
+	lu.piv = useInt(lu.piv, n)
+	work := getFloat64s(n, false)
 	anorm := lapack64.Lange(norm, lu.lu.mat, work)
 	putFloat64s(work)
-	lapack64.Getrf(lu.lu.mat, lu.swaps)
+	lu.ok = lapack64.Getrf(lu.lu.mat, lu.swaps)
+	lu.updatePivots(lu.swaps)
 	lu.updateCond(anorm, norm)
+}
+
+func (lu *LU) updatePivots(swaps []int) {
+	// Replay the sequence of row swaps in order to find the row permutation.
+	for i := range lu.piv {
+		lu.piv[i] = i
+	}
+	n, _ := lu.Dims()
+	for i := n - 1; i >= 0; i-- {
+		v := swaps[i]
+		lu.piv[i], lu.piv[v] = lu.piv[v], lu.piv[i]
+	}
 }
 
 // isValid returns whether the receiver contains a factorization.
@@ -104,6 +169,7 @@ func (lu *LU) Reset() {
 		lu.lu.Reset()
 	}
 	lu.swaps = lu.swaps[:0]
+	lu.piv = lu.piv[:0]
 }
 
 func (lu *LU) isZero() bool {
@@ -114,6 +180,9 @@ func (lu *LU) isZero() bool {
 // expressions, using LogDet will be more numerically stable.
 // Det will panic if the receiver does not contain a factorization.
 func (lu *LU) Det() float64 {
+	if !lu.ok {
+		return 0
+	}
 	det, sign := lu.LogDet()
 	return math.Exp(det) * sign
 }
@@ -157,7 +226,6 @@ func (lu *LU) RowPivots(dst []int) []int {
 	if !lu.isValid() {
 		panic(badLU)
 	}
-
 	_, n := lu.lu.Dims()
 	if dst == nil {
 		dst = make([]int, n)
@@ -165,15 +233,7 @@ func (lu *LU) RowPivots(dst []int) []int {
 	if len(dst) != n {
 		panic(badSliceLength)
 	}
-	// Perform the inverse of the row swaps in order to find the row
-	// permutation.
-	for i := range dst {
-		dst[i] = i
-	}
-	for i := n - 1; i >= 0; i-- {
-		v := lu.swaps[i]
-		dst[i], dst[v] = dst[v], dst[i]
-	}
+	copy(dst, lu.piv)
 	return dst
 }
 
@@ -185,7 +245,7 @@ func (lu *LU) Pivot(dst []int) []int {
 // RankOne updates an LU factorization as if a rank-one update had been applied to
 // the original matrix A, storing the result into the receiver. That is, if in
 // the original LU decomposition P * L * U = A, in the updated decomposition
-// P * L * U = A + alpha * x * yᵀ.
+// P * L' * U' = A + alpha * x * yᵀ.
 // RankOne will panic if orig does not contain a factorization.
 func (lu *LU) RankOne(orig *LU, alpha float64, x, y Vector) {
 	if !orig.isValid() {
@@ -205,6 +265,7 @@ func (lu *LU) RankOne(orig *LU, alpha float64, x, y Vector) {
 	if orig != lu {
 		if lu.isZero() {
 			lu.swaps = useInt(lu.swaps, n)
+			lu.piv = useInt(lu.piv, n)
 			if lu.lu == nil {
 				lu.lu = NewDense(n, n, nil)
 			} else {
@@ -214,6 +275,7 @@ func (lu *LU) RankOne(orig *LU, alpha float64, x, y Vector) {
 			panic(ErrShape)
 		}
 		copy(lu.swaps, orig.swaps)
+		lu.updatePivots(lu.swaps)
 		lu.lu.Copy(orig.lu)
 	}
 
@@ -276,10 +338,8 @@ func (lu *LU) LTo(dst *TriDense) *TriDense {
 		}
 	}
 	// Extract the lower triangular elements.
-	for i := 0; i < n; i++ {
-		for j := 0; j < i; j++ {
-			dst.mat.Data[i*dst.mat.Stride+j] = lu.lu.mat.Data[i*lu.lu.mat.Stride+j]
-		}
+	for i := 1; i < n; i++ {
+		copy(dst.mat.Data[i*dst.mat.Stride:i*dst.mat.Stride+i], lu.lu.mat.Data[i*lu.lu.mat.Stride:i*lu.lu.mat.Stride+i])
 	}
 	// Set ones on the diagonal.
 	for i := 0; i < n; i++ {
@@ -313,24 +373,21 @@ func (lu *LU) UTo(dst *TriDense) {
 	}
 	// Extract the upper triangular elements.
 	for i := 0; i < n; i++ {
-		for j := i; j < n; j++ {
-			dst.mat.Data[i*dst.mat.Stride+j] = lu.lu.mat.Data[i*lu.lu.mat.Stride+j]
-		}
+		copy(dst.mat.Data[i*dst.mat.Stride+i:i*dst.mat.Stride+n], lu.lu.mat.Data[i*lu.lu.mat.Stride+i:i*lu.lu.mat.Stride+n])
 	}
 }
 
-// SolveTo solves a system of linear equations using the LU decomposition of a matrix.
-// It computes
+// SolveTo solves a system of linear equations
 //
-//	A * X = B if trans == false
-//	Aᵀ * X = B if trans == true
+//	A * X = B   if trans == false
+//	Aᵀ * X = B  if trans == true
 //
-// In both cases, A is represented in LU factorized form, and the matrix X is
-// stored into dst.
+// using the LU factorization of A stored in the receiver. The solution matrix X
+// is stored into dst.
 //
-// If A is singular or near-singular a Condition error is returned. See
-// the documentation for Condition for more information.
-// SolveTo will panic if the receiver does not contain a factorization.
+// If A is singular or near-singular a Condition error is returned. See the
+// documentation for Condition for more information. SolveTo will panic if the
+// receiver does not contain a factorization.
 func (lu *LU) SolveTo(dst *Dense, trans bool, b Matrix) error {
 	if !lu.isValid() {
 		panic(badLU)
@@ -341,16 +398,15 @@ func (lu *LU) SolveTo(dst *Dense, trans bool, b Matrix) error {
 	if br != n {
 		panic(ErrShape)
 	}
-	// TODO(btracey): Should test the condition number instead of testing that
-	// the determinant is exactly zero.
-	if lu.Det() == 0 {
+
+	if !lu.ok {
 		return Condition(math.Inf(1))
 	}
 
 	dst.reuseAsNonZeroed(n, bc)
 	bU, _ := untranspose(b)
-	var restore func()
 	if dst == bU {
+		var restore func()
 		dst, restore = dst.isolatedWorkspace(bU)
 		defer restore()
 	} else if rm, ok := bU.(RawMatrixer); ok {
@@ -369,18 +425,17 @@ func (lu *LU) SolveTo(dst *Dense, trans bool, b Matrix) error {
 	return nil
 }
 
-// SolveVecTo solves a system of linear equations using the LU decomposition of a matrix.
-// It computes
+// SolveVecTo solves a system of linear equations
 //
-//	A * x = b if trans == false
-//	Aᵀ * x = b if trans == true
+//	A * x = b   if trans == false
+//	Aᵀ * x = b  if trans == true
 //
-// In both cases, A is represented in LU factorized form, and the vector x is
-// stored into dst.
+// using the LU factorization of A stored in the receiver. The solution matrix x
+// is stored into dst.
 //
-// If A is singular or near-singular a Condition error is returned. See
-// the documentation for Condition for more information.
-// SolveVecTo will panic if the receiver does not contain a factorization.
+// If A is singular or near-singular a Condition error is returned. See the
+// documentation for Condition for more information. SolveVecTo will panic if the
+// receiver does not contain a factorization.
 func (lu *LU) SolveVecTo(dst *VecDense, trans bool, b Vector) error {
 	if !lu.isValid() {
 		panic(badLU)
@@ -390,6 +445,7 @@ func (lu *LU) SolveVecTo(dst *VecDense, trans bool, b Vector) error {
 	if br, bc := b.Dims(); br != n || bc != 1 {
 		panic(ErrShape)
 	}
+
 	switch rv := b.(type) {
 	default:
 		dst.reuseAsNonZeroed(n)
@@ -398,9 +454,8 @@ func (lu *LU) SolveVecTo(dst *VecDense, trans bool, b Vector) error {
 		if dst != b {
 			dst.checkOverlap(rv.RawVector())
 		}
-		// TODO(btracey): Should test the condition number instead of testing that
-		// the determinant is exactly zero.
-		if lu.Det() == 0 {
+
+		if !lu.ok {
 			return Condition(math.Inf(1))
 		}
 

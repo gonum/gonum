@@ -144,16 +144,16 @@ func (lu *LU) LogDet() (det float64, sign float64) {
 	return floats.Sum(logDiag), sign
 }
 
-// Pivot returns the row permutation that represents the permutation matrix P
-// from the LU factorization
+// RowPivots returns the row permutation that represents the permutation matrix
+// P from the LU factorization
 //
 //	A = P * L * U.
 //
 // If dst is nil, a new slice is allocated and returned. If dst is not nil and
-// the length of dst does not equal the size of the factorized matrix, Pivot
-// will panic. Pivot will panic if the receiver does not contain a
+// the length of dst does not equal the size of the factorized matrix, RowPivots
+// will panic. RowPivots will panic if the receiver does not contain a
 // factorization.
-func (lu *LU) Pivot(dst []int) []int {
+func (lu *LU) RowPivots(dst []int) []int {
 	if !lu.isValid() {
 		panic(badLU)
 	}
@@ -175,6 +175,11 @@ func (lu *LU) Pivot(dst []int) []int {
 		dst[i], dst[v] = dst[v], dst[i]
 	}
 	return dst
+}
+
+// Deprecated: Use RowPivots instead.
+func (lu *LU) Pivot(dst []int) []int {
+	return lu.RowPivots(dst)
 }
 
 // RankOne updates an LU factorization as if a rank-one update had been applied to

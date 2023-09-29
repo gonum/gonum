@@ -30,7 +30,7 @@ func TestLUD(t *testing.T) {
 		lu.LTo(&l)
 		lu.UTo(&u)
 		var p Dense
-		pivot := lu.Pivot(nil)
+		pivot := lu.RowPivots(nil)
 		p.Permutation(n, pivot)
 		var got Dense
 		got.Product(&p, &l, &u)
@@ -100,7 +100,7 @@ func luReconstruct(lu *LU) *Dense {
 	lu.LTo(&L)
 	lu.UTo(&U)
 	var P Dense
-	pivot := lu.Pivot(nil)
+	pivot := lu.RowPivots(nil)
 	P.Permutation(len(pivot), pivot)
 
 	var a Dense

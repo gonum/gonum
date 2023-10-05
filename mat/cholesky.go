@@ -81,18 +81,12 @@ func (c *Cholesky) updateCond(norm float64) {
 
 // Dims returns the dimensions of the matrix.
 func (ch *Cholesky) Dims() (r, c int) {
-	if !ch.valid() {
-		panic(badCholesky)
-	}
-	r, c = ch.chol.Dims()
-	return r, c
+	n := ch.SymmetricDim()
+	return n, n
 }
 
 // At returns the element at row i, column j.
 func (c *Cholesky) At(i, j int) float64 {
-	if !c.valid() {
-		panic(badCholesky)
-	}
 	n := c.SymmetricDim()
 	if uint(i) >= uint(n) {
 		panic(ErrRowAccess)
@@ -116,8 +110,11 @@ func (c *Cholesky) T() Matrix {
 // SymmetricDim implements the Symmetric interface and returns the number of rows
 // in the matrix (this is also the number of columns).
 func (c *Cholesky) SymmetricDim() int {
-	r, _ := c.chol.Dims()
-	return r
+	if c.chol == nil {
+		return 0
+	}
+	n, _ := c.chol.Triangle()
+	return n
 }
 
 // Cond returns the condition number of the factorized matrix.
@@ -850,19 +847,13 @@ func (ch *BandCholesky) Reset() {
 
 // Dims returns the dimensions of the matrix.
 func (ch *BandCholesky) Dims() (r, c int) {
-	if !ch.valid() {
-		panic(badCholesky)
-	}
-	r, c = ch.chol.Dims()
-	return r, c
+	n := ch.SymmetricDim()
+	return n, n
 }
 
 // At returns the element at row i, column j.
 func (ch *BandCholesky) At(i, j int) float64 {
-	if !ch.valid() {
-		panic(badCholesky)
-	}
-	n, k, _ := ch.chol.TriBand()
+	n, k := ch.SymBand()
 	if uint(i) >= uint(n) {
 		panic(ErrRowAccess)
 	}
@@ -896,6 +887,9 @@ func (ch *BandCholesky) TBand() Banded {
 // SymmetricDim implements the Symmetric interface and returns the number of rows
 // in the matrix (this is also the number of columns).
 func (ch *BandCholesky) SymmetricDim() int {
+	if ch.chol == nil {
+		return 0
+	}
 	n, _ := ch.chol.Triangle()
 	return n
 }
@@ -1025,9 +1019,6 @@ func (ch *PivotedCholesky) Dims() (r, c int) {
 
 // At returns the element of A at row i, column j.
 func (c *PivotedCholesky) At(i, j int) float64 {
-	if c.chol == nil {
-		panic(badCholesky)
-	}
 	n := c.SymmetricDim()
 	if uint(i) >= uint(n) {
 		panic(ErrRowAccess)
@@ -1055,9 +1046,9 @@ func (c *PivotedCholesky) T() Matrix {
 // rows (or columns) in the matrix .
 func (c *PivotedCholesky) SymmetricDim() int {
 	if c.chol == nil {
-		panic(badCholesky)
+		return 0
 	}
-	n, _ := c.chol.Dims()
+	n, _ := c.chol.Triangle()
 	return n
 }
 

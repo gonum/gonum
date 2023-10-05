@@ -694,6 +694,28 @@ func Ormlq(side blas.Side, trans blas.Transpose, a blas64.General, tau []float64
 	lapack64.Dormlq(side, trans, c.Rows, c.Cols, a.Rows, a.Data, max(1, a.Stride), tau, c.Data, max(1, c.Stride), work, lwork)
 }
 
+// Orgqr generates an m×n matrix Q with orthonormal columns defined by the
+// product of elementary reflectors
+//
+//	Q = H_0 * H_1 * ... * H_{k-1}
+//
+// as computed by Geqrf.
+//
+// k is determined by the length of tau.
+//
+// The length of work must be at least n and it also must be that 0 <= k <= n
+// and 0 <= n <= m.
+//
+// work is temporary storage, and lwork specifies the usable memory length. At
+// minimum, lwork >= n, and the amount of blocking is limited by the usable
+// length. If lwork == -1, instead of computing Orgqr the optimal work length
+// is stored into work[0].
+//
+// Orgqr will panic if the conditions on input values are not met.
+func Orgqr(a blas64.General, tau []float64, work []float64, lwork int) {
+	lapack64.Dorgqr(a.Rows, a.Cols, len(tau), a.Data, a.Stride, tau, work, lwork)
+}
+
 // Ormqr multiplies an m×n matrix C by an orthogonal matrix Q as
 //
 //	C = Q * C   if side == blas.Left  and trans == blas.NoTrans,
@@ -705,12 +727,13 @@ func Ormlq(side blas.Side, trans blas.Transpose, a blas64.General, tau []float64
 //
 //	Q = H_0 * H_1 * ... * H_{k-1}.
 //
+// k is determined by the length of tau.
+//
 // If side == blas.Left, A is an m×k matrix and 0 <= k <= m.
 // If side == blas.Right, A is an n×k matrix and 0 <= k <= n.
 // The ith column of A contains the vector which defines the elementary
-// reflector H_i and tau[i] contains its scalar factor. tau must have length k
-// and Ormqr will panic otherwise. Geqrf returns A and tau in the required
-// form.
+// reflector H_i and tau[i] contains its scalar factor. Geqrf returns A and tau
+// in the required form.
 //
 // work must have length at least max(1,lwork), and lwork must be at least n if
 // side == blas.Left and at least m if side == blas.Right, otherwise Ormqr will
@@ -725,7 +748,7 @@ func Ormlq(side blas.Side, trans blas.Transpose, a blas64.General, tau []float64
 // If lwork is -1, instead of performing Ormqr, the optimal workspace size will
 // be stored into work[0].
 func Ormqr(side blas.Side, trans blas.Transpose, a blas64.General, tau []float64, c blas64.General, work []float64, lwork int) {
-	lapack64.Dormqr(side, trans, c.Rows, c.Cols, a.Cols, a.Data, max(1, a.Stride), tau, c.Data, max(1, c.Stride), work, lwork)
+	lapack64.Dormqr(side, trans, c.Rows, c.Cols, len(tau), a.Data, max(1, a.Stride), tau, c.Data, max(1, c.Stride), work, lwork)
 }
 
 // Pocon estimates the reciprocal of the condition number of a positive-definite

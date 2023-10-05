@@ -42,6 +42,13 @@ func TestQR(t *testing.T) {
 			t.Errorf("Q is not orthonormal: m = %v, n = %v", m, n)
 		}
 
+		if !EqualApprox(a, &qr, 1e-14) {
+			t.Errorf("m=%d,n=%d: A and QR are not equal", m, n)
+		}
+		if !EqualApprox(a.T(), qr.T(), 1e-14) {
+			t.Errorf("m=%d,n=%d: Aᵀ and (QR)ᵀ are not equal", m, n)
+		}
+
 		qr.RTo(&r)
 
 		var got Dense

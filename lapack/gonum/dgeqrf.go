@@ -20,7 +20,7 @@ import (
 // by the temporary space available. If lwork == -1, instead of performing Dgeqrf,
 // the optimal work length will be stored into work[0].
 //
-// tau must have length at least min(m,n), and this function will panic otherwise.
+// tau must have length min(m,n), and this function will panic otherwise.
 func (impl Implementation) Dgeqrf(m, n int, a []float64, lda int, tau, work []float64, lwork int) {
 	switch {
 	case m < 0:
@@ -52,8 +52,8 @@ func (impl Implementation) Dgeqrf(m, n int, a []float64, lda int, tau, work []fl
 	if len(a) < (m-1)*lda+n {
 		panic(shortA)
 	}
-	if len(tau) < k {
-		panic(shortTau)
+	if len(tau) != k {
+		panic(badLenTau)
 	}
 
 	nbmin := 2 // Minimal block size.
@@ -83,7 +83,7 @@ func (impl Implementation) Dgeqrf(m, n int, a []float64, lda int, tau, work []fl
 		for i = 0; i < k-nx; i += nb {
 			ib := min(k-i, nb)
 			// Compute the QR factorization of the current block.
-			impl.Dgeqr2(m-i, ib, a[i*lda+i:], lda, tau[i:], work)
+			impl.Dgeqr2(m-i, ib, a[i*lda+i:], lda, tau[i:i+ib], work)
 			if i+ib < n {
 				// Form the triangular factor of the block reflector and apply Hᵀ
 				// In Dlarft, work becomes the T matrix.

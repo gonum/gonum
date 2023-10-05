@@ -18,7 +18,7 @@ import (
 // Dorgqr is the blocked version of Dorg2r that makes greater use of level-3 BLAS
 // routines.
 //
-// The length of tau must be at least k, and the length of work must be at least n.
+// The length of tau must be k, and the length of work must be at least n.
 // It also must be that 0 <= k <= n and 0 <= n <= m.
 //
 // work is temporary storage, and lwork specifies the usable memory length. At
@@ -70,8 +70,8 @@ func (impl Implementation) Dorgqr(m, n, k int, a []float64, lda int, tau, work [
 	switch {
 	case len(a) < (m-1)*lda+n:
 		panic(shortA)
-	case len(tau) < k:
-		panic(shortTau)
+	case len(tau) != k:
+		panic(badLenTau)
 	}
 
 	nbmin := 2 // Minimum block size
@@ -123,7 +123,7 @@ func (impl Implementation) Dorgqr(m, n, k int, a []float64, lda int, tau, work [
 					a[i*lda+i+ib:], lda,
 					work[ib*ldwork:], ldwork)
 			}
-			impl.Dorg2r(m-i, ib, ib, a[i*lda+i:], lda, tau[i:], work)
+			impl.Dorg2r(m-i, ib, ib, a[i*lda+i:], lda, tau[i:i+ib], work)
 			// Set rows 0:i-1 of current block to zero.
 			for j := i; j < i+ib; j++ {
 				for l := 0; l < i; l++ {

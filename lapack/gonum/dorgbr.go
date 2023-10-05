@@ -91,7 +91,7 @@ func (impl Implementation) Dorgbr(vect lapack.GenOrtho, m, n, k int, a []float64
 	if wantq {
 		// Form Q, determined by a call to Dgebrd to reduce an m×k matrix.
 		if m >= k {
-			impl.Dorgqr(m, n, k, a, lda, tau, work, lwork)
+			impl.Dorgqr(m, n, k, a, lda, tau[:k], work, lwork)
 		} else {
 			// Shift the vectors which define the elementary reflectors one
 			// column to the right, and set the first row and column of Q to
@@ -108,7 +108,7 @@ func (impl Implementation) Dorgbr(vect lapack.GenOrtho, m, n, k int, a []float64
 			}
 			if m > 1 {
 				// Form Q[1:m-1, 1:m-1]
-				impl.Dorgqr(m-1, m-1, m-1, a[lda+1:], lda, tau, work, lwork)
+				impl.Dorgqr(m-1, m-1, m-1, a[lda+1:], lda, tau[:m-1], work, lwork)
 			}
 		}
 	} else {

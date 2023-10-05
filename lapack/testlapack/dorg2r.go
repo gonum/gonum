@@ -59,7 +59,7 @@ func Dorg2rTest(t *testing.T, impl Dorg2rer) {
 		q := constructQK("QR", m, n, k, a, lda, tau)
 
 		// Compute the matrix Q using Dorg2r.
-		impl.Dorg2r(m, n, k, a, lda, tau, work)
+		impl.Dorg2r(m, n, k, a, lda, tau[:k], work)
 
 		// Check that the first n columns of both results match.
 		same := true

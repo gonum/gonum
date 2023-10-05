@@ -406,7 +406,7 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 				iwork := itau + n
 
 				// Compute A = Q * R.
-				impl.Dgeqrf(m, n, a, lda, work[itau:], work[iwork:], lwork-iwork)
+				impl.Dgeqrf(m, n, a, lda, work[itau:itau+n], work[iwork:], lwork-iwork)
 
 				// Zero out below R.
 				impl.Dlaset(blas.Lower, n-1, n-1, 0, 0, a[lda:], lda)
@@ -455,14 +455,14 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 						itau := ir + ldworkr*n
 						iwork := itau + n
 						// Compute A = Q * R.
-						impl.Dgeqrf(m, n, a, lda, work[itau:], work[iwork:], lwork-iwork)
+						impl.Dgeqrf(m, n, a, lda, work[itau:itau+n], work[iwork:], lwork-iwork)
 
 						// Copy R to work[ir:], zeroing out below it.
 						impl.Dlacpy(blas.Upper, n, n, a, lda, work[ir:], ldworkr)
 						impl.Dlaset(blas.Lower, n-1, n-1, 0, 0, work[ir+ldworkr:], ldworkr)
 
 						// Generate Q in A.
-						impl.Dorgqr(m, n, n, a, lda, work[itau:], work[iwork:], lwork-iwork)
+						impl.Dorgqr(m, n, n, a, lda, work[itau:itau+n], work[iwork:], lwork-iwork)
 						ie := itau
 						itauq := ie + n
 						itaup := itauq + n
@@ -492,11 +492,11 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 						iwork := itau + n
 
 						// Compute A = Q*R, copying result to U.
-						impl.Dgeqrf(m, n, a, lda, work[itau:], work[iwork:], lwork-iwork)
+						impl.Dgeqrf(m, n, a, lda, work[itau:itau+n], work[iwork:], lwork-iwork)
 						impl.Dlacpy(blas.Lower, m, n, a, lda, u, ldu)
 
 						// Generate Q in U.
-						impl.Dorgqr(m, n, n, u, ldu, work[itau:], work[iwork:], lwork-iwork)
+						impl.Dorgqr(m, n, n, u, ldu, work[itau:itau+n], work[iwork:], lwork-iwork)
 						ie := itau
 						itauq := ie + n
 						itaup := itauq + n
@@ -537,13 +537,13 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 						iwork := itau + n
 
 						// Compute A = Q * R.
-						impl.Dgeqrf(m, n, a, lda, work[itau:], work[iwork:], lwork-iwork)
+						impl.Dgeqrf(m, n, a, lda, work[itau:itau+n], work[iwork:], lwork-iwork)
 						// Copy R to work[iu:], zeroing out below it.
 						impl.Dlacpy(blas.Upper, n, n, a, lda, work[iu:], ldworku)
 						impl.Dlaset(blas.Lower, n-1, n-1, 0, 0, work[iu+ldworku:], ldworku)
 
 						// Generate Q in A.
-						impl.Dorgqr(m, n, n, a, lda, work[itau:], work[iwork:], lwork-iwork)
+						impl.Dorgqr(m, n, n, a, lda, work[itau:itau+n], work[iwork:], lwork-iwork)
 
 						ie := itau
 						itauq := ie + n
@@ -580,11 +580,11 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 						iwork := itau + n
 
 						// Compute A = Q * R, copying result to U.
-						impl.Dgeqrf(m, n, a, lda, work[itau:], work[iwork:], lwork-iwork)
+						impl.Dgeqrf(m, n, a, lda, work[itau:itau+n], work[iwork:], lwork-iwork)
 						impl.Dlacpy(blas.Lower, m, n, a, lda, u, ldu)
 
 						// Generate Q in U.
-						impl.Dorgqr(m, n, n, u, ldu, work[itau:], work[iwork:], lwork-iwork)
+						impl.Dorgqr(m, n, n, u, ldu, work[itau:itau+n], work[iwork:], lwork-iwork)
 
 						// Copy R to VT, zeroing out below it.
 						impl.Dlacpy(blas.Upper, n, n, a, lda, vt, ldvt)
@@ -631,7 +631,7 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 						iwork := itau + n
 
 						// Compute A = Q*R, copying result to U.
-						impl.Dgeqrf(m, n, a, lda, work[itau:], work[iwork:], lwork-iwork)
+						impl.Dgeqrf(m, n, a, lda, work[itau:itau+n], work[iwork:], lwork-iwork)
 						impl.Dlacpy(blas.Lower, m, n, a, lda, u, ldu)
 
 						// Copy R to work[ir:], zeroing out below it.
@@ -639,7 +639,7 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 						impl.Dlaset(blas.Lower, n-1, n-1, 0, 0, work[ir+ldworkr:], ldworkr)
 
 						// Generate Q in U.
-						impl.Dorgqr(m, m, n, u, ldu, work[itau:], work[iwork:], lwork-iwork)
+						impl.Dorgqr(m, m, n, u, ldu, work[itau:itau+n], work[iwork:], lwork-iwork)
 						ie := itau
 						itauq := ie + n
 						itaup := itauq + n
@@ -672,11 +672,11 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 						iwork := itau + n
 
 						// Compute A = Q*R, copying result to U.
-						impl.Dgeqrf(m, n, a, lda, work[itau:], work[iwork:], lwork-iwork)
+						impl.Dgeqrf(m, n, a, lda, work[itau:itau+n], work[iwork:], lwork-iwork)
 						impl.Dlacpy(blas.Lower, m, n, a, lda, u, ldu)
 
 						// Generate Q in U.
-						impl.Dorgqr(m, m, n, u, ldu, work[itau:], work[iwork:], lwork-iwork)
+						impl.Dorgqr(m, m, n, u, ldu, work[itau:itau+n], work[iwork:], lwork-iwork)
 						ie := itau
 						itauq := ie + n
 						itaup := itauq + n
@@ -717,11 +717,11 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 						iwork := itau + n
 
 						// Compute A = Q * R, copying result to U.
-						impl.Dgeqrf(m, n, a, lda, work[itau:], work[iwork:], lwork-iwork)
+						impl.Dgeqrf(m, n, a, lda, work[itau:itau+n], work[iwork:], lwork-iwork)
 						impl.Dlacpy(blas.Lower, m, n, a, lda, u, ldu)
 
 						// Generate Q in U.
-						impl.Dorgqr(m, m, n, u, ldu, work[itau:], work[iwork:], lwork-iwork)
+						impl.Dorgqr(m, m, n, u, ldu, work[itau:itau+n], work[iwork:], lwork-iwork)
 
 						// Copy R to work[iu:], zeroing out below it.
 						impl.Dlacpy(blas.Upper, n, n, a, lda, work[iu:], ldworku)
@@ -786,11 +786,11 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 						iwork := itau + n
 
 						// Compute A = Q*R, copying result to U.
-						impl.Dgeqrf(m, n, a, lda, work[itau:], work[iwork:], lwork-iwork)
+						impl.Dgeqrf(m, n, a, lda, work[itau:itau+n], work[iwork:], lwork-iwork)
 						impl.Dlacpy(blas.Lower, m, n, a, lda, u, ldu)
 
 						// Generate Q in U.
-						impl.Dorgqr(m, m, n, u, ldu, work[itau:], work[iwork:], lwork-iwork)
+						impl.Dorgqr(m, m, n, u, ldu, work[itau:itau+n], work[iwork:], lwork-iwork)
 
 						// Copy R from A to VT, zeroing out below it.
 						impl.Dlacpy(blas.Upper, n, n, a, lda, vt, ldvt)

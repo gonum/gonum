@@ -62,8 +62,9 @@ func DgeqrfTest(t *testing.T, impl Dgeqrfer) {
 
 		// Allocate a slice for scalar factors of elementary reflectors
 		// and fill it with random numbers.
-		tau := make([]float64, n)
-		for i := 0; i < n; i++ {
+		k := min(m, n)
+		tau := make([]float64, k)
+		for i := range tau {
 			tau[i] = rnd.Float64()
 		}
 

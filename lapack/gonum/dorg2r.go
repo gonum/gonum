@@ -14,7 +14,7 @@ import (
 //
 //	Q = H_0 * H_1 * ... * H_{k-1}
 //
-// len(tau) >= k, 0 <= k <= n, 0 <= n <= m, len(work) >= n.
+// len(tau) = k, 0 <= k <= n, 0 <= n <= m, len(work) >= n.
 // Dorg2r will panic if these conditions are not met.
 //
 // Dorg2r is an internal routine. It is exported for testing purposes.
@@ -41,8 +41,8 @@ func (impl Implementation) Dorg2r(m, n, k int, a []float64, lda int, tau []float
 	switch {
 	case len(a) < (m-1)*lda+n:
 		panic(shortA)
-	case len(tau) < k:
-		panic(shortTau)
+	case len(tau) != k:
+		panic(badLenTau)
 	case len(work) < n:
 		panic(shortWork)
 	}

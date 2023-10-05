@@ -57,7 +57,7 @@ func DorgqrTest(t *testing.T, impl Dorgqrer) {
 			a[i] = rnd.Float64()
 		}
 		work := make([]float64, 1)
-		tau := make([]float64, n)
+		tau := make([]float64, min(m, n))
 		for i := range tau {
 			tau[i] = math.NaN()
 		}
@@ -71,12 +71,12 @@ func DorgqrTest(t *testing.T, impl Dorgqrer) {
 		for i := range work {
 			work[i] = math.NaN()
 		}
-		impl.Dorg2r(m, n, k, aUnblocked, lda, tau, work)
+		impl.Dorg2r(m, n, k, aUnblocked, lda, tau[:k], work)
 		// make sure work isn't used before initialized
 		for i := range work {
 			work[i] = math.NaN()
 		}
-		impl.Dorgqr(m, n, k, a, lda, tau, work, len(work))
+		impl.Dorgqr(m, n, k, a, lda, tau[:k], work, len(work))
 		if !floats.EqualApprox(a, aUnblocked, 1e-10) {
 			t.Errorf("Q Mismatch. m = %d, n = %d, k = %d, lda = %d", m, n, k, lda)
 		}

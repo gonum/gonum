@@ -123,7 +123,7 @@ func (impl Implementation) Dgeqp3(m, n int, a []float64, lda int, jpvt []int, ta
 	// Compute the QR factorization of nfxd columns and update remaining columns.
 	if nfxd > 0 {
 		na := min(m, nfxd)
-		impl.Dgeqrf(m, na, a, lda, tau, work, lwork)
+		impl.Dgeqrf(m, na, a, lda, tau[:na], work, lwork)
 		iws = max(iws, int(work[0]))
 		if na < n {
 			impl.Dormqr(blas.Left, blas.Trans, m, n-na, na, a, lda, tau[:na], a[na:], lda,

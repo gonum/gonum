@@ -154,7 +154,7 @@ func (impl Implementation) Dggsvp3(jobU, jobV, jobQ lapack.GSVDJob, m, p, n int,
 		if p > 1 {
 			impl.Dlacpy(blas.Lower, p-1, min(p, n), b[ldb:], ldb, v[ldv:], ldv)
 		}
-		impl.Dorg2r(p, p, min(p, n), v, ldv, tau, work)
+		impl.Dorg2r(p, p, min(p, n), v, ldv, tau[:min(p, n)], work)
 	}
 
 	// Clean up B.
@@ -216,7 +216,7 @@ func (impl Implementation) Dggsvp3(jobU, jobV, jobQ lapack.GSVDJob, m, p, n int,
 	}
 
 	// Update A12 := Uᵀ*A12, where A12 = A[0:m, n-l:n].
-	impl.Dorm2r(blas.Left, blas.Trans, m, l, min(m, n-l), a, lda, tau, a[n-l:], lda, work)
+	impl.Dorm2r(blas.Left, blas.Trans, m, l, min(m, n-l), a, lda, tau[:min(m, n-l)], a[n-l:], lda, work)
 
 	if wantu {
 		// Copy the details of U, and form U.
@@ -224,7 +224,8 @@ func (impl Implementation) Dggsvp3(jobU, jobV, jobQ lapack.GSVDJob, m, p, n int,
 		if m > 1 {
 			impl.Dlacpy(blas.Lower, m-1, min(m, n-l), a[lda:], lda, u[ldu:], ldu)
 		}
-		impl.Dorg2r(m, m, min(m, n-l), u, ldu, tau, work)
+		k := min(m, n-l)
+		impl.Dorg2r(m, m, k, u, ldu, tau[:k], work)
 	}
 
 	if wantq {
@@ -250,7 +251,7 @@ func (impl Implementation) Dggsvp3(jobU, jobV, jobQ lapack.GSVDJob, m, p, n int,
 
 		if wantq {
 			// Update Q[0:n, 0:n-l] := Q[0:n, 0:n-l]*Z1ᵀ.
-			impl.Dorm2r(blas.Right, blas.Trans, n, n-l, k, a, lda, tau, q, ldq, work)
+			impl.Dorm2r(blas.Right, blas.Trans, n, n-l, k, a, lda, tau[:k], q, ldq, work)
 		}
 
 		// Clean up A.
@@ -265,10 +266,10 @@ func (impl Implementation) Dggsvp3(jobU, jobV, jobQ lapack.GSVDJob, m, p, n int,
 
 	if m > k {
 		// QR factorization of A[k:m, n-l:n].
-		impl.Dgeqr2(m-k, l, a[k*lda+n-l:], lda, tau, work)
+		impl.Dgeqr2(m-k, l, a[k*lda+n-l:], lda, tau[:min(m-k, l)], work)
 		if wantu {
 			// Update U[:, k:m) := U[:, k:m]*U1.
-			impl.Dorm2r(blas.Right, blas.NoTrans, m, m-k, min(m-k, l), a[k*lda+n-l:], lda, tau, u[k:], ldu, work)
+			impl.Dorm2r(blas.Right, blas.NoTrans, m, m-k, min(m-k, l), a[k*lda+n-l:], lda, tau[:min(m-k, l)], u[k:], ldu, work)
 		}
 
 		// Clean up A.

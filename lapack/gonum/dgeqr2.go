@@ -14,7 +14,7 @@ import "gonum.org/v1/gonum/blas"
 // A is modified to contain the information to construct Q and R.
 // The upper triangle of a contains the matrix R. The lower triangular elements
 // (not including the diagonal) contain the elementary reflectors. tau is modified
-// to contain the reflector scales. tau must have length at least min(m,n), and
+// to contain the reflector scales. tau must have length min(m,n), and
 // this function will panic otherwise.
 //
 // The ith elementary reflector can be explicitly constructed by first extracting
@@ -57,8 +57,8 @@ func (impl Implementation) Dgeqr2(m, n int, a []float64, lda int, tau, work []fl
 	switch {
 	case len(a) < (m-1)*lda+n:
 		panic(shortA)
-	case len(tau) < k:
-		panic(shortTau)
+	case len(tau) != k:
+		panic(badLenTau)
 	}
 
 	for i := 0; i < k; i++ {

@@ -267,7 +267,7 @@ func Geqp3(a blas64.General, jpvt []int, tau, work []float64, lwork int) {
 // algorithm. A is modified to contain the information to construct Q and R.
 // The upper triangle of a contains the matrix R. The lower triangular elements
 // (not including the diagonal) contain the elementary reflectors. tau is modified
-// to contain the reflector scales. tau must have length at least min(m,n), and
+// to contain the reflector scales. tau must have length min(m,n), and
 // this function will panic otherwise.
 //
 // The ith elementary reflector can be explicitly constructed by first extracting

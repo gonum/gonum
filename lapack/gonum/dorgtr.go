@@ -99,7 +99,7 @@ func (impl Implementation) Dorgtr(uplo blas.Uplo, n int, a []float64, lda int, t
 		}
 		if n > 1 {
 			// Generate Q[1:n, 1:n].
-			impl.Dorgqr(n-1, n-1, n-1, a[lda+1:], lda, tau, work, lwork)
+			impl.Dorgqr(n-1, n-1, n-1, a[lda+1:], lda, tau[:n-1], work, lwork)
 		}
 	}
 	work[0] = float64(lworkopt)

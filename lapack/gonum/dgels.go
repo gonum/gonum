@@ -131,7 +131,7 @@ func (impl Implementation) Dgels(trans blas.Transpose, m, n, nrhs int, a []float
 	// Solve the minimization problem using a QR or an LQ decomposition.
 	var scllen int
 	if m >= n {
-		impl.Dgeqrf(m, n, a, lda, work, work[mn:], lwork-mn)
+		impl.Dgeqrf(m, n, a, lda, work[:n], work[mn:], lwork-mn)
 		if trans == blas.NoTrans {
 			impl.Dormqr(blas.Left, blas.Trans, m, nrhs, n,
 				a, lda,

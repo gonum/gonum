@@ -52,7 +52,8 @@ func DlarftTest(t *testing.T, impl Dlarfter) {
 					}
 				}
 				// Use dgeqr2 to find the v vectors
-				tau := make([]float64, n)
+				k := min(m, n)
+				tau := make([]float64, k)
 				work := make([]float64, n)
 				impl.Dgeqr2(m, n, a, lda, tau, work)
 
@@ -64,7 +65,6 @@ func DlarftTest(t *testing.T, impl Dlarfter) {
 
 				h := constructH(tau, vMat, store, direct)
 
-				k := min(m, n)
 				ldt := test.ldt
 				if ldt == 0 {
 					ldt = k

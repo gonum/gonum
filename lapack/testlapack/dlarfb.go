@@ -84,7 +84,7 @@ func DlarfbTest(t *testing.T, impl Dlarfber) {
 						}
 
 						// Use dgeqr2 to find the v vectors
-						tau := make([]float64, na)
+						tau := make([]float64, k)
 						work := make([]float64, na)
 						impl.Dgeqr2(ma, k, a, lda, tau, work)
 

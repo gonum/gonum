@@ -11,6 +11,7 @@ import (
 	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas/blas64"
+	"gonum.org/v1/gonum/stat/combin"
 )
 
 func TestNewVecDense(t *testing.T) {
@@ -478,6 +479,41 @@ func TestVecDenseDivElem(t *testing.T) {
 		v.DivElemVec(test.a.(*VecDense), test.b.(*VecDense))
 		if !reflect.DeepEqual(v.RawVector(), test.want.RawVector()) {
 			t.Errorf("unexpected result for test %d: got: %v want: %v", i, v.RawVector(), test.want.RawVector())
+		}
+	}
+}
+
+func TestVecDensePermute(t *testing.T) {
+	rnd := rand.New(rand.NewSource(1))
+	for n := 1; n <= 6; n++ {
+		for k, perm := range combin.Permutations(n, n) {
+			v := NewVecDense(n, nil)
+			for i := 0; i < n; i++ {
+				v.SetVec(i, rnd.Float64())
+			}
+
+			var p Dense
+			p.Permutation(n, perm)
+
+			var want VecDense
+			want.MulVec(&p, v)
+			var got VecDense
+			got.CloneFromVec(v)
+			got.Permute(perm, false)
+			if !Equal(&want, &got) {
+				t.Errorf("n=%d,k=%d: unexpected result after permutation\nwant=%v\n got=%v", n, k,
+					Formatted(want.T()), Formatted(got.T()))
+			}
+
+			var wantInv VecDense
+			wantInv.MulVec(p.T(), v)
+			var gotInv VecDense
+			gotInv.CloneFromVec(v)
+			gotInv.Permute(perm, true)
+			if !Equal(&wantInv, &gotInv) {
+				t.Errorf("n=%d,k=%d: unexpected result after inverse permutation\nwant=%v\n got=%v", n, k,
+					Formatted(wantInv.T()), Formatted(gotInv.T()))
+			}
 		}
 	}
 }

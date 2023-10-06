@@ -5,6 +5,7 @@
 package distmv
 
 import (
+	"fmt"
 	"math"
 	"testing"
 
@@ -569,6 +570,97 @@ func TestNormalScoreInput(t *testing.T) {
 		scoreFD := fd.Gradient(nil, normal.LogProb, x, nil)
 		if !floats.EqualApprox(score, scoreFD, 1e-4) {
 			t.Errorf("Case %d: derivative mismatch. Got %v, want %v", cas, score, scoreFD)
+		}
+	}
+}
+
+func TestNormalRandCov(t *testing.T) {
+	const numSamples = 1_000_000
+	const tol = 1e-2
+
+	for cas, test := range []struct {
+		mean []float64
+		cov  []float64
+		semi bool
+	}{
+		{
+			mean: []float64{0, 0},
+			cov: []float64{
+				1, 0,
+				0, 1,
+			},
+		},
+		{
+			mean: []float64{0, 0},
+			cov: []float64{
+				2, 0.9,
+				0.9, 1,
+			},
+		},
+		{
+			mean: []float64{6, 7},
+			cov: []float64{
+				2, 0.9,
+				0.9, 5,
+			},
+		},
+		{
+			mean: []float64{-1, 2, -3},
+			cov: []float64{
+				0, 0, 0,
+				0, 0, 0.1,
+				0, 0.1, 5,
+			},
+			semi: true,
+		},
+	} {
+		for _, covType := range []string{"Cholesky", "PivotedCholesky", "SymDense"} {
+			if covType == "Cholesky" && test.semi {
+				continue
+			}
+
+			name := fmt.Sprintf("case %d with %s", cas, covType)
+
+			n := len(test.mean)
+			a := mat.NewSymDense(n, test.cov)
+			src := rand.NewSource(1)
+
+			var cov mat.Symmetric
+			switch covType {
+			case "Cholesky":
+				var chol mat.Cholesky
+				ok := chol.Factorize(a)
+				if !ok {
+					t.Fatalf("%s: factorization failed, input covariance not positive definite?", name)
+				}
+				cov = &chol
+			case "PivotedCholesky":
+				var chol mat.PivotedCholesky
+				chol.Factorize(a, -1)
+				cov = &chol
+			case "SymDense":
+				cov = a
+			}
+
+			samples := mat.NewDense(numSamples, n, nil)
+			for i := 0; i < numSamples; i++ {
+				NormalRandCov(samples.RawRowView(i), test.mean, cov, src)
+			}
+
+			estMean := make([]float64, n)
+			for i := range estMean {
+				estMean[i] = stat.Mean(mat.Col(nil, i, samples), nil)
+			}
+			if !floats.EqualApprox(estMean, test.mean, tol) {
+				t.Errorf("%s: mean mismatch\nwant=%v\n got=%v", name, test.mean, estMean)
+			}
+
+			var estCov mat.SymDense
+			stat.CovarianceMatrix(&estCov, samples, nil)
+			if !mat.EqualApprox(&estCov, a, tol) {
+				t.Errorf("%s: covariance mismatch\nwant=%v\n got=%v", name,
+					mat.Formatted(a, mat.Prefix("     ")), mat.Formatted(&estCov, mat.Prefix("     ")))
+			}
 		}
 	}
 }

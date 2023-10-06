@@ -837,3 +837,19 @@ func (v *VecDense) RowViewOf(m RawMatrixer, i int) {
 	v.mat.Data = rm.Data[i*rm.Stride : i*rm.Stride+rm.Cols]
 	v.mat.N = rm.Cols
 }
+
+// Permute rearranges the elements of the n-vector v in the receiver as
+// specified by the permutation p[0],p[1],...,p[n-1] of the integers 0,...,n-1.
+//
+// If inverse is false, the given permutation is applied:
+//
+//	v[p[i]] is moved to v[i] for i=0,1,...,n-1.
+//
+// If inverse is true, the inverse permutation is applied:
+//
+//	v[i] is moved to v[p[i]] for i=0,1,...,n-1.
+//
+// p must have length n, otherwise Permute will panic.
+func (v *VecDense) Permute(p []int, inverse bool) {
+	v.asDense().PermuteRows(p, inverse)
+}

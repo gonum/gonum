@@ -15,8 +15,6 @@ import (
 	"gonum.org/v1/gonum/stat/distuv"
 )
 
-const badInputLength = "distmv: input slice length mismatch"
-
 // Normal is a multivariate normal distribution (also known as the multivariate
 // Gaussian distribution). Its pdf in k dimensions is given by
 //
@@ -326,6 +324,59 @@ func NormalRand(x, mean []float64, chol *mat.Cholesky, src rand.Source) []float6
 	}
 	transformNormal(x, x, mean, chol)
 	return x
+}
+
+// NormalRandCov generates a random sample from a multivariate normal
+// distribution given by mean and cov.
+//
+// If dst is nil, new memory is allocated and returned, otherwise the result is
+// stored in place into dst. NormalRandCov panics if dst is non-nil and not
+// equal to len(mean), or if len(mean) != cov.SymmetricDim().
+//
+// If the covariance matrix is certainly positive definite, cov should be
+// *mat.Cholesky. If the covariance matrix may be positive semi-definite, cov
+// should be *mat.PivotedCholesky. Otherwise NormalRandCov will be very
+// inefficient because a pivoted Cholesky factorization will be computed for
+// every sample.
+func NormalRandCov(dst, mean []float64, cov mat.Symmetric, src rand.Source) []float64 {
+	n := len(mean)
+	if cov.SymmetricDim() != n {
+		panic(badInputLength)
+	}
+	dst = reuseAs(dst, n)
+	if src == nil {
+		for i := range dst {
+			dst[i] = rand.NormFloat64()
+		}
+	} else {
+		rnd := rand.New(src)
+		for i := range dst {
+			dst[i] = rnd.NormFloat64()
+		}
+	}
+
+	switch cov := cov.(type) {
+	case *mat.Cholesky:
+		dstVec := mat.NewVecDense(n, dst)
+		dstVec.MulVec(cov.RawU().T(), dstVec)
+		floats.Add(dst, mean)
+	case *mat.PivotedCholesky:
+		dstVec := mat.NewVecDense(n, dst)
+		dstVec.MulVec(cov.RawU().T(), dstVec)
+		dstVec.Permute(cov.ColumnPivots(nil), true)
+		floats.Add(dst, mean)
+	// TODO(vladimir-ch): enable this case when EigenSym satisfies Matrix.
+	// case *mat.EigenSym:
+	default:
+		var chol mat.PivotedCholesky
+		chol.Factorize(cov, -1)
+		dstVec := mat.NewVecDense(n, dst)
+		dstVec.MulVec(chol.RawU().T(), dstVec)
+		dstVec.Permute(chol.ColumnPivots(nil), true)
+		floats.Add(dst, mean)
+	}
+
+	return dst
 }
 
 // ScoreInput returns the gradient of the log-probability with respect to the

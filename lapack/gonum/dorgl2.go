@@ -9,13 +9,19 @@ import (
 	"gonum.org/v1/gonum/blas/blas64"
 )
 
-// Dorgl2 generates an m×n matrix Q with orthonormal rows defined by the
-// first m rows product of elementary reflectors as computed by Dgelqf.
+// Dorgl2 generates an m×n matrix Q with orthonormal rows defined as the first m
+// rows of a product of k elementary reflectors of order n
 //
-//	Q = H_0 * H_1 * ... * H_{k-1}
+//	Q = H_{k-1} * ... * H_0
 //
-// len(tau) >= k, 0 <= k <= m, 0 <= m <= n, len(work) >= m.
-// Dorgl2 will panic if these conditions are not met.
+// as returned by Dgelqf.
+//
+// On entry, tau and the first k rows of A must contain the scalar factors and
+// the vectors, respectively, which define the elementary reflectors H_i,
+// i=0,...,k-1, as returned by Dgelqf. On return, A contains the matrix Q.
+//
+// tau must have length at least k, work must have length at least m, and it
+// must hold that 0 <= k <= m <= n, otherwise Dorgl2 will panic.
 //
 // Dorgl2 is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dorgl2(m, n, k int, a []float64, lda int, tau, work []float64) {
@@ -28,7 +34,7 @@ func (impl Implementation) Dorgl2(m, n, k int, a []float64, lda int, tau, work [
 		panic(kLT0)
 	case k > m:
 		panic(kGTM)
-	case lda < max(1, m):
+	case lda < max(1, n):
 		panic(badLdA)
 	}
 

@@ -29,6 +29,7 @@ type Float64 interface {
 	Dlapmt(forward bool, m, n int, x []float64, ldx int, k []int)
 	Dorgqr(m, n, k int, a []float64, lda int, tau, work []float64, lwork int)
 	Dormqr(side blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int, tau, c []float64, ldc int, work []float64, lwork int)
+	Dorglq(m, n, k int, a []float64, lda int, tau, work []float64, lwork int)
 	Dormlq(side blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int, tau, c []float64, ldc int, work []float64, lwork int)
 	Dpbcon(uplo blas.Uplo, n, kd int, ab []float64, ldab int, anorm float64, work []float64, iwork []int) float64
 	Dpbtrf(uplo blas.Uplo, n, kd int, ab []float64, ldab int) (ok bool)

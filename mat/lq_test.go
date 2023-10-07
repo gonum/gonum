@@ -12,8 +12,9 @@ import (
 
 func TestLQ(t *testing.T) {
 	t.Parallel()
+	const tol = 1e-14
 	rnd := rand.New(rand.NewSource(1))
-	for _, test := range []struct {
+	for cas, test := range []struct {
 		m, n int
 	}{
 		{5, 5},
@@ -32,10 +33,15 @@ func TestLQ(t *testing.T) {
 
 		var lq LQ
 		lq.Factorize(a)
+
+		if !EqualApprox(a, &lq, tol) {
+			t.Errorf("case %d: A and LQ are not equal", cas)
+		}
+
 		var l, q Dense
 		lq.QTo(&q)
 
-		if !isOrthonormal(&q, 1e-10) {
+		if !isOrthonormal(&q, tol) {
 			t.Errorf("Q is not orthonormal: m = %v, n = %v", m, n)
 		}
 
@@ -43,7 +49,7 @@ func TestLQ(t *testing.T) {
 
 		var got Dense
 		got.Mul(&l, &q)
-		if !EqualApprox(&got, &want, 1e-12) {
+		if !EqualApprox(&got, &want, tol) {
 			t.Errorf("LQ does not equal original matrix. \nWant: %v\nGot: %v", want, got)
 		}
 	}

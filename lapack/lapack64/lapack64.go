@@ -670,6 +670,29 @@ func Lapmt(forward bool, x blas64.General, k []int) {
 	lapack64.Dlapmt(forward, x.Rows, x.Cols, x.Data, max(1, x.Stride), k)
 }
 
+// Orglq generates an m×n matrix Q with orthonormal rows defined as the first m
+// rows of a product of k elementary reflectors of order n
+//
+//	Q = H_{k-1} * ... * H_0
+//
+// as returned by Dgelqf.
+//
+// k is determined by the length of tau.
+//
+// On entry, tau and the first k rows of A must contain the scalar factors and
+// the vectors, respectively, which define the elementary reflectors H_i,
+// i=0,...,k-1, as returned by Dgelqf. On return, A contains the matrix Q.
+//
+// work must have length at least lwork and lwork must be at least max(1,m). On
+// return, optimal value of lwork will be stored in work[0]. It must also hold
+// that 0 <= k <= m <= n, otherwise Orglq will panic.
+//
+// If lwork == -1, instead of performing Orglq, the function only calculates the
+// optimal value of lwork and stores it into work[0].
+func Orglq(a blas64.General, tau, work []float64, lwork int) {
+	lapack64.Dorglq(a.Rows, a.Cols, len(tau), a.Data, a.Stride, tau, work, lwork)
+}
+
 // Ormlq multiplies the matrix C by the othogonal matrix Q defined by
 // A and tau. A and tau are as returned from Gelqf.
 //

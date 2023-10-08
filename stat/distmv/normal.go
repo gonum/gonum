@@ -253,13 +253,15 @@ func (n *Normal) MarginalNormalSingle(i int, src rand.Source) distuv.Normal {
 	}
 }
 
-// Mean returns the mean of the probability distribution at x. If the
-// input argument is nil, a new slice will be allocated, otherwise the result
-// will be put in-place into the receiver.
-func (n *Normal) Mean(x []float64) []float64 {
-	x = reuseAs(x, n.dim)
-	copy(x, n.mu)
-	return x
+// Mean returns the mean of the probability distribution.
+//
+// If dst is not nil, the mean will be stored in-place into dst and returned,
+// otherwise a new slice will be allocated first. If dst is not nil, it must
+// have length equal to the dimension of the distribution.
+func (n *Normal) Mean(dst []float64) []float64 {
+	dst = reuseAs(dst, n.dim)
+	copy(dst, n.mu)
+	return dst
 }
 
 // Prob computes the value of the probability density function at x.
@@ -267,71 +269,75 @@ func (n *Normal) Prob(x []float64) float64 {
 	return math.Exp(n.LogProb(x))
 }
 
-// Quantile returns the multi-dimensional inverse cumulative distribution function.
-// If x is nil, a new slice will be allocated and returned. If x is non-nil,
-// len(x) must equal len(p) and the quantile will be stored in-place into x.
-// All of the values of p must be between 0 and 1, inclusive, or Quantile will panic.
-func (n *Normal) Quantile(x, p []float64) []float64 {
-	dim := n.Dim()
-	if len(p) != dim {
+// Quantile returns the value of the multi-dimensional inverse cumulative
+// distribution function at p.
+//
+// If dst is not nil, the quantile will be stored in-place into dst and
+// returned, otherwise a new slice will be allocated first. If dst is not nil,
+// it must have length equal to the dimension of the distribution. Quantile will
+// also panic if the length of p is not equal to the dimension of the
+// distribution.
+//
+// All of the values of p must be between 0 and 1, inclusive, or Quantile will
+// panic.
+func (n *Normal) Quantile(dst, p []float64) []float64 {
+	if len(p) != n.dim {
 		panic(badInputLength)
 	}
-	if x == nil {
-		x = make([]float64, dim)
-	}
-	if len(x) != len(p) {
-		panic(badInputLength)
-	}
+	dst = reuseAs(dst, n.dim)
 
 	// Transform to a standard normal and then transform to a multivariate Gaussian.
-	tmp := make([]float64, len(x))
 	for i, v := range p {
-		tmp[i] = distuv.UnitNormal.Quantile(v)
+		dst[i] = distuv.UnitNormal.Quantile(v)
 	}
-	n.TransformNormal(x, tmp)
-	return x
+	n.TransformNormal(dst, dst)
+	return dst
 }
 
-// Rand generates a random number according to the distributon.
-// If the input slice is nil, new memory is allocated, otherwise the result is stored
-// in place.
-func (n *Normal) Rand(x []float64) []float64 {
-	return NormalRand(x, n.mu, &n.chol, n.src)
-}
-
-// NormalRand generates a random number with the given mean and Cholesky
-// decomposition of the covariance matrix.
-// If x is nil, new memory is allocated and returned, otherwise the result is stored
-// in place into x. NormalRand panics if x is non-nil and not equal to len(mu),
-// or if len(mu) != chol.Size().
+// Rand generates a random sample according to the distributon.
 //
-// This function saves time and memory if the Cholesky decomposition is already
+// If dst is not nil, the sample will be stored in-place into dst and returned,
+// otherwise a new slice will be allocated first. If dst is not nil, it must
+// have length equal to the dimension of the distribution.
+func (n *Normal) Rand(dst []float64) []float64 {
+	return NormalRand(dst, n.mu, &n.chol, n.src)
+}
+
+// NormalRand generates a random sample from a multivariate normal distributon
+// given by the mean and the Cholesky factorization of the covariance matrix.
+//
+// If dst is not nil, the sample will be stored in-place into dst and returned,
+// otherwise a new slice will be allocated first. If dst is not nil, it must
+// have length equal to the dimension of the distribution.
+//
+// This function saves time and memory if the Cholesky factorization is already
 // available. Otherwise, the NewNormal function should be used.
-func NormalRand(x, mean []float64, chol *mat.Cholesky, src rand.Source) []float64 {
-	x = reuseAs(x, len(mean))
+func NormalRand(dst, mean []float64, chol *mat.Cholesky, src rand.Source) []float64 {
 	if len(mean) != chol.SymmetricDim() {
 		panic(badInputLength)
 	}
+	dst = reuseAs(dst, len(mean))
+
 	if src == nil {
-		for i := range x {
-			x[i] = rand.NormFloat64()
+		for i := range dst {
+			dst[i] = rand.NormFloat64()
 		}
 	} else {
 		rnd := rand.New(src)
-		for i := range x {
-			x[i] = rnd.NormFloat64()
+		for i := range dst {
+			dst[i] = rnd.NormFloat64()
 		}
 	}
-	transformNormal(x, x, mean, chol)
-	return x
+	transformNormal(dst, dst, mean, chol)
+	return dst
 }
 
 // NormalRandCov generates a random sample from a multivariate normal
-// distribution given by mean and cov.
+// distribution given by the mean and the covariance matrix.
 //
-// If dst is nil, new memory is allocated and returned, otherwise the result is
-// stored in place into dst. NormalRandCov panics if dst is non-nil and not
-// equal to len(mean), or if len(mean) != cov.SymmetricDim().
+// If dst is not nil, the sample will be stored in-place into dst and returned,
+// otherwise a new slice will be allocated first. If dst is not nil, it must
+// have length equal to the dimension of the distribution.
 //
 // If the covariance matrix is certainly positive definite, cov should be
 // *mat.Cholesky. If the covariance matrix may be positive semi-definite, cov
@@ -384,10 +390,10 @@ func NormalRandCov(dst, mean []float64, cov mat.Symmetric, src rand.Source) []fl
 //
 //	∇_x log(p(x))
 //
-// If score is nil, a new slice will be allocated and returned. If score is of
-// length the dimension of Normal, then the result will be put in-place into score.
-// If neither of these is true, ScoreInput will panic.
-func (n *Normal) ScoreInput(score, x []float64) []float64 {
+// If dst is not nil, the score will be stored in-place into dst and returned,
+// otherwise a new slice will be allocated first. If dst is not nil, it must
+// have length equal to the dimension of the distribution.
+func (n *Normal) ScoreInput(dst, x []float64) []float64 {
 	// Normal log probability is
 	//  c - 0.5*(x-μ)' Σ^-1 (x-μ).
 	// So the derivative is just
@@ -395,22 +401,16 @@ func (n *Normal) ScoreInput(score, x []float64) []float64 {
 	if len(x) != n.Dim() {
 		panic(badInputLength)
 	}
-	if score == nil {
-		score = make([]float64, len(x))
-	}
-	if len(score) != len(x) {
-		panic(badSizeMismatch)
-	}
-	tmp := make([]float64, len(x))
-	copy(tmp, x)
-	floats.Sub(tmp, n.mu)
+	dst = reuseAs(dst, n.dim)
 
-	err := n.chol.SolveVecTo(mat.NewVecDense(len(score), score), mat.NewVecDense(len(tmp), tmp))
+	floats.SubTo(dst, x, n.mu)
+	dstVec := mat.NewVecDense(len(dst), dst)
+	err := n.chol.SolveVecTo(dstVec, dstVec)
 	if err != nil {
 		panic(err)
 	}
-	floats.Scale(-1, score)
-	return score
+	floats.Scale(-1, dst)
+	return dst
 }
 
 // SetMean changes the mean of the normal distribution. SetMean panics if len(mu)
@@ -422,22 +422,20 @@ func (n *Normal) SetMean(mu []float64) {
 	copy(n.mu, mu)
 }
 
-// TransformNormal transforms the vector, normal, generated from a standard
-// multidimensional normal into a vector that has been generated under the
-// distribution of the receiver.
+// TransformNormal transforms x generated from a standard multivariate normal
+// into a vector that has been generated under the normal distribution of the
+// receiver.
 //
-// If dst is non-nil, the result will be stored into dst, otherwise a new slice
-// will be allocated. TransformNormal will panic if the length of normal is not
-// the dimension of the receiver, or if dst is non-nil and len(dist) != len(normal).
-func (n *Normal) TransformNormal(dst, normal []float64) []float64 {
-	if len(normal) != n.dim {
+// If dst is not nil, the result will be stored in-place into dst and returned,
+// otherwise a new slice will be allocated first. If dst is not nil, it must
+// have length equal to the dimension of the distribution. TransformNormal will
+// also panic if the length of x is not equal to the dimension of the receiver.
+func (n *Normal) TransformNormal(dst, x []float64) []float64 {
+	if len(x) != n.dim {
 		panic(badInputLength)
 	}
 	dst = reuseAs(dst, n.dim)
-	if len(dst) != len(normal) {
-		panic(badInputLength)
-	}
-	transformNormal(dst, normal, n.mu, &n.chol)
+	transformNormal(dst, x, n.mu, &n.chol)
 	return dst
 }
 

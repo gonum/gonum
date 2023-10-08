@@ -310,13 +310,15 @@ func (s *StudentsT) MarginalStudentsTSingle(i int, src rand.Source) distuv.Stude
 // TODO(btracey): Implement marginal single. Need to modify univariate StudentsT
 // to be three-parameter.
 
-// Mean returns the mean of the probability distribution at x. If the
-// input argument is nil, a new slice will be allocated, otherwise the result
-// will be put in-place into the receiver.
-func (s *StudentsT) Mean(x []float64) []float64 {
-	x = reuseAs(x, s.dim)
-	copy(x, s.mu)
-	return x
+// Mean returns the mean of the probability distribution.
+//
+// If dst is not nil, the mean will be stored in-place into dst and returned,
+// otherwise a new slice will be allocated first. If dst is not nil, it must
+// have length equal to the dimension of the distribution.
+func (s *StudentsT) Mean(dst []float64) []float64 {
+	dst = reuseAs(dst, s.dim)
+	copy(dst, s.mu)
+	return dst
 }
 
 // Nu returns the degrees of freedom parameter of the distribution.
@@ -329,34 +331,32 @@ func (s *StudentsT) Prob(y []float64) float64 {
 	return math.Exp(s.LogProb(y))
 }
 
-// Rand generates a random number according to the distributon.
-// If the input slice is nil, new memory is allocated, otherwise the result is stored
-// in place.
-func (s *StudentsT) Rand(x []float64) []float64 {
+// Rand generates a random sample according to the distributon.
+//
+// If dst is not nil, the sample will be stored in-place into dst and returned,
+// otherwise a new slice will be allocated first. If dst is not nil, it must
+// have length equal to the dimension of the distribution.
+func (s *StudentsT) Rand(dst []float64) []float64 {
 	// If Y is distributed according to N(0,Sigma), and U is chi^2 with
 	// parameter ν, then
 	//  X = mu + Y * sqrt(nu / U)
 	// X is distributed according to this distribution.
 
 	// Generate Y.
-	x = reuseAs(x, s.dim)
-	tmp := make([]float64, s.dim)
+	dst = reuseAs(dst, s.dim)
 	if s.rnd == nil {
-		for i := range x {
-			tmp[i] = rand.NormFloat64()
+		for i := range dst {
+			dst[i] = rand.NormFloat64()
 		}
 	} else {
-		for i := range x {
-			tmp[i] = s.rnd.NormFloat64()
+		for i := range dst {
+			dst[i] = s.rnd.NormFloat64()
 		}
 	}
-	xVec := mat.NewVecDense(s.dim, x)
-	tmpVec := mat.NewVecDense(s.dim, tmp)
-	xVec.MulVec(&s.lower, tmpVec)
-
+	y := mat.NewVecDense(s.dim, dst)
+	y.MulVec(&s.lower, y)
+	// Compute mu + Y*sqrt(nu/U)
 	u := distuv.ChiSquared{K: s.nu, Src: s.src}.Rand()
-	floats.Scale(math.Sqrt(s.nu/u), x)
-
-	floats.Add(x, s.mu)
-	return x
+	floats.AddScaledTo(dst, s.mu, math.Sqrt(s.nu/u), dst)
+	return dst
 }

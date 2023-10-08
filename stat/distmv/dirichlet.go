@@ -118,14 +118,15 @@ func (d *Dirichlet) LogProb(x []float64) float64 {
 	return lprob
 }
 
-// Mean returns the mean of the probability distribution at x. If the
-// input argument is nil, a new slice will be allocated, otherwise the result
-// will be put in-place into the receiver.
-func (d *Dirichlet) Mean(x []float64) []float64 {
-	x = reuseAs(x, d.dim)
-	copy(x, d.alpha)
-	floats.Scale(1/d.sumAlpha, x)
-	return x
+// Mean returns the mean of the probability distribution.
+//
+// If dst is not nil, the mean will be stored in-place into dst and returned,
+// otherwise a new slice will be allocated first. If dst is not nil, it must
+// have length equal to the dimension of the distribution.
+func (d *Dirichlet) Mean(dst []float64) []float64 {
+	dst = reuseAs(dst, d.dim)
+	floats.ScaleTo(dst, 1/d.sumAlpha, d.alpha)
+	return dst
 }
 
 // Prob computes the value of the probability density function at x.
@@ -134,14 +135,16 @@ func (d *Dirichlet) Prob(x []float64) float64 {
 }
 
 // Rand generates a random number according to the distributon.
-// If the input slice is nil, new memory is allocated, otherwise the result is stored
-// in place.
-func (d *Dirichlet) Rand(x []float64) []float64 {
-	x = reuseAs(x, d.dim)
-	for i := range x {
-		x[i] = distuv.Gamma{Alpha: d.alpha[i], Beta: 1, Src: d.src}.Rand()
+//
+// If dst is not nil, the sample will be stored in-place into dst and returned,
+// otherwise a new slice will be allocated first. If dst is not nil, it must
+// have length equal to the dimension of the distribution.
+func (d *Dirichlet) Rand(dst []float64) []float64 {
+	dst = reuseAs(dst, d.dim)
+	for i, alpha := range d.alpha {
+		dst[i] = distuv.Gamma{Alpha: alpha, Beta: 1, Src: d.src}.Rand()
 	}
-	sum := floats.Sum(x)
-	floats.Scale(1/sum, x)
-	return x
+	sum := floats.Sum(dst)
+	floats.Scale(1/sum, dst)
+	return dst
 }

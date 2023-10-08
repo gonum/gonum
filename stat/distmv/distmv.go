@@ -15,17 +15,14 @@ const (
 
 const logTwoPi = 1.8378770664093454835606594728112352797227949472755668
 
-// reuseAs returns a slice of length n. If len(x) == n, x is returned, if len(x)
-// == 0 then a slice of length n is returned, otherwise reuseAs panics.
-func reuseAs(x []float64, n int) []float64 {
-	if len(x) == n {
-		return x
+// reuseAs returns a slice of length n. If len(dst) is n, dst is returned,
+// otherwise dst must be nil or reuseAs will panic.
+func reuseAs(dst []float64, n int) []float64 {
+	if dst == nil {
+		dst = make([]float64, n)
 	}
-	if len(x) == 0 {
-		if cap(x) >= n {
-			return x[:n]
-		}
-		return make([]float64, n)
+	if len(dst) != n {
+		panic(badOutputLen)
 	}
-	panic(badOutputLen)
+	return dst
 }

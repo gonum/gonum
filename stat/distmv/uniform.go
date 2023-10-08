@@ -65,10 +65,11 @@ func NewUnitUniform(dim int, src rand.Source) *Uniform {
 	return &u
 }
 
-// Bounds returns the bounds on the variables of the distribution. If the input
-// is nil, a new slice is allocated and returned. If the input is non-nil, then
-// the bounds are stored in-place into the input argument, and Bounds will panic
-// if len(bounds) != u.Dim().
+// Bounds returns the bounds on the variables of the distribution.
+//
+// If dst is not nil, the bounds will be stored in-place into dst and returned,
+// otherwise a new slice will be allocated first. If dst is not nil, it must
+// have length equal to the dimension of the distribution.
 func (u *Uniform) Bounds(bounds []r1.Interval) []r1.Interval {
 	if bounds == nil {
 		bounds = make([]r1.Interval, u.Dim())
@@ -80,33 +81,29 @@ func (u *Uniform) Bounds(bounds []r1.Interval) []r1.Interval {
 	return bounds
 }
 
-// CDF returns the multidimensional cumulative distribution function of the
-// probability distribution at the point x. If p is non-nil, the CDF is stored
-// in-place into the first argument, otherwise a new slice is allocated and
-// returned.
+// CDF returns the value of the multidimensional cumulative distribution
+// function of the probability distribution at the point x.
 //
-// CDF will panic if len(x) is not equal to the dimension of the distribution,
-// or if p is non-nil and len(p) is not equal to the dimension of the distribution.
-func (u *Uniform) CDF(p, x []float64) []float64 {
+// If dst is not nil, the value will be stored in-place into dst and returned,
+// otherwise a new slice will be allocated first. If dst is not nil, it must
+// have length equal to the dimension of the distribution. CDF will also panic
+// if the length of x is not equal to the dimension of the distribution.
+func (u *Uniform) CDF(dst, x []float64) []float64 {
 	if len(x) != u.dim {
 		panic(badSizeMismatch)
 	}
-	if p == nil {
-		p = make([]float64, u.dim)
-	}
-	if len(p) != u.dim {
-		panic(badSizeMismatch)
-	}
+	dst = reuseAs(dst, u.dim)
+
 	for i, v := range x {
 		if v < u.bounds[i].Min {
-			p[i] = 0
+			dst[i] = 0
 		} else if v > u.bounds[i].Max {
-			p[i] = 1
+			dst[i] = 1
 		} else {
-			p[i] = (v - u.bounds[i].Min) / (u.bounds[i].Max - u.bounds[i].Min)
+			dst[i] = (v - u.bounds[i].Min) / (u.bounds[i].Max - u.bounds[i].Min)
 		}
 	}
-	return p
+	return dst
 }
 
 // Dim returns the dimension of the distribution.
@@ -140,15 +137,17 @@ func (u *Uniform) LogProb(x []float64) float64 {
 	return logprob
 }
 
-// Mean returns the mean of the probability distribution at x. If the
-// input argument is nil, a new slice will be allocated, otherwise the result
-// will be put in-place into the receiver.
-func (u *Uniform) Mean(x []float64) []float64 {
-	x = reuseAs(x, u.dim)
+// Mean returns the mean of the probability distribution.
+//
+// If dst is not nil, the mean will be stored in-place into dst and returned,
+// otherwise a new slice will be allocated first. If dst is not nil, it must
+// have length equal to the dimension of the distribution.
+func (u *Uniform) Mean(dst []float64) []float64 {
+	dst = reuseAs(dst, u.dim)
 	for i, b := range u.bounds {
-		x[i] = (b.Max + b.Min) / 2
+		dst[i] = (b.Max + b.Min) / 2
 	}
-	return x
+	return dst
 }
 
 // Prob computes the value of the probability density function at x.
@@ -156,43 +155,46 @@ func (u *Uniform) Prob(x []float64) float64 {
 	return math.Exp(u.LogProb(x))
 }
 
-// Rand generates a random number according to the distributon.
-// If the input slice is nil, new memory is allocated, otherwise the result is stored
-// in place.
-func (u *Uniform) Rand(x []float64) []float64 {
-	x = reuseAs(x, u.dim)
+// Rand generates a random sample according to the distributon.
+//
+// If dst is not nil, the sample will be stored in-place into dst and returned,
+// otherwise a new slice will be allocated first. If dst is not nil, it must
+// have length equal to the dimension of the distribution.
+func (u *Uniform) Rand(dst []float64) []float64 {
+	dst = reuseAs(dst, u.dim)
 	if u.rnd == nil {
 		for i, b := range u.bounds {
-			x[i] = rand.Float64()*(b.Max-b.Min) + b.Min
+			dst[i] = rand.Float64()*(b.Max-b.Min) + b.Min
 		}
-		return x
+		return dst
 	}
 	for i, b := range u.bounds {
-		x[i] = u.rnd.Float64()*(b.Max-b.Min) + b.Min
+		dst[i] = u.rnd.Float64()*(b.Max-b.Min) + b.Min
 	}
-	return x
+	return dst
 }
 
-// Quantile returns the multi-dimensional inverse cumulative distribution function.
-// len(x) must equal len(p), and if x is non-nil, len(x) must also equal len(p).
-// If x is nil, a new slice will be allocated and returned, otherwise the quantile
-// will be stored in-place into x. All of the values of p must be between 0 and 1,
-// or Quantile will panic.
-func (u *Uniform) Quantile(x, p []float64) []float64 {
+// Quantile returns the value of the multi-dimensional inverse cumulative
+// distribution function at p.
+//
+// If dst is not nil, the quantile will be stored in-place into dst and
+// returned, otherwise a new slice will be allocated first. If dst is not nil,
+// it must have length equal to the dimension of the distribution. Quantile will
+// also panic if the length of p is not equal to the dimension of the
+// distribution.
+//
+// All of the values of p must be between 0 and 1, inclusive, or Quantile will
+// panic.
+func (u *Uniform) Quantile(dst, p []float64) []float64 {
 	if len(p) != u.dim {
 		panic(badSizeMismatch)
 	}
-	if x == nil {
-		x = make([]float64, u.dim)
-	}
-	if len(x) != u.dim {
-		panic(badSizeMismatch)
-	}
+	dst = reuseAs(dst, u.dim)
 	for i, v := range p {
 		if v < 0 || v > 1 {
 			panic(badQuantile)
 		}
-		x[i] = v*(u.bounds[i].Max-u.bounds[i].Min) + u.bounds[i].Min
+		dst[i] = v*(u.bounds[i].Max-u.bounds[i].Min) + u.bounds[i].Min
 	}
-	return x
+	return dst
 }

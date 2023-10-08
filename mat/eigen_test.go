@@ -131,10 +131,11 @@ func cmplxEqualTol(v1, v2 []complex128, tol float64) bool {
 	return true
 }
 
-func TestSymEigen(t *testing.T) {
+func TestEigenSym(t *testing.T) {
 	t.Parallel()
+	const tol = 1e-14
 	// Hand coded tests with results from lapack.
-	for _, test := range []struct {
+	for cas, test := range []struct {
 		mat *SymDense
 
 		values  []float64
@@ -153,25 +154,26 @@ func TestSymEigen(t *testing.T) {
 		var es EigenSym
 		ok := es.Factorize(test.mat, true)
 		if !ok {
-			t.Errorf("bad factorization")
+			t.Errorf("case %d: bad test", cas)
+			continue
 		}
-		if !floats.EqualApprox(test.values, es.values, 1e-14) {
-			t.Errorf("Eigenvalue mismatch")
+		if !floats.EqualApprox(test.values, es.values, tol) {
+			t.Errorf("case %d: eigenvalue mismatch", cas)
 		}
-		if !EqualApprox(test.vectors, es.vectors, 1e-14) {
-			t.Errorf("Eigenvector mismatch")
+		if !EqualApprox(test.vectors, es.vectors, tol) {
+			t.Errorf("case %d: eigenvector mismatch", cas)
 		}
 
 		var es2 EigenSym
 		es2.Factorize(test.mat, false)
-		if !floats.EqualApprox(es2.values, es.values, 1e-14) {
-			t.Errorf("Eigenvalue mismatch when no vectors computed")
+		if !floats.EqualApprox(es2.values, es.values, tol) {
+			t.Errorf("case %d: eigenvalue mismatch when no vectors computed", cas)
 		}
 	}
 
 	// Randomized tests
 	rnd := rand.New(rand.NewSource(1))
-	for _, n := range []int{3, 5, 10, 70} {
+	for _, n := range []int{1, 2, 3, 5, 10, 70} {
 		for cas := 0; cas < 10; cas++ {
 			a := make([]float64, n*n)
 			for i := range a {
@@ -181,12 +183,21 @@ func TestSymEigen(t *testing.T) {
 			var es EigenSym
 			ok := es.Factorize(s, true)
 			if !ok {
-				t.Errorf("Bad test")
+				t.Errorf("n=%d,cas=%d: bad test", n, cas)
+				continue
+			}
+
+			// Check that A and EigenSym are equal as Matrix.
+			if !EqualApprox(s, &es, tol*float64(n)) {
+				t.Errorf("n=%d,cas=%d: A and EigenSym are not equal as Matrix", n, cas)
+			}
+			if !EqualApprox(s.T(), es.T(), tol*float64(n)) {
+				t.Errorf("n=%d,cas=%d: Aᵀ and EigenSymᵀ are not equal as Matrix", n, cas)
 			}
 
 			// Check that the eigenvectors are orthonormal.
 			if !isOrthonormal(es.vectors, 1e-8) {
-				t.Errorf("Eigenvectors not orthonormal")
+				t.Errorf("n=%d,cas=%d: eigenvectors not orthonormal", n, cas)
 			}
 
 			// Check that the eigenvalues are actually eigenvalues.
@@ -199,13 +210,13 @@ func TestSymEigen(t *testing.T) {
 				scal.ScaleVec(es.values[i], v)
 
 				if !EqualApprox(&m, &scal, 1e-8) {
-					t.Errorf("Eigenvalue does not match")
+					t.Errorf("n=%d,cas=%d: eigenvalue %d does not match", n, cas, i)
 				}
 			}
 
 			// Check that the eigenvalues are in ascending order.
 			if !sort.Float64sAreSorted(es.values) {
-				t.Errorf("Eigenvalues not ascending")
+				t.Errorf("n=%d,cas=%d: eigenvalues not ascending", n, cas)
 			}
 		}
 	}

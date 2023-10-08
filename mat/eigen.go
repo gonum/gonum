@@ -23,6 +23,43 @@ type EigenSym struct {
 	vectors *Dense
 }
 
+// Dims returns the dimensions of the matrix.
+func (e *EigenSym) Dims() (r, c int) {
+	n := e.SymmetricDim()
+	return n, n
+}
+
+// SymmetricDim implements the Symmetric interface.
+func (e *EigenSym) SymmetricDim() int {
+	return len(e.values)
+}
+
+// At returns the element at row i, column j.
+// At will panic if the eigenvectors have not been computed.
+func (e *EigenSym) At(i, j int) float64 {
+	if !e.vectorsComputed {
+		panic(noVectors)
+	}
+	n, _ := e.Dims()
+	if uint(i) >= uint(n) {
+		panic(ErrRowAccess)
+	}
+	if uint(j) >= uint(n) {
+		panic(ErrColAccess)
+	}
+
+	var val float64
+	for k := 0; k < n; k++ {
+		val += e.values[k] * e.vectors.at(i, k) * e.vectors.at(j, k)
+	}
+	return val
+}
+
+// T returns the receiver, the transpose of a symmetric matrix.
+func (e *EigenSym) T() Matrix {
+	return e
+}
+
 // Factorize computes the eigenvalue decomposition of the symmetric matrix a.
 // The Eigen decomposition is defined as
 //
@@ -31,7 +68,8 @@ type EigenSym struct {
 // where D is a diagonal matrix containing the eigenvalues of the matrix, and
 // P is a matrix of the eigenvectors of A. Factorize computes the eigenvalues
 // in ascending order. If the vectors input argument is false, the eigenvectors
-// are not computed.
+// are not computed and the factorization cannot be used as a Matrix because
+// At will panic.
 //
 // Factorize returns whether the decomposition succeeded. If the decomposition
 // failed, methods that require a successful factorization will panic.

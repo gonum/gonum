@@ -219,6 +219,17 @@ type ColNonZeroDoer interface {
 	DoColNonZero(j int, fn func(i, j int, v float64))
 }
 
+// A SolveToer can solve a linear system A⋅X = B or Aᵀ⋅X = B where A is a matrix
+// represented by the receiver and B is a given matrix, storing the result into
+// dst.
+//
+// If dst is empty, SolveTo will resize it to the correct size, otherwise it
+// must have the correct size. Individual implementations may impose other
+// restrictions on the input parameters, for example that A is a square matrix.
+type SolveToer interface {
+	SolveTo(dst *Dense, trans bool, b Matrix) error
+}
+
 // untranspose untransposes a matrix if applicable. If a is an Untransposer, then
 // untranspose returns the underlying matrix and true. If it is not, then it returns
 // the input matrix and false.

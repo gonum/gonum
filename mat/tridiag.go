@@ -234,13 +234,23 @@ func (a *Tridiag) SolveTo(dst *Dense, trans bool, b Matrix) error {
 	if n != a.mat.N {
 		panic(ErrShape)
 	}
-	if b, ok := b.(RawMatrixer); ok && dst != b {
-		dst.checkOverlap(b.RawMatrix())
-	}
+
 	dst.reuseAsNonZeroed(n, nrhs)
-	if dst != b {
+	bU, bTrans := untranspose(b)
+	if dst == bU {
+		if bTrans {
+			work := getDenseWorkspace(n, nrhs, false)
+			defer putDenseWorkspace(work)
+			work.Copy(b)
+			dst.Copy(work)
+		}
+	} else {
+		if rm, ok := bU.(RawMatrixer); ok {
+			dst.checkOverlap(rm.RawMatrix())
+		}
 		dst.Copy(b)
 	}
+
 	var aCopy Tridiag
 	aCopy.CloneFromTridiag(a)
 	var ok bool

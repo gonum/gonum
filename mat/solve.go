@@ -4,12 +4,6 @@
 
 package mat
 
-import (
-	"gonum.org/v1/gonum/blas"
-	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/lapack/lapack64"
-)
-
 // Solve solves the linear least squares problem
 //
 //	minimize over x |b - A*x|_2
@@ -30,63 +24,23 @@ import (
 // single call. Vectors b are stored in the columns of the m×k matrix B. Vectors
 // x will be stored in-place into the n×k receiver.
 //
+// If the underlying matrix of a is a SolveToer, its SolveTo method is used,
+// otherwise a Dense copy of a will be used for the solution.
+//
 // If A does not have full rank, a Condition error is returned. See the
 // documentation for Condition for more information.
 func (m *Dense) Solve(a, b Matrix) error {
+	aU, aTrans := untransposeExtract(a)
+	if a, ok := aU.(SolveToer); ok {
+		return a.SolveTo(m, aTrans, b)
+	}
+
 	ar, ac := a.Dims()
 	br, bc := b.Dims()
 	if ar != br {
 		panic(ErrShape)
 	}
 	m.reuseAsNonZeroed(ac, bc)
-
-	// TODO(btracey): Add special cases for SymDense, etc.
-	aU, aTrans := untranspose(a)
-	bU, bTrans := untranspose(b)
-	switch rma := aU.(type) {
-	case RawTriangular:
-		side := blas.Left
-		tA := blas.NoTrans
-		if aTrans {
-			tA = blas.Trans
-		}
-
-		switch rm := bU.(type) {
-		case RawMatrixer:
-			if m != bU || bTrans {
-				if m == bU || m.checkOverlap(rm.RawMatrix()) {
-					tmp := getDenseWorkspace(br, bc, false)
-					tmp.Copy(b)
-					m.Copy(tmp)
-					putDenseWorkspace(tmp)
-					break
-				}
-				m.Copy(b)
-			}
-		default:
-			if m != bU {
-				m.Copy(b)
-			} else if bTrans {
-				// m and b share data so Copy cannot be used directly.
-				tmp := getDenseWorkspace(br, bc, false)
-				tmp.Copy(b)
-				m.Copy(tmp)
-				putDenseWorkspace(tmp)
-			}
-		}
-
-		rm := rma.RawTriangular()
-		blas64.Trsm(side, tA, 1, rm, m.mat)
-		work := getFloat64s(3*rm.N, false)
-		iwork := getInts(rm.N, false)
-		cond := lapack64.Trcon(CondNorm, rm, work, iwork)
-		putFloat64s(work)
-		putInts(iwork)
-		if cond > ConditionTolerance {
-			return Condition(cond)
-		}
-		return nil
-	}
 
 	switch {
 	case ar == ac:

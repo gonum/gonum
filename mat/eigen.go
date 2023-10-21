@@ -140,6 +140,20 @@ func (e *EigenSym) Values(dst []float64) []float64 {
 	return dst
 }
 
+// RawValues returns the slice storing the eigenvalues of A in ascending order.
+//
+// If the returned slice is modified, the factorization is invalid and should
+// not be used.
+//
+// If the receiver does not contain a successful factorization, RawValues will
+// return nil.
+func (e *EigenSym) RawValues() []float64 {
+	if !e.succFact() {
+		return nil
+	}
+	return e.values
+}
+
 // VectorsTo stores the orthonormal eigenvectors of the factorized n×n matrix A
 // into the columns of dst.
 //
@@ -164,6 +178,25 @@ func (e *EigenSym) VectorsTo(dst *Dense) {
 		}
 	}
 	dst.Copy(e.vectors)
+}
+
+// RawQ returns the orthogonal matrix Q from the spectral factorization of the
+// original matrix A
+//
+//	A = Q * Λ * Qᵀ
+//
+// The columns of Q contain the eigenvectors of A.
+//
+// If the returned matrix is modified, the factorization is invalid and should
+// not be used.
+//
+// If the receiver does not contain a successful factorization or eigenvectors
+// not computed, RawU will return nil.
+func (e *EigenSym) RawQ() Matrix {
+	if !e.succFact() || !e.vectorsComputed {
+		return nil
+	}
+	return e.vectors
 }
 
 // EigenKind specifies the computation of eigenvectors during factorization.

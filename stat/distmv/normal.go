@@ -339,11 +339,12 @@ func NormalRand(dst, mean []float64, chol *mat.Cholesky, src rand.Source) []floa
 // otherwise a new slice will be allocated first. If dst is not nil, it must
 // have length equal to the dimension of the distribution.
 //
-// If the covariance matrix is certainly positive definite, cov should be
-// *mat.Cholesky. If the covariance matrix may be positive semi-definite, cov
-// should be *mat.PivotedCholesky. Otherwise NormalRandCov will be very
-// inefficient because a pivoted Cholesky factorization will be computed for
-// every sample.
+// cov should be *mat.Cholesky, *mat.PivotedCholesky or *mat.EigenSym, otherwise
+// NormalRandCov will be very inefficient because a pivoted Cholesky
+// factorization of cov will be computed for every sample.
+//
+// If cov is *mat.EigenSym, the smallest eigenvalue must be non-negative,
+// otherwise NormalRandCov will panic.
 func NormalRandCov(dst, mean []float64, cov mat.Symmetric, src rand.Source) []float64 {
 	n := len(mean)
 	if cov.SymmetricDim() != n {
@@ -365,22 +366,28 @@ func NormalRandCov(dst, mean []float64, cov mat.Symmetric, src rand.Source) []fl
 	case *mat.Cholesky:
 		dstVec := mat.NewVecDense(n, dst)
 		dstVec.MulVec(cov.RawU().T(), dstVec)
-		floats.Add(dst, mean)
 	case *mat.PivotedCholesky:
 		dstVec := mat.NewVecDense(n, dst)
 		dstVec.MulVec(cov.RawU().T(), dstVec)
 		dstVec.Permute(cov.ColumnPivots(nil), true)
-		floats.Add(dst, mean)
-	// TODO(vladimir-ch): enable this case when EigenSym satisfies Matrix.
-	// case *mat.EigenSym:
+	case *mat.EigenSym:
+		d := cov.RawValues()
+		if d[0] < 0 {
+			panic("distmv: covariance not positive semi-definite")
+		}
+		for i, di := range d {
+			dst[i] *= math.Sqrt(di)
+		}
+		dstVec := mat.NewVecDense(n, dst)
+		dstVec.MulVec(cov.RawQ(), dstVec)
 	default:
 		var chol mat.PivotedCholesky
 		chol.Factorize(cov, -1)
 		dstVec := mat.NewVecDense(n, dst)
 		dstVec.MulVec(chol.RawU().T(), dstVec)
 		dstVec.Permute(chol.ColumnPivots(nil), true)
-		floats.Add(dst, mean)
 	}
+	floats.Add(dst, mean)
 
 	return dst
 }

@@ -607,14 +607,22 @@ func TestNormalRandCov(t *testing.T) {
 		{
 			mean: []float64{-1, 2, -3},
 			cov: []float64{
+				2, 1, 1,
+				1, 3, 0.1,
+				1, 0.1, 5,
+			},
+		},
+		{
+			mean: []float64{-1, 2, -3},
+			cov: []float64{
 				0, 0, 0,
-				0, 0, 0.1,
+				0, 1, 0.1,
 				0, 0.1, 5,
 			},
 			semi: true,
 		},
 	} {
-		for _, covType := range []string{"Cholesky", "PivotedCholesky", "SymDense"} {
+		for _, covType := range []string{"Cholesky", "PivotedCholesky", "SymDense", "EigenSym"} {
 			if covType == "Cholesky" && test.semi {
 				continue
 			}
@@ -631,7 +639,7 @@ func TestNormalRandCov(t *testing.T) {
 				var chol mat.Cholesky
 				ok := chol.Factorize(a)
 				if !ok {
-					t.Fatalf("%s: factorization failed, input covariance not positive definite?", name)
+					t.Fatalf("%s: Cholesky factorization failed, input covariance not positive definite?", name)
 				}
 				cov = &chol
 			case "PivotedCholesky":
@@ -640,6 +648,13 @@ func TestNormalRandCov(t *testing.T) {
 				cov = &chol
 			case "SymDense":
 				cov = a
+			case "EigenSym":
+				var eigen mat.EigenSym
+				ok := eigen.Factorize(a, true)
+				if !ok {
+					t.Fatalf("%s: eigendecomposition failed", name)
+				}
+				cov = &eigen
 			}
 
 			samples := mat.NewDense(numSamples, n, nil)

@@ -5,6 +5,7 @@
 package mat
 
 import (
+	"math"
 	"sort"
 	"testing"
 
@@ -212,6 +213,17 @@ func TestEigenSym(t *testing.T) {
 				if !EqualApprox(&m, &scal, 1e-8) {
 					t.Errorf("n=%d,cas=%d: eigenvalue %d does not match", n, cas, i)
 				}
+			}
+
+			// Check that A = Q * D * Qᵀ using the Raw methods.
+			var got Dense
+			got.Product(es.RawQ(), NewDiagDense(n, es.RawValues()), es.RawQ().T())
+			if !EqualApprox(s, &got, tol*float64(n)) {
+				var diff Dense
+				diff.Sub(s, &got)
+				diff.Apply(func(i, j int, v float64) float64 { return math.Abs(diff.At(i, j)) }, &diff)
+				t.Errorf("n=%d,cas=%d: A not reconstructed from Q*D*Qᵀ\n|diff|=%v", n, cas,
+					Formatted(&diff, Prefix("       ")))
 			}
 
 			// Check that the eigenvalues are in ascending order.

@@ -332,6 +332,68 @@ func NormalRand(dst, mean []float64, chol *mat.Cholesky, src rand.Source) []floa
 	return dst
 }
 
+// EigenSym is an eigendecomposition of a symmetric matrix.
+type EigenSym interface {
+	mat.Symmetric
+	// RawValues returns all eigenvalues in ascending order. The returned slice
+	// must not be modified.
+	RawValues() []float64
+	// RawQ returns an orthogonal matrix whose columns contain the eigenvectors.
+	// The returned matrix must not be modified.
+	RawQ() mat.Matrix
+}
+
+// PositivePartEigenSym is an EigenSym that sets any negative eigenvalues from
+// the given eigendecomposition to zero but otherwise returns the values
+// unchanged.
+//
+// This is useful for filtering eigenvalues of positive semi-definite matrices
+// that are almost zero but negative due to rounding errors.
+type PositivePartEigenSym struct {
+	ed   *mat.EigenSym
+	vals []float64
+}
+
+var _ EigenSym = (*PositivePartEigenSym)(nil)
+var _ EigenSym = (*mat.EigenSym)(nil)
+
+// NewPositivePartEigenSym returns a new PositivePartEigenSym, wrapping the
+// given eigendecomposition.
+func NewPositivePartEigenSym(ed *mat.EigenSym) *PositivePartEigenSym {
+	n := ed.SymmetricDim()
+	vals := make([]float64, n)
+	for i, lamda := range ed.RawValues() {
+		if lamda > 0 {
+			vals[i] = lamda
+		}
+	}
+	return &PositivePartEigenSym{
+		ed:   ed,
+		vals: vals,
+	}
+}
+
+// SymmetricDim returns the value from the wrapped eigendecomposition.
+func (ed *PositivePartEigenSym) SymmetricDim() int { return ed.ed.SymmetricDim() }
+
+// Dims returns the dimensions from the wrapped eigendecomposition.
+func (ed *PositivePartEigenSym) Dims() (r, c int) { return ed.ed.Dims() }
+
+// At returns the value from the wrapped eigendecomposition.
+func (ed *PositivePartEigenSym) At(i, j int) float64 { return ed.ed.At(i, j) }
+
+// T returns the transpose from the wrapped eigendecomposition.
+func (ed *PositivePartEigenSym) T() mat.Matrix { return ed.ed.T() }
+
+// RawQ returns the orthogonal matrix Q from the wrapped eigendecomposition. The
+// returned matrix must not be modified.
+func (ed *PositivePartEigenSym) RawQ() mat.Matrix { return ed.ed.RawQ() }
+
+// RawValues returns the eigenvalues from the wrapped eigendecomposition in
+// ascending order with any negative value replaced by zero. The returned slice
+// must not be modified.
+func (ed *PositivePartEigenSym) RawValues() []float64 { return ed.vals }
+
 // NormalRandCov generates a random sample from a multivariate normal
 // distribution given by the mean and the covariance matrix.
 //
@@ -339,12 +401,12 @@ func NormalRand(dst, mean []float64, chol *mat.Cholesky, src rand.Source) []floa
 // otherwise a new slice will be allocated first. If dst is not nil, it must
 // have length equal to the dimension of the distribution.
 //
-// cov should be *mat.Cholesky, *mat.PivotedCholesky or *mat.EigenSym, otherwise
+// cov should be *mat.Cholesky, *mat.PivotedCholesky or EigenSym, otherwise
 // NormalRandCov will be very inefficient because a pivoted Cholesky
 // factorization of cov will be computed for every sample.
 //
-// If cov is *mat.EigenSym, the smallest eigenvalue must be non-negative,
-// otherwise NormalRandCov will panic.
+// If cov is an EigenSym, all eigenvalues returned by RawValues must be
+// non-negative, otherwise NormalRandCov will panic.
 func NormalRandCov(dst, mean []float64, cov mat.Symmetric, src rand.Source) []float64 {
 	n := len(mean)
 	if cov.SymmetricDim() != n {
@@ -370,13 +432,13 @@ func NormalRandCov(dst, mean []float64, cov mat.Symmetric, src rand.Source) []fl
 		dstVec := mat.NewVecDense(n, dst)
 		dstVec.MulVec(cov.RawU().T(), dstVec)
 		dstVec.Permute(cov.ColumnPivots(nil), true)
-	case *mat.EigenSym:
-		d := cov.RawValues()
-		if d[0] < 0 {
-			panic("distmv: covariance not positive semi-definite")
+	case EigenSym:
+		vals := cov.RawValues()
+		if vals[0] < 0 {
+			panic("distmv: covariance matrix is not positive semi-definite")
 		}
-		for i, di := range d {
-			dst[i] *= math.Sqrt(di)
+		for i, val := range vals {
+			dst[i] *= math.Sqrt(val)
 		}
 		dstVec := mat.NewVecDense(n, dst)
 		dstVec.MulVec(cov.RawQ(), dstVec)

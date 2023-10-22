@@ -649,12 +649,12 @@ func TestNormalRandCov(t *testing.T) {
 			case "SymDense":
 				cov = a
 			case "EigenSym":
-				var eigen mat.EigenSym
-				ok := eigen.Factorize(a, true)
+				var ed mat.EigenSym
+				ok := ed.Factorize(a, true)
 				if !ok {
 					t.Fatalf("%s: eigendecomposition failed", name)
 				}
-				cov = &eigen
+				cov = NewPositivePartEigenSym(&ed)
 			}
 
 			samples := mat.NewDense(numSamples, n, nil)

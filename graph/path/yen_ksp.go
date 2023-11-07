@@ -85,7 +85,18 @@ func YenKShortestPaths(g graph.Graph, k int, cost float64, s, t graph.Node) [][]
 				spath = append(root[:len(root)-1], spath...)
 				weight += rootWeight
 			}
-			pot = append(pot, yenShortest{spath, weight})
+
+			// Add the potential k-shortest path if it is new.
+			isNewPot := true
+			for x := range pot {
+				if isSamePath(pot[x].path, spath) {
+					isNewPot = false
+					break
+				}
+			}
+			if isNewPot {
+				pot = append(pot, yenShortest{spath, weight})
+			}
 		}
 
 		if len(pot) == 0 {
@@ -102,6 +113,19 @@ func YenKShortestPaths(g graph.Graph, k int, cost float64, s, t graph.Node) [][]
 	}
 
 	return paths
+}
+
+func isSamePath(pathA, pathB []graph.Node) bool {
+	if len(pathA) != len(pathB) {
+		return false
+	}
+
+	for i := range pathA {
+		if pathA[i].ID() != pathB[i].ID() {
+			return false
+		}
+	}
+	return true
 }
 
 // yenShortest holds a path and its weight for sorting.

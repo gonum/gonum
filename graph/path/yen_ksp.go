@@ -115,13 +115,13 @@ func YenKShortestPaths(g graph.Graph, k int, cost float64, s, t graph.Node) [][]
 	return paths
 }
 
-func isSamePath(pathA, pathB []graph.Node) bool {
-	if len(pathA) != len(pathB) {
+func isSamePath(a, b []graph.Node) bool {
+	if len(a) != len(b) {
 		return false
 	}
 
-	for i := range pathA {
-		if pathA[i].ID() != pathB[i].ID() {
+	for i, x := range a {
+		if x.ID() != b[i].ID() {
 			return false
 		}
 	}

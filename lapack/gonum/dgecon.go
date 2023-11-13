@@ -12,14 +12,20 @@ import (
 	"gonum.org/v1/gonum/lapack"
 )
 
-// Dgecon estimates the reciprocal of the condition number of the n×n matrix A
-// given the LU decomposition of the matrix. The condition number computed may
-// be based on the 1-norm or the ∞-norm.
+// Dgecon estimates and returns the reciprocal of the condition number of the
+// n×n matrix A, in either the 1-norm or the ∞-norm, using the LU factorization
+// computed by Dgetrf.
 //
-// The slice a contains the result of the LU decomposition of A as computed by Dgetrf.
+// An estimate is obtained for norm(A⁻¹), and the reciprocal of the condition
+// number rcond is computed as
 //
-// anorm is the corresponding 1-norm or ∞-norm of the original matrix A. anorm
-// must be non-negative.
+//	rcond 1 / ( norm(A) * norm(A⁻¹) ).
+//
+// If n is zero, rcond is always 1.
+//
+// anorm is the 1-norm or the ∞-norm of the original matrix A. anorm must be
+// non-negative, otherwise Dgecon will panic. If anorm is 0 or infinity, Dgecon
+// returns 0. If anorm is NaN, Dgecon returns NaN.
 //
 // work must have length at least 4*n and iwork must have length at least n,
 // otherwise Dgecon will panic.
@@ -50,14 +56,14 @@ func (impl Implementation) Dgecon(norm lapack.MatrixNorm, n int, a []float64, ld
 	}
 
 	// Quick return if possible.
-	if anorm == 0 {
+	switch {
+	case anorm == 0:
 		return 0
-	}
-	if math.IsNaN(anorm) {
-		// The reference implementation treats the NaN anorm as invalid and
-		// returns an error code. Our error handling is to panic which seems too
-		// harsh for a runtime condition, so we just propagate the NaN instead.
+	case math.IsNaN(anorm):
+		// Propagate NaN.
 		return anorm
+	case math.IsInf(anorm, 1):
+		return 0
 	}
 
 	bi := blas64.Implementation()

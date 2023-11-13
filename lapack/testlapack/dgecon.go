@@ -6,6 +6,7 @@ package testlapack
 
 import (
 	"fmt"
+	"math"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -86,6 +87,26 @@ func dgeconTest(t *testing.T, impl Dgeconer, rnd *rand.Rand, n, lda int) {
 		if ratio >= ratioThresh {
 			t.Errorf("%v: unexpected value of rcond; got=%v, want=%v (ratio=%v)",
 				name, rcondGot, rcondWant, ratio)
+		}
+
+		// Check for corner-case values of anorm.
+		for _, anorm := range []float64{0, math.Inf(1), math.NaN()} {
+			rcondGot = impl.Dgecon(norm, n, aFac, lda, anorm, work, iwork)
+			if n == 0 {
+				if rcondGot != 1 {
+					t.Errorf("%v: unexpected rcond when anorm=%v: got=%v, want=1", name, anorm, rcondGot)
+				}
+				continue
+			}
+			if math.IsNaN(anorm) {
+				if !math.IsNaN(rcondGot) {
+					t.Errorf("%v: NaN not propagated when anorm=NaN: got=%v", name, rcondGot)
+				}
+				continue
+			}
+			if rcondGot != 0 {
+				t.Errorf("%v: unexpected rcond when anorm=%v: got=%v, want=0", name, anorm, rcondGot)
+			}
 		}
 	}
 }

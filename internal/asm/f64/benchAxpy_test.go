@@ -11,7 +11,7 @@ import (
 	. "gonum.org/v1/gonum/internal/asm/f64"
 )
 
-const testLen = 1e5
+const testLen = 50e5
 
 var (
 	a = 2.0

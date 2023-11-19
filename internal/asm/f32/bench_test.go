@@ -7,7 +7,7 @@ package f32
 import "testing"
 
 const (
-	benchLen = 1e5
+	benchLen = 10e5
 	a        = 2
 )
 

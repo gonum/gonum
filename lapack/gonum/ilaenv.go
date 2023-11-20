@@ -176,6 +176,13 @@ func (impl Implementation) Ilaenv(ispec int, name string, opts string, n1, n2, n
 				}
 				return 32
 			}
+		case "PT":
+			switch c3 {
+			default:
+				panic(badName)
+			case "TRS":
+				return 1
+			}
 		case "TR":
 			switch c3 {
 			default:

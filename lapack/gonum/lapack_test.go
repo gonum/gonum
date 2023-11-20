@@ -588,6 +588,11 @@ func TestDpttrs(t *testing.T) {
 	testlapack.DpttrsTest(t, impl)
 }
 
+func TestDptsv(t *testing.T) {
+	t.Parallel()
+	testlapack.DptsvTest(t, impl)
+}
+
 func TestDrscl(t *testing.T) {
 	t.Parallel()
 	testlapack.DrsclTest(t, impl)

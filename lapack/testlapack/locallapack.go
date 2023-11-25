@@ -677,3 +677,39 @@ func dlantb(norm lapack.MatrixNorm, uplo blas.Uplo, diag blas.Diag, n, k int, a 
 	}
 	return value
 }
+
+func dlanst(norm lapack.MatrixNorm, n int, d, e []float64) float64 {
+	if n == 0 {
+		return 0
+	}
+	var value float64
+	switch norm {
+	case lapack.MaxAbs:
+		if n == 1 {
+			value = math.Abs(d[0])
+		} else {
+			for _, di := range d[:n] {
+				value = math.Max(value, math.Abs(di))
+			}
+			for _, ei := range e[:n-1] {
+				value = math.Max(value, math.Abs(ei))
+			}
+		}
+	case lapack.MaxColumnSum, lapack.MaxRowSum:
+		if n == 1 {
+			value = math.Abs(d[0])
+		} else {
+			value = math.Abs(d[0]) + math.Abs(e[0])
+			value = math.Max(value, math.Abs(d[n-1])+math.Abs(e[n-2]))
+			for i := 1; i < n-1; i++ {
+				sum := math.Abs(d[i]) + math.Abs(e[i]) + math.Abs(e[i-1])
+				value = math.Max(value, sum)
+			}
+		}
+	case lapack.Frobenius:
+		panic("not implemented")
+	default:
+		panic("invalid norm")
+	}
+	return value
+}

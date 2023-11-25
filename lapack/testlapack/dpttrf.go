@@ -10,6 +10,8 @@ import (
 	"testing"
 
 	"golang.org/x/exp/rand"
+
+	"gonum.org/v1/gonum/lapack"
 )
 
 type Dpttrfer interface {
@@ -75,18 +77,17 @@ func dpttrfResidual(n int, d, e, dFac, eFac []float64) float64 {
 	}
 
 	// Compute the 1-norm of the difference L*D*Lᵀ - A.
-	var anorm, resid float64
+	var resid float64
 	if n == 1 {
-		anorm = d[0]
 		resid = math.Abs(dDiff[0])
 	} else {
-		anorm = math.Max(d[0]+math.Abs(e[0]), d[n-1]+math.Abs(e[n-2]))
 		resid = math.Max(math.Abs(dDiff[0])+math.Abs(eDiff[0]), math.Abs(dDiff[n-1])+math.Abs(eDiff[n-2]))
 		for i := 1; i < n-1; i++ {
-			anorm = math.Max(anorm, d[i]+math.Abs(e[i])+math.Abs(e[i-1]))
 			resid = math.Max(resid, math.Abs(dDiff[i])+math.Abs(eDiff[i-1])+math.Abs(eDiff[i]))
 		}
 	}
+
+	anorm := dlanst(lapack.MaxColumnSum, n, d, e)
 
 	// Compute norm(L*D*Lᵀ - A)/(n * norm(A)).
 	if anorm == 0 {

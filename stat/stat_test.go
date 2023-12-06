@@ -1785,20 +1785,18 @@ func TestVariance(t *testing.T) {
 }
 
 func TestMeanVariance(t *testing.T) {
-	m, v := MeanVariance([]float64{0.0}, nil)
-	if math.Abs(m-0.0) > 1e-14 {
-		t.Errorf("MeanVariance mismatch case 0: Expected %v, Found %v", 0.0, m)
-	}
-	if !math.IsNaN(v) {
-		t.Errorf("MeanVariance mismatch case 0: Expected NaN, Found %v", v)
-	}
-
 	for i, test := range []struct {
 		x        []float64
 		weights  []float64
 		mean     float64
 		variance float64
 	}{
+		{
+			x:        []float64{0.0},
+			weights:  nil,
+			mean:     0.0,
+			variance: math.NaN(),
+		},
 		{
 			x:        []float64{0.0, 1.0},
 			weights:  nil,
@@ -1810,8 +1808,14 @@ func TestMeanVariance(t *testing.T) {
 		if math.Abs(mean-test.mean) > 1e-14 {
 			t.Errorf("MeanVariance mismatch case %d. Expected %v, Found %v", i, test.mean, mean)
 		}
-		if math.Abs(variance-test.variance) > 1e-14 {
-			t.Errorf("MeanVariance mismatch case %d. Expected %v, Found %v", i, test.variance, variance)
+		if math.IsNaN(test.variance) {
+			if !math.IsNaN(variance) {
+				t.Errorf("MeanVariance mismatch case %d. Expected %v, Found %v", i, test.variance, variance)
+			}
+		} else {
+			if math.Abs(variance-test.variance) > 1e-14 {
+				t.Errorf("MeanVariance mismatch case %d. Expected %v, Found %v", i, test.variance, variance)
+			}
 		}
 	}
 }

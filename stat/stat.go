@@ -1319,6 +1319,11 @@ func MeanVariance(x, weights []float64) (mean, variance float64) {
 		unnormalisedVariance float64
 		sumWeights           float64
 	)
+
+	if len(x) == 1 {
+		return x[0], 0
+	}
+
 	mean, unnormalisedVariance, sumWeights = meanUnnormalisedVarianceSumWeights(x, weights)
 	return mean, unnormalisedVariance / (sumWeights - 1)
 }

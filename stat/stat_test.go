@@ -1773,6 +1773,11 @@ func TestVariance(t *testing.T) {
 			weights: []float64{1, 1.5, 1},
 			ans:     .8,
 		},
+		{
+			x:       []float64{2},
+			weights: nil,
+			ans:     0,
+		},
 	} {
 		variance := Variance(test.x, test.weights)
 		if math.Abs(variance-test.ans) > 1e-14 {
@@ -1781,6 +1786,36 @@ func TestVariance(t *testing.T) {
 	}
 	if !panics(func() { Variance(make([]float64, 3), make([]float64, 2)) }) {
 		t.Errorf("Variance did not panic with x, weights length mismatch")
+	}
+}
+
+func TestMeanVariance(t *testing.T) {
+	m, v := MeanVariance([]float64{0.0}, nil)
+	if math.IsNaN(m) {
+		t.Errorf("MeanVariance mismatch case 0: Expected %v, Found %v", 0.0, m)
+	}
+	if math.IsNaN(v) {
+		t.Errorf("MeanVariance mismatch case 0: Expected %v, Found %v", 0.0, v)
+	}
+	if math.Abs(m-0.0) > 1e-14 {
+		t.Errorf("MeanVariance mismatch case 0: Expected %v, Found %v", 0.0, m)
+	}
+	if math.Abs(v-0.0) > 1e-14 {
+		t.Errorf("MeanVariance mismatch case 0: Expected %v, Found %v", 0.0, v)
+	}
+
+	m, v = MeanVariance([]float64{0.0, 1.0}, nil)
+	if math.IsNaN(m) {
+		t.Errorf("MeanVariance mismatch case 0: Expected %v, Found %v", 0.5, m)
+	}
+	if math.IsNaN(v) {
+		t.Errorf("MeanVariance mismatch case 0: Expected %v, Found %v", 0.5, v)
+	}
+	if math.Abs(m-0.5) > 1e-14 {
+		t.Errorf("MeanVariance mismatch case 0: Expected %v, Found %v", 0.5, m)
+	}
+	if math.Abs(v-0.5) > 1e-14 {
+		t.Errorf("MeanVariance mismatch case 0: Expected %v, Found %v", 0.5, v)
 	}
 }
 

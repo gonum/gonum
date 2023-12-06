@@ -1784,6 +1784,24 @@ func TestVariance(t *testing.T) {
 	}
 }
 
+func TestMeanVariance(t *testing.T) {
+	m, v := MeanVariance([]float64{0.0}, nil)
+	if math.Abs(m-0.0) > 1e-14 {
+		t.Errorf("MeanVariance mismatch case 0: Expected %v, Found %v", 0.0, m)
+	}
+	if !math.IsNaN(v) {
+		t.Errorf("MeanVariance mismatch case 0: Expected NaN, Found %v", v)
+	}
+
+	m, v = MeanVariance([]float64{0.0, 1.0}, nil)
+	if math.Abs(m-0.5) > 1e-14 {
+		t.Errorf("MeanVariance mismatch case 1: Expected %v, Found %v", 0.5, m)
+	}
+	if math.Abs(v-0.5) > 1e-14 {
+		t.Errorf("MeanVariance mismatch case 1: Expected %v, Found %v", 0.5, v)
+	}
+}
+
 func TestPopVariance(t *testing.T) {
 	for i, test := range []struct {
 		x       []float64
@@ -1833,6 +1851,30 @@ func TestPopVariance(t *testing.T) {
 	}
 	if !panics(func() { PopVariance(make([]float64, 3), make([]float64, 2)) }) {
 		t.Errorf("PopVariance did not panic with x, weights length mismatch")
+	}
+}
+
+func TestPopMeanVariance(t *testing.T) {
+	m, v := PopMeanVariance([]float64{0.0}, nil)
+	if math.IsNaN(m) {
+		t.Errorf("PopMeanVariance mismatch case 0: Expected %v, Found %v", 0.0, m)
+	}
+	if math.IsNaN(v) {
+		t.Errorf("PopMeanVariance mismatch case 0: Expected %v, Found %v", 0.0, v)
+	}
+	if math.Abs(m-0.0) > 1e-14 {
+		t.Errorf("PopMeanVariance mismatch case 0: Expected %v, Found %v", 0.0, m)
+	}
+	if math.Abs(v-0.0) > 1e-14 {
+		t.Errorf("PopMeanVariance mismatch case 0: Expected %v, Found %v", 0.0, v)
+	}
+
+	m, v = PopMeanVariance([]float64{0.0, 1.0}, nil)
+	if math.Abs(m-0.5) > 1e-14 {
+		t.Errorf("PopMeanVariance mismatch case 0: Expected %v, Found %v", 0.5, m)
+	}
+	if math.Abs(v-0.25) > 1e-14 {
+		t.Errorf("PopMeanVariance mismatch case 0: Expected %v, Found %v", 0.25, v)
 	}
 }
 

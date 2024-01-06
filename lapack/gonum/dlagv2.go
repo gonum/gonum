@@ -12,22 +12,22 @@ import (
 
 // Dlagv2 computes the Generalized Schur factorization of a real 2×2
 // matrix pencil (A,B) where B is upper triangular. This routine
-// computes orthogonal (rotation) matrices given by CSL, SNL and CSR,
+// computes orthogonal (rotation) matrices given by csl, SNL and CSR,
 // SNR such that
 //
 //  1. if the pencil (A,B) has two real eigenvalues (include 0/0 or 1/0 types), then
-//     [ a11 a12 ] = [  CSL  SNL ] [ a11 a12 ] [  CSR -SNR ]
-//     [  0  a22 ]    [ -SNL  CSL ] [ a21 a22 ] [  SNR  CSR ]
+//     [ a11 a12 ] = [  csl  snl ] [ a11 a12 ] [ csr -snr ]
+//     [  0  a22 ]   [ -snl  csl ] [ a21 a22 ] [ snr  csr ]
 //
-//     [ b11 b12 ] = [  CSL  SNL ] [ b11 b12 ] [  CSR -SNR ]
-//     [  0  b22 ]    [ -SNL  CSL ] [  0  b22 ] [  SNR  CSR ],
+//     [ b11 b12 ] = [  csl  snl ] [ b11 b12 ] [ csr -snr ]
+//     [  0  b22 ]   [ -snl  csl ] [  0  b22 ] [ snr  csr ],
 //
 //  2. if the pencil (A,B) has a pair of complex conjugate eigenvalues, then
-//     [ a11 a12 ] = [  CSL  SNL ] [ a11 a12 ] [  CSR -SNR ]
-//     [ a21 a22 ]    [ -SNL  CSL ] [ a21 a22 ] [  SNR  CSR ]
+//     [ a11 a12 ] = [  csl  snl ] [ a11 a12 ] [ csr -snr ]
+//     [ a21 a22 ]   [ -snl  csl ] [ a21 a22 ] [ snr  csr ]
 //
-//     [ b11  0  ] = [  CSL  SNL ] [ b11 b12 ] [  CSR -SNR ]
-//     [  0  b22 ]    [ -SNL  CSL ] [  0  b22 ] [  SNR  CSR ]
+//     [ b11  0  ] = [  csl  snl ] [ b11 b12 ] [ csr -snr ]
+//     [  0  b22 ]   [ -snl  csl ] [  0  b22 ] [ snr  csr ]
 //
 // where b11 >= b22 > 0.
 //
@@ -56,8 +56,9 @@ func (impl Implementation) Dlagv2(a []float64, lda int, b []float64, ldb int, al
 		panic(badLenAlpha)
 	case len(beta) < 2:
 		panic(badLenBeta)
-	case b[0] <= 0 || b[ldb+1] <= 0 || b[0] < b[ldb+1]:
-		panic(badBDiag)
+		// Documentation in reference requires B diagonal to be non-negative and
+		// non-zero and in descending order but it seems to not be strictly
+		// necessary looking at code.
 	}
 
 	const (

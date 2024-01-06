@@ -1068,15 +1068,15 @@ func extract2x2Block(t []float64, ldt int) (a, b, c, d float64) {
 
 // isSchurCanonical returns whether the 2×2 matrix [a b; c d] is in Schur
 // canonical form.
-func isSchurCanonical(a, b, c, d, tol float64) bool {
-	return math.Abs(c) <= tol || (b != 0 && math.Abs(a-d) <= tol && math.Signbit(b) != math.Signbit(c))
+func isSchurCanonical(a, b, c, d float64) bool {
+	return c == 0 || (b != 0 && a == d && math.Signbit(b) != math.Signbit(c))
 }
 
 // isSchurCanonicalGeneral returns whether T is block upper triangular with 1×1
 // and 2×2 diagonal blocks, each 2×2 block in Schur canonical form. The function
 // checks only along the diagonal and the first subdiagonal, otherwise the lower
 // triangle is not accessed.
-func isSchurCanonicalGeneral(t blas64.General, tol float64) bool {
+func isSchurCanonicalGeneral(t blas64.General) bool {
 	n := t.Cols
 	if t.Rows != n {
 		panic("invalid matrix")
@@ -1094,7 +1094,7 @@ func isSchurCanonicalGeneral(t blas64.General, tol float64) bool {
 		}
 		// 2×2 block.
 		a, b, c, d := extract2x2Block(t.Data[j*t.Stride+j:], t.Stride)
-		if !isSchurCanonical(a, b, c, d, tol) {
+		if !isSchurCanonical(a, b, c, d) {
 			return false
 		}
 		for i := j + 2; i < n; i++ {
@@ -1117,7 +1117,7 @@ func isSchurCanonicalGeneral(t blas64.General, tol float64) bool {
 //
 //lint:ignore U1000 This is useful for debugging.
 func schurBlockEigenvalues(a, b, c, d float64) (ev1, ev2 complex128) {
-	if !isSchurCanonical(a, b, c, d, 0) {
+	if !isSchurCanonical(a, b, c, d) {
 		panic("block not in Schur canonical form")
 	}
 	if c == 0 {

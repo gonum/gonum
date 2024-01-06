@@ -39,7 +39,7 @@ func dlagv2Test(t *testing.T, impl Dlagv2er, rnd *rand.Rand, lda, ldb int, aKind
 	a := makeDlag2TestMatrix(rnd, lda, aKind)
 	b := makeDlag2TestMatrix(rnd, ldb, bKind)
 	b.Data[b.Stride] = math.NaN() // b is lower triangular.
-	// a.Data[a.Stride] = 0
+	a.Data[a.Stride] = 0
 	// Enforce positive, non-zero diagonal.
 	b.Data[0] = math.Max(safmin, math.Abs(b.Data[0]))
 	b.Data[b.Stride+1] = math.Max(safmin, math.Abs(b.Data[b.Stride+1]))
@@ -59,11 +59,11 @@ func dlagv2Test(t *testing.T, impl Dlagv2er, rnd *rand.Rand, lda, ldb int, aKind
 	wr1, wr2 := alphar[0], alphar[1]
 	if beta1 == 0 {
 		beta1 = 1
-		// wi1, wr1 = wi1/beta1, wr1/beta1
+		wi1, wr1 = wi1/beta1, wr1/beta1
 	}
 	if beta2 == 0 {
 		beta2 = 1
-		// wi2, wr2 = wi2/beta2, wr2/beta2
+		wi2, wr2 = wi2/beta2, wr2/beta2
 	}
 	// Generate r1, r2 rotation matrices.
 	// r1 = [ CSL  SNL; -SNL CSL]
@@ -78,48 +78,35 @@ func dlagv2Test(t *testing.T, impl Dlagv2er, rnd *rand.Rand, lda, ldb int, aKind
 	}
 	isComplexEig := wi1 != 0
 	name := fmt.Sprintf("cmplx=%v,lda=%d,ldb=%d,aKind=%d,bKind=%d", isComplexEig, lda, ldb, aKind, bKind)
-	// aOrigStr := sprint2x2Block("A", aCopy.Data, aCopy.Stride, 4)
-	// bOrigStr := sprint2x2Block("B", bCopy.Data, bCopy.Stride, 4)
 
 	aStr := sprint2x2Block("As", a.Data, a.Stride, 4)
 	bStr := sprint2x2Block("Bs", b.Data, b.Stride, 4)
 
 	if wi1 < 0 {
-		t.Fatalf("%s: negative wi1; wi1=%g,wi2=%g,\n%s\n%s", name, wi1, wi2, aStr, bStr)
-		return
+		t.Errorf("%s: negative wi1; wi1=%g,wi2=%g,\n%s\n%s", name, wi1, wi2, aStr, bStr)
 	}
 	if isComplexEig && wi2 != -wi1 {
-		t.Fatalf("%s: wi1 != -wi2; wi1=%g,wi2=%g,\n%s\n%s", name, wi1, wi2, aStr, bStr)
-		return
+		t.Errorf("%s: wi1 != -wi2; wi1=%g,wi2=%g,\n%s\n%s", name, wi1, wi2, aStr, bStr)
 	}
 	if math.Abs(b.Data[b.Stride]) > tol {
-		t.Fatalf("%s: expected b to remain upper triangular:\n%s", name, bStr)
-		return
+		t.Errorf("%s: expected b to remain upper triangular:\n%s", name, bStr)
 	}
 	if isComplexEig && b.Data[0] < b.Data[b.Stride+1] {
 		t.Errorf("%s: expected b diagonal elements to be in descending order:\n%s", name, bStr)
 	}
 
-	if !isComplexEig && !isSchurCanonicalGeneral(a, tol) {
-		t.Fatalf("%s: a is not Schur canonical:\n%s", name, aStr)
-		return
-	}
-
-	if !isSchurCanonicalGeneral(b, tol) {
-		t.Fatalf("%s: b is not Schur canonical:\n%s", name, bStr)
-		return
+	if !isComplexEig && !isSchurCanonicalGeneral(a) {
+		t.Errorf("%s: a is not Schur canonical:\n%s", name, aStr)
 	}
 
 	switch {
 	case isComplexEig:
 		// Complex eigenvalue pair.
 		if wr1 != wr2 {
-			t.Fatalf("%s: complex eigenvalue but wr1 != wr2; wr1=%g, wr2=%g,\n%s\n%s", name, wr1, wr2, aStr, bStr)
-			return
+			t.Errorf("%s: complex eigenvalue but wr1 != wr2; wr1=%g, wr2=%g,\n%s\n%s", name, wr1, wr2, aStr, bStr)
 		}
 		if beta1 != beta2 {
-			t.Fatalf("%s: complex eigenvalue but scale1 != scale2; scale1=%g, scale2=%g,\n%s\n%s", name, beta1, beta2, aStr, bStr)
-			return
+			t.Errorf("%s: complex eigenvalue but scale1 != scale2; scale1=%g, scale2=%g,\n%s\n%s", name, beta1, beta2, aStr, bStr)
 		}
 		if b.Data[1] != 0 {
 			t.Errorf("%s: expected b to be diagonal on complex pair:\n%s", name, bStr)
@@ -127,8 +114,7 @@ func dlagv2Test(t *testing.T, impl Dlagv2er, rnd *rand.Rand, lda, ldb int, aKind
 	default:
 		// Real eigenvalue pair.
 		if wi1 != 0 || wi2 != 0 {
-			t.Fatalf("%s: real eigenvalue but wi1 != 0 or wi2 != 0; wi1=%g, wi2=%g,\n%s\n%s", name, wi1, wi2, aStr, bStr)
-			return
+			t.Errorf("%s: real eigenvalue but wi1 != 0 or wi2 != 0; wi1=%g, wi2=%g,\n%s\n%s", name, wi1, wi2, aStr, bStr)
 		}
 		if a.Data[a.Stride] != 0 {
 			t.Errorf("%s: expected a to be upper triangular on real pair:\n%s", name, aStr)
@@ -159,8 +145,7 @@ func dlagv2Test(t *testing.T, impl Dlagv2er, rnd *rand.Rand, lda, ldb int, aKind
 
 	res, err := residualDlag2(aCopy, bCopy, beta1, complex(wr1, wi1))
 	if err != nil {
-		// t.Logf("%s: invalid input data: %v\n%s\n%s\n%s\n%s", name, err, aStr, bStr, aOrigStr, bOrigStr)
-		return
+		t.Fatalf("%s: while computing residual: %v", name, err)
 	}
 	if res > tol || math.IsNaN(res) {
 		t.Errorf("%s: unexpected first eigenvalue %g with s=%g; resid=%g, want<=%g\n%s\n%s", name, complex(wr1, wi1), beta1, res, tol, aStr, bStr)
@@ -168,8 +153,7 @@ func dlagv2Test(t *testing.T, impl Dlagv2er, rnd *rand.Rand, lda, ldb int, aKind
 
 	res, err = residualDlag2(a, b, beta2, complex(wr2, wi2))
 	if err != nil {
-		// t.Logf("%s: invalid input data: %v\n%s\n%s\n%s\n%s", name, err, aStr, bStr, aOrigStr, bOrigStr)
-		return
+		t.Fatalf("%s: while computing residual: %v", name, err)
 	}
 	if res > tol || math.IsNaN(res) {
 		t.Errorf("%s: unexpected second eigenvalue %g with s=%g; resid=%g, want<=%g\n%s\n%s", name, complex(wr2, wi2), beta2, res, tol, aStr, bStr)

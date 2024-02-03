@@ -10,6 +10,7 @@ import (
 	"math"
 	"os"
 	"reflect"
+	"slices"
 	"sort"
 	"strings"
 	"testing"
@@ -204,9 +205,7 @@ func nearestN(n int, q Comparable, p []Comparable) []ComparableDist {
 		return nk.Heap
 	}
 	sort.Sort(nk)
-	for i, j := 0, len(nk.Heap)-1; i < j; i, j = i+1, j-1 {
-		nk.Heap[i], nk.Heap[j] = nk.Heap[j], nk.Heap[i]
-	}
+	slices.Reverse(nk.Heap)
 	return nk.Heap
 }
 

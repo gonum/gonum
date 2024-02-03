@@ -6,6 +6,7 @@ package mat
 
 import (
 	"reflect"
+	"slices"
 	"testing"
 
 	"gonum.org/v1/gonum/blas/blas64"
@@ -290,8 +291,7 @@ func TestBandDenseZero(t *testing.T) {
 			},
 		},
 	} {
-		dataCopy := make([]float64, len(test.mat.Data))
-		copy(dataCopy, test.mat.Data)
+		dataCopy := slices.Clone(test.mat.Data)
 		test.Zero()
 		for i, v := range test.mat.Data {
 			if dataCopy[i] != -1 && v != 0 {

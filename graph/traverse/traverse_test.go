@@ -7,6 +7,7 @@ package traverse
 import (
 	"fmt"
 	"reflect"
+	"slices"
 	"strings"
 	"testing"
 
@@ -171,7 +172,7 @@ func TestBreadthFirst(t *testing.T) {
 			t.Errorf("unexpected final node for test %d:\ngot:  %v\nwant: %v", i, final, test.final)
 		}
 		for _, l := range got {
-			ordered.Int64s(l)
+			slices.Sort(l)
 		}
 		if !reflect.DeepEqual(got, test.want) {
 			t.Errorf("unexpected BFS level structure for test %d:\ngot:  %v\nwant: %v", i, got, test.want)
@@ -371,7 +372,7 @@ func TestWalkAll(t *testing.T) {
 				for k, n := range c {
 					ids[k] = n.ID()
 				}
-				ordered.Int64s(ids)
+				slices.Sort(ids)
 				got[j] = ids
 			}
 			ordered.BySliceValues(got)

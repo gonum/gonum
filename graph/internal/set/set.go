@@ -4,7 +4,11 @@
 
 package set
 
-import "gonum.org/v1/gonum/graph"
+import (
+	"maps"
+
+	"gonum.org/v1/gonum/graph"
+)
 
 // Ints is a set of int identifiers.
 type Ints map[int]struct{}
@@ -139,11 +143,10 @@ func (s Nodes) Has(n graph.Node) bool {
 
 // CloneNodes returns a clone of src.
 func CloneNodes(src Nodes) Nodes {
-	dst := make(Nodes, len(src))
-	for e, n := range src {
-		dst[e] = n
+	if src == nil {
+		return make(Nodes)
 	}
-	return dst
+	return maps.Clone(src)
 }
 
 // Equal reports set equality between the parameters. Sets are equal if

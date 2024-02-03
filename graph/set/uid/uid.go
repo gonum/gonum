@@ -17,12 +17,12 @@ const Max = math.MaxInt64
 // Set implements available ID storage.
 type Set struct {
 	maxID      int64
-	used, free set.Int64s
+	used, free set.Set[int64]
 }
 
 // NewSet returns a new Set.
 func NewSet() *Set {
-	return &Set{maxID: -1, used: make(set.Int64s), free: make(set.Int64s)}
+	return &Set{maxID: -1, used: make(set.Set[int64]), free: make(set.Set[int64])}
 }
 
 // NewID returns a new unique ID. The ID returned is not considered used

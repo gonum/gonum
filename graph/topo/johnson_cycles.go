@@ -17,8 +17,8 @@ import (
 // Comments in the johnson methods are kept in sync with the comments
 // and labels from the paper.
 type johnson struct {
-	adjacent johnsonGraph // SCC adjacency list.
-	b        []set.Ints   // Johnson's "B-list".
+	adjacent johnsonGraph   // SCC adjacency list.
+	b        []set.Set[int] // Johnson's "B-list".
 	blocked  []bool
 	s        int
 
@@ -32,7 +32,7 @@ func DirectedCyclesIn(g graph.Directed) [][]graph.Node {
 	jg := johnsonGraphFrom(g)
 	j := johnson{
 		adjacent: jg,
-		b:        make([]set.Ints, len(jg.orig)),
+		b:        make([]set.Set[int], len(jg.orig)),
 		blocked:  make([]bool, len(jg.orig)),
 	}
 
@@ -57,7 +57,7 @@ func DirectedCyclesIn(g graph.Directed) [][]graph.Node {
 			}
 			if len(j.adjacent.succ[v.ID()]) > 0 {
 				j.blocked[i] = false
-				j.b[i] = make(set.Ints)
+				j.b[i] = make(set.Set[int])
 			}
 		}
 		//L3:
@@ -125,8 +125,8 @@ type johnsonGraph struct {
 	orig  []graph.Node
 	index map[int64]int
 
-	nodes set.Int64s
-	succ  map[int64]set.Int64s
+	nodes set.Set[int64]
+	succ  map[int64]set.Set[int64]
 }
 
 // johnsonGraphFrom returns a deep copy of the graph g.
@@ -137,8 +137,8 @@ func johnsonGraphFrom(g graph.Directed) johnsonGraph {
 		orig:  nodes,
 		index: make(map[int64]int, len(nodes)),
 
-		nodes: make(set.Int64s, len(nodes)),
-		succ:  make(map[int64]set.Int64s),
+		nodes: make(set.Set[int64], len(nodes)),
+		succ:  make(map[int64]set.Set[int64]),
 	}
 	for i, u := range nodes {
 		uid := u.ID()
@@ -147,7 +147,7 @@ func johnsonGraphFrom(g graph.Directed) johnsonGraph {
 		for to.Next() {
 			v := to.Node()
 			if c.succ[uid] == nil {
-				c.succ[uid] = make(set.Int64s)
+				c.succ[uid] = make(set.Set[int64])
 				c.nodes.Add(uid)
 			}
 			c.nodes.Add(v.ID())
@@ -207,8 +207,8 @@ func (g johnsonGraph) sccSubGraph(sccs [][]graph.Node, min int) johnsonGraph {
 	sub := johnsonGraph{
 		orig:  g.orig,
 		index: g.index,
-		nodes: make(set.Int64s),
-		succ:  make(map[int64]set.Int64s),
+		nodes: make(set.Set[int64]),
+		succ:  make(map[int64]set.Set[int64]),
 	}
 
 	var n int
@@ -221,7 +221,7 @@ func (g johnsonGraph) sccSubGraph(sccs [][]graph.Node, min int) johnsonGraph {
 			for _, v := range scc {
 				if _, ok := g.succ[u.ID()][v.ID()]; ok {
 					if sub.succ[u.ID()] == nil {
-						sub.succ[u.ID()] = make(set.Int64s)
+						sub.succ[u.ID()] = make(set.Set[int64])
 						sub.nodes.Add(u.ID())
 					}
 					sub.nodes.Add(v.ID())

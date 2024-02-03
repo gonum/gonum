@@ -129,18 +129,18 @@ func NewUndirectedLayers(layers ...graph.Undirected) (UndirectedLayers, error) {
 	if len(layers) == 0 {
 		return nil, nil
 	}
-	base := make(set.Int64s)
+	base := make(set.Set[int64])
 	nodes := layers[0].Nodes()
 	for nodes.Next() {
 		base.Add(nodes.Node().ID())
 	}
 	for i, l := range layers[1:] {
-		next := make(set.Int64s)
+		next := make(set.Set[int64])
 		nodes := l.Nodes()
 		for nodes.Next() {
 			next.Add(nodes.Node().ID())
 		}
-		if !set.Int64sEqual(next, base) {
+		if !set.Equal(next, base) {
 			return nil, fmt.Errorf("community: layer ID mismatch between layers: %d", i+1)
 		}
 	}
@@ -735,7 +735,7 @@ func (l *undirectedMultiplexLocalMover) deltaQ(n graph.Node) (deltaQ float64, ds
 		iterator = &dense{n: len(l.communities)}
 	} else {
 		// Find communities connected to n.
-		connected := make(set.Ints)
+		connected := make(set.Set[int])
 		// The following for loop is equivalent to:
 		//
 		//  for i := 0; i < l.g.Depth(); i++ {

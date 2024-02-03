@@ -342,7 +342,7 @@ type slice struct {
 }
 
 // newSlice returns a new slice of elements from s, sorted ascending.
-func newSlice(s set.Ints) *slice {
+func newSlice(s set.Set[int]) *slice {
 	elems := make([]int, 0, len(s))
 	for i := range s {
 		elems = append(elems, i)

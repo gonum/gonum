@@ -6,6 +6,7 @@ package topo
 
 import (
 	"reflect"
+	"slices"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
@@ -178,7 +179,7 @@ func TestTarjanSCC(t *testing.T) {
 			for j, id := range scc {
 				gotIDs[i][j] = id.ID()
 			}
-			ordered.Int64s(gotIDs[i])
+			slices.Sort(gotIDs[i])
 		}
 		for _, iv := range test.ambiguousOrder {
 			ordered.BySliceValues(test.want[iv.start:iv.end])

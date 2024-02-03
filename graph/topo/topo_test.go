@@ -6,6 +6,7 @@ package topo
 
 import (
 	"reflect"
+	"slices"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
@@ -163,7 +164,7 @@ func TestConnectedComponents(t *testing.T) {
 			for k, n := range c {
 				ids[k] = n.ID()
 			}
-			ordered.Int64s(ids)
+			slices.Sort(ids)
 			got[j] = ids
 		}
 		ordered.BySliceValues(got)

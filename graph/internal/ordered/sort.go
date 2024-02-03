@@ -57,11 +57,6 @@ func BySliceIDs(c [][]graph.Node) {
 	})
 }
 
-// Int64s sorts a slice of int64.
-func Int64s(s []int64) {
-	sort.Slice(s, func(i, j int) bool { return s[i] < s[j] })
-}
-
 // LinesByIDs sort a slice of graph.LinesByIDs lexically by the From IDs,
 // then by the To IDs, finally by the Line IDs.
 func LinesByIDs(n []graph.Line) {

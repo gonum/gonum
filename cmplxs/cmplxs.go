@@ -8,6 +8,7 @@ import (
 	"errors"
 	"math"
 	"math/cmplx"
+	"slices"
 
 	"gonum.org/v1/gonum/cmplxs/cscalar"
 	"gonum.org/v1/gonum/internal/asm/c128"
@@ -563,10 +564,10 @@ func Real(dst []float64, src []complex128) []float64 {
 }
 
 // Reverse reverses the order of elements in the slice.
+//
+// Deprecated: This function simply calls [slices.Reverse].
 func Reverse(s []complex128) {
-	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
-		s[i], s[j] = s[j], s[i]
-	}
+	slices.Reverse(s)
 }
 
 // Same returns true when the input slices have the same length and all

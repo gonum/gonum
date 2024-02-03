@@ -6,6 +6,7 @@ package topo
 
 import (
 	"reflect"
+	"slices"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
@@ -133,7 +134,7 @@ func canonicalise(c []graph.Node) []graph.Node {
 		c = append(c[idx:], c[:idx]...)
 	}
 	if c[len(c)-1].ID() < c[1].ID() {
-		ordered.Reverse(c[1:])
+		slices.Reverse(c[1:])
 	}
 	return c
 }

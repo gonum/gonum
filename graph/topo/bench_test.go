@@ -128,7 +128,8 @@ func BenchmarkUndirectedCyclesInGnp_100_half(b *testing.B) {
 
 func benchmarkSort(b *testing.B, g graph.Directed) {
 	for i := 0; i < b.N; i++ {
-		if _, err := Sort(g); err != nil {
+		_, err := Sort(g)
+		if err != nil {
 			b.FailNow()
 		}
 	}
@@ -164,7 +165,8 @@ func BenchmarkSortPath_100000(b *testing.B) {
 
 func benchmarkSortStabilized(b *testing.B, g graph.Directed) {
 	for i := 0; i < b.N; i++ {
-		if _, err := SortStabilized(g, nil); err != nil {
+		_, err := SortStabilized(g, nil)
+		if err != nil {
 			b.FailNow()
 		}
 	}

@@ -214,12 +214,6 @@ type moveStructures struct {
 	tol        float64
 }
 
-func reverse(f []float64) {
-	for i, j := 0, len(f)-1; i < j; i, j = i+1, j-1 {
-		f[i], f[j] = f[j], f[i]
-	}
-}
-
 func hasNegative(f []float64) bool {
 	for _, v := range f {
 		if v < 0 {

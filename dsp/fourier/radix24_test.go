@@ -79,8 +79,7 @@ func TestSequence(t *testing.T) {
 		for i := 0; i < 10; i++ {
 			t.Run(fmt.Sprintf("Radix2/%d", n), func(t *testing.T) {
 				d := randComplexes(n, src)
-				want := make([]complex128, n)
-				copy(want, d)
+				want := slices.Clone(d)
 				SequenceRadix2(CoefficientsRadix2(d))
 				got := d
 
@@ -95,8 +94,7 @@ func TestSequence(t *testing.T) {
 			}
 			t.Run(fmt.Sprintf("Radix4/%d", n), func(t *testing.T) {
 				d := randComplexes(n, src)
-				want := make([]complex128, n)
-				copy(want, d)
+				want := slices.Clone(d)
 				SequenceRadix4(CoefficientsRadix4(d))
 				got := d
 

@@ -10,84 +10,33 @@ import (
 	"gonum.org/v1/gonum/graph"
 )
 
-// Ints is a set of int identifiers.
-type Ints map[int]struct{}
-
-// The simple accessor methods for Ints are provided to allow ease of
-// implementation change should the need arise.
+type Set[T comparable] map[T]struct{}
 
 // Add inserts an element into the set.
-func (s Ints) Add(e int) {
+func (s Set[T]) Add(e T) {
 	s[e] = struct{}{}
 }
 
 // Has reports the existence of the element in the set.
-func (s Ints) Has(e int) bool {
+func (s Set[T]) Has(e T) bool {
 	_, ok := s[e]
 	return ok
 }
 
 // Remove deletes the specified element from the set.
-func (s Ints) Remove(e int) {
+func (s Set[T]) Remove(e T) {
 	delete(s, e)
 }
 
 // Count reports the number of elements stored in the set.
-func (s Ints) Count() int {
+func (s Set[T]) Count() int {
 	return len(s)
 }
 
-// IntsEqual reports set equality between the parameters. Sets are equal if
-// and only if they have the same elements.
-func IntsEqual(a, b Ints) bool {
-	if intsSame(a, b) {
-		return true
-	}
-
-	if len(a) != len(b) {
-		return false
-	}
-
-	for e := range a {
-		if _, ok := b[e]; !ok {
-			return false
-		}
-	}
-
-	return true
-}
-
-// Int64s is a set of int64 identifiers.
-type Int64s map[int64]struct{}
-
-// The simple accessor methods for Ints are provided to allow ease of
-// implementation change should the need arise.
-
-// Add inserts an element into the set.
-func (s Int64s) Add(e int64) {
-	s[e] = struct{}{}
-}
-
-// Has reports the existence of the element in the set.
-func (s Int64s) Has(e int64) bool {
-	_, ok := s[e]
-	return ok
-}
-
-// Remove deletes the specified element from the set.
-func (s Int64s) Remove(e int64) {
-	delete(s, e)
-}
-
-// Count reports the number of elements stored in the set.
-func (s Int64s) Count() int {
-	return len(s)
-}
-
-// Int64sEqual reports set equality between the parameters. Sets are equal if
-// and only if they have the same elements.
-func Int64sEqual(a, b Int64s) bool {
-	if int64sSame(a, b) {
+// Equal reports set equality between the parameters. Sets are equal if and
+// only if they have the same elements.
+func Equal[T comparable](a, b Set[T]) bool {
+	if same(a, b) {
 		return true
 	}
 
@@ -149,10 +98,10 @@ func CloneNodes(src Nodes) Nodes {
 	return maps.Clone(src)
 }
 
-// Equal reports set equality between the parameters. Sets are equal if
+// NodesEqual reports set equality between the parameters. Sets are equal if
 // and only if they have the same elements.
-func Equal(a, b Nodes) bool {
-	if same(a, b) {
+func NodesEqual(a, b Nodes) bool {
+	if nodesSame(a, b) {
 		return true
 	}
 
@@ -181,7 +130,7 @@ func Equal(a, b Nodes) bool {
 //
 //	{a,b,c} UNION {b,c,d} = {a,b,c,d}
 func UnionOfNodes(a, b Nodes) Nodes {
-	if same(a, b) {
+	if nodesSame(a, b) {
 		return CloneNodes(a)
 	}
 
@@ -213,7 +162,7 @@ func UnionOfNodes(a, b Nodes) Nodes {
 //
 //	{a,b,c} INTERSECT {d,e,f} = {}
 func IntersectionOfNodes(a, b Nodes) Nodes {
-	if same(a, b) {
+	if nodesSame(a, b) {
 		return CloneNodes(a)
 	}
 	dst := make(Nodes)

@@ -6,6 +6,7 @@ package stat
 
 import (
 	"math"
+	"slices"
 	"sort"
 )
 
@@ -117,13 +118,9 @@ func ROC(cutoffs, y []float64, classes []bool, weights []float64) (tpr, fpr, thr
 		tpr[i] = 1 - float64(tpr[i]*invPos)
 		fpr[i] = 1 - float64(fpr[i]*invNeg)
 	}
-	for i, j := 0, len(tpr)-1; i < j; i, j = i+1, j-1 {
-		tpr[i], tpr[j] = tpr[j], tpr[i]
-		fpr[i], fpr[j] = fpr[j], fpr[i]
-	}
-	for i, j := 0, len(cutoffs)-1; i < j; i, j = i+1, j-1 {
-		cutoffs[i], cutoffs[j] = cutoffs[j], cutoffs[i]
-	}
+	slices.Reverse(tpr)
+	slices.Reverse(fpr)
+	slices.Reverse(cutoffs)
 
 	return tpr, fpr, cutoffs
 }

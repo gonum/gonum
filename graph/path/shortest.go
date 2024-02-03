@@ -6,12 +6,12 @@ package path
 
 import (
 	"math"
+	"slices"
 
 	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/graph"
-	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/internal/set"
 	"gonum.org/v1/gonum/mat"
 )
@@ -184,7 +184,7 @@ func (p Shortest) To(vid int64) (path []graph.Node, weight float64) {
 			n--
 		}
 	}
-	ordered.Reverse(path)
+	slices.Reverse(path)
 	return path, math.Min(weight, p.dist[p.indexOf[vid]])
 }
 
@@ -397,7 +397,7 @@ func (p ShortestAlts) To(vid int64) (path []graph.Node, weight float64, unique b
 		weight = p.dist[p.indexOf[vid]]
 	}
 
-	ordered.Reverse(path)
+	slices.Reverse(path)
 	return path, weight, unique
 }
 
@@ -460,9 +460,9 @@ func (p ShortestAlts) allTo(from, to int, seen []bool, path []graph.Node, fn fun
 		if path == nil {
 			return
 		}
-		ordered.Reverse(path)
+		slices.Reverse(path)
 		fn(path)
-		ordered.Reverse(path)
+		slices.Reverse(path)
 		return
 	}
 	first := true
@@ -676,7 +676,7 @@ func (p AllShortest) Between(uid, vid int64) (path []graph.Node, weight float64,
 		}
 	}
 	if !p.forward {
-		ordered.Reverse(path)
+		slices.Reverse(path)
 	}
 
 	return path, weight, unique
@@ -765,11 +765,11 @@ func (p AllShortest) allBetween(from, to int, seen []bool, path []graph.Node, fn
 			return
 		}
 		if !p.forward {
-			ordered.Reverse(path)
+			slices.Reverse(path)
 		}
 		fn(path)
 		if !p.forward {
-			ordered.Reverse(path)
+			slices.Reverse(path)
 		}
 		return
 	}

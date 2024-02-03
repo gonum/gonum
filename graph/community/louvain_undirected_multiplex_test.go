@@ -7,6 +7,7 @@ package community
 import (
 	"math"
 	"reflect"
+	"slices"
 	"sort"
 	"testing"
 
@@ -576,7 +577,7 @@ func TestLouvainMultiplex(t *testing.T) {
 			}
 
 			// Recovery of Q values is reversed.
-			if reverse(qs); !sort.Float64sAreSorted(qs) {
+			if slices.Reverse(qs); !sort.Float64sAreSorted(qs) {
 				t.Errorf("Q values not monotonically increasing: %.5v", qs)
 			}
 		}

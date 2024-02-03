@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"math"
 	"reflect"
+	"slices"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -181,7 +182,7 @@ func (p allShortest) allBetween(from, to int, seen []bool, path []graph.Node, pa
 			return paths
 		}
 		if !p.forward {
-			ordered.Reverse(path)
+			slices.Reverse(path)
 		}
 		return append(paths, path)
 	}

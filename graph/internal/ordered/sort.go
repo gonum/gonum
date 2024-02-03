@@ -68,13 +68,6 @@ func LinesByIDs(n []graph.Line) {
 		if a.To().ID() != b.To().ID() {
 			return a.To().ID() < b.To().ID()
 		}
-		return n[i].ID() < n[j].ID()
+		return a.ID() < b.ID()
 	})
-}
-
-// Reverse reverses the order of nodes.
-func Reverse(nodes []graph.Node) {
-	for i, j := 0, len(nodes)-1; i < j; i, j = i+1, j-1 {
-		nodes[i], nodes[j] = nodes[j], nodes[i]
-	}
 }

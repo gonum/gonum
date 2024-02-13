@@ -12,7 +12,7 @@ jobs:
       matrix:
         # Do not move this line; it is referred to by README.md.
         # Versions of Go that are explicitly supported by Gonum.
-        go-version: [1.21.x, 1.20.x]
+        go-version: [1.22.x, 1.21.x]
         platform: [ubuntu-latest, macos-latest]
         force-goarch: ["", "386"]
         tags: 
@@ -52,17 +52,17 @@ jobs:
 
     steps:
     - name: Install Go
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v5
       with:
         go-version: ${{ matrix.go-version }}
 
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       with:
           path: ${{ env.GOPATH }}/src/gonum.org/v1/gonum
 
     - name: Cache-Go
-      uses: actions/cache@v2
+      uses: actions/cache@v4
       with:
         # In order:
         # * Module download cache 

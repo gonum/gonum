@@ -1784,6 +1784,42 @@ func TestVariance(t *testing.T) {
 	}
 }
 
+func TestMeanVariance(t *testing.T) {
+	for i, test := range []struct {
+		x        []float64
+		weights  []float64
+		mean     float64
+		variance float64
+	}{
+		{
+			x:        []float64{0.0},
+			weights:  nil,
+			mean:     0.0,
+			variance: math.NaN(),
+		},
+		{
+			x:        []float64{0.0, 1.0},
+			weights:  nil,
+			mean:     0.5,
+			variance: 0.5,
+		},
+	} {
+		mean, variance := MeanVariance(test.x, test.weights)
+		if math.Abs(mean-test.mean) > 1e-14 {
+			t.Errorf("MeanVariance mismatch case %d. Expected %v, Found %v", i, test.mean, mean)
+		}
+		if math.IsNaN(test.variance) {
+			if !math.IsNaN(variance) {
+				t.Errorf("MeanVariance mismatch case %d. Expected %v, Found %v", i, test.variance, variance)
+			}
+		} else {
+			if math.Abs(variance-test.variance) > 1e-14 {
+				t.Errorf("MeanVariance mismatch case %d. Expected %v, Found %v", i, test.variance, variance)
+			}
+		}
+	}
+}
+
 func TestPopVariance(t *testing.T) {
 	for i, test := range []struct {
 		x       []float64
@@ -1833,6 +1869,36 @@ func TestPopVariance(t *testing.T) {
 	}
 	if !panics(func() { PopVariance(make([]float64, 3), make([]float64, 2)) }) {
 		t.Errorf("PopVariance did not panic with x, weights length mismatch")
+	}
+}
+
+func TestPopMeanVariance(t *testing.T) {
+	for i, test := range []struct {
+		x        []float64
+		weights  []float64
+		mean     float64
+		variance float64
+	}{
+		{
+			x:        []float64{0.0},
+			weights:  nil,
+			mean:     0.0,
+			variance: 0.0,
+		},
+		{
+			x:        []float64{0.0, 1.0},
+			weights:  nil,
+			mean:     0.5,
+			variance: 0.25,
+		},
+	} {
+		mean, variance := PopMeanVariance(test.x, test.weights)
+		if math.Abs(mean-test.mean) > 1e-14 {
+			t.Errorf("PopMeanVariance mismatch case %d. Expected %v, Found %v", i, test.mean, mean)
+		}
+		if math.Abs(variance-test.variance) > 1e-14 {
+			t.Errorf("PopMeanVariance mismatch case %d. Expected %v, Found %v", i, test.variance, variance)
+		}
 	}
 }
 

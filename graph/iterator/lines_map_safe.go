@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build safe
-// +build safe
-
 package iterator
 
 import (
@@ -17,7 +14,7 @@ import (
 // The iteration order of Lines is randomized.
 type Lines struct {
 	lines reflect.Value
-	iter  *reflect.MapIter
+	iter  reflect.MapIter
 	pos   int
 	curr  graph.Line
 }
@@ -30,7 +27,9 @@ type Lines struct {
 // the call to NewLines.
 func NewLines(lines map[int64]graph.Line) *Lines {
 	rv := reflect.ValueOf(lines)
-	return &Lines{lines: rv, iter: rv.MapRange()}
+	ret := &Lines{lines: rv}
+	ret.iter.Reset(rv)
+	return ret
 }
 
 // Len returns the remaining number of lines to be iterated over.
@@ -61,7 +60,7 @@ func (l *Lines) Line() graph.Line {
 func (l *Lines) Reset() {
 	l.curr = nil
 	l.pos = 0
-	l.iter = l.lines.MapRange()
+	l.iter.Reset(l.lines)
 }
 
 // LineSlice returns all the remaining lines in the iterator and advances
@@ -83,7 +82,7 @@ func (l *Lines) LineSlice() []graph.Line {
 // The iteration order of WeightedLines is randomized.
 type WeightedLines struct {
 	lines reflect.Value
-	iter  *reflect.MapIter
+	iter  reflect.MapIter
 	pos   int
 	curr  graph.WeightedLine
 }
@@ -96,7 +95,9 @@ type WeightedLines struct {
 // the call to NewWeightedLines.
 func NewWeightedLines(lines map[int64]graph.WeightedLine) *WeightedLines {
 	rv := reflect.ValueOf(lines)
-	return &WeightedLines{lines: rv, iter: rv.MapRange()}
+	ret := &WeightedLines{lines: rv}
+	ret.iter.Reset(rv)
+	return ret
 }
 
 // Len returns the remaining number of lines to be iterated over.
@@ -127,7 +128,7 @@ func (l *WeightedLines) WeightedLine() graph.WeightedLine {
 func (l *WeightedLines) Reset() {
 	l.curr = nil
 	l.pos = 0
-	l.iter = l.lines.MapRange()
+	l.iter.Reset(l.lines)
 }
 
 // WeightedLineSlice returns all the remaining lines in the iterator and advances

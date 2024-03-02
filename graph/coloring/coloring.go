@@ -9,6 +9,7 @@ package coloring
 
 import (
 	"errors"
+	"maps"
 	"sort"
 
 	"golang.org/x/exp/rand"
@@ -538,11 +539,10 @@ func newPartial(partial map[int64]int, g graph.Undirected) (map[int64]int, bool)
 }
 
 func clone(colors map[int64]int) map[int64]int {
-	new := make(map[int64]int, len(colors))
-	for id, c := range colors {
-		new[id] = c
+	if colors == nil {
+		return make(map[int64]int)
 	}
-	return new
+	return maps.Clone(colors)
 }
 
 // greedyColoringOf returns the chromatic number and a graph coloring of g

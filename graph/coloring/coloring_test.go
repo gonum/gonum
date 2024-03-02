@@ -29,11 +29,11 @@ var coloringTests = []struct {
 
 	partial map[int64]int
 
-	dsatur      set.Set[int]
-	randomized  set.Set[int]
-	rlf         set.Set[int]
-	sanSegundo  set.Set[int]
-	welshPowell set.Set[int]
+	dsatur      set.Ints
+	randomized  set.Ints
+	rlf         set.Ints
+	sanSegundo  set.Ints
+	welshPowell set.Ints
 }{
 	{
 		name:   "empty",
@@ -411,8 +411,8 @@ var coloringTests = []struct {
 	},
 }
 
-func setOf(vals ...int) set.Set[int] {
-	s := make(set.Set[int])
+func setOf(vals ...int) set.Ints {
+	s := make(set.Ints)
 	for _, v := range vals {
 		s.Add(v)
 	}

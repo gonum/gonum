@@ -11,6 +11,7 @@ import (
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/simple"
+	"gonum.org/v1/gonum/internal/sorted"
 )
 
 func TestIsPath(t *testing.T) {
@@ -166,7 +167,7 @@ func TestConnectedComponents(t *testing.T) {
 			ordered.Int64s(ids)
 			got[j] = ids
 		}
-		ordered.BySliceValues(got)
+		sorted.BySliceValues(got)
 		if !reflect.DeepEqual(got, test.want) {
 			t.Errorf("unexpected connected components for test %d %T:\ngot: %v\nwant:%v", i, g, got, test.want)
 		}

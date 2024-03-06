@@ -11,6 +11,7 @@ import (
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/simple"
+	"gonum.org/v1/gonum/internal/sorted"
 )
 
 var undirectedCyclesInTests = []struct {
@@ -97,7 +98,7 @@ func TestUndirectedCyclesIn(t *testing.T) {
 			ids[len(ids)-1] = ids[0]
 			got[j] = ids
 		}
-		ordered.BySliceValues(got)
+		sorted.BySliceValues(got)
 		var matched bool
 		for _, want := range test.want {
 			if reflect.DeepEqual(got, want) {

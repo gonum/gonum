@@ -10,10 +10,10 @@ import (
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
-	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/path/internal/testgraphs"
 	"gonum.org/v1/gonum/graph/simple"
 	"gonum.org/v1/gonum/graph/traverse"
+	"gonum.org/v1/gonum/internal/sorted"
 )
 
 func TestDijkstraFrom(t *testing.T) {
@@ -182,7 +182,7 @@ func TestDijkstraAllFrom(t *testing.T) {
 					gotPaths[i] = append(gotPaths[i], v.ID())
 				}
 			}
-			ordered.BySliceValues(gotPaths)
+			sorted.BySliceValues(gotPaths)
 			if !reflect.DeepEqual(gotPaths, test.WantPaths) {
 				t.Errorf("testing %q: unexpected shortest paths:\ngot: %v\nwant:%v",
 					test.Name, gotPaths, test.WantPaths)
@@ -210,7 +210,7 @@ func TestDijkstraAllFrom(t *testing.T) {
 					gotPaths[i] = append(gotPaths[i], v.ID())
 				}
 			}
-			ordered.BySliceValues(gotPaths)
+			sorted.BySliceValues(gotPaths)
 			if !reflect.DeepEqual(gotPaths, test.WantPaths) {
 				t.Errorf("testing %q %s: unexpected shortest paths:\ngot: %v\nwant:%v",
 					test.Name, tg.typ, gotPaths, test.WantPaths)
@@ -318,7 +318,7 @@ func TestDijkstraAllPaths(t *testing.T) {
 				got[i] = append(got[i], v.ID())
 			}
 		}
-		ordered.BySliceValues(got)
+		sorted.BySliceValues(got)
 		if !reflect.DeepEqual(got, test.WantPaths) {
 			t.Errorf("testing %q: unexpected shortest paths:\ngot: %v\nwant:%v",
 				test.Name, got, test.WantPaths)
@@ -337,7 +337,7 @@ func TestDijkstraAllPaths(t *testing.T) {
 				got[i] = append(got[i], v.ID())
 			}
 		}
-		ordered.BySliceValues(got)
+		sorted.BySliceValues(got)
 		if !reflect.DeepEqual(got, test.WantPaths) {
 			t.Errorf("testing %q: unexpected shortest paths:\ngot: %v\nwant:%v",
 				test.Name, got, test.WantPaths)

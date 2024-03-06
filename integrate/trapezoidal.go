@@ -4,7 +4,7 @@
 
 package integrate
 
-import "sort"
+import "slices"
 
 // Trapezoidal returns an approximate value of the integral
 //
@@ -36,7 +36,7 @@ func Trapezoidal(x, f []float64) float64 {
 		panic("integrate: slice length mismatch")
 	case n < 2:
 		panic("integrate: input data too small")
-	case !sort.Float64sAreSorted(x):
+	case !slices.IsSorted(x):
 		panic("integrate: input must be sorted")
 	}
 

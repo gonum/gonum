@@ -5,6 +5,7 @@
 package gonum
 
 import (
+	"slices"
 	"sort"
 
 	"gonum.org/v1/gonum/lapack"
@@ -29,7 +30,7 @@ func (impl Implementation) Dlasrt(s lapack.Sort, n int, d []float64) {
 	default:
 		panic(badSort)
 	case lapack.SortIncreasing:
-		sort.Float64s(d)
+		slices.Sort(d)
 	case lapack.SortDecreasing:
 		sort.Sort(sort.Reverse(sort.Float64Slice(d)))
 	}

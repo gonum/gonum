@@ -11,6 +11,8 @@ import (
 	"testing"
 
 	"golang.org/x/exp/rand"
+
+	"gonum.org/v1/gonum/internal/order"
 )
 
 var andTests = []struct {
@@ -58,8 +60,8 @@ func TestQueryAnd(t *testing.T) {
 			b := Query{terms: permutedTerms(test.b, src)}
 
 			got := a.And(b).Result()
-			sortByID(got)
-			sortByID(test.want)
+			order.ByID(got)
+			order.ByID(test.want)
 
 			if !reflect.DeepEqual(got, test.want) {
 				t.Errorf("unexpected result for test %q:\ngot: %v\nwant:%v",
@@ -114,8 +116,8 @@ func TestQueryOr(t *testing.T) {
 			b := Query{terms: permutedTerms(test.b, src)}
 
 			got := a.Or(b).Result()
-			sortByID(got)
-			sortByID(test.want)
+			order.ByID(got)
+			order.ByID(test.want)
 
 			if !reflect.DeepEqual(got, test.want) {
 				t.Errorf("unexpected result for test %q:\ngot: %v\nwant:%v",
@@ -170,8 +172,8 @@ func TestQueryNot(t *testing.T) {
 			b := Query{terms: permutedTerms(test.b, src)}
 
 			got := a.Not(b).Result()
-			sortByID(got)
-			sortByID(test.want)
+			order.ByID(got)
+			order.ByID(test.want)
 
 			if !reflect.DeepEqual(got, test.want) {
 				t.Errorf("unexpected result for test %q:\ngot: %v\nwant:%v",
@@ -276,8 +278,8 @@ func TestQueryUnique(t *testing.T) {
 			a := Query{terms: permutedTerms(test.in, src)}
 
 			got := a.Unique().Result()
-			sortByID(got)
-			sortByID(test.want)
+			order.ByID(got)
+			order.ByID(test.want)
 
 			if !reflect.DeepEqual(got, test.want) {
 				t.Errorf("unexpected result for test %q:\ngot: %v\nwant:%v",
@@ -424,8 +426,8 @@ func TestQueryHasAllOut(t *testing.T) {
 		a := Query{g: g, terms: test.in}
 
 		got := a.HasAllOut(test.fn).Result()
-		sortByID(got)
-		sortByID(test.wantAll)
+		order.ByID(got)
+		order.ByID(test.wantAll)
 
 		if !reflect.DeepEqual(got, test.wantAll) {
 			t.Errorf("unexpected result for test %q:\ngot: %v\nwant:%v",
@@ -433,7 +435,7 @@ func TestQueryHasAllOut(t *testing.T) {
 		}
 
 		cons := test.cons(a).Result()
-		sortByID(cons)
+		order.ByID(cons)
 		if !reflect.DeepEqual(got, cons) {
 			t.Errorf("unexpected construction result for test %q:\ngot: %v\nwant:%v",
 				test.name, got, cons)
@@ -463,8 +465,8 @@ func TestQueryHasAnyOut(t *testing.T) {
 		a := Query{g: g, terms: test.in}
 
 		got := a.HasAnyOut(test.fn).Result()
-		sortByID(got)
-		sortByID(test.wantAny)
+		order.ByID(got)
+		order.ByID(test.wantAny)
 
 		if !reflect.DeepEqual(got, test.wantAny) {
 			t.Errorf("unexpected result for test %q:\ngot: %v\nwant:%v",
@@ -593,8 +595,8 @@ func TestQueryHasAllIn(t *testing.T) {
 		a := Query{g: g, terms: test.in}
 
 		got := a.HasAllIn(test.fn).Result()
-		sortByID(got)
-		sortByID(test.wantAll)
+		order.ByID(got)
+		order.ByID(test.wantAll)
 
 		if !reflect.DeepEqual(got, test.wantAll) {
 			t.Errorf("unexpected result for test %q:\ngot: %v\nwant:%v",
@@ -602,7 +604,7 @@ func TestQueryHasAllIn(t *testing.T) {
 		}
 
 		cons := test.cons(a).Result()
-		sortByID(cons)
+		order.ByID(cons)
 		if !reflect.DeepEqual(got, cons) {
 			t.Errorf("unexpected construction result for test %q:\ngot: %v\nwant:%v",
 				test.name, got, cons)
@@ -632,8 +634,8 @@ func TestQueryHasAnyIn(t *testing.T) {
 		a := Query{g: g, terms: test.in}
 
 		got := a.HasAnyIn(test.fn).Result()
-		sortByID(got)
-		sortByID(test.wantAny)
+		order.ByID(got)
+		order.ByID(test.wantAny)
 
 		if !reflect.DeepEqual(got, test.wantAny) {
 			t.Errorf("unexpected result for test %q:\ngot: %v\nwant:%v",

@@ -6,12 +6,12 @@ package iterator_test
 
 import (
 	"reflect"
-	"sort"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/iterator"
 	"gonum.org/v1/gonum/graph/simple"
+	"gonum.org/v1/gonum/internal/order"
 )
 
 type line struct{ f, t, id int64 }
@@ -62,8 +62,8 @@ func TestLinesSlice(t *testing.T) {
 			for _, l := range test.lines {
 				want = append(want, l)
 			}
-			sort.Slice(got, func(i, j int) bool { return got[i].ID() < got[j].ID() })
-			sort.Slice(want, func(i, j int) bool { return want[i].ID() < want[j].ID() })
+			order.ByID(got)
+			order.ByID(want)
 			if !reflect.DeepEqual(got, want) {
 				t.Errorf("unexpected iterator output for round %d: got:%#v want:%#v", i, got, want)
 			}
@@ -167,8 +167,8 @@ func TestWeightedLinesSlice(t *testing.T) {
 			for _, l := range test.lines {
 				want = append(want, l)
 			}
-			sort.Slice(got, func(i, j int) bool { return got[i].ID() < got[j].ID() })
-			sort.Slice(want, func(i, j int) bool { return want[i].ID() < want[j].ID() })
+			order.ByID(got)
+			order.ByID(want)
 			if !reflect.DeepEqual(got, want) {
 				t.Errorf("unexpected iterator output for round %d: got:%#v want:%#v", i, got, want)
 			}

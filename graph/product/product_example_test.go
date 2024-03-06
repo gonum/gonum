@@ -93,7 +93,7 @@ func ExampleModular_subgraphIsomorphism() {
 	mc := topo.BronKerbosch(p)
 
 	// Report the largest.
-	sort.Sort(byLength(mc))
+	sortByLengthDescending(mc)
 	max := len(mc[0])
 	w := tabwriter.NewWriter(os.Stdout, 5, 0, 0, ' ', tabwriter.AlignRight)
 	fmt.Println("  Adenine   Guanine")
@@ -128,10 +128,6 @@ func ExampleModular_subgraphIsomorphism() {
 	//     C    4    C    4
 }
 
-// byLength implements the sort.Interface, sorting the slices
-// descending by length.
-type byLength [][]graph.Node
-
-func (n byLength) Len() int           { return len(n) }
-func (n byLength) Less(i, j int) bool { return len(n[i]) > len(n[j]) }
-func (n byLength) Swap(i, j int)      { n[i], n[j] = n[j], n[i] }
+func sortByLengthDescending(mc [][]graph.Node) {
+	sort.Slice(mc, func(i, j int) bool { return len(mc[i]) > len(mc[j]) })
+}

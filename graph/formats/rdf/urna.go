@@ -11,7 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"hash"
-	"sort"
+	"slices"
 
 	"gonum.org/v1/gonum/stat/combin"
 )
@@ -23,7 +23,7 @@ func Deduplicate(s []*Statement) []*Statement {
 	if len(s) < 2 {
 		return s
 	}
-	sort.Sort(c14nStatements(s))
+	sortC14nStatements(s)
 	curr := 0
 	for i, e := range s {
 		if isSameStatement(e, s[curr]) {
@@ -217,7 +217,7 @@ func (u *urna) relabel(dst, src []*Statement) ([]*Statement, error) {
 		n.Object = Term{Value: translateURNA(s.Object.Value, u.canon.issued), UID: s.Object.UID}
 		n.Label = Term{Value: translateURNA(s.Label.Value, u.canon.issued), UID: s.Label.UID}
 	}
-	sort.Sort(c14nStatements(dst))
+	sortC14nStatements(dst)
 
 	return dst, nil
 }
@@ -230,7 +230,7 @@ func lexicallySortedPathHashes(paths map[string][]*issuer) []string {
 		lexicalHashPaths[i] = h
 		i++
 	}
-	sort.Strings(lexicalHashPaths)
+	slices.Sort(lexicalHashPaths)
 	return lexicalHashPaths
 }
 
@@ -273,7 +273,7 @@ func (u *urna) hashFirstDegreeQuads(b string) string {
 		statements = append(statements, &n)
 	}
 
-	sort.Sort(c14nStatements(statements)) // 4.
+	sortC14nStatements(statements) // 4.
 
 	// 5.
 	u.hash.Reset()
@@ -384,7 +384,7 @@ func lexicallySortedTermHashes(termsFor map[string][]string) []string {
 		lexicalHashes[i] = h
 		i++
 	}
-	sort.Strings(lexicalHashes)
+	slices.Sort(lexicalHashes)
 	return lexicalHashes
 }
 

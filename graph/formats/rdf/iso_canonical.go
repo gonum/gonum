@@ -6,10 +6,14 @@ package rdf
 
 import (
 	"bytes"
+	"cmp"
 	"errors"
 	"fmt"
 	"hash"
+	"slices"
 	"sort"
+
+	"gonum.org/v1/gonum/internal/order"
 )
 
 // See "Canonical Forms for Isomorphic and Equivalent RDF Graphs: Algorithms
@@ -53,7 +57,7 @@ func lexicalHashes(dst [][]byte, hashes map[string][]byte) {
 		dst[i] = s
 		i++
 	}
-	sort.Sort(lexical(dst))
+	order.BySliceValues(dst)
 }
 
 // IsoCanonicalHashes returns a mapping between the nodes of the RDF graph
@@ -185,7 +189,7 @@ func C14n(dst, src []*Statement, terms map[string]map[string]bool) ([]*Statement
 		blanks[i] = h
 		i++
 	}
-	sort.Strings(blanks)
+	slices.Sort(blanks)
 
 	c14n := make(map[string]string)
 	for i, b := range blanks {
@@ -218,7 +222,7 @@ func C14n(dst, src []*Statement, terms map[string]map[string]bool) ([]*Statement
 		n.Object = Term{Value: translate(s.Object.Value, c14n)}
 		n.Label = Term{Value: translate(s.Label.Value, c14n)}
 	}
-	sort.Sort(c14nStatements(dst))
+	sortC14nStatements(dst)
 
 	return dst, nil
 }
@@ -230,33 +234,20 @@ func translate(term string, mapping map[string]string) string {
 	return term
 }
 
-type c14nStatements []*Statement
+func sortC14nStatements(statements []*Statement) {
+	slices.SortFunc(statements, func(a, b *Statement) int {
+		if n := cmp.Compare(a.Subject.Value, b.Subject.Value); n != 0 {
+			return n
+		}
 
-func (s c14nStatements) Len() int { return len(s) }
-func (s c14nStatements) Less(i, j int) bool {
-	si := s[i]
-	sj := s[j]
-	switch {
-	case si.Subject.Value < sj.Subject.Value:
-		return true
-	case si.Subject.Value > sj.Subject.Value:
-		return false
-	}
-	switch { // Always IRI.
-	case si.Predicate.Value < sj.Predicate.Value:
-		return true
-	case si.Predicate.Value > sj.Predicate.Value:
-		return false
-	}
-	switch {
-	case si.Object.Value < sj.Object.Value:
-		return true
-	case si.Object.Value > sj.Object.Value:
-		return false
-	}
-	return si.Label.Value < sj.Label.Value
+		// Always IRI.
+		if n := cmp.Compare(a.Predicate.Value, b.Predicate.Value); n != 0 {
+			return n
+		}
+
+		return cmp.Compare(a.Object.Value, b.Object.Value)
+	})
 }
-func (s c14nStatements) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
 
 // hashBNodes returns the hashed blank nodes of the graph described by statements
 // using the provided hash function. Hashes are initialised with zero.
@@ -497,19 +488,12 @@ func (b hashBag) add(term string, hash []byte) {
 // state and returns the hash.
 func (b hashBag) sum(term string) []byte {
 	p := b.hashesFor[term]
-	sort.Sort(lexical(p))
+	order.BySliceValues(p)
 	h := hashTuple(b.hash, p...)
 	b.hashesFor[term] = b.hashesFor[term][:1]
 	b.hashesFor[term][0] = h
 	return h
 }
-
-// lexical implements lexical sorting of [][]byte.
-type lexical [][]byte
-
-func (b lexical) Len() int           { return len(b) }
-func (b lexical) Less(i, j int) bool { return string(b[i]) < string(b[j]) }
-func (b lexical) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
 
 // hashTuple returns the h hash of the concatenation of t.
 func hashTuple(h hash.Hash, t ...[]byte) []byte {

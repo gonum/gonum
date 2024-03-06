@@ -6,7 +6,7 @@ package community
 
 import (
 	"math"
-	"sort"
+	"slices"
 
 	"golang.org/x/exp/rand"
 
@@ -554,7 +554,7 @@ func (l *undirectedLocalMover) deltaQ(n graph.Node) (deltaQ float64, dst int, sr
 	for i := range connected {
 		candidates = append(candidates, i)
 	}
-	sort.Ints(candidates)
+	slices.Sort(candidates)
 
 	// Calculate the highest modularity gain
 	// from moving into another community and

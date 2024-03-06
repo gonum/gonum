@@ -10,9 +10,9 @@ import (
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
-	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/path/internal/testgraphs"
 	"gonum.org/v1/gonum/graph/traverse"
+	"gonum.org/v1/gonum/internal/sorted"
 )
 
 func TestBellmanFordFrom(t *testing.T) {
@@ -163,7 +163,7 @@ func TestBellmanFordAllFrom(t *testing.T) {
 						test.Name, tg.typ, gotPaths)
 				}
 			} else {
-				ordered.BySliceValues(gotPaths)
+				sorted.BySliceValues(gotPaths)
 				if !reflect.DeepEqual(gotPaths, test.WantPaths) {
 					t.Errorf("testing %q %s: unexpected shortest paths:\ngot: %v\nwant:%v",
 						test.Name, tg.typ, gotPaths, test.WantPaths)
@@ -194,7 +194,7 @@ func TestBellmanFordAllFrom(t *testing.T) {
 						test.Name, tg.typ, gotPaths)
 				}
 			} else {
-				ordered.BySliceValues(gotPaths)
+				sorted.BySliceValues(gotPaths)
 				if !reflect.DeepEqual(gotPaths, test.WantPaths) {
 					t.Errorf("testing %q %s: unexpected shortest paths:\ngot: %v\nwant:%v",
 						test.Name, tg.typ, gotPaths, test.WantPaths)

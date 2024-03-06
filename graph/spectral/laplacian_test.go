@@ -9,9 +9,9 @@ import (
 
 	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/graph"
-	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/iterator"
 	"gonum.org/v1/gonum/graph/simple"
+	"gonum.org/v1/gonum/internal/order"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -128,7 +128,7 @@ type sortedNodeGraph struct {
 
 func (g sortedNodeGraph) Nodes() graph.Nodes {
 	n := graph.NodesOf(g.Graph.Nodes())
-	ordered.ByID(n)
+	order.ByID(n)
 	return iterator.NewOrderedNodes(n)
 }
 

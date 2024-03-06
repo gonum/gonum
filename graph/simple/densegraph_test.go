@@ -11,17 +11,17 @@ import (
 	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/graph"
-	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/internal/set"
 	"gonum.org/v1/gonum/graph/simple"
 	"gonum.org/v1/gonum/graph/testgraph"
+	"gonum.org/v1/gonum/internal/order"
 )
 
 func isZeroContiguousSet(nodes []graph.Node) bool {
 	t := make([]graph.Node, len(nodes))
 	copy(t, nodes)
 	nodes = t
-	ordered.ByID(nodes)
+	order.ByID(nodes)
 	for i, n := range nodes {
 		if int64(i) != n.ID() {
 			return false
@@ -641,7 +641,7 @@ func TestDenseLists(t *testing.T) {
 		t.Fatalf("Wrong number of nodes: got:%v want:%v", len(nodes), 15)
 	}
 
-	ordered.ByID(nodes)
+	order.ByID(nodes)
 
 	for i, node := range graph.NodesOf(dg.Nodes()) {
 		if int64(i) != node.ID() {

@@ -15,8 +15,8 @@ import (
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
-	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/iterator"
+	"gonum.org/v1/gonum/internal/order"
 	"gonum.org/v1/plot/cmpimg"
 )
 
@@ -29,13 +29,13 @@ type orderedGraph struct {
 
 func (g orderedGraph) Nodes() graph.Nodes {
 	n := graph.NodesOf(g.Graph.Nodes())
-	ordered.ByID(n)
+	order.ByID(n)
 	return iterator.NewOrderedNodes(n)
 }
 
 func (g orderedGraph) From(id int64) graph.Nodes {
 	n := graph.NodesOf(g.Graph.From(id))
-	ordered.ByID(n)
+	order.ByID(n)
 	return iterator.NewOrderedNodes(n)
 }
 

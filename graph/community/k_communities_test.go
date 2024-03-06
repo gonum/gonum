@@ -10,8 +10,8 @@ import (
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
-	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/simple"
+	"gonum.org/v1/gonum/internal/order"
 )
 
 // batageljZaversnikGraph is the example graph from
@@ -125,9 +125,9 @@ func TestKCliqueCommunities(t *testing.T) {
 		got := KCliqueCommunities(test.k, g)
 
 		for _, c := range got {
-			ordered.ByID(c)
+			order.ByID(c)
 		}
-		ordered.BySliceIDs(got)
+		order.BySliceIDs(got)
 
 		if !reflect.DeepEqual(got, test.want) {
 			t.Errorf("unexpected k-connected components for %q k=%d:\ngot: %v\nwant:%v", test.name, test.k, got, test.want)

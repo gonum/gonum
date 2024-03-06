@@ -11,9 +11,9 @@ import (
 	"strings"
 
 	"gonum.org/v1/gonum/graph"
-	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/iterator"
 	"gonum.org/v1/gonum/graph/simple"
+	"gonum.org/v1/gonum/internal/order"
 )
 
 // Graph is a digraph6-represented directed graph.
@@ -37,7 +37,7 @@ var (
 func Encode(g graph.Graph) Graph {
 	nodes := graph.NodesOf(g.Nodes())
 	n := len(nodes)
-	ordered.ByID(nodes)
+	order.ByID(nodes)
 	indexOf := make(map[int64]int, n)
 	for i, n := range nodes {
 		indexOf[n.ID()] = i

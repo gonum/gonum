@@ -17,8 +17,8 @@ import (
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/graph"
-	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/simple"
+	"gonum.org/v1/gonum/internal/order"
 )
 
 var communityUndirectedMultiplexQTests = []struct {
@@ -279,7 +279,7 @@ func TestCommunityQUndirectedMultiplex(t *testing.T) {
 			got := floats.Sum(q)
 			if !scalar.EqualWithinAbsOrRel(got, structure.want, structure.tol, structure.tol) && !math.IsNaN(structure.want) {
 				for _, c := range communities {
-					ordered.ByID(c)
+					order.ByID(c)
 				}
 				t.Errorf("unexpected Q value for %q %v: got: %v %.3v want: %v",
 					test.name, communities, got, q, structure.want)
@@ -307,7 +307,7 @@ tests:
 					communityOf[n] = i
 					communities[i] = append(communities[i], simple.Node(n))
 				}
-				ordered.ByID(communities[i])
+				order.ByID(communities[i])
 			}
 			resolution := []float64{structure.resolution}
 
@@ -328,7 +328,7 @@ tests:
 
 			// This is done to avoid run-to-run
 			// variation due to map iteration order.
-			ordered.ByID(l.nodes)
+			order.ByID(l.nodes)
 
 			l.shuffle(rnd)
 
@@ -345,7 +345,7 @@ tests:
 						}
 						migrated[i] = append(migrated[i], simple.Node(n))
 					}
-					ordered.ByID(migrated[i])
+					order.ByID(migrated[i])
 				}
 
 				for i, c := range structure.memberships {
@@ -423,7 +423,7 @@ tests:
 				for n := range c {
 					communities[i] = append(communities[i], simple.Node(n))
 				}
-				ordered.ByID(communities[i])
+				order.ByID(communities[i])
 			}
 
 			gQ := QMultiplex(g, communities, weights, []float64{structure.resolution})
@@ -509,7 +509,7 @@ func TestMoveLocalUndirectedMultiplex(t *testing.T) {
 				for n := range c {
 					communities[i] = append(communities[i], simple.Node(n))
 				}
-				ordered.ByID(communities[i])
+				order.ByID(communities[i])
 			}
 
 			r := reduceUndirectedMultiplex(reduceUndirectedMultiplex(g, nil, weights), communities, weights)
@@ -549,9 +549,9 @@ func TestLouvainMultiplex(t *testing.T) {
 			for n := range c {
 				want[i] = append(want[i], simple.Node(n))
 			}
-			ordered.ByID(want[i])
+			order.ByID(want[i])
 		}
-		ordered.BySliceIDs(want)
+		order.BySliceIDs(want)
 
 		var (
 			got   *ReducedUndirectedMultiplex
@@ -585,9 +585,9 @@ func TestLouvainMultiplex(t *testing.T) {
 
 		gotCommunities := got.Communities()
 		for _, c := range gotCommunities {
-			ordered.ByID(c)
+			order.ByID(c)
 		}
-		ordered.BySliceIDs(gotCommunities)
+		order.BySliceIDs(gotCommunities)
 		if !reflect.DeepEqual(gotCommunities, want) {
 			t.Errorf("unexpected community membership for %s Q=%.4v:\n\tgot: %v\n\twant:%v",
 				test.name, bestQ, gotCommunities, want)
@@ -600,9 +600,9 @@ func TestLouvainMultiplex(t *testing.T) {
 			if p.parent != nil {
 				communities = p.parent.Communities()
 				for _, c := range communities {
-					ordered.ByID(c)
+					order.ByID(c)
 				}
-				ordered.BySliceIDs(communities)
+				order.BySliceIDs(communities)
 			} else {
 				communities = reduceUndirectedMultiplex(g, nil, weights).Communities()
 			}

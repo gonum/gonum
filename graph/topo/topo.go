@@ -6,8 +6,8 @@ package topo
 
 import (
 	"gonum.org/v1/gonum/graph"
-	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/traverse"
+	"gonum.org/v1/gonum/internal/order"
 )
 
 // IsPathIn returns whether path is a path in g.
@@ -80,8 +80,8 @@ func Equal(a, b graph.Graph) bool {
 
 	aNodeSlice := graph.NodesOf(aNodes)
 	bNodeSlice := graph.NodesOf(bNodes)
-	ordered.ByID(aNodeSlice)
-	ordered.ByID(bNodeSlice)
+	order.ByID(aNodeSlice)
+	order.ByID(bNodeSlice)
 	for i, aU := range aNodeSlice {
 		id := aU.ID()
 		if id != bNodeSlice[i].ID() {
@@ -96,8 +96,8 @@ func Equal(a, b graph.Graph) bool {
 
 		aAdjacent := graph.NodesOf(toA)
 		bAdjacent := graph.NodesOf(toB)
-		ordered.ByID(aAdjacent)
-		ordered.ByID(bAdjacent)
+		order.ByID(aAdjacent)
+		order.ByID(bAdjacent)
 		for i, aV := range aAdjacent {
 			id := aV.ID()
 			if id != bAdjacent[i].ID() {

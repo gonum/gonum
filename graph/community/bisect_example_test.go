@@ -11,8 +11,8 @@ import (
 	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/graph/community"
-	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/simple"
+	"gonum.org/v1/gonum/internal/order"
 )
 
 func ExampleProfile_simple() {
@@ -51,9 +51,9 @@ func ExampleProfile_simple() {
 	for _, d := range p {
 		comm := d.Communities()
 		for _, c := range comm {
-			ordered.ByID(c)
+			order.ByID(c)
 		}
-		ordered.BySliceIDs(comm)
+		order.BySliceIDs(comm)
 		fmt.Printf("Low:%.2v High:%.2v Score:%v Communities:%v Q=%.3v\n",
 			d.Low, d.High, d.Score, comm, community.Q(g, comm, d.Low))
 	}
@@ -199,9 +199,9 @@ func ExampleProfile_multiplex() {
 	for _, d := range p {
 		comm := d.Communities()
 		for _, c := range comm {
-			ordered.ByID(c)
+			order.ByID(c)
 		}
-		ordered.BySliceIDs(comm)
+		order.BySliceIDs(comm)
 		fmt.Printf("Low:%.2v High:%.2v Score:%v Communities:%v Q=%.3v\n",
 			d.Low, d.High, d.Score, comm, community.QMultiplex(g, comm, weights, []float64{d.Low}))
 	}

@@ -15,8 +15,8 @@ import (
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/graphs/gen"
-	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/simple"
+	"gonum.org/v1/gonum/internal/order"
 )
 
 var shortestTests = []struct {
@@ -58,7 +58,7 @@ func TestShortestAlts(t *testing.T) {
 							gotPaths[i] = append(gotPaths[i], v.ID())
 						}
 					}
-					ordered.BySliceValues(gotPaths)
+					order.BySliceValues(gotPaths)
 					var wantPaths [][]int64
 					if len(want) != 0 {
 						wantPaths = make([][]int64, len(want))
@@ -68,7 +68,7 @@ func TestShortestAlts(t *testing.T) {
 							wantPaths[i] = append(wantPaths[i], v.ID())
 						}
 					}
-					ordered.BySliceValues(wantPaths)
+					order.BySliceValues(wantPaths)
 					if !reflect.DeepEqual(gotPaths, wantPaths) {
 						t.Errorf("unexpected shortest paths %d --> %d:\ngot: %v\nwant:%v",
 							uid, vid, gotPaths, wantPaths)
@@ -104,7 +104,7 @@ func TestAllShortest(t *testing.T) {
 							gotPaths[i] = append(gotPaths[i], v.ID())
 						}
 					}
-					ordered.BySliceValues(gotPaths)
+					order.BySliceValues(gotPaths)
 					var wantPaths [][]int64
 					if len(want) != 0 {
 						wantPaths = make([][]int64, len(want))
@@ -114,7 +114,7 @@ func TestAllShortest(t *testing.T) {
 							wantPaths[i] = append(wantPaths[i], v.ID())
 						}
 					}
-					ordered.BySliceValues(wantPaths)
+					order.BySliceValues(wantPaths)
 					if !reflect.DeepEqual(gotPaths, wantPaths) {
 						t.Errorf("unexpected shortest paths %d --> %d:\ngot: %v\nwant:%v",
 							uid, vid, gotPaths, wantPaths)

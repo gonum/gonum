@@ -10,7 +10,7 @@ package rdf
 import (
 	"fmt"
 	"os"
-	"sort"
+	"slices"
 	"strings"
 	"text/tabwriter"
 )
@@ -47,7 +47,7 @@ func (d debugger) logHashes(depth int, hashes map[string][]byte, size int) {
 			keys[i] = k
 			i++
 		}
-		sort.Strings(keys)
+		slices.Sort(keys)
 		w := tabwriter.NewWriter(os.Stderr, 0, 4, 8, ' ', 0)
 		for _, k := range keys {
 			fmt.Fprintf(w, prefix+"%s\t%0*x\n", k, 2*size, hashes[k])

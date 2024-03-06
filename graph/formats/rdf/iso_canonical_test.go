@@ -5,6 +5,7 @@
 package rdf
 
 import (
+	"cmp"
 	"crypto/md5"
 	"flag"
 	"fmt"
@@ -13,6 +14,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"sort"
 	"testing"
 	"text/tabwriter"
@@ -82,10 +84,10 @@ func TestIsoCanonicalHashes(t *testing.T) {
 						}
 						if last != nil {
 							last := relabelStatements(statements, termsFor(last, hash))
-							sort.Sort(simpleLexicalStatements(last))
+							sortSimpleLexicalStatements(last)
 
 							curr := relabelStatements(statements, termsFor(curr, hash))
-							sort.Sort(simpleLexicalStatements(curr))
+							sortSimpleLexicalStatements(curr)
 
 							if !reflect.DeepEqual(last, curr) {
 								t.Errorf("IsoCanonicalHashes was not stable between runs on %q with decomp=%t",
@@ -154,7 +156,7 @@ func TestIsoCanonicalHashes(t *testing.T) {
 
 					// Relabel a copy of the statements and then sort.
 					orig := relabelStatements(statements, termsFor(hashes, hash))
-					sort.Sort(simpleLexicalStatements(orig))
+					sortSimpleLexicalStatements(orig)
 
 					for _, perm := range []struct {
 						name string
@@ -216,7 +218,7 @@ func TestIsoCanonicalHashes(t *testing.T) {
 									keys[i] = k
 									i++
 								}
-								sort.Strings(keys)
+								slices.Sort(keys)
 								w := tabwriter.NewWriter(os.Stderr, 0, 4, 8, ' ', 0)
 								for _, k := range keys {
 									fmt.Fprintf(w, "\t%s\t%s\n", k, translate(k, terms))
@@ -227,7 +229,7 @@ func TestIsoCanonicalHashes(t *testing.T) {
 
 							// Relabel a copy of the alternative statements and then sort.
 							alt := relabelStatements(altStatements, termsFor(altHashes, hash))
-							sort.Sort(simpleLexicalStatements(alt))
+							sortSimpleLexicalStatements(alt)
 
 							for i := range statements {
 								if *orig[i] != *alt[i] { // Otherwise we have pointer inequality.
@@ -290,7 +292,7 @@ func permuteBlanks(s []*Statement, src rand.Source) ([]*Statement, map[string]st
 			blanks = append(blanks, t)
 		}
 	}
-	sort.Strings(blanks)
+	slices.Sort(blanks)
 	for x, y := range rnd.Perm(len(blanks)) {
 		terms[blanks[x]] = blanks[y]
 	}
@@ -369,7 +371,7 @@ func mergeFirst2B(s []*Statement) ([]*Statement, map[string]string) {
 		blanks[i] = b
 		i++
 	}
-	sort.Strings(blanks)
+	slices.Sort(blanks)
 	terms[blanks[1]] = terms[blanks[0]]
 
 	m := relabelStatements(s, terms)
@@ -428,7 +430,7 @@ func TestLexicalStatements(t *testing.T) {
 
 			// Relabel a copy of the statements and then sort.
 			direct := relabelStatements(statements, terms)
-			sort.Sort(simpleLexicalStatements(direct))
+			sortSimpleLexicalStatements(direct)
 
 			for i := range statements {
 				if *indirect[i] != *direct[i] { // Otherwise we have pointer inequality.
@@ -450,36 +452,21 @@ func termsFor(hashes map[string][]byte, hash hash.Hash) map[string]string {
 	return terms
 }
 
-// simpleLexicalStatements implements lexical statement sorting on the
+// sortSimpleLexicalStatements implements lexical statement sorting on the
 // literal values without interpolation.
-type simpleLexicalStatements []*Statement
+func sortSimpleLexicalStatements(statements []*Statement) {
+	slices.SortFunc(statements, func(a, b *Statement) int {
+		if n := cmp.Compare(unquoteIRI(a.Subject.Value), unquoteIRI(b.Subject.Value)); n != 0 {
+			return n
+		}
 
-func (s simpleLexicalStatements) Len() int { return len(s) }
-func (s simpleLexicalStatements) Less(i, j int) bool {
-	si := s[i]
-	sj := s[j]
-	switch {
-	case unquoteIRI(si.Subject.Value) < unquoteIRI(sj.Subject.Value):
-		return true
-	case unquoteIRI(si.Subject.Value) > unquoteIRI(sj.Subject.Value):
-		return false
-	}
-	switch { // Always IRI.
-	case si.Predicate.Value < sj.Predicate.Value:
-		return true
-	case si.Predicate.Value > sj.Predicate.Value:
-		return false
-	}
-	switch {
-	case unquoteIRI(si.Object.Value) < unquoteIRI(sj.Object.Value):
-		return true
-	case unquoteIRI(si.Object.Value) > unquoteIRI(sj.Object.Value):
-		return false
-	}
-	return unquoteIRI(si.Label.Value) < unquoteIRI(sj.Label.Value)
-}
-func (s simpleLexicalStatements) Swap(i, j int) {
-	s[i], s[j] = s[j], s[i]
+		// Always IRI.
+		if n := cmp.Compare(unquoteIRI(a.Predicate.Value), unquoteIRI(b.Predicate.Value)); n != 0 {
+			return n
+		}
+
+		return cmp.Compare(unquoteIRI(a.Object.Value), unquoteIRI(b.Object.Value))
+	})
 }
 
 func relabelStatements(s []*Statement, terms map[string]string) []*Statement {

@@ -13,13 +13,13 @@ import (
 )
 
 // ByID sorts a slice of graph.Node by ID.
-func ByID(n []graph.Node) {
+func ByID[S ~[]E, E graph.Node](n S) {
 	sort.Slice(n, func(i, j int) bool { return n[i].ID() < n[j].ID() })
 }
 
 // BySliceValues sorts a slice of []cmp.Ordered lexically by the values of
 // the []cmp.Ordered.
-func BySliceValues[S interface{ ~[]E }, E cmp.Ordered](c []S) {
+func BySliceValues[S ~[]E, E cmp.Ordered](c []S) {
 	slices.SortFunc(c, func(a, b S) int {
 		l := min(len(a), len(b))
 		for k, v := range a[:l] {
@@ -34,35 +34,27 @@ func BySliceValues[S interface{ ~[]E }, E cmp.Ordered](c []S) {
 // BySliceIDs sorts a slice of []graph.Node lexically by the IDs of the
 // []graph.Node.
 func BySliceIDs(c [][]graph.Node) {
-	sort.Slice(c, func(i, j int) bool {
-		a, b := c[i], c[j]
-		l := len(a)
-		if len(b) < l {
-			l = len(b)
-		}
+	slices.SortFunc(c, func(a, b []graph.Node) int {
+		l := min(len(a), len(b))
 		for k, v := range a[:l] {
-			if v.ID() < b[k].ID() {
-				return true
-			}
-			if v.ID() > b[k].ID() {
-				return false
+			if n := cmp.Compare(v.ID(), b[k].ID()); n != 0 {
+				return n
 			}
 		}
-		return len(a) < len(b)
+		return cmp.Compare(len(a), len(b))
 	})
 }
 
 // LinesByIDs sort a slice of graph.LinesByIDs lexically by the From IDs,
 // then by the To IDs, finally by the Line IDs.
 func LinesByIDs(n []graph.Line) {
-	sort.Slice(n, func(i, j int) bool {
-		a, b := n[i], n[j]
-		if a.From().ID() != b.From().ID() {
-			return a.From().ID() < b.From().ID()
+	slices.SortFunc(n, func(a, b graph.Line) int {
+		if n := cmp.Compare(a.From().ID(), b.From().ID()); n != 0 {
+			return n
 		}
-		if a.To().ID() != b.To().ID() {
-			return a.To().ID() < b.To().ID()
+		if n := cmp.Compare(a.To().ID(), b.To().ID()); n != 0 {
+			return n
 		}
-		return n[i].ID() < n[j].ID()
+		return cmp.Compare(a.ID(), b.ID())
 	})
 }

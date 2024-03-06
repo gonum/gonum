@@ -5,9 +5,10 @@
 package path
 
 import (
+	"cmp"
 	"math"
 	"reflect"
-	"sort"
+	"slices"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
@@ -370,11 +371,13 @@ func TestYenKSP(t *testing.T) {
 		got := YenKShortestPaths(g.(graph.Graph), test.k, test.cost, test.query.From(), test.query.To())
 		gotIDs := pathIDs(got)
 
-		paths := make(byPathWeight, len(gotIDs))
+		paths := make([]yenShortest, len(gotIDs))
 		for i, p := range got {
 			paths[i] = yenShortest{path: p, weight: pathWeight(p, g.(graph.Weighted))}
 		}
-		if !sort.IsSorted(paths) {
+		if !slices.IsSortedFunc(paths, func(a, b yenShortest) int {
+			return cmp.Compare(a.weight, b.weight)
+		}) {
 			t.Errorf("unexpected result for %q: got:%+v", test.name, paths)
 		}
 		if test.relaxed {

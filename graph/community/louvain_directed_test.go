@@ -8,7 +8,6 @@ import (
 	"math"
 	"reflect"
 	"slices"
-	"sort"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -632,7 +631,7 @@ func testModularizeDirected(t *testing.T, test communityDirectedQTest, g graph.D
 		}
 
 		// Recovery of Q values is reversed.
-		if slices.Reverse(qs); !sort.Float64sAreSorted(qs) {
+		if slices.Reverse(qs); !slices.IsSorted(qs) {
 			t.Errorf("Q values not monotonically increasing: %.5v", qs)
 		}
 	}

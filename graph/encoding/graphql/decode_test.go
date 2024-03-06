@@ -9,7 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"os/exec"
-	"sort"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
@@ -211,7 +211,7 @@ func (a attributes) Attributes() []encoding.Attribute {
 	for k := range a {
 		keys = append(keys, k)
 	}
-	sort.Strings(keys)
+	slices.Sort(keys)
 	attr := make([]encoding.Attribute, 0, len(keys))
 	for _, k := range keys {
 		v := a[k]

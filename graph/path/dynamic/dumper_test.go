@@ -6,9 +6,10 @@ package dynamic
 
 import (
 	"bytes"
+	"cmp"
 	"fmt"
 	"io"
-	"sort"
+	"slices"
 	"text/tabwriter"
 
 	"gonum.org/v1/gonum/graph/path/internal/testgraphs"
@@ -131,7 +132,12 @@ func (d *dumper) printEdges(format string, edges []simple.WeightedEdge) {
 		return
 	}
 	var buf bytes.Buffer
-	sort.Sort(lexically(edges))
+	slices.SortFunc(edges, func(a, b simple.WeightedEdge) int {
+		if n := cmp.Compare(a.From().ID(), b.From().ID()); n != 0 {
+			return n
+		}
+		return cmp.Compare(a.To().ID(), b.To().ID())
+	})
 	for i, e := range edges {
 		if i != 0 {
 			fmt.Fprint(&buf, ", ")
@@ -143,11 +149,3 @@ func (d *dumper) printEdges(format string, edges []simple.WeightedEdge) {
 	}
 	fmt.Fprintf(d.w, format, buf.Bytes())
 }
-
-type lexically []simple.WeightedEdge
-
-func (l lexically) Len() int { return len(l) }
-func (l lexically) Less(i, j int) bool {
-	return l[i].From().ID() < l[j].From().ID() || (l[i].From().ID() == l[j].From().ID() && l[i].To().ID() < l[j].To().ID())
-}
-func (l lexically) Swap(i, j int) { l[i], l[j] = l[j], l[i] }

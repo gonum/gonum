@@ -7,7 +7,7 @@ package rdf_test
 import (
 	"io"
 	"math"
-	"sort"
+	"slices"
 	"strings"
 	"testing"
 
@@ -230,7 +230,7 @@ func TestRemoveStatement(t *testing.T) {
 		for it.Next() {
 			gotStatements = append(gotStatements, it.Statement().String())
 		}
-		sort.Strings(gotStatements)
+		slices.Sort(gotStatements)
 
 		got := strings.TrimSpace(strings.Join(gotStatements, "\n"))
 		want := strings.TrimSpace(test.want)
@@ -349,7 +349,7 @@ func TestRemoveTerm(t *testing.T) {
 		for it.Next() {
 			gotStatements = append(gotStatements, it.Statement().String())
 		}
-		sort.Strings(gotStatements)
+		slices.Sort(gotStatements)
 
 		got := strings.TrimSpace(strings.Join(gotStatements, "\n"))
 		want := strings.TrimSpace(test.want)

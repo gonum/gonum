@@ -5,9 +5,10 @@
 package network
 
 import (
+	"cmp"
 	"fmt"
 	"math"
-	"sort"
+	"slices"
 	"testing"
 
 	"gonum.org/v1/gonum/floats/scalar"
@@ -245,11 +246,13 @@ func TestEdgeWeightedPageRankSparse(t *testing.T) {
 }
 
 func orderedFloats(w map[int64]float64, prec int) []keyFloatVal {
-	o := make(orderedFloatsMap, 0, len(w))
+	o := make([]keyFloatVal, 0, len(w))
 	for k, v := range w {
 		o = append(o, keyFloatVal{prec: prec, key: k, val: v})
 	}
-	sort.Sort(o)
+	slices.SortFunc(o, func(a, b keyFloatVal) int {
+		return cmp.Compare(a.key, b.key)
+	})
 	return o
 }
 
@@ -260,9 +263,3 @@ type keyFloatVal struct {
 }
 
 func (kv keyFloatVal) String() string { return fmt.Sprintf("%c:%.*f", kv.key+'A', kv.prec, kv.val) }
-
-type orderedFloatsMap []keyFloatVal
-
-func (o orderedFloatsMap) Len() int           { return len(o) }
-func (o orderedFloatsMap) Less(i, j int) bool { return o[i].key < o[j].key }
-func (o orderedFloatsMap) Swap(i, j int)      { o[i], o[j] = o[j], o[i] }

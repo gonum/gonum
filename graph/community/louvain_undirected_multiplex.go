@@ -11,9 +11,9 @@ import (
 	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/graph"
-	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/internal/set"
 	"gonum.org/v1/gonum/graph/iterator"
+	"gonum.org/v1/gonum/internal/order"
 )
 
 // UndirectedMultiplex is an undirected multiplex graph.
@@ -294,7 +294,7 @@ func reduceUndirectedMultiplex(g UndirectedMultiplex, communities [][]graph.Node
 		// community provided by the user for a Q calculation.
 		// Probably we should use a function to map the
 		// communities in the test sets to the remapped order.
-		ordered.ByID(nodes)
+		order.ByID(nodes)
 		communities = make([][]graph.Node, len(nodes))
 		for i := range nodes {
 			communities[i] = []graph.Node{node(i)}

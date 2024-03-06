@@ -6,7 +6,7 @@ package product
 
 import (
 	"gonum.org/v1/gonum/graph"
-	"gonum.org/v1/gonum/graph/internal/ordered"
+	"gonum.org/v1/gonum/internal/order"
 	"gonum.org/v1/gonum/stat/combin"
 )
 
@@ -367,7 +367,7 @@ func cartesianNodes(a, b graph.Graph) (aNodes, bNodes []graph.Node, product []No
 // lexicalNodes returns the nodes in g sorted lexically by node ID.
 func lexicalNodes(g graph.Graph) []graph.Node {
 	nodes := graph.NodesOf(g.Nodes())
-	ordered.ByID(nodes)
+	order.ByID(nodes)
 	return nodes
 }
 

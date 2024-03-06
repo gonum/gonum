@@ -9,9 +9,9 @@ import (
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
-	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/iterator"
 	"gonum.org/v1/gonum/graph/simple"
+	"gonum.org/v1/gonum/internal/order"
 )
 
 var orderedNodesTests = []struct {
@@ -740,7 +740,7 @@ func TestNodeSlicers(t *testing.T) {
 				t.Errorf("test %d: unexpected total node count: got:%d want:%d", k, gotLen, wantLen)
 			}
 			got := append(gotIter, gotSlice...)
-			ordered.ByID(got)
+			order.ByID(got)
 			if !reflect.DeepEqual(got, test.want) {
 				t.Errorf("test %d: unexpected node slice:\ngot: %v\nwant:%v", k, got, test.want)
 			}

@@ -6,9 +6,9 @@ package topo
 
 import (
 	"gonum.org/v1/gonum/graph"
-	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/internal/set"
 	"gonum.org/v1/gonum/graph/iterator"
+	"gonum.org/v1/gonum/internal/order"
 )
 
 // johnson implements Johnson's "Finding all the elementary
@@ -132,7 +132,7 @@ type johnsonGraph struct {
 // johnsonGraphFrom returns a deep copy of the graph g.
 func johnsonGraphFrom(g graph.Directed) johnsonGraph {
 	nodes := graph.NodesOf(g.Nodes())
-	ordered.ByID(nodes)
+	order.ByID(nodes)
 	c := johnsonGraph{
 		orig:  nodes,
 		index: make(map[int64]int, len(nodes)),

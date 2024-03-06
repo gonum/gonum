@@ -9,8 +9,8 @@ import (
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
-	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/simple"
+	"gonum.org/v1/gonum/internal/order"
 )
 
 var dominatorsTests = []struct {
@@ -171,7 +171,7 @@ func TestDominators(t *testing.T) {
 				}
 
 				for _, nodes := range got.dominatedBy {
-					ordered.ByID(nodes)
+					order.ByID(nodes)
 				}
 
 				if !reflect.DeepEqual(got.dominatedBy, test.want.dominatedBy) {

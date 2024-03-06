@@ -10,8 +10,8 @@ import (
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
-	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/path/internal/testgraphs"
+	"gonum.org/v1/gonum/internal/order"
 )
 
 func TestJohnsonAllPaths(t *testing.T) {
@@ -87,7 +87,7 @@ func TestJohnsonAllPaths(t *testing.T) {
 				got[i] = append(got[i], v.ID())
 			}
 		}
-		ordered.BySliceValues(got)
+		order.BySliceValues(got)
 		if !reflect.DeepEqual(got, test.WantPaths) {
 			t.Errorf("testing %q: unexpected shortest paths:\ngot: %v\nwant:%v",
 				test.Name, got, test.WantPaths)
@@ -106,7 +106,7 @@ func TestJohnsonAllPaths(t *testing.T) {
 				got[i] = append(got[i], v.ID())
 			}
 		}
-		ordered.BySliceValues(got)
+		order.BySliceValues(got)
 		if !reflect.DeepEqual(got, test.WantPaths) {
 			t.Errorf("testing %q: unexpected shortest paths:\ngot: %v\nwant:%v",
 				test.Name, got, test.WantPaths)

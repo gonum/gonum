@@ -10,8 +10,8 @@ import (
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
-	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/simple"
+	"gonum.org/v1/gonum/internal/order"
 )
 
 var vOrderTests = []struct {
@@ -196,7 +196,7 @@ func TestBronKerbosch(t *testing.T) {
 			slices.Sort(ids)
 			got[j] = ids
 		}
-		ordered.BySliceValues(got)
+		order.BySliceValues(got)
 		if !reflect.DeepEqual(got, test.want) {
 			t.Errorf("unexpected cliques for test %q:\ngot: %v\nwant:%v", test.name, got, test.want)
 		}

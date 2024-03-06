@@ -8,8 +8,8 @@ import (
 	"reflect"
 	"testing"
 
-	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/simple"
+	"gonum.org/v1/gonum/internal/order"
 )
 
 var cyclesInTests = []struct {
@@ -108,7 +108,7 @@ func TestDirectedCyclesIn(t *testing.T) {
 			}
 			got[j] = ids
 		}
-		ordered.BySliceValues(got)
+		order.BySliceValues(got)
 		if !reflect.DeepEqual(got, test.want) {
 			t.Errorf("unexpected johnson result for %d:\n\tgot:%#v\n\twant:%#v", i, got, test.want)
 		}

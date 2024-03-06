@@ -10,8 +10,8 @@ import (
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
-	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/simple"
+	"gonum.org/v1/gonum/internal/order"
 )
 
 type interval struct{ start, end int }
@@ -182,8 +182,8 @@ func TestTarjanSCC(t *testing.T) {
 			slices.Sort(gotIDs[i])
 		}
 		for _, iv := range test.ambiguousOrder {
-			ordered.BySliceValues(test.want[iv.start:iv.end])
-			ordered.BySliceValues(gotIDs[iv.start:iv.end])
+			order.BySliceValues(test.want[iv.start:iv.end])
+			order.BySliceValues(gotIDs[iv.start:iv.end])
 		}
 		if !reflect.DeepEqual(gotIDs, test.want) {
 			t.Errorf("unexpected Tarjan scc result for %d:\n\tgot:%v\n\twant:%v", i, gotIDs, test.want)

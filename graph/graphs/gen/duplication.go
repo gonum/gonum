@@ -11,7 +11,7 @@ import (
 	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/graph"
-	"gonum.org/v1/gonum/graph/internal/ordered"
+	"gonum.org/v1/gonum/internal/order"
 )
 
 // UndirectedMutator is an undirected graph builder that can remove edges.
@@ -56,7 +56,7 @@ func Duplication(dst UndirectedMutator, n int, delta, alpha, sigma float64, src 
 	}
 
 	nodes := graph.NodesOf(dst.Nodes())
-	ordered.ByID(nodes)
+	order.ByID(nodes)
 	if len(nodes) == 0 {
 		n--
 		u := dst.NewNode()
@@ -76,7 +76,7 @@ func Duplication(dst UndirectedMutator, n int, delta, alpha, sigma float64, src 
 		for {
 			// Add edges to parent's neighbours.
 			to := graph.NodesOf(dst.From(u.ID()))
-			ordered.ByID(to)
+			order.ByID(to)
 			for _, v := range to {
 				vid := v.ID()
 				if rnd() < delta || dst.HasEdgeBetween(vid, did) {

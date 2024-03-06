@@ -6,8 +6,8 @@ package topo
 
 import (
 	"gonum.org/v1/gonum/graph"
-	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/internal/set"
+	"gonum.org/v1/gonum/internal/order"
 )
 
 // Builder is a pure topological graph construction type.
@@ -26,9 +26,9 @@ func CliqueGraph(dst Builder, g graph.Undirected) {
 	// Construct a consistent view of cliques in g. Sorting costs
 	// us a little, but not as much as the cliques themselves.
 	for _, c := range cliques {
-		ordered.ByID(c)
+		order.ByID(c)
 	}
-	ordered.BySliceIDs(cliques)
+	order.BySliceIDs(cliques)
 
 	cliqueNodes := make(cliqueNodeSets, len(cliques))
 	for id, c := range cliques {
@@ -59,7 +59,7 @@ func CliqueGraph(dst Builder, g graph.Undirected) {
 					for _, n := range set.IntersectionOfNodes(uc.nodes, vc.nodes) {
 						edgeNodes = append(edgeNodes, n)
 					}
-					ordered.ByID(edgeNodes)
+					order.ByID(edgeNodes)
 				}
 
 				dst.SetEdge(CliqueGraphEdge{from: uc.Clique, to: vc.Clique, nodes: edgeNodes})

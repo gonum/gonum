@@ -11,8 +11,8 @@ import (
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
-	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/simple"
+	"gonum.org/v1/gonum/internal/order"
 )
 
 var yenShortestPathTests = []struct {
@@ -389,11 +389,11 @@ func TestYenKSP(t *testing.T) {
 				if w == last {
 					continue
 				}
-				ordered.BySliceValues(gotIDs[first:i])
+				order.BySliceValues(gotIDs[first:i])
 				first = i
 				last = w
 			}
-			ordered.BySliceValues(gotIDs[first:])
+			order.BySliceValues(gotIDs[first:])
 		}
 
 		if !reflect.DeepEqual(test.wantPaths, gotIDs) {

@@ -6,13 +6,21 @@ on:
 jobs:
   ci:
     name: lint
+    strategy:
+      matrix:
+        go: ["1.21.x"]
     runs-on: ubuntu-latest
     env:
-        GO111MODULE: on
+      GO111MODULE: on
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 1
-    - uses: dominikh/staticcheck-action@v1
-      with:
-        version: "2022.1"
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: WillAbides/setup-go-faster@v1.7.0
+        with:
+          go-version: ${{ matrix.go }}
+      - uses: dominikh/staticcheck-action@v1.3.0
+        with:
+          version: "2023.1.6"
+          install-go: false
+          cache-key: ${{ matrix.go }}

@@ -6,7 +6,7 @@ package distuv
 
 import (
 	"math"
-	"sort"
+	"slices"
 
 	"golang.org/x/exp/rand"
 	"gonum.org/v1/gonum/stat"
@@ -62,7 +62,7 @@ func (l *Laplace) Fit(samples, weights []float64) {
 		sortedSamples []float64
 		sortedWeights []float64
 	)
-	if sort.Float64sAreSorted(samples) {
+	if slices.IsSorted(samples) {
 		sortedSamples = samples
 		sortedWeights = weights
 	} else {

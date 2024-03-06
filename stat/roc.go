@@ -6,7 +6,7 @@ package stat
 
 import (
 	"math"
-	"sort"
+	"slices"
 )
 
 // ROC returns paired false positive rate (FPR) and true positive rate
@@ -44,10 +44,10 @@ func ROC(cutoffs, y []float64, classes []bool, weights []float64) (tpr, fpr, thr
 	if weights != nil && len(y) != len(weights) {
 		panic("stat: slice length mismatch")
 	}
-	if !sort.Float64sAreSorted(y) {
+	if !slices.IsSorted(y) {
 		panic("stat: input must be sorted ascending")
 	}
-	if !sort.Float64sAreSorted(cutoffs) {
+	if !slices.IsSorted(cutoffs) {
 		panic("stat: cutoff values must be sorted ascending")
 	}
 	if len(y) == 0 {

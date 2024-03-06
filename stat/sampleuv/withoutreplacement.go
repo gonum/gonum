@@ -5,7 +5,7 @@
 package sampleuv
 
 import (
-	"sort"
+	"slices"
 
 	"golang.org/x/exp/rand"
 )
@@ -56,6 +56,6 @@ func WithoutReplacement(idxs []int, n int, src rand.Source) {
 		}
 		idxs[i] = r
 		sorted = append(sorted, r)
-		sort.Ints(sorted)
+		slices.Sort(sorted)
 	}
 }

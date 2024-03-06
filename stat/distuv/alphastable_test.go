@@ -6,7 +6,7 @@ package distuv
 
 import (
 	"math"
-	"sort"
+	"slices"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -179,8 +179,8 @@ func testStability(t *testing.T, i, n int, alpha, beta1, beta2, c1, c2, mu1, mu2
 		sample1[i] = d1.Rand() + d2.Rand()
 		sample2[i] = d.Rand()
 	}
-	sort.Float64s(sample1)
-	sort.Float64s(sample2)
+	slices.Sort(sample1)
+	slices.Sort(sample2)
 	ks := stat.KolmogorovSmirnov(sample1, nil, sample2, nil)
 	if ks > ksTol {
 		t.Errorf("%d: Kolmogorov-Smirnov distance %g exceeding tolerance %g", i, ks, ksTol)

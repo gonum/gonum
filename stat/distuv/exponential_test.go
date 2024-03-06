@@ -6,7 +6,7 @@ package distuv
 
 import (
 	"math"
-	"sort"
+	"slices"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -68,7 +68,7 @@ func testExponential(t *testing.T, dist Exponential, i int) {
 	)
 	x := make([]float64, n)
 	generateSamples(x, dist)
-	sort.Float64s(x)
+	slices.Sort(x)
 
 	checkMean(t, i, x, dist, tol)
 	checkVarAndStd(t, i, x, dist, tol)

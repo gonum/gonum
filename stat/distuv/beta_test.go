@@ -6,7 +6,7 @@ package distuv
 
 import (
 	"math"
-	"sort"
+	"slices"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -54,7 +54,7 @@ func testBeta(t *testing.T, b Beta, i int) {
 	)
 	x := make([]float64, n)
 	generateSamples(x, b)
-	sort.Float64s(x)
+	slices.Sort(x)
 
 	testRandLogProbContinuous(t, i, 0, x, b, tol, bins)
 	checkMean(t, i, x, b, tol)

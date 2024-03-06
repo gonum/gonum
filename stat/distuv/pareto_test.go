@@ -6,7 +6,7 @@ package distuv
 
 import (
 	"math"
-	"sort"
+	"slices"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -159,7 +159,7 @@ func testPareto(t *testing.T, p Pareto, i int) {
 	)
 	x := make([]float64, n)
 	generateSamples(x, p)
-	sort.Float64s(x)
+	slices.Sort(x)
 
 	checkQuantileCDFSurvival(t, i, x, p, 1e-3)
 	testRandLogProbContinuous(t, i, 0, x, p, tol, bins)

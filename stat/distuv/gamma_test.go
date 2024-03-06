@@ -7,7 +7,7 @@ package distuv
 import (
 	"fmt"
 	"math"
-	"sort"
+	"slices"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -57,7 +57,7 @@ func testGamma(t *testing.T, f Gamma, i int) {
 	)
 	x := make([]float64, n)
 	generateSamples(x, f)
-	sort.Float64s(x)
+	slices.Sort(x)
 
 	var quadTol float64
 

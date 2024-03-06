@@ -7,7 +7,7 @@ package distuv
 import (
 	"fmt"
 	"math"
-	"sort"
+	"slices"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -125,7 +125,7 @@ func testPoisson(t *testing.T, p Poisson, i int) {
 	)
 	x := make([]float64, n)
 	generateSamples(x, p)
-	sort.Float64s(x)
+	slices.Sort(x)
 
 	checkProbDiscrete(t, i, x, p, 2e-3)
 	checkMean(t, i, x, p, tol)

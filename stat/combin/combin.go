@@ -6,6 +6,7 @@ package combin
 
 import (
 	"math"
+	"slices"
 	"sort"
 )
 
@@ -203,7 +204,7 @@ func CombinationIndex(comb []int, n, k int) int {
 	if len(comb) != k {
 		panic("combin: bad length combination")
 	}
-	if !sort.IntsAreSorted(comb) {
+	if !slices.IsSorted(comb) {
 		panic("combin: input combination is not sorted")
 	}
 	contains := make(map[int]struct{}, k)

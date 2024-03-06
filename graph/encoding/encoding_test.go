@@ -5,7 +5,8 @@
 package encoding
 
 import (
-	"sort"
+	"cmp"
+	"slices"
 	"testing"
 )
 
@@ -109,9 +110,9 @@ func sameAttributes(a, b Attributer) bool {
 		return false
 	}
 	aAttr = append(aAttr[:0:0], aAttr...)
-	sort.Slice(aAttr, func(i, j int) bool { return aAttr[i].Key < aAttr[j].Key })
+	slices.SortFunc(aAttr, func(a, b Attribute) int { return cmp.Compare(a.Key, b.Key) })
 	bAttr = append(bAttr[:0:0], bAttr...)
-	sort.Slice(bAttr, func(i, j int) bool { return bAttr[i].Key < bAttr[j].Key })
+	slices.SortFunc(bAttr, func(a, b Attribute) int { return cmp.Compare(a.Key, b.Key) })
 	for i, a := range aAttr {
 		if bAttr[i] != a {
 			return false

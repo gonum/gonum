@@ -8,13 +8,13 @@ import (
 	"fmt"
 	"math"
 	"reflect"
+	"slices"
 	"testing"
 
 	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/graphs/gen"
-	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/simple"
 	"gonum.org/v1/gonum/internal/sorted"
 )
@@ -182,7 +182,7 @@ func (p allShortest) allBetween(from, to int, seen []bool, path []graph.Node, pa
 			return paths
 		}
 		if !p.forward {
-			ordered.Reverse(path)
+			slices.Reverse(path)
 		}
 		return append(paths, path)
 	}

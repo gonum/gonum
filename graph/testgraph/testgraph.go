@@ -7,9 +7,10 @@
 package testgraph // import "gonum.org/v1/gonum/graph/testgraph"
 
 import (
+	"cmp"
 	"fmt"
 	"reflect"
-	"sort"
+	"slices"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -616,14 +617,14 @@ func checkEdges(t *testing.T, name string, g graph.Graph, got, want []Edge) {
 	t.Helper()
 	switch g.(type) {
 	case graph.Undirected:
-		sort.Sort(lexicalUndirectedEdges(got))
-		sort.Sort(lexicalUndirectedEdges(want))
+		sortLexicalUndirectedEdges(got)
+		sortLexicalUndirectedEdges(want)
 		if !undirectedEdgeSetEqual(got, want) {
 			t.Errorf("unexpected edges result for test %q:\ngot: %#v\nwant:%#v", name, got, want)
 		}
 	default:
-		sort.Sort(lexicalEdges(got))
-		sort.Sort(lexicalEdges(want))
+		sortLexicalEdges(got)
+		sortLexicalEdges(want)
 		if !reflect.DeepEqual(got, want) {
 			t.Errorf("unexpected edges result for test %q:\ngot: %#v\nwant:%#v", name, got, want)
 		}
@@ -1230,77 +1231,67 @@ func AdjacencyMatrix(t *testing.T, b Builder) {
 	}
 }
 
-// lexicalEdges sorts a collection of edges lexically on the
+// sortLexicalEdges sorts a collection of edges lexically on the
 // keys: from.ID > to.ID > [line.ID] > [weight].
-type lexicalEdges []Edge
-
-func (e lexicalEdges) Len() int { return len(e) }
-func (e lexicalEdges) Less(i, j int) bool {
-	if e[i].From().ID() < e[j].From().ID() {
-		return true
-	}
-	sf := e[i].From().ID() == e[j].From().ID()
-	if sf && e[i].To().ID() < e[j].To().ID() {
-		return true
-	}
-	st := e[i].To().ID() == e[j].To().ID()
-	li, oki := e[i].(graph.Line)
-	lj, okj := e[j].(graph.Line)
-	if oki != okj {
-		panic(fmt.Sprintf("testgraph: mismatched types %T != %T", e[i], e[j]))
-	}
-	if !oki {
-		return sf && st && lessWeight(e[i], e[j])
-	}
-	if sf && st && li.ID() < lj.ID() {
-		return true
-	}
-	return sf && st && li.ID() == lj.ID() && lessWeight(e[i], e[j])
+func sortLexicalEdges(edges []Edge) {
+	slices.SortFunc(edges, func(a, b Edge) int {
+		if n := cmp.Compare(a.From().ID(), b.From().ID()); n != 0 {
+			return n
+		}
+		if n := cmp.Compare(a.To().ID(), b.To().ID()); n != 0 {
+			return n
+		}
+		la, oka := a.(graph.Line)
+		lb, okb := b.(graph.Line)
+		if oka != okb {
+			panic(fmt.Sprintf("testgraph: mismatched types %T != %T", a, b))
+		}
+		if oka {
+			if n := cmp.Compare(la.ID(), lb.ID()); n != 0 {
+				return n
+			}
+		}
+		return cmpWeight(a, b)
+	})
 }
-func (e lexicalEdges) Swap(i, j int) { e[i], e[j] = e[j], e[i] }
 
-// lexicalUndirectedEdges sorts a collection of edges lexically on the
+// sortLexicalUndirectedEdges sorts a collection of edges lexically on the
 // keys: lo.ID > hi.ID > [line.ID] > [weight].
-type lexicalUndirectedEdges []Edge
+func sortLexicalUndirectedEdges(edges []Edge) {
+	slices.SortFunc(edges, func(a, b Edge) int {
+		lida, hida, _ := undirectedIDs(a)
+		lidb, hidb, _ := undirectedIDs(b)
 
-func (e lexicalUndirectedEdges) Len() int { return len(e) }
-func (e lexicalUndirectedEdges) Less(i, j int) bool {
-	lidi, hidi, _ := undirectedIDs(e[i])
-	lidj, hidj, _ := undirectedIDs(e[j])
-
-	if lidi < lidj {
-		return true
-	}
-	sl := lidi == lidj
-	if sl && hidi < hidj {
-		return true
-	}
-	sh := hidi == hidj
-	li, oki := e[i].(graph.Line)
-	lj, okj := e[j].(graph.Line)
-	if oki != okj {
-		panic(fmt.Sprintf("testgraph: mismatched types %T != %T", e[i], e[j]))
-	}
-	if !oki {
-		return sl && sh && lessWeight(e[i], e[j])
-	}
-	if sl && sh && li.ID() < lj.ID() {
-		return true
-	}
-	return sl && sh && li.ID() == lj.ID() && lessWeight(e[i], e[j])
+		if n := cmp.Compare(lida, lidb); n != 0 {
+			return n
+		}
+		if n := cmp.Compare(hida, hidb); n != 0 {
+			return n
+		}
+		la, oka := a.(graph.Line)
+		lb, okb := b.(graph.Line)
+		if oka != okb {
+			panic(fmt.Sprintf("testgraph: mismatched types %T != %T", a, b))
+		}
+		if oka {
+			if n := cmp.Compare(la.ID(), lb.ID()); n != 0 {
+				return n
+			}
+		}
+		return cmpWeight(a, b)
+	})
 }
-func (e lexicalUndirectedEdges) Swap(i, j int) { e[i], e[j] = e[j], e[i] }
 
-func lessWeight(ei, ej Edge) bool {
-	wei, oki := ei.(graph.WeightedEdge)
-	wej, okj := ej.(graph.WeightedEdge)
-	if oki != okj {
-		panic(fmt.Sprintf("testgraph: mismatched types %T != %T", ei, ej))
+func cmpWeight(ea, eb Edge) int {
+	wea, oka := ea.(graph.WeightedEdge)
+	web, okb := eb.(graph.WeightedEdge)
+	if oka != okb {
+		panic(fmt.Sprintf("testgraph: mismatched types %T != %T", ea, eb))
 	}
-	if !oki {
-		return false
+	if !oka {
+		return 0
 	}
-	return wei.Weight() < wej.Weight()
+	return cmp.Compare(wea.Weight(), web.Weight())
 }
 
 // undirectedEdgeSetEqual returned whether a pair of undirected edge

@@ -6,10 +6,10 @@ package topo
 
 import (
 	"reflect"
+	"slices"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
-	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/simple"
 	"gonum.org/v1/gonum/internal/sorted"
 )
@@ -134,7 +134,7 @@ func canonicalise(c []graph.Node) []graph.Node {
 		c = append(c[idx:], c[:idx]...)
 	}
 	if c[len(c)-1].ID() < c[1].ID() {
-		ordered.Reverse(c[1:])
+		slices.Reverse(c[1:])
 	}
 	return c
 }

@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"sort"
+	"slices"
 	"strings"
 	"text/tabwriter"
 
@@ -76,7 +76,7 @@ _:greet <l:is> "hola"@es .
 				blanks = append(blanks, k)
 			}
 		}
-		sort.Strings(blanks)
+		slices.Sort(blanks)
 
 		if len(blanks) == 0 {
 			fmt.Println("No blank nodes.")
@@ -163,7 +163,7 @@ _:c1 <ex:r> _:d1 .
 				blanks = append(blanks, k)
 			}
 		}
-		sort.Strings(blanks)
+		slices.Sort(blanks)
 
 		if len(blanks) == 0 {
 			fmt.Println("No blank nodes.")

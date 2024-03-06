@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"sort"
+	"slices"
 	"strings"
 
 	"gonum.org/v1/gonum/graph/simple"
@@ -185,7 +185,7 @@ func ExampleTarjanSCC_twoSAT() {
 		for v, t := range state {
 			ps = append(ps, fmt.Sprintf("%s:%t", v, t))
 		}
-		sort.Strings(ps)
+		slices.Sort(ps)
 		fmt.Printf("system %d is satisfiable: %s\n", i, strings.Join(ps, " "))
 	}
 

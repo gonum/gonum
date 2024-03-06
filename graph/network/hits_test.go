@@ -5,9 +5,10 @@
 package network
 
 import (
+	"cmp"
 	"fmt"
 	"math"
-	"sort"
+	"slices"
 	"testing"
 
 	"gonum.org/v1/gonum/floats/scalar"
@@ -71,11 +72,11 @@ func TestHITS(t *testing.T) {
 }
 
 func orderedHubAuth(w map[int64]HubAuthority, prec int) []keyHubAuthVal {
-	o := make(orderedHubAuthMap, 0, len(w))
+	o := make([]keyHubAuthVal, 0, len(w))
 	for k, v := range w {
 		o = append(o, keyHubAuthVal{prec: prec, key: k, val: v})
 	}
-	sort.Sort(o)
+	slices.SortFunc(o, func(a, b keyHubAuthVal) int { return cmp.Compare(a.key, b.key) })
 	return o
 }
 
@@ -90,9 +91,3 @@ func (kv keyHubAuthVal) String() string {
 		kv.key, kv.prec, kv.val.Hub, kv.prec, kv.val.Authority,
 	)
 }
-
-type orderedHubAuthMap []keyHubAuthVal
-
-func (o orderedHubAuthMap) Len() int           { return len(o) }
-func (o orderedHubAuthMap) Less(i, j int) bool { return o[i].key < o[j].key }
-func (o orderedHubAuthMap) Swap(i, j int)      { o[i], o[j] = o[j], o[i] }

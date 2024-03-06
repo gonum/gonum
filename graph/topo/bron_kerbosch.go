@@ -6,8 +6,8 @@ package topo
 
 import (
 	"gonum.org/v1/gonum/graph"
-	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/internal/set"
+	"slices"
 )
 
 // DegeneracyOrdering returns the degeneracy ordering and the k-cores of
@@ -15,7 +15,7 @@ import (
 func DegeneracyOrdering(g graph.Undirected) (order []graph.Node, cores [][]graph.Node) {
 	order, offsets := degeneracyOrdering(g)
 
-	ordered.Reverse(order)
+	slices.Reverse(order)
 	cores = make([][]graph.Node, len(offsets))
 	offset := len(order)
 	for i, n := range offsets {
@@ -145,7 +145,7 @@ func BronKerbosch(g graph.Undirected) [][]graph.Node {
 	x := set.NewNodes()
 	var bk bronKerbosch
 	order, _ := degeneracyOrdering(g)
-	ordered.Reverse(order)
+	slices.Reverse(order)
 	for _, v := range order {
 		neighbours := graph.NodesOf(g.From(v.ID()))
 		nv := set.NewNodesSize(len(neighbours))

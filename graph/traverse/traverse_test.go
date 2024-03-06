@@ -7,12 +7,12 @@ package traverse
 import (
 	"fmt"
 	"reflect"
+	"slices"
 	"strings"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/graphs/gen"
-	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/simple"
 	"gonum.org/v1/gonum/internal/sorted"
 )
@@ -172,7 +172,7 @@ func TestBreadthFirst(t *testing.T) {
 			t.Errorf("unexpected final node for test %d:\ngot:  %v\nwant: %v", i, final, test.final)
 		}
 		for _, l := range got {
-			ordered.Int64s(l)
+			slices.Sort(l)
 		}
 		if !reflect.DeepEqual(got, test.want) {
 			t.Errorf("unexpected BFS level structure for test %d:\ngot:  %v\nwant: %v", i, got, test.want)
@@ -372,7 +372,7 @@ func TestWalkAll(t *testing.T) {
 				for k, n := range c {
 					ids[k] = n.ID()
 				}
-				ordered.Int64s(ids)
+				slices.Sort(ids)
 				got[j] = ids
 			}
 			sorted.BySliceValues(got)

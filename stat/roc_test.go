@@ -5,8 +5,12 @@
 package stat
 
 import (
+	"fmt"
 	"math"
+	"slices"
 	"testing"
+
+	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/floats"
 )
@@ -323,4 +327,62 @@ func TestTOC(t *testing.T) {
 			t.Errorf("%d: unexpected TOC got:%v want:%v", i, gotTOC, test.wantTOC)
 		}
 	}
+}
+
+func BenchmarkROC(b *testing.B) {
+	sizes := []int{empty, small, medium, large}
+	for _, cutoffsSize := range sizes {
+		for _, ySize := range sizes {
+			classesSize := ySize
+			for _, weightsSize := range slices.Compact([]int{empty, ySize}) {
+				benchmarkROC(b, cutoffsSize, ySize, classesSize, weightsSize)
+			}
+		}
+	}
+}
+
+func benchmarkROC(b *testing.B, cutoffsSize int, ySize int, classesSize int, weightsSize int) bool {
+	return b.Run(
+		fmt.Sprintf(
+			"cutoffs=%d,y=%d,classes=%d,weights=%d",
+			cutoffsSize, ySize, classesSize, weightsSize),
+		func(b *testing.B) {
+			src := rand.NewSource(1)
+
+			cutoffs := randomFloats(cutoffsSize, src)
+			slices.Sort(cutoffs)
+
+			y := randomFloats(ySize, src)
+			slices.Sort(y)
+
+			classes := randomBools(classesSize, src)
+
+			var weights []float64
+			if weightsSize != empty {
+				weights = randomFloats(weightsSize, src)
+			}
+
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				ROC(cutoffs, y, classes, weights)
+			}
+		})
+}
+
+func randomFloats(l int, src rand.Source) []float64 {
+	rnd := rand.New(src)
+	s := make([]float64, l)
+	for i := range s {
+		s[i] = rnd.Float64()
+	}
+	return s
+}
+
+func randomBools(l int, src rand.Source) []bool {
+	rnd := rand.New(src)
+	s := make([]bool, l)
+	for i := range s {
+		s[i] = rnd.Int31n(2) == 1
+	}
+	return s
 }

@@ -18,10 +18,11 @@ import (
 )
 
 const (
-	small  = 10
-	medium = 1000
-	large  = 100000
-	huge   = 10000000
+	empty  = 0
+	small  = 1e1
+	medium = 1e3
+	large  = 1e5
+	huge   = 1e7
 )
 
 // tests for unweighted versions

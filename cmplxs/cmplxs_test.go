@@ -1371,3 +1371,16 @@ func BenchmarkNorm2Small(b *testing.B)  { benchmarkNorm2(b, Small) }
 func BenchmarkNorm2Medium(b *testing.B) { benchmarkNorm2(b, Medium) }
 func BenchmarkNorm2Large(b *testing.B)  { benchmarkNorm2(b, Large) }
 func BenchmarkNorm2Huge(b *testing.B)   { benchmarkNorm2(b, Huge) }
+
+func benchmarkReverse(b *testing.B, size int) {
+	src := rand.NewSource(1)
+	s := randomSlice(size, src)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		Reverse(s)
+	}
+}
+func BenchmarkReverseSmall(b *testing.B)  { benchmarkReverse(b, Small) }
+func BenchmarkReverseMedium(b *testing.B) { benchmarkReverse(b, Medium) }
+func BenchmarkReverseLarge(b *testing.B)  { benchmarkReverse(b, Large) }
+func BenchmarkReverseHuge(b *testing.B)   { benchmarkReverse(b, Huge) }

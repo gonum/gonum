@@ -1833,3 +1833,17 @@ func BenchmarkSumSmall(b *testing.B)  { benchmarkSum(b, Small) }
 func BenchmarkSumMedium(b *testing.B) { benchmarkSum(b, Medium) }
 func BenchmarkSumLarge(b *testing.B)  { benchmarkSum(b, Large) }
 func BenchmarkSumHuge(b *testing.B)   { benchmarkSum(b, Huge) }
+
+func benchmarkReverse(b *testing.B, size int) {
+	src := rand.NewSource(1)
+	s := randomSlice(size, src)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		Reverse(s)
+	}
+}
+
+func BenchmarkReverseSmall(b *testing.B)  { benchmarkReverse(b, Small) }
+func BenchmarkReverseMedium(b *testing.B) { benchmarkReverse(b, Medium) }
+func BenchmarkReverseLarge(b *testing.B)  { benchmarkReverse(b, Large) }
+func BenchmarkReverseHuge(b *testing.B)   { benchmarkReverse(b, Huge) }

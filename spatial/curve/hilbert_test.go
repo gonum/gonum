@@ -16,10 +16,10 @@ import (
 )
 
 func ExampleHilbert2D_Pos() {
-	h := Hilbert2D{Order: 3}
+	h := Hilbert2D{order: 3}
 
-	for y := 0; y < 1<<h.Order; y++ {
-		for x := 0; x < 1<<h.Order; x++ {
+	for y := 0; y < 1<<h.order; y++ {
+		for x := 0; x < 1<<h.order; x++ {
 			if x > 0 {
 				fmt.Print("  ")
 			}
@@ -39,11 +39,11 @@ func ExampleHilbert2D_Pos() {
 }
 
 func ExampleHilbert3D_Pos() {
-	h := Hilbert3D{Order: 2}
+	h := Hilbert3D{order: 2}
 
-	for z := 0; z < 1<<h.Order; z++ {
-		for y := 0; y < 1<<h.Order; y++ {
-			for x := 0; x < 1<<h.Order; x++ {
+	for z := 0; z < 1<<h.order; z++ {
+		for y := 0; y < 1<<h.order; y++ {
+			for x := 0; x < 1<<h.order; x++ {
 				if x > 0 {
 					fmt.Print("  ")
 				}
@@ -76,8 +76,8 @@ func ExampleHilbert3D_Pos() {
 }
 
 func ExampleHilbert4D_Pos() {
-	h := Hilbert4D{Order: 2}
-	N := 1 << h.Order
+	h := Hilbert4D{order: 2}
+	N := 1 << h.order
 	for z := 0; z < N; z++ {
 		if z > 0 {
 			s := strings.Repeat("═", N*4-2)
@@ -173,7 +173,7 @@ func TestConstructors(t *testing.T) {
 func TestHilbert2D(t *testing.T) {
 	for ord := 1; ord <= 4; ord++ {
 		t.Run(fmt.Sprintf("Order/%d", ord), func(t *testing.T) {
-			testCurve(t, Hilbert2D{Order: ord})
+			testCurve(t, Hilbert2D{order: ord})
 		})
 	}
 
@@ -202,7 +202,7 @@ func TestHilbert2D(t *testing.T) {
 
 	for order, expected := range cases {
 		t.Run(fmt.Sprintf("Case/%d", order), func(t *testing.T) {
-			testCurveCase(t, Hilbert2D{Order: order}, order, expected)
+			testCurveCase(t, Hilbert2D{order: order}, order, expected)
 		})
 	}
 }
@@ -210,7 +210,7 @@ func TestHilbert2D(t *testing.T) {
 func TestHilbert3D(t *testing.T) {
 	for ord := 1; ord <= 4; ord++ {
 		t.Run(fmt.Sprintf("Order/%d", ord), func(t *testing.T) {
-			testCurve(t, Hilbert3D{Order: ord})
+			testCurve(t, Hilbert3D{order: ord})
 		})
 	}
 
@@ -247,7 +247,7 @@ func TestHilbert3D(t *testing.T) {
 
 	for order, expected := range cases {
 		t.Run(fmt.Sprintf("Case/%d", order), func(t *testing.T) {
-			testCurveCase(t, Hilbert3D{Order: order}, order, expected)
+			testCurveCase(t, Hilbert3D{order: order}, order, expected)
 		})
 	}
 }
@@ -255,7 +255,7 @@ func TestHilbert3D(t *testing.T) {
 func TestHilbert4D(t *testing.T) {
 	for ord := 1; ord <= 4; ord++ {
 		t.Run(fmt.Sprintf("Order %d", ord), func(t *testing.T) {
-			testCurve(t, Hilbert4D{Order: ord})
+			testCurve(t, Hilbert4D{order: ord})
 		})
 	}
 }
@@ -305,11 +305,11 @@ type curve interface {
 func newCurve(order, dim int) curve {
 	switch dim {
 	case 2:
-		return Hilbert2D{Order: order}
+		return Hilbert2D{order: order}
 	case 3:
-		return Hilbert3D{Order: order}
+		return Hilbert3D{order: order}
 	case 4:
-		return Hilbert4D{Order: order}
+		return Hilbert4D{order: order}
 	}
 	panic("invalid dimension")
 }

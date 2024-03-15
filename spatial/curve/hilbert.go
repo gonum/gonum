@@ -11,7 +11,7 @@ import (
 
 // ErrUnderflow is returned by Hilbert curve constructors when the power is less
 // than 1.
-var ErrUnderflow = errors.New("order cannot be less than 1")
+var ErrUnderflow = errors.New("order is less than 1")
 
 // ErrOverflow is returned (wrapped) by Hilbert curve constructors when the
 // power would cause Len and Pos to overflow.
@@ -20,19 +20,22 @@ var ErrOverflow = errors.New("overflow int")
 // The size of an int. Taken from src/math/const.go.
 const intSize = 32 << (^uint(0) >> 63) // 32 or 64
 
+// Hilbert2D is a 2-dimensional Hilbert curve.
+type Hilbert2D struct{ order int }
+
 // NewHilbert2D constructs a [Hilbert2D] of the given order. NewHilbert2D
 // returns [ErrOverflow] (wrapped) if the order would cause Len and Pos to
 // overflow.
 func NewHilbert2D(order int) (Hilbert2D, error) {
-	v := Hilbert2D{Order: order}
+	v := Hilbert2D{order: order}
 
-	// The order must be greater than zero
+	// The order must be greater than zero.
 	if order < 1 {
 		return v, ErrUnderflow
 	}
 
 	// The product of the order and number of dimensions must not exceed or
-	// equal the size of an int
+	// equal the size of an int.
 	if order*2 >= intSize {
 		return v, fmt.Errorf("a 2-dimensional, %d-order Hilbert curve will %w", order, ErrOverflow)
 	}
@@ -40,59 +43,16 @@ func NewHilbert2D(order int) (Hilbert2D, error) {
 	return v, nil
 }
 
-// NewHilbert3D constructs a [Hilbert3D] of the given order. NewHilbert3D
-// returns [ErrOverflow] (wrapped) if the order would cause Len and Pos to
-// overflow.
-func NewHilbert3D(order int) (Hilbert3D, error) {
-	v := Hilbert3D{Order: order}
-
-	// The order must be greater than zero
-	if order < 1 {
-		return v, ErrUnderflow
-	}
-
-	// The product of the order and number of dimensions must not exceed or
-	// equal the size of an int
-	if order*3 >= intSize {
-		return v, fmt.Errorf("a 3-dimensional, %d-order Hilbert curve will %w", order, ErrOverflow)
-	}
-
-	return v, nil
-}
-
-// NewHilbert4D constructs a [Hilbert4D] of the given order. NewHilbert4D
-// returns [ErrOverflow] (wrapped) if the order would cause Len and Pos to
-// overflow.
-func NewHilbert4D(order int) (Hilbert4D, error) {
-	v := Hilbert4D{Order: order}
-
-	// The order must be greater than zero
-	if order < 1 {
-		return v, ErrUnderflow
-	}
-
-	// The product of the order and number of dimensions must not exceed or
-	// equal the size of an int
-	if order*4 >= intSize {
-		return v, fmt.Errorf("a 4-dimensional, %d-order Hilbert curve will %w", order, ErrOverflow)
-	}
-
-	return v, nil
-}
-
-// Hilbert2D is a 2-dimensional Hilbert curve.
-type Hilbert2D struct{ Order int }
-
 // Dims returns the spatial dimensions of the curve, which is {2ᵏ, 2ᵏ}, where k
 // is the order.
-func (h Hilbert2D) Dims() []int { return []int{1 << h.Order, 1 << h.Order} }
+func (h Hilbert2D) Dims() []int { return []int{1 << h.order, 1 << h.order} }
 
 // Len returns the length of the curve, which is 2ⁿᵏ, where n is the dimension
 // (2) and k is the order.
 //
 // Len will overflow if order is ≥ 16 on architectures where [int] is 32-bits,
 // or ≥ 32 on architectures where [int] is 64-bits.
-func (h Hilbert2D) Len() int { return 1 << (2 * h.Order) }
+func (h Hilbert2D) Len() int { return 1 << (2 * h.order) }
 
 func (h Hilbert2D) rot(n int, v []int, d int) {
 	switch d {
@@ -110,12 +70,13 @@ func (h Hilbert2D) rot(n int, v []int, d int) {
 // or ≥ 32 on architectures where [int] is 64-bits.
 func (h Hilbert2D) Pos(v []int) int {
 	var d int
-	for n := h.Order - 1; n >= 0; n-- {
+	const dims = 2
+	for n := h.order - 1; n >= 0; n-- {
 		rx := (v[0] >> n) & 1
 		ry := (v[1] >> n) & 1
 		rd := ry<<1 | (ry ^ rx)
-		d += rd << (2 * n)
-		h.rot(h.Order, v, rd)
+		d += rd << (dims * n)
+		h.rot(h.order, v, rd)
 	}
 	return d
 }
@@ -131,7 +92,7 @@ func (h Hilbert2D) Coord(dst []int, pos int) []int {
 	} else if len(dst) != 2 {
 		panic("len(dst) must equal 2")
 	}
-	for n := 0; n < h.Order; n++ {
+	for n := 0; n < h.order; n++ {
 		e := pos & 3
 		h.rot(n, dst[:], e)
 
@@ -145,18 +106,38 @@ func (h Hilbert2D) Coord(dst []int, pos int) []int {
 }
 
 // Hilbert3D is a 3-dimensional Hilbert curve.
-type Hilbert3D struct{ Order int }
+type Hilbert3D struct{ order int }
+
+// NewHilbert3D constructs a [Hilbert3D] of the given order. NewHilbert3D
+// returns [ErrOverflow] (wrapped) if the order would cause Len and Pos to
+// overflow.
+func NewHilbert3D(order int) (Hilbert3D, error) {
+	v := Hilbert3D{order: order}
+
+	// The order must be greater than zero.
+	if order < 1 {
+		return v, ErrUnderflow
+	}
+
+	// The product of the order and number of dimensions must not exceed or
+	// equal the size of an int.
+	if order*3 >= intSize {
+		return v, fmt.Errorf("a 3-dimensional, %d-order Hilbert curve will %w", order, ErrOverflow)
+	}
+
+	return v, nil
+}
 
 // Dims returns the spatial dimensions of the curve, which is {2ᵏ, 2ᵏ, 2ᵏ}, where
 // k is the order.
-func (h Hilbert3D) Dims() []int { return []int{1 << h.Order, 1 << h.Order, 1 << h.Order} }
+func (h Hilbert3D) Dims() []int { return []int{1 << h.order, 1 << h.order, 1 << h.order} }
 
 // Len returns the length of the curve, which is 2ⁿᵏ, where n is the dimension
 // (3) and k is the order.
 //
 // Len will overflow if order is ≥ 11 on architectures where [int] is 32-bits,
 // or ≥ 21 on architectures where [int] is 64-bits.
-func (h Hilbert3D) Len() int { return 1 << (3 * h.Order) }
+func (h Hilbert3D) Len() int { return 1 << (3 * h.order) }
 
 func (h Hilbert3D) rot(reverse bool, n int, v []int, d int) {
 	switch d {
@@ -180,13 +161,14 @@ func (h Hilbert3D) rot(reverse bool, n int, v []int, d int) {
 // or ≥ 21 on architectures where [int] is 64-bits.
 func (h Hilbert3D) Pos(v []int) int {
 	var d int
-	for n := h.Order - 1; n >= 0; n-- {
+	const dims = 3
+	for n := h.order - 1; n >= 0; n-- {
 		rx := (v[0] >> n) & 1
 		ry := (v[1] >> n) & 1
 		rz := (v[2] >> n) & 1
 		rd := rz<<2 | (rz^ry)<<1 | (rz ^ ry ^ rx)
-		d += rd << (3 * n)
-		h.rot(false, h.Order, v, rd)
+		d += rd << (dims * n)
+		h.rot(false, h.order, v, rd)
 	}
 	return d
 }
@@ -202,7 +184,7 @@ func (h Hilbert3D) Coord(dst []int, pos int) []int {
 	} else if len(dst) != 3 {
 		panic("len(dst) must equal 3")
 	}
-	for n := 0; n < h.Order; n++ {
+	for n := 0; n < h.order; n++ {
 		e := pos & 7
 		h.rot(true, n, dst[:], e)
 
@@ -218,18 +200,38 @@ func (h Hilbert3D) Coord(dst []int, pos int) []int {
 }
 
 // Hilbert4D is a 4-dimensional Hilbert curve.
-type Hilbert4D struct{ Order int }
+type Hilbert4D struct{ order int }
+
+// NewHilbert4D constructs a [Hilbert4D] of the given order. NewHilbert4D
+// returns [ErrOverflow] (wrapped) if the order would cause Len and Pos to
+// overflow.
+func NewHilbert4D(order int) (Hilbert4D, error) {
+	v := Hilbert4D{order: order}
+
+	// The order must be greater than zero.
+	if order < 1 {
+		return v, ErrUnderflow
+	}
+
+	// The product of the order and number of dimensions must not exceed or
+	// equal the size of an int.
+	if order*4 >= intSize {
+		return v, fmt.Errorf("a 4-dimensional, %d-order Hilbert curve will %w", order, ErrOverflow)
+	}
+
+	return v, nil
+}
 
 // Dims returns the spatial dimensions of the curve, which is {2ᵏ, 2ᵏ, 2ᵏ, 2ᵏ},
 // where k is the order.
-func (h Hilbert4D) Dims() []int { return []int{1 << h.Order, 1 << h.Order, 1 << h.Order, 1 << h.Order} }
+func (h Hilbert4D) Dims() []int { return []int{1 << h.order, 1 << h.order, 1 << h.order, 1 << h.order} }
 
 // Len returns the length of the curve, which is 2ⁿᵏ, where n is the dimension
 // (4) and k is the order.
 //
 // Len will overflow if order is ≥ 8 on architectures where [int] is 32-bits, or
 // ≥ 16 on architectures where [int] is 64-bits.
-func (h Hilbert4D) Len() int { return 1 << (4 * h.Order) }
+func (h Hilbert4D) Len() int { return 1 << (4 * h.order) }
 
 func (h Hilbert4D) rot(reverse bool, n int, v []int, d int) {
 	switch d {
@@ -261,16 +263,16 @@ func (h Hilbert4D) rot(reverse bool, n int, v []int, d int) {
 // ≥ 16 on architectures where [int] is 64-bits.
 func (h Hilbert4D) Pos(v []int) int {
 	var d int
-	N := 4
-	for n := h.Order - 1; n >= 0; n-- {
+	const dims = 4
+	for n := h.order - 1; n >= 0; n-- {
 		var e int
-		for i := N - 1; i >= 0; i-- {
+		for i := dims - 1; i >= 0; i-- {
 			v := v[i] >> n & 1
 			e = e<<1 | (e^v)&1
 		}
 
-		d += e << (N * n)
-		h.rot(false, h.Order, v, e)
+		d += e << (dims * n)
+		h.rot(false, h.order, v, e)
 	}
 	return d
 }
@@ -287,7 +289,7 @@ func (h Hilbert4D) Coord(dst []int, pos int) []int {
 		panic("len(dst) must equal 4")
 	}
 	N := 4
-	for n := 0; n < h.Order; n++ {
+	for n := 0; n < h.order; n++ {
 		e := pos & (1<<N - 1)
 		h.rot(true, n, dst[:], e)
 

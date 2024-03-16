@@ -14,6 +14,13 @@ import (
 	"gonum.org/v1/gonum/graph/simple"
 )
 
+const (
+	tiny   = 1
+	small  = 10
+	medium = 1000
+	large  = 100000
+)
+
 // intset is an integer set.
 type intset map[int]struct{}
 

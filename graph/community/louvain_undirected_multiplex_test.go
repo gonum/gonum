@@ -5,6 +5,7 @@
 package community
 
 import (
+	"fmt"
 	"math"
 	"reflect"
 	"sort"
@@ -690,4 +691,31 @@ func undirectedMultiplexFrom(raw []layer) (UndirectedLayers, []float64, error) {
 		return nil, nil, err
 	}
 	return g, weights, nil
+}
+
+func BenchmarkNewUndirectedLayers(b *testing.B) {
+	for _, graphSize := range []int{tiny, small, medium, large} {
+		for _, numGraphs := range []int{tiny, small} {
+			b.Run(
+				fmt.Sprintf("graphSize=%d,numGraphs=%d", graphSize, numGraphs),
+				func(b *testing.B) {
+					g := simple.NewUndirectedGraph()
+					for i := 0; i < graphSize; i++ {
+						g.AddNode(g.NewNode())
+					}
+					gs := make([]graph.Undirected, numGraphs)
+					for i := 0; i < numGraphs; i++ {
+						gs[i] = g
+					}
+
+					b.ResetTimer()
+					for i := 0; i < b.N; i++ {
+						_, err := NewUndirectedLayers(gs...)
+						if err != nil {
+							b.Fatalf("NewUndirectedLayers failed: %v", err)
+						}
+					}
+				})
+		}
+	}
 }

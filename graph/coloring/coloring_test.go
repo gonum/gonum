@@ -767,6 +767,16 @@ func BenchmarkColoring(b *testing.B) {
 					}
 				})
 			}
+			b.Run("Randomized", func(b *testing.B) {
+				rnd := rand.NewSource(1)
+				b.ResetTimer()
+				for i := 0; i < b.N; i++ {
+					_, _, err := Randomized(bench.g, nil, rnd)
+					if err != nil {
+						b.Fatalf("coloring failed: %v", err)
+					}
+				}
+			})
 			b.Run("RecursiveLargestFirst", func(b *testing.B) {
 				for i := 0; i < b.N; i++ {
 					RecursiveLargestFirst(bench.g)

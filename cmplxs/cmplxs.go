@@ -563,6 +563,8 @@ func Real(dst []float64, src []complex128) []float64 {
 	return dst
 }
 
+// Deprecated: This function simply calls [slices.Reverse].
+//
 // Reverse reverses the order of elements in the slice.
 func Reverse(s []complex128) {
 	slices.Reverse(s)

@@ -21,10 +21,24 @@ var (
 	gnpDirected_10_half    = gnpDirected(10, 0.5)
 	gnpDirected_100_half   = gnpDirected(100, 0.5)
 	gnpDirected_1000_half  = gnpDirected(1000, 0.5)
+
+	gnpUndirected_10_tenth  = gnpUndirected(10, 0.1)
+	gnpUndirected_100_tenth = gnpUndirected(100, 0.1)
+	gnpUndirected_10_half   = gnpUndirected(10, 0.5)
+	gnpUndirected_100_half  = gnpUndirected(100, 0.5)
 )
 
 func gnpDirected(n int, p float64) graph.Directed {
 	g := simple.NewDirectedGraph()
+	err := gen.Gnp(g, n, p, rand.NewSource(1))
+	if err != nil {
+		panic(fmt.Sprintf("topo: bad test: %v", err))
+	}
+	return g
+}
+
+func gnpUndirected(n int, p float64) graph.Undirected {
+	g := simple.NewUndirectedGraph()
 	err := gen.Gnp(g, n, p, rand.NewSource(1))
 	if err != nil {
 		panic(fmt.Sprintf("topo: bad test: %v", err))
@@ -72,4 +86,23 @@ func BenchmarkDirectedCyclesInGnp_10_tenth(b *testing.B) {
 }
 func BenchmarkDirectedCyclesInGnp_10_half(b *testing.B) {
 	benchmarkDirectedCyclesIn(b, gnpDirected_10_half)
+}
+
+func benchmarkUndirectedCyclesIn(b *testing.B, g graph.Undirected) {
+	for i := 0; i < b.N; i++ {
+		UndirectedCyclesIn(g)
+	}
+}
+
+func BenchmarkUndirectedCyclesInGnp_10_tenth(b *testing.B) {
+	benchmarkUndirectedCyclesIn(b, gnpUndirected_10_tenth)
+}
+func BenchmarkUndirectedCyclesInGnp_100_tenth(b *testing.B) {
+	benchmarkUndirectedCyclesIn(b, gnpUndirected_100_tenth)
+}
+func BenchmarkUndirectedCyclesInGnp_10_half(b *testing.B) {
+	benchmarkUndirectedCyclesIn(b, gnpUndirected_10_half)
+}
+func BenchmarkUndirectedCyclesInGnp_100_half(b *testing.B) {
+	benchmarkUndirectedCyclesIn(b, gnpUndirected_100_half)
 }

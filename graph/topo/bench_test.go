@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"testing"
 
+	"golang.org/x/exp/rand"
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/graphs/gen"
 	"gonum.org/v1/gonum/graph/simple"
@@ -24,7 +25,7 @@ var (
 
 func gnpDirected(n int, p float64) graph.Directed {
 	g := simple.NewDirectedGraph()
-	err := gen.Gnp(g, n, p, nil)
+	err := gen.Gnp(g, n, p, rand.NewSource(1))
 	if err != nil {
 		panic(fmt.Sprintf("topo: bad test: %v", err))
 	}
@@ -58,4 +59,17 @@ func BenchmarkTarjanSCCGnp_100_half(b *testing.B) {
 }
 func BenchmarkTarjanSCCGnp_1000_half(b *testing.B) {
 	benchmarkTarjanSCC(b, gnpDirected_1000_half)
+}
+
+func benchmarkDirectedCyclesIn(b *testing.B, g graph.Directed) {
+	for i := 0; i < b.N; i++ {
+		DirectedCyclesIn(g)
+	}
+}
+
+func BenchmarkDirectedCyclesInGnp_10_tenth(b *testing.B) {
+	benchmarkDirectedCyclesIn(b, gnpDirected_10_tenth)
+}
+func BenchmarkDirectedCyclesInGnp_10_half(b *testing.B) {
+	benchmarkDirectedCyclesIn(b, gnpDirected_10_half)
 }

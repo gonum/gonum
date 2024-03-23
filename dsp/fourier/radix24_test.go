@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"fmt"
 	"math/bits"
+	"slices"
 	"strconv"
 	"testing"
 	"unsafe"
@@ -207,9 +208,7 @@ func naiveReversePairs(x uint) uint {
 	b = b[len(b)-bits/2:]
 
 	// Reverse the quits.
-	for i, j := 0, len(b)-1; i < j; i, j = i+1, j-1 {
-		b[i], b[j] = b[j], b[i]
-	}
+	slices.Reverse(b)
 
 	// Re-parse the reversed number.
 	y, err := strconv.ParseUint(string(b), 4, 64)

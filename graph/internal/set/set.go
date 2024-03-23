@@ -6,7 +6,9 @@ package set
 
 import "gonum.org/v1/gonum/graph"
 
-type Set[T comparable] map[T]struct{}
+type Int interface{ ~int | ~int64 }
+
+type Set[T Int] map[T]struct{}
 
 // Add inserts an element into the set.
 func (s Set[T]) Add(e T) {
@@ -29,10 +31,10 @@ func (s Set[T]) Count() int {
 	return len(s)
 }
 
-// Equal reports set equality between the parameters. Sets are equal if and
+// IntsEqual reports set equality between the parameters. Sets are equal if and
 // only if they have the same elements.
-func Equal[T comparable](a, b Set[T]) bool {
-	if same(a, b) {
+func IntsEqual[T Int](a, b Set[T]) bool {
+	if intsSame(a, b) {
 		return true
 	}
 
@@ -95,10 +97,10 @@ func CloneNodes(src Nodes) Nodes {
 	return dst
 }
 
-// NodesEqual reports set equality between the parameters. Sets are equal if
+// Equal reports set equality between the parameters. Sets are equal if
 // and only if they have the same elements.
-func NodesEqual(a, b Nodes) bool {
-	if nodesSame(a, b) {
+func Equal(a, b Nodes) bool {
+	if same(a, b) {
 		return true
 	}
 
@@ -127,7 +129,7 @@ func NodesEqual(a, b Nodes) bool {
 //
 //	{a,b,c} UNION {b,c,d} = {a,b,c,d}
 func UnionOfNodes(a, b Nodes) Nodes {
-	if nodesSame(a, b) {
+	if same(a, b) {
 		return CloneNodes(a)
 	}
 
@@ -159,7 +161,7 @@ func UnionOfNodes(a, b Nodes) Nodes {
 //
 //	{a,b,c} INTERSECT {d,e,f} = {}
 func IntersectionOfNodes(a, b Nodes) Nodes {
-	if nodesSame(a, b) {
+	if same(a, b) {
 		return CloneNodes(a)
 	}
 	dst := make(Nodes)

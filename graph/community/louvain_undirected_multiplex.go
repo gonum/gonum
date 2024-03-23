@@ -140,7 +140,7 @@ func NewUndirectedLayers(layers ...graph.Undirected) (UndirectedLayers, error) {
 		for nodes.Next() {
 			next.Add(nodes.Node().ID())
 		}
-		if !set.Equal(next, base) {
+		if !set.IntsEqual(next, base) {
 			return nil, fmt.Errorf("community: layer ID mismatch between layers: %d", i+1)
 		}
 	}

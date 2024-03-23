@@ -13,38 +13,38 @@ type node int64
 
 func (n node) ID() int64 { return int64(n) }
 
-// TestSameSet tests the assumption that pointer equality via unsafe conversion
-// of a map[N]struct{} to uintptr is a valid test for perfect identity between
+// TestSameInts tests the assumption that pointer equality via unsafe conversion
+// of a map[int]struct{} to uintptr is a valid test for perfect identity between
 // set values. If any of the tests in TestSame fail, the package is broken and same
 // must be reimplemented to conform to the runtime map implementation. The relevant
 // code to look at (at least for gc) is the hmap type in runtime/map.go.
 
-func TestSameSet(t *testing.T) {
+func TestSameInts(t *testing.T) {
 	var (
 		a = make(Set[int64])
 		b = make(Set[int64])
 		c = a
 	)
 
-	if same(a, b) {
+	if intsSame(a, b) {
 		t.Error("Independently created sets test as same")
 	}
-	if !same(a, c) {
+	if !intsSame(a, c) {
 		t.Error("Set copy and original test as not same.")
 	}
 	a.Add(1)
-	if !same(a, c) {
+	if !intsSame(a, c) {
 		t.Error("Set copy and original test as not same after addition.")
 	}
-	if !same[int64](nil, nil) {
+	if !intsSame[int64](nil, nil) {
 		t.Error("nil sets test as not same.")
 	}
-	if same(b, nil) {
+	if intsSame(b, nil) {
 		t.Error("nil and empty sets test as same.")
 	}
 }
 
-func TestAddSet(t *testing.T) {
+func TestAddInts(t *testing.T) {
 	s := make(Set[int64])
 	if s.Count() != 0 {
 		t.Error("Set somehow contains new elements upon creation")
@@ -79,7 +79,7 @@ func TestAddSet(t *testing.T) {
 	}
 }
 
-func TestRemoveSet(t *testing.T) {
+func TestRemoveInts(t *testing.T) {
 	s := make(Set[int64])
 
 	s.Add(1)
@@ -113,41 +113,41 @@ func TestRemoveSet(t *testing.T) {
 	}
 }
 
-func TestSelfEqualSet(t *testing.T) {
+func TestSelfEqualInts(t *testing.T) {
 	s := make(Set[int64])
 
-	if !Equal(s, s) {
+	if !IntsEqual(s, s) {
 		t.Error("Set is not equal to itself")
 	}
 
 	s.Add(1)
 
-	if !Equal(s, s) {
+	if !IntsEqual(s, s) {
 		t.Error("Set ceases self equality after adding element")
 	}
 }
 
-func TestEqualSet(t *testing.T) {
+func TestEqualInts(t *testing.T) {
 	a := make(Set[int64])
 	b := make(Set[int64])
 
-	if !Equal(a, b) {
+	if !IntsEqual(a, b) {
 		t.Error("Two different empty sets not equal")
 	}
 
 	a.Add(1)
-	if Equal(a, b) {
+	if IntsEqual(a, b) {
 		t.Error("Two different sets with different sizes equal")
 	}
 
 	b.Add(1)
-	if !Equal(a, b) {
+	if !IntsEqual(a, b) {
 		t.Error("Two sets with same element not equal")
 	}
 
 	b.Remove(1)
 	b.Add(2)
-	if Equal(a, b) {
+	if IntsEqual(a, b) {
 		t.Error("Two different sets with different elements equal")
 	}
 }
@@ -159,20 +159,20 @@ func TestSameNodes(t *testing.T) {
 		c = a
 	)
 
-	if nodesSame(a, b) {
+	if same(a, b) {
 		t.Error("Independently created sets test as same")
 	}
-	if !nodesSame(a, c) {
+	if !same(a, c) {
 		t.Error("Set copy and original test as not same.")
 	}
 	a.Add(node(1))
-	if !nodesSame(a, c) {
+	if !same(a, c) {
 		t.Error("Set copy and original test as not same after addition.")
 	}
-	if !nodesSame(nil, nil) {
+	if !same(nil, nil) {
 		t.Error("nil sets test as not same.")
 	}
-	if nodesSame(b, nil) {
+	if same(b, nil) {
 		t.Error("nil and empty sets test as same.")
 	}
 }
@@ -259,13 +259,13 @@ func TestRemoveNodes(t *testing.T) {
 func TestSelfEqualNodes(t *testing.T) {
 	s := NewNodes()
 
-	if !NodesEqual(s, s) {
+	if !Equal(s, s) {
 		t.Error("Set is not equal to itself")
 	}
 
 	s.Add(node(1))
 
-	if !NodesEqual(s, s) {
+	if !Equal(s, s) {
 		t.Error("Set ceases self equality after adding element")
 	}
 }
@@ -274,23 +274,23 @@ func TestEqualNodes(t *testing.T) {
 	a := NewNodes()
 	b := NewNodes()
 
-	if !NodesEqual(a, b) {
+	if !Equal(a, b) {
 		t.Error("Two different empty sets not equal")
 	}
 
 	a.Add(node(1))
-	if NodesEqual(a, b) {
+	if Equal(a, b) {
 		t.Error("Two different sets with different sizes equal")
 	}
 
 	b.Add(node(1))
-	if !NodesEqual(a, b) {
+	if !Equal(a, b) {
 		t.Error("Two sets with same element not equal")
 	}
 
 	b.Remove(node(1))
 	b.Add(node(2))
-	if NodesEqual(a, b) {
+	if Equal(a, b) {
 		t.Error("Two different sets with different elements equal")
 	}
 }
@@ -304,13 +304,13 @@ func TestCopyNodes(t *testing.T) {
 
 	b := CloneNodes(a)
 
-	if !NodesEqual(a, b) {
+	if !Equal(a, b) {
 		t.Fatalf("Two sets not equal after copy: %v != %v", a, b)
 	}
 
 	b.Remove(node(1))
 
-	if NodesEqual(a, b) {
+	if Equal(a, b) {
 		t.Errorf("Mutating one set mutated another after copy: %v == %v", a, b)
 	}
 }

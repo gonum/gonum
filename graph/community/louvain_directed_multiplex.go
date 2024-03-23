@@ -144,7 +144,7 @@ func NewDirectedLayers(layers ...graph.Directed) (DirectedLayers, error) {
 		for nodes.Next() {
 			next.Add(nodes.Node().ID())
 		}
-		if !set.Equal(base, next) {
+		if !set.IntsEqual(base, next) {
 			return nil, fmt.Errorf("community: layer ID mismatch between layers: %d", i+1)
 		}
 	}

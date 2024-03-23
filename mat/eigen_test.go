@@ -6,7 +6,7 @@ package mat
 
 import (
 	"math"
-	"sort"
+	"slices"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -227,7 +227,7 @@ func TestEigenSym(t *testing.T) {
 			}
 
 			// Check that the eigenvalues are in ascending order.
-			if !sort.Float64sAreSorted(es.values) {
+			if !slices.IsSorted(es.values) {
 				t.Errorf("n=%d,cas=%d: eigenvalues not ascending", n, cas)
 			}
 		}

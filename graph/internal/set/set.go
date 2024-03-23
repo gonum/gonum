@@ -31,8 +31,8 @@ func (s Set[T]) Count() int {
 	return len(s)
 }
 
-// IntsEqual reports set equality between the parameters. Sets are equal if and
-// only if they have the same elements.
+// IntsEqual reports set equality between the parameters. Sets are equal if
+// and only if they have the same elements.
 func IntsEqual[T Int](a, b Set[T]) bool {
 	if intsSame(a, b) {
 		return true

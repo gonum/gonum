@@ -5,9 +5,8 @@
 package rdf
 
 import (
-	"sort"
-
 	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/internal/ordered"
 )
 
 // Query represents a step in an RDF graph query. The methods on Query
@@ -278,5 +277,5 @@ func (q Query) Result() []Term {
 }
 
 func sortByID(terms []Term) {
-	sort.Slice(terms, func(i, j int) bool { return terms[i].ID() < terms[j].ID() })
+	ordered.ByID(terms)
 }

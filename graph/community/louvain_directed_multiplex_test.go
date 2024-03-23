@@ -7,7 +7,7 @@ package community
 import (
 	"math"
 	"reflect"
-	"sort"
+	"slices"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -607,7 +607,7 @@ func TestLouvainDirectedMultiplex(t *testing.T) {
 			}
 
 			// Recovery of Q values is reversed.
-			if reverse(qs); !sort.Float64sAreSorted(qs) {
+			if slices.Reverse(qs); !slices.IsSorted(qs) {
 				t.Errorf("Q values not monotonically increasing: %.5v", qs)
 			}
 		}

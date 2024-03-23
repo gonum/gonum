@@ -5,7 +5,9 @@
 package rdf
 
 import (
+	"cmp"
 	"errors"
+	"slices"
 	"sort"
 )
 
@@ -341,8 +343,8 @@ func findCoreEndomorphism(strategy *dfs, g []*Statement, cands map[string]map[st
 			q = append(q, s)
 		}
 	}
-	sort.Slice(q, func(i, j int) bool {
-		return selectivity(q[i], cands, preds) < selectivity(q[j], cands, preds)
+	slices.SortFunc(q, func(a, b *Statement) int {
+		return cmp.Compare(selectivity(a, cands, preds), selectivity(b, cands, preds))
 	})
 	return strategy.evaluate(g, q, cands, mu)
 }

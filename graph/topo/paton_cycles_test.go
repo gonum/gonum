@@ -6,11 +6,12 @@ package topo
 
 import (
 	"reflect"
+	"slices"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
-	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/simple"
+	"gonum.org/v1/gonum/internal/sorted"
 )
 
 var undirectedCyclesInTests = []struct {
@@ -97,7 +98,7 @@ func TestUndirectedCyclesIn(t *testing.T) {
 			ids[len(ids)-1] = ids[0]
 			got[j] = ids
 		}
-		ordered.BySliceValues(got)
+		sorted.BySliceValues(got)
 		var matched bool
 		for _, want := range test.want {
 			if reflect.DeepEqual(got, want) {
@@ -133,7 +134,7 @@ func canonicalise(c []graph.Node) []graph.Node {
 		c = append(c[idx:], c[:idx]...)
 	}
 	if c[len(c)-1].ID() < c[1].ID() {
-		ordered.Reverse(c[1:])
+		slices.Reverse(c[1:])
 	}
 	return c
 }

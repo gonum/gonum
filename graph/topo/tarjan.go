@@ -6,6 +6,7 @@ package topo
 
 import (
 	"fmt"
+	"slices"
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/ordered"
@@ -75,7 +76,7 @@ func sortedFrom(sccs [][]graph.Node, order func([]graph.Node)) ([]graph.Node, er
 		}
 		err = sc
 	}
-	ordered.Reverse(sorted)
+	slices.Reverse(sorted)
 	return sorted, err
 }
 
@@ -100,12 +101,12 @@ func tarjanSCCstabilized(g graph.Directed, order func([]graph.Node)) [][]graph.N
 		}
 	} else {
 		order(nodes)
-		ordered.Reverse(nodes)
+		slices.Reverse(nodes)
 
 		succ = func(id int64) []graph.Node {
 			to := graph.NodesOf(g.From(id))
 			order(to)
-			ordered.Reverse(to)
+			slices.Reverse(to)
 			return to
 		}
 	}

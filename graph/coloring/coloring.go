@@ -8,7 +8,9 @@
 package coloring
 
 import (
+	"cmp"
 	"errors"
+	"slices"
 	"sort"
 
 	"golang.org/x/exp/rand"
@@ -31,7 +33,7 @@ func Sets(colors map[int64]int) map[int][]int64 {
 		sets[c] = append(sets[c], id)
 	}
 	for _, s := range sets {
-		sort.Slice(s, func(i, j int) bool { return s[i] < s[j] })
+		slices.Sort(s)
 	}
 	return sets
 }
@@ -274,7 +276,7 @@ func bestMaximumClique(g graph.Undirected, cliques [][]graph.Node) (colors map[i
 		return colorClique(cliques[0])
 	}
 
-	sort.Slice(cliques, func(i, j int) bool { return len(cliques[i]) > len(cliques[j]) })
+	slices.SortFunc(cliques, func(a, b []graph.Node) int { return cmp.Compare(len(b), len(a)) })
 	maxClique := cliques[0]
 	minDegree := cliqueDegree(g, maxClique)
 	for _, c := range cliques[1:] {

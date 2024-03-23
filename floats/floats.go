@@ -772,7 +772,7 @@ func Within(s []float64, v float64) int {
 	if len(s) < 2 {
 		panic(shortSpan)
 	}
-	if !sort.Float64sAreSorted(s) {
+	if !slices.IsSorted(s) {
 		panic("floats: input slice not sorted")
 	}
 	if v < s[0] || v >= s[len(s)-1] || math.IsNaN(v) {

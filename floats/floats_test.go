@@ -7,7 +7,7 @@ package floats
 import (
 	"fmt"
 	"math"
-	"sort"
+	"slices"
 	"strconv"
 	"testing"
 
@@ -191,10 +191,10 @@ func TestArgsortStable(t *testing.T) {
 		}
 		idx := make([]int, len(data))
 		ArgsortStable(data, idx)
-		if !sort.Float64sAreSorted(data) {
+		if !slices.IsSorted(data) {
 			t.Errorf("unexpected data sort order for case %d", i)
 		}
-		if !sort.IntsAreSorted(idx[:i]) {
+		if !slices.IsSorted(idx[:i]) {
 			t.Errorf("unexpected index sort order for case %d", i)
 		}
 	}

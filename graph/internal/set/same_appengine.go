@@ -18,7 +18,7 @@ func same(a, b Nodes) bool {
 	return reflect.ValueOf(a).Pointer() == reflect.ValueOf(b).Pointer()
 }
 
-// nodesSame determines whether two sets are backed by the same store. In the
+// intsSame determines whether two sets are backed by the same store. In the
 // current implementation using hash maps it makes use of the fact that
 // hash maps are passed as a pointer to a runtime Hmap struct. A map is
 // not seen by the runtime as a pointer though, so we use reflect to get

@@ -6,7 +6,7 @@ package distuv
 
 import (
 	"math"
-	"sort"
+	"slices"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -82,7 +82,7 @@ func testF(t *testing.T, f F, i int) {
 	)
 	x := make([]float64, n)
 	generateSamples(x, f)
-	sort.Float64s(x)
+	slices.Sort(x)
 
 	testRandLogProbContinuous(t, i, 0, x, f, tol, bins)
 	checkProbContinuous(t, i, x, 0, math.Inf(1), f, 1e-4)

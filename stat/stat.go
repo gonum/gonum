@@ -6,6 +6,7 @@ package stat
 
 import (
 	"math"
+	"slices"
 	"sort"
 
 	"gonum.org/v1/gonum/floats"
@@ -73,7 +74,7 @@ func CDF(q float64, c CumulantKind, x, weights []float64) float64 {
 	if len(x) == 0 {
 		panic("stat: zero length slice")
 	}
-	if !sort.Float64sAreSorted(x) {
+	if !slices.IsSorted(x) {
 		panic("x data are not sorted")
 	}
 
@@ -512,10 +513,10 @@ func Histogram(count, dividers, x, weights []float64) []float64 {
 	if len(count) != len(dividers)-1 {
 		panic("histogram: bin count mismatch")
 	}
-	if !sort.Float64sAreSorted(dividers) {
+	if !slices.IsSorted(dividers) {
 		panic("histogram: dividers are not sorted")
 	}
-	if !sort.Float64sAreSorted(x) {
+	if !slices.IsSorted(x) {
 		panic("histogram: x data are not sorted")
 	}
 	for i := range count {
@@ -632,10 +633,10 @@ func KolmogorovSmirnov(x, xWeights, y, yWeights []float64) float64 {
 		return math.NaN()
 	}
 
-	if !sort.Float64sAreSorted(x) {
+	if !slices.IsSorted(x) {
 		panic("x data are not sorted")
 	}
-	if !sort.Float64sAreSorted(y) {
+	if !slices.IsSorted(y) {
 		panic("y data are not sorted")
 	}
 
@@ -1091,7 +1092,7 @@ func Quantile(p float64, c CumulantKind, x, weights []float64) float64 {
 	if floats.HasNaN(x) {
 		return math.NaN() // This is needed because the algorithm breaks otherwise.
 	}
-	if !sort.Float64sAreSorted(x) {
+	if !slices.IsSorted(x) {
 		panic("x data are not sorted")
 	}
 
@@ -1188,7 +1189,7 @@ func skewCorrection(n float64) float64 {
 // length as x.
 func SortWeighted(x, weights []float64) {
 	if weights == nil {
-		sort.Float64s(x)
+		slices.Sort(x)
 		return
 	}
 	if len(x) != len(weights) {

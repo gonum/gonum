@@ -5,7 +5,7 @@
 package sampleuv
 
 import (
-	"sort"
+	"slices"
 	"testing"
 
 	"gonum.org/v1/gonum/floats/scalar"
@@ -29,7 +29,7 @@ func TestLatinHypercube(t *testing.T) {
 			distuv.Normal{Mu: 5, Sigma: 3},
 		} {
 			LatinHypercube{Q: dist}.Sample(samples)
-			sort.Float64s(samples)
+			slices.Sort(samples)
 			for i, v := range samples {
 				p := dist.CDF(v)
 				if p < float64(i)/float64(nSamples) || p > float64(i+1)/float64(nSamples) {

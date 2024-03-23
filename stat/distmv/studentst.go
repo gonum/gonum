@@ -6,7 +6,7 @@ package distmv
 
 import (
 	"math"
-	"sort"
+	"slices"
 
 	"golang.org/x/exp/rand"
 	"golang.org/x/tools/container/intsets"
@@ -219,7 +219,7 @@ func findUnob(observed []int, dim int) (unobserved []int) {
 	var setUnob intsets.Sparse
 	setUnob.Difference(&setAll, &setOb)
 	unobserved = setUnob.AppendTo(nil)
-	sort.Ints(unobserved)
+	slices.Sort(unobserved)
 	return unobserved
 }
 

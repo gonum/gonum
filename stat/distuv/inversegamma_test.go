@@ -6,7 +6,7 @@ package distuv
 
 import (
 	"math"
-	"sort"
+	"slices"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -47,7 +47,7 @@ func testInverseGamma(t *testing.T, f InverseGamma, i int) {
 	)
 	x := make([]float64, n)
 	generateSamples(x, f)
-	sort.Float64s(x)
+	slices.Sort(x)
 
 	testRandLogProbContinuous(t, i, 0, x, f, tol, bins)
 	checkMean(t, i, x, f, tol)

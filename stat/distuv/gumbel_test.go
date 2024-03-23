@@ -6,7 +6,7 @@ package distuv
 
 import (
 	"math"
-	"sort"
+	"slices"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -60,7 +60,7 @@ func testGumbelRight(t *testing.T, g GumbelRight, i int) {
 	)
 	x := make([]float64, n)
 	generateSamples(x, g)
-	sort.Float64s(x)
+	slices.Sort(x)
 
 	min := math.Inf(-1)
 	testRandLogProbContinuous(t, i, min, x, g, tol, bins)

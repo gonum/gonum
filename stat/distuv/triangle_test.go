@@ -6,7 +6,7 @@ package distuv
 
 import (
 	"math"
-	"sort"
+	"slices"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -65,7 +65,7 @@ func TestTriangle(t *testing.T) {
 		)
 		x := make([]float64, n)
 		generateSamples(x, f)
-		sort.Float64s(x)
+		slices.Sort(x)
 
 		checkMean(t, i, x, f, tol)
 		checkVarAndStd(t, i, x, f, tol)

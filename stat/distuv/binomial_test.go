@@ -5,7 +5,7 @@
 package distuv
 
 import (
-	"sort"
+	"slices"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -140,7 +140,7 @@ func testBinomial(t *testing.T, b Binomial, i int) {
 	)
 	x := make([]float64, n)
 	generateSamples(x, b)
-	sort.Float64s(x)
+	slices.Sort(x)
 
 	checkMean(t, i, x, b, tol)
 	checkVarAndStd(t, i, x, b, tol)

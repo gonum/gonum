@@ -7,7 +7,7 @@ package testlapack
 import (
 	"fmt"
 	"math"
-	"sort"
+	"slices"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -42,7 +42,7 @@ func Dlasq2Test(t *testing.T, impl Dlasq2er) {
 						z[2*i] = rnd.Float64()
 						want[i] = z[2*i]
 					}
-					sort.Float64s(want)
+					slices.Sort(want)
 				case 2:
 					// Random tridiagonal matrix
 					for i := range z {
@@ -111,7 +111,7 @@ func Dlasq2Test(t *testing.T, impl Dlasq2er) {
 					}
 				}
 
-				sort.Float64s(got)
+				slices.Sort(got)
 				diff := floats.Distance(got, want, math.Inf(1))
 				if diff > tol {
 					t.Errorf("%v: unexpected eigenvalues; diff=%v\n%v\n%v\n\n", name, diff, got, want)

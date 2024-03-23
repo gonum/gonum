@@ -7,7 +7,7 @@ package testlapack
 import (
 	"fmt"
 	"math"
-	"sort"
+	"slices"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -55,7 +55,7 @@ func DsterfTest(t *testing.T, impl Dsterfer) {
 		}
 		want := make([]float64, len(test.want))
 		copy(want, test.want)
-		sort.Float64s(want)
+		slices.Sort(want)
 		diff := floats.Distance(got, want, math.Inf(1))
 		if diff > tol {
 			t.Errorf("Case %d, n=%v: unexpected result, |dGot-dWant|=%v", cas, n, diff)
@@ -162,7 +162,7 @@ func DsterfTest(t *testing.T, impl Dsterfer) {
 			}
 
 			// Test that the eigenvalues are sorted.
-			if !sort.Float64sAreSorted(dGot) {
+			if !slices.IsSorted(dGot) {
 				t.Errorf("%v: eigenvalues are not sorted", name)
 				continue
 			}

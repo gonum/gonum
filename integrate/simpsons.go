@@ -4,7 +4,7 @@
 
 package integrate
 
-import "sort"
+import "slices"
 
 // Simpsons returns an approximate value of the integral
 //
@@ -27,7 +27,7 @@ func Simpsons(x, f []float64) float64 {
 		panic("integrate: slice length mismatch")
 	case n < 3:
 		panic("integrate: input data too small")
-	case !sort.Float64sAreSorted(x):
+	case !slices.IsSorted(x):
 		panic("integrate: must be sorted")
 	}
 

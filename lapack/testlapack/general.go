@@ -292,6 +292,10 @@ func blockedUpperTriGeneral(r, c, k, l, stride int, kblock bool, rnd *rand.Rand)
 	return ans
 }
 
+func randomUpperTriGeneral(n, stride int, rnd *rand.Rand) blas64.General {
+	return blockedUpperTriGeneral(n, n, 0, n, stride, false, rnd)
+}
+
 // nanTriangular allocates a new r×c triangular matrix filled with NaN values.
 func nanTriangular(uplo blas.Uplo, n, stride int) blas64.Triangular {
 	if n < 0 {

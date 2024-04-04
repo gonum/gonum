@@ -193,7 +193,7 @@ func ExampleTOC_aUC_unweighted() {
 	aucNTP := integrate.Trapezoidal(x, ntp)
 	aucMin := pos * pos / 2
 
-	// Calculate the the area under the curve
+	// Calculate the area under the curve
 	// within the bounding parallelogram.
 	auc := aucNTP - aucMin
 
@@ -228,7 +228,7 @@ func ExampleTOC_aUC_weighted() {
 	aucMin := integrate.Trapezoidal(x, min)
 	aucMax := integrate.Trapezoidal(x, max)
 
-	// Calculate the the area under the curve
+	// Calculate the area under the curve
 	// within the bounding parallelogram.
 	auc := aucNTP - aucMin
 

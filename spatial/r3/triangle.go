@@ -40,7 +40,7 @@ func (t Triangle) IsDegenerate(tol float64) bool {
 }
 
 // longIdx returns index of the longest side. The sides
-// of the triangles are are as follows:
+// of the triangles are as follows:
 //   - Side 0 formed by vertices 0 and 1
 //   - Side 1 formed by vertices 1 and 2
 //   - Side 2 formed by vertices 0 and 2

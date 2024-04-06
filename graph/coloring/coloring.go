@@ -128,13 +128,13 @@ func DsaturExact(term Terminator, g graph.Undirected) (k int, colors map[int64]i
 // dSaturColoring is a partial graph coloring.
 type dSaturColoring struct {
 	colors    map[int64]int
-	uncolored set.Int64s
+	uncolored set.Ints[int64]
 }
 
 // newDsaturColoring returns a dSaturColoring representing a partial coloring
 // of a graph with the given nodes and colors.
 func newDsaturColoring(nodes []graph.Node, colors map[int64]int) dSaturColoring {
-	uncolored := make(set.Int64s)
+	uncolored := make(set.Ints[int64])
 	for _, v := range nodes {
 		vid := v.ID()
 		if _, ok := colors[vid]; !ok {
@@ -193,7 +193,7 @@ func dSaturExact(term Terminator, selector *saturationDegree, cand dSaturColorin
 			if best == nil {
 				return -1, nil, term.Err()
 			}
-			colors := make(set.Ints)
+			colors := make(set.Ints[int])
 			for _, c := range best {
 				colors.Add(c)
 			}
@@ -215,7 +215,7 @@ func dSaturExact(term Terminator, selector *saturationDegree, cand dSaturColorin
 	adjColors := selector.adjColors[selector.indexOf[vid]]
 
 	// Collect all feasible existing colors plus one, remembering it.
-	feasible := make(set.Ints)
+	feasible := make(set.Ints[int])
 	for _, c := range cand.colors {
 		if adjColors.Has(c) {
 			continue
@@ -293,7 +293,7 @@ func bestMaximumClique(g graph.Undirected, cliques [][]graph.Node) (colors map[i
 
 // cliqueDegree returns the degree of the clique to nodes outside the clique.
 func cliqueDegree(g graph.Undirected, clique []graph.Node) int {
-	n := make(set.Int64s)
+	n := make(set.Ints[int64])
 	for _, u := range clique {
 		to := g.From(u.ID())
 		for to.Next() {
@@ -584,7 +584,7 @@ func greedyColoringOf(g graph.Undirected, order graph.Nodes, partial map[int64]i
 	if !constrained {
 		return k + 1, colors
 	}
-	seen := make(set.Ints)
+	seen := make(set.Ints[int])
 	for _, c := range colors {
 		seen.Add(c)
 	}
@@ -593,8 +593,8 @@ func greedyColoringOf(g graph.Undirected, order graph.Nodes, partial map[int64]i
 
 // colorsOf returns all the colors in the coloring that are used by the
 // given nodes.
-func colorsOf(nodes graph.Nodes, coloring map[int64]int) set.Ints {
-	c := make(set.Ints, nodes.Len())
+func colorsOf(nodes graph.Nodes, coloring map[int64]int) set.Ints[int] {
+	c := make(set.Ints[int], nodes.Len())
 	for nodes.Next() {
 		used, ok := coloring[nodes.Node().ID()]
 		if ok {
@@ -692,7 +692,7 @@ type saturationDegree struct {
 	// colors of each node.
 	indexOf   map[int64]int
 	degrees   []int
-	adjColors []set.Ints
+	adjColors []set.Ints[int]
 
 	// g and colors are the graph coloring.
 	// colors is held by both the iterator
@@ -712,13 +712,13 @@ func newSaturationDegree(it graph.Nodes, g graph.Undirected, colors map[int64]in
 		nodes:     nodes,
 		indexOf:   make(map[int64]int, len(nodes)),
 		degrees:   make([]int, len(nodes)),
-		adjColors: make([]set.Ints, len(nodes)),
+		adjColors: make([]set.Ints[int], len(nodes)),
 		g:         g,
 		colors:    colors,
 	}
 	for i, u := range nodes {
 		sd.degrees[i] = g.From(u.ID()).Len()
-		sd.adjColors[i] = make(set.Ints)
+		sd.adjColors[i] = make(set.Ints[int])
 		sd.indexOf[u.ID()] = i
 	}
 	for uid, c := range colors {
@@ -734,7 +734,7 @@ func newSaturationDegree(it graph.Nodes, g graph.Undirected, colors map[int64]in
 func (sd *saturationDegree) reset(colors map[int64]int) {
 	sd.colors = colors
 	for i := range sd.nodes {
-		sd.adjColors[i] = make(set.Ints)
+		sd.adjColors[i] = make(set.Ints[int])
 	}
 	for uid, c := range colors {
 		to := sd.g.From(uid)
@@ -804,8 +804,8 @@ func (sd *saturationDegree) pass() int {
 }
 
 // same implements the same function from San Segundo doi:10.1016/j.cor.2011.10.008.
-func (sd *saturationDegree) same(vi, vj set.Ints) int {
-	valid := make(set.Ints)
+func (sd *saturationDegree) same(vi, vj set.Ints[int]) int {
+	valid := make(set.Ints[int])
 	for _, c := range sd.colors {
 		if !vi.Has(c) {
 			valid.Add(c)
@@ -823,7 +823,7 @@ func saturationDegreeOf(vid int64, g graph.Undirected, colors map[int64]int) int
 	if _, ok := colors[vid]; ok {
 		panic("coloring: saturation degree not defined for colored node")
 	}
-	adjColors := make(set.Ints)
+	adjColors := make(set.Ints[int])
 	to := g.From(vid)
 	for to.Next() {
 		if c, ok := colors[to.Node().ID()]; ok {

@@ -29,11 +29,11 @@ var coloringTests = []struct {
 
 	partial map[int64]int
 
-	dsatur      set.Ints
-	randomized  set.Ints
-	rlf         set.Ints
-	sanSegundo  set.Ints
-	welshPowell set.Ints
+	dsatur      set.Ints[int]
+	randomized  set.Ints[int]
+	rlf         set.Ints[int]
+	sanSegundo  set.Ints[int]
+	welshPowell set.Ints[int]
 }{
 	{
 		name:   "empty",
@@ -411,8 +411,8 @@ var coloringTests = []struct {
 	},
 }
 
-func setOf(vals ...int) set.Ints {
-	s := make(set.Ints)
+func setOf(vals ...int) set.Ints[int] {
+	s := make(set.Ints[int])
 	for _, v := range vals {
 		s.Add(v)
 	}
@@ -767,6 +767,16 @@ func BenchmarkColoring(b *testing.B) {
 					}
 				})
 			}
+			b.Run("Randomized", func(b *testing.B) {
+				rnd := rand.NewSource(1)
+				b.ResetTimer()
+				for i := 0; i < b.N; i++ {
+					_, _, err := Randomized(bench.g, nil, rnd)
+					if err != nil {
+						b.Fatalf("coloring failed: %v", err)
+					}
+				}
+			})
 			b.Run("RecursiveLargestFirst", func(b *testing.B) {
 				for i := 0; i < b.N; i++ {
 					RecursiveLargestFirst(bench.g)

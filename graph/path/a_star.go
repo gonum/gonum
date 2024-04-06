@@ -47,7 +47,7 @@ func AStar(s, t graph.Node, g traverse.Graph, h Heuristic) (path Shortest, expan
 	path = newShortestFrom(s, []graph.Node{s, t})
 	tid := t.ID()
 
-	visited := make(set.Int64s)
+	visited := make(set.Ints[int64])
 	open := &aStarQueue{indexOf: make(map[int64]int)}
 	heap.Push(open, aStarNode{node: s, gscore: 0, fscore: h(s, t)})
 

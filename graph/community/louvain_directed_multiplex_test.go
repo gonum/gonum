@@ -5,6 +5,7 @@
 package community
 
 import (
+	"fmt"
 	"math"
 	"reflect"
 	"sort"
@@ -721,4 +722,31 @@ func directedMultiplexFrom(raw []layer) (DirectedLayers, []float64, error) {
 		return nil, nil, err
 	}
 	return g, weights, nil
+}
+
+func BenchmarkNewDirectedLayers(b *testing.B) {
+	for _, graphSize := range []int{1e0, 1e1, 1e3, 1e5} {
+		for _, numGraphs := range []int{1e0, 1e1} {
+			b.Run(
+				fmt.Sprintf("graphSize=%d,numGraphs=%d", graphSize, numGraphs),
+				func(b *testing.B) {
+					g := simple.NewDirectedGraph()
+					for i := 0; i < graphSize; i++ {
+						g.AddNode(g.NewNode())
+					}
+					gs := make([]graph.Directed, numGraphs)
+					for i := 0; i < numGraphs; i++ {
+						gs[i] = g
+					}
+
+					b.ResetTimer()
+					for i := 0; i < b.N; i++ {
+						_, err := NewDirectedLayers(gs...)
+						if err != nil {
+							b.Fatalf("NewDirectedLayers failed: %v", err)
+						}
+					}
+				})
+		}
+	}
 }

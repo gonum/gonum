@@ -39,7 +39,7 @@ type BreadthFirst struct {
 	Traverse func(graph.Edge) bool
 
 	queue   linear.NodeQueue
-	visited set.Int64s
+	visited set.Ints[int64]
 }
 
 // Walk performs a breadth-first traversal of the graph g starting from the given node,
@@ -49,7 +49,7 @@ type BreadthFirst struct {
 // non-nil, it is called with each node the first time it is visited.
 func (b *BreadthFirst) Walk(g Graph, from graph.Node, until func(n graph.Node, d int) bool) graph.Node {
 	if b.visited == nil {
-		b.visited = make(set.Int64s)
+		b.visited = make(set.Ints[int64])
 	}
 	b.queue.Enqueue(from)
 	if b.Visit != nil && !b.visited.Has(from.ID()) {
@@ -147,7 +147,7 @@ type DepthFirst struct {
 	Traverse func(graph.Edge) bool
 
 	stack   linear.NodeStack
-	visited set.Int64s
+	visited set.Ints[int64]
 }
 
 // Walk performs a depth-first traversal of the graph g starting from the given node,
@@ -157,7 +157,7 @@ type DepthFirst struct {
 // is called with each node the first time it is visited.
 func (d *DepthFirst) Walk(g Graph, from graph.Node, until func(graph.Node) bool) graph.Node {
 	if d.visited == nil {
-		d.visited = make(set.Int64s)
+		d.visited = make(set.Ints[int64])
 	}
 	d.stack.Push(from)
 	for d.stack.Len() != 0 {

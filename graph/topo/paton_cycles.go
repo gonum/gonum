@@ -17,7 +17,7 @@ func UndirectedCyclesIn(g graph.Undirected) [][]graph.Node {
 	// https://doi.org/10.1145/363219.363232
 
 	var cycles [][]graph.Node
-	done := make(set.Int64s)
+	done := make(set.Ints[int64])
 	var tree linear.NodeStack
 	nodes := g.Nodes()
 	for nodes.Next() {
@@ -30,7 +30,7 @@ func UndirectedCyclesIn(g graph.Undirected) [][]graph.Node {
 
 		tree = tree[:0]
 		tree.Push(n)
-		from := sets{id: set.Int64s{}}
+		from := sets{id: set.Ints[int64]{}}
 		to := map[int64]graph.Node{id: n}
 
 		for tree.Len() != 0 {
@@ -68,12 +68,12 @@ func UndirectedCyclesIn(g graph.Undirected) [][]graph.Node {
 	return cycles
 }
 
-type sets map[int64]set.Int64s
+type sets map[int64]set.Ints[int64]
 
 func (s sets) add(uid, vid int64) {
 	e, ok := s[vid]
 	if !ok {
-		e = make(set.Int64s)
+		e = make(set.Ints[int64])
 		s[vid] = e
 	}
 	e.Add(uid)

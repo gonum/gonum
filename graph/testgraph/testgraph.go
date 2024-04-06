@@ -2102,7 +2102,7 @@ type RandomNodes struct {
 	curr int64
 
 	state *rand.Rand
-	seen  set.Int64s
+	seen  set.Ints[int64]
 	count int
 }
 
@@ -2118,7 +2118,7 @@ func NewRandomNodes(n int, seed uint64, new func(id int64) graph.Node) *RandomNo
 		newNode: new,
 
 		state: rand.New(rand.NewSource(seed)),
-		seen:  make(set.Int64s),
+		seen:  make(set.Ints[int64]),
 		count: 0,
 	}
 }
@@ -2159,7 +2159,7 @@ func (n *RandomNodes) Node() graph.Node {
 // Reset returns the iterator to its initial state.
 func (n *RandomNodes) Reset() {
 	n.state = rand.New(rand.NewSource(n.seed))
-	n.seen = make(set.Int64s)
+	n.seen = make(set.Ints[int64])
 	n.count = 0
 }
 

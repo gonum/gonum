@@ -159,7 +159,7 @@ func (p Shortest) To(vid int64) (path []graph.Node, weight float64) {
 	path = []graph.Node{p.nodes[to]}
 	weight = math.Inf(1)
 	if p.hasNegativeCycle {
-		seen := make(set.Ints)
+		seen := make(set.Ints[int])
 		seen.Add(from)
 		for to != from {
 			next := p.next[to]
@@ -348,7 +348,7 @@ func (p ShortestAlts) To(vid int64) (path []graph.Node, weight float64, unique b
 	path = []graph.Node{p.nodes[to]}
 	if p.hasNegativeCycle {
 		weight = math.Inf(1)
-		seen := make(set.Ints)
+		seen := make(set.Ints[int])
 		seen.Add(from)
 		for to != from {
 			c := p.next[to]

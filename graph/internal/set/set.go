@@ -6,84 +6,35 @@ package set
 
 import "gonum.org/v1/gonum/graph"
 
-// Ints is a set of int identifiers.
-type Ints map[int]struct{}
+type Int interface{ ~int | ~int64 }
 
-// The simple accessor methods for Ints are provided to allow ease of
-// implementation change should the need arise.
+type Ints[T Int] map[T]struct{}
 
 // Add inserts an element into the set.
-func (s Ints) Add(e int) {
+func (s Ints[T]) Add(e T) {
 	s[e] = struct{}{}
 }
 
 // Has reports the existence of the element in the set.
-func (s Ints) Has(e int) bool {
+func (s Ints[T]) Has(e T) bool {
 	_, ok := s[e]
 	return ok
 }
 
 // Remove deletes the specified element from the set.
-func (s Ints) Remove(e int) {
+func (s Ints[T]) Remove(e T) {
 	delete(s, e)
 }
 
 // Count reports the number of elements stored in the set.
-func (s Ints) Count() int {
+func (s Ints[T]) Count() int {
 	return len(s)
 }
 
 // IntsEqual reports set equality between the parameters. Sets are equal if
 // and only if they have the same elements.
-func IntsEqual(a, b Ints) bool {
+func IntsEqual[T Int](a, b Ints[T]) bool {
 	if intsSame(a, b) {
-		return true
-	}
-
-	if len(a) != len(b) {
-		return false
-	}
-
-	for e := range a {
-		if _, ok := b[e]; !ok {
-			return false
-		}
-	}
-
-	return true
-}
-
-// Int64s is a set of int64 identifiers.
-type Int64s map[int64]struct{}
-
-// The simple accessor methods for Ints are provided to allow ease of
-// implementation change should the need arise.
-
-// Add inserts an element into the set.
-func (s Int64s) Add(e int64) {
-	s[e] = struct{}{}
-}
-
-// Has reports the existence of the element in the set.
-func (s Int64s) Has(e int64) bool {
-	_, ok := s[e]
-	return ok
-}
-
-// Remove deletes the specified element from the set.
-func (s Int64s) Remove(e int64) {
-	delete(s, e)
-}
-
-// Count reports the number of elements stored in the set.
-func (s Int64s) Count() int {
-	return len(s)
-}
-
-// Int64sEqual reports set equality between the parameters. Sets are equal if
-// and only if they have the same elements.
-func Int64sEqual(a, b Int64s) bool {
-	if int64sSame(a, b) {
 		return true
 	}
 

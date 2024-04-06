@@ -72,13 +72,6 @@ func Select(list SortSlicer, k int) int {
 	}
 }
 
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
 // MedianOfMedians returns the index to the median value of the medians
 // of groups of 5 consecutive elements.
 func MedianOfMedians(list SortSlicer) int {

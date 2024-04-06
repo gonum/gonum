@@ -18,13 +18,6 @@ const (
 	negativeTasks        string = "optimize: negative input number of tasks"
 )
 
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
 // Task is a type to communicate between the Method and the outer
 // calling script.
 type Task struct {

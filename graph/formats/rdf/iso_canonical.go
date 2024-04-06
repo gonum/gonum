@@ -868,13 +868,6 @@ func sub(a, b lexicalStatements, max int) []*Statement {
 	return d
 }
 
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
 func (s lexicalStatements) Len() int { return len(s.statements) }
 func (s lexicalStatements) Less(i, j int) bool {
 	return relabeledStatement{s.statements[i], s.hashes}.less(relabeledStatement{s.statements[j], s.hashes})

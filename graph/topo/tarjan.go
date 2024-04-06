@@ -187,10 +187,3 @@ func (t *tarjan) strongconnect(v graph.Node) {
 		t.sccs = append(t.sccs, scc)
 	}
 }
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}

@@ -27,13 +27,6 @@ type Tridiagonal struct {
 	DU []float64
 }
 
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
 // Potrf computes the Cholesky factorization of a.
 // The factorization has the form
 //

@@ -20,19 +20,6 @@ func iabs(a int) int {
 	return -a
 }
 
-func min0(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func max0(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
 
 func zairyOrig(ZR, ZI float64, ID, KODE int) (AIR, AII float64, NZ, IERR int) {
 	// zairy is adapted from the original Netlib code by Donald Amos.
@@ -337,7 +324,7 @@ Seventy:
 	K2 = imach[16]
 	R1M5 = dmach[5]
 
-	K = min0(iabs(K1), iabs(K2))
+	K = min(iabs(K1), iabs(K2))
 	ELIM = 2.303e0 * (float64(K)*R1M5 - 3.0e0)
 	K1 = imach[14] - 1
 	AA = R1M5 * float64(K1)
@@ -1227,7 +1214,7 @@ func zksclOrig(ZRR, ZRI, FNU float64, N int, YR, YI []float64, NZ int, RZR, RZI,
 	ZEROI = 0
 	NZ = 0
 	IC = 0
-	NN = min0(2, N)
+	NN = min(2, N)
 	for I = 1; I <= NN; I++ {
 		S1R = YR[I]
 		S1I = YI[I]
@@ -1508,7 +1495,7 @@ func zasyiOrig(ZR, ZI, FNU float64, KODE, N int, YR, YI []float64, NZ int, RL, T
 	AZ = zabs(complex(ZR, ZI))
 	ARM = 1.0e3 * dmach[1]
 	RTR1 = dsqrt(ARM)
-	IL = min0(2, N)
+	IL = min(2, N)
 	DFNU = FNU + float64(float32(N-IL))
 
 	// OVERFLOW TEST
@@ -1788,7 +1775,7 @@ Twenty:
 Forty:
 	// BACKWARD RECURRENCE AND SUM NORMALIZING RELATION.
 	K = K + 1
-	KK = max0(I+IAZ, K+INU)
+	KK = max(I+IAZ, K+INU)
 	FKK = float64(float32(KK))
 	P1R = ZEROR
 	P1I = ZEROI
@@ -1994,7 +1981,7 @@ Fifty:
 	COEFR = AA * dcos(AK1I)
 	COEFI = AA * dsin(AK1I)
 	ATOL = TOL * ACZ / FNUP
-	IL = min0(2, NN)
+	IL = min(2, NN)
 	for I = 1; I <= IL; I++ {
 		DFNU = FNU + float64(float32(NN-I))
 		FNUP = DFNU + 1.0e0

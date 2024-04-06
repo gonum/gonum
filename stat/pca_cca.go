@@ -94,13 +94,6 @@ func (c *PC) VarsTo(dst []float64) []float64 {
 	return dst
 }
 
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
 // CC is a type for computing the canonical correlations of a pair of matrices.
 // The results of the canonical correlation analysis are only valid
 // if the call to CanonicalCorrelations was successful.

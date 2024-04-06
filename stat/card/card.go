@@ -36,20 +36,6 @@ func linearCounting(m, v float64) float64 {
 	return m * (math.Log(m) - math.Log(v))
 }
 
-func max(a, b uint8) uint8 {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-func min(a, b uint8) uint8 {
-	if a < b {
-		return a
-	}
-	return b
-}
-
 func typeNameOf(v interface{}) string {
 	t := reflect.TypeOf(v)
 	var prefix string

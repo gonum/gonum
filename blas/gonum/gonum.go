@@ -21,20 +21,6 @@ const (
 	minParBlock = 4  // minimum number of blocks needed to go parallel
 )
 
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-func min(a, b int) int {
-	if a > b {
-		return b
-	}
-	return a
-}
-
 // blocks returns the number of divisions of the dimension length with the given
 // block size.
 func blocks(dim, bsize int) int {

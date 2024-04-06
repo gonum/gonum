@@ -25,13 +25,6 @@ var (
 	_ WeightedSampler = Importance{}
 )
 
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
 // Sampler generates a batch of samples according to the rule specified by the
 // implementing type. The number of samples generated is equal to len(batch),
 // and the samples are stored in-place into the input.

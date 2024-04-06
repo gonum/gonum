@@ -32,20 +32,6 @@ const (
 	bignum = safmax * ulp
 )
 
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
 // worklen describes how much workspace a test should use.
 type worklen int
 

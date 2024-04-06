@@ -28,20 +28,6 @@ func abs(a int) int {
 	return -a
 }
 
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
 func Zairy(ZR, ZI float64, ID, KODE int) (AIR, AII float64, NZ, IERR int) {
 	// zairy is adapted from the original Netlib code by Donald Amos.
 	// http://www.netlib.no/netlib/amos/zairy.f

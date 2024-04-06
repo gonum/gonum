@@ -962,20 +962,6 @@ func Trace(a Matrix) float64 {
 	return v
 }
 
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
 // use returns a float64 slice with l elements, using f if it
 // has the necessary capacity, otherwise creating a new slice.
 func use(f []float64, l int) []float64 {

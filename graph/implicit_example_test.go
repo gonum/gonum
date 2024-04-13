@@ -134,6 +134,7 @@ func (g *GraphNode) nodes(dst []graph.Node, seen map[int64]struct{}) []graph.Nod
 			continue
 		}
 
+		seen[n.ID()] = struct{}{}
 		dst = append(dst, n)
 		if gn, ok := n.(*GraphNode); ok {
 			dst = gn.nodes(dst, seen)

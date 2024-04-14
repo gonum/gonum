@@ -6,8 +6,9 @@ package unit
 
 import (
 	"bytes"
+	"cmp"
 	"fmt"
-	"sort"
+	"slices"
 	"sync"
 	"unicode/utf8"
 )
@@ -198,13 +199,19 @@ func (d Dimensions) String() string {
 	// Map iterates randomly, but print should be in a fixed order. Can't use
 	// dimension number, because for user-defined dimension that number may
 	// not be fixed from run to run.
-	atoms := make(unitPrinters, 0, len(d))
+	atoms := make([]atom, 0, len(d))
 	for dimension, power := range d {
 		if power != 0 {
 			atoms = append(atoms, atom{dimension, power})
 		}
 	}
-	sort.Sort(atoms)
+	slices.SortFunc(atoms, func(a, b atom) int {
+		// Order first by positive powers, then by name.
+		if a.pow*b.pow < 0 {
+			return cmp.Compare(0, a.pow)
+		}
+		return cmp.Compare(a.String(), b.String())
+	})
 	var b bytes.Buffer
 	for i, a := range atoms {
 		if i > 0 {
@@ -222,24 +229,6 @@ func (d Dimensions) String() string {
 type atom struct {
 	Dimension
 	pow int
-}
-
-type unitPrinters []atom
-
-func (u unitPrinters) Len() int {
-	return len(u)
-}
-
-func (u unitPrinters) Less(i, j int) bool {
-	// Order first by positive powers, then by name.
-	if u[i].pow*u[j].pow < 0 {
-		return u[i].pow > 0
-	}
-	return u[i].String() < u[j].String()
-}
-
-func (u unitPrinters) Swap(i, j int) {
-	u[i], u[j] = u[j], u[i]
 }
 
 // Unit represents a dimensional value. The dimensions will typically be in SI

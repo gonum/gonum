@@ -17,6 +17,8 @@ import (
 	"unsafe"
 
 	"golang.org/x/exp/rand"
+
+	"gonum.org/v1/gonum/internal/order"
 )
 
 var (
@@ -344,8 +346,8 @@ func TestDo(t *testing.T) {
 	for i, p := range wpData {
 		want[i] = p.(Point)
 	}
-	sort.Sort(lexical(got))
-	sort.Sort(lexical(want))
+	order.BySliceValues(got)
+	order.BySliceValues(want)
 
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("unexpected result from tree iteration: got:%v want:%v", got, want)
@@ -354,27 +356,6 @@ func TestDo(t *testing.T) {
 		t.Error("tree iteration unexpectedly killed")
 	}
 }
-
-type lexical []Point
-
-func (c lexical) Len() int { return len(c) }
-func (c lexical) Less(i, j int) bool {
-	a, b := c[i], c[j]
-	l := len(a)
-	if len(b) < l {
-		l = len(b)
-	}
-	for k, v := range a[:l] {
-		if v < b[k] {
-			return true
-		}
-		if v > b[k] {
-			return false
-		}
-	}
-	return len(a) < len(b)
-}
-func (c lexical) Swap(i, j int) { c[i], c[j] = c[j], c[i] }
 
 func BenchmarkNew(b *testing.B) {
 	for _, effort := range []int{0, 10, 100} {

@@ -472,3 +472,44 @@ func BenchmarkMulMapLargeSame(b *testing.B) {
 		u2.Mul(u1)
 	}
 }
+
+func BenchmarkDimensionsString(b *testing.B) {
+	oneDim := Dimensions{CurrentDim: 1}
+	threeDims := Dimensions{
+		CurrentDim:           1,
+		LengthDim:            2,
+		LuminousIntensityDim: 3,
+	}
+	allDims := Dimensions{
+		CurrentDim:           1,
+		LengthDim:            2,
+		LuminousIntensityDim: 3,
+		MassDim:              4,
+		MoleDim:              5,
+		TemperatureDim:       6,
+		TimeDim:              7,
+		AngleDim:             8,
+	}
+
+	b.Run("oneDim", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			if oneDim.String() != "" {
+				b.FailNow()
+			}
+		}
+	})
+	b.Run("threeDims", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			if threeDims.String() != "" {
+				b.FailNow()
+			}
+		}
+	})
+	b.Run("allDims", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			if allDims.String() != "" {
+				b.FailNow()
+			}
+		}
+	})
+}

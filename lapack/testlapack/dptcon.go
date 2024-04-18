@@ -77,4 +77,24 @@ func dptconTest(t *testing.T, impl Dptconer, rnd *rand.Rand, n int) {
 	if diff > tol {
 		t.Errorf("%v: unexpected value of rcond. got=%v, want=%v (diff=%v)", name, rcondGot, rcondWant, diff)
 	}
+
+	// -----------------------------------------
+	if n == 0 {
+		return
+	}
+	for _, pow := range []float64{1, 2, 3, 4, 7} {
+		for i := range d {
+			d[i] = math.Pow(float64(i+1)*(0.5+rnd.Float64()), pow)
+		}
+		for i := range e {
+			e[i] = math.Pow(2*rnd.Float64()-1, pow)
+		}
+		ok := impl.Dpttrf(n, d, e)
+		if !ok {
+			t.Logf("%v: not PSD", name)
+			continue
+		}
+		rcond := impl.Dptcon(n, d, e, dlanst(lapack.MaxColumnSum, n, d, e), work)
+		t.Logf("%v: cond=%v", name, 1/rcond)
+	}
 }

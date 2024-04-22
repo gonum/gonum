@@ -609,7 +609,7 @@ func (g *dotUndirectedGraph) DOTAttributers() (graph, node, edge encoding.Attrib
 	return g.graph, g.node, g.edge
 }
 
-// DOTUnmarshalerAttrs implements the dot.UnmarshalerAttrs interface.
+// DOTAttributeSetters implements the dot.UnmarshalerAttrs interface.
 func (g *dotUndirectedGraph) DOTAttributeSetters() (graph, node, edge encoding.AttributeSetter) {
 	return g.graph, g.node, g.edge
 }

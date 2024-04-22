@@ -152,7 +152,7 @@ func checkVertex(graph *ast.Graph, vertex ast.Vertex) error {
 	}
 }
 
-// checNode validates the semantics of the given node.
+// checkNode validates the semantics of the given node.
 func checkNode(graph *ast.Graph, node *ast.Node) error {
 	// TODO: Check node.ID for duplicates?
 	// TODO: Validate node.Port.

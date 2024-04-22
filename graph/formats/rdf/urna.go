@@ -452,7 +452,7 @@ func (u *urna) hashToRelatedURGNA2012(b string, names *issuer) map[string][]stri
 	return termsFor
 }
 
-// hashNDegreeQuads is the algorithm described in section 4.7 of the spec
+// hashRelatedBlank is the algorithm described in section 4.7 of the spec
 // https://json-ld.github.io/rdf-dataset-canonicalization/spec/index.html#hash-related-blank-node.
 func (u *urna) hashRelatedBlank(term string, s *Statement, names *issuer, pos byte) []byte {
 	// 1.

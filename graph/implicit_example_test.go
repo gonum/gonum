@@ -281,7 +281,7 @@ func (g *GraphNode) ID() int64 {
 	return g.id
 }
 
-// AddMeighbor adds an edge between g and n.
+// AddNeighbor adds an edge between g and n.
 func (g *GraphNode) AddNeighbor(n *GraphNode) {
 	g.neighbors = append(g.neighbors, graph.Node(n))
 }

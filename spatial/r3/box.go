@@ -21,7 +21,7 @@ func NewBox(x0, y0, z0, x1, y1, z1 float64) Box {
 	}
 }
 
-// IsEmpty returns true if a Box's volume is zero
+// Empty returns true if a Box's volume is zero
 // or if a Min component is greater than its Max component.
 func (a Box) Empty() bool {
 	return a.Min.X >= a.Max.X || a.Min.Y >= a.Max.Y || a.Min.Z >= a.Max.Z

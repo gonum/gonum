@@ -31,7 +31,7 @@ func (a Box) Center() Vec {
 	return Scale(0.5, Add(a.Min, a.Max))
 }
 
-// IsEmpty returns true if a Box's volume is zero
+// Empty returns true if a Box's volume is zero
 // or if a Min component is greater than its Max component.
 func (a Box) Empty() bool {
 	return a.Min.X >= a.Max.X || a.Min.Y >= a.Max.Y

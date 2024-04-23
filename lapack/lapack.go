@@ -221,7 +221,7 @@ const (
 	EVSelected EVHowMany = 'S' // Compute selected right and/or left eigenvectors.
 )
 
-// MaximizeNormX specifies the heuristic method for computing a contribution to
+// MaximizeNormXJob specifies the heuristic method for computing a contribution to
 // the reciprocal Dif-estimate in Dlatdf.
 type MaximizeNormXJob byte
 

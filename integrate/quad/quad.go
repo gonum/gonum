@@ -18,9 +18,11 @@ type FixedLocationer interface {
 	FixedLocations(x, weight []float64, min, max float64)
 }
 
-// FixedLocationSingle returns the location and weight for element k in a
-// fixed quadrature rule with n total samples and integral bounds from min to max.
+// FixedLocationSingler wraps the FixedLocationSingle method.
 type FixedLocationSingler interface {
+	// FixedLocationSingle returns the location and weight for
+	// element k in a fixed quadrature rule with n total samples
+	// and integral bounds from min to max.
 	FixedLocationSingle(n, k int, min, max float64) (x, weight float64)
 }
 

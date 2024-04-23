@@ -237,6 +237,8 @@ func (lu *LU) RowPivots(dst []int) []int {
 	return dst
 }
 
+// Pivot returns the row pivots of the receiver.
+//
 // Deprecated: Use RowPivots instead.
 func (lu *LU) Pivot(dst []int) []int {
 	return lu.RowPivots(dst)

@@ -633,9 +633,9 @@ func Prod(s []float64) float64 {
 	return prod
 }
 
-// Deprecated: This function simply calls [slices.Reverse].
-//
 // Reverse reverses the order of elements in the slice.
+//
+// Deprecated: This function simply calls [slices.Reverse].
 func Reverse(s []float64) {
 	slices.Reverse(s)
 }

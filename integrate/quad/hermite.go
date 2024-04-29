@@ -89,7 +89,7 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-// locationAsy returns the node locations and weights of a Hermite quadrature rule
+// locationsAsy returns the node locations and weights of a Hermite quadrature rule
 // with len(x) points.
 func (h Hermite) locationsAsy(x, w []float64) {
 	// A. Townsend, T. Trogdon, and S.Olver, Fast computation of Gauss quadrature

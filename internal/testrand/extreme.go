@@ -184,7 +184,7 @@ func (e *extreme) Uint32() uint32 {
 	return e.rnd.Uint32()
 }
 
-// Uint32 returns a pseudo-random uint64.
+// Uint64 returns a pseudo-random uint64.
 func (e *extreme) Uint64() uint64 {
 	if e.p() {
 		return extremeUint64[e.rnd.Intn(len(extremeUint64))]

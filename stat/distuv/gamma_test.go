@@ -83,11 +83,19 @@ func testGamma(t *testing.T, f Gamma, i int) {
 	checkProbContinuous(t, i, x, 0, math.Inf(1), f, quadTol)
 	checkQuantileCDFSurvival(t, i, x, f, 5e-2)
 	if f.Alpha < 1 {
-		if !math.IsNaN(f.Mode()) {
-			t.Errorf("Expected NaN mode for alpha < 1, got %v", f.Mode())
+		if f.Mode() != 0 {
+			t.Errorf("Expected 0 mode for alpha < 1, got %v", f.Mode())
+		}
+		if !math.IsInf(f.Prob(0), 1) {
+			t.Errorf("Expected pdf(0) to be +Infinity for alpha < 1, got %v", f.Prob(0))
 		}
 	} else {
 		checkMode(t, i, x, f, 2e-1, 1)
+	}
+	if f.Alpha == 1 {
+		if math.IsInf(f.LogProb(0), 0) {
+			t.Errorf("Expected log(pdf(0)) to be finite for alpha = 1, got %v", f.LogProb(0))
+		}
 	}
 	cdfNegX := f.CDF(-0.0001)
 	if cdfNegX != 0 {

@@ -47,12 +47,15 @@ func (g Gamma) ExKurtosis() float64 {
 // LogProb computes the natural logarithm of the value of the probability
 // density function at x.
 func (g Gamma) LogProb(x float64) float64 {
-	if x <= 0 {
+	if x < 0 {
 		return math.Inf(-1)
 	}
 	a := g.Alpha
 	b := g.Beta
 	lg, _ := math.Lgamma(a)
+	if a == 1 {
+		return math.Log(b) - lg - b*x
+	}
 	return a*math.Log(b) - lg + (a-1)*math.Log(x) - b*x
 }
 
@@ -63,11 +66,11 @@ func (g Gamma) Mean() float64 {
 
 // Mode returns the mode of the normal distribution.
 //
-// The mode is NaN in the special case where the Alpha (shape) parameter
+// The mode is 0 in the special case where the Alpha (shape) parameter
 // is less than 1.
 func (g Gamma) Mode() float64 {
 	if g.Alpha < 1 {
-		return math.NaN()
+		return 0
 	}
 	return (g.Alpha - 1) / g.Beta
 }

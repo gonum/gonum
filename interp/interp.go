@@ -4,7 +4,7 @@
 
 package interp
 
-import "sort"
+import "slices"
 
 const (
 	differentLengths        = "interp: input slices have different lengths"
@@ -156,10 +156,13 @@ func (pc PiecewiseConstant) Predict(x float64) float64 {
 }
 
 // findSegment returns 0 <= i < len(xs) such that xs[i] <= x < xs[i + 1], where xs[len(xs)]
-// is assumed to be +Inf. If no such i is found, it returns -1. It assumes that len(xs) >= 2
-// without checking.
+// is assumed to be +Inf. If no such i is found, it returns -1.
 func findSegment(xs []float64, x float64) int {
-	return sort.Search(len(xs), func(i int) bool { return xs[i] > x }) - 1
+	i, found := slices.BinarySearch(xs, x)
+	if !found {
+		return i - 1
+	}
+	return i
 }
 
 // calculateSlopes calculates slopes (ys[i+1] - ys[i]) / (xs[i+1] - xs[i]).

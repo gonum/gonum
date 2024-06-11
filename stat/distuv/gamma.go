@@ -64,7 +64,7 @@ func (g Gamma) Mean() float64 {
 	return g.Alpha / g.Beta
 }
 
-// Mode returns the mode of the normal distribution.
+// Mode returns the mode of the gamma distribution.
 //
 // The mode is 0 in the special case where the Alpha (shape) parameter
 // is less than 1.

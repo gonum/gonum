@@ -50,6 +50,28 @@ func TestFindSegment(t *testing.T) {
 	}
 }
 
+func TestFindSegmentEdgeCases(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		xs   []float64
+		x    float64
+		want int
+	}{
+		{xs: nil, x: 0, want: -1},
+		{xs: []float64{0}, x: -1, want: -1},
+		{xs: []float64{0}, x: 0, want: 0},
+		{xs: []float64{0}, x: 1, want: 0},
+	}
+
+	for _, test := range cases {
+		if got := findSegment(test.xs, test.x); got != test.want {
+			t.Errorf("unexpected value of findSegment(%v, %f): got %d want: %d",
+				test.xs, test.x, got, test.want)
+		}
+	}
+}
+
 func BenchmarkFindSegment(b *testing.B) {
 	xs := []float64{0, 1.5, 3, 4.5, 6, 7.5, 9, 12, 13.5, 16.5}
 	for i := 0; i < b.N; i++ {

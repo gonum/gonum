@@ -5,9 +5,8 @@
 package rdf
 
 import (
-	"sort"
-
 	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/internal/order"
 )
 
 // Query represents a step in an RDF graph query. The methods on Query
@@ -147,8 +146,8 @@ func (q Query) And(p Query) Query {
 	if q.g != p.g {
 		panic("rdf: binary query operation parameters from distinct graphs")
 	}
-	sortByID(q.terms)
-	sortByID(p.terms)
+	order.ByID(q.terms)
+	order.ByID(p.terms)
 	r := Query{g: q.g}
 	var i, j int
 	for i < len(q.terms) && j < len(p.terms) {
@@ -173,8 +172,8 @@ func (q Query) Or(p Query) Query {
 	if q.g != p.g {
 		panic("rdf: binary query operation parameters from distinct graphs")
 	}
-	sortByID(q.terms)
-	sortByID(p.terms)
+	order.ByID(q.terms)
+	order.ByID(p.terms)
 	r := Query{g: q.g}
 	var i, j int
 	for i < len(q.terms) && j < len(p.terms) {
@@ -209,8 +208,8 @@ func (q Query) Not(p Query) Query {
 	if q.g != p.g {
 		panic("rdf: binary query operation parameters from distinct graphs")
 	}
-	sortByID(q.terms)
-	sortByID(p.terms)
+	order.ByID(q.terms)
+	order.ByID(p.terms)
 	r := Query{g: q.g}
 	var i, j int
 	for i < len(q.terms) && j < len(p.terms) {
@@ -257,7 +256,7 @@ func (q Query) Repeat(fn func(Query) (q Query, ok bool)) Query {
 // Unique returns a copy of the receiver that contains only one instance
 // of each term.
 func (q Query) Unique() Query {
-	sortByID(q.terms)
+	order.ByID(q.terms)
 	r := Query{g: q.g}
 	for i, t := range q.terms {
 		if i == 0 || t.UID != q.terms[i-1].UID {
@@ -275,8 +274,4 @@ func (q Query) Len() int {
 // Result returns the terms held by the query.
 func (q Query) Result() []Term {
 	return q.terms
-}
-
-func sortByID(terms []Term) {
-	sort.Slice(terms, func(i, j int) bool { return terms[i].ID() < terms[j].ID() })
 }

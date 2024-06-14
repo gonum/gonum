@@ -9,6 +9,7 @@ package coloring
 
 import (
 	"errors"
+	"slices"
 	"sort"
 
 	"golang.org/x/exp/rand"
@@ -31,7 +32,7 @@ func Sets(colors map[int64]int) map[int][]int64 {
 		sets[c] = append(sets[c], id)
 	}
 	for _, s := range sets {
-		sort.Slice(s, func(i, j int) bool { return s[i] < s[j] })
+		slices.Sort(s)
 	}
 	return sets
 }

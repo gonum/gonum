@@ -6,7 +6,7 @@ package community
 
 import (
 	"fmt"
-	"sort"
+	"slices"
 
 	"golang.org/x/exp/rand"
 
@@ -347,7 +347,7 @@ func newSlice(s set.Ints[int]) *slice {
 	for i := range s {
 		elems = append(elems, i)
 	}
-	sort.Ints(elems)
+	slices.Sort(elems)
 	return &slice{elems: elems}
 }
 

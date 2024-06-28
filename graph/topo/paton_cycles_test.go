@@ -119,9 +119,10 @@ func TestUndirectedCyclesIn(t *testing.T) {
 // c lists each node only once - the final node must not be a
 // reiteration of the first node.
 func canonicalise(c []graph.Node) []graph.Node {
-	if len(c) < 2 {
+	if len(c) < 3 {
 		return c
 	}
+	c = c[:len(c)-1] // Remove the bridge to the first node.
 	idx := 0
 	min := c[0].ID()
 	for i, n := range c[1:] {
@@ -136,5 +137,6 @@ func canonicalise(c []graph.Node) []graph.Node {
 	if c[len(c)-1].ID() < c[1].ID() {
 		slices.Reverse(c[1:])
 	}
+	c = append(c, c[0]) // Add a new bridge.
 	return c
 }

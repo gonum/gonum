@@ -18,9 +18,11 @@ func TestQR(t *testing.T) {
 	rnd := rand.New(rand.NewSource(1))
 	for _, test := range []struct {
 		m, n int
+		big  bool
 	}{
-		{5, 5},
-		{10, 5},
+		{m: 5, n: 5},
+		{m: 10, n: 5},
+		{m: 1e5, n: 3, big: true}, // Test that very tall matrices do not OoM.
 	} {
 		m := test.m
 		n := test.n
@@ -35,7 +37,15 @@ func TestQR(t *testing.T) {
 
 		var qr QR
 		qr.Factorize(a)
-		var q, r Dense
+
+		var r Dense
+		qr.RTo(&r)
+		if test.big {
+			// We cannot proceed past here for big matrices.
+			continue
+		}
+
+		var q Dense
 		qr.QTo(&q)
 
 		if !isOrthonormal(&q, 1e-10) {
@@ -48,8 +58,6 @@ func TestQR(t *testing.T) {
 		if !EqualApprox(a.T(), qr.T(), 1e-14) {
 			t.Errorf("m=%d,n=%d: Aᵀ and (QR)ᵀ are not equal", m, n)
 		}
-
-		qr.RTo(&r)
 
 		var got Dense
 		got.Mul(&q, &r)

@@ -98,23 +98,9 @@ func (qr *QR) factorize(a Matrix, norm lapack.MatrixNorm) {
 	lapack64.Geqrf(qr.qr.mat, qr.tau, work, len(work))
 	putFloat64s(work)
 	qr.updateCond(norm)
-	qr.updateQ()
-}
-
-func (qr *QR) updateQ() {
-	m, _ := qr.Dims()
-	if qr.q == nil {
-		qr.q = NewDense(m, m, nil)
-	} else {
-		qr.q.reuseAsNonZeroed(m, m)
+	if qr.q != nil {
+		qr.q.Reset()
 	}
-	// Construct Q from the elementary reflectors.
-	qr.q.Copy(qr.qr)
-	work := []float64{0}
-	lapack64.Orgqr(qr.q.mat, qr.tau, work, -1)
-	work = getFloat64s(int(work[0]), false)
-	lapack64.Orgqr(qr.q.mat, qr.tau, work, len(work))
-	putFloat64s(work)
 }
 
 // isValid returns whether the receiver contains a factorization.
@@ -192,7 +178,26 @@ func (qr *QR) QTo(dst *Dense) {
 			panic(ErrShape)
 		}
 	}
+	if qr.q == nil || qr.q.IsEmpty() {
+		qr.updateQ()
+	}
 	dst.Copy(qr.q)
+}
+
+func (qr *QR) updateQ() {
+	m, _ := qr.Dims()
+	if qr.q == nil {
+		qr.q = NewDense(m, m, nil)
+	} else {
+		qr.q.reuseAsNonZeroed(m, m)
+	}
+	// Construct Q from the elementary reflectors.
+	qr.q.Copy(qr.qr)
+	work := []float64{0}
+	lapack64.Orgqr(qr.q.mat, qr.tau, work, -1)
+	work = getFloat64s(int(work[0]), false)
+	lapack64.Orgqr(qr.q.mat, qr.tau, work, len(work))
+	putFloat64s(work)
 }
 
 // SolveTo finds a minimum-norm solution to a system of linear equations defined

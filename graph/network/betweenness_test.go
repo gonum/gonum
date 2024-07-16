@@ -5,9 +5,10 @@
 package network
 
 import (
+	"cmp"
 	"fmt"
 	"math"
-	"sort"
+	"slices"
 	"testing"
 
 	"gonum.org/v1/gonum/floats/scalar"
@@ -311,11 +312,16 @@ func TestEdgeBetweennessWeighted(t *testing.T) {
 }
 
 func orderedPairFloats(w map[[2]int64]float64, prec int) []pairKeyFloatVal {
-	o := make(orderedPairFloatsMap, 0, len(w))
+	o := make([]pairKeyFloatVal, 0, len(w))
 	for k, v := range w {
 		o = append(o, pairKeyFloatVal{prec: prec, key: k, val: v})
 	}
-	sort.Sort(o)
+	slices.SortFunc(o, func(a, b pairKeyFloatVal) int {
+		if n := cmp.Compare(a.key[0], b.key[0]); n != 0 {
+			return n
+		}
+		return cmp.Compare(a.key[1], b.key[1])
+	})
 	return o
 }
 
@@ -328,11 +334,3 @@ type pairKeyFloatVal struct {
 func (kv pairKeyFloatVal) String() string {
 	return fmt.Sprintf("(%c,%c):%.*f", kv.key[0]+'A', kv.key[1]+'A', kv.prec, kv.val)
 }
-
-type orderedPairFloatsMap []pairKeyFloatVal
-
-func (o orderedPairFloatsMap) Len() int { return len(o) }
-func (o orderedPairFloatsMap) Less(i, j int) bool {
-	return o[i].key[0] < o[j].key[0] || (o[i].key[0] == o[j].key[0] && o[i].key[1] < o[j].key[1])
-}
-func (o orderedPairFloatsMap) Swap(i, j int) { o[i], o[j] = o[j], o[i] }

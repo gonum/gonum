@@ -5,9 +5,10 @@
 package path
 
 import (
+	"cmp"
 	"container/heap"
 	"math"
-	"sort"
+	"slices"
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/simple"
@@ -163,7 +164,9 @@ type UndirectedWeightLister interface {
 // If dst has nodes that exist in g, Kruskal will panic.
 func Kruskal(dst WeightedBuilder, g UndirectedWeightLister) float64 {
 	edges := graph.WeightedEdgesOf(g.WeightedEdges())
-	sort.Sort(byWeight(edges))
+	slices.SortFunc(edges, func(a, b graph.WeightedEdge) int {
+		return cmp.Compare(a.Weight(), b.Weight())
+	})
 
 	ds := make(djSet)
 	it := g.Nodes()
@@ -183,9 +186,3 @@ func Kruskal(dst WeightedBuilder, g UndirectedWeightLister) float64 {
 	}
 	return w
 }
-
-type byWeight []graph.WeightedEdge
-
-func (e byWeight) Len() int           { return len(e) }
-func (e byWeight) Less(i, j int) bool { return e[i].Weight() < e[j].Weight() }
-func (e byWeight) Swap(i, j int)      { e[i], e[j] = e[j], e[i] }

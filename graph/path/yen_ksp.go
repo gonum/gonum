@@ -5,8 +5,9 @@
 package path
 
 import (
+	"cmp"
 	"math"
-	"sort"
+	"slices"
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/iterator"
@@ -103,7 +104,9 @@ func YenKShortestPaths(g graph.Graph, k int, cost float64, s, t graph.Node) [][]
 			break
 		}
 
-		sort.Sort(byPathWeight(pot))
+		slices.SortFunc(pot, func(a, b yenShortest) int {
+			return cmp.Compare(a.weight, b.weight)
+		})
 		best := pot[0]
 		if len(best.path) <= 1 || best.weight > cost {
 			break
@@ -133,12 +136,6 @@ type yenShortest struct {
 	path   []graph.Node
 	weight float64
 }
-
-type byPathWeight []yenShortest
-
-func (s byPathWeight) Len() int           { return len(s) }
-func (s byPathWeight) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
-func (s byPathWeight) Less(i, j int) bool { return s[i].weight < s[j].weight }
 
 // yenKSPAdjuster allows walked edges to be omitted from a graph
 // without altering the embedded graph.

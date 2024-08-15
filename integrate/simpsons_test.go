@@ -8,9 +8,8 @@ import (
 	"math"
 	"testing"
 
-	"golang.org/x/exp/rand"
-
 	"gonum.org/v1/gonum/integrate/testquad"
+	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestSimpsons(t *testing.T) {

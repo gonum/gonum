@@ -8,10 +8,9 @@ import (
 	"fmt"
 	"testing"
 
-	"golang.org/x/exp/rand"
-
 	"gonum.org/v1/gonum/floats/scalar"
 	. "gonum.org/v1/gonum/internal/asm/f64"
+	"gonum.org/v1/gonum/internal/rand"
 )
 
 var scalTests = []struct {

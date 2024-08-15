@@ -13,9 +13,8 @@ import (
 	"testing"
 	"unsafe"
 
-	"golang.org/x/exp/rand"
-
 	"gonum.org/v1/gonum/cmplxs"
+	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestCoefficients(t *testing.T) {

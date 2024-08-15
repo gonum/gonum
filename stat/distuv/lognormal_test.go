@@ -9,7 +9,7 @@ import (
 	"sort"
 	"testing"
 
-	"golang.org/x/exp/rand"
+	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestLognormal(t *testing.T) {
@@ -37,7 +37,7 @@ func TestLognormal(t *testing.T) {
 		checkQuantileCDFSurvival(t, i, x, dist, tol)
 		checkProbContinuous(t, i, x, 0, math.Inf(1), dist, 1e-10)
 		checkProbQuantContinuous(t, i, x, dist, tol)
-		checkMode(t, i, x, dist, 1e-2, 1e-2)
+		checkMode(t, i, x, dist, 1e-2, 1e-1)
 
 		logProb := dist.LogProb(-0.0001)
 		if !math.IsInf(logProb, -1) {

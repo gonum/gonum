@@ -10,9 +10,8 @@ import (
 	"reflect"
 	"testing"
 
-	"golang.org/x/exp/rand"
-
 	"gonum.org/v1/gonum/floats/scalar"
+	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/spatial/r2"
 )
 

@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"golang.org/x/exp/rand"
+	"gonum.org/v1/gonum/internal/rand"
 )
 
 // Random values in tests are produced by 40 iterations of the C code.

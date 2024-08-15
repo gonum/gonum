@@ -13,12 +13,11 @@ import (
 	"slices"
 	"testing"
 
-	"golang.org/x/exp/rand"
-
 	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/set"
 	"gonum.org/v1/gonum/internal/order"
+	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -1614,6 +1613,9 @@ func AddEdges(t *testing.T, n int, g EdgeAdder, newNode func(id int64) graph.Nod
 		var v graph.Node
 		for {
 			v = newNode(rnd.Int63n(int64(n)))
+			if g.Edge(u.ID(), v.ID()) != nil {
+				continue
+			}
 			if canLoop || u.ID() != v.ID() {
 				break
 			}
@@ -1678,6 +1680,9 @@ func AddWeightedEdges(t *testing.T, n int, g WeightedEdgeAdder, w float64, newNo
 		var v graph.Node
 		for {
 			v = newNode(rnd.Int63n(int64(n)))
+			if g.Edge(u.ID(), v.ID()) != nil {
+				continue
+			}
 			if canLoop || u.ID() != v.ID() {
 				break
 			}

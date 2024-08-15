@@ -7,9 +7,8 @@ package testblas
 import (
 	"testing"
 
-	"golang.org/x/exp/rand"
-
 	"gonum.org/v1/gonum/blas"
+	"gonum.org/v1/gonum/internal/rand"
 )
 
 func DtrmvBenchmark(b *testing.B, dtrmv Dtrmver, n, lda, incX int, ul blas.Uplo, tA blas.Transpose, d blas.Diag) {

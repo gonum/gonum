@@ -8,7 +8,7 @@ import (
 	"math/cmplx"
 	"testing"
 
-	"golang.org/x/exp/rand"
+	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestCDenseNewAtSet(t *testing.T) {

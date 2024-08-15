@@ -7,7 +7,7 @@ package kdtree
 import (
 	"sort"
 
-	"golang.org/x/exp/rand"
+	"gonum.org/v1/gonum/internal/rand"
 )
 
 // Partition partitions list such that all elements less than the value at

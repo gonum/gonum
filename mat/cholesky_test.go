@@ -10,9 +10,8 @@ import (
 	"strconv"
 	"testing"
 
-	"golang.org/x/exp/rand"
-
 	"gonum.org/v1/gonum/floats/scalar"
+	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestCholesky(t *testing.T) {
@@ -917,9 +916,8 @@ func TestBandCholeskyDet(t *testing.T) {
 
 			want := cholDense.Det()
 			got := chol.Det()
-			diff := math.Abs(got - want)
-			if diff > tol {
-				t.Errorf("%v: unexpected result; got=%v, want=%v (diff=%v)", name, got, want, diff)
+			if !scalar.EqualWithinRel(got, want, tol) {
+				t.Errorf("%v: unexpected result; got=%v, want=%v (diff=%v)", name, got, want, math.Abs(got-want))
 			}
 		}
 	}

@@ -7,7 +7,7 @@ package distuv
 import (
 	"math"
 
-	"golang.org/x/exp/rand"
+	"gonum.org/v1/gonum/internal/rand"
 )
 
 // AlphaStable represents an α-stable distribution with four parameters.

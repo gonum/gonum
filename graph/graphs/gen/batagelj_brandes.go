@@ -11,9 +11,8 @@ import (
 	"fmt"
 	"math"
 
-	"golang.org/x/exp/rand"
-
 	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/internal/rand"
 )
 
 // Gnp constructs a Gilbert’s model subgraph in the destination, dst, of order n. Edges

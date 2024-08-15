@@ -9,9 +9,8 @@ import (
 	"math"
 	"testing"
 
-	"golang.org/x/exp/rand"
-
 	. "gonum.org/v1/gonum/internal/asm/f64"
+	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestDotUnitary(t *testing.T) {

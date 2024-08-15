@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"testing"
 
-	"golang.org/x/exp/rand"
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
+	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Dlapmrer interface {

@@ -9,7 +9,7 @@ import (
 	"sort"
 	"testing"
 
-	"golang.org/x/exp/rand"
+	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestBernoulli(t *testing.T) {

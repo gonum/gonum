@@ -18,9 +18,11 @@ func TestQR(t *testing.T) {
 	rnd := rand.New(rand.NewSource(1))
 	for _, test := range []struct {
 		m, n int
+		big  bool
 	}{
-		{5, 5},
-		{10, 5},
+		{m: 5, n: 5},
+		{m: 10, n: 5},
+		{m: 1e5, n: 3, big: true}, // Test that very tall matrices do not OoM.
 	} {
 		m := test.m
 		n := test.n
@@ -35,6 +37,13 @@ func TestQR(t *testing.T) {
 
 		var qr QR
 		qr.Factorize(a)
+		if test.big {
+			_ = qr.At(0, 0)     // should not panic, even for big matrices
+			_ = qr.At(m-1, n-1) // should not panic, even for big matrices
+			// We cannot proceed past here for big matrices.
+			continue
+		}
+
 		var q, r Dense
 		qr.QTo(&q)
 
@@ -55,6 +64,23 @@ func TestQR(t *testing.T) {
 		got.Mul(&q, &r)
 		if !EqualApprox(&got, &want, 1e-12) {
 			t.Errorf("QR does not equal original matrix. \nWant: %v\nGot: %v", want, got)
+		}
+
+		// Verify indirect QR.At()
+		got.Reset()
+		got.ReuseAs(m, n)
+		qr.q.Reset() // reset q matrix to force lazy computation
+		for i := 0; i < m; i++ {
+			for j := 0; j < n; j++ {
+				got.set(i, j, qr.At(i, j))
+			}
+		}
+
+		if !EqualApprox(a, &got, 1e-14) {
+			t.Errorf("m=%d,n=%d: A and QR (computed with QR.At()) are not equal", m, n)
+		}
+		if !EqualApprox(a.T(), got.T(), 1e-14) {
+			t.Errorf("m=%d,n=%d: Aᵀ and (QR)ᵀ (computed with QR.At()) are not equal", m, n)
 		}
 	}
 }

@@ -16,9 +16,8 @@ import (
 	"testing"
 	"unsafe"
 
-	"golang.org/x/exp/rand"
-
 	"gonum.org/v1/gonum/internal/order"
+	"gonum.org/v1/gonum/internal/rand"
 )
 
 var (

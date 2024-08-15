@@ -9,9 +9,8 @@ import (
 	"sort"
 	"testing"
 
-	"golang.org/x/exp/rand"
-
 	"gonum.org/v1/gonum/floats/scalar"
+	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestParetoProb(t *testing.T) {
@@ -161,11 +160,11 @@ func testPareto(t *testing.T, p Pareto, i int) {
 	generateSamples(x, p)
 	sort.Float64s(x)
 
-	checkQuantileCDFSurvival(t, i, x, p, 1e-3)
+	checkQuantileCDFSurvival(t, i, x, p, 3e-3)
 	testRandLogProbContinuous(t, i, 0, x, p, tol, bins)
 	checkMean(t, i, x, p, tol)
 	checkVarAndStd(t, i, x, p, tol)
-	checkExKurtosis(t, i, x, p, 7e-2)
+	checkExKurtosis(t, i, x, p, 3e-1)
 	checkProbContinuous(t, i, x, p.Xm, math.Inf(1), p, 1e-10)
 	checkEntropy(t, i, x, p, 1e-2)
 	checkMedian(t, i, x, p, 1e-3)

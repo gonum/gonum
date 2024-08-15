@@ -8,12 +8,11 @@ import (
 	"math"
 	"testing"
 
-	"golang.org/x/exp/rand"
-
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/set"
 	"gonum.org/v1/gonum/graph/simple"
 	"gonum.org/v1/gonum/graph/testgraph"
+	"gonum.org/v1/gonum/internal/rand"
 )
 
 const (

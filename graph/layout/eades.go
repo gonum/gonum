@@ -7,9 +7,8 @@ package layout
 import (
 	"math"
 
-	"golang.org/x/exp/rand"
-
 	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/spatial/barneshut"
 	"gonum.org/v1/gonum/spatial/r2"
 )

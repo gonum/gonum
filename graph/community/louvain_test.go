@@ -7,11 +7,10 @@ package community
 import (
 	"fmt"
 
-	"golang.org/x/exp/rand"
-
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/graphs/gen"
 	"gonum.org/v1/gonum/graph/simple"
+	"gonum.org/v1/gonum/internal/rand"
 )
 
 // intset is an integer set.

@@ -8,7 +8,7 @@ import (
 	"math"
 	"testing"
 
-	"golang.org/x/exp/rand"
+	"gonum.org/v1/gonum/internal/rand"
 )
 
 // Testing EllipticF (and EllipticRF) using the addition theorems from http://dlmf.nist.gov/19.11.i

@@ -7,7 +7,7 @@ package testrand
 import (
 	"math"
 
-	"golang.org/x/exp/rand"
+	"gonum.org/v1/gonum/internal/rand"
 )
 
 // extreme is a pseudo-random number generator that has high probability of returning extreme values.

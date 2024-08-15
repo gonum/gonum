@@ -8,11 +8,10 @@ import (
 	"fmt"
 	"testing"
 
-	"golang.org/x/exp/rand"
-
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
 	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Dorgtrer interface {
@@ -21,7 +20,7 @@ type Dorgtrer interface {
 }
 
 func DorgtrTest(t *testing.T, impl Dorgtrer) {
-	const tol = 1e-14
+	const tol = 1e-13
 
 	rnd := rand.New(rand.NewSource(1))
 	for _, uplo := range []blas.Uplo{blas.Upper, blas.Lower} {

@@ -7,11 +7,10 @@ package testlapack
 import (
 	"math"
 
-	"golang.org/x/exp/rand"
-
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
 	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/internal/rand"
 )
 
 // Dlatm1 computes the entries of dst as specified by mode, cond and rsign.

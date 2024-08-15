@@ -8,12 +8,11 @@ import (
 	"math"
 	"slices"
 
-	"golang.org/x/exp/rand"
-
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/set"
 	"gonum.org/v1/gonum/graph/iterator"
 	"gonum.org/v1/gonum/internal/order"
+	"gonum.org/v1/gonum/internal/rand"
 )
 
 // qUndirected returns the modularity Q score of the graph g subdivided into the

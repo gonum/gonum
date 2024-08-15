@@ -149,7 +149,7 @@ func (qr *QR) RTo(dst *Dense) {
 		dst.ReuseAs(r, c)
 	} else {
 		r2, c2 := dst.Dims()
-		if c != r2 || c != c2 {
+		if r != r2 || c != c2 {
 			panic(ErrShape)
 		}
 	}

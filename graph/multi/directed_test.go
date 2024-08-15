@@ -8,13 +8,12 @@ import (
 	"math"
 	"testing"
 
-	"golang.org/x/exp/rand"
-
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/set"
 	"gonum.org/v1/gonum/graph/iterator"
 	"gonum.org/v1/gonum/graph/multi"
 	"gonum.org/v1/gonum/graph/testgraph"
+	"gonum.org/v1/gonum/internal/rand"
 )
 
 func directedBuilder(nodes []graph.Node, edges []testgraph.WeightedLine, _, _ float64) (g graph.Graph, n []graph.Node, e []testgraph.Edge, s, a float64, ok bool) {

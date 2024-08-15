@@ -7,9 +7,8 @@ package testlapack
 import (
 	"math"
 
-	"golang.org/x/exp/rand"
-
 	"gonum.org/v1/gonum/blas/blas64"
+	"gonum.org/v1/gonum/internal/rand"
 )
 
 // A123 is the non-symmetric singular matrix

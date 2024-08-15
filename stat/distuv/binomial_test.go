@@ -8,9 +8,8 @@ import (
 	"sort"
 	"testing"
 
-	"golang.org/x/exp/rand"
-
 	"gonum.org/v1/gonum/floats/scalar"
+	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestBinomialProb(t *testing.T) {
@@ -145,7 +144,7 @@ func testBinomial(t *testing.T, b Binomial, i int) {
 	checkMean(t, i, x, b, tol)
 	checkVarAndStd(t, i, x, b, tol)
 	checkExKurtosis(t, i, x, b, 7e-2)
-	checkSkewness(t, i, x, b, tol)
+	checkSkewness(t, i, x, b, 3e-2)
 
 	if b.NumParameters() != 2 {
 		t.Errorf("Wrong number of parameters")

@@ -8,9 +8,8 @@ import (
 	"fmt"
 	"testing"
 
-	"golang.org/x/exp/rand"
-
 	"gonum.org/v1/gonum/blas"
+	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Ztrsmer interface {
@@ -37,7 +36,7 @@ func ZtrsmTest(t *testing.T, impl Ztrsmer) {
 }
 
 func ztrsmTest(t *testing.T, impl Ztrsmer, side blas.Side, uplo blas.Uplo, trans blas.Transpose, diag blas.Diag, m, n int) {
-	const tol = 1e-13
+	const tol = 1e-12
 
 	rnd := rand.New(rand.NewSource(1))
 

@@ -8,11 +8,10 @@ import (
 	"math"
 	"slices"
 
-	"golang.org/x/exp/rand"
-
 	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/set"
+	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/mat"
 )
 

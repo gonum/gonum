@@ -31,8 +31,13 @@ func (qr *QR) Dims() (r, c int) {
 	return qr.qr.Dims()
 }
 
-// At returns the element at row i, column j.
+// At returns the element at row i, column j. At will panic if the receiver
+// does not contain a successful factorization.
 func (qr *QR) At(i, j int) float64 {
+	if !qr.isValid() {
+		panic(badQR)
+	}
+
 	m, n := qr.Dims()
 	if uint(i) >= uint(m) {
 		panic(ErrRowAccess)
@@ -41,11 +46,44 @@ func (qr *QR) At(i, j int) float64 {
 		panic(ErrColAccess)
 	}
 
+	if qr.q == nil || qr.q.IsEmpty() {
+		// Calculate Qi, Q i-th row
+		qi := getFloat64s(m, true)
+		qr.qRowTo(i, qi)
+
+		// Compute QR(i,j)
+		var val float64
+		for k := 0; k <= j; k++ {
+			val += qi[k] * qr.qr.at(k, j)
+		}
+		putFloat64s(qi)
+		return val
+	}
+
 	var val float64
 	for k := 0; k <= j; k++ {
 		val += qr.q.at(i, k) * qr.qr.at(k, j)
 	}
 	return val
+}
+
+// qRowTo extracts the i-th row of the orthonormal matrix Q from a QR
+// decomposition.
+func (qr *QR) qRowTo(i int, dst []float64) {
+	c := blas64.General{
+		Rows:   1,
+		Cols:   len(dst),
+		Stride: len(dst),
+		Data:   dst,
+	}
+	c.Data[i] = 1 // C is the i-th unit vector
+
+	// Construct Qi from the elementary reflectors: Qi = C * (H(1) H(2) ... H(nTau))
+	work := []float64{0}
+	lapack64.Ormqr(blas.Right, blas.NoTrans, qr.qr.mat, qr.tau, c, work, -1)
+	work = getFloat64s(int(work[0]), false)
+	lapack64.Ormqr(blas.Right, blas.NoTrans, qr.qr.mat, qr.tau, c, work, len(work))
+	putFloat64s(work)
 }
 
 // T performs an implicit transpose by returning the receiver inside a
@@ -98,7 +136,9 @@ func (qr *QR) factorize(a Matrix, norm lapack.MatrixNorm) {
 	lapack64.Geqrf(qr.qr.mat, qr.tau, work, len(work))
 	putFloat64s(work)
 	qr.updateCond(norm)
-	qr.updateQ()
+	if qr.q != nil {
+		qr.q.Reset()
+	}
 }
 
 func (qr *QR) updateQ() {
@@ -191,6 +231,10 @@ func (qr *QR) QTo(dst *Dense) {
 		if r != r2 || r != c2 {
 			panic(ErrShape)
 		}
+	}
+
+	if qr.q == nil || qr.q.IsEmpty() {
+		qr.updateQ()
 	}
 	dst.Copy(qr.q)
 }

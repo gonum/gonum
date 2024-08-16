@@ -9,7 +9,7 @@ import (
 	"sort"
 	"testing"
 
-	"golang.org/x/exp/rand"
+	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestExponentialProb(t *testing.T) {
@@ -73,7 +73,7 @@ func testExponential(t *testing.T, dist Exponential, i int) {
 	checkMean(t, i, x, dist, tol)
 	checkVarAndStd(t, i, x, dist, tol)
 	checkEntropy(t, i, x, dist, tol)
-	checkExKurtosis(t, i, x, dist, tol)
+	checkExKurtosis(t, i, x, dist, 3e-2)
 	checkSkewness(t, i, x, dist, tol)
 	checkMedian(t, i, x, dist, tol)
 	checkQuantileCDFSurvival(t, i, x, dist, tol)

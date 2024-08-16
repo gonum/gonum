@@ -7,7 +7,7 @@ package sampleuv
 import (
 	"testing"
 
-	"golang.org/x/exp/rand"
+	"gonum.org/v1/gonum/internal/rand"
 
 	"gonum.org/v1/gonum/floats"
 )
@@ -28,7 +28,7 @@ func TestWithoutReplacement(t *testing.T) {
 		{
 			// Test without perm and with source.
 			N: 10, K: 3, Src: rand.New(rand.NewSource(1)),
-			Trials: 100000, Tol: 1e-3,
+			Trials: 100000, Tol: 1.4e-3,
 		},
 	} {
 		dist := make([]float64, test.N)

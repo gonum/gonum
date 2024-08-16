@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"golang.org/x/exp/rand"
+	"gonum.org/v1/gonum/internal/rand"
 
 	"gonum.org/v1/gonum/floats"
 )
@@ -25,7 +25,7 @@ var (
 	}
 	exp = newExp()
 
-	obt = []float64{1020, 1909, 3937, 7881, 15687, 31486, 62310, 124632, 250453, 500685}
+	obt = []float64{980, 1945, 3929, 7835, 15473, 31322, 62602, 124937, 250815, 500162}
 )
 
 func newTestWeighted() Weighted {

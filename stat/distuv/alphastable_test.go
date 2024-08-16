@@ -9,7 +9,7 @@ import (
 	"sort"
 	"testing"
 
-	"golang.org/x/exp/rand"
+	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/stat"
 )
 
@@ -38,7 +38,7 @@ func TestAlphaStable(t *testing.T) {
 func TestAlphaStability(t *testing.T) {
 	t.Parallel()
 	const (
-		n     = 10000
+		n     = 100000
 		ksTol = 2e-2
 	)
 	for i, test := range []struct {
@@ -60,7 +60,7 @@ func TestAlphaStableGaussian(t *testing.T) {
 	t.Parallel()
 	src := rand.New(rand.NewSource(1))
 	d := AlphaStable{Alpha: 2, Beta: 0, C: 1.5, Mu: -0.4, Src: src}
-	n := 100000
+	n := 1000000
 	x := make([]float64, n)
 	for i := 0; i < n; i++ {
 		x[i] = d.Rand()
@@ -69,14 +69,14 @@ func TestAlphaStableGaussian(t *testing.T) {
 	checkExKurtosis(t, 0, x, d, 1e-2)
 	checkMean(t, 0, x, d, 1e-2)
 	checkVarAndStd(t, 0, x, d, 1e-2)
-	checkMode(t, 0, x, d, 5e-2, 1e-1)
+	checkMode(t, 0, x, d, 5e-2, 3e-1)
 }
 
 func TestAlphaStableMean(t *testing.T) {
 	t.Parallel()
 	src := rand.New(rand.NewSource(1))
 	d := AlphaStable{Alpha: 1.75, Beta: 0.2, C: 1.2, Mu: 0.3, Src: src}
-	n := 100000
+	n := 1000000
 	x := make([]float64, n)
 	for i := 0; i < n; i++ {
 		x[i] = d.Rand()
@@ -166,6 +166,8 @@ func testAlphaStableAnalytic(t *testing.T, i int, dist AlphaStable) {
 }
 
 func testStability(t *testing.T, i, n int, alpha, beta1, beta2, c1, c2, mu1, mu2, ksTol float64) {
+	t.Helper()
+
 	src := rand.New(rand.NewSource(1))
 	d1 := AlphaStable{alpha, beta1, c1, mu1, src}
 	d2 := AlphaStable{alpha, beta2, c2, mu2, src}

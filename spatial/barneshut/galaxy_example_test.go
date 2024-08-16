@@ -7,7 +7,7 @@ package barneshut_test
 import (
 	"log"
 
-	"golang.org/x/exp/rand"
+	"gonum.org/v1/gonum/internal/rand"
 
 	"gonum.org/v1/gonum/spatial/barneshut"
 	"gonum.org/v1/gonum/spatial/r2"

@@ -7,7 +7,7 @@ package lp
 import (
 	"testing"
 
-	"golang.org/x/exp/rand"
+	"gonum.org/v1/gonum/internal/rand"
 
 	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/mat"
@@ -132,7 +132,7 @@ func TestSimplex(t *testing.T) {
 
 	rnd := rand.New(rand.NewSource(1))
 	// Randomized tests
-	testRandomSimplex(t, 20000, 0.7, 10, rnd)
+	testRandomSimplex(t, 20000, 0.2, 10, rnd)
 	testRandomSimplex(t, 20000, 0, 10, rnd)
 	testRandomSimplex(t, 200, 0, 100, rnd)
 	testRandomSimplex(t, 2, 0, 400, rnd)

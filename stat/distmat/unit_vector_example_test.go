@@ -7,7 +7,7 @@ package distmat_test
 import (
 	"fmt"
 
-	"golang.org/x/exp/rand"
+	"gonum.org/v1/gonum/internal/rand"
 
 	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/stat/distmat"
@@ -39,5 +39,5 @@ func ExampleUnitVector() {
 	distance := mat.Norm(position, 2)
 	fmt.Printf("took %d steps in %d-space, walked %1.1f in total", nSteps, nDim, distance)
 	// Output:
-	// took 22 steps in 52-space, walked 5.3 in total
+	// took 60 steps in 41-space, walked 7.8 in total
 }

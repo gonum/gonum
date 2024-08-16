@@ -7,7 +7,7 @@ package sampleuv
 import (
 	"sort"
 
-	"golang.org/x/exp/rand"
+	"gonum.org/v1/gonum/internal/rand"
 )
 
 // WithoutReplacement samples len(idxs) integers from [0, n) without replacement.

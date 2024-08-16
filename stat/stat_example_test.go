@@ -7,7 +7,7 @@ package stat_test
 import (
 	"fmt"
 
-	"golang.org/x/exp/rand"
+	"gonum.org/v1/gonum/internal/rand"
 
 	"gonum.org/v1/gonum/stat"
 )
@@ -39,7 +39,7 @@ func ExampleLinearRegression() {
 	fmt.Printf("R^2: %.6f\n", r2)
 
 	// Output:
-	// Estimated offset is: 0.988572
-	// Estimated slope is:  3.000154
+	// Estimated offset is: 0.999675
+	// Estimated slope is:  2.999971
 	// R^2: 0.999999
 }

@@ -8,7 +8,7 @@ import (
 	"math"
 	"testing"
 
-	"golang.org/x/exp/rand"
+	"gonum.org/v1/gonum/internal/rand"
 
 	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/num/quat"
@@ -284,7 +284,7 @@ var scalarFields = []struct {
 
 func TestMatHessian(t *testing.T) {
 	const (
-		tol = 1e-5
+		tol = 3e-5
 		h   = 8e-4
 	)
 	step := Vec{X: h, Y: h, Z: h}
@@ -296,8 +296,9 @@ func TestMatHessian(t *testing.T) {
 			got.Hessian(p, step, test.field)
 			want := test.hessian(p)
 			if !mat.EqualApprox(got, want, tol) {
-				t.Errorf("matrices not equal within tol\ngot:  %v\nwant:  %v",
-					mat.Formatted(got), mat.Formatted(want))
+				t.Errorf("matrices not equal within tol\ngot:  %v\nwant: %v",
+					mat.Formatted(got, mat.Prefix("      ")),
+					mat.Formatted(want, mat.Prefix("      ")))
 			}
 		}
 	}

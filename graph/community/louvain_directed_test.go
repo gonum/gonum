@@ -11,7 +11,7 @@ import (
 	"sort"
 	"testing"
 
-	"golang.org/x/exp/rand"
+	"gonum.org/v1/gonum/internal/rand"
 
 	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/graph"
@@ -168,11 +168,12 @@ var communityDirectedQTests = []communityDirectedQTest{
 				},
 			},
 			{
-				q: 0.36862244897959184,
+				q: 0.3405612244897959,
 				communities: [][]graph.Node{
 					{simple.Node(0), simple.Node(1), simple.Node(2), simple.Node(4), simple.Node(5)},
 					{simple.Node(3), simple.Node(6), simple.Node(7)},
-					{simple.Node(8), simple.Node(9), simple.Node(10), simple.Node(11), simple.Node(12), simple.Node(13), simple.Node(14), simple.Node(15)},
+					{simple.Node(8), simple.Node(10), simple.Node(11), simple.Node(13), simple.Node(15)},
+					{simple.Node(9), simple.Node(12), simple.Node(14)},
 				},
 			},
 			{
@@ -213,7 +214,9 @@ func TestCommunityQDirected(t *testing.T) {
 			}
 		}
 
-		testCommunityQDirected(t, test, g)
+		t.Run(test.name, func(t *testing.T) {
+			testCommunityQDirected(t, test, g)
+		})
 	}
 }
 
@@ -230,7 +233,9 @@ func TestCommunityQWeightedDirected(t *testing.T) {
 			}
 		}
 
-		testCommunityQDirected(t, test, g)
+		t.Run(test.name, func(t *testing.T) {
+			testCommunityQDirected(t, test, g)
+		})
 	}
 }
 
@@ -266,7 +271,9 @@ func TestCommunityDeltaQDirected(t *testing.T) {
 			}
 		}
 
-		testCommunityDeltaQDirected(t, test, g)
+		t.Run(test.name, func(t *testing.T) {
+			testCommunityDeltaQDirected(t, test, g)
+		})
 	}
 }
 
@@ -283,7 +290,9 @@ func TestCommunityDeltaQWeightedDirected(t *testing.T) {
 			}
 		}
 
-		testCommunityDeltaQDirected(t, test, g)
+		t.Run(test.name, func(t *testing.T) {
+			testCommunityDeltaQDirected(t, test, g)
+		})
 	}
 }
 
@@ -391,7 +400,9 @@ func TestReduceQConsistencyDirected(t *testing.T) {
 			}
 		}
 
-		testReduceQConsistencyDirected(t, test, g)
+		t.Run(test.name, func(t *testing.T) {
+			testReduceQConsistencyDirected(t, test, g)
+		})
 	}
 }
 
@@ -408,7 +419,9 @@ func TestReduceQConsistencyWeightedDirected(t *testing.T) {
 			}
 		}
 
-		testReduceQConsistencyDirected(t, test, g)
+		t.Run(test.name, func(t *testing.T) {
+			testReduceQConsistencyDirected(t, test, g)
+		})
 	}
 }
 
@@ -509,7 +522,9 @@ func TestMoveLocalDirected(t *testing.T) {
 			}
 		}
 
-		testMoveLocalDirected(t, test, g)
+		t.Run(test.name, func(t *testing.T) {
+			testMoveLocalDirected(t, test, g)
+		})
 	}
 }
 
@@ -526,7 +541,9 @@ func TestMoveLocalWeightedDirected(t *testing.T) {
 			}
 		}
 
-		testMoveLocalDirected(t, test, g)
+		t.Run(test.name, func(t *testing.T) {
+			testMoveLocalDirected(t, test, g)
+		})
 	}
 }
 
@@ -571,7 +588,9 @@ func TestModularizeDirected(t *testing.T) {
 			}
 		}
 
-		testModularizeDirected(t, test, g)
+		t.Run(test.name, func(t *testing.T) {
+			testModularizeDirected(t, test, g)
+		})
 	}
 }
 
@@ -588,7 +607,9 @@ func TestModularizeWeightedDirected(t *testing.T) {
 			}
 		}
 
-		testModularizeDirected(t, test, g)
+		t.Run(test.name, func(t *testing.T) {
+			testModularizeDirected(t, test, g)
+		})
 	}
 }
 

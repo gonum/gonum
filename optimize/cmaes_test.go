@@ -9,7 +9,7 @@ import (
 	"math"
 	"testing"
 
-	"golang.org/x/exp/rand"
+	"gonum.org/v1/gonum/internal/rand"
 
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/mat"
@@ -156,7 +156,7 @@ func cmaTestCases() []cmaTestCase {
 				Func: functions.Rastrigin{}.Func,
 			},
 			method: &CmaEsChol{
-				Population: 100, // Increase the population size to reduce noise.
+				Population: 200, // Increase the population size to reduce noise.
 			},
 			settings: &Settings{
 				Converger: NeverTerminate{},

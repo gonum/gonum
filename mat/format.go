@@ -5,15 +5,15 @@
 package mat
 
 import (
+	"bytes"
 	"fmt"
-	"strconv"
-	"strings"
+	"unicode/utf8"
 )
 
 // Formatted returns a fmt.Formatter for the matrix m using the given options.
 func Formatted(m Matrix, options ...FormatOption) fmt.Formatter {
 	f := formatter{
-		matrix: m,
+		matrix: formattableMatrix{mat: m},
 		dot:    '.',
 	}
 	for _, o := range options {
@@ -22,15 +22,31 @@ func Formatted(m Matrix, options ...FormatOption) fmt.Formatter {
 	return f
 }
 
+// CFormatted returns a fmt.Formatter for the complex-valued matrix m using the
+// given options.
+func CFormatted(m CMatrix, options ...FormatOption) fmt.Formatter {
+	f := formatter{
+		matrix: formattableCMatrix{mat: m},
+		dot:    '.',
+	}
+	for _, o := range options {
+		o(&f)
+	}
+	return f
+}
+
+// formatter is a matrix formatter that satisfies the fmt.Formatter interface.
 type formatter struct {
-	matrix  Matrix
+	matrix  formattable
 	prefix  string
 	margin  int
 	dot     byte
 	squeeze bool
 
-	format func(m Matrix, prefix string, margin int, dot byte, squeeze bool, fs fmt.State, c rune)
+	format func(m formattable, prefix string, margin int, dot byte, squeeze bool, fs fmt.State, c rune)
 }
+
+var _ fmt.Formatter = (*formatter)(nil)
 
 // FormatOption is a functional option for matrix formatting.
 type FormatOption func(*formatter)
@@ -76,13 +92,78 @@ func FormatPython() FormatOption {
 // Format satisfies the fmt.Formatter interface.
 func (f formatter) Format(fs fmt.State, c rune) {
 	if c == 'v' && fs.Flag('#') && f.format == nil {
-		fmt.Fprintf(fs, "%#v", f.matrix)
+		fmt.Fprintf(fs, "%#v", f.matrix.Mat())
 		return
 	}
 	if f.format == nil {
 		f.format = format
 	}
 	f.format(f.matrix, f.prefix, f.margin, f.dot, f.squeeze, fs, c)
+}
+
+// formattable holds a matrix and provides methods for formatting values.
+type formattable interface {
+	dimser
+
+	// NewValueFormatter returns a new, zero-valued fmt.Formatter.
+	NewValueFormatter(options ...valueFormatOption) fmt.Formatter
+
+	// RevalueFormatter sets the value of a formatter to element i, j.
+	// A use is to recycle an existing value formatter for efficiency.
+	RevalueFormatter(f fmt.Formatter, i, j int) fmt.Formatter
+
+	// ValueFormatter returns a new fmt.Formatter for element i, j.
+	ValueFormatter(i, j int, options ...valueFormatOption) fmt.Formatter
+
+	// Matrix returns the source matrix.
+	Mat() dimser
+}
+
+// formattableMatrix is a formattable for floating point-valued matrices, those
+// that satisfy the Matrix interface.
+type formattableMatrix struct{ mat Matrix }
+
+var _ formattable = formattableMatrix{}
+
+func (m formattableMatrix) Dims() (r, c int) { return m.mat.Dims() }
+func (m formattableMatrix) Mat() dimser      { return m.mat }
+func (m formattableMatrix) NewValueFormatter(options ...valueFormatOption) fmt.Formatter {
+	f := formattedFloat(0, options...).(floatFormatter)
+	return &f
+}
+func (m formattableMatrix) RevalueFormatter(f fmt.Formatter, i, j int) fmt.Formatter {
+	f.(*floatFormatter).value = m.mat.At(i, j)
+	return f
+}
+func (m formattableMatrix) ValueFormatter(i, j int, options ...valueFormatOption) fmt.Formatter {
+	return formattedFloat(m.mat.At(i, j), options...)
+}
+
+// formattableCMatrix is a formattable for complex-valued matrices, those that
+// satisfy the CMatrix interface.
+type formattableCMatrix struct{ mat CMatrix }
+
+var _ formattable = formattableCMatrix{}
+
+func (m formattableCMatrix) Dims() (r, c int) { return m.mat.Dims() }
+func (m formattableCMatrix) Mat() dimser      { return m.mat }
+func (m formattableCMatrix) NewValueFormatter(options ...valueFormatOption) fmt.Formatter {
+	f := formattedComplex(0, options...).(complexFormatter)
+	return &f
+}
+func (m formattableCMatrix) RevalueFormatter(f fmt.Formatter, i, j int) fmt.Formatter {
+	f.(*complexFormatter).value = m.mat.At(i, j)
+	return f
+}
+func (m formattableCMatrix) ValueFormatter(i, j int, options ...valueFormatOption) fmt.Formatter {
+	return formattedComplex(m.mat.At(i, j), options...)
+}
+
+// dimser type is a two-dimensional array having rows and columns with table
+// elements accessible by a formattable. Details regarding value type and
+// methods for element access are left to the formattable.
+type dimser interface {
+	Dims() (r, c int)
 }
 
 // format prints a pretty representation of m to the fs io.Writer. The format character c
@@ -94,122 +175,128 @@ func (f formatter) Format(fs fmt.State, c rune) {
 // are output. If squeeze is true, column widths are determined on a per-column basis.
 //
 // format will not provide Go syntax output.
-func format(m Matrix, prefix string, margin int, dot byte, squeeze bool, fs fmt.State, c rune) {
-	rows, cols := m.Dims()
-
-	var printed int
-	if margin <= 0 {
-		printed = rows
-		if cols > printed {
-			printed = cols
-		}
-	} else {
-		printed = margin
-	}
-
-	prec, pOk := fs.Precision()
-	if !pOk {
-		prec = -1
-	}
-
+func format(m formattable, prefix string, margin int, dot byte, squeeze bool, fs fmt.State, c rune) {
 	var (
-		maxWidth int
-		widths   widther
-		buf, pad []byte
+		buf        = make([]byte, 0, 3) // Three bytes required because of Unicode decoration.
+		f          = m.NewValueFormatter(valueDotByte(dot))
+		rows, cols = m.Dims()
+		s          = newState(fs)
 	)
-	if squeeze {
-		widths = make(columnWidth, cols)
-	} else {
-		widths = new(uniformWidth)
-	}
+
+	// Emit matrix characteristics if given verb is not in printable set.
 	switch c {
 	case 'v', 'e', 'E', 'f', 'F', 'g', 'G':
-		if c == 'v' {
-			buf, maxWidth = maxCellWidth(m, 'g', printed, prec, widths)
-		} else {
-			buf, maxWidth = maxCellWidth(m, c, printed, prec, widths)
-		}
 	default:
-		fmt.Fprintf(fs, "%%!%c(%T=Dims(%d, %d))", c, m, rows, cols)
+		fmt.Fprintf(fs, "%%!%c(%T=Dims(%d, %d))", c, m.Mat(), rows, cols)
 		return
 	}
-	width, _ := fs.Width()
-	width = max(width, maxWidth)
-	pad = make([]byte, max(width, 2))
-	for i := range pad {
-		pad[i] = ' '
+
+	// Caculate printed margin.
+	var printed = max(rows, cols)
+	if margin > 0 {
+		printed = min(printed, margin)
 	}
 
-	first := true
-	if rows > 2*printed || cols > 2*printed {
-		first = false
-		fmt.Fprintf(fs, "Dims(%d, %d)\n", rows, cols)
+	// The widthing state must be fit to the formattable in order to
+	// horizontally align cells.
+	s.fit(m, printed, squeeze, fs, c, f)
+
+	// Prepend dimensions if mat overflows printed region.
+	if (rows > 2*printed) || (cols > 2*printed) {
+		fmt.Fprintf(fs, "Dims(%d, %d)\n%s", rows, cols, prefix)
 	}
 
-	skipZero := fs.Flag(' ')
+	// Write matrix content.
+	var (
+		lbrack, rbrack rune // lbrack and rbrack runes store Unicode characters.
+		n              int  // n is a counter for bytes written by utf.EncodeRune.
+	)
 	for i := 0; i < rows; i++ {
-		if !first {
-			fmt.Fprint(fs, prefix)
+		// Matrix rows are printed on their own lines.  These lines may
+		// be prefixed.
+		if i > 0 {
+			buf = append(buf[:0], '\n')
+			fs.Write(buf)
+
+			if prefix != "" {
+				fmt.Fprint(fs, prefix)
+			}
 		}
-		first = false
-		var el string
+
+		// The first three rows below the upper printable region
+		// contain only a dot left indented by one space. Additional
+		// rows beyond the upper printable region but above the lower
+		// printable region are skipped.
+		if (i >= printed) && (i < rows-printed) && (2*printed < rows) {
+			buf = append(buf[:0], ' ', '.')
+			fs.Write(buf)
+
+			// After three sequences, advance to the next printable
+			// row.
+			if i == (2 + printed) {
+				i = rows - printed - 1
+			}
+			continue
+		}
+
+		// Set left and right pair of brackets (or bracket pieces).
 		switch {
 		case rows == 1:
-			fmt.Fprint(fs, "[")
-			el = "]"
+			lbrack = '[' // Left square bracket (U+005B).
+			rbrack = ']' // Right square bracket (U+005D).
 		case i == 0:
-			fmt.Fprint(fs, "⎡")
-			el = "⎤\n"
+			lbrack = '⎡' // Left square bracket upper corner (U+23A1).
+			rbrack = '⎤' // Right square bracket upper corner (U+23A4)
 		case i < rows-1:
-			fmt.Fprint(fs, "⎢")
-			el = "⎥\n"
+			lbrack = '⎢' // Left square bracket extension (U+23A2).
+			rbrack = '⎥' // Right square bracket extension (U+23A5).
 		default:
-			fmt.Fprint(fs, "⎣")
-			el = "⎦"
+			lbrack = '⎣' // Left square bracket lower corner (U+23A3).
+			rbrack = '⎦' // Right square bracket lower corner (U+23A6).
 		}
 
+		// Write left bracket (or bracket piece).
+		n = utf8.EncodeRune(buf[:3], lbrack)
+		fs.Write(buf[:n])
+
+		// Write row content.
 		for j := 0; j < cols; j++ {
-			if j >= printed && j < cols-printed {
-				j = cols - printed - 1
-				if i == 0 || i == rows-1 {
-					fmt.Fprint(fs, "...  ...  ")
+			// Elements in a matrix row are separated by two spaces.
+			if j > 0 {
+				buf = append(buf[:0], ' ', ' ')
+				fs.Write(buf)
+			}
+
+			// The first two columns beyond the left printable
+			// region are filled with a three-character sequence,
+			// consisting of dots (if on first or last row) or
+			// spaces (if on an inner row). Additional columns
+			// beyond the left printable region but before the
+			// right printable region are skipped.
+			if (j >= printed) && (j < cols-printed) {
+				if (i == 0) || (i == rows-1) {
+					buf = append(buf[:0], '.', '.', '.')
 				} else {
-					fmt.Fprint(fs, "          ")
+					buf = append(buf[:0], ' ', ' ', ' ')
+				}
+				fs.Write(buf)
+
+				// After two sequences, advance to the next
+				// printable column.
+				if j == (1 + printed) {
+					j = cols - printed - 1
 				}
 				continue
 			}
 
-			v := m.At(i, j)
-			if v == 0 && skipZero {
-				buf = buf[:1]
-				buf[0] = dot
-			} else {
-				if c == 'v' {
-					buf = strconv.AppendFloat(buf[:0], v, 'g', prec, 64)
-				} else {
-					buf = strconv.AppendFloat(buf[:0], v, byte(c), prec, 64)
-				}
-			}
-			if fs.Flag('-') {
-				fs.Write(buf)
-				fs.Write(pad[:widths.width(j)-len(buf)])
-			} else {
-				fs.Write(pad[:widths.width(j)-len(buf)])
-				fs.Write(buf)
-			}
-
-			if j < cols-1 {
-				fs.Write(pad[:2])
-			}
+			// Write cell content.
+			f = m.RevalueFormatter(f, i, j)
+			f.Format(s.At(j), c)
 		}
 
-		fmt.Fprint(fs, el)
-
-		if i >= printed-1 && i < rows-printed && 2*printed < rows {
-			i = rows - printed - 1
-			fmt.Fprintf(fs, "%s .\n%[1]s .\n%[1]s .\n", prefix)
-			continue
-		}
+		// Write right bracket (or bracket piece).
+		n = utf8.EncodeRune(buf[:3], rbrack)
+		fs.Write(buf[:n])
 	}
 }
 
@@ -220,110 +307,81 @@ func format(m Matrix, prefix string, margin int, dot byte, squeeze bool, fs fmt.
 // If squeeze is true, column widths are determined on a per-column basis.
 //
 // formatMATLAB will not provide Go syntax output.
-func formatMATLAB(m Matrix, prefix string, _ int, _ byte, squeeze bool, fs fmt.State, c rune) {
-	rows, cols := m.Dims()
-
-	prec, pOk := fs.Precision()
-	width, _ := fs.Width()
-	if !fs.Flag('#') {
-		switch c {
-		case 'v', 'e', 'E', 'f', 'F', 'g', 'G':
-		default:
-			fmt.Fprintf(fs, "%%!%c(%T=Dims(%d, %d))", c, m, rows, cols)
-			return
-		}
-		format := fmtString(fs, c, prec, width)
-		fs.Write([]byte{'['})
-		for i := 0; i < rows; i++ {
-			if i != 0 {
-				fs.Write([]byte("; "))
-			}
-			for j := 0; j < cols; j++ {
-				if j != 0 {
-					fs.Write([]byte{' '})
-				}
-				fmt.Fprintf(fs, format, m.At(i, j))
-			}
-		}
-		fs.Write([]byte{']'})
-		return
-	}
-
-	if !pOk {
-		prec = -1
-	}
-
-	printed := rows
-	if cols > printed {
-		printed = cols
-	}
-
+func formatMATLAB(m formattable, prefix string, _ int, _ byte, squeeze bool, fs fmt.State, c rune) {
 	var (
-		maxWidth int
-		widths   widther
-		buf, pad []byte
+		buf        = make([]byte, 0, 2)
+		f          = m.NewValueFormatter(valueFormatMATLAB())
+		rows, cols = m.Dims()
+		s          = newState(fs)
 	)
-	if squeeze {
-		widths = make(columnWidth, cols)
-	} else {
-		widths = new(uniformWidth)
-	}
+
+	// Emit matrix characteristics if given verb is not in printable set.
 	switch c {
 	case 'v', 'e', 'E', 'f', 'F', 'g', 'G':
-		if c == 'v' {
-			buf, maxWidth = maxCellWidth(m, 'g', printed, prec, widths)
-		} else {
-			buf, maxWidth = maxCellWidth(m, c, printed, prec, widths)
-		}
 	default:
-		fmt.Fprintf(fs, "%%!%c(%T=Dims(%d, %d))", c, m, rows, cols)
+		fmt.Fprintf(fs, "%%!%c(%T=Dims(%d, %d))", c, m.Mat(), rows, cols)
 		return
 	}
-	width = max(width, maxWidth)
-	pad = make([]byte, max(width, 1))
-	for i := range pad {
-		pad[i] = ' '
+
+	// Read flag for layout syntax.
+	var layout bool = fs.Flag('#')
+
+	// In layout syntax, the widthing state must be fit to the formattable
+	// in order to horizontally align cells.
+	if layout {
+		s.fit(m, max(rows, cols), squeeze, fs, c, f)
 	}
 
+	// Write an opening bracket.
+	buf = append(buf[:0], '[')
+	fs.Write(buf)
+
+	// Write matrix content.
 	for i := 0; i < rows; i++ {
-		var el string
-		switch {
-		case rows == 1:
-			fmt.Fprint(fs, "[")
-			el = "]"
-		case i == 0:
-			fmt.Fprint(fs, "[\n"+prefix+" ")
-			el = "\n"
-		case i < rows-1:
-			fmt.Fprint(fs, prefix+" ")
-			el = "\n"
-		default:
-			fmt.Fprint(fs, prefix+" ")
-			el = "\n" + prefix + "]"
+		// In standard syntax, matrix rows are separated by a semicolon
+		// and one space.
+		if !layout && (i > 0) {
+			buf = append(buf[:0], ';', ' ')
+			fs.Write(buf)
 		}
 
+		// In layout syntax, matrix rows are printed on their own lines
+		// unless the matrix consists of only a single row. These lines
+		// may be prefixed and are always left-indented by one space.
+		if layout && (rows > 1) {
+			if prefix == "" {
+				buf = append(buf[:0], '\n', ' ')
+				fs.Write(buf)
+			} else {
+				fmt.Fprintf(fs, "\n%s ", prefix)
+			}
+		}
+
+		// Write the row content.
 		for j := 0; j < cols; j++ {
-			v := m.At(i, j)
-			if c == 'v' {
-				buf = strconv.AppendFloat(buf[:0], v, 'g', prec, 64)
-			} else {
-				buf = strconv.AppendFloat(buf[:0], v, byte(c), prec, 64)
-			}
-			if fs.Flag('-') {
-				fs.Write(buf)
-				fs.Write(pad[:widths.width(j)-len(buf)])
-			} else {
-				fs.Write(pad[:widths.width(j)-len(buf)])
+			// Elements in a matrix row are separated by one space.
+			if j > 0 {
+				buf = append(buf[:0], ' ')
 				fs.Write(buf)
 			}
 
-			if j < cols-1 {
-				fs.Write(pad[:1])
-			}
+			// Write cell content.
+			f = m.RevalueFormatter(f, i, j)
+			f.Format(s.At(j), c)
 		}
-
-		fmt.Fprint(fs, el)
 	}
+
+	// In layout syntax, the closing bracket is printed on its
+	// own line unless the matrix consists of only a single row.
+	if layout && (rows > 1) {
+		buf = append(buf[:0], '\n', ']')
+		fs.Write(buf)
+		return
+	}
+
+	// Write a closing bracket.
+	buf = append(buf[:0], ']')
+	fs.Write(buf)
 }
 
 // formatPython prints a Python representation of m to the fs io.Writer. The format character c
@@ -333,150 +391,134 @@ func formatMATLAB(m Matrix, prefix string, _ int, _ byte, squeeze bool, fs fmt.S
 // If squeeze is true, column widths are determined on a per-column basis.
 //
 // formatPython will not provide Go syntax output.
-func formatPython(m Matrix, prefix string, _ int, _ byte, squeeze bool, fs fmt.State, c rune) {
-	rows, cols := m.Dims()
-
-	prec, pOk := fs.Precision()
-	width, _ := fs.Width()
-	if !fs.Flag('#') {
-		switch c {
-		case 'v', 'e', 'E', 'f', 'F', 'g', 'G':
-		default:
-			fmt.Fprintf(fs, "%%!%c(%T=Dims(%d, %d))", c, m, rows, cols)
-			return
-		}
-		format := fmtString(fs, c, prec, width)
-		fs.Write([]byte{'['})
-		if rows > 1 {
-			fs.Write([]byte{'['})
-		}
-		for i := 0; i < rows; i++ {
-			if i != 0 {
-				fs.Write([]byte("], ["))
-			}
-			for j := 0; j < cols; j++ {
-				if j != 0 {
-					fs.Write([]byte(", "))
-				}
-				fmt.Fprintf(fs, format, m.At(i, j))
-			}
-		}
-		if rows > 1 {
-			fs.Write([]byte{']'})
-		}
-		fs.Write([]byte{']'})
-		return
-	}
-
-	if !pOk {
-		prec = -1
-	}
-
-	printed := rows
-	if cols > printed {
-		printed = cols
-	}
-
+func formatPython(m formattable, prefix string, _ int, _ byte, squeeze bool, fs fmt.State, c rune) {
 	var (
-		maxWidth int
-		widths   widther
-		buf, pad []byte
+		buf        = make([]byte, 0, 3)
+		f          = m.NewValueFormatter(valueFormatPython())
+		rows, cols = m.Dims()
+		s          = newState(fs)
 	)
-	if squeeze {
-		widths = make(columnWidth, cols)
-	} else {
-		widths = new(uniformWidth)
-	}
+
+	// Emit matrix characteristics if given verb is not in printable set.
 	switch c {
 	case 'v', 'e', 'E', 'f', 'F', 'g', 'G':
-		if c == 'v' {
-			buf, maxWidth = maxCellWidth(m, 'g', printed, prec, widths)
-		} else {
-			buf, maxWidth = maxCellWidth(m, c, printed, prec, widths)
-		}
 	default:
-		fmt.Fprintf(fs, "%%!%c(%T=Dims(%d, %d))", c, m, rows, cols)
+		fmt.Fprintf(fs, "%%!%c(%T=Dims(%d, %d))", c, m.Mat(), rows, cols)
 		return
 	}
-	width = max(width, maxWidth)
-	pad = make([]byte, max(width, 1))
-	for i := range pad {
-		pad[i] = ' '
+
+	// Read flag for layout syntax.
+	var layout bool = fs.Flag('#')
+
+	// In layout syntax, the widthing state must be fit to the formattable
+	// in order to horizontally align cells.
+	if layout {
+		s.fit(m, max(rows, cols), squeeze, fs, c, f)
 	}
 
+	// Write an opening bracket.
+	buf = append(buf[:0], '[')
+	fs.Write(buf)
+
+	// Write matrix content.
 	for i := 0; i < rows; i++ {
-		if i != 0 {
-			fmt.Fprint(fs, prefix)
-		}
-		var el string
-		switch {
-		case rows == 1:
-			fmt.Fprint(fs, "[")
-			el = "]"
-		case i == 0:
-			fmt.Fprint(fs, "[[")
-			el = "],\n"
-		case i < rows-1:
-			fmt.Fprint(fs, " [")
-			el = "],\n"
-		default:
-			fmt.Fprint(fs, " [")
-			el = "]]"
+		// In standard syntax, matrix rows are separated by a semicolon
+		// and one space.
+		if !layout && (i > 0) {
+			buf = append(buf[:0], ',', ' ')
+			fs.Write(buf)
 		}
 
+		// In layout syntax, matrix rows are separated by a comma and
+		// a new line.  Matrix rows after the first are printed on
+		// their own lines. These lines may be prefixed and are always
+		// left-indented by one space.
+		if layout && (i > 0) {
+			if prefix == "" {
+				buf = append(buf[:0], ',', '\n', ' ')
+				fs.Write(buf)
+			} else {
+				fmt.Fprintf(fs, ",\n%s ", prefix)
+			}
+		}
+
+		// Write left bracket.
+		if rows > 1 {
+			buf = append(buf[:0], '[')
+			fs.Write(buf)
+		}
+
+		// Write the row content.
 		for j := 0; j < cols; j++ {
-			v := m.At(i, j)
-			if c == 'v' {
-				buf = strconv.AppendFloat(buf[:0], v, 'g', prec, 64)
-			} else {
-				buf = strconv.AppendFloat(buf[:0], v, byte(c), prec, 64)
-			}
-			if fs.Flag('-') {
-				fs.Write(buf)
-				fs.Write(pad[:widths.width(j)-len(buf)])
-			} else {
-				fs.Write(pad[:widths.width(j)-len(buf)])
+			// Elements in a matrix row are separated by a comma
+			// and one space.
+			if j > 0 {
+				buf = append(buf[:0], ',', ' ')
 				fs.Write(buf)
 			}
 
-			if j < cols-1 {
-				fs.Write([]byte{','})
-				fs.Write(pad[:1])
-			}
+			// Write cell content.
+			f = m.RevalueFormatter(f, i, j)
+			f.Format(s.At(j), c)
 		}
 
-		fmt.Fprint(fs, el)
+		// Write right bracket.
+		if rows > 1 {
+			buf = append(buf[:0], ']')
+			fs.Write(buf)
+		}
 	}
+
+	// Write a closing bracket.
+	buf = append(buf[:0], ']')
+	fs.Write(buf)
 }
 
-// This is horrible, but it's what we have.
-func fmtString(fs fmt.State, c rune, prec, width int) string {
-	var b strings.Builder
-	b.WriteByte('%')
-	for _, f := range "0+- " {
-		if fs.Flag(int(f)) {
-			b.WriteByte(byte(f))
-		}
-	}
-	if width >= 0 {
-		fmt.Fprint(&b, width)
-	}
-	if prec >= 0 {
-		b.WriteByte('.')
-		if prec > 0 {
-			fmt.Fprint(&b, prec)
-		}
-	}
-	b.WriteRune(c)
-	return b.String()
+// state satisfies fmt.State and may vary its responses to Width.
+type state struct {
+	write     func(b []byte) (n int, err error)
+	width     func() (wid int, ok bool)
+	precision func() (prec int, ok bool)
+	flag      func(c int) bool
+
+	w widther
+	p int
 }
 
-func maxCellWidth(m Matrix, c rune, printed, prec int, w widther) ([]byte, int) {
-	var (
-		buf        = make([]byte, 0, 64)
-		rows, cols = m.Dims()
-		max        int
-	)
+var _ fmt.State = state{}
+
+// newState returns a new state, shadowing given fmt.State fs.
+func newState(fs fmt.State) state {
+	s := state{
+		write:     fs.Write,
+		width:     fs.Width,
+		precision: fs.Precision,
+		flag:      fs.Flag,
+	}
+	return s
+}
+
+// fit fits a state to formattable m, storing a single width for the
+// formattable or, if squeeze is true, individual widths are stored for each
+// column in the formattable. After fitting, the state responds to Width calls
+// with the value in p, which may be updated for a new column by calling At.
+//
+// The fitted state is not safe for concurrent use.
+func (s *state) fit(m formattable, printed int, squeeze bool, fs fmt.State, c rune, f fmt.Formatter) *state {
+	rows, cols := m.Dims()
+
+	// Assign appropriate widther.
+	if squeeze {
+		s.w = make(columnWidth, cols)
+	} else {
+		s.w = new(uniformWidth)
+	}
+
+	// Set state to temporarily write to a buffer instead of fs.Write.
+	var buf bytes.Buffer
+	s.write = buf.Write
+
+	// Fit state to m.
 	for i := 0; i < rows; i++ {
 		if i >= printed-1 && i < rows-printed && 2*printed < rows {
 			i = rows - printed - 1
@@ -487,17 +529,56 @@ func maxCellWidth(m Matrix, c rune, printed, prec int, w widther) ([]byte, int) 
 				continue
 			}
 
-			buf = strconv.AppendFloat(buf, m.At(i, j), byte(c), prec, 64)
-			if len(buf) > max {
-				max = len(buf)
+			_ = m.RevalueFormatter(f, i, j)
+			f.Format(s, c)
+
+			if buf.Len() > s.w.width(j) {
+				s.w.setWidth(j, buf.Len())
 			}
-			if len(buf) > w.width(j) {
-				w.setWidth(j, len(buf))
-			}
-			buf = buf[:0]
+
+			buf.Reset()
 		}
 	}
-	return buf, max
+
+	// Restore writes by the state to fs.
+	s.write = fs.Write
+
+	// State should now respond to width with p, defaulting to fs.Width.
+	s.width = func() (wid int, ok bool) { return s.p, true }
+	if p, ok := fs.Width(); ok {
+		s.p = p
+	}
+
+	return s
+}
+
+// Write carries the same meaning as in fmt.State.
+func (s state) Write(b []byte) (n int, err error) {
+	return s.write(b)
+}
+
+// Width carries the same meaning as in fmt.State.
+func (s state) Width() (wid int, ok bool) {
+	return s.width()
+}
+
+// Precision carries the same meaning as in fmt.State.
+func (s state) Precision() (prec int, ok bool) {
+	return s.precision()
+}
+
+// Flag carries the same meaning as in fmt.State.
+func (s state) Flag(c int) bool {
+	return s.flag(c)
+}
+
+// At will provide a copy of the state that responds to subsequent Width calls
+// with the widther value for column i.
+func (s *state) At(i int) *state {
+	if s.w != nil {
+		s.p = s.w.width(i)
+	}
+	return s
 }
 
 type widther interface {
@@ -507,10 +588,14 @@ type widther interface {
 
 type uniformWidth int
 
+var _ widther = (*uniformWidth)(nil)
+
 func (u *uniformWidth) width(_ int) int   { return int(*u) }
 func (u *uniformWidth) setWidth(_, w int) { *u = uniformWidth(w) }
 
 type columnWidth []int
+
+var _ widther = columnWidth{}
 
 func (c columnWidth) width(i int) int   { return c[i] }
 func (c columnWidth) setWidth(i, w int) { c[i] = w }

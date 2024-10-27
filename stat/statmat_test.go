@@ -5,6 +5,7 @@
 package stat
 
 import (
+	"errors"
 	"math"
 	"testing"
 
@@ -303,6 +304,300 @@ func TestMahalanobis(t *testing.T) {
 	}
 }
 
+func flatten(f [][]float64) (r, c int, d []float64) {
+	r = len(f)
+	if r == 0 {
+		panic("bad test: no row")
+	}
+	c = len(f[0])
+	d = make([]float64, 0, r*c)
+	for _, row := range f {
+		if len(row) != c {
+			panic("bad test: ragged input")
+		}
+		d = append(d, row...)
+	}
+	return r, c, d
+}
+
+func TestLassoOptionsValidate(t *testing.T) {
+	testData := map[string]struct {
+		opt      *LassoOptions
+		err      error
+		expected *LassoOptions
+	}{
+		"nil": {nil, nil, NewDefaultLassoOptions()},
+		"valid": {
+			&LassoOptions{
+				Lambda:     1.0,
+				Iterations: 100,
+				Tolerance:  1e-5,
+			}, nil,
+			&LassoOptions{
+				Lambda:     1.0,
+				Iterations: 100,
+				Tolerance:  1e-5,
+			},
+		},
+		"invalid lambda": {
+			&LassoOptions{Lambda: -1.0},
+			ErrNegativeLambda, nil,
+		},
+		"invalid iterations": {
+			&LassoOptions{Iterations: -1.0},
+			ErrNegativeIterations, nil,
+		},
+		"invalid tolerance": {
+			&LassoOptions{Tolerance: -1.0},
+			ErrNegativeTolerance, nil,
+		},
+	}
+
+	for name, td := range testData {
+		t.Run(name, func(t *testing.T) {
+			opt, err := td.opt.Validate()
+			if td.err != nil {
+				if !errors.Is(err, td.err) {
+					t.Errorf("expected error, %v, but got %v", td.err, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Errorf("expected no error, but got, %v", err)
+				return
+			}
+			if opt != td.expected {
+				t.Errorf("expected option, %v, but got, %v", td.expected, opt)
+			}
+		})
+	}
+}
+
+func TestLassoRegression(t *testing.T) {
+	// y = 2 + 3*x0 + 4*x1
+	testData := map[string]struct {
+		x         *mat.Dense
+		y         *mat.Dense
+		opt       *LassoOptions
+		tol       float64
+		intercept float64
+		coef      []float64
+	}{
+		"fit with intercept": {
+			x: mat.NewDense(
+				flatten(
+					[][]float64{
+						{0, 0},
+						{3, 5},
+						{9, 20},
+						{12, 6},
+					},
+				),
+			),
+			y: mat.NewDense(4, 1, []float64{2, 31, 109, 62}),
+			opt: &LassoOptions{
+				Lambda:       0.0,
+				Tolerance:    1e-6,
+				FitIntercept: true,
+				Iterations:   1000,
+			},
+			tol:       1e-5,
+			intercept: 2.0,
+			coef:      []float64{3.0, 4.0},
+		},
+		"fit with no intercept": {
+			x: mat.NewDense(
+				flatten(
+					[][]float64{
+						{1, 0, 0},
+						{1, 3, 5},
+						{1, 9, 20},
+						{1, 12, 6},
+					},
+				),
+			),
+			y: mat.NewDense(4, 1, []float64{2, 31, 109, 62}),
+			opt: &LassoOptions{
+				Lambda:       0.0,
+				Tolerance:    1e-6,
+				FitIntercept: false,
+				Iterations:   1000,
+			},
+			tol:       1e-5,
+			intercept: 0.0,
+			coef:      []float64{2.0, 3.0, 4.0},
+		},
+	}
+
+	for name, td := range testData {
+		t.Run(name, func(t *testing.T) {
+			model, err := NewLassoRegression(td.opt)
+			if err != nil {
+				t.Errorf("expected no error, but got, %v", err)
+				return
+			}
+
+			err = model.Fit(td.x, td.y)
+			if err != nil {
+				t.Errorf("expected no error from fit, but got %v", err)
+			}
+
+			if math.Abs(model.Intercept()-td.intercept) > td.tol {
+				t.Errorf("expected intercept to be in tolerance of %v, got %v, but expected, %v", td.tol, model.Intercept(), td.intercept)
+			}
+
+			coef := model.Coef()
+			if len(coef) != len(td.coef) {
+				t.Errorf("expected %d coefficients, but got %d", len(td.coef), len(coef))
+				return
+			}
+
+			for i := range td.coef {
+				if math.Abs(coef[i]-td.coef[i]) > td.tol {
+					t.Errorf("expected coefficient at index, %d, to be in tolerance of %v, got %v, but expected, %v", i, td.tol, coef[i], td.coef[i])
+				}
+			}
+
+			r2, err := model.Score(td.x, td.y)
+			if err != nil {
+				t.Errorf("expected no error, but got, %v", err)
+				return
+			}
+			if math.Abs(r2-1.0) > td.tol {
+				t.Errorf("expected coefficient of determination to be in tolerance of %v, got %v, but expected, %v", td.tol, r2, 1.0)
+			}
+		})
+	}
+}
+
+func TestOLSOptionsValidate(t *testing.T) {
+	testData := map[string]struct {
+		opt      *OLSOptions
+		err      error
+		expected *OLSOptions
+	}{
+		"nil": {nil, nil, NewDefaultOLSOptions()},
+		"valid": {
+			&OLSOptions{
+				FitIntercept: true,
+			}, nil,
+			&OLSOptions{
+				FitIntercept: true,
+			},
+		},
+	}
+
+	for name, td := range testData {
+		t.Run(name, func(t *testing.T) {
+			opt, err := td.opt.Validate()
+			if td.err != nil {
+				if !errors.Is(err, td.err) {
+					t.Errorf("expected error, %v, but got %v", td.err, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Errorf("expected no error, but got, %v", err)
+				return
+			}
+			if opt != td.expected {
+				t.Errorf("expected option, %v, but got, %v", td.expected, opt)
+			}
+		})
+	}
+}
+
+func TestOLSRegression(t *testing.T) {
+	// y = 2 + 3*x0 + 4*x1
+	testData := map[string]struct {
+		x         *mat.Dense
+		y         *mat.Dense
+		opt       *OLSOptions
+		tol       float64
+		intercept float64
+		coef      []float64
+	}{
+		"fit with intercept": {
+			x: mat.NewDense(
+				flatten(
+					[][]float64{
+						{0, 0},
+						{3, 5},
+						{9, 20},
+						{12, 6},
+					},
+				),
+			),
+			y: mat.NewDense(4, 1, []float64{2, 31, 109, 62}),
+			opt: &OLSOptions{
+				FitIntercept: true,
+			},
+			tol:       1e-5,
+			intercept: 2.0,
+			coef:      []float64{3.0, 4.0},
+		},
+		"fit with no intercept": {
+			x: mat.NewDense(
+				flatten(
+					[][]float64{
+						{1, 0, 0},
+						{1, 3, 5},
+						{1, 9, 20},
+						{1, 12, 6},
+					},
+				),
+			),
+			y: mat.NewDense(4, 1, []float64{2, 31, 109, 62}),
+			opt: &OLSOptions{
+				FitIntercept: false,
+			},
+			tol:       1e-5,
+			intercept: 0.0,
+			coef:      []float64{2.0, 3.0, 4.0},
+		},
+	}
+
+	for name, td := range testData {
+		t.Run(name, func(t *testing.T) {
+			model, err := NewOLSRegression(td.opt)
+			if err != nil {
+				t.Errorf("expected no error, but got, %v", err)
+				return
+			}
+
+			err = model.Fit(td.x, td.y)
+			if err != nil {
+				t.Errorf("expected no error from fit, but got %v", err)
+			}
+
+			if math.Abs(model.Intercept()-td.intercept) > td.tol {
+				t.Errorf("expected intercept to be in tolerance of %v, got %v, but expected, %v", td.tol, model.Intercept(), td.intercept)
+			}
+
+			coef := model.Coef()
+			if len(coef) != len(td.coef) {
+				t.Errorf("expected %d coefficients, but got %d", len(td.coef), len(coef))
+				return
+			}
+
+			for i := range td.coef {
+				if math.Abs(coef[i]-td.coef[i]) > td.tol {
+					t.Errorf("expected coefficient at index, %d, to be in tolerance of %v, got %v, but expected, %v", i, td.tol, coef[i], td.coef[i])
+				}
+			}
+
+			r2, err := model.Score(td.x, td.y)
+			if err != nil {
+				t.Errorf("expected no error, but got, %v", err)
+				return
+			}
+			if math.Abs(r2-1.0) > td.tol {
+				t.Errorf("expected coefficient of determination to be in tolerance of %v, got %v, but expected, %v", td.tol, r2, 1.0)
+			}
+		})
+	}
+}
+
 // benchmarks
 
 func randMat(r, c int) mat.Matrix {
@@ -476,5 +771,85 @@ func BenchmarkCorrToCov(b *testing.B) {
 		cc.CopySym(&corr)
 		b.StartTimer()
 		corrToCov(cc, sigma)
+	}
+}
+
+func BenchmarkLassoRegression(b *testing.B) {
+	nObs := 1000
+	nFeat := 100
+
+	data := make([][]float64, nObs)
+	for i := 0; i < nObs; i++ {
+		data[i] = make([]float64, nFeat)
+		for j := 0; j < nFeat; j++ {
+			val := float64(i*nFeat + j)
+			if j == 0 {
+				val = 1.0
+			}
+			data[i][j] = val
+		}
+	}
+
+	data2 := make([]float64, 0, nObs)
+	for i := 0; i < cap(data2); i++ {
+		data2 = append(data2, float64(i))
+	}
+
+	for i := 0; i < b.N; i++ {
+		m, n, d := flatten(data)
+		x := mat.NewDense(m, n, d)
+		y := mat.NewDense(nObs, 1, data2)
+		opt := NewDefaultLassoOptions()
+		opt.FitIntercept = false
+		model, err := NewLassoRegression(opt)
+		if err != nil {
+			b.Error(err)
+			continue
+		}
+		if err := model.Fit(x, y); err != nil {
+			b.Error(err)
+			continue
+		}
+	}
+}
+
+func BenchmarkOLSRegression(b *testing.B) {
+	nObs := 1000
+	nFeat := 100
+
+	data := make([][]float64, nObs)
+	for i := 0; i < nObs; i++ {
+		data[i] = make([]float64, nFeat)
+		for j := 0; j < nFeat; j++ {
+			val := float64(i*nFeat + j)
+			if j == 0 {
+				val = 1.0
+			}
+			data[i][j] = val
+		}
+	}
+
+	data2 := make([]float64, 0, nObs)
+	for i := 0; i < cap(data2); i++ {
+		data2 = append(data2, float64(i))
+	}
+
+	for i := 0; i < b.N; i++ {
+		m, n, d := flatten(data)
+		x := mat.NewDense(m, n, d)
+		y := mat.NewDense(nObs, 1, data2)
+		model, err := NewOLSRegression(
+			&OLSOptions{
+				FitIntercept: false,
+			},
+		)
+		if err != nil {
+			b.Error(err)
+			continue
+		}
+		if err := model.Fit(x, y); err != nil {
+			b.Error(err)
+			continue
+		}
 	}
 }

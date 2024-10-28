@@ -324,16 +324,16 @@ func TestLassoOptionsValidate(t *testing.T) {
 	testData := map[string]struct {
 		opt      *LassoOptions
 		err      error
-		expected *LassoOptions
+		expected LassoOptions
 	}{
-		"nil": {nil, nil, NewDefaultLassoOptions()},
+		"nil": {nil, nil, *NewDefaultLassoOptions()},
 		"valid": {
 			&LassoOptions{
 				Lambda:     1.0,
 				Iterations: 100,
 				Tolerance:  1e-5,
 			}, nil,
-			&LassoOptions{
+			LassoOptions{
 				Lambda:     1.0,
 				Iterations: 100,
 				Tolerance:  1e-5,
@@ -341,15 +341,15 @@ func TestLassoOptionsValidate(t *testing.T) {
 		},
 		"invalid lambda": {
 			&LassoOptions{Lambda: -1.0},
-			ErrNegativeLambda, nil,
+			ErrNegativeLambda, LassoOptions{},
 		},
 		"invalid iterations": {
 			&LassoOptions{Iterations: -1.0},
-			ErrNegativeIterations, nil,
+			ErrNegativeIterations, LassoOptions{},
 		},
 		"invalid tolerance": {
 			&LassoOptions{Tolerance: -1.0},
-			ErrNegativeTolerance, nil,
+			ErrNegativeTolerance, LassoOptions{},
 		},
 	}
 
@@ -366,8 +366,17 @@ func TestLassoOptionsValidate(t *testing.T) {
 				t.Errorf("expected no error, but got, %v", err)
 				return
 			}
-			if opt != td.expected {
-				t.Errorf("expected option, %v, but got, %v", td.expected, opt)
+			if opt != nil {
+				res := *opt
+				if res.Lambda != td.expected.Lambda {
+					t.Errorf("expected lambda option, %v, but got, %v", td.expected.Lambda, res.Lambda)
+				}
+				if res.Iterations != td.expected.Iterations {
+					t.Errorf("expected iteration option, %v, but got, %v", td.expected.Iterations, res.Iterations)
+				}
+				if res.Tolerance != td.expected.Tolerance {
+					t.Errorf("expected tolerance option, %v, but got, %v", td.expected.Tolerance, res.Tolerance)
+				}
 			}
 		})
 	}
@@ -474,14 +483,14 @@ func TestOLSOptionsValidate(t *testing.T) {
 	testData := map[string]struct {
 		opt      *OLSOptions
 		err      error
-		expected *OLSOptions
+		expected OLSOptions
 	}{
-		"nil": {nil, nil, NewDefaultOLSOptions()},
+		"nil": {nil, nil, *NewDefaultOLSOptions()},
 		"valid": {
 			&OLSOptions{
 				FitIntercept: true,
 			}, nil,
-			&OLSOptions{
+			OLSOptions{
 				FitIntercept: true,
 			},
 		},
@@ -500,8 +509,11 @@ func TestOLSOptionsValidate(t *testing.T) {
 				t.Errorf("expected no error, but got, %v", err)
 				return
 			}
-			if opt != td.expected {
-				t.Errorf("expected option, %v, but got, %v", td.expected, opt)
+			if opt != nil {
+				res := *opt
+				if res.FitIntercept != td.expected.FitIntercept {
+					t.Errorf("expected fit intercept option, %v, but got, %v", td.expected.FitIntercept, res.FitIntercept)
+				}
 			}
 		})
 	}

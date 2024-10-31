@@ -5,6 +5,8 @@
 package flow
 
 import (
+	"log"
+
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/linear"
 )
@@ -44,15 +46,17 @@ func Intervals(g graph.Directed, eid int64) []*Interval {
 	dfsPostorder(g, eid, &ns, visited)
 	reversePostorderNodes, reversePostorderMap := reversePostorder(ns)
 	n := g.Node(eid)
-
-	for n != nil {
-		n = interval.findInterval(n, g, reversePostorderMap, reversePostorderNodes)
+	worklist.Enqueue(n)
+	for worklist.Len() > 0 {
+		n = worklist.Dequeue()
+		interval.findInterval(&n, g, reversePostorderMap, reversePostorderNodes)
+		log.Println(interval.nodes)
+		intervals = append(intervals, &interval)
 		if n == nil {
 			break
 		}
 
 		worklist.Enqueue(n)
-		intervals = append(intervals, &interval)
 	}
 
 	return intervals
@@ -82,38 +86,39 @@ func (i *Interval) Head() graph.Node {
 // Finds all interval nodes.
 // Nodes are added to the interval if all their predecessors are in
 // the interval or they are the header node.
-func (i *Interval) findInterval(n graph.Node, g graph.Directed, reversePostorderMap map[*graph.Node]int, reversePostorderArray []*graph.Node) graph.Node {
-	i.head = n
-	i.nodes = append(i.nodes, n)
+func (i *Interval) findInterval(head *graph.Node, g graph.Directed, reversePostorderMap map[*graph.Node]int, reversePostorderArray []*graph.Node) {
+	i.head = *head
+	var nq linear.NodeQueue
+	nq.Enqueue(*head)
+	i.nodes = append(i.nodes, *head)
 	intervalMap := make(map[graph.Node]bool)
-	intervalMap[n] = true
-	for {
-		nPos := reversePostorderMap[&n]
-		if nPos > len(reversePostorderArray) {
-			break
-		}
+	intervalMap[*head] = true
+	var node graph.Node
+	for nq.Len() > 0 {
+		node = nq.Dequeue()
+		succs := g.From(node.ID())
 
-		n = *reversePostorderArray[nPos+1]
-		preds := g.To(n.ID())
-		x := 0
-		for preds.Next() {
-			if intervalMap[preds.Node()] {
-				x++
+		for succs.Next() {
+			if intervalMap[succs.Node()] {
+				continue
+			}
+
+			preds := g.To(succs.Node().ID())
+			predsLength := preds.Len()
+			x := 0
+			for preds.Next() {
+				if intervalMap[preds.Node()] {
+					x++
+				}
+			}
+
+			if x == predsLength {
+				nq.Enqueue(succs.Node())
+				i.nodes = append(i.nodes, succs.Node())
+				intervalMap[succs.Node()] = true
 			}
 		}
-
-		if 0 < x && x < preds.Len() {
-			// n is a new interval header
-			return n
-		}
-
-		// n is a part of the interval
-		i.nodes = append(i.nodes, n)
-		intervalMap[n] = true
 	}
-
-	// run out of nodes
-	return nil
 }
 
 // Put nodes into the stack in postorder.
@@ -126,11 +131,10 @@ func dfsPostorder(g graph.Directed, eid int64, ns *linear.NodeStack, visited map
 		}
 
 		succ := succs.Node()
-		if visited[succ.ID()] {
-			continue
+		if !visited[succ.ID()] {
+			dfsPostorder(g, succ.ID(), ns, visited)
 		}
 
-		dfsPostorder(g, succ.ID(), ns, visited)
 	}
 
 	n := g.Node(eid)
@@ -141,7 +145,8 @@ func dfsPostorder(g graph.Directed, eid int64, ns *linear.NodeStack, visited map
 func reversePostorder(ns linear.NodeStack) ([]*graph.Node, map[*graph.Node]int) {
 	var nodes []*graph.Node
 	nodePosition := make(map[*graph.Node]int)
-	for i := 0; i < ns.Len(); i++ {
+	stackLength := ns.Len()
+	for i := 0; i < stackLength; i++ {
 		n := ns.Pop()
 		nodePosition[&n] = i
 		nodes = append(nodes, &n)

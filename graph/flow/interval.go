@@ -1,3 +1,7 @@
+// Copyright ©2017 The Gonum Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package flow
 
 import (
@@ -35,26 +39,20 @@ func Intervals(g graph.Directed, eid int64) []*Interval {
 	var worklist linear.NodeQueue
 	var intervals []*Interval
 	var interval Interval
-	var inInterval map[graph.Node]bool
 	var ns linear.NodeStack
-	var intNodeMap map[graph.Node]int
-	dfsPostorder(g, eid, &ns)
+	visited := make(map[int64]bool)
+	dfsPostorder(g, eid, &ns, visited)
 	reversePostorderNodes, reversePostorderMap := reversePostorder(ns)
-	head := g.Node(eid)
+	n := g.Node(eid)
 
-	worklist.Enqueue(head)
-	for {
-		// exits when the worklist is empty
-		if worklist.Len() <= 0 {
+	for n != nil {
+		n = interval.findInterval(n, g, reversePostorderMap, reversePostorderNodes)
+		if n == nil {
 			break
 		}
 
-		n := worklist.Dequeue()
-		worklist.Enqueue(interval.findInterval(n, g, reversePostorderMap, reversePostorderNodes))
+		worklist.Enqueue(n)
 		intervals = append(intervals, &interval)
-		// add all interval nodes to interval
-		// can pass the map to the function to make it efficient
-
 	}
 
 	return intervals
@@ -71,15 +69,15 @@ func (i *Interval) Head() graph.Node {
 	return i.head
 }
 
-func (i *Interval) Nodes() graph.Nodes {
+// func (i *Interval) Nodes() graph.Nodes {
 
-}
+// }
 
 // Returns the edge given 2 node id's if the edge exists.
 // Else it returns null.
-func (i *Interval) Edge(uid, vid int64) graph.Edge {
+// func (i *Interval) Edge(uid, vid int64) graph.Edge {
 
-}
+// }
 
 // Finds all interval nodes.
 // Nodes are added to the interval if all their predecessors are in
@@ -87,7 +85,7 @@ func (i *Interval) Edge(uid, vid int64) graph.Edge {
 func (i *Interval) findInterval(n graph.Node, g graph.Directed, reversePostorderMap map[*graph.Node]int, reversePostorderArray []*graph.Node) graph.Node {
 	i.head = n
 	i.nodes = append(i.nodes, n)
-	var intervalMap map[graph.Node]bool
+	intervalMap := make(map[graph.Node]bool)
 	intervalMap[n] = true
 	for {
 		nPos := reversePostorderMap[&n]
@@ -119,15 +117,20 @@ func (i *Interval) findInterval(n graph.Node, g graph.Directed, reversePostorder
 }
 
 // Put nodes into the stack in postorder.
-func dfsPostorder(g graph.Directed, eid int64, ns *linear.NodeStack) {
+func dfsPostorder(g graph.Directed, eid int64, ns *linear.NodeStack, visited map[int64]bool) {
 	succs := g.From(eid)
+	visited[eid] = true
 	for {
 		if !succs.Next() {
 			break
 		}
 
 		succ := succs.Node()
-		dfsPostorder(g, succ.ID(), ns)
+		if visited[succ.ID()] {
+			continue
+		}
+
+		dfsPostorder(g, succ.ID(), ns, visited)
 	}
 
 	n := g.Node(eid)
@@ -137,7 +140,7 @@ func dfsPostorder(g graph.Directed, eid int64, ns *linear.NodeStack) {
 // Extracts all nodes in the stack into an array in reverse postorder.
 func reversePostorder(ns linear.NodeStack) ([]*graph.Node, map[*graph.Node]int) {
 	var nodes []*graph.Node
-	var nodePosition map[*graph.Node]int
+	nodePosition := make(map[*graph.Node]int)
 	for i := 0; i < ns.Len(); i++ {
 		n := ns.Pop()
 		nodePosition[&n] = i

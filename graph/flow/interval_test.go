@@ -61,11 +61,13 @@ func TestInterval(t *testing.T) {
 	g.SetEdge(g.NewEdge(n14, n15))
 	g.SetEdge(g.NewEdge(n15, n6))
 
+	// test number of intervals
 	intervals := Intervals(g, 1)
 	if len(intervals) != 3 {
 		t.Fatalf("Expected 3 intervals, got %d", len(intervals))
 	}
 
+	// test number of nodes
 	interval := intervals[0]
 	if len(interval.nodes) != 5 {
 		t.Errorf("Expected 5 nodes in interval 1, got %d", len(interval.nodes))

@@ -1,4 +1,4 @@
-// Copyright ©2017 The Gonum Authors. All rights reserved.
+// Copyright ©2024 The Gonum Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -9,6 +9,7 @@ import (
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/linear"
+	"gonum.org/v1/gonum/graph/iterator"
 )
 
 /*
@@ -33,16 +34,17 @@ of its immediate predecessors become members of an interval.
 5. Select the next unprocessed node in H and repeat steps 2, 3, 4, 5.
 When there are no more unprocessed nodes in H, the procedure
 terminates
+
+(https://dl.acm.org/doi/pdf/10.1145/360018.360025)
 */
 
-// Returns the set of intervals given by the control flow graph.
-// IDs must be in reverse postorder
+// Returns the set of intervals given by the directed graph.
 func Intervals(g graph.Directed, eid int64) []*Interval {
 	var worklist linear.NodeQueue
 	var intervals []*Interval
 	var ns linear.NodeStack
 	visited := make(map[int64]bool)
-	inInterval := make(map[graph.Node]bool)
+	inInterval := make(map[int64]graph.Node)
 
 	dfsPostorder(g, eid, &ns, visited)
 	reversePostorderNodes := reversePostorder(ns)
@@ -58,9 +60,8 @@ func Intervals(g graph.Directed, eid int64) []*Interval {
 			break
 		}
 
-		// use i external to the top group to find the next n
 		for _, node := range reversePostorderNodes {
-			if inInterval[*node] {
+			if inInterval[(*node).ID()] != nil {
 				continue
 			}
 
@@ -68,7 +69,7 @@ func Intervals(g graph.Directed, eid int64) []*Interval {
 			predsLength := preds.Len()
 			x := 0
 			for preds.Next() {
-				if interval.nodeMap[preds.Node()] {
+				if interval.nodes[preds.Node().ID()] != nil {
 					x++
 				}
 			}
@@ -80,48 +81,77 @@ func Intervals(g graph.Directed, eid int64) []*Interval {
 		}
 	}
 
+	linkIntervals(intervals, g)
 	return intervals
 }
 
 // An Interval I(h) is the maximal, single entry subgraph for which h (head)
 // is the entry node and in which all closed paths contain h.
 type Interval struct {
-	head    graph.Node
-	nodes   []graph.Node
-	nodeMap map[graph.Node]bool
+	head  graph.Node
+	nodes map[int64]graph.Node
+	// nodeMap map[graph.Node]bool
+	from map[int64]map[int64]graph.Edge
 }
 
+// Returns header node for an interval.
 func (i *Interval) Head() graph.Node {
 	return i.head
 }
 
-// func (i *Interval) Nodes() graph.Nodes {
-
-// }
+// Returns a node iterator for an interval.
+func (i *Interval) Nodes() graph.Nodes {
+	if len(i.nodes) == 0 {
+		return graph.Empty
+	}
+	return iterator.NewNodes(i.nodes)
+}
 
 // Returns the edge given 2 node id's if the edge exists.
 // Else it returns null.
-// func (i *Interval) Edge(uid, vid int64) graph.Edge {
+func (i *Interval) Edge(uid, vid int64) graph.Edge {
+	edge, ok := i.from[uid][vid]
+	if !ok {
+		return nil
+	}
+	return edge
+}
 
-// }
+func (i *Interval) From(id int64) graph.Nodes {
+	if len(i.from[id]) == 0 {
+		return graph.Empty
+	}
+	return iterator.NewNodesByEdge(i.nodes, i.from[id])
+}
+
+func (i *Interval) HasEdgeBetween(xid int64, yid int64) bool {
+	if _, ok := i.from[xid][yid]; ok {
+		return true
+	}
+	_, ok := i.from[yid][xid]
+	return ok
+}
+
+func (i *Interval) Node(id int64) graph.Node {
+	return i.nodes[id]
+}
 
 // Finds all interval nodes.
 // Nodes are added to the interval if all their predecessors are in
 // the interval or they are the header node.
-func (i *Interval) findInterval(head *graph.Node, g graph.Directed) map[graph.Node]bool {
+func (i *Interval) findInterval(head *graph.Node, g graph.Directed) map[int64]graph.Node {
 	i.head = *head
 	var nq linear.NodeQueue
 	nq.Enqueue(*head)
-	i.nodes = append(i.nodes, *head)
-	i.nodeMap = make(map[graph.Node]bool)
-	i.nodeMap[*head] = true
+	i.nodes = make(map[int64]graph.Node)
+	i.nodes[(*head).ID()] = *head
 	var node graph.Node
 	for nq.Len() > 0 {
 		node = nq.Dequeue()
 		succs := g.From(node.ID())
 
 		for succs.Next() {
-			if i.nodeMap[succs.Node()] {
+			if i.nodes[succs.Node().ID()] != nil {
 				continue
 			}
 
@@ -129,23 +159,22 @@ func (i *Interval) findInterval(head *graph.Node, g graph.Directed) map[graph.No
 			predsLength := preds.Len()
 			x := 0
 			for preds.Next() {
-				if i.nodeMap[preds.Node()] {
+				if i.nodes[preds.Node().ID()] != nil {
 					x++
 				}
 			}
 
 			if x == predsLength {
 				nq.Enqueue(succs.Node())
-				i.nodes = append(i.nodes, succs.Node())
-				i.nodeMap[succs.Node()] = true
+				i.nodes[succs.Node().ID()] = succs.Node()
 			}
 		}
 	}
 
-	return i.nodeMap
+	return i.nodes
 }
 
-// Put nodes into the stack in postorder.
+// Put nodes into a stack in postorder.
 func dfsPostorder(g graph.Directed, eid int64, ns *linear.NodeStack, visited map[int64]bool) {
 	succs := g.From(eid)
 	visited[eid] = true
@@ -175,4 +204,24 @@ func reversePostorder(ns linear.NodeStack) []*graph.Node {
 	}
 
 	return nodes
+}
+
+// Computes the internal edges for the intervals.
+func linkIntervals(intervals []*Interval, g graph.Directed) {
+	for _, interval := range intervals {
+		interval.from = make(map[int64]map[int64]graph.Edge)
+		for _, node := range interval.nodes {
+			succs := g.From(node.ID())
+			for succs.Next() {
+				succNode := succs.Node()
+				if interval.nodes[succNode.ID()] != nil {
+					if interval.from[node.ID()] == nil {
+						interval.from[node.ID()] = make(map[int64]graph.Edge)
+					}
+
+					interval.from[node.ID()][succNode.ID()] = g.Edge(node.ID(), succNode.ID())
+				}
+			}
+		}
+	}
 }

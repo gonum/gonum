@@ -71,13 +71,13 @@ func TestInterval(t *testing.T) {
 		t.Errorf("Expected 5 nodes in interval 1, got %d", len(interval.nodes))
 	}
 
-	interval2 := intervals[0]
+	interval2 := intervals[1]
 	if len(interval2.nodes) != 7 {
-		t.Errorf("Expected 7 nodes in interval 2, got %d", len(interval.nodes))
+		t.Errorf("Expected 7 nodes in interval 2, got %d", len(interval2.nodes))
 	}
 
-	interval3 := intervals[0]
+	interval3 := intervals[2]
 	if len(interval3.nodes) != 3 {
-		t.Errorf("Expected 3 nodes in interval 3, got %d", len(interval.nodes))
+		t.Errorf("Expected 3 nodes in interval 3, got %d", len(interval3.nodes))
 	}
 }

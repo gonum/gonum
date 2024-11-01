@@ -5,7 +5,7 @@
 package flow
 
 import (
-	"log"
+	"maps"
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/linear"
@@ -40,23 +40,44 @@ terminates
 func Intervals(g graph.Directed, eid int64) []*Interval {
 	var worklist linear.NodeQueue
 	var intervals []*Interval
-	var interval Interval
 	var ns linear.NodeStack
 	visited := make(map[int64]bool)
+	inInterval := make(map[graph.Node]bool)
+
 	dfsPostorder(g, eid, &ns, visited)
-	reversePostorderNodes, reversePostorderMap := reversePostorder(ns)
+	reversePostorderNodes := reversePostorder(ns)
 	n := g.Node(eid)
 	worklist.Enqueue(n)
+
 	for worklist.Len() > 0 {
+		var interval Interval
 		n = worklist.Dequeue()
-		interval.findInterval(&n, g, reversePostorderMap, reversePostorderNodes)
-		log.Println(interval.nodes)
+		maps.Copy(inInterval, interval.findInterval(&n, g))
 		intervals = append(intervals, &interval)
 		if n == nil {
 			break
 		}
 
-		worklist.Enqueue(n)
+		// use i external to the top group to find the next n
+		for _, node := range reversePostorderNodes {
+			if inInterval[*node] {
+				continue
+			}
+
+			preds := g.To((*node).ID())
+			predsLength := preds.Len()
+			x := 0
+			for preds.Next() {
+				if interval.nodeMap[preds.Node()] {
+					x++
+				}
+			}
+
+			if x > 0 && x < predsLength {
+				worklist.Enqueue(*node)
+				break
+			}
+		}
 	}
 
 	return intervals
@@ -65,8 +86,9 @@ func Intervals(g graph.Directed, eid int64) []*Interval {
 // An Interval I(h) is the maximal, single entry subgraph for which h (head)
 // is the entry node and in which all closed paths contain h.
 type Interval struct {
-	head  graph.Node
-	nodes []graph.Node
+	head    graph.Node
+	nodes   []graph.Node
+	nodeMap map[graph.Node]bool
 }
 
 func (i *Interval) Head() graph.Node {
@@ -86,20 +108,20 @@ func (i *Interval) Head() graph.Node {
 // Finds all interval nodes.
 // Nodes are added to the interval if all their predecessors are in
 // the interval or they are the header node.
-func (i *Interval) findInterval(head *graph.Node, g graph.Directed, reversePostorderMap map[*graph.Node]int, reversePostorderArray []*graph.Node) {
+func (i *Interval) findInterval(head *graph.Node, g graph.Directed) map[graph.Node]bool {
 	i.head = *head
 	var nq linear.NodeQueue
 	nq.Enqueue(*head)
 	i.nodes = append(i.nodes, *head)
-	intervalMap := make(map[graph.Node]bool)
-	intervalMap[*head] = true
+	i.nodeMap = make(map[graph.Node]bool)
+	i.nodeMap[*head] = true
 	var node graph.Node
 	for nq.Len() > 0 {
 		node = nq.Dequeue()
 		succs := g.From(node.ID())
 
 		for succs.Next() {
-			if intervalMap[succs.Node()] {
+			if i.nodeMap[succs.Node()] {
 				continue
 			}
 
@@ -107,7 +129,7 @@ func (i *Interval) findInterval(head *graph.Node, g graph.Directed, reversePosto
 			predsLength := preds.Len()
 			x := 0
 			for preds.Next() {
-				if intervalMap[preds.Node()] {
+				if i.nodeMap[preds.Node()] {
 					x++
 				}
 			}
@@ -115,10 +137,12 @@ func (i *Interval) findInterval(head *graph.Node, g graph.Directed, reversePosto
 			if x == predsLength {
 				nq.Enqueue(succs.Node())
 				i.nodes = append(i.nodes, succs.Node())
-				intervalMap[succs.Node()] = true
+				i.nodeMap[succs.Node()] = true
 			}
 		}
 	}
+
+	return i.nodeMap
 }
 
 // Put nodes into the stack in postorder.
@@ -142,15 +166,13 @@ func dfsPostorder(g graph.Directed, eid int64, ns *linear.NodeStack, visited map
 }
 
 // Extracts all nodes in the stack into an array in reverse postorder.
-func reversePostorder(ns linear.NodeStack) ([]*graph.Node, map[*graph.Node]int) {
+func reversePostorder(ns linear.NodeStack) []*graph.Node {
 	var nodes []*graph.Node
-	nodePosition := make(map[*graph.Node]int)
 	stackLength := ns.Len()
 	for i := 0; i < stackLength; i++ {
 		n := ns.Pop()
-		nodePosition[&n] = i
 		nodes = append(nodes, &n)
 	}
 
-	return nodes, nodePosition
+	return nodes
 }

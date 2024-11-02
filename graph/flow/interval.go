@@ -38,7 +38,8 @@ terminates
 (https://dl.acm.org/doi/pdf/10.1145/360018.360025)
 */
 
-// Returns the set of intervals given by the directed graph.
+// Returns the interval graph given by the directed graph.
+// The interval graph contains the individual intervals.
 func Intervals(g graph.Directed, eid int64) IntervalGraph {
 	var worklist linear.NodeQueue
 	var intervals []*Interval
@@ -56,9 +57,6 @@ func Intervals(g graph.Directed, eid int64) IntervalGraph {
 		n = worklist.Dequeue()
 		maps.Copy(inInterval, interval.findInterval(&n, g))
 		intervals = append(intervals, &interval)
-		if n == nil {
-			break
-		}
 
 		for _, node := range reversePostorderNodes {
 			if inInterval[(*node).ID()] != nil {
@@ -116,6 +114,10 @@ func (i *Interval) Edge(uid, vid int64) graph.Edge {
 	return edge
 }
 
+// From returns all nodes in g that can be reached directly from n.
+//
+// The returned graph.Nodes is only valid until the next mutation of
+// the receiver.
 func (i *Interval) From(id int64) graph.Nodes {
 	if len(i.from[id]) == 0 {
 		return graph.Empty
@@ -123,6 +125,8 @@ func (i *Interval) From(id int64) graph.Nodes {
 	return iterator.NewNodesByEdge(i.nodes, i.from[id])
 }
 
+// HasEdgeBetween returns whether an edge exists between nodes x and y without
+// considering direction.
 func (i *Interval) HasEdgeBetween(xid int64, yid int64) bool {
 	if _, ok := i.from[xid][yid]; ok {
 		return true
@@ -131,6 +135,8 @@ func (i *Interval) HasEdgeBetween(xid int64, yid int64) bool {
 	return ok
 }
 
+// Node returns the node with the given ID if it exists in the graph,
+// and nil otherwise.
 func (i *Interval) Node(id int64) graph.Node {
 	return i.nodes[id]
 }
@@ -186,7 +192,6 @@ func dfsPostorder(g graph.Directed, eid int64, ns *linear.NodeStack, visited map
 		if !visited[succ.ID()] {
 			dfsPostorder(g, succ.ID(), ns, visited)
 		}
-
 	}
 
 	n := g.Node(eid)
@@ -205,7 +210,7 @@ func reversePostorder(ns linear.NodeStack) []*graph.Node {
 	return nodes
 }
 
-// Contains the intervals and the edges between the intervals
+// Contains the intervals and the edges between the intervals.
 type IntervalGraph struct {
 	Intervals []*Interval
 	from      map[int64]map[int64]graph.Edge

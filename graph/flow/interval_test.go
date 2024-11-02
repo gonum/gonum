@@ -9,57 +9,32 @@ import (
 func TestInterval(t *testing.T) {
 	// Graph from C. Cifuentes, "Reverse Compilation Techniques", 1994 (figure 6-23)
 	g := simple.NewDirectedGraph()
-	n1 := simple.Node(1)
-	n2 := simple.Node(2)
-	n3 := simple.Node(3)
-	n4 := simple.Node(4)
-	n5 := simple.Node(5)
-	n6 := simple.Node(6)
-	n7 := simple.Node(7)
-	n8 := simple.Node(8)
-	n9 := simple.Node(9)
-	n10 := simple.Node(10)
-	n11 := simple.Node(11)
-	n12 := simple.Node(12)
-	n13 := simple.Node(13)
-	n14 := simple.Node(14)
-	n15 := simple.Node(15)
-	g.AddNode(n1)
-	g.AddNode(n2)
-	g.AddNode(n3)
-	g.AddNode(n4)
-	g.AddNode(n5)
-	g.AddNode(n6)
-	g.AddNode(n7)
-	g.AddNode(n8)
-	g.AddNode(n9)
-	g.AddNode(n10)
-	g.AddNode(n11)
-	g.AddNode(n12)
-	g.AddNode(n13)
-	g.AddNode(n14)
-	g.AddNode(n15)
+	edges := []struct{ from, to int }{
+		{1, 2},
+		{1, 5},
+		{2, 3},
+		{2, 4},
+		{3, 5},
+		{4, 5},
+		{5, 6},
+		{6, 7},
+		{6, 12},
+		{7, 8},
+		{7, 9},
+		{8, 9},
+		{8, 10},
+		{9, 10},
+		{10, 11},
+		{12, 13},
+		{14, 13},
+		{13, 14},
+		{14, 15},
+		{15, 6},
+	}
 
-	g.SetEdge(g.NewEdge(n1, n2))
-	g.SetEdge(g.NewEdge(n1, n5))
-	g.SetEdge(g.NewEdge(n2, n3))
-	g.SetEdge(g.NewEdge(n2, n4))
-	g.SetEdge(g.NewEdge(n3, n5))
-	g.SetEdge(g.NewEdge(n4, n5))
-	g.SetEdge(g.NewEdge(n5, n6))
-	g.SetEdge(g.NewEdge(n6, n7))
-	g.SetEdge(g.NewEdge(n6, n12))
-	g.SetEdge(g.NewEdge(n7, n8))
-	g.SetEdge(g.NewEdge(n7, n9))
-	g.SetEdge(g.NewEdge(n8, n9))
-	g.SetEdge(g.NewEdge(n8, n10))
-	g.SetEdge(g.NewEdge(n9, n10))
-	g.SetEdge(g.NewEdge(n10, n11))
-	g.SetEdge(g.NewEdge(n12, n13))
-	g.SetEdge(g.NewEdge(n14, n13))
-	g.SetEdge(g.NewEdge(n13, n14))
-	g.SetEdge(g.NewEdge(n14, n15))
-	g.SetEdge(g.NewEdge(n15, n6))
+	for _, e := range edges {
+		g.SetEdge(g.NewEdge(simple.Node(e.from), simple.Node(e.to)))
+	}
 
 	// test number of intervals
 	ig := Intervals(g, 1)
@@ -84,7 +59,13 @@ func TestInterval(t *testing.T) {
 	}
 
 	// test interval edges
-	if len(ig.from) != 3 {
-		t.Errorf("Expected 3 edges in interval graph, got %d", len(ig.from))
+	toEdges := ig.To(6)
+	if toEdges.Len() != 2 {
+		t.Errorf("Expected 2 edges to node 6 in interval graph, got %d", len(ig.to))
+	}
+
+	toEdges2 := ig.To(13)
+	if toEdges2.Len() != 1 {
+		t.Errorf("Expected 1 edge to node 13 in interval graph, got %d", len(ig.to))
 	}
 }

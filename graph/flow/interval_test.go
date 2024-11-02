@@ -7,7 +7,7 @@ import (
 )
 
 func TestInterval(t *testing.T) {
-	// copy from book
+	// Graph from C. Cifuentes, "Reverse Compilation Techniques", 1994 (figure 6-23)
 	g := simple.NewDirectedGraph()
 	n1 := simple.Node(1)
 	n2 := simple.Node(2)
@@ -62,24 +62,29 @@ func TestInterval(t *testing.T) {
 	g.SetEdge(g.NewEdge(n15, n6))
 
 	// test number of intervals
-	intervals := Intervals(g, 1)
-	if len(intervals) != 3 {
-		t.Fatalf("Expected 3 intervals, got %d", len(intervals))
+	ig := Intervals(g, 1)
+	if len(ig.Intervals) != 3 {
+		t.Fatalf("Expected 3 intervals, got %d", len(ig.Intervals))
 	}
 
 	// test number of nodes
-	interval := intervals[0]
+	interval := ig.Intervals[0]
 	if len(interval.nodes) != 5 {
 		t.Errorf("Expected 5 nodes in interval 1, got %d", len(interval.nodes))
 	}
 
-	interval2 := intervals[1]
+	interval2 := ig.Intervals[1]
 	if len(interval2.nodes) != 7 {
 		t.Errorf("Expected 7 nodes in interval 2, got %d", len(interval2.nodes))
 	}
 
-	interval3 := intervals[2]
+	interval3 := ig.Intervals[2]
 	if len(interval3.nodes) != 3 {
 		t.Errorf("Expected 3 nodes in interval 3, got %d", len(interval3.nodes))
+	}
+
+	// test interval edges
+	if len(ig.from) != 3 {
+		t.Errorf("Expected 3 edges in interval graph, got %d", len(ig.from))
 	}
 }

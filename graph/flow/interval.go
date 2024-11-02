@@ -39,7 +39,7 @@ terminates
 */
 
 // Returns the set of intervals given by the directed graph.
-func Intervals(g graph.Directed, eid int64) []*Interval {
+func Intervals(g graph.Directed, eid int64) IntervalGraph {
 	var worklist linear.NodeQueue
 	var intervals []*Interval
 	var ns linear.NodeStack
@@ -81,8 +81,8 @@ func Intervals(g graph.Directed, eid int64) []*Interval {
 		}
 	}
 
-	linkIntervals(intervals, g)
-	return intervals
+	ig := linkIntervals(intervals, g)
+	return ig
 }
 
 // An Interval I(h) is the maximal, single entry subgraph for which h (head)
@@ -90,8 +90,7 @@ func Intervals(g graph.Directed, eid int64) []*Interval {
 type Interval struct {
 	head  graph.Node
 	nodes map[int64]graph.Node
-	// nodeMap map[graph.Node]bool
-	from map[int64]map[int64]graph.Edge
+	from  map[int64]map[int64]graph.Edge
 }
 
 // Returns header node for an interval.
@@ -206,8 +205,19 @@ func reversePostorder(ns linear.NodeStack) []*graph.Node {
 	return nodes
 }
 
-// Computes the internal edges for the intervals.
-func linkIntervals(intervals []*Interval, g graph.Directed) {
+// Contains the intervals and the edges between the intervals
+type IntervalGraph struct {
+	Intervals []*Interval
+	from      map[int64]map[int64]graph.Edge
+}
+
+// Computes the internal and external edges for the intervals.
+func linkIntervals(intervals []*Interval, g graph.Directed) IntervalGraph {
+	ig := IntervalGraph{
+		Intervals: intervals,
+		from:      make(map[int64]map[int64]graph.Edge),
+	}
+
 	for _, interval := range intervals {
 		interval.from = make(map[int64]map[int64]graph.Edge)
 		for _, node := range interval.nodes {
@@ -220,8 +230,16 @@ func linkIntervals(intervals []*Interval, g graph.Directed) {
 					}
 
 					interval.from[node.ID()][succNode.ID()] = g.Edge(node.ID(), succNode.ID())
+				} else {
+					if ig.from[node.ID()] == nil {
+						ig.from[node.ID()] = make(map[int64]graph.Edge)
+					}
+
+					ig.from[node.ID()][succNode.ID()] = g.Edge(node.ID(), succNode.ID())
 				}
 			}
 		}
 	}
+
+	return ig
 }

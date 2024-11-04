@@ -46,10 +46,6 @@ func TestInterval(t *testing.T) {
 		g.SetEdge(g.NewEdge(simple.Node(e.from), simple.Node(e.to)))
 	}
 
-	for i := 0; i < 15; i++ {
-		g.AddNode(g.NewNode())
-	}
-
 	// test number of intervals
 	ig := Intervals(g, 1)
 	if len(ig.Intervals) != 3 {

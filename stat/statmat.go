@@ -6,7 +6,6 @@ package stat
 
 import (
 	"errors"
-	"fmt"
 	"math"
 
 	"gonum.org/v1/gonum/floats"
@@ -165,12 +164,12 @@ type OLSOptions struct {
 }
 
 // Validate runs basic validation on OLS options
-func (o *OLSOptions) Validate() (*OLSOptions, error) {
+func (o *OLSOptions) Validate() *OLSOptions {
 	if o == nil {
 		o = NewDefaultOLSOptions()
 	}
 
-	return o, nil
+	return o
 }
 
 // NewDefaultOLSOptions returns a default set of OLS Regression options
@@ -188,32 +187,30 @@ type OLSRegression struct {
 }
 
 // NewOLSRegression initializes an ordinary least squares model ready for fitting
-func NewOLSRegression(opt *OLSOptions) (*OLSRegression, error) {
-	opt, err := opt.Validate()
-	if err != nil {
-		return nil, err
-	}
+func NewOLSRegression(opt *OLSOptions) *OLSRegression {
+	opt = opt.Validate()
 	return &OLSRegression{
 		opt: opt,
-	}, nil
+	}
 }
 
-// Fit the model according to the given training data
-func (o *OLSRegression) Fit(x, y mat.Matrix) error {
+// Fit the model according to the given training data. OLS Options must be set and the training, target matrices
+// must also be non nil. Number of rows in x must match the number of rows in y or this.
+func (o *OLSRegression) Fit(x, y mat.Matrix) {
 	if o.opt == nil {
-		return ErrNoOptions
+		panic(ErrNoOptions)
 	}
 	if x == nil {
-		return ErrNoTrainingMatrix
+		panic(ErrNoTrainingMatrix)
 	}
 	if y == nil {
-		return ErrNoTargetMatrix
+		panic(ErrNoTargetMatrix)
 	}
 	m, n := x.Dims()
 
 	ym, _ := y.Dims()
 	if ym != m {
-		return fmt.Errorf("training data has %d rows and target has %d row, %w", m, ym, ErrTargetLenMismatch)
+		panic(ErrTargetLenMismatch)
 	}
 
 	if o.opt.FitIntercept {
@@ -256,17 +253,16 @@ func (o *OLSRegression) Fit(x, y mat.Matrix) error {
 	} else {
 		o.coef = c
 	}
-
-	return nil
 }
 
-// Predict using the OLS model
-func (o *OLSRegression) Predict(x mat.Matrix) ([]float64, error) {
+// Predict using the OLS model. OLS options must be initialized before calling and input x must not be nil.
+// The number of columns in the matrix must match the number of model coefficients.
+func (o *OLSRegression) Predict(x mat.Matrix) []float64 {
 	if o.opt == nil {
-		return nil, ErrNoOptions
+		panic(ErrNoOptions)
 	}
 	if x == nil {
-		return nil, ErrNoDesignMatrix
+		panic(ErrNoDesignMatrix)
 	}
 
 	coef := o.coef
@@ -288,42 +284,41 @@ func (o *OLSRegression) Predict(x mat.Matrix) ([]float64, error) {
 	xT := x.T()
 	xn, _ := xT.Dims()
 	if xn != n {
-		return nil, fmt.Errorf("got %d features in design matrix, but expected %d, %w", xn, n, ErrFeatureLenMismatch)
+		panic(ErrFeatureLenMismatch)
 	}
 	coefMx := mat.NewDense(1, n, coef)
 
 	var res mat.Dense
 	res.Mul(coefMx, xT)
-	return res.RawRowView(0), nil
+	return res.RawRowView(0)
 }
 
-// Score computes the coefficient of determination of the prediction
-func (o *OLSRegression) Score(x, y mat.Matrix) (float64, error) {
+// Score computes the coefficient of determination of the prediction. This will panic if no
+// OLS options have been initialized or if x, y are nil. x and y must have the same number of
+// rows or will panic.
+func (o *OLSRegression) Score(x, y mat.Matrix) float64 {
 	if o.opt == nil {
-		return 0.0, ErrNoOptions
+		panic(ErrNoOptions)
 	}
 	if x == nil {
-		return 0.0, ErrNoDesignMatrix
+		panic(ErrNoDesignMatrix)
 	}
 	if y == nil {
-		return 0.0, ErrNoTargetMatrix
+		panic(ErrNoTargetMatrix)
 	}
 
 	m, _ := x.Dims()
 
 	ym, _ := y.Dims()
 	if m != ym {
-		return 0.0, fmt.Errorf("design matrix has %d rows and target has %d rows, %w", m, ym, ErrTargetLenMismatch)
+		panic(ErrTargetLenMismatch)
 	}
 
-	res, err := o.Predict(x)
-	if err != nil {
-		return 0.0, err
-	}
+	res := o.Predict(x)
 
 	ySlice := mat.Col(nil, 0, y)
 
-	return RSquaredFrom(res, ySlice, nil), nil
+	return RSquaredFrom(res, ySlice, nil)
 }
 
 // Intercept returns the computed intercept if FitIntercept is set to true. Defaults to 0.0 if not set.
@@ -358,22 +353,22 @@ type LassoOptions struct {
 	FitIntercept bool
 }
 
-// Validate runs basic validation on Lasso options
-func (l *LassoOptions) Validate() (*LassoOptions, error) {
+// Validate runs basic validation on Lasso options. Lambda, iterations and tolerance must be positive or 0.
+func (l *LassoOptions) Validate() *LassoOptions {
 	if l == nil {
 		l = NewDefaultLassoOptions()
 	}
 
 	if l.Lambda < 0 {
-		return nil, ErrNegativeLambda
+		panic(ErrNegativeLambda)
 	}
 	if l.Iterations < 0 {
-		return nil, ErrNegativeIterations
+		panic(ErrNegativeIterations)
 	}
 	if l.Tolerance < 0 {
-		return nil, ErrNegativeTolerance
+		panic(ErrNegativeTolerance)
 	}
-	return l, nil
+	return l
 }
 
 // NewDefaultLassoOptions returns a default set of Lasso Regression options
@@ -396,33 +391,32 @@ type LassoRegression struct {
 }
 
 // NewLassoRegression initializes a Lasso model ready for fitting
-func NewLassoRegression(opt *LassoOptions) (*LassoRegression, error) {
-	opt, err := opt.Validate()
-	if err != nil {
-		return nil, err
-	}
+func NewLassoRegression(opt *LassoOptions) *LassoRegression {
+	opt = opt.Validate()
 	return &LassoRegression{
 		opt: opt,
-	}, nil
+	}
 }
 
-// Fit the model according to the given training data
-func (l *LassoRegression) Fit(x, y mat.Matrix) error {
+// Fit the model according to the given training data. LassoOptions must be set and the training, target matrices
+// must also be non nil. Number of rows in x must match the number of rows in y or this. If WarmStartBeta has been
+// set through the initialized options, the length must match that of the number of columns in x.
+func (l *LassoRegression) Fit(x, y mat.Matrix) {
 	if l.opt == nil {
-		return ErrNoOptions
+		panic(ErrNoOptions)
 	}
 	if x == nil {
-		return ErrNoTrainingMatrix
+		panic(ErrNoTrainingMatrix)
 	}
 	if y == nil {
-		return ErrNoTargetMatrix
+		panic(ErrNoTargetMatrix)
 	}
 
 	m, n := x.Dims()
 
 	ym, _ := y.Dims()
 	if ym != m {
-		return fmt.Errorf("training data has %d rows and target has %d row, %w", m, ym, ErrTargetLenMismatch)
+		panic(ErrTargetLenMismatch)
 	}
 
 	if l.opt.FitIntercept {
@@ -438,7 +432,7 @@ func (l *LassoRegression) Fit(x, y mat.Matrix) error {
 	}
 
 	if l.opt.WarmStartBeta != nil && len(l.opt.WarmStartBeta) != n {
-		return fmt.Errorf("warm start beta has %d features instead of %d, %w", len(l.opt.WarmStartBeta), n, ErrWarmStartBetaSize)
+		panic(ErrWarmStartBetaSize)
 	}
 
 	// tracks current betas
@@ -512,17 +506,16 @@ func (l *LassoRegression) Fit(x, y mat.Matrix) error {
 	} else {
 		l.coef = beta
 	}
-
-	return nil
 }
 
-// Predict using the Lasso model
-func (l *LassoRegression) Predict(x mat.Matrix) ([]float64, error) {
+// Predict using the Lasso model. Lasso options must be initialized and input matrix must be non-nil.
+// The number of columns in the matrix must match the number of model coefficients.
+func (l *LassoRegression) Predict(x mat.Matrix) []float64 {
 	if l.opt == nil {
-		return nil, ErrNoOptions
+		panic(ErrNoOptions)
 	}
 	if x == nil {
-		return nil, ErrNoDesignMatrix
+		panic(ErrNoDesignMatrix)
 	}
 
 	coef := l.coef
@@ -543,7 +536,7 @@ func (l *LassoRegression) Predict(x mat.Matrix) ([]float64, error) {
 
 	_, xn := x.Dims()
 	if xn != n {
-		return nil, fmt.Errorf("got %d features in design matrix, but expected %d, %w", xn, n, ErrFeatureLenMismatch)
+		panic(ErrFeatureLenMismatch)
 	}
 
 	xT := x.T()
@@ -551,36 +544,34 @@ func (l *LassoRegression) Predict(x mat.Matrix) ([]float64, error) {
 
 	var res mat.Dense
 	res.Mul(coefMx, xT)
-	return res.RawRowView(0), nil
+	return res.RawRowView(0)
 }
 
-// Score computes the coefficient of determination of the prediction
-func (l *LassoRegression) Score(x, y mat.Matrix) (float64, error) {
+// Score computes the coefficient of determination of the prediction. Lasso options must be initialized and x, y
+// must be non-nil. x and y must have the same number of rows.
+func (l *LassoRegression) Score(x, y mat.Matrix) float64 {
 	if l.opt == nil {
-		return 0.0, ErrNoOptions
+		panic(ErrNoOptions)
 	}
 	if x == nil {
-		return 0.0, ErrNoDesignMatrix
+		panic(ErrNoDesignMatrix)
 	}
 	if y == nil {
-		return 0.0, ErrNoTargetMatrix
+		panic(ErrNoTargetMatrix)
 	}
 
 	m, _ := x.Dims()
 
 	ym, _ := y.Dims()
 	if m != ym {
-		return 0.0, fmt.Errorf("design matrix has %d rows and target has %d rows, %w", m, ym, ErrTargetLenMismatch)
+		panic(ErrTargetLenMismatch)
 	}
 
-	res, err := l.Predict(x)
-	if err != nil {
-		return 0.0, err
-	}
+	res := l.Predict(x)
 
 	ySlice := mat.Col(nil, 0, y)
 
-	return RSquaredFrom(res, ySlice, nil), nil
+	return RSquaredFrom(res, ySlice, nil)
 }
 
 // Intercept returns the computed intercept if FitIntercept is set to true. Defaults to 0.0 if not set.

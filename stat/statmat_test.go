@@ -5,7 +5,6 @@
 package stat
 
 import (
-	"errors"
 	"math"
 	"testing"
 
@@ -141,7 +140,8 @@ func TestCorrelationMatrix(t *testing.T) {
 				1, 0.6,
 				0.6, 1,
 			}),
-		}, {
+		},
+		{
 			data: mat.NewDense(3, 2, []float64{
 				1, 1,
 				2, 4,
@@ -228,7 +228,8 @@ func TestCorrCov(t *testing.T) {
 				2, 4,
 			}),
 			weights: nil,
-		}, {
+		},
+		{
 			data: mat.NewDense(3, 2, []float64{
 				1, 1,
 				2, 4,
@@ -288,7 +289,8 @@ func TestMahalanobis(t *testing.T) {
 				[]float64{
 					0.8, 0.3, 0.1,
 					0.3, 0.7, -0.1,
-					0.1, -0.1, 7}),
+					0.1, -0.1, 7,
+				}),
 			ans: 1.9251757377680914,
 		},
 	} {
@@ -341,31 +343,31 @@ func TestLassoOptionsValidate(t *testing.T) {
 		},
 		"invalid lambda": {
 			&LassoOptions{Lambda: -1.0},
-			ErrNegativeLambda, LassoOptions{},
+			ErrNegativeLambda,
+			LassoOptions{},
 		},
 		"invalid iterations": {
 			&LassoOptions{Iterations: -1.0},
-			ErrNegativeIterations, LassoOptions{},
+			ErrNegativeIterations,
+			LassoOptions{},
 		},
 		"invalid tolerance": {
 			&LassoOptions{Tolerance: -1.0},
-			ErrNegativeTolerance, LassoOptions{},
+			ErrNegativeTolerance,
+			LassoOptions{},
 		},
 	}
 
 	for name, td := range testData {
 		t.Run(name, func(t *testing.T) {
-			opt, err := td.opt.Validate()
 			if td.err != nil {
-				if !errors.Is(err, td.err) {
-					t.Errorf("expected error, %v, but got %v", td.err, err)
+				if !panics(func() { td.opt.Validate() }) {
+					t.Errorf("Validate did not panic with %v", td.err)
 				}
 				return
 			}
-			if err != nil {
-				t.Errorf("expected no error, but got, %v", err)
-				return
-			}
+
+			opt := td.opt.Validate()
 			if opt != nil {
 				res := *opt
 				if res.Lambda != td.expected.Lambda {
@@ -440,17 +442,8 @@ func TestLassoRegression(t *testing.T) {
 
 	for name, td := range testData {
 		t.Run(name, func(t *testing.T) {
-			model, err := NewLassoRegression(td.opt)
-			if err != nil {
-				t.Errorf("expected no error, but got, %v", err)
-				return
-			}
-
-			err = model.Fit(td.x, td.y)
-			if err != nil {
-				t.Errorf("expected no error from fit, but got %v", err)
-			}
-
+			model := NewLassoRegression(td.opt)
+			model.Fit(td.x, td.y)
 			if math.Abs(model.Intercept()-td.intercept) > td.tol {
 				t.Errorf("expected intercept to be in tolerance of %v, got %v, but expected, %v", td.tol, model.Intercept(), td.intercept)
 			}
@@ -467,11 +460,7 @@ func TestLassoRegression(t *testing.T) {
 				}
 			}
 
-			r2, err := model.Score(td.x, td.y)
-			if err != nil {
-				t.Errorf("expected no error, but got, %v", err)
-				return
-			}
+			r2 := model.Score(td.x, td.y)
 			if math.Abs(r2-1.0) > td.tol {
 				t.Errorf("expected coefficient of determination to be in tolerance of %v, got %v, but expected, %v", td.tol, r2, 1.0)
 			}
@@ -498,17 +487,14 @@ func TestOLSOptionsValidate(t *testing.T) {
 
 	for name, td := range testData {
 		t.Run(name, func(t *testing.T) {
-			opt, err := td.opt.Validate()
 			if td.err != nil {
-				if !errors.Is(err, td.err) {
-					t.Errorf("expected error, %v, but got %v", td.err, err)
+				if !panics(func() { td.opt.Validate() }) {
+					t.Errorf("Validate did not panic with %v", td.err)
 				}
 				return
 			}
-			if err != nil {
-				t.Errorf("expected no error, but got, %v", err)
-				return
-			}
+
+			opt := td.opt.Validate()
 			if opt != nil {
 				res := *opt
 				if res.FitIntercept != td.expected.FitIntercept {
@@ -571,17 +557,8 @@ func TestOLSRegression(t *testing.T) {
 
 	for name, td := range testData {
 		t.Run(name, func(t *testing.T) {
-			model, err := NewOLSRegression(td.opt)
-			if err != nil {
-				t.Errorf("expected no error, but got, %v", err)
-				return
-			}
-
-			err = model.Fit(td.x, td.y)
-			if err != nil {
-				t.Errorf("expected no error from fit, but got %v", err)
-			}
-
+			model := NewOLSRegression(td.opt)
+			model.Fit(td.x, td.y)
 			if math.Abs(model.Intercept()-td.intercept) > td.tol {
 				t.Errorf("expected intercept to be in tolerance of %v, got %v, but expected, %v", td.tol, model.Intercept(), td.intercept)
 			}
@@ -598,11 +575,7 @@ func TestOLSRegression(t *testing.T) {
 				}
 			}
 
-			r2, err := model.Score(td.x, td.y)
-			if err != nil {
-				t.Errorf("expected no error, but got, %v", err)
-				return
-			}
+			r2 := model.Score(td.x, td.y)
 			if math.Abs(r2-1.0) > td.tol {
 				t.Errorf("expected coefficient of determination to be in tolerance of %v, got %v, but expected, %v", td.tol, r2, 1.0)
 			}
@@ -628,6 +601,7 @@ func benchmarkCovarianceMatrix(b *testing.B, m mat.Matrix) {
 		CovarianceMatrix(&res, m, nil)
 	}
 }
+
 func benchmarkCovarianceMatrixWeighted(b *testing.B, m mat.Matrix) {
 	r, _ := m.Dims()
 	wts := make([]float64, r)
@@ -641,6 +615,7 @@ func benchmarkCovarianceMatrixWeighted(b *testing.B, m mat.Matrix) {
 		CovarianceMatrix(&res, m, wts)
 	}
 }
+
 func benchmarkCovarianceMatrixInPlace(b *testing.B, m mat.Matrix) {
 	_, c := m.Dims()
 	res := mat.NewSymDense(c, nil)
@@ -655,6 +630,7 @@ func BenchmarkCovarianceMatrixSmallxSmall(b *testing.B) {
 	x := randMat(small, small)
 	benchmarkCovarianceMatrix(b, x)
 }
+
 func BenchmarkCovarianceMatrixSmallxMedium(b *testing.B) {
 	// 10 * 1000 elements
 	x := randMat(small, medium)
@@ -666,6 +642,7 @@ func BenchmarkCovarianceMatrixMediumxSmall(b *testing.B) {
 	x := randMat(medium, small)
 	benchmarkCovarianceMatrix(b, x)
 }
+
 func BenchmarkCovarianceMatrixMediumxMedium(b *testing.B) {
 	// 1000 * 1000 elements
 	x := randMat(medium, medium)
@@ -689,6 +666,7 @@ func BenchmarkCovarianceMatrixSmallxSmallWeighted(b *testing.B) {
 	x := randMat(small, small)
 	benchmarkCovarianceMatrixWeighted(b, x)
 }
+
 func BenchmarkCovarianceMatrixSmallxMediumWeighted(b *testing.B) {
 	// 10 * 1000 elements
 	x := randMat(small, medium)
@@ -700,6 +678,7 @@ func BenchmarkCovarianceMatrixMediumxSmallWeighted(b *testing.B) {
 	x := randMat(medium, small)
 	benchmarkCovarianceMatrixWeighted(b, x)
 }
+
 func BenchmarkCovarianceMatrixMediumxMediumWeighted(b *testing.B) {
 	// 1000 * 1000 elements
 	x := randMat(medium, medium)
@@ -723,6 +702,7 @@ func BenchmarkCovarianceMatrixSmallxSmallInPlace(b *testing.B) {
 	x := randMat(small, small)
 	benchmarkCovarianceMatrixInPlace(b, x)
 }
+
 func BenchmarkCovarianceMatrixSmallxMediumInPlace(b *testing.B) {
 	// 10 * 1000 elements
 	x := randMat(small, medium)
@@ -734,6 +714,7 @@ func BenchmarkCovarianceMatrixMediumxSmallInPlace(b *testing.B) {
 	x := randMat(medium, small)
 	benchmarkCovarianceMatrixInPlace(b, x)
 }
+
 func BenchmarkCovarianceMatrixMediumxMediumInPlace(b *testing.B) {
 	// 1000 * 1000 elements
 	x := randMat(medium, medium)
@@ -813,15 +794,8 @@ func BenchmarkLassoRegression(b *testing.B) {
 		y := mat.NewDense(nObs, 1, data2)
 		opt := NewDefaultLassoOptions()
 		opt.FitIntercept = false
-		model, err := NewLassoRegression(opt)
-		if err != nil {
-			b.Error(err)
-			continue
-		}
-		if err := model.Fit(x, y); err != nil {
-			b.Error(err)
-			continue
-		}
+		model := NewLassoRegression(opt)
+		model.Fit(x, y)
 	}
 }
 
@@ -850,18 +824,11 @@ func BenchmarkOLSRegression(b *testing.B) {
 		m, n, d := flatten(data)
 		x := mat.NewDense(m, n, d)
 		y := mat.NewDense(nObs, 1, data2)
-		model, err := NewOLSRegression(
+		model := NewOLSRegression(
 			&OLSOptions{
 				FitIntercept: false,
 			},
 		)
-		if err != nil {
-			b.Error(err)
-			continue
-		}
-		if err := model.Fit(x, y); err != nil {
-			b.Error(err)
-			continue
-		}
+		model.Fit(x, y)
 	}
 }

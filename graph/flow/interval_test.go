@@ -60,7 +60,7 @@ func TestInterval(t *testing.T) {
 
 	for _, node := range nodes[0] {
 		if interval.nodes[node] == nil {
-			t.Errorf("Unexpected node %d found in interval 1", node)
+			t.Errorf("Node %d not found in interval 1", node)
 		}
 	}
 
@@ -71,7 +71,7 @@ func TestInterval(t *testing.T) {
 
 	for _, node := range nodes[1] {
 		if interval2.nodes[node] == nil {
-			t.Errorf("Unexpected node %d found in interval 2", node)
+			t.Errorf("Node %d not found in interval 2", node)
 		}
 	}
 
@@ -82,7 +82,7 @@ func TestInterval(t *testing.T) {
 
 	for _, node := range nodes[2] {
 		if interval3.nodes[node] == nil {
-			t.Errorf("Unexpected node %d found in interval 3", node)
+			t.Errorf("Node %d not found in interval 3", node)
 		}
 	}
 

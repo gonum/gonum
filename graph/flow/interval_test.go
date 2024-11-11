@@ -42,47 +42,31 @@ func TestInterval(t *testing.T) {
 		{13, 14, 15},
 	}
 
+	intervalSize := []int64{
+		5, 7, 3,
+	}
+
 	for _, e := range edges {
 		g.SetEdge(g.NewEdge(simple.Node(e.from), simple.Node(e.to)))
 	}
 
-	// test number of intervals
+	// Test number of intervals
 	ig := Intervals(g, 1)
 	if len(ig.Intervals) != 3 {
 		t.Fatalf("Expected 3 intervals, got %d", len(ig.Intervals))
 	}
 
-	// test number of nodes
-	interval := ig.Intervals[0]
-	if len(interval.nodes) != 5 {
-		t.Errorf("Expected 5 nodes in interval 1, got %d", len(interval.nodes))
-	}
-
-	for _, node := range nodes[0] {
-		if interval.nodes[node] == nil {
-			t.Errorf("Node %d not found in interval 1", node)
+	for i, interval := range ig.Intervals {
+		// Test correct number of nodes are found in interval
+		if len(interval.nodes) != int(intervalSize[i]) {
+			t.Errorf("Expected %d nodes in interval %d, got %d", intervalSize[i], i, len(interval.nodes))
 		}
-	}
 
-	interval2 := ig.Intervals[1]
-	if len(interval2.nodes) != 7 {
-		t.Errorf("Expected 7 nodes in interval 2, got %d", len(interval2.nodes))
-	}
-
-	for _, node := range nodes[1] {
-		if interval2.nodes[node] == nil {
-			t.Errorf("Node %d not found in interval 2", node)
-		}
-	}
-
-	interval3 := ig.Intervals[2]
-	if len(interval3.nodes) != 3 {
-		t.Errorf("Expected 3 nodes in interval 3, got %d", len(interval3.nodes))
-	}
-
-	for _, node := range nodes[2] {
-		if interval3.nodes[node] == nil {
-			t.Errorf("Node %d not found in interval 3", node)
+		// Test all expected in interval are present
+		for _, node := range nodes[i] {
+			if interval.nodes[node] == nil {
+				t.Errorf("Node %d not found in interval %d", node, i)
+			}
 		}
 	}
 

@@ -39,7 +39,7 @@ func (h *Hilbert) Len() int {
 // returning it.
 // If the dst slice is nil, a new slice will be created and returned. The dst slice
 // must be the same length as the input signal.
-func (h *Hilbert) AnalyticSignal(signal []float64, dst []complex128) []complex128 {
+func (h *Hilbert) AnalyticSignal(dst []complex128, signal []float64) []complex128 {
 	if dst == nil {
 		dst = make([]complex128, len(signal))
 	}
@@ -48,7 +48,7 @@ func (h *Hilbert) AnalyticSignal(signal []float64, dst []complex128) []complex12
 		h.work[i] = complex(v, 0)
 	}
 
-	// forward fft of signal
+	// Forward fft of signal
 	coeff := h.fft.Coefficients(dst, h.work)
 	for i := range h.work {
 		h.work[i] = 0
@@ -64,8 +64,7 @@ func (h *Hilbert) AnalyticSignal(signal []float64, dst []complex128) []complex12
 		h.work[len(coeff)/2] = coeff[len(coeff)/2]
 	}
 
-	// normalize the results for now
-	// TODO: is this important for analytic signal or envelope?
+	// Normalize the results so they have a similar amplitude to the input
 	unnorm := h.fft.Sequence(dst, h.work)
 	for i, u := range unnorm {
 		unnorm[i] = u / complex(float64(len(unnorm)), 0)
@@ -77,12 +76,12 @@ func (h *Hilbert) AnalyticSignal(signal []float64, dst []complex128) []complex12
 // returning it.
 // If the dst slice is nil, a new slice will be created and returned. The dst slice
 // must be the same length as the input signal.
-func (h *Hilbert) Envelope(signal []float64, dst []float64) []float64 {
+func (h *Hilbert) Envelope(dst []float64, signal []float64) []float64 {
 	if dst == nil {
 		dst = make([]float64, len(signal))
 	}
 
-	analytic := h.AnalyticSignal(signal, nil)
+	analytic := h.AnalyticSignal(nil, signal)
 	for i, a := range analytic {
 		dst[i] = cmplx.Abs(a)
 	}

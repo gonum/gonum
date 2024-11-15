@@ -31,17 +31,17 @@ func TestHilbertAnalytic(t *testing.T) {
 		},
 	}
 
-	for i, tc := range testCases {
-		t.Run(fmt.Sprintf("known Hilbert %d", i), func(t *testing.T) {
-			h := NewHilbert(len(tc.in))
-			if h.Len() != len(tc.in) {
-				t.Errorf("unexpected Hilbert transform length: got:%d, want:%d", h.Len(), len(tc.in))
+	for i, test := range testCases {
+		t.Run(fmt.Sprintf("known Hilbert test %d", i), func(t *testing.T) {
+			h := NewHilbert(len(test.in))
+			if h.Len() != len(test.in) {
+				t.Errorf("unexpected Hilbert transform length: got:%d, want:%d", h.Len(), len(test.in))
 			}
 
-			dst := make([]complex128, len(tc.in))
-			analytic := h.AnalyticSignal(tc.in, dst)
-			if !cmplxs.EqualApprox(tc.want, analytic, tol) {
-				t.Errorf("expected Hilbert transform result %v, got %v", tc.want, analytic)
+			dst := make([]complex128, len(test.in))
+			analytic := h.AnalyticSignal(dst, test.in)
+			if !cmplxs.EqualApprox(test.want, analytic, tol) {
+				t.Errorf("expected Hilbert transform result %v, got %v", test.want, analytic)
 			}
 		})
 	}

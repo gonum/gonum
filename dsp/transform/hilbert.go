@@ -30,7 +30,7 @@ func NewHilbert(n int) *Hilbert {
 	}
 }
 
-// Retrieve the length N of signals that are valid input for this Hilbert transform.
+// Len returns the length of signals that are valid input for this Hilbert transform.
 func (h *Hilbert) Len() int {
 	return len(h.work)
 }

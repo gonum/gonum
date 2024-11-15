@@ -13,16 +13,13 @@ import (
 // Hilbert implements an approximate Hilbert transform that allows calculation
 // of an approximate analytical signal of a real signal, and determine the
 // real envelope of a signal.
-//
-// The underlying implementation uses a discrete Fourier transform and inverse
-// and discrete Fourier transform, so usual methods for speeding up these
-// transforms are likely to apply here as well.
 type Hilbert struct {
 	fft  *fourier.CmplxFFT
 	work []complex128
 }
 
-// NewHilbert returns a new Hilbert transformer for signals of size N.
+// NewHilbert returns a new Hilbert transformer for signals of size n.
+// The transform is most efficient when n is a product of small primes.
 func NewHilbert(n int) *Hilbert {
 	return &Hilbert{
 		fft:  fourier.NewCmplxFFT(n),

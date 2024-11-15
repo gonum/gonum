@@ -49,7 +49,7 @@ func (h *Hilbert) AnalyticSignal(dst []complex128, signal []float64) []complex12
 		h.work[i] = complex(v, 0)
 	}
 
-	// Forward fft of signal
+	// Forward FFT of the signal.
 	coeff := h.fft.Coefficients(dst, h.work)
 	for i := range h.work {
 		h.work[i] = 0

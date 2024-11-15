@@ -21,7 +21,7 @@ type Hilbert struct {
 	work []complex128
 }
 
-// Return a new Hilbert transformer for signals of size N.
+// NewHilbert returns a new Hilbert transformer for signals of size N.
 func NewHilbert(n int) *Hilbert {
 	return &Hilbert{
 		fft:  fourier.NewCmplxFFT(n),

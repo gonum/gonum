@@ -54,8 +54,8 @@ func (h *Hilbert) AnalyticSignal(signal []float64, dst []complex128) []complex12
 		h.work[i] = 0
 	}
 
-	// multiply positive frequencies by 2, zero out negative frequencies
-	// however, leave dc unchanged (and nyquist when n%2 == 0)
+	// Multiply positive frequencies by 2, zero out negative frequencies.
+	// However, leave dc unchanged (and nyquist when n%2 == 0).
 	h.work[0] = coeff[0]
 	for i, d := range coeff[1 : len(coeff)/2+1] {
 		h.work[i+1] = d * 2

@@ -10,12 +10,13 @@ import (
 	"gonum.org/v1/gonum/dsp/fourier"
 )
 
-// Implements an approximate Hilbert transform that allows the user to determine an
-// approximate analytical signal of a real signal, and determine the real 'envelope'
-// of a signal.
+// Hilbert implements an approximate Hilbert transform that allows calculation
+// of an approximate analytical signal of a real signal, and determine the
+// real envelope of a signal.
 //
-// The underlying implementation uses a DFT and IDFT transform, so usual methods for
-// speeding up DFT/IDFT are likely to apply here as well.
+// The underlying implementation uses a discrete Fourier transform and inverse
+// and discrete Fourier transform, so usual methods for speeding up these
+// transforms are likely to apply here as well.
 type Hilbert struct {
 	fft  *fourier.CmplxFFT
 	work []complex128

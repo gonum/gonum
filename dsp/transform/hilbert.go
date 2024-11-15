@@ -35,8 +35,9 @@ func (h *Hilbert) Len() int {
 	return len(h.work)
 }
 
-// Compute the analytical signal of a real signal, and stores the result in the dst slice,
-// returning it.
+// AnalyticSignal computes the analytical signal of a real signal, and stores
+// the result in the dst slice, returning it.
+//
 // If the dst slice is nil, a new slice will be created and returned. The dst slice
 // must be the same length as the input signal.
 func (h *Hilbert) AnalyticSignal(dst []complex128, signal []float64) []complex128 {

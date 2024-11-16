@@ -5,8 +5,6 @@
 package transform
 
 import (
-	"math/cmplx"
-
 	"gonum.org/v1/gonum/dsp/fourier"
 )
 
@@ -21,6 +19,9 @@ type Hilbert struct {
 // NewHilbert returns a new Hilbert transformer for signals of size n.
 // The transform is most efficient when n is a product of small primes.
 func NewHilbert(n int) *Hilbert {
+	if n < 1 {
+		return &Hilbert{nil, nil}
+	}
 	return &Hilbert{
 		fft:  fourier.NewCmplxFFT(n),
 		work: make([]complex128, n),
@@ -36,10 +37,21 @@ func (h *Hilbert) Len() int {
 // the result in the dst slice, returning it.
 //
 // If the dst slice is nil, a new slice will be created and returned. The dst slice
-// must be the same length as the input signal.
+// must be the same length as the input signal, otherwise the method will panic.
 func (h *Hilbert) AnalyticSignal(dst []complex128, signal []float64) []complex128 {
+	if len(signal) != h.Len() {
+		panic("transform: input signal length mismatch")
+	}
+
 	if dst == nil {
 		dst = make([]complex128, len(signal))
+	} else if len(dst) != h.Len() {
+		panic("transform: destination length mismatch")
+	}
+
+	// edge case where the length is zero or less
+	if h.fft == nil {
+		return dst
 	}
 
 	for i, v := range signal {
@@ -68,20 +80,4 @@ func (h *Hilbert) AnalyticSignal(dst []complex128, signal []float64) []complex12
 		unnorm[i] = u / complex(float64(len(unnorm)), 0)
 	}
 	return unnorm
-}
-
-// Compute the positive envelope of a real signal, and stores the result in the dst slice,
-// returning it.
-// If the dst slice is nil, a new slice will be created and returned. The dst slice
-// must be the same length as the input signal.
-func (h *Hilbert) Envelope(dst []float64, signal []float64) []float64 {
-	if dst == nil {
-		dst = make([]float64, len(signal))
-	}
-
-	analytic := h.AnalyticSignal(nil, signal)
-	for i, a := range analytic {
-		dst[i] = cmplx.Abs(a)
-	}
-	return dst
 }

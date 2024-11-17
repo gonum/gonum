@@ -25,8 +25,10 @@ func ExampleHilbert_AnalyticSignal() {
 		envelope[ind] = cmplx.Abs(iq)
 	}
 
-	// We can also compute the instantaneous phase of each part of the signal using the 4-quadrant arc-tangent.
-	// With multiple samples, the instantaneous phase can be used to estimate instantaneous frequency of a signal.
+	// We can also compute the instantaneous phase of each part of the
+	// signal using the 4-quadrant arc-tangent. With multiple samples,
+	// the instantaneous phase can be used to estimate instantaneous
+	// frequency of a signal.
 	phase := make([]float64, len(samples))
 	for ind, iq := range iqSamples {
 		phase[ind] = cmplx.Phase(iq)

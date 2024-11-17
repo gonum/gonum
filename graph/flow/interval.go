@@ -48,7 +48,7 @@ terminates
 // of the directed graph in g from starting from the entry node identified
 // by eid.
 func Intervals(g graph.Directed, eid int64) IntervalGraph {
-	var intervals []Interval
+	var intervals []*Interval
 
 	var ns linear.NodeStack
 	visited := make(map[int64]bool)
@@ -62,7 +62,7 @@ func Intervals(g graph.Directed, eid int64) IntervalGraph {
 	for worklist.Len() != 0 {
 		var interval Interval
 		maps.Copy(inInterval, interval.findInterval(worklist.Dequeue(), g))
-		intervals = append(intervals, interval)
+		intervals = append(intervals, &interval)
 
 		for _, node := range ns {
 			if inInterval[node.ID()] != nil {
@@ -90,7 +90,7 @@ func Intervals(g graph.Directed, eid int64) IntervalGraph {
 
 // IntervalGraph contains the intervals and the edges between the intervals.
 type IntervalGraph struct {
-	Intervals []Interval
+	Intervals []*Interval
 	headers   map[int64]graph.Node
 	to        map[int64]map[int64]graph.Edge
 }
@@ -111,6 +111,7 @@ type Interval struct {
 	head  graph.Node
 	nodes map[int64]graph.Node
 	from  map[int64]map[int64]graph.Edge
+	to    map[int64]map[int64]graph.Edge
 }
 
 // Head returns header node for an interval.
@@ -137,6 +138,7 @@ func (i *Interval) Edge(uid, vid int64) graph.Edge {
 }
 
 // From returns all nodes in g that can be reached directly from n.
+//
 // The returned graph.Nodes is only valid until the next mutation of
 // the receiver.
 func (i *Interval) From(id int64) graph.Nodes {
@@ -144,6 +146,17 @@ func (i *Interval) From(id int64) graph.Nodes {
 		return graph.Empty
 	}
 	return iterator.NewNodesByEdge(i.nodes, i.from[id])
+}
+
+// To returns all nodes in g that can reach directly to n.
+//
+// The returned graph.Nodes is only valid until the next mutation of
+// the receiver.
+func (i *Interval) To(id int64) graph.Nodes {
+	if len(i.to[id]) == 0 {
+		return graph.Empty
+	}
+	return iterator.NewNodesByEdge(i.nodes, i.to[id])
 }
 
 // HasEdgeBetween returns whether an edge exists between nodes x and y without
@@ -160,6 +173,14 @@ func (i *Interval) HasEdgeBetween(xid int64, yid int64) bool {
 // and nil otherwise.
 func (i *Interval) Node(id int64) graph.Node {
 	return i.nodes[id]
+}
+
+// HasEdgeFromTo returns whether an edge exists in the graph from u to v.
+func (i *Interval) HasEdgeFromTo(uid, vid int64) bool {
+	if _, ok := i.from[uid][vid]; !ok {
+		return false
+	}
+	return true
 }
 
 // findInterval finds all interval nodes.
@@ -219,7 +240,7 @@ func dfsPostorder(g graph.Directed, eid int64, ns *linear.NodeStack, visited map
 }
 
 // linkIntervals computes the internal and external edges for the intervals.
-func linkIntervals(intervals []Interval, g graph.Directed) IntervalGraph {
+func linkIntervals(intervals []*Interval, g graph.Directed) IntervalGraph {
 	ig := IntervalGraph{
 		Intervals: intervals,
 		headers:   make(map[int64]graph.Node),
@@ -229,6 +250,7 @@ func linkIntervals(intervals []Interval, g graph.Directed) IntervalGraph {
 	for i, interval := range intervals {
 		ig.headers[int64(i)] = interval.head
 		interval.from = make(map[int64]map[int64]graph.Edge)
+		interval.to = make(map[int64]map[int64]graph.Edge)
 		for _, node := range interval.nodes {
 			succs := g.From(node.ID())
 			for succs.Next() {
@@ -238,7 +260,12 @@ func linkIntervals(intervals []Interval, g graph.Directed) IntervalGraph {
 						interval.from[node.ID()] = make(map[int64]graph.Edge)
 					}
 
+					if interval.to[succNode.ID()] == nil {
+						interval.to[succNode.ID()] = make(map[int64]graph.Edge)
+					}
+
 					interval.from[node.ID()][succNode.ID()] = g.Edge(node.ID(), succNode.ID())
+					interval.to[succNode.ID()][node.ID()] = g.Edge(node.ID(), succNode.ID())
 				} else {
 					if ig.to[succNode.ID()] == nil {
 						ig.to[succNode.ID()] = make(map[int64]graph.Edge)

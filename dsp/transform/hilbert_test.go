@@ -43,9 +43,9 @@ func TestHilbertAnalytic(t *testing.T) {
 			}
 
 			dst := make([]complex128, len(test.in))
-			analytic := h.AnalyticSignal(dst, test.in)
-			if !cmplxs.EqualApprox(test.want, analytic, tol) {
-				t.Errorf("expected Hilbert transform result %v, got %v", test.want, analytic)
+			got := h.AnalyticSignal(dst, test.in)
+			if !cmplxs.EqualApprox(got, test.want, tol) {
+				t.Errorf("unexpected Hilbert transform result:\ngot: %v\nwant:%v", got, test.want)
 			}
 		})
 	}

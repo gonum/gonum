@@ -49,11 +49,6 @@ func (h *Hilbert) AnalyticSignal(dst []complex128, signal []float64) []complex12
 		panic("transform: destination length mismatch")
 	}
 
-	// edge case where the length is zero or less
-	if h.fft == nil {
-		return dst
-	}
-
 	for i, v := range signal {
 		h.work[i] = complex(v, 0)
 	}

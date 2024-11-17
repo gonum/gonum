@@ -35,7 +35,7 @@ func ExampleHilbert_AnalyticSignal() {
 	}
 
 	for i, iq := range iqSamples {
-		fmt.Printf("ind=%d -> I=%.4g, Q=%.4g, envelope=%.4g, phase=%.4g\n",
+		fmt.Printf("ind=%d -> I=%.4f, Q=%.4f, envelope=%.4f, phase=%.4f\n",
 			i, real(iq), imag(iq), envelope[i], phase[i])
 	}
 

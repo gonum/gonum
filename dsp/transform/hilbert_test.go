@@ -15,14 +15,19 @@ var hilbertAnalyticSignalTests = []struct {
 	in   []float64
 	want []complex128
 }{
-	{"Hilbert nil slice", nil, nil},
-	{"Hilbert empty slice", []float64{}, []complex128{}},
-	{"Hilbert zeros test", []float64{0, 0, 0, 0}, []complex128{0, 0, 0, 0}},
-	{"Hilbert whole components test", []float64{1, 2, 3, 4}, []complex128{1 + 1i, 2 - 1i, 3 - 1i, 4 + 1i}},
 	{
-		"Hilbert irrational imaginary components test",
-		[]float64{1, 2, 3, 4, 5},
-		[]complex128{
+		name: "zeros",
+		in:   []float64{0, 0, 0, 0},
+		want: []complex128{0, 0, 0, 0}},
+	{
+		name: "whole_components",
+		in:   []float64{1, 2, 3, 4},
+		want: []complex128{1 + 1i, 2 - 1i, 3 - 1i, 4 + 1i},
+	},
+	{
+		name: "irrational_imaginary_components",
+		in:   []float64{1, 2, 3, 4, 5},
+		want: []complex128{
 			1 + 1.7013016167i,
 			2 - 1.3763819204i,
 			3 - 0.6498393924i,

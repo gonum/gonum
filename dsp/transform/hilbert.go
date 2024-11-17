@@ -18,10 +18,8 @@ type Hilbert struct {
 
 // NewHilbert returns a new Hilbert transformer for signals of size n.
 // The transform is most efficient when n is a product of small primes.
+// If n is 0 or negative, the function will panic.
 func NewHilbert(n int) *Hilbert {
-	if n < 1 {
-		return &Hilbert{nil, nil}
-	}
 	return &Hilbert{
 		fft:  fourier.NewCmplxFFT(n),
 		work: make([]complex128, n),

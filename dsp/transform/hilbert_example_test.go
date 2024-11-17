@@ -41,12 +41,12 @@ func ExampleHilbert_AnalyticSignal() {
 
 	// Output:
 	//
-	// ind=0 -> I=1, Q=0, envelope=1, phase=0
-	// ind=1 -> I=-9.571e-17, Q=-0.8107, envelope=0.8107, phase=-1.571
-	// ind=2 -> I=2, Q=0, envelope=2, phase=0
-	// ind=3 -> I=-1.263e-16, Q=-1.311, envelope=1.311, phase=-1.571
-	// ind=4 -> I=4, Q=0, envelope=4, phase=0
-	// ind=5 -> I=1.263e-16, Q=1.311, envelope=1.311, phase=1.571
-	// ind=6 -> I=2, Q=0, envelope=2, phase=0
-	// ind=7 -> I=9.571e-17, Q=0.8107, envelope=0.8107, phase=1.571
+	// ind=0 -> I=1.0000, Q=0.0000, envelope=1.0000, phase=0.0000
+	// ind=1 -> I=-0.0000, Q=-0.8107, envelope=0.8107, phase=-1.5708
+	// ind=2 -> I=2.0000, Q=0.0000, envelope=2.0000, phase=0.0000
+	// ind=3 -> I=-0.0000, Q=-1.3107, envelope=1.3107, phase=-1.5708
+	// ind=4 -> I=4.0000, Q=0.0000, envelope=4.0000, phase=0.0000
+	// ind=5 -> I=0.0000, Q=1.3107, envelope=1.3107, phase=1.5708
+	// ind=6 -> I=2.0000, Q=0.0000, envelope=2.0000, phase=0.0000
+	// ind=7 -> I=0.0000, Q=0.8107, envelope=0.8107, phase=1.5708
 }

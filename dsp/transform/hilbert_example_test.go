@@ -16,8 +16,10 @@ func ExampleHilbert_AnalyticSignal() {
 	h := NewHilbert(len(samples))
 	iqSamples := h.AnalyticSignal(nil, samples)
 
-	// We can compute the instantaneous amplitude of the signal (or 'envelope') using absolute value.
-	// Analyzing the envelope is an easy way to measure changes in amplitude over time in a signal.
+	// We can compute the instantaneous amplitude of the signal
+	// (or 'envelope') using absolute value. Analyzing the envelope
+	// is an easy way to measure changes in amplitude over time in a
+	// signal.
 	envelope := make([]float64, len(samples))
 	for ind, iq := range iqSamples {
 		envelope[ind] = cmplx.Abs(iq)

@@ -6,7 +6,7 @@ import (
 )
 
 func ExampleHilbert_AnalyticSignal() {
-	// Samples is a set of real amplitudes that make up a signal
+	// Samples is a set of real amplitudes that make up a signal.
 	samples := []float64{1, 0, 2, 0, 4, 0, 2, 0}
 
 	// Initialize a Hilbert transform and 'demodulate' to get the analytic signal.

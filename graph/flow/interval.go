@@ -46,7 +46,7 @@ terminates
 */
 
 // Intervals returns the IntervalGraph containing the individual intervals
-// of the directed graph in g from starting from the entry node identified
+// of the directed graph in g when starting from the entry node identified
 // by eid.
 func Intervals(g graph.Directed, eid int64) IntervalGraph {
 	var intervals []*Interval

@@ -143,77 +143,31 @@ func Mahalanobis(x, y mat.Vector, chol *mat.Cholesky) float64 {
 }
 
 var (
-	ErrNoOptions          = errors.New("no initialized model options")
-	ErrTargetLenMismatch  = errors.New("target length does not match target rows")
-	ErrNoTrainingMatrix   = errors.New("no training matrix")
-	ErrNoTargetMatrix     = errors.New("no target matrix")
-	ErrNoDesignMatrix     = errors.New("no design matrix for inference")
-	ErrFeatureLenMismatch = errors.New("number of features does not match number of model coefficients")
-
-	// Lasso Errors
 	ErrNegativeLambda     = errors.New("negative lambda")
 	ErrNegativeIterations = errors.New("negative iterations")
 	ErrNegativeTolerance  = errors.New("negative tolerance")
 	ErrWarmStartBetaSize  = errors.New("warm start beta does not have the same number of coefficients as training features")
 )
 
-// OLSOptions represents input options to run the OLS Regression
-type OLSOptions struct {
-	// FitIntercept adds a constant 1.0 feature as the first column if set to true
+// OLSModel represents the model options and coefficients for Ordinary Leaast Squares Regression
+type OLSModel struct {
 	FitIntercept bool
+
+	Intercept float64
+	Coef      []float64
 }
 
-// Validate runs basic validation on OLS options
-func (o *OLSOptions) Validate() *OLSOptions {
-	if o == nil {
-		o = NewDefaultOLSOptions()
-	}
-
-	return o
-}
-
-// NewDefaultOLSOptions returns a default set of OLS Regression options
-func NewDefaultOLSOptions() *OLSOptions {
-	return &OLSOptions{
-		FitIntercept: true,
-	}
-}
-
-// OLSRegression computes ordinary least squares using QR factorization
-type OLSRegression struct {
-	opt       *OLSOptions
-	coef      []float64
-	intercept float64
-}
-
-// NewOLSRegression initializes an ordinary least squares model ready for fitting
-func NewOLSRegression(opt *OLSOptions) *OLSRegression {
-	opt = opt.Validate()
-	return &OLSRegression{
-		opt: opt,
-	}
-}
-
-// Fit the model according to the given training data. OLS Options must be set and the training, target matrices
+// OLSRegression fits the linear model according to the given training data. OLS Options must be set and the training, target matrices
 // must also be non nil. Number of rows in x must match the number of rows in y or this.
-func (o *OLSRegression) Fit(x, y mat.Matrix) {
-	if o.opt == nil {
-		panic(ErrNoOptions)
-	}
-	if x == nil {
-		panic(ErrNoTrainingMatrix)
-	}
-	if y == nil {
-		panic(ErrNoTargetMatrix)
-	}
+func (o *OLSModel) Fit(x, y mat.Matrix) (float64, []float64) {
 	m, n := x.Dims()
 
 	ym, _ := y.Dims()
 	if ym != m {
-		panic(ErrTargetLenMismatch)
+		panic(mat.ErrShape)
 	}
 
-	if o.opt.FitIntercept {
+	if o.FitIntercept {
 		ones := make([]float64, m)
 		floats.AddConst(1.0, ones)
 		onesMx := mat.NewDense(1, m, ones)
@@ -247,27 +201,20 @@ func (o *OLSRegression) Fit(x, y mat.Matrix) {
 		c[i] /= r.At(i, i)
 	}
 
-	if o.opt.FitIntercept {
-		o.intercept = c[0]
-		o.coef = c[1:]
-	} else {
-		o.coef = c
+	o.Coef = c
+	if o.FitIntercept {
+		o.Intercept = c[0]
+		o.Coef = c[1:]
 	}
+	return o.Intercept, o.Coef
 }
 
 // Predict using the OLS model. OLS options must be initialized before calling and input x must not be nil.
 // The number of columns in the matrix must match the number of model coefficients.
-func (o *OLSRegression) Predict(x mat.Matrix) []float64 {
-	if o.opt == nil {
-		panic(ErrNoOptions)
-	}
-	if x == nil {
-		panic(ErrNoDesignMatrix)
-	}
-
-	coef := o.coef
-	if o.opt.FitIntercept {
-		coef = append([]float64{o.intercept}, o.coef...)
+func (o *OLSModel) Predict(x mat.Matrix) []float64 {
+	coef := o.Coef
+	if o.FitIntercept {
+		coef = append([]float64{o.Intercept}, o.Coef...)
 
 		m, _ := x.Dims()
 		ones := make([]float64, m)
@@ -284,7 +231,7 @@ func (o *OLSRegression) Predict(x mat.Matrix) []float64 {
 	xT := x.T()
 	xn, _ := xT.Dims()
 	if xn != n {
-		panic(ErrFeatureLenMismatch)
+		panic(mat.ErrShape)
 	}
 	coefMx := mat.NewDense(1, n, coef)
 
@@ -296,22 +243,12 @@ func (o *OLSRegression) Predict(x mat.Matrix) []float64 {
 // Score computes the coefficient of determination of the prediction. This will panic if no
 // OLS options have been initialized or if x, y are nil. x and y must have the same number of
 // rows or will panic.
-func (o *OLSRegression) Score(x, y mat.Matrix) float64 {
-	if o.opt == nil {
-		panic(ErrNoOptions)
-	}
-	if x == nil {
-		panic(ErrNoDesignMatrix)
-	}
-	if y == nil {
-		panic(ErrNoTargetMatrix)
-	}
-
+func (o *OLSModel) Score(x, y mat.Matrix) float64 {
 	m, _ := x.Dims()
 
 	ym, _ := y.Dims()
 	if m != ym {
-		panic(ErrTargetLenMismatch)
+		panic(mat.ErrShape)
 	}
 
 	res := o.Predict(x)
@@ -321,20 +258,8 @@ func (o *OLSRegression) Score(x, y mat.Matrix) float64 {
 	return RSquaredFrom(res, ySlice, nil)
 }
 
-// Intercept returns the computed intercept if FitIntercept is set to true. Defaults to 0.0 if not set.
-func (o *OLSRegression) Intercept() float64 {
-	return o.intercept
-}
-
-// Coef returns a slice of the trained coefficients in the same order of the training feature Matrix by column.
-func (o *OLSRegression) Coef() []float64 {
-	c := make([]float64, len(o.coef))
-	copy(c, o.coef)
-	return c
-}
-
-// LassoOptions represents input options to run the Lasso Regression
-type LassoOptions struct {
+// LassoModel represents model options and coefficients for Lasso Regression
+type LassoModel struct {
 	// WarmStartBeta is used to prime the coordinate descent to reduce the training time if a previous
 	// fit has been performed.
 	WarmStartBeta []float64
@@ -351,14 +276,15 @@ type LassoOptions struct {
 
 	// FitIntercept adds a constant 1.0 feature as the first column if set to true
 	FitIntercept bool
+
+	Intercept float64
+	Coef      []float64
 }
 
-// Validate runs basic validation on Lasso options. Lambda, iterations and tolerance must be positive or 0.
-func (l *LassoOptions) Validate() *LassoOptions {
-	if l == nil {
-		l = NewDefaultLassoOptions()
-	}
-
+// Fit the model according to the given training data. LassoOptions must be set and the training, target matrices
+// must also be non nil. Number of rows in x must match the number of rows in y or this. If WarmStartBeta has been
+// set through the initialized options, the length must match that of the number of columns in x.
+func (l *LassoModel) Fit(x, y mat.Matrix) (float64, []float64) {
 	if l.Lambda < 0 {
 		panic(ErrNegativeLambda)
 	}
@@ -368,58 +294,15 @@ func (l *LassoOptions) Validate() *LassoOptions {
 	if l.Tolerance < 0 {
 		panic(ErrNegativeTolerance)
 	}
-	return l
-}
-
-// NewDefaultLassoOptions returns a default set of Lasso Regression options
-func NewDefaultLassoOptions() *LassoOptions {
-	return &LassoOptions{
-		Lambda:        1.0,
-		Iterations:    1000,
-		Tolerance:     1e-4,
-		WarmStartBeta: nil,
-		FitIntercept:  true,
-	}
-}
-
-// LassoRegression computes the lasso regression using coordinate descent. lambda = 0 converges to OLS
-type LassoRegression struct {
-	opt *LassoOptions
-
-	coef      []float64
-	intercept float64
-}
-
-// NewLassoRegression initializes a Lasso model ready for fitting
-func NewLassoRegression(opt *LassoOptions) *LassoRegression {
-	opt = opt.Validate()
-	return &LassoRegression{
-		opt: opt,
-	}
-}
-
-// Fit the model according to the given training data. LassoOptions must be set and the training, target matrices
-// must also be non nil. Number of rows in x must match the number of rows in y or this. If WarmStartBeta has been
-// set through the initialized options, the length must match that of the number of columns in x.
-func (l *LassoRegression) Fit(x, y mat.Matrix) {
-	if l.opt == nil {
-		panic(ErrNoOptions)
-	}
-	if x == nil {
-		panic(ErrNoTrainingMatrix)
-	}
-	if y == nil {
-		panic(ErrNoTargetMatrix)
-	}
 
 	m, n := x.Dims()
 
 	ym, _ := y.Dims()
 	if ym != m {
-		panic(ErrTargetLenMismatch)
+		panic(mat.ErrShape)
 	}
 
-	if l.opt.FitIntercept {
+	if l.FitIntercept {
 		ones := make([]float64, m)
 		floats.AddConst(1.0, ones)
 		onesMx := mat.NewDense(1, m, ones)
@@ -431,14 +314,14 @@ func (l *LassoRegression) Fit(x, y mat.Matrix) {
 		_, n = x.Dims()
 	}
 
-	if l.opt.WarmStartBeta != nil && len(l.opt.WarmStartBeta) != n {
+	if l.WarmStartBeta != nil && len(l.WarmStartBeta) != n {
 		panic(ErrWarmStartBetaSize)
 	}
 
 	// tracks current betas
 	beta := make([]float64, n)
-	if l.opt.WarmStartBeta != nil {
-		copy(beta, l.opt.WarmStartBeta)
+	if l.WarmStartBeta != nil {
+		copy(beta, l.WarmStartBeta)
 	}
 
 	xcols := make([][]float64, n)
@@ -463,7 +346,7 @@ func (l *LassoRegression) Fit(x, y mat.Matrix) {
 	betaXDelta := make([]float64, m)
 
 	yArr := mat.Col(nil, 0, y)
-	for i := 0; i < l.opt.Iterations; i++ {
+	for i := 0; i < l.Iterations; i++ {
 		maxCoef := 0.0
 		maxUpdate := 0.0
 		betaDiff := 0.0
@@ -484,8 +367,8 @@ func (l *LassoRegression) Fit(x, y mat.Matrix) {
 			num := floats.Dot(obsCol, residual)
 			betaNext := num/xdot[j] + betaCurr
 
-			gamma := l.opt.Lambda / xdot[j]
-			betaNext = SoftThreshold(betaNext, gamma)
+			gamma := l.Lambda / xdot[j]
+			betaNext = softThreshold(betaNext, gamma)
 
 			maxCoef = math.Max(maxCoef, betaNext)
 			maxUpdate = math.Max(maxUpdate, math.Abs(betaNext-betaCurr))
@@ -495,32 +378,25 @@ func (l *LassoRegression) Fit(x, y mat.Matrix) {
 		}
 
 		// break early if we've achieved the desired tolerance
-		if maxUpdate < l.opt.Tolerance*maxCoef {
+		if maxUpdate < l.Tolerance*maxCoef {
 			break
 		}
 	}
 
-	if l.opt.FitIntercept {
-		l.intercept = beta[0]
-		l.coef = beta[1:]
-	} else {
-		l.coef = beta
+	l.Coef = beta
+	if l.FitIntercept {
+		l.Intercept = beta[0]
+		l.Coef = beta[1:]
 	}
+	return l.Intercept, l.Coef
 }
 
 // Predict using the Lasso model. Lasso options must be initialized and input matrix must be non-nil.
 // The number of columns in the matrix must match the number of model coefficients.
-func (l *LassoRegression) Predict(x mat.Matrix) []float64 {
-	if l.opt == nil {
-		panic(ErrNoOptions)
-	}
-	if x == nil {
-		panic(ErrNoDesignMatrix)
-	}
-
-	coef := l.coef
-	if l.opt.FitIntercept {
-		coef = append([]float64{l.intercept}, l.coef...)
+func (l *LassoModel) Predict(x mat.Matrix) []float64 {
+	coef := l.Coef
+	if l.FitIntercept {
+		coef = append([]float64{l.Intercept}, l.Coef...)
 
 		m, _ := x.Dims()
 		ones := make([]float64, m)
@@ -536,7 +412,7 @@ func (l *LassoRegression) Predict(x mat.Matrix) []float64 {
 
 	_, xn := x.Dims()
 	if xn != n {
-		panic(ErrFeatureLenMismatch)
+		panic(mat.ErrShape)
 	}
 
 	xT := x.T()
@@ -549,22 +425,12 @@ func (l *LassoRegression) Predict(x mat.Matrix) []float64 {
 
 // Score computes the coefficient of determination of the prediction. Lasso options must be initialized and x, y
 // must be non-nil. x and y must have the same number of rows.
-func (l *LassoRegression) Score(x, y mat.Matrix) float64 {
-	if l.opt == nil {
-		panic(ErrNoOptions)
-	}
-	if x == nil {
-		panic(ErrNoDesignMatrix)
-	}
-	if y == nil {
-		panic(ErrNoTargetMatrix)
-	}
-
+func (l *LassoModel) Score(x, y mat.Matrix) float64 {
 	m, _ := x.Dims()
 
 	ym, _ := y.Dims()
 	if m != ym {
-		panic(ErrTargetLenMismatch)
+		panic(mat.ErrShape)
 	}
 
 	res := l.Predict(x)
@@ -574,21 +440,14 @@ func (l *LassoRegression) Score(x, y mat.Matrix) float64 {
 	return RSquaredFrom(res, ySlice, nil)
 }
 
-// Intercept returns the computed intercept if FitIntercept is set to true. Defaults to 0.0 if not set.
-func (l *LassoRegression) Intercept() float64 {
-	return l.intercept
-}
-
-// Coef returns a slice of the trained coefficients in the same order of the training feature Matrix by column.
-func (l *LassoRegression) Coef() []float64 {
-	return l.coef
-}
-
-// SoftThreshold returns 0.0 if the value is less than or equal to the gamma input
-func SoftThreshold(x, gamma float64) float64 {
-	res := math.Max(0, math.Abs(x)-gamma)
-	if math.Signbit(x) {
-		return -res
+// softThreshold returns 0.0 if the value is less than or equal to the gamma input
+func softThreshold(x, gamma float64) float64 {
+	switch {
+	case x < -gamma:
+		return x + gamma
+	case gamma < x:
+		return x - gamma
+	default:
+		return 0
 	}
-	return res
 }

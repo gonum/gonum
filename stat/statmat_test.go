@@ -322,78 +322,62 @@ func flatten(f [][]float64) (r, c int, d []float64) {
 	return r, c, d
 }
 
-func TestLassoOptionsValidate(t *testing.T) {
-	testData := map[string]struct {
-		opt      *LassoOptions
-		err      error
-		expected LassoOptions
-	}{
-		"nil": {nil, nil, *NewDefaultLassoOptions()},
-		"valid": {
-			&LassoOptions{
-				Lambda:     1.0,
-				Iterations: 100,
-				Tolerance:  1e-5,
-			}, nil,
-			LassoOptions{
-				Lambda:     1.0,
-				Iterations: 100,
-				Tolerance:  1e-5,
-			},
-		},
-		"invalid lambda": {
-			&LassoOptions{Lambda: -1.0},
-			ErrNegativeLambda,
-			LassoOptions{},
-		},
-		"invalid iterations": {
-			&LassoOptions{Iterations: -1.0},
-			ErrNegativeIterations,
-			LassoOptions{},
-		},
-		"invalid tolerance": {
-			&LassoOptions{Tolerance: -1.0},
-			ErrNegativeTolerance,
-			LassoOptions{},
-		},
-	}
-
-	for name, td := range testData {
-		t.Run(name, func(t *testing.T) {
-			if td.err != nil {
-				if !panics(func() { td.opt.Validate() }) {
-					t.Errorf("Validate did not panic with %v", td.err)
-				}
-				return
-			}
-
-			opt := td.opt.Validate()
-			if opt != nil {
-				res := *opt
-				if res.Lambda != td.expected.Lambda {
-					t.Errorf("expected lambda option, %v, but got, %v", td.expected.Lambda, res.Lambda)
-				}
-				if res.Iterations != td.expected.Iterations {
-					t.Errorf("expected iteration option, %v, but got, %v", td.expected.Iterations, res.Iterations)
-				}
-				if res.Tolerance != td.expected.Tolerance {
-					t.Errorf("expected tolerance option, %v, but got, %v", td.expected.Tolerance, res.Tolerance)
-				}
-			}
-		})
-	}
-}
-
 func TestLassoRegression(t *testing.T) {
 	// y = 2 + 3*x0 + 4*x1
 	testData := map[string]struct {
 		x         *mat.Dense
 		y         *mat.Dense
-		opt       *LassoOptions
+		model     LassoModel
+		err       error
 		tol       float64
 		intercept float64
 		coef      []float64
 	}{
+		"invalid lambda": {
+			x: mat.NewDense(
+				flatten(
+					[][]float64{
+						{0, 0},
+						{3, 5},
+						{9, 20},
+						{12, 6},
+					},
+				),
+			),
+			y:     mat.NewDense(4, 1, []float64{2, 31, 109, 62}),
+			model: LassoModel{Lambda: -1.0},
+			err:   ErrNegativeLambda,
+		},
+		"invalid iterations": {
+			x: mat.NewDense(
+				flatten(
+					[][]float64{
+						{0, 0},
+						{3, 5},
+						{9, 20},
+						{12, 6},
+					},
+				),
+			),
+			y:     mat.NewDense(4, 1, []float64{2, 31, 109, 62}),
+			model: LassoModel{Iterations: -1.0},
+			err:   ErrNegativeIterations,
+		},
+		"invalid tolerance": {
+			x: mat.NewDense(
+				flatten(
+					[][]float64{
+						{0, 0},
+						{3, 5},
+						{9, 20},
+						{12, 6},
+					},
+				),
+			),
+			y:     mat.NewDense(4, 1, []float64{2, 31, 109, 62}),
+			model: LassoModel{Tolerance: -1.0},
+			err:   ErrNegativeTolerance,
+		},
 		"fit with intercept": {
 			x: mat.NewDense(
 				flatten(
@@ -406,12 +390,13 @@ func TestLassoRegression(t *testing.T) {
 				),
 			),
 			y: mat.NewDense(4, 1, []float64{2, 31, 109, 62}),
-			opt: &LassoOptions{
+			model: LassoModel{
 				Lambda:       0.0,
 				Tolerance:    1e-6,
 				FitIntercept: true,
 				Iterations:   1000,
 			},
+			err:       nil,
 			tol:       1e-5,
 			intercept: 2.0,
 			coef:      []float64{3.0, 4.0},
@@ -428,12 +413,13 @@ func TestLassoRegression(t *testing.T) {
 				),
 			),
 			y: mat.NewDense(4, 1, []float64{2, 31, 109, 62}),
-			opt: &LassoOptions{
+			model: LassoModel{
 				Lambda:       0.0,
 				Tolerance:    1e-6,
 				FitIntercept: false,
 				Iterations:   1000,
 			},
+			err:       nil,
 			tol:       1e-5,
 			intercept: 0.0,
 			coef:      []float64{2.0, 3.0, 4.0},
@@ -442,64 +428,32 @@ func TestLassoRegression(t *testing.T) {
 
 	for name, td := range testData {
 		t.Run(name, func(t *testing.T) {
-			model := NewLassoRegression(td.opt)
-			model.Fit(td.x, td.y)
-			if math.Abs(model.Intercept()-td.intercept) > td.tol {
-				t.Errorf("expected intercept to be in tolerance of %v, got %v, but expected, %v", td.tol, model.Intercept(), td.intercept)
+			if td.err != nil {
+				if !panics(func() { td.model.Fit(td.x, td.y) }) {
+					t.Errorf("Fit did not panic with %v", td.err)
+				}
+				return
 			}
 
-			coef := model.Coef()
-			if len(coef) != len(td.coef) {
-				t.Errorf("expected %d coefficients, but got %d", len(td.coef), len(coef))
+			td.model.Fit(td.x, td.y)
+			if math.Abs(td.model.Intercept-td.intercept) > td.tol {
+				t.Errorf("expected intercept to be in tolerance of %v, got %v, but expected, %v", td.tol, td.model.Intercept, td.intercept)
+			}
+
+			if len(td.model.Coef) != len(td.coef) {
+				t.Errorf("expected %d coefficients, but got %d", len(td.coef), len(td.model.Coef))
 				return
 			}
 
 			for i := range td.coef {
-				if math.Abs(coef[i]-td.coef[i]) > td.tol {
-					t.Errorf("expected coefficient at index, %d, to be in tolerance of %v, got %v, but expected, %v", i, td.tol, coef[i], td.coef[i])
+				if math.Abs(td.model.Coef[i]-td.coef[i]) > td.tol {
+					t.Errorf("expected coefficient at index, %d, to be in tolerance of %v, got %v, but expected, %v", i, td.tol, td.model.Coef[i], td.coef[i])
 				}
 			}
 
-			r2 := model.Score(td.x, td.y)
+			r2 := td.model.Score(td.x, td.y)
 			if math.Abs(r2-1.0) > td.tol {
 				t.Errorf("expected coefficient of determination to be in tolerance of %v, got %v, but expected, %v", td.tol, r2, 1.0)
-			}
-		})
-	}
-}
-
-func TestOLSOptionsValidate(t *testing.T) {
-	testData := map[string]struct {
-		opt      *OLSOptions
-		err      error
-		expected OLSOptions
-	}{
-		"nil": {nil, nil, *NewDefaultOLSOptions()},
-		"valid": {
-			&OLSOptions{
-				FitIntercept: true,
-			}, nil,
-			OLSOptions{
-				FitIntercept: true,
-			},
-		},
-	}
-
-	for name, td := range testData {
-		t.Run(name, func(t *testing.T) {
-			if td.err != nil {
-				if !panics(func() { td.opt.Validate() }) {
-					t.Errorf("Validate did not panic with %v", td.err)
-				}
-				return
-			}
-
-			opt := td.opt.Validate()
-			if opt != nil {
-				res := *opt
-				if res.FitIntercept != td.expected.FitIntercept {
-					t.Errorf("expected fit intercept option, %v, but got, %v", td.expected.FitIntercept, res.FitIntercept)
-				}
 			}
 		})
 	}
@@ -510,7 +464,7 @@ func TestOLSRegression(t *testing.T) {
 	testData := map[string]struct {
 		x         *mat.Dense
 		y         *mat.Dense
-		opt       *OLSOptions
+		model     OLSModel
 		tol       float64
 		intercept float64
 		coef      []float64
@@ -527,7 +481,7 @@ func TestOLSRegression(t *testing.T) {
 				),
 			),
 			y: mat.NewDense(4, 1, []float64{2, 31, 109, 62}),
-			opt: &OLSOptions{
+			model: OLSModel{
 				FitIntercept: true,
 			},
 			tol:       1e-5,
@@ -546,7 +500,7 @@ func TestOLSRegression(t *testing.T) {
 				),
 			),
 			y: mat.NewDense(4, 1, []float64{2, 31, 109, 62}),
-			opt: &OLSOptions{
+			model: OLSModel{
 				FitIntercept: false,
 			},
 			tol:       1e-5,
@@ -557,25 +511,23 @@ func TestOLSRegression(t *testing.T) {
 
 	for name, td := range testData {
 		t.Run(name, func(t *testing.T) {
-			model := NewOLSRegression(td.opt)
-			model.Fit(td.x, td.y)
-			if math.Abs(model.Intercept()-td.intercept) > td.tol {
-				t.Errorf("expected intercept to be in tolerance of %v, got %v, but expected, %v", td.tol, model.Intercept(), td.intercept)
+			td.model.Fit(td.x, td.y)
+			if math.Abs(td.model.Intercept-td.intercept) > td.tol {
+				t.Errorf("expected intercept to be in tolerance of %v, got %v, but expected, %v", td.tol, td.model.Intercept, td.intercept)
 			}
 
-			coef := model.Coef()
-			if len(coef) != len(td.coef) {
-				t.Errorf("expected %d coefficients, but got %d", len(td.coef), len(coef))
+			if len(td.model.Coef) != len(td.coef) {
+				t.Errorf("expected %d coefficients, but got %d", len(td.coef), len(td.model.Coef))
 				return
 			}
 
 			for i := range td.coef {
-				if math.Abs(coef[i]-td.coef[i]) > td.tol {
-					t.Errorf("expected coefficient at index, %d, to be in tolerance of %v, got %v, but expected, %v", i, td.tol, coef[i], td.coef[i])
+				if math.Abs(td.model.Coef[i]-td.coef[i]) > td.tol {
+					t.Errorf("expected coefficient at index, %d, to be in tolerance of %v, got %v, but expected, %v", i, td.tol, td.model.Coef[i], td.coef[i])
 				}
 			}
 
-			r2 := model.Score(td.x, td.y)
+			r2 := td.model.Score(td.x, td.y)
 			if math.Abs(r2-1.0) > td.tol {
 				t.Errorf("expected coefficient of determination to be in tolerance of %v, got %v, but expected, %v", td.tol, r2, 1.0)
 			}
@@ -792,9 +744,7 @@ func BenchmarkLassoRegression(b *testing.B) {
 		m, n, d := flatten(data)
 		x := mat.NewDense(m, n, d)
 		y := mat.NewDense(nObs, 1, data2)
-		opt := NewDefaultLassoOptions()
-		opt.FitIntercept = false
-		model := NewLassoRegression(opt)
+		model := &LassoModel{FitIntercept: false}
 		model.Fit(x, y)
 	}
 }
@@ -824,11 +774,9 @@ func BenchmarkOLSRegression(b *testing.B) {
 		m, n, d := flatten(data)
 		x := mat.NewDense(m, n, d)
 		y := mat.NewDense(nObs, 1, data2)
-		model := NewOLSRegression(
-			&OLSOptions{
-				FitIntercept: false,
-			},
-		)
+		model := &OLSModel{
+			FitIntercept: false,
+		}
 		model.Fit(x, y)
 	}
 }

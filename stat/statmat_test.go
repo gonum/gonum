@@ -527,7 +527,6 @@ func benchmarkCovarianceMatrix(b *testing.B, m mat.Matrix) {
 		CovarianceMatrix(&res, m, nil)
 	}
 }
-
 func benchmarkCovarianceMatrixWeighted(b *testing.B, m mat.Matrix) {
 	r, _ := m.Dims()
 	wts := make([]float64, r)
@@ -577,6 +576,7 @@ func BenchmarkCovarianceMatrixLargexSmall(b *testing.B) {
 	x := randMat(large, small)
 	benchmarkCovarianceMatrix(b, x)
 }
+
 func BenchmarkCovarianceMatrixHugexSmall(b *testing.B) {
 	// 1e7 * 10 elements
 	x := randMat(huge, small)

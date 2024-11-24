@@ -541,7 +541,6 @@ func benchmarkCovarianceMatrixWeighted(b *testing.B, m mat.Matrix) {
 		CovarianceMatrix(&res, m, wts)
 	}
 }
-
 func benchmarkCovarianceMatrixInPlace(b *testing.B, m mat.Matrix) {
 	_, c := m.Dims()
 	res := mat.NewSymDense(c, nil)
@@ -550,6 +549,7 @@ func benchmarkCovarianceMatrixInPlace(b *testing.B, m mat.Matrix) {
 		CovarianceMatrix(res, m, nil)
 	}
 }
+
 func BenchmarkCovarianceMatrixSmallxSmall(b *testing.B) {
 	// 10 * 10 elements
 	x := randMat(small, small)
@@ -560,6 +560,7 @@ func BenchmarkCovarianceMatrixSmallxMedium(b *testing.B) {
 	x := randMat(small, medium)
 	benchmarkCovarianceMatrix(b, x)
 }
+
 func BenchmarkCovarianceMatrixMediumxSmall(b *testing.B) {
 	// 1000 * 10 elements
 	x := randMat(medium, small)
@@ -570,6 +571,7 @@ func BenchmarkCovarianceMatrixMediumxMedium(b *testing.B) {
 	x := randMat(medium, medium)
 	benchmarkCovarianceMatrix(b, x)
 }
+
 func BenchmarkCovarianceMatrixLargexSmall(b *testing.B) {
 	// 1e5 * 10 elements
 	x := randMat(large, small)
@@ -580,6 +582,7 @@ func BenchmarkCovarianceMatrixHugexSmall(b *testing.B) {
 	x := randMat(huge, small)
 	benchmarkCovarianceMatrix(b, x)
 }
+
 func BenchmarkCovarianceMatrixSmallxSmallWeighted(b *testing.B) {
 	// 10 * 10 elements
 	x := randMat(small, small)
@@ -590,6 +593,7 @@ func BenchmarkCovarianceMatrixSmallxMediumWeighted(b *testing.B) {
 	x := randMat(small, medium)
 	benchmarkCovarianceMatrixWeighted(b, x)
 }
+
 func BenchmarkCovarianceMatrixMediumxSmallWeighted(b *testing.B) {
 	// 1000 * 10 elements
 	x := randMat(medium, small)
@@ -600,16 +604,19 @@ func BenchmarkCovarianceMatrixMediumxMediumWeighted(b *testing.B) {
 	x := randMat(medium, medium)
 	benchmarkCovarianceMatrixWeighted(b, x)
 }
+
 func BenchmarkCovarianceMatrixLargexSmallWeighted(b *testing.B) {
 	// 1e5 * 10 elements
 	x := randMat(large, small)
 	benchmarkCovarianceMatrixWeighted(b, x)
 }
+
 func BenchmarkCovarianceMatrixHugexSmallWeighted(b *testing.B) {
 	// 1e7 * 10 elements
 	x := randMat(huge, small)
 	benchmarkCovarianceMatrixWeighted(b, x)
 }
+
 func BenchmarkCovarianceMatrixSmallxSmallInPlace(b *testing.B) {
 	// 10 * 10 elements
 	x := randMat(small, small)
@@ -620,6 +627,7 @@ func BenchmarkCovarianceMatrixSmallxMediumInPlace(b *testing.B) {
 	x := randMat(small, medium)
 	benchmarkCovarianceMatrixInPlace(b, x)
 }
+
 func BenchmarkCovarianceMatrixMediumxSmallInPlace(b *testing.B) {
 	// 1000 * 10 elements
 	x := randMat(medium, small)

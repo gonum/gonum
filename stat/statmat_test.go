@@ -140,8 +140,7 @@ func TestCorrelationMatrix(t *testing.T) {
 				1, 0.6,
 				0.6, 1,
 			}),
-		},
-		{
+		}, {
 			data: mat.NewDense(3, 2, []float64{
 				1, 1,
 				2, 4,
@@ -228,8 +227,7 @@ func TestCorrCov(t *testing.T) {
 				2, 4,
 			}),
 			weights: nil,
-		},
-		{
+		}, {
 			data: mat.NewDense(3, 2, []float64{
 				1, 1,
 				2, 4,
@@ -289,8 +287,7 @@ func TestMahalanobis(t *testing.T) {
 				[]float64{
 					0.8, 0.3, 0.1,
 					0.3, 0.7, -0.1,
-					0.1, -0.1, 7,
-				}),
+					0.1, -0.1, 7}),
 			ans: 1.9251757377680914,
 		},
 	} {
@@ -306,128 +303,107 @@ func TestMahalanobis(t *testing.T) {
 	}
 }
 
-func flatten(f [][]float64) (r, c int, d []float64) {
-	r = len(f)
-	if r == 0 {
-		panic("bad test: no row")
-	}
-	c = len(f[0])
-	d = make([]float64, 0, r*c)
-	for _, row := range f {
-		if len(row) != c {
-			panic("bad test: ragged input")
-		}
-		d = append(d, row...)
-	}
-	return r, c, d
+var lassoRegressionTests = []struct {
+	name      string
+	x         *mat.Dense
+	y         *mat.Dense
+	model     LassoModel
+	err       error
+	tol       float64
+	intercept float64
+	coef      []float64
+}{
+	{
+		name: "invalid_lambda",
+		x: mat.NewDense(4, 2,
+			[]float64{
+				0, 0,
+				3, 5,
+				9, 20,
+				12, 6,
+			},
+		),
+		y:     mat.NewDense(4, 1, []float64{2, 31, 109, 62}),
+		model: LassoModel{Lambda: -1.0},
+		err:   ErrNegativeLambda,
+	},
+	{
+		name: "invalid_iterations",
+		x: mat.NewDense(4, 2,
+			[]float64{
+				0, 0,
+				3, 5,
+				9, 20,
+				12, 6,
+			},
+		),
+		y:     mat.NewDense(4, 1, []float64{2, 31, 109, 62}),
+		model: LassoModel{Iterations: -1.0},
+		err:   ErrNegativeIterations,
+	},
+	{
+		name: "invalid_tolerance",
+		x: mat.NewDense(4, 2,
+			[]float64{
+				0, 0,
+				3, 5,
+				9, 20,
+				12, 6,
+			},
+		),
+		y:     mat.NewDense(4, 1, []float64{2, 31, 109, 62}),
+		model: LassoModel{Tolerance: -1.0},
+		err:   ErrNegativeTolerance,
+	},
+	{
+		name: "fit_with_intercept",
+		x: mat.NewDense(4, 2,
+			[]float64{
+				0, 0,
+				3, 5,
+				9, 20,
+				12, 6,
+			},
+		),
+		y: mat.NewDense(4, 1, []float64{2, 31, 109, 62}),
+		model: LassoModel{
+			Lambda:       0.0,
+			Tolerance:    1e-6,
+			FitIntercept: true,
+			Iterations:   1000,
+		},
+		err:       nil,
+		tol:       1e-5,
+		intercept: 2.0,
+		coef:      []float64{3.0, 4.0},
+	},
+	{
+		name: "fit_with_no_intercept",
+		x: mat.NewDense(4, 3,
+			[]float64{
+				1, 0, 0,
+				1, 3, 5,
+				1, 9, 20,
+				1, 12, 6,
+			},
+		),
+		y: mat.NewDense(4, 1, []float64{2, 31, 109, 62}),
+		model: LassoModel{
+			Lambda:       0.0,
+			Tolerance:    1e-6,
+			FitIntercept: false,
+			Iterations:   1000,
+		},
+		err:       nil,
+		tol:       1e-5,
+		intercept: 0.0,
+		coef:      []float64{2.0, 3.0, 4.0},
+	},
 }
 
 func TestLassoRegression(t *testing.T) {
-	// y = 2 + 3*x0 + 4*x1
-	testData := map[string]struct {
-		x         *mat.Dense
-		y         *mat.Dense
-		model     LassoModel
-		err       error
-		tol       float64
-		intercept float64
-		coef      []float64
-	}{
-		"invalid lambda": {
-			x: mat.NewDense(
-				flatten(
-					[][]float64{
-						{0, 0},
-						{3, 5},
-						{9, 20},
-						{12, 6},
-					},
-				),
-			),
-			y:     mat.NewDense(4, 1, []float64{2, 31, 109, 62}),
-			model: LassoModel{Lambda: -1.0},
-			err:   ErrNegativeLambda,
-		},
-		"invalid iterations": {
-			x: mat.NewDense(
-				flatten(
-					[][]float64{
-						{0, 0},
-						{3, 5},
-						{9, 20},
-						{12, 6},
-					},
-				),
-			),
-			y:     mat.NewDense(4, 1, []float64{2, 31, 109, 62}),
-			model: LassoModel{Iterations: -1.0},
-			err:   ErrNegativeIterations,
-		},
-		"invalid tolerance": {
-			x: mat.NewDense(
-				flatten(
-					[][]float64{
-						{0, 0},
-						{3, 5},
-						{9, 20},
-						{12, 6},
-					},
-				),
-			),
-			y:     mat.NewDense(4, 1, []float64{2, 31, 109, 62}),
-			model: LassoModel{Tolerance: -1.0},
-			err:   ErrNegativeTolerance,
-		},
-		"fit with intercept": {
-			x: mat.NewDense(
-				flatten(
-					[][]float64{
-						{0, 0},
-						{3, 5},
-						{9, 20},
-						{12, 6},
-					},
-				),
-			),
-			y: mat.NewDense(4, 1, []float64{2, 31, 109, 62}),
-			model: LassoModel{
-				Lambda:       0.0,
-				Tolerance:    1e-6,
-				FitIntercept: true,
-				Iterations:   1000,
-			},
-			err:       nil,
-			tol:       1e-5,
-			intercept: 2.0,
-			coef:      []float64{3.0, 4.0},
-		},
-		"fit with no intercept": {
-			x: mat.NewDense(
-				flatten(
-					[][]float64{
-						{1, 0, 0},
-						{1, 3, 5},
-						{1, 9, 20},
-						{1, 12, 6},
-					},
-				),
-			),
-			y: mat.NewDense(4, 1, []float64{2, 31, 109, 62}),
-			model: LassoModel{
-				Lambda:       0.0,
-				Tolerance:    1e-6,
-				FitIntercept: false,
-				Iterations:   1000,
-			},
-			err:       nil,
-			tol:       1e-5,
-			intercept: 0.0,
-			coef:      []float64{2.0, 3.0, 4.0},
-		},
-	}
-
-	for name, td := range testData {
-		t.Run(name, func(t *testing.T) {
+	for _, td := range lassoRegressionTests {
+		t.Run(td.name, func(t *testing.T) {
 			if td.err != nil {
 				if !panics(func() { td.model.Fit(td.x, td.y) }) {
 					t.Errorf("Fit did not panic with %v", td.err)
@@ -459,58 +435,56 @@ func TestLassoRegression(t *testing.T) {
 	}
 }
 
-func TestOLSRegression(t *testing.T) {
-	// y = 2 + 3*x0 + 4*x1
-	testData := map[string]struct {
-		x         *mat.Dense
-		y         *mat.Dense
-		model     OLSModel
-		tol       float64
-		intercept float64
-		coef      []float64
-	}{
-		"fit with intercept": {
-			x: mat.NewDense(
-				flatten(
-					[][]float64{
-						{0, 0},
-						{3, 5},
-						{9, 20},
-						{12, 6},
-					},
-				),
-			),
-			y: mat.NewDense(4, 1, []float64{2, 31, 109, 62}),
-			model: OLSModel{
-				FitIntercept: true,
+var olsRegressionTests = []struct {
+	name      string
+	x         *mat.Dense
+	y         *mat.Dense
+	model     OLSModel
+	tol       float64
+	intercept float64
+	coef      []float64
+}{
+	{
+		name: "fit_with_intercept",
+		x: mat.NewDense(4, 2,
+			[]float64{
+				0, 0,
+				3, 5,
+				9, 20,
+				12, 6,
 			},
-			tol:       1e-5,
-			intercept: 2.0,
-			coef:      []float64{3.0, 4.0},
+		),
+		y: mat.NewDense(4, 1, []float64{2, 31, 109, 62}),
+		model: OLSModel{
+			FitIntercept: true,
 		},
-		"fit with no intercept": {
-			x: mat.NewDense(
-				flatten(
-					[][]float64{
-						{1, 0, 0},
-						{1, 3, 5},
-						{1, 9, 20},
-						{1, 12, 6},
-					},
-				),
-			),
-			y: mat.NewDense(4, 1, []float64{2, 31, 109, 62}),
-			model: OLSModel{
-				FitIntercept: false,
+		tol:       1e-5,
+		intercept: 2.0,
+		coef:      []float64{3.0, 4.0},
+	},
+	{
+		name: "fit_with_no_intercept",
+		x: mat.NewDense(4, 3,
+			[]float64{
+				1, 0, 0,
+				1, 3, 5,
+				1, 9, 20,
+				1, 12, 6,
 			},
-			tol:       1e-5,
-			intercept: 0.0,
-			coef:      []float64{2.0, 3.0, 4.0},
+		),
+		y: mat.NewDense(4, 1, []float64{2, 31, 109, 62}),
+		model: OLSModel{
+			FitIntercept: false,
 		},
-	}
+		tol:       1e-5,
+		intercept: 0.0,
+		coef:      []float64{2.0, 3.0, 4.0},
+	},
+}
 
-	for name, td := range testData {
-		t.Run(name, func(t *testing.T) {
+func TestOLSRegression(t *testing.T) {
+	for _, td := range olsRegressionTests {
+		t.Run(td.name, func(t *testing.T) {
 			td.model.Fit(td.x, td.y)
 			if math.Abs(td.model.Intercept-td.intercept) > td.tol {
 				t.Errorf("expected intercept to be in tolerance of %v, got %v, but expected, %v", td.tol, td.model.Intercept, td.intercept)
@@ -576,97 +550,81 @@ func benchmarkCovarianceMatrixInPlace(b *testing.B, m mat.Matrix) {
 		CovarianceMatrix(res, m, nil)
 	}
 }
-
 func BenchmarkCovarianceMatrixSmallxSmall(b *testing.B) {
 	// 10 * 10 elements
 	x := randMat(small, small)
 	benchmarkCovarianceMatrix(b, x)
 }
-
 func BenchmarkCovarianceMatrixSmallxMedium(b *testing.B) {
 	// 10 * 1000 elements
 	x := randMat(small, medium)
 	benchmarkCovarianceMatrix(b, x)
 }
-
 func BenchmarkCovarianceMatrixMediumxSmall(b *testing.B) {
 	// 1000 * 10 elements
 	x := randMat(medium, small)
 	benchmarkCovarianceMatrix(b, x)
 }
-
 func BenchmarkCovarianceMatrixMediumxMedium(b *testing.B) {
 	// 1000 * 1000 elements
 	x := randMat(medium, medium)
 	benchmarkCovarianceMatrix(b, x)
 }
-
 func BenchmarkCovarianceMatrixLargexSmall(b *testing.B) {
 	// 1e5 * 10 elements
 	x := randMat(large, small)
 	benchmarkCovarianceMatrix(b, x)
 }
-
 func BenchmarkCovarianceMatrixHugexSmall(b *testing.B) {
 	// 1e7 * 10 elements
 	x := randMat(huge, small)
 	benchmarkCovarianceMatrix(b, x)
 }
-
 func BenchmarkCovarianceMatrixSmallxSmallWeighted(b *testing.B) {
 	// 10 * 10 elements
 	x := randMat(small, small)
 	benchmarkCovarianceMatrixWeighted(b, x)
 }
-
 func BenchmarkCovarianceMatrixSmallxMediumWeighted(b *testing.B) {
 	// 10 * 1000 elements
 	x := randMat(small, medium)
 	benchmarkCovarianceMatrixWeighted(b, x)
 }
-
 func BenchmarkCovarianceMatrixMediumxSmallWeighted(b *testing.B) {
 	// 1000 * 10 elements
 	x := randMat(medium, small)
 	benchmarkCovarianceMatrixWeighted(b, x)
 }
-
 func BenchmarkCovarianceMatrixMediumxMediumWeighted(b *testing.B) {
 	// 1000 * 1000 elements
 	x := randMat(medium, medium)
 	benchmarkCovarianceMatrixWeighted(b, x)
 }
-
 func BenchmarkCovarianceMatrixLargexSmallWeighted(b *testing.B) {
 	// 1e5 * 10 elements
 	x := randMat(large, small)
 	benchmarkCovarianceMatrixWeighted(b, x)
 }
-
 func BenchmarkCovarianceMatrixHugexSmallWeighted(b *testing.B) {
 	// 1e7 * 10 elements
 	x := randMat(huge, small)
 	benchmarkCovarianceMatrixWeighted(b, x)
 }
-
 func BenchmarkCovarianceMatrixSmallxSmallInPlace(b *testing.B) {
 	// 10 * 10 elements
 	x := randMat(small, small)
 	benchmarkCovarianceMatrixInPlace(b, x)
 }
-
 func BenchmarkCovarianceMatrixSmallxMediumInPlace(b *testing.B) {
 	// 10 * 1000 elements
 	x := randMat(small, medium)
 	benchmarkCovarianceMatrixInPlace(b, x)
 }
-
 func BenchmarkCovarianceMatrixMediumxSmallInPlace(b *testing.B) {
 	// 1000 * 10 elements
 	x := randMat(medium, small)
 	benchmarkCovarianceMatrixInPlace(b, x)
 }
-
 func BenchmarkCovarianceMatrixMediumxMediumInPlace(b *testing.B) {
 	// 1000 * 1000 elements
 	x := randMat(medium, medium)
@@ -723,15 +681,14 @@ func BenchmarkLassoRegression(b *testing.B) {
 	nObs := 1000
 	nFeat := 100
 
-	data := make([][]float64, nObs)
+	data := make([]float64, nObs*nFeat)
 	for i := 0; i < nObs; i++ {
-		data[i] = make([]float64, nFeat)
 		for j := 0; j < nFeat; j++ {
 			val := float64(i*nFeat + j)
 			if j == 0 {
 				val = 1.0
 			}
-			data[i][j] = val
+			data[i*nFeat+j] = val
 		}
 	}
 
@@ -740,11 +697,12 @@ func BenchmarkLassoRegression(b *testing.B) {
 		data2 = append(data2, float64(i))
 	}
 
+	x := mat.NewDense(nObs, nFeat, data)
+	y := mat.NewDense(nObs, 1, data2)
+
+	model := &LassoModel{FitIntercept: false}
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		m, n, d := flatten(data)
-		x := mat.NewDense(m, n, d)
-		y := mat.NewDense(nObs, 1, data2)
-		model := &LassoModel{FitIntercept: false}
 		model.Fit(x, y)
 	}
 }
@@ -753,15 +711,14 @@ func BenchmarkOLSRegression(b *testing.B) {
 	nObs := 1000
 	nFeat := 100
 
-	data := make([][]float64, nObs)
+	data := make([]float64, nObs*nFeat)
 	for i := 0; i < nObs; i++ {
-		data[i] = make([]float64, nFeat)
 		for j := 0; j < nFeat; j++ {
 			val := float64(i*nFeat + j)
 			if j == 0 {
 				val = 1.0
 			}
-			data[i][j] = val
+			data[i*nFeat+j] = val
 		}
 	}
 
@@ -770,13 +727,14 @@ func BenchmarkOLSRegression(b *testing.B) {
 		data2 = append(data2, float64(i))
 	}
 
+	x := mat.NewDense(nObs, nFeat, data)
+	y := mat.NewDense(nObs, 1, data2)
+	model := &OLSModel{
+		FitIntercept: false,
+	}
+
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		m, n, d := flatten(data)
-		x := mat.NewDense(m, n, d)
-		y := mat.NewDense(nObs, 1, data2)
-		model := &OLSModel{
-			FitIntercept: false,
-		}
 		model.Fit(x, y)
 	}
 }

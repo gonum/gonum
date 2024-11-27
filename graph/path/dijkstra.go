@@ -20,8 +20,30 @@ import (
 //
 // The time complexity of DijkstraFrom is O(|E|.log|V|).
 func DijkstraFrom(u graph.Node, g traverse.Graph) Shortest {
+	return dijkstraFrom(u, nil, g)
+}
+
+// DijkstraFromTo returns a shortest path from u to v in the graph g. The
+// result is equivalent to DijkstraFrom(u, g).To(v), but DijkstraFromTo can be
+// more efficient, as it can terminate early if v is reached. If the graph does
+// not implement Weighted, UniformCost is used. DijkstraFromTo will panic if g
+// has a u-reachable negative edge weight that is discovered before reaching v.
+//
+// The time complexity of DijkstraFromTo is O(|E|.log|V|).
+func DijkstraFromTo(u graph.Node, v graph.Node, g traverse.Graph) (path []graph.Node, weight float64) {
+	// An implementation of Bidirectional Dijkstra's algorithm could be even
+	// more efficient, but it requires a transposed (or undirected) graph.
+	if v == nil {
+		panic("dijkstra: nil target node")
+	}
+	return dijkstraFrom(u, v, g).To(v.ID())
+}
+
+// Shared implementation of DijkstraFrom and DijkstraFromTo.
+func dijkstraFrom(u, target graph.Node, g traverse.Graph) Shortest {
 	var path Shortest
-	if h, ok := g.(graph.Graph); ok {
+	// Use the incremental version when a target is provided
+	if h, ok := g.(graph.Graph); target == nil && ok {
 		if h.Node(u.ID()) == nil {
 			return Shortest{from: u}
 		}
@@ -58,6 +80,9 @@ func DijkstraFrom(u graph.Node, g traverse.Graph) Shortest {
 			continue
 		}
 		mnid := mid.node.ID()
+		if target != nil && mnid == target.ID() {
+			break
+		}
 		to := g.From(mnid)
 		for to.Next() {
 			v := to.Node()

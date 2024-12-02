@@ -24,10 +24,48 @@ func TestDijkstraFrom(t *testing.T) {
 			g.SetWeightedEdge(e)
 		}
 
-		checkPath := func(typ string, p []graph.Node, weight float64) {
+		for _, tg := range []struct {
+			typ string
+			g   traverse.Graph
+			t   graph.Node
+		}{
+			{"complete", g.(graph.Graph), nil},
+			{"incremental", incremental{g.(graph.Weighted)}, nil},
+			{"single-destination", g.(graph.Graph), test.Query.To()},
+		} {
+			var (
+				pt Shortest
+
+				panicked bool
+			)
+			func() {
+				defer func() {
+					panicked = recover() != nil
+				}()
+				pt = dijkstraFrom(test.Query.From(), tg.t, tg.g)
+			}()
+			if panicked || test.HasNegativeWeight {
+				if !test.HasNegativeWeight {
+					t.Errorf("%q %s: unexpected panic", test.Name, tg.typ)
+				}
+				if !panicked && tg.t == nil {
+					t.Errorf("%q %s: expected panic for negative edge weight", test.Name, tg.typ)
+				}
+				continue
+			}
+
+			if pt.From().ID() != test.Query.From().ID() {
+				t.Fatalf("%q %s: unexpected from node ID: got:%d want:%d", test.Name, tg.typ, pt.From().ID(), test.Query.From().ID())
+			}
+
+			p, weight := pt.To(test.Query.To().ID())
 			if weight != test.Weight {
 				t.Errorf("%q %s: unexpected weight from To: got:%f want:%f",
-					test.Name, typ, weight, test.Weight)
+					test.Name, tg.typ, weight, test.Weight)
+			}
+			if weight := pt.WeightTo(test.Query.To().ID()); weight != test.Weight {
+				t.Errorf("%q %s: unexpected weight from WeightTo: got:%f want:%f",
+					test.Name, tg.typ, weight, test.Weight)
 			}
 
 			var got []int64
@@ -43,49 +81,8 @@ func TestDijkstraFrom(t *testing.T) {
 			}
 			if !ok {
 				t.Errorf("%q %s: unexpected shortest path:\ngot: %v\nwant from:%v",
-					test.Name, typ, p, test.WantPaths)
+					test.Name, tg.typ, p, test.WantPaths)
 			}
-		}
-
-		for _, tg := range []struct {
-			typ string
-			g   traverse.Graph
-		}{
-			{"complete", g.(graph.Graph)},
-			{"incremental", incremental{g.(graph.Weighted)}},
-		} {
-			var (
-				pt Shortest
-
-				panicked bool
-			)
-			func() {
-				defer func() {
-					panicked = recover() != nil
-				}()
-				pt = DijkstraFrom(test.Query.From(), tg.g)
-			}()
-			if panicked || test.HasNegativeWeight {
-				if !test.HasNegativeWeight {
-					t.Errorf("%q %s: unexpected panic", test.Name, tg.typ)
-				}
-				if !panicked {
-					t.Errorf("%q %s: expected panic for negative edge weight", test.Name, tg.typ)
-				}
-				continue
-			}
-
-			if pt.From().ID() != test.Query.From().ID() {
-				t.Fatalf("%q %s: unexpected from node ID: got:%d want:%d", test.Name, tg.typ, pt.From().ID(), test.Query.From().ID())
-			}
-
-			if weight := pt.WeightTo(test.Query.To().ID()); weight != test.Weight {
-				t.Errorf("%q %s: unexpected weight from Weight: got:%f want:%f",
-					test.Name, tg.typ, weight, test.Weight)
-			}
-
-			p, weight := pt.To(test.Query.To().ID())
-			checkPath(tg.typ, p, weight)
 
 			np, weight := pt.To(test.NoPathFor.To().ID())
 			if pt.From().ID() == test.NoPathFor.From().ID() && (np != nil || !math.IsInf(weight, 1)) {
@@ -93,27 +90,6 @@ func TestDijkstraFrom(t *testing.T) {
 					test.Name, tg.typ, np, weight)
 			}
 		}
-
-		// Test the single-destination variant.
-		var (
-			p        []graph.Node
-			weight   float64
-			panicked bool
-		)
-		func() {
-			defer func() {
-				panicked = recover() != nil
-			}()
-			p, weight = DijkstraFromTo(test.Query.From(), test.Query.To(), g.(graph.Graph))
-		}()
-		if panicked || test.HasNegativeWeight {
-			if !test.HasNegativeWeight {
-				t.Errorf("%q: unexpected panic", test.Name)
-			}
-			continue
-		}
-
-		checkPath("from-to", p, weight)
 	}
 }
 

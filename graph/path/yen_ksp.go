@@ -114,6 +114,14 @@ func YenKShortestPaths(g graph.Graph, k int, cost float64, s, t graph.Node) [][]
 		if len(best.path) <= 1 || best.weight > cost {
 			break
 		}
+		if neededPaths := k - int(i); k >= 0 && len(pot) >= neededPaths && best.weight == pot[neededPaths-1].weight {
+			// Terminate early if we have found k-i paths with the same minimum weight.
+			// All subsequent deviations will have the same or greater weight.
+			for j := 0; j < neededPaths; j++ {
+				paths = append(paths, pot[j].path)
+			}
+			break
+		}
 		paths = append(paths, best.path)
 		spurIndex = best.spurIndex
 		pot = pot[1:]

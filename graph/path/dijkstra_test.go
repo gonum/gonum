@@ -27,9 +27,11 @@ func TestDijkstraFrom(t *testing.T) {
 		for _, tg := range []struct {
 			typ string
 			g   traverse.Graph
+			t   graph.Node
 		}{
-			{"complete", g.(graph.Graph)},
-			{"incremental", incremental{g.(graph.Weighted)}},
+			{"complete", g.(graph.Graph), nil},
+			{"incremental", incremental{g.(graph.Weighted)}, nil},
+			{"single-destination", g.(graph.Graph), test.Query.To()},
 		} {
 			var (
 				pt Shortest
@@ -40,13 +42,13 @@ func TestDijkstraFrom(t *testing.T) {
 				defer func() {
 					panicked = recover() != nil
 				}()
-				pt = DijkstraFrom(test.Query.From(), tg.g)
+				pt = dijkstraFrom(test.Query.From(), tg.t, tg.g)
 			}()
 			if panicked || test.HasNegativeWeight {
 				if !test.HasNegativeWeight {
 					t.Errorf("%q %s: unexpected panic", test.Name, tg.typ)
 				}
-				if !panicked {
+				if !panicked && tg.t == nil {
 					t.Errorf("%q %s: expected panic for negative edge weight", test.Name, tg.typ)
 				}
 				continue
@@ -62,7 +64,7 @@ func TestDijkstraFrom(t *testing.T) {
 					test.Name, tg.typ, weight, test.Weight)
 			}
 			if weight := pt.WeightTo(test.Query.To().ID()); weight != test.Weight {
-				t.Errorf("%q %s: unexpected weight from Weight: got:%f want:%f",
+				t.Errorf("%q %s: unexpected weight from WeightTo: got:%f want:%f",
 					test.Name, tg.typ, weight, test.Weight)
 			}
 

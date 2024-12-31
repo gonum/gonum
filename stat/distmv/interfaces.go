@@ -18,9 +18,11 @@ type LogProber interface {
 	LogProb(x []float64) float64
 }
 
-// Rander generates a random number according to the distributon.
+// Rander generates a random number according to the distribution.
+//
 // If the input is non-nil, len(x) must equal len(p) and the dimension of the distribution,
 // otherwise Quantile will panic.
+//
 // If the input is nil, a new slice will be allocated and returned.
 type Rander interface {
 	Rand(x []float64) []float64

@@ -18,7 +18,7 @@ import "gonum.org/v1/gonum/mathext/internal/gonum"
 //	B(a,b) returns NaN if a or b is < 0
 //	B(a,b) returns +Inf if a xor b is 0.
 //
-// See http://mathworld.wolfram.com/BetaFunction.html for more detailed informations.
+// See http://mathworld.wolfram.com/BetaFunction.html for more detailed information.
 func Beta(a, b float64) float64 {
 	return gonum.Beta(a, b)
 }

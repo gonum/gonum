@@ -134,7 +134,7 @@ func (d *Dirichlet) Prob(x []float64) float64 {
 	return math.Exp(d.LogProb(x))
 }
 
-// Rand generates a random number according to the distributon.
+// Rand generates a random number according to the distribution.
 //
 // If dst is not nil, the sample will be stored in-place into dst and returned,
 // otherwise a new slice will be allocated first. If dst is not nil, it must

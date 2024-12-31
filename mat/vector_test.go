@@ -118,7 +118,7 @@ func TestCap(t *testing.T) {
 	} {
 		got := test.vector.Cap()
 		if got != test.want {
-			t.Errorf("unexpected capacty for test %d: got: %d want: %d", i, got, test.want)
+			t.Errorf("unexpected capacity for test %d: got: %d want: %d", i, got, test.want)
 		}
 	}
 }

@@ -28,7 +28,7 @@ func TestHalton(t *testing.T) {
 		batch := mat.NewDense(test.n, test.d, nil)
 		Halton{Kind: Owen, Q: distmv.NewUnitUniform(test.d, nil), Src: src}.Sample(batch)
 
-		// In each dimension, the samples should be stratefied according to the
+		// In each dimension, the samples should be stratified according to the
 		// prime for that dimension. There should be at most 1 sample per
 		// 1/b^k block, where k is log(n)/log(b).
 		for d := 0; d < test.d; d++ {

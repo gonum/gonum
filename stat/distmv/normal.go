@@ -294,7 +294,7 @@ func (n *Normal) Quantile(dst, p []float64) []float64 {
 	return dst
 }
 
-// Rand generates a random sample according to the distributon.
+// Rand generates a random sample according to the distribution.
 //
 // If dst is not nil, the sample will be stored in-place into dst and returned,
 // otherwise a new slice will be allocated first. If dst is not nil, it must
@@ -303,7 +303,7 @@ func (n *Normal) Rand(dst []float64) []float64 {
 	return NormalRand(dst, n.mu, &n.chol, n.src)
 }
 
-// NormalRand generates a random sample from a multivariate normal distributon
+// NormalRand generates a random sample from a multivariate normal distribution
 // given by the mean and the Cholesky factorization of the covariance matrix.
 //
 // If dst is not nil, the sample will be stored in-place into dst and returned,

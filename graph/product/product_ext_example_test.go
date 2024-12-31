@@ -54,13 +54,13 @@ func ExampleModularExt_subgraphIsomorphism() {
 
 	// Make a graph for the query pattern: a love triangle.
 	pattern := simple.NewDirectedGraph()
-	for _, relationsip := range []simple.WeightedEdge{
+	for _, relationship := range []simple.WeightedEdge{
 		{F: person{name: "A", id: -1}, T: person{name: "B", id: -2}, W: 1},
 		{F: person{name: "B", id: -2}, T: person{name: "A", id: -1}, W: 1},
 		{F: person{name: "C", id: -3}, T: person{name: "A", id: -1}, W: -1},
 		{F: person{name: "C", id: -3}, T: person{name: "B", id: -2}, W: 1},
 	} {
-		pattern.SetEdge(relationsip)
+		pattern.SetEdge(relationship)
 	}
 
 	// Produce the modular product of the two graphs.

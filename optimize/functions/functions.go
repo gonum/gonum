@@ -710,7 +710,7 @@ func (BrownAndDennis) Minima() []Minimum {
 //
 // References:
 //   - Spedicato E.: Computational experience with quasi-Newton algorithms for
-//     minimization problems of moderatly large size. Towards Global
+//     minimization problems of moderately large size. Towards Global
 //     Optimization 2 (1978), 209-219
 //   - More, J., Garbow, B.S., Hillstrom, K.E.: Testing unconstrained
 //     optimization software. ACM Trans Math Softw 7 (1981), 17-41
@@ -1334,7 +1334,7 @@ func (PowellBadlyScaled) Minima() []Minimum {
 //
 // References:
 //   - Spedicato E.: Computational experience with quasi-Newton algorithms for
-//     minimization problems of moderatly large size. Towards Global
+//     minimization problems of moderately large size. Towards Global
 //     Optimization 2 (1978), 209-219
 //   - More, J., Garbow, B.S., Hillstrom, K.E.: Testing unconstrained
 //     optimization software. ACM Trans Math Softw 7 (1981), 17-41

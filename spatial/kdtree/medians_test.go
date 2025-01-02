@@ -5,10 +5,9 @@
 package kdtree
 
 import (
+	"math/rand/v2"
 	"sort"
 	"testing"
-
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type ints []int
@@ -19,14 +18,14 @@ func (a ints) Slice(s, e int) SortSlicer { return a[s:e] }
 func (a ints) Swap(i, j int)             { a[i], a[j] = a[j], a[i] }
 
 func TestPartition(t *testing.T) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	for p := 0; p < 100; p++ {
 		list := make(ints, 1e5)
 		for i := range list {
 			list[i] = rnd.Int()
 		}
-		pi := Partition(list, rnd.Intn(list.Len()))
+		pi := Partition(list, rnd.IntN(list.Len()))
 		for i := 0; i < pi; i++ {
 			if list[i] > list[pi] {
 				t.Errorf("unexpected partition sort order p[%d] > p[%d]: %d > %d", i, pi, list[i], list[pi])
@@ -41,12 +40,12 @@ func TestPartition(t *testing.T) {
 }
 
 func TestPartitionCollision(t *testing.T) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	for p := 0; p < 10; p++ {
 		list := make(ints, 10)
 		for i := range list {
-			list[i] = rnd.Intn(5)
+			list[i] = rnd.IntN(5)
 		}
 		pi := Partition(list, p)
 		for i := 0; i < pi; i++ {
@@ -68,12 +67,12 @@ func sortSelection(list ints, k int) int {
 }
 
 func TestSelect(t *testing.T) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	for k := 0; k < 2121; k++ {
 		list := make(ints, 2121)
 		for i := range list {
-			list[i] = rnd.Intn(1000)
+			list[i] = rnd.IntN(1000)
 		}
 		Select(list, k)
 		sorted := append(ints(nil), list...)
@@ -85,7 +84,7 @@ func TestSelect(t *testing.T) {
 }
 
 func TestMedianOfMedians(t *testing.T) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	list := make(ints, 1e4)
 	for i := range list {
@@ -107,7 +106,7 @@ func TestMedianOfMedians(t *testing.T) {
 }
 
 func TestMedianOfRandoms(t *testing.T) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	list := make(ints, 1e4)
 	for i := range list {
@@ -131,7 +130,7 @@ func TestMedianOfRandoms(t *testing.T) {
 var benchSink int
 
 func BenchmarkMedianOfMedians(b *testing.B) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	for i := 0; i < b.N; i++ {
 		b.StopTimer()
@@ -145,7 +144,7 @@ func BenchmarkMedianOfMedians(b *testing.B) {
 }
 
 func BenchmarkPartitionMedianOfMedians(b *testing.B) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	for i := 0; i < b.N; i++ {
 		b.StopTimer()
@@ -159,7 +158,7 @@ func BenchmarkPartitionMedianOfMedians(b *testing.B) {
 }
 
 func BenchmarkMedianOfRandoms(b *testing.B) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	b.StopTimer()
 	list := make(ints, 1e4)
@@ -173,7 +172,7 @@ func BenchmarkMedianOfRandoms(b *testing.B) {
 }
 
 func BenchmarkPartitionMedianOfRandoms(b *testing.B) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	b.StopTimer()
 	list := make(ints, 1e4)

@@ -6,10 +6,10 @@ package testlapack
 
 import (
 	"math"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Dorgqrer interface {
@@ -18,7 +18,7 @@ type Dorgqrer interface {
 }
 
 func DorgqrTest(t *testing.T, impl Dorgqrer) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	// TODO(btracey): Base tests off of nb and nx.
 	for _, test := range []struct{ m, n, k, lda int }{
 		{10, 10, 10, 0},

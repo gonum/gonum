@@ -7,11 +7,11 @@ package mat
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"strconv"
 	"testing"
 
 	"gonum.org/v1/gonum/floats/scalar"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestCholesky(t *testing.T) {
@@ -331,7 +331,7 @@ func TestCloneCholesky(t *testing.T) {
 
 func TestCholeskyInverseTo(t *testing.T) {
 	t.Parallel()
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, n := range []int{1, 3, 5, 9} {
 		data := make([]float64, n*n)
 		for i := range data {
@@ -364,7 +364,7 @@ func TestCholeskyInverseTo(t *testing.T) {
 
 func TestCholeskySymRankOne(t *testing.T) {
 	t.Parallel()
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, n := range []int{1, 2, 3, 4, 5, 7, 10, 20, 50, 100} {
 		for k := 0; k < 50; k++ {
 			// Construct a random positive definite matrix.
@@ -628,7 +628,7 @@ func equalApproxChol(a, b *Cholesky, matTol, condTol float64) bool {
 func BenchmarkCholeskyFactorize(b *testing.B) {
 	for _, n := range []int{10, 100, 1000} {
 		b.Run("n="+strconv.Itoa(n), func(b *testing.B) {
-			rnd := rand.New(rand.NewSource(1))
+			rnd := rand.New(rand.NewPCG(1, 1))
 
 			data := make([]float64, n*n)
 			for i := range data {
@@ -652,7 +652,7 @@ func BenchmarkCholeskyFactorize(b *testing.B) {
 func BenchmarkCholeskyToSym(b *testing.B) {
 	for _, n := range []int{10, 100, 1000} {
 		b.Run("n="+strconv.Itoa(n), func(b *testing.B) {
-			rnd := rand.New(rand.NewSource(1))
+			rnd := rand.New(rand.NewPCG(1, 1))
 
 			data := make([]float64, n*n)
 			for i := range data {
@@ -680,7 +680,7 @@ func BenchmarkCholeskyToSym(b *testing.B) {
 func BenchmarkCholeskyInverseTo(b *testing.B) {
 	for _, n := range []int{10, 100, 1000} {
 		b.Run("n="+strconv.Itoa(n), func(b *testing.B) {
-			rnd := rand.New(rand.NewSource(1))
+			rnd := rand.New(rand.NewPCG(1, 1))
 
 			data := make([]float64, n*n)
 			for i := range data {
@@ -715,7 +715,7 @@ func TestBandCholeskySolveTo(t *testing.T) {
 		nrhs = 4
 		tol  = 1e-14
 	)
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, n := range []int{1, 2, 3, 5, 10} {
 		for _, k := range []int{0, 1, n / 2, n - 1} {
 			k := min(k, n-1)
@@ -781,7 +781,7 @@ func TestBandCholeskySolveVecTo(t *testing.T) {
 	t.Parallel()
 
 	const tol = 1e-14
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, n := range []int{1, 2, 3, 5, 10} {
 		for _, k := range []int{0, 1, n / 2, n - 1} {
 			k := min(k, n-1)
@@ -845,7 +845,7 @@ func TestBandCholeskyAt(t *testing.T) {
 	t.Parallel()
 
 	const tol = 1e-14
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, n := range []int{1, 2, 3, 5, 10} {
 		for _, k := range []int{0, 1, n / 2, n - 1} {
 			k := min(k, n-1)
@@ -883,7 +883,7 @@ func TestBandCholeskyDet(t *testing.T) {
 	t.Parallel()
 
 	const tol = 1e-14
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, n := range []int{1, 2, 3, 5, 10} {
 		for _, k := range []int{0, 1, n / 2, n - 1} {
 			k := min(k, n-1)
@@ -927,7 +927,7 @@ func TestPivotedCholesky(t *testing.T) {
 	t.Parallel()
 
 	const tol = 1e-14
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	for _, n := range []int{1, 2, 3, 4, 5, 10} {
 		for _, rank := range []int{int(0.3 * float64(n)), int(0.7 * float64(n)), n} {
 			name := fmt.Sprintf("n=%d, rank=%d", n, rank)
@@ -1010,7 +1010,7 @@ func TestPivotedCholeskySolveTo(t *testing.T) {
 		nrhs = 4
 		tol  = 1e-14
 	)
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, n := range []int{1, 2, 3, 5, 10} {
 		a := NewSymDense(n, nil)
 		for i := 0; i < n; i++ {
@@ -1073,7 +1073,7 @@ func TestPivotedCholeskySolveVecTo(t *testing.T) {
 	t.Parallel()
 
 	const tol = 1e-14
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, n := range []int{1, 2, 3, 5, 10} {
 
 		a := NewSymDense(n, nil)

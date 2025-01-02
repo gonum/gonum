@@ -9,6 +9,7 @@ package testgraph // import "gonum.org/v1/gonum/graph/testgraph"
 import (
 	"cmp"
 	"fmt"
+	"math/rand/v2"
 	"reflect"
 	"slices"
 	"testing"
@@ -17,7 +18,6 @@ import (
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/set"
 	"gonum.org/v1/gonum/internal/order"
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -1607,12 +1607,12 @@ func AddEdges(t *testing.T, n int, g EdgeAdder, newNode func(id int64) graph.Nod
 		graph.Node
 	}
 
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < n; i++ {
-		u := newNode(rnd.Int63n(int64(n)))
+		u := newNode(rnd.Int64N(int64(n)))
 		var v graph.Node
 		for {
-			v = newNode(rnd.Int63n(int64(n)))
+			v = newNode(rnd.Int64N(int64(n)))
 			if g.Edge(u.ID(), v.ID()) != nil {
 				continue
 			}
@@ -1674,12 +1674,12 @@ func AddWeightedEdges(t *testing.T, n int, g WeightedEdgeAdder, w float64, newNo
 		graph.Node
 	}
 
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < n; i++ {
-		u := newNode(rnd.Int63n(int64(n)))
+		u := newNode(rnd.Int64N(int64(n)))
 		var v graph.Node
 		for {
-			v = newNode(rnd.Int63n(int64(n)))
+			v = newNode(rnd.Int64N(int64(n)))
 			if g.Edge(u.ID(), v.ID()) != nil {
 				continue
 			}
@@ -1797,11 +1797,11 @@ func AddLines(t *testing.T, n int, g LineAdder, newNode func(id int64) graph.Nod
 		graph.Node
 	}
 
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	seen := make(tripleInt64s)
 	for i := 0; i < n; i++ {
-		u := newNode(rnd.Int63n(int64(n)))
-		v := newNode(rnd.Int63n(int64(n)))
+		u := newNode(rnd.Int64N(int64(n)))
+		v := newNode(rnd.Int64N(int64(n)))
 		prev := g.Lines(u.ID(), v.ID())
 		l := g.NewLine(u, v)
 		if seen.has(u.ID(), v.ID(), l.ID()) {
@@ -1861,11 +1861,11 @@ func AddWeightedLines(t *testing.T, n int, g WeightedLineAdder, w float64, newNo
 		graph.Node
 	}
 
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	seen := make(tripleInt64s)
 	for i := 0; i < n; i++ {
-		u := newNode(rnd.Int63n(int64(n)))
-		v := newNode(rnd.Int63n(int64(n)))
+		u := newNode(rnd.Int64N(int64(n)))
+		v := newNode(rnd.Int64N(int64(n)))
 		prev := g.Lines(u.ID(), v.ID())
 		l := g.NewWeightedLine(u, v, w)
 		if seen.has(u.ID(), v.ID(), l.ID()) {
@@ -2113,7 +2113,7 @@ func NewRandomNodes(n int, seed uint64, new func(id int64) graph.Node) *RandomNo
 		seed:    seed,
 		newNode: new,
 
-		state: rand.New(rand.NewSource(seed)),
+		state: rand.New(rand.NewPCG(seed, seed)),
 		seen:  make(set.Ints[int64]),
 		count: 0,
 	}
@@ -2135,7 +2135,7 @@ func (n *RandomNodes) Next() bool {
 		if n.state.Float64() < 0.5 {
 			sign *= -1
 		}
-		n.curr = sign * n.state.Int63()
+		n.curr = sign * n.state.Int64()
 		if !n.seen.Has(n.curr) {
 			n.seen.Add(n.curr)
 			return true
@@ -2154,7 +2154,7 @@ func (n *RandomNodes) Node() graph.Node {
 
 // Reset returns the iterator to its initial state.
 func (n *RandomNodes) Reset() {
-	n.state = rand.New(rand.NewSource(n.seed))
+	n.state = rand.New(rand.NewPCG(n.seed, n.seed))
 	n.seen = make(set.Ints[int64])
 	n.count = 0
 }

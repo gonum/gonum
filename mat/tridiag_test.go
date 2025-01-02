@@ -6,10 +6,10 @@ package mat
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"reflect"
 	"testing"
 
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/lapack/lapack64"
 )
 
@@ -328,7 +328,7 @@ func TestTridiagSolveTo(t *testing.T) {
 
 	const tol = 1e-13
 
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	random := func(n int) []float64 {
 		d := make([]float64, n)
 		for i := range d {
@@ -418,7 +418,7 @@ func TestTridiagSolveVecTo(t *testing.T) {
 
 	const tol = 1e-13
 
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	random := func(n int) []float64 {
 		d := make([]float64, n)
 		for i := range d {

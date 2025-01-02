@@ -5,12 +5,12 @@
 package testlapack
 
 import (
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
 	"gonum.org/v1/gonum/floats/scalar"
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/lapack"
 )
 
@@ -21,7 +21,7 @@ type Dggsvd3er interface {
 func Dggsvd3Test(t *testing.T, impl Dggsvd3er) {
 	const tol = 1e-13
 
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for cas, test := range []struct {
 		m, p, n, lda, ldb, ldu, ldv, ldq int
 

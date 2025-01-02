@@ -7,11 +7,11 @@ package barneshut
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"reflect"
 	"testing"
 
 	"gonum.org/v1/gonum/floats/scalar"
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/spatial/r3"
 )
 
@@ -411,7 +411,7 @@ func TestVolumeForceOn(t *testing.T) {
 		tol  = 1e-3
 	)
 	for _, n := range []int{3e3, 1e4, 3e4} {
-		rnd := rand.New(rand.NewSource(1))
+		rnd := rand.New(rand.NewPCG(1, 1))
 		particles := make([]Particle3, n)
 		for i := range particles {
 			particles[i] = particle3{x: size * rnd.Float64(), y: size * rnd.Float64(), z: size * rnd.Float64(), m: 1}
@@ -467,7 +467,7 @@ var (
 
 func BenchmarkNewVolume(b *testing.B) {
 	for _, n := range []int{1e3, 1e4, 1e5, 1e6} {
-		rnd := rand.New(rand.NewSource(1))
+		rnd := rand.New(rand.NewPCG(1, 1))
 		particles := make([]Particle3, n)
 		for i := range particles {
 			particles[i] = particle3{x: rnd.Float64(), y: rnd.Float64(), z: rnd.Float64(), m: 1}
@@ -492,7 +492,7 @@ func BenchmarkVolumeForceOn(b *testing.B) {
 				// Don't run unreasonably long benchmarks.
 				continue
 			}
-			rnd := rand.New(rand.NewSource(1))
+			rnd := rand.New(rand.NewPCG(1, 1))
 			particles := make([]Particle3, n)
 			for i := range particles {
 				particles[i] = particle3{x: rnd.Float64(), y: rnd.Float64(), z: rnd.Float64(), m: 1}
@@ -520,7 +520,7 @@ func BenchmarkVolumeFull(b *testing.B) {
 				// Don't run unreasonably long benchmarks.
 				continue
 			}
-			rnd := rand.New(rand.NewSource(1))
+			rnd := rand.New(rand.NewPCG(1, 1))
 			particles := make([]Particle3, n)
 			for i := range particles {
 				particles[i] = particle3{x: rnd.Float64(), y: rnd.Float64(), z: rnd.Float64(), m: 1}

@@ -7,10 +7,10 @@ package testblas
 import (
 	"fmt"
 	"math/cmplx"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Zsyrker interface {
@@ -35,7 +35,7 @@ func ZsyrkTest(t *testing.T, impl Zsyrker) {
 func zsyrkTest(t *testing.T, impl Zsyrker, uplo blas.Uplo, trans blas.Transpose, n, k int) {
 	const tol = 1e-13
 
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	rowA, colA := n, k
 	if trans == blas.Trans {

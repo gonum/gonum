@@ -6,10 +6,10 @@ package path
 
 import (
 	"math"
+	"math/rand/v2"
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/simple"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 // JohnsonAllPaths returns a shortest-path tree for shortest paths in the graph g.
@@ -32,7 +32,7 @@ func JohnsonAllPaths(g graph.Graph) (paths AllShortest, ok bool) {
 	for {
 		// Choose a random node ID until we find
 		// one that is not in g.
-		q = sign * rand.Int63()
+		q = sign * rand.Int64()
 		if _, exists := paths.indexOf[q]; !exists {
 			break
 		}

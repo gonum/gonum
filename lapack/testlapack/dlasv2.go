@@ -5,10 +5,10 @@
 package testlapack
 
 import (
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Dlasv2er interface {
@@ -16,7 +16,7 @@ type Dlasv2er interface {
 }
 
 func Dlasv2Test(t *testing.T, impl Dlasv2er) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < 100; i++ {
 		f := rnd.NormFloat64()
 		g := rnd.NormFloat64()

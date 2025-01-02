@@ -5,11 +5,11 @@
 package distuv
 
 import (
+	"math/rand/v2"
 	"sort"
 	"testing"
 
 	"gonum.org/v1/gonum/floats/scalar"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestBinomialProb(t *testing.T) {
@@ -115,7 +115,7 @@ func TestBinomialCDF(t *testing.T) {
 
 func TestBinomial(t *testing.T) {
 	t.Parallel()
-	src := rand.New(rand.NewSource(1))
+	src := rand.New(rand.NewPCG(1, 1))
 	for i, b := range []Binomial{
 		{100, 0.5, src},
 		{15, 0.25, src},

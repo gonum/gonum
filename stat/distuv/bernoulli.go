@@ -6,8 +6,7 @@ package distuv
 
 import (
 	"math"
-
-	"gonum.org/v1/gonum/internal/rand"
+	"math/rand/v2"
 )
 
 // Bernoulli represents a random variable whose value is 1 with probability p and

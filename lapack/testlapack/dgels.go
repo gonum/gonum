@@ -5,12 +5,12 @@
 package testlapack
 
 import (
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Dgelser interface {
@@ -18,7 +18,7 @@ type Dgelser interface {
 }
 
 func DgelsTest(t *testing.T, impl Dgelser) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, trans := range []blas.Transpose{blas.NoTrans, blas.Trans} {
 		for _, test := range []struct {
 			m, n, nrhs, lda, ldb int

@@ -8,6 +8,7 @@ import (
 	"flag"
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"os"
 	"reflect"
 	"slices"
@@ -15,8 +16,6 @@ import (
 	"strings"
 	"testing"
 	"unsafe"
-
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 var (
@@ -219,7 +218,7 @@ func nearest(q Point, p Points) (Point, float64) {
 }
 
 func TestNearestRandom(t *testing.T) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	const (
 		min = 0.0
@@ -483,7 +482,7 @@ func TestDoBounded(t *testing.T) {
 }
 
 func BenchmarkNew(b *testing.B) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	p := make(Points, 1e5)
 	for i := range p {
 		p[i] = Point{rnd.Float64(), rnd.Float64(), rnd.Float64()}
@@ -495,7 +494,7 @@ func BenchmarkNew(b *testing.B) {
 }
 
 func BenchmarkNewBounds(b *testing.B) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	p := make(Points, 1e5)
 	for i := range p {
 		p[i] = Point{rnd.Float64(), rnd.Float64(), rnd.Float64()}
@@ -507,7 +506,7 @@ func BenchmarkNewBounds(b *testing.B) {
 }
 
 func BenchmarkInsert(b *testing.B) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	t := &Tree{}
 	for i := 0; i < b.N; i++ {
 		t.Insert(Point{rnd.Float64(), rnd.Float64(), rnd.Float64()}, false)
@@ -515,7 +514,7 @@ func BenchmarkInsert(b *testing.B) {
 }
 
 func BenchmarkInsertBounds(b *testing.B) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	t := &Tree{}
 	for i := 0; i < b.N; i++ {
 		t.Insert(Point{rnd.Float64(), rnd.Float64(), rnd.Float64()}, true)
@@ -523,7 +522,7 @@ func BenchmarkInsertBounds(b *testing.B) {
 }
 
 func Benchmark(b *testing.B) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	data := make(Points, 1e2)
 	for i := range data {
 		data[i] = Point{rnd.Float64(), rnd.Float64(), rnd.Float64()}

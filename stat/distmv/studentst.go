@@ -6,12 +6,12 @@ package distmv
 
 import (
 	"math"
+	"math/rand/v2"
 	"sort"
 
 	"golang.org/x/tools/container/intsets"
 
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/stat"
 	"gonum.org/v1/gonum/stat/distuv"

@@ -7,10 +7,10 @@ package testblas
 import (
 	"fmt"
 	"math/cmplx"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Zhemmer interface {
@@ -35,7 +35,7 @@ func ZhemmTest(t *testing.T, impl Zhemmer) {
 func zhemmTest(t *testing.T, impl Zhemmer, side blas.Side, uplo blas.Uplo, m, n int) {
 	const tol = 1e-13
 
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	nA := m
 	if side == blas.Right {

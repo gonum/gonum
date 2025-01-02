@@ -6,9 +6,8 @@ package testlapack
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
-
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func Dlaqr5Benchmark(b *testing.B, impl Dlaqr5er) {
@@ -17,7 +16,7 @@ func Dlaqr5Benchmark(b *testing.B, impl Dlaqr5er) {
 		iplusj
 		laplacian
 	)
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, typ := range []int{random, iplusj, laplacian} {
 		for _, n := range []int{100, 200, 500, 1000} {
 			h := zeros(n, n, n)

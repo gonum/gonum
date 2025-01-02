@@ -6,11 +6,11 @@ package distuv
 
 import (
 	"math"
+	"math/rand/v2"
 	"sort"
 	"testing"
 
 	"gonum.org/v1/gonum/floats/scalar"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestChiSquaredProb(t *testing.T) {
@@ -55,7 +55,7 @@ func TestChiSquaredCDF(t *testing.T) {
 
 func TestChiSquared(t *testing.T) {
 	t.Parallel()
-	src := rand.New(rand.NewSource(1))
+	src := rand.New(rand.NewPCG(1, 1))
 	for i, b := range []ChiSquared{
 		{3, src},
 		{1.5, src},

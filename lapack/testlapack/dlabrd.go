@@ -6,9 +6,8 @@ package testlapack
 
 import (
 	"math"
+	"math/rand/v2"
 	"testing"
-
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Dlabrder interface {
@@ -16,7 +15,7 @@ type Dlabrder interface {
 }
 
 func DlabrdTest(t *testing.T, impl Dlabrder) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, test := range []struct {
 		m, n, nb, lda, ldx, ldy int
 	}{

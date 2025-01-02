@@ -5,16 +5,16 @@
 package testlapack
 
 import (
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/lapack"
 )
 
 func DgeevBenchmark(b *testing.B, impl Dgeever) {
 	var resultGeneral blas64.General
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	benchmarks := []struct {
 		name string
 		a    blas64.General

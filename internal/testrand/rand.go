@@ -7,8 +7,7 @@ package testrand
 
 import (
 	"flag"
-
-	"gonum.org/v1/gonum/internal/rand"
+	"math/rand/v2"
 )
 
 var (
@@ -25,25 +24,23 @@ type TB interface {
 // Source corresponds to the interface in golang.org/x/exp/rand.Source.
 type Source = rand.Source
 
-// Rand corresponds to golang.org/x/exp/rand.Rand.
+// Rand corresponds to math/rand/v2.Rand.
 type Rand interface {
 	ExpFloat64() float64
 	Float32() float32
 	Float64() float64
 	Int() int
-	Int31() int32
-	Int31n(n int32) int32
-	Int63() int64
-	Int63n(n int64) int64
-	Intn(n int) int
+	Int32() int32
+	Int32N(n int32) int32
+	Int64() int64
+	Int64N(n int64) int64
+	IntN(n int) int
 	NormFloat64() float64
 	Perm(n int) []int
-	Read(p []byte) (n int, err error)
-	Seed(seed uint64)
 	Shuffle(n int, swap func(i, j int))
 	Uint32() uint32
 	Uint64() uint64
-	Uint64n(n uint64) uint64
+	Uint64N(n uint64) uint64
 }
 
 // New returns a new random number generator using the global flags.
@@ -55,13 +52,13 @@ func New(tb TB) Rand {
 
 	// Don't log the default case.
 	if seed == 1 && *extremeFlag == 0 && *nanFlag == 0 {
-		base := rand.New(rand.NewSource(seed))
+		base := rand.New(rand.NewPCG(seed, seed))
 		return base
 	}
 
 	tb.Logf("seed=%d, prob=%.2f, nan=%.2f", seed, *extremeFlag, *nanFlag)
 
-	base := rand.New(rand.NewSource(seed))
+	base := rand.New(rand.NewPCG(seed, seed))
 	if *extremeFlag <= 0 && *nanFlag <= 0 {
 		return base
 	}
@@ -78,9 +75,9 @@ func NewSource(tb TB) Source {
 
 	// Don't log the default case.
 	if seed == 1 {
-		return rand.NewSource(seed)
+		return rand.NewPCG(seed, seed)
 	}
 
 	tb.Logf("seed %d", seed)
-	return rand.NewSource(seed)
+	return rand.NewPCG(seed, seed)
 }

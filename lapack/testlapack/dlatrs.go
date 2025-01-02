@@ -7,11 +7,11 @@ package testlapack
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Dlatrser interface {
@@ -19,7 +19,7 @@ type Dlatrser interface {
 }
 
 func DlatrsTest(t *testing.T, impl Dlatrser) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, uplo := range []blas.Uplo{blas.Upper, blas.Lower} {
 		for _, trans := range []blas.Transpose{blas.Trans, blas.NoTrans} {
 			for _, n := range []int{0, 1, 2, 3, 4, 5, 6, 7, 10, 20, 50, 100} {

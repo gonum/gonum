@@ -6,10 +6,9 @@ package distuv
 
 import (
 	"math"
+	"math/rand/v2"
 	"sort"
 	"testing"
-
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestExponentialProb(t *testing.T) {
@@ -45,12 +44,12 @@ func TestExponentialProb(t *testing.T) {
 
 func TestExponentialFitPrior(t *testing.T) {
 	t.Parallel()
-	testConjugateUpdate(t, func() ConjugateUpdater { return &Exponential{Rate: 13.7, Src: rand.NewSource(1)} })
+	testConjugateUpdate(t, func() ConjugateUpdater { return &Exponential{Rate: 13.7, Src: rand.NewPCG(1, 1)} })
 }
 
 func TestExponential(t *testing.T) {
 	t.Parallel()
-	src := rand.New(rand.NewSource(1))
+	src := rand.New(rand.NewPCG(1, 1))
 	for i, dist := range []Exponential{
 		{Rate: 3, Src: src},
 		{Rate: 1.5, Src: src},

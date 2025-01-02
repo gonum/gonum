@@ -6,9 +6,9 @@ package testlapack
 
 import (
 	"math"
+	"math/rand/v2"
 	"testing"
 
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/lapack"
 )
 
@@ -18,7 +18,7 @@ type Dlanhser interface {
 
 func DlanhsTest(t *testing.T, impl Dlanhser) {
 	const tol = 1e-15
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, n := range []int{0, 1, 2, 4, 9} {
 		for _, lda := range []int{max(1, n), n + 5} {
 			a := randomGeneral(n, n, lda, rnd)

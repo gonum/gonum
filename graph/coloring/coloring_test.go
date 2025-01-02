@@ -7,6 +7,7 @@ package coloring
 import (
 	"context"
 	"flag"
+	"math/rand/v2"
 	"testing"
 	"time"
 
@@ -14,7 +15,6 @@ import (
 	"gonum.org/v1/gonum/graph/encoding/graph6"
 	"gonum.org/v1/gonum/graph/internal/set"
 	"gonum.org/v1/gonum/graph/simple"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 var runLong = flag.Bool("color.long", false, "run long exact coloring tests")
@@ -511,7 +511,7 @@ func TestRandomized(t *testing.T) {
 	for seed := uint64(1); seed <= 1000; seed++ {
 		for _, test := range coloringTests {
 			for _, partial := range []map[int64]int{nil, test.partial} {
-				k, colors, err := Randomized(test.g, partial, rand.NewSource(seed))
+				k, colors, err := Randomized(test.g, partial, rand.NewPCG(seed, seed))
 
 				if partial == nil && k != test.colors && !test.randomized.Has(k) {
 					t.Errorf("unexpected chromatic number for %q with seed=%d: got:%d want:%d or in %v\ncolors:%v",
@@ -767,7 +767,7 @@ func BenchmarkColoring(b *testing.B) {
 				})
 			}
 			b.Run("Randomized", func(b *testing.B) {
-				rnd := rand.NewSource(1)
+				rnd := rand.NewPCG(1, 1)
 				b.ResetTimer()
 				for i := 0; i < b.N; i++ {
 					_, _, err := Randomized(bench.g, nil, rnd)

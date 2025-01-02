@@ -6,13 +6,12 @@ package testrand
 
 import (
 	"math"
+	"math/rand/v2"
 	"testing"
-
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestExtreme_NaN(t *testing.T) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	rnd := rand.New(src)
 	ext := newExtreme(0, 1, rnd)
 

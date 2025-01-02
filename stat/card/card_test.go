@@ -10,13 +10,13 @@ import (
 	"hash"
 	"hash/fnv"
 	"io"
+	"math/rand/v2"
 	"strconv"
 	"strings"
 	"sync"
 	"testing"
 
 	"gonum.org/v1/gonum/floats/scalar"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 // exact is an exact cardinality accumulator.
@@ -79,7 +79,7 @@ func TestCounters(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
-			rnd := rand.New(rand.NewSource(1))
+			rnd := rand.New(rand.NewPCG(1, 1))
 			var dst []byte
 			c := test.counter()
 			for i := 0; i < int(test.count); i++ {
@@ -115,7 +115,7 @@ func TestUnion(t *testing.T) {
 		test := test
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
-			rnd := rand.New(rand.NewSource(1))
+			rnd := rand.New(rand.NewPCG(1, 1))
 			var dst []byte
 			var cs [2]counter
 			for j := range cs {
@@ -186,7 +186,7 @@ func TestResetCounters(t *testing.T) {
 		c := test.resetCounter()
 		var counts [2]float64
 		for k := range counts {
-			rnd := rand.New(rand.NewSource(1))
+			rnd := rand.New(rand.NewPCG(1, 1))
 			for i := 0; i < test.count; i++ {
 				dst = strconv.AppendUint(dst[:0], rnd.Uint64(), 16)
 				dst = append(dst, '-')
@@ -277,7 +277,7 @@ func TestBinaryEncoding(t *testing.T) {
 		hashes = sync.Map{}
 	}()
 	for _, test := range counterEncoderTests {
-		rnd := rand.New(rand.NewSource(1))
+		rnd := rand.New(rand.NewPCG(1, 1))
 		src := test.src()
 		for i := 0; i < test.count; i++ {
 			buf := strconv.AppendUint(nil, rnd.Uint64(), 16)
@@ -403,7 +403,7 @@ var counterBenchmarks = []struct {
 func BenchmarkCounters(b *testing.B) {
 	for _, bench := range counterBenchmarks {
 		c := bench.counter()
-		rnd := rand.New(rand.NewSource(1))
+		rnd := rand.New(rand.NewPCG(1, 1))
 		var dst []byte
 		b.Run(bench.name, func(b *testing.B) {
 			for i := 0; i < b.N; i++ {

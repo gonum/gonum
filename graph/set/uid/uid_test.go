@@ -7,13 +7,12 @@ package uid
 
 import (
 	"math"
+	"math/rand/v2"
 	"testing"
-
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestSetChurn(t *testing.T) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	set := NewSet()
 
@@ -29,7 +28,7 @@ func TestSetChurn(t *testing.T) {
 			set.Use(id)
 			seen[id] = true
 			if rnd.Float64() < 0.01 {
-				j := rnd.Intn(10)
+				j := rnd.IntN(10)
 				for id := range seen {
 					set.Release(id)
 					delete(seen, id)

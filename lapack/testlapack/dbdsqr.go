@@ -6,6 +6,7 @@ package testlapack
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"sort"
 	"testing"
 
@@ -13,7 +14,6 @@ import (
 	"gonum.org/v1/gonum/blas/blas64"
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/floats/scalar"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Dbdsqrer interface {
@@ -21,7 +21,7 @@ type Dbdsqrer interface {
 }
 
 func DbdsqrTest(t *testing.T, impl Dbdsqrer) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	bi := blas64.Implementation()
 	for _, uplo := range []blas.Uplo{blas.Upper, blas.Lower} {
 		for _, test := range []struct {

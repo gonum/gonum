@@ -7,10 +7,10 @@ package gen
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/internal/order"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 // UndirectedMutator is an undirected graph builder that can remove edges.
@@ -47,11 +47,11 @@ func Duplication(dst UndirectedMutator, n int, delta, alpha, sigma float64, src 
 	)
 	if src == nil {
 		rnd = rand.Float64
-		rndN = rand.Intn
+		rndN = rand.IntN
 	} else {
 		r := rand.New(src)
 		rnd = r.Float64
-		rndN = r.Intn
+		rndN = r.IntN
 	}
 
 	nodes := graph.NodesOf(dst.Nodes())

@@ -8,19 +8,19 @@ import (
 	"bytes"
 	"fmt"
 	"math/bits"
+	"math/rand/v2"
 	"slices"
 	"strconv"
 	"testing"
 	"unsafe"
 
 	"gonum.org/v1/gonum/cmplxs"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestCoefficients(t *testing.T) {
 	const tol = 1e-8
 
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	for n := 4; n < 1<<20; n <<= 1 {
 		for i := 0; i < 10; i++ {
 			t.Run(fmt.Sprintf("Radix2/%d", n), func(t *testing.T) {
@@ -73,7 +73,7 @@ func TestCoefficients(t *testing.T) {
 func TestSequence(t *testing.T) {
 	const tol = 1e-10
 
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	for n := 4; n < 1<<20; n <<= 1 {
 		for i := 0; i < 10; i++ {
 			t.Run(fmt.Sprintf("Radix2/%d", n), func(t *testing.T) {
@@ -185,7 +185,7 @@ func TestBitPairReversePermute(t *testing.T) {
 }
 
 func TestReversePairs(t *testing.T) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < 1000; i++ {
 		x := uint(rnd.Uint64())
 		got := reversePairs(x)
@@ -254,7 +254,7 @@ func TestTrimRadix4(t *testing.T) {
 
 func BenchmarkCoefficients(b *testing.B) {
 	for n := 16; n < 1<<24; n <<= 3 {
-		d := randComplexes(n, rand.NewSource(1))
+		d := randComplexes(n, rand.NewPCG(1, 1))
 		b.Run(fmt.Sprintf("Radix2/%d", n), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
 				CoefficientsRadix2(d)
@@ -273,7 +273,7 @@ func BenchmarkCoefficients(b *testing.B) {
 
 func BenchmarkSequence(b *testing.B) {
 	for n := 16; n < 1<<24; n <<= 3 {
-		d := randComplexes(n, rand.NewSource(1))
+		d := randComplexes(n, rand.NewPCG(1, 1))
 		b.Run(fmt.Sprintf("Radix2/%d", n), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
 				SequenceRadix2(d)

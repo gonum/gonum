@@ -6,12 +6,12 @@ package path
 
 import (
 	"math"
+	"math/rand/v2"
 	"slices"
 
 	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/set"
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -354,7 +354,7 @@ func (p ShortestAlts) To(vid int64) (path []graph.Node, weight float64, unique b
 			var next int
 			if len(c) != 1 {
 				unique = false
-				next = c[rand.Intn(len(c))]
+				next = c[rand.IntN(len(c))]
 			} else {
 				next = c[0]
 			}
@@ -382,7 +382,7 @@ func (p ShortestAlts) To(vid int64) (path []graph.Node, weight float64, unique b
 			c := p.next[to]
 			if len(c) != 1 {
 				unique = false
-				next = c[rand.Intn(len(c))]
+				next = c[rand.IntN(len(c))]
 			} else {
 				next = c[0]
 			}
@@ -659,7 +659,7 @@ func (p AllShortest) Between(uid, vid int64) (path []graph.Node, weight float64,
 		c := p.at(from, to)
 		if len(c) != 1 {
 			unique = false
-			next = c[rand.Intn(len(c))]
+			next = c[rand.IntN(len(c))]
 		} else {
 			next = c[0]
 		}

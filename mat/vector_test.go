@@ -5,11 +5,11 @@
 package mat
 
 import (
+	"math/rand/v2"
 	"reflect"
 	"testing"
 
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/stat/combin"
 )
 
@@ -483,7 +483,7 @@ func TestVecDenseDivElem(t *testing.T) {
 }
 
 func TestVecDensePermute(t *testing.T) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for n := 1; n <= 6; n++ {
 		for k, perm := range combin.Permutations(n, n) {
 			v := NewVecDense(n, nil)
@@ -533,7 +533,7 @@ func BenchmarkAddScaledVec1000Inc20(b *testing.B)   { addScaledVecBench(b, 1000,
 func BenchmarkAddScaledVec10000Inc20(b *testing.B)  { addScaledVecBench(b, 10000, 20) }
 func BenchmarkAddScaledVec100000Inc20(b *testing.B) { addScaledVecBench(b, 100000, 20) }
 func addScaledVecBench(b *testing.B, size, inc int) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	x := randVecDense(size, inc, 1, src)
 	y := randVecDense(size, inc, 1, src)
 	b.ResetTimer()
@@ -559,7 +559,7 @@ func BenchmarkScaleVec1000Inc20(b *testing.B)   { scaleVecBench(b, 1000, 20) }
 func BenchmarkScaleVec10000Inc20(b *testing.B)  { scaleVecBench(b, 10000, 20) }
 func BenchmarkScaleVec100000Inc20(b *testing.B) { scaleVecBench(b, 100000, 20) }
 func scaleVecBench(b *testing.B, size, inc int) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	x := randVecDense(size, inc, 1, src)
 	b.ResetTimer()
 	var v VecDense
@@ -584,7 +584,7 @@ func BenchmarkAddVec1000Inc20(b *testing.B)   { addVecBench(b, 1000, 20) }
 func BenchmarkAddVec10000Inc20(b *testing.B)  { addVecBench(b, 10000, 20) }
 func BenchmarkAddVec100000Inc20(b *testing.B) { addVecBench(b, 100000, 20) }
 func addVecBench(b *testing.B, size, inc int) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	x := randVecDense(size, inc, 1, src)
 	y := randVecDense(size, inc, 1, src)
 	b.ResetTimer()
@@ -610,7 +610,7 @@ func BenchmarkSubVec1000Inc20(b *testing.B)   { subVecBench(b, 1000, 20) }
 func BenchmarkSubVec10000Inc20(b *testing.B)  { subVecBench(b, 10000, 20) }
 func BenchmarkSubVec100000Inc20(b *testing.B) { subVecBench(b, 100000, 20) }
 func subVecBench(b *testing.B, size, inc int) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	x := randVecDense(size, inc, 1, src)
 	y := randVecDense(size, inc, 1, src)
 	b.ResetTimer()
@@ -645,7 +645,7 @@ func BenchmarkVectorSum100000(b *testing.B) { vectorSumBench(b, 100000) }
 var vectorSumForBench float64
 
 func vectorSumBench(b *testing.B, size int) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	a := randVecDense(size, 1, 1.0, src)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {

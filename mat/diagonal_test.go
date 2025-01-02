@@ -6,11 +6,11 @@ package mat
 
 import (
 	"math"
+	"math/rand/v2"
 	"reflect"
 	"testing"
 
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestNewDiagDense(t *testing.T) {

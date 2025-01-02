@@ -6,10 +6,10 @@ package r3
 
 import (
 	"math"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/floats/scalar"
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -309,7 +309,7 @@ func TestDivergence(t *testing.T) {
 		h   = 1e-2
 	)
 	step := Vec{X: h, Y: h, Z: h}
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, test := range vectorFields {
 		for i := 0; i < 30; i++ {
 			p := randomVec(rnd)
@@ -328,7 +328,7 @@ func TestGradient(t *testing.T) {
 		h   = 1e-5
 	)
 	step := Vec{X: h, Y: h, Z: h}
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, test := range scalarFields {
 		for i := 0; i < 30; i++ {
 			p := randomVec(rnd)

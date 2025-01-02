@@ -7,11 +7,11 @@ package barneshut
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"reflect"
 	"testing"
 
 	"gonum.org/v1/gonum/floats/scalar"
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/spatial/r2"
 )
 
@@ -414,7 +414,7 @@ func TestPlaneForceOn(t *testing.T) {
 		tol  = 0.07
 	)
 	for _, n := range []int{3e3, 1e4, 3e4} {
-		rnd := rand.New(rand.NewSource(1))
+		rnd := rand.New(rand.NewPCG(1, 1))
 		particles := make([]Particle2, n)
 		for i := range particles {
 			particles[i] = particle2{x: size * rnd.Float64(), y: size * rnd.Float64(), m: 1}
@@ -470,7 +470,7 @@ var (
 
 func BenchmarkNewPlane(b *testing.B) {
 	for _, n := range []int{1e3, 1e4, 1e5, 1e6} {
-		rnd := rand.New(rand.NewSource(1))
+		rnd := rand.New(rand.NewPCG(1, 1))
 		particles := make([]Particle2, n)
 		for i := range particles {
 			particles[i] = particle2{x: rnd.Float64(), y: rnd.Float64(), m: 1}
@@ -495,7 +495,7 @@ func BenchmarkPlaneForceOn(b *testing.B) {
 				// Don't run unreasonably long benchmarks.
 				continue
 			}
-			rnd := rand.New(rand.NewSource(1))
+			rnd := rand.New(rand.NewPCG(1, 1))
 			particles := make([]Particle2, n)
 			for i := range particles {
 				particles[i] = particle2{x: rnd.Float64(), y: rnd.Float64(), m: 1}
@@ -523,7 +523,7 @@ func BenchmarkPlaneFull(b *testing.B) {
 				// Don't run unreasonably long benchmarks.
 				continue
 			}
-			rnd := rand.New(rand.NewSource(1))
+			rnd := rand.New(rand.NewPCG(1, 1))
 			particles := make([]Particle2, n)
 			for i := range particles {
 				particles[i] = particle2{x: rnd.Float64(), y: rnd.Float64(), m: 1}

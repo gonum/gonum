@@ -6,11 +6,11 @@ package testlapack
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/lapack"
 )
 
@@ -20,7 +20,7 @@ type Dgeqp3er interface {
 }
 
 func Dgeqp3Test(t *testing.T, impl Dgeqp3er) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, m := range []int{0, 1, 2, 3, 4, 5, 12, 23, 129} {
 		for _, n := range []int{0, 1, 2, 3, 4, 5, 12, 23, 129} {
 			for _, lda := range []int{max(1, n), n + 3} {
@@ -55,7 +55,7 @@ func dgeqp3Test(t *testing.T, impl Dgeqp3er, rnd *rand.Rand, m, n, lda int) {
 				name += "free=all"
 			case some:
 				// Some columns are free, some are leading columns.
-				jpvt[j] = rnd.Intn(2) - 1 // -1 or 0
+				jpvt[j] = rnd.IntN(2) - 1 // -1 or 0
 				name += "free=some"
 			case none:
 				// All columns are leading.

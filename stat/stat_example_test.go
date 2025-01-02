@@ -6,8 +6,8 @@ package stat_test
 
 import (
 	"fmt"
+	"math/rand/v2"
 
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/stat"
 )
 
@@ -22,9 +22,10 @@ func ExampleLinearRegression() {
 		return 1 + 3*x
 	}
 
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := range xs {
 		xs[i] = float64(i)
-		ys[i] = line(xs[i]) + 0.1*rand.NormFloat64()
+		ys[i] = line(xs[i]) + 0.1*rnd.NormFloat64()
 	}
 
 	// Do not force the regression line to pass through the origin.

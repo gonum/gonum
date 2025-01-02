@@ -6,11 +6,11 @@ package distuv
 
 import (
 	"math"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/floats/scalar"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 const (
@@ -26,7 +26,7 @@ func TestCategoricalProb(t *testing.T) {
 	for _, test := range [][]float64{
 		{1, 2, 3, 0},
 	} {
-		dist := NewCategorical(test, nil)
+		dist := NewCategorical(test, rand.NewPCG(1, 1))
 		norm := make([]float64, len(test))
 		floats.Scale(1/floats.Sum(norm), norm)
 		for i, v := range norm {
@@ -71,7 +71,7 @@ func TestCategoricalRand(t *testing.T) {
 	for _, test := range [][]float64{
 		{1, 2, 3, 0},
 	} {
-		dist := NewCategorical(test, nil)
+		dist := NewCategorical(test, rand.NewPCG(1, 1))
 		nSamples := 2000000
 		counts := sampleCategorical(t, dist, nSamples)
 
@@ -115,7 +115,7 @@ func TestCategoricalRand(t *testing.T) {
 
 func TestCategoricalReweight(t *testing.T) {
 	t.Parallel()
-	dist := NewCategorical([]float64{1, 1}, nil)
+	dist := NewCategorical([]float64{1, 1}, rand.NewPCG(1, 1))
 	if !panics(func() { dist.Reweight(0, -1) }) {
 		t.Errorf("Reweight did not panic for negative weight")
 	}
@@ -128,7 +128,7 @@ func TestCategoricalReweight(t *testing.T) {
 func TestCategoricalReweightAll(t *testing.T) {
 	t.Parallel()
 	w := []float64{0, 1, 2, 1}
-	dist := NewCategorical(w, nil)
+	dist := NewCategorical(w, rand.NewPCG(1, 1))
 	if !panics(func() { dist.ReweightAll([]float64{1, 1}) }) {
 		t.Errorf("ReweightAll did not panic for different number of weights")
 	}
@@ -182,7 +182,7 @@ func TestCategoricalCDF(t *testing.T) {
 		sum := make([]float64, len(test))
 		floats.CumSum(sum, c)
 
-		dist := NewCategorical(test, nil)
+		dist := NewCategorical(test, rand.NewPCG(1, 1))
 		cdf := dist.CDF(-0.5)
 		if cdf != 0 {
 			t.Errorf("CDF of negative number not zero")
@@ -219,7 +219,7 @@ func TestCategoricalEntropy(t *testing.T) {
 			entropy: math.Ln2,
 		},
 	} {
-		dist := NewCategorical(test.weights, nil)
+		dist := NewCategorical(test.weights, rand.NewPCG(1, 1))
 		entropy := dist.Entropy()
 		if math.IsNaN(entropy) || math.Abs(entropy-test.entropy) > 1e-14 {
 			t.Errorf("Entropy mismatch. Want %v, got %v.", test.entropy, entropy)
@@ -246,7 +246,7 @@ func TestCategoricalMean(t *testing.T) {
 			mean:    2,
 		},
 	} {
-		dist := NewCategorical(test.weights, nil)
+		dist := NewCategorical(test.weights, rand.NewPCG(1, 1))
 		mean := dist.Mean()
 		if math.IsNaN(mean) || math.Abs(mean-test.mean) > 1e-14 {
 			t.Errorf("Entropy mismatch. Want %v, got %v.", test.mean, mean)
@@ -261,7 +261,7 @@ func BenchmarkCategoricalRandLarge(b *testing.B)  { benchmarkCategoricalRand(b, 
 func BenchmarkCategoricalRandHuge(b *testing.B)   { benchmarkCategoricalRand(b, Huge) }
 
 func benchmarkCategoricalRand(b *testing.B, size int) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	rng := rand.New(src)
 	weights := make([]float64, size)
 	for i := 0; i < size; i++ {

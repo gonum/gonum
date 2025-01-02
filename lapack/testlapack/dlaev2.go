@@ -6,9 +6,8 @@ package testlapack
 
 import (
 	"math"
+	"math/rand/v2"
 	"testing"
-
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Dlaev2er interface {
@@ -16,7 +15,7 @@ type Dlaev2er interface {
 }
 
 func Dlaev2Test(t *testing.T, impl Dlaev2er) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for trial := 0; trial < 100; trial++ {
 		a := rnd.NormFloat64()
 		b := rnd.NormFloat64()

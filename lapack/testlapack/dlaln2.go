@@ -8,9 +8,8 @@ import (
 	"fmt"
 	"math"
 	"math/cmplx"
+	"math/rand/v2"
 	"testing"
-
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Dlaln2er interface {
@@ -18,7 +17,7 @@ type Dlaln2er interface {
 }
 
 func Dlaln2Test(t *testing.T, impl Dlaln2er) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, trans := range []bool{true, false} {
 		for _, na := range []int{1, 2} {
 			for _, nw := range []int{1, 2} {

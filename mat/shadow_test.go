@@ -5,9 +5,8 @@
 package mat
 
 import (
+	"math/rand/v2"
 	"testing"
-
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestDenseOverlaps(t *testing.T) {
@@ -17,7 +16,7 @@ func TestDenseOverlaps(t *testing.T) {
 		*Dense
 	}
 
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	for r := 1; r < 20; r++ {
 		for c := 1; c < 20; c++ {
@@ -34,14 +33,14 @@ func TestDenseOverlaps(t *testing.T) {
 				var views [2]view
 				for k := range views {
 					if r > 1 {
-						views[k].i = rnd.Intn(r - 1)
-						views[k].r = rnd.Intn(r-views[k].i-1) + 1
+						views[k].i = rnd.IntN(r - 1)
+						views[k].r = rnd.IntN(r-views[k].i-1) + 1
 					} else {
 						views[k].r = 1
 					}
 					if c > 1 {
-						views[k].j = rnd.Intn(c - 1)
-						views[k].c = rnd.Intn(c-views[k].j-1) + 1
+						views[k].j = rnd.IntN(c - 1)
+						views[k].c = rnd.IntN(c-views[k].j-1) + 1
 					} else {
 						views[k].c = 1
 					}

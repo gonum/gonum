@@ -6,11 +6,11 @@ package community
 
 import (
 	"fmt"
+	"math/rand/v2"
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/graphs/gen"
 	"gonum.org/v1/gonum/graph/simple"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 // intset is an integer set.
@@ -228,7 +228,7 @@ var (
 )
 
 func init() {
-	err := gen.Duplication(dupGraph, 1000, 0.8, 0.1, 0.5, rand.New(rand.NewSource(1)))
+	err := gen.Duplication(dupGraph, 1000, 0.8, 0.1, 0.5, rand.New(rand.NewPCG(1, 1)))
 	if err != nil {
 		panic(err)
 	}

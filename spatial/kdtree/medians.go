@@ -5,9 +5,8 @@
 package kdtree
 
 import (
+	"math/rand/v2"
 	"sort"
-
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 // Partition partitions list such that all elements less than the value at
@@ -59,7 +58,7 @@ func Select(list SortSlicer, k int) int {
 			panic("kdtree: internal inconsistency")
 		}
 		sub := list.Slice(start, end)
-		pivot := Partition(sub, rand.Intn(sub.Len()))
+		pivot := Partition(sub, rand.IntN(sub.Len()))
 		switch {
 		case pivot == k:
 			return k

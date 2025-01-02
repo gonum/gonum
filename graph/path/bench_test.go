@@ -6,6 +6,7 @@ package path
 
 import (
 	"fmt"
+	"math"
 	"sync"
 	"testing"
 
@@ -188,5 +189,30 @@ func BenchmarkBellmanFordFrom(b *testing.B) {
 				}
 			})
 		}
+	}
+}
+
+func path(n int64) graph.Graph {
+	g := simple.NewDirectedGraph()
+	gen.Path(g, gen.IDRange{First: 0, Last: n - 1})
+	return g
+}
+
+func BenchmarkYenKShortestPaths(b *testing.B) {
+	benchmarks := []struct {
+		name  string
+		graph graph.Graph
+	}{
+		{"path 5000", path(5_000)},
+		{"GNP Directed 2000 tenth", gnpDirected_2000_tenth()},
+	}
+
+	for _, bm := range benchmarks {
+		t := bm.graph.Node(int64(bm.graph.Nodes().Len()) - 1)
+		b.Run(bm.name, func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				YenKShortestPaths(bm.graph, 2, math.Inf(1), bm.graph.Node(0), t)
+			}
+		})
 	}
 }

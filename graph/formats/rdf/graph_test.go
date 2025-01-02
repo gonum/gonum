@@ -7,11 +7,10 @@ package rdf_test
 import (
 	"io"
 	"math"
+	"math/rand/v2"
 	"slices"
 	"strings"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"github.com/google/go-cmp/cmp"
 
@@ -89,10 +88,10 @@ func TestGraph(t *testing.T) {
 			g.AddNode(it.Node())
 		}
 		it.Reset()
-		rnd := rand.New(rand.NewSource(1))
+		rnd := rand.New(rand.NewPCG(1, 1))
 		for it.Next() {
 			u := it.Node()
-			d := rnd.Intn(5)
+			d := rnd.IntN(5)
 			vit := g.Nodes()
 			for d >= 0 && vit.Next() {
 				v := vit.Node()
@@ -117,10 +116,10 @@ func TestGraph(t *testing.T) {
 		}
 		it.Reset()
 		var lines []graph.Line
-		rnd := rand.New(rand.NewSource(1))
+		rnd := rand.New(rand.NewPCG(1, 1))
 		for it.Next() {
 			u := it.Node()
-			d := rnd.Intn(5)
+			d := rnd.IntN(5)
 			vit := g.Nodes()
 			for d >= 0 && vit.Next() {
 				v := vit.Node()

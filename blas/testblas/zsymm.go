@@ -7,9 +7,8 @@ package testblas
 import (
 	"fmt"
 	"math/cmplx"
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 )
@@ -36,7 +35,7 @@ func ZsymmTest(t *testing.T, impl Zsymmer) {
 func zsymmTest(t *testing.T, impl Zsymmer, side blas.Side, uplo blas.Uplo, m, n int) {
 	const tol = 1e-13
 
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	nA := m
 	if side == blas.Right {

@@ -6,9 +6,8 @@ package mat
 
 import (
 	"math"
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas/blas64"
 	"gonum.org/v1/gonum/blas/testblas"
@@ -155,7 +154,7 @@ func makeVecDenseInc(inc int, f []float64) *VecDense {
 }
 
 func benchmarkInner(b *testing.B, m, n int) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	x := NewVecDense(m, nil)
 	randomSlice(x.mat.Data, src)
 	y := NewVecDense(n, nil)

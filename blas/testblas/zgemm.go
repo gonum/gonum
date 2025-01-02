@@ -6,9 +6,9 @@ package testblas
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
 
-	"golang.org/x/exp/rand"
 	"gonum.org/v1/gonum/blas"
 )
 
@@ -36,7 +36,7 @@ func ZgemmTest(t *testing.T, impl Zgemmer) {
 func zgemmTest(t *testing.T, impl Zgemmer, tA, tB blas.Transpose, m, n, k int) {
 	const tol = 1e-13
 
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	rowA, colA := m, k
 	if tA != blas.NoTrans {

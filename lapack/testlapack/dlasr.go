@@ -6,9 +6,8 @@ package testlapack
 
 import (
 	"math"
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
@@ -21,7 +20,7 @@ type Dlasrer interface {
 }
 
 func DlasrTest(t *testing.T, impl Dlasrer) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, side := range []blas.Side{blas.Left, blas.Right} {
 		for _, pivot := range []lapack.Pivot{lapack.Variable, lapack.Top, lapack.Bottom} {
 			for _, direct := range []lapack.Direct{lapack.Forward, lapack.Backward} {

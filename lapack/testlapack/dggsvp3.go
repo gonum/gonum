@@ -5,9 +5,8 @@
 package testlapack
 
 import (
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
@@ -22,7 +21,7 @@ type Dggsvp3er interface {
 func Dggsvp3Test(t *testing.T, impl Dggsvp3er) {
 	const tol = 1e-14
 
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for cas, test := range []struct {
 		m, p, n, lda, ldb, ldu, ldv, ldq int
 	}{

@@ -7,10 +7,9 @@ package mat
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"reflect"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
@@ -204,10 +203,10 @@ func TestTriDiagView(t *testing.T) {
 
 func TestTriDenseCopy(t *testing.T) {
 	t.Parallel()
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	rnd := rand.New(src)
 	for i := 0; i < 100; i++ {
-		size := rnd.Intn(100)
+		size := rnd.IntN(100)
 		r, err := randDense(size, 0.9, src)
 		if size == 0 {
 			if err != ErrZeroLength {
@@ -257,10 +256,10 @@ func TestTriDenseCopy(t *testing.T) {
 
 func TestTriTriDenseCopy(t *testing.T) {
 	t.Parallel()
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	rnd := rand.New(src)
 	for i := 0; i < 100; i++ {
-		size := rnd.Intn(100)
+		size := rnd.IntN(100)
 		r, err := randDense(size, 1, src)
 		if size == 0 {
 			if err != ErrZeroLength {
@@ -312,7 +311,7 @@ func TestTriTriDenseCopy(t *testing.T) {
 
 func TestTriInverse(t *testing.T) {
 	t.Parallel()
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, kind := range []TriKind{Upper, Lower} {
 		for _, n := range []int{1, 3, 5, 9} {
 			data := make([]float64, n*n)
@@ -531,7 +530,7 @@ func TestCopySymIntoTriangle(t *testing.T) {
 
 func TestTriSliceTri(t *testing.T) {
 	t.Parallel()
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for cas, test := range []struct {
 		n, start1, span1, start2, span2 int
 	}{
@@ -612,7 +611,7 @@ func TestTriSliceTri(t *testing.T) {
 var triSumForBench float64
 
 func BenchmarkTriSum(b *testing.B) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for n := 100; n <= 1600; n *= 2 {
 		a := randTriDense(n, rnd)
 		b.Run(fmt.Sprintf("BenchmarkTriSum%d", n), func(b *testing.B) {
@@ -626,7 +625,7 @@ func BenchmarkTriSum(b *testing.B) {
 var triProductForBench *TriDense
 
 func BenchmarkTriMul(b *testing.B) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for n := 100; n <= 1600; n *= 2 {
 		triProductForBench = NewTriDense(n, Upper, nil)
 		a := randTriDense(n, rnd)
@@ -640,7 +639,7 @@ func BenchmarkTriMul(b *testing.B) {
 }
 
 func BenchmarkTriMulDiag(b *testing.B) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for n := 100; n <= 1600; n *= 2 {
 		triProductForBench = NewTriDense(n, Upper, nil)
 		a := randTriDense(n, rnd)
@@ -654,7 +653,7 @@ func BenchmarkTriMulDiag(b *testing.B) {
 }
 
 func BenchmarkTriMul2Diag(b *testing.B) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for n := 100; n <= 1600; n *= 2 {
 		triProductForBench = NewTriDense(n, Upper, nil)
 		a := randDiagDense(n, rnd)

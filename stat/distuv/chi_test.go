@@ -6,10 +6,9 @@ package distuv
 
 import (
 	"math"
+	"math/rand/v2"
 	"sort"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/floats/scalar"
 )
@@ -56,7 +55,7 @@ func TestChiCDF(t *testing.T) {
 
 func TestChi(t *testing.T) {
 	t.Parallel()
-	src := rand.New(rand.NewSource(1))
+	src := rand.New(rand.NewPCG(1, 1))
 	for i, b := range []Chi{
 		{3, src},
 		{1.5, src},

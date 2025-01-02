@@ -6,9 +6,8 @@ package samplemv
 
 import (
 	"math"
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/stat/distmv"
@@ -23,7 +22,7 @@ func TestHalton(t *testing.T) {
 		{100, 2},
 		{1000, 3},
 	} {
-		src := rand.New(rand.NewSource(1))
+		src := rand.New(rand.NewPCG(1, 1))
 		// Generate the samples.
 		batch := mat.NewDense(test.n, test.d, nil)
 		Halton{Kind: Owen, Q: distmv.NewUnitUniform(test.d, nil), Src: src}.Sample(batch)

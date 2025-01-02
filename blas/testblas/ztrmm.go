@@ -6,9 +6,8 @@ package testblas
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 )
@@ -39,7 +38,7 @@ func ZtrmmTest(t *testing.T, impl Ztrmmer) {
 func ztrmmTest(t *testing.T, impl Ztrmmer, side blas.Side, uplo blas.Uplo, trans blas.Transpose, diag blas.Diag, m, n int) {
 	const tol = 1e-13
 
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	nA := m
 	if side == blas.Right {

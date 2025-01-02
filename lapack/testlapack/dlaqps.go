@@ -6,9 +6,8 @@ package testlapack
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
@@ -23,7 +22,7 @@ type Dlaqpser interface {
 func DlaqpsTest(t *testing.T, impl Dlaqpser) {
 	const tol = 1e-14
 
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for ti, test := range []struct {
 		m, n, nb, offset int
 	}{

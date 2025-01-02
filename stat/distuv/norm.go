@@ -6,8 +6,7 @@ package distuv
 
 import (
 	"math"
-
-	"golang.org/x/exp/rand"
+	"math/rand/v2"
 
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/mathext"

@@ -6,9 +6,8 @@ package distmat
 
 import (
 	"math"
+	"math/rand/v2"
 	"sync"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/mathext"

@@ -7,9 +7,8 @@ package testlapack
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
@@ -24,7 +23,7 @@ type Dgesc2er interface {
 }
 
 func Dgesc2Test(t *testing.T, impl Dgesc2er) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, n := range []int{0, 1, 2, 3, 4, 5, 10, 20, 50} {
 		for _, lda := range []int{n, n + 3} {
 			testDgesc2(t, impl, rnd, n, lda, false)

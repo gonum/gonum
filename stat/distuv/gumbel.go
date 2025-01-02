@@ -6,8 +6,7 @@ package distuv
 
 import (
 	"math"
-
-	"golang.org/x/exp/rand"
+	"math/rand/v2"
 )
 
 // GumbelRight implements the right-skewed Gumbel distribution, a two-parameter

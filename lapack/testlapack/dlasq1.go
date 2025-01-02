@@ -7,10 +7,9 @@ package testlapack
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"sort"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/floats"
 )
@@ -23,7 +22,7 @@ type Dlasq1er interface {
 
 func Dlasq1Test(t *testing.T, impl Dlasq1er) {
 	const tol = 1e-14
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, n := range []int{0, 1, 2, 3, 4, 5, 8, 10, 30, 50} {
 		for typ := 0; typ <= 7; typ++ {
 			name := fmt.Sprintf("n=%v,typ=%v", n, typ)

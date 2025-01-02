@@ -7,11 +7,10 @@ package path
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"reflect"
 	"slices"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/graphs/gen"
@@ -36,7 +35,7 @@ func TestShortestAlts(t *testing.T) {
 	for _, test := range shortestTests {
 		t.Run(fmt.Sprintf("AllTo_%d×%d|%v", test.n, test.d, test.p), func(t *testing.T) {
 			g := simple.NewDirectedGraph()
-			gen.SmallWorldsBB(g, test.n, test.d, test.p, rand.New(rand.NewSource(test.seed)))
+			gen.SmallWorldsBB(g, test.n, test.d, test.p, rand.New(rand.NewPCG(test.seed, test.seed)))
 			all := allShortest(DijkstraAllPaths(g))
 
 			for uid := int64(0); uid < int64(test.n); uid++ {
@@ -83,7 +82,7 @@ func TestAllShortest(t *testing.T) {
 	for _, test := range shortestTests {
 		t.Run(fmt.Sprintf("AllBetween_%d×%d|%v", test.n, test.d, test.p), func(t *testing.T) {
 			g := simple.NewDirectedGraph()
-			gen.SmallWorldsBB(g, test.n, test.d, test.p, rand.New(rand.NewSource(test.seed)))
+			gen.SmallWorldsBB(g, test.n, test.d, test.p, rand.New(rand.NewPCG(test.seed, test.seed)))
 
 			p := DijkstraAllPaths(g)
 			for uid := int64(0); uid < int64(test.n); uid++ {
@@ -222,7 +221,7 @@ var shortestBenchmarks = []struct {
 func BenchmarkShortestAlts(b *testing.B) {
 	for _, bench := range shortestBenchmarks {
 		g := simple.NewDirectedGraph()
-		gen.SmallWorldsBB(g, bench.n, bench.d, bench.p, rand.New(rand.NewSource(bench.seed)))
+		gen.SmallWorldsBB(g, bench.n, bench.d, bench.p, rand.New(rand.NewPCG(bench.seed, bench.seed)))
 
 		// Find the widest path set.
 		var (
@@ -283,7 +282,7 @@ func BenchmarkAllShortest(b *testing.B) {
 	for _, bench := range shortestBenchmarks {
 		for _, f := range shortestPathAlgs {
 			g := simple.NewDirectedGraph()
-			gen.SmallWorldsBB(g, bench.n, bench.d, bench.p, rand.New(rand.NewSource(bench.seed)))
+			gen.SmallWorldsBB(g, bench.n, bench.d, bench.p, rand.New(rand.NewPCG(bench.seed, bench.seed)))
 			p := f.fn(g)
 
 			// Find the widest path set.

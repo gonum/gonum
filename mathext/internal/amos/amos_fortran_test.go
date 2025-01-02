@@ -9,10 +9,9 @@ package amos
 
 import (
 	"flag"
+	"math/rand/v2"
 	"runtime"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/mathext/internal/amos/amoslib"
 )
@@ -24,7 +23,7 @@ import (
 var runFailing = flag.Bool("failing", false, "run known failing cases")
 
 func TestAiryFortran(t *testing.T) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < nInputs; i++ {
 		in := randInput(rnd)
 		zairytestFort(t, in.x, in.kode, in.id)
@@ -40,7 +39,7 @@ func TestZacaiFortran(t *testing.T) {
 	case "arm64":
 		t.Skipf("skipping on GOARCH=%s", runtime.GOARCH)
 	}
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < nInputs; i++ {
 		in := randInput(rnd)
 		zacaitestFort(t, in.x, in.is, in.tol, in.n, in.yr, in.yi, in.kode)
@@ -52,7 +51,7 @@ func TestZbknuFortran(t *testing.T) {
 		t.Skip("fails")
 	}
 
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < nInputs; i++ {
 		in := randInput(rnd)
 		zbknutestFort(t, in.x, in.is, in.tol, in.n, in.yr, in.yi, in.kode)
@@ -64,7 +63,7 @@ func TestZasyiFortran(t *testing.T) {
 		t.Skip("fails")
 	}
 
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < nInputs; i++ {
 		in := randInput(rnd)
 		zasyitestFort(t, in.x, in.is, in.tol, in.n, in.yr, in.yi, in.kode)
@@ -76,7 +75,7 @@ func TestZseriFortran(t *testing.T) {
 	case "arm64":
 		t.Skipf("skipping on GOARCH=%s", runtime.GOARCH)
 	}
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < nInputs; i++ {
 		in := randInput(rnd)
 		zseritestFort(t, in.x, in.is, in.tol, in.n, in.yr, in.yi, in.kode)
@@ -88,7 +87,7 @@ func TestZmlriFortran(t *testing.T) {
 		t.Skip("fails")
 	}
 
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < nInputs; i++ {
 		in := randInput(rnd)
 		zmlritestFort(t, in.x, in.is, in.tol, in.n, in.yr, in.yi, in.kode)
@@ -100,7 +99,7 @@ func TestZksclFortran(t *testing.T) {
 		t.Skip("fails")
 	}
 
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < nInputs; i++ {
 		in := randInput(rnd)
 		zkscltestFort(t, in.x, in.is, in.tol, in.n, in.yr, in.yi)
@@ -108,7 +107,7 @@ func TestZksclFortran(t *testing.T) {
 }
 
 func TestZuchkFortran(t *testing.T) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < nInputs; i++ {
 		in := randInput(rnd)
 		zuchktestFort(t, in.x, in.is, in.tol)
@@ -116,7 +115,7 @@ func TestZuchkFortran(t *testing.T) {
 }
 
 func TestZs1s2Fortran(t *testing.T) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < nInputs; i++ {
 		in := randInput(rnd)
 		zs1s2testFort(t, in.x, in.is)

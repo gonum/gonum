@@ -6,9 +6,8 @@ package community
 
 import (
 	"math"
+	"math/rand/v2"
 	"slices"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/set"
@@ -78,7 +77,7 @@ func qDirected(g graph.Directed, communities [][]graph.Node, resolution float64)
 }
 
 // louvainDirected returns the hierarchical modularization of g at the given
-// resolution using the Louvain algorithm. If src is nil, rand.Intn is used
+// resolution using the Louvain algorithm. If src is nil, rand.IntN is used
 // as the random generator. louvainDirected will panic if g has any edge with negative
 // edge weight.
 func louvainDirected(g graph.Directed, resolution float64, src rand.Source) ReducedGraph {
@@ -86,9 +85,9 @@ func louvainDirected(g graph.Directed, resolution float64, src rand.Source) Redu
 	// of the algorithm used here.
 
 	c := reduceDirected(g, nil)
-	rnd := rand.Intn
+	rnd := rand.IntN
 	if src != nil {
-		rnd = rand.New(src).Intn
+		rnd = rand.New(src).IntN
 	}
 	for {
 		l := newDirectedLocalMover(c, c.communities, resolution)

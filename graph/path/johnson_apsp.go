@@ -6,8 +6,7 @@ package path
 
 import (
 	"math"
-
-	"golang.org/x/exp/rand"
+	"math/rand/v2"
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/simple"
@@ -33,7 +32,7 @@ func JohnsonAllPaths(g graph.Graph) (paths AllShortest, ok bool) {
 	for {
 		// Choose a random node ID until we find
 		// one that is not in g.
-		q = sign * rand.Int63()
+		q = sign * rand.Int64()
 		if _, exists := paths.indexOf[q]; !exists {
 			break
 		}

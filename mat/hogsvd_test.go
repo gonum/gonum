@@ -5,15 +5,14 @@
 package mat
 
 import (
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 )
 
 func TestHOGSVD(t *testing.T) {
 	t.Parallel()
 	const tol = 1e-10
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for cas, test := range []struct {
 		r, c int
 	}{

@@ -8,9 +8,8 @@ import (
 	"container/heap"
 	"errors"
 	"math"
+	"math/rand/v2"
 	"sort"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/stat"
 )
@@ -70,11 +69,11 @@ func New(p []Comparable, effort int, src rand.Source) (t *Tree, err error) {
 	var intn func(int) int
 	var shuf func(n int, swap func(i, j int))
 	if src == nil {
-		intn = rand.Intn
+		intn = rand.IntN
 		shuf = rand.Shuffle
 	} else {
 		rnd := rand.New(src)
-		intn = rnd.Intn
+		intn = rnd.IntN
 		shuf = rnd.Shuffle
 	}
 	b := builder{work: make([]float64, len(p)), intn: intn, shuf: shuf}

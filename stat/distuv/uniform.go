@@ -6,8 +6,7 @@ package distuv
 
 import (
 	"math"
-
-	"golang.org/x/exp/rand"
+	"math/rand/v2"
 )
 
 // UnitUniform is an instantiation of the uniform distribution with Min = 0

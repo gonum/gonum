@@ -7,9 +7,8 @@ package testlapack
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/lapack"
 )
@@ -21,7 +20,7 @@ type Dlascler interface {
 func DlasclTest(t *testing.T, impl Dlascler) {
 	const tol = 1e-15
 
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for ti, test := range []struct {
 		m, n int
 	}{

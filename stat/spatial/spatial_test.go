@@ -6,9 +6,8 @@ package spatial
 
 import (
 	"math"
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/mat"
@@ -72,8 +71,8 @@ var spatialTests = []struct {
 		},
 		locality: simpleAdjacency,
 
-		wantMoranI: -0.04387221370785312,
-		wantZ:      -1.3543515772206267,
+		wantMoranI: 0.008189938751264034,
+		wantZ:      0.2903525107058353,
 		wantSegs:   0,
 	},
 	{
@@ -98,8 +97,8 @@ var spatialTests = []struct {
 		},
 		locality: simpleAdjacency,
 
-		wantMoranI: 0.0259414094549987,
-		wantZ:      0.8511426395944303,
+		wantMoranI: 0.03230842429979648,
+		wantZ:      1.052284249349285,
 		wantSegs:   0,
 	},
 	{
@@ -112,8 +111,8 @@ var spatialTests = []struct {
 		},
 		locality: simpleAdjacency,
 
-		wantMoranI: -0.0003533345592575677,
-		wantZ:      0.0204605353504713,
+		wantMoranI: -0.020274625925858967,
+		wantZ:      -0.6088762077902174,
 		wantSegs:   0,
 	},
 	{
@@ -126,8 +125,8 @@ var spatialTests = []struct {
 		},
 		locality: simpleAdjacency,
 
-		wantMoranI: -0.8587138204405251,
-		wantZ:      -27.09614459007475,
+		wantMoranI: -0.8587390485358907,
+		wantZ:      -27.096941353241128,
 		wantSegs:   0,
 	},
 	{
@@ -150,8 +149,8 @@ var spatialTests = []struct {
 		},
 		locality: simpleAdjacencyBand,
 
-		wantMoranI: -0.04387221370785312,
-		wantZ:      -1.3543515772206267,
+		wantMoranI: 0.008189938751264034,
+		wantZ:      0.2903525107058353,
 		wantSegs:   0,
 	},
 	{
@@ -176,8 +175,8 @@ var spatialTests = []struct {
 		},
 		locality: simpleAdjacencyBand,
 
-		wantMoranI: 0.0259414094549987,
-		wantZ:      0.8511426395944303,
+		wantMoranI: 0.03230842429979648,
+		wantZ:      1.052284249349285,
 		wantSegs:   0,
 	},
 	{
@@ -190,8 +189,8 @@ var spatialTests = []struct {
 		},
 		locality: simpleAdjacencyBand,
 
-		wantMoranI: -0.0003533345592575677,
-		wantZ:      0.0204605353504713,
+		wantMoranI: -0.020274625925858967,
+		wantZ:      -0.6088762077902174,
 		wantSegs:   0,
 	},
 	{
@@ -204,8 +203,8 @@ var spatialTests = []struct {
 		},
 		locality: simpleAdjacencyBand,
 
-		wantMoranI: -0.8587138204405251,
-		wantZ:      -27.09614459007475,
+		wantMoranI: -0.8587390485358907,
+		wantZ:      -27.096941353241128,
 		wantSegs:   0,
 	},
 	{
@@ -223,7 +222,7 @@ var spatialTests = []struct {
 
 func TestGetisOrd(t *testing.T) {
 	for ti, test := range spatialTests {
-		rnd := rand.New(rand.NewSource(1))
+		rnd := rand.New(rand.NewPCG(1, 1))
 		data := make([]float64, test.n)
 		step := (test.to - test.from) / float64(test.n)
 		for i := range data {
@@ -274,7 +273,7 @@ func getisOrdSegments(data, weight []float64, locality mat.Matrix) int {
 func TestGlobalMoransI(t *testing.T) {
 	const tol = 1e-14
 	for ti, test := range spatialTests {
-		rnd := rand.New(rand.NewSource(1))
+		rnd := rand.New(rand.NewPCG(1, 1))
 		data := make([]float64, test.n)
 		step := (test.to - test.from) / float64(test.n)
 		for i := range data {

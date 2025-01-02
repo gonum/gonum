@@ -6,10 +6,9 @@ package distuv
 
 import (
 	"math"
+	"math/rand/v2"
 	"sort"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/floats/scalar"
 )
@@ -35,7 +34,7 @@ func TestBetaProb(t *testing.T) {
 
 func TestBetaRand(t *testing.T) {
 	t.Parallel()
-	src := rand.New(rand.NewSource(1))
+	src := rand.New(rand.NewPCG(1, 1))
 	for i, b := range []Beta{
 		{Alpha: 0.5, Beta: 0.5, Src: src},
 		{Alpha: 5, Beta: 1, Src: src},
@@ -98,7 +97,7 @@ func testBeta(t *testing.T, b Beta, i int) {
 
 func TestBetaBadParams(t *testing.T) {
 	t.Parallel()
-	src := rand.New(rand.NewSource(1))
+	src := rand.New(rand.NewPCG(1, 1))
 	for _, alpha := range []float64{0, -0.1} {
 		testBetaBadParams(t, alpha, 1, src)
 		testBetaBadParams(t, 1, alpha, src)

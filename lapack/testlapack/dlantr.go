@@ -7,9 +7,8 @@ package testlapack
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/floats"
@@ -22,7 +21,7 @@ type Dlantrer interface {
 }
 
 func DlantrTest(t *testing.T, impl Dlantrer) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, m := range []int{0, 1, 2, 3, 4, 5, 10} {
 		for _, n := range []int{0, 1, 2, 3, 4, 5, 10} {
 			for _, uplo := range []blas.Uplo{blas.Lower, blas.Upper} {

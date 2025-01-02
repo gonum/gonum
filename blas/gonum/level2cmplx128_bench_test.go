@@ -6,9 +6,8 @@ package gonum
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 )
@@ -27,7 +26,7 @@ func BenchmarkZher(b *testing.B) {
 
 func benchmarkZher(b *testing.B, uplo blas.Uplo, n, inc int) {
 	b.Run(fmt.Sprintf("Uplo%d-N%d-Inc%d", uplo, n, inc), func(b *testing.B) {
-		rnd := rand.New(rand.NewSource(1))
+		rnd := rand.New(rand.NewPCG(1, 1))
 		alpha := rnd.NormFloat64()
 		x := make([]complex128, (n-1)*inc+1)
 		for i := range x {

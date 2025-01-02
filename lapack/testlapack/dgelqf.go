@@ -5,9 +5,8 @@
 package testlapack
 
 import (
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/floats"
 )
@@ -19,7 +18,7 @@ type Dgelqfer interface {
 
 func DgelqfTest(t *testing.T, impl Dgelqfer) {
 	const tol = 1e-12
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for c, test := range []struct {
 		m, n, lda int
 	}{

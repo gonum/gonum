@@ -6,8 +6,7 @@ package distuv
 
 import (
 	"math"
-
-	"golang.org/x/exp/rand"
+	"math/rand/v2"
 )
 
 // AlphaStable represents an α-stable distribution with four parameters.

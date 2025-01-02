@@ -5,9 +5,8 @@
 package optimize
 
 import (
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/mat"
@@ -16,7 +15,7 @@ import (
 
 func TestListSearch(t *testing.T) {
 	t.Parallel()
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for cas, test := range []struct {
 		r, c       int
 		shortEvals int
@@ -132,7 +131,7 @@ func TestListSearch(t *testing.T) {
 		for floats.MinIdx(fs[:evals]) != floats.MinIdx(fs[:evals+concurrent]) {
 			// Swap the minimum index with a random element.
 			minIdxFirst := floats.MinIdx(fs[:evals+concurrent])
-			new := rnd.Intn(evals)
+			new := rnd.IntN(evals)
 			swapSamples(locs, fs, minIdxFirst, new)
 		}
 

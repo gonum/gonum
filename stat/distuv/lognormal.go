@@ -6,8 +6,7 @@ package distuv
 
 import (
 	"math"
-
-	"golang.org/x/exp/rand"
+	"math/rand/v2"
 )
 
 // LogNormal represents a random variable whose log is normally distributed.

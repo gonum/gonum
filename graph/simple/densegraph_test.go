@@ -6,9 +6,8 @@ package simple_test
 
 import (
 	"math"
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/set"
@@ -130,11 +129,11 @@ func TestDirectedMatrix(t *testing.T) {
 	})
 	t.Run("RemoveEdges", func(t *testing.T) {
 		g := newEdgeShimDir{simple.NewDirectedMatrix(100, 0, 1, 0)}
-		rnd := rand.New(rand.NewSource(1))
+		rnd := rand.New(rand.NewPCG(1, 1))
 		it := g.Nodes()
 		for it.Next() {
 			u := it.Node()
-			d := rnd.Intn(5)
+			d := rnd.IntN(5)
 			vit := g.Nodes()
 			for d >= 0 && vit.Next() {
 				v := vit.Node()
@@ -251,11 +250,11 @@ func TestDirectedMatrixFrom(t *testing.T) {
 	})
 	t.Run("RemoveEdges", func(t *testing.T) {
 		g := newEdgeShimDir{simple.NewDirectedMatrixFrom(makeNodes(numNodes), 0, 1, 0)}
-		rnd := rand.New(rand.NewSource(1))
+		rnd := rand.New(rand.NewPCG(1, 1))
 		it := g.Nodes()
 		for it.Next() {
 			u := it.Node()
-			d := rnd.Intn(5)
+			d := rnd.IntN(5)
 			vit := g.Nodes()
 			for d >= 0 && vit.Next() {
 				v := vit.Node()
@@ -381,11 +380,11 @@ func TestUnirectedMatrix(t *testing.T) {
 	})
 	t.Run("RemoveEdges", func(t *testing.T) {
 		g := newEdgeShimUndir{simple.NewUndirectedMatrix(100, 0, 1, 0)}
-		rnd := rand.New(rand.NewSource(1))
+		rnd := rand.New(rand.NewPCG(1, 1))
 		it := g.Nodes()
 		for it.Next() {
 			u := it.Node()
-			d := rnd.Intn(5)
+			d := rnd.IntN(5)
 			vit := g.Nodes()
 			for d >= 0 && vit.Next() {
 				v := vit.Node()
@@ -502,11 +501,11 @@ func TestUndirectedMatrixFrom(t *testing.T) {
 	})
 	t.Run("RemoveEdges", func(t *testing.T) {
 		g := newEdgeShimUndir{simple.NewUndirectedMatrixFrom(makeNodes(numNodes), 0, 1, 0)}
-		rnd := rand.New(rand.NewSource(1))
+		rnd := rand.New(rand.NewPCG(1, 1))
 		it := g.Nodes()
 		for it.Next() {
 			u := it.Node()
-			d := rnd.Intn(5)
+			d := rnd.IntN(5)
 			vit := g.Nodes()
 			for d >= 0 && vit.Next() {
 				v := vit.Node()

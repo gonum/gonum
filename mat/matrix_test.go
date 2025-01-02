@@ -7,10 +7,10 @@ package mat
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"reflect"
 	"testing"
 
-	"golang.org/x/exp/rand"
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
 	"gonum.org/v1/gonum/floats/scalar"
@@ -699,7 +699,7 @@ func TestMulVecToer(t *testing.T) {
 	t.Parallel()
 	const tol = 1e-14
 
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	random := func(n int) []float64 {
 		d := make([]float64, n)
 		for i := range d {

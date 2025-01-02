@@ -6,9 +6,8 @@ package testlapack
 
 import (
 	"math"
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/lapack"
 )
@@ -19,7 +18,7 @@ type Dlanster interface {
 }
 
 func DlanstTest(t *testing.T, impl Dlanster) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, norm := range []lapack.MatrixNorm{lapack.MaxAbs, lapack.MaxColumnSum, lapack.MaxRowSum, lapack.Frobenius} {
 		for _, n := range []int{1, 3, 10, 100} {
 			for cas := 0; cas < 100; cas++ {

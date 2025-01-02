@@ -20,7 +20,6 @@ func iabs(a int) int {
 	return -a
 }
 
-
 func zairyOrig(ZR, ZI float64, ID, KODE int) (AIR, AII float64, NZ, IERR int) {
 	// zairy is adapted from the original Netlib code by Donald Amos.
 	// http://www.netlib.no/netlib/amos/zairy.f

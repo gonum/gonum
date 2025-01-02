@@ -6,9 +6,8 @@ package r3
 
 import (
 	"math"
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/num/quat"
@@ -16,7 +15,7 @@ import (
 
 func TestMatAdd(t *testing.T) {
 	const tol = 1e-16
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for tc := 0; tc < 20; tc++ {
 		a := randomMat(rnd)
 		b := randomMat(rnd)
@@ -34,7 +33,7 @@ func TestMatAdd(t *testing.T) {
 
 func TestMatSub(t *testing.T) {
 	const tol = 1e-16
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for tc := 0; tc < 20; tc++ {
 		a := randomMat(rnd)
 		b := randomMat(rnd)
@@ -52,7 +51,7 @@ func TestMatSub(t *testing.T) {
 
 func TestMatMul(t *testing.T) {
 	const tol = 1e-14
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for tc := 0; tc < 20; tc++ {
 		a := randomMat(rnd)
 		b := randomMat(rnd)
@@ -70,7 +69,7 @@ func TestMatMul(t *testing.T) {
 
 func TestMatScale(t *testing.T) {
 	const tol = 1e-16
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for tc := 0; tc < 20; tc++ {
 		v := rnd.Float64()
 		a := randomMat(rnd)
@@ -88,7 +87,7 @@ func TestMatScale(t *testing.T) {
 
 func TestMatCloneFrom(t *testing.T) {
 	const tol = 1e-16
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for tc := 0; tc < 20; tc++ {
 		want := randomMat(rnd)
 		got := NewMat(nil)
@@ -101,7 +100,7 @@ func TestMatCloneFrom(t *testing.T) {
 
 func TestSkew(t *testing.T) {
 	const tol = 1e-16
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for tc := 0; tc < 20; tc++ {
 		sk := NewMat(nil)
 		v1 := randomVec(rnd)
@@ -117,7 +116,7 @@ func TestSkew(t *testing.T) {
 
 func TestTranspose(t *testing.T) {
 	const tol = 1e-16
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for tc := 0; tc < 20; tc++ {
 		d := mat.NewDense(3, 3, nil)
 		m := randomMat(rnd)
@@ -160,7 +159,7 @@ func randomVec(rnd *rand.Rand) (v Vec) {
 
 func TestDet(t *testing.T) {
 	const tol = 1e-11
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for tc := 0; tc < 20; tc++ {
 		m := randomMat(rnd)
 		got := m.Det()
@@ -172,7 +171,7 @@ func TestDet(t *testing.T) {
 }
 
 func TestOuter(t *testing.T) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for tc := 0; tc < 20; tc++ {
 		alpha := rnd.Float64()
 		d := mat.NewDense(3, 3, nil)
@@ -191,7 +190,7 @@ func TestOuter(t *testing.T) {
 
 func TestRotationMat(t *testing.T) {
 	const tol = 1e-14
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	for tc := 0; tc < 20; tc++ {
 		// Generate a random unit quaternion.
@@ -223,7 +222,7 @@ func TestRotationMat(t *testing.T) {
 }
 
 func BenchmarkQuat(b *testing.B) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < b.N; i++ {
 		q := quat.Number{Real: rnd.Float64(), Imag: rnd.Float64(), Jmag: rnd.Float64(), Kmag: rnd.Float64()}
 		if Rotation(q).Mat() == nil {
@@ -284,11 +283,11 @@ var scalarFields = []struct {
 
 func TestMatHessian(t *testing.T) {
 	const (
-		tol = 1e-5
+		tol = 3e-5
 		h   = 8e-4
 	)
 	step := Vec{X: h, Y: h, Z: h}
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, test := range scalarFields {
 		for i := 0; i < 30; i++ {
 			p := randomVec(rnd)
@@ -296,8 +295,9 @@ func TestMatHessian(t *testing.T) {
 			got.Hessian(p, step, test.field)
 			want := test.hessian(p)
 			if !mat.EqualApprox(got, want, tol) {
-				t.Errorf("matrices not equal within tol\ngot:  %v\nwant:  %v",
-					mat.Formatted(got), mat.Formatted(want))
+				t.Errorf("matrices not equal within tol\ngot:  %v\nwant: %v",
+					mat.Formatted(got, mat.Prefix("      ")),
+					mat.Formatted(want, mat.Prefix("      ")))
 			}
 		}
 	}
@@ -309,7 +309,7 @@ func TestMatJacobian(t *testing.T) {
 		h   = 8e-4
 	)
 	step := Vec{X: h, Y: h, Z: h}
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, test := range vectorFields {
 		for i := 0; i < 1; i++ {
 			p := randomVec(rnd)

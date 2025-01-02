@@ -6,9 +6,8 @@ package f64_test
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/floats/scalar"
 	. "gonum.org/v1/gonum/internal/asm/f64"
@@ -101,7 +100,7 @@ func TestScalUnitary(t *testing.T) {
 
 func TestScalUnitaryTo(t *testing.T) {
 	const xGdVal, dstGdVal = -1, 0.5
-	rng := rand.New(rand.NewSource(42))
+	rng := rand.New(rand.NewPCG(42, 42))
 	for i, test := range scalTests {
 		n := len(test.x)
 		for _, align := range align2 {
@@ -156,7 +155,7 @@ func TestScalInc(t *testing.T) {
 func TestScalIncTo(t *testing.T) {
 	const xGdVal, dstGdVal = -1, 0.5
 	gdLn := 4
-	rng := rand.New(rand.NewSource(42))
+	rng := rand.New(rand.NewPCG(42, 42))
 	for i, test := range scalTests {
 		n := len(test.x)
 		for _, inc := range newIncSet(1, 2, 3, 4, 7, 10) {

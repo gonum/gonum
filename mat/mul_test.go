@@ -5,9 +5,8 @@
 package mat
 
 import (
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
@@ -17,7 +16,7 @@ import (
 // TODO: Need to add tests where one is overwritten.
 func TestMulTypes(t *testing.T) {
 	t.Parallel()
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	for _, test := range []struct {
 		ar     int
 		ac     int

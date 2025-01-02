@@ -7,9 +7,9 @@ package testblas
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"testing"
 
-	"golang.org/x/exp/rand"
 	"gonum.org/v1/gonum/blas"
 )
 
@@ -20,7 +20,7 @@ type Zhbmver interface {
 }
 
 func ZhbmvTest(t *testing.T, impl Zhbmver) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, uplo := range []blas.Uplo{blas.Upper, blas.Lower} {
 		for _, n := range []int{0, 1, 2, 3, 5} {
 			for k := 0; k < n; k++ {

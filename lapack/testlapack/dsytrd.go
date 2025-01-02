@@ -6,9 +6,8 @@ package testlapack
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
@@ -25,7 +24,7 @@ type Dsytrder interface {
 func DsytrdTest(t *testing.T, impl Dsytrder) {
 	const tol = 1e-14
 
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for tc, test := range []struct {
 		n, lda int
 	}{

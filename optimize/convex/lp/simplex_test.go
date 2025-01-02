@@ -5,9 +5,8 @@
 package lp
 
 import (
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/mat"
@@ -130,9 +129,9 @@ func TestSimplex(t *testing.T) {
 		testSimplex(t, test.initialBasic, test.c, test.A, test.b, convergenceTol)
 	}
 
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	// Randomized tests
-	testRandomSimplex(t, 20000, 0.7, 10, rnd)
+	testRandomSimplex(t, 20000, 0.2, 10, rnd)
 	testRandomSimplex(t, 20000, 0, 10, rnd)
 	testRandomSimplex(t, 200, 0, 100, rnd)
 	testRandomSimplex(t, 2, 0, 400, rnd)
@@ -141,8 +140,8 @@ func TestSimplex(t *testing.T) {
 func testRandomSimplex(t *testing.T, nTest int, pZero float64, maxN int, rnd *rand.Rand) {
 	// Try a bunch of random LPs
 	for i := 0; i < nTest; i++ {
-		n := rnd.Intn(maxN) + 2 // n must be at least two.
-		m := rnd.Intn(n-1) + 1  // m must be between 1 and n
+		n := rnd.IntN(maxN) + 2 // n must be at least two.
+		m := rnd.IntN(n-1) + 1  // m must be between 1 and n
 		if m == 0 || n == 0 {
 			continue
 		}

@@ -6,9 +6,8 @@ package testlapack
 
 import (
 	"math"
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
@@ -20,7 +19,7 @@ type Dlags2er interface {
 }
 
 func Dlags2Test(t *testing.T, impl Dlags2er) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, upper := range []bool{true, false} {
 		for i := 0; i < 100; i++ {
 			// Generate randomly the elements of a 2×2 matrix A

@@ -5,9 +5,8 @@
 package sampleuv
 
 import (
+	"math/rand/v2"
 	"sort"
-
-	"golang.org/x/exp/rand"
 )
 
 // WithoutReplacement samples len(idxs) integers from [0, n) without replacement.
@@ -45,9 +44,9 @@ func WithoutReplacement(idxs []int, n int, src rand.Source) {
 	for i := range idxs {
 		var r int
 		if src != nil {
-			r = rand.New(src).Intn(n - i)
+			r = rand.New(src).IntN(n - i)
 		} else {
-			r = rand.Intn(n - i)
+			r = rand.IntN(n - i)
 		}
 		for _, v := range sorted {
 			if r >= v {

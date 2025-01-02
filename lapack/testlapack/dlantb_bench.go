@@ -7,9 +7,8 @@ package testlapack
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/lapack"
@@ -17,7 +16,7 @@ import (
 
 func DlantbBenchmark(b *testing.B, impl Dlantber) {
 	var result float64
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, bm := range []struct {
 		n, k int
 	}{

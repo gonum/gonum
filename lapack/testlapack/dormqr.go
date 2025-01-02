@@ -6,9 +6,8 @@ package testlapack
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/floats"
@@ -20,7 +19,7 @@ type Dormqrer interface {
 }
 
 func DormqrTest(t *testing.T, impl Dormqrer) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, side := range []blas.Side{blas.Left, blas.Right} {
 		for _, trans := range []blas.Transpose{blas.NoTrans, blas.Trans} {
 			for _, test := range []struct {

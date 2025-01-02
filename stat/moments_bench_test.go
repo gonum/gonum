@@ -12,9 +12,8 @@
 package stat
 
 import (
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 )
 
 const (

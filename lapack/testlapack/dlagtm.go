@@ -6,9 +6,8 @@ package testlapack
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
@@ -21,7 +20,7 @@ type Dlagtmer interface {
 }
 
 func DlagtmTest(t *testing.T, impl Dlagtmer) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, trans := range []blas.Transpose{blas.NoTrans, blas.Trans, blas.ConjTrans} {
 		t.Run(transToString(trans), func(t *testing.T) {
 			for _, m := range []int{0, 1, 2, 3, 4, 5, 10} {

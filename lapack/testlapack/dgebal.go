@@ -6,9 +6,8 @@ package testlapack
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
@@ -20,7 +19,7 @@ type Dgebaler interface {
 }
 
 func DgebalTest(t *testing.T, impl Dgebaler) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	for _, job := range []lapack.BalanceJob{lapack.BalanceNone, lapack.Permute, lapack.Scale, lapack.PermuteScale} {
 		for _, n := range []int{0, 1, 2, 3, 4, 5, 6, 10, 18, 31, 53, 100} {

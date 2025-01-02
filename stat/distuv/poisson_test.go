@@ -7,10 +7,9 @@ package distuv
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"sort"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/floats/scalar"
 )
@@ -104,7 +103,7 @@ func TestPoissonCDF(t *testing.T) {
 
 func TestPoisson(t *testing.T) {
 	t.Parallel()
-	src := rand.New(rand.NewSource(1))
+	src := rand.New(rand.NewPCG(1, 1))
 	for i, b := range []Poisson{
 		{100, src},
 		{15, src},
@@ -162,7 +161,7 @@ func testPoisson(t *testing.T, p Poisson, i int) {
 }
 
 func BenchmarkPoissonRand(b *testing.B) {
-	src := rand.New(rand.NewSource(1))
+	src := rand.New(rand.NewPCG(1, 1))
 	for i, p := range []Poisson{
 		{100, src},
 		{15, src},

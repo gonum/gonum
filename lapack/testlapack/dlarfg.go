@@ -6,9 +6,8 @@ package testlapack
 
 import (
 	"math"
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
@@ -21,7 +20,7 @@ type Dlarfger interface {
 
 func DlarfgTest(t *testing.T, impl Dlarfger) {
 	const tol = 1e-14
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i, test := range []struct {
 		alpha float64
 		n     int

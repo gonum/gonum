@@ -6,11 +6,11 @@ package distuv
 
 import (
 	"math"
+	"math/rand/v2"
 	"sort"
 	"testing"
 
 	"gonum.org/v1/gonum/floats/scalar"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestFProb(t *testing.T) {
@@ -63,7 +63,7 @@ func TestFCDF(t *testing.T) {
 
 func TestF(t *testing.T) {
 	t.Parallel()
-	src := rand.New(rand.NewSource(1))
+	src := rand.New(rand.NewPCG(1, 1))
 	for i, f := range []F{
 		{13, 16, src},
 		{42, 31, src},

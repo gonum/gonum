@@ -5,10 +5,10 @@
 package testlapack
 
 import (
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/floats/scalar"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Dorg2rer interface {
@@ -17,7 +17,7 @@ type Dorg2rer interface {
 }
 
 func Dorg2rTest(t *testing.T, impl Dorg2rer) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for ti, test := range []struct {
 		m, n, k, lda int
 	}{

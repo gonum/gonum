@@ -6,11 +6,11 @@ package mat
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/floats/scalar"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestGSVD(t *testing.T) {
@@ -39,7 +39,7 @@ func TestGSVD(t *testing.T) {
 		t.Run(fmt.Sprintf("%v", test), func(t *testing.T) {
 			t.Parallel()
 
-			rnd := rand.New(rand.NewSource(1))
+			rnd := rand.New(rand.NewPCG(1, 1))
 			for trial := 0; trial < 10; trial++ {
 				a := NewDense(m, n, nil)
 				for i := range a.mat.Data {

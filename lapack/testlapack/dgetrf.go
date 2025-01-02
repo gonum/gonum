@@ -5,9 +5,8 @@
 package testlapack
 
 import (
+	"math/rand/v2"
 	"testing"
-
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Dgetrfer interface {
@@ -15,7 +14,7 @@ type Dgetrfer interface {
 }
 
 func DgetrfTest(t *testing.T, impl Dgetrfer) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, test := range []struct {
 		m, n, lda int
 	}{

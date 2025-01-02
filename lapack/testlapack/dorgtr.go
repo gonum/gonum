@@ -6,12 +6,12 @@ package testlapack
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Dorgtrer interface {
@@ -22,7 +22,7 @@ type Dorgtrer interface {
 func DorgtrTest(t *testing.T, impl Dorgtrer) {
 	const tol = 1e-13
 
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, uplo := range []blas.Uplo{blas.Upper, blas.Lower} {
 		for _, wl := range []worklen{minimumWork, mediumWork, optimumWork} {
 			for _, test := range []struct {

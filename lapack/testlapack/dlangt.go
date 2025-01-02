@@ -7,10 +7,10 @@ package testlapack
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/lapack"
 )
 
@@ -19,7 +19,7 @@ type Dlangter interface {
 }
 
 func DlangtTest(t *testing.T, impl Dlangter) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, norm := range []lapack.MatrixNorm{lapack.MaxAbs, lapack.MaxRowSum, lapack.MaxColumnSum, lapack.Frobenius} {
 		t.Run(normToString(norm), func(t *testing.T) {
 			for _, n := range []int{0, 1, 2, 3, 4, 5, 10} {
@@ -47,7 +47,7 @@ func dlangtTest(t *testing.T, impl Dlangter, rnd *rand.Rand, norm lapack.MatrixN
 	d := randomSlice(n+1+extra, rnd)
 	// Sometimes put a NaN into the matrix.
 	if n > 0 && rnd.Float64() < 0.5 {
-		d[rnd.Intn(n)] = math.NaN()
+		d[rnd.IntN(n)] = math.NaN()
 	}
 	dCopy := make([]float64, len(d))
 	copy(dCopy, d)

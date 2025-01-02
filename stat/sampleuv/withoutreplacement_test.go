@@ -5,10 +5,10 @@
 package sampleuv
 
 import (
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestWithoutReplacement(t *testing.T) {
@@ -21,12 +21,12 @@ func TestWithoutReplacement(t *testing.T) {
 	}{
 		{
 			// Test with perm and source.
-			N: 10, K: 5, Src: rand.New(rand.NewSource(1)),
+			N: 10, K: 5, Src: rand.New(rand.NewPCG(1, 1)),
 			Trials: 100000, Tol: 1e-3,
 		},
 		{
 			// Test without perm and with source.
-			N: 10, K: 3, Src: rand.New(rand.NewSource(1)),
+			N: 10, K: 3, Src: rand.New(rand.NewPCG(1, 1)),
 			Trials: 100000, Tol: 1.4e-3,
 		},
 	} {

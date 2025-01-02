@@ -5,6 +5,7 @@
 package community
 
 import (
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
@@ -46,7 +47,7 @@ func TestProfileWeightedUndirected(t *testing.T) {
 }
 
 func testProfileUndirected(t *testing.T, test communityUndirectedQTest, g graph.Undirected) {
-	fn := ModularScore(g, Weight, 10, nil)
+	fn := ModularScore(g, Weight, 10, rand.NewPCG(1, 1))
 	p, err := Profile(fn, true, 1e-3, 0.1, 10)
 	if err != nil {
 		t.Errorf("%s: unexpected error: %v", test.name, err)
@@ -105,7 +106,7 @@ func TestProfileWeightedDirected(t *testing.T) {
 }
 
 func testProfileDirected(t *testing.T, test communityDirectedQTest, g graph.Directed) {
-	fn := ModularScore(g, Weight, 10, nil)
+	fn := ModularScore(g, Weight, 10, rand.NewPCG(1, 1))
 	p, err := Profile(fn, true, 1e-3, 0.1, 10)
 	if err != nil {
 		t.Errorf("%s: unexpected error: %v", test.name, err)

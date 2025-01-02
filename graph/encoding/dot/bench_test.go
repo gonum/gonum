@@ -6,13 +6,13 @@ package dot
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/graphs/gen"
 	"gonum.org/v1/gonum/graph/multi"
 	"gonum.org/v1/gonum/graph/simple"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 var (
@@ -33,7 +33,7 @@ var (
 
 func gnpDirected(n int, p float64) graph.Directed {
 	g := simple.NewDirectedGraph()
-	err := gen.Gnp(g, n, p, rand.NewSource(1))
+	err := gen.Gnp(g, n, p, rand.NewPCG(1, 1))
 	if err != nil {
 		panic(fmt.Sprintf("dot: bad test: %v", err))
 	}
@@ -42,7 +42,7 @@ func gnpDirected(n int, p float64) graph.Directed {
 
 func powerLawMultiDirected(n, d int) graph.DirectedMultigraph {
 	g := multi.NewDirectedGraph()
-	err := gen.PowerLaw(g, n, d, rand.NewSource(1))
+	err := gen.PowerLaw(g, n, d, rand.NewPCG(1, 1))
 	if err != nil {
 		panic(fmt.Sprintf("dot: bad test: %v", err))
 	}

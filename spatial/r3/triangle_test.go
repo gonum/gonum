@@ -6,9 +6,8 @@ package r3
 
 import (
 	"math"
+	"math/rand/v2"
 	"testing"
-
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestTriangleDegenerate(t *testing.T) {
@@ -22,7 +21,7 @@ func TestTriangleDegenerate(t *testing.T) {
 		// longest edge and the opposite vertex.
 		spatialTol = 1e-2
 	)
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < 200; i++ {
 		// Generate a random line for the longest triangle side.
 		ln := line{randomVec(rnd), randomVec(rnd)}
@@ -81,7 +80,7 @@ func TestTriangleDegenerate(t *testing.T) {
 
 func TestTriangleCentroid(t *testing.T) {
 	const tol = 1e-12
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < 100; i++ {
 		tri := randomTriangle(rnd)
 		got := tri.Centroid()
@@ -98,7 +97,7 @@ func TestTriangleCentroid(t *testing.T) {
 
 func TestTriangleNormal(t *testing.T) {
 	const tol = 1e-12
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < 100; i++ {
 		tri := randomTriangle(rnd)
 		got := tri.Normal()
@@ -149,7 +148,7 @@ func TestTriangleArea(t *testing.T) {
 		}
 	}
 	const tol2 = 1e-12
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < 100; i++ {
 		tri := randomTriangle(rnd)
 		got := tri.Area()
@@ -161,7 +160,7 @@ func TestTriangleArea(t *testing.T) {
 }
 
 func TestTriangleOrderedLengths(t *testing.T) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < 200; i++ {
 		tri := randomTriangle(rnd)
 		s1, s2, s3 := tri.sides()

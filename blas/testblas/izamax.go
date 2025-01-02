@@ -5,9 +5,8 @@
 package testblas
 
 import (
+	"math/rand/v2"
 	"testing"
-
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Izamaxer interface {
@@ -15,7 +14,7 @@ type Izamaxer interface {
 }
 
 func IzamaxTest(t *testing.T, impl Izamaxer) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, n := range []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 50, 100} {
 		for _, incX := range []int{-5, 1, 2, 10} {
 			aincX := abs(incX)
@@ -34,7 +33,7 @@ func IzamaxTest(t *testing.T, impl Izamaxer) {
 
 			want := -1
 			if incX > 0 && n > 0 {
-				want = rnd.Intn(n)
+				want = rnd.IntN(n)
 				x[want*incX] = 10 + 10i
 			}
 			got := impl.Izamax(n, x, incX)

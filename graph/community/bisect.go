@@ -8,9 +8,9 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"math/rand/v2"
 
 	"gonum.org/v1/gonum/graph"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 // Interval is an interval of resolutions with a common score.

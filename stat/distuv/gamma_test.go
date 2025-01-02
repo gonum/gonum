@@ -7,11 +7,11 @@ package distuv
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"sort"
 	"testing"
 
 	"gonum.org/v1/gonum/floats/scalar"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestGamma(t *testing.T) {
@@ -29,7 +29,7 @@ func TestGamma(t *testing.T) {
 			t.Errorf("Pdf mismatch. Got %v, want %v", pdf, test.want)
 		}
 	}
-	src := rand.New(rand.NewSource(1))
+	src := rand.New(rand.NewPCG(1, 1))
 	for i, g := range []Gamma{
 		{Alpha: 0.1, Beta: 0.8, Src: src},
 		{Alpha: 0.3, Beta: 0.8, Src: src},
@@ -126,7 +126,7 @@ func TestGammaPanics(t *testing.T) {
 }
 
 func BenchmarkGammaRand(b *testing.B) {
-	src := rand.New(rand.NewSource(1))
+	src := rand.New(rand.NewPCG(1, 1))
 	for i, g := range []Gamma{
 		{Alpha: 0.1, Beta: 0.8, Src: src},
 		{Alpha: 0.5, Beta: 0.8, Src: src},

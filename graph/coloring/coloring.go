@@ -9,6 +9,7 @@ package coloring
 
 import (
 	"errors"
+	"math/rand/v2"
 	"slices"
 	"sort"
 
@@ -16,7 +17,6 @@ import (
 	"gonum.org/v1/gonum/graph/internal/set"
 	"gonum.org/v1/gonum/graph/iterator"
 	"gonum.org/v1/gonum/graph/topo"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 // ErrInvalidPartialColoring is returned when a partial coloring

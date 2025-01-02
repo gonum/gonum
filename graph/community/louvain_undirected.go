@@ -6,13 +6,13 @@ package community
 
 import (
 	"math"
+	"math/rand/v2"
 	"slices"
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/set"
 	"gonum.org/v1/gonum/graph/iterator"
 	"gonum.org/v1/gonum/internal/order"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 // qUndirected returns the modularity Q score of the graph g subdivided into the
@@ -73,7 +73,7 @@ func qUndirected(g graph.Undirected, communities [][]graph.Node, resolution floa
 }
 
 // louvainUndirected returns the hierarchical modularization of g at the given
-// resolution using the Louvain algorithm. If src is nil, rand.Intn is used as
+// resolution using the Louvain algorithm. If src is nil, rand.IntN is used as
 // the random generator. louvainUndirected will panic if g has any edge with negative edge
 // weight.
 //
@@ -83,9 +83,9 @@ func louvainUndirected(g graph.Undirected, resolution float64, src rand.Source) 
 	// of the algorithm used here.
 
 	c := reduceUndirected(g, nil)
-	rnd := rand.Intn
+	rnd := rand.IntN
 	if src != nil {
-		rnd = rand.New(src).Intn
+		rnd = rand.New(src).IntN
 	}
 	for {
 		l := newUndirectedLocalMover(c, c.communities, resolution)

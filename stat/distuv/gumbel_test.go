@@ -6,11 +6,11 @@ package distuv
 
 import (
 	"math"
+	"math/rand/v2"
 	"sort"
 	"testing"
 
 	"gonum.org/v1/gonum/floats/scalar"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestGumbelRightProbCDF(t *testing.T) {
@@ -42,7 +42,7 @@ func TestGumbelRightProbCDF(t *testing.T) {
 
 func TestGumbelRight(t *testing.T) {
 	t.Parallel()
-	src := rand.New(rand.NewSource(1))
+	src := rand.New(rand.NewPCG(1, 1))
 	for i, b := range []GumbelRight{
 		{0, 1, src},
 		{-5, 6, src},

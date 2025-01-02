@@ -6,9 +6,8 @@ package testlapack
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
-
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Dptsver interface {
@@ -16,7 +15,7 @@ type Dptsver interface {
 }
 
 func DptsvTest(t *testing.T, impl Dptsver) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, n := range []int{0, 1, 2, 3, 4, 5, 10, 20, 50, 51, 52, 53, 54, 100} {
 		for _, nrhs := range []int{0, 1, 2, 3, 4, 5, 10, 20, 50} {
 			for _, ldb := range []int{max(1, nrhs), nrhs + 3} {

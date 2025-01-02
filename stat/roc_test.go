@@ -7,10 +7,9 @@ package stat
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"slices"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/floats"
 )
@@ -347,7 +346,7 @@ func benchmarkROC(b *testing.B, cutoffsSize int, ySize int, classesSize int, wei
 			"cutoffs=%d,y=%d,classes=%d,weights=%d",
 			cutoffsSize, ySize, classesSize, weightsSize),
 		func(b *testing.B) {
-			src := rand.NewSource(1)
+			src := rand.NewPCG(1, 1)
 
 			cutoffs := randomFloats(cutoffsSize, src)
 			slices.Sort(cutoffs)
@@ -382,7 +381,7 @@ func randomBools(l int, src rand.Source) []bool {
 	rnd := rand.New(src)
 	s := make([]bool, l)
 	for i := range s {
-		s[i] = rnd.Int31n(2) == 1
+		s[i] = rnd.Int32N(2) == 1
 	}
 	return s
 }

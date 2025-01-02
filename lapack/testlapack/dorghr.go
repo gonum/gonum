@@ -7,11 +7,11 @@ package testlapack
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Dorghrer interface {
@@ -21,14 +21,14 @@ type Dorghrer interface {
 }
 
 func DorghrTest(t *testing.T, impl Dorghrer) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	for _, n := range []int{1, 2, 3, 4, 5, 6, 7, 8, 23, 34} {
 		for _, extra := range []int{0, 1, 13} {
 			for _, optwork := range []bool{true, false} {
 				for cas := 0; cas < 100; cas++ {
-					ilo := rnd.Intn(n)
-					ihi := rnd.Intn(n)
+					ilo := rnd.IntN(n)
+					ihi := rnd.IntN(n)
 					if ilo > ihi {
 						ilo, ihi = ihi, ilo
 					}

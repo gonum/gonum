@@ -6,11 +6,11 @@ package testlapack
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Dlarfxer interface {
@@ -18,7 +18,7 @@ type Dlarfxer interface {
 }
 
 func DlarfxTest(t *testing.T, impl Dlarfxer) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, side := range []blas.Side{blas.Right, blas.Left} {
 		// For m and n greater than 10 we are testing Dlarf, so avoid unnecessary work.
 		for m := 1; m < 12; m++ {

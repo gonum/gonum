@@ -5,12 +5,12 @@
 package testlapack
 
 import (
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Dorml2er interface {
@@ -19,7 +19,7 @@ type Dorml2er interface {
 }
 
 func Dorml2Test(t *testing.T, impl Dorml2er) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	// TODO(btracey): This test is not complete, because it
 	// doesn't test individual values of m, n, and k, instead only testing
 	// a specific subset of possible k values.

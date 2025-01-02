@@ -7,12 +7,12 @@ package testlapack
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Dlatbser interface {
@@ -22,7 +22,7 @@ type Dlatbser interface {
 // DlatbsTest tests Dlatbs by generating a random triangular band system and
 // checking that a residual for the computed solution is small.
 func DlatbsTest(t *testing.T, impl Dlatbser) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, n := range []int{0, 1, 2, 3, 4, 5, 10, 50} {
 		for _, kd := range []int{0, (n + 1) / 4, (3*n - 1) / 4, (5*n + 1) / 4} {
 			for _, uplo := range []blas.Uplo{blas.Upper, blas.Lower} {

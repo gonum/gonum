@@ -6,10 +6,10 @@ package testblas
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Ztrsmer interface {
@@ -38,7 +38,7 @@ func ZtrsmTest(t *testing.T, impl Ztrsmer) {
 func ztrsmTest(t *testing.T, impl Ztrsmer, side blas.Side, uplo blas.Uplo, trans blas.Transpose, diag blas.Diag, m, n int) {
 	const tol = 1e-12
 
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	nA := m
 	if side == blas.Right {

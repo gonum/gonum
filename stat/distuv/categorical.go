@@ -6,8 +6,7 @@ package distuv
 
 import (
 	"math"
-
-	"gonum.org/v1/gonum/internal/rand"
+	"math/rand/v2"
 )
 
 // Categorical is an extension of the Bernoulli distribution where x takes

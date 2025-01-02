@@ -6,11 +6,11 @@ package community
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"slices"
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/set"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 // Q returns the modularity Q score of the graph g subdivided into the
@@ -71,7 +71,7 @@ type ReducedGraph interface {
 }
 
 // Modularize returns the hierarchical modularization of g at the given resolution
-// using the Louvain algorithm. If src is nil, rand.Intn is used as the random
+// using the Louvain algorithm. If src is nil, rand.IntN is used as the random
 // generator. Modularize will panic if g has any edge with negative edge weight.
 //
 // If g is undirected it is modularised to minimise
@@ -186,7 +186,7 @@ type ReducedMultiplex interface {
 
 // ModularizeMultiplex returns the hierarchical modularization of g at the given resolution
 // using the Louvain algorithm. If all is true and g have negatively weighted layers, all
-// communities will be searched during the modularization. If src is nil, rand.Intn is
+// communities will be searched during the modularization. If src is nil, rand.IntN is
 // used as the random generator. ModularizeMultiplex will panic if g has any edge with
 // edge weight that does not sign-match the layer weight.
 //

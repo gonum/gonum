@@ -6,9 +6,8 @@ package testblas
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
-
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Zswaper interface {
@@ -16,7 +15,7 @@ type Zswaper interface {
 }
 
 func ZswapTest(t *testing.T, impl Zswaper) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for n := 0; n < 20; n++ {
 		for _, inc := range allPairs([]int{-5, -1, 1, 2, 5, 10}, []int{-3, -1, 1, 3, 7, 12}) {
 			incX := inc[0]

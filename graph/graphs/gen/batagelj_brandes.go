@@ -10,9 +10,9 @@ package gen
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 
 	"gonum.org/v1/gonum/graph"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 // Gnp constructs a Gilbert’s model subgraph in the destination, dst, of order n. Edges
@@ -77,7 +77,7 @@ func Gnp(dst graph.Builder, n int, p float64, src rand.Source) error {
 
 // Gnm constructs a Erdős-Rényi model subgraph in the destination, dst, of
 // order n and size m. If src is not nil it is used as the random source,
-// otherwise rand.Intn is used. The graph is constructed in O(m) expected
+// otherwise rand.IntN is used. The graph is constructed in O(m) expected
 // time for m ≤ (n choose 2)/2.
 func Gnm(dst GraphBuilder, n, m int, src rand.Source) error {
 	if m == 0 {
@@ -101,9 +101,9 @@ func Gnm(dst GraphBuilder, n, m int, src rand.Source) error {
 
 	var rnd func(int) int
 	if src == nil {
-		rnd = rand.Intn
+		rnd = rand.IntN
 	} else {
-		rnd = rand.New(src).Intn
+		rnd = rand.New(src).IntN
 	}
 
 	nodes := make([]graph.Node, n)
@@ -166,11 +166,11 @@ func SmallWorldsBB(dst GraphBuilder, n, d int, p float64, src rand.Source) error
 	)
 	if src == nil {
 		rnd = rand.Float64
-		rndN = rand.Intn
+		rndN = rand.IntN
 	} else {
 		r := rand.New(src)
 		rnd = r.Float64
-		rndN = r.Intn
+		rndN = r.IntN
 	}
 
 	hasEdge := dst.HasEdgeBetween
@@ -309,7 +309,7 @@ func edgeNodesFor(i int, nodes []graph.Node) (v, w graph.Node) {
 
 // PowerLaw constructs a power-law degree graph by preferential attachment in dst
 // with n nodes and minimum degree d. PowerLaw does not consider nodes in dst prior
-// to the call. If src is not nil it is used as the random source, otherwise rand.Intn
+// to the call. If src is not nil it is used as the random source, otherwise rand.IntN
 // is used.
 // The graph is constructed in O(nd) — O(n+m) — time.
 //
@@ -320,9 +320,9 @@ func PowerLaw(dst graph.MultigraphBuilder, n, d int, src rand.Source) error {
 	}
 	var rnd func(int) int
 	if src == nil {
-		rnd = rand.Intn
+		rnd = rand.IntN
 	} else {
-		rnd = rand.New(src).Intn
+		rnd = rand.New(src).IntN
 	}
 
 	m := make([]graph.Node, 2*n*d)
@@ -345,7 +345,7 @@ func PowerLaw(dst graph.MultigraphBuilder, n, d int, src rand.Source) error {
 // BipartitePowerLaw constructs a bipartite power-law degree graph by preferential attachment
 // in dst with 2×n nodes and minimum degree d. BipartitePowerLaw does not consider nodes in
 // dst prior to the call. The two partitions are returned in p1 and p2. If src is not nil it is
-// used as the random source, otherwise rand.Intn is used.
+// used as the random source, otherwise rand.IntN is used.
 // The graph is constructed in O(nd) — O(n+m) — time.
 //
 // The algorithm used is described in http://algo.uni-konstanz.de/publications/bb-eglrn-05.pdf
@@ -355,9 +355,9 @@ func BipartitePowerLaw(dst graph.MultigraphBuilder, n, d int, src rand.Source) (
 	}
 	var rnd func(int) int
 	if src == nil {
-		rnd = rand.Intn
+		rnd = rand.IntN
 	} else {
-		rnd = rand.New(src).Intn
+		rnd = rand.New(src).IntN
 	}
 
 	p := make([]graph.Node, 2*n)

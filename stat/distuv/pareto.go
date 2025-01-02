@@ -6,8 +6,7 @@ package distuv
 
 import (
 	"math"
-
-	"gonum.org/v1/gonum/internal/rand"
+	"math/rand/v2"
 )
 
 // Pareto implements the Pareto (Type I) distribution, a one parameter distribution

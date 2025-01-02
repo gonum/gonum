@@ -7,10 +7,10 @@ package testlapack
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/lapack"
 )
 
@@ -22,7 +22,7 @@ type Dptconer interface {
 }
 
 func DptconTest(t *testing.T, impl Dptconer) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, n := range []int{0, 1, 2, 3, 4, 5, 10, 20, 50, 51, 52, 53, 54, 100} {
 		dptconTest(t, impl, rnd, n)
 	}

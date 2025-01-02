@@ -7,10 +7,10 @@ package gen
 import (
 	"errors"
 	"fmt"
+	"math/rand/v2"
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/simple"
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/stat/sampleuv"
 )
 
@@ -20,7 +20,7 @@ import (
 // additional edges joining existing nodes with probability proportional to the nodes'
 // degrees. The edges are formed as a triad with probability, p.
 // If src is not nil it is used as the random source, otherwise rand.Float64 and
-// rand.Intn are used for the random number generators.
+// rand.IntN are used for the random number generators.
 //
 // The algorithm is essentially as described in http://arxiv.org/abs/cond-mat/0110452.
 func TunableClusteringScaleFree(dst graph.UndirectedBuilder, n, m int, p float64, src rand.Source) error {
@@ -37,11 +37,11 @@ func TunableClusteringScaleFree(dst graph.UndirectedBuilder, n, m int, p float64
 	)
 	if src == nil {
 		rnd = rand.Float64
-		rndN = rand.Intn
+		rndN = rand.IntN
 	} else {
 		r := rand.New(src)
 		rnd = r.Float64
-		rndN = r.Intn
+		rndN = r.IntN
 	}
 
 	// Initial condition.

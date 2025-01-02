@@ -7,10 +7,10 @@ package testblas
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/floats/scalar"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Dznrm2er interface {
@@ -105,7 +105,7 @@ func Dznrm2Test(t *testing.T, impl Dznrm2er) {
 	}
 
 	tol = 1e-14
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, n := range []int{10, 50, 100} {
 		for _, incX := range []int{1, 2, 10} {
 			re := make([]float64, n)

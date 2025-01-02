@@ -6,9 +6,9 @@ package distuv
 
 import (
 	"math"
+	"math/rand/v2"
 	"sort"
 
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/stat"
 )
 

@@ -6,10 +6,10 @@ package r2
 
 import (
 	"math"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/floats/scalar"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestAdd(t *testing.T) {

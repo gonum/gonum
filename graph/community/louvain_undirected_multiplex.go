@@ -7,12 +7,12 @@ package community
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/set"
 	"gonum.org/v1/gonum/graph/iterator"
 	"gonum.org/v1/gonum/internal/order"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 // UndirectedMultiplex is an undirected multiplex graph.
@@ -162,7 +162,7 @@ func (g UndirectedLayers) Layer(l int) graph.Undirected { return g[l] }
 
 // louvainUndirectedMultiplex returns the hierarchical modularization of g at the given resolution
 // using the Louvain algorithm. If all is true and g has negatively weighted layers, all
-// communities will be searched during the modularization. If src is nil, rand.Intn is
+// communities will be searched during the modularization. If src is nil, rand.IntN is
 // used as the random generator. louvainUndirectedMultiplex will panic if g has any edge with
 // edge weight that does not sign-match the layer weight.
 //
@@ -179,9 +179,9 @@ func louvainUndirectedMultiplex(g UndirectedMultiplex, weights, resolutions []fl
 	// of the algorithm used here.
 
 	c := reduceUndirectedMultiplex(g, nil, weights)
-	rnd := rand.Intn
+	rnd := rand.IntN
 	if src != nil {
-		rnd = rand.New(src).Intn
+		rnd = rand.New(src).IntN
 	}
 	for {
 		l := newUndirectedMultiplexLocalMover(c, c.communities, weights, resolutions, all)

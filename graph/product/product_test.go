@@ -7,13 +7,13 @@ package product
 import (
 	"bytes"
 	"fmt"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/encoding/dot"
 	"gonum.org/v1/gonum/graph/graphs/gen"
 	"gonum.org/v1/gonum/graph/simple"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func (n Node) DOTID() string { return fmt.Sprintf("(%d,%d)", n.A.ID(), n.B.ID()) }
@@ -69,10 +69,10 @@ var productTests = []struct {
 	{name: "paths", a: path(-1), b: path(1)},
 	{name: "wp_mp", a: path(-2), b: path(2)},
 	{name: "wp_gp", a: left(), b: right()},
-	{name: "gnp_2×2", a: gnp(2, 0.5, rand.NewSource(1)), b: gnp(2, 0.5, rand.NewSource(2))},
-	{name: "gnp_2×3", a: gnp(2, 0.5, rand.NewSource(1)), b: gnp(3, 0.5, rand.NewSource(2))},
-	{name: "gnp_3×3", a: gnp(3, 0.5, rand.NewSource(1)), b: gnp(3, 0.5, rand.NewSource(2))},
-	{name: "gnp_4×4", a: gnp(4, 0.5, rand.NewSource(1)), b: gnp(4, 0.5, rand.NewSource(2))},
+	{name: "gnp_2×2", a: gnp(2, 0.5, rand.NewPCG(1, 1)), b: gnp(2, 0.5, rand.NewPCG(2, 2))},
+	{name: "gnp_2×3", a: gnp(2, 0.5, rand.NewPCG(1, 1)), b: gnp(3, 0.5, rand.NewPCG(2, 2))},
+	{name: "gnp_3×3", a: gnp(3, 0.5, rand.NewPCG(1, 1)), b: gnp(3, 0.5, rand.NewPCG(2, 2))},
+	{name: "gnp_4×4", a: gnp(4, 0.5, rand.NewPCG(1, 1)), b: gnp(4, 0.5, rand.NewPCG(2, 2))},
 }
 
 func TestCartesian(t *testing.T) {
@@ -373,7 +373,7 @@ func BenchmarkProduct(b *testing.B) {
 	} {
 		for _, p := range []float64{0.05, 0.25, 0.5, 0.75, 0.95} {
 			for _, n := range bench.len {
-				src := rand.NewSource(uint64(seed))
+				src := rand.NewPCG(uint64(seed), uint64(seed))
 				b.Run(fmt.Sprintf("%s %d-%.2f", bench.name, n, p), func(b *testing.B) {
 					g1 := gnp(n, p, src)
 					g2 := gnp(n, p, src)

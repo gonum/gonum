@@ -5,10 +5,9 @@
 package prng
 
 import (
+	"math/rand/v2"
 	"testing"
 	"time"
-
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 var _ rand.Source = (*MT19937_64)(nil)

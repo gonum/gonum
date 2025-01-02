@@ -6,11 +6,11 @@ package testlapack
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/lapack"
 )
 
@@ -19,7 +19,7 @@ type Dlaqr5er interface {
 }
 
 func Dlaqr5Test(t *testing.T, impl Dlaqr5er) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, n := range []int{1, 2, 3, 4, 5, 6, 10, 30} {
 		for _, extra := range []int{0, 1, 20} {
 			for _, kacc22 := range []int{0, 1, 2} {
@@ -52,8 +52,8 @@ func testDlaqr5(t *testing.T, impl Dlaqr5er, n, extra, kacc22 int, rnd *rand.Ran
 		si[i], si[i+1] = im, -im
 		i += 2
 	}
-	ktop := rnd.Intn(n)
-	kbot := rnd.Intn(n)
+	ktop := rnd.IntN(n)
+	kbot := rnd.IntN(n)
 	if kbot < ktop {
 		ktop, kbot = kbot, ktop
 	}

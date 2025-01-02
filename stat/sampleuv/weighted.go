@@ -4,7 +4,7 @@
 
 package sampleuv
 
-import "gonum.org/v1/gonum/internal/rand"
+import "math/rand/v2"
 
 // Weighted provides sampling without replacement from a collection of items with
 // non-uniform probability.

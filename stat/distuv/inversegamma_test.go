@@ -6,11 +6,11 @@ package distuv
 
 import (
 	"math"
+	"math/rand/v2"
 	"sort"
 	"testing"
 
 	"gonum.org/v1/gonum/floats/scalar"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestInverseGamma(t *testing.T) {
@@ -28,7 +28,7 @@ func TestInverseGamma(t *testing.T) {
 			t.Errorf("Pdf mismatch. Got %v, want %v", pdf, test.want)
 		}
 	}
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	for i, g := range []InverseGamma{
 		{Alpha: 5.6, Beta: 0.5, Src: src},
 		{Alpha: 30, Beta: 1.7, Src: src},

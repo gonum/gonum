@@ -7,9 +7,8 @@ package testlapack
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"testing"
-
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Dlanv2er interface {
@@ -17,7 +16,7 @@ type Dlanv2er interface {
 }
 
 func Dlanv2Test(t *testing.T, impl Dlanv2er) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	t.Run("UpperTriangular", func(t *testing.T) {
 		for i := 0; i < 10; i++ {
 			a := rnd.NormFloat64()

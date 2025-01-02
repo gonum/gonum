@@ -6,10 +6,10 @@ package testlapack
 
 import (
 	"math"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/lapack"
 )
 
@@ -19,7 +19,7 @@ type Dlansyer interface {
 }
 
 func DlansyTest(t *testing.T, impl Dlansyer) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, norm := range []lapack.MatrixNorm{lapack.MaxAbs, lapack.MaxColumnSum, lapack.MaxRowSum, lapack.Frobenius} {
 		for _, uplo := range []blas.Uplo{blas.Lower, blas.Upper} {
 			for _, test := range []struct {

@@ -7,9 +7,9 @@ package testlapack
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"testing"
 
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/lapack"
 )
 
@@ -21,7 +21,7 @@ type Dpttrfer interface {
 // positive definite tridiagonal matrices by checking that the Cholesky factors
 // multiply back to the original matrix.
 func DpttrfTest(t *testing.T, impl Dpttrfer) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, n := range []int{0, 1, 2, 3, 4, 5, 10, 20, 50, 51, 52, 53, 54, 100} {
 		dpttrfTest(t, impl, rnd, n)
 	}

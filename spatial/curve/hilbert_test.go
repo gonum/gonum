@@ -7,12 +7,11 @@ package curve
 import (
 	"errors"
 	"fmt"
+	"math/rand/v2"
 	"reflect"
 	"slices"
 	"strings"
 	"testing"
-
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func ExampleHilbert2D_Pos() {
@@ -269,7 +268,7 @@ func BenchmarkHilbert(b *testing.B) {
 					h := newCurve(ord, N)
 					v := make([]int, N)
 					for i := range v {
-						v[i] = rand.Intn(1 << ord)
+						v[i] = rand.IntN(1 << ord)
 					}
 					u := make([]int, N)
 					for n := 0; n < b.N; n++ {
@@ -284,7 +283,7 @@ func BenchmarkHilbert(b *testing.B) {
 			for ord := 1; ord <= O; ord++ {
 				b.Run(fmt.Sprintf("Order %d", ord), func(b *testing.B) {
 					h := newCurve(ord, N)
-					d := rand.Intn(1 << (ord * N))
+					d := rand.IntN(1 << (ord * N))
 					v := make([]int, N)
 					for n := 0; n < b.N; n++ {
 						h.Coord(v, d)

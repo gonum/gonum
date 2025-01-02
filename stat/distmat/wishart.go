@@ -6,9 +6,9 @@ package distmat
 
 import (
 	"math"
+	"math/rand/v2"
 	"sync"
 
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/mathext"
 	"gonum.org/v1/gonum/stat/distuv"

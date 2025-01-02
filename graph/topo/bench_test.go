@@ -6,12 +6,12 @@ package topo
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/graphs/gen"
 	"gonum.org/v1/gonum/graph/simple"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 var (
@@ -34,7 +34,7 @@ var (
 
 func gnpDirected(n int, p float64) graph.Directed {
 	g := simple.NewDirectedGraph()
-	err := gen.Gnp(g, n, p, rand.NewSource(1))
+	err := gen.Gnp(g, n, p, rand.NewPCG(1, 1))
 	if err != nil {
 		panic(fmt.Sprintf("topo: bad test: %v", err))
 	}
@@ -43,7 +43,7 @@ func gnpDirected(n int, p float64) graph.Directed {
 
 func gnpUndirected(n int, p float64) graph.Undirected {
 	g := simple.NewUndirectedGraph()
-	err := gen.Gnp(g, n, p, rand.NewSource(1))
+	err := gen.Gnp(g, n, p, rand.NewPCG(1, 1))
 	if err != nil {
 		panic(fmt.Sprintf("topo: bad test: %v", err))
 	}

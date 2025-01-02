@@ -7,6 +7,7 @@ package community
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"reflect"
 	"slices"
 	"testing"
@@ -16,7 +17,6 @@ import (
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/simple"
 	"gonum.org/v1/gonum/internal/order"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 var communityDirectedMultiplexQTests = []struct {
@@ -326,7 +326,7 @@ tests:
 			continue
 		}
 
-		rnd := rand.New(rand.NewSource(1)).Intn
+		rnd := rand.New(rand.NewPCG(1, 1)).IntN
 		for _, structure := range test.structures {
 			communityOf := make(map[int64]int)
 			communities := make([][]graph.Node, len(structure.memberships))
@@ -588,7 +588,7 @@ func TestLouvainDirectedMultiplex(t *testing.T) {
 		)
 		// Modularize is randomised so we do this to
 		// ensure the level tests are consistent.
-		src := rand.New(rand.NewSource(1))
+		src := rand.New(rand.NewPCG(1, 1))
 		for i := 0; i < louvainIterations; i++ {
 			r := ModularizeMultiplex(g, weights, nil, true, src).(*ReducedDirectedMultiplex)
 			if q := floats.Sum(QMultiplex(r, nil, weights, nil)); q > bestQ || math.IsNaN(q) {
@@ -689,7 +689,7 @@ func TestNonContiguousWeightedDirectedMultiplex(t *testing.T) {
 }
 
 func BenchmarkLouvainDirectedMultiplex(b *testing.B) {
-	src := rand.New(rand.NewSource(1))
+	src := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < b.N; i++ {
 		ModularizeMultiplex(DirectedLayers{dupGraphDirected}, nil, nil, true, src)
 	}

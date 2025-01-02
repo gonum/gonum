@@ -8,11 +8,11 @@ import (
 	"fmt"
 	"math"
 	"math/cmplx"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/lapack"
 )
 
@@ -1203,8 +1203,8 @@ func isUpperTriangular(a blas64.General) bool {
 func unbalancedSparseGeneral(m, n, stride int, nonzeros int, rnd *rand.Rand) blas64.General {
 	a := zeros(m, n, stride)
 	for k := 0; k < nonzeros; k++ {
-		i := rnd.Intn(n)
-		j := rnd.Intn(n)
+		i := rnd.IntN(n)
+		j := rnd.IntN(n)
 		if rnd.Float64() < 0.5 {
 			a.Data[i*stride+j] = float64(i+1) * rnd.NormFloat64()
 		} else {

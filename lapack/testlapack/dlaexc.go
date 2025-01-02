@@ -6,11 +6,11 @@ package testlapack
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/lapack"
 )
 
@@ -19,7 +19,7 @@ type Dlaexcer interface {
 }
 
 func DlaexcTest(t *testing.T, impl Dlaexcer) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	for _, n := range []int{1, 2, 3, 4, 5, 6, 10, 18, 31, 53} {
 		for _, extra := range []int{0, 3} {
@@ -38,7 +38,7 @@ func testDlaexc(t *testing.T, impl Dlaexcer, rnd *rand.Rand, n, extra int) {
 	tmatCopy := cloneGeneral(tmat)
 
 	// Randomly pick the index of the first block.
-	j1 := rnd.Intn(n)
+	j1 := rnd.IntN(n)
 	if j1 > 0 && tmat.Data[j1*tmat.Stride+j1-1] != 0 {
 		// Adjust j1 if it points to the second row of a 2x2 block.
 		j1--

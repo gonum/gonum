@@ -6,11 +6,11 @@ package testlapack
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/lapack"
 )
 
@@ -22,7 +22,7 @@ type Dtrconer interface {
 }
 
 func DtrconTest(t *testing.T, impl Dtrconer) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, n := range []int{0, 1, 2, 3, 4, 5, 10, 50} {
 		for _, uplo := range []blas.Uplo{blas.Lower, blas.Upper} {
 			for _, diag := range []blas.Diag{blas.NonUnit, blas.Unit} {

@@ -7,10 +7,10 @@ package testlapack
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Dlassqer interface {
@@ -31,7 +31,7 @@ func DlassqTest(t *testing.T, impl Dlassqer) {
 		math.NaN(),
 	}
 
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, n := range []int{0, 1, 2, 3, 4, 5, 10, 20, 30, 40} {
 		for _, incx := range []int{1, 3} {
 			for cas := 0; cas < 3; cas++ {

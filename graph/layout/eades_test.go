@@ -5,12 +5,12 @@
 package layout_test
 
 import (
+	"math/rand/v2"
 	"path/filepath"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/simple"
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/spatial/r2"
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/vg"
@@ -37,7 +37,7 @@ func TestEadesR2(t *testing.T) {
 				}
 				return orderedGraph{g}
 			}(),
-			param:     EadesR2{Repulsion: 1, Rate: 0.1, Updates: 100, Theta: 0.1, Src: rand.NewSource(1)},
+			param:     EadesR2{Repulsion: 1, Rate: 0.1, Updates: 100, Theta: 0.1, Src: rand.NewPCG(1, 1)},
 			wantIters: 100,
 		},
 		{
@@ -55,7 +55,7 @@ func TestEadesR2(t *testing.T) {
 				}
 				return orderedGraph{g}
 			}(),
-			param:     EadesR2{Repulsion: 1, Rate: 0.1, Updates: 100, Theta: 0.1, Src: rand.NewSource(1)},
+			param:     EadesR2{Repulsion: 1, Rate: 0.1, Updates: 100, Theta: 0.1, Src: rand.NewPCG(1, 1)},
 			wantIters: 100,
 		},
 		{
@@ -75,7 +75,7 @@ func TestEadesR2(t *testing.T) {
 				}
 				return orderedGraph{g}
 			}(),
-			param:     EadesR2{Repulsion: 1, Rate: 0.1, Updates: 100, Theta: 0.1, Src: rand.NewSource(1)},
+			param:     EadesR2{Repulsion: 1, Rate: 0.1, Updates: 100, Theta: 0.1, Src: rand.NewPCG(1, 1)},
 			wantIters: 100,
 		},
 		{
@@ -101,7 +101,7 @@ func TestEadesR2(t *testing.T) {
 				}
 				return orderedGraph{g}
 			}(),
-			param:     EadesR2{Repulsion: 1, Rate: 0.1, Updates: 100, Theta: 0.1, Src: rand.NewSource(1)},
+			param:     EadesR2{Repulsion: 1, Rate: 0.1, Updates: 100, Theta: 0.1, Src: rand.NewPCG(1, 1)},
 			wantIters: 100,
 		},
 		{
@@ -130,7 +130,7 @@ func TestEadesR2(t *testing.T) {
 				}
 				return orderedGraph{g}
 			}(),
-			param:     EadesR2{Repulsion: 1, Rate: 0.1, Updates: 100, Theta: 0.1, Src: rand.NewSource(1)},
+			param:     EadesR2{Repulsion: 1, Rate: 0.1, Updates: 100, Theta: 0.1, Src: rand.NewPCG(1, 1)},
 			wantIters: 100,
 		},
 		{
@@ -161,7 +161,7 @@ func TestEadesR2(t *testing.T) {
 				}
 				return orderedGraph{g}
 			}(),
-			param:     EadesR2{Repulsion: 1, Rate: 1, Updates: 100, Theta: 0.1, Src: rand.NewSource(1)},
+			param:     EadesR2{Repulsion: 1, Rate: 1, Updates: 100, Theta: 0.1, Src: rand.NewPCG(1, 1)},
 			wantIters: 96,
 		},
 
@@ -191,7 +191,7 @@ func TestEadesR2(t *testing.T) {
 				}
 				return orderedGraph{g}
 			}(),
-			param:     EadesR2{Repulsion: 1, Rate: 0.01, Updates: 100, Theta: 0.1, Src: rand.NewSource(1)},
+			param:     EadesR2{Repulsion: 1, Rate: 0.01, Updates: 100, Theta: 0.1, Src: rand.NewPCG(1, 1)},
 			wantIters: 100,
 		},
 	}

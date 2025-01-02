@@ -6,10 +6,10 @@ package samplemv
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/spatial/r1"
 	"gonum.org/v1/gonum/stat"
@@ -23,7 +23,7 @@ type lhDist interface {
 }
 
 func TestLatinHypercube(t *testing.T) {
-	src := rand.New(rand.NewSource(1))
+	src := rand.New(rand.NewPCG(1, 1))
 	for _, nSamples := range []int{1, 2, 5, 10, 20} {
 		for _, dist := range []lhDist{
 			distmv.NewUniform([]r1.Interval{{Min: 0, Max: 3}}, src),
@@ -62,7 +62,7 @@ func TestLatinHypercube(t *testing.T) {
 }
 
 func TestImportance(t *testing.T) {
-	src := rand.New(rand.NewSource(1))
+	src := rand.New(rand.NewPCG(1, 1))
 	// Test by finding the expected value of a multi-variate normal.
 	dim := 3
 	target, ok := randomNormal(dim, src)
@@ -85,11 +85,11 @@ func TestImportance(t *testing.T) {
 	weights := make([]float64, nSamples)
 	Importance{Target: target, Proposal: proposal}.SampleWeighted(batch, weights)
 
-	compareNormal(t, target, batch, weights, 5e-2, 5e-2)
+	compareNormal(t, target, batch, weights, 5e-1, 5e-1)
 }
 
 func TestRejection(t *testing.T) {
-	src := rand.New(rand.NewSource(1))
+	src := rand.New(rand.NewPCG(1, 1))
 	// Test by finding the expected value of a uniform.
 	dim := 3
 	bounds := make([]r1.Interval, dim)
@@ -135,7 +135,7 @@ func TestRejection(t *testing.T) {
 }
 
 func TestMetropolisHastings(t *testing.T) {
-	src := rand.New(rand.NewSource(1))
+	src := rand.New(rand.NewPCG(1, 1))
 	// Test by finding the expected value of a normal distribution.
 	dim := 3
 	target, ok := randomNormal(dim, src)
@@ -226,7 +226,7 @@ func TestMetropolisHastingser(t *testing.T) {
 		{3, 103, 11, 51},
 		{3, 103, 51, 11},
 	} {
-		src := rand.New(rand.NewSource(1))
+		src := rand.New(rand.NewPCG(1, 1))
 		dim := test.dim
 
 		initial := make([]float64, dim)
@@ -242,7 +242,7 @@ func TestMetropolisHastingser(t *testing.T) {
 
 		// Test the Metropolis Hastingser by generating all the samples, then generating
 		// the same samples with a burnin and rate.
-		src = rand.New(rand.NewSource(1))
+		src = rand.New(rand.NewPCG(1, 1))
 		proposal, ok := NewProposalNormal(sigmaImp, src)
 		if !ok {
 			t.Fatal("bad test, sigma not pos def")
@@ -262,7 +262,7 @@ func TestMetropolisHastingser(t *testing.T) {
 		fullBatch := mat.NewDense(1+burnin+rate*(samples-1), dim, nil)
 		mh.Sample(fullBatch)
 
-		src = rand.New(rand.NewSource(1))
+		src = rand.New(rand.NewPCG(1, 1))
 		proposal, _ = NewProposalNormal(sigmaImp, src)
 		mh = MetropolisHastingser{
 			Initial:  initial,

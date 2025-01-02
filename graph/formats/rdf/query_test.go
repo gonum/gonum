@@ -6,12 +6,12 @@ package rdf
 
 import (
 	"io"
+	"math/rand/v2"
 	"reflect"
 	"strings"
 	"testing"
 
 	"gonum.org/v1/gonum/internal/order"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 var andTests = []struct {
@@ -52,7 +52,7 @@ var andTests = []struct {
 }
 
 func TestQueryAnd(t *testing.T) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	for _, test := range andTests {
 		for i := 0; i < 10; i++ {
 			a := Query{terms: permutedTerms(test.a, src)}
@@ -108,7 +108,7 @@ var orTests = []struct {
 }
 
 func TestQueryOr(t *testing.T) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	for _, test := range orTests {
 		for i := 0; i < 10; i++ {
 			a := Query{terms: permutedTerms(test.a, src)}
@@ -164,7 +164,7 @@ var notTests = []struct {
 }
 
 func TestQueryNot(t *testing.T) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	for _, test := range notTests {
 		for i := 0; i < 10; i++ {
 			a := Query{terms: permutedTerms(test.a, src)}
@@ -271,7 +271,7 @@ var uniqueTests = []struct {
 }
 
 func TestQueryUnique(t *testing.T) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	for _, test := range uniqueTests {
 		for i := 0; i < 10; i++ {
 			a := Query{terms: permutedTerms(test.in, src)}

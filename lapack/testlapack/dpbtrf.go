@@ -6,11 +6,11 @@ package testlapack
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Dpbtrfer interface {
@@ -25,7 +25,7 @@ func DpbtrfTest(t *testing.T, impl Dpbtrfer) {
 	// With the current implementation of Ilaenv the blocked code path is taken if kd > 64.
 	// Unfortunately, with the block size nb=32 this also means that in Dpbtrf
 	// it never happens that i2 <= 0 and the state coverage (unlike code coverage) is not complete.
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, n := range []int{0, 1, 2, 3, 4, 5, 64, 65, 66, 91, 96, 97, 101, 128, 130} {
 		for _, kd := range []int{0, (n + 1) / 4, (3*n - 1) / 4, (5*n + 1) / 4} {
 			for _, uplo := range []blas.Uplo{blas.Upper, blas.Lower} {

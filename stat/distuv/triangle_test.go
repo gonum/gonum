@@ -6,10 +6,9 @@ package distuv
 
 import (
 	"math"
+	"math/rand/v2"
 	"sort"
 	"testing"
-
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestTriangleConstraint(t *testing.T) {
@@ -28,7 +27,7 @@ func TestTriangleConstraint(t *testing.T) {
 
 func TestTriangle(t *testing.T) {
 	t.Parallel()
-	src := rand.New(rand.NewSource(1))
+	src := rand.New(rand.NewPCG(1, 1))
 	for i, test := range []struct {
 		a, b, c float64
 	}{

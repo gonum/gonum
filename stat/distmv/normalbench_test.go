@@ -6,20 +6,20 @@ package distmv
 
 import (
 	"log"
+	"math/rand/v2"
 	"testing"
 
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/mat"
 )
 
 func BenchmarkMarginalNormal10(b *testing.B) {
 	sz := 10
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	normal := randomNormal(sz, rnd)
 	normal.CovarianceMatrix(&mat.SymDense{}) // pre-compute sigma
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		marg, ok := normal.MarginalNormal([]int{1}, nil)
+		marg, ok := normal.MarginalNormal([]int{1}, rand.NewPCG(1, 1))
 		if !ok {
 			b.Error("bad test")
 		}
@@ -29,11 +29,11 @@ func BenchmarkMarginalNormal10(b *testing.B) {
 
 func BenchmarkMarginalNormalReset10(b *testing.B) {
 	sz := 10
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	normal := randomNormal(sz, rnd)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		marg, ok := normal.MarginalNormal([]int{1}, nil)
+		marg, ok := normal.MarginalNormal([]int{1}, rand.NewPCG(1, 1))
 		if !ok {
 			b.Error("bad test")
 		}
@@ -43,11 +43,11 @@ func BenchmarkMarginalNormalReset10(b *testing.B) {
 
 func BenchmarkMarginalNormalSingle10(b *testing.B) {
 	sz := 10
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	normal := randomNormal(sz, rnd)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		marg := normal.MarginalNormalSingle(1, nil)
+		marg := normal.MarginalNormalSingle(1, rand.NewPCG(1, 1))
 		_ = marg
 	}
 }
@@ -65,7 +65,7 @@ func randomNormal(sz int, rnd *rand.Rand) *Normal {
 	var sigma mat.SymDense
 	sigma.SymOuterK(1, dM)
 
-	normal, ok := NewNormal(mu, &sigma, nil)
+	normal, ok := NewNormal(mu, &sigma, rand.NewPCG(1, 1))
 	if !ok {
 		log.Fatal("bad test, not pos def")
 	}

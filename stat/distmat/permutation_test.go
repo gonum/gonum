@@ -5,14 +5,14 @@
 package distmat
 
 import (
+	"math/rand/v2"
 	"testing"
 
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/mat"
 )
 
 func TestUniformPermutation(t *testing.T) {
-	up := NewUniformPermutation(rand.NewSource(1))
+	up := NewUniformPermutation(rand.NewPCG(1, 1))
 	for _, n := range []int{10, 32, 64, 100} {
 		m := mat.NewDense(n, n, nil)
 		up.PermTo(m)

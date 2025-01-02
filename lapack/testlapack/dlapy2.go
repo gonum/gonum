@@ -6,10 +6,10 @@ package testlapack
 
 import (
 	"math"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/floats/scalar"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Dlapy2er interface {
@@ -17,7 +17,7 @@ type Dlapy2er interface {
 }
 
 func Dlapy2Test(t *testing.T, impl Dlapy2er) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < 10; i++ {
 		x := math.Abs(1e200 * rnd.NormFloat64())
 		y := math.Abs(1e200 * rnd.NormFloat64())

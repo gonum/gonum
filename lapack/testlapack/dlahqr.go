@@ -7,11 +7,11 @@ package testlapack
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Dlahqrer interface {
@@ -28,7 +28,7 @@ type dlahqrTest struct {
 }
 
 func DlahqrTest(t *testing.T, impl Dlahqrer) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	// Tests that choose the [ilo:ihi+1,ilo:ihi+1] and
 	// [iloz:ihiz+1,ilo:ihi+1] blocks randomly.
@@ -37,13 +37,13 @@ func DlahqrTest(t *testing.T, impl Dlahqrer) {
 			for _, n := range []int{1, 2, 3, 4, 5, 6, 10, 18, 31, 53} {
 				for _, extra := range []int{0, 1, 11} {
 					for cas := 0; cas < 100; cas++ {
-						ilo := rnd.Intn(n)
-						ihi := rnd.Intn(n)
+						ilo := rnd.IntN(n)
+						ihi := rnd.IntN(n)
 						if ilo > ihi {
 							ilo, ihi = ihi, ilo
 						}
-						iloz := rnd.Intn(ilo + 1)
-						ihiz := ihi + rnd.Intn(n-ihi)
+						iloz := rnd.IntN(ilo + 1)
+						ihiz := ihi + rnd.IntN(n-ihi)
 						h := randomHessenberg(n, n+extra, rnd)
 						if ilo-1 >= 0 {
 							h.Data[ilo*h.Stride+ilo-1] = 0

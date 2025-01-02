@@ -7,11 +7,11 @@ package testblas
 import (
 	"math"
 	"math/cmplx"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/floats/scalar"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 // throwPanic will throw unexpected panics if true, or will just report them as errors if false

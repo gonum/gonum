@@ -5,14 +5,14 @@
 package testblas
 
 import (
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func DtrmvBenchmark(b *testing.B, dtrmv Dtrmver, n, lda, incX int, ul blas.Uplo, tA blas.Transpose, d blas.Diag) {
-	rnd := rand.New(rand.NewSource(0))
+	rnd := rand.New(rand.NewPCG(0, 0))
 	a := make([]float64, n*lda)
 	for i := range a {
 		a[i] = rnd.Float64()

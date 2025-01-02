@@ -6,10 +6,10 @@ package testblas
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Ztpsver interface {
@@ -19,7 +19,7 @@ type Ztpsver interface {
 }
 
 func ZtpsvTest(t *testing.T, impl Ztpsver) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, uplo := range []blas.Uplo{blas.Upper, blas.Lower} {
 		for _, trans := range []blas.Transpose{blas.NoTrans, blas.Trans, blas.ConjTrans} {
 			for _, diag := range []blas.Diag{blas.NonUnit, blas.Unit} {

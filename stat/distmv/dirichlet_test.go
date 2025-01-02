@@ -6,9 +6,9 @@ package distmv
 
 import (
 	"math"
+	"math/rand/v2"
 	"testing"
 
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -20,12 +20,12 @@ func TestDirichlet(t *testing.T) {
 		prob float64
 	}{
 		{
-			NewDirichlet([]float64{1, 1, 1}, nil),
+			NewDirichlet([]float64{1, 1, 1}, rand.NewPCG(1, 1)),
 			[]float64{0.2, 0.3, 0.5},
 			2.0,
 		},
 		{
-			NewDirichlet([]float64{0.6, 10, 8.7}, nil),
+			NewDirichlet([]float64{0.6, 10, 8.7}, rand.NewPCG(1, 1)),
 			[]float64{0.2, 0.3, 0.5},
 			0.24079612737071665,
 		},
@@ -36,7 +36,7 @@ func TestDirichlet(t *testing.T) {
 		}
 	}
 
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for cas, test := range []struct {
 		Dir *Dirichlet
 	}{

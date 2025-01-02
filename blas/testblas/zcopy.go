@@ -6,9 +6,8 @@ package testblas
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
-
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Zcopyer interface {
@@ -16,7 +15,7 @@ type Zcopyer interface {
 }
 
 func ZcopyTest(t *testing.T, impl Zcopyer) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for n := 0; n <= 20; n++ {
 		for _, inc := range allPairs([]int{-7, -3, 1, 13}, []int{-11, -5, 1, 17}) {
 			incX := inc[0]

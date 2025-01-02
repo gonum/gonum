@@ -8,6 +8,7 @@ import (
 	"flag"
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"os"
 	"reflect"
 	"slices"
@@ -17,7 +18,6 @@ import (
 	"unsafe"
 
 	"gonum.org/v1/gonum/internal/order"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 var (
@@ -61,7 +61,7 @@ func TestNew(t *testing.T) {
 					panicked = true
 				}
 			}()
-			tree, err = New(test.data, test.effort, rand.NewSource(test.seed))
+			tree, err = New(test.data, test.effort, rand.NewPCG(test.seed, test.seed))
 		}()
 		if panicked {
 			t.Errorf("unexpected panic for test %d", i)
@@ -130,7 +130,7 @@ func nearest(q Comparable, p []Comparable) (Comparable, float64) {
 }
 
 func TestNearestRandom(t *testing.T) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	const (
 		min = 0.0
@@ -148,7 +148,7 @@ func TestNearestRandom(t *testing.T) {
 		}
 		randData = append(randData, p)
 	}
-	tree, err := New(randData, 10, rand.NewSource(1))
+	tree, err := New(randData, 10, rand.NewPCG(1, 1))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -168,7 +168,7 @@ func TestNearestRandom(t *testing.T) {
 }
 
 func TestNearest(t *testing.T) {
-	tree, err := New(wpData, 3, rand.NewSource(1))
+	tree, err := New(wpData, 3, rand.NewPCG(1, 1))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -226,7 +226,7 @@ func TestNearestSetN(t *testing.T) {
 		Point{-1e5, 0}},
 		wpData[:len(wpData)-1]...)
 
-	tree, err := New(wpData, 3, rand.NewSource(1))
+	tree, err := New(wpData, 3, rand.NewPCG(1, 1))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -289,7 +289,7 @@ var nearestSetDistTests = []Point{
 }
 
 func TestNearestSetDist(t *testing.T) {
-	tree, err := New(wpData, 3, rand.NewSource(1))
+	tree, err := New(wpData, 3, rand.NewPCG(1, 1))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -330,7 +330,7 @@ func TestNearestSetDist(t *testing.T) {
 }
 
 func TestDo(t *testing.T) {
-	tree, err := New(wpData, 3, rand.NewSource(1))
+	tree, err := New(wpData, 3, rand.NewPCG(1, 1))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -359,14 +359,14 @@ func TestDo(t *testing.T) {
 func BenchmarkNew(b *testing.B) {
 	for _, effort := range []int{0, 10, 100} {
 		b.Run(fmt.Sprintf("New:%d", effort), func(b *testing.B) {
-			rnd := rand.New(rand.NewSource(1))
+			rnd := rand.New(rand.NewPCG(1, 1))
 			p := make([]Comparable, 1e5)
 			for i := range p {
 				p[i] = Point{rnd.Float64(), rnd.Float64(), rnd.Float64()}
 			}
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
-				_, err := New(p, effort, rand.NewSource(1))
+				_, err := New(p, effort, rand.NewPCG(1, 1))
 				if err != nil {
 					b.Fatalf("unexpected error: %v", err)
 				}
@@ -443,12 +443,12 @@ func Benchmark(b *testing.B) {
 	}
 
 	for _, effort := range []int{0, 3, 10, 30, 100, 300} {
-		rnd := rand.New(rand.NewSource(1))
+		rnd := rand.New(rand.NewPCG(1, 1))
 		data := make([]Comparable, 1e5)
 		for i := range data {
 			data[i] = Point{rnd.Float64(), rnd.Float64(), rnd.Float64()}
 		}
-		tree, err := New(data, effort, rand.NewSource(1))
+		tree, err := New(data, effort, rand.NewPCG(1, 1))
 		if err != nil {
 			b.Errorf("unexpected error for effort=%d: %v", effort, err)
 			continue

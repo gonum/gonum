@@ -6,13 +6,13 @@ package simple_test
 
 import (
 	"math"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/set"
 	"gonum.org/v1/gonum/graph/simple"
 	"gonum.org/v1/gonum/graph/testgraph"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func weightedUndirectedBuilder(nodes []graph.Node, edges []testgraph.WeightedLine, self, absent float64) (g graph.Graph, n []graph.Node, e []testgraph.Edge, s, a float64, ok bool) {
@@ -116,10 +116,10 @@ func TestWeightedUndirected(t *testing.T) {
 			g.AddNode(it.Node())
 		}
 		it.Reset()
-		rnd := rand.New(rand.NewSource(1))
+		rnd := rand.New(rand.NewPCG(1, 1))
 		for it.Next() {
 			u := it.Node()
-			d := rnd.Intn(5)
+			d := rnd.IntN(5)
 			vit := g.Nodes()
 			for d >= 0 && vit.Next() {
 				v := vit.Node()
@@ -139,10 +139,10 @@ func TestWeightedUndirected(t *testing.T) {
 			g.AddNode(it.Node())
 		}
 		it.Reset()
-		rnd := rand.New(rand.NewSource(1))
+		rnd := rand.New(rand.NewPCG(1, 1))
 		for it.Next() {
 			u := it.Node()
-			d := rnd.Intn(5)
+			d := rnd.IntN(5)
 			vit := g.Nodes()
 			for d >= 0 && vit.Next() {
 				v := vit.Node()

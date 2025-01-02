@@ -5,18 +5,18 @@
 package mat
 
 import (
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 // TODO: Need to add tests where one is overwritten.
 func TestMulTypes(t *testing.T) {
 	t.Parallel()
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	for _, test := range []struct {
 		ar     int
 		ac     int

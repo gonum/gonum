@@ -6,8 +6,7 @@ package testrand
 
 import (
 	"math"
-
-	"gonum.org/v1/gonum/internal/rand"
+	"math/rand/v2"
 )
 
 // extreme is a pseudo-random number generator that has high probability of returning extreme values.
@@ -27,12 +26,6 @@ func newExtreme(p, nan float64, rnd Rand) *extreme {
 
 // Perm returns a permutation of integers [0, n).
 func (e *extreme) Perm(n int) []int { return e.rnd.Perm(n) }
-
-// Read generates len(p) pseudo-random bytes.
-func (e *extreme) Read(p []byte) (n int, err error) { return e.rnd.Read(p) }
-
-// Seed reseeds the pseudo-random generator.
-func (e *extreme) Seed(seed uint64) { e.rnd.Seed(seed) }
 
 // Shuffle shuffles n items using the swap callback.
 func (e *extreme) Shuffle(n int, swap func(i, j int)) { e.rnd.Shuffle(n, swap) }
@@ -57,7 +50,7 @@ func (e *extreme) nan() bool {
 func (e *extreme) ExpFloat64() float64 {
 	switch {
 	case e.p():
-		return extremeFloat64Exp[e.rnd.Intn(len(extremeFloat64Exp))]
+		return extremeFloat64Exp[e.rnd.IntN(len(extremeFloat64Exp))]
 	case e.nan():
 		return math.NaN()
 	}
@@ -69,7 +62,7 @@ func (e *extreme) ExpFloat64() float64 {
 func (e *extreme) Float32() float32 {
 	switch {
 	case e.p():
-		return extremeFloat32Unit[e.rnd.Intn(len(extremeFloat32Unit))]
+		return extremeFloat32Unit[e.rnd.IntN(len(extremeFloat32Unit))]
 	case e.nan():
 		return float32(math.NaN())
 	}
@@ -81,7 +74,7 @@ func (e *extreme) Float32() float32 {
 func (e *extreme) Float64() float64 {
 	switch {
 	case e.p():
-		return extremeFloat64Unit[e.rnd.Intn(len(extremeFloat64Unit))]
+		return extremeFloat64Unit[e.rnd.IntN(len(extremeFloat64Unit))]
 	case e.nan():
 		return math.NaN()
 	}
@@ -92,23 +85,23 @@ func (e *extreme) Float64() float64 {
 // Int returns a non-negative pseudo-random int.
 func (e *extreme) Int() int {
 	if e.p() {
-		return extremeInt[e.rnd.Intn(len(extremeInt))]
+		return extremeInt[e.rnd.IntN(len(extremeInt))]
 	}
 	return e.rnd.Int()
 }
 
-// Int31 returns a non-negative pseudo-random int32.
-func (e *extreme) Int31() int32 {
+// Int32 returns a non-negative pseudo-random int32.
+func (e *extreme) Int32() int32 {
 	if e.p() {
-		return extremeInt31[e.rnd.Intn(len(extremeInt31))]
+		return extremeInt31[e.rnd.IntN(len(extremeInt31))]
 	}
-	return e.rnd.Int31()
+	return e.rnd.Int32()
 }
 
-// Int31n returns a non-negative pseudo-random int32 from range [0, n).
-func (e *extreme) Int31n(n int32) int32 {
+// Int32N returns a non-negative pseudo-random int32 from range [0, n).
+func (e *extreme) Int32N(n int32) int32 {
 	if e.p() {
-		switch rand.Intn(4) {
+		switch rand.IntN(4) {
 		case 0:
 			return 0
 		case 1:
@@ -119,21 +112,21 @@ func (e *extreme) Int31n(n int32) int32 {
 			return n - 1
 		}
 	}
-	return e.rnd.Int31n(n)
+	return e.rnd.Int32N(n)
 }
 
-// Int63 returns a non-negative pseudo-random int64.
-func (e *extreme) Int63() int64 {
+// Int64 returns a non-negative pseudo-random int64.
+func (e *extreme) Int64() int64 {
 	if e.p() {
-		return extremeInt63[e.rnd.Intn(len(extremeInt63))]
+		return extremeInt63[e.rnd.IntN(len(extremeInt63))]
 	}
-	return e.rnd.Int63()
+	return e.rnd.Int64()
 }
 
-// Int63n returns a non-negative pseudo-random int from range [0, n).
-func (e *extreme) Int63n(n int64) int64 {
+// Int64N returns a non-negative pseudo-random int from range [0, n).
+func (e *extreme) Int64N(n int64) int64 {
 	if e.p() {
-		switch rand.Intn(4) {
+		switch rand.IntN(4) {
 		case 0:
 			return 0
 		case 1:
@@ -144,13 +137,13 @@ func (e *extreme) Int63n(n int64) int64 {
 			return n - 1
 		}
 	}
-	return e.rnd.Int63n(n)
+	return e.rnd.Int64N(n)
 }
 
-// Int returns a non-negative pseudo-random int from range [0, n).
-func (e *extreme) Intn(n int) int {
+// IntN returns a non-negative pseudo-random int from range [0, n).
+func (e *extreme) IntN(n int) int {
 	if e.p() {
-		switch rand.Intn(4) {
+		switch rand.IntN(4) {
 		case 0:
 			return 0
 		case 1:
@@ -161,14 +154,14 @@ func (e *extreme) Intn(n int) int {
 			return n - 1
 		}
 	}
-	return e.rnd.Intn(n)
+	return e.rnd.IntN(n)
 }
 
 // NormFloat64 returns a normally distributed pseudo-random float64 in range [-math.MaxFloat64, math.MaxFloat64].
 func (e *extreme) NormFloat64() float64 {
 	switch {
 	case e.p():
-		return extremeFloat64Norm[e.rnd.Intn(len(extremeFloat64Norm))]
+		return extremeFloat64Norm[e.rnd.IntN(len(extremeFloat64Norm))]
 	case e.nan():
 		return math.NaN()
 	}
@@ -179,7 +172,7 @@ func (e *extreme) NormFloat64() float64 {
 // Uint32 returns a pseudo-random uint32.
 func (e *extreme) Uint32() uint32 {
 	if e.p() {
-		return extremeUint32[e.rnd.Intn(len(extremeUint32))]
+		return extremeUint32[e.rnd.IntN(len(extremeUint32))]
 	}
 	return e.rnd.Uint32()
 }
@@ -187,15 +180,15 @@ func (e *extreme) Uint32() uint32 {
 // Uint64 returns a pseudo-random uint64.
 func (e *extreme) Uint64() uint64 {
 	if e.p() {
-		return extremeUint64[e.rnd.Intn(len(extremeUint64))]
+		return extremeUint64[e.rnd.IntN(len(extremeUint64))]
 	}
 	return e.rnd.Uint64()
 }
 
-// Uint64n returns a pseudo-random uint64 from range [0, n).
-func (e *extreme) Uint64n(n uint64) uint64 {
+// Uint64N returns a pseudo-random uint64 from range [0, n).
+func (e *extreme) Uint64N(n uint64) uint64 {
 	if e.p() {
-		switch rand.Intn(4) {
+		switch rand.IntN(4) {
 		case 0:
 			return 0
 		case 1:
@@ -206,5 +199,5 @@ func (e *extreme) Uint64n(n uint64) uint64 {
 			return n - 1
 		}
 	}
-	return e.rnd.Uint64n(n)
+	return e.rnd.Uint64N(n)
 }

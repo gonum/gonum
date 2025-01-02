@@ -6,15 +6,15 @@ package mat
 
 import (
 	"math"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestQR(t *testing.T) {
 	t.Parallel()
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, test := range []struct {
 		m, n int
 		big  bool
@@ -107,7 +107,7 @@ func isOrthonormal(q *Dense, tol float64) bool {
 
 func TestQRSolveTo(t *testing.T) {
 	t.Parallel()
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, trans := range []bool{false, true} {
 		for _, test := range []struct {
 			m, n, bc int
@@ -170,7 +170,7 @@ func TestQRSolveTo(t *testing.T) {
 
 func TestQRSolveVecTo(t *testing.T) {
 	t.Parallel()
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, trans := range []bool{false, true} {
 		for _, test := range []struct {
 			m, n int

@@ -6,15 +6,14 @@ package distuv
 
 import (
 	"math"
+	"math/rand/v2"
 	"sort"
 	"testing"
-
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestLognormal(t *testing.T) {
 	t.Parallel()
-	src := rand.New(rand.NewSource(1))
+	src := rand.New(rand.NewPCG(1, 1))
 	for i, dist := range []LogNormal{
 		{Mu: 0.1, Sigma: 0.3, Src: src},
 		{Mu: 0.01, Sigma: 0.01, Src: src},

@@ -6,15 +6,14 @@ package distuv
 
 import (
 	"math"
+	"math/rand/v2"
 	"sort"
 	"testing"
-
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestBernoulli(t *testing.T) {
 	t.Parallel()
-	src := rand.New(rand.NewSource(1))
+	src := rand.New(rand.NewPCG(1, 1))
 	for i, dist := range []Bernoulli{
 		{P: 0.5, Src: src},
 		{P: 0.9, Src: src},

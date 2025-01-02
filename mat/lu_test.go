@@ -5,15 +5,14 @@
 package mat
 
 import (
+	"math/rand/v2"
 	"testing"
-
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestLU(t *testing.T) {
 	t.Parallel()
 	const tol = 1e-16
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, n := range []int{1, 2, 3, 4, 5, 10, 11, 50} {
 		// Construct a random matrix A.
 		a := NewDense(n, n, nil)
@@ -48,7 +47,7 @@ func TestLU(t *testing.T) {
 func TestLURankOne(t *testing.T) {
 	t.Parallel()
 	const tol = 1e-14
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, n := range []int{1, 2, 3, 4, 5, 10, 50} {
 		// Construct a random matrix A.
 		a := NewDense(n, n, nil)
@@ -90,7 +89,7 @@ func TestLURankOne(t *testing.T) {
 
 func TestLUSolveTo(t *testing.T) {
 	t.Parallel()
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, test := range []struct {
 		n, bc int
 	}{
@@ -151,7 +150,7 @@ func TestLUSolveToCond(t *testing.T) {
 
 func TestLUSolveVecTo(t *testing.T) {
 	t.Parallel()
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, n := range []int{5, 10} {
 		a := NewDense(n, n, nil)
 		for i := 0; i < n; i++ {

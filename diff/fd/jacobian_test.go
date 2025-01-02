@@ -6,10 +6,10 @@ package fd
 
 import (
 	"math"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -56,7 +56,7 @@ func vecFunc43Jac(jac *mat.Dense, x []float64) {
 
 func TestJacobian(t *testing.T) {
 	t.Parallel()
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	// Test with default settings.
 	for tc, test := range []struct {

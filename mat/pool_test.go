@@ -6,10 +6,9 @@ package mat
 
 import (
 	"math"
+	"math/rand/v2"
 	"reflect"
 	"testing"
-
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestPool(t *testing.T) {
@@ -18,7 +17,7 @@ func TestPool(t *testing.T) {
 		for j := 1; j < 10; j++ {
 			m := NewDense(i, j, nil)
 			for k := 0; k < 5; k++ {
-				work := make([]*Dense, rand.Intn(10)+1)
+				work := make([]*Dense, rand.IntN(10)+1)
 				for l := range work {
 					w := getDenseWorkspace(i, j, true)
 					if !reflect.DeepEqual(w.mat, m.mat) {
@@ -73,7 +72,7 @@ func BenchmarkMulWorkspaceDense1000Tenth(b *testing.B)      { denseMulWorkspaceB
 func BenchmarkMulWorkspaceDense1000Hundredth(b *testing.B)  { denseMulWorkspaceBench(b, 1000, 0.01) }
 func BenchmarkMulWorkspaceDense1000Thousandth(b *testing.B) { denseMulWorkspaceBench(b, 1000, 0.001) }
 func denseMulWorkspaceBench(b *testing.B, size int, rho float64) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	b.StopTimer()
 	a, _ := randDense(size, rho, src)
 	d, _ := randDense(size, rho, src)

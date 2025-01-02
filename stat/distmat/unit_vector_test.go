@@ -5,15 +5,15 @@
 package distmat
 
 import (
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/floats/scalar"
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/mat"
 )
 
 func TestUnitVector(t *testing.T) {
-	u := NewUnitVector(rand.NewSource(1))
+	u := NewUnitVector(rand.NewPCG(1, 1))
 	for _, d := range []int{10, 32, 64, 100} {
 		v := mat.NewVecDense(d, nil)
 		u.UnitVecTo(v)
@@ -26,7 +26,7 @@ func TestUnitVector(t *testing.T) {
 
 func TestUnitVectorStats(t *testing.T) {
 	n := 1e7
-	u := NewUnitVector(rand.NewSource(1))
+	u := NewUnitVector(rand.NewPCG(1, 1))
 	for _, d := range []int{1, 2, 3} {
 		v := mat.NewVecDense(d, nil)
 		tot := mat.NewVecDense(d, nil)

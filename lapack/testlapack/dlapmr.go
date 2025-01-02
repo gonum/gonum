@@ -6,11 +6,11 @@ package testlapack
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Dlapmrer interface {
@@ -18,7 +18,7 @@ type Dlapmrer interface {
 }
 
 func DlapmrTest(t *testing.T, impl Dlapmrer) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, fwd := range []bool{true, false} {
 		for _, m := range []int{0, 1, 2, 3, 4, 5, 10} {
 			for _, n := range []int{0, 1, 4} {
@@ -42,7 +42,7 @@ func dlapmrTest(t *testing.T, impl Dlapmrer, rnd *rand.Rand, fwd bool, m, n, ldx
 	}
 	p := eye(m, m)
 	for i := 0; i < m-1; i++ {
-		j := i + rnd.Intn(m-i)
+		j := i + rnd.IntN(m-i)
 		k[i], k[j] = k[j], k[i]
 		bi.Dswap(m, p.Data[i*p.Stride:], 1, p.Data[j*p.Stride:], 1)
 	}

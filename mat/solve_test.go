@@ -5,14 +5,13 @@
 package mat
 
 import (
+	"math/rand/v2"
 	"testing"
-
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestSolve(t *testing.T) {
 	t.Parallel()
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	// Hand-coded cases.
 	for _, test := range []struct {
 		a         [][]float64
@@ -248,7 +247,7 @@ func TestSolve(t *testing.T) {
 
 func TestSolveVec(t *testing.T) {
 	t.Parallel()
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, test := range []struct {
 		m, n int
 	}{

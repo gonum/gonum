@@ -5,12 +5,12 @@
 package testlapack
 
 import (
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Dgeql2er interface {
@@ -20,7 +20,7 @@ type Dgeql2er interface {
 func Dgeql2Test(t *testing.T, impl Dgeql2er) {
 	const tol = 1e-14
 
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	// TODO(btracey): Add tests for m < n.
 	for _, test := range []struct {
 		m, n, lda int

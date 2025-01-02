@@ -6,8 +6,7 @@ package distuv
 
 import (
 	"math"
-
-	"gonum.org/v1/gonum/internal/rand"
+	"math/rand/v2"
 )
 
 // UnitUniform is an instantiation of the uniform distribution with Min = 0

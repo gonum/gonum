@@ -6,10 +6,10 @@ package testlapack
 
 import (
 	"math"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Dlaqr1er interface {
@@ -17,7 +17,7 @@ type Dlaqr1er interface {
 }
 
 func Dlaqr1Test(t *testing.T, impl Dlaqr1er) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	for _, n := range []int{2, 3} {
 		for _, ldh := range []int{n, n + 1, n + 10} {

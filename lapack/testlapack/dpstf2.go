@@ -7,11 +7,11 @@ package testlapack
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Dpstf2er interface {
@@ -19,7 +19,7 @@ type Dpstf2er interface {
 }
 
 func Dpstf2Test(t *testing.T, impl Dpstf2er) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, uplo := range []blas.Uplo{blas.Upper, blas.Lower} {
 		t.Run(uploToString(uplo), func(t *testing.T) {
 			for _, n := range []int{0, 1, 2, 3, 4, 5, 10, 20, 50} {

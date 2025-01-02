@@ -7,11 +7,11 @@ package testlapack
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Dlahr2er interface {
@@ -21,7 +21,7 @@ type Dlahr2er interface {
 func Dlahr2Test(t *testing.T, impl Dlahr2er) {
 	const tol = 1e-14
 
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, test := range []struct {
 		n, k, nb int
 	}{

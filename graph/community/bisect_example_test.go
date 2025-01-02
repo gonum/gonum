@@ -7,11 +7,11 @@ package community_test
 import (
 	"fmt"
 	"log"
+	"math/rand/v2"
 
 	"gonum.org/v1/gonum/graph/community"
 	"gonum.org/v1/gonum/graph/simple"
 	"gonum.org/v1/gonum/internal/order"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func ExampleProfile_simple() {
@@ -19,7 +19,7 @@ func ExampleProfile_simple() {
 	// Since this is a randomized algorithm we use a defined random source to ensure
 	// consistency between test runs. In practice, results will not differ greatly
 	// between runs with different PRNG seeds.
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 
 	// Create dumbell graph:
 	//
@@ -173,7 +173,7 @@ func ExampleProfile_multiplex() {
 	// algorithm. Since this is a randomized algorithm we use a defined random source
 	// to ensure consistency between test runs. In practice, results will not differ
 	// greatly between runs with different PRNG seeds.
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 
 	// The undirected graphs, friends and enemies, are the political relationships
 	// in the Middle East as described in the Slate article:
@@ -209,10 +209,10 @@ func ExampleProfile_multiplex() {
 	// Low:0.1 High:0.72 Score:26 Communities:[[0] [1 7 9 12] [2 8 11] [3 4 5 10] [6]] Q=[24.7 1.97]
 	// Low:0.72 High:1.1 Score:24 Communities:[[0 6] [1 7 9 12] [2 8 11] [3 4 5 10]] Q=[16.9 14.1]
 	// Low:1.1 High:1.2 Score:18 Communities:[[0 2 6 11] [1 7 9 12] [3 4 5 8 10]] Q=[9.16 25.1]
-	// Low:1.2 High:1.6 Score:10 Communities:[[0 3 4 5 6 10] [1 7 9 12] [2 8 11]] Q=[11 25.2]
+	// Low:1.2 High:1.6 Score:10 Communities:[[0 3 4 5 6 10] [1 7 9 12] [2 8 11]] Q=[10.7 26]
 	// Low:1.6 High:1.6 Score:8 Communities:[[0 1 6 7 9 12] [2 8 11] [3 4 5 10]] Q=[5.56 39.8]
 	// Low:1.6 High:1.8 Score:2 Communities:[[0 2 3 4 5 6 10] [1 7 8 9 11 12]] Q=[-1.82 48.6]
-	// Low:1.8 High:2.3 Score:-6 Communities:[[0 2 3 4 5 6 8 10 11] [1 7 9 12]] Q=[-5 57.5]
+	// Low:1.8 High:2.3 Score:-6 Communities:[[0 2 3 4 5 6 8 10 11] [1 7 9 12]] Q=[-5.02 57.5]
 	// Low:2.3 High:2.4 Score:-10 Communities:[[0 1 2 6 7 8 9 11 12] [3 4 5 10]] Q=[-11.2 79]
 	// Low:2.4 High:4.3 Score:-52 Communities:[[0 1 2 3 4 5 6 7 8 9 10 11 12]] Q=[-46.1 117]
 	// Low:4.3 High:10 Score:-54 Communities:[[0 1 2 3 4 6 7 8 9 10 11 12] [5]] Q=[-82 254]

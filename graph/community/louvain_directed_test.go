@@ -6,6 +6,7 @@ package community
 
 import (
 	"math"
+	"math/rand/v2"
 	"reflect"
 	"slices"
 	"testing"
@@ -14,7 +15,6 @@ import (
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/simple"
 	"gonum.org/v1/gonum/internal/order"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type communityDirectedQTest struct {
@@ -90,13 +90,12 @@ var communityDirectedQTests = []communityDirectedQTest{
 				},
 			},
 			{
-				q: 0.3911232174331037,
+				q: 0.4037814452812049,
 				communities: [][]graph.Node{
 					{simple.Node(0), simple.Node(1), simple.Node(2), simple.Node(3), simple.Node(7), simple.Node(11), simple.Node(12), simple.Node(13), simple.Node(17), simple.Node(19), simple.Node(21)},
 					{simple.Node(4), simple.Node(10)},
 					{simple.Node(5), simple.Node(6), simple.Node(16)},
-					{simple.Node(8), simple.Node(30)},
-					{simple.Node(9), simple.Node(14), simple.Node(15), simple.Node(18), simple.Node(20), simple.Node(22), simple.Node(32), simple.Node(33)},
+					{simple.Node(8), simple.Node(9), simple.Node(14), simple.Node(15), simple.Node(18), simple.Node(20), simple.Node(22), simple.Node(30), simple.Node(32), simple.Node(33)},
 					{simple.Node(23), simple.Node(24), simple.Node(25), simple.Node(27), simple.Node(28), simple.Node(31)},
 					{simple.Node(26), simple.Node(29)},
 				},
@@ -166,7 +165,7 @@ var communityDirectedQTests = []communityDirectedQTest{
 				},
 			},
 			{
-				q: 0.3405612244897959,
+				q: 0.34056122448979587,
 				communities: [][]graph.Node{
 					{simple.Node(0), simple.Node(1), simple.Node(2), simple.Node(4), simple.Node(5)},
 					{simple.Node(3), simple.Node(6), simple.Node(7)},
@@ -295,7 +294,7 @@ func TestCommunityDeltaQWeightedDirected(t *testing.T) {
 }
 
 func testCommunityDeltaQDirected(t *testing.T, test communityDirectedQTest, g graph.Directed) {
-	rnd := rand.New(rand.NewSource(1)).Intn
+	rnd := rand.New(rand.NewPCG(1, 1)).IntN
 	for _, structure := range test.structures {
 		communityOf := make(map[int64]int)
 		communities := make([][]graph.Node, len(structure.memberships))
@@ -632,7 +631,7 @@ func testModularizeDirected(t *testing.T, test communityDirectedQTest, g graph.D
 	)
 	// Modularize is randomised so we do this to
 	// ensure the level tests are consistent.
-	src := rand.New(rand.NewSource(1))
+	src := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < louvainIterations; i++ {
 		r := Modularize(g, 1, src).(*ReducedDirected)
 		if q := Q(r, nil, 1); q > bestQ || math.IsNaN(q) {
@@ -732,7 +731,7 @@ func TestNonContiguousWeightedDirected(t *testing.T) {
 }
 
 func BenchmarkLouvainDirected(b *testing.B) {
-	src := rand.New(rand.NewSource(1))
+	src := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < b.N; i++ {
 		Modularize(dupGraphDirected, 1, src)
 	}

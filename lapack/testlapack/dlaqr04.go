@@ -7,11 +7,11 @@ package testlapack
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Dlaqr04er interface {
@@ -30,7 +30,7 @@ type dlaqr04Test struct {
 }
 
 func Dlaqr04Test(t *testing.T, impl Dlaqr04er) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	// Tests for small matrices that choose the ilo,ihi and iloz,ihiz pairs
 	// randomly.
@@ -40,13 +40,13 @@ func Dlaqr04Test(t *testing.T, impl Dlaqr04er) {
 				for _, extra := range []int{0, 11} {
 					for recur := 0; recur <= 2; recur++ {
 						for cas := 0; cas < n; cas++ {
-							ilo := rnd.Intn(n)
-							ihi := rnd.Intn(n)
+							ilo := rnd.IntN(n)
+							ihi := rnd.IntN(n)
 							if ilo > ihi {
 								ilo, ihi = ihi, ilo
 							}
-							iloz := rnd.Intn(ilo + 1)
-							ihiz := ihi + rnd.Intn(n-ihi)
+							iloz := rnd.IntN(ilo + 1)
+							ihiz := ihi + rnd.IntN(n-ihi)
 							h := randomHessenberg(n, n+extra, rnd)
 							if ilo-1 >= 0 {
 								h.Data[ilo*h.Stride+ilo-1] = 0

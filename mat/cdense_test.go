@@ -6,9 +6,8 @@ package mat
 
 import (
 	"math/cmplx"
+	"math/rand/v2"
 	"testing"
-
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestCDenseNewAtSet(t *testing.T) {
@@ -56,7 +55,7 @@ func TestCDenseNewAtSet(t *testing.T) {
 func TestCDenseConjElem(t *testing.T) {
 	t.Parallel()
 
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	for r := 1; r <= 8; r++ {
 		for c := 1; c <= 8; c++ {

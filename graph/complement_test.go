@@ -6,23 +6,23 @@ package graph_test
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/graphs/gen"
 	"gonum.org/v1/gonum/graph/iterator"
 	"gonum.org/v1/gonum/graph/simple"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 var complementTests = []struct {
 	g graph.Graph
 }{
-	{g: gnp(100, 0, rand.NewSource(1))},
-	{g: gnp(100, 0.05, rand.NewSource(1))},
-	{g: gnp(100, 0.5, rand.NewSource(1))},
-	{g: gnp(100, 0.95, rand.NewSource(1))},
-	{g: gnp(100, 1, rand.NewSource(1))},
+	{g: gnp(100, 0, rand.NewPCG(1, 1))},
+	{g: gnp(100, 0.05, rand.NewPCG(1, 1))},
+	{g: gnp(100, 0.5, rand.NewPCG(1, 1))},
+	{g: gnp(100, 0.95, rand.NewPCG(1, 1))},
+	{g: gnp(100, 1, rand.NewPCG(1, 1))},
 }
 
 func TestComplement(t *testing.T) {

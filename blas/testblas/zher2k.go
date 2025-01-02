@@ -7,10 +7,10 @@ package testblas
 import (
 	"fmt"
 	"math/cmplx"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Zher2ker interface {
@@ -35,7 +35,7 @@ func Zher2kTest(t *testing.T, impl Zher2ker) {
 func zher2kTest(t *testing.T, impl Zher2ker, uplo blas.Uplo, trans blas.Transpose, n, k int) {
 	const tol = 1e-13
 
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	row, col := n, k
 	if trans == blas.ConjTrans {

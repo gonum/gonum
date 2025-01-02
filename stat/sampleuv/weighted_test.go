@@ -6,12 +6,14 @@ package sampleuv
 
 import (
 	"flag"
+	"math/rand/v2"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
+
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 var prob = flag.Bool("prob", false, "enables probabilistic testing of the random weighted sampler")
@@ -27,17 +29,22 @@ var (
 	obt = []float64{980, 1945, 3929, 7835, 15473, 31322, 62602, 124937, 250815, 500162}
 )
 
-func newTestWeighted() Weighted {
+func newTestWeighted(src rand.Source) Weighted {
 	weights := make([]float64, len(obt))
 	for i := range weights {
 		weights[i] = float64(int(1) << uint(i))
 	}
-	return NewWeighted(weights, nil)
+	return NewWeighted(weights, src)
 }
 
-func TestWeightedUnseeded(t *testing.T) {
-	rand.Seed(0)
+var ignoreSource = cmp.FilterValues(
+	func(_, _ *rand.Rand) bool { return true },
+	cmp.Ignore(),
+)
 
+var allowUnexported = cmp.AllowUnexported(Weighted{})
+
+func TestWeightedUnseeded(t *testing.T) {
 	want := Weighted{
 		weights: []float64{1 << 0, 1 << 1, 1 << 2, 1 << 3, 1 << 4, 1 << 5, 1 << 6, 1 << 7, 1 << 8, 1 << 9},
 		heap: []float64{
@@ -54,14 +61,15 @@ func TestWeightedUnseeded(t *testing.T) {
 		},
 	}
 
-	ts := newTestWeighted()
-	if !reflect.DeepEqual(ts, want) {
+	src := rand.NewPCG(0, 0)
+	ts := newTestWeighted(src)
+	if !cmp.Equal(ts, want, allowUnexported, ignoreSource) {
 		t.Fatalf("unexpected new Weighted value:\ngot: %#v\nwant:%#v", ts, want)
 	}
 
 	f := make([]float64, len(obt))
 	for i := 0; i < 1e6; i++ {
-		item, ok := newTestWeighted().Take()
+		item, ok := newTestWeighted(src).Take()
 		if !ok {
 			t.Fatal("Weighted unexpectedly empty")
 		}
@@ -91,11 +99,10 @@ func TestWeightedTimeSeeded(t *testing.T) {
 	}
 	t.Log("Note: This test is stochastic and is expected to fail with probability ≈ 0.05.")
 
-	rand.Seed(uint64(time.Now().Unix()))
-
+	src := rand.NewPCG(uint64(time.Now().Unix()), uint64(time.Now().Unix()))
 	f := make([]float64, len(obt))
 	for i := 0; i < 1e6; i++ {
-		item, ok := newTestWeighted().Take()
+		item, ok := newTestWeighted(src).Take()
 		if !ok {
 			t.Fatal("Weighted unexpectedly empty")
 		}
@@ -117,8 +124,6 @@ func TestWeightedTimeSeeded(t *testing.T) {
 }
 
 func TestWeightZero(t *testing.T) {
-	rand.Seed(0)
-
 	want := Weighted{
 		weights: []float64{1 << 0, 1 << 1, 1 << 2, 1 << 3, 1 << 4, 1 << 5, 0, 1 << 7, 1 << 8, 1 << 9},
 		heap: []float64{
@@ -135,15 +140,16 @@ func TestWeightZero(t *testing.T) {
 		},
 	}
 
-	ts := newTestWeighted()
+	src := rand.NewPCG(0, 0)
+	ts := newTestWeighted(src)
 	ts.Reweight(6, 0)
-	if !reflect.DeepEqual(ts, want) {
+	if !cmp.Equal(ts, want, allowUnexported, ignoreSource) {
 		t.Fatalf("unexpected new Weighted value:\ngot: %#v\nwant:%#v", ts, want)
 	}
 
 	f := make([]float64, len(obt))
 	for i := 0; i < 1e6; i++ {
-		ts := newTestWeighted()
+		ts := newTestWeighted(src)
 		ts.Reweight(6, 0)
 		item, ok := ts.Take()
 		if !ok {
@@ -172,8 +178,6 @@ func TestWeightZero(t *testing.T) {
 }
 
 func TestWeightIncrease(t *testing.T) {
-	rand.Seed(0)
-
 	want := Weighted{
 		weights: []float64{1 << 0, 1 << 1, 1 << 2, 1 << 3, 1 << 4, 1 << 5, 1 << 9 * 2, 1 << 7, 1 << 8, 1 << 9},
 		heap: []float64{
@@ -190,15 +194,16 @@ func TestWeightIncrease(t *testing.T) {
 		},
 	}
 
-	ts := newTestWeighted()
+	src := rand.NewPCG(0, 0)
+	ts := newTestWeighted(src)
 	ts.Reweight(6, ts.weights[len(ts.weights)-1]*2)
-	if !reflect.DeepEqual(ts, want) {
+	if !cmp.Equal(ts, want, allowUnexported, ignoreSource) {
 		t.Fatalf("unexpected new Weighted value:\ngot: %#v\nwant:%#v", ts, want)
 	}
 
 	f := make([]float64, len(obt))
 	for i := 0; i < 1e6; i++ {
-		ts := newTestWeighted()
+		ts := newTestWeighted(src)
 		ts.Reweight(6, ts.weights[len(ts.weights)-1]*2)
 		item, ok := ts.Take()
 		if !ok {
@@ -277,7 +282,7 @@ var issue1866Tests = []struct {
 // See https://github.com/gonum/gonum/issues/1866
 func TestIssue1866(t *testing.T) {
 	for i, test := range issue1866Tests {
-		w := NewWeighted(test.weights, rand.NewSource(test.seed))
+		w := NewWeighted(test.weights, rand.NewPCG(test.seed, test.seed))
 		for j := 0; j < len(test.weights)+1; j++ {
 			if panicked(func() { w.Take() }) {
 				t.Errorf("unexpected panic for test %d iteration %d", i, j)
@@ -306,7 +311,7 @@ func FuzzWeightedTake(f *testing.F) {
 
 		weights := []float64{w1, w2}
 
-		weighted := NewWeighted(weights, rand.NewSource(0))
+		weighted := NewWeighted(weights, rand.NewPCG(0, 0))
 
 		want := calculateNonZeroWeights(weights)
 		var got int

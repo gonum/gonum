@@ -7,11 +7,11 @@ package testlapack
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/lapack"
 )
 
@@ -20,7 +20,7 @@ type Dgetc2er interface {
 }
 
 func Dgetc2Test(t *testing.T, impl Dgetc2er) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, n := range []int{0, 1, 2, 3, 4, 5, 10, 20} {
 		for _, lda := range []int{n, n + 5} {
 			dgetc2Test(t, impl, rnd, n, lda, false)
@@ -52,7 +52,7 @@ func dgetc2Test(t *testing.T, impl Dgetc2er, rnd *rand.Rand, n, lda int, perturb
 	}
 	if perturb && n > 0 {
 		// Make U singular by randomly placing a zero on the diagonal.
-		i := rnd.Intn(n)
+		i := rnd.IntN(n)
 		u.Data[i*u.Stride+i] = 0
 	}
 

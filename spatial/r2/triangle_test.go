@@ -6,9 +6,8 @@ package r2
 
 import (
 	"math"
+	"math/rand/v2"
 	"testing"
-
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestTriangleDegenerate(t *testing.T) {
@@ -22,7 +21,7 @@ func TestTriangleDegenerate(t *testing.T) {
 		// longest edge and the opposite vertex.
 		spatialTol = 1e-2
 	)
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	randVec := func() Vec {
 		return Vec{X: 20 * (rnd.Float64() - 0.5), Y: 20 * (rnd.Float64() - 0.5)}
 	}
@@ -118,11 +117,11 @@ func TestTriangleArea(t *testing.T) {
 			t.Errorf("got area %g, expected %g", got, test.Expect)
 		}
 		const tol2 = 1e-11
-		rnd := rand.New(rand.NewSource(1))
+		rnd := rand.New(rand.NewPCG(1, 1))
 		for i := 0; i < 100; i++ {
 			tri := Triangle{
 				{rnd.Float64() * 20, rnd.Float64() * 20},
-				{rand.Float64() * 20, rnd.Float64() * 20},
+				{rnd.Float64() * 20, rnd.Float64() * 20},
 				{rnd.Float64() * 20, rnd.Float64() * 20},
 			}
 
@@ -137,7 +136,7 @@ func TestTriangleArea(t *testing.T) {
 
 func TestTriangleCentroid(t *testing.T) {
 	const tol = 1e-12
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < 100; i++ {
 		tri := Triangle{
 			{rnd.Float64() * 20, rnd.Float64() * 20},

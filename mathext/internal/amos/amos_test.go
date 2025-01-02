@@ -6,12 +6,12 @@ package amos
 
 import (
 	"math"
+	"math/rand/v2"
 	"runtime"
 	"strconv"
 	"testing"
 
 	"gonum.org/v1/gonum/floats/scalar"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type input struct {
@@ -40,11 +40,11 @@ func randInput(rnd *rand.Rand) input {
 	}
 	is := make([]int, 3)
 	for j := range is {
-		is[j] = rnd.Intn(1000)
+		is[j] = rnd.IntN(1000)
 	}
-	kode := rnd.Intn(2) + 1
-	id := rnd.Intn(2)
-	n := rnd.Intn(5) + 1
+	kode := rnd.IntN(2) + 1
+	id := rnd.IntN(2)
+	n := rnd.IntN(5) + 1
 	yr := make([]float64, n+1)
 	yi := make([]float64, n+1)
 	for j := range yr {
@@ -62,7 +62,7 @@ const nInputs = 100000
 
 func TestAiry(t *testing.T) {
 	t.Parallel()
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < nInputs; i++ {
 		in := randInput(rnd)
 		zairytest(t, in.x, in.kode, in.id)
@@ -75,7 +75,7 @@ func TestZacai(t *testing.T) {
 	case "arm64":
 		t.Skipf("skipping on GOARCH=%s", runtime.GOARCH)
 	}
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < nInputs; i++ {
 		in := randInput(rnd)
 		zacaitest(t, in.x, in.is, in.tol, in.n, in.yr, in.yi, in.kode)
@@ -84,7 +84,7 @@ func TestZacai(t *testing.T) {
 
 func TestZbknu(t *testing.T) {
 	t.Parallel()
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < nInputs; i++ {
 		in := randInput(rnd)
 		zbknutest(t, in.x, in.is, in.tol, in.n, in.yr, in.yi, in.kode)
@@ -93,7 +93,7 @@ func TestZbknu(t *testing.T) {
 
 func TestZasyi(t *testing.T) {
 	t.Parallel()
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < nInputs; i++ {
 		in := randInput(rnd)
 		zasyitest(t, in.x, in.is, in.tol, in.n, in.yr, in.yi, in.kode)
@@ -106,7 +106,7 @@ func TestZseri(t *testing.T) {
 	case "arm64":
 		t.Skipf("skipping on GOARCH=%s", runtime.GOARCH)
 	}
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < nInputs; i++ {
 		in := randInput(rnd)
 		zseritest(t, in.x, in.is, in.tol, in.n, in.yr, in.yi, in.kode)
@@ -115,7 +115,7 @@ func TestZseri(t *testing.T) {
 
 func TestZmlri(t *testing.T) {
 	t.Parallel()
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < nInputs; i++ {
 		in := randInput(rnd)
 		zmlritest(t, in.x, in.is, in.tol, in.n, in.yr, in.yi, in.kode)
@@ -124,7 +124,7 @@ func TestZmlri(t *testing.T) {
 
 func TestZkscl(t *testing.T) {
 	t.Parallel()
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < nInputs; i++ {
 		in := randInput(rnd)
 		zkscltest(t, in.x, in.is, in.tol, in.n, in.yr, in.yi)
@@ -133,7 +133,7 @@ func TestZkscl(t *testing.T) {
 
 func TestZuchk(t *testing.T) {
 	t.Parallel()
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < nInputs; i++ {
 		in := randInput(rnd)
 		zuchktest(t, in.x, in.is, in.tol)
@@ -142,7 +142,7 @@ func TestZuchk(t *testing.T) {
 
 func TestZs1s2(t *testing.T) {
 	t.Parallel()
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < nInputs; i++ {
 		in := randInput(rnd)
 		zs1s2test(t, in.x, in.is)

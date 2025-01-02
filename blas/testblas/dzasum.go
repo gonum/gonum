@@ -5,10 +5,10 @@
 package testblas
 
 import (
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/floats/scalar"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Dzasumer interface {
@@ -17,7 +17,7 @@ type Dzasumer interface {
 
 func DzasumTest(t *testing.T, impl Dzasumer) {
 	const tol = 1e-14
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, n := range []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 50, 100} {
 		for _, incX := range []int{-5, 1, 2, 10} {
 			aincX := abs(incX)
@@ -30,11 +30,11 @@ func DzasumTest(t *testing.T, impl Dzasumer) {
 			}
 			for i := 0; i < n; i++ {
 				re := float64(2*i + 1)
-				if rnd.Intn(2) == 0 {
+				if rnd.IntN(2) == 0 {
 					re *= -1
 				}
 				im := float64(2 * (i + 1))
-				if rnd.Intn(2) == 0 {
+				if rnd.IntN(2) == 0 {
 					im *= -1
 				}
 				x[i*aincX] = complex(re, im)

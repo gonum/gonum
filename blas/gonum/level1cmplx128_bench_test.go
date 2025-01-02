@@ -5,13 +5,12 @@
 package gonum
 
 import (
+	"math/rand/v2"
 	"testing"
-
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func benchmarkZdscal(b *testing.B, n, inc int) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	alpha := rnd.NormFloat64()
 	x := make([]complex128, (n-1)*inc+1)
 	for i := range x {

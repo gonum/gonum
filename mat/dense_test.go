@@ -7,13 +7,13 @@ package mat
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"reflect"
 	"strings"
 	"testing"
 
 	"gonum.org/v1/gonum/blas/blas64"
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/stat/combin"
 )
 
@@ -2082,7 +2082,7 @@ func TestDenseInverse(t *testing.T) {
 
 	// Randomized tests
 	const tol = 1e-16
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, recvSameAsA := range []bool{false, true} {
 		for _, trans := range []bool{false, true} {
 			if trans && recvSameAsA {
@@ -2154,7 +2154,7 @@ func TestDensePermutation(t *testing.T) {
 }
 
 func TestDensePermuteRows(t *testing.T) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for m := 1; m <= 5; m++ {
 		for idx, perm := range combin.Permutations(m, m) {
 			// Construct a permutation matrix P from perm.
@@ -2210,7 +2210,7 @@ func TestDensePermuteRows(t *testing.T) {
 }
 
 func TestDensePermuteCols(t *testing.T) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for n := 1; n <= 5; n++ {
 		for idx, perm := range combin.Permutations(n, n) {
 			// Construct a permutation matrix P from perm.
@@ -2276,7 +2276,7 @@ func BenchmarkMulDense1000Tenth(b *testing.B)      { denseMulBench(b, 1000, 0.1)
 func BenchmarkMulDense1000Hundredth(b *testing.B)  { denseMulBench(b, 1000, 0.01) }
 func BenchmarkMulDense1000Thousandth(b *testing.B) { denseMulBench(b, 1000, 0.001) }
 func denseMulBench(b *testing.B, size int, rho float64) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	b.StopTimer()
 	a, _ := randDense(size, rho, src)
 	d, _ := randDense(size, rho, src)
@@ -2295,7 +2295,7 @@ func BenchmarkPreMulDense1000Tenth(b *testing.B)      { densePreMulBench(b, 1000
 func BenchmarkPreMulDense1000Hundredth(b *testing.B)  { densePreMulBench(b, 1000, 0.01) }
 func BenchmarkPreMulDense1000Thousandth(b *testing.B) { densePreMulBench(b, 1000, 0.001) }
 func densePreMulBench(b *testing.B, size int, rho float64) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	b.StopTimer()
 	a, _ := randDense(size, rho, src)
 	d, _ := randDense(size, rho, src)
@@ -2311,7 +2311,7 @@ func BenchmarkDenseRow100(b *testing.B)  { rowDenseBench(b, 100) }
 func BenchmarkDenseRow1000(b *testing.B) { rowDenseBench(b, 1000) }
 
 func rowDenseBench(b *testing.B, size int) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	a, _ := randDense(size, 1, src)
 	_, c := a.Dims()
 	dst := make([]float64, c)
@@ -2327,7 +2327,7 @@ func BenchmarkDenseExp100(b *testing.B)  { expDenseBench(b, 100) }
 func BenchmarkDenseExp1000(b *testing.B) { expDenseBench(b, 1000) }
 
 func expDenseBench(b *testing.B, size int) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	a, _ := randDense(size, 1, src)
 
 	b.ResetTimer()
@@ -2360,7 +2360,7 @@ func BenchmarkDensePow100_9(b *testing.B)  { powDenseBench(b, 100, 9) }
 func BenchmarkDensePow1000_9(b *testing.B) { powDenseBench(b, 1000, 9) }
 
 func powDenseBench(b *testing.B, size, n int) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	a, _ := randDense(size, 1, src)
 
 	b.ResetTimer()
@@ -2377,7 +2377,7 @@ func BenchmarkDenseMulTransDense1000Tenth(b *testing.B)      { denseMulTransBenc
 func BenchmarkDenseMulTransDense1000Hundredth(b *testing.B)  { denseMulTransBench(b, 1000, 0.01) }
 func BenchmarkDenseMulTransDense1000Thousandth(b *testing.B) { denseMulTransBench(b, 1000, 0.001) }
 func denseMulTransBench(b *testing.B, size int, rho float64) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	b.StopTimer()
 	a, _ := randDense(size, rho, src)
 	d, _ := randDense(size, rho, src)
@@ -2398,7 +2398,7 @@ func BenchmarkDenseMulTransDenseSym1000Thousandth(b *testing.B) {
 	denseMulTransSymBench(b, 1000, 0.001)
 }
 func denseMulTransSymBench(b *testing.B, size int, rho float64) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	b.StopTimer()
 	a, _ := randDense(size, rho, src)
 	b.StartTimer()
@@ -2414,7 +2414,7 @@ func BenchmarkDenseSum1000(b *testing.B) { denseSumBench(b, 1000) }
 var denseSumForBench float64
 
 func denseSumBench(b *testing.B, size int) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	a, _ := randDense(size, 1.0, src)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {

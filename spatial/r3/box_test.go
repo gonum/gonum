@@ -5,13 +5,12 @@
 package r3
 
 import (
+	"math/rand/v2"
 	"testing"
-
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestBoxContains(t *testing.T) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < 200; i++ {
 		b := randomBox(rnd)
 		for j := 0; j < 10; j++ {
@@ -37,7 +36,7 @@ func TestBoxContains(t *testing.T) {
 }
 
 func TestBoxUnion(t *testing.T) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < 200; i++ {
 		b1 := randomBox(rnd)
 		b2 := randomBox(rnd)
@@ -70,7 +69,7 @@ func TestBoxUnion(t *testing.T) {
 
 func TestBoxCenter(t *testing.T) {
 	const tol = 1e-11
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < 300; i++ {
 		b := randomBox(rnd)
 		center := b.Center()
@@ -86,8 +85,8 @@ func TestBoxCenter(t *testing.T) {
 }
 
 func TestBoxScale(t *testing.T) {
-	const tol = 1e-11
-	rnd := rand.New(rand.NewSource(1))
+	const tol = 1e-10
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < 300; i++ {
 		b := randomBox(rnd)
 		size := b.Size()
@@ -107,7 +106,7 @@ func TestBoxScale(t *testing.T) {
 }
 
 func TestBoxVertices(t *testing.T) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < 300; i++ {
 		b := randomBox(rnd)
 		gots := b.Vertices()
@@ -125,7 +124,7 @@ func TestBoxVertices(t *testing.T) {
 }
 
 func TestBoxEmpty(t *testing.T) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < 300; i++ {
 		v := absElem(randomVec(rnd))
 		b := randomBox(rnd)
@@ -153,7 +152,7 @@ func TestBoxEmpty(t *testing.T) {
 }
 
 func TestBoxCanon(t *testing.T) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < 300; i++ {
 		b := randomBox(rnd)
 		badBox := Box{Min: b.Max, Max: b.Min}

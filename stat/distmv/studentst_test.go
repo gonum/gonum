@@ -6,17 +6,17 @@ package distmv
 
 import (
 	"math"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/floats/scalar"
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/stat"
 )
 
 func TestStudentTProbs(t *testing.T) {
-	src := rand.New(rand.NewSource(1))
+	src := rand.New(rand.NewPCG(1, 1))
 	for _, test := range []struct {
 		nu    float64
 		mu    []float64
@@ -85,7 +85,7 @@ func TestStudentTProbs(t *testing.T) {
 }
 
 func TestStudentsTRand(t *testing.T) {
-	src := rand.New(rand.NewSource(1))
+	src := rand.New(rand.NewPCG(1, 1))
 	for cas, test := range []struct {
 		mean   []float64
 		cov    *mat.SymDense
@@ -139,7 +139,7 @@ func TestStudentsTRand(t *testing.T) {
 }
 
 func TestStudentsTConditional(t *testing.T) {
-	src := rand.New(rand.NewSource(1))
+	src := rand.New(rand.NewPCG(1, 1))
 	for _, test := range []struct {
 		mean []float64
 		cov  *mat.SymDense
@@ -252,12 +252,12 @@ func TestStudentsTMarginalSingle(t *testing.T) {
 			nu:    6,
 		},
 	} {
-		studentst, ok := NewStudentsT(test.mu, test.sigma, test.nu, nil)
+		studentst, ok := NewStudentsT(test.mu, test.sigma, test.nu, rand.NewPCG(1, 2))
 		if !ok {
 			t.Fatalf("Bad test, covariance matrix not positive definite")
 		}
 		for i, mean := range test.mu {
-			st := studentst.MarginalStudentsTSingle(i, nil)
+			st := studentst.MarginalStudentsTSingle(i, rand.NewPCG(3, 4))
 			if st.Mean() != mean {
 				t.Errorf("Mean mismatch nil Sigma, idx %v: want %v, got %v.", i, mean, st.Mean())
 			}

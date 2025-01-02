@@ -7,10 +7,10 @@ package optimize
 import (
 	"errors"
 	"math"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/optimize/functions"
 )
@@ -201,7 +201,7 @@ func cmaTestCases() []cmaTestCase {
 func TestCmaEsChol(t *testing.T) {
 	t.Parallel()
 	for i, test := range cmaTestCases() {
-		src := rand.New(rand.NewSource(1))
+		src := rand.New(rand.NewPCG(1, 1))
 		method := test.method
 		method.Src = src
 		initX := test.initX

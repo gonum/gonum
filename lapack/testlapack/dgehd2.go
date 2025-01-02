@@ -7,11 +7,11 @@ package testlapack
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Dgehd2er interface {
@@ -19,7 +19,7 @@ type Dgehd2er interface {
 }
 
 func Dgehd2Test(t *testing.T, impl Dgehd2er) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, n := range []int{1, 2, 3, 4, 5, 7, 10, 30} {
 		for _, extra := range []int{0, 1, 13} {
 			for cas := 0; cas < 100; cas++ {
@@ -32,8 +32,8 @@ func Dgehd2Test(t *testing.T, impl Dgehd2er) {
 func testDgehd2(t *testing.T, impl Dgehd2er, n, extra int, rnd *rand.Rand) {
 	const tol = 1e-14
 
-	ilo := rnd.Intn(n)
-	ihi := rnd.Intn(n)
+	ilo := rnd.IntN(n)
+	ihi := rnd.IntN(n)
 	if ilo > ihi {
 		ilo, ihi = ihi, ilo
 	}

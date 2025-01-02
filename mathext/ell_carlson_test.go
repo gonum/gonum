@@ -6,16 +6,15 @@ package mathext
 
 import (
 	"math"
+	"math/rand/v2"
 	"testing"
-
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 // Testing EllipticF (and EllipticRF) using the addition theorems from http://dlmf.nist.gov/19.11.i
 func TestEllipticF(t *testing.T) {
 	t.Parallel()
 	const tol = 1.0e-14
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	// The following EllipticF(pi/3,m), m=0.1(0.1)0.9 was computed in Maxima 5.38.0 using Bigfloat arithmetic.
 	vF := [...]float64{
@@ -62,7 +61,7 @@ func TestEllipticF(t *testing.T) {
 func TestEllipticE(t *testing.T) {
 	t.Parallel()
 	const tol = 1.0e-14
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	// The following EllipticE(pi/3,m), m=0.1(0.1)0.9 was computed in Maxima 5.38.0 using Bigfloat arithmetic.
 	vE := [...]float64{

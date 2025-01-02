@@ -6,11 +6,11 @@ package mat
 
 import (
 	"math"
+	"math/rand/v2"
 	"sort"
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestEigen(t *testing.T) {
@@ -172,7 +172,7 @@ func TestEigenSym(t *testing.T) {
 	}
 
 	// Randomized tests
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, n := range []int{1, 2, 3, 5, 10, 70} {
 		for cas := 0; cas < 10; cas++ {
 			a := make([]float64, n*n)

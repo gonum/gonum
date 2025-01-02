@@ -7,11 +7,11 @@ package testlapack
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Dgehrder interface {
@@ -21,7 +21,7 @@ type Dgehrder interface {
 }
 
 func DgehrdTest(t *testing.T, impl Dgehrder) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	// Randomized tests for small matrix sizes that will most likely
 	// use the unblocked algorithm.
@@ -29,8 +29,8 @@ func DgehrdTest(t *testing.T, impl Dgehrder) {
 		for _, extra := range []int{0, 13} {
 			for _, optwork := range []bool{true, false} {
 				for cas := 0; cas < 10; cas++ {
-					ilo := rnd.Intn(n)
-					ihi := rnd.Intn(n)
+					ilo := rnd.IntN(n)
+					ihi := rnd.IntN(n)
 					if ilo > ihi {
 						ilo, ihi = ihi, ilo
 					}

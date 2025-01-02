@@ -5,15 +5,14 @@
 package mat
 
 import (
+	"math/rand/v2"
 	"testing"
-
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestLQ(t *testing.T) {
 	t.Parallel()
 	const tol = 1e-14
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for cas, test := range []struct {
 		m, n int
 	}{
@@ -57,7 +56,7 @@ func TestLQ(t *testing.T) {
 
 func TestLQSolveTo(t *testing.T) {
 	t.Parallel()
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, trans := range []bool{false, true} {
 		for _, test := range []struct {
 			m, n, bc int
@@ -120,7 +119,7 @@ func TestLQSolveTo(t *testing.T) {
 
 func TestLQSolveToVec(t *testing.T) {
 	t.Parallel()
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, trans := range []bool{false, true} {
 		for _, test := range []struct {
 			m, n int

@@ -6,6 +6,7 @@ package distmv
 
 import (
 	"math"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/spatial/r1"
@@ -17,11 +18,11 @@ func TestUniformEntropy(t *testing.T) {
 		Entropy float64
 	}{
 		{
-			NewUniform([]r1.Interval{{Min: 0, Max: 1}, {Min: 0, Max: 1}}, nil),
+			NewUniform([]r1.Interval{{Min: 0, Max: 1}, {Min: 0, Max: 1}}, rand.NewPCG(1, 1)),
 			0,
 		},
 		{
-			NewUniform([]r1.Interval{{Min: -1, Max: 3}, {Min: 2, Max: 8}, {Min: -5, Max: -3}}, nil),
+			NewUniform([]r1.Interval{{Min: -1, Max: 3}, {Min: 2, Max: 8}, {Min: -5, Max: -3}}, rand.NewPCG(1, 1)),
 			math.Log(48),
 		},
 	} {

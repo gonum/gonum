@@ -6,11 +6,11 @@ package testlapack
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/lapack"
 )
 
@@ -19,19 +19,19 @@ type Dgebaker interface {
 }
 
 func DgebakTest(t *testing.T, impl Dgebaker) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	for _, job := range []lapack.BalanceJob{lapack.BalanceNone, lapack.Permute, lapack.Scale, lapack.PermuteScale} {
 		for _, side := range []lapack.EVSide{lapack.EVLeft, lapack.EVRight} {
 			for _, n := range []int{0, 1, 2, 3, 4, 5, 6, 10, 18, 31, 53} {
 				for _, extra := range []int{0, 11} {
 					for cas := 0; cas < 100; cas++ {
-						m := rnd.Intn(n + 1)
+						m := rnd.IntN(n + 1)
 						v := randomGeneral(n, m, m+extra, rnd)
 						var ilo, ihi int
 						if v.Rows > 0 {
-							ihi = rnd.Intn(n)
-							ilo = rnd.Intn(ihi + 1)
+							ihi = rnd.IntN(n)
+							ilo = rnd.IntN(ihi + 1)
 						} else {
 							ihi = -1
 						}
@@ -70,12 +70,12 @@ func testDgebak(t *testing.T, impl Dgebaker, job lapack.BalanceJob, side lapack.
 	if job == lapack.Permute || job == lapack.PermuteScale {
 		// Make up some random permutations.
 		for i := n - 1; i > ihi; i-- {
-			scale[i] = float64(rnd.Intn(i + 1))
+			scale[i] = float64(rnd.IntN(i + 1))
 			blas64.Swap(blas64.Vector{N: n, Data: p.Data[i:], Inc: p.Stride},
 				blas64.Vector{N: n, Data: p.Data[int(scale[i]):], Inc: p.Stride})
 		}
 		for i := 0; i < ilo; i++ {
-			scale[i] = float64(i + rnd.Intn(ihi-i+1))
+			scale[i] = float64(i + rnd.IntN(ihi-i+1))
 			blas64.Swap(blas64.Vector{N: n, Data: p.Data[i:], Inc: p.Stride},
 				blas64.Vector{N: n, Data: p.Data[int(scale[i]):], Inc: p.Stride})
 		}

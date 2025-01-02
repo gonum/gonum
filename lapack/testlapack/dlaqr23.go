@@ -6,11 +6,11 @@ package testlapack
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/lapack"
 )
 
@@ -34,11 +34,11 @@ func newDlaqr23TestCase(wantt, wantz bool, n, ldh int, rnd *rand.Rand) dlaqr23Te
 	if n <= 75 {
 		// For small matrices any window size works because they will
 		// always use Dlahrq inside Dlaqr23.
-		nw = rnd.Intn(n) + 1
+		nw = rnd.IntN(n) + 1
 	} else {
 		// For sufficiently large matrices generate a large enough
 		// window to assure that the Dlaqr4 path is taken.
-		nw = 76 + rnd.Intn(n-75)
+		nw = 76 + rnd.IntN(n-75)
 	}
 	// Generate a random Hessenberg matrix.
 	h := randomHessenberg(n, ldh, rnd)
@@ -46,9 +46,9 @@ func newDlaqr23TestCase(wantt, wantz bool, n, ldh int, rnd *rand.Rand) dlaqr23Te
 	// the restriction
 	//  0 <= nw <= kbot-ktop+1
 	// is satisfied.
-	ktop := rnd.Intn(n - nw + 1)
+	ktop := rnd.IntN(n - nw + 1)
 	kbot := ktop + nw - 1
-	kbot += rnd.Intn(n - kbot)
+	kbot += rnd.IntN(n - kbot)
 	// Make the block isolated by zeroing out the sub-diagonal elements.
 	if ktop-1 >= 0 {
 		h.Data[ktop*h.Stride+ktop-1] = 0
@@ -58,8 +58,8 @@ func newDlaqr23TestCase(wantt, wantz bool, n, ldh int, rnd *rand.Rand) dlaqr23Te
 	}
 	// Generate the rows of Z to which transformations will be applied if
 	// wantz is true.
-	iloz := rnd.Intn(ktop + 1)
-	ihiz := kbot + rnd.Intn(n-kbot)
+	iloz := rnd.IntN(ktop + 1)
+	ihiz := kbot + rnd.IntN(n-kbot)
 	return dlaqr23Test{
 		wantt: wantt,
 		wantz: wantz,
@@ -73,7 +73,7 @@ func newDlaqr23TestCase(wantt, wantz bool, n, ldh int, rnd *rand.Rand) dlaqr23Te
 }
 
 func Dlaqr23Test(t *testing.T, impl Dlaqr23er) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	// Randomized tests.
 	for _, wantt := range []bool{true, false} {
@@ -267,12 +267,12 @@ func testDlaqr23(t *testing.T, impl Dlaqr23er, test dlaqr23Test, opt bool, recur
 	v := randomGeneral(nw, nw, nw+extra, rnd)
 	var nh int
 	if nw > 0 {
-		nh = nw + rnd.Intn(nw) // nh must be at least nw.
+		nh = nw + rnd.IntN(nw) // nh must be at least nw.
 	}
 	tmat := randomGeneral(nw, nh, nh+extra, rnd)
 	var nv int
 	if nw > 0 {
-		nv = rnd.Intn(nw) + 1
+		nv = rnd.IntN(nw) + 1
 	}
 	wv := randomGeneral(nv, nw, nw+extra, rnd)
 

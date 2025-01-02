@@ -7,11 +7,11 @@ package testlapack
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/lapack"
 )
 
@@ -20,7 +20,7 @@ type Dlantber interface {
 }
 
 func DlantbTest(t *testing.T, impl Dlantber) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, norm := range []lapack.MatrixNorm{lapack.MaxAbs, lapack.MaxRowSum, lapack.MaxColumnSum, lapack.Frobenius} {
 		for _, uplo := range []blas.Uplo{blas.Lower, blas.Upper} {
 			for _, diag := range []blas.Diag{blas.NonUnit, blas.Unit} {
@@ -71,7 +71,7 @@ func dlantbTest(t *testing.T, impl Dlantber, rnd *rand.Rand, norm lapack.MatrixN
 	}
 	// Sometimes put a NaN into A.
 	if rnd.Float64() < 0.5 {
-		a[rnd.Intn(len(a))] = math.NaN()
+		a[rnd.IntN(len(a))] = math.NaN()
 	}
 	// Make a copy of A for later comparison.
 	aCopy := make([]float64, len(a))

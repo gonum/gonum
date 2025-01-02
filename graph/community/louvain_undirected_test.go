@@ -6,6 +6,7 @@ package community
 
 import (
 	"math"
+	"math/rand/v2"
 	"reflect"
 	"slices"
 	"testing"
@@ -14,7 +15,6 @@ import (
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/simple"
 	"gonum.org/v1/gonum/internal/order"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type communityUndirectedQTest struct {
@@ -356,7 +356,7 @@ func TestCommunityDeltaQWeightedUndirected(t *testing.T) {
 }
 
 func testCommunityDeltaQUndirected(t *testing.T, test communityUndirectedQTest, g graph.Undirected) {
-	rnd := rand.New(rand.NewSource(1)).Intn
+	rnd := rand.New(rand.NewPCG(1, 1)).IntN
 	for _, structure := range test.structures {
 		communityOf := make(map[int64]int)
 		communities := make([][]graph.Node, len(structure.memberships))
@@ -693,7 +693,7 @@ func testModularizeUndirected(t *testing.T, test communityUndirectedQTest, g gra
 	)
 	// Modularize is randomised so we do this to
 	// ensure the level tests are consistent.
-	src := rand.New(rand.NewSource(1))
+	src := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < louvainIterations; i++ {
 		r := Modularize(g, 1, src).(*ReducedUndirected)
 		if q := Q(r, nil, 1); q > bestQ || math.IsNaN(q) {
@@ -793,7 +793,7 @@ func TestNonContiguousWeightedUndirected(t *testing.T) {
 }
 
 func BenchmarkLouvain(b *testing.B) {
-	src := rand.New(rand.NewSource(1))
+	src := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < b.N; i++ {
 		Modularize(dupGraph, 1, src)
 	}

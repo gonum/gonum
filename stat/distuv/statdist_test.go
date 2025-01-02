@@ -6,16 +6,16 @@ package distuv
 
 import (
 	"math"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/floats/scalar"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestBhattacharyyaBeta(t *testing.T) {
 	t.Parallel()
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for cas, test := range []struct {
 		a, b    Beta
 		samples int
@@ -56,7 +56,7 @@ func TestBhattacharyyaBeta(t *testing.T) {
 
 func TestBhattacharyyaNormal(t *testing.T) {
 	t.Parallel()
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for cas, test := range []struct {
 		a, b    Normal
 		samples int
@@ -112,7 +112,7 @@ func bhattacharyyaSample(samples int, l RandLogProber, r LogProber) float64 {
 
 func TestKullbackLeiblerBeta(t *testing.T) {
 	t.Parallel()
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for cas, test := range []struct {
 		a, b    Beta
 		samples int
@@ -163,7 +163,7 @@ func TestKullbackLeiblerBeta(t *testing.T) {
 
 func TestKullbackLeiblerNormal(t *testing.T) {
 	t.Parallel()
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for cas, test := range []struct {
 		a, b    Normal
 		samples int
@@ -211,7 +211,7 @@ func klSample(samples int, l RandLogProber, r LogProber) float64 {
 
 func TestHellingerBeta(t *testing.T) {
 	t.Parallel()
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	const tol = 1e-15
 	for cas, test := range []struct {
 		a, b Beta
@@ -239,7 +239,7 @@ func TestHellingerBeta(t *testing.T) {
 
 func TestHellingerNormal(t *testing.T) {
 	t.Parallel()
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	const tol = 1e-15
 	for cas, test := range []struct {
 		a, b Normal

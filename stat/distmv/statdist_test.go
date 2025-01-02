@@ -6,11 +6,11 @@ package distmv
 
 import (
 	"math"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/floats/scalar"
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/spatial/r1"
 )
@@ -31,7 +31,7 @@ func TestBhattacharyyaNormal(t *testing.T) {
 			tol:     3e-1,
 		},
 	} {
-		rnd := rand.New(rand.NewSource(1))
+		rnd := rand.New(rand.NewPCG(1, 1))
 		a, ok := NewNormal(test.am, test.ac, rnd)
 		if !ok {
 			panic("bad test")
@@ -55,7 +55,7 @@ func TestBhattacharyyaNormal(t *testing.T) {
 }
 
 func TestBhattacharyyaUniform(t *testing.T) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for cas, test := range []struct {
 		a, b    *Uniform
 		samples int
@@ -120,7 +120,7 @@ func TestCrossEntropyNormal(t *testing.T) {
 			tol:     1e-2,
 		},
 	} {
-		rnd := rand.New(rand.NewSource(1))
+		rnd := rand.New(rand.NewPCG(1, 1))
 		a, ok := NewNormal(test.am, test.ac, rnd)
 		if !ok {
 			panic("bad test")
@@ -159,7 +159,7 @@ func TestHellingerNormal(t *testing.T) {
 			tol:     5e-1,
 		},
 	} {
-		rnd := rand.New(rand.NewSource(1))
+		rnd := rand.New(rand.NewPCG(1, 1))
 		a, ok := NewNormal(test.am, test.ac, rnd)
 		if !ok {
 			panic("bad test")
@@ -188,7 +188,7 @@ func TestHellingerNormal(t *testing.T) {
 }
 
 func TestKullbackLeiblerDirichlet(t *testing.T) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for cas, test := range []struct {
 		a, b    *Dirichlet
 		samples int
@@ -232,7 +232,7 @@ func TestKullbackLeiblerNormal(t *testing.T) {
 			tol:     1e-2,
 		},
 	} {
-		rnd := rand.New(rand.NewSource(1))
+		rnd := rand.New(rand.NewPCG(1, 1))
 		a, ok := NewNormal(test.am, test.ac, rnd)
 		if !ok {
 			panic("bad test")
@@ -250,7 +250,7 @@ func TestKullbackLeiblerNormal(t *testing.T) {
 }
 
 func TestKullbackLeiblerUniform(t *testing.T) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for cas, test := range []struct {
 		a, b    *Uniform
 		samples int
@@ -309,7 +309,7 @@ func TestRenyiNormal(t *testing.T) {
 			tol:     3e-1,
 		},
 	} {
-		rnd := rand.New(rand.NewSource(1))
+		rnd := rand.New(rand.NewPCG(1, 1))
 		a, ok := NewNormal(test.am, test.ac, rnd)
 		if !ok {
 			panic("bad test")

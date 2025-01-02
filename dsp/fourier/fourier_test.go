@@ -6,17 +6,17 @@ package fourier
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"reflect"
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestFFT(t *testing.T) {
 	t.Parallel()
 	const tol = 1e-10
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	t.Run("NewFFT", func(t *testing.T) {
 		for n := 1; n <= 200; n++ {
 			fft := NewFFT(n)
@@ -122,7 +122,7 @@ func TestFFT(t *testing.T) {
 
 func TestCmplxFFT(t *testing.T) {
 	const tol = 1e-12
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	t.Run("NewFFT", func(t *testing.T) {
 		for n := 1; n <= 200; n++ {
 			fft := NewCmplxFFT(n)
@@ -220,7 +220,7 @@ func TestCmplxFFT(t *testing.T) {
 func TestDCT(t *testing.T) {
 	t.Parallel()
 	const tol = 1e-10
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	t.Run("NewDCT", func(t *testing.T) {
 		for n := 2; n <= 200; n++ {
 			dct := NewDCT(n)
@@ -263,7 +263,7 @@ func TestDCT(t *testing.T) {
 func TestDST(t *testing.T) {
 	t.Parallel()
 	const tol = 1e-10
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	t.Run("NewDST", func(t *testing.T) {
 		for n := 1; n <= 200; n++ {
 			dst := NewDST(n)
@@ -306,7 +306,7 @@ func TestDST(t *testing.T) {
 func TestQuarterWaveFFT(t *testing.T) {
 	t.Parallel()
 	const tol = 1e-10
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	t.Run("NewQuarterWaveFFT", func(t *testing.T) {
 		for n := 1; n <= 200; n++ {
 			qw := NewQuarterWaveFFT(n)
@@ -397,7 +397,7 @@ func BenchmarkRealFFTCoefficients(b *testing.B) {
 	sizes = append(sizes, 100, 4000, 1e6)
 	for _, n := range sizes {
 		fft := NewFFT(n)
-		seq := randFloats(n, rand.NewSource(1))
+		seq := randFloats(n, rand.NewPCG(1, 1))
 		dst := make([]complex128, n/2+1)
 
 		b.Run(fmt.Sprint(n), func(b *testing.B) {
@@ -416,7 +416,7 @@ func BenchmarkRealFFTSequence(b *testing.B) {
 	sizes = append(sizes, 100, 4000, 1e6)
 	for _, n := range sizes {
 		fft := NewFFT(n)
-		coeff := randComplexes(n/2+1, rand.NewSource(1))
+		coeff := randComplexes(n/2+1, rand.NewPCG(1, 1))
 		dst := make([]float64, n)
 
 		b.Run(fmt.Sprint(n), func(b *testing.B) {
@@ -435,7 +435,7 @@ func BenchmarkCmplxFFTCoefficients(b *testing.B) {
 	sizes = append(sizes, 100, 4000, 1e6)
 	for _, n := range sizes {
 		fft := NewCmplxFFT(n)
-		d := randComplexes(n, rand.NewSource(1))
+		d := randComplexes(n, rand.NewPCG(1, 1))
 
 		b.Run(fmt.Sprint(n), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
@@ -453,7 +453,7 @@ func BenchmarkCmplxFFTSequence(b *testing.B) {
 	sizes = append(sizes, 100, 4000, 1e6)
 	for _, n := range sizes {
 		fft := NewCmplxFFT(n)
-		d := randComplexes(n, rand.NewSource(1))
+		d := randComplexes(n, rand.NewPCG(1, 1))
 
 		b.Run(fmt.Sprint(n), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {

@@ -6,8 +6,7 @@ package distuv
 
 import (
 	"math"
-
-	"gonum.org/v1/gonum/internal/rand"
+	"math/rand/v2"
 )
 
 // Triangle represents a triangle distribution (https://en.wikipedia.org/wiki/Triangular_distribution).

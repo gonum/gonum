@@ -8,6 +8,7 @@ import (
 	"flag"
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"os"
 	"path/filepath"
 	"strings"
@@ -20,7 +21,6 @@ import (
 	"gonum.org/v1/gonum/graph/iterator"
 	"gonum.org/v1/gonum/graph/simple"
 	"gonum.org/v1/gonum/graph/topo"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 var slta = flag.Bool("slta", false, "specify DominatorsSLT benchmark")
@@ -165,7 +165,7 @@ func BenchmarkRandomGraphDominators(b *testing.B) {
 	}
 
 	for _, test := range tests {
-		rnd := rand.New(rand.NewSource(1))
+		rnd := rand.New(rand.NewPCG(1, 1))
 		g := test.g()
 
 		// Guess a maximally expensive entry to the graph.
@@ -177,7 +177,7 @@ func BenchmarkRandomGraphDominators(b *testing.B) {
 			// in the first position of the error. Pick one
 			// of the nodes at random.
 			unordered := err.(topo.Unorderable)
-			root = unordered[0][rnd.Intn(len(unordered[0]))]
+			root = unordered[0][rnd.IntN(len(unordered[0]))]
 		}
 		if root == nil {
 			b.Error("no entry node label for graph")
@@ -198,11 +198,11 @@ func BenchmarkRandomGraphDominators(b *testing.B) {
 			for i, v := range sort[1:] {
 				u := sort[i]
 				if u == nil {
-					u = unordered[ui][rnd.Intn(len(unordered[ui]))]
+					u = unordered[ui][rnd.IntN(len(unordered[ui]))]
 					ui++
 				}
 				if v == nil {
-					v = unordered[ui][rnd.Intn(len(unordered[ui]))]
+					v = unordered[ui][rnd.IntN(len(unordered[ui]))]
 				}
 				if !g.HasEdgeFromTo(u.ID(), v.ID()) {
 					g.SetEdge(g.NewEdge(u, v))
@@ -225,7 +225,7 @@ func BenchmarkRandomGraphDominators(b *testing.B) {
 func gnm(n, m int) func() *simple.DirectedGraph {
 	return func() *simple.DirectedGraph {
 		dg := simple.NewDirectedGraph()
-		err := gen.Gnm(dg, n, m, rand.New(rand.NewSource(1)))
+		err := gen.Gnm(dg, n, m, rand.New(rand.NewPCG(1, 1)))
 		if err != nil {
 			panic(err)
 		}
@@ -238,13 +238,13 @@ func gnm(n, m int) func() *simple.DirectedGraph {
 func duplication(n int, delta, alpha, sigma float64) func() *simple.DirectedGraph {
 	return func() *simple.DirectedGraph {
 		g := undirected{simple.NewDirectedGraph()}
-		rnd := rand.New(rand.NewSource(1))
+		rnd := rand.New(rand.NewPCG(1, 1))
 		err := gen.Duplication(g, n, delta, alpha, sigma, rnd)
 		if err != nil {
 			panic(err)
 		}
 		for _, e := range graph.EdgesOf(g.Edges()) {
-			if rnd.Intn(2) == 0 {
+			if rnd.IntN(2) == 0 {
 				g.RemoveEdge(e.From().ID(), e.To().ID())
 			}
 		}

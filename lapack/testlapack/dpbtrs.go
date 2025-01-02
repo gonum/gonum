@@ -7,12 +7,12 @@ package testlapack
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Dpbtrser interface {
@@ -24,7 +24,7 @@ type Dpbtrser interface {
 // DpbtrsTest tests Dpbtrs by comparing the computed and known, generated solutions of
 // a linear system with a random symmetric positive definite band matrix.
 func DpbtrsTest(t *testing.T, impl Dpbtrser) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, n := range []int{0, 1, 2, 3, 4, 5, 65, 100, 129} {
 		for _, kd := range []int{0, (n + 1) / 4, (3*n - 1) / 4, (5*n + 1) / 4} {
 			for _, nrhs := range []int{0, 1, 2, 5} {

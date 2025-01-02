@@ -5,6 +5,7 @@
 package sampleuv
 
 import (
+	"math/rand/v2"
 	"sort"
 	"testing"
 
@@ -24,9 +25,9 @@ func TestLatinHypercube(t *testing.T) {
 	for _, nSamples := range []int{1, 2, 5, 10, 20} {
 		samples := make([]float64, nSamples)
 		for _, dist := range []lhDist{
-			distuv.Uniform{Min: 0, Max: 1},
-			distuv.Uniform{Min: 0, Max: 10},
-			distuv.Normal{Mu: 5, Sigma: 3},
+			distuv.Uniform{Min: 0, Max: 1, Src: rand.NewPCG(1, 2)},
+			distuv.Uniform{Min: 0, Max: 10, Src: rand.NewPCG(3, 4)},
+			distuv.Normal{Mu: 5, Sigma: 3, Src: rand.NewPCG(5, 6)},
 		} {
 			LatinHypercube{Q: dist}.Sample(samples)
 			sort.Float64s(samples)
@@ -43,8 +44,8 @@ func TestLatinHypercube(t *testing.T) {
 func TestImportance(t *testing.T) {
 	// Test by finding the expected value of a Normal.
 	trueMean := 3.0
-	target := distuv.Normal{Mu: trueMean, Sigma: 2}
-	proposal := distuv.Normal{Mu: 0, Sigma: 5}
+	target := distuv.Normal{Mu: trueMean, Sigma: 2, Src: rand.NewPCG(1, 2)}
+	proposal := distuv.Normal{Mu: 0, Sigma: 5, Src: rand.NewPCG(3, 4)}
 	nSamples := 100000
 	x := make([]float64, nSamples)
 	weights := make([]float64, nSamples)
@@ -58,12 +59,12 @@ func TestImportance(t *testing.T) {
 func TestRejection(t *testing.T) {
 	// Test by finding the expected value of a Normal.
 	trueMean := 3.0
-	target := distuv.Normal{Mu: trueMean, Sigma: 2}
-	proposal := distuv.Normal{Mu: 0, Sigma: 5}
+	target := distuv.Normal{Mu: trueMean, Sigma: 2, Src: rand.NewPCG(1, 2)}
+	proposal := distuv.Normal{Mu: 0, Sigma: 5, Src: rand.NewPCG(3, 4)}
 
 	nSamples := 20000
 	x := make([]float64, nSamples)
-	r := &Rejection{Target: target, Proposal: proposal, C: 100}
+	r := &Rejection{Target: target, Proposal: proposal, C: 100, Src: rand.NewPCG(5, 6)}
 	r.Sample(x)
 	ev := stat.Mean(x, nil)
 	if !scalar.EqualWithinAbsOrRel(ev, trueMean, tol, tol) {
@@ -73,10 +74,11 @@ func TestRejection(t *testing.T) {
 
 type condNorm struct {
 	Sigma float64
+	Src   rand.Source
 }
 
 func (c condNorm) ConditionalRand(y float64) float64 {
-	return distuv.Normal{Mu: y, Sigma: c.Sigma}.Rand()
+	return distuv.Normal{Mu: y, Sigma: c.Sigma, Src: c.Src}.Rand()
 }
 
 func (c condNorm) ConditionalLogProb(x, y float64) float64 {
@@ -86,8 +88,8 @@ func (c condNorm) ConditionalLogProb(x, y float64) float64 {
 func TestMetropolisHastings(t *testing.T) {
 	// Test by finding the expected value of a Normal.
 	trueMean := 3.0
-	target := distuv.Normal{Mu: trueMean, Sigma: 2}
-	proposal := condNorm{Sigma: 5}
+	target := distuv.Normal{Mu: trueMean, Sigma: 2, Src: rand.NewPCG(1, 2)}
+	proposal := condNorm{Sigma: 5, Src: rand.NewPCG(3, 4)}
 
 	burnin := 500
 	nSamples := 100000 + burnin
@@ -96,6 +98,7 @@ func TestMetropolisHastings(t *testing.T) {
 		Initial:  100,
 		Target:   target,
 		Proposal: proposal,
+		Src:      rand.NewPCG(5, 6),
 
 		BurnIn: burnin,
 	}

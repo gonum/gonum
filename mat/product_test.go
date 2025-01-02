@@ -6,9 +6,8 @@ package mat
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
-
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type dims struct{ r, c int }
@@ -92,7 +91,7 @@ var productTests = []struct {
 
 func TestProduct(t *testing.T) {
 	t.Parallel()
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, test := range productTests {
 		dimensions := test.factors
 		if dimensions == nil && test.n > 0 {
@@ -101,7 +100,7 @@ func TestProduct(t *testing.T) {
 				if i != 0 {
 					dimensions[i].r = dimensions[i-1].c
 				}
-				dimensions[i].c = rnd.Intn(50) + 1
+				dimensions[i].c = rnd.IntN(50) + 1
 			}
 			dimensions[0].r = test.product.r
 			dimensions[test.n-1].c = test.product.c

@@ -6,10 +6,10 @@ package spatial
 
 import (
 	"math"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/floats/scalar"
-	"gonum.org/v1/gonum/internal/rand"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -222,7 +222,7 @@ var spatialTests = []struct {
 
 func TestGetisOrd(t *testing.T) {
 	for ti, test := range spatialTests {
-		rnd := rand.New(rand.NewSource(1))
+		rnd := rand.New(rand.NewPCG(1, 1))
 		data := make([]float64, test.n)
 		step := (test.to - test.from) / float64(test.n)
 		for i := range data {
@@ -273,7 +273,7 @@ func getisOrdSegments(data, weight []float64, locality mat.Matrix) int {
 func TestGlobalMoransI(t *testing.T) {
 	const tol = 1e-14
 	for ti, test := range spatialTests {
-		rnd := rand.New(rand.NewSource(1))
+		rnd := rand.New(rand.NewPCG(1, 1))
 		data := make([]float64, test.n)
 		step := (test.to - test.from) / float64(test.n)
 		for i := range data {

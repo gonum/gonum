@@ -6,10 +6,9 @@ package distuv
 
 import (
 	"math"
+	"math/rand/v2"
 	"sort"
 	"testing"
-
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 func TestHalfKStandardWeibullProb(t *testing.T) {
@@ -230,7 +229,7 @@ func TestWeibullScores(t *testing.T) {
 
 func TestWeibull(t *testing.T) {
 	t.Parallel()
-	src := rand.New(rand.NewSource(1))
+	src := rand.New(rand.NewPCG(1, 1))
 	for i, dist := range []Weibull{
 		{K: 0.75, Lambda: 1, Src: src},
 		{K: 1, Lambda: 1, Src: src},

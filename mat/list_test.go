@@ -9,6 +9,7 @@ package mat
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"reflect"
 	"testing"
 
@@ -16,7 +17,6 @@ import (
 	"gonum.org/v1/gonum/blas/blas64"
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/floats/scalar"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 // legalSizeSameRectangular returns whether the two matrices have the same rectangular shape.
@@ -1122,7 +1122,7 @@ func testOneInputFunc(t *testing.T,
 	// legalSize returns true if the size is valid for the function.
 	legalSize func(r, c int) bool,
 ) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	for _, aMat := range testMatrices {
 		for _, test := range sizes {
 			// Skip the test if the argument would not be assignable to the
@@ -1287,7 +1287,7 @@ func testTwoInputFunc(t *testing.T,
 	// legalSize returns true if the sizes are valid for the function.
 	legalSize func(ar, ac, br, bc int) bool,
 ) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	for _, aMat := range testMatrices {
 		for _, bMat := range testMatrices {
 			// Loop over all of the size combinations (bigger, smaller, etc.).
@@ -1374,7 +1374,7 @@ func testOneInput(t *testing.T,
 	// tol is the tolerance for equality when comparing method results.
 	tol float64,
 ) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	for _, aMat := range testMatrices {
 		for _, test := range sizes {
 			// Skip the test if the argument would not be assignable to the
@@ -1533,7 +1533,7 @@ func testTwoInput(t *testing.T,
 	// tol is the tolerance for equality when comparing method results.
 	tol float64,
 ) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	for _, aMat := range testMatrices {
 		for _, bMat := range testMatrices {
 			// Loop over all of the size combinations (bigger, smaller, etc.).

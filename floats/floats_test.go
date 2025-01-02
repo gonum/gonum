@@ -7,12 +7,12 @@ package floats
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"sort"
 	"strconv"
 	"testing"
 
 	"gonum.org/v1/gonum/floats/scalar"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 const (
@@ -1609,7 +1609,7 @@ func randomSlice(l int, src rand.Source) []float64 {
 }
 
 func benchmarkMin(b *testing.B, size int) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	s := randomSlice(size, src)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -1622,7 +1622,7 @@ func BenchmarkMinLarge(b *testing.B) { benchmarkMin(b, Large) }
 func BenchmarkMinHuge(b *testing.B)  { benchmarkMin(b, Huge) }
 
 func benchmarkAdd(b *testing.B, size int) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	s1 := randomSlice(size, src)
 	s2 := randomSlice(size, src)
 	b.ResetTimer()
@@ -1636,7 +1636,7 @@ func BenchmarkAddLarge(b *testing.B) { benchmarkAdd(b, Large) }
 func BenchmarkAddHuge(b *testing.B)  { benchmarkAdd(b, Huge) }
 
 func benchmarkAddTo(b *testing.B, size int) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	s1 := randomSlice(size, src)
 	s2 := randomSlice(size, src)
 	dst := randomSlice(size, src)
@@ -1651,7 +1651,7 @@ func BenchmarkAddToLarge(b *testing.B) { benchmarkAddTo(b, Large) }
 func BenchmarkAddToHuge(b *testing.B)  { benchmarkAddTo(b, Huge) }
 
 func benchmarkCumProd(b *testing.B, size int) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	s := randomSlice(size, src)
 	dst := randomSlice(size, src)
 	b.ResetTimer()
@@ -1665,7 +1665,7 @@ func BenchmarkCumProdLarge(b *testing.B) { benchmarkCumProd(b, Large) }
 func BenchmarkCumProdHuge(b *testing.B)  { benchmarkCumProd(b, Huge) }
 
 func benchmarkCumSum(b *testing.B, size int) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	s := randomSlice(size, src)
 	dst := randomSlice(size, src)
 	b.ResetTimer()
@@ -1679,7 +1679,7 @@ func BenchmarkCumSumLarge(b *testing.B) { benchmarkCumSum(b, Large) }
 func BenchmarkCumSumHuge(b *testing.B)  { benchmarkCumSum(b, Huge) }
 
 func benchmarkDiv(b *testing.B, size int) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	s := randomSlice(size, src)
 	dst := randomSlice(size, src)
 	b.ResetTimer()
@@ -1693,7 +1693,7 @@ func BenchmarkDivLarge(b *testing.B) { benchmarkDiv(b, Large) }
 func BenchmarkDivHuge(b *testing.B)  { benchmarkDiv(b, Huge) }
 
 func benchmarkDivTo(b *testing.B, size int) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	s1 := randomSlice(size, src)
 	s2 := randomSlice(size, src)
 	dst := randomSlice(size, src)
@@ -1708,7 +1708,7 @@ func BenchmarkDivToLarge(b *testing.B) { benchmarkDivTo(b, Large) }
 func BenchmarkDivToHuge(b *testing.B)  { benchmarkDivTo(b, Huge) }
 
 func benchmarkSub(b *testing.B, size int) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	s1 := randomSlice(size, src)
 	s2 := randomSlice(size, src)
 	b.ResetTimer()
@@ -1722,7 +1722,7 @@ func BenchmarkSubLarge(b *testing.B) { benchmarkSub(b, Large) }
 func BenchmarkSubHuge(b *testing.B)  { benchmarkSub(b, Huge) }
 
 func benchmarkSubTo(b *testing.B, size int) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	s1 := randomSlice(size, src)
 	s2 := randomSlice(size, src)
 	dst := randomSlice(size, src)
@@ -1737,7 +1737,7 @@ func BenchmarkSubToLarge(b *testing.B) { benchmarkSubTo(b, Large) }
 func BenchmarkSubToHuge(b *testing.B)  { benchmarkSubTo(b, Huge) }
 
 func benchmarkLogSumExp(b *testing.B, size int) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	s := randomSlice(size, src)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -1750,7 +1750,7 @@ func BenchmarkLogSumExpLarge(b *testing.B) { benchmarkLogSumExp(b, Large) }
 func BenchmarkLogSumExpHuge(b *testing.B)  { benchmarkLogSumExp(b, Huge) }
 
 func benchmarkDot(b *testing.B, size int) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	s1 := randomSlice(size, src)
 	s2 := randomSlice(size, src)
 	b.ResetTimer()
@@ -1764,7 +1764,7 @@ func BenchmarkDotLarge(b *testing.B) { benchmarkDot(b, Large) }
 func BenchmarkDotHuge(b *testing.B)  { benchmarkDot(b, Huge) }
 
 func benchmarkAddScaledTo(b *testing.B, size int) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	dst := randomSlice(size, src)
 	y := randomSlice(size, src)
 	s := randomSlice(size, src)
@@ -1779,7 +1779,7 @@ func BenchmarkAddScaledToLarge(b *testing.B)  { benchmarkAddScaledTo(b, Large) }
 func BenchmarkAddScaledToHuge(b *testing.B)   { benchmarkAddScaledTo(b, Huge) }
 
 func benchmarkScale(b *testing.B, size int) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	dst := randomSlice(size, src)
 	b.ResetTimer()
 	for i := 0; i < b.N; i += 2 {
@@ -1793,7 +1793,7 @@ func BenchmarkScaleLarge(b *testing.B)  { benchmarkScale(b, Large) }
 func BenchmarkScaleHuge(b *testing.B)   { benchmarkScale(b, Huge) }
 
 func benchmarkNorm2(b *testing.B, size int) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	s := randomSlice(size, src)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -1806,7 +1806,7 @@ func BenchmarkNorm2Large(b *testing.B)  { benchmarkNorm2(b, Large) }
 func BenchmarkNorm2Huge(b *testing.B)   { benchmarkNorm2(b, Huge) }
 
 func benchmarkSumCompensated(b *testing.B, size int) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	s := randomSlice(size, src)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -1820,7 +1820,7 @@ func BenchmarkSumCompensatedLarge(b *testing.B)  { benchmarkSumCompensated(b, La
 func BenchmarkSumCompensatedHuge(b *testing.B)   { benchmarkSumCompensated(b, Huge) }
 
 func benchmarkSum(b *testing.B, size int) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	s := randomSlice(size, src)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -1834,7 +1834,7 @@ func BenchmarkSumLarge(b *testing.B)  { benchmarkSum(b, Large) }
 func BenchmarkSumHuge(b *testing.B)   { benchmarkSum(b, Huge) }
 
 func benchmarkReverse(b *testing.B, size int) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	s := randomSlice(size, src)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {

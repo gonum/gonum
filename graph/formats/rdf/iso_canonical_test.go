@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"hash"
 	"io"
+	"math/rand/v2"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -19,8 +20,6 @@ import (
 	"testing"
 	"text/tabwriter"
 	"time"
-
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 var (
@@ -53,7 +52,7 @@ func TestIsoCanonicalHashes(t *testing.T) {
 	for _, path := range glob {
 		name := filepath.Base(path)
 		t.Run(name, func(t *testing.T) {
-			src := rand.NewSource(seed)
+			src := rand.NewPCG(seed, seed)
 
 			f, err := os.Open(path)
 			if err != nil {

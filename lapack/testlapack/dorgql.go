@@ -6,11 +6,11 @@ package testlapack
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Dorgqler interface {
@@ -27,7 +27,7 @@ func DorgqlTest(t *testing.T, impl Dorgqler) {
 	}
 	dorg2ler, hasDorg2l := impl.(Dorg2ler)
 
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, m := range []int{0, 1, 2, 3, 4, 5, 7, 10, 15, 30, 50, 150} {
 		for _, extra := range []int{0, 11} {
 			for _, wl := range []worklen{minimumWork, mediumWork, optimumWork} {
@@ -36,11 +36,11 @@ func DorgqlTest(t *testing.T, impl Dorgqler) {
 					// For large matrices make sure that k
 					// is large enough to trigger blocked
 					// path.
-					k = 129 + rnd.Intn(m-129+1)
+					k = 129 + rnd.IntN(m-129+1)
 				} else {
-					k = rnd.Intn(m + 1)
+					k = rnd.IntN(m + 1)
 				}
-				n := k + rnd.Intn(m-k+1)
+				n := k + rnd.IntN(m-k+1)
 				if m == 0 || n == 0 {
 					m = 0
 					n = 0

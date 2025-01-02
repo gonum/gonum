@@ -7,11 +7,11 @@ package testlapack
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/internal/rand"
 )
 
 type Dormhrer interface {
@@ -21,7 +21,7 @@ type Dormhrer interface {
 }
 
 func DormhrTest(t *testing.T, impl Dormhrer) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	for _, side := range []blas.Side{blas.Left, blas.Right} {
 		for _, trans := range []blas.Transpose{blas.NoTrans, blas.Trans} {
@@ -33,8 +33,8 @@ func DormhrTest(t *testing.T, impl Dormhrer) {
 							if side == blas.Right {
 								nq = n
 							}
-							ilo := rnd.Intn(nq)
-							ihi := rnd.Intn(nq)
+							ilo := rnd.IntN(nq)
+							ihi := rnd.IntN(nq)
 							if ilo > ihi {
 								ilo, ihi = ihi, ilo
 							}

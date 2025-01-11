@@ -160,6 +160,18 @@ func CircularMean(x, weights []float64) float64 {
 	return math.Atan2(aY, aX)
 }
 
+// CircularStdDev returns the circular standard deviation of the dataset.
+//
+//	sqrt(-2 * log(sqrt((\sum_i w_i * sin(alpha_i))^2 + (\sum_i w_i * cos(alpha_i))^2) / length(x)))
+func CircularStdDev(x []float64) float64 {
+	var aX, aY float64
+	for _, v := range x {
+		aX += math.Cos(v)
+		aY += math.Sin(v)
+	}
+	return math.Sqrt(-2 * math.Log(math.Sqrt(aY*aY+aX*aX)/float64(len(x))))
+}
+
 // Correlation returns the weighted correlation between the samples of x and y
 // with the given means.
 //

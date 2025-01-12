@@ -169,7 +169,7 @@ func CircularStdDev(x []float64) float64 {
 		aX += math.Cos(v)
 		aY += math.Sin(v)
 	}
-	return math.Sqrt(-2 * math.Log(math.Sqrt(aY*aY+aX*aX)/float64(len(x))))
+	return math.Sqrt(-2 * math.Log(math.Hypot(aY, aX)/float64(len(x))))
 }
 
 // Correlation returns the weighted correlation between the samples of x and y

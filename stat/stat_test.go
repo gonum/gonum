@@ -81,12 +81,12 @@ func TestCircularStdDev(t *testing.T) {
 			x:   []float64{0, 2 * math.Pi},
 			ans: 0,
 		},
-		// This test case taken from https://stackoverflow.com/questions/55616697/how-to-calculate-standard-deviation-of-circular-data :
+		// This test case taken from https://stackoverflow.com/questions/55616697/how-to-calculate-standard-deviation-of-circular-data.
 		{
 			x:   []float64{6.108655, 0.3490660, 0.698132},
 			ans: 0.36157912052347674,
 		},
-		// This test case taken from scipy's test suite:
+		// This test case taken from scipy's test suite.
 		{
 			x:   []float64{6.1959215, 0.0872665, 0.0349066, 6.2657347, 0.174533, 6.108655},
 			ans: 0.11380663124405205,

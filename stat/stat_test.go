@@ -65,7 +65,7 @@ func TestCircularMean(t *testing.T) {
 
 func ExampleCircularStdDev() {
 	x := []float64{0, 0.25 * math.Pi, 0.75 * math.Pi}
-	cstd := CircularStdDev(x)
+	cstd := CircularStdDev(x, nil)
 
 	fmt.Printf("The circular standard deviation is %.5f.\n", cstd)
 	// Output:
@@ -75,24 +75,36 @@ func ExampleCircularStdDev() {
 func TestCircularStdDev(t *testing.T) {
 	for i, test := range []struct {
 		x   []float64
+		wts []float64
 		ans float64
 	}{
-		{
-			x:   []float64{0, 2 * math.Pi},
-			ans: 0,
-		},
-		// This test case taken from https://stackoverflow.com/questions/55616697/how-to-calculate-standard-deviation-of-circular-data.
+		// Following test case taken from https://stackoverflow.com/questions/55616697/how-to-calculate-standard-deviation-of-circular-data.
 		{
 			x:   []float64{6.108655, 0.3490660, 0.698132},
 			ans: 0.36157912052347674,
 		},
-		// This test case taken from scipy's test suite.
+		// Following test case taken from scipy's test suite.
 		{
 			x:   []float64{6.1959215, 0.0872665, 0.0349066, 6.2657347, 0.174533, 6.108655},
 			ans: 0.11380663124405205,
 		},
+		// Following test cases validated against astropy's stats.circstats.circstd circstd function.
+		{
+			x:   []float64{0, 0.5 * math.Pi},
+			wts: []float64{1, 2},
+			ans: 0.7666724625954157,
+		},
+		{
+			x:   []float64{-1.5 * math.Pi, 0.5 * math.Pi, 2 * math.Pi},
+			wts: []float64{1, 2, 5},
+			ans: 0.7953128684634184,
+		},
+		{
+			x:   []float64{0, 2 * math.Pi},
+			ans: 0,
+		},
 	} {
-		c := CircularStdDev(test.x)
+		c := CircularStdDev(test.x, test.wts)
 		if math.Abs(c-test.ans) > 1e-14 {
 			t.Errorf("Circular standard deviation mismatch case %d: Expected %v, Found %v", i, test.ans, c)
 		}

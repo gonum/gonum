@@ -33,7 +33,7 @@ func YenKShortestPaths(g graph.Graph, k int, cost float64, s, t graph.Node) [][]
 		yk.weight = UniformCost(g)
 	}
 
-	shortest, weight := DijkstraFrom(s, yk).To(t.ID())
+	shortest, weight := DijkstraFromTo(s, t, yk)
 	cost += weight // Set cost to absolute cost limit.
 	switch len(shortest) {
 	case 0:
@@ -73,7 +73,7 @@ func YenKShortestPaths(g graph.Graph, k int, cost float64, s, t graph.Node) [][]
 				yk.removeNode(u.ID())
 			}
 
-			spath, weight := DijkstraFrom(spur, yk).To(t.ID())
+			spath, weight := DijkstraFromTo(spur, t, yk)
 			if weight > cost || math.IsInf(weight, 1) {
 				continue
 			}

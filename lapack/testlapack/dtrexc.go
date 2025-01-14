@@ -6,9 +6,8 @@ package testlapack
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
@@ -20,15 +19,15 @@ type Dtrexcer interface {
 }
 
 func DtrexcTest(t *testing.T, impl Dtrexcer) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	for _, n := range []int{0, 1, 2, 3, 4, 5, 6, 10, 18, 31, 53} {
 		for _, extra := range []int{0, 3} {
 			for cas := 0; cas < 100; cas++ {
 				var ifst, ilst int
 				if n > 0 {
-					ifst = rnd.Intn(n)
-					ilst = rnd.Intn(n)
+					ifst = rnd.IntN(n)
+					ilst = rnd.IntN(n)
 				}
 				dtrexcTest(t, impl, rnd, n, ifst, ilst, extra)
 			}

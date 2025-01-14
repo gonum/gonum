@@ -7,9 +7,8 @@ package testlapack
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
@@ -24,7 +23,7 @@ type Dorgr2er interface {
 }
 
 func Dorgr2Test(t *testing.T, impl Dorgr2er) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, k := range []int{0, 1, 2, 5} {
 		for _, m := range []int{k, k + 1, k + 2, k + 4} {
 			for _, n := range []int{m, m + 1, m + 2, m + 4, m + 7} {

@@ -7,9 +7,8 @@ package testblas
 import (
 	"math"
 	"math/cmplx"
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/floats"
@@ -194,7 +193,7 @@ func TestFlattenTriangular(t *testing.T) {
 }
 
 func TestPackUnpackAsHermitian(t *testing.T) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, uplo := range []blas.Uplo{blas.Upper, blas.Lower} {
 		for _, n := range []int{1, 2, 5, 50} {
 			for _, lda := range []int{max(1, n), n + 11} {

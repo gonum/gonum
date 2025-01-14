@@ -7,10 +7,9 @@ package testlapack
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"sort"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
@@ -48,7 +47,7 @@ func DgesvdTest(t *testing.T, impl Dgesvder, tol float64) {
 func dgesvdTest(t *testing.T, impl Dgesvder, m, n, mtype int, tol float64) {
 	const tolOrtho = 1e-15
 
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	// Use a fixed leading dimension to reduce testing time.
 	lda := n + 3

@@ -8,8 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
-
-	"golang.org/x/exp/rand"
+	"math/rand/v2"
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/stat/sampleuv"

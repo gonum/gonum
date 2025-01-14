@@ -5,9 +5,8 @@
 package testlapack
 
 import (
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
@@ -20,7 +19,7 @@ type Dgetrier interface {
 
 func DgetriTest(t *testing.T, impl Dgetrier) {
 	const tol = 1e-13
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	bi := blas64.Implementation()
 	for _, test := range []struct {
 		n, lda int

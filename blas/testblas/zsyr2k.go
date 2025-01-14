@@ -6,9 +6,8 @@ package testblas
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 )
@@ -35,7 +34,7 @@ func Zsyr2kTest(t *testing.T, impl Zsyr2ker) {
 func zsyr2kTest(t *testing.T, impl Zsyr2ker, uplo blas.Uplo, trans blas.Transpose, n, k int) {
 	const tol = 1e-13
 
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	row, col := n, k
 	if trans == blas.Trans {

@@ -6,9 +6,8 @@ package testlapack
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
@@ -20,7 +19,7 @@ type Dlasy2er interface {
 }
 
 func Dlasy2Test(t *testing.T, impl Dlasy2er) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, tranl := range []bool{true, false} {
 		for _, tranr := range []bool{true, false} {
 			for _, isgn := range []int{1, -1} {

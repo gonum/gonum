@@ -6,8 +6,7 @@ package distuv
 
 import (
 	"math"
-
-	"golang.org/x/exp/rand"
+	"math/rand/v2"
 )
 
 // Weibull distribution. Valid range for x is [0,+∞).

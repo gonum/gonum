@@ -7,9 +7,8 @@ package testlapack
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
@@ -22,7 +21,7 @@ type Dtbtrser interface {
 }
 
 func DtbtrsTest(t *testing.T, impl Dtbtrser) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	for _, trans := range []blas.Transpose{blas.NoTrans, blas.Trans, blas.ConjTrans} {
 		name := transToString(trans)
@@ -70,7 +69,7 @@ func dtbtrsTest(t *testing.T, impl Dtbtrser, rnd *rand.Rand, uplo blas.Uplo, tra
 		a[i] = rnd.NormFloat64()
 	}
 	if singular {
-		i := rnd.Intn(n)
+		i := rnd.IntN(n)
 		if uplo == blas.Upper {
 			a[i*lda] = 0
 		} else {

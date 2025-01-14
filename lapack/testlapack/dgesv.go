@@ -7,9 +7,8 @@ package testlapack
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
@@ -23,7 +22,7 @@ type Dgesver interface {
 }
 
 func DgesvTest(t *testing.T, impl Dgesver) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, n := range []int{0, 1, 2, 3, 4, 5, 10, 50, 100} {
 		for _, nrhs := range []int{0, 1, 2, 5} {
 			for _, lda := range []int{max(1, n), n + 5} {

@@ -7,9 +7,8 @@ package testlapack
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas/blas64"
 	"gonum.org/v1/gonum/floats"
@@ -20,7 +19,7 @@ type Dlag2er interface {
 }
 
 func Dlag2Test(t *testing.T, impl Dlag2er) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, lda := range []int{2, 5} {
 		for _, ldb := range []int{2, 5} {
 			for aKind := 0; aKind <= 20; aKind++ {

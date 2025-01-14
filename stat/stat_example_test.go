@@ -6,8 +6,7 @@ package stat_test
 
 import (
 	"fmt"
-
-	"golang.org/x/exp/rand"
+	"math/rand/v2"
 
 	"gonum.org/v1/gonum/stat"
 )
@@ -23,9 +22,10 @@ func ExampleLinearRegression() {
 		return 1 + 3*x
 	}
 
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := range xs {
 		xs[i] = float64(i)
-		ys[i] = line(xs[i]) + 0.1*rand.NormFloat64()
+		ys[i] = line(xs[i]) + 0.1*rnd.NormFloat64()
 	}
 
 	// Do not force the regression line to pass through the origin.
@@ -39,7 +39,7 @@ func ExampleLinearRegression() {
 	fmt.Printf("R^2: %.6f\n", r2)
 
 	// Output:
-	// Estimated offset is: 0.988572
-	// Estimated slope is:  3.000154
+	// Estimated offset is: 0.999675
+	// Estimated slope is:  2.999971
 	// R^2: 0.999999
 }

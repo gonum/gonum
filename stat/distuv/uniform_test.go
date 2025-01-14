@@ -6,10 +6,9 @@ package distuv
 
 import (
 	"math"
+	"math/rand/v2"
 	"sort"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/floats/scalar"
 )
@@ -67,7 +66,7 @@ func TestUniformCDFSurvival(t *testing.T) {
 
 func TestUniform(t *testing.T) {
 	t.Parallel()
-	src := rand.New(rand.NewSource(1))
+	src := rand.New(rand.NewPCG(1, 1))
 	for i, b := range []Uniform{
 		{1, 2, src},
 		{0, 100, src},

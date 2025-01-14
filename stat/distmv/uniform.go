@@ -6,8 +6,8 @@ package distmv
 
 import (
 	"math"
+	"math/rand/v2"
 
-	"golang.org/x/exp/rand"
 	"gonum.org/v1/gonum/spatial/r1"
 )
 

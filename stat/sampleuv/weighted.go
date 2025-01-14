@@ -4,7 +4,7 @@
 
 package sampleuv
 
-import "golang.org/x/exp/rand"
+import "math/rand/v2"
 
 // Weighted provides sampling without replacement from a collection of items with
 // non-uniform probability.

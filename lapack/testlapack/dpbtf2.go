@@ -6,9 +6,8 @@ package testlapack
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 )
@@ -21,7 +20,7 @@ type Dpbtf2er interface {
 // by checking that the Cholesky factors multiply back to the original matrix.
 func Dpbtf2Test(t *testing.T, impl Dpbtf2er) {
 	// TODO(vladimir-ch): include expected-failure test case.
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, n := range []int{0, 1, 2, 3, 4, 5, 10, 20} {
 		for _, kd := range []int{0, (n + 1) / 4, (3*n - 1) / 4, (5*n + 1) / 4} {
 			for _, uplo := range []blas.Uplo{blas.Upper, blas.Lower} {

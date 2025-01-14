@@ -5,9 +5,8 @@
 package testlapack
 
 import (
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
@@ -20,7 +19,7 @@ type Dgetrser interface {
 }
 
 func DgetrsTest(t *testing.T, impl Dgetrser) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	// TODO(btracey): Put more thought into creating more regularized matrices
 	// and what correct tolerances should be. Consider also seeding the random
 	// number in this test to make it more robust to code changes in other

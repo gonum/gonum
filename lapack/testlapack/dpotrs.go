@@ -6,9 +6,8 @@ package testlapack
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
@@ -23,7 +22,7 @@ type Dpotrser interface {
 func DpotrsTest(t *testing.T, impl Dpotrser) {
 	const tol = 1e-14
 
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	bi := blas64.Implementation()
 
 	for _, uplo := range []blas.Uplo{blas.Upper, blas.Lower} {

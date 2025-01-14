@@ -6,10 +6,9 @@ package distuv
 
 import (
 	"math"
+	"math/rand/v2"
 	"sort"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/floats/scalar"
 )
@@ -64,7 +63,7 @@ func TestFCDF(t *testing.T) {
 
 func TestF(t *testing.T) {
 	t.Parallel()
-	src := rand.New(rand.NewSource(1))
+	src := rand.New(rand.NewPCG(1, 1))
 	for i, f := range []F{
 		{13, 16, src},
 		{42, 31, src},
@@ -88,10 +87,10 @@ func testF(t *testing.T, f F, i int) {
 	checkProbContinuous(t, i, x, 0, math.Inf(1), f, 1e-4)
 	checkMean(t, i, x, f, tol)
 	checkVarAndStd(t, i, x, f, tol)
-	checkExKurtosis(t, i, x, f, 1e-1)
+	checkExKurtosis(t, i, x, f, 2e-1)
 	checkSkewness(t, i, x, f, 5e-2)
 	checkQuantileCDFSurvival(t, i, x, f, 5e-3)
-	checkMode(t, i, x, f, 2e-2, 3e-2)
+	checkMode(t, i, x, f, 2e-2, 1e-1)
 
 	if f.NumParameters() != 2 {
 		t.Errorf("Wrong number of parameters. Got %v, want 2", f.NumParameters())

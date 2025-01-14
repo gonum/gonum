@@ -8,10 +8,9 @@ import (
 	"fmt"
 	"math"
 	"math/cmplx"
+	"math/rand/v2"
 	"strconv"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
@@ -31,7 +30,7 @@ type dgeevTest struct {
 }
 
 func DgeevTest(t *testing.T, impl Dgeever) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 
 	for i, test := range []dgeevTest{
 		{
@@ -489,7 +488,7 @@ func DgeevTest(t *testing.T, impl Dgeever) {
 						re := rnd.NormFloat64()
 						if i == n-1 || rnd.Float64() < 0.5 {
 							// Real eigenvalue.
-							nb := rnd.Intn(min(4, n-i)) + 1
+							nb := rnd.IntN(min(4, n-i)) + 1
 							for k := 0; k < nb; k++ {
 								tmat.Data[i*tmat.Stride+i] = re
 								ev[i] = complex(re, 0)
@@ -499,7 +498,7 @@ func DgeevTest(t *testing.T, impl Dgeever) {
 						}
 						// Complex eigenvalue.
 						im := rnd.NormFloat64()
-						nb := rnd.Intn(min(4, (n-i)/2)) + 1
+						nb := rnd.IntN(min(4, (n-i)/2)) + 1
 						for k := 0; k < nb; k++ {
 							// 2×2 block for the complex eigenvalue.
 							tmat.Data[i*tmat.Stride+i] = re

@@ -6,10 +6,10 @@ package distuv
 
 import (
 	"math"
+	"math/rand/v2"
 	"sort"
 	"testing"
 
-	"golang.org/x/exp/rand"
 	"gonum.org/v1/gonum/floats/scalar"
 )
 
@@ -64,7 +64,7 @@ func TestLaplaceProb(t *testing.T) {
 
 func TestLaplace(t *testing.T) {
 	t.Parallel()
-	src := rand.New(rand.NewSource(1))
+	src := rand.New(rand.NewPCG(1, 1))
 	for i, dist := range []Laplace{
 		{Mu: 0, Scale: 3, Src: src},
 		{Mu: 1, Scale: 1.5, Src: src},
@@ -166,7 +166,7 @@ func TestLaplaceFitRandomSamples(t *testing.T) {
 	t.Parallel()
 
 	nSamples := 100000
-	src := rand.New(rand.NewSource(1))
+	src := rand.New(rand.NewPCG(1, 1))
 	l := Laplace{
 		Mu:    3,
 		Scale: 5,

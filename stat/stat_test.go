@@ -7,11 +7,10 @@ package stat
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"reflect"
 	"strconv"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/floats/scalar"
@@ -995,7 +994,7 @@ func TestLinearRegression(t *testing.T) {
 }
 
 func BenchmarkLinearRegression(b *testing.B) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	slope, offset := 2.0, 3.0
 
 	maxn := 10000

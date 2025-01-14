@@ -6,9 +6,8 @@ package testlapack
 
 import (
 	"math"
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
@@ -19,7 +18,7 @@ type Dlacn2er interface {
 }
 
 func Dlacn2Test(t *testing.T, impl Dlacn2er) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, n := range []int{1, 2, 3, 4, 5, 7, 10, 15, 20, 100} {
 		for cas := 0; cas < 10; cas++ {
 			a := randomGeneral(n, n, n, rnd)

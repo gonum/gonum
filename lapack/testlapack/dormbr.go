@@ -5,9 +5,8 @@
 package testlapack
 
 import (
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
@@ -21,7 +20,7 @@ type Dormbrer interface {
 }
 
 func DormbrTest(t *testing.T, impl Dormbrer) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	bi := blas64.Implementation()
 	for _, vect := range []lapack.ApplyOrtho{lapack.ApplyQ, lapack.ApplyP} {
 		for _, side := range []blas.Side{blas.Left, blas.Right} {

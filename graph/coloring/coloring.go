@@ -9,10 +9,9 @@ package coloring
 
 import (
 	"errors"
+	"math/rand/v2"
 	"slices"
 	"sort"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/set"

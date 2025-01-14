@@ -6,11 +6,10 @@ package community
 
 import (
 	"math"
+	"math/rand/v2"
 	"reflect"
 	"slices"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/graph"
@@ -153,16 +152,15 @@ var communityUndirectedQTests = []communityUndirectedQTest{
 				},
 			},
 			{
-				q: 0.3496877054569362,
+				q: 0.3707264957264957,
 				communities: [][]graph.Node{
 					{simple.Node(0), simple.Node(1), simple.Node(2), simple.Node(3), simple.Node(7), simple.Node(11), simple.Node(12), simple.Node(13), simple.Node(17), simple.Node(19), simple.Node(21)},
 					{simple.Node(4), simple.Node(10)},
 					{simple.Node(5), simple.Node(6), simple.Node(16)},
 					{simple.Node(8), simple.Node(9), simple.Node(14), simple.Node(15), simple.Node(18), simple.Node(20), simple.Node(22), simple.Node(30), simple.Node(32), simple.Node(33)},
-					{simple.Node(23), simple.Node(25)},
-					{simple.Node(24), simple.Node(27)},
+					{simple.Node(23), simple.Node(27)},
+					{simple.Node(24), simple.Node(25), simple.Node(28), simple.Node(31)},
 					{simple.Node(26), simple.Node(29)},
-					{simple.Node(28), simple.Node(31)},
 				},
 			},
 			{
@@ -275,7 +273,9 @@ func TestCommunityQUndirected(t *testing.T) {
 			}
 		}
 
-		testCommunityQUndirected(t, test, g)
+		t.Run(test.name, func(t *testing.T) {
+			testCommunityQUndirected(t, test, g)
+		})
 	}
 }
 
@@ -292,7 +292,9 @@ func TestCommunityQWeightedUndirected(t *testing.T) {
 			}
 		}
 
-		testCommunityQUndirected(t, test, g)
+		t.Run(test.name, func(t *testing.T) {
+			testCommunityQUndirected(t, test, g)
+		})
 	}
 }
 
@@ -328,7 +330,9 @@ func TestCommunityDeltaQUndirected(t *testing.T) {
 			}
 		}
 
-		testCommunityDeltaQUndirected(t, test, g)
+		t.Run(test.name, func(t *testing.T) {
+			testCommunityDeltaQUndirected(t, test, g)
+		})
 	}
 }
 
@@ -345,12 +349,14 @@ func TestCommunityDeltaQWeightedUndirected(t *testing.T) {
 			}
 		}
 
-		testCommunityDeltaQUndirected(t, test, g)
+		t.Run(test.name, func(t *testing.T) {
+			testCommunityDeltaQUndirected(t, test, g)
+		})
 	}
 }
 
 func testCommunityDeltaQUndirected(t *testing.T, test communityUndirectedQTest, g graph.Undirected) {
-	rnd := rand.New(rand.NewSource(1)).Intn
+	rnd := rand.New(rand.NewPCG(1, 1)).IntN
 	for _, structure := range test.structures {
 		communityOf := make(map[int64]int)
 		communities := make([][]graph.Node, len(structure.memberships))
@@ -453,7 +459,9 @@ func TestReduceQConsistencyUndirected(t *testing.T) {
 			}
 		}
 
-		testReduceQConsistencyUndirected(t, test, g)
+		t.Run(test.name, func(t *testing.T) {
+			testReduceQConsistencyUndirected(t, test, g)
+		})
 	}
 }
 
@@ -470,7 +478,9 @@ func TestReduceQConsistencyWeightedUndirected(t *testing.T) {
 			}
 		}
 
-		testReduceQConsistencyUndirected(t, test, g)
+		t.Run(test.name, func(t *testing.T) {
+			testReduceQConsistencyUndirected(t, test, g)
+		})
 	}
 }
 
@@ -571,7 +581,9 @@ func TestMoveLocalUndirected(t *testing.T) {
 			}
 		}
 
-		testMoveLocalUndirected(t, test, g)
+		t.Run(test.name, func(t *testing.T) {
+			testMoveLocalUndirected(t, test, g)
+		})
 	}
 }
 
@@ -588,7 +600,9 @@ func TestMoveLocalWeightedUndirected(t *testing.T) {
 			}
 		}
 
-		testMoveLocalUndirected(t, test, g)
+		t.Run(test.name, func(t *testing.T) {
+			testMoveLocalUndirected(t, test, g)
+		})
 	}
 }
 
@@ -633,7 +647,9 @@ func TestModularizeUndirected(t *testing.T) {
 			}
 		}
 
-		testModularizeUndirected(t, test, g)
+		t.Run(test.name, func(t *testing.T) {
+			testModularizeUndirected(t, test, g)
+		})
 	}
 }
 
@@ -650,7 +666,9 @@ func TestModularizeWeightedUndirected(t *testing.T) {
 			}
 		}
 
-		testModularizeUndirected(t, test, g)
+		t.Run(test.name, func(t *testing.T) {
+			testModularizeUndirected(t, test, g)
+		})
 	}
 }
 
@@ -675,7 +693,7 @@ func testModularizeUndirected(t *testing.T, test communityUndirectedQTest, g gra
 	)
 	// Modularize is randomised so we do this to
 	// ensure the level tests are consistent.
-	src := rand.New(rand.NewSource(1))
+	src := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < louvainIterations; i++ {
 		r := Modularize(g, 1, src).(*ReducedUndirected)
 		if q := Q(r, nil, 1); q > bestQ || math.IsNaN(q) {
@@ -775,7 +793,7 @@ func TestNonContiguousWeightedUndirected(t *testing.T) {
 }
 
 func BenchmarkLouvain(b *testing.B) {
-	src := rand.New(rand.NewSource(1))
+	src := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < b.N; i++ {
 		Modularize(dupGraph, 1, src)
 	}

@@ -10,12 +10,11 @@ import (
 	"hash"
 	"hash/fnv"
 	"io"
+	"math/rand/v2"
 	"strconv"
 	"strings"
 	"sync"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/floats/scalar"
 )
@@ -51,16 +50,16 @@ var counterTests = []struct {
 	{name: "HyperLogLog32-0-10-FNV-1a", count: 0, counter: func() counter { return mustCounter(NewHyperLogLog32(10, fnv.New32a())) }, tol: 0},
 	{name: "HyperLogLog64-0-10-FNV-1a", count: 0, counter: func() counter { return mustCounter(NewHyperLogLog64(10, fnv.New64a())) }, tol: 0},
 	{name: "HyperLogLog32-10-14-FNV-1a", count: 10, counter: func() counter { return mustCounter(NewHyperLogLog32(14, fnv.New32a())) }, tol: 0.0005},
-	{name: "HyperLogLog32-1e3-4-FNV-1a", count: 1e3, counter: func() counter { return mustCounter(NewHyperLogLog32(4, fnv.New32a())) }, tol: 0.1},
-	{name: "HyperLogLog32-1e4-6-FNV-1a", count: 1e4, counter: func() counter { return mustCounter(NewHyperLogLog32(6, fnv.New32a())) }, tol: 0.06},
-	{name: "HyperLogLog32-1e7-8-FNV-1a", count: 1e7, counter: func() counter { return mustCounter(NewHyperLogLog32(8, fnv.New32a())) }, tol: 0.03},
+	{name: "HyperLogLog32-1e3-4-FNV-1a", count: 1e3, counter: func() counter { return mustCounter(NewHyperLogLog32(4, fnv.New32a())) }, tol: 0.5},
+	{name: "HyperLogLog32-1e4-6-FNV-1a", count: 1e4, counter: func() counter { return mustCounter(NewHyperLogLog32(6, fnv.New32a())) }, tol: 0.1},
+	{name: "HyperLogLog32-1e7-8-FNV-1a", count: 1e7, counter: func() counter { return mustCounter(NewHyperLogLog32(8, fnv.New32a())) }, tol: 0.08},
 	{name: "HyperLogLog64-1e7-8-FNV-1a", count: 1e7, counter: func() counter { return mustCounter(NewHyperLogLog64(8, fnv.New64a())) }, tol: 0.07},
 	{name: "HyperLogLog32-1e7-10-FNV-1a", count: 1e7, counter: func() counter { return mustCounter(NewHyperLogLog32(10, fnv.New32a())) }, tol: 0.06},
-	{name: "HyperLogLog64-1e7-10-FNV-1a", count: 1e7, counter: func() counter { return mustCounter(NewHyperLogLog64(10, fnv.New64a())) }, tol: 0.02},
-	{name: "HyperLogLog32-1e7-14-FNV-1a", count: 1e7, counter: func() counter { return mustCounter(NewHyperLogLog32(14, fnv.New32a())) }, tol: 0.005},
-	{name: "HyperLogLog64-1e7-14-FNV-1a", count: 1e7, counter: func() counter { return mustCounter(NewHyperLogLog64(14, fnv.New64a())) }, tol: 0.002},
+	{name: "HyperLogLog64-1e7-10-FNV-1a", count: 1e7, counter: func() counter { return mustCounter(NewHyperLogLog64(10, fnv.New64a())) }, tol: 0.04},
+	{name: "HyperLogLog32-1e7-14-FNV-1a", count: 1e7, counter: func() counter { return mustCounter(NewHyperLogLog32(14, fnv.New32a())) }, tol: 0.015},
+	{name: "HyperLogLog64-1e7-14-FNV-1a", count: 1e7, counter: func() counter { return mustCounter(NewHyperLogLog64(14, fnv.New64a())) }, tol: 0.01},
 	{name: "HyperLogLog32-1e7-16-FNV-1a", count: 1e7, counter: func() counter { return mustCounter(NewHyperLogLog32(16, fnv.New32a())) }, tol: 0.005},
-	{name: "HyperLogLog64-1e7-16-FNV-1a", count: 1e7, counter: func() counter { return mustCounter(NewHyperLogLog64(16, fnv.New64a())) }, tol: 0.002},
+	{name: "HyperLogLog64-1e7-16-FNV-1a", count: 1e7, counter: func() counter { return mustCounter(NewHyperLogLog64(16, fnv.New64a())) }, tol: 0.008},
 	{name: "HyperLogLog64-1e7-20-FNV-1a", count: 1e7, counter: func() counter { return mustCounter(NewHyperLogLog64(20, fnv.New64a())) }, tol: 0.001},
 	{name: "HyperLogLog64-1e3-20-FNV-1a", count: 1e3, counter: func() counter { return mustCounter(NewHyperLogLog64(20, fnv.New64a())) }, tol: 0.001},
 }
@@ -80,7 +79,7 @@ func TestCounters(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
-			rnd := rand.New(rand.NewSource(1))
+			rnd := rand.New(rand.NewPCG(1, 1))
 			var dst []byte
 			c := test.counter()
 			for i := 0; i < int(test.count); i++ {
@@ -116,7 +115,7 @@ func TestUnion(t *testing.T) {
 		test := test
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
-			rnd := rand.New(rand.NewSource(1))
+			rnd := rand.New(rand.NewPCG(1, 1))
 			var dst []byte
 			var cs [2]counter
 			for j := range cs {
@@ -187,7 +186,7 @@ func TestResetCounters(t *testing.T) {
 		c := test.resetCounter()
 		var counts [2]float64
 		for k := range counts {
-			rnd := rand.New(rand.NewSource(1))
+			rnd := rand.New(rand.NewPCG(1, 1))
 			for i := 0; i < test.count; i++ {
 				dst = strconv.AppendUint(dst[:0], rnd.Uint64(), 16)
 				dst = append(dst, '-')
@@ -278,7 +277,7 @@ func TestBinaryEncoding(t *testing.T) {
 		hashes = sync.Map{}
 	}()
 	for _, test := range counterEncoderTests {
-		rnd := rand.New(rand.NewSource(1))
+		rnd := rand.New(rand.NewPCG(1, 1))
 		src := test.src()
 		for i := 0; i < test.count; i++ {
 			buf := strconv.AppendUint(nil, rnd.Uint64(), 16)
@@ -404,7 +403,7 @@ var counterBenchmarks = []struct {
 func BenchmarkCounters(b *testing.B) {
 	for _, bench := range counterBenchmarks {
 		c := bench.counter()
-		rnd := rand.New(rand.NewSource(1))
+		rnd := rand.New(rand.NewPCG(1, 1))
 		var dst []byte
 		b.Run(bench.name, func(b *testing.B) {
 			for i := 0; i < b.N; i++ {

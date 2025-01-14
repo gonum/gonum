@@ -5,10 +5,9 @@
 package prng
 
 import (
+	"math/rand/v2"
 	"testing"
 	"time"
-
-	"golang.org/x/exp/rand"
 )
 
 // Random values in tests are produced by 40 iterations of the C code.

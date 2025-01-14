@@ -6,11 +6,10 @@ package mat
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"os"
 	"reflect"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
@@ -177,7 +176,7 @@ func TestSymDiagView(t *testing.T) {
 
 func TestSymAdd(t *testing.T) {
 	t.Parallel()
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, test := range []struct {
 		n int
 	}{
@@ -240,7 +239,7 @@ func TestSymAdd(t *testing.T) {
 
 func TestCopy(t *testing.T) {
 	t.Parallel()
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, test := range []struct {
 		n int
 	}{
@@ -289,7 +288,7 @@ func TestSymCopyPanic(t *testing.T) {
 
 func TestSymRankOne(t *testing.T) {
 	t.Parallel()
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	const tol = 1e-15
 
 	for _, test := range []struct {
@@ -389,7 +388,7 @@ func TestIssue250SymRankOne(t *testing.T) {
 
 func TestRankTwo(t *testing.T) {
 	t.Parallel()
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, test := range []struct {
 		n int
 	}{
@@ -740,7 +739,7 @@ func TestPowPSD(t *testing.T) {
 	}
 
 	// Compare with Dense.Pow
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for dim := 2; dim < 10; dim++ {
 		for pow := 2; pow < 6; pow++ {
 			a := NewDense(dim, dim, nil)
@@ -773,7 +772,7 @@ func BenchmarkSymSum1000(b *testing.B) { symSumBench(b, 1000) }
 var symSumForBench float64
 
 func symSumBench(b *testing.B, size int) {
-	src := rand.NewSource(1)
+	src := rand.NewPCG(1, 1)
 	a := randSymDense(size, src)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {

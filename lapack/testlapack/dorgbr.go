@@ -5,9 +5,8 @@
 package testlapack
 
 import (
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas/blas64"
 	"gonum.org/v1/gonum/floats/scalar"
@@ -20,7 +19,7 @@ type Dorgbrer interface {
 }
 
 func DorgbrTest(t *testing.T, impl Dorgbrer) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, vect := range []lapack.GenOrtho{lapack.GenerateQ, lapack.GeneratePT} {
 		for _, test := range []struct {
 			m, n, k, lda int

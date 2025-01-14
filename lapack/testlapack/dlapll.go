@@ -5,9 +5,8 @@
 package testlapack
 
 import (
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/lapack"
@@ -19,7 +18,7 @@ type Dlapller interface {
 }
 
 func DlapllTest(t *testing.T, impl Dlapller) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for i, m := range []int{5, 6, 9, 300, 400, 600} {
 		n := 2
 		lda := n

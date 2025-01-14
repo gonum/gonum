@@ -6,9 +6,9 @@ package testblas
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
 
-	"golang.org/x/exp/rand"
 	"gonum.org/v1/gonum/blas"
 )
 
@@ -19,7 +19,7 @@ type Zgbmver interface {
 }
 
 func ZgbmvTest(t *testing.T, impl Zgbmver) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, trans := range []blas.Transpose{blas.NoTrans, blas.Trans, blas.ConjTrans} {
 		// Generate all possible size combinations.
 		for _, mn := range allPairs([]int{1, 2, 3, 5}, []int{1, 2, 3, 5}) {

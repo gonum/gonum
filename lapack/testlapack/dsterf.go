@@ -7,10 +7,9 @@ package testlapack
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"sort"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
@@ -62,7 +61,7 @@ func DsterfTest(t *testing.T, impl Dsterfer) {
 		}
 	}
 
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	// Probabilistic tests.
 	for _, n := range []int{0, 1, 2, 3, 4, 5, 6, 10, 50} {
 		for typ := 0; typ <= 8; typ++ {

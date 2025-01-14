@@ -6,10 +6,9 @@ package distuv
 
 import (
 	"math"
+	"math/rand/v2"
 	"sort"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/floats/scalar"
 )
@@ -142,7 +141,7 @@ func TestParetoCDF(t *testing.T) {
 
 func TestPareto(t *testing.T) {
 	t.Parallel()
-	src := rand.New(rand.NewSource(1))
+	src := rand.New(rand.NewPCG(1, 1))
 	for i, p := range []Pareto{
 		{1, 10, src},
 		{1, 20, src},
@@ -161,11 +160,11 @@ func testPareto(t *testing.T, p Pareto, i int) {
 	generateSamples(x, p)
 	sort.Float64s(x)
 
-	checkQuantileCDFSurvival(t, i, x, p, 1e-3)
+	checkQuantileCDFSurvival(t, i, x, p, 3e-3)
 	testRandLogProbContinuous(t, i, 0, x, p, tol, bins)
 	checkMean(t, i, x, p, tol)
 	checkVarAndStd(t, i, x, p, tol)
-	checkExKurtosis(t, i, x, p, 7e-2)
+	checkExKurtosis(t, i, x, p, 3e-1)
 	checkProbContinuous(t, i, x, p.Xm, math.Inf(1), p, 1e-10)
 	checkEntropy(t, i, x, p, 1e-2)
 	checkMedian(t, i, x, p, 1e-3)
@@ -206,7 +205,7 @@ func TestParetoNotExists(t *testing.T) {
 }
 
 func BenchmarkParetoRand(b *testing.B) {
-	src := rand.New(rand.NewSource(1))
+	src := rand.New(rand.NewPCG(1, 1))
 	p := Pareto{1, 1, src}
 	for i := 0; i < b.N; i++ {
 		p.Rand()

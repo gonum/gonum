@@ -5,10 +5,9 @@
 package prng
 
 import (
+	"math/rand/v2"
 	"testing"
 	"time"
-
-	"golang.org/x/exp/rand"
 )
 
 var _ rand.Source = (*MT19937)(nil)

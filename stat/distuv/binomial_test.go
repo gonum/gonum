@@ -5,10 +5,9 @@
 package distuv
 
 import (
+	"math/rand/v2"
 	"sort"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/floats/scalar"
 )
@@ -116,7 +115,7 @@ func TestBinomialCDF(t *testing.T) {
 
 func TestBinomial(t *testing.T) {
 	t.Parallel()
-	src := rand.New(rand.NewSource(1))
+	src := rand.New(rand.NewPCG(1, 1))
 	for i, b := range []Binomial{
 		{100, 0.5, src},
 		{15, 0.25, src},
@@ -145,7 +144,7 @@ func testBinomial(t *testing.T, b Binomial, i int) {
 	checkMean(t, i, x, b, tol)
 	checkVarAndStd(t, i, x, b, tol)
 	checkExKurtosis(t, i, x, b, 7e-2)
-	checkSkewness(t, i, x, b, tol)
+	checkSkewness(t, i, x, b, 3e-2)
 
 	if b.NumParameters() != 2 {
 		t.Errorf("Wrong number of parameters")

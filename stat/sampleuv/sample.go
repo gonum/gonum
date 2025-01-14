@@ -7,8 +7,7 @@ package sampleuv
 import (
 	"errors"
 	"math"
-
-	"golang.org/x/exp/rand"
+	"math/rand/v2"
 
 	"gonum.org/v1/gonum/stat/distuv"
 )

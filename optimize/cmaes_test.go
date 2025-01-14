@@ -7,9 +7,8 @@ package optimize
 import (
 	"errors"
 	"math"
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/mat"
@@ -156,7 +155,7 @@ func cmaTestCases() []cmaTestCase {
 				Func: functions.Rastrigin{}.Func,
 			},
 			method: &CmaEsChol{
-				Population: 100, // Increase the population size to reduce noise.
+				Population: 200, // Increase the population size to reduce noise.
 			},
 			settings: &Settings{
 				Converger: NeverTerminate{},
@@ -202,7 +201,7 @@ func cmaTestCases() []cmaTestCase {
 func TestCmaEsChol(t *testing.T) {
 	t.Parallel()
 	for i, test := range cmaTestCases() {
-		src := rand.New(rand.NewSource(1))
+		src := rand.New(rand.NewPCG(1, 1))
 		method := test.method
 		method.Src = src
 		initX := test.initX

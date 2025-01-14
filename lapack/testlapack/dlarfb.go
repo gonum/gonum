@@ -5,9 +5,8 @@
 package testlapack
 
 import (
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
@@ -23,7 +22,7 @@ type Dlarfber interface {
 }
 
 func DlarfbTest(t *testing.T, impl Dlarfber) {
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, store := range []lapack.StoreV{lapack.ColumnWise, lapack.RowWise} {
 		for _, direct := range []lapack.Direct{lapack.Forward, lapack.Backward} {
 			for _, side := range []blas.Side{blas.Left, blas.Right} {

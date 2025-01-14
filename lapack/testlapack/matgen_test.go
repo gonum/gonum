@@ -5,16 +5,15 @@
 package testlapack
 
 import (
+	"math/rand/v2"
 	"testing"
-
-	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas/blas64"
 )
 
 func TestDlagsy(t *testing.T) {
 	const tol = 1e-14
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, n := range []int{0, 1, 2, 3, 4, 5, 10, 50} {
 		for _, lda := range []int{0, 2*n + 1} {
 			if lda == 0 {
@@ -42,7 +41,7 @@ func TestDlagsy(t *testing.T) {
 
 func TestDlagge(t *testing.T) {
 	const tol = 1e-14
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, n := range []int{0, 1, 2, 3, 4, 5, 10, 50} {
 		for _, lda := range []int{0, 2*n + 1} {
 			if lda == 0 {
@@ -71,7 +70,7 @@ func TestDlagge(t *testing.T) {
 
 func TestRandomOrthogonal(t *testing.T) {
 	const tol = 1e-14
-	rnd := rand.New(rand.NewSource(1))
+	rnd := rand.New(rand.NewPCG(1, 1))
 	for n := 1; n <= 20; n++ {
 		q := randomOrthogonal(n, rnd)
 		if resid := residualOrthogonal(q, false); resid > tol {

@@ -42,7 +42,7 @@ func DijkstraFromTo(u, t graph.Node, g traverse.Graph) (path []graph.Node, weigh
 
 func dijkstraFrom(u, t graph.Node, g traverse.Graph) Shortest {
 	var path Shortest
-	// Use the incremental version when a target is provided
+	// Use the incremental version when a target is provided.
 	if h, ok := g.(graph.Graph); t == nil && ok {
 		if h.Node(u.ID()) == nil {
 			return Shortest{from: u}

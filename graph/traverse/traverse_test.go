@@ -71,7 +71,7 @@ var (
 var breadthFirstTests = []struct {
 	g     []intset
 	from  graph.Node
-	edge  func(graph.Edge) bool
+	edge  func(graph.Edge, int) bool
 	until func(graph.Node, int) bool
 	final map[graph.Node]bool
 	want  [][]int64
@@ -89,7 +89,7 @@ var breadthFirstTests = []struct {
 	},
 	{
 		g: wpBronKerboschGraph,
-		edge: func(e graph.Edge) bool {
+		edge: func(e graph.Edge, _ int) bool {
 			// Do not traverse an edge between 3 and 5.
 			return (e.From().ID() != 3 || e.To().ID() != 5) && (e.From().ID() != 5 || e.To().ID() != 3)
 		},
@@ -138,6 +138,20 @@ var breadthFirstTests = []struct {
 			{13},
 			{14, 15},
 			{6, 7, 8, 16, 17},
+		},
+	},
+	{
+		g:    batageljZaversnikGraph,
+		from: simple.Node(6),
+		edge: func(e graph.Edge, d int) bool {
+			return d < 2 || e.To().ID()%2 == 0
+		},
+		final: map[graph.Node]bool{nil: true},
+		want: [][]int64{
+			{6},
+			{7, 8, 14},
+			{11, 12, 13, 15, 17},
+			{10, 16, 18, 20},
 		},
 	},
 }
@@ -295,9 +309,10 @@ func TestDepthFirst(t *testing.T) {
 }
 
 var walkAllTests = []struct {
-	g    []intset
-	edge func(graph.Edge) bool
-	want [][]int64
+	g         []intset
+	edge      func(graph.Edge) bool
+	edgeDepth func(graph.Edge, int) bool
+	want      [][]int64
 }{
 	{
 		g: batageljZaversnikGraph,
@@ -310,6 +325,10 @@ var walkAllTests = []struct {
 	{
 		g: batageljZaversnikGraph,
 		edge: func(e graph.Edge) bool {
+			// Do not traverse an edge between 3 and 5.
+			return (e.From().ID() != 4 || e.To().ID() != 5) && (e.From().ID() != 5 || e.To().ID() != 4)
+		},
+		edgeDepth: func(e graph.Edge, _ int) bool {
 			// Do not traverse an edge between 3 and 5.
 			return (e.From().ID() != 4 || e.To().ID() != 5) && (e.From().ID() != 5 || e.To().ID() != 4)
 		},
@@ -350,7 +369,7 @@ func TestWalkAll(t *testing.T) {
 			)
 			switch w := w.(type) {
 			case *BreadthFirst:
-				w.Traverse = test.edge
+				w.Traverse = test.edgeDepth
 			case *DepthFirst:
 				w.Traverse = test.edge
 			default:

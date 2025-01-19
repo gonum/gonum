@@ -28,15 +28,17 @@ type Graph interface {
 // BreadthFirst implements stateful breadth-first graph traversal.
 type BreadthFirst struct {
 	// Visit is called on all nodes on their first visit.
-	Visit func(graph.Node)
+	// depth is the current traversal depth.
+	Visit func(n graph.Node, depth int)
 
 	// Traverse is called on all edges that may be traversed
 	// during the walk. This includes edges that would hop to
-	// an already visited node.
+	// an already visited node. depth is the current traversal
+	// depth for the from node of the edge.
 	//
 	// The value returned by Traverse determines whether
 	// an edge can be traversed during the walk.
-	Traverse func(graph.Edge) bool
+	Traverse func(e graph.Edge, depth int) bool
 
 	queue   linear.NodeQueue
 	visited set.Ints[int64]
@@ -53,7 +55,7 @@ func (b *BreadthFirst) Walk(g Graph, from graph.Node, until func(n graph.Node, d
 	}
 	b.queue.Enqueue(from)
 	if b.Visit != nil && !b.visited.Has(from.ID()) {
-		b.Visit(from)
+		b.Visit(from, 0)
 	}
 	b.visited.Add(from.ID())
 
@@ -72,14 +74,14 @@ func (b *BreadthFirst) Walk(g Graph, from graph.Node, until func(n graph.Node, d
 		for to.Next() {
 			n := to.Node()
 			nid := n.ID()
-			if b.Traverse != nil && !b.Traverse(g.Edge(tid, nid)) {
+			if b.Traverse != nil && !b.Traverse(g.Edge(tid, nid), depth) {
 				continue
 			}
 			if b.visited.Has(nid) {
 				continue
 			}
 			if b.Visit != nil {
-				b.Visit(n)
+				b.Visit(n, depth)
 			}
 			b.visited.Add(nid)
 			children++

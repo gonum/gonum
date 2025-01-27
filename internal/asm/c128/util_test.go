@@ -81,9 +81,7 @@ func checkValidIncGuard(t *testing.T, vec []complex128, guard_val complex128, in
 }
 
 var ( // Offset sets for testing alignment handling in Unitary assembly functions.
-	align1 = []int{0, 1}
 	align2 = newIncSet(0, 1)
-	align3 = newIncToSet(0, 1)
 )
 
 type incSet struct {
@@ -97,24 +95,6 @@ func newIncSet(inc ...int) []incSet {
 	for x := range inc {
 		for y := range inc {
 			is[x*n+y] = incSet{inc[x], inc[y]}
-		}
-	}
-	return is
-}
-
-type incToSet struct {
-	dst, x, y int
-}
-
-// genIncTo will generate all (dst,x,y) combinations of the input increment set.
-func newIncToSet(inc ...int) []incToSet {
-	n := len(inc)
-	is := make([]incToSet, n*n*n)
-	for i, dst := range inc {
-		for x := range inc {
-			for y := range inc {
-				is[i*n*n+x*n+y] = incToSet{dst, inc[x], inc[y]}
-			}
 		}
 	}
 	return is

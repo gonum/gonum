@@ -28,7 +28,7 @@ func TestL1Norm(t *testing.T) {
 		g_ln := 4 + j%2
 		v.x = guardVector(v.x, src_gd, g_ln)
 		src := v.x[g_ln : len(v.x)-g_ln]
-		ret := L1Norm(src)
+		ret := L1NormUnitary(src)
 		if !scalar.Same(ret, v.want) {
 			t.Errorf("Test %d L1Norm error Got: %f Expected: %f", j, ret, v.want)
 		}

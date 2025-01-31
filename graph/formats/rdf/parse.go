@@ -15,7 +15,7 @@ import (
 )
 
 
-//line parse.go:19
+//line parse.go:17
 const nquads_start int = 1
 const nquads_first_final int = 87
 const nquads_error int = 0
@@ -42,7 +42,7 @@ func parse(data []rune) (Statement, error) {
 	)
 
 	
-//line parse.go:46
+//line parse.go:42
 	{
 	cs = nquads_start
 	}
@@ -50,7 +50,7 @@ func parse(data []rune) (Statement, error) {
 //line parse.rl:49
 
 	
-//line parse.go:54
+//line parse.go:48
 	{
 	if p == pe {
 		goto _test_eof
@@ -271,7 +271,7 @@ tr0:
 		return s, ErrIncomplete
 	
 	goto st0
-//line parse.go:275
+//line parse.go:269
 st_case_0:
 	st0:
 		cs = 0
@@ -287,7 +287,7 @@ tr2:
 			goto _test_eof2
 		}
 	st_case_2:
-//line parse.go:291
+//line parse.go:285
 		switch data[p] {
 		case 62:
 			goto tr5
@@ -327,7 +327,7 @@ tr4:
 			goto _test_eof3
 		}
 	st_case_3:
-//line parse.go:331
+//line parse.go:325
 		switch data[p] {
 		case 62:
 			goto tr8
@@ -393,7 +393,7 @@ tr8:
 			goto _test_eof4
 		}
 	st_case_4:
-//line parse.go:397
+//line parse.go:391
 		switch data[p] {
 		case 9:
 			goto tr10
@@ -417,7 +417,7 @@ tr10:
 			goto _test_eof5
 		}
 	st_case_5:
-//line parse.go:421
+//line parse.go:415
 		switch data[p] {
 		case 9:
 			goto st5
@@ -451,7 +451,7 @@ tr13:
 			goto _test_eof6
 		}
 	st_case_6:
-//line parse.go:455
+//line parse.go:449
 		switch data[p] {
 		case 62:
 			goto tr15
@@ -491,7 +491,7 @@ tr14:
 			goto _test_eof7
 		}
 	st_case_7:
-//line parse.go:495
+//line parse.go:489
 		switch data[p] {
 		case 62:
 			goto tr18
@@ -557,7 +557,7 @@ tr18:
 			goto _test_eof8
 		}
 	st_case_8:
-//line parse.go:561
+//line parse.go:555
 		switch data[p] {
 		case 9:
 			goto tr20
@@ -585,7 +585,7 @@ tr20:
 			goto _test_eof9
 		}
 	st_case_9:
-//line parse.go:589
+//line parse.go:583
 		switch data[p] {
 		case 9:
 			goto st9
@@ -623,7 +623,7 @@ tr25:
 			goto _test_eof10
 		}
 	st_case_10:
-//line parse.go:627
+//line parse.go:621
 		switch data[p] {
 		case 34:
 			goto st11
@@ -695,7 +695,7 @@ tr97:
 			goto _test_eof12
 		}
 	st_case_12:
-//line parse.go:699
+//line parse.go:693
 		switch data[p] {
 		case 9:
 			goto st12
@@ -732,7 +732,7 @@ tr48:
 			goto _test_eof87
 		}
 	st_case_87:
-//line parse.go:736
+//line parse.go:730
 		switch data[p] {
 		case 9:
 			goto st87
@@ -752,7 +752,7 @@ tr120:
 			goto _test_eof88
 		}
 	st_case_88:
-//line parse.go:756
+//line parse.go:750
 		goto st88
 tr33:
 //line parse_actions.rl:42
@@ -778,7 +778,7 @@ tr39:
 			goto _test_eof13
 		}
 	st_case_13:
-//line parse.go:782
+//line parse.go:776
 		switch data[p] {
 		case 62:
 			goto tr42
@@ -818,7 +818,7 @@ tr41:
 			goto _test_eof14
 		}
 	st_case_14:
-//line parse.go:822
+//line parse.go:816
 		switch data[p] {
 		case 62:
 			goto tr45
@@ -884,7 +884,7 @@ tr45:
 			goto _test_eof15
 		}
 	st_case_15:
-//line parse.go:888
+//line parse.go:882
 		switch data[p] {
 		case 9:
 			goto tr47
@@ -908,7 +908,7 @@ tr47:
 			goto _test_eof16
 		}
 	st_case_16:
-//line parse.go:912
+//line parse.go:906
 		switch data[p] {
 		case 9:
 			goto st16
@@ -929,7 +929,7 @@ tr43:
 			goto _test_eof17
 		}
 	st_case_17:
-//line parse.go:933
+//line parse.go:927
 		switch data[p] {
 		case 85:
 			goto st18
@@ -1105,7 +1105,7 @@ tr40:
 			goto _test_eof26
 		}
 	st_case_26:
-//line parse.go:1109
+//line parse.go:1103
 		if data[p] == 58 {
 			goto st27
 		}
@@ -1285,7 +1285,7 @@ tr60:
 			goto _test_eof89
 		}
 	st_case_89:
-//line parse.go:1289
+//line parse.go:1283
 		switch data[p] {
 		case 9:
 			goto st87
@@ -1585,7 +1585,7 @@ tr26:
 			goto _test_eof36
 		}
 	st_case_36:
-//line parse.go:1589
+//line parse.go:1583
 		switch data[p] {
 		case 62:
 			goto tr68
@@ -1625,7 +1625,7 @@ tr67:
 			goto _test_eof37
 		}
 	st_case_37:
-//line parse.go:1629
+//line parse.go:1623
 		switch data[p] {
 		case 62:
 			goto tr71
@@ -1691,7 +1691,7 @@ tr71:
 			goto _test_eof38
 		}
 	st_case_38:
-//line parse.go:1695
+//line parse.go:1689
 		switch data[p] {
 		case 9:
 			goto tr31
@@ -1716,7 +1716,7 @@ tr69:
 			goto _test_eof39
 		}
 	st_case_39:
-//line parse.go:1720
+//line parse.go:1714
 		switch data[p] {
 		case 85:
 			goto st40
@@ -2064,7 +2064,7 @@ tr27:
 			goto _test_eof57
 		}
 	st_case_57:
-//line parse.go:2068
+//line parse.go:2062
 		if data[p] == 58 {
 			goto st58
 		}
@@ -2246,7 +2246,7 @@ tr91:
 			goto _test_eof90
 		}
 	st_case_90:
-//line parse.go:2250
+//line parse.go:2244
 		switch data[p] {
 		case 9:
 			goto st87
@@ -2430,7 +2430,7 @@ tr92:
 			goto _test_eof61
 		}
 	st_case_61:
-//line parse.go:2434
+//line parse.go:2428
 		switch data[p] {
 		case 9:
 			goto tr31
@@ -2632,7 +2632,7 @@ tr96:
 			goto _test_eof63
 		}
 	st_case_63:
-//line parse.go:2636
+//line parse.go:2630
 		switch data[p] {
 		case 9:
 			goto tr97
@@ -2737,7 +2737,7 @@ tr98:
 			goto _test_eof91
 		}
 	st_case_91:
-//line parse.go:2741
+//line parse.go:2735
 		switch data[p] {
 		case 9:
 			goto st87
@@ -2914,7 +2914,7 @@ tr16:
 			goto _test_eof65
 		}
 	st_case_65:
-//line parse.go:2918
+//line parse.go:2912
 		switch data[p] {
 		case 85:
 			goto st66
@@ -3077,7 +3077,7 @@ tr6:
 			goto _test_eof74
 		}
 	st_case_74:
-//line parse.go:3081
+//line parse.go:3075
 		switch data[p] {
 		case 85:
 			goto st75
@@ -3240,7 +3240,7 @@ tr3:
 			goto _test_eof83
 		}
 	st_case_83:
-//line parse.go:3244
+//line parse.go:3238
 		if data[p] == 58 {
 			goto st84
 		}
@@ -3611,7 +3611,7 @@ tr3:
 
 		return s, nil
 	
-//line parse.go:3615
+//line parse.go:3609
 		}
 	}
 

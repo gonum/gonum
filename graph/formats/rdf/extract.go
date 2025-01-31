@@ -14,7 +14,7 @@ import (
 )
 
 
-//line extract.go:18
+//line extract.go:16
 const extract_start int = 1
 const extract_first_final int = 31
 const extract_error int = 0
@@ -43,7 +43,7 @@ func extract(data []rune) (text, qual string, kind Kind, err error) {
 	)
 
 	
-//line extract.go:47
+//line extract.go:43
 	{
 	cs = extract_start
 	}
@@ -51,7 +51,7 @@ func extract(data []rune) (text, qual string, kind Kind, err error) {
 //line extract.rl:48
 
 	
-//line extract.go:55
+//line extract.go:49
 	{
 	if p == pe {
 		goto _test_eof
@@ -154,7 +154,7 @@ tr0:
 		return "", "", Invalid, ErrIncompleteTerm
 	
 	goto st0
-//line extract.go:158
+//line extract.go:152
 st_case_0:
 	st0:
 		cs = 0
@@ -194,7 +194,7 @@ tr4:
 			goto _test_eof3
 		}
 	st_case_3:
-//line extract.go:198
+//line extract.go:192
 		switch data[p] {
 		case 34:
 			goto tr8
@@ -243,7 +243,7 @@ tr8:
 			goto _test_eof31
 		}
 	st_case_31:
-//line extract.go:247
+//line extract.go:241
 		switch data[p] {
 		case 64:
 			goto tr39
@@ -262,7 +262,7 @@ tr39:
 			goto _test_eof4
 		}
 	st_case_4:
-//line extract.go:266
+//line extract.go:260
 		switch {
 		case data[p] > 90:
 			if 97 <= data[p] && data[p] <= 122 {
@@ -390,7 +390,7 @@ tr13:
 			goto _test_eof9
 		}
 	st_case_9:
-//line extract.go:394
+//line extract.go:388
 		switch data[p] {
 		case 62:
 			goto tr17
@@ -452,7 +452,7 @@ tr17:
 			goto _test_eof34
 		}
 	st_case_34:
-//line extract.go:456
+//line extract.go:450
 		goto st0
 tr15:
 //line extract_actions.rl:8
@@ -465,7 +465,7 @@ tr15:
 			goto _test_eof10
 		}
 	st_case_10:
-//line extract.go:469
+//line extract.go:463
 		switch data[p] {
 		case 85:
 			goto st11
@@ -628,7 +628,7 @@ tr6:
 			goto _test_eof19
 		}
 	st_case_19:
-//line extract.go:632
+//line extract.go:626
 		switch data[p] {
 		case 34:
 			goto st3
@@ -891,7 +891,7 @@ tr36:
 			goto _test_eof35
 		}
 	st_case_35:
-//line extract.go:895
+//line extract.go:889
 		switch data[p] {
 		case 45:
 			goto st35
@@ -1171,7 +1171,7 @@ tr36:
 			return "", "", kind, ErrInvalidTerm
 		}
 	
-//line extract.go:1175
+//line extract.go:1169
 		}
 	}
 

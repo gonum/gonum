@@ -14,7 +14,7 @@ import (
 )
 
 
-//line check.go:18
+//line check.go:16
 const checkLabel_start int = 1
 const checkLabel_first_final int = 3
 const checkLabel_error int = 0
@@ -33,7 +33,7 @@ func checkLabelText(data []rune) (err error) {
 	)
 
 	
-//line check.go:37
+//line check.go:33
 	{
 	cs = checkLabel_start
 	}
@@ -41,7 +41,7 @@ func checkLabelText(data []rune) (err error) {
 //line check.rl:63
 
 	
-//line check.go:45
+//line check.go:39
 	{
 	if p == pe {
 		goto _test_eof
@@ -141,7 +141,7 @@ tr0:
 		return ErrIncompleteTerm
 	
 	goto st0
-//line check.go:145
+//line check.go:139
 st_case_0:
 	st0:
 		cs = 0
@@ -334,7 +334,7 @@ st_case_0:
 		}
 		return ErrIncompleteTerm
 	
-//line check.go:338
+//line check.go:332
 		}
 	}
 
@@ -347,7 +347,7 @@ st_case_0:
 }
 
 
-//line check.go:351
+//line check.go:343
 const checkLang_start int = 1
 const checkLang_first_final int = 4
 const checkLang_error int = 0
@@ -366,7 +366,7 @@ func checkLangText(data []byte) (err error) {
 	)
 
 	
-//line check.go:370
+//line check.go:360
 	{
 	cs = checkLang_start
 	}
@@ -374,7 +374,7 @@ func checkLangText(data []byte) (err error) {
 //line check.rl:91
 
 	
-//line check.go:378
+//line check.go:366
 	{
 	if p == pe {
 		goto _test_eof
@@ -412,7 +412,7 @@ tr0:
 		return ErrIncompleteTerm
 	
 	goto st0
-//line check.go:416
+//line check.go:404
 st_case_0:
 	st0:
 		cs = 0
@@ -513,7 +513,7 @@ st_case_0:
 		}
 		return ErrIncompleteTerm
 	
-//line check.go:517
+//line check.go:505
 		}
 	}
 

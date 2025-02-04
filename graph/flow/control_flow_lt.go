@@ -155,7 +155,7 @@ func (lt *lengauerTarjan) dfs(g graph.Directed, v graph.Node) {
 			// this happens in the child call to dfs.
 			idx, ok = lt.indexOf[wid]
 			if !ok {
-				panic("path: unintialized node")
+				panic("path: uninitialized node")
 			}
 			lt.nodes[idx].parent = ltv
 		}

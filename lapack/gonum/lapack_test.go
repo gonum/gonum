@@ -208,6 +208,11 @@ func TestDlags2(t *testing.T) {
 	testlapack.Dlags2Test(t, impl)
 }
 
+func TestDlagv2(t *testing.T) {
+	t.Parallel()
+	testlapack.Dlagv2Test(t, impl)
+}
+
 func TestDlagtm(t *testing.T) {
 	t.Parallel()
 	testlapack.DlagtmTest(t, impl)

@@ -8,7 +8,7 @@ jobs:
     name: lint
     strategy:
       matrix:
-        go: ["1.22.x"]
+        go: ["1.24.x"]
     runs-on: ubuntu-latest
     env:
       GO111MODULE: on

@@ -5,7 +5,7 @@
 //go:generate ragel -Z -G2 parse.rl
 //go:generate ragel -Z -G2 extract.rl
 //go:generate ragel -Z -G2 check.rl
-//go:generate stringer -type=Kind
+//go:generate go tool golang.org/x/tools/cmd/stringer -type=Kind
 
 package rdf
 

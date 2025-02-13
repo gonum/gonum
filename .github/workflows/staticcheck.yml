@@ -19,8 +19,8 @@ jobs:
       - uses: WillAbides/setup-go-faster@v1.7.0
         with:
           go-version: ${{ matrix.go }}
-      - uses: dominikh/staticcheck-action@v1.3.0
+      - uses: dominikh/staticcheck-action@v1
         with:
-          version: "2023.1.6"
+          version: "2025.1"
           install-go: false
           cache-key: ${{ matrix.go }}

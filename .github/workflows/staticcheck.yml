@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
-      - uses: WillAbides/setup-go-faster@v1.7.0
+      - uses: WillAbides/setup-go-faster@v1.14.0
         with:
           go-version: ${{ matrix.go }}
       - uses: dominikh/staticcheck-action@v1

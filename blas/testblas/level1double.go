@@ -1434,7 +1434,7 @@ func IdamaxTest(t *testing.T, blasser Idamaxer) {
 			if floats.HasNaN(c.X) {
 				t.Log(s)
 			} else {
-				t.Errorf(s)
+				t.Error(s)
 			}
 		}
 	}

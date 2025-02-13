@@ -1350,7 +1350,7 @@ func TestNelderMeadOneD(t *testing.T) {
 	var s *Settings
 	result, err := Minimize(p, x, s, m)
 	if err != nil {
-		t.Errorf(err.Error())
+		t.Fatalf("could not minimize: %v", err)
 	}
 	if !floats.EqualApprox(result.X, []float64{0}, 1e-10) {
 		t.Errorf("Minimum not found")

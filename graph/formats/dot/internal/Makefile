@@ -1,13 +1,13 @@
 gen: dot.bnf
-	gocc $<
+	go tool github.com/goccmack/gocc $<
 	go run paste_copyright.go
 
 debug_lexer: dot.bnf
-	gocc -debug_lexer -v -a $<
+	go tool github.com/goccmack/gocc -debug_lexer -v -a $<
 	go run paste_copyright.go
 
 debug_parser: dot.bnf
-	gocc -debug_parser -v -a $<
+	go tool github.com/goccmack/gocc -debug_parser -v -a $<
 	go run paste_copyright.go
 
 clean:

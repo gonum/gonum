@@ -7,7 +7,7 @@ import (
 	"math"
 )
 
-// ClosenessCentrality computes closeness centrality for all nodes in an unweighted graph.
+// ClosenessCentrality computes closeness centrality for all nodes in an unweighted undirectedGraph.
 func ClosenessCentrality(graph graph.Graph) map[int64]float64 {
 	nodes := graph.Nodes()
 	numberOfNodes := nodes.Len()

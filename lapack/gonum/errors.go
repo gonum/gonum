@@ -102,6 +102,7 @@ const (
 	// Panic strings for bad slice lengths.
 	badLenAlpha    = "lapack: bad length of alpha"
 	badLenBeta     = "lapack: bad length of beta"
+	badLenScale    = "lapack: bad length of scale"
 	badLenIpiv     = "lapack: bad length of ipiv"
 	badLenJpiv     = "lapack: bad length of jpiv"
 	badLenJpvt     = "lapack: bad length of jpvt"

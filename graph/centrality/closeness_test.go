@@ -155,33 +155,33 @@ func TestClosenessCentralityWeightedGraph(test *testing.T) {
 				cycleGraph.SetWeightedEdge(simple.WeightedEdge{F: nodes[3], T: nodes[0], W: weights[3]})
 				return cycleGraph
 			},
-			expectedResult: map[int64]float64{0: 10.0 / 3.0, 1: 0.75, 2: 0.75, 3: 0.75},
+			expectedResult: map[int64]float64{0: 3.0 / 8.0, 1: 3.0 / 8.0, 2: 3.0 / 8.0, 3: 1.0 / 4.0},
 		},
 		{
 			name: "Star Graph (5 Nodes)",
-			weightedUndirectedGraph: func() *simple.UndirectedGraph {
+			weightedUndirectedGraph: func() *simple.WeightedUndirectedGraph {
 				starGraph := simple.NewWeightedUndirectedGraph(math.Inf(1), math.Inf(1))
-				nodes := addNodes(starGraph, 5)
+				nodes := addNodesWeightedGraph(starGraph, 5)
 				// Star topology (0 is the central node)
 				for i := 1; i < 5; i++ {
-					starGraph.SetEdge(simple.Edge{F: nodes[0], T: nodes[i]})
+					starGraph.SetWeightedEdge(simple.WeightedEdge{F: nodes[0], T: nodes[i], W: float64(i)})
 				}
 				return starGraph
 			},
-			expectedResult: map[int64]float64{0: 1.0, 1: 4.0 / 7.0, 2: 4.0 / 7.0, 3: 4.0 / 7.0, 4: 4.0 / 7.0},
+			expectedResult: map[int64]float64{0: 2.0 / 5.0, 1: 4.0 / 13.0, 2: 4.0 / 16.0, 3: 4.0 / 19.0, 4: 4.0 / 22.0},
 		},
 		{
 			name: "Line Graph (5 Nodes)",
-			weightedUndirectedGraph: func() *simple.UndirectedGraph {
+			weightedUndirectedGraph: func() *simple.WeightedUndirectedGraph {
 				lineGraph := simple.NewWeightedUndirectedGraph(math.Inf(1), math.Inf(1))
-				nodes := addNodes(lineGraph, 5)
+				nodes := addNodesWeightedGraph(lineGraph, 5)
 				// Line topology (A-B-C-D-E)
 				for i := 0; i < 4; i++ {
-					lineGraph.SetEdge(simple.Edge{F: nodes[i], T: nodes[i+1]})
+					lineGraph.SetWeightedEdge(simple.WeightedEdge{F: nodes[i], T: nodes[i+1], W: float64(i + 1)})
 				}
 				return lineGraph
 			},
-			expectedResult: map[int64]float64{0: 4.0 / 10.0, 1: 4.0 / 7.0, 2: 4.0 / 6.0, 3: 4.0 / 7.0, 4: 4.0 / 10.0},
+			expectedResult: map[int64]float64{0: 4.0 / 20.0, 1: 4.0 / 17.0, 2: 4.0 / 15.0, 3: 4.0 / 18.0, 4: 4.0 / 30.0},
 		},
 	}
 
@@ -189,7 +189,7 @@ func TestClosenessCentralityWeightedGraph(test *testing.T) {
 
 	for _, testCase := range tests {
 		test.Run(testCase.name, func(t *testing.T) {
-			result := centrality.ClosenessCentrality(testCase.weightedUndirectedGraph())
+			result := centrality.ClosenessCentralityWeighted(testCase.weightedUndirectedGraph())
 			if result == nil && testCase.expectedResult != nil {
 				t.Errorf("%s: Expected non-nil result, but got nil", testCase.name)
 			} else if result != nil && testCase.expectedResult == nil {
@@ -197,7 +197,7 @@ func TestClosenessCentralityWeightedGraph(test *testing.T) {
 			}
 			for id, expectedValue := range testCase.expectedResult {
 				if !numericalEqual(result[id], expectedValue, epsilon) {
-					t.Errorf("%s: ClosenessCentrality(%d) = %f, expectedResult %f",
+					t.Errorf("%s: ClosenessCentralityWeighted(%d) = %f, expectedResult %f",
 						testCase.name, id, result[id], expectedValue)
 				}
 			}

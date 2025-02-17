@@ -62,8 +62,9 @@ func ClosenessCentralityWeighted(g graph.Weighted) map[int64]float64 {
 
 		// Sum shortest path distances
 		totalDistance := 0.0
-		for nodes.Reset(); nodes.Next(); {
-			target := nodes.Node()
+		neighbors := g.Nodes()
+		for neighbors.Next() {
+			target := neighbors.Node()
 			if target.ID() == currentNode.ID() {
 				continue
 			}
@@ -73,7 +74,6 @@ func ClosenessCentralityWeighted(g graph.Weighted) map[int64]float64 {
 			}
 		}
 
-		// Compute closeness centrality
 		if totalDistance > 0 {
 			centrality[currentNode.ID()] = float64(numberOfNodes-1) / totalDistance
 		} else {

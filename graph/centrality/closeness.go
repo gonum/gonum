@@ -1,11 +1,18 @@
 package centrality
 
 import (
+	"errors"
+	"fmt"
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/path"
 	"gonum.org/v1/gonum/graph/traverse"
 	"math"
 )
+
+type GraphWithEdgesAndWeights interface {
+	graph.Weighted
+	Edges() graph.Edges
+}
 
 // ClosenessCentrality computes closeness centrality for all nodes in an unweighted weightedUndirectedGraph.
 func ClosenessCentrality(graph graph.Graph) map[int64]float64 {
@@ -47,22 +54,38 @@ func shortestPathsBFS(g graph.Graph, startNode graph.Node) map[int64]int {
 	return distance
 }
 
-func ClosenessCentralityWeighted(g graph.Weighted) map[int64]float64 {
-	nodes := g.Nodes()
+func ValidateNonNegativeWeights(graph GraphWithEdgesAndWeights) error {
+	edges := graph.Edges()
+	for edges.Next() {
+		edge := edges.Edge()
+		weight, _ := graph.Weight(edge.From().ID(), edge.To().ID())
+		if weight < 0 {
+			return errors.New("graph contains negative edge weights")
+		}
+	}
+	return nil
+}
+
+func ClosenessCentralityWeighted(graph GraphWithEdgesAndWeights) (map[int64]float64, error) {
+	if err := ValidateNonNegativeWeights(graph); err != nil {
+		return nil, err
+	}
+
+	nodes := graph.Nodes()
 	numberOfNodes := nodes.Len()
 
 	if numberOfNodes <= 1 {
-		return nil
+		return make(map[int64]float64), fmt.Errorf("graph must have more than one node; got %d node(s)", numberOfNodes)
 	}
 	centrality := make(map[int64]float64)
 
 	for nodes.Next() {
 		currentNode := nodes.Node()
-		shortestPaths := path.DijkstraFrom(currentNode, g)
+		shortestPaths := path.DijkstraFrom(currentNode, graph)
 
 		// Sum shortest path distances
 		totalDistance := 0.0
-		neighbors := g.Nodes()
+		neighbors := graph.Nodes()
 		for neighbors.Next() {
 			target := neighbors.Node()
 			if target.ID() == currentNode.ID() {
@@ -81,5 +104,5 @@ func ClosenessCentralityWeighted(g graph.Weighted) map[int64]float64 {
 		}
 	}
 
-	return centrality
+	return centrality, nil
 }

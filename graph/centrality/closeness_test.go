@@ -189,7 +189,7 @@ func TestClosenessCentralityWeightedGraph(test *testing.T) {
 
 	for _, testCase := range tests {
 		test.Run(testCase.name, func(t *testing.T) {
-			result := centrality.ClosenessCentralityWeighted(testCase.weightedUndirectedGraph())
+			result, _ := centrality.ClosenessCentralityWeighted(testCase.weightedUndirectedGraph())
 			if result == nil && testCase.expectedResult != nil {
 				t.Errorf("%s: Expected non-nil result, but got nil", testCase.name)
 			} else if result != nil && testCase.expectedResult == nil {

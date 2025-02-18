@@ -15,12 +15,11 @@ func numericalEqual(a, b, epsilon float64) bool {
 	return math.Abs(1.0-a/b) < epsilon
 }
 
-// addNodes creates `count` nodes, adds them to `g`, and returns the slice of nodes.
 func addNodes(undirectedGraph *simple.UndirectedGraph, count int) []graph.Node {
 	nodes := make([]graph.Node, count)
 	for i := 0; i < count; i++ {
-		nodes[i] = undirectedGraph.NewNode() // Create a new node
-		undirectedGraph.AddNode(nodes[i])    // Add it to the weightedUndirectedGraph
+		nodes[i] = undirectedGraph.NewNode()
+		undirectedGraph.AddNode(nodes[i])
 	}
 	return nodes
 }
@@ -28,13 +27,13 @@ func addNodes(undirectedGraph *simple.UndirectedGraph, count int) []graph.Node {
 func addNodesWeightedGraph(weightedUndirectedGraph *simple.WeightedUndirectedGraph, count int) []graph.Node {
 	nodes := make([]graph.Node, count)
 	for i := 0; i < count; i++ {
-		nodes[i] = weightedUndirectedGraph.NewNode() // Create a new node
-		weightedUndirectedGraph.AddNode(nodes[i])    // Add it to the weightedUndirectedGraph
+		nodes[i] = weightedUndirectedGraph.NewNode()
+		weightedUndirectedGraph.AddNode(nodes[i])
 	}
 	return nodes
 }
 
-// Test ClosenessCentrality on an undirected weightedUndirectedGraph
+// Test ClosenessCentrality on an undirected unweighted Graph
 func TestClosenessCentrality(test *testing.T) {
 	tests := []struct {
 		name            string
@@ -44,9 +43,9 @@ func TestClosenessCentrality(test *testing.T) {
 		{
 			name: "Empty Graph",
 			undirectedGraph: func() *simple.UndirectedGraph {
-				return simple.NewUndirectedGraph() // No nodes, no edges
+				return simple.NewUndirectedGraph()
 			},
-			expectedResult: nil, // We expect a nil or empty result
+			expectedResult: nil,
 		},
 		{
 			name: "Graph with one node only",
@@ -56,7 +55,7 @@ func TestClosenessCentrality(test *testing.T) {
 				oneNode.AddNode(node)
 				return oneNode
 			},
-			expectedResult: nil, // We expect a nil or empty result
+			expectedResult: nil,
 		},
 		{
 			name: "Cycle Graph (4 Nodes)",
@@ -76,7 +75,6 @@ func TestClosenessCentrality(test *testing.T) {
 			undirectedGraph: func() *simple.UndirectedGraph {
 				starGraph := simple.NewUndirectedGraph()
 				nodes := addNodes(starGraph, 5)
-				// Star topology (0 is the central node)
 				for i := 1; i < 5; i++ {
 					starGraph.SetEdge(simple.Edge{F: nodes[0], T: nodes[i]})
 				}
@@ -89,7 +87,6 @@ func TestClosenessCentrality(test *testing.T) {
 			undirectedGraph: func() *simple.UndirectedGraph {
 				lineGraph := simple.NewUndirectedGraph()
 				nodes := addNodes(lineGraph, 5)
-				// Line topology (A-B-C-D-E)
 				for i := 0; i < 4; i++ {
 					lineGraph.SetEdge(simple.Edge{F: nodes[i], T: nodes[i+1]})
 				}
@@ -119,7 +116,7 @@ func TestClosenessCentrality(test *testing.T) {
 	}
 }
 
-// Test ClosenessCentrality on an undirected weightedUndirectedGraph
+// Test ClosenessCentrality on an undirected weighted Graph
 func TestClosenessCentralityWeightedGraph(test *testing.T) {
 	tests := []struct {
 		name                    string
@@ -129,7 +126,7 @@ func TestClosenessCentralityWeightedGraph(test *testing.T) {
 		{
 			name: "Empty Graph",
 			weightedUndirectedGraph: func() *simple.WeightedUndirectedGraph {
-				return simple.NewWeightedUndirectedGraph(math.Inf(1), math.Inf(1)) // No nodes, no edges
+				return simple.NewWeightedUndirectedGraph(math.Inf(1), math.Inf(1))
 			},
 			expectedResult: map[int64]float64{},
 		},
@@ -176,7 +173,6 @@ func TestClosenessCentralityWeightedGraph(test *testing.T) {
 			weightedUndirectedGraph: func() *simple.WeightedUndirectedGraph {
 				starGraph := simple.NewWeightedUndirectedGraph(math.Inf(1), math.Inf(1))
 				nodes := addNodesWeightedGraph(starGraph, 5)
-				// Star topology (0 is the central node)
 				for i := 1; i < 5; i++ {
 					starGraph.SetWeightedEdge(simple.WeightedEdge{F: nodes[0], T: nodes[i], W: float64(i)})
 				}
@@ -189,7 +185,6 @@ func TestClosenessCentralityWeightedGraph(test *testing.T) {
 			weightedUndirectedGraph: func() *simple.WeightedUndirectedGraph {
 				lineGraph := simple.NewWeightedUndirectedGraph(math.Inf(1), math.Inf(1))
 				nodes := addNodesWeightedGraph(lineGraph, 5)
-				// Line topology (A-B-C-D-E)
 				for i := 0; i < 4; i++ {
 					lineGraph.SetWeightedEdge(simple.WeightedEdge{F: nodes[i], T: nodes[i+1], W: float64(i + 1)})
 				}

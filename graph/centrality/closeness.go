@@ -13,7 +13,7 @@ type GraphWithEdgesAndWeights interface {
 	Edges() graph.Edges
 }
 
-// ClosenessCentrality computes closeness centrality for all nodes in an unweighted weightedUndirectedGraph.
+// ClosenessCentrality computes normalized closeness centrality for all nodes in an unweighted undirected Graph.
 func ClosenessCentrality(graph graph.Graph) map[int64]float64 {
 	nodes := graph.Nodes()
 	numberOfNodes := nodes.Len()
@@ -32,7 +32,7 @@ func ClosenessCentrality(graph graph.Graph) map[int64]float64 {
 			totalDistance += float64(distance)
 		}
 
-		// Compute closeness centrality
+		// Compute normalized closeness centrality
 		if totalDistance > 0 {
 			centrality[currentNode.ID()] = float64(numberOfNodes-1) / totalDistance
 		} else {
@@ -65,6 +65,7 @@ func ValidateNonNegativeWeights(graph GraphWithEdgesAndWeights) error {
 	return nil
 }
 
+// ClosenessCentralityWeighted computes normalized closeness centrality for all nodes in a weighted undirected Graph.
 func ClosenessCentralityWeighted(graph GraphWithEdgesAndWeights) (map[int64]float64, error) {
 	if err := ValidateNonNegativeWeights(graph); err != nil {
 		return nil, err

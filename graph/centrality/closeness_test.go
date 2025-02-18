@@ -131,7 +131,7 @@ func TestClosenessCentralityWeightedGraph(test *testing.T) {
 			weightedUndirectedGraph: func() *simple.WeightedUndirectedGraph {
 				return simple.NewWeightedUndirectedGraph(math.Inf(1), math.Inf(1)) // No nodes, no edges
 			},
-			expectedResult: nil, // We expect a nil or empty result
+			expectedResult: map[int64]float64{},
 		},
 		{
 			name: "Graph with one node only",
@@ -141,7 +141,21 @@ func TestClosenessCentralityWeightedGraph(test *testing.T) {
 				oneNode.AddNode(node)
 				return oneNode
 			},
-			expectedResult: nil, // We expect a nil or empty result
+			expectedResult: map[int64]float64{},
+		},
+		{
+			name: "Graph with negative weights",
+			weightedUndirectedGraph: func() *simple.WeightedUndirectedGraph {
+				negativeWeightsGraph := simple.NewWeightedUndirectedGraph(math.Inf(1), math.Inf(1))
+				nodes := addNodesWeightedGraph(negativeWeightsGraph, 4)
+				weights := [4]float64{1.0, 2.0, -3.0, 4.0}
+				negativeWeightsGraph.SetWeightedEdge(simple.WeightedEdge{F: nodes[0], T: nodes[1], W: weights[0]})
+				negativeWeightsGraph.SetWeightedEdge(simple.WeightedEdge{F: nodes[1], T: nodes[2], W: weights[1]})
+				negativeWeightsGraph.SetWeightedEdge(simple.WeightedEdge{F: nodes[2], T: nodes[3], W: weights[2]})
+				negativeWeightsGraph.SetWeightedEdge(simple.WeightedEdge{F: nodes[3], T: nodes[0], W: weights[3]})
+				return negativeWeightsGraph
+			},
+			expectedResult: nil,
 		},
 		{
 			name: "Cycle Graph (4 Nodes)",
@@ -189,16 +203,27 @@ func TestClosenessCentralityWeightedGraph(test *testing.T) {
 
 	for _, testCase := range tests {
 		test.Run(testCase.name, func(t *testing.T) {
-			result, _ := centrality.ClosenessCentralityWeighted(testCase.weightedUndirectedGraph())
-			if result == nil && testCase.expectedResult != nil {
+			result, err := centrality.ClosenessCentralityWeighted(testCase.weightedUndirectedGraph())
+
+			switch {
+			case result == nil && testCase.expectedResult != nil:
 				t.Errorf("%s: Expected non-nil result, but got nil", testCase.name)
-			} else if result != nil && testCase.expectedResult == nil {
+
+			case result == nil && testCase.expectedResult == nil:
+				expectedErrorMessage := "graph contains negative edge weights"
+				if err == nil || err.Error() != expectedErrorMessage {
+					t.Errorf("%s: Expected error %q, but got %v", testCase.name, expectedErrorMessage, err)
+				}
+
+			case result != nil && testCase.expectedResult == nil:
 				t.Errorf("%s: Expected nil result, but got non-nil", testCase.name)
-			}
-			for id, expectedValue := range testCase.expectedResult {
-				if !numericalEqual(result[id], expectedValue, epsilon) {
-					t.Errorf("%s: ClosenessCentralityWeighted(%d) = %f, expectedResult %f",
-						testCase.name, id, result[id], expectedValue)
+
+			default:
+				for id, expectedValue := range testCase.expectedResult {
+					if !numericalEqual(result[id], expectedValue, epsilon) {
+						t.Errorf("%s: ClosenessCentralityWeighted(%d) = %f, expected %f",
+							testCase.name, id, result[id], expectedValue)
+					}
 				}
 			}
 		})

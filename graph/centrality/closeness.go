@@ -2,7 +2,6 @@ package centrality
 
 import (
 	"errors"
-	"fmt"
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/path"
 	"gonum.org/v1/gonum/graph/traverse"
@@ -75,7 +74,7 @@ func ClosenessCentralityWeighted(graph GraphWithEdgesAndWeights) (map[int64]floa
 	numberOfNodes := nodes.Len()
 
 	if numberOfNodes <= 1 {
-		return make(map[int64]float64), fmt.Errorf("graph must have more than one node; got %d node(s)", numberOfNodes)
+		return make(map[int64]float64), nil
 	}
 	centrality := make(map[int64]float64)
 

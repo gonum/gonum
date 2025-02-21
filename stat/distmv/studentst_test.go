@@ -7,6 +7,7 @@ package distmv
 import (
 	"math"
 	"math/rand/v2"
+	"strconv"
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
@@ -270,4 +271,30 @@ func TestStudentsTMarginalSingle(t *testing.T) {
 			}
 		}
 	}
+}
+
+func BenchmarkFindUnob(b *testing.B) {
+	for _, ints := range genInts() {
+		b.Run("len="+strconv.Itoa(len(ints)), func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				findUnob(ints, len(ints)/2)
+			}
+		})
+	}
+}
+
+func genInts() [][]int {
+	var ints [][]int
+
+	for _, size := range []int{10, 100, 1000} {
+		s := make([]int, 0, size)
+
+		for i := range size {
+			s = append(s, i*2)
+		}
+
+		ints = append(ints, s)
+	}
+
+	return ints
 }

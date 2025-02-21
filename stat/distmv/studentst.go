@@ -7,9 +7,7 @@ package distmv
 import (
 	"math"
 	"math/rand/v2"
-	"sort"
-
-	"golang.org/x/tools/container/intsets"
+	"slices"
 
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/mat"
@@ -208,18 +206,18 @@ func studentsTConditional(observed []int, values []float64, nu float64, mu []flo
 // findUnob returns the unobserved variables (the complementary set to observed).
 // findUnob panics if any value repeated in observed.
 func findUnob(observed []int, dim int) (unobserved []int) {
-	var setOb intsets.Sparse
-	for _, v := range observed {
-		setOb.Insert(v)
+	all := make([]int, 0, dim)
+	for i := range dim {
+		all = append(all, i)
 	}
-	var setAll intsets.Sparse
-	for i := 0; i < dim; i++ {
-		setAll.Insert(i)
+	for _, obs := range observed {
+		if obs >= 0 && obs < dim {
+			all[obs] = -1
+		}
 	}
-	var setUnob intsets.Sparse
-	setUnob.Difference(&setAll, &setOb)
-	unobserved = setUnob.AppendTo(nil)
-	sort.Ints(unobserved)
+	unobserved = slices.DeleteFunc(all, func(i int) bool {
+		return i == -1
+	})
 	return unobserved
 }
 

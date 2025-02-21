@@ -5,7 +5,6 @@ go 1.23
 require (
 	github.com/goccmack/gocc v0.0.0-20230228185258-2292f9e40198
 	github.com/google/go-cmp v0.6.0
-	golang.org/x/tools v0.24.0
 	gonum.org/v1/plot v0.14.0
 )
 

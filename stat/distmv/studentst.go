@@ -211,7 +211,7 @@ func findUnob(observed []int, dim int) (unobserved []int) {
 		all = append(all, i)
 	}
 	for _, obs := range observed {
-		if obs >= 0 && obs < dim {
+		if 0 <= obs && obs < dim {
 			all[obs] = -1
 		}
 	}

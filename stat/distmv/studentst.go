@@ -218,10 +218,10 @@ func findUnob(observed []int, dim int) (unobserved []int) {
 	unobserved = slices.DeleteFunc(all, func(i int) bool {
 		return i == -1
 	})
-	cp := slices.Clone(observed)
-	slices.Sort(cp)
-	for i := 1; i < len(cp); i++ {
-		if cp[i] == cp[i-1] {
+	observed = slices.Clone(observed)
+	slices.Sort(observed)
+	for i, v := range observed[1:] {
+		if observed[i] == v {
 			panic("duplicate values in observed")
 		}
 	}

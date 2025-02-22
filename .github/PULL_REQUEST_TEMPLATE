@@ -13,4 +13,7 @@ Please make sure your commit message summary line and pull request
 title match the Go convention; a one-line summary of the change,
 prefixed by the primary affected package that should complete the
 sentence, "This change modifies Gonum to _____."
+
+Do not delete any of this templated text in the PR description, but
+feel free to add additional context.
 -->

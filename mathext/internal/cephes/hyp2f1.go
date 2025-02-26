@@ -1,54 +1,20 @@
-package mathext
+// Copyright ©2016 The Gonum Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+/*
+Cephes Math Library Release 2.8:  June, 2000
+Copyright 1984, 1987, 1992, 2000 by Stephen L. Moshier
+*/
+
+package cephes
 
 import (
-	"fmt"
 	"math"
 )
 
-// Machine epsilon used in Cephes.
-var mACHEP float64 = (math.Nextafter(1.0, 2.0) - 1.0) / 2
-
 const eps float64 = 1e-13
 const ethresh float64 = 1e-12
-
-// Hyp2f1 returns the value of the Gaussian Hypergeometric function at z.
-// For |z| < 1, this implementation follows the Cephes library.
-// For |z| > 1, this implementation perform analytic continuation via relevant Hypergeometric identities.
-// See https://en.wikipedia.org/wiki/Hypergeometric_function for more details.
-func Hyp2f1(a float64, b float64, c float64, z float64) (float64, error) {
-	if math.Abs(z) < 1 {
-		return hyp2f1(a, b, c, z)
-	}
-
-	// Function undefined between the 1 and Inf branch points.
-	if z > 0 {
-		return math.NaN(), fmt.Errorf("analytic continuation failed")
-	}
-
-	// Analytic continuation formula contains infinities from Gamma(a-b) when a == b.
-	// Make a and b different using equation 15.3.4 from Abramowitz.
-	// M. Abramowitz and I. A. Stegun 1965. Handbook of Mathematical Functions, New York: Dover.
-	if a == b {
-		y, err := Hyp2f1(a, c-b, c, z/(z-1))
-		if err != nil {
-			return y, err
-		}
-		return math.Pow(1-z, -a) * y, nil
-	}
-
-	// Analytic continuation based on https://www.johndcook.com/blog/2021/11/03/escaping-the-unit-disk/
-	y1, err := hyp2f1(a, 1-c+a, 1-b+a, 1/z)
-	if err != nil {
-		return y1, err
-	}
-	y1 *= math.Gamma(c) / math.Gamma(b) * math.Gamma(b-a) / math.Gamma(c-a) * math.Pow(-z, -a)
-	y2, err := hyp2f1(b, 1-c+b, 1-a+b, 1/z)
-	if err != nil {
-		return y2, err
-	}
-	y2 *= math.Gamma(c) / math.Gamma(a) * math.Gamma(a-b) / math.Gamma(c-b) * math.Pow(-z, -b)
-	return y1 + y2, nil
-}
 
 /*							hyp2f1.c
  *
@@ -107,11 +73,7 @@ func Hyp2f1(a float64, b float64, c float64, z float64) (float64, error) {
  * A "singularity" message is printed on overflow or
  * in cases not addressed (such as x < -1).
  */
-/*
-Cephes Math Library Release 2.8:  June, 2000
-Copyright 1984, 1987, 1992, 2000 by Stephen L. Moshier
-*/
-func hyp2f1(a float64, b float64, c float64, x float64) (float64, error) {
+func Hyp2f1(a float64, b float64, c float64, x float64) float64 {
 	var d float64
 	var d1 float64
 	var d2 float64
@@ -232,15 +194,8 @@ func hyp2f1(a float64, b float64, c float64, x float64) (float64, error) {
 		err = 0
 		aid = int(2 - id)
 		e = c + float64(aid)
-		var herr error
-		d2, herr = Hyp2f1(a, b, e, x)
-		if herr != nil {
-			return math.NaN(), herr
-		}
-		d1, herr = Hyp2f1(a, b, e+1, x)
-		if herr != nil {
-			return math.NaN(), herr
-		}
+		d2 = Hyp2f1(a, b, e, x)
+		d1 = Hyp2f1(a, b, e+1, x)
 		q = a + b + 1
 		for i = 0; i < aid; i++ {
 			r = e - 1
@@ -260,14 +215,15 @@ hypok:
 	y = hyt2f1(a, b, c, x, &err)
 hypdon:
 	if err > ethresh {
-		return y, fmt.Errorf("partial loss of precision")
+		// partial loss of precision
 	}
-	return y, nil
+	return y
 hypf:
 	y = math.Pow(s, d) * hys2f1(c-a, c-b, c, x, &err)
 	goto hypdon
 hypdiv:
-	return math.MaxFloat64, fmt.Errorf("overflow range error")
+	// overflow range error
+	return math.Inf(1)
 }
 
 /* Apply transformations for |x| near 1
@@ -326,7 +282,7 @@ func hyt2f1(a float64, b float64, c float64, x float64, loss *float64) float64 {
 			if q > r {
 				r = q
 			}
-			err += err1 + mACHEP*r/y
+			err += err1 + machEp*r/y
 
 			y *= math.Gamma(c)
 			goto done
@@ -346,13 +302,13 @@ func hyt2f1(a float64, b float64, c float64, x float64, loss *float64) float64 {
 			ax = math.Log(s)
 
 			// sum for t = 0
-			y = Digamma(1) + Digamma(1+e) - Digamma(a+d1) - Digamma(b+d1) - ax
+			y = psi(1) + psi(1+e) - psi(a+d1) - psi(b+d1) - ax
 			y /= math.Gamma(e + 1)
 
 			p = (a + d1) * (b + d1) * s / math.Gamma(e+2)
 			t = 1
 			for {
-				r = Digamma(1+t) + Digamma(1+t+e) - Digamma(a+t+d1) - Digamma(b+t+d1) - ax
+				r = psi(1+t) + psi(1+t+e) - psi(a+t+d1) - psi(b+t+d1) - ax
 				q = p * r
 				y += q
 				p *= s * (a + t + d1) / (t + 1)
@@ -455,12 +411,12 @@ func hys2f1(a float64, b float64, c float64, x float64, loss *float64) float64 {
 			return s
 		}
 
-		if math.Abs(u/s) <= mACHEP {
+		if math.Abs(u/s) <= machEp {
 			break
 		}
 	}
 
-	*loss = mACHEP*umax/math.Abs(s) + mACHEP*float64(i)
+	*loss = machEp*umax/math.Abs(s) + machEp*float64(i)
 
 	return s
 }

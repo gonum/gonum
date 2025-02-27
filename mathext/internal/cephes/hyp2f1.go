@@ -1,4 +1,4 @@
-// Copyright ©2016 The Gonum Authors. All rights reserved.
+// Copyright ©2025 The Gonum Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -73,7 +73,7 @@ const ethresh float64 = 1e-12
  * A "singularity" message is printed on overflow or
  * in cases not addressed (such as x < -1).
  */
-func Hyp2f1(a float64, b float64, c float64, x float64) float64 {
+func Hyp2f1(a, b, c, x float64) float64 {
 	var d float64
 	var d1 float64
 	var d2 float64
@@ -229,7 +229,7 @@ hypdiv:
 /* Apply transformations for |x| near 1
  * then call the power series
  */
-func hyt2f1(a float64, b float64, c float64, x float64, loss *float64) float64 {
+func hyt2f1(a, b, c, x float64, loss *float64) float64 {
 	var p float64
 	var q float64
 	var r float64
@@ -272,9 +272,9 @@ func hyt2f1(a float64, b float64, c float64, x float64, loss *float64) float64 {
 
 			// If power series fails, then apply AMS55 #15.3.6
 			q = hys2f1(a, b, 1-d, s, &err)
-			q *= math.Gamma(d) / (math.Gamma(c-a) * math.Gamma(c-b))
+			q *= gammaADivBDivC(d, c-a, c-b)
 			r = math.Pow(s, d) * hys2f1(c-a, c-b, d+1, s, &err1)
-			r *= math.Gamma(-d) / (math.Gamma(a) * math.Gamma(b))
+			r *= gammaADivBDivC(-d, a, b)
 			y = q + r
 
 			q = math.Abs(q) // estimate cancellation error
@@ -372,7 +372,7 @@ done:
 
 /* Defining power series expansion of Gauss hypergeometric function */
 // loss estimates loss of significance upon return.
-func hys2f1(a float64, b float64, c float64, x float64, loss *float64) float64 {
+func hys2f1(a, b, c, x float64, loss *float64) float64 {
 	var f float64
 	var g float64
 	var h float64
@@ -419,4 +419,25 @@ func hys2f1(a float64, b float64, c float64, x float64, loss *float64) float64 {
 	*loss = machEp*umax/math.Abs(s) + machEp*float64(i)
 
 	return s
+}
+
+// gammaADivBDivC performs gamma(a) / (gamma(b)*gamma(c)).
+// It is more accurate than directly multiplying gammas for large values of b as discussed in https://github.com/scipy/scipy/pull/2734 .
+func gammaADivBDivC(a, b, c float64) float64 {
+	var sign int = 1
+	var w float64
+
+	lga, sgngam := math.Lgamma(a)
+	w += lga
+	sign *= sgngam
+
+	lgb, sgngam := math.Lgamma(b)
+	w -= lgb
+	sign *= sgngam
+
+	lgc, sgngam := math.Lgamma(c)
+	w -= lgc
+	sign *= sgngam
+
+	return float64(sign) * math.Exp(w)
 }

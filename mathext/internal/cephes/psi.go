@@ -1,4 +1,4 @@
-// Copyright ©2016 The Gonum Authors. All rights reserved.
+// Copyright ©2025 The Gonum Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -139,7 +139,6 @@ func psi(x float64) float64 {
 	y = math.Log(s) - 0.5/s - y - w
 
 done:
-	;
 	if negative != 0 {
 		y -= nz
 	}

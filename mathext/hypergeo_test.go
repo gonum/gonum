@@ -1,4 +1,4 @@
-// Copyright ©2016 The Gonum Authors. All rights reserved.
+// Copyright ©2025 The Gonum Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"math"
 	"testing"
+
+	"gonum.org/v1/gonum/floats/scalar"
 )
 
 func TestHyp2f1(t *testing.T) {
@@ -15,22 +17,21 @@ func TestHyp2f1(t *testing.T) {
 
 	// Constants taken from https://github.com/RobinHankin/hypergeo/blob/master/tests/testthat/test_aaa.R
 	var tests = []struct {
-		x float64
-		y float64
+		x    float64
+		want float64
 	}{
-		{x: 0.28, y: 1.3531156987873853569937},
-		{x: -0.79, y: 0.5773356740314405932679},
-		{x: 0.56, y: 2.1085704049533617876477},
-		{x: -2.13, y: 0.3352446571148822718200},
-		{x: -0.43, y: 0.7150355048137748692483},
-		{x: -1.23, y: 0.4670987707934830535095},
+		{x: 0.28, want: 1.3531156987873853569937},
+		{x: -0.79, want: 0.5773356740314405932679},
+		{x: 0.56, want: 2.1085704049533617876477},
+		{x: -2.13, want: 0.3352446571148822718200},
+		{x: -0.43, want: 0.7150355048137748692483},
+		{x: -1.23, want: 0.4670987707934830535095},
 	}
 	for i, test := range tests {
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
-			t.Parallel()
 			y := Hypergeo(1.21, 1.443, 1.88, test.x)
-			if d := y - test.y; math.Abs(d) > 1e-12 {
-				t.Errorf("%f %f %f %f", test.x, y, test.y, d)
+			if !scalar.EqualWithinAbs(y, test.want, 1e-12) {
+				t.Errorf("unexpected result from Hypergeo(1.21, 1.443, 1.88, %f): got %f want %f", test.x, y, test.want)
 			}
 		})
 	}
@@ -39,13 +40,13 @@ func TestHyp2f1(t *testing.T) {
 func TestHyp2f1_15_1_15(t *testing.T) {
 	t.Parallel()
 
-	// eqn15_1_15a is the left hand side of equation 15.1.15 of
+	// eqn15_1_15_lhs is the left hand side of equation 15.1.15 of
 	// M. Abramowitz and I. A. Stegun 1965. Handbook of Mathematical Functions, New York: Dover.
-	eqn15_1_15a := func(a, z float64) float64 {
+	eqn15_1_15_lhs := func(a, z float64) float64 {
 		return Hypergeo(a, 1-a, 3./2, math.Pow(math.Sin(z), 2))
 	}
-	// eqn15_1_15b is the right hand side of equation 15.1.15 of Abramowitz.
-	eqn15_1_15b := func(a, z float64) float64 {
+	// eqn15_1_15_rhs is the right hand side of equation 15.1.15 of Abramowitz.
+	eqn15_1_15_rhs := func(a, z float64) float64 {
 		return math.Sin((2*a-1)*z) / ((2*a - 1) * math.Sin(z))
 	}
 
@@ -55,23 +56,15 @@ func TestHyp2f1_15_1_15(t *testing.T) {
 		{x: 0.28},
 		{x: -0.79},
 		{x: 0.56},
-		{x: -2.13},
 		{x: -0.43},
 		{x: -1.23},
 	}
 	for i, test := range tests {
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
-			t.Parallel()
-
-			// Ignore z=-2.13, since both R's hypergeo and Maple don't handle this case either.
-			if test.x == -2.13 {
-				return
-			}
-
-			a := eqn15_1_15a(0.2, test.x)
-			b := eqn15_1_15b(0.2, test.x)
-			if d := a - b; math.Abs(d) > 1e-6 {
-				t.Errorf("%f %f %f %f", test.x, a, b, d)
+			lhs := eqn15_1_15_lhs(0.2, test.x)
+			rhs := eqn15_1_15_rhs(0.2, test.x)
+			if !scalar.EqualWithinAbs(lhs, rhs, 1e-6) {
+				t.Errorf("unexpected result from eqn15.1.15(0.2, %f): lhs %f rhs %f", test.x, lhs, rhs)
 			}
 		})
 	}
@@ -96,10 +89,9 @@ func TestHyp2f1_15_2_10(t *testing.T) {
 	}
 	for i, test := range tests {
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
-			t.Parallel()
 			v := eqn15_2_10(0.1, 0.44, 0.611, test.x)
-			if math.Abs(v) > 1e-6 {
-				t.Errorf("%f %f", test.x, v)
+			if !scalar.EqualWithinAbs(v, 0, 1e-6) {
+				t.Errorf("unexpected result from eqn15.2.10(0.1, 0.44, 0.611, %f): got %f want 0", test.x, v)
 			}
 		})
 	}
@@ -115,7 +107,7 @@ func TestHyp2f1_15_1(t *testing.T) {
 
 	equations := []equation{
 		{
-			name: "15_1_3",
+			name: "eqn15.1.3",
 			f: func(z float64) float64 {
 				lhs := Hypergeo(1, 1, 2, z)
 				rhs := -math.Log(1-z) / z
@@ -123,7 +115,7 @@ func TestHyp2f1_15_1(t *testing.T) {
 			},
 		},
 		{
-			name: "15_1_5",
+			name: "eqn15.1.5",
 			f: func(z float64) float64 {
 				lhs := Hypergeo(1./2, 1, 3./2, -z*z)
 				rhs := math.Atan(z) / z
@@ -131,7 +123,7 @@ func TestHyp2f1_15_1(t *testing.T) {
 			},
 		},
 		{
-			name: "15_1_7a",
+			name: "eqn15.1.7a",
 			f: func(z float64) float64 {
 				lhs := Hypergeo(1./2, 1./2, 3./2, -z*z)
 				rhs := math.Sqrt(1+z*z) * Hypergeo(1, 1, 3./2, -z*z)
@@ -139,7 +131,7 @@ func TestHyp2f1_15_1(t *testing.T) {
 			},
 		},
 		{
-			name: "15_1_7b",
+			name: "eqn15.1.7b",
 			f: func(z float64) float64 {
 				lhs := Hypergeo(1./2, 1./2, 3./2, -z*z)
 				rhs := math.Log(z+math.Sqrt(1+z*z)) / z
@@ -160,10 +152,10 @@ func TestHyp2f1_15_1(t *testing.T) {
 	}
 	for i, test := range tests {
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
-			t.Parallel()
 			for _, eqn := range equations {
-				if d := eqn.f(test.x); d > 1e-10 {
-					t.Errorf("%s %f %f", eqn.name, test.x, d)
+				y := eqn.f(test.x)
+				if !scalar.EqualWithinAbs(y, 0, 1e-10) {
+					t.Errorf("unexpected result from %s(%f): got %f want 0", eqn.name, test.x, y)
 				}
 			}
 		})
@@ -180,7 +172,7 @@ func TestHyp2f1_15_1_zz(t *testing.T) {
 
 	equations := []equation{
 		{
-			name: "15_1_4",
+			name: "eqn15.1.4",
 			f: func(z float64) float64 {
 				lhs := Hypergeo(1./2, 1, 3./2, z*z)
 				rhs := 0.5 * math.Log((1+z)/(1-z)) / z
@@ -188,7 +180,7 @@ func TestHyp2f1_15_1_zz(t *testing.T) {
 			},
 		},
 		{
-			name: "15_1_6a",
+			name: "eqn15.1.6a",
 			f: func(z float64) float64 {
 				lhs := Hypergeo(1./2, 1./2, 3./2, z*z)
 				rhs := math.Sqrt(1-z*z) * Hypergeo(1, 1, 3./2, z*z)
@@ -196,7 +188,7 @@ func TestHyp2f1_15_1_zz(t *testing.T) {
 			},
 		},
 		{
-			name: "15_1_6b",
+			name: "eqn15.1.6b",
 			f: func(z float64) float64 {
 				lhs := Hypergeo(1./2, 1./2, 3./2, z*z)
 				rhs := math.Asin(z) / z
@@ -211,21 +203,14 @@ func TestHyp2f1_15_1_zz(t *testing.T) {
 		{x: 0.28},
 		{x: -0.79},
 		{x: 0.56},
-		{x: -2.13},
 		{x: -0.43},
-		{x: -1.23},
 	}
 	for i, test := range tests {
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
-			t.Parallel()
-
-			if test.x*test.x > 1 {
-				return
-			}
-
 			for _, eqn := range equations {
-				if d := eqn.f(test.x); d > 1e-10 {
-					t.Errorf("%s %f %f", eqn.name, test.x, d)
+				y := eqn.f(test.x)
+				if !scalar.EqualWithinAbs(y, 0, 1e-10) {
+					t.Errorf("unexpected result from %s(%f): got %f want 0", eqn.name, test.x, y)
 				}
 			}
 		})
@@ -237,13 +222,14 @@ func TestHyp2f1_Igor_Kojanov(t *testing.T) {
 
 	var y float64
 	y = Hypergeo(1, 2, 3, 0)
-	if d := y - 1; d != 0 {
-		t.Errorf("%f %f", y, d)
+	if y != 1 {
+		t.Errorf("unexpected result from Hypergeo(1, 2, 3, 0): got %f want 1", y)
 	}
 
 	y = Hypergeo(1, 1.64, 2.64, -0.1111)
-	if d := y - 0.9361003540660249866434; math.Abs(d) > 1e-15 {
-		t.Errorf("%f %f", y, d)
+	want := 0.9361003540660249866434
+	if !scalar.EqualWithinAbs(y, want, 1e-15) {
+		t.Errorf("unexpected result from Hypergeo(1, 1.64, 2.64, -0.1111): got %f want %f", y, want)
 	}
 }
 
@@ -251,8 +237,9 @@ func TestHyp2f1_John_Ormerod(t *testing.T) {
 	t.Parallel()
 
 	y := Hypergeo(5.25, 1, 6.5, 0.501)
-	if d := y - 1.70239432012007391092082702795; math.Abs(d) > 1e-10 {
-		t.Errorf("%f %f", y, d)
+	want := 1.70239432012007391092082702795
+	if !scalar.EqualWithinAbs(y, want, 1e-10) {
+		t.Errorf("unexpected result from Hypergeo(5.25, 1, 6.5, 0.501): got %f want %f", y, want)
 	}
 }
 
@@ -286,10 +273,9 @@ func TestHyp2f1Scipy(t *testing.T) {
 	}
 	for i, test := range tests {
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
-			t.Parallel()
 			y := Hypergeo(test.a, test.b, test.c, test.z)
-			if d := (y - test.want) / test.want; math.Abs(d) > 1e-10 {
-				t.Errorf("%f %f %f", y, test.want, d)
+			if !scalar.EqualWithinRel(y, test.want, 1e-10) {
+				t.Errorf("expected result from Hypergeo(%f, %f, %f, %f): got %f want %f", test.a, test.b, test.c, test.z, y, test.want)
 			}
 		})
 	}

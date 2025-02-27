@@ -27,34 +27,6 @@ type emptyInterface struct {
 	typ, word unsafe.Pointer
 }
 
-// hiter's structure matches runtime.hiter's structure.
-// Having a clone here allows us to embed a map iterator
-// inside type mapIter so that mapIters can be re-used
-// without doing any allocations.
-//
-//lint:ignore U1000 This is a verbatim copy of the runtime type.
-type hiter struct {
-	key         unsafe.Pointer
-	elem        unsafe.Pointer
-	t           unsafe.Pointer
-	h           unsafe.Pointer
-	buckets     unsafe.Pointer
-	bptr        unsafe.Pointer
-	overflow    *[]unsafe.Pointer
-	oldoverflow *[]unsafe.Pointer
-	startBucket uintptr
-	offset      uint8
-	wrapped     bool
-	B           uint8
-	i           uint8
-	bucket      uintptr
-	checkBucket uintptr
-}
-
-func (h *hiter) initialized() bool {
-	return h.t != nil
-}
-
 // newMapIterNodes returns a range iterator for a map of nodes.
 // The returned mapIter must not have its line or weightedLine methods called.
 func newMapIterNodes(m map[int64]graph.Node) *mapIter {

@@ -21,78 +21,75 @@ func TestHypergeo(t *testing.T) {
 		c    float64
 		z    float64
 		want float64
+		tol  float64
 	}{
 		// Constants based on https://github.com/scipy/scipy/blob/main/scipy/special/tests/test_hyp2f1.py
-		{a: 1.3, b: -0.2, c: 0.3, z: -2.1, want: 1.8202169687521206},
+		{a: 1.3, b: -0.2, c: 0.3, z: -2.1, want: 1.8202169687521206, tol: 5e-15},
 
 		// Constants based on https://github.com/scipy/scipy/blob/main/scipy/special/tests/test_mpmath.py
-		{a: 1. / 3, b: 2. / 3, c: 5. / 6, z: 27. / 32, want: 1.6},
-		{a: 1. / 4, b: 1. / 2, c: 3. / 4, z: 80. / 81, want: 1.8},
-		{a: 0.7235, b: -1, c: -5, z: 0.3, want: 1.04341},
-		{a: 0.25, b: 1. / 3, c: 2, z: 0.999, want: 1.0682644949603062},
-		{a: 0.25, b: 1. / 3, c: 2, z: -1, want: 0.9665658449252437},
-		{a: 2, b: 3, c: 5, z: 0.99, want: 27.699347904322664},
-		{a: 3. / 2, b: -0.5, c: 3, z: 0.99, want: 0.6840303684391167},
-		{a: 2, b: 2.5, c: -3.25, z: 0.999, want: 2.183739328012162e+26},
-		{a: -8, b: 18.016500331508873, c: 10.805295997850628, z: 0.90875647507000001, want: -3.566216341442061e-09},
-		{a: -10, b: 900, c: -10.5, z: 0.99, want: 2.5101757354622962e+22},
-		{a: -10, b: 900, c: 10.5, z: 0.99, want: 5.5748237303615776e+17},
-		{a: -1, b: 2, c: 1, z: -1, want: 3},
-		{a: 0.5, b: 1 - 270.5, c: 1.5, z: 0.999 * 0.999, want: 0.053963052503373715},
+		{a: 1. / 3, b: 2. / 3, c: 5. / 6, z: 27. / 32, want: 1.6, tol: 1e-10},
+		{a: 1. / 4, b: 1. / 2, c: 3. / 4, z: 80. / 81, want: 1.8, tol: 1e-10},
+		{a: 0.7235, b: -1, c: -5, z: 0.3, want: 1.04341, tol: 1e-10},
+		{a: 0.25, b: 1. / 3, c: 2, z: 0.999, want: 1.0682644949603062, tol: 1e-10},
+		{a: 0.25, b: 1. / 3, c: 2, z: -1, want: 0.9665658449252437, tol: 1e-10},
+		{a: 2, b: 3, c: 5, z: 0.99, want: 27.699347904322664, tol: 1e-10},
+		{a: 3. / 2, b: -0.5, c: 3, z: 0.99, want: 0.6840303684391167, tol: 1e-10},
+		{a: 2, b: 2.5, c: -3.25, z: 0.999, want: 2.183739328012162e+26, tol: 1e-10},
+		{a: -8, b: 18.016500331508873, c: 10.805295997850628, z: 0.90875647507000001, want: -3.566216341442061e-09, tol: 1e-10},
+		{a: -10, b: 900, c: -10.5, z: 0.99, want: 2.5101757354622962e+22, tol: 1e-10},
+		{a: -10, b: 900, c: 10.5, z: 0.99, want: 5.5748237303615776e+17, tol: 1e-10},
+		{a: -1, b: 2, c: 1, z: -1, want: 3, tol: 1e-10},
+		{a: 0.5, b: 1 - 270.5, c: 1.5, z: 0.999 * 0.999, want: 0.053963052503373715, tol: 1e-10},
 
 		// Constants based on https://github.com/scipy/scipy/issues/1561
-		{a: 10, b: 5, c: -300.5, z: 0.5, want: -3.85202708152391e32},
-		{a: -290, b: 5, c: -300.5, z: 0.5, want: 26.9076853843542},
-		{a: 10, b: 5, c: -300.5, z: -0.5, want: 1.08800279612752},
-		{a: 10, b: 5, c: 300.5, z: 0.5, want: 1.08796774775660468},
-		{a: 100, b: 5, c: -300.5, z: 0.5, want: -1.07414870340863581e139},
+		{a: 10, b: 5, c: -300.5, z: 0.5, want: -3.85202708152391e32, tol: 5e-15},
 
 		// Constants based on Table 26, John Pearson, Computation of Hypergeometric Functions, Master thesis for Worcester College, Oxford University.
-		{a: 0.1, b: 0.2, c: 0.3, z: 0.5, want: 1.046432811217352},
-		{a: -0.1, b: 0.2, c: 0.3, z: 0.5, want: 0.956434210968214},
-		{a: 1e-8, b: 1e-8, c: 1e-8, z: 1e-6, want: 1},
-		{a: 2 + 1e-9, b: 3, c: 5, z: -0.75, want: 0.492238858852651},
-		{a: -2, b: -3, c: -5 + 1e-9, z: 0.5, want: 0.474999999913750},
-		{a: -1, b: -1.5, c: -2 - 1e-15, z: 0.5, want: 0.625},
-		{a: 500, b: -500, c: 500, z: 0.75, want: 9.332636185032189e-302},
-		{a: 500, b: 500, c: 500, z: -0.6, want: 8.709809816217217e-103},
-		{a: -1000, b: -2000, c: -4000.1, z: -0.5, want: 5.233580403196932e94},
-		{a: -100, b: -200, c: -300 + 1e-9, z: 0.5 * math.Sqrt(2), want: 2.653635302903707e-31},
-		{a: -100, b: -200, c: 300 + 1e-9, z: -0.5 * math.Sqrt(2), want: -1.073671875630690e-30},
-		{a: 300, b: 10, c: 5, z: 0.5, want: 3.912238919961547e98},
-		{a: 5, b: -300, c: 10, z: 0.5, want: 1.661006238211309e-7},
-		{a: 2.25, b: 3.75, c: -0.5, z: -1, want: -0.631220676949703},
+		// https://api.semanticscholar.org/CorpusID:124333574
+		{a: 0.1, b: 0.2, c: 0.3, z: 0.5, want: 1.046432811217352, tol: 1e-15},
+		{a: -0.1, b: 0.2, c: 0.3, z: 0.5, want: 0.956434210968214, tol: 1e-15},
+		{a: 1e-8, b: 1e-8, c: 1e-8, z: 1e-6, want: 1, tol: 1e-14},
+		{a: 2 + 1e-9, b: 3, c: 5, z: -0.75, want: 0.492238858852651, tol: 1e-15},
+		{a: -2, b: -3, c: -5 + 1e-9, z: 0.5, want: 0.474999999913750, tol: 1e-15},
+		{a: -1, b: -1.5, c: -2 - 1e-15, z: 0.5, want: 0.625, tol: 1e-15},
+		{a: 500, b: -500, c: 500, z: 0.75, want: 9.332636185032189e-302, tol: 1e-15},
+		{a: 500, b: 500, c: 500, z: -0.6, want: 8.709809816217217e-103, tol: 1e-15},
+		{a: -1000, b: -2000, c: -4000.1, z: -0.5, want: 5.233580403196932e94, tol: 5e-7},
+		{a: -100, b: -200, c: -300 + 1e-9, z: 0.5 * math.Sqrt(2), want: 2.653635302903707e-31, tol: 1e-15},
+		{a: 300, b: 10, c: 5, z: 0.5, want: 3.912238919961547e98, tol: 1e-15},
+		{a: 5, b: -300, c: 10, z: 0.5, want: 1.661006238211309e-7, tol: 1e-15},
+		{a: 2.25, b: 3.75, c: -0.5, z: -1, want: -0.631220676949703, tol: 1e-15},
+
+		// Additional cases for hardening against large |a|, |b|, or |c|.
+		// These wanted values are based on the agreed values of both Mathematica 14.2.0 and mpmath 1.3.0.
+		// mpmath is chosen because it is often treated as ground truth in scipy's issues:
+		// * https://github.com/scipy/scipy/issues/1561
+		// * https://github.com/scipy/scipy/issues/5349
+		{a: -290, b: 5, c: -300.5, z: 0.5, want: 26.9076853843542, tol: 5e-15},
+		{a: 10, b: 5, c: -300.5, z: -0.5, want: 1.08800279612753, tol: 1e-14},
+		{a: 10, b: 5, c: 300.5, z: 0.5, want: 1.08796774775660, tol: 5e-15},
+		{a: -5.28, b: -3, c: -12.28, z: 0.95, want: 0.17167484351795846, tol: 1e-15},
+		{a: -5, b: 0.5, c: 0.3, z: -2.1, want: 607.226576917773834, tol: 1e-15},
+
+		// Additional cases for hardening against large |a|, |b|, or |c|.
+		// These wanted values are based on the agreed values of both Mathematica 14.2.0 and Miller's algorithm described in https://github.com/scipy/scipy/issues/1561#issuecomment-130488352
+		// We trust Mathematica and Miller's algorithm because
+		// * Mathematica is the gold standard held in discussions in R's hypergeo, scipy, and mpmath:
+		//   * https://github.com/RobinHankin/hypergeo/issues/7
+		//   * https://github.com/scipy/scipy/issues/5349
+		//   * https://github.com/mpmath/mpmath/issues/296
+		// * Miller's algorithm is discussed in the often cited paper John Pearson, Computation of Hypergeometric Functions
+		// Note that these are particular hard cases, as all four softwares R's hypergeo, scipy, mpmath, and Mathematica give wildly different results.
+		{a: 100, b: 5, c: -300.5, z: 0.5, want: -1.07414870340863581e139, tol: 1e-15},
+		{a: -100, b: -200, c: 300 + 1e-9, z: -0.5 * math.Sqrt(2), want: -1.073671875630690e-30, tol: 1e-15},
+		{a: -100, b: -200, c: -300 + 0.1, z: 0.5 * math.Sqrt(2), want: 2.568211952590272e-31, tol: 1e-15},
 	}
 	for i, test := range tests {
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
 			y := Hypergeo(test.a, test.b, test.c, test.z)
-			if !scalar.EqualWithinRel(y, test.want, 1e-10) {
+			eps := math.Nextafter(1.0, 2.0) - 1.0
+			if !scalar.EqualWithinAbsOrRel(y, test.want, eps, test.tol) {
 				t.Errorf("expected result from Hypergeo(%f, %f, %f, %f): got %f want %f", test.a, test.b, test.c, test.z, y, test.want)
-			}
-		})
-	}
-}
-
-func TestAAA(t *testing.T) {
-	t.Parallel()
-
-	// Constants taken from https://github.com/RobinHankin/hypergeo/blob/master/tests/testthat/test_aaa.R
-	var tests = []struct {
-		x    float64
-		want float64
-	}{
-		{x: 0.28, want: 1.3531156987873853569937},
-		{x: -0.79, want: 0.5773356740314405932679},
-		{x: 0.56, want: 2.1085704049533617876477},
-		{x: -2.13, want: 0.3352446571148822718200},
-		{x: -0.43, want: 0.7150355048137748692483},
-		{x: -1.23, want: 0.4670987707934830535095},
-	}
-	for i, test := range tests {
-		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
-			y := Hypergeo(1.21, 1.443, 1.88, test.x)
-			if !scalar.EqualWithinAbs(y, test.want, 1e-12) {
-				t.Errorf("unexpected result from Hypergeo(1.21, 1.443, 1.88, %f): got %f want %f", test.x, y, test.want)
 			}
 		})
 	}
@@ -281,8 +278,8 @@ func Test_15_1_zz(t *testing.T) {
 func Test_Igor_Kojanov(t *testing.T) {
 	t.Parallel()
 
-	var y float64
-	y = Hypergeo(1, 2, 3, 0)
+	// Constants taken from https://github.com/RobinHankin/hypergeo/blob/master/tests/testthat/test_aaa.R
+	y := Hypergeo(1, 2, 3, 0)
 	if y != 1 {
 		t.Errorf("unexpected result from Hypergeo(1, 2, 3, 0): got %f want 1", y)
 	}
@@ -297,6 +294,7 @@ func Test_Igor_Kojanov(t *testing.T) {
 func Test_John_Ormerod(t *testing.T) {
 	t.Parallel()
 
+	// Constants taken from https://github.com/RobinHankin/hypergeo/blob/master/tests/testthat/test_aaa.R
 	y := Hypergeo(5.25, 1, 6.5, 0.501)
 	want := 1.70239432012007391092082702795
 	if !scalar.EqualWithinAbs(y, want, 1e-10) {

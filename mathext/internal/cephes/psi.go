@@ -7,11 +7,12 @@ Cephes Math Library Release 2.8:  June, 2000
 Copyright 1984, 1987, 1992, 2000 by Stephen L. Moshier
 */
 
+// Code derived from psi.c in https://www.moshier.net/cephes-math-28.tar.gz.
 package cephes
 
 import "math"
 
-var A []float64 = []float64{
+var a []float64 = []float64{
 	0.08333333333333333,
 	-0.021092796092796094,
 	0.007575757575757576,
@@ -74,22 +75,14 @@ var A []float64 = []float64{
  * psi singularity    x integer <=0      MAXNUM
  */
 func psi(x float64) float64 {
-	var p float64
-	var q float64
-	var nz float64
-	var s float64
-	var w float64
-	var y float64
-	var z float64
-	var i int
-	var n int
-	var negative int
-
-	negative = 0
-	nz = 0
+	var (
+		p, q, nz, s, w, y, z float64
+		i, n                 int
+		negative             bool
+	)
 
 	if x <= 0 {
-		negative = 1
+		negative = true
 		q = x
 		p = math.Floor(q)
 		if p == q {
@@ -131,7 +124,7 @@ func psi(x float64) float64 {
 
 	if s < 1e+17 {
 		z = 1 / (s * s)
-		y = z * polevl(z, A, 6)
+		y = z * polevl(z, a, 6)
 	} else {
 		y = 0
 	}
@@ -139,7 +132,7 @@ func psi(x float64) float64 {
 	y = math.Log(s) - 0.5/s - y - w
 
 done:
-	if negative != 0 {
+	if negative {
 		y -= nz
 	}
 	return y

@@ -7,14 +7,15 @@ Cephes Math Library Release 2.8:  June, 2000
 Copyright 1984, 1987, 1992, 2000 by Stephen L. Moshier
 */
 
+// Code derived from hyp2f1.c in https://www.moshier.net/cephes-math-28.tar.gz.
 package cephes
 
-import (
-	"math"
-)
+import "math"
 
-const eps float64 = 1e-13
-const ethresh float64 = 1e-12
+const (
+	eps     float64 = 1e-13
+	ethresh float64 = 1e-12
+)
 
 /*							hyp2f1.c
  *
@@ -74,29 +75,15 @@ const ethresh float64 = 1e-12
  * in cases not addressed (such as x < -1).
  */
 func Hyp2f1(a, b, c, x float64) float64 {
-	var d float64
-	var d1 float64
-	var d2 float64
-	var e float64
-	var p float64
-	var q float64
-	var r float64
-	var s float64
-	var y float64
-	var ax float64
-	var ia float64
-	var ib float64
-	var ic float64
-	var id float64
-	var err float64
-	var flag int
-	var i int
-	var aid int
+	var (
+		d, d1, d2, e        float64
+		p, q, r, s, y, ax   float64
+		ia, ib, ic, id, err float64
+		flag, i, aid        int
+	)
 
-	err = 0
 	ax = math.Abs(x)
 	s = 1 - x
-	flag = 0
 	ia = math.Round(a) // nearest integer to a
 	ib = math.Round(b)
 
@@ -185,7 +172,7 @@ func Hyp2f1(a, b, c, x float64) float64 {
 	// Conditionally make d > 0 by recurrence on c, AMS55 #15.2.27.
 	if d < 0 {
 		// Try the power series first
-		y = hyt2f1(a, b, c, x, &err)
+		y, err = hyt2f1(a, b, c, x)
 		if err < ethresh {
 			goto hypdon
 		}
@@ -212,14 +199,15 @@ func Hyp2f1(a, b, c, x float64) float64 {
 	}
 
 hypok:
-	y = hyt2f1(a, b, c, x, &err)
+	y, err = hyt2f1(a, b, c, x)
 hypdon:
 	if err > ethresh {
 		// partial loss of precision
 	}
 	return y
 hypf:
-	y = math.Pow(s, d) * hys2f1(c-a, c-b, c, x, &err)
+	y, err = Hys2f1(c-a, c-b, c, x)
+	y *= math.Pow(s, d)
 	goto hypdon
 hypdiv:
 	// overflow range error
@@ -229,32 +217,21 @@ hypdiv:
 /* Apply transformations for |x| near 1
  * then call the power series
  */
-func hyt2f1(a, b, c, x float64, loss *float64) float64 {
-	var p float64
-	var q float64
-	var r float64
-	var s float64
-	var t float64
-	var y float64
-	var d float64
-	var err float64
-	var err1 float64
-	var ax float64
-	var id float64
-	var d1 float64
-	var d2 float64
-	var e float64
-	var y1 float64
-	var i int32
-	var aid int32
+func hyt2f1(a, b, c, x float64) (y, loss float64) {
+	var (
+		p, q, r, s, t, d, err, err1 float64
+		ax, id, d1, d2, e, y1       float64
+		i, aid                      int32
+	)
 
-	err = 0
 	s = 1 - x
 	if x < -0.5 {
 		if b > a {
-			y = math.Pow(s, -a) * hys2f1(a, c-b, c, -x/s, &err)
+			y, err = Hys2f1(a, c-b, c, -x/s)
+			y *= math.Pow(s, -a)
 		} else {
-			y = math.Pow(s, -b) * hys2f1(c-a, b, c, -x/s, &err)
+			y, err = Hys2f1(c-a, b, c, -x/s)
+			y *= math.Pow(s, -b)
 		}
 		goto done
 	}
@@ -265,15 +242,16 @@ func hyt2f1(a, b, c, x float64, loss *float64) float64 {
 	if x > 0.9 {
 		if math.Abs(d-id) > eps { // test for integer c-a-b
 			// Try the power series first
-			y = hys2f1(a, b, c, x, &err)
+			y, err = Hys2f1(a, b, c, x)
 			if err < ethresh {
 				goto done
 			}
 
 			// If power series fails, then apply AMS55 #15.3.6
-			q = hys2f1(a, b, 1-d, s, &err)
+			q, err = Hys2f1(a, b, 1-d, s)
 			q *= gammaADivBDivC(d, c-a, c-b)
-			r = math.Pow(s, d) * hys2f1(c-a, c-b, d+1, s, &err1)
+			r, err1 = Hys2f1(c-a, c-b, d+1, s)
+			r *= math.Pow(s, d)
 			r *= gammaADivBDivC(-d, a, b)
 			y = q + r
 
@@ -282,7 +260,7 @@ func hyt2f1(a, b, c, x float64, loss *float64) float64 {
 			if q > r {
 				r = q
 			}
-			err += err1 + machEp*r/y
+			err += err1 + float64(machEp*r/y)
 
 			y *= math.Gamma(c)
 			goto done
@@ -363,38 +341,28 @@ func hyt2f1(a, b, c, x float64, loss *float64) float64 {
 	}
 
 	// Use defining power series if no special cases
-	y = hys2f1(a, b, c, x, &err)
+	y, err = Hys2f1(a, b, c, x)
 
 done:
-	*loss = err
-	return y
+	return y, err
 }
 
 /* Defining power series expansion of Gauss hypergeometric function */
 // loss estimates loss of significance upon return.
-func hys2f1(a, b, c, x float64, loss *float64) float64 {
-	var f float64
-	var g float64
-	var h float64
-	var k float64
-	var m float64
-	var s float64
-	var u float64
-	var umax float64
-	var i int32
+func Hys2f1(a, b, c, x float64) (s, loss float64) {
+	var (
+		f, g, h, k, m, u, umax float64
+		i                      int32
+	)
 
-	i = 0
-	umax = 0
 	f = a
 	g = b
 	h = c
 	s = 1
 	u = 1
-	k = 0
 	for {
 		if math.Abs(h) < 1e-13 {
-			*loss = 1
-			return math.MaxFloat64
+			return math.MaxFloat64, 1
 		}
 		m = k + 1
 		u = u * ((f + k) * (g + k) * x / ((h + k) * m))
@@ -407,8 +375,7 @@ func hys2f1(a, b, c, x float64, loss *float64) float64 {
 
 		i++
 		if i > 10000 { // should never happen
-			*loss = 1
-			return s
+			return s, 1
 		}
 
 		if math.Abs(u/s) <= machEp {
@@ -416,9 +383,7 @@ func hys2f1(a, b, c, x float64, loss *float64) float64 {
 		}
 	}
 
-	*loss = machEp*umax/math.Abs(s) + machEp*float64(i)
-
-	return s
+	return s, machEp*umax/math.Abs(s) + machEp*float64(i)
 }
 
 // gammaADivBDivC performs gamma(a) / (gamma(b)*gamma(c)).

@@ -44,7 +44,9 @@ func TestHypergeo(t *testing.T) {
 		// Constants based on https://github.com/scipy/scipy/issues/1561
 		{a: 10, b: 5, c: -300.5, z: 0.5, want: -3.85202708152391e32, tol: 5e-15},
 
-		// Constants based on Table 26, John Pearson, Computation of Hypergeometric Functions, Master thesis for Worcester College, Oxford University.
+		// Constants based on Table 26,
+		// John Pearson, Computation of Hypergeometric Functions,
+		// Master thesis for Worcester College, Oxford University.
 		// https://api.semanticscholar.org/CorpusID:124333574
 		{a: 0.1, b: 0.2, c: 0.3, z: 0.5, want: 1.046432811217352, tol: 1e-15},
 		{a: -0.1, b: 0.2, c: 0.3, z: 0.5, want: 0.956434210968214, tol: 1e-15},
@@ -62,7 +64,8 @@ func TestHypergeo(t *testing.T) {
 
 		// Additional cases for hardening against large |a|, |b|, or |c|.
 		// These wanted values are based on the agreed values of both Mathematica 14.2.0 and mpmath 1.3.0.
-		// mpmath is chosen because it is often treated as ground truth in scipy's issues:
+		// mpmath is chosen because it is often treated as
+		// ground truth in scipy's issues:
 		// * https://github.com/scipy/scipy/issues/1561
 		// * https://github.com/scipy/scipy/issues/5349
 		{a: -290, b: 5, c: -300.5, z: 0.5, want: 26.9076853843542, tol: 5e-15},
@@ -72,14 +75,16 @@ func TestHypergeo(t *testing.T) {
 		{a: -5, b: 0.5, c: 0.3, z: -2.1, want: 607.226576917773834, tol: 1e-15},
 
 		// Additional cases for hardening against large |a|, |b|, or |c|.
-		// These wanted values are based on the agreed values of both Mathematica 14.2.0 and Miller's algorithm described in https://github.com/scipy/scipy/issues/1561#issuecomment-130488352
+		// These wanted values are based on the agreed values
+		// of both Mathematica 14.2.0 and Miller's algorithm described in https://github.com/scipy/scipy/issues/1561#issuecomment-130488352
 		// We trust Mathematica and Miller's algorithm because
 		// * Mathematica is the gold standard held in discussions in R's hypergeo, scipy, and mpmath:
 		//   * https://github.com/RobinHankin/hypergeo/issues/7
 		//   * https://github.com/scipy/scipy/issues/5349
 		//   * https://github.com/mpmath/mpmath/issues/296
 		// * Miller's algorithm is discussed in the often cited paper John Pearson, Computation of Hypergeometric Functions
-		// Note that these are particular hard cases, as all four softwares R's hypergeo, scipy, mpmath, and Mathematica give wildly different results.
+		// Note that these are particular hard cases,
+		// as all four softwares R's hypergeo, scipy, mpmath, and Mathematica give wildly different results.
 		{a: 100, b: 5, c: -300.5, z: 0.5, want: -1.07414870340863581e139, tol: 1e-15},
 		{a: -100, b: -200, c: 300 + 1e-9, z: -0.5 * math.Sqrt(2), want: -1.073671875630690e-30, tol: 1e-15},
 		{a: -100, b: -200, c: -300 + 0.1, z: 0.5 * math.Sqrt(2), want: 2.568211952590272e-31, tol: 1e-15},

@@ -54,7 +54,8 @@ func Hypergeo(a, b, c, z float64) float64 {
 		return eqn15_3_4(a, b, c, z)
 	}
 
-	// When a or b is a non-positive integer, Hypergeo reduces to the finite polynomial described in equation 15.4.1.
+	// When a or b is a non-positive integer, Hypergeo reduces to
+	// the finite polynomial described in equation 15.4.1.
 	if isNonPosInt(a) {
 		return eqn15_4_1(int(-a), b, c, z)
 	}
@@ -218,5 +219,6 @@ func isCephesBug(a, b, c, z float64) (float64, bool) {
 }
 
 func isNonPosInt(x float64) bool {
-	return x <= 0 && (math.Round(x) == x)
+	_, frac := math.Modf(x)
+	return x <= 0 && frac == 0
 }

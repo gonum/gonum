@@ -204,11 +204,13 @@ func lpochhammer(x float64, n int) (float64, int) {
 	return y, sign
 }
 
-// isCephesBug checks if the received arguments hit a Cephes bug.
+// isCephesBug checks whether the received arguments hit a Cephes bug,
+// occurring when z ≈ 1 and |c-a-b| is a negative integer.
 // If the bug is hit, isCephesBug returns the remedied value.
 //
 // This bug concerns Cephes' evaluation of mathext.Digamma on negative integers,
-// which is mathematically undefined.
+// where it is mathematically undefined.
+//
 // For reference, scipy also found this workaround necessary in:
 // https://github.com/scipy/scipy/commit/1dfea85b34e8cbd868f9fc43345898084ba73aab
 func isCephesBug(a, b, c, z float64) (float64, bool) {

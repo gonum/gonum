@@ -7,6 +7,7 @@ package mat
 import (
 	"math"
 	"math/rand/v2"
+	"slices"
 	"sort"
 	"testing"
 
@@ -114,12 +115,7 @@ func TestEigen(t *testing.T) {
 }
 
 func cmplxEqual(v1, v2 []complex128) bool {
-	for i, v := range v1 {
-		if v != v2[i] {
-			return false
-		}
-	}
-	return true
+	return slices.Equal(v1, v2)
 }
 
 func cmplxEqualTol(v1, v2 []complex128, tol float64) bool {

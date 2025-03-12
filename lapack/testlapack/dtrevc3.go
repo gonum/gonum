@@ -400,7 +400,7 @@ func residualEVNormalization(emat blas64.General, wi []float64) float64 {
 			ipair = 0
 		}
 	}
-	return math.Max(math.Abs(enrmin-1), math.Abs(enrmin-1))
+	return math.Max(math.Abs(enrmin-1), math.Abs(enrmax-1))
 }
 
 // normalizeEV normalizes eigenvectors in the columns of E so that the element

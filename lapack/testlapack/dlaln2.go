@@ -41,9 +41,9 @@ func testDlaln2(t *testing.T, impl Dlaln2er, trans bool, na, nw, extra int, rnd 
 
 	var w complex128
 	if nw == 1 {
-		w = complex(rand.NormFloat64(), 0)
+		w = complex(rnd.NormFloat64(), 0)
 	} else {
-		w = complex(rand.NormFloat64(), rand.NormFloat64())
+		w = complex(rnd.NormFloat64(), rnd.NormFloat64())
 	}
 	smin := dlamchP * (math.Abs(real(w)) + math.Abs(imag(w)))
 

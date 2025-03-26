@@ -241,9 +241,10 @@ func TestDistanceCentralityUndirected(t *testing.T) {
 var directedCentralityTests = []struct {
 	g []set
 
-	farness  map[int64]float64
-	harmonic map[int64]float64
-	residual map[int64]float64
+	eccentricity map[int64]float64
+	farness      map[int64]float64
+	harmonic     map[int64]float64
+	residual     map[int64]float64
 }{
 	{
 		g: []set{
@@ -252,6 +253,11 @@ var directedCentralityTests = []struct {
 			C: nil,
 		},
 
+		eccentricity: map[int64]float64{
+			A: 0,
+			B: 1,
+			C: 2,
+		},
 		farness: map[int64]float64{
 			A: 0,
 			B: 1,
@@ -277,6 +283,13 @@ var directedCentralityTests = []struct {
 			E: nil,
 		},
 
+		eccentricity: map[int64]float64{
+			A: 0,
+			B: 1,
+			C: 2,
+			D: 3,
+			E: 4,
+		},
 		farness: map[int64]float64{
 			A: 0,
 			B: 1,
@@ -308,6 +321,13 @@ var directedCentralityTests = []struct {
 			E: linksTo(C),
 		},
 
+		eccentricity: map[int64]float64{
+			A: 0,
+			B: 0,
+			C: 1,
+			D: 0,
+			E: 0,
+		},
 		farness: map[int64]float64{
 			A: 0,
 			B: 0,
@@ -339,6 +359,13 @@ var directedCentralityTests = []struct {
 			E: nil,
 		},
 
+		eccentricity: map[int64]float64{
+			A: 0,
+			B: 1,
+			C: 1,
+			D: 1,
+			E: 1,
+		},
 		farness: map[int64]float64{
 			A: 0,
 			B: 1,
@@ -395,6 +422,15 @@ func TestDistanceCentralityDirected(t *testing.T) {
 				}
 				t.Errorf("unexpected closeness centrality for test %d:\ngot: %v\nwant:%v",
 					i, orderedFloats(got, prec), orderedFloats(want, prec))
+				break
+			}
+		}
+
+		got = Eccentricity(g, p)
+		for n := range test.g {
+			if !scalar.EqualWithinAbsOrRel(got[int64(n)], test.eccentricity[int64(n)], tol, tol) {
+				t.Errorf("unexpected eccentricity for test %d:\ngot: %v\nwant:%v",
+					i, orderedFloats(got, prec), orderedFloats(test.eccentricity, prec))
 				break
 			}
 		}

@@ -12,20 +12,18 @@ import (
 	"gonum.org/v1/gonum/graph/simple"
 )
 
-// ExampleEccentricity_diameter shows how to compute the diameter of a graph
-// based on its eccentricity map.
 func ExampleEccentricity_diameter() {
-	// Build a simple graph: n1--n2--n3
+	// Build a simple graph: n1--n2--n3.
 	var n1, n2, n3 simple.Node = 1, 2, 3
 	g := simple.NewUndirectedGraph()
 	g.SetEdge(simple.Edge{F: n1, T: n2})
 	g.SetEdge(simple.Edge{F: n2, T: n3})
 
-	// Get eccentricity map
+	// Find shortest paths and calculate eccentricity values.
 	paths := path.DijkstraAllPaths(g)
 	e := network.Eccentricity(g, paths)
 
-	// Compute diameter
+	// Compute the graph's diameter from the eccentricities.
 	var diameter float64
 	for _, d := range e {
 		diameter = max(d, diameter)

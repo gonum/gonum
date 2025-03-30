@@ -46,14 +46,14 @@ func ExampleLinearRegression() {
 	// R^2: 0.999999
 }
 
-// Example_confidenceInterval shows how one can compute a confidence
-// interval to quantify the uncertainty around an estimated parameter,
-// when working with a small sample.
+// This example shows how one can compute a confidence interval to quantify
+// the uncertainty around an estimated parameter, when working with a small
+// sample from a normally distributed variable.
 //
 // For small samples (N ≤ 30), confidence intervals are computed with
 // the t-distribution:
 //
-//	Conf.Interval = $\hat{x} \pm t \frac{s}{\sqrt{n}}
+//	Conf.Interval = $\hat{x} ± t \frac{s}{\sqrt{n}}
 //
 // where:
 //   - x is the sample mean,
@@ -67,12 +67,10 @@ func ExampleLinearRegression() {
 //	https://en.wikipedia.org/wiki/Student's_t-distribution
 func Example_confidenceInterval() {
 
-	// example data derived from:
-	//  https://datagy.io/python-confidence-intervals/
-
 	var (
-		xs = []float64{25, 28, 30, 32, 29, 27, 31, 26, 28, 30} // sample data
-		ws = []float64(nil)                                    // weights
+		// First 10 sepal widths from iris data set.
+		xs = []float64{3.5, 3.0, 3.2, 3.1, 3.6, 3.9, 3.4, 3.4, 2.9, 3.1}
+		ws = []float64(nil) // weights
 		n  = float64(len(xs))
 		df = n - 1
 
@@ -95,6 +93,6 @@ func Example_confidenceInterval() {
 	fmt.Printf("CI(@%g%%): [%.2f, %.2f]\n", lvl*100, lo, hi)
 
 	// Output:
-	// Mean:     28.60
-	// CI(@95%): [27.01, 30.19]
+	// Mean:     3.31
+	// CI(@95%): [3.09, 3.53]
 }

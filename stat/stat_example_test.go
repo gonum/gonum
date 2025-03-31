@@ -46,26 +46,26 @@ func ExampleLinearRegression() {
 	// R^2: 0.999999
 }
 
-// This example shows how one can compute a confidence interval to quantify
-// the uncertainty around an estimated parameter, when working with a small
-// sample from a normally distributed variable.
-//
-// For small samples (N ≤ 30), confidence intervals are computed with
-// the t-distribution:
-//
-//	Conf.Interval = $\hat{x} ± t \frac{s}{\sqrt{n}}
-//
-// where:
-//   - x is the sample mean,
-//   - s is the sample standard deviation,
-//   - n is the sample size, and
-//   - t is the critical value from the t-distribution based on the desired
-//     confidence level and degrees of freedom (df=n-1)
-//
-// For more details, see:
-//
-//	https://en.wikipedia.org/wiki/Student's_t-distribution
 func Example_confidenceInterval() {
+	// This example shows how one can compute a confidence interval to quantify
+	// the uncertainty around an estimated parameter, when working with a small
+	// sample from a normally distributed variable.
+	//
+	// For small samples (N ≤ 30), confidence intervals are computed with
+	// the t-distribution:
+	//
+	//	Conf.Interval = $\hat{x} ± t \frac{s}{\sqrt{n}}
+	//
+	// where:
+	//   - x is the sample mean,
+	//   - s is the sample standard deviation,
+	//   - n is the sample size, and
+	//   - t is the critical value from the t-distribution based on the desired
+	//     confidence level and degrees of freedom (df=n-1)
+	//
+	// For more details, see:
+	//
+	//	https://en.wikipedia.org/wiki/Student's_t-distribution
 
 	var (
 		// First 10 sepal widths from iris data set.

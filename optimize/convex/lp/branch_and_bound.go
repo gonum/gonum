@@ -6,6 +6,9 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
+// wholeNumberTol is the tolerance for a number differing from a whole value
+const wholeNumberTol = 1e-14
+
 // Branch and Bound uses simplex to resolve an integer programming problem where some of the constraints may be on the variables
 // being whole numbers.
 //
@@ -36,10 +39,15 @@ func BNB(c []float64, A mat.Matrix, b []float64, G mat.Matrix, h []float64, whol
 
 		if err != nil {
 			switch err {
+			// Problems are programatically created,
+			// if one of them is infeasible, it could be that the branch we're testing
+			// now is infeasible but some other branch isn't, just skip this problem
+			// and don't add any new ones, if no branches have any feasible solutions
+			// then the whole problem is infeasible.
 			case ErrInfeasible:
 				continue
 			default:
-				return 0, nil, err
+				return math.NaN(), nil, err
 			}
 		}
 
@@ -47,7 +55,7 @@ func BNB(c []float64, A mat.Matrix, b []float64, G mat.Matrix, h []float64, whol
 		broken_whole := 0
 		is_whole := true
 		for i, b := range whole {
-			if b && x[i] != math.Round(x[i]) {
+			if b && !checkWholeNumber(x[i]) {
 				is_whole = false
 				broken_whole = i
 				break
@@ -96,7 +104,7 @@ func BNB(c []float64, A mat.Matrix, b []float64, G mat.Matrix, h []float64, whol
 	}
 
 	if math.IsInf(best_attempt.fitness, 0) {
-		return 0, nil, ErrInfeasible
+		return math.NaN(), nil, ErrInfeasible
 	}
 
 	return best_attempt.fitness, best_attempt.x, nil
@@ -110,4 +118,9 @@ type problem struct {
 type attempt struct {
 	fitness float64
 	x       []float64
+}
+
+func checkWholeNumber(x float64) bool {
+	diff := math.Abs(x - math.Round(x))
+	return diff < wholeNumberTol
 }

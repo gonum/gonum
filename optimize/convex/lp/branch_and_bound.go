@@ -71,6 +71,10 @@ func BNB(c []float64, A mat.Matrix, b []float64, G mat.Matrix, h []float64, whol
 			}
 		} else {
 			if fit > best_attempt.fitness {
+				// If it breaks integer constraints and has a worse
+				// fitness than the best solution as far,
+				// adding more constraints wouldn't make the fitness any better,
+				// so we might as well end the search in this branch here.
 				continue
 			}
 			lowX := math.Floor(x[broken_whole])
@@ -103,6 +107,8 @@ func BNB(c []float64, A mat.Matrix, b []float64, G mat.Matrix, h []float64, whol
 		}
 	}
 
+	// infinite best attmpt fitness implies we have not a single feasible
+	// solution, so the problem is infeasible as a whole.
 	if math.IsInf(best_attempt.fitness, 0) {
 		return math.NaN(), nil, ErrInfeasible
 	}

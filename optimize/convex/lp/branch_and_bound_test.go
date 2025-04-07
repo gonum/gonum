@@ -39,7 +39,7 @@ func TestBNB(t *testing.T) {
 	// Check for infeasibility
 	// This happens if no whole number solution exists
 	// test is a diamond with no whole numbers contained within.
-	// Ideal solution would be (0.5, 0), but it's not a whole number.
+	// Ideal solution would be (0, 0.5), but it's not a whole number.
 	_, _, err = BNB(
 		[]float64{1, 0},
 		nil,

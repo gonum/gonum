@@ -1887,3 +1887,77 @@ func TestStdScore(t *testing.T) {
 		}
 	}
 }
+
+func TestWassersteinDistance(t *testing.T) {
+	p := []float64{0, 1, 2}
+	q := []float64{0, 1, 2}
+	u := []float64{0.2, 0.3, 0.5}
+	v := []float64{0.2, 0.3, 0.5}
+
+	dist := WassersteinDistance(p, q, u, v)
+	if dist != 0 {
+		t.Errorf("WassersteinDistance returned %f, expected 0", dist)
+	}
+
+	p = []float64{0, 1, 2}
+	q = []float64{1, 2, 3}
+	u = []float64{0.2, 0.3, 0.5}
+	v = []float64{0.2, 0.3, 0.5}
+
+	dist = WassersteinDistance(p, q, u, v)
+	if math.Abs(dist-1) > 1e-9 {
+		t.Errorf("WassersteinDistance returned %f, expected 1", dist)
+	}
+}
+
+func TestWassersteinDistanceNd(t *testing.T) {
+	pPoints := [][]float64{{0, 0}, {1, 1}, {2, 2}}
+	pWeights := [][]float64{{0.2}, {0.3}, {0.5}}
+	qPoints := [][]float64{{0, 0}, {1, 1}, {2, 2}}
+	qWeights := [][]float64{{0.2}, {0.3}, {0.5}}
+
+	dist := WassersteinDistanceNd(pPoints, pWeights, qPoints, qWeights)
+	if dist != 0 {
+		t.Errorf("WassersteinDistanceNd returned %f, expected 0", dist)
+	}
+
+	pPoints = [][]float64{{0, 0}, {1, 1}, {2, 2}}
+	pWeights = [][]float64{{0.2}, {0.3}, {0.5}}
+	qPoints = [][]float64{{1, 1}, {2, 2}, {3, 3}}
+	qWeights = [][]float64{{0.2}, {0.3}, {0.5}}
+
+	dist = WassersteinDistanceNd(pPoints, pWeights, qPoints, qWeights)
+	if math.Abs(dist-math.Sqrt(2)) > 1e-9 {
+		t.Errorf("WassersteinDistanceNd returned %f, expected sqrt(2)", dist)
+	}
+}
+
+func TestWassersteinDistanceInvalidInput(t *testing.T) {
+	p := []float64{0, 1, 2}
+	q := []float64{0, 1}
+	u := []float64{0.2, 0.3, 0.5}
+	v := []float64{0.2, 0.3, 0.5}
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("WassersteinDistance did not panic with invalid input")
+		}
+	}()
+
+	WassersteinDistance(p, q, u, v)
+}
+
+func TestWassersteinDistanceNdInvalidInput(t *testing.T) {
+	pPoints := [][]float64{{0, 0}, {1, 1}, {2, 2}}
+	pWeights := [][]float64{{0.2}, {0.3}, {0.5}}
+	qPoints := [][]float64{{0, 0}, {1, 1}}
+	qWeights := [][]float64{{0.2}, {0.3}, {0.5}}
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("WassersteinDistanceNd did not panic with invalid input")
+		}
+	}()
+
+	WassersteinDistanceNd(pPoints, pWeights, qPoints, qWeights)
+}

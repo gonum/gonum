@@ -24,6 +24,151 @@ const (
 	LinInterp CumulantKind = 4
 )
 
+// validateDistributions is a helper function for the WassersteinDistance calculation
+func validateDistributions(p, q, u, v []float64) {
+	if len(p) != len(u) || len(q) != len(v) {
+		panic("distribution and weight lengths must match")
+	}
+	if len(p) == 0 || len(q) == 0 {
+		panic("input distributions cannot be empty")
+	}
+}
+
+// validateNdDistributions is a helper function for the WassersteinDistanceNd calculation
+func validateNdDistributions(pPoints, pWeights, qPoints, qWeights [][]float64) {
+	if len(pPoints) != len(pWeights) || len(qPoints) != len(qWeights) {
+		panic("distribution and weight lengths must match")
+	}
+	if len(pPoints) == 0 || len(qPoints) == 0 {
+		panic("input distributions cannot be empty")
+	}
+	dim := len(pPoints[0])
+	for _, point := range pPoints {
+		if len(point) != dim {
+			panic("all points in pPoints must have the same dimension")
+		}
+	}
+	for _, point := range qPoints {
+		if len(point) != dim {
+			panic("all points in qPoints must have the same dimension")
+		}
+	}
+}
+
+// sumWeights is a helper function for the Wasserstein Distance calculation
+func sumWeights(weights [][]float64) float64 {
+	sum := 0.0
+	for _, weight := range weights {
+		sum += weight[0]
+	}
+	return sum
+}
+
+// WassersteinDistance computes the Wasserstein distance (also known as Earth Mover's Distance) between two 1d-distributions
+func WassersteinDistance(p, q, u, v []float64) float64 {
+	validateDistributions(p, q, u, v)
+	totalP, totalQ := sumWeights([][]float64{u}), sumWeights([][]float64{v})
+	if math.Abs(totalP-totalQ) > 1e-9 {
+		panic("total mass mismatch")
+	}
+
+	type pair struct {
+		value  float64
+		weight float64
+	}
+
+	pPairs := make([]pair, len(p))
+	qPairs := make([]pair, len(q))
+	for i := range p {
+		pPairs[i] = pair{p[i], u[i]}
+	}
+	for i := range q {
+		qPairs[i] = pair{q[i], v[i]}
+	}
+	sort.Slice(pPairs, func(i, j int) bool { return pPairs[i].value < pPairs[j].value })
+	sort.Slice(qPairs, func(i, j int) bool { return qPairs[i].value < qPairs[j].value })
+
+	i, j := 0, 0
+	resP, resQ := pPairs[0].weight, qPairs[0].weight
+	distance := 0.0
+
+	for i < len(pPairs) && j < len(qPairs) {
+		flow := math.Min(resP, resQ)
+		distance += flow * math.Abs(pPairs[i].value-qPairs[j].value)
+		resP -= flow
+		resQ -= flow
+
+		if resP < 1e-12 {
+			i++
+			if i < len(pPairs) {
+				resP = pPairs[i].weight
+			}
+		}
+		if resQ < 1e-12 {
+			j++
+			if j < len(qPairs) {
+				resQ = qPairs[j].weight
+			}
+		}
+	}
+	return distance
+}
+
+// WassersteinDistanceNd computes the Wasserstein Distance (also known as Earth Mover's Distance) between two n-dimensional distributions
+func WassersteinDistanceNd(pPoints, pWeights, qPoints, qWeights [][]float64) float64 {
+	validateNdDistributions(pPoints, pWeights, qPoints, qWeights)
+	totalP, totalQ := sumWeights(pWeights), sumWeights(qWeights)
+	if math.Abs(totalP-totalQ) > 1e-9 {
+		panic("total mass mismatch")
+	}
+
+	type pair struct {
+		point  []float64
+		weight float64
+	}
+
+	pPairs := make([]pair, len(pPoints))
+	qPairs := make([]pair, len(qPoints))
+	for i := range pPoints {
+		pPairs[i] = pair{pPoints[i], pWeights[i][0]}
+	}
+	for i := range qPoints {
+		qPairs[i] = pair{qPoints[i], qWeights[i][0]}
+	}
+	sort.Slice(pPairs, func(i, j int) bool {
+		return pPairs[i].point[0] < pPairs[j].point[0]
+	})
+	sort.Slice(qPairs, func(i, j int) bool {
+		return qPairs[i].point[0] < qPairs[j].point[0]
+	})
+
+	i, j := 0, 0
+	resP, resQ := pPairs[0].weight, qPairs[0].weight
+	distance := 0.0
+
+	for i < len(pPairs) && j < len(qPairs) {
+		flow := math.Min(resP, resQ)
+		dist := floats.Distance(pPairs[i].point, qPairs[j].point, 2)
+		distance += flow * dist
+		resP -= flow
+		resQ -= flow
+
+		if resP < 1e-12 {
+			i++
+			if i < len(pPairs) {
+				resP = pPairs[i].weight
+			}
+		}
+		if resQ < 1e-12 {
+			j++
+			if j < len(qPairs) {
+				resQ = qPairs[j].weight
+			}
+		}
+	}
+	return distance
+}
+
 // bhattacharyyaCoeff computes the Bhattacharyya Coefficient for probability distributions given by:
 //
 //	\sum_i \sqrt{p_i q_i}
@@ -332,7 +477,7 @@ func covarianceMeans(x, y, weights []float64, xu, yu float64) float64 {
 		w := weights[i]
 		yv := y[i]
 		wxd := w * (xv - xu)
-		yd := (yv - yu)
+		yd := yv - yu
 		ss += wxd * yd
 		xcompensation += wxd
 		ycompensation += w * yd
@@ -1383,7 +1528,7 @@ func meanUnnormalisedVarianceSumWeights(x, weights []float64) (mean, unnormalise
 			ss += d * d
 			compensation += d
 		}
-		unnormalisedVariance = (ss - compensation*compensation/float64(len(x)))
+		unnormalisedVariance = ss - compensation*compensation/float64(len(x))
 		return mean, unnormalisedVariance, float64(len(x))
 	}
 
@@ -1395,6 +1540,6 @@ func meanUnnormalisedVarianceSumWeights(x, weights []float64) (mean, unnormalise
 		compensation += wd
 		sumWeights += w
 	}
-	unnormalisedVariance = (ss - compensation*compensation/sumWeights)
+	unnormalisedVariance = ss - compensation*compensation/sumWeights
 	return mean, unnormalisedVariance, sumWeights
 }

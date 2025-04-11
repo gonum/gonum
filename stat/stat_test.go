@@ -1899,6 +1899,11 @@ func TestWassersteinDistance(t *testing.T) {
 		t.Errorf("WassersteinDistance returned %f, expected 0", dist)
 	}
 
+	dist = WassersteinDistance(p, q, nil, nil)
+	if dist != 0 {
+		t.Errorf("WassersteinDistance returned %f, expected 0", dist)
+	}
+
 	p = []float64{0, 1, 2}
 	q = []float64{1, 2, 3}
 	u = []float64{0.2, 0.3, 0.5}
@@ -1916,7 +1921,12 @@ func TestWassersteinDistanceNd(t *testing.T) {
 	qPoints := [][]float64{{0, 0}, {1, 1}, {2, 2}}
 	qWeights := [][]float64{{0.2}, {0.3}, {0.5}}
 
-	dist := WassersteinDistanceNd(pPoints, pWeights, qPoints, qWeights)
+	dist := WassersteinDistanceNd(pPoints, qPoints, pWeights, qWeights)
+	if dist != 0 {
+		t.Errorf("WassersteinDistanceNd returned %f, expected 0", dist)
+	}
+
+	dist = WassersteinDistanceNd(pPoints, qPoints, nil, nil)
 	if dist != 0 {
 		t.Errorf("WassersteinDistanceNd returned %f, expected 0", dist)
 	}
@@ -1926,7 +1936,7 @@ func TestWassersteinDistanceNd(t *testing.T) {
 	qPoints = [][]float64{{1, 1}, {2, 2}, {3, 3}}
 	qWeights = [][]float64{{0.2}, {0.3}, {0.5}}
 
-	dist = WassersteinDistanceNd(pPoints, pWeights, qPoints, qWeights)
+	dist = WassersteinDistanceNd(pPoints, qPoints, pWeights, qWeights)
 	if math.Abs(dist-math.Sqrt(2)) > 1e-9 {
 		t.Errorf("WassersteinDistanceNd returned %f, expected sqrt(2)", dist)
 	}

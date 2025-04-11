@@ -25,8 +25,12 @@ const (
 )
 
 // validateDistributions is a helper function for the WassersteinDistance calculation
-func validateDistributions(p, q, u, v []float64) {
-	if len(p) != len(u) || len(q) != len(v) {
+func validateDistributions(p, q, pWeights, qWeights []float64) {
+	if len(p) != len(q) {
+		panic("p and q must have the same length")
+	}
+
+	if len(p) != len(pWeights) || len(q) != len(qWeights) {
 		panic("distribution and weight lengths must match")
 	}
 	if len(p) == 0 || len(q) == 0 {
@@ -35,22 +39,26 @@ func validateDistributions(p, q, u, v []float64) {
 }
 
 // validateNdDistributions is a helper function for the WassersteinDistanceNd calculation
-func validateNdDistributions(pPoints, pWeights, qPoints, qWeights [][]float64) {
-	if len(pPoints) != len(pWeights) || len(qPoints) != len(qWeights) {
+func validateNdDistributions(p, q, pWeights, qWeights [][]float64) {
+	if len(p) != len(q) {
+		panic("p and q must have the same length")
+	}
+
+	if len(p) != len(pWeights) || len(q) != len(qWeights) {
 		panic("distribution and weight lengths must match")
 	}
-	if len(pPoints) == 0 || len(qPoints) == 0 {
+	if len(p) == 0 || len(q) == 0 {
 		panic("input distributions cannot be empty")
 	}
-	dim := len(pPoints[0])
-	for _, point := range pPoints {
+	dim := len(p[0])
+	for _, point := range p {
 		if len(point) != dim {
-			panic("all points in pPoints must have the same dimension")
+			panic("all points in p must have the same dimension")
 		}
 	}
-	for _, point := range qPoints {
+	for _, point := range q {
 		if len(point) != dim {
-			panic("all points in qPoints must have the same dimension")
+			panic("all points in q must have the same dimension")
 		}
 	}
 }
@@ -65,9 +73,26 @@ func sumWeights(weights [][]float64) float64 {
 }
 
 // WassersteinDistance computes the Wasserstein distance (also known as Earth Mover's Distance) between two 1d-distributions
-func WassersteinDistance(p, q, u, v []float64) float64 {
-	validateDistributions(p, q, u, v)
-	totalP, totalQ := sumWeights([][]float64{u}), sumWeights([][]float64{v})
+// if the weights are nil, all points are treated as equally weighted
+func WassersteinDistance(p, q, pWeights, qWeights []float64) float64 {
+	if pWeights == nil {
+		pWeights = make([]float64, len(p))
+
+		for i := range p {
+			pWeights[i] = float64(1.0 / len(p))
+		}
+	}
+
+	if qWeights == nil {
+		qWeights = make([]float64, len(q))
+
+		for i := range q {
+			qWeights[i] = float64(1.0 / len(q))
+		}
+	}
+
+	validateDistributions(p, q, pWeights, qWeights)
+	totalP, totalQ := sumWeights([][]float64{pWeights}), sumWeights([][]float64{qWeights})
 	if math.Abs(totalP-totalQ) > 1e-9 {
 		panic("total mass mismatch")
 	}
@@ -80,10 +105,10 @@ func WassersteinDistance(p, q, u, v []float64) float64 {
 	pPairs := make([]pair, len(p))
 	qPairs := make([]pair, len(q))
 	for i := range p {
-		pPairs[i] = pair{p[i], u[i]}
+		pPairs[i] = pair{p[i], pWeights[i]}
 	}
 	for i := range q {
-		qPairs[i] = pair{q[i], v[i]}
+		qPairs[i] = pair{q[i], qWeights[i]}
 	}
 	sort.Slice(pPairs, func(i, j int) bool { return pPairs[i].value < pPairs[j].value })
 	sort.Slice(qPairs, func(i, j int) bool { return qPairs[i].value < qPairs[j].value })
@@ -115,8 +140,25 @@ func WassersteinDistance(p, q, u, v []float64) float64 {
 }
 
 // WassersteinDistanceNd computes the Wasserstein Distance (also known as Earth Mover's Distance) between two n-dimensional distributions
-func WassersteinDistanceNd(pPoints, pWeights, qPoints, qWeights [][]float64) float64 {
-	validateNdDistributions(pPoints, pWeights, qPoints, qWeights)
+// if the weights are nil, all points are treated as equally weighted
+func WassersteinDistanceNd(p, q, pWeights, qWeights [][]float64) float64 {
+	if pWeights == nil {
+		pWeights = make([][]float64, len(p))
+
+		for i := range p {
+			pWeights[i] = []float64{1.0 / float64(len(p))}
+		}
+	}
+
+	if qWeights == nil {
+		qWeights = make([][]float64, len(q))
+
+		for i := range q {
+			qWeights[i] = []float64{1.0 / float64(len(q))}
+		}
+	}
+
+	validateNdDistributions(p, q, pWeights, qWeights)
 	totalP, totalQ := sumWeights(pWeights), sumWeights(qWeights)
 	if math.Abs(totalP-totalQ) > 1e-9 {
 		panic("total mass mismatch")
@@ -127,13 +169,13 @@ func WassersteinDistanceNd(pPoints, pWeights, qPoints, qWeights [][]float64) flo
 		weight float64
 	}
 
-	pPairs := make([]pair, len(pPoints))
-	qPairs := make([]pair, len(qPoints))
-	for i := range pPoints {
-		pPairs[i] = pair{pPoints[i], pWeights[i][0]}
+	pPairs := make([]pair, len(p))
+	qPairs := make([]pair, len(q))
+	for i := range p {
+		pPairs[i] = pair{p[i], pWeights[i][0]}
 	}
-	for i := range qPoints {
-		qPairs[i] = pair{qPoints[i], qWeights[i][0]}
+	for i := range q {
+		qPairs[i] = pair{q[i], qWeights[i][0]}
 	}
 	sort.Slice(pPairs, func(i, j int) bool {
 		return pPairs[i].point[0] < pPairs[j].point[0]

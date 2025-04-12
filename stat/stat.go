@@ -185,6 +185,11 @@ func WassersteinDistanceND(p, q [][]float64, pWeights, qWeights []float64) (floa
 
 	validateNDInputs(p, q)
 
+	// Special case for single-point distributions
+	if len(p) == 1 && len(q) == 1 {
+		return floats.Distance(p[0], q[0], 2), nil
+	}
+
 	// Handle identical distributions case.
 	if len(p) == len(q) {
 		identical := true
@@ -195,9 +200,7 @@ func WassersteinDistanceND(p, q [][]float64, pWeights, qWeights []float64) (floa
 			}
 		}
 		if identical {
-			// Also check if weights are equal when provided.
-			if (pWeights == nil && qWeights == nil) ||
-				(pWeights != nil && qWeights != nil && floats.Equal(pWeights, qWeights)) {
+			if floats.Equal(pWeights, qWeights) {
 				return 0, nil
 			}
 		}
@@ -216,11 +219,6 @@ func WassersteinDistanceND(p, q [][]float64, pWeights, qWeights []float64) (floa
 		floats.AddConst(1/float64(len(q)), qWeights)
 	} else {
 		normalizeWeights(qWeights)
-	}
-
-	// Special case for single-point distributions
-	if len(p) == 1 && len(q) == 1 {
-		return floats.Distance(p[0], q[0], 2), nil
 	}
 
 	// Create cost matrix using Euclidean distance.

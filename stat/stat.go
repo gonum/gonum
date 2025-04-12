@@ -5,6 +5,9 @@
 package stat
 
 import (
+	"fmt"
+	"gonum.org/v1/gonum/mat"
+	"gonum.org/v1/gonum/optimize/convex/lp"
 	"math"
 	"sort"
 
@@ -24,79 +27,57 @@ const (
 	LinInterp CumulantKind = 4
 )
 
-// validateDistributions is a helper function for the WassersteinDistance calculation
-func validateDistributions(p, q, pWeights, qWeights []float64) {
-	if len(p) != len(q) {
-		panic("p and q must have the same length")
-	}
+const epsilon = 1e-8
 
-	if len(p) != len(pWeights) || len(q) != len(qWeights) {
-		panic("distribution and weight lengths must match")
-	}
-	if len(p) == 0 || len(q) == 0 {
-		panic("input distributions cannot be empty")
-	}
-}
-
-// validateNdDistributions is a helper function for the WassersteinDistanceNd calculation
-func validateNdDistributions(p, q, pWeights, qWeights [][]float64) {
-	if len(p) != len(q) {
-		panic("p and q must have the same length")
-	}
-
-	if len(p) != len(pWeights) || len(q) != len(qWeights) {
-		panic("distribution and weight lengths must match")
-	}
-	if len(p) == 0 || len(q) == 0 {
-		panic("input distributions cannot be empty")
-	}
-	dim := len(p[0])
-	for _, point := range p {
-		if len(point) != dim {
-			panic("all points in p must have the same dimension")
-		}
-	}
-	for _, point := range q {
-		if len(point) != dim {
-			panic("all points in q must have the same dimension")
-		}
-	}
-}
-
-// sumWeights is a helper function for the Wasserstein Distance calculation
-func sumWeights(weights [][]float64) float64 {
-	sum := 0.0
-	for _, weight := range weights {
-		sum += weight[0]
-	}
-	return sum
-}
-
-// WassersteinDistance computes the Wasserstein distance (also known as Earth Mover's Distance) between two 1d-distributions
-// if the weights are nil, all points are treated as equally weighted
+// WassersteinDistance computes the Wasserstein distance (Earth Mover's Distance)
+// between two 1D distributions p and q with optional weights.
+//
+// Parameters:
+//   - p, q: Slice of values representing the support points of each distribution
+//   - pWeights, qWeights: Optional weights for each point. If nil, uniform weights are used
+//
+// The function returns the 1-Wasserstein distance (L1 metric).
+// This implementation uses the CDF-based algorithm for the 1D case.
 func WassersteinDistance(p, q, pWeights, qWeights []float64) float64 {
+	if len(p) == 0 || len(q) == 0 {
+		panic("stat: input distributions cannot be empty")
+	}
+
+	if len(p) != len(pWeights) || len(q) != len(qWeights) {
+		panic("stat: input distributions and their weights must have same length")
+	}
+
+	// Handle identical distributions case
+	if len(p) == len(q) && floats.Equal(p, q) {
+		if (pWeights == nil && qWeights == nil) ||
+			(pWeights != nil && qWeights != nil && floats.Equal(pWeights, qWeights)) {
+			return 0.0
+		}
+	}
+
+	// Use uniform weights if not provided
 	if pWeights == nil {
 		pWeights = make([]float64, len(p))
-
-		for i := range p {
-			pWeights[i] = float64(1.0 / len(p))
+		for i := range pWeights {
+			pWeights[i] = 1.0 / float64(len(p))
 		}
 	}
 
 	if qWeights == nil {
 		qWeights = make([]float64, len(q))
-
-		for i := range q {
-			qWeights[i] = float64(1.0 / len(q))
+		for i := range qWeights {
+			qWeights[i] = 1.0 / float64(len(q))
 		}
 	}
 
-	validateDistributions(p, q, pWeights, qWeights)
-	totalP, totalQ := sumWeights([][]float64{pWeights}), sumWeights([][]float64{qWeights})
-	if math.Abs(totalP-totalQ) > 1e-9 {
-		panic("total mass mismatch")
+	normalizeWeights(pWeights, qWeights)
+
+	// Special case for single-point distributions
+	if len(p) == 1 && len(q) == 1 {
+		return math.Abs(p[0] - q[0])
 	}
 
+	// Pair values with weights and sort
 	type pair struct {
 		value  float64
 		weight float64
@@ -110,105 +91,223 @@ func WassersteinDistance(p, q, pWeights, qWeights []float64) float64 {
 	for i := range q {
 		qPairs[i] = pair{q[i], qWeights[i]}
 	}
+
 	sort.Slice(pPairs, func(i, j int) bool { return pPairs[i].value < pPairs[j].value })
 	sort.Slice(qPairs, func(i, j int) bool { return qPairs[i].value < qPairs[j].value })
 
-	i, j := 0, 0
-	resP, resQ := pPairs[0].weight, qPairs[0].weight
-	distance := 0.0
+	// Compute CDFs
+	pCDF := make([]float64, len(pPairs))
+	qCDF := make([]float64, len(qPairs))
 
-	for i < len(pPairs) && j < len(qPairs) {
-		flow := math.Min(resP, resQ)
-		distance += flow * math.Abs(pPairs[i].value-qPairs[j].value)
-		resP -= flow
-		resQ -= flow
+	pCDF[0] = pPairs[0].weight
+	for i := 1; i < len(pPairs); i++ {
+		pCDF[i] = pCDF[i-1] + pPairs[i].weight
+	}
 
-		if resP < 1e-12 {
-			i++
-			if i < len(pPairs) {
-				resP = pPairs[i].weight
-			}
-		}
-		if resQ < 1e-12 {
-			j++
-			if j < len(qPairs) {
-				resQ = qPairs[j].weight
-			}
+	qCDF[0] = qPairs[0].weight
+	for i := 1; i < len(qPairs); i++ {
+		qCDF[i] = qCDF[i-1] + qPairs[i].weight
+	}
+
+	// Merge the support points
+	allPoints := make([]float64, 0, len(pPairs)+len(qPairs))
+	for _, pair := range pPairs {
+		allPoints = append(allPoints, pair.value)
+	}
+	for _, pair := range qPairs {
+		allPoints = append(allPoints, pair.value)
+	}
+
+	sort.Float64s(allPoints)
+
+	// Remove duplicates
+	uniquePoints := make([]float64, 0, len(allPoints))
+	for i := 0; i < len(allPoints); i++ {
+		if i == 0 || allPoints[i] != allPoints[i-1] {
+			uniquePoints = append(uniquePoints, allPoints[i])
 		}
 	}
+
+	// Calculate the Wasserstein distance
+	distance := 0.0
+
+	for i := 0; i < len(uniquePoints)-1; i++ {
+		x1 := uniquePoints[i]
+		x2 := uniquePoints[i+1]
+
+		// Find CDF values at x1
+		pCDFAtX1 := 0.0
+		for j := 0; j < len(pPairs); j++ {
+			if pPairs[j].value <= x1 {
+				pCDFAtX1 = pCDF[j]
+			} else {
+				break
+			}
+		}
+
+		qCDFAtX1 := 0.0
+		for j := 0; j < len(qPairs); j++ {
+			if qPairs[j].value <= x1 {
+				qCDFAtX1 = qCDF[j]
+			} else {
+				break
+			}
+		}
+
+		distance += math.Abs(pCDFAtX1-qCDFAtX1) * (x2 - x1)
+	}
+
 	return distance
 }
 
-// WassersteinDistanceNd computes the Wasserstein Distance (also known as Earth Mover's Distance) between two n-dimensional distributions
-// if the weights are nil, all points are treated as equally weighted
-func WassersteinDistanceNd(p, q, pWeights, qWeights [][]float64) float64 {
-	if pWeights == nil {
-		pWeights = make([][]float64, len(p))
+// WassersteinDistanceND computes the Wasserstein distance (Earth Mover's Distance)
+// between two n-dimensional distributions p and q with optional weights.
+//
+// Parameters:
+//   - p, q: Slices of points where each point is a slice of float64 coordinates
+//   - pWeights, qWeights: Optional weights for each point. If nil, uniform weights are used
+//
+// This implementation uses linear programming to solve the optimal transport problem.
+func WassersteinDistanceND(p, q [][]float64, pWeights, qWeights []float64) float64 {
+	if len(p) == 0 || len(q) == 0 {
+		panic("stat: input distributions cannot be empty")
+	}
 
+	// Handle identical distributions case
+	if len(p) == len(q) {
+		identical := true
 		for i := range p {
-			pWeights[i] = []float64{1.0 / float64(len(p))}
+			if len(p[i]) != len(q[i]) || !floats.Equal(p[i], q[i]) {
+				identical = false
+				break
+			}
 		}
+		if identical {
+			// Also check if weights are equal when provided
+			if (pWeights == nil && qWeights == nil) ||
+				(pWeights != nil && qWeights != nil && floats.Equal(pWeights, qWeights)) {
+				return 0.0
+			}
+		}
+	}
+
+	// Use uniform weights if not provided
+	if pWeights == nil {
+		pWeights = make([]float64, len(p))
+		floats.AddConst(1.0/float64(len(p)), pWeights)
 	}
 
 	if qWeights == nil {
-		qWeights = make([][]float64, len(q))
+		qWeights = make([]float64, len(q))
+		floats.AddConst(1.0/float64(len(q)), qWeights)
+	}
 
-		for i := range q {
-			qWeights[i] = []float64{1.0 / float64(len(q))}
+	validateNDInputs(p, q, pWeights, qWeights)
+
+	// Special case for single-point distributions
+	if len(p) == 1 && len(q) == 1 {
+		return floats.Distance(p[0], q[0], 2)
+	}
+
+	// Create cost matrix using Euclidean distance
+	n, m := len(p), len(q)
+	costMatrix := mat.NewDense(n, m, nil)
+
+	for i := 0; i < n; i++ {
+		for j := 0; j < m; j++ {
+			dist := floats.Distance(p[i], q[j], 2)
+			costMatrix.Set(i, j, dist)
 		}
 	}
 
-	validateNdDistributions(p, q, pWeights, qWeights)
-	totalP, totalQ := sumWeights(pWeights), sumWeights(qWeights)
-	if math.Abs(totalP-totalQ) > 1e-9 {
-		panic("total mass mismatch")
+	return solveOptimalTransportLP(costMatrix, pWeights, qWeights)
+}
+
+// validateNDInputs checks if the inputs to WassersteinDistanceND are valid
+func validateNDInputs(p, q [][]float64, pWeights, qWeights []float64) {
+	if len(p) != len(pWeights) || len(q) != len(qWeights) {
+		panic("stat: distribution and weight lengths must match")
 	}
 
-	type pair struct {
-		point  []float64
-		weight float64
-	}
+	if len(p) > 0 && len(q) > 0 {
+		dimP := len(p[0])
+		dimQ := len(q[0])
 
-	pPairs := make([]pair, len(p))
-	qPairs := make([]pair, len(q))
-	for i := range p {
-		pPairs[i] = pair{p[i], pWeights[i][0]}
-	}
-	for i := range q {
-		qPairs[i] = pair{q[i], qWeights[i][0]}
-	}
-	sort.Slice(pPairs, func(i, j int) bool {
-		return pPairs[i].point[0] < pPairs[j].point[0]
-	})
-	sort.Slice(qPairs, func(i, j int) bool {
-		return qPairs[i].point[0] < qPairs[j].point[0]
-	})
+		if dimP != dimQ {
+			panic("stat: point dimensions must match between distributions")
+		}
 
-	i, j := 0, 0
-	resP, resQ := pPairs[0].weight, qPairs[0].weight
-	distance := 0.0
-
-	for i < len(pPairs) && j < len(qPairs) {
-		flow := math.Min(resP, resQ)
-		dist := floats.Distance(pPairs[i].point, qPairs[j].point, 2)
-		distance += flow * dist
-		resP -= flow
-		resQ -= flow
-
-		if resP < 1e-12 {
-			i++
-			if i < len(pPairs) {
-				resP = pPairs[i].weight
+		for _, point := range p {
+			if len(point) != dimP {
+				panic("stat: all points in p must have the same dimension")
 			}
 		}
-		if resQ < 1e-12 {
-			j++
-			if j < len(qPairs) {
-				resQ = qPairs[j].weight
+		for _, point := range q {
+			if len(point) != dimQ {
+				panic("stat: all points in q must have the same dimension")
 			}
 		}
+		if dimP == 0 {
+			panic("stat: points cannot have zero dimensions")
+		}
 	}
-	return distance
+
+	normalizeWeights(pWeights, qWeights)
+}
+
+// normalizeWeights checks and normalizes weights if needed
+func normalizeWeights(pWeights, qWeights []float64) {
+	totalP := floats.Sum(pWeights)
+	totalQ := floats.Sum(qWeights)
+
+	if totalP <= 0 || totalQ <= 0 {
+		panic("stat: weights must sum to positive values")
+	}
+
+	floats.Scale(1.0/totalP, pWeights)
+	floats.Scale(1.0/totalQ, qWeights)
+}
+
+// solveOptimalTransportLP solves the optimal transport problem using Gonum's linear programming solver.
+func solveOptimalTransportLP(costMatrix *mat.Dense, supply, demand []float64) float64 {
+	rows, cols := costMatrix.Dims()
+
+	// Formulate the linear program
+	c := make([]float64, rows*cols)
+	for i := 0; i < rows; i++ {
+		for j := 0; j < cols; j++ {
+			c[i*cols+j] = costMatrix.At(i, j)
+		}
+	}
+
+	constraintMatrix := mat.NewDense(rows+cols-1, rows*cols, nil)
+
+	// Supply constraints (row sums) - all rows except the last one
+	for i := 0; i < rows-1; i++ {
+		for j := 0; j < cols; j++ {
+			constraintMatrix.Set(i, i*cols+j, 1.0)
+		}
+	}
+
+	// Demand constraints (column sums)
+	for j := 0; j < cols; j++ {
+		for i := 0; i < rows; i++ {
+			constraintMatrix.Set(rows-1+j, i*cols+j, 1.0)
+		}
+	}
+
+	// Right-hand side of constraints
+	b := make([]float64, rows+cols-1)
+	copy(b[:rows-1], supply[:rows-1])
+	copy(b[rows-1:], demand)
+
+	// Solve the linear program
+	optVal, _, err := lp.Simplex(c, constraintMatrix, b, epsilon, nil)
+	if err != nil {
+		panic(fmt.Sprintf("stat: failed to solve optimal transport problem: %v", err))
+	}
+
+	return optVal
 }
 
 // bhattacharyyaCoeff computes the Bhattacharyya Coefficient for probability distributions given by:

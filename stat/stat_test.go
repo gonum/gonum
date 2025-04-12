@@ -1889,85 +1889,241 @@ func TestStdScore(t *testing.T) {
 }
 
 func TestWassersteinDistance(t *testing.T) {
-	p := []float64{0, 1, 2}
-	q := []float64{0, 1, 2}
-	u := []float64{0.2, 0.3, 0.5}
-	v := []float64{0.2, 0.3, 0.5}
+	const tol = 1e-8
 
-	dist := WassersteinDistance(p, q, u, v)
-	if dist != 0 {
-		t.Errorf("WassersteinDistance returned %f, expected 0", dist)
+	// sample cases were taken from scipy's documentation
+	tests := []struct {
+		name     string
+		p        []float64
+		q        []float64
+		pWeights []float64
+		qWeights []float64
+		want     float64
+	}{
+		{
+			name:     "Example 1: Basic case with different distributions",
+			p:        []float64{0, 1, 3},
+			q:        []float64{5, 6, 8},
+			pWeights: nil,
+			qWeights: nil,
+			want:     5.0,
+		},
+		{
+			name:     "Example 2: Same distributions with different weights",
+			p:        []float64{0, 1},
+			q:        []float64{0, 1},
+			pWeights: []float64{3, 1},
+			qWeights: []float64{2, 2},
+			want:     0.25,
+		},
+		{
+			name:     "Example 3: Complex case with different sizes and weights",
+			p:        []float64{3.4, 3.9, 7.5, 7.8},
+			q:        []float64{4.5, 1.4},
+			pWeights: []float64{1.4, 0.9, 3.1, 7.2},
+			qWeights: []float64{3.2, 3.5},
+			want:     4.078133143804786,
+		},
 	}
 
-	dist = WassersteinDistance(p, q, nil, nil)
-	if dist != 0 {
-		t.Errorf("WassersteinDistance returned %f, expected 0", dist)
-	}
-
-	p = []float64{0, 1, 2}
-	q = []float64{1, 2, 3}
-	u = []float64{0.2, 0.3, 0.5}
-	v = []float64{0.2, 0.3, 0.5}
-
-	dist = WassersteinDistance(p, q, u, v)
-	if math.Abs(dist-1) > 1e-9 {
-		t.Errorf("WassersteinDistance returned %f, expected 1", dist)
-	}
-}
-
-func TestWassersteinDistanceNd(t *testing.T) {
-	pPoints := [][]float64{{0, 0}, {1, 1}, {2, 2}}
-	pWeights := [][]float64{{0.2}, {0.3}, {0.5}}
-	qPoints := [][]float64{{0, 0}, {1, 1}, {2, 2}}
-	qWeights := [][]float64{{0.2}, {0.3}, {0.5}}
-
-	dist := WassersteinDistanceNd(pPoints, qPoints, pWeights, qWeights)
-	if dist != 0 {
-		t.Errorf("WassersteinDistanceNd returned %f, expected 0", dist)
-	}
-
-	dist = WassersteinDistanceNd(pPoints, qPoints, nil, nil)
-	if dist != 0 {
-		t.Errorf("WassersteinDistanceNd returned %f, expected 0", dist)
-	}
-
-	pPoints = [][]float64{{0, 0}, {1, 1}, {2, 2}}
-	pWeights = [][]float64{{0.2}, {0.3}, {0.5}}
-	qPoints = [][]float64{{1, 1}, {2, 2}, {3, 3}}
-	qWeights = [][]float64{{0.2}, {0.3}, {0.5}}
-
-	dist = WassersteinDistanceNd(pPoints, qPoints, pWeights, qWeights)
-	if math.Abs(dist-math.Sqrt(2)) > 1e-9 {
-		t.Errorf("WassersteinDistanceNd returned %f, expected sqrt(2)", dist)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got := WassersteinDistance(test.p, test.q, test.pWeights, test.qWeights)
+			if math.Abs(got-test.want) > tol {
+				t.Errorf("WassersteinDistance() = %v, want %v", got, test.want)
+			}
+		})
 	}
 }
 
-func TestWassersteinDistanceInvalidInput(t *testing.T) {
-	p := []float64{0, 1, 2}
-	q := []float64{0, 1}
-	u := []float64{0.2, 0.3, 0.5}
-	v := []float64{0.2, 0.3, 0.5}
-
+// TestWassersteinDistanceEdgeCases tests specific edge cases
+func TestWassersteinDistanceEdgeCases(t *testing.T) {
+	// Test panic on empty distributions
 	defer func() {
 		if r := recover(); r == nil {
-			t.Errorf("WassersteinDistance did not panic with invalid input")
+			t.Errorf("Expected panic for empty distributions, but none occurred")
 		}
 	}()
-
-	WassersteinDistance(p, q, u, v)
+	WassersteinDistance([]float64{}, []float64{1.0}, nil, nil)
 }
 
-func TestWassersteinDistanceNdInvalidInput(t *testing.T) {
-	pPoints := [][]float64{{0, 0}, {1, 1}, {2, 2}}
-	pWeights := [][]float64{{0.2}, {0.3}, {0.5}}
-	qPoints := [][]float64{{0, 0}, {1, 1}}
-	qWeights := [][]float64{{0.2}, {0.3}, {0.5}}
+// TestWassersteinDistanceWeightNormalization tests that weights are properly normalized
+func TestWassersteinDistanceWeightNormalization(t *testing.T) {
+	const tol = 1e-14
 
+	p := []float64{1.0, 2.0, 3.0}
+	q := []float64{2.0, 3.0, 4.0}
+
+	// Non-normalized weights that sum to different values
+	pWeights := []float64{2.0, 3.0, 5.0} // Sum = 10
+	qWeights := []float64{1.0, 1.0, 1.0} // Sum = 3
+
+	// Create normalized copies for reference
+	pWeightsNorm := make([]float64, len(pWeights))
+	qWeightsNorm := make([]float64, len(qWeights))
+	copy(pWeightsNorm, pWeights)
+	copy(qWeightsNorm, qWeights)
+	floats.Scale(1.0/floats.Sum(pWeightsNorm), pWeightsNorm)
+	floats.Scale(1.0/floats.Sum(qWeightsNorm), qWeightsNorm)
+
+	// Calculate with original and normalized weights
+	result1 := WassersteinDistance(p, q, pWeights, qWeights)
+	result2 := WassersteinDistance(p, q, pWeightsNorm, qWeightsNorm)
+
+	// Results should be the same
+	if math.Abs(result1-result2) > tol {
+		t.Errorf("Weight normalization failed: got %v and %v", result1, result2)
+	}
+}
+
+func TestWassersteinDistanceND(t *testing.T) {
+	const tol = 1e-14
+
+	tests := []struct {
+		name     string
+		p        [][]float64
+		q        [][]float64
+		pWeights []float64
+		qWeights []float64
+		want     float64
+	}{
+		{
+			name: "Example 1: 2D with uniform weights",
+			p: [][]float64{
+				{0, 0},
+				{1, 1},
+				{2, 2},
+			},
+			q: [][]float64{
+				{0, 1},
+				{1, 2},
+				{2, 3},
+			},
+			pWeights: []float64{1.0 / 3, 1.0 / 3, 1.0 / 3},
+			qWeights: []float64{1.0 / 3, 1.0 / 3, 1.0 / 3},
+			want:     1.0,
+		},
+		{
+			name: "Example 2: 2D with different sizes",
+			p: [][]float64{
+				{0, 0},
+				{1, 1},
+			},
+			q: [][]float64{
+				{0, 1},
+				{1, 2},
+				{2, 3},
+			},
+			pWeights: []float64{0.5, 0.5},
+			qWeights: []float64{1.0 / 3, 1.0 / 3, 1.0 / 3},
+			want:     1.618033988749895,
+		},
+		{
+			name: "Example 3: 2D with custom weights",
+			p: [][]float64{
+				{0, 0},
+				{1, 1},
+				{2, 2},
+			},
+			q: [][]float64{
+				{0, 0},
+				{1, 1},
+				{2, 2},
+			},
+			pWeights: []float64{0.2, 0.3, 0.5},
+			qWeights: []float64{0.5, 0.3, 0.2},
+			want:     0.848528137423857,
+		},
+		{
+			name: "Example 4: 3D with uniform weights",
+			p: [][]float64{
+				{0, 0, 0},
+				{1, 1, 1},
+				{2, 2, 2},
+			},
+			q: [][]float64{
+				{0, 1, 0},
+				{1, 2, 1},
+				{2, 3, 2},
+			},
+			pWeights: []float64{1.0 / 3, 1.0 / 3, 1.0 / 3},
+			qWeights: []float64{1.0 / 3, 1.0 / 3, 1.0 / 3},
+			want:     1.0,
+		},
+		{
+			name: "Example 5: Single points",
+			p: [][]float64{
+				{1, 2},
+			},
+			q: [][]float64{
+				{3, 4},
+			},
+			pWeights: []float64{1.0},
+			qWeights: []float64{1.0},
+			want:     2.8284271247461903,
+		},
+		{
+			name: "Example 6: Identical distributions",
+			p: [][]float64{
+				{1, 2},
+				{3, 4},
+			},
+			q: [][]float64{
+				{1, 2},
+				{3, 4},
+			},
+			pWeights: nil,
+			qWeights: nil,
+			want:     0.0,
+		},
+		{
+			name: "Example 7: 3D points from SciPy docs",
+			p: [][]float64{
+				{0, 2, 3},
+				{1, 2, 5},
+			},
+			q: [][]float64{
+				{3, 2, 3},
+				{4, 2, 5},
+			},
+			pWeights: nil,
+			qWeights: nil,
+			want:     3.0,
+		},
+		{
+			name: "Example 8: 2D with custom weights from SciPy docs",
+			p: [][]float64{
+				{0, 2.75},
+				{2, 209.3},
+				{0, 0},
+			},
+			q: [][]float64{
+				{0.2, 0.322},
+				{4.5, 25.1808},
+			},
+			pWeights: []float64{0.4, 5.2, 0.114},
+			qWeights: []float64{0.8, 1.5},
+			want:     174.15840245217169,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got := WassersteinDistanceND(test.p, test.q, test.pWeights, test.qWeights)
+			if math.Abs(got-test.want) > tol {
+				t.Errorf("WassersteinDistanceND() = %v, want %v", got, test.want)
+			}
+		})
+	}
+}
+
+// TestWassersteinDistanceNDEdgeCases tests specific edge cases
+func TestWassersteinDistanceNDEdgeCases(t *testing.T) {
+	// Test panic on empty distributions
 	defer func() {
 		if r := recover(); r == nil {
-			t.Errorf("WassersteinDistanceNd did not panic with invalid input")
+			t.Errorf("Expected panic for empty distributions, but none occurred")
 		}
 	}()
-
-	WassersteinDistanceNd(pPoints, pWeights, qPoints, qWeights)
+	WassersteinDistanceND([][]float64{}, [][]float64{{1, 2}}, nil, nil)
 }

@@ -43,10 +43,6 @@ func WassersteinDistance(p, q, pWeights, qWeights []float64) float64 {
 		panic("stat: input distributions cannot be empty")
 	}
 
-	if len(p) != len(pWeights) || len(q) != len(qWeights) {
-		panic("stat: input distributions and their weights must have same length")
-	}
-
 	// Handle identical distributions case
 	if len(p) == len(q) && floats.Equal(p, q) {
 		if (pWeights == nil && qWeights == nil) ||
@@ -58,16 +54,16 @@ func WassersteinDistance(p, q, pWeights, qWeights []float64) float64 {
 	// Use uniform weights if not provided
 	if pWeights == nil {
 		pWeights = make([]float64, len(p))
-		for i := range pWeights {
-			pWeights[i] = 1.0 / float64(len(p))
-		}
+		floats.AddConst(1.0/float64(len(p)), pWeights)
 	}
 
 	if qWeights == nil {
 		qWeights = make([]float64, len(q))
-		for i := range qWeights {
-			qWeights[i] = 1.0 / float64(len(q))
-		}
+		floats.AddConst(1.0/float64(len(q)), qWeights)
+	}
+
+	if len(p) != len(pWeights) || len(q) != len(qWeights) {
+		panic("stat: input distributions and their weights must have same length")
 	}
 
 	normalizeWeights(pWeights, qWeights)

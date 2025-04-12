@@ -1938,13 +1938,12 @@ func TestWassersteinDistance(t *testing.T) {
 
 // TestWassersteinDistanceEdgeCases tests specific edge cases
 func TestWassersteinDistanceEdgeCases(t *testing.T) {
-	// Test panic on empty distributions
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("Expected panic for empty distributions, but none occurred")
-		}
-	}()
-	WassersteinDistance([]float64{}, []float64{1.0}, nil, nil)
+	// Test empty distribution.
+	result := WassersteinDistance([]float64{}, []float64{1.0}, nil, nil)
+
+	if !math.IsNaN(result) {
+		t.Errorf("WassersteinDistance() = %v, want %v", result, math.NaN())
+	}
 }
 
 // TestWassersteinDistanceWeightNormalization tests that weights are properly normalized
@@ -2109,7 +2108,12 @@ func TestWassersteinDistanceND(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			got := WassersteinDistanceND(test.p, test.q, test.pWeights, test.qWeights)
+			got, err := WassersteinDistanceND(test.p, test.q, test.pWeights, test.qWeights)
+
+			if err != nil {
+				t.Errorf("WassersteinDistanceND() error: %v", err)
+			}
+
 			if math.Abs(got-test.want) > tol {
 				t.Errorf("WassersteinDistanceND() = %v, want %v", got, test.want)
 			}
@@ -2119,11 +2123,10 @@ func TestWassersteinDistanceND(t *testing.T) {
 
 // TestWassersteinDistanceNDEdgeCases tests specific edge cases
 func TestWassersteinDistanceNDEdgeCases(t *testing.T) {
-	// Test panic on empty distributions
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("Expected panic for empty distributions, but none occurred")
-		}
-	}()
-	WassersteinDistanceND([][]float64{}, [][]float64{{1, 2}}, nil, nil)
+	// Test empty distributions.
+	result, err := WassersteinDistanceND([][]float64{}, [][]float64{{1, 2}}, nil, nil)
+
+	if !math.IsNaN(result) && err != nil {
+		t.Errorf("WassersteinDistanceND() = %v, want %v", result, math.NaN())
+	}
 }

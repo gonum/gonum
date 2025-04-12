@@ -5,11 +5,11 @@
 package stat
 
 import (
-	"fmt"
-	"gonum.org/v1/gonum/mat"
-	"gonum.org/v1/gonum/optimize/convex/lp"
 	"math"
 	"sort"
+
+	"gonum.org/v1/gonum/mat"
+	"gonum.org/v1/gonum/optimize/convex/lp"
 
 	"gonum.org/v1/gonum/floats"
 )
@@ -34,46 +34,48 @@ const epsilon = 1e-8
 //
 // Parameters:
 //   - p, q: Slice of values representing the support points of each distribution
-//   - pWeights, qWeights: Optional weights for each point. If nil, uniform weights are used
+//   - pWeights, qWeights: Optional weights for each point. If nil, uniform weights are used.
 //
 // The function returns the 1-Wasserstein distance (L1 metric).
 // This implementation uses the CDF-based algorithm for the 1D case.
 func WassersteinDistance(p, q, pWeights, qWeights []float64) float64 {
 	if len(p) == 0 || len(q) == 0 {
-		panic("stat: input distributions cannot be empty")
+		return math.NaN()
 	}
 
-	// Handle identical distributions case
-	if len(p) == len(q) && floats.Equal(p, q) {
-		if (pWeights == nil && qWeights == nil) ||
-			(pWeights != nil && qWeights != nil && floats.Equal(pWeights, qWeights)) {
-			return 0.0
-		}
-	}
-
-	// Use uniform weights if not provided
-	if pWeights == nil {
-		pWeights = make([]float64, len(p))
-		floats.AddConst(1.0/float64(len(p)), pWeights)
-	}
-
-	if qWeights == nil {
-		qWeights = make([]float64, len(q))
-		floats.AddConst(1.0/float64(len(q)), qWeights)
-	}
-
-	if len(p) != len(pWeights) || len(q) != len(qWeights) {
+	if (pWeights != nil && len(p) != len(pWeights)) || (qWeights != nil && len(q) != len(qWeights)) {
 		panic("stat: input distributions and their weights must have same length")
 	}
-
-	normalizeWeights(pWeights, qWeights)
 
 	// Special case for single-point distributions
 	if len(p) == 1 && len(q) == 1 {
 		return math.Abs(p[0] - q[0])
 	}
 
-	// Pair values with weights and sort
+	// Handle identical distributions case.
+	if floats.Equal(p, q) && floats.Equal(pWeights, qWeights) {
+		return 0
+	}
+
+	// Use uniform weights if not provided.
+	pUniform := pWeights == nil
+	qUniform := qWeights == nil
+
+	var pUniformWeight, qUniformWeight float64
+
+	if pUniform {
+		pUniformWeight = 1 / float64(len(p))
+	} else {
+		normalizeWeights(pWeights)
+	}
+
+	if qUniform {
+		qUniformWeight = 1 / float64(len(q))
+	} else {
+		normalizeWeights(qWeights)
+	}
+
+	// Pair values with weights and sort.
 	type pair struct {
 		value  float64
 		weight float64
@@ -82,16 +84,24 @@ func WassersteinDistance(p, q, pWeights, qWeights []float64) float64 {
 	pPairs := make([]pair, len(p))
 	qPairs := make([]pair, len(q))
 	for i := range p {
-		pPairs[i] = pair{p[i], pWeights[i]}
+		if pUniform {
+			pPairs[i] = pair{p[i], pUniformWeight}
+		} else {
+			pPairs[i] = pair{p[i], pWeights[i]}
+		}
 	}
 	for i := range q {
-		qPairs[i] = pair{q[i], qWeights[i]}
+		if qUniform {
+			qPairs[i] = pair{q[i], qUniformWeight}
+		} else {
+			qPairs[i] = pair{q[i], qWeights[i]}
+		}
 	}
 
 	sort.Slice(pPairs, func(i, j int) bool { return pPairs[i].value < pPairs[j].value })
 	sort.Slice(qPairs, func(i, j int) bool { return qPairs[i].value < qPairs[j].value })
 
-	// Compute CDFs
+	// Compute CDFs.
 	pCDF := make([]float64, len(pPairs))
 	qCDF := make([]float64, len(qPairs))
 
@@ -105,7 +115,7 @@ func WassersteinDistance(p, q, pWeights, qWeights []float64) float64 {
 		qCDF[i] = qCDF[i-1] + qPairs[i].weight
 	}
 
-	// Merge the support points
+	// Merge the support points.
 	allPoints := make([]float64, 0, len(pPairs)+len(qPairs))
 	for _, pair := range pPairs {
 		allPoints = append(allPoints, pair.value)
@@ -116,7 +126,7 @@ func WassersteinDistance(p, q, pWeights, qWeights []float64) float64 {
 
 	sort.Float64s(allPoints)
 
-	// Remove duplicates
+	// Remove duplicates.
 	uniquePoints := make([]float64, 0, len(allPoints))
 	for i := 0; i < len(allPoints); i++ {
 		if i == 0 || allPoints[i] != allPoints[i-1] {
@@ -124,15 +134,15 @@ func WassersteinDistance(p, q, pWeights, qWeights []float64) float64 {
 		}
 	}
 
-	// Calculate the Wasserstein distance
-	distance := 0.0
+	// Calculate the Wasserstein distance.
+	var distance float64
 
 	for i := 0; i < len(uniquePoints)-1; i++ {
 		x1 := uniquePoints[i]
 		x2 := uniquePoints[i+1]
 
-		// Find CDF values at x1
-		pCDFAtX1 := 0.0
+		// Find CDF values at x1.
+		var pCDFAtX1 float64
 		for j := 0; j < len(pPairs); j++ {
 			if pPairs[j].value <= x1 {
 				pCDFAtX1 = pCDF[j]
@@ -141,7 +151,7 @@ func WassersteinDistance(p, q, pWeights, qWeights []float64) float64 {
 			}
 		}
 
-		qCDFAtX1 := 0.0
+		var qCDFAtX1 float64
 		for j := 0; j < len(qPairs); j++ {
 			if qPairs[j].value <= x1 {
 				qCDFAtX1 = qCDF[j]
@@ -150,7 +160,7 @@ func WassersteinDistance(p, q, pWeights, qWeights []float64) float64 {
 			}
 		}
 
-		distance += math.Abs(pCDFAtX1-qCDFAtX1) * (x2 - x1)
+		distance += float64(math.Abs(pCDFAtX1-qCDFAtX1) * (x2 - x1))
 	}
 
 	return distance
@@ -161,15 +171,21 @@ func WassersteinDistance(p, q, pWeights, qWeights []float64) float64 {
 //
 // Parameters:
 //   - p, q: Slices of points where each point is a slice of float64 coordinates
-//   - pWeights, qWeights: Optional weights for each point. If nil, uniform weights are used
+//   - pWeights, qWeights: Optional weights for each point. If nil, uniform weights are used.
 //
 // This implementation uses linear programming to solve the optimal transport problem.
-func WassersteinDistanceND(p, q [][]float64, pWeights, qWeights []float64) float64 {
+func WassersteinDistanceND(p, q [][]float64, pWeights, qWeights []float64) (float64, error) {
 	if len(p) == 0 || len(q) == 0 {
-		panic("stat: input distributions cannot be empty")
+		return math.NaN(), nil
 	}
 
-	// Handle identical distributions case
+	if (pWeights != nil && len(p) != len(pWeights)) || (qWeights != nil && len(q) != len(qWeights)) {
+		panic("stat: input distributions and their weights must have same length")
+	}
+
+	validateNDInputs(p, q)
+
+	// Handle identical distributions case.
 	if len(p) == len(q) {
 		identical := true
 		for i := range p {
@@ -179,52 +195,55 @@ func WassersteinDistanceND(p, q [][]float64, pWeights, qWeights []float64) float
 			}
 		}
 		if identical {
-			// Also check if weights are equal when provided
+			// Also check if weights are equal when provided.
 			if (pWeights == nil && qWeights == nil) ||
 				(pWeights != nil && qWeights != nil && floats.Equal(pWeights, qWeights)) {
-				return 0.0
+				return 0, nil
 			}
 		}
 	}
 
-	// Use uniform weights if not provided
+	// Use uniform weights if not provided.
 	if pWeights == nil {
 		pWeights = make([]float64, len(p))
-		floats.AddConst(1.0/float64(len(p)), pWeights)
+		floats.AddConst(1/float64(len(p)), pWeights)
+	} else {
+		normalizeWeights(pWeights)
 	}
 
 	if qWeights == nil {
 		qWeights = make([]float64, len(q))
-		floats.AddConst(1.0/float64(len(q)), qWeights)
+		floats.AddConst(1/float64(len(q)), qWeights)
+	} else {
+		normalizeWeights(qWeights)
 	}
-
-	validateNDInputs(p, q, pWeights, qWeights)
 
 	// Special case for single-point distributions
 	if len(p) == 1 && len(q) == 1 {
-		return floats.Distance(p[0], q[0], 2)
+		return floats.Distance(p[0], q[0], 2), nil
 	}
 
-	// Create cost matrix using Euclidean distance
-	n, m := len(p), len(q)
-	costMatrix := mat.NewDense(n, m, nil)
+	// Create cost matrix using Euclidean distance.
+	cost := mat.NewDense(len(p), len(q), nil)
 
-	for i := 0; i < n; i++ {
-		for j := 0; j < m; j++ {
+	for i := 0; i < len(p); i++ {
+		for j := 0; j < len(q); j++ {
 			dist := floats.Distance(p[i], q[j], 2)
-			costMatrix.Set(i, j, dist)
+			cost.Set(i, j, dist)
 		}
 	}
 
-	return solveOptimalTransportLP(costMatrix, pWeights, qWeights)
-}
+	val, err := solveOptimalTransportLP(cost, pWeights, qWeights)
 
-// validateNDInputs checks if the inputs to WassersteinDistanceND are valid
-func validateNDInputs(p, q [][]float64, pWeights, qWeights []float64) {
-	if len(p) != len(pWeights) || len(q) != len(qWeights) {
-		panic("stat: distribution and weight lengths must match")
+	if err != nil {
+		return math.NaN(), err
 	}
 
+	return val, nil
+}
+
+// validateNDInputs checks if the inputs to WassersteinDistanceND are valid.
+func validateNDInputs(p, q [][]float64) {
 	if len(p) > 0 && len(q) > 0 {
 		dimP := len(p[0])
 		dimQ := len(q[0])
@@ -247,48 +266,38 @@ func validateNDInputs(p, q [][]float64, pWeights, qWeights []float64) {
 			panic("stat: points cannot have zero dimensions")
 		}
 	}
-
-	normalizeWeights(pWeights, qWeights)
 }
 
-// normalizeWeights checks and normalizes weights if needed
-func normalizeWeights(pWeights, qWeights []float64) {
-	totalP := floats.Sum(pWeights)
-	totalQ := floats.Sum(qWeights)
+// normalizeWeights checks and normalizes the provided weight array if needed.
+func normalizeWeights(weights []float64) {
+	total := floats.Sum(weights)
 
-	if totalP <= 0 || totalQ <= 0 {
+	if total <= 0 {
 		panic("stat: weights must sum to positive values")
 	}
 
-	floats.Scale(1.0/totalP, pWeights)
-	floats.Scale(1.0/totalQ, qWeights)
+	floats.Scale(1/total, weights)
 }
 
-// solveOptimalTransportLP solves the optimal transport problem using Gonum's linear programming solver.
-func solveOptimalTransportLP(costMatrix *mat.Dense, supply, demand []float64) float64 {
+// solveOptimalTransportLP solves the optimal transport problem.
+func solveOptimalTransportLP(costMatrix *mat.Dense, supply, demand []float64) (float64, error) {
 	rows, cols := costMatrix.Dims()
 
-	// Formulate the linear program
-	c := make([]float64, rows*cols)
-	for i := 0; i < rows; i++ {
-		for j := 0; j < cols; j++ {
-			c[i*cols+j] = costMatrix.At(i, j)
-		}
-	}
-
-	constraintMatrix := mat.NewDense(rows+cols-1, rows*cols, nil)
+	// Formulate the linear program.
+	c := costMatrix.RawMatrix().Data
+	constraints := mat.NewDense(rows+cols-1, rows*cols, nil)
 
 	// Supply constraints (row sums) - all rows except the last one
 	for i := 0; i < rows-1; i++ {
 		for j := 0; j < cols; j++ {
-			constraintMatrix.Set(i, i*cols+j, 1.0)
+			constraints.Set(i, i*cols+j, 1.0)
 		}
 	}
 
 	// Demand constraints (column sums)
 	for j := 0; j < cols; j++ {
 		for i := 0; i < rows; i++ {
-			constraintMatrix.Set(rows-1+j, i*cols+j, 1.0)
+			constraints.Set(rows-1+j, i*cols+j, 1.0)
 		}
 	}
 
@@ -297,13 +306,9 @@ func solveOptimalTransportLP(costMatrix *mat.Dense, supply, demand []float64) fl
 	copy(b[:rows-1], supply[:rows-1])
 	copy(b[rows-1:], demand)
 
-	// Solve the linear program
-	optVal, _, err := lp.Simplex(c, constraintMatrix, b, epsilon, nil)
-	if err != nil {
-		panic(fmt.Sprintf("stat: failed to solve optimal transport problem: %v", err))
-	}
-
-	return optVal
+	// Solve the linear program.
+	optVal, _, err := lp.Simplex(c, constraints, b, epsilon, nil)
+	return optVal, err
 }
 
 // bhattacharyyaCoeff computes the Bhattacharyya Coefficient for probability distributions given by:

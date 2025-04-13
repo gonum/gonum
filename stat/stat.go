@@ -8,10 +8,9 @@ import (
 	"math"
 	"sort"
 
+	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/optimize/convex/lp"
-
-	"gonum.org/v1/gonum/floats"
 )
 
 // CumulantKind specifies the behavior for calculating the empirical CDF or Quantile
@@ -33,8 +32,8 @@ const epsilon = 1e-8
 // between two 1D distributions p and q with optional weights.
 //
 // Parameters:
-//   - p, q: Slice of values representing the support points of each distribution
-//   - pWeights, qWeights: Optional weights for each point. If nil, uniform weights are used.
+// p and q are slices of values representing the support points of each distribution.
+// pWeights and qWeights are optional weights for each point. If nil, uniform weights are used.
 //
 // The function returns the 1-Wasserstein distance (L1 metric).
 // This implementation uses the CDF-based algorithm for the 1D case.
@@ -144,20 +143,18 @@ func WassersteinDistance(p, q, pWeights, qWeights []float64) float64 {
 		// Find CDF values at x1.
 		var pCDFAtX1 float64
 		for j := 0; j < len(pPairs); j++ {
-			if pPairs[j].value <= x1 {
-				pCDFAtX1 = pCDF[j]
-			} else {
+			if pPairs[j].value > x1 {
 				break
 			}
+			pCDFAtX1 = pCDF[j]
 		}
 
 		var qCDFAtX1 float64
 		for j := 0; j < len(qPairs); j++ {
-			if qPairs[j].value <= x1 {
-				qCDFAtX1 = qCDF[j]
-			} else {
+			if qPairs[j].value > x1 {
 				break
 			}
+			qCDFAtX1 = qCDF[j]
 		}
 
 		distance += float64(math.Abs(pCDFAtX1-qCDFAtX1) * (x2 - x1))
@@ -170,33 +167,45 @@ func WassersteinDistance(p, q, pWeights, qWeights []float64) float64 {
 // between two n-dimensional distributions p and q with optional weights.
 //
 // Parameters:
-//   - p, q: Slices of points where each point is a slice of float64 coordinates
-//   - pWeights, qWeights: Optional weights for each point. If nil, uniform weights are used.
+// p and q are matrices where each row represents a point with coordinates as columns.
+// pWeights and qWeights are optional weights for each point. If nil, uniform weights are used.
 //
 // This implementation uses linear programming to solve the optimal transport problem.
-func WassersteinDistanceND(p, q [][]float64, pWeights, qWeights []float64) (float64, error) {
-	if len(p) == 0 || len(q) == 0 {
+func WassersteinDistanceND(p, q mat.Matrix, pWeights, qWeights []float64) (float64, error) {
+	pRows, pCols := p.Dims()
+	qRows, qCols := q.Dims()
+
+	if pCols == 0 || qCols == 0 || pRows == 0 || qRows == 0 {
 		return math.NaN(), nil
 	}
 
-	if (pWeights != nil && len(p) != len(pWeights)) || (qWeights != nil && len(q) != len(qWeights)) {
+	if (pWeights != nil && pRows != len(pWeights)) || (qWeights != nil && qRows != len(qWeights)) {
 		panic("stat: input distributions and their weights must have same length")
 	}
 
-	validateNDInputs(p, q)
+	if pCols != qCols {
+		panic("stat: point dimensions must match between distributions")
+	}
 
 	// Special case for single-point distributions
-	if len(p) == 1 && len(q) == 1 {
-		return floats.Distance(p[0], q[0], 2), nil
+	if pRows == 1 && qRows == 1 {
+		var sumSquares float64
+		for j := 0; j < pCols; j++ {
+			diff := p.At(0, j) - q.At(0, j)
+			sumSquares += diff * diff
+		}
+		return math.Sqrt(sumSquares), nil
 	}
 
 	// Handle identical distributions case.
-	if len(p) == len(q) {
+	if pRows == qRows {
 		identical := true
-		for i := range p {
-			if len(p[i]) != len(q[i]) || !floats.Equal(p[i], q[i]) {
-				identical = false
-				break
+		for i := 0; i < pRows; i++ {
+			for j := 0; j < pCols; j++ {
+				if p.At(i, j) != q.At(i, j) {
+					identical = false
+					break
+				}
 			}
 		}
 		if identical {
@@ -208,62 +217,36 @@ func WassersteinDistanceND(p, q [][]float64, pWeights, qWeights []float64) (floa
 
 	// Use uniform weights if not provided.
 	if pWeights == nil {
-		pWeights = make([]float64, len(p))
-		floats.AddConst(1/float64(len(p)), pWeights)
+		pWeights = make([]float64, pRows)
+		floats.AddConst(1/float64(pRows), pWeights)
 	} else {
 		normalizeWeights(pWeights)
 	}
 
 	if qWeights == nil {
-		qWeights = make([]float64, len(q))
-		floats.AddConst(1/float64(len(q)), qWeights)
+		qWeights = make([]float64, qRows)
+		floats.AddConst(1/float64(qRows), qWeights)
 	} else {
 		normalizeWeights(qWeights)
 	}
 
 	// Create cost matrix using Euclidean distance.
-	cost := mat.NewDense(len(p), len(q), nil)
+	cost := mat.NewDense(pRows, qRows, nil)
 
-	for i := 0; i < len(p); i++ {
-		for j := 0; j < len(q); j++ {
-			dist := floats.Distance(p[i], q[j], 2)
+	for i := 0; i < pRows; i++ {
+		for j := 0; j < qRows; j++ {
+			// Calculate Euclidean distance between points
+			var sumSquares float64
+			for k := 0; k < pCols; k++ {
+				diff := p.At(i, k) - q.At(j, k)
+				sumSquares += diff * diff
+			}
+			dist := math.Sqrt(sumSquares)
 			cost.Set(i, j, dist)
 		}
 	}
 
-	val, err := solveOptimalTransportLP(cost, pWeights, qWeights)
-
-	if err != nil {
-		return math.NaN(), err
-	}
-
-	return val, nil
-}
-
-// validateNDInputs checks if the inputs to WassersteinDistanceND are valid.
-func validateNDInputs(p, q [][]float64) {
-	if len(p) > 0 && len(q) > 0 {
-		dimP := len(p[0])
-		dimQ := len(q[0])
-
-		if dimP != dimQ {
-			panic("stat: point dimensions must match between distributions")
-		}
-
-		for _, point := range p {
-			if len(point) != dimP {
-				panic("stat: all points in p must have the same dimension")
-			}
-		}
-		for _, point := range q {
-			if len(point) != dimQ {
-				panic("stat: all points in q must have the same dimension")
-			}
-		}
-		if dimP == 0 {
-			panic("stat: points cannot have zero dimensions")
-		}
-	}
+	return solveOptimalTransportLP(cost, pWeights, qWeights)
 }
 
 // normalizeWeights checks and normalizes the provided weight array if needed.
@@ -617,7 +600,7 @@ func covarianceMeans(x, y, weights []float64, xu, yu float64) float64 {
 		w := weights[i]
 		yv := y[i]
 		wxd := w * (xv - xu)
-		yd := yv - yu
+		yd := (yv - yu)
 		ss += wxd * yd
 		xcompensation += wxd
 		ycompensation += w * yd
@@ -1668,7 +1651,7 @@ func meanUnnormalisedVarianceSumWeights(x, weights []float64) (mean, unnormalise
 			ss += d * d
 			compensation += d
 		}
-		unnormalisedVariance = ss - compensation*compensation/float64(len(x))
+		unnormalisedVariance = (ss - compensation*compensation/float64(len(x)))
 		return mean, unnormalisedVariance, float64(len(x))
 	}
 
@@ -1680,6 +1663,6 @@ func meanUnnormalisedVarianceSumWeights(x, weights []float64) (mean, unnormalise
 		compensation += wd
 		sumWeights += w
 	}
-	unnormalisedVariance = ss - compensation*compensation/sumWeights
+	unnormalisedVariance = (ss - compensation*compensation/sumWeights)
 	return mean, unnormalisedVariance, sumWeights
 }

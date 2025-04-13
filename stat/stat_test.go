@@ -6,6 +6,7 @@ package stat
 
 import (
 	"fmt"
+	"gonum.org/v1/gonum/mat"
 	"math"
 	"math/rand/v2"
 	"reflect"
@@ -1980,126 +1981,126 @@ func TestWassersteinDistanceND(t *testing.T) {
 
 	tests := []struct {
 		name     string
-		p        [][]float64
-		q        [][]float64
+		p        *mat.Dense
+		q        *mat.Dense
 		pWeights []float64
 		qWeights []float64
 		want     float64
 	}{
 		{
 			name: "Example 1: 2D with uniform weights",
-			p: [][]float64{
-				{0, 0},
-				{1, 1},
-				{2, 2},
-			},
-			q: [][]float64{
-				{0, 1},
-				{1, 2},
-				{2, 3},
-			},
+			p: mat.NewDense(3, 2, []float64{
+				0, 0,
+				1, 1,
+				2, 2,
+			}),
+			q: mat.NewDense(3, 2, []float64{
+				0, 1,
+				1, 2,
+				2, 3,
+			}),
 			pWeights: []float64{1.0 / 3, 1.0 / 3, 1.0 / 3},
 			qWeights: []float64{1.0 / 3, 1.0 / 3, 1.0 / 3},
 			want:     1.0,
 		},
 		{
 			name: "Example 2: 2D with different sizes",
-			p: [][]float64{
-				{0, 0},
-				{1, 1},
-			},
-			q: [][]float64{
-				{0, 1},
-				{1, 2},
-				{2, 3},
-			},
+			p: mat.NewDense(2, 2, []float64{
+				0, 0,
+				1, 1,
+			}),
+			q: mat.NewDense(3, 2, []float64{
+				0, 1,
+				1, 2,
+				2, 3,
+			}),
 			pWeights: []float64{0.5, 0.5},
 			qWeights: []float64{1.0 / 3, 1.0 / 3, 1.0 / 3},
 			want:     1.618033988749895,
 		},
 		{
 			name: "Example 3: 2D with custom weights",
-			p: [][]float64{
-				{0, 0},
-				{1, 1},
-				{2, 2},
-			},
-			q: [][]float64{
-				{0, 0},
-				{1, 1},
-				{2, 2},
-			},
+			p: mat.NewDense(3, 2, []float64{
+				0, 0,
+				1, 1,
+				2, 2,
+			}),
+			q: mat.NewDense(3, 2, []float64{
+				0, 0,
+				1, 1,
+				2, 2,
+			}),
 			pWeights: []float64{0.2, 0.3, 0.5},
 			qWeights: []float64{0.5, 0.3, 0.2},
 			want:     0.848528137423857,
 		},
 		{
 			name: "Example 4: 3D with uniform weights",
-			p: [][]float64{
-				{0, 0, 0},
-				{1, 1, 1},
-				{2, 2, 2},
-			},
-			q: [][]float64{
-				{0, 1, 0},
-				{1, 2, 1},
-				{2, 3, 2},
-			},
+			p: mat.NewDense(3, 3, []float64{
+				0, 0, 0,
+				1, 1, 1,
+				2, 2, 2,
+			}),
+			q: mat.NewDense(3, 3, []float64{
+				0, 1, 0,
+				1, 2, 1,
+				2, 3, 2,
+			}),
 			pWeights: []float64{1.0 / 3, 1.0 / 3, 1.0 / 3},
 			qWeights: []float64{1.0 / 3, 1.0 / 3, 1.0 / 3},
 			want:     1.0,
 		},
 		{
 			name: "Example 5: Single points",
-			p: [][]float64{
-				{1, 2},
-			},
-			q: [][]float64{
-				{3, 4},
-			},
+			p: mat.NewDense(1, 2, []float64{
+				1, 2,
+			}),
+			q: mat.NewDense(1, 2, []float64{
+				3, 4,
+			}),
 			pWeights: []float64{1.0},
 			qWeights: []float64{1.0},
 			want:     2.8284271247461903,
 		},
 		{
 			name: "Example 6: Identical distributions",
-			p: [][]float64{
-				{1, 2},
-				{3, 4},
-			},
-			q: [][]float64{
-				{1, 2},
-				{3, 4},
-			},
+			p: mat.NewDense(2, 2, []float64{
+				1, 2,
+				3, 4,
+			}),
+			q: mat.NewDense(2, 2, []float64{
+				1, 2,
+				3, 4,
+			}),
 			pWeights: nil,
 			qWeights: nil,
 			want:     0.0,
 		},
 		{
 			name: "Example 7: 3D points from SciPy docs",
-			p: [][]float64{
-				{0, 2, 3},
-				{1, 2, 5},
-			},
-			q: [][]float64{
-				{3, 2, 3},
-				{4, 2, 5},
-			},
+			p: mat.NewDense(2, 3, []float64{
+				0, 2, 3,
+				1, 2, 5,
+			}),
+			q: mat.NewDense(2, 3, []float64{
+				3, 2, 3,
+				4, 2, 5,
+			}),
 			pWeights: nil,
 			qWeights: nil,
 			want:     3.0,
 		},
 		{
 			name: "Example 8: 2D with custom weights from SciPy docs",
-			p: [][]float64{
-				{0, 2.75},
-				{2, 209.3},
-				{0, 0},
-			},
-			q: [][]float64{
-				{0.2, 0.322},
-				{4.5, 25.1808},
-			},
+			p: mat.NewDense(3, 2, []float64{
+				0, 2.75,
+				2, 209.3,
+				0, 0,
+			}),
+			q: mat.NewDense(2, 2, []float64{
+				0.2, 0.322,
+				4.5, 25.1808,
+			}),
 			pWeights: []float64{0.4, 5.2, 0.114},
 			qWeights: []float64{0.8, 1.5},
 			want:     174.15840245217169,
@@ -2118,15 +2119,5 @@ func TestWassersteinDistanceND(t *testing.T) {
 				t.Errorf("WassersteinDistanceND() = %v, want %v", got, test.want)
 			}
 		})
-	}
-}
-
-// TestWassersteinDistanceNDEdgeCases tests specific edge cases
-func TestWassersteinDistanceNDEdgeCases(t *testing.T) {
-	// Test empty distributions.
-	result, err := WassersteinDistanceND([][]float64{}, [][]float64{{1, 2}}, nil, nil)
-
-	if !math.IsNaN(result) && err != nil {
-		t.Errorf("WassersteinDistanceND() = %v, want %v", result, math.NaN())
 	}
 }

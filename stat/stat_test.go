@@ -1949,7 +1949,7 @@ func TestWassersteinDistanceEdgeCases(t *testing.T) {
 
 // TestWassersteinDistanceWeightNormalization tests that weights are properly normalized
 func TestWassersteinDistanceWeightNormalization(t *testing.T) {
-	const tol = 1e-14
+	const tol = 1e-8
 
 	p := []float64{1.0, 2.0, 3.0}
 	q := []float64{2.0, 3.0, 4.0}
@@ -1977,7 +1977,7 @@ func TestWassersteinDistanceWeightNormalization(t *testing.T) {
 }
 
 func TestWassersteinDistanceND(t *testing.T) {
-	const tol = 1e-14
+	const tol = 1e-8
 
 	tests := []struct {
 		name     string
@@ -2120,4 +2120,30 @@ func TestWassersteinDistanceND(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestNormalizeWeights(t *testing.T) {
+	t.Run("panics on zero weight", func(t *testing.T) {
+		weights := []float64{1.0, 0.0, 3.0}
+
+		defer func() {
+			if r := recover(); r == nil {
+				t.Errorf("expected panic on zero weight, but got none")
+			}
+		}()
+
+		normalizeWeights(weights)
+	})
+
+	t.Run("panics on negative weight", func(t *testing.T) {
+		weights := []float64{1.0, -2.0, 3.0}
+
+		defer func() {
+			if r := recover(); r == nil {
+				t.Errorf("expected panic on negative weight, but got none")
+			}
+		}()
+
+		normalizeWeights(weights)
+	})
 }

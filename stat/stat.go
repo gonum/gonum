@@ -192,7 +192,7 @@ func WassersteinDistanceND(p, q mat.Matrix, pWeights, qWeights []float64) (float
 		var sumSquares float64
 		for j := 0; j < pCols; j++ {
 			diff := p.At(0, j) - q.At(0, j)
-			sumSquares += diff * diff
+			sumSquares += float64(diff * diff)
 		}
 		return math.Sqrt(sumSquares), nil
 	}
@@ -239,7 +239,7 @@ func WassersteinDistanceND(p, q mat.Matrix, pWeights, qWeights []float64) (float
 			var sumSquares float64
 			for k := 0; k < pCols; k++ {
 				diff := p.At(i, k) - q.At(j, k)
-				sumSquares += diff * diff
+				sumSquares += float64(diff * diff)
 			}
 			dist := math.Sqrt(sumSquares)
 			cost.Set(i, j, dist)
@@ -251,13 +251,16 @@ func WassersteinDistanceND(p, q mat.Matrix, pWeights, qWeights []float64) (float
 
 // normalizeWeights checks and normalizes the provided weight array if needed.
 func normalizeWeights(weights []float64) {
-	total := floats.Sum(weights)
+	var sum float64
 
-	if total <= 0 {
-		panic("stat: weights must sum to positive values")
+	for _, w := range weights {
+		if w <= 0 {
+			panic("stat: all weights must be positive")
+		}
+		sum += w
 	}
 
-	floats.Scale(1/total, weights)
+	floats.Scale(1/sum, weights)
 }
 
 // solveOptimalTransportLP solves the optimal transport problem.

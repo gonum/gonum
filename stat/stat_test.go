@@ -6,7 +6,6 @@ package stat
 
 import (
 	"fmt"
-	"gonum.org/v1/gonum/mat"
 	"math"
 	"math/rand/v2"
 	"reflect"
@@ -15,6 +14,7 @@ import (
 
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/floats/scalar"
+	"gonum.org/v1/gonum/mat"
 )
 
 func ExampleCircularMean() {

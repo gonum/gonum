@@ -14,6 +14,7 @@ import (
 
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/floats/scalar"
+	"gonum.org/v1/gonum/mat"
 )
 
 func ExampleCircularMean() {
@@ -1886,4 +1887,263 @@ func TestStdScore(t *testing.T) {
 			t.Errorf("StdScore mismatch case %d. Expected %v, Found %v", i, test.z, z)
 		}
 	}
+}
+
+func TestWassersteinDistance(t *testing.T) {
+	const tol = 1e-8
+
+	// sample cases were taken from scipy's documentation
+	tests := []struct {
+		name     string
+		p        []float64
+		q        []float64
+		pWeights []float64
+		qWeights []float64
+		want     float64
+	}{
+		{
+			name:     "Example 1: Basic case with different distributions",
+			p:        []float64{0, 1, 3},
+			q:        []float64{5, 6, 8},
+			pWeights: nil,
+			qWeights: nil,
+			want:     5.0,
+		},
+		{
+			name:     "Example 2: Same distributions with different weights",
+			p:        []float64{0, 1},
+			q:        []float64{0, 1},
+			pWeights: []float64{3, 1},
+			qWeights: []float64{2, 2},
+			want:     0.25,
+		},
+		{
+			name:     "Example 3: Complex case with different sizes and weights",
+			p:        []float64{3.4, 3.9, 7.5, 7.8},
+			q:        []float64{4.5, 1.4},
+			pWeights: []float64{1.4, 0.9, 3.1, 7.2},
+			qWeights: []float64{3.2, 3.5},
+			want:     4.078133143804786,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got := WassersteinDistance(test.p, test.q, test.pWeights, test.qWeights)
+			if math.Abs(got-test.want) > tol {
+				t.Errorf("WassersteinDistance() = %v, want %v", got, test.want)
+			}
+		})
+	}
+}
+
+// TestWassersteinDistanceEdgeCases tests specific edge cases
+func TestWassersteinDistanceEdgeCases(t *testing.T) {
+	// Test empty distribution.
+	result := WassersteinDistance([]float64{}, []float64{1.0}, nil, nil)
+
+	if !math.IsNaN(result) {
+		t.Errorf("WassersteinDistance() = %v, want %v", result, math.NaN())
+	}
+}
+
+// TestWassersteinDistanceWeightNormalization tests that weights are properly normalized
+func TestWassersteinDistanceWeightNormalization(t *testing.T) {
+	const tol = 1e-8
+
+	p := []float64{1.0, 2.0, 3.0}
+	q := []float64{2.0, 3.0, 4.0}
+
+	// Non-normalized weights that sum to different values
+	pWeights := []float64{2.0, 3.0, 5.0} // Sum = 10
+	qWeights := []float64{1.0, 1.0, 1.0} // Sum = 3
+
+	// Create normalized copies for reference
+	pWeightsNorm := make([]float64, len(pWeights))
+	qWeightsNorm := make([]float64, len(qWeights))
+	copy(pWeightsNorm, pWeights)
+	copy(qWeightsNorm, qWeights)
+	floats.Scale(1.0/floats.Sum(pWeightsNorm), pWeightsNorm)
+	floats.Scale(1.0/floats.Sum(qWeightsNorm), qWeightsNorm)
+
+	// Calculate with original and normalized weights
+	result1 := WassersteinDistance(p, q, pWeights, qWeights)
+	result2 := WassersteinDistance(p, q, pWeightsNorm, qWeightsNorm)
+
+	// Results should be the same
+	if math.Abs(result1-result2) > tol {
+		t.Errorf("Weight normalization failed: got %v and %v", result1, result2)
+	}
+}
+
+func TestWassersteinDistanceND(t *testing.T) {
+	const tol = 1e-8
+
+	tests := []struct {
+		name     string
+		p        *mat.Dense
+		q        *mat.Dense
+		pWeights []float64
+		qWeights []float64
+		want     float64
+	}{
+		{
+			name: "Example 1: 2D with uniform weights",
+			p: mat.NewDense(3, 2, []float64{
+				0, 0,
+				1, 1,
+				2, 2,
+			}),
+			q: mat.NewDense(3, 2, []float64{
+				0, 1,
+				1, 2,
+				2, 3,
+			}),
+			pWeights: []float64{1.0 / 3, 1.0 / 3, 1.0 / 3},
+			qWeights: []float64{1.0 / 3, 1.0 / 3, 1.0 / 3},
+			want:     1.0,
+		},
+		{
+			name: "Example 2: 2D with different sizes",
+			p: mat.NewDense(2, 2, []float64{
+				0, 0,
+				1, 1,
+			}),
+			q: mat.NewDense(3, 2, []float64{
+				0, 1,
+				1, 2,
+				2, 3,
+			}),
+			pWeights: []float64{0.5, 0.5},
+			qWeights: []float64{1.0 / 3, 1.0 / 3, 1.0 / 3},
+			want:     1.618033988749895,
+		},
+		{
+			name: "Example 3: 2D with custom weights",
+			p: mat.NewDense(3, 2, []float64{
+				0, 0,
+				1, 1,
+				2, 2,
+			}),
+			q: mat.NewDense(3, 2, []float64{
+				0, 0,
+				1, 1,
+				2, 2,
+			}),
+			pWeights: []float64{0.2, 0.3, 0.5},
+			qWeights: []float64{0.5, 0.3, 0.2},
+			want:     0.848528137423857,
+		},
+		{
+			name: "Example 4: 3D with uniform weights",
+			p: mat.NewDense(3, 3, []float64{
+				0, 0, 0,
+				1, 1, 1,
+				2, 2, 2,
+			}),
+			q: mat.NewDense(3, 3, []float64{
+				0, 1, 0,
+				1, 2, 1,
+				2, 3, 2,
+			}),
+			pWeights: []float64{1.0 / 3, 1.0 / 3, 1.0 / 3},
+			qWeights: []float64{1.0 / 3, 1.0 / 3, 1.0 / 3},
+			want:     1.0,
+		},
+		{
+			name: "Example 5: Single points",
+			p: mat.NewDense(1, 2, []float64{
+				1, 2,
+			}),
+			q: mat.NewDense(1, 2, []float64{
+				3, 4,
+			}),
+			pWeights: []float64{1.0},
+			qWeights: []float64{1.0},
+			want:     2.8284271247461903,
+		},
+		{
+			name: "Example 6: Identical distributions",
+			p: mat.NewDense(2, 2, []float64{
+				1, 2,
+				3, 4,
+			}),
+			q: mat.NewDense(2, 2, []float64{
+				1, 2,
+				3, 4,
+			}),
+			pWeights: nil,
+			qWeights: nil,
+			want:     0.0,
+		},
+		{
+			name: "Example 7: 3D points from SciPy docs",
+			p: mat.NewDense(2, 3, []float64{
+				0, 2, 3,
+				1, 2, 5,
+			}),
+			q: mat.NewDense(2, 3, []float64{
+				3, 2, 3,
+				4, 2, 5,
+			}),
+			pWeights: nil,
+			qWeights: nil,
+			want:     3.0,
+		},
+		{
+			name: "Example 8: 2D with custom weights from SciPy docs",
+			p: mat.NewDense(3, 2, []float64{
+				0, 2.75,
+				2, 209.3,
+				0, 0,
+			}),
+			q: mat.NewDense(2, 2, []float64{
+				0.2, 0.322,
+				4.5, 25.1808,
+			}),
+			pWeights: []float64{0.4, 5.2, 0.114},
+			qWeights: []float64{0.8, 1.5},
+			want:     174.15840245217169,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got, err := WassersteinDistanceND(test.p, test.q, test.pWeights, test.qWeights, tol)
+
+			if err != nil {
+				t.Errorf("WassersteinDistanceND() error: %v", err)
+			}
+
+			if math.Abs(got-test.want) > tol {
+				t.Errorf("WassersteinDistanceND() = %v, want %v", got, test.want)
+			}
+		})
+	}
+}
+
+func TestNormalizeWeights(t *testing.T) {
+	t.Run("panics on zero weight", func(t *testing.T) {
+		weights := []float64{1.0, 0.0, 3.0}
+
+		defer func() {
+			if r := recover(); r == nil {
+				t.Errorf("expected panic on zero weight, but got none")
+			}
+		}()
+
+		normalizeWeights(weights)
+	})
+
+	t.Run("panics on negative weight", func(t *testing.T) {
+		weights := []float64{1.0, -2.0, 3.0}
+
+		defer func() {
+			if r := recover(); r == nil {
+				t.Errorf("expected panic on negative weight, but got none")
+			}
+		}()
+
+		normalizeWeights(weights)
+	})
 }

@@ -30,7 +30,6 @@ const (
 // between two 1D distributions p and q with optional weights. p and q are
 // the support points of each distribution. pWeights and qWeights are the weights
 // for each point.
-// The lengths of p and q don't have to be equal.
 // If a weights slice is nil, then uniform weights are used. If it is not nil,
 // then the length of the weights slice must equal the length of the corresponding points.
 // Otherwise, the function will panic.
@@ -167,10 +166,9 @@ func WassersteinDistance(p, q, pWeights, qWeights []float64) float64 {
 // between two n-dimensional distributions p and q with optional weights. p and q are
 // matrices where each row represents a point. pWeights and qWeights are the weights for each point.
 // The number of columns in p and q must be equal.
-// The number of points (= rows) in p and q doesn't have to be equal.
 // If a weights slice is nil, then uniform weights are used. If it is not nil, then the
 // length of the weights slice must equal the number of rows in the corresponding matrix.
-// The function will panic if the described conditions are not met.
+// WassersteinDistanceND will panic if these conditions are not met.
 //
 // This implementation uses linear programming to solve the optimal transport problem.
 // tol controls the solver's tolerance. See lp.Simplex for more information on this.

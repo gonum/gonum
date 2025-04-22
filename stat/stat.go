@@ -26,14 +26,14 @@ const (
 	LinInterp CumulantKind = 4
 )
 
-const epsilon = 1e-8
-
 // WassersteinDistance computes the Wasserstein distance (Earth Mover's Distance)
-// between two 1D distributions p and q with optional weights.
-//
-// Parameters:
-// p and q are slices of values representing the support points of each distribution.
-// pWeights and qWeights are optional weights for each point. If nil, uniform weights are used.
+// between two 1D distributions p and q with optional weights. p and q are
+// the support points of each distribution. pWeights and qWeights are the weights
+// for each point.
+// The lengths of p and q don't have to be equal.
+// If a weights slice is nil, then uniform weights are used. If it is not nil,
+// then the length of the weights slice must equal the length of the corresponding points.
+// Otherwise, the function will panic.
 //
 // The function returns the 1-Wasserstein distance (L1 metric).
 // This implementation uses the CDF-based algorithm for the 1D case.
@@ -164,14 +164,17 @@ func WassersteinDistance(p, q, pWeights, qWeights []float64) float64 {
 }
 
 // WassersteinDistanceND computes the Wasserstein distance (Earth Mover's Distance)
-// between two n-dimensional distributions p and q with optional weights.
-//
-// Parameters:
-// p and q are matrices where each row represents a point with coordinates as columns.
-// pWeights and qWeights are optional weights for each point. If nil, uniform weights are used.
+// between two n-dimensional distributions p and q with optional weights. p and q are
+// matrices where each row represents a point. pWeights and qWeights are the weights for each point.
+// The number of columns in p and q must be equal.
+// The number of points (= rows) in p and q doesn't have to be equal.
+// If a weights slice is nil, then uniform weights are used. If it is not nil, then the
+// length of the weights slice must equal the number of rows in the corresponding matrix.
+// The function will panic if the described conditions are not met.
 //
 // This implementation uses linear programming to solve the optimal transport problem.
-func WassersteinDistanceND(p, q mat.Matrix, pWeights, qWeights []float64) (float64, error) {
+// tol controls the solver's tolerance. See lp.Simplex for more information on this.
+func WassersteinDistanceND(p, q mat.Matrix, pWeights, qWeights []float64, tol float64) (float64, error) {
 	pRows, pCols := p.Dims()
 	qRows, qCols := q.Dims()
 
@@ -246,7 +249,7 @@ func WassersteinDistanceND(p, q mat.Matrix, pWeights, qWeights []float64) (float
 		}
 	}
 
-	return solveOptimalTransportLP(cost, pWeights, qWeights)
+	return solveOptimalTransportLP(cost, pWeights, qWeights, tol)
 }
 
 // normalizeWeights checks and normalizes the provided weight array if needed.
@@ -264,7 +267,7 @@ func normalizeWeights(weights []float64) {
 }
 
 // solveOptimalTransportLP solves the optimal transport problem.
-func solveOptimalTransportLP(costMatrix *mat.Dense, supply, demand []float64) (float64, error) {
+func solveOptimalTransportLP(costMatrix *mat.Dense, supply, demand []float64, tol float64) (float64, error) {
 	rows, cols := costMatrix.Dims()
 
 	// Formulate the linear program.
@@ -291,7 +294,7 @@ func solveOptimalTransportLP(costMatrix *mat.Dense, supply, demand []float64) (f
 	copy(b[rows-1:], demand)
 
 	// Solve the linear program.
-	optVal, _, err := lp.Simplex(c, constraints, b, epsilon, nil)
+	optVal, _, err := lp.Simplex(c, constraints, b, tol, nil)
 	return optVal, err
 }
 

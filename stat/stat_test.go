@@ -2109,7 +2109,7 @@ func TestWassersteinDistanceND(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			got, err := WassersteinDistanceND(test.p, test.q, test.pWeights, test.qWeights)
+			got, err := WassersteinDistanceND(test.p, test.q, test.pWeights, test.qWeights, tol)
 
 			if err != nil {
 				t.Errorf("WassersteinDistanceND() error: %v", err)

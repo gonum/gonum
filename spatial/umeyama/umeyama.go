@@ -2,6 +2,7 @@ package umeyama
 
 import (
 	"errors"
+
 	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/stat"
 )

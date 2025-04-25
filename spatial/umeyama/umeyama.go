@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"gonum.org/v1/gonum/mat"
-	"gonum.org/v1/gonum/stat"
 )
 
 const (
@@ -28,8 +27,10 @@ const (
 // Y ≈ c * R * X + t
 //
 // The dimensions of X and Y must be equal. The function will panic if they are not.
-// The points require consistent indexing. This means
-// that point i of X needs to correspond to point i of Y.
+// The points require consistent indexing. This means that point i of X needs to correspond
+// to point i of Y.
+//
+// In this implementation, rows represent points and columns represent dimensions.
 //
 // Umeyama returns the scale factor c, the rotation matrix r and the translation vector t.
 // If a computation fails, Umeyama will return an error.
@@ -42,26 +43,32 @@ func Umeyama(X, Y *mat.Dense) (float64, *mat.Dense, *mat.VecDense, error) {
 		panic("umeyama: dimensions of X and Y do not match")
 	}
 
-	rows, cols := rowsX, colsX
+	n := rowsX // number of points
+	m := colsX // number of dimensions
 
 	// Calculate means.
-	muX := mat.NewVecDense(rows, nil)
-	muY := mat.NewVecDense(rows, nil)
+	muX := mat.NewVecDense(m, nil)
+	muY := mat.NewVecDense(m, nil)
 
-	for i := 0; i < rows; i++ {
-		muX.SetVec(i, stat.Mean(mat.Row(nil, i, X), nil))
-		muY.SetVec(i, stat.Mean(mat.Row(nil, i, Y), nil))
+	for i := 0; i < m; i++ {
+		var sumX, sumY float64
+		for j := 0; j < n; j++ {
+			sumX += X.At(j, i)
+			sumY += Y.At(j, i)
+		}
+		muX.SetVec(i, sumX/float64(n))
+		muY.SetVec(i, sumY/float64(n))
 	}
 
 	// Calculate variance of X.
 	var varX float64
-	for j := 0; j < cols; j++ {
-		for i := 0; i < rows; i++ {
-			diff := X.At(i, j) - muX.AtVec(i)
-			varX += float64(diff) * float64(diff)
+	for i := 0; i < n; i++ {
+		for j := 0; j < m; j++ {
+			diff := X.At(i, j) - muX.AtVec(j)
+			varX += diff * diff
 		}
 	}
-	varX /= float64(cols)
+	varX /= float64(n)
 
 	// Check for degenerate case.
 	if varX < 1e-10 {
@@ -69,13 +76,13 @@ func Umeyama(X, Y *mat.Dense) (float64, *mat.Dense, *mat.VecDense, error) {
 	}
 
 	// Calculate covariance matrix.
-	covXY := mat.NewDense(rows, rows, nil)
-	for j := 0; j < cols; j++ {
-		for i := 0; i < rows; i++ {
-			diffY := Y.At(i, j) - muY.AtVec(i)
-			for k := 0; k < rows; k++ {
-				diffX := X.At(k, j) - muX.AtVec(k)
-				covXY.Set(i, k, covXY.At(i, k)+diffY*diffX/float64(cols))
+	covXY := mat.NewDense(m, m, nil)
+	for i := 0; i < n; i++ {
+		for j := 0; j < m; j++ {
+			diffY := Y.At(i, j) - muY.AtVec(j)
+			for k := 0; k < m; k++ {
+				diffX := X.At(i, k) - muX.AtVec(k)
+				covXY.Set(j, k, covXY.At(j, k)+diffY*diffX/float64(n))
 			}
 		}
 	}
@@ -87,42 +94,42 @@ func Umeyama(X, Y *mat.Dense) (float64, *mat.Dense, *mat.VecDense, error) {
 	}
 
 	// Get U and V.
-	u := mat.NewDense(rows, rows, nil)
-	v := mat.NewDense(rows, rows, nil)
+	u := mat.NewDense(m, m, nil)
+	v := mat.NewDense(m, m, nil)
 	svd.UTo(u)
 	svd.VTo(v)
 
 	// Create S matrix (identity matrix).
-	s := mat.NewDiagDense(rows, nil)
-	for i := 0; i < rows; i++ {
+	s := mat.NewDiagDense(m, nil)
+	for i := 0; i < m; i++ {
 		s.SetDiag(i, 1.0)
 	}
 
 	// Check determinants to ensure proper rotation matrix (not reflection).
 	if mat.Det(u)*mat.Det(v) < 0 {
-		s.SetDiag(rows-1, -1.0)
+		s.SetDiag(m-1, -1.0)
 	}
 
 	// Calculate scale factor c.
 	var c float64
 	singularValues := svd.Values(nil)
-	for i := 0; i < rows; i++ {
+	for i := 0; i < m; i++ {
 		c += singularValues[i] * s.At(i, i)
 	}
 	c /= varX
 
 	// Calculate rotation matrix R.
-	r := mat.NewDense(rows, rows, nil)
-	tmp := mat.NewDense(rows, rows, nil)
+	r := mat.NewDense(m, m, nil)
+	tmp := mat.NewDense(m, m, nil)
 	tmp.Mul(u, s)
 	r.Mul(tmp, v.T())
 
 	// Calculate translation vector t.
-	t := mat.NewVecDense(rows, nil)
-	rMuX := mat.NewVecDense(rows, nil)
+	t := mat.NewVecDense(m, nil)
+	rMuX := mat.NewVecDense(m, nil)
 	rMuX.MulVec(r, muX)
 
-	for i := 0; i < rows; i++ {
+	for i := 0; i < m; i++ {
 		t.SetVec(i, muY.AtVec(i)-c*rMuX.AtVec(i))
 	}
 

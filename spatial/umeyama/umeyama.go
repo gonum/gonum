@@ -54,11 +54,11 @@ func Umeyama(X, Y *mat.Dense) (float64, *mat.Dense, *mat.VecDense, error) {
 	}
 
 	// Calculate variance of X.
-	varX := 0.0
+	var varX float64
 	for j := 0; j < cols; j++ {
 		for i := 0; i < rows; i++ {
 			diff := X.At(i, j) - muX.AtVec(i)
-			varX += diff * diff
+			varX += float64(diff) * float64(diff)
 		}
 	}
 	varX /= float64(cols)
@@ -82,20 +82,15 @@ func Umeyama(X, Y *mat.Dense) (float64, *mat.Dense, *mat.VecDense, error) {
 
 	// Singular Value Decomposition
 	var svd mat.SVD
-	ok := svd.Factorize(covXY, mat.SVDFull)
-	if !ok {
+	if !svd.Factorize(covXY, mat.SVDFull) {
 		return 0, nil, nil, errors.New(ErrMsgSVDFailed)
 	}
 
-	// Get U, Σ, and V.
+	// Get U and V.
 	u := mat.NewDense(rows, rows, nil)
-	vt := mat.NewDense(rows, rows, nil)
+	v := mat.NewDense(rows, rows, nil)
 	svd.UTo(u)
-	svd.VTo(vt)
-
-	// Transpose V to get VH.
-	vh := mat.NewDense(rows, rows, nil)
-	vh.Copy(vt.T())
+	svd.VTo(v)
 
 	// Create S matrix (identity matrix).
 	s := mat.NewDiagDense(rows, nil)
@@ -104,15 +99,12 @@ func Umeyama(X, Y *mat.Dense) (float64, *mat.Dense, *mat.VecDense, error) {
 	}
 
 	// Check determinants to ensure proper rotation matrix (not reflection).
-	// This is a key contribution of Umeyama's paper - ensuring a proper rotation.
-	uDet := mat.Det(u)
-	vhDet := mat.Det(vh)
-	if uDet*vhDet < 0 {
+	if mat.Det(u)*mat.Det(v) < 0 {
 		s.SetDiag(rows-1, -1.0)
 	}
 
 	// Calculate scale factor c.
-	c := 0.0
+	var c float64
 	singularValues := svd.Values(nil)
 	for i := 0; i < rows; i++ {
 		c += singularValues[i] * s.At(i, i)
@@ -120,23 +112,15 @@ func Umeyama(X, Y *mat.Dense) (float64, *mat.Dense, *mat.VecDense, error) {
 	c /= varX
 
 	// Calculate rotation matrix R.
-	tmp := mat.NewDense(rows, rows, nil)
 	r := mat.NewDense(rows, rows, nil)
+	tmp := mat.NewDense(rows, rows, nil)
 	tmp.Mul(u, s)
-	r.Mul(tmp, vh)
+	r.Mul(tmp, v.T())
 
 	// Calculate translation vector t.
 	t := mat.NewVecDense(rows, nil)
 	rMuX := mat.NewVecDense(rows, nil)
-	tmp2 := mat.NewDense(rows, 1, nil)
-	for i := 0; i < rows; i++ {
-		for j := 0; j < rows; j++ {
-			tmp2.Set(i, 0, tmp2.At(i, 0)+r.At(i, j)*muX.AtVec(j))
-		}
-	}
-	for i := 0; i < rows; i++ {
-		rMuX.SetVec(i, tmp2.At(i, 0))
-	}
+	rMuX.MulVec(r, muX)
 
 	for i := 0; i < rows; i++ {
 		t.SetVec(i, muY.AtVec(i)-c*rMuX.AtVec(i))

@@ -9,9 +9,9 @@ import (
 
 const (
 	// ErrMsgSVDFailed is the error message for SVD factorization failure
-	ErrMsgSVDFailed = "SVD factorization failed"
+	ErrMsgSVDFailed = "umeyama: SVD factorization failed"
 	// ErrMsgDegenerateInput is the error message for degenerate input data
-	ErrMsgDegenerateInput = "degenerate input: variance of X is too small"
+	ErrMsgDegenerateInput = "umeyama: variance of X is too small"
 )
 
 // Umeyama estimates the similarity transformation parameters between two matrices X and Y.
@@ -19,7 +19,7 @@ const (
 // This is an implementation of the algorithm presented in:
 // "Least-Squares Estimation of Transformation Parameters Between Two Point Patterns"
 // by Shinji Umeyama, IEEE Transactions on Pattern Analysis and Machine Intelligence,
-// Vol. 13, No. 4, April 1991.
+// Vol. 13, No. 4, April 1991, which can be found here: https://doi.org/10.1109/34.88573
 //
 // The algorithm finds the optimal similarity transformation [c, R, t] ∈ Sim(m)
 // that minimizes the mean squared error between two point patterns.
@@ -31,7 +31,7 @@ const (
 // The points require consistent indexing. This means
 // that point i of X needs to correspond to point i of Y.
 //
-// Umeyama returns the scale factor c, the rotation matrix R and the translation vector t.
+// Umeyama returns the scale factor c, the rotation matrix r and the translation vector t.
 // If a computation fails, Umeyama will return an error.
 func Umeyama(X, Y *mat.Dense) (float64, *mat.Dense, *mat.VecDense, error) {
 	rowsX, colsX := X.Dims()

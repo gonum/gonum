@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package umeyama
+package transform
 
 import (
 	"errors"
@@ -13,9 +13,9 @@ import (
 
 const (
 	// ErrMsgSVDFailed is the error message for SVD factorization failure.
-	ErrMsgSVDFailed = "umeyama: SVD factorization failed"
+	ErrMsgSVDFailed = "transform: SVD factorization failed"
 	// ErrMsgDegenerateInput is the error message for degenerate input data.
-	ErrMsgDegenerateInput = "umeyama: variance of X is too small"
+	ErrMsgDegenerateInput = "transform: variance of X is too small"
 )
 
 // Umeyama estimates the similarity transformation parameters between two matrices X and Y.
@@ -45,7 +45,7 @@ func Umeyama(X, Y *mat.Dense) (float64, *mat.Dense, *mat.VecDense, error) {
 
 	// Check dimensions.
 	if rowsX != rowsY || colsX != colsY {
-		panic("umeyama: dimensions of X and Y do not match")
+		panic("transform: dimensions of X and Y do not match")
 	}
 
 	n := rowsX // number of points

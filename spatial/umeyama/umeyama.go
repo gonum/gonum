@@ -4,12 +4,13 @@ import (
 	"errors"
 
 	"gonum.org/v1/gonum/mat"
+	"gonum.org/v1/gonum/stat"
 )
 
 const (
-	// ErrMsgSVDFailed is the error message for SVD factorization failure
+	// ErrMsgSVDFailed is the error message for SVD factorization failure.
 	ErrMsgSVDFailed = "umeyama: SVD factorization failed"
-	// ErrMsgDegenerateInput is the error message for degenerate input data
+	// ErrMsgDegenerateInput is the error message for degenerate input data.
 	ErrMsgDegenerateInput = "umeyama: variance of X is too small"
 )
 
@@ -50,42 +51,41 @@ func Umeyama(X, Y *mat.Dense) (float64, *mat.Dense, *mat.VecDense, error) {
 	muX := mat.NewVecDense(m, nil)
 	muY := mat.NewVecDense(m, nil)
 
-	for i := 0; i < m; i++ {
-		var sumX, sumY float64
-		for j := 0; j < n; j++ {
-			sumX += X.At(j, i)
-			sumY += Y.At(j, i)
-		}
-		muX.SetVec(i, sumX/float64(n))
-		muY.SetVec(i, sumY/float64(n))
+	colX := make([]float64, n)
+	colY := make([]float64, n)
+
+	for j := 0; j < m; j++ {
+		mat.Col(colX, j, X)
+		mat.Col(colY, j, Y)
+		muX.SetVec(j, stat.Mean(colX, nil))
+		muY.SetVec(j, stat.Mean(colY, nil))
 	}
 
-	// Calculate variance of X.
+	// Center the matrices and calculate variance of X.
 	var varX float64
+	Xc := mat.NewDense(n, m, nil)
+	Yc := mat.NewDense(n, m, nil)
+
 	for i := 0; i < n; i++ {
 		for j := 0; j < m; j++ {
-			diff := X.At(i, j) - muX.AtVec(j)
-			varX += diff * diff
+			Xc.Set(i, j, X.At(i, j)-muX.AtVec(j))
+			Yc.Set(i, j, Y.At(i, j)-muY.AtVec(j))
+
+			varX += Xc.At(i, j) * Xc.At(i, j)
 		}
 	}
 	varX /= float64(n)
 
-	// Check for degenerate case.
+	// Check for degenerate case. This prevents cases of division by zero and mathematical instability due to
+	// very low variance.
 	if varX < 1e-10 {
 		return 0, nil, nil, errors.New(ErrMsgDegenerateInput)
 	}
 
 	// Calculate covariance matrix.
 	covXY := mat.NewDense(m, m, nil)
-	for i := 0; i < n; i++ {
-		for j := 0; j < m; j++ {
-			diffY := Y.At(i, j) - muY.AtVec(j)
-			for k := 0; k < m; k++ {
-				diffX := X.At(i, k) - muX.AtVec(k)
-				covXY.Set(j, k, covXY.At(j, k)+diffY*diffX/float64(n))
-			}
-		}
-	}
+	covXY.Mul(Yc.T(), Xc)
+	covXY.Scale(1/float64(n), covXY)
 
 	// Singular Value Decomposition
 	var svd mat.SVD
@@ -99,15 +99,15 @@ func Umeyama(X, Y *mat.Dense) (float64, *mat.Dense, *mat.VecDense, error) {
 	svd.UTo(u)
 	svd.VTo(v)
 
-	// Create S matrix (identity matrix).
+	// Create identity matrix.
 	s := mat.NewDiagDense(m, nil)
 	for i := 0; i < m; i++ {
-		s.SetDiag(i, 1.0)
+		s.SetDiag(i, 1)
 	}
 
 	// Check determinants to ensure proper rotation matrix (not reflection).
 	if mat.Det(u)*mat.Det(v) < 0 {
-		s.SetDiag(m-1, -1.0)
+		s.SetDiag(m-1, -1)
 	}
 
 	// Calculate scale factor c.
@@ -120,18 +120,15 @@ func Umeyama(X, Y *mat.Dense) (float64, *mat.Dense, *mat.VecDense, error) {
 
 	// Calculate rotation matrix R.
 	r := mat.NewDense(m, m, nil)
-	tmp := mat.NewDense(m, m, nil)
-	tmp.Mul(u, s)
-	r.Mul(tmp, v.T())
+	r.Product(u, s, v.T())
 
 	// Calculate translation vector t.
 	t := mat.NewVecDense(m, nil)
 	rMuX := mat.NewVecDense(m, nil)
 	rMuX.MulVec(r, muX)
 
-	for i := 0; i < m; i++ {
-		t.SetVec(i, muY.AtVec(i)-c*rMuX.AtVec(i))
-	}
+	t.CopyVec(muY)
+	t.AddScaledVec(t, -c, rMuX)
 
 	return c, r, t, nil
 }

@@ -1339,7 +1339,7 @@ type Sphere struct{}
 
 func (Sphere) Func(x []float64) (sum float64) {
 	for _, v := range x {
-		sum += math.Pow(v, 2)
+		sum += float64(v*v)
 	}
 	return sum
 }
@@ -1362,42 +1362,7 @@ func (Sphere) Minima() []Minimum {
 			Global: true,
 		},
 		{
-			X:      []float64{0, 0},
-			F:      0,
-			Global: true,
-		},
-		{
-			X:      []float64{0, 0, 0},
-			F:      0,
-			Global: true,
-		},
-		{
-			X:      []float64{0, 0, 0, 0},
-			F:      0,
-			Global: true,
-		},
-		{
 			X:      []float64{0, 0, 0, 0, 0},
-			F:      0,
-			Global: true,
-		},
-		{
-			X:      []float64{0, 0, 0, 0, 0, 0},
-			F:      0,
-			Global: true,
-		},
-		{
-			X:      []float64{0, 0, 0, 0, 0, 0, 0},
-			F:      0,
-			Global: true,
-		},
-		{
-			X:      []float64{0, 0, 0, 0, 0, 0, 0, 0},
-			F:      0,
-			Global: true,
-		},
-		{
-			X:      []float64{0, 0, 0, 0, 0, 0, 0, 0, 0},
 			F:      0,
 			Global: true,
 		},

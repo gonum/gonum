@@ -221,6 +221,24 @@ var gradientDescentTests = []unconstrainedTest{
 		x: []float64{1.00001, 0.00001, 0.00001},
 	},
 	{
+		name: "Sphere",
+		p: Problem{
+			Func: functions.Sphere{}.Func,
+			Grad: functions.Sphere{}.Grad,
+		},
+		x:       []float64{5.00001, 5.00001, 5.00001, 5.00001, 5.00001},
+		gradTol: 1e-10,
+	},
+	{
+		name: "Sphere",
+		p: Problem{
+			Func: functions.Sphere{}.Func,
+			Grad: functions.Sphere{}.Grad,
+		},
+		x:       []float64{1.00001, 1.00001, 1.00001, 1.00001, 1.00001, 1.00001, 1.00001, 1.00001, 1.00001, 1.00001},
+		gradTol: 1e-10,
+	},
+	{
 		name: "Trigonometric",
 		p: Problem{
 			Func: functions.Trigonometric{}.Func,

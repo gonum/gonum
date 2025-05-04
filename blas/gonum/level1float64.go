@@ -49,7 +49,6 @@ func (Implementation) Dnrm2(n int, x []float64, incX int) float64 {
 //
 // Dasum returns 0 if incX is negative.
 func (Implementation) Dasum(n int, x []float64, incX int) float64 {
-	var sum float64
 	if n < 0 {
 		panic(nLT0)
 	}
@@ -64,15 +63,9 @@ func (Implementation) Dasum(n int, x []float64, incX int) float64 {
 	}
 	if incX == 1 {
 		x = x[:n]
-		for _, v := range x {
-			sum += math.Abs(v)
-		}
-		return sum
+		return f64.L1NormUnitary(x)
 	}
-	for i := 0; i < n; i++ {
-		sum += math.Abs(x[i*incX])
-	}
-	return sum
+	return f64.L1NormInc(x, n, incX)
 }
 
 // Idamax returns the index of an element of x with the largest absolute value.

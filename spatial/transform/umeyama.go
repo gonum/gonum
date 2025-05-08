@@ -14,8 +14,6 @@ import (
 const (
 	// ErrMsgSVDFailed is the error message for SVD factorization failure.
 	ErrMsgSVDFailed = "transform: SVD factorization failed"
-	// ErrMsgDegenerateInput is the error message for degenerate input data.
-	ErrMsgDegenerateInput = "transform: variance of X is too small"
 )
 
 // Umeyama estimates the similarity transformation parameters between two matrices X and Y.
@@ -39,7 +37,15 @@ const (
 //
 // Umeyama returns the scale factor c, the rotation matrix r and the translation vector t.
 // If a computation fails, Umeyama will return an error.
-func Umeyama(x, y *mat.Dense) (c float64, r *mat.Dense, t *mat.VecDense, err error) {
+// varThreshold is used for detecting a degenerate input by comparing it with the variance of x. This is necessary
+// because a variance equal or close to zero could cause numerical instability and/or division by zero.
+// In case of variance <= threshold, Umeyama will return an error.
+// The threshold should be >= 0. If a negative value is passed, the default threshold of 1e-10 will be used.
+func Umeyama(x, y *mat.Dense, varThreshold float64) (c float64, r *mat.Dense, t *mat.VecDense, err error) {
+	if varThreshold < 0 {
+		varThreshold = 1e-10
+	}
+
 	rowsX, colsX := x.Dims()
 	rowsY, colsY := y.Dims()
 
@@ -82,8 +88,11 @@ func Umeyama(x, y *mat.Dense) (c float64, r *mat.Dense, t *mat.VecDense, err err
 
 	// Check for degenerate case. This prevents cases of division by zero and mathematical instability due to
 	// very low variance.
-	if varX < 1e-10 {
-		return 0, nil, nil, errors.New(ErrMsgDegenerateInput)
+	if varX <= varThreshold {
+		return 0, nil, nil, mat.DegenerateInputError{
+			Variance:  varX,
+			Threshold: varThreshold,
+		}
 	}
 
 	// Calculate covariance matrix.

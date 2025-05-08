@@ -32,6 +32,17 @@ func (c Condition) Error() string {
 // condition number is above this value, the matrix is considered singular.
 const ConditionTolerance = 1e16
 
+// DegenerateInputError represents an error due to input data with variance
+// below a threshold, which would cause numerical instability.
+type DegenerateInputError struct {
+	Variance  float64
+	Threshold float64
+}
+
+func (e DegenerateInputError) Error() string {
+	return fmt.Sprintf("variance of X (%.4e) below threshold (%.4e)", e.Variance, e.Threshold)
+}
+
 const (
 	// CondNorm is the matrix norm used for computing the condition number by routines
 	// in the matrix packages.

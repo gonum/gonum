@@ -129,7 +129,7 @@ func TestUmeyama(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			scale, rotation, translation, err := Umeyama(tc.src, tc.dst)
+			scale, rotation, translation, err := Umeyama(tc.src, tc.dst, tol)
 			if err != nil {
 				t.Fatalf("Umeyama returned error: %v", err)
 			}

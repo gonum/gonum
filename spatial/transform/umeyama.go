@@ -90,8 +90,7 @@ func Umeyama(x, y *mat.Dense, varThreshold float64) (c float64, r *mat.Dense, t 
 	// very low variance.
 	if varX <= varThreshold {
 		return 0, nil, nil, mat.DegenerateInputError{
-			Variance:  varX,
-			Threshold: varThreshold,
+			Variance: varX,
 		}
 	}
 

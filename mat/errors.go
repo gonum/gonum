@@ -34,12 +34,10 @@ const ConditionTolerance = 1e16
 
 // DegenerateInputError represents an error due to input data with variance
 // below a threshold, which would cause numerical instability.
-type DegenerateInputError struct {
-	Variance float64
-}
+type DegenerateInputError float64
 
 func (e DegenerateInputError) Error() string {
-	return fmt.Sprintf("variance of X (%.4e) below threshold.", e.Variance)
+	return fmt.Sprintf("variance too low: %v", float64(e))
 }
 
 const (

@@ -11,10 +11,8 @@ import (
 	"gonum.org/v1/gonum/stat"
 )
 
-const (
-	// ErrMsgSVDFailed is the error message for SVD factorization failure.
-	ErrMsgSVDFailed = "transform: SVD factorization failed"
-)
+// ErrSVDFailed is returned when the SVD factorization process fails.
+var ErrSVDFailed = errors.New("transform: SVD factorization failed")
 
 // Umeyama estimates the similarity transformation parameters between two matrices X and Y.
 //
@@ -39,7 +37,7 @@ const (
 // If a computation fails, Umeyama will return an error.
 // varThreshold is used for detecting a degenerate input by comparing it with the variance of x. This is necessary
 // because a variance equal or close to zero could cause numerical instability and/or division by zero.
-// In case of variance <= threshold, Umeyama will return an error.
+// In case of variance <= threshold, Umeyama will return a DegenerateInputError.
 // The threshold should be >= 0. If a negative value is passed, the default threshold of 1e-10 will be used.
 func Umeyama(x, y *mat.Dense, varThreshold float64) (c float64, r *mat.Dense, t *mat.VecDense, err error) {
 	if varThreshold < 0 {
@@ -89,9 +87,7 @@ func Umeyama(x, y *mat.Dense, varThreshold float64) (c float64, r *mat.Dense, t 
 	// Check for degenerate case. This prevents cases of division by zero and mathematical instability due to
 	// very low variance.
 	if varX <= varThreshold {
-		return 0, nil, nil, mat.DegenerateInputError{
-			Variance: varX,
-		}
+		return 0, nil, nil, mat.DegenerateInputError(varX)
 	}
 
 	// Calculate covariance matrix.
@@ -102,7 +98,7 @@ func Umeyama(x, y *mat.Dense, varThreshold float64) (c float64, r *mat.Dense, t 
 	// Singular Value Decomposition
 	var svd mat.SVD
 	if !svd.Factorize(covXY, mat.SVDFull) {
-		return 0, nil, nil, errors.New(ErrMsgSVDFailed)
+		return 0, nil, nil, ErrSVDFailed
 	}
 
 	// Get U and V.

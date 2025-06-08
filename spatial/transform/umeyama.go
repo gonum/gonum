@@ -11,7 +11,7 @@ import (
 	"gonum.org/v1/gonum/stat"
 )
 
-// ErrSVDFailed is returned when the SVD factorization process fails.
+// ErrSVDFailed is returned when a required SVD factorization process fails.
 var ErrSVDFailed = errors.New("transform: SVD factorization failed")
 
 // Umeyama estimates the similarity transformation parameters between two matrices X and Y.
@@ -19,7 +19,8 @@ var ErrSVDFailed = errors.New("transform: SVD factorization failed")
 // This is an implementation of the algorithm presented in:
 // "Least-Squares Estimation of Transformation Parameters Between Two Point Patterns"
 // by Shinji Umeyama, IEEE Transactions on Pattern Analysis and Machine Intelligence,
-// Vol. 13, No. 4, April 1991, which can be found here: https://doi.org/10.1109/34.88573
+// Vol. 13, No. 4, April 1991, [doi:10.1109/34.88573].
+// [doi:10.1109/34.88573]: https://doi.org/10.1109/34.88573
 //
 // The algorithm finds the optimal similarity transformation [c, R, t] ∈ Sim(m)
 // that minimizes the mean squared error between two point patterns.
@@ -33,15 +34,19 @@ var ErrSVDFailed = errors.New("transform: SVD factorization failed")
 //
 // In this implementation, rows represent points and columns represent dimensions.
 //
-// Umeyama returns the scale factor c, the rotation matrix r and the translation vector t.
-// If a computation fails, Umeyama will return an error.
-// varThreshold is used for detecting a degenerate input by comparing it with the variance of x. This is necessary
-// because a variance equal or close to zero could cause numerical instability and/or division by zero.
-// In case of variance <= threshold, Umeyama will return a DegenerateInputError.
-// The threshold should be >= 0. If a negative value is passed, the default threshold of 1e-10 will be used.
-func Umeyama(x, y *mat.Dense, varThreshold float64) (c float64, r *mat.Dense, t *mat.VecDense, err error) {
-	if varThreshold < 0 {
-		varThreshold = 1e-10
+// Umeyama returns the scale factor c, the rotation matrix r and the translation
+// vector t.
+//
+// If the required SVD fails, Umeyama will return an ErrSVDFailed.
+//
+// minVar is used for detecting a degenerate input by comparing it with the
+// variance of x. This is necessary because a variance equal or close to zero
+// may cause numerical instability and/or division by zero.
+// In case of variance ≤ minVar, Umeyama will return a DegenerateInputError.
+// If a negative value is provided, the default threshold of 1e-10 will be used.
+func Umeyama(x, y *mat.Dense, minVar float64) (c float64, r *mat.Dense, t *mat.VecDense, err error) {
+	if minVar < 0 {
+		minVar = 1e-10
 	}
 
 	rowsX, colsX := x.Dims()
@@ -86,7 +91,7 @@ func Umeyama(x, y *mat.Dense, varThreshold float64) (c float64, r *mat.Dense, t 
 
 	// Check for degenerate case. This prevents cases of division by zero and mathematical instability due to
 	// very low variance.
-	if varX <= varThreshold {
+	if varX <= minVar {
 		return 0, nil, nil, mat.DegenerateInputError(varX)
 	}
 

@@ -16,12 +16,6 @@ var ErrSVDFailed = errors.New("transform: SVD factorization failed")
 
 // Umeyama estimates the similarity transformation parameters between two matrices X and Y.
 //
-// This is an implementation of the algorithm presented in:
-// "Least-Squares Estimation of Transformation Parameters Between Two Point Patterns"
-// by Shinji Umeyama, IEEE Transactions on Pattern Analysis and Machine Intelligence,
-// Vol. 13, No. 4, April 1991, [doi:10.1109/34.88573].
-// [doi:10.1109/34.88573]: https://doi.org/10.1109/34.88573
-//
 // The algorithm finds the optimal similarity transformation [c, R, t] ∈ Sim(m)
 // that minimizes the mean squared error between two point patterns.
 //
@@ -44,6 +38,11 @@ var ErrSVDFailed = errors.New("transform: SVD factorization failed")
 // may cause numerical instability and/or division by zero.
 // In case of variance ≤ minVar, Umeyama will return a DegenerateInputError.
 // If a negative value is provided, the default threshold of 1e-10 will be used.
+//
+// "Least-Squares Estimation of Transformation Parameters Between Two Point Patterns"
+// by Shinji Umeyama, IEEE Transactions on Pattern Analysis and Machine Intelligence,
+// Vol. 13, No. 4, April 1991, [doi:10.1109/34.88573].
+// [doi:10.1109/34.88573]: https://doi.org/10.1109/34.88573
 func Umeyama(x, y *mat.Dense, minVar float64) (c float64, r *mat.Dense, t *mat.VecDense, err error) {
 	if minVar < 0 {
 		minVar = 1e-10

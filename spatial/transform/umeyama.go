@@ -59,22 +59,34 @@ func Umeyama(x, y *mat.Dense, minVar float64) (c float64, r *mat.Dense, t *mat.V
 	n := rowsX // number of points
 	m := colsX // number of dimensions
 
-	// Calculate means.
+	// Calculate means and variance of x.
 	muX := mat.NewVecDense(m, nil)
 	muY := mat.NewVecDense(m, nil)
 
 	colX := make([]float64, n)
 	colY := make([]float64, n)
 
+	var varX float64
+
 	for j := 0; j < m; j++ {
 		mat.Col(colX, j, x)
 		mat.Col(colY, j, y)
-		muX.SetVec(j, stat.Mean(colX, nil))
+
+		meanX, varXj := stat.PopMeanVariance(colX, nil)
+
 		muY.SetVec(j, stat.Mean(colY, nil))
+		muX.SetVec(j, meanX)
+
+		varX += varXj
 	}
 
-	// Center the matrices and calculate variance of x.
-	var varX float64
+	// Check for degenerate case. This prevents cases of division by zero and mathematical instability due to
+	// very low variance.
+	if varX <= minVar {
+		return 0, nil, nil, mat.DegenerateInputError(varX)
+	}
+
+	// Center the matrices.
 	xc := mat.NewDense(n, m, nil)
 	yc := mat.NewDense(n, m, nil)
 
@@ -82,16 +94,7 @@ func Umeyama(x, y *mat.Dense, minVar float64) (c float64, r *mat.Dense, t *mat.V
 		for j := 0; j < m; j++ {
 			xc.Set(i, j, x.At(i, j)-muX.AtVec(j))
 			yc.Set(i, j, y.At(i, j)-muY.AtVec(j))
-
-			varX += float64(xc.At(i, j) * xc.At(i, j))
 		}
-	}
-	varX /= float64(n)
-
-	// Check for degenerate case. This prevents cases of division by zero and mathematical instability due to
-	// very low variance.
-	if varX <= minVar {
-		return 0, nil, nil, mat.DegenerateInputError(varX)
 	}
 
 	// Calculate covariance matrix.

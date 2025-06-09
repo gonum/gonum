@@ -5,9 +5,9 @@
 package transform
 
 import (
-	"gonum.org/v1/gonum/floats/scalar"
 	"testing"
 
+	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/mat"
 )
 

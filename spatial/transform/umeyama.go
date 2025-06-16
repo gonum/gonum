@@ -14,19 +14,21 @@ import (
 // ErrSVDFailed is returned when a required SVD factorization process fails.
 var ErrSVDFailed = errors.New("transform: SVD factorization failed")
 
-// Umeyama estimates the similarity transformation parameters between two matrices X and Y.
+// Umeyama finds the similarity transformation between two sets of points
+// that minimizes the mean squared error between them.
 //
-// The algorithm finds the optimal similarity transformation [c, R, t] ∈ Sim(m)
-// that minimizes the mean squared error between two point patterns.
+// The transformation relates two sets of n corresponding points {x_i}
+// and {y_i} as:
 //
-// The transformation relates the point sets as:
-// Y ≈ c * R * X + t
+//	y_i ≈ c * R * x_i + t,  i=1,...,n
 //
-// The dimensions of X and Y must be equal. The function will panic if they are not.
-// The points require consistent indexing. This means that point i of X needs to correspond
-// to point i of Y.
+// where c is the scale factor, R is the rotation matrix and t is
+// the translation vector.
 //
-// In this implementation, rows represent points and columns represent dimensions.
+// The point sets are represented as two n×m matrices X and Y, where
+// m is the number of dimensions and x_i and y_i are stored in the i-th
+// row of X and Y, respectively. Typically, m is equal to 2 or 3.
+// If the dimensions of X and Y are not equal, Umeyama will panic.
 //
 // Umeyama returns the scale factor c, the rotation matrix r and the translation
 // vector t.
@@ -48,16 +50,13 @@ func Umeyama(x, y *mat.Dense, minVar float64) (c float64, r *mat.Dense, t *mat.V
 		minVar = 1e-10
 	}
 
-	rowsX, colsX := x.Dims()
+	n, m := x.Dims()
 	rowsY, colsY := y.Dims()
 
 	// Check dimensions.
-	if rowsX != rowsY || colsX != colsY {
+	if n != rowsY || m != colsY {
 		panic("transform: dimensions of x and y do not match")
 	}
-
-	n := rowsX // number of points
-	m := colsX // number of dimensions
 
 	// Calculate means and variance of x.
 	muX := mat.NewVecDense(m, nil)

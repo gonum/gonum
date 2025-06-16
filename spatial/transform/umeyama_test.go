@@ -53,14 +53,14 @@ var umeyamaTests = []struct {
 			1, 1,
 			2, 2,
 		}),
-		wantScale: 1.0,
+		wantScale: 1,
 		wantRot: mat.NewDense(2, 2, []float64{
-			1.0, 0.0,
-			0.0, 1.0,
+			1, 0,
+			0, 1,
 		}),
 		wantTrans: mat.NewVecDense(2, []float64{
-			-2.220446049250313e-16,
-			-2.220446049250313e-16,
+			0,
+			0,
 		}),
 	},
 	{
@@ -75,14 +75,14 @@ var umeyamaTests = []struct {
 			0, 1,
 			-1, 1,
 		}),
-		wantScale: 1.0,
+		wantScale: 1,
 		wantRot: mat.NewDense(2, 2, []float64{
-			-5.613347976343136e-17, -1.0,
-			1.0, -2.9040269150165053e-16,
+			0, -1,
+			1, -0,
 		}),
 		wantTrans: mat.NewVecDense(2, []float64{
-			-5.551115123125783e-17,
-			3.3306690738754696e-16,
+			0,
+			0,
 		}),
 	},
 	{
@@ -97,14 +97,14 @@ var umeyamaTests = []struct {
 			2, 2,
 			4, 4,
 		}),
-		wantScale: 2.0,
+		wantScale: 2,
 		wantRot: mat.NewDense(2, 2, []float64{
-			1.0, 0.0,
-			0.0, 1.0,
+			1, 0,
+			0, 1,
 		}),
 		wantTrans: mat.NewVecDense(2, []float64{
-			-4.440892098500626e-16,
-			-4.440892098500626e-16,
+			0,
+			0,
 		}),
 	},
 	{
@@ -119,14 +119,14 @@ var umeyamaTests = []struct {
 			4, 4,
 			5, 5,
 		}),
-		wantScale: 1.0,
+		wantScale: 1,
 		wantRot: mat.NewDense(2, 2, []float64{
-			1.0, 0.0,
-			0.0, 1.0,
+			1, 0,
+			0, 1,
 		}),
 		wantTrans: mat.NewVecDense(2, []float64{
-			3.0,
-			3.0,
+			3,
+			3,
 		}),
 	},
 	{
@@ -156,11 +156,11 @@ var umeyamaTests = []struct {
 }
 
 func TestUmeyama(t *testing.T) {
-	tol := 1e-10
+	tol := 1e-14
 
 	for _, test := range umeyamaTests {
 		t.Run(test.name, func(t *testing.T) {
-			scale, rotation, translation, err := Umeyama(test.from, test.to, tol)
+			scale, rotation, translation, err := Umeyama(test.from, test.to, -1)
 			if err != nil {
 				t.Fatalf("Umeyama returned error: %v", err)
 			}
@@ -171,20 +171,21 @@ func TestUmeyama(t *testing.T) {
 			}
 
 			// Check rotation
-			_, d := test.wantRot.Dims()
-			for i := 0; i < d; i++ {
-				for j := 0; j < d; j++ {
-					if !scalar.EqualWithinAbs(rotation.At(i, j), test.wantRot.At(i, j), tol) {
-						t.Errorf("Rotation[%d,%d] = %v, want %v", i, j, rotation.At(i, j), test.wantRot.At(i, j))
-					}
-				}
+			var rDiff mat.Dense
+			rDiff.Sub(rotation, test.wantRot)
+			diff := rDiff.Norm(1)
+
+			if diff > tol {
+				t.Errorf("unexpected rotation matrix, |R_got-R_want| = %v", diff)
 			}
 
 			// Check translation
-			for i := 0; i < d; i++ {
-				if !scalar.EqualWithinAbs(translation.AtVec(i), test.wantTrans.AtVec(i), tol) {
-					t.Errorf("Translation[%d] = %v, want %v", i, translation.AtVec(i), test.wantTrans.AtVec(i))
-				}
+			var tDiff mat.VecDense
+			tDiff.SubVec(translation, test.wantTrans)
+			diff = tDiff.Norm(1)
+
+			if diff > tol {
+				t.Errorf("unexpected translation vector, |t_got-t_want| = %v", diff)
 			}
 		})
 	}

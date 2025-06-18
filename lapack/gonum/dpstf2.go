@@ -30,9 +30,7 @@ import (
 // piv contains P stored such that P[piv[k],k] = 1.
 //
 // Dpstf2 returns the computed rank of A and whether the factorization can be
-// used to solve a system. Dpstf2 does not attempt to check that A is positive
-// semi-definite, so if ok is false, the matrix A is either rank deficient or is
-// not positive semidefinite.
+// used to solve a system. If 'ok' is false, matrix A is not positive semidefinite.
 //
 // The length of piv must be n and the length of work must be at least 2*n,
 // otherwise Dpstf2 will panic.
@@ -66,6 +64,9 @@ func (Implementation) Dpstf2(uplo blas.Uplo, n int, a []float64, lda int, piv []
 	for i := range piv[:n] {
 		piv[i] = i
 	}
+
+	//Initialize rank count
+	rank = 0
 
 	// Compute the first pivot.
 	pvt := 0
@@ -118,10 +119,14 @@ func (Implementation) Dpstf2(uplo blas.Uplo, n int, a []float64, lda int, piv []
 						ajj = wk
 					}
 				}
-				// Test for exit.
-				if ajj <= dstop || math.IsNaN(ajj) {
+				//Return false if the matrix is not positive semi-definite
+				if ajj < -dstop || math.IsNaN(ajj) {
 					a[j*lda+j] = ajj
-					return j, false
+					return rank, false
+				}
+				//Matrix is positive semi-definite and we reached a 0 on the diagonal
+				if ajj <= dstop {
+					return rank, true
 				}
 			}
 			if j != pvt {
@@ -138,6 +143,8 @@ func (Implementation) Dpstf2(uplo blas.Uplo, n int, a []float64, lda int, piv []
 			}
 			ajj = math.Sqrt(ajj)
 			a[j*lda+j] = ajj
+			//Increment rank
+			rank++
 			// Compute elements j+1:n of row j.
 			if j < n-1 {
 				bi.Dgemv(blas.Trans, j, n-j-1,
@@ -169,10 +176,14 @@ func (Implementation) Dpstf2(uplo blas.Uplo, n int, a []float64, lda int, piv []
 						ajj = wk
 					}
 				}
-				// Test for exit.
-				if ajj <= dstop || math.IsNaN(ajj) {
+				//Return false if the matrix is not positive semi-definite
+				if ajj < -dstop || math.IsNaN(ajj) {
 					a[j*lda+j] = ajj
-					return j, false
+					return rank, false
+				}
+				//Matrix is positive semi-definite and we reached a 0 on the diagonal
+				if ajj <= dstop {
+					return rank, true
 				}
 			}
 			if j != pvt {
@@ -189,6 +200,8 @@ func (Implementation) Dpstf2(uplo blas.Uplo, n int, a []float64, lda int, piv []
 			}
 			ajj = math.Sqrt(ajj)
 			a[j*lda+j] = ajj
+			// Increment rank
+			rank++
 			// Compute elements j+1:n of column j.
 			if j < n-1 {
 				bi.Dgemv(blas.NoTrans, n-j-1, j,
@@ -198,5 +211,5 @@ func (Implementation) Dpstf2(uplo blas.Uplo, n int, a []float64, lda int, piv []
 			}
 		}
 	}
-	return n, true
+	return rank, true
 }

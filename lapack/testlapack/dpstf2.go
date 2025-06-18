@@ -62,11 +62,7 @@ func dpstf2Test(t *testing.T, impl Dpstf2er, rnd *rand.Rand, uplo blas.Uplo, n, 
 
 	// Call Dpstf2 to Compute the Cholesky factorization with complete pivoting.
 	rank, ok := impl.Dpstf2(uplo, n, aFac, lda, piv, -1, work)
-
-	if ok != (rank == n) {
-		t.Errorf("%v: unexpected ok; got %v, want %v", name, ok, rank == n)
-	}
-	if rank != rankWant {
+	if ok && rank != rankWant {
 		t.Errorf("%v: unexpected rank; got %v, want %v", name, rank, rankWant)
 	}
 

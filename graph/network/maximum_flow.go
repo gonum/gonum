@@ -57,9 +57,10 @@ func computeBlockingPath(graph *simple.WeightedDirectedGraph, source, target gra
 			}
 			vID = path[len(path)-1]
 		}
-
+		// path has been build from target to source, so the parent is on i+1 position of the ith child
 		if vID == source.ID() {
 			bottleNeckObPath := math.MaxFloat64
+			// determine minimal flow on path
 			for i := 0; i+1 < len(path); i++ {
 				parentID := path[i+1]
 				childID := path[i]
@@ -72,7 +73,7 @@ func computeBlockingPath(graph *simple.WeightedDirectedGraph, source, target gra
 					bottleNeckObPath = weight
 				}
 			}
-
+			// update the capacities and flows in the other edges
 			for i := 0; i+1 < len(path); i++ {
 				parentID := path[i+1]
 				childID := path[i]

@@ -107,6 +107,9 @@ func computeBlockingPath(graph *simple.WeightedDirectedGraph, source, target gra
 }
 
 func canReachTargetInLevelGraph(graph graph.WeightedDirected, source, target graph.Node, parents [][]int64) bool {
+	for i := range parents {
+		parents[i] = parents[i][:0]
+	}
 	levels := make([]int32, graph.Nodes().Len())
 	for i := range levels {
 		levels[i] = -1
@@ -126,7 +129,7 @@ func canReachTargetInLevelGraph(graph graph.WeightedDirected, source, target gra
 					levels[childID] = levels[parentID] + 1
 					parents[childID] = append(parents[childID], parentID)
 					queue.PushBack(childID)
-				} else if levels[childID] == levels[parentID]-1 {
+				} else if levels[childID] == levels[parentID]+1 {
 					parents[childID] = append(parents[childID], parentID)
 				}
 			}

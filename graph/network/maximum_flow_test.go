@@ -21,13 +21,13 @@ func TestMaxFlowDinicSameSourceAndTarget(t *testing.T) {
 	if err == nil {
 		t.Fatal("Expected error when source and target are the same, got nil")
 	}
-	want := "source and target must be different"
-	if err.Error() != want {
-		t.Fatalf("unexpected error message: got %q, want %q", err.Error(), want)
+	expected := "source and target must be different"
+	if err.Error() != expected {
+		t.Fatalf("unexpected error message: got %q, expected %q", err.Error(), expected)
 	}
 }
 
-func TestThreeDisjointPaths(t *testing.T) {
+func TestMaxFlowDinicThreeDisjointPaths(t *testing.T) {
 	graph := simple.NewWeightedDirectedGraph(0, 0)
 	// Add nodes 0..4
 	for i := int64(0); i < 5; i++ {
@@ -43,11 +43,11 @@ func TestThreeDisjointPaths(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 	if !almostEqual(maxFlow, 3.0) {
-		t.Errorf("maxFlow = %v, want %v", maxFlow, 3.0)
+		t.Errorf("maxFlow = %v, expected %v", maxFlow, 3.0)
 	}
 }
 
-func TestCycleWithTailGraph(t *testing.T) {
+func TestMaxFlowDinicCycleWithTailGraph(t *testing.T) {
 	graph := simple.NewWeightedDirectedGraph(0, 0)
 	for i := int64(0); i < 4; i++ {
 		graph.AddNode(simple.Node(i))
@@ -68,7 +68,7 @@ func TestCycleWithTailGraph(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 	if !almostEqual(maxFlow03, 0.3) {
-		t.Errorf("maxFlow 0->3 = %v, want %v", maxFlow03, 0.3)
+		t.Errorf("maxFlow 0->3 = %v, expected %v", maxFlow03, 0.3)
 	}
 
 	maxFlow13, err := MaxFlowDinic(graph, simple.Node(1), simple.Node(3))
@@ -76,11 +76,11 @@ func TestCycleWithTailGraph(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 	if !almostEqual(maxFlow13, 0.6) {
-		t.Errorf("maxFlow 1->3 = %v, want %v", maxFlow13, 0.6)
+		t.Errorf("maxFlow 1->3 = %v, expected %v", maxFlow13, 0.6)
 	}
 }
 
-func TestFourLayeredDAG(t *testing.T) {
+func TestMaxFlowDinicFourLayeredDAG(t *testing.T) {
 	graph := simple.NewWeightedDirectedGraph(0, 0)
 	for i := int64(0); i < 8; i++ {
 		graph.AddNode(simple.Node(i))
@@ -91,12 +91,12 @@ func TestFourLayeredDAG(t *testing.T) {
 		{1, 4}, {2, 4}, {2, 5}, {3, 5}, {3, 6},
 		{4, 7}, {5, 7}, {6, 7},
 	}
-	for _, egde := range edges {
-		graph.SetWeightedEdge(graph.NewWeightedEdge(simple.Node(egde.u), simple.Node(egde.v), 1.0))
+	for _, edge := range edges {
+		graph.SetWeightedEdge(graph.NewWeightedEdge(simple.Node(edge.u), simple.Node(edge.v), 1.0))
 	}
 
 	testCases := []struct {
-		s, t, want float64
+		s, t, expected float64
 	}{
 		{0, 7, 3.0},
 		{3, 7, 2.0},
@@ -108,13 +108,13 @@ func TestFourLayeredDAG(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Unexpected error for %v->%v: %v", tc.s, tc.t, err)
 		}
-		if !almostEqual(maxFlow, tc.want) {
-			t.Errorf("maxFlow %v->%v = %v, want %v", tc.s, tc.t, maxFlow, tc.want)
+		if !almostEqual(maxFlow, tc.expected) {
+			t.Errorf("maxFlow %v->%v = %v, expected %v", tc.s, tc.t, maxFlow, tc.expected)
 		}
 	}
 }
 
-func TestMaxFlowDiamondWithCrossGraph(t *testing.T) {
+func TestMaxFlowDinicDiamondWithCrossGraph(t *testing.T) {
 	graph := simple.NewWeightedDirectedGraph(0, 0)
 	for i := int64(0); i < 4; i++ {
 		graph.AddNode(simple.Node(i))
@@ -134,7 +134,7 @@ func TestMaxFlowDiamondWithCrossGraph(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 	if !almostEqual(maxFlow03, 20.0) {
-		t.Errorf("maxFlow 0->3 = %v, want %v", maxFlow03, 20.0)
+		t.Errorf("maxFlow 0->3 = %v, expected %v", maxFlow03, 20.0)
 	}
 
 	maxFlow02, err := MaxFlowDinic(graph, simple.Node(0), simple.Node(2))
@@ -142,11 +142,11 @@ func TestMaxFlowDiamondWithCrossGraph(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 	if !almostEqual(maxFlow02, 15.0) {
-		t.Errorf("maxFlow 0->2 = %v, want %v", maxFlow02, 15.0)
+		t.Errorf("maxFlow 0->2 = %v, expected %v", maxFlow02, 15.0)
 	}
 }
 
-func TestMaxFlowDisconnectedGraphs(t *testing.T) {
+func TestMaxFlowDinicDisconnectedGraphs(t *testing.T) {
 	graph := simple.NewWeightedDirectedGraph(0, 0)
 	for i := int64(0); i < 7; i++ {
 		graph.AddNode(simple.Node(i))
@@ -167,6 +167,6 @@ func TestMaxFlowDisconnectedGraphs(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 	if !almostEqual(maxFlow, 0.0) {
-		t.Errorf("maxFlow = %v, want %v", maxFlow, 0.0)
+		t.Errorf("maxFlow = %v, expected %v", maxFlow, 0.0)
 	}
 }

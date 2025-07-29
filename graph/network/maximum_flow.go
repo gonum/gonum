@@ -3,9 +3,10 @@ package network
 import (
 	"container/list"
 	"fmt"
+	"math"
+
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/simple"
-	"math"
 )
 
 func initializeResidualGraph(graph graph.WeightedDirected) *simple.WeightedDirectedGraph {

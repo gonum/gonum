@@ -38,8 +38,7 @@ func initializeResidualGraph(graph graph.WeightedDirected) *simple.WeightedDirec
 	return residualGraph
 }
 
-
-func canReachTargetInLevelGraph(graph graph.WeightedDirected, source, target graph.Node, parents []int32) bool {
+func canReachTargetInLevelGraph(graph graph.WeightedDirected, source, target graph.Node, parents [][]int64) bool {
 	levels := make([]int32, graph.Nodes().Len())
 	for i := range levels {
 		levels[i] = -1
@@ -53,18 +52,18 @@ func canReachTargetInLevelGraph(graph graph.WeightedDirected, source, target gra
 		parentID := parent.Value.(int64)
 		queue.Remove(parent)
 		for it := graph.From(parentID); it.Next(); {
-			child := it.Node()
-			childID := child.ID()
+			childID := it.Node().ID()
 			if capacity, ok := graph.Weight(parentID, childID); ok && capacity > 0 {
 				if levels[childID] == -1 {
 					levels[childID] = levels[parentID] + 1
-					parents[childID]
+					parents[childID] = append(parents[childID], parentID)
+				} else if levels[childID] == levels[parentID]-1 {
+					parents[childID] = append(parents[childID], parentID)
 				}
 			}
 		}
 	}
-
-
+	return levels[target.ID()] > -1
 }
 
 
@@ -72,10 +71,7 @@ func Dinic(graph graph.WeightedDirected, source, target graph.Node) (float64, er
 	if source.ID() == target.ID() {
 		return 0, fmt.Errorf("source and target must be different")
 	}
-	parents := make([]int32, graph.Nodes().Len())
-	for i := range parents {
-		parents[i] = -1
-	}
+	parents := make([][]int64, graph.Nodes().Len())
 	residualGraph := initializeResidualGraph(graph)
 
 }

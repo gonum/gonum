@@ -1,27 +1,28 @@
 package network
 
 import (
+	"container/list"
 	"fmt"
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/simple"
 )
 
-func initializeResidualGraph(g graph.WeightedDirected) *simple.WeightedDirectedGraph {
+func initializeResidualGraph(graph graph.WeightedDirected) *simple.WeightedDirectedGraph {
 	residualGraph := simple.NewWeightedDirectedGraph(0, 0)
 
-	// 1) Add all nodes
-	for nodes := g.Nodes(); nodes.Next(); {
+	// Add all nodes
+	for nodes := graph.Nodes(); nodes.Next(); {
 		residualGraph.AddNode(nodes.Node())
 	}
 
-	// 2) For each u -> v in g:
-	for nodes := g.Nodes(); nodes.Next(); {
+	// For each node u :
+	for nodes := graph.Nodes(); nodes.Next(); {
 		u := nodes.Node()
-		// Iterate over all parents of u
-		for it := g.From(u.ID()); it.Next(); {
+		// Iterate over all children of u
+		for it := graph.From(u.ID()); it.Next(); {
 			v := it.Node()
 			// get the weight/capacity
-			capacity, ok := g.Weight(u.ID(), v.ID())
+			capacity, ok := graph.Weight(u.ID(), v.ID())
 			if !ok {
 				panic("expected a weight for existing edge")
 			}
@@ -37,6 +38,34 @@ func initializeResidualGraph(g graph.WeightedDirected) *simple.WeightedDirectedG
 	return residualGraph
 }
 
+
+func canReachTargetInLevelGraph(graph graph.WeightedDirected, source, target graph.Node, parents []int32) bool {
+	levels := make([]int32, graph.Nodes().Len())
+	for i := range levels {
+		levels[i] = -1
+	}
+	sourceID := source.ID()
+	queue := list.New()
+	levels[sourceID] = 0
+	queue.PushBack(sourceID)
+	for queue.Len() > 0 {
+		parent := queue.Front()
+		parentID := parent.Value.(int64)
+		queue.Remove(parent)
+		for it := graph.From(parentID); it.Next(); {
+			child := it.Node()
+			childID := child.ID()
+			if capacity, ok := graph.Weight(parentID, childID); ok && capacity > 0 {
+				if levels[childID] == -1 {
+					levels[childID] = levels[parentID] + 1
+					parents[childID]
+				}
+			}
+		}
+	}
+
+
+}
 
 
 func Dinic(graph graph.WeightedDirected, source, target graph.Node) (float64, error {

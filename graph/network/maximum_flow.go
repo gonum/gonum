@@ -87,15 +87,15 @@ func computeBlockingPath(graph *simple.WeightedDirectedGraph, source, target gra
 				newCapacity := graph.NewWeightedEdge(parent, child, currentCapacity-bottleNeckOnPath)
 				graph.SetWeightedEdge(newCapacity)
 				if graph.HasEdgeFromTo(childID, parentID) {
-					flow, ok := graph.Weight(childID, parentID)
+					currentFlow, ok := graph.Weight(childID, parentID)
 					if !ok {
 						panic("expected a weight for existing edge")
 					}
-					newReverseCapacity := graph.NewWeightedEdge(child, parent, flow+bottleNeckOnPath)
-					graph.SetWeightedEdge(newReverseCapacity)
+					updatedFlow := graph.NewWeightedEdge(child, parent, currentFlow+bottleNeckOnPath)
+					graph.SetWeightedEdge(updatedFlow)
 				} else {
-					newReverseCapacity := graph.NewWeightedEdge(child, parent, bottleNeckOnPath)
-					graph.SetWeightedEdge(newReverseCapacity)
+					newFlow := graph.NewWeightedEdge(child, parent, bottleNeckOnPath)
+					graph.SetWeightedEdge(newFlow)
 				}
 			}
 			totalFlow += bottleNeckOnPath

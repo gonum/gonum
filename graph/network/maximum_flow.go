@@ -60,7 +60,7 @@ func computeBlockingPath(graph *simple.WeightedDirectedGraph, source, target gra
 		}
 		// path has been build from target to source, so the parent is on i+1 position of the ith child
 		if vID == source.ID() {
-			bottleNeckObPath := math.MaxFloat64
+			bottleNeckOnPath := math.MaxFloat64
 			// determine minimal flow on path
 			for i := 0; i+1 < len(path); i++ {
 				parentID := path[i+1]
@@ -70,8 +70,8 @@ func computeBlockingPath(graph *simple.WeightedDirectedGraph, source, target gra
 					panic("expected a weight for existing edge")
 				}
 
-				if weight < bottleNeckObPath {
-					bottleNeckObPath = weight
+				if weight < bottleNeckOnPath {
+					bottleNeckOnPath = weight
 				}
 			}
 			// update the capacities and flows in the other edges
@@ -84,21 +84,21 @@ func computeBlockingPath(graph *simple.WeightedDirectedGraph, source, target gra
 				}
 				parent := graph.Node(parentID)
 				child := graph.Node(childID)
-				newCapacity := graph.NewWeightedEdge(parent, child, currentCapacity-bottleNeckObPath)
+				newCapacity := graph.NewWeightedEdge(parent, child, currentCapacity-bottleNeckOnPath)
 				graph.SetWeightedEdge(newCapacity)
 				if graph.HasEdgeFromTo(childID, parentID) {
-					reverseCapacity, ok := graph.Weight(childID, parentID)
+					flow, ok := graph.Weight(childID, parentID)
 					if !ok {
 						panic("expected a weight for existing edge")
 					}
-					newReverseCapacity := graph.NewWeightedEdge(child, parent, reverseCapacity+bottleNeckObPath)
+					newReverseCapacity := graph.NewWeightedEdge(child, parent, flow+bottleNeckOnPath)
 					graph.SetWeightedEdge(newReverseCapacity)
 				} else {
-					newReverseCapacity := graph.NewWeightedEdge(child, parent, bottleNeckObPath)
+					newReverseCapacity := graph.NewWeightedEdge(child, parent, bottleNeckOnPath)
 					graph.SetWeightedEdge(newReverseCapacity)
 				}
 			}
-			totalFlow += bottleNeckObPath
+			totalFlow += bottleNeckOnPath
 			path = path[:0]
 			path = append(path, targetID)
 		}

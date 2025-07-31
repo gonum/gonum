@@ -47,6 +47,26 @@ func TestMaxFlowDinicThreeDisjointPaths(t *testing.T) {
 	}
 }
 
+func TestMaxFlowDinicThreeDisjointPathsWithParallelEdges(t *testing.T) {
+	graph := simple.NewWeightedDirectedGraph(0, 0)
+	// Add nodes 0..4
+	for i := int64(0); i < 5; i++ {
+		graph.AddNode(simple.Node(i))
+	}
+	// Build three disjoint paths of capacity 1
+	edges := []struct{ u, v int64 }{{0, 1}, {1, 0}, {1, 4}, {0, 2}, {2, 0}, {2, 4}, {0, 3}, {3, 0}, {3, 4}}
+	for _, edge := range edges {
+		graph.SetWeightedEdge(graph.NewWeightedEdge(simple.Node(edge.u), simple.Node(edge.v), 1.0))
+	}
+	maxFlow, err := MaxFlowDinic(graph, simple.Node(0), simple.Node(4))
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+	if !almostEqual(maxFlow, 3.0) {
+		t.Errorf("maxFlow = %v, expected %v", maxFlow, 3.0)
+	}
+}
+
 func TestMaxFlowDinicCycleWithTailGraph(t *testing.T) {
 	graph := simple.NewWeightedDirectedGraph(0, 0)
 	for i := int64(0); i < 4; i++ {
@@ -77,6 +97,40 @@ func TestMaxFlowDinicCycleWithTailGraph(t *testing.T) {
 	}
 	if !almostEqual(maxFlow13, 0.6) {
 		t.Errorf("maxFlow 1->3 = %v, expected %v", maxFlow13, 0.6)
+	}
+}
+
+func TestMaxFlowDinicCycleWithTailGraphWithParallelEdges(t *testing.T) {
+	graph := simple.NewWeightedDirectedGraph(0, 0)
+	for i := int64(0); i < 4; i++ {
+		graph.AddNode(simple.Node(i))
+	}
+	// Cycle: 0->1->2->0 and tail 2->3
+	edges := []struct {
+		u, v int64
+		w    float64
+	}{
+		{0, 1, 0.3}, {1, 2, 0.6}, {2, 0, 0.9}, {2, 3, 0.7},
+		{1, 0, 1.3}, {2, 1, 1.6}, {0, 2, 1.9},
+	}
+	for _, edge := range edges {
+		graph.SetWeightedEdge(graph.NewWeightedEdge(simple.Node(edge.u), simple.Node(edge.v), edge.w))
+	}
+
+	maxFlow03, err := MaxFlowDinic(graph, simple.Node(0), simple.Node(3))
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+	if !almostEqual(maxFlow03, 0.7) {
+		t.Errorf("maxFlow 0->3 = %v, expected %v", maxFlow03, 0.7)
+	}
+
+	maxFlow13, err := MaxFlowDinic(graph, simple.Node(1), simple.Node(3))
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+	if !almostEqual(maxFlow13, 0.7) {
+		t.Errorf("maxFlow 1->3 = %v, expected %v", maxFlow13, 0.7)
 	}
 }
 

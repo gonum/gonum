@@ -9,38 +9,46 @@ import (
 	"gonum.org/v1/gonum/graph/simple"
 )
 
-func initializeResidualGraph(graph graph.WeightedDirected) *simple.WeightedDirectedGraph {
-	residualGraph := simple.NewWeightedDirectedGraph(0, 0)
+type edgeKey struct{ from, to int64 }
 
+type residualGraph struct {
+	Graph *simple.WeightedDirectedGraph
+	Flow  map[edgeKey]float64
+}
+
+func initializeResidualGraph(originalGraph graph.WeightedDirected) *residualGraph {
+	graphCopy := simple.NewWeightedDirectedGraph(0, 0)
+	flow := make(map[edgeKey]float64)
 	// Add all nodes
-	for nodes := graph.Nodes(); nodes.Next(); {
-		residualGraph.AddNode(nodes.Node())
+	for nodes := originalGraph.Nodes(); nodes.Next(); {
+		graphCopy.AddNode(nodes.Node())
 	}
 
 	// For each node u :
-	for nodes := graph.Nodes(); nodes.Next(); {
+	for nodes := originalGraph.Nodes(); nodes.Next(); {
 		u := nodes.Node()
 		// Iterate over all children of u
-		for it := graph.From(u.ID()); it.Next(); {
+		for it := originalGraph.From(u.ID()); it.Next(); {
 			v := it.Node()
 			// get the weight/capacity
-			capacity, ok := graph.Weight(u.ID(), v.ID())
+			capacity, ok := originalGraph.Weight(u.ID(), v.ID())
 			if !ok {
 				panic("expected a weight for existing edge")
 			}
 			// add forward edge to residualGraph (capacity)
-			forward := residualGraph.NewWeightedEdge(u, v, capacity)
-			residualGraph.SetWeightedEdge(forward)
+			forward := graphCopy.NewWeightedEdge(u, v, capacity)
+			graphCopy.SetWeightedEdge(forward)
 			// add reverse edge v->u with zero weight (flow)
-			reverse := residualGraph.NewWeightedEdge(v, u, 0)
-			residualGraph.SetWeightedEdge(reverse)
+			flow[edgeKey{from: u.ID(), to: v.ID()}] = 0.0
 		}
 	}
-
-	return residualGraph
+	return &residualGraph{
+		Graph: graphCopy,
+		Flow:  flow,
+	}
 }
 
-func computeBlockingPath(graph *simple.WeightedDirectedGraph, source, target graph.Node, parents [][]int64) float64 {
+func computeBlockingPath(residualGraph *residualGraph, source, target graph.Node, parents [][]int64) float64 {
 	var totalFlow = 0.0
 	var path []int64
 	targetID := target.ID()
@@ -65,7 +73,7 @@ func computeBlockingPath(graph *simple.WeightedDirectedGraph, source, target gra
 			for i := 0; i+1 < len(path); i++ {
 				parentID := path[i+1]
 				childID := path[i]
-				weight, ok := graph.Weight(parentID, childID)
+				weight, ok := residualGraph.Graph.Weight(parentID, childID)
 				if !ok {
 					panic("expected a weight for existing edge")
 				}
@@ -78,24 +86,20 @@ func computeBlockingPath(graph *simple.WeightedDirectedGraph, source, target gra
 			for i := 0; i+1 < len(path); i++ {
 				parentID := path[i+1]
 				childID := path[i]
-				currentCapacity, ok := graph.Weight(parentID, childID)
+				currentCapacity, ok := residualGraph.Graph.Weight(parentID, childID)
 				if !ok {
 					panic("expected a weight for existing edge")
 				}
-				parent := graph.Node(parentID)
-				child := graph.Node(childID)
-				newCapacity := graph.NewWeightedEdge(parent, child, currentCapacity-bottleNeckOnPath)
-				graph.SetWeightedEdge(newCapacity)
-				if graph.HasEdgeFromTo(childID, parentID) {
-					currentFlow, ok := graph.Weight(childID, parentID)
-					if !ok {
-						panic("expected a weight for existing edge")
-					}
-					updatedFlow := graph.NewWeightedEdge(child, parent, currentFlow+bottleNeckOnPath)
-					graph.SetWeightedEdge(updatedFlow)
+				parent := residualGraph.Graph.Node(parentID)
+				child := residualGraph.Graph.Node(childID)
+				newCapacity := residualGraph.Graph.NewWeightedEdge(parent, child, currentCapacity-bottleNeckOnPath)
+				residualGraph.Graph.SetWeightedEdge(newCapacity)
+				edgeID := edgeKey{from: parentID, to: childID}
+				currentFlow, ok := residualGraph.Flow[edgeID]
+				if ok {
+					residualGraph.Flow[edgeID] = currentFlow + bottleNeckOnPath
 				} else {
-					newFlow := graph.NewWeightedEdge(child, parent, bottleNeckOnPath)
-					graph.SetWeightedEdge(newFlow)
+					residualGraph.Flow[edgeID] = bottleNeckOnPath
 				}
 			}
 			totalFlow += bottleNeckOnPath
@@ -107,11 +111,11 @@ func computeBlockingPath(graph *simple.WeightedDirectedGraph, source, target gra
 	return totalFlow
 }
 
-func canReachTargetInLevelGraph(graph graph.WeightedDirected, source, target graph.Node, parents [][]int64) bool {
+func canReachTargetInLevelGraph(residualGraph *residualGraph, source, target graph.Node, parents [][]int64) bool {
 	for i := range parents {
 		parents[i] = parents[i][:0]
 	}
-	levels := make([]int32, graph.Nodes().Len())
+	levels := make([]int32, residualGraph.Graph.Nodes().Len())
 	for i := range levels {
 		levels[i] = -1
 	}
@@ -123,9 +127,9 @@ func canReachTargetInLevelGraph(graph graph.WeightedDirected, source, target gra
 		parent := queue.Front()
 		queue.Remove(parent)
 		parentID := parent.Value.(int64)
-		for it := graph.From(parentID); it.Next(); {
+		for it := residualGraph.Graph.From(parentID); it.Next(); {
 			childID := it.Node().ID()
-			if capacity, ok := graph.Weight(parentID, childID); ok && capacity > 0 {
+			if capacity, ok := residualGraph.Graph.Weight(parentID, childID); ok && capacity > 0 {
 				if levels[childID] == -1 {
 					levels[childID] = levels[parentID] + 1
 					parents[childID] = append(parents[childID], parentID)

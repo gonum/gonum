@@ -47,8 +47,8 @@
 #define ALPHA X0
 #define ALPHA_2 X1
 
-// func AxpyUnitaryTo(dst []float64, alpha float64, x, y []float64)
-TEXT ·AxpyUnitaryTo(SB), NOSPLIT, $0
+// func axpyUnitaryToSSE2Asm(dst []float64, alpha float64, x, y []float64)
+TEXT ·axpyUnitaryToSSE2Asm(SB), NOSPLIT, $0
 	MOVQ    dst_base+0(FP), DST_PTR // DST_PTR := &dst
 	MOVQ    x_base+32(FP), X_PTR    // X_PTR := &x
 	MOVQ    y_base+56(FP), Y_PTR    // Y_PTR := &y

@@ -235,6 +235,13 @@ func dgemmSerial(aTrans, bTrans bool, m, n, k int, a []float64, lda int, b []flo
 
 // dgemmSerial where neither a nor b are transposed
 func dgemmSerialNotNot(m, n, k int, a []float64, lda int, b []float64, ldb int, c []float64, ldc int, alpha float64) {
+	// Use optimized micro-kernels when available and alpha == 1.0
+	if alpha == 1.0 && f64.HasGemmKernel {
+		dgemmSerialNotNotKernel(m, n, k, a, lda, b, ldb, c, ldc)
+		return
+	}
+	
+	// Original implementation for alpha != 1.0 or no kernel support
 	// This style is used instead of the literal [i*stride +j]) is used because
 	// approximately 5 times faster as of go 1.3.
 	for i := 0; i < m; i++ {
@@ -243,6 +250,63 @@ func dgemmSerialNotNot(m, n, k int, a []float64, lda int, b []float64, ldb int, 
 			tmp := alpha * v
 			if tmp != 0 {
 				f64.AxpyUnitary(tmp, b[l*ldb:l*ldb+n], ctmp)
+			}
+		}
+	}
+}
+
+// dgemmSerialNotNotKernel uses optimized micro-kernels for matrix multiplication
+func dgemmSerialNotNotKernel(m, n, k int, a []float64, lda int, b []float64, ldb int, c []float64, ldc int) {
+	// Try 8x8 kernel first for better performance
+	const mr8 = 8
+	const nr8 = 8
+	const mr4 = 4
+	const nr4 = 4
+	
+	// Use 8x8 kernels for the bulk
+	mi8 := m / mr8 * mr8
+	ni8 := n / nr8 * nr8
+	
+	for i := 0; i < mi8; i += mr8 {
+		for j := 0; j < ni8; j += nr8 {
+			f64.GemmKernel8x8(&a[i*lda], &b[j], &c[i*ldc+j], k, lda, ldb, ldc)
+		}
+		
+		// Handle remaining columns with 4x4 kernels
+		for j := ni8; j < n; j += nr4 {
+			if j+nr4 <= n {
+				f64.GemmKernel4x4(&a[i*lda], &b[j], &c[i*ldc+j], k, lda, ldb, ldc)
+				f64.GemmKernel4x4(&a[(i+4)*lda], &b[j], &c[(i+4)*ldc+j], k, lda, ldb, ldc)
+			}
+		}
+	}
+	
+	// Handle remaining rows with 4x4 kernels
+	for i := mi8; i < m; i += mr4 {
+		if i+mr4 <= m {
+			ni := n / nr4 * nr4
+			for j := 0; j < ni; j += nr4 {
+				f64.GemmKernel4x4(&a[i*lda], &b[j], &c[i*ldc+j], k, lda, ldb, ldc)
+			}
+			// Handle remaining columns
+			for j := ni; j < n; j++ {
+				for ii := i; ii < i+mr4; ii++ {
+					sum := 0.0
+					for l := 0; l < k; l++ {
+						sum += a[ii*lda+l] * b[l*ldb+j]
+					}
+					c[ii*ldc+j] += sum
+				}
+			}
+		}
+	}
+	
+	// Handle any truly remaining rows
+	for i := (m / mr4) * mr4; i < m; i++ {
+		ctmp := c[i*ldc : i*ldc+n]
+		for l, v := range a[i*lda : i*lda+k] {
+			if v != 0 {
+				f64.AxpyUnitary(v, b[l*ldb:l*ldb+n], ctmp)
 			}
 		}
 	}

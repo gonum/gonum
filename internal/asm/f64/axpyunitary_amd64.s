@@ -47,8 +47,8 @@
 #define ALPHA X0
 #define ALPHA_2 X1
 
-// func AxpyUnitary(alpha float64, x, y []float64)
-TEXT ·AxpyUnitary(SB), NOSPLIT, $0
+// func axpyUnitarySSE2Asm(alpha float64, x, y []float64)
+TEXT ·axpyUnitarySSE2Asm(SB), NOSPLIT, $0
 	MOVQ    x_base+8(FP), X_PTR  // X_PTR := &x
 	MOVQ    y_base+32(FP), Y_PTR // Y_PTR := &y
 	MOVQ    x_len+16(FP), LEN    // LEN = min( len(x), len(y) )

@@ -230,7 +230,7 @@
 //	x []float64, incX int,
 //	beta float64,
 //	y []float64, incY int)
-TEXT ·GemvN(SB), NOSPLIT, $32-128
+TEXT ·gemvN(SB), NOSPLIT, $32-128
 	MOVQ M_DIM, M
 	MOVQ N_DIM, N
 	CMPQ M, $0
@@ -683,3 +683,8 @@ inc_r1end:
 
 inc_end:
 	RET
+
+// func gemvNSSE2(m, n uintptr, alpha float64, a []float64, lda uintptr, x []float64, incX uintptr, beta float64, y []float64, incY uintptr)
+// Wrapper for the existing gemvN implementation
+TEXT ·gemvNSSE2(SB), NOSPLIT, $0
+	JMP ·gemvN(SB)

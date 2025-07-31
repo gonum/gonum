@@ -48,8 +48,8 @@
 #define ALPHA X0
 #define ALPHA_2 X1
 
-// func ScalUnitary(alpha float64, x []float64)
-TEXT ·ScalUnitary(SB), NOSPLIT, $0
+// func scalUnitary(alpha float64, x []float64)
+TEXT ·scalUnitary(SB), NOSPLIT, $0
 	MOVDDUP_ALPHA            // ALPHA = { alpha, alpha }
 	MOVQ x_base+8(FP), X_PTR // X_PTR = &x
 	MOVQ x_len+16(FP), LEN   // LEN = len(x)
@@ -110,3 +110,8 @@ tail_one:
 
 end:
 	RET
+
+// func scalUnitarySSE2(alpha float64, x []float64)
+// Wrapper for the existing ScalUnitary implementation
+TEXT ·scalUnitarySSE2(SB), NOSPLIT, $0
+	JMP ·scalUnitary(SB)

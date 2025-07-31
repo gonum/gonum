@@ -38,9 +38,9 @@
 
 #include "textflag.h"
 
-// func DdotUnitary(x, y []float64) (sum float64)
+// func dotUnitary(x, y []float64) (sum float64)
 // This function assumes len(y) >= len(x).
-TEXT ·DotUnitary(SB), NOSPLIT, $0
+TEXT ·dotUnitary(SB), NOSPLIT, $0
 	MOVQ x+0(FP), R8
 	MOVQ x_len+8(FP), DI // n = len(x)
 	MOVQ y+24(FP), R9
@@ -90,6 +90,11 @@ end_uni:
 	ADDSD    X0, X7
 	MOVSD    X7, sum+48(FP) // Return final sum.
 	RET
+
+// func dotUnitarySSE2Asm(x, y []float64) (sum float64)
+// Wrapper for the existing dotUnitary implementation
+TEXT ·dotUnitarySSE2Asm(SB), NOSPLIT, $0
+	JMP ·dotUnitary(SB)
 
 // func DdotInc(x, y []float64, n, incX, incY, ix, iy uintptr) (sum float64)
 TEXT ·DotInc(SB), NOSPLIT, $0

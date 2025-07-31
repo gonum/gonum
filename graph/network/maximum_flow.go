@@ -16,7 +16,7 @@ type residualGraph struct {
 	Flow  map[edgeKey]float64
 }
 
-func initializeResidualGraph(originalGraph graph.WeightedDirected) *residualGraph {
+func initializeResidualGraph(originalGraph graph.WeightedDirected) (*residualGraph, error) {
 	graphCopy := simple.NewWeightedDirectedGraph(0, 0)
 	flow := make(map[edgeKey]float64)
 	// Add all nodes
@@ -35,6 +35,9 @@ func initializeResidualGraph(originalGraph graph.WeightedDirected) *residualGrap
 			if !ok {
 				panic("expected a weight for existing edge")
 			}
+			if capacity < 0.0 {
+				return nil, fmt.Errorf("edge weights (capacities) can not be negative")
+			}
 			// add forward edge to residualGraph (capacity)
 			forward := graphCopy.NewWeightedEdge(u, v, capacity)
 			graphCopy.SetWeightedEdge(forward)
@@ -45,7 +48,7 @@ func initializeResidualGraph(originalGraph graph.WeightedDirected) *residualGrap
 	return &residualGraph{
 		Graph: graphCopy,
 		Flow:  flow,
-	}
+	}, nil
 }
 
 func computeBlockingPath(residualGraph *residualGraph, source, target graph.Node, parents [][]int64) float64 {
@@ -148,7 +151,10 @@ func MaxFlowDinic(graph graph.WeightedDirected, source, target graph.Node) (floa
 		return 0, fmt.Errorf("source and target must be different")
 	}
 	parents := make([][]int64, graph.Nodes().Len())
-	residualGraph := initializeResidualGraph(graph)
+	residualGraph, err := initializeResidualGraph(graph)
+	if err != nil {
+		return 0, fmt.Errorf("could not build residual graph: %v", err)
+	}
 	epsilon := 1.e-12
 	var maxFlow = 0.0
 	for canReachTargetInLevelGraph(residualGraph, source, target, parents) {

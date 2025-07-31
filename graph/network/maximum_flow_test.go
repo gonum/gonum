@@ -2,6 +2,7 @@ package network
 
 import (
 	"math"
+	"strings"
 	"testing"
 
 	"gonum.org/v1/gonum/graph/simple"
@@ -27,13 +28,35 @@ func TestMaxFlowDinicSameSourceAndTarget(t *testing.T) {
 	}
 }
 
+func TestNegativeCapacityRaisesError(t *testing.T) {
+	graph := simple.NewWeightedDirectedGraph(0, 0)
+	for i := int64(0); i < 3; i++ {
+		graph.AddNode(simple.Node(i))
+	}
+	edges := []struct {
+		u, v int64
+		w    float64
+	}{
+		{0, 1, 0.3}, {1, 2, -0.6},
+	}
+	for _, edge := range edges {
+		graph.SetWeightedEdge(graph.NewWeightedEdge(simple.Node(edge.u), simple.Node(edge.v), edge.w))
+	}
+
+	_, err := MaxFlowDinic(graph, simple.Node(0), simple.Node(1))
+	if err == nil {
+		t.Fatal("expected an error when graph contains a negative capacity, got nil")
+	}
+	if !strings.Contains(err.Error(), "edge weights (capacities) can not be negative") {
+		t.Fatalf("unexpected error message: %v", err)
+	}
+}
+
 func TestMaxFlowDinicThreeDisjointPaths(t *testing.T) {
 	graph := simple.NewWeightedDirectedGraph(0, 0)
-	// Add nodes 0..4
 	for i := int64(0); i < 5; i++ {
 		graph.AddNode(simple.Node(i))
 	}
-	// Build three disjoint paths of capacity 1
 	edges := []struct{ u, v int64 }{{0, 1}, {1, 4}, {0, 2}, {2, 4}, {0, 3}, {3, 4}}
 	for _, edge := range edges {
 		graph.SetWeightedEdge(graph.NewWeightedEdge(simple.Node(edge.u), simple.Node(edge.v), 1.0))
@@ -49,11 +72,9 @@ func TestMaxFlowDinicThreeDisjointPaths(t *testing.T) {
 
 func TestMaxFlowDinicThreeDisjointPathsWithParallelEdges(t *testing.T) {
 	graph := simple.NewWeightedDirectedGraph(0, 0)
-	// Add nodes 0..4
 	for i := int64(0); i < 5; i++ {
 		graph.AddNode(simple.Node(i))
 	}
-	// Build three disjoint paths of capacity 1
 	edges := []struct{ u, v int64 }{{0, 1}, {1, 0}, {1, 4}, {0, 2}, {2, 0}, {2, 4}, {0, 3}, {3, 0}, {3, 4}}
 	for _, edge := range edges {
 		graph.SetWeightedEdge(graph.NewWeightedEdge(simple.Node(edge.u), simple.Node(edge.v), 1.0))
@@ -105,7 +126,6 @@ func TestMaxFlowDinicCycleWithTailGraphWithParallelEdges(t *testing.T) {
 	for i := int64(0); i < 4; i++ {
 		graph.AddNode(simple.Node(i))
 	}
-	// Cycle: 0->1->2->0 and tail 2->3
 	edges := []struct {
 		u, v int64
 		w    float64

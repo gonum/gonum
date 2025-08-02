@@ -45,24 +45,26 @@ func initializeResidualGraph(originalGraph graph.WeightedDirected) (*residualGra
 	// flow tracks the current flow for each forward edge (initially zero).
 	flow := make(map[edgeKey]float64)
 
-	for nodes := originalGraph.Nodes(); nodes.Next(); {
+	nodes := originalGraph.Nodes()
+	for nodes.Next() {
 		graphCopy.AddNode(nodes.Node())
 	}
 
-	nodes := originalGraph.Nodes()
+	nodes = originalGraph.Nodes()
 	// For each edge current->neighbor in the original graph:
 	// 1) add a forward edge with its capacity
 	// 2) initialize its flow to 0.0
 	for nodes.Next() {
 		current := nodes.Node()
-		for it := originalGraph.From(current.ID()); it.Next(); {
+		it := originalGraph.From(current.ID())
+		for it.Next() {
 			neighbor := it.Node()
 
 			capacity, ok := originalGraph.Weight(current.ID(), neighbor.ID())
 			if !ok {
 				panic("expected a weight for existing edge")
 			}
-			if capacity < 0.0 {
+			if capacity < 0 {
 				return nil, fmt.Errorf("edge weights (capacities) can not be negative")
 			}
 

@@ -5,18 +5,15 @@
 package network
 
 import (
-	"math"
 	"strings"
 	"testing"
+
+	"gonum.org/v1/gonum/floats/scalar"
 
 	"gonum.org/v1/gonum/graph/simple"
 )
 
-// almostEqual tests float64 equality within a small epsilon.
-func almostEqual(a, b float64) bool {
-	const eps = 1e-9
-	return math.Abs(a-b) <= eps
-}
+const numericalTolerance = 1.e-10
 
 func TestMaxFlowDinicSameSourceAndTarget(t *testing.T) {
 	graph := simple.NewWeightedDirectedGraph(0, 0)
@@ -69,7 +66,7 @@ func TestMaxFlowDinicThreeDisjointPaths(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if !almostEqual(maxFlow, 3.0) {
+	if !scalar.EqualWithinAbs(maxFlow, 3.0, numericalTolerance) {
 		t.Errorf("maxFlow = %v, expected %v", maxFlow, 3.0)
 	}
 }
@@ -87,7 +84,7 @@ func TestMaxFlowDinicThreeDisjointPathsWithParallelEdges(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if !almostEqual(maxFlow, 3.0) {
+	if !scalar.EqualWithinAbs(maxFlow, 3.0, numericalTolerance) {
 		t.Errorf("maxFlow = %v, expected %v", maxFlow, 3.0)
 	}
 }
@@ -112,7 +109,7 @@ func TestMaxFlowDinicCycleWithTailGraph(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if !almostEqual(maxFlow03, 0.3) {
+	if !scalar.EqualWithinAbs(maxFlow03, 0.3, numericalTolerance) {
 		t.Errorf("maxFlow 0->3 = %v, expected %v", maxFlow03, 0.3)
 	}
 
@@ -120,7 +117,7 @@ func TestMaxFlowDinicCycleWithTailGraph(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if !almostEqual(maxFlow13, 0.6) {
+	if !scalar.EqualWithinAbs(maxFlow13, 0.6, numericalTolerance) {
 		t.Errorf("maxFlow 1->3 = %v, expected %v", maxFlow13, 0.6)
 	}
 }
@@ -145,7 +142,7 @@ func TestMaxFlowDinicCycleWithTailGraphWithParallelEdges(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if !almostEqual(maxFlow03, 0.7) {
+	if !scalar.EqualWithinAbs(maxFlow03, 0.7, numericalTolerance) {
 		t.Errorf("maxFlow 0->3 = %v, expected %v", maxFlow03, 0.7)
 	}
 
@@ -153,7 +150,7 @@ func TestMaxFlowDinicCycleWithTailGraphWithParallelEdges(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if !almostEqual(maxFlow13, 0.7) {
+	if !scalar.EqualWithinAbs(maxFlow13, 0.7, numericalTolerance) {
 		t.Errorf("maxFlow 1->3 = %v, expected %v", maxFlow13, 0.7)
 	}
 }
@@ -186,7 +183,7 @@ func TestMaxFlowDinicFourLayeredDAG(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Unexpected error for %v->%v: %v", tc.s, tc.t, err)
 		}
-		if !almostEqual(maxFlow, tc.expected) {
+		if !scalar.EqualWithinAbs(maxFlow, tc.expected, numericalTolerance) {
 			t.Errorf("maxFlow %v->%v = %v, expected %v", tc.s, tc.t, maxFlow, tc.expected)
 		}
 	}
@@ -211,7 +208,7 @@ func TestMaxFlowDinicDiamondWithCrossGraph(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if !almostEqual(maxFlow03, 20.0) {
+	if !scalar.EqualWithinAbs(maxFlow03, 20, numericalTolerance) {
 		t.Errorf("maxFlow 0->3 = %v, expected %v", maxFlow03, 20.0)
 	}
 
@@ -219,7 +216,7 @@ func TestMaxFlowDinicDiamondWithCrossGraph(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if !almostEqual(maxFlow02, 15.0) {
+	if !scalar.EqualWithinAbs(maxFlow02, 15, numericalTolerance) {
 		t.Errorf("maxFlow 0->2 = %v, expected %v", maxFlow02, 15.0)
 	}
 }
@@ -244,7 +241,7 @@ func TestMaxFlowDinicDisconnectedGraphs(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if !almostEqual(maxFlow, 0.0) {
+	if !scalar.EqualWithinAbs(maxFlow, 0.0, numericalTolerance) {
 		t.Errorf("maxFlow = %v, expected %v", maxFlow, 0.0)
 	}
 }

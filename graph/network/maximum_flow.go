@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"math"
 
+	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/simple"
 )
@@ -25,11 +26,11 @@ func MaxFlowDinic(graph graph.WeightedDirected, source, target graph.Node) (floa
 	if err != nil {
 		return 0, fmt.Errorf("could not build residual graph: %v", err)
 	}
-	epsilon := 1.e-12
+	const epsilon = 1.e-12
 	var maxFlow = 0.0
 	for canReachTargetInLevelGraph(residualGraph, source, target, parents) {
 		flow := computeBlockingPath(residualGraph, source, target, parents)
-		if flow < epsilon {
+		if scalar.EqualWithinAbs(flow, 0, epsilon) {
 			break
 		}
 		maxFlow += flow

@@ -23,7 +23,7 @@ func TestMaxFlowDinicSameSourceAndTarget(t *testing.T) {
 	if err == nil {
 		t.Fatal("Expected error when source and target are the same, got nil")
 	}
-	expected := "source and target must be different"
+	expected := "s and t must be different"
 	if err.Error() != expected {
 		t.Fatalf("unexpected error message: got %q, expected %q", err.Error(), expected)
 	}

@@ -78,7 +78,7 @@ func initializeResidualGraph(g graph.WeightedDirected) (*residualGraph, error) {
 			r.g.SetWeightedEdge(forward)
 
 			// Initialize flow for this edge to zero.
-			r.flow[edgeKey{from: u.ID(), to: v.ID()}] = 0.0
+			r.flow[edgeKey{from: u.ID(), to: v.ID()}] = 0
 		}
 	}
 	return r, nil

@@ -28,8 +28,8 @@ func MaxFlowDinic(g graph.WeightedDirected, s, t graph.Node) float64 {
 	if err != nil {
 		return 0, fmt.Errorf("could not build residual graph: %v", err)
 	}
-	const epsilon = 1.e-12
-	var maxFlow = 0.0
+	const epsilon = 1e-12
+	var maxFlow float64
 	for canReachTargetInLevelGraph(r, s, t, parents) {
 		flow := computeBlockingPath(r, s, t, parents)
 		if scalar.EqualWithinAbs(flow, 0, epsilon) {

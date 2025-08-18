@@ -19,7 +19,7 @@ import (
 // and augments blocking flows until no more augmenting paths exist.
 //
 // [Dinic's algorithm]: https://en.wikipedia.org/wiki/Dinic%27s_algorithm
-func MaxFlowDinic(graph graph.WeightedDirected, s, t graph.Node) (float64, error) {
+func MaxFlowDinic(g graph.WeightedDirected, s, t graph.Node) float64 {
 	if s.ID() == t.ID() {
 		return 0, fmt.Errorf("s and t must be different")
 	}

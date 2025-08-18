@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"gonum.org/v1/gonum/floats/scalar"
-
 	"gonum.org/v1/gonum/graph/simple"
 )
 

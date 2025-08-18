@@ -87,7 +87,7 @@ func initializeResidualGraph(g graph.WeightedDirected) (*residualGraph, error) {
 // canReachTargetInLevelGraph builds a level graph using BFS on residualGraph.
 // It records, for each reachable node, the list of parents at the previous level.
 // Returns true iff target is reachable from source via positive-capacity edges.
-func canReachTargetInLevelGraph(residualGraph *residualGraph, s, t graph.Node, parents [][]int64) bool {
+func canReachTargetInLevelGraph(r *residualGraph, s, t graph.Node, parents [][]int64) bool {
 	// Reset parents slices in place.
 	for i := range parents {
 		parents[i] = parents[i][:0]

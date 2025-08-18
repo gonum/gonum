@@ -129,7 +129,7 @@ func canReachTargetInLevelGraph(r *residualGraph, s, t graph.Node, parents [][]i
 		}
 	}
 	// The t node is reachable iff it was assigned a level ≥ 0.
-	return levels[t.ID()] > -1
+	return levels[t.ID()] >= 0
 }
 
 // computeBlockingPath finds and augments all blocking‐flow paths in the current

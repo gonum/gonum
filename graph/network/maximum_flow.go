@@ -15,8 +15,10 @@ import (
 )
 
 // MaxFlowDinic computes the maximum flow from source to target in a directed,
-// weighted graph using Dinic’s algorithm. It repeatedly builds level graphs
+// weighted graph using [Dinic's algorithm]. It repeatedly builds level graphs
 // and augments blocking flows until no more augmenting paths exist.
+//
+// [Dinic's algorithm]: https://en.wikipedia.org/wiki/Dinic%27s_algorithm
 func MaxFlowDinic(graph graph.WeightedDirected, s, t graph.Node) (float64, error) {
 	if s.ID() == t.ID() {
 		return 0, fmt.Errorf("s and t must be different")

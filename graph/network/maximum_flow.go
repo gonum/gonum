@@ -137,7 +137,7 @@ func canReachTargetInLevelGraph(r *residualGraph, s, t graph.Node, parents [][]i
 // the parents slices, computes each path’s bottleneck capacity, updates both
 // the residual capacities and the flow map, and returns the total flow added.
 func computeBlockingPath(r *residualGraph, s, t graph.Node, parents [][]int64) float64 {
-	var totalFlow = 0.0
+	var totalFlow float64
 
 	// path holds node IDs from t back to (eventually) s.
 	path := []int64{t.ID()}

@@ -141,7 +141,7 @@ func computeBlockingPath(r *residualGraph, s, t graph.Node, parents [][]int64) f
 
 	// path holds node IDs from t back to (eventually) s.
 	path := []int64{t.ID()}
-	var uid = t.ID()
+	uid := t.ID()
 
 	for {
 		var vid int64

@@ -12,7 +12,7 @@ import (
 	"gonum.org/v1/gonum/graph/simple"
 )
 
-const numericalTolerance = 1.e-10
+const tol = 1e-10
 
 func TestMaxFlowDinicSameSourceAndTarget(t *testing.T) {
 	graph := simple.NewWeightedDirectedGraph(0, 0)

@@ -21,12 +21,12 @@ import (
 // [Dinic's algorithm]: https://en.wikipedia.org/wiki/Dinic%27s_algorithm
 func MaxFlowDinic(g graph.WeightedDirected, s, t graph.Node) float64 {
 	if s.ID() == t.ID() {
-		return 0, fmt.Errorf("s and t must be different")
+		panic("no cut between s and t")
 	}
-	parents := make([][]int64, graph.Nodes().Len())
-	r, err := initializeResidualGraph(graph)
+	parents := make([][]int64, g.Nodes().Len())
+	r, err := initializeResidualGraph(g)
 	if err != nil {
-		return 0, fmt.Errorf("could not build residual graph: %v", err)
+		panic("negative edge weight")
 	}
 	const epsilon = 1e-12
 	var maxFlow float64
@@ -37,7 +37,7 @@ func MaxFlowDinic(g graph.WeightedDirected, s, t graph.Node) float64 {
 		}
 		maxFlow += flow
 	}
-	return maxFlow, nil
+	return maxFlow
 }
 
 // initializeResidualGraph builds the residual graph for Dinic’s algorithm.
@@ -94,7 +94,7 @@ func canReachTargetInLevelGraph(r *residualGraph, s, t graph.Node, parents [][]i
 	}
 
 	// levels[i] holds the BFS level of node i, or -1 if unvisited.
-	levels := make([]int32, residualGraph.g.Nodes().Len())
+	levels := make([]int32, r.g.Nodes().Len())
 	for i := range levels {
 		levels[i] = -1
 	}
@@ -111,9 +111,9 @@ func canReachTargetInLevelGraph(r *residualGraph, s, t graph.Node, parents [][]i
 		pid := p.Value.(int64)
 
 		// Explore all outgoing edges with capacity > 0.
-		for it := residualGraph.g.From(pid); it.Next(); {
+		for it := r.g.From(pid); it.Next(); {
 			cid := it.Node().ID()
-			capacity, ok := residualGraph.g.Weight(pid, cid)
+			capacity, ok := r.g.Weight(pid, cid)
 			if !ok || capacity <= 0 {
 				continue
 			}

@@ -55,7 +55,7 @@ func initializeResidualGraph(g graph.WeightedDirected) (*residualGraph, error) {
 		r.g.AddNode(nodes.Node())
 	}
 
-	nodes = g.Nodes()
+	nodes.Reset()
 	// For each edge current->neighbor in the original graph:
 	// 1) add a forward edge with its capacity
 	// 2) initialize its flow to 0

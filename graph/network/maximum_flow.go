@@ -18,6 +18,9 @@ import (
 // weighted graph using [Dinic's algorithm]. It repeatedly builds level graphs
 // and augments blocking flows until no more augmenting paths exist.
 //
+// MaxFlowDinic will panic if s and t are the same node or g has any
+// reachable negative edge weight.
+// 
 // [Dinic's algorithm]: https://en.wikipedia.org/wiki/Dinic%27s_algorithm
 func MaxFlowDinic(g graph.WeightedDirected, s, t graph.Node) float64 {
 	if s.ID() == t.ID() {

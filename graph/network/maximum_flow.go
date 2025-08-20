@@ -46,7 +46,7 @@ func MaxFlowDinic(g graph.WeightedDirected, s, t graph.Node) float64 {
 // initializeResidualGraph builds the residual graph for Dinic’s algorithm.
 // It copies all nodes, adds directed edges with their original capacities,
 // and initializes a zero flow map for each forward edge.
-func initializeResidualGraph(g graph.WeightedDirected) (*residualGraph, error) {
+func initializeResidualGraph(g graph.WeightedDirected) *residualGraph {
 	r := &residualGraph{
 		g: simple.NewWeightedDirectedGraph(0, 0),
 		// flow tracks the current flow for each forward edge (initially zero).

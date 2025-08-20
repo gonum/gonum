@@ -5,8 +5,7 @@
 package network
 
 import (
-	"container/list"
-	"fmt"
+	"gonum.org/v1/gonum/graph/internal/linear"
 	"math"
 
 	"gonum.org/v1/gonum/floats/scalar"
@@ -20,17 +19,15 @@ import (
 //
 // MaxFlowDinic will panic if s and t are the same node or g has any
 // reachable negative edge weight.
-// 
+//
 // [Dinic's algorithm]: https://en.wikipedia.org/wiki/Dinic%27s_algorithm
 func MaxFlowDinic(g graph.WeightedDirected, s, t graph.Node) float64 {
 	if s.ID() == t.ID() {
 		panic("no cut between s and t")
 	}
 	parents := make([][]int64, g.Nodes().Len())
-	r, err := initializeResidualGraph(g)
-	if err != nil {
-		panic("negative edge weight")
-	}
+	r := initializeResidualGraph(g)
+
 	const epsilon = 1e-12
 	var maxFlow float64
 	for canReachTargetInLevelGraph(r, s, t, parents) {
@@ -73,7 +70,7 @@ func initializeResidualGraph(g graph.WeightedDirected) *residualGraph {
 				panic("expected a weight for existing edge")
 			}
 			if capacity < 0 {
-				return nil, fmt.Errorf("edge weights (capacities) can not be negative")
+				panic("negative edge weight")
 			}
 
 			// Add forward edge with full capacity.
@@ -84,7 +81,7 @@ func initializeResidualGraph(g graph.WeightedDirected) *residualGraph {
 			r.flow[edgeKey{from: u.ID(), to: v.ID()}] = 0
 		}
 	}
-	return r, nil
+	return r
 }
 
 // canReachTargetInLevelGraph builds a level graph using BFS on residualGraph.
@@ -105,13 +102,12 @@ func canReachTargetInLevelGraph(r *residualGraph, s, t graph.Node, parents [][]i
 	sID := s.ID()
 	levels[sID] = 0
 
-	queue := list.New()
-	queue.PushBack(sID)
+	queue := linear.NodeQueue{}
+	queue.Enqueue(s)
 
 	for queue.Len() > 0 {
-		p := queue.Front()
-		queue.Remove(p)
-		pid := p.Value.(int64)
+		p := queue.Dequeue()
+		pid := p.ID()
 
 		// Explore all outgoing edges with capacity > 0.
 		for it := r.g.From(pid); it.Next(); {
@@ -124,7 +120,7 @@ func canReachTargetInLevelGraph(r *residualGraph, s, t graph.Node, parents [][]i
 			if levels[cid] == -1 {
 				levels[cid] = levels[pid] + 1
 				parents[cid] = append(parents[cid], pid)
-				queue.PushBack(cid)
+				queue.Enqueue(it.Node())
 				// If we reach cid again at the same level, record an additional p.
 			} else if levels[cid] == levels[pid]+1 {
 				parents[cid] = append(parents[cid], pid)

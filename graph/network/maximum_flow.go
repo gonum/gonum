@@ -5,8 +5,9 @@
 package network
 
 import (
-	"gonum.org/v1/gonum/graph/internal/linear"
 	"math"
+
+	"gonum.org/v1/gonum/graph/internal/linear"
 
 	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/graph"

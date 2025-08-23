@@ -6,6 +6,7 @@ package network
 
 import (
 	"fmt"
+	"math/rand"
 	"reflect"
 	"testing"
 
@@ -229,5 +230,37 @@ func TestMaxFlowDinic(t *testing.T) {
 				})
 			}
 		})
+	}
+}
+
+func TestDinicIterationOrderRobustness(t *testing.T) {
+	const tol = 1e-10
+
+	type Edge struct{ u, v int64 }
+	edges := []Edge{
+		{0, 1}, {0, 2}, {0, 3},
+		{1, 4},
+		{2, 4}, {2, 5},
+		{3, 5}, {3, 6},
+		{4, 7}, {5, 7}, {6, 7},
+	}
+
+	r := rand.New(rand.NewSource(42)) // deterministic RNG
+
+	for trial := 0; trial < 100; trial++ {
+		perm := r.Perm(len(edges))
+
+		g := simple.NewWeightedDirectedGraph(0, 0)
+		for _, i := range perm {
+			e := edges[i]
+			g.SetWeightedEdge(simple.WeightedEdge{
+				F: simple.Node(e.u), T: simple.Node(e.v), W: 1,
+			})
+		}
+
+		got := MaxFlowDinic(g, simple.Node(0), simple.Node(7))
+		if !scalar.EqualWithinAbs(got, 3, tol) {
+			t.Fatalf("trial %d: unexpected max flow 0->7: got=%v want=3", trial, got)
+		}
 	}
 }

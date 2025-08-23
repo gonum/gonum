@@ -46,8 +46,6 @@ func MaxFlowDinic(g graph.WeightedDirected, s, t graph.Node) float64 {
 func initializeResidualGraph(g graph.WeightedDirected) *residualGraph {
 	r := &residualGraph{
 		g: simple.NewWeightedDirectedGraph(0, 0),
-		// flow tracks the current flow for each forward edge (initially zero).
-		flow: make(map[edgeKey]float64),
 	}
 
 	nodes := g.Nodes()
@@ -76,9 +74,10 @@ func initializeResidualGraph(g graph.WeightedDirected) *residualGraph {
 			// Add forward edge with full capacity.
 			forward := r.g.NewWeightedEdge(u, v, capacity)
 			r.g.SetWeightedEdge(forward)
-
-			// Initialize flow for this edge to zero.
-			r.flow[edgeKey{from: u.ID(), to: v.ID()}] = 0
+			// Add reverse edge if it does not exist
+			if _, ok := r.g.Weight(v.ID(), u.ID()); !ok {
+				r.g.SetWeightedEdge(r.g.NewWeightedEdge(v, u, 0))
+			}
 		}
 	}
 	return r
@@ -184,15 +183,13 @@ func computeBlockingPath(r *residualGraph, s, t graph.Node, parents [][]int64) f
 				}
 				parent := r.g.Node(pid)
 				child := r.g.Node(cid)
-				newCapacity := r.g.NewWeightedEdge(parent, child, currentCapacity-bottleNeckOnPath)
-				r.g.SetWeightedEdge(newCapacity)
-				edgeID := edgeKey{from: pid, to: cid}
-				currentFlow, ok := r.flow[edgeID]
-				if ok {
-					r.flow[edgeID] = currentFlow + bottleNeckOnPath
-				} else {
-					r.flow[edgeID] = bottleNeckOnPath
+				forwardCapacity := r.g.NewWeightedEdge(parent, child, currentCapacity-bottleNeckOnPath)
+				r.g.SetWeightedEdge(forwardCapacity)
+				reverseCapacity, ok := r.g.Weight(cid, pid)
+				if !ok {
+					panic("expected reverse residual edge")
 				}
+				r.g.SetWeightedEdge(r.g.NewWeightedEdge(r.g.Node(cid), r.g.Node(pid), reverseCapacity+bottleNeckOnPath))
 			}
 			totalFlow += bottleNeckOnPath
 			path = []int64{t.ID()}
@@ -203,8 +200,5 @@ func computeBlockingPath(r *residualGraph, s, t graph.Node, parents [][]int64) f
 }
 
 type residualGraph struct {
-	g    *simple.WeightedDirectedGraph
-	flow map[edgeKey]float64
+	g *simple.WeightedDirectedGraph
 }
-
-type edgeKey struct{ from, to int64 }

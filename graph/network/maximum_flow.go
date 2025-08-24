@@ -95,16 +95,13 @@ func canReachTargetInLevelGraph(r *simple.WeightedDirectedGraph, s, t graph.Node
 	for i := range levels {
 		levels[i] = -1
 	}
+	levels[s.ID()] = 0
 
-	sID := s.ID()
-	levels[sID] = 0
-
-	queue := linear.NodeQueue{}
+	var queue linear.NodeQueue
 	queue.Enqueue(s)
 
 	for queue.Len() > 0 {
-		p := queue.Dequeue()
-		pid := p.ID()
+		pid := queue.Dequeue().ID()
 
 		// Explore all outgoing edges with capacity > 0.
 		for it := r.From(pid); it.Next(); {

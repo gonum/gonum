@@ -14,8 +14,6 @@ import (
 	"gonum.org/v1/gonum/graph/simple"
 )
 
-const tol = 1e-10
-
 var dinicTests = []struct {
 	name      string
 	g         graph.WeightedDirected

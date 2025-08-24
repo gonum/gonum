@@ -43,14 +43,12 @@ func MaxFlowDinic(g graph.WeightedDirected, s, t graph.Node) float64 {
 // initializeResidualGraph builds the residual graph for Dinic’s algorithm.
 // It copies all nodes, adds directed edges with their original capacities,
 // and initializes a zero flow map for each forward edge.
-func initializeResidualGraph(g graph.WeightedDirected) *residualGraph {
-	r := &residualGraph{
-		g: simple.NewWeightedDirectedGraph(0, 0),
-	}
+func initializeResidualGraph(g graph.WeightedDirected) *simple.WeightedDirectedGraph {
+	r := simple.NewWeightedDirectedGraph(0, 0)
 
 	nodes := g.Nodes()
 	for nodes.Next() {
-		r.g.AddNode(nodes.Node())
+		r.AddNode(nodes.Node())
 	}
 
 	nodes.Reset()
@@ -72,11 +70,11 @@ func initializeResidualGraph(g graph.WeightedDirected) *residualGraph {
 			}
 
 			// Add forward edge with full capacity.
-			forward := r.g.NewWeightedEdge(u, v, capacity)
-			r.g.SetWeightedEdge(forward)
+			forward := r.NewWeightedEdge(u, v, capacity)
+			r.SetWeightedEdge(forward)
 			// Add reverse edge if it does not exist
-			if _, ok := r.g.Weight(v.ID(), u.ID()); !ok {
-				r.g.SetWeightedEdge(r.g.NewWeightedEdge(v, u, 0))
+			if _, ok := r.Weight(v.ID(), u.ID()); !ok {
+				r.SetWeightedEdge(r.NewWeightedEdge(v, u, 0))
 			}
 		}
 	}
@@ -86,14 +84,14 @@ func initializeResidualGraph(g graph.WeightedDirected) *residualGraph {
 // canReachTargetInLevelGraph builds a level graph using BFS on residualGraph.
 // It records, for each reachable node, the list of parents at the previous level.
 // It returns whether target is reachable from source via positive-capacity edges.
-func canReachTargetInLevelGraph(r *residualGraph, s, t graph.Node, parents [][]int64) bool {
+func canReachTargetInLevelGraph(r *simple.WeightedDirectedGraph, s, t graph.Node, parents [][]int64) bool {
 	// Reset parents slices in place.
 	for i := range parents {
 		parents[i] = parents[i][:0]
 	}
 
 	// levels[i] holds the BFS level of node i, or -1 if unvisited.
-	levels := make([]int32, r.g.Nodes().Len())
+	levels := make([]int32, r.Nodes().Len())
 	for i := range levels {
 		levels[i] = -1
 	}
@@ -109,9 +107,9 @@ func canReachTargetInLevelGraph(r *residualGraph, s, t graph.Node, parents [][]i
 		pid := p.ID()
 
 		// Explore all outgoing edges with capacity > 0.
-		for it := r.g.From(pid); it.Next(); {
+		for it := r.From(pid); it.Next(); {
 			cid := it.Node().ID()
-			capacity, ok := r.g.Weight(pid, cid)
+			capacity, ok := r.Weight(pid, cid)
 			if !ok || capacity <= 0 {
 				continue
 			}
@@ -134,7 +132,7 @@ func canReachTargetInLevelGraph(r *residualGraph, s, t graph.Node, parents [][]i
 // level graph of Dinic’s algorithm. It backtracks from target to source using
 // the parents slices, computes each path’s bottleneck capacity, updates both
 // the residual capacities and the flow map, and returns the total flow added.
-func computeBlockingPath(r *residualGraph, s, t graph.Node, parents [][]int64) float64 {
+func computeBlockingPath(r *simple.WeightedDirectedGraph, s, t graph.Node, parents [][]int64) float64 {
 	var totalFlow float64
 
 	// path holds node IDs from t back to (eventually) s.
@@ -164,7 +162,7 @@ func computeBlockingPath(r *residualGraph, s, t graph.Node, parents [][]int64) f
 			for i := 0; i+1 < len(path); i++ {
 				pid := path[i+1]
 				cid := path[i]
-				w, ok := r.g.Weight(pid, cid)
+				w, ok := r.Weight(pid, cid)
 				if !ok {
 					panic("expected a w for existing edge")
 				}
@@ -177,19 +175,19 @@ func computeBlockingPath(r *residualGraph, s, t graph.Node, parents [][]int64) f
 			for i := 0; i+1 < len(path); i++ {
 				pid := path[i+1]
 				cid := path[i]
-				currentCapacity, ok := r.g.Weight(pid, cid)
+				currentCapacity, ok := r.Weight(pid, cid)
 				if !ok {
 					panic("expected a weight for existing edge")
 				}
-				parent := r.g.Node(pid)
-				child := r.g.Node(cid)
-				forwardCapacity := r.g.NewWeightedEdge(parent, child, currentCapacity-bottleNeckOnPath)
-				r.g.SetWeightedEdge(forwardCapacity)
-				reverseCapacity, ok := r.g.Weight(cid, pid)
+				parent := r.Node(pid)
+				child := r.Node(cid)
+				forwardCapacity := r.NewWeightedEdge(parent, child, currentCapacity-bottleNeckOnPath)
+				r.SetWeightedEdge(forwardCapacity)
+				reverseCapacity, ok := r.Weight(cid, pid)
 				if !ok {
 					panic("expected reverse residual edge")
 				}
-				r.g.SetWeightedEdge(r.g.NewWeightedEdge(r.g.Node(cid), r.g.Node(pid), reverseCapacity+bottleNeckOnPath))
+				r.SetWeightedEdge(r.NewWeightedEdge(r.Node(cid), r.Node(pid), reverseCapacity+bottleNeckOnPath))
 			}
 			totalFlow += bottleNeckOnPath
 			path = []int64{t.ID()}
@@ -197,8 +195,4 @@ func computeBlockingPath(r *residualGraph, s, t graph.Node, parents [][]int64) f
 		uid = vid
 	}
 	return totalFlow
-}
-
-type residualGraph struct {
-	g *simple.WeightedDirectedGraph
 }

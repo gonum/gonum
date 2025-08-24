@@ -1437,7 +1437,10 @@ func TestQuantile(t *testing.T) {
 	cumulantKinds := []CumulantKind{
 		Empirical,
 		LinInterp,
+		Linear,
 	}
+	const tol = 1e-12
+
 	for i, test := range []struct {
 		p      []float64
 		x      []float64
@@ -1464,6 +1467,7 @@ func TestQuantile(t *testing.T) {
 			ans: [][]float64{
 				{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 				{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+				{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 			},
 		},
 		{
@@ -1473,6 +1477,7 @@ func TestQuantile(t *testing.T) {
 			ans: [][]float64{
 				{1, 1, 1, 2, 5, 5, 6, 9, 9, 10, 10},
 				{1, 1, 1, 1.5, 4.5, 5, 5.5, 8.5, 9, 9.5, 10},
+				{1, 1.45, 1.9, 2.35, 5.05, 5.5, 5.95, 8.65, 9.1, 9.55, 10},
 			},
 		},
 		{
@@ -1482,6 +1487,7 @@ func TestQuantile(t *testing.T) {
 			ans: [][]float64{
 				{1, 1, 1, 2, 5, 5, 6, 9, 9, 10, 10},
 				{1, 1, 1, 1.5, 4.5, 5, 5.5, 8.5, 9, 9.5, 10},
+				{1, 1, 1, 1.5, 4.5, 5, 5.5, 8.5, 9, 9.5, 10},
 			},
 		},
 		{
@@ -1490,13 +1496,15 @@ func TestQuantile(t *testing.T) {
 			w: []float64{0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0},
 			ans: [][]float64{
 				{1, 2, 3, 4, 7, 7, 8, 10, 10, 10, 10},
-				{1, 1.875, 2.833333333333333, 3.5625, 6.535714285714286, 6.928571428571429, 7.281250000000001, 9.175, 9.45, 9.725, 10},
+				{1, 1.875, 2.833333333333333, 3.5625, 6.535714285714286, 6.928571428571429, 7.28125, 9.175, 9.45, 9.725, 10},
+				{1, 1.875, 2.833333333333333, 3.5625, 6.535714285714286, 6.928571428571429, 7.28125, 9.175, 9.45, 9.725, 10},
 			},
 		},
 		{
 			p: []float64{0.5},
 			x: []float64{1, 2, 3, 4, 5, 6, 7, 8, math.NaN(), 10},
 			ans: [][]float64{
+				{math.NaN()},
 				{math.NaN()},
 				{math.NaN()},
 			},
@@ -1524,8 +1532,9 @@ func TestQuantile(t *testing.T) {
 				if test.panics {
 					continue
 				}
-				if v != test.ans[k][j] && !(math.IsNaN(v) && math.IsNaN(test.ans[k][j])) {
-					t.Errorf("mismatch case %d kind %d percentile %v. Expected: %v, found: %v", i, k, p, test.ans[k][j], v)
+				expected := test.ans[k][j]
+				if !(math.IsNaN(v) && math.IsNaN(expected)) && math.Abs(v-expected) > tol {
+					t.Errorf("mismatch case %d kind %d percentile %v. Expected: %v, found: %v", i, kind, p, expected, v)
 				}
 			}
 		}
@@ -1536,6 +1545,7 @@ func TestQuantileInvalidInput(t *testing.T) {
 	cumulantKinds := []CumulantKind{
 		Empirical,
 		LinInterp,
+		Linear,
 	}
 	for _, test := range []struct {
 		name string

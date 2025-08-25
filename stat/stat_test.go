@@ -1534,7 +1534,7 @@ func TestQuantile(t *testing.T) {
 					continue
 				}
 				want := test.ans[k][j]
-				if !scalar.EqualWithinAbs(v, want, tol) && !scalar.Same(v, want) && !(math.IsNaN(v) && math.IsNaN(want)) && math.Abs(v-want) > tol {
+				if !scalar.EqualWithinAbs(v, want, tol) && !scalar.Same(v, want) {
 					t.Errorf("mismatch case %d kind %d percentile %v. Expected: %v, found: %v", i, kind, p, want, v)
 				}
 			}

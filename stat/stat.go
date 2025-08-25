@@ -1437,12 +1437,12 @@ func linearQuantile(p float64, x, weights []float64, sumWeights float64) float64
 		if p >= 1 {
 			return x[n-1]
 		}
-		h, frac := math.Modf(1 + p*float64(n-1))
+		h, frac := math.Modf(1 + float64(p*float64(n-1)))
 		i := int(h) - 1
 		if frac == 0 {
 			return x[i]
 		}
-		return (1-frac)*x[i] + frac*x[i+1]
+		return float64((1-frac)*x[i]) + float64(frac*x[i+1])
 	}
 
 	// Weighted: linear interpolation over the weighted ECDF.
@@ -1464,7 +1464,7 @@ func linearQuantile(p float64, x, weights []float64, sumWeights float64) float64
 			if alpha >= 1 {
 				return x[i]
 			}
-			return (1-alpha)*x[i-1] + alpha*x[i]
+			return float64((1-alpha)*x[i-1]) + float64(alpha*x[i])
 		}
 	}
 	panic("impossible")

@@ -20,19 +20,24 @@ import (
 // MaxFlowDinic will panic if s and t are the same node or g has any
 // reachable negative edge weight.
 //
+// The eps parameter specifies an absolute tolerance for treating tiny flow
+// updates as zero. If eps <= 0, a default of 1e-12 is used.
+//
 // [Dinic's algorithm]: https://en.wikipedia.org/wiki/Dinic%27s_algorithm
-func MaxFlowDinic(g graph.WeightedDirected, s, t graph.Node) float64 {
+func MaxFlowDinic(g graph.WeightedDirected, s, t graph.Node, eps float64) float64 {
 	if s.ID() == t.ID() {
 		panic("no cut between s and t")
 	}
 	parents := make([][]int64, g.Nodes().Len())
 	r := initializeResidualGraph(g)
 
-	const epsilon = 1e-12
+	if eps <= 0 {
+		eps = 1e-12
+	}
 	var maxFlow float64
 	for canReachTargetInLevelGraph(r, s, t, parents) {
 		flow := computeBlockingPath(r, s, t, parents)
-		if scalar.EqualWithinAbs(flow, 0, epsilon) {
+		if scalar.EqualWithinAbs(flow, 0, eps) {
 			break
 		}
 		maxFlow += flow

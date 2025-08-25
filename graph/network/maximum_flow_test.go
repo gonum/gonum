@@ -220,7 +220,7 @@ func TestMaxFlowDinic(t *testing.T) {
 							t.Errorf("unexpected panic: got:%v want:%v", r, flow.wantPanic)
 						}
 					}()
-					got := MaxFlowDinic(test.g, flow.s, flow.t)
+					got := MaxFlowDinic(test.g, flow.s, flow.t, tol)
 					if !scalar.EqualWithinAbs(got, flow.want, tol) {
 						t.Errorf("unexpected maximum flow: got = %v, want = %v", got, flow.want)
 					}

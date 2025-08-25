@@ -1441,7 +1441,6 @@ func TestQuantile(t *testing.T) {
 		LinInterp,
 		Linear,
 	}
-
 	for i, test := range []struct {
 		p      []float64
 		x      []float64

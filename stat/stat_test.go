@@ -1434,12 +1434,13 @@ func TestCDF(t *testing.T) {
 }
 
 func TestQuantile(t *testing.T) {
+	const tol = 1e-12
+
 	cumulantKinds := []CumulantKind{
 		Empirical,
 		LinInterp,
 		Linear,
 	}
-	const tol = 1e-12
 
 	for i, test := range []struct {
 		p      []float64
@@ -1532,9 +1533,9 @@ func TestQuantile(t *testing.T) {
 				if test.panics {
 					continue
 				}
-				expected := test.ans[k][j]
-				if !(math.IsNaN(v) && math.IsNaN(expected)) && math.Abs(v-expected) > tol {
-					t.Errorf("mismatch case %d kind %d percentile %v. Expected: %v, found: %v", i, kind, p, expected, v)
+				want := test.ans[k][j]
+				if !scalar.EqualWithinAbs(v, want, tol) && !scalar.Same(v, want) && !(math.IsNaN(v) && math.IsNaN(want)) && math.Abs(v-want) > tol {
+					t.Errorf("mismatch case %d kind %d percentile %v. Expected: %v, found: %v", i, kind, p, want, v)
 				}
 			}
 		}

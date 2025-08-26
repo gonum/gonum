@@ -21,7 +21,7 @@ import (
 // reachable negative edge weight.
 //
 // The eps parameter specifies an absolute tolerance for treating tiny flow
-// updates as zero. If eps <= 0, a default of 1e-12 is used.
+// updates as zero. If eps is negative a default of 1e-12 is used.
 //
 // [Dinic's algorithm]: https://en.wikipedia.org/wiki/Dinic%27s_algorithm
 func MaxFlowDinic(g graph.WeightedDirected, s, t graph.Node, eps float64) float64 {

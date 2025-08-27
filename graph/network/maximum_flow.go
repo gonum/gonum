@@ -31,7 +31,7 @@ func MaxFlowDinic(g graph.WeightedDirected, s, t graph.Node, eps float64) float6
 	parents := make([][]int64, g.Nodes().Len())
 	r := initializeResidualGraph(g)
 
-	if eps <= 0 {
+	if eps < 0 {
 		eps = 1e-12
 	}
 	var maxFlow float64

@@ -160,7 +160,7 @@ func computeBlockingPath(r *simple.WeightedDirectedGraph, s, t graph.Node, paren
 		// When we’ve backtracked all the way to s:
 		if vid == s.ID() {
 			// 1) Find the minimum residual capacity (bottleneck) along this path.
-			bottleNeckOnPath := math.MaxFloat64
+			bottleNeckOnPath := math.Inf(0)
 			for i := 0; i+1 < len(path); i++ {
 				pid := path[i+1]
 				cid := path[i]

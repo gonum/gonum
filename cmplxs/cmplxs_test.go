@@ -473,7 +473,7 @@ func TestFind(t *testing.T) {
 	trueInds := allTrueInds[:2]
 	str := eqIntSlice(inds, trueInds)
 	if str != "" {
-		t.Errorf("Find first two: " + str)
+		t.Errorf("Find first two: %s", str)
 	}
 
 	// Test finding no elements with non nil slice
@@ -484,7 +484,7 @@ func TestFind(t *testing.T) {
 	}
 	str = eqIntSlice(inds, []int{})
 	if str != "" {
-		t.Errorf("Find no non-nil: " + str)
+		t.Errorf("Find no non-nil: %s", str)
 	}
 
 	// Test finding first two elements with non nil slice
@@ -495,7 +495,7 @@ func TestFind(t *testing.T) {
 	}
 	str = eqIntSlice(inds, trueInds)
 	if str != "" {
-		t.Errorf("Find first two non-nil: " + str)
+		t.Errorf("Find first two non-nil: %s", str)
 	}
 
 	// Test finding too many elements
@@ -505,7 +505,7 @@ func TestFind(t *testing.T) {
 	}
 	str = eqIntSlice(inds, allTrueInds)
 	if str != "" {
-		t.Errorf("Request too many: Does not match all of the inds: " + str)
+		t.Errorf("Request too many: Does not match all of the inds: %s", str)
 	}
 
 	// Test finding all elements
@@ -515,7 +515,7 @@ func TestFind(t *testing.T) {
 	}
 	str = eqIntSlice(inds, allTrueInds)
 	if str != "" {
-		t.Errorf("Find all: Does not match all of the inds: " + str)
+		t.Errorf("Find all: Does not match all of the inds: %s", str)
 	}
 }
 

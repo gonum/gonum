@@ -20,7 +20,7 @@ var ErrSVDFailed = errors.New("transform: SVD factorization failed")
 // The transformation relates two sets of n corresponding points {x_i}
 // and {y_i} as:
 //
-//	y_i ≈ c * R * x_i + t,  i=1,...,n
+//	y_i ≈ c * R * x_i + t,  i=0,...,n-1
 //
 // where c is the scale factor, R is the rotation matrix and t is
 // the translation vector.
@@ -30,7 +30,7 @@ var ErrSVDFailed = errors.New("transform: SVD factorization failed")
 // row of X and Y, respectively. Typically, m is equal to 2 or 3.
 // If the dimensions of X and Y are not equal, Umeyama will panic.
 //
-// Umeyama returns the scale factor c, the rotation matrix r and the translation
+// Umeyama returns the scale factor c, the rotation matrix R and the translation
 // vector t.
 //
 // If the required SVD fails, Umeyama will return an ErrSVDFailed.

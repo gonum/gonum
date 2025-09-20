@@ -35,17 +35,13 @@ func Li2(z complex128) complex128 {
 
 	// Reflection: map Re(z) > 0.5 into left half-plane for better convergence
 	if real(z) > 0.5 {
-		return complex(math.Pi*math.Pi/6, 0) -
-			cmplx.Log(z)*cmplx.Log(1-z) -
-			Li2(1-z)
+		return complex(math.Pi*math.Pi/6, 0) - cmplx.Log(z)*cmplx.Log(1-z) - Li2(1-z)
 	}
 
 	// Inversion: map |z| > 1 into unit disk
 	if cmplx.Abs(z) > 1 {
 		logmz := cmplx.Log(-z)
-		return -complex(math.Pi*math.Pi/6, 0) -
-			0.5*logmz*logmz -
-			Li2(1/z)
+		return -complex(math.Pi*math.Pi/6, 0) - 0.5*logmz*logmz - Li2(1/z)
 	}
 
 	// Direct series for |z| <= 1 and Re(z) <= 0.5

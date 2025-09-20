@@ -17,12 +17,7 @@ import (
 //
 // Branch cut: Li2 has a logarithmic branch point at z=1 with the standard
 // cut on the real axis for z in the interval (1, infinity). The principal value is taken with
-// Arg(z) ∈ (−Pi, Pi].
-//
-// Special values:
-//   Li2(0) = 0
-//   Li2(1) = Pi^2/6
-//   Li2(−1) = −Pi^2/12
+// Arg(z) element of (−Pi, Pi].
 
 func Li2(z complex128) complex128 {
 	// Special cases
@@ -34,6 +29,11 @@ func Li2(z complex128) complex128 {
 	}
 
 	// Reflection: map Re(z) > 0.5 into left half-plane for better convergence
+	// This formula is applied before inversion on the principal branch and gives very accurate results
+	// for real z > 1 because Li2(-1) and similar values are known exactly.
+	// Inversion first would also be valid, but is more sensitive to the
+	// Arg(-z)= +/-Pi branch choice in log(-z) and can yield wrong imaginary signs
+	// if care is not taken.
 	if real(z) > 0.5 {
 		return complex(math.Pi*math.Pi/6, 0) - cmplx.Log(z)*cmplx.Log(1-z) - Li2(1-z)
 	}

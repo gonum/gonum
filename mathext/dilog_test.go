@@ -13,7 +13,7 @@ import (
 func TestDiLogValues(t *testing.T) {
 	t.Parallel()
 
-	for i, test := range []struct {
+	for _, test := range []struct {
 		input, want complex128
 	}{
 		// Reference values were generated using Python's scipy.special.spence
@@ -39,9 +39,15 @@ func TestDiLogValues(t *testing.T) {
 		{1000 + 10000i, -42.71073756884990 + 15.39396088869304i},
 		{-1791.91931 + 0.5i, -29.70223568904652 + 0.00209038439188i},
 	} {
-
-		if got := Li2(test.input); math.Abs(real(got)-real(test.want)) > 1e-12 || math.Abs(imag(got)-imag(test.want)) > 1e-12 {
-			t.Errorf("test %d Li2(%g) failed: got %g want %g", i, test.input, got, test.want)
+		got := Li2(test.input)
+		const tol = 1e-12
+		diff := cmplx.Abs(got - test.want)
+		if cmplx.Abs(test.want) > 0 {
+			if diff/cmplx.Abs(test.want) > tol {
+				t.Errorf("Li2(%g) relative error %g exceeds tol %g", test.input, diff/cmplx.Abs(test.want), tol)
+			}
+		} else if diff > tol {
+			t.Errorf("Li2(%g) abs error %g exceeds tol %g", test.input, diff, tol)
 		}
 	}
 }

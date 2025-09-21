@@ -7,13 +7,13 @@ import (
 
 // Li2 returns the dilogarithm Li2(z) on the principal branch.
 //
-// Li2(z) is defined for |z| < 1 by the power series
+// For |z| < 1, Li2(z) is defined by the power series
 //
 //     Li2(z) = SUM_{k=1}^{infinity} z^k / k^2
 //
-// and extended to the rest of the complex plane by analytic continuation.
+// and is analytically continued to the rest of the complex plane.
 // The implementation uses reflection and inversion identities to map z into
-// a region where the series converges rapidly, and then evaluates the series.
+// a region where the series converges rapidly, then evaluates the series.
 //
 // Branch cut: Li2 has a logarithmic branch point at z=1 with the standard
 // cut on the real axis for z in the interval (1, infinity). The principal value is taken with

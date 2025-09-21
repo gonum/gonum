@@ -31,6 +31,9 @@ func Li2(z complex128) complex128 {
 	if z == 1 {
 		return complex(math.Pi*math.Pi/6, 0)
 	}
+	if z == -1 {
+		return complex(-math.Pi*math.Pi/12, 0)
+	}
 
 	// Reflection: map Re(z) > 0.5 into left half-plane for better convergence
 	// This formula is applied before inversion on the principal branch and gives very accurate results

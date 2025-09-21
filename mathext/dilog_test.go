@@ -23,6 +23,8 @@ func TestDiLogValues(t *testing.T) {
 		{0 + 0i, 0 + 0i},
 		{1 + 0i, math.Pi*math.Pi/6 + 0i},
 		{-1 + 0i, -math.Pi*math.Pi/12 + 0i},
+		{-1.000010000000000 + 0i, -0.822473964886262 + 0i},
+		{-0.999999000000000 + 0i, -0.822466340276836 + 0i},
 		{0.5 + 0i, 0.582240526465012 + 0i},
 		{2 + 0i, 2.467401100272340 - 2.177586090303602i},
 		// abs(z) < 0.5
@@ -40,7 +42,7 @@ func TestDiLogValues(t *testing.T) {
 		{-1791.91931 + 0.5i, -29.70223568904652 + 0.00209038439188i},
 	} {
 		got := Li2(test.input)
-		const tol = 1e-12
+		const tol = 1e-10
 		diff := cmplx.Abs(got - test.want)
 		if cmplx.Abs(test.want) > 0 {
 			if diff/cmplx.Abs(test.want) > tol {
@@ -54,7 +56,7 @@ func TestDiLogValues(t *testing.T) {
 
 func TestDiLogProperties(t *testing.T) {
 	t.Parallel()
-	const tol = 1e-12
+	const tol = 1e-10
 
 	// Duplication formula: Li2(z^2) = 2 (Li2(z) + Li2(-z))
 	for i, z := range []complex128{

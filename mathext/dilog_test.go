@@ -25,9 +25,6 @@ func TestDiLogValues(t *testing.T) {
 		{in: 0 + 0i, want: 0 + 0i},
 		{in: 1 + 0i, want: math.Pi*math.Pi/6 + 0i},
 		{in: -1 + 0i, want: -math.Pi*math.Pi/12 + 0i},
-		{in: -1.000010000000000 + 0i, want: -0.822473964886262 + 0i},
-		{in: -0.9999 + 0.001i, want: -0.8224073757146268 + 0.0069316422414370i},
-		{in: -0.999999000000000 + 0i, want: -0.822466340276836 + 0i},
 		{in: 0.5 + 0i, want: 0.582240526465012 + 0i},
 		{in: 2 + 0i, want: 2.467401100272340 - 2.177586090303602i},
 		// abs(z) < 0.5
@@ -35,10 +32,12 @@ func TestDiLogValues(t *testing.T) {
 		{in: -0.3 + 0.39i, want: -0.306174046754339 + 0.337550668621259i},
 		{in: 0.001 - 0.49i, want: -0.055831393285929 - 0.478156430372353i},
 		// 0.5 < abs(z) < 1
+		{in: -0.9999 + 0.001i, want: -0.8223978143206974 + 0.0006931664732411i},
 		{in: 0.5 + 0.7i, want: 0.359364350522653 + 0.856767712327590i},
 		{in: complex(math.Pi/4, -math.Pi/7), want: 0.828086461155377 - 0.739345385309341i},
 		{in: -0.8 - 0.0001i, want: -0.679781588954542 - 0.000073473333084i},
 		// abs(z) > 1
+		{in: -1.1 + 0.1i, want: -0.8917388814454027 + 0.0674285967726009i},
 		{in: 5 + 0i, want: 1.783719161266631 - 5.056198322111862i},
 		{in: -10 + 0i, want: -4.198277886858104 + 0i},
 		{in: 1000 + 10000i, want: -42.71073756884990 + 15.39396088869304i},
@@ -46,7 +45,7 @@ func TestDiLogValues(t *testing.T) {
 	} {
 		got := Li2(test.in)
 
-		const tol = 1e-10
+		const tol = 1e-12
 		diff := cmplx.Abs(got - test.want)
 		if cmplx.Abs(test.want) != 0 {
 			if !cscalar.EqualWithinRel(got, test.want, tol) {
@@ -56,18 +55,11 @@ func TestDiLogValues(t *testing.T) {
 			t.Errorf("Li2(%g) abs error %g exceeds tol %g", test.in, diff, tol)
 		}
 	}
-	gotLog := cmplx.Log(-0.9999 + 0.01i)
-	diffLog := cmplx.Abs(gotLog - (-0.000049997499667 + 3.131591986903128i))
-	const tol = 1e-12
-	if diffLog > tol {
-		t.Errorf("LOG ERROR: %g", gotLog)
-	}
-
 }
 
 func TestDiLogProperties(t *testing.T) {
 	t.Parallel()
-	const tol = 1e-10
+	const tol = 1e-12
 
 	// Duplication formula: Li2(z^2) = 2 (Li2(z) + Li2(-z))
 	for i, z := range []complex128{

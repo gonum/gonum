@@ -50,7 +50,6 @@ func Li2(z complex128) complex128 {
 		logmz := cmplx.Log(-z)
 		return -complex(math.Pi*math.Pi/6, 0) - complex128(0.5*logmz*logmz) - Li2(1/z)
 	}
-
 	// Direct series for |z| <= 1 and Re(z) <= 0.5
 	return li2Series(z)
 }

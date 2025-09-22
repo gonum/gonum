@@ -17,6 +17,11 @@ func TestDbdsqr(t *testing.T) {
 	testlapack.DbdsqrTest(t, impl)
 }
 
+func TestDhgeqz(t *testing.T) {
+	t.Parallel()
+	testlapack.DhgeqzTest(t, impl)
+}
+
 func TestDhseqr(t *testing.T) {
 	t.Parallel()
 	testlapack.DhseqrTest(t, impl)

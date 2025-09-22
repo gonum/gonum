@@ -329,6 +329,33 @@ var yenShortestPathTests = []struct {
 			{1, 4, 5, 2, 3, 6},
 		},
 	},
+	{
+		// 1st shortest path: 1 -> 2 -> 3 (cost: 2)
+		// Shortest deviations: 1 -> 4 -> 3 (cost: 3), 1 -> 2 -> 6 -> 3 (cost: 11)
+		// 2nd shortest path: 1 -> 4 -> 3
+		// New deviation: 1 -> 4 -> 5 -> 3 (cost: 4) (shorter than 1 -> 2 -> 6 -> 3)
+		name: "new_shorter_deviation",
+		graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedDirectedGraph(0, math.Inf(1)) },
+		edges: []simple.WeightedEdge{
+			{F: simple.Node(1), T: simple.Node(2), W: 1},
+			{F: simple.Node(2), T: simple.Node(3), W: 1},
+			{F: simple.Node(2), T: simple.Node(6), W: 5},
+			{F: simple.Node(6), T: simple.Node(3), W: 5},
+			{F: simple.Node(1), T: simple.Node(4), W: 1},
+			{F: simple.Node(4), T: simple.Node(3), W: 2},
+			{F: simple.Node(4), T: simple.Node(5), W: 1},
+			{F: simple.Node(5), T: simple.Node(3), W: 2},
+		},
+		k: 4,
+		query: simple.Edge{F: simple.Node(1), T: simple.Node(3)},
+		cost: math.Inf(1),
+		wantPaths: [][]int64{
+			{1, 2, 3},
+			{1, 4, 3},
+			{1, 4, 5, 3},
+			{1, 2, 6, 3},
+		},
+	},
 }
 
 func bipartite(n int, weight, inc float64) []simple.WeightedEdge {

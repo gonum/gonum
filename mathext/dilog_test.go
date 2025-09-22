@@ -8,50 +8,61 @@ import (
 	"math"
 	"math/cmplx"
 	"testing"
+
+	"gonum.org/v1/gonum/cmplxs/cscalar"
 )
 
 func TestDiLogValues(t *testing.T) {
 	t.Parallel()
 
 	for _, test := range []struct {
-		input, want complex128
+		in, want complex128
 	}{
 		// Reference values were generated using Python's scipy.special.spence
 		// (where Li2(z) = spence(1 - z)) and verified with a computer algebra system.
 
 		// well known values
-		{0 + 0i, 0 + 0i},
-		{1 + 0i, math.Pi*math.Pi/6 + 0i},
-		{-1 + 0i, -math.Pi*math.Pi/12 + 0i},
-		{-1.000010000000000 + 0i, -0.822473964886262 + 0i},
-		{-0.999999000000000 + 0i, -0.822466340276836 + 0i},
-		{0.5 + 0i, 0.582240526465012 + 0i},
-		{2 + 0i, 2.467401100272340 - 2.177586090303602i},
+		{in: 0 + 0i, want: 0 + 0i},
+		{in: 1 + 0i, want: math.Pi*math.Pi/6 + 0i},
+		{in: -1 + 0i, want: -math.Pi*math.Pi/12 + 0i},
+		{in: -1.000010000000000 + 0i, want: -0.822473964886262 + 0i},
+		{in: -0.9999 + 0.001i, want: -0.8224073757146268 + 0.0069316422414370i},
+		{in: -0.999999000000000 + 0i, want: -0.822466340276836 + 0i},
+		{in: 0.5 + 0i, want: 0.582240526465012 + 0i},
+		{in: 2 + 0i, want: 2.467401100272340 - 2.177586090303602i},
 		// abs(z) < 0.5
-		{0.1 + 0.1i, 0.099751196798713 + 0.105220383905600i},
-		{-0.3 + 0.39i, -0.306174046754339 + 0.337550668621259i},
-		{0.001 - 0.49i, -0.055831393285929 - 0.478156430372353i},
+		{in: 0.1 + 0.1i, want: 0.099751196798713 + 0.105220383905600i},
+		{in: -0.3 + 0.39i, want: -0.306174046754339 + 0.337550668621259i},
+		{in: 0.001 - 0.49i, want: -0.055831393285929 - 0.478156430372353i},
 		// 0.5 < abs(z) < 1
-		{0.5 + 0.7i, 0.359364350522653 + 0.856767712327590i},
-		{complex(math.Pi/4, -math.Pi/7), 0.828086461155377 - 0.739345385309341i},
-		{-0.8 - 0.0001i, -0.679781588954542 - 0.000073473333084i},
+		{in: 0.5 + 0.7i, want: 0.359364350522653 + 0.856767712327590i},
+		{in: complex(math.Pi/4, -math.Pi/7), want: 0.828086461155377 - 0.739345385309341i},
+		{in: -0.8 - 0.0001i, want: -0.679781588954542 - 0.000073473333084i},
 		// abs(z) > 1
-		{5 + 0i, 1.783719161266631 - 5.056198322111862i},
-		{-10 + 0i, -4.198277886858104 + 0i},
-		{1000 + 10000i, -42.71073756884990 + 15.39396088869304i},
-		{-1791.91931 + 0.5i, -29.70223568904652 + 0.00209038439188i},
+		{in: 5 + 0i, want: 1.783719161266631 - 5.056198322111862i},
+		{in: -10 + 0i, want: -4.198277886858104 + 0i},
+		{in: 1000 + 10000i, want: -42.71073756884990 + 15.39396088869304i},
+		{in: -1791.91931 + 0.5i, want: -29.70223568904652 + 0.00209038439188i},
 	} {
-		got := Li2(test.input)
+		got := Li2(test.in)
+
 		const tol = 1e-10
 		diff := cmplx.Abs(got - test.want)
-		if cmplx.Abs(test.want) > 0 {
-			if diff/cmplx.Abs(test.want) > tol {
-				t.Errorf("Li2(%g) relative error %g exceeds tol %g", test.input, diff/cmplx.Abs(test.want), tol)
+		if cmplx.Abs(test.want) != 0 {
+			if !cscalar.EqualWithinRel(got, test.want, tol) {
+				t.Errorf("Li2(%g) relative error %g exceeds tol %g", test.in, diff/cmplx.Abs(test.want), tol)
 			}
-		} else if diff > tol {
-			t.Errorf("Li2(%g) abs error %g exceeds tol %g", test.input, diff, tol)
+		} else if !cscalar.EqualWithinAbs(got, test.want, tol) {
+			t.Errorf("Li2(%g) abs error %g exceeds tol %g", test.in, diff, tol)
 		}
 	}
+	gotLog := cmplx.Log(-0.9999 + 0.01i)
+	diffLog := cmplx.Abs(gotLog - (-0.000049997499667 + 3.131591986903128i))
+	const tol = 1e-12
+	if diffLog > tol {
+		t.Errorf("LOG ERROR: %g", gotLog)
+	}
+
 }
 
 func TestDiLogProperties(t *testing.T) {
@@ -67,7 +78,7 @@ func TestDiLogProperties(t *testing.T) {
 	} {
 		lhs := Li2(z * z)
 		rhs := 2 * (Li2(z) + Li2(-z))
-		if math.Abs(real(lhs)-real(rhs)) > tol || math.Abs(imag(lhs)-imag(rhs)) > tol {
+		if !cscalar.EqualWithinAbs(lhs, rhs, tol) {
 			t.Errorf("duplication formula failed for case %d, z=%v: got %v want %v", i, z, lhs, rhs)
 		}
 	}
@@ -81,7 +92,7 @@ func TestDiLogProperties(t *testing.T) {
 	} {
 		lhs := Li2(cmplx.Conj(z))
 		rhs := cmplx.Conj(Li2(z))
-		if math.Abs(real(lhs)-real(rhs)) > tol || math.Abs(imag(lhs)-imag(rhs)) > tol {
+		if !cscalar.EqualWithinAbs(lhs, rhs, tol) {
 			t.Errorf("conjugation symmetry failed for case %d, z=%v: got %v want %v", i, z, lhs, rhs)
 		}
 	}

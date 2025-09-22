@@ -42,13 +42,13 @@ func Li2(z complex128) complex128 {
 	// Arg(-z)= +/-Pi branch choice in log(-z) and can yield wrong imaginary signs
 	// if care is not taken.
 	if real(z) > 0.5 {
-		return complex(math.Pi*math.Pi/6, 0) - cmplx.Log(z)*cmplx.Log(1-z) - Li2(1-z)
+		return complex(math.Pi*math.Pi/6, 0) - complex128(cmplx.Log(z)*cmplx.Log(1-z)) - Li2(1-z)
 	}
 
 	// Inversion: map |z| > 1 into unit disk
 	if cmplx.Abs(z) > 1 {
 		logmz := cmplx.Log(-z)
-		return -complex(math.Pi*math.Pi/6, 0) - 0.5*logmz*logmz - Li2(1/z)
+		return -complex(math.Pi*math.Pi/6, 0) - complex128(0.5*logmz*logmz) - Li2(1/z)
 	}
 
 	// Direct series for |z| <= 1 and Re(z) <= 0.5
@@ -57,10 +57,10 @@ func Li2(z complex128) complex128 {
 
 func li2Series(z complex128) complex128 {
 	const tol = 1e-15
-	sum := complex(0, 0)
+	var sum complex128
 	zk := z // zk = z^k
-	for k := 1; cmplx.Abs(zk)/float64(k*k) > tol; k++ {
-		sum += zk / complex(float64(k*k), 0)
+	for k := 1.0; cmplx.Abs(zk)/(k*k) > tol; k++ {
+		sum += zk / complex(k*k, 0)
 		zk *= z
 	}
 	return sum

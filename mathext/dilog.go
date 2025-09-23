@@ -22,7 +22,6 @@ import (
 // Branch cut: Li2 has a logarithmic branch point at z=1 with the standard
 // cut on the real axis for z in the interval (1, infinity). The principal value is taken with
 // Arg(z) element of (−Pi, Pi].
-
 func Li2(z complex128) complex128 {
 	// Special cases
 	if z == 0 {

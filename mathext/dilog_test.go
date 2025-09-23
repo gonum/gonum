@@ -47,8 +47,6 @@ func TestDiLogValues(t *testing.T) {
 		{in: -1791.91931 + 0.5i, want: -29.70223568904652 + 0.00209038439188i},
 	} {
 		got := Li2(test.in)
-
-		const tol = 1e-12
 		diff := cmplx.Abs(got - test.want)
 		if cmplx.Abs(test.want) != 0 {
 			if !cscalar.EqualWithinRel(got, test.want, tol) {

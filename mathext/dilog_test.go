@@ -14,6 +14,7 @@ import (
 
 func TestDiLogValues(t *testing.T) {
 	t.Parallel()
+	const tol = 1e-12
 
 	for _, test := range []struct {
 		in, want complex128

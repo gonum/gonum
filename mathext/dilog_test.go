@@ -63,7 +63,7 @@ func TestDiLogProperties(t *testing.T) {
 	t.Parallel()
 	const tol = 1e-12
 
-	// Duplication formula: Li2(z^2) = 2 (Li2(z) + Li2(-z))
+	// Duplication formula: Li2(z^2) = 2*(Li2(z) + Li2(-z))
 	for i, z := range []complex128{
 		0.1 + 0.1i,
 		-0.3 + 0.4i,

@@ -23,11 +23,11 @@ func TestDiLogValues(t *testing.T) {
 		// (where Li2(z) = spence(1 - z)) and verified with a computer algebra system.
 
 		// well known values
-		{in: 0 + 0i, want: 0 + 0i},
-		{in: 1 + 0i, want: math.Pi*math.Pi/6 + 0i},
-		{in: -1 + 0i, want: -math.Pi*math.Pi/12 + 0i},
-		{in: 0.5 + 0i, want: 0.582240526465012 + 0i},
-		{in: 2 + 0i, want: 2.467401100272340 - 2.177586090303602i},
+		{in: 0, want: 0},
+		{in: 1, want: math.Pi * math.Pi / 6},
+		{in: -1, want: -math.Pi * math.Pi / 12},
+		{in: 0.5, want: math.Pi*math.Pi/12 - math.Ln2*math.Ln2/2},
+		{in: 2, want: complex(math.Pi*math.Pi/4, -math.Pi*math.Ln2)},
 
 		// abs(z) < 0.5
 		{in: 0.1 + 0.1i, want: 0.099751196798713 + 0.105220383905600i},

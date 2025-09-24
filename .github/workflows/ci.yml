@@ -83,7 +83,6 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -qq ragel
-        ./.github/workflows/script.d/deps.sh
         ./.github/workflows/script.d/check-copyright.sh
         ./.github/workflows/script.d/check-imports.sh
         ./.github/workflows/script.d/check-formatting.sh

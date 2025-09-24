@@ -58,7 +58,8 @@ func li2Series(z complex128) complex128 {
 	var sum complex128
 	zk := z // zk = z^k
 	for k := 1.0; cmplx.Abs(zk)/(k*k) > tol; k++ {
-		sum += zk / complex(k*k, 0)
+		k2 := k * k
+		sum += complex(real(zk)/k2, imag(zk)/k2)
 		zk *= z
 	}
 	return sum

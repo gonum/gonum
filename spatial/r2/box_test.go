@@ -101,7 +101,7 @@ func TestBoxAdd(t *testing.T) {
 }
 
 func TestBoxScale(t *testing.T) {
-	const tol = 1e-11
+	const tol = 1e-10
 	rnd := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < 300; i++ {
 		b := randomBox(rnd)

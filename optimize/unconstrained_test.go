@@ -82,6 +82,20 @@ var gradFreeTests = []unconstrainedTest{
 		},
 		x: []float64{-5, 4, 16, 3},
 	},
+    {
+		name: "Sphere5D",
+		p: Problem{
+			Func: functions.Sphere{}.Func,
+		},
+		x:       []float64{0.00001, 1.00001, 2.00001, 3.00001, 4.00001},
+	},
+	{
+		name: "Sphere10D",
+		p: Problem{
+			Func: functions.Sphere{}.Func,
+		},
+		x:       []float64{0.00001, 1.00001, 2.00001, 3.00001, 4.00001, 5.00001, 6.00001, 7.00001, 8.00001, 9.00001},
+	},
 }
 
 var gradientDescentTests = []unconstrainedTest{
@@ -219,6 +233,24 @@ var gradientDescentTests = []unconstrainedTest{
 			Grad: functions.HelicalValley{}.Grad,
 		},
 		x: []float64{1.00001, 0.00001, 0.00001},
+	},
+	{
+		name: "Sphere5D",
+		p: Problem{
+			Func: functions.Sphere{}.Func,
+			Grad: functions.Sphere{}.Grad,
+		},
+		x:       []float64{0.00001, 1.00001, 2.00001, 3.00001, 4.00001},
+		gradTol: 1e-10,
+	},
+	{
+		name: "Sphere10D",
+		p: Problem{
+			Func: functions.Sphere{}.Func,
+			Grad: functions.Sphere{}.Grad,
+		},
+		x:       []float64{0.00001, 1.00001, 2.00001, 3.00001, 4.00001, 5.00001, 6.00001, 7.00001, 8.00001, 9.00001},
+		gradTol: 1e-10,
 	},
 	{
 		name: "Trigonometric",

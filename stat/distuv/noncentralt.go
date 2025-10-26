@@ -19,62 +19,64 @@ type NoncentralT struct {
 	// Nu is the degrees of freedom.
 	Nu float64
 
-	// Ncp is the noncentral parameter.
-	Ncp float64
+	// Mu is the noncentral parameter.
+	Mu float64
 
 	// Src is the random source used to generate samples.
 	Src rand.Source
 }
 
 // Rand samples from the noncentral t-distribution.
-func (dist NoncentralT) Rand() float64 {
-	n := dist.Ncp + rand.New(dist.Src).NormFloat64()
-	c2 := ChiSquared{K: dist.Nu, Src: dist.Src}.Rand()
-	return n / math.Sqrt(c2/dist.Nu)
+func (n NoncentralT) Rand() float64 {
+	z := n.Mu + rand.New(n.Src).NormFloat64()
+	c2 := ChiSquared{K: n.Nu, Src: n.Src}.Rand()
+	return z / math.Sqrt(c2/n.Nu)
 }
 
 // Mean returns the mean of the noncentral t-distribution.
-func (dist NoncentralT) Mean() float64 {
-	nu := dist.Nu
+func (n NoncentralT) Mean() float64 {
+	nu := n.Nu
 	if nu <= 1 {
 		return math.NaN()
 	}
-	return dist.Ncp * math.Sqrt(nu/2) * gammaADivB((nu-1)/2, nu/2)
+	return n.Mu * math.Sqrt(nu/2) * gammaADivB((nu-1)/2, nu/2)
 }
 
 // Variance returns the variance of the noncentral t-distribution.
-func (dist NoncentralT) Variance() float64 {
-	nu := dist.Nu
+func (n NoncentralT) Variance() float64 {
+	nu := n.Nu
 	if nu <= 2 {
 		return math.NaN()
 	}
-	mean := dist.Mean()
-	return nu*(1+dist.Ncp*dist.Ncp)/(nu-2) - mean*mean
+	mean := n.Mean()
+	return nu*(1+n.Mu*n.Mu)/(nu-2) - mean*mean
 }
 
 // Prob returns the probability density function of the noncentral t-distribution.
-func (dist NoncentralT) Prob(x float64) float64 {
-	return math.Exp(dist.LogProb(x))
+func (n NoncentralT) Prob(x float64) float64 {
+	return math.Exp(n.LogProb(x))
 }
 
 // LogProb returns the log-probability density function of the noncentral t-distribution.
-func (dist NoncentralT) LogProb(x float64) float64 {
-	var epsilon = math.Nextafter(1, 2) - 1
+// This implementation is based on the third form described in
+// https://en.wikipedia.org/wiki/Noncentral_t-distribution#Probability_density_function
+func (n NoncentralT) LogProb(x float64) float64 {
+	const epsilon = 0x1p-52
 	ax := math.Abs(x)
-	if ax > math.Sqrt(dist.Nu*epsilon) {
-		a := NoncentralT{Nu: dist.Nu + 2, Ncp: dist.Ncp}.CDF(x * math.Sqrt(1+2/dist.Nu))
-		b := dist.CDF(x)
-		return math.Log(dist.Nu) - math.Log(ax) + math.Log(math.Abs(a-b))
+	if ax > math.Sqrt(n.Nu*epsilon) {
+		a := NoncentralT{Nu: n.Nu + 2, Mu: n.Mu}.CDF(x * math.Sqrt(1+2/n.Nu))
+		b := n.CDF(x)
+		return math.Log(n.Nu) - math.Log(ax) + math.Log(math.Abs(a-b))
 	} else {
-		return lgamma((dist.Nu+1)/2) - lgamma(dist.Nu/2) - 0.5*(math.Log(math.Pi)+math.Log(dist.Nu)+dist.Ncp*dist.Ncp)
+		return lgamma((n.Nu+1)/2) - lgamma(n.Nu/2) - 0.5*(logPi+math.Log(n.Nu)+n.Mu*n.Mu)
 	}
 }
 
 // CDF is the cumulative distribution function of the noncentral t-distribution.
 // This implementation is based on:
 // Russell Lenth, Cumulative Distribution Function of the Non-Central T Distribution, Algorithm AS 243.
-func (dist NoncentralT) CDF(t float64) float64 {
-	df, delta := dist.Nu, dist.Ncp
+func (n NoncentralT) CDF(t float64) float64 {
+	df, delta := n.Nu, n.Mu
 
 	const itrmax = 1000
 	const errmax = 1e-12
@@ -108,10 +110,10 @@ func (dist NoncentralT) CDF(t float64) float64 {
 	rxb := math.Pow(1-x, b)
 	albeta := math.Log(math.Sqrt(math.Pi)) + lgamma(b) - lgamma(0.5+b)
 	xodd := mathext.RegIncBeta(a, b, x)
-	godd := 2 * rxb * math.Exp(a*math.Log(x)-albeta)
+	godd := 2 * rxb * math.Exp(float64(a*math.Log(x))-albeta)
 	xeven := 1 - rxb
 	geven := b * x * rxb
-	tnc := p*xodd + q*xeven
+	tnc := float64(p*xodd) + float64(q*xeven)
 
 	// Repeat until convergence.
 	for en := 1; en <= itrmax; en++ {
@@ -121,9 +123,9 @@ func (dist NoncentralT) CDF(t float64) float64 {
 		godd *= x * (a + b - 1) / a
 		geven *= x * (a + b - 0.5) / (a + 0.5)
 		p *= lambda / (2 * float64(en))
-		q *= lambda / (2*float64(en) + 1)
+		q *= lambda / (float64(2*float64(en)) + 1)
 		s -= p
-		tnc += p*xodd + q*xeven
+		tnc += float64(p*xodd) + float64(q*xeven)
 		errbd := 2 * s * (xodd - godd)
 		if math.Abs(errbd) < errmax {
 			break
@@ -143,19 +145,19 @@ func (dist NoncentralT) CDF(t float64) float64 {
 }
 
 // Quantile is the quantile function.
-func (dist NoncentralT) Quantile(p float64) float64 {
-	if dist.Nu <= 0 {
+func (n NoncentralT) Quantile(p float64) float64 {
+	if n.Nu <= 0 {
 		return math.NaN()
 	}
 
-	f := func(x float64) float64 { return dist.CDF(x) - p }
+	f := func(x float64) float64 { return n.CDF(x) - p }
 
 	// Find a, b where f(a)f(b) < 0.
 	// Start the find by making a rough guess assuming a gaussian.
 	var guess float64 = 1
-	if dist.Nu > 3 {
-		sigma := math.Sqrt(dist.Variance())
-		guess = dist.Mean() + sigma*mathext.NormalQuantile(p)
+	if n.Nu > 3 {
+		sigma := math.Sqrt(n.Variance())
+		guess = n.Mean() + sigma*mathext.NormalQuantile(p)
 	}
 	a, b := findBracketMono(f, guess)
 
@@ -181,7 +183,7 @@ var (
 // See https://en.wikipedia.org/wiki/Brent%27s_method for more details.
 func brent(f func(float64) float64, a, b, tol float64) (float64, error) {
 	const itmax = 100
-	var eps = math.Nextafter(1, 2) - 1
+	const eps = 0x1p-52
 
 	var d, e, xm float64
 
@@ -273,7 +275,7 @@ func findBracketMono(f func(float64) float64, guess float64) (float64, float64) 
 	if (a > 0) == (fa < 0) {
 		r = 2
 	} else {
-		r = 1. / 2
+		r = 0.5
 	}
 
 	b := a * r

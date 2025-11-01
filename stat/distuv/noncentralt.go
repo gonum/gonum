@@ -59,17 +59,16 @@ func (n NoncentralT) Prob(x float64) float64 {
 
 // LogProb returns the log-probability density function of the noncentral t-distribution.
 // This implementation is based on the third form described in
-// https://en.wikipedia.org/wiki/Noncentral_t-distribution#Probability_density_function
+// https://en.wikipedia.org/w/index.php?title=Noncentral_t-distribution&oldid=1251317434#Probability_density_function
 func (n NoncentralT) LogProb(x float64) float64 {
 	const epsilon = 0x1p-52
 	ax := math.Abs(x)
+	a := NoncentralT{Nu: n.Nu + 2, Mu: n.Mu}.CDF(x * math.Sqrt(1+2/n.Nu))
+	b := n.CDF(x)
 	if ax > math.Sqrt(n.Nu*epsilon) {
-		a := NoncentralT{Nu: n.Nu + 2, Mu: n.Mu}.CDF(x * math.Sqrt(1+2/n.Nu))
-		b := n.CDF(x)
 		return math.Log(n.Nu) - math.Log(ax) + math.Log(math.Abs(a-b))
-	} else {
-		return lgamma((n.Nu+1)/2) - lgamma(n.Nu/2) - 0.5*(logPi+math.Log(n.Nu)+n.Mu*n.Mu)
 	}
+	return lgamma((n.Nu+1)/2) - lgamma(n.Nu/2) - 0.5*(logPi+math.Log(n.Nu)+n.Mu*n.Mu)
 }
 
 // CDF is the cumulative distribution function of the noncentral t-distribution.

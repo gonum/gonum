@@ -18,8 +18,7 @@ func BenchmarkLi2(b *testing.B) {
 		-1.1 + 0.1i, 5 + 0i, -10 + 0i, 1000 + 1e4i, -1791.91931 + 0.5i, // |z| > 1
 	}
 	for _, z := range cases {
-		name := fmt.Sprintf("z=(%.6g%+.6gi)", real(z), imag(z))
-		b.Run(name, func(b *testing.B) {
+		b.Run(fmt.Sprintf("z=%.6g", z), func(b *testing.B) {
 			b.ReportAllocs()
 			var r complex128
 			b.ResetTimer()

@@ -9,29 +9,19 @@ import (
 	"math/cmplx"
 )
 
-// Li2 returns the dilogarithm Li₂(z) on the principal branch.
+// Li2 returns the dilogarithm Li2(z) on the principal branch.
 //
-// For |z| < 1, Li₂ is defined by the power series
+// For |z| < 1, Li2(z) is defined by the power series
 //
-//	Li₂(z) = ∑_{k=1}^∞ z^k / k²
+//	Li2(z) = SUM_{k=1}^{infinity} z^k / k^2
 //
-// and is analytically continued to ℂ using reflection and inversion identities.
-// The implementation chooses among several mappings for fast and stable
-// evaluation: a real-axis fast path, reflection near z≈1, inversion for |z|>1,
-// and a Bernoulli-in-x expansion with x = −log(1−z) when |x| is small.
+// and is analytically continued to the rest of the complex plane.
+// The implementation uses reflection and inversion identities to map z into
+// a region where the series converges rapidly, then evaluates the series.
 //
-// Branch cut: Li₂ has a logarithmic branch point at z=1 with the standard cut
-// along (1, +∞) on the real axis. The principal value is taken with
-// Arg(z) ∈ (−π, π]. On the real line, for x>1 the principal imaginary part is
-// Im(Li₂(x)) = −π ln x.
-//
-// Special values:
-//
-//	Li₂(0)  = 0
-//	Li₂(1)  = π²/6
-//	Li₂(−1) = −π²/12
-//
-// This function uses the principal values of cmplx.Log in all identities.
+// Branch cut: Li2 has a logarithmic branch point at z=1 with the standard
+// cut on the real axis for z in the interval (1, infinity). The principal value is taken with
+// Arg(z) element of (−Pi, Pi].
 func Li2(z complex128) complex128 {
 	rz, iz := real(z), imag(z)
 
@@ -83,11 +73,8 @@ func Li2(z complex128) complex128 {
 	return -(li2SeriesXFromX(x)) - 0.5*l*l - complex(pi2over6, 0)
 }
 
-// li2Real computes the real part Re(Li₂(x)) for real x.
-//
-// Used internally by Li2’s real-axis fast path. Returns only the real part;
-// for x>1 the principal imaginary part −π·ln(x) is omitted by design.
 func li2Real(x float64) float64 {
+	// see arXiv:2201.01678 for the underlying approximation strategy.
 	switch {
 	case x < -1:
 		// Li2(x) = Li2(1/(1−x)) − π²/6 + ln(1−x)·(½ ln(1−x) − ln(−x))
@@ -127,8 +114,9 @@ func li2Real(x float64) float64 {
 	}
 }
 
-// Padé-like rational approximant for Re[Li2(x)] on x ∈ [0, 1/2].
 func li2ApproxHalf(x float64) float64 {
+	// Padé-like rational approximant for Re(Li2(x)) on x ∈ [0, 1/2],
+	// following arXiv:2201.01678.
 	cp := [...]float64{
 		0.9999999999999999502e+0,
 		-2.6883926818565423430e+0,
@@ -153,10 +141,9 @@ func li2ApproxHalf(x float64) float64 {
 	return x * (p / q)
 }
 
-// Finite Bernoulli-in-x series:
-// x = −log(1−z); valid & fast when |x| is small.
 func li2SeriesXFromX(x complex128) complex128 {
-	// Bernoulli(2n)/(2n+1)! for n=1..10
+	// Bernoulli-in-x expansion with x = −ln(1−z).
+	// Inspired by SPheno CLI2 implementation in Fortran90 (https://spheno.hepforge.org/)
 	const (
 		b0 = -1.0 / 4.0
 		b1 = 1.0 / 36.0

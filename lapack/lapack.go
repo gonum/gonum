@@ -226,7 +226,7 @@ const (
 type MaximizeNormXJob byte
 
 const (
-	LocalLookAhead       MaximizeNormXJob = 0 // Solve Z*x=h-f where h is a vector of ±1.
+	LocalLookAhead       MaximizeNormXJob = 1 // Solve Z*x=h-f where h is a vector of ±1.
 	NormalizedNullVector MaximizeNormXJob = 2 // Compute an approximate null-vector e of Z, normalize e and solve Z*x=±e-f.
 )
 

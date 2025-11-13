@@ -43,12 +43,15 @@ func YenKShortestPaths(g graph.Graph, k int, cost float64, s, t graph.Node) [][]
 	}
 	paths := [][]graph.Node{shortest}
 
+	// For Lawler's modification
+	// The index of the spur node in the previous shortest path
+	spurIndex := 0
 	var pot []yenShortest
 	var root []graph.Node
 	for i := int64(1); k < 0 || i < int64(k); i++ {
-		// The spur node ranges from the first node to the next
+		// The spur node ranges from the previous spur node to the next
 		// to last node in the previous k-shortest path.
-		for n := 0; n < len(paths[i-1])-1; n++ {
+		for n := spurIndex; n < len(paths[i-1])-1; n++ {
 			yk.reset()
 
 			spur := paths[i-1][n]
@@ -96,7 +99,7 @@ func YenKShortestPaths(g graph.Graph, k int, cost float64, s, t graph.Node) [][]
 				}
 			}
 			if isNewPot {
-				pot = append(pot, yenShortest{spath, weight})
+				pot = append(pot, yenShortest{spath, weight, n})
 			}
 		}
 
@@ -111,7 +114,16 @@ func YenKShortestPaths(g graph.Graph, k int, cost float64, s, t graph.Node) [][]
 		if len(best.path) <= 1 || best.weight > cost {
 			break
 		}
+		if neededPaths := k - int(i); k >= 0 && len(pot) >= neededPaths && best.weight == pot[neededPaths-1].weight {
+			// Terminate early if we have found k-i paths with the same minimum weight.
+			// All subsequent deviations will have the same or greater weight.
+			for j := 0; j < neededPaths; j++ {
+				paths = append(paths, pot[j].path)
+			}
+			break
+		}
 		paths = append(paths, best.path)
+		spurIndex = best.spurIndex
 		pot = pot[1:]
 	}
 
@@ -131,10 +143,11 @@ func isSamePath(a, b []graph.Node) bool {
 	return true
 }
 
-// yenShortest holds a path and its weight for sorting.
+// yenShortest holds a path, its spurIndex and its weight for sorting.
 type yenShortest struct {
-	path   []graph.Node
-	weight float64
+	path      []graph.Node
+	weight    float64
+	spurIndex int
 }
 
 // yenKSPAdjuster allows walked edges to be omitted from a graph

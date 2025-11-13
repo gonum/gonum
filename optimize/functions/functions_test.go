@@ -252,6 +252,28 @@ func TestPowelBadlyScaled(t *testing.T) {
 	testFunction(PowellBadlyScaled{}, tests, t)
 }
 
+func TestSphere(t *testing.T) {
+	t.Parallel()
+	tests := []funcTest{
+		{
+			X:        []float64{0.5, 0.5, 0.5},
+			F:        0.75,
+			Gradient: []float64{1, 1, 1},
+		},
+		{
+			X:        []float64{0.25, 0.25, 0.25, 0.25, 0.25},
+			F:        0.3125,
+			Gradient: []float64{0.5, 0.5, 0.5, 0.5, 0.5},
+		},
+		{
+			X:        []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+			F:        385,
+			Gradient: []float64{2, 4, 6, 8, 10, 12, 14, 16, 18, 20},
+		},
+	}
+	testFunction(Sphere{}, tests, t)
+}
+
 func TestTrigonometric(t *testing.T) {
 	t.Parallel()
 	tests := []funcTest{

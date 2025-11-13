@@ -1326,6 +1326,54 @@ func (PowellBadlyScaled) Minima() []Minimum {
 	}
 }
 
+// Sphere implements the sphere optimization function. It is continuous, convex, and
+// unimodal. The global minimum is always at f(x)=0 at x=(0,...,0).
+//
+// Standard starting point:
+//
+//	Any point away from the minimum
+//
+// References:
+//   - https://www.sfu.ca/~ssurjano/spheref.html
+type Sphere struct{}
+
+func (Sphere) Func(x []float64) (sum float64) {
+	for _, v := range x {
+		sum += float64(v*v)
+	}
+	return sum
+}
+
+func (Sphere) Grad(grad, x []float64) {
+	if len(x) != len(grad) {
+		panic("incorrect size of the gradient")
+	}
+
+	for i, v := range x {
+		grad[i] = 2 * v
+	}
+}
+
+func (Sphere) Minima() []Minimum {
+	return []Minimum{
+		{
+			X:      []float64{0},
+			F:      0,
+			Global: true,
+		},
+		{
+			X:      []float64{0, 0, 0, 0, 0},
+			F:      0,
+			Global: true,
+		},
+		{
+			X:      []float64{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			F:      0,
+			Global: true,
+		},
+	}
+}
+
 // Trigonometric implements the trigonometric function.
 //
 // Standard starting point:

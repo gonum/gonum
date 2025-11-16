@@ -167,6 +167,4 @@ func li2SeriesXFromX(x complex128) complex128 {
 					x4*x4*(complex(b6, 0)+x2*complex(b7, 0)+x4*(complex(b8, 0)+x2*complex(b9, 0))))))
 }
 
-const (
-	pi2over6 = math.Pi * math.Pi / 6
-)
+const pi2over6 = math.Pi * math.Pi / 6

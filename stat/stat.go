@@ -24,6 +24,8 @@ const (
 	Empirical CumulantKind = 1
 	// LinInterp linearly interpolates the empirical distribution between sample values, with a flat extrapolation.
 	LinInterp CumulantKind = 4
+	// Linear applies a linear transformation to the empirical distribution.
+	Linear CumulantKind = 7
 )
 
 // WassersteinDistance computes the Wasserstein distance (Earth Mover's Distance)
@@ -1378,6 +1380,8 @@ func Quantile(p float64, c CumulantKind, x, weights []float64) float64 {
 		return empiricalQuantile(p, x, weights, sumWeights)
 	case LinInterp:
 		return linInterpQuantile(p, x, weights, sumWeights)
+	case Linear:
+		return linearQuantile(p, x, weights, sumWeights)
 	default:
 		panic("stat: bad cumulant kind")
 	}
@@ -1417,6 +1421,50 @@ func linInterpQuantile(p float64, x, weights []float64, sumWeights float64) floa
 				t /= weights[i]
 			}
 			return t*x[i-1] + (1-t)*x[i]
+		}
+	}
+	panic("impossible")
+}
+
+func linearQuantile(p float64, x, weights []float64, sumWeights float64) float64 {
+	n := len(x)
+
+	// Unweighted: Hyndman & Fan Type 7 (R default).
+	if weights == nil {
+		if p <= 0 {
+			return x[0]
+		}
+		if p >= 1 {
+			return x[n-1]
+		}
+		h, frac := math.Modf(1 + float64(p*float64(n-1)))
+		i := int(h) - 1
+		if frac == 0 {
+			return x[i]
+		}
+		return float64((1-frac)*x[i]) + float64(frac*x[i+1])
+	}
+
+	// Weighted: linear interpolation over the weighted ECDF.
+	// On exact boundaries, return the current x[i] (no averaging).
+	fidx := p * sumWeights
+	var cumsum float64
+	for i := range x {
+		w := weights[i]
+		prev := cumsum
+		cumsum += w
+		if cumsum >= fidx {
+			if i == 0 {
+				return x[0]
+			}
+			alpha := (fidx - prev) / w // in [0,1]
+			if alpha <= 0 {
+				return x[i-1]
+			}
+			if alpha >= 1 {
+				return x[i]
+			}
+			return float64((1-alpha)*x[i-1]) + float64(alpha*x[i])
 		}
 	}
 	panic("impossible")

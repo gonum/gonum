@@ -32,6 +32,11 @@ func TestDgebal(t *testing.T) {
 	testlapack.DgebalTest(t, impl)
 }
 
+func TestDggbal(t *testing.T) {
+	t.Parallel()
+	testlapack.DggbalTest(t, impl)
+}
+
 func TestDgebd2(t *testing.T) {
 	t.Parallel()
 	testlapack.Dgebd2Test(t, impl)

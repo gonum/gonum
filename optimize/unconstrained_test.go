@@ -1055,6 +1055,15 @@ func TestGradientDescentBacktracking(t *testing.T) {
 	t.Parallel()
 	testLocal(t, gradientDescentTests, &GradientDescent{
 		Linesearcher: &Backtracking{
+			DecreaseFactor: 0.1,
+		},
+	})
+}
+
+func TestGradientDescentBacktrackingWithMinimumStepSize(t *testing.T) {
+	t.Parallel()
+	testLocal(t, gradientDescentTests, &GradientDescent{
+		Linesearcher: &Backtracking{
 			DecreaseFactor:  0.1,
 			MinimumStepSize: 2e-8,
 		},

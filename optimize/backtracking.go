@@ -60,8 +60,8 @@ func (b *Backtracking) Init(f, g float64, step float64) Operation {
 	if b.DecreaseFactor <= 0 || b.DecreaseFactor >= 1 {
 		panic("backtracking: DecreaseFactor must be between 0 and 1")
 	}
-	if b.MinimumStepSize <= 0 {
-		panic("backtracking: MinimumStepSize must be strictly positive")
+	if b.MinimumStepSize < 0 {
+		panic("backtracking: MinimumStepSize must be positive")
 	}
 
 	b.stepSize = step

@@ -28,6 +28,7 @@ var _ Linesearcher = (*Backtracking)(nil)
 type Backtracking struct {
 	DecreaseFactor    float64 // Constant factor in the sufficient decrease (Armijo) condition.
 	ContractionFactor float64 // Step size multiplier at each iteration (step *= ContractionFactor).
+	MinimumStepSize   float64 // Smallest allowed step size; line search fails if step shrinks below this value.
 
 	stepSize float64
 	initF    float64
@@ -50,11 +51,17 @@ func (b *Backtracking) Init(f, g float64, step float64) Operation {
 	if b.DecreaseFactor == 0 {
 		b.DecreaseFactor = defaultBacktrackingDecrease
 	}
+	if b.MinimumStepSize == 0 {
+		b.MinimumStepSize = minimumBacktrackingStepSize
+	}
 	if b.ContractionFactor <= 0 || b.ContractionFactor >= 1 {
 		panic("backtracking: ContractionFactor must be between 0 and 1")
 	}
 	if b.DecreaseFactor <= 0 || b.DecreaseFactor >= 1 {
 		panic("backtracking: DecreaseFactor must be between 0 and 1")
+	}
+	if b.MinimumStepSize <= 0 {
+		panic("backtracking: MinimumStepSize must be strictly positive")
 	}
 
 	b.stepSize = step
@@ -75,7 +82,7 @@ func (b *Backtracking) Iterate(f, _ float64) (Operation, float64, error) {
 		return b.lastOp, b.stepSize, nil
 	}
 	b.stepSize *= b.ContractionFactor
-	if b.stepSize < minimumBacktrackingStepSize {
+	if b.stepSize < b.MinimumStepSize {
 		b.lastOp = NoOperation
 		return b.lastOp, b.stepSize, ErrLinesearcherFailure
 	}

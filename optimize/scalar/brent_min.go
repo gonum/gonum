@@ -46,7 +46,7 @@ type Settings struct {
 	Tol float64
 
 	// MaxIterations is the maximum number of iterations allowed.
-	// If MaxIterations <= 0, a default safety limit (e.g., 100) is used.
+	// If MaxIterations <= 0, a default safety limit of 100 is used.
 	MaxIterations int
 }
 

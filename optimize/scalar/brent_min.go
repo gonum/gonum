@@ -66,7 +66,7 @@ type Result struct {
 // Reference: Brent, Richard P. Algorithms for minimization without derivatives. Courier Corporation, 2013.
 func BrentMin(f func(float64) float64, min, max float64, settings *Settings) (Result, error) {
 	// Machine epsilon for float64 (approx 2.22e-16)
-	const epsilon = 1.0 / (1 << 52)
+	const epsilon = 0x1p-52
 	// c is the squared inverse of the golden ratio: (3 - sqrt(5))/2
 	const c = 0.3819660112501051517954131656343618822796908201942371
 

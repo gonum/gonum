@@ -68,7 +68,7 @@ func TestBrentMin(t *testing.T) {
 			distTol:    1e-9, // Expect higher precision
 		},
 		{
-			name: "Iteration Limit Check",
+			name: "iteration_limit_check",
 			f: func(x float64) float64 {
 				return (x-2)*(x-2) + 1
 			},

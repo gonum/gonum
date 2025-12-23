@@ -93,7 +93,6 @@ func TestBrentMin(t *testing.T) {
 				t.Errorf("status mismatch: got %v, want %v", res.Status, tc.wantStatus)
 			}
 
-			// Check value precision for converged cases
 			if tc.wantStatus == Converged {
 				dist := math.Abs(res.X - tc.wantX)
 				if dist > tc.distTol {

@@ -89,7 +89,6 @@ func TestBrentMin(t *testing.T) {
 				t.Fatalf("unexpected error: %v", err)
 			}
 
-			// Check status
 			if res.Status != tc.wantStatus {
 				t.Errorf("status mismatch: got %v, want %v", res.Status, tc.wantStatus)
 			}

@@ -20,7 +20,7 @@ func TestBrentMin(t *testing.T) {
 		distTol    float64 // Tolerance for the distance from wantX
 	}{
 		{
-			name: "Parabola: (x-2)^2 + 1",
+			name: "parabola",
 			f: func(x float64) float64 {
 				return (x-2)*(x-2) + 1
 			},

@@ -102,11 +102,7 @@ func BrentMin(f func(float64) float64, min, max float64, settings *Settings) (Re
 	fw := fx
 	fv := fx
 
-	iterations := 0
-
-	// Main loop
-	for {
-		iterations++
+	for i:= 1; ; i++ {
 
 		// Check iteration limit
 		if iterations > maxIter {

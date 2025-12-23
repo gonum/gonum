@@ -63,7 +63,7 @@ func TestBrentMin(t *testing.T) {
 			min:        0,
 			max:        5,
 			settings:   &Settings{Tol: 1e-10}, // Stricter tolerance
-			wantX:      2.0,
+			wantX:      2,
 			wantStatus: Converged,
 			distTol:    1e-9, // Expect higher precision
 		},

@@ -93,8 +93,10 @@ func BrentMin(f func(float64) float64, min, max float64, settings *Settings) (Re
 	x := a + c*(b-a)
 	w := x
 	v := x
-	e := 0.0 // step size of the step before last
-	d := 0.0 // step size of the last step
+	var (
+		e float64 // step size of the step before last
+		d float64 // step size of the last step
+	)
 
 	fx := f(x)
 	fw := fx

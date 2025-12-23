@@ -76,7 +76,7 @@ func TestBrentMin(t *testing.T) {
 			max: 5,
 			// Set a very low iteration limit to ensure it stops early
 			settings:   &Settings{MaxIterations: 2},
-			wantX:      2.0,            // Ignored in check
+			wantX:      2,            // Ignored in check
 			wantStatus: IterationLimit, // Should hit limit
 			distTol:    10.0,           // Ignored in check
 		},

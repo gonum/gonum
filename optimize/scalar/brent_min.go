@@ -65,13 +65,15 @@ type Result struct {
 // See: http://www.netlib.org/opt/fmin.f
 // Reference: Brent, Richard P. Algorithms for minimization without derivatives. Courier Corporation, 2013.
 func BrentMin(f func(float64) float64, min, max float64, settings *Settings) (Result, error) {
-	// Machine epsilon for float64: 2**-52
-	const epsilon = 0x1p-52
-	// Sqrt of machine epsilon: 2**-26
-	const sqrtEpsilon = 0x1p-26
+	const (
+		// Machine epsilon for float64: 2**-52
+		epsilon = 0x1p-52
+		// Sqrt of machine epsilon: 2**-26
+		sqrtEpsilon = 0x1p-26
 
-	// c is the squared inverse of the golden ratio: (3 - sqrt(5))/2
-	const c = 0.3819660112501051517954131656343618822796908201942371
+		// c is the squared inverse of the golden ratio: (3 - sqrt(5))/2
+		c = 0.3819660112501051517954131656343618822796908201942371
+	)
 
 	// Default settings
 	tol := sqrtEpsilon

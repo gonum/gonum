@@ -141,7 +141,7 @@ func BrentMin(f func(float64) float64, min, max float64, settings *Settings) (Re
 			e = d
 
 			// Check acceptability of the parabolic fit
-			if math.Abs(p) >= math.Abs(0.5*q*etemp) || p <= q*(a-x) || p >= q*(b-x) {
+			if math.Abs(p) >= math.Abs(q*etemp/2) || p <= q*(a-x) || p >= q*(b-x) {
 				// Parabolic interpolation step rejected, use golden-section
 				if x >= xm {
 					e = a - x

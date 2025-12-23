@@ -82,7 +82,7 @@ func TestBrentMin(t *testing.T) {
 		},
 	}
 
-	for _, tc := range tests {
+	for _, test := range brentMinTests {
 		t.Run(tc.name, func(t *testing.T) {
 			res, err := BrentMin(tc.f, tc.min, tc.max, tc.settings)
 			if err != nil {

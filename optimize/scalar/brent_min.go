@@ -9,6 +9,8 @@ import (
 )
 
 // Status represents the status of the optimization.
+//
+//go:generate go tool golang.org/x/tools/cmd/stringer -type Status
 type Status int
 
 const (
@@ -21,21 +23,6 @@ const (
 	// Failure indicates that the optimization failed.
 	Failure
 )
-
-func (s Status) String() string {
-	switch s {
-	case NotTerminated:
-		return "NotTerminated"
-	case Converged:
-		return "Converged"
-	case IterationLimit:
-		return "IterationLimit"
-	case Failure:
-		return "Failure"
-	default:
-		return "Unknown"
-	}
-}
 
 // Settings allows fine-grained control over the optimization process.
 type Settings struct {
@@ -102,13 +89,13 @@ func BrentMin(f func(float64) float64, min, max float64, settings *Settings) (Re
 	fw := fx
 	fv := fx
 
-	for i:= 1; ; i++ {
+	for i := 1; ; i++ {
 
-		if iterations > maxIter {
+		if i > maxIter {
 			return Result{
 				X:          x,
 				F:          fx,
-				Iterations: iterations,
+				Iterations: i,
 				Status:     IterationLimit,
 			}, nil
 		}
@@ -122,7 +109,7 @@ func BrentMin(f func(float64) float64, min, max float64, settings *Settings) (Re
 			return Result{
 				X:          x,
 				F:          fx,
-				Iterations: iterations,
+				Iterations: i,
 				Status:     Converged,
 			}, nil
 		}

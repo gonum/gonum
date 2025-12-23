@@ -113,9 +113,9 @@ func BrentMin(f func(float64) float64, min, max float64, settings *Settings) (Re
 			}, nil
 		}
 
-		xm := 0.5 * (a + b)
-		tol1 := epsilon*math.Abs(x) + tol/3.0
-		tol2 := 2.0 * tol1
+		xm := (a + b) / 2
+		tol1 := epsilon*math.Abs(x) + tol/3
+		tol2 := 2 * tol1
 
 		// Check stopping criterion
 		if math.Abs(x-xm) <= (tol2 - 0.5*(b-a)) {

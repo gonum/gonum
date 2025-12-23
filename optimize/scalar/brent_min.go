@@ -132,7 +132,7 @@ func BrentMin(f func(float64) float64, min, max float64, settings *Settings) (Re
 			r := (x - w) * (fx - fv)
 			q := (x - v) * (fx - fw)
 			p := (x-v)*q - (x-w)*r
-			q = 2.0 * (q - r)
+			q = 2 * (q - r)
 			if q > 0 {
 				p = -p
 			}

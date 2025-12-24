@@ -9,7 +9,6 @@ import (
 	"testing"
 )
 
-// brentMinTests is hoisted to a package variable as suggested by the reviewer.
 var brentMinTests = []struct {
 	name       string
 	f          func(float64) float64

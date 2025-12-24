@@ -90,7 +90,6 @@ func BrentMin(f func(float64) float64, min, max float64, settings *Settings) (Re
 	fv := fx
 
 	for i := 1; ; i++ {
-
 		if i > maxIter {
 			return Result{
 				X:          x,

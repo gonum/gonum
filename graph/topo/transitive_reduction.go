@@ -24,7 +24,7 @@ func TransitiveReduce(g GraphReducer) error {
 
 		// Snapshot successors of u to avoid iterator invalidation
 		// while removing edges out of uid.
-		succ := succIDs(g.From(uid))
+		succ := successorIDs(g.From(uid))
 
 		for _, vid := range succ {
 			v := g.Node(vid)
@@ -47,7 +47,7 @@ func TransitiveReduce(g GraphReducer) error {
 	return nil
 }
 
-func succIDs(it graph.Nodes) []int64 {
+func successorIDs(it graph.Nodes) []int64 {
 	var ids []int64
 	for it.Next() {
 		ids = append(ids, it.Node().ID())
@@ -61,76 +61,108 @@ func TransitiveReduce2(g GraphReducer) error {
 	if _, err := Sort(g); err != nil {
 		return errors.New("topo: transitive reduction requires a DAG")
 	}
+	// From node IDs build mapping to dense indices
+	ids, id2idx := indexNodes(g)
+	n := len(ids)
+	if n == 0 {
+		return nil
+	}
+
+	// Use generation/epoch trick for allocation-free, copy-free resetting of DFS
+	seen := make([]uint32, n)
+	visited := make([]uint32, n)
+	var seenGen uint32
+	var visitedGen uint32
+
+	// Reusable data-structures
+	dfsStack := make([]int64, 0, 64)
+	reached := make([]int64, 0, 64)
+
 	uit := g.Nodes()
 	for uit.Next() {
 		uid := uit.Node().ID()
+		_, ok := id2idx[uid]
+		if !ok {
+			continue
+		}
+		// Snapshot successors of uid (as IDs).
+		successors := successorIDs(g.From(uid))
 
-		// Snapshot successors of uid; we will remove edges out of uid.
-		succ := succIDs(g.From(uid))
+		seenGen++
 
-		// Nodes reachable from any already-processed successor of uid.
-		seen := make(map[int64]struct{}, len(succ))
-
-		for _, vid := range succ {
-			// If vid is already reachable through another successor, edge uid->vid is redundant.
-			if _, ok := seen[vid]; ok {
+		for _, vid := range successors {
+			// If vid already covered via another successor, uid->vid is redundant.
+			if vIdx, ok := id2idx[vid]; ok && seen[vIdx] == seenGen {
 				if g.HasEdgeFromTo(uid, vid) {
 					g.RemoveEdge(uid, vid)
 				}
 			}
+			// Pruned DFS from vid:
+			// - report reached nodes even if already in seen
+			// - but do not descend into nodes already in seen
+			visitedGen++
+			dfsStack = dfsStack[:0]
+			reached = reached[:0]
 
-			// Walk from vid, pruning subgraphs already covered by prior successors.
-			newly := prunedDFS(g, vid, seen)
+			// Start node to check the successors-of-successors of u via DFS
+			vIdx, ok := id2idx[vid]
+			if !ok {
+				continue
+			}
+			visited[vIdx] = visitedGen
+			dfsStack = append(dfsStack, vid)
 
-			for _, xid := range newly {
+			for len(dfsStack) > 0 {
+				cid := dfsStack[len(dfsStack)-1]
+				dfsStack = dfsStack[:len(dfsStack)-1]
+
+				it := g.From(cid)
+				for it.Next() {
+					nid := it.Node().ID()
+					nIdx, ok := id2idx[nid]
+					if !ok {
+						continue
+					}
+					if visited[nIdx] == visitedGen {
+						continue
+					}
+					visited[nIdx] = visitedGen
+
+					reached = append(reached, nid)
+
+					// If already covered by prior successors of uid, prune descendants --> prune DFS
+					if seen[nIdx] == seenGen {
+						continue
+					}
+					dfsStack = append(dfsStack, nid)
+				}
+			}
+
+			// Remove redundant uid->x edges (if existing) that have been already reached via successor v.
+			for _, xid := range reached {
 				if g.HasEdgeFromTo(uid, xid) {
 					g.RemoveEdge(uid, xid)
 				}
-				seen[xid] = struct{}{}
+				if xIdx, ok := id2idx[xid]; ok {
+					seen[xIdx] = seenGen
+				}
 			}
 
 			// Mark vid itself as covered (reachable directly from uid).
-			seen[vid] = struct{}{}
+			seen[vIdx] = seenGen
 		}
 	}
 	return nil
 }
 
-// prunedDFS walks nodes reachable from start. It does not descend into nodes already
-// present in seen, but it still reports them as reached.
-// It returns all nodes first reached by this walk (excluding start).
-func prunedDFS(g graph.Directed, start int64, seen map[int64]struct{}) []int64 {
-	var reached []int64
-
-	localVisited := make(map[int64]struct{}, len(seen)+1)
-	stack := []int64{start}
-	localVisited[start] = struct{}{}
-
-	for len(stack) > 0 {
-		n := stack[len(stack)-1]
-		stack = stack[:len(stack)-1]
-
-		from := g.From(n)
-		for from.Next() {
-			x := from.Node().ID()
-
-			// If we already visited x in this walk, skip.
-			if _, ok := localVisited[x]; ok {
-				continue
-			}
-			localVisited[x] = struct{}{}
-
-			// Report x as reached (even if x is already in seen).
-			reached = append(reached, x)
-
-			// If x is already covered by prior successors, prune its descendants.
-			if _, ok := seen[x]; ok {
-				continue
-			}
-
-			// Otherwise, explore further.
-			stack = append(stack, x)
-		}
+func indexNodes(g graph.Graph) (ids []int64, id2idx map[int64]int) {
+	it := g.Nodes()
+	ids = make([]int64, 0, it.Len())
+	id2idx = make(map[int64]int, it.Len())
+	for it.Next() {
+		id := it.Node().ID()
+		id2idx[id] = len(ids)
+		ids = append(ids, id)
 	}
-	return reached
+	return ids, id2idx
 }

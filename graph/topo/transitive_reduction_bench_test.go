@@ -38,12 +38,12 @@ func BenchmarkTransitiveReduce(b *testing.B) {
 
 	sizes := []int{50, 250, 500}
 	densities := []float64{0.02, 0.10, 0.30}
-	seed := int64(1)
+	seed := uint64(1)
 
 	for _, n := range sizes {
 		for _, p := range densities {
 			name := fmt.Sprintf("TransitiveReduction/RandomDAG/n=%d/p=%d%%", n, int(p*100+0.5))
-			edges := makeRandomDAGEdges(n, p, seed+int64(n*1000)+int64(p*100))
+			edges := makeRandomDAGEdges(n, p, seed+uint64(n*1000)+uint64(p*100))
 			b.Run(name, func(b *testing.B) { run(b, n, edges) })
 		}
 	}
@@ -59,8 +59,8 @@ func BenchmarkTransitiveReduce(b *testing.B) {
 
 // makeRandomDAGEdges creates a DAG by only adding edges from i->j where i<j with probability p.
 // Deterministic due to seed.
-func makeRandomDAGEdges(n int, p float64, seed int64) []edge {
-	rng := rand.New(rand.NewSource(seed))
+func makeRandomDAGEdges(n int, p float64, seed uint64) []edge {
+	rng := rand.New(rand.NewPCG(seed, seed^0x9e3779b97f4a7c15))
 	edges := make([]edge, 0, int(float64(n*n)*p/2))
 
 	for i := 0; i < n; i++ {

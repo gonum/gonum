@@ -1,85 +1,57 @@
+// Copyright ©2026 The Gonum Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package topo
 
 import (
 	"fmt"
-	"math/rand"
+	"math/rand/v2"
 	"testing"
 
 	"gonum.org/v1/gonum/graph/simple"
 )
 
-func BenchmarkTransitiveReduce(b *testing.B) {
-	benchReducers(b, "TransitiveReduction1", TransitiveReduce)
-}
-
-func BenchmarkTransitiveReduce2(b *testing.B) {
-	benchReducers(b, "TransitiveReduction2", TransitiveReduce2)
-}
-
-type reducerFn func(g GraphReducer) error
-
-func benchReducers(b *testing.B, label string, fn reducerFn) {
-	sizes := []int{50, 250, 500}
-	densities := []float64{0.02, 0.10, 0.30} // sparse -> dense-ish
-
-	seed := int64(1)
-
-	// 1) Random DAGs at multiple densities
-	for _, n := range sizes {
-		for _, p := range densities {
-			name := fmt.Sprintf("%s/RandomDAG/n=%d/p=%d%%", label, n, int(p*100+0.5))
-			edges := makeRandomDAGEdges(n, p, seed+int64(n*1000)+int64(p*100))
-
-			b.Run(name, func(b *testing.B) {
-				runReduceBenchmark(b, n, edges, fn)
-			})
-		}
-	}
-
-	// 2) Worst-case-ish: complete DAG (edges i->j for all i<j).
-	// Reduction should shrink it to just the chain edges (i->i+1).
-	for _, n := range []int{50, 100, 200} {
-		name := fmt.Sprintf("%s/CompleteDAG/n=%d", label, n)
-		edges := makeCompleteDAGEdges(n)
-
-		b.Run(name, func(b *testing.B) {
-			runReduceBenchmark(b, n, edges, fn)
-		})
-	}
-}
-
-// ---- Core runner ----
-
 type edge struct{ from, to int64 }
 
-// runReduceBenchmark builds a fresh graph per iteration from a fixed edge list, then runs fn(g).
-// Graph construction is done outside the timed section (best-effort), so you primarily measure reduction cost.
-func runReduceBenchmark(b *testing.B, n int, edges []edge, fn reducerFn) {
-	b.ReportAllocs()
+func BenchmarkTransitiveReduce(b *testing.B) {
 
-	// Pre-create nodes once; we’ll reuse IDs when constructing graphs.
-	nodeIDs := make([]int64, n)
-	for i := 0; i < n; i++ {
-		nodeIDs[i] = int64(i)
+	run := func(b *testing.B, n int, edges []edge) {
+		b.ReportAllocs()
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			b.StopTimer()
+			g := simple.NewDirectedGraph()
+			for id := 0; id < n; id++ {
+				g.AddNode(simple.Node(int64(id)))
+			}
+			for _, e := range edges {
+				g.SetEdge(g.NewEdge(simple.Node(e.from), simple.Node(e.to)))
+			}
+			b.StartTimer()
+
+			if err := TransitiveReduce(g); err != nil {
+				b.Fatalf("reduction error: %v", err)
+			}
+		}
 	}
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		// Build graph outside timer.
-		b.StopTimer()
-		g := simple.NewDirectedGraph()
+	sizes := []int{50, 250, 500}
+	densities := []float64{0.02, 0.10, 0.30}
+	seed := int64(1)
 
-		for _, id := range nodeIDs {
-			g.AddNode(simple.Node(id))
+	for _, n := range sizes {
+		for _, p := range densities {
+			name := fmt.Sprintf("TransitiveReduction/RandomDAG/n=%d/p=%d%%", n, int(p*100+0.5))
+			edges := makeRandomDAGEdges(n, p, seed+int64(n*1000)+int64(p*100))
+			b.Run(name, func(b *testing.B) { run(b, n, edges) })
 		}
-		for _, e := range edges {
-			g.SetEdge(g.NewEdge(simple.Node(e.from), simple.Node(e.to)))
-		}
-		b.StartTimer()
+	}
 
-		if err := fn(g); err != nil {
-			b.Fatalf("reduction error: %v", err)
-		}
+	for _, n := range []int{50, 100, 200} {
+		name := fmt.Sprintf("TransitiveReduction/CompleteDAG/n=%d", n)
+		edges := makeCompleteDAGEdges(n)
+		b.Run(name, func(b *testing.B) { run(b, n, edges) })
 	}
 }
 

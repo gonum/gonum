@@ -6,22 +6,22 @@ package topo
 
 import (
 	"errors"
+	"slices"
 
 	"gonum.org/v1/gonum/graph"
 )
 
-type GraphReducer interface {
+type DirectedGraphReducer interface {
 	graph.Directed
 	graph.EdgeRemover
 }
 
 // TransitiveReduce removes redundant edges from g while preserving reachability.
 // g must be a DAG; otherwise TransitiveReduce returns an error.
-func TransitiveReduce(g GraphReducer) error {
-	if _, err := Sort(g); err != nil {
-		return errors.New("topo: transitive reduction requires a DAG")
-	}
-	// Map node IDs to dense indices.
+func TransitiveReduce(g DirectedGraphReducer) error {
+	if slices.ContainsFunc(TarjanSCC(g), func(scc []graph.Node) bool { return len(scc) != 1 }) {
+		return errors.New("topo: graph is not directed acyclic")
+	} // Map node IDs to dense indices.
 	ids, id2idx := indexNodes(g)
 	n := len(ids)
 	if n == 0 {
@@ -31,7 +31,8 @@ func TransitiveReduce(g GraphReducer) error {
 	// Generation counters avoid clearing DFS state.
 	seen := make([]uint32, n)
 	visited := make([]uint32, n)
-	var seenGen, visitedGen uint32
+	var seenGen uint32
+	var visitedGen uint32
 
 	// Reusable buffers.
 	dfsStack := make([]int64, 0, 64)

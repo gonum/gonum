@@ -12,11 +12,8 @@ import (
 	"gonum.org/v1/gonum/graph/simple"
 )
 
-type edge struct{ from, to int64 }
-
 func BenchmarkTransitiveReduce(b *testing.B) {
-
-	run := func(b *testing.B, n int, edges []edge) {
+	run := func(b *testing.B, n int, edges []simple.Edge) {
 		b.ReportAllocs()
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
@@ -26,7 +23,7 @@ func BenchmarkTransitiveReduce(b *testing.B) {
 				g.AddNode(simple.Node(int64(id)))
 			}
 			for _, e := range edges {
-				g.SetEdge(g.NewEdge(simple.Node(e.from), simple.Node(e.to)))
+				g.SetEdge(g.NewEdge(e.F, e.T))
 			}
 			b.StartTimer()
 
@@ -55,18 +52,18 @@ func BenchmarkTransitiveReduce(b *testing.B) {
 	}
 }
 
-// ---- Graph families ----
-
 // makeRandomDAGEdges creates a DAG by only adding edges from i->j where i<j with probability p.
 // Deterministic due to seed.
-func makeRandomDAGEdges(n int, p float64, seed uint64) []edge {
+func makeRandomDAGEdges(n int, p float64, seed uint64) []simple.Edge {
+	// Mix two seed values for PCG; the XOR uses the 64-bit golden-ratio constant
+	// commonly used for bit-mixing to decorrelate nearby seeds.
 	rng := rand.New(rand.NewPCG(seed, seed^0x9e3779b97f4a7c15))
-	edges := make([]edge, 0, int(float64(n*n)*p/2))
+	edges := make([]simple.Edge, 0, int(float64(n*n)*p/2))
 
 	for i := 0; i < n; i++ {
 		for j := i + 1; j < n; j++ {
 			if rng.Float64() < p {
-				edges = append(edges, edge{from: int64(i), to: int64(j)})
+				edges = append(edges, simple.Edge{F: simple.Node(int64(i)), T: simple.Node(int64(j))})
 			}
 		}
 	}
@@ -75,11 +72,11 @@ func makeRandomDAGEdges(n int, p float64, seed uint64) []edge {
 
 // makeCompleteDAGEdges returns all edges i->j for i<j.
 // This is dense and produces many redundant edges.
-func makeCompleteDAGEdges(n int) []edge {
-	edges := make([]edge, 0, n*(n-1)/2)
+func makeCompleteDAGEdges(n int) []simple.Edge {
+	edges := make([]simple.Edge, 0, n*(n-1)/2)
 	for i := 0; i < n; i++ {
 		for j := i + 1; j < n; j++ {
-			edges = append(edges, edge{from: int64(i), to: int64(j)})
+			edges = append(edges, simple.Edge{F: simple.Node(int64(i)), T: simple.Node(int64(j))})
 		}
 	}
 	return edges

@@ -28,11 +28,14 @@ func TransitiveReduce(g DirectedGraphReducer) error {
 		return nil
 	}
 
-	// Generation counters avoid clearing DFS state.
+	// We use a dense index for nodes (via indexNodes) so we can keep per-node state
+	// in flat slices rather than maps.
+	// The seen/visited slices use "generation counters" to avoid O(n) clearing between
+	// DFS runs: entries equal to the current generation are considered set, and we
+	// increment the generation to logically reset the slice.
 	seen := make([]uint32, n)
 	visited := make([]uint32, n)
-	var seenGen uint32
-	var visitedGen uint32
+	var seenGen, visitedGen uint32
 
 	// Reusable buffers.
 	dfsStack := make([]int64, 0, 64)

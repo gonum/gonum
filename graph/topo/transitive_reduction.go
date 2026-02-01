@@ -22,7 +22,7 @@ func TransitiveReduce(g DirectedGraphReducer) error {
 	if slices.ContainsFunc(TarjanSCC(g), func(scc []graph.Node) bool { return len(scc) != 1 }) {
 		return errors.New("topo: graph is not directed acyclic")
 	} // Map node IDs to dense indices.
-	ids, id2idx := indexNodes(g)
+	ids, indexOf := indexNodes(g)
 	n := len(ids)
 	if n == 0 {
 		return nil
@@ -41,18 +41,18 @@ func TransitiveReduce(g DirectedGraphReducer) error {
 	uit := g.Nodes()
 	for uit.Next() {
 		uid := uit.Node().ID()
-		_, ok := id2idx[uid]
+		_, ok := indexOf[uid]
 		if !ok {
 			continue
 		}
 		// Snapshot successors of uid (as IDs).
-		successors := successorIDs(g.From(uid))
+		successors := idsFrom(g.From(uid))
 
 		seenGen++
 
 		for _, vid := range successors {
 			// If vid already covered via another successor, uid->vid is redundant.
-			if vIdx, ok := id2idx[vid]; ok && seen[vIdx] == seenGen {
+			if vIdx, ok := indexOf[vid]; ok && seen[vIdx] == seenGen {
 				if g.HasEdgeFromTo(uid, vid) {
 					g.RemoveEdge(uid, vid)
 				}
@@ -65,7 +65,7 @@ func TransitiveReduce(g DirectedGraphReducer) error {
 			reached = reached[:0]
 
 			// DFS starting at vid to find nodes reachable via vid.
-			vIdx, ok := id2idx[vid]
+			vIdx, ok := indexOf[vid]
 			if !ok {
 				continue
 			}
@@ -79,7 +79,7 @@ func TransitiveReduce(g DirectedGraphReducer) error {
 				it := g.From(cid)
 				for it.Next() {
 					nid := it.Node().ID()
-					nIdx, ok := id2idx[nid]
+					nIdx, ok := indexOf[nid]
 					if !ok {
 						continue
 					}
@@ -103,7 +103,7 @@ func TransitiveReduce(g DirectedGraphReducer) error {
 				if g.HasEdgeFromTo(uid, xid) {
 					g.RemoveEdge(uid, xid)
 				}
-				if xIdx, ok := id2idx[xid]; ok {
+				if xIdx, ok := indexOf[xid]; ok {
 					seen[xIdx] = seenGen
 				}
 			}
@@ -115,22 +115,33 @@ func TransitiveReduce(g DirectedGraphReducer) error {
 	return nil
 }
 
-func successorIDs(it graph.Nodes) []int64 {
+func idsFrom(it graph.Nodes) []int64 {
 	var ids []int64
+	if n := it.Len(); n > 0 {
+		ids = make([]int64, 0, n)
+	}
 	for it.Next() {
 		ids = append(ids, it.Node().ID())
 	}
 	return ids
 }
 
-func indexNodes(g graph.Graph) (ids []int64, id2idx map[int64]int) {
+// indexNodes returns the node IDs of g and a map from node ID to a dense index
+// into the returned ids slice.
+func indexNodes(g graph.Graph) (ids []int64, indexOf map[int64]int) {
 	it := g.Nodes()
-	ids = make([]int64, 0, it.Len())
-	id2idx = make(map[int64]int, it.Len())
+
+	if n := it.Len(); n > 0 {
+		ids = make([]int64, 0, n)
+		indexOf = make(map[int64]int, n)
+	} else {
+		indexOf = make(map[int64]int)
+	}
+
 	for it.Next() {
 		id := it.Node().ID()
-		id2idx[id] = len(ids)
+		indexOf[id] = len(ids)
 		ids = append(ids, id)
 	}
-	return ids, id2idx
+	return ids, indexOf
 }

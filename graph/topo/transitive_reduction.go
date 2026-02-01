@@ -31,8 +31,7 @@ func TransitiveReduce(g GraphReducer) error {
 	// Generation counters avoid clearing DFS state.
 	seen := make([]uint32, n)
 	visited := make([]uint32, n)
-	var seenGen uint32
-	var visitedGen uint32
+	var seenGen, visitedGen uint32
 
 	// Reusable buffers.
 	dfsStack := make([]int64, 0, 64)

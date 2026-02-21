@@ -265,6 +265,7 @@ func TestTransitiveReduce(t *testing.T) {
 
 func checkEdgesSubset(t *testing.T, original, reduced graph.Directed) {
 	t.Helper()
+
 	it := reduced.Nodes()
 	for it.Next() {
 		u := it.Node().ID()

@@ -11,14 +11,14 @@ import (
 	"gonum.org/v1/gonum/graph"
 )
 
-type DirectedGraphReducer interface {
+type DirectedGraphRemover interface {
 	graph.Directed
 	graph.EdgeRemover
 }
 
 // TransitiveReduce removes redundant edges from g while preserving reachability.
 // g must be a DAG; otherwise TransitiveReduce returns an error.
-func TransitiveReduce(g DirectedGraphReducer) error {
+func TransitiveReduce(g DirectedGraphRemover) error {
 	if slices.ContainsFunc(TarjanSCC(g), func(scc []graph.Node) bool { return len(scc) != 1 }) {
 		return errors.New("topo: graph is not directed acyclic")
 	}
@@ -30,14 +30,12 @@ func TransitiveReduce(g DirectedGraphReducer) error {
 		return nil
 	}
 
-	// We use a dense index for nodes (via indexNodes) so we can keep per-node state
-	// in flat slices rather than maps.
 	// The seen/visited slices use "generation counters" to avoid O(n) clearing between
 	// DFS runs: entries equal to the current generation are considered set, and we
 	// increment the generation to logically reset the slice.
-	seen := make([]uint32, n)
-	visited := make([]uint32, n)
-	var seenGen, visitedGen uint32
+	seen := make([]uint64, n)
+	visited := make([]uint64, n)
+	var seenGen, visitedGen uint64
 
 	// Reusable buffers.
 	dfsStack := make([]int64, 0, 64)

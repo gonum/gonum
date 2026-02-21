@@ -55,7 +55,9 @@ func BenchmarkTransitiveReduce(b *testing.B) {
 // makeRandomDAGEdges creates a DAG by only adding edges from i->j where i<j with probability p.
 // Deterministic due to seed.
 func makeRandomDAGEdges(n int, p float64, seed uint64) []simple.Edge {
-	// Mix the seed; the constant is the 64-bit golden-ratio increment (2^64/φ).
+	// Mix the seed to derive a second, decorrelated parameter. The constant is a
+	// well-distributed odd 64-bit value (golden-ratio increment) commonly used to
+	// break correlation between related inputs (e.g. sequential seeds).
 	rng := rand.New(rand.NewPCG(seed, seed^0x9e3779b97f4a7c15))
 	edges := make([]simple.Edge, 0, int(float64(n*n)*p/2))
 

@@ -234,15 +234,14 @@ var transitiveReduceTests = []struct {
 }
 
 func TestTransitiveReduce(t *testing.T) {
-
-	for _, tc := range transitiveReduceTests {
-		t.Run(tc.name, func(t *testing.T) {
-			orig := tc.build()
+	for _, test := range transitiveReduceTests {
+		t.Run(test.name, func(t *testing.T) {
+			orig := test.build()
 			before := cloneDirected(orig)
 			after := cloneDirected(orig)
 
 			err := TransitiveReduce(after)
-			if tc.wantErr {
+			if test.wantErr {
 				if err == nil {
 					t.Fatalf("expected error, got nil")
 				}
@@ -256,8 +255,8 @@ func TestTransitiveReduce(t *testing.T) {
 			checkReachabilityPreserved(t, before, after)
 			checkMinimal(t, after)
 
-			if tc.check != nil {
-				tc.check(t, before, after)
+			if test.check != nil {
+				test.check(t, before, after)
 			}
 		})
 	}

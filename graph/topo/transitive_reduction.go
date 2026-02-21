@@ -21,7 +21,9 @@ type DirectedGraphReducer interface {
 func TransitiveReduce(g DirectedGraphReducer) error {
 	if slices.ContainsFunc(TarjanSCC(g), func(scc []graph.Node) bool { return len(scc) != 1 }) {
 		return errors.New("topo: graph is not directed acyclic")
-	} // Map node IDs to dense indices.
+	}
+
+	// Map node IDs to dense indices.
 	ids, indexOf := indexNodes(g)
 	n := len(ids)
 	if n == 0 {

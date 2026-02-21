@@ -5,7 +5,6 @@
 package topo
 
 import (
-	"errors"
 	"slices"
 
 	"gonum.org/v1/gonum/graph"
@@ -17,17 +16,17 @@ type DirectedGraphRemover interface {
 }
 
 // TransitiveReduce removes redundant edges from g while preserving reachability.
-// g must be a DAG; otherwise TransitiveReduce returns an error.
-func TransitiveReduce(g DirectedGraphRemover) error {
+// g must be a DAG; otherwise if g contains a cycle, TransitiveReduce panics.
+func TransitiveReduce(g DirectedGraphRemover) {
 	if slices.ContainsFunc(TarjanSCC(g), func(scc []graph.Node) bool { return len(scc) != 1 }) {
-		return errors.New("topo: graph is not directed acyclic")
+		panic("topo: TransitiveReduce: graph is not directed acyclic")
 	}
 
 	// Map node IDs to dense indices.
 	ids, indexOf := indexNodes(g)
 	n := len(ids)
 	if n == 0 {
-		return nil
+		return
 	}
 
 	// The seen/visited slices use "generation counters" to avoid O(n) clearing between
@@ -115,7 +114,6 @@ func TransitiveReduce(g DirectedGraphRemover) error {
 			seen[vIdx] = seenGen
 		}
 	}
-	return nil
 }
 
 func idsFrom(it graph.Nodes) []int64 {

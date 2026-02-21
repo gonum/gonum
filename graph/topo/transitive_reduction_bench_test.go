@@ -27,9 +27,7 @@ func BenchmarkTransitiveReduce(b *testing.B) {
 			}
 			b.StartTimer()
 
-			if err := TransitiveReduce(g); err != nil {
-				b.Fatalf("reduction error: %v", err)
-			}
+			TransitiveReduce(g)
 		}
 	}
 

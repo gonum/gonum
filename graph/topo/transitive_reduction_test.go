@@ -12,10 +12,10 @@ import (
 )
 
 var transitiveReduceTests = []struct {
-	name    string
-	build   func() *simple.DirectedGraph
-	wantErr bool
-	check   func(t *testing.T, before, after graph.Directed) // optional spot-checks
+	name      string
+	build     func() *simple.DirectedGraph
+	wantPanic bool
+	check     func(t *testing.T, before, after graph.Directed) // optional spot-checks
 }{
 	{
 		name: "ChainWithShortcuts",
@@ -141,7 +141,7 @@ var transitiveReduceTests = []struct {
 		},
 	},
 	{
-		name: "CycleReturnsError",
+		name: "CyclePanics",
 		build: func() *simple.DirectedGraph {
 			g := simple.NewDirectedGraph()
 			g.SetEdge(simple.Edge{F: simple.Node(1), T: simple.Node(2)})
@@ -149,7 +149,7 @@ var transitiveReduceTests = []struct {
 			g.SetEdge(simple.Edge{F: simple.Node(3), T: simple.Node(1)}) // cycle
 			return g
 		},
-		wantErr: true,
+		wantPanic: true,
 	},
 	{
 		name: "StarNoTransitiveEdges",
@@ -240,15 +240,16 @@ func TestTransitiveReduce(t *testing.T) {
 			before := cloneDirected(orig)
 			after := cloneDirected(orig)
 
-			err := TransitiveReduce(after)
-			if test.wantErr {
-				if err == nil {
-					t.Fatalf("expected error, got nil")
-				}
-				return
+			if test.wantPanic {
+				defer func() {
+					if r := recover(); r == nil {
+						t.Fatalf("expected panic, got none")
+					}
+				}()
 			}
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
+			TransitiveReduce(after)
+			if test.wantPanic {
+				return // we expected to panic; if we got here, recover didn't trigger
 			}
 
 			checkEdgesSubset(t, before, after)

@@ -36,7 +36,7 @@ var transitiveReduceTests = []struct {
 			// Spot-check: all 0->k (k>=2) should be removed.
 			for k := int64(2); k < 8; k++ {
 				if after.HasEdgeFromTo(0, k) {
-					t.Fatalf("expected redundant edge 0->%d to be removed", k)
+					t.Errorf("expected redundant edge 0->%d to be removed", k)
 				}
 			}
 		},
@@ -55,7 +55,7 @@ var transitiveReduceTests = []struct {
 		},
 		check: func(t *testing.T, before, after graph.Directed) {
 			if after.HasEdgeFromTo(1, 4) {
-				t.Fatalf("expected redundant edge 1->4 to be removed")
+				t.Errorf("expected redundant edge 1->4 to be removed")
 			}
 		},
 	},
@@ -71,7 +71,7 @@ var transitiveReduceTests = []struct {
 		},
 		check: func(t *testing.T, before, after graph.Directed) {
 			if edgeCount(after) != edgeCount(before) {
-				t.Fatalf("expected edge count unchanged: before=%d after=%d", edgeCount(before), edgeCount(after))
+				t.Errorf("expected edge count unchanged: before=%d after=%d", edgeCount(before), edgeCount(after))
 			}
 		},
 	},
@@ -90,10 +90,10 @@ var transitiveReduceTests = []struct {
 		},
 		check: func(t *testing.T, before, after graph.Directed) {
 			if after.HasEdgeFromTo(0, 2) {
-				t.Fatalf("expected redundant edge 0->2 to be removed")
+				t.Errorf("expected redundant edge 0->2 to be removed")
 			}
 			if !after.HasEdgeFromTo(10, 11) {
-				t.Fatalf("expected edge 10->11 to remain")
+				t.Errorf("expected edge 10->11 to remain")
 			}
 		},
 	},
@@ -104,10 +104,10 @@ var transitiveReduceTests = []struct {
 		},
 		check: func(t *testing.T, before, after graph.Directed) {
 			if after.Nodes().Len() != 0 {
-				t.Fatalf("expected 0 nodes, got %d", after.Nodes().Len())
+				t.Errorf("expected 0 nodes, got %d", after.Nodes().Len())
 			}
 			if edgeCount(after) != 0 {
-				t.Fatalf("expected 0 edges, got %d", edgeCount(after))
+				t.Errorf("expected 0 edges, got %d", edgeCount(after))
 			}
 		},
 	},
@@ -120,7 +120,7 @@ var transitiveReduceTests = []struct {
 		},
 		check: func(t *testing.T, before, after graph.Directed) {
 			if edgeCount(after) != 0 {
-				t.Fatalf("expected 0 edges, got %d", edgeCount(after))
+				t.Errorf("expected 0 edges, got %d", edgeCount(after))
 			}
 		},
 	},
@@ -133,10 +133,10 @@ var transitiveReduceTests = []struct {
 		},
 		check: func(t *testing.T, before, after graph.Directed) {
 			if !after.HasEdgeFromTo(1, 2) {
-				t.Fatalf("expected edge 1->2 to remain")
+				t.Errorf("expected edge 1->2 to remain")
 			}
 			if edgeCount(after) != 1 {
-				t.Fatalf("expected 1 edge, got %d", edgeCount(after))
+				t.Errorf("expected 1 edge, got %d", edgeCount(after))
 			}
 		},
 	},
@@ -163,7 +163,7 @@ var transitiveReduceTests = []struct {
 		},
 		check: func(t *testing.T, before, after graph.Directed) {
 			if edgeCount(after) != edgeCount(before) {
-				t.Fatalf("expected no edge removals: before=%d after=%d", edgeCount(before), edgeCount(after))
+				t.Errorf("expected no edge removals: before=%d after=%d", edgeCount(before), edgeCount(after))
 			}
 		},
 	},
@@ -201,11 +201,11 @@ var transitiveReduceTests = []struct {
 		},
 		check: func(t *testing.T, before, after graph.Directed) {
 			if after.HasEdgeFromTo(0, 7) {
-				t.Fatalf("expected redundant edge 0->7 to be removed")
+				t.Errorf("expected redundant edge 0->7 to be removed")
 			}
 			for _, v := range []int64{4, 5, 6} {
 				if after.HasEdgeFromTo(0, v) {
-					t.Fatalf("expected redundant edge 0->%d to be removed", v)
+					t.Errorf("expected redundant edge 0->%d to be removed", v)
 				}
 			}
 		},
@@ -273,7 +273,7 @@ func checkEdgesSubset(t *testing.T, original, reduced graph.Directed) {
 		for from.Next() {
 			v := from.Node().ID()
 			if !original.HasEdgeFromTo(u, v) {
-				t.Fatalf("reduced graph contains edge %d->%d not present in original", u, v)
+				t.Errorf("reduced graph contains edge %d->%d not present in original", u, v)
 			}
 		}
 	}
@@ -288,7 +288,7 @@ func checkReachabilityPreserved(t *testing.T, before, after graph.Directed) {
 			got := PathExistsIn(after, after.Node(u.ID()), after.Node(v.ID()))
 			want := PathExistsIn(before, before.Node(u.ID()), before.Node(v.ID()))
 			if got != want {
-				t.Fatalf("reachability changed for (%d -> %d): before=%v after=%v", u.ID(), v.ID(), want, got)
+				t.Errorf("reachability changed for (%d -> %d): before=%v after=%v", u.ID(), v.ID(), want, got)
 			}
 		}
 	}
@@ -314,7 +314,7 @@ func checkMinimal(t *testing.T, reduced graph.Directed) {
 				t.Fatalf("missing node after clone: u=%d v=%d", u, v)
 			}
 			if PathExistsIn(g2, u2, v2) {
-				t.Fatalf("edge %d->%d is redundant: path still exists after removal", u, v)
+				t.Errorf("edge %d->%d is redundant: path still exists after removal", u, v)
 			}
 		}
 	}

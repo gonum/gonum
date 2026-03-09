@@ -912,7 +912,7 @@ func (ch *BandCholesky) SymBand() (n, k int) {
 // receiver for dimensionally restricted operations. The receiver can be emptied
 // using Reset.
 func (ch *BandCholesky) IsEmpty() bool {
-	return ch == nil || ch.chol.IsEmpty()
+	return ch == nil || ch.chol == nil || ch.chol.IsEmpty()
 }
 
 // Det returns the determinant of the matrix that has been factorized.

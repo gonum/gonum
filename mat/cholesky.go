@@ -616,7 +616,7 @@ func (c *Cholesky) SymRankOne(orig *Cholesky, alpha float64, x Vector) (ok bool)
 	if rv, ok := x.(RawVectorer); ok {
 		xmat = rv.RawVector()
 	} else {
-		var tmp *VecDense
+		tmp := NewVecDense(n, nil)
 		tmp.CopyVec(x)
 		xmat = tmp.RawVector()
 	}

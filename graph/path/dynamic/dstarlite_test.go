@@ -632,6 +632,29 @@ func TestDStarLiteDynamic(t *testing.T) {
 	}
 }
 
+func TestMoveToAway(t *testing.T) {
+	t.Parallel()
+
+	g := simple.NewWeightedDirectedGraph(0, math.Inf(1))
+	p0 := simple.Node(0)
+	p1 := simple.Node(1)
+	p2 := simple.Node(2)
+	g.SetWeightedEdge(simple.WeightedEdge{F: p0, T: p1, W: 1})
+	g.SetWeightedEdge(simple.WeightedEdge{F: p1, T: p2, W: 1})
+
+	d := NewDStarLite(p1, p2, g, path.NullHeuristic, simple.NewWeightedDirectedGraph(0, math.Inf(1)))
+	_, _ = d.Path()
+
+	d.MoveTo(p0)
+	p, w := d.Path()
+	wantP := []graph.Node{p0, p1, p2}
+	wantW := 2.0
+
+	if !samePath(p, wantP) || w != wantW {
+		t.Errorf("unexpected path after move. got %v (weight %v), want %v (weight %v)", p, w, wantP, wantW)
+	}
+}
+
 type memory bool
 
 func (m memory) String() string {

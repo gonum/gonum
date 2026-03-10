@@ -281,6 +281,7 @@ func (d *DStarLite) MoveTo(n graph.Node) {
 	d.last = d.s
 	d.s = d.model.Node(n.ID()).(*dStarLiteNode)
 	d.keyModifier += d.heuristic(d.last, d.s)
+	d.findShortestPath()
 }
 
 // UpdateWorld updates or adds edges in the world graph. UpdateWorld will

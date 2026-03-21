@@ -24,6 +24,9 @@ const (
 	Empirical CumulantKind = 1
 	// LinInterp linearly interpolates the empirical distribution between sample values, with a flat extrapolation.
 	LinInterp CumulantKind = 4
+	// Linear linearly interpolates the empirical distribution between sample values
+	// using the approach used by default in NumPy and R.
+	Linear CumulantKind = 7
 )
 
 // WassersteinDistance computes the Wasserstein distance (Earth Mover's Distance)
@@ -1349,6 +1352,7 @@ func MomentAbout(moment float64, x []float64, mean float64, weights []float64) f
 //   - Empirical: Returns the lowest value q for which q is greater than or equal
 //     to the fraction p of samples
 //   - LinInterp: Returns the linearly interpolated value
+//   - Linear: Returns the R-7 linearly interpolated value
 func Quantile(p float64, c CumulantKind, x, weights []float64) float64 {
 	if !(p >= 0 && p <= 1) {
 		panic("stat: percentile out of bounds")
@@ -1378,6 +1382,8 @@ func Quantile(p float64, c CumulantKind, x, weights []float64) float64 {
 		return empiricalQuantile(p, x, weights, sumWeights)
 	case LinInterp:
 		return linInterpQuantile(p, x, weights, sumWeights)
+	case Linear:
+		return type7Quantile(p, x, weights, sumWeights)
 	default:
 		panic("stat: bad cumulant kind")
 	}
@@ -1420,6 +1426,33 @@ func linInterpQuantile(p float64, x, weights []float64, sumWeights float64) floa
 		}
 	}
 	panic("impossible")
+}
+
+func type7Quantile(p float64, x, weights []float64, sumWeights float64) float64 {
+	// avgW ensures the denominator becomes (n-1) if
+	// all weights are 1.0 which maps exactly to R's
+	// (k-1)/(n-1) formula.
+	avgW := sumWeights / float64(len(x))
+	denom := sumWeights - avgW
+	if denom <= 0 {
+		return x[0]
+	}
+
+	var cumW float64
+	for i := range x[:len(x)-1] {
+		last := cumW / denom
+		if weights == nil {
+			cumW++
+		} else {
+			cumW += weights[i]
+		}
+		next := cumW / denom
+		if last <= p && p <= next {
+			t := (p - last) / (next - last)
+			return x[i] + t*(x[i+1]-x[i])
+		}
+	}
+	return x[len(x)-1]
 }
 
 // Skew computes the skewness of the sample data.

@@ -1437,6 +1437,7 @@ func TestQuantile(t *testing.T) {
 	cumulantKinds := []CumulantKind{
 		Empirical,
 		LinInterp,
+		Linear,
 	}
 	for i, test := range []struct {
 		p      []float64
@@ -1464,6 +1465,7 @@ func TestQuantile(t *testing.T) {
 			ans: [][]float64{
 				{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 				{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+				{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 			},
 		},
 		{
@@ -1473,6 +1475,7 @@ func TestQuantile(t *testing.T) {
 			ans: [][]float64{
 				{1, 1, 1, 2, 5, 5, 6, 9, 9, 10, 10},
 				{1, 1, 1, 1.5, 4.5, 5, 5.5, 8.5, 9, 9.5, 10},
+				{1, 1.45, 1.9, 2.35, 5.05, 5.5, 5.95, 8.65, 9.1, 9.55, 10},
 			},
 		},
 		{
@@ -1482,6 +1485,7 @@ func TestQuantile(t *testing.T) {
 			ans: [][]float64{
 				{1, 1, 1, 2, 5, 5, 6, 9, 9, 10, 10},
 				{1, 1, 1, 1.5, 4.5, 5, 5.5, 8.5, 9, 9.5, 10},
+				{1, 1.45, 1.9, 2.35, 5.05, 5.5, 5.95, 8.65, 9.1, 9.55, 10},
 			},
 		},
 		{
@@ -1491,12 +1495,24 @@ func TestQuantile(t *testing.T) {
 			ans: [][]float64{
 				{1, 2, 3, 4, 7, 7, 8, 10, 10, 10, 10},
 				{1, 1.875, 2.833333333333333, 3.5625, 6.535714285714286, 6.928571428571429, 7.281250000000001, 9.175, 9.45, 9.725, 10},
+				{1, 2.7375, 3.65, 4.35625, 7.182142857142857, 7.535714285714286, 7.889285714285714, 9.675, 9.95, 10, 10},
+			},
+		},
+		{
+			p: []float64{0, 0.05, 0.1, 0.15, 0.45, 0.5, 0.55, 0.85, 0.9, 0.95, 1},
+			x: []float64{2, 3, 5, 9},
+			w: nil,
+			ans: [][]float64{
+				{2, 2, 2, 2, 3, 3, 5, 9, 9, 9, 9},
+				{2, 2, 2, 2, 2.8, 3, 3.4, 6.6, 7.4, 8.2, 9},
+				{2, 2.15, 2.3, 2.45, 3.7, 4, 4.3, 7.2, 7.8, 8.4, 9},
 			},
 		},
 		{
 			p: []float64{0.5},
 			x: []float64{1, 2, 3, 4, 5, 6, 7, 8, math.NaN(), 10},
 			ans: [][]float64{
+				{math.NaN()},
 				{math.NaN()},
 				{math.NaN()},
 			},
@@ -1524,7 +1540,7 @@ func TestQuantile(t *testing.T) {
 				if test.panics {
 					continue
 				}
-				if v != test.ans[k][j] && !(math.IsNaN(v) && math.IsNaN(test.ans[k][j])) {
+				if !scalar.EqualWithinAbsOrRel(v, test.ans[k][j], 1e-14, 1e-14) && !(math.IsNaN(v) && math.IsNaN(test.ans[k][j])) {
 					t.Errorf("mismatch case %d kind %d percentile %v. Expected: %v, found: %v", i, k, p, test.ans[k][j], v)
 				}
 			}

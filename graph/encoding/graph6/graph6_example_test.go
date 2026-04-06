@@ -6,6 +6,7 @@ package graph6_test
 
 import (
 	"fmt"
+	"log"
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/encoding/graph6"
@@ -15,6 +16,11 @@ func ExampleGraph() {
 	// Construct a graph from HOG graph 32194.
 	// https://hog.grinvin.org/ViewGraphInfo.action?id=32194
 	g := graph6.Graph("H@BQPS^")
+
+	// Check that the graph is valid.
+	if !graph6.IsValid(g) {
+		log.Fatal("invalid graph6 string")
+	}
 
 	// Get the nodes of the graph and print
 	// an adjacency list.

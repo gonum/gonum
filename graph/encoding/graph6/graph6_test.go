@@ -5,6 +5,10 @@
 package graph6
 
 import (
+	"bytes"
+	"compress/gzip"
+	"io"
+	"os"
 	"reflect"
 	"testing"
 
@@ -261,3 +265,49 @@ func (i implicitCycle) Edge(xid, yid int64) graph.Edge     { return nil }
 type node int32
 
 func (n node) ID() int64 { return int64(n) }
+
+func BenchmarkCopy(b *testing.B) {
+	g6, err := loadGraph6("arxiv_5000.graph6.gz")
+	if err != nil {
+		b.Fatalf("failed to load graph6 data: %v", err)
+	}
+	b.ResetTimer()
+	g := nodeIgnorer{simple.NewUndirectedGraph()}
+	for range b.N {
+		graph.Copy(g, g6)
+	}
+	// This is not a general claim, but it is true of this graph.
+	// Done to ensure that we don't optimise the graph.Copy away.
+	if g.Nodes().Len() != g6.Nodes().Len() {
+		b.Errorf("unexpected graph order: got=%d want=%d", g.Nodes().Len(), g6.Nodes().Len())
+	}
+}
+
+type nodeIgnorer struct {
+	graphBuilder
+}
+
+type graphBuilder interface {
+	graph.Graph
+	graph.Builder
+}
+
+func (nodeIgnorer) AddNode(graph.Node) {}
+
+func loadGraph6(file string) (graph.Undirected, error) {
+	f, err := os.Open(file)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	gz, err := gzip.NewReader(f)
+	if err != nil {
+		return nil, err
+	}
+	defer gz.Close()
+	g6, err := io.ReadAll(gz)
+	if err != nil {
+		return nil, err
+	}
+	return Graph(bytes.TrimSpace(g6)), nil
+}

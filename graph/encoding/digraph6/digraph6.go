@@ -22,7 +22,9 @@ import (
 //
 // Note that the digraph6 format specifies that the first character of the graph
 // string is a '&'. This character must be present for use in the digraph6 package.
-// A Graph without this prefix is treated as the null graph.
+//
+// Callers must check IsValid before calling graph methods; behaviour
+// is undefined for invalid encodings.
 type Graph string
 
 var (
@@ -96,9 +98,18 @@ func bit6(b int64) byte {
 	return byte(b) & 0x3f
 }
 
-// IsValid returns whether the graph is a valid digraph6 encoding. An invalid Graph
-// behaves as the null graph.
+// IsValid returns whether the graph is a valid digraph6 encoding.
+// Graph methods are only valid for strings that have been confirmed
+// valid by this function.
 func IsValid(g Graph) bool {
+	if len(g) < 2 || g[0] != '&' {
+		return false
+	}
+	for _, b := range []byte(g[1:]) {
+		if b < 63 || 126 < b {
+			return false
+		}
+	}
 	n := int(numberOf(g))
 	if n < 0 {
 		return false
@@ -119,9 +130,6 @@ func IsValid(g Graph) bool {
 // exists and nil otherwise. The node v must be directly reachable from u as
 // defined by the From method.
 func (g Graph) Edge(uid, vid int64) graph.Edge {
-	if !IsValid(g) {
-		return nil
-	}
 	if !g.HasEdgeFromTo(uid, vid) {
 		return nil
 	}
@@ -131,30 +139,22 @@ func (g Graph) Edge(uid, vid int64) graph.Edge {
 // From returns all nodes that can be reached directly from the node with the
 // given ID.
 func (g Graph) From(id int64) graph.Nodes {
-	if !IsValid(g) {
-		return graph.Empty
-	}
-	if g.Node(id) == nil {
+	n := numberOf(g)
+	if id < 0 || n <= id {
 		return nil
 	}
-	return &d6ForwardIterator{g: g, from: id, to: -1}
+	return &d6ForwardIterator{g: g, n: n, from: id, to: -1}
 }
 
 // HasEdgeBetween returns whether an edge exists between nodes with IDs xid
 // and yid without considering direction.
 func (g Graph) HasEdgeBetween(xid, yid int64) bool {
-	if !IsValid(g) {
-		return false
-	}
 	return g.HasEdgeFromTo(xid, yid) || g.HasEdgeFromTo(yid, xid)
 }
 
 // HasEdgeFromTo returns whether an edge exists in the graph from u to v with
 // IDs uid and vid.
 func (g Graph) HasEdgeFromTo(uid, vid int64) bool {
-	if !IsValid(g) {
-		return false
-	}
 	if uid == vid {
 		return false
 	}
@@ -171,9 +171,6 @@ func (g Graph) HasEdgeFromTo(uid, vid int64) bool {
 // Node returns the node with the given ID if it exists in the graph, and nil
 // otherwise.
 func (g Graph) Node(id int64) graph.Node {
-	if !IsValid(g) {
-		return nil
-	}
 	if id < 0 || numberOf(g) <= id {
 		return nil
 	}
@@ -182,23 +179,22 @@ func (g Graph) Node(id int64) graph.Node {
 
 // Nodes returns all the nodes in the graph.
 func (g Graph) Nodes() graph.Nodes {
-	if !IsValid(g) {
-		return graph.Empty
-	}
 	return iterator.NewImplicitNodes(0, int(numberOf(g)), func(id int) graph.Node { return simple.Node(id) })
 }
 
 // To returns all nodes that can reach directly to the node with the given ID.
 func (g Graph) To(id int64) graph.Nodes {
-	if !IsValid(g) || g.Node(id) == nil {
+	n := numberOf(g)
+	if id < 0 || n <= id {
 		return graph.Empty
 	}
-	return &d6ReverseIterator{g: g, from: -1, to: id}
+	return &d6ReverseIterator{g: g, n: n, from: -1, to: id}
 }
 
 // d6ForwardIterator is a graph.Nodes for digraph6 graph edges for forward hops.
 type d6ForwardIterator struct {
 	g    Graph
+	n    int64
 	from int64
 	to   int64
 }
@@ -206,10 +202,9 @@ type d6ForwardIterator struct {
 var _ graph.Nodes = (*d6ForwardIterator)(nil)
 
 func (i *d6ForwardIterator) Next() bool {
-	n := numberOf(i.g)
-	for i.to < n-1 {
+	for i.to < i.n-1 {
 		i.to++
-		if i.to != i.from && isSet(bitFor(i.from, i.to, n), i.g) {
+		if i.to != i.from && isSet(bitFor(i.from, i.to, i.n), i.g) {
 			return true
 		}
 	}
@@ -218,10 +213,9 @@ func (i *d6ForwardIterator) Next() bool {
 
 func (i *d6ForwardIterator) Len() int {
 	var cnt int
-	n := numberOf(i.g)
-	for to := i.to; to < n-1; {
+	for to := i.to; to < i.n-1; {
 		to++
-		if to != i.from && isSet(bitFor(i.from, to, n), i.g) {
+		if to != i.from && isSet(bitFor(i.from, to, i.n), i.g) {
 			cnt++
 		}
 	}
@@ -235,6 +229,7 @@ func (i *d6ForwardIterator) Node() graph.Node { return simple.Node(i.to) }
 // d6ReverseIterator is a graph.Nodes for digraph6 graph edges for reverse hops.
 type d6ReverseIterator struct {
 	g    Graph
+	n    int64
 	from int64
 	to   int64
 }
@@ -242,10 +237,9 @@ type d6ReverseIterator struct {
 var _ graph.Nodes = (*d6ReverseIterator)(nil)
 
 func (i *d6ReverseIterator) Next() bool {
-	n := numberOf(i.g)
-	for i.from < n-1 {
+	for i.from < i.n-1 {
 		i.from++
-		if i.to != i.from && isSet(bitFor(i.from, i.to, n), i.g) {
+		if i.to != i.from && isSet(bitFor(i.from, i.to, i.n), i.g) {
 			return true
 		}
 	}
@@ -254,10 +248,9 @@ func (i *d6ReverseIterator) Next() bool {
 
 func (i *d6ReverseIterator) Len() int {
 	var cnt int
-	n := numberOf(i.g)
-	for from := i.from; from < n-1; {
+	for from := i.from; from < i.n-1; {
 		from++
-		if from != i.to && isSet(bitFor(from, i.to, n), i.g) {
+		if from != i.to && isSet(bitFor(from, i.to, i.n), i.g) {
 			cnt++
 		}
 	}
@@ -269,6 +262,8 @@ func (i *d6ReverseIterator) Reset() { i.from = -1 }
 func (i *d6ReverseIterator) Node() graph.Node { return simple.Node(i.from) }
 
 // numberOf returns the digraph6-encoded number corresponding to g.
+// It parses only the header and does not validate the payload;
+// use IsValid to check validity before calling graph methods.
 func numberOf(g Graph) int64 {
 	if len(g) < 2 {
 		return -1
@@ -277,11 +272,6 @@ func numberOf(g Graph) int64 {
 		return -1
 	}
 	g = g[1:]
-	for _, b := range []byte(g) {
-		if b < 63 || 126 < b {
-			return -1
-		}
-	}
 	if g[0] != 126 {
 		return int64(g[0] - 63)
 	}
@@ -353,3 +343,4 @@ func binary(g Graph) (b *big.Int, l int) {
 
 	return b, n * n
 }
+

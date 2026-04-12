@@ -9,6 +9,7 @@ package coloring
 
 import (
 	"errors"
+	"math/bits"
 	"math/rand/v2"
 	"slices"
 	"sort"
@@ -115,6 +116,7 @@ func DsaturExact(term Terminator, g graph.Undirected) (k int, colors map[int64]i
 
 	selector := &order.saturationDegree
 	cand := newDsaturColoring(order.nodes, bestMaximumClique(g, cliques))
+	selector.reset(cand.colors, ub)
 	k, colors, err = dSaturExact(term, selector, cand, len(cand.colors), ub, nil)
 	if colors == nil {
 		return ub, initial, err
@@ -193,60 +195,88 @@ func dSaturExact(term Terminator, selector *saturationDegree, cand dSaturColorin
 			if best == nil {
 				return -1, nil, term.Err()
 			}
-			colors := make(set.Ints[int])
-			for _, c := range best {
-				colors.Add(c)
+			var colors colorSet
+			if selector.stride <= 4 {
+				var usedBuf [4]uint64
+				colors = colorSet(usedBuf[:selector.stride])
+			} else {
+				colors = make(colorSet, selector.stride)
 			}
-			return colors.Count(), best, term.Err()
+			for _, c := range best {
+				colors.set(c)
+			}
+			return colors.colors(), best, term.Err()
 		default:
 		}
 	}
 
 	// Select the next node.
-	selector.reset(cand.colors)
-	vid := selector.nodes[selector.dsatur()].ID()
+	selector.colors = cand.colors
+	idx := selector.dsatur()
+	vid := selector.nodes[idx].ID()
 	cand.color(vid)
 	// If uncolor panics, we have failed to find a
 	// feasible color. This should never happen.
 	defer cand.uncolor(vid)
 
-	// Keep the adjacent colors set as it will be
-	// overwritten by child recurrences.
-	adjColors := selector.adjColors[selector.indexOf[vid]]
+	// Temporary bit sets for this recursion level. Stack-allocated
+	// arrays avoid heap allocation in the recursive hot path for
+	// the common case (stride <= 4; up to 256 colors).
+	var adjColors, used, feasible colorSet
+	if selector.stride <= 4 {
+		var adjBuf, usedBuf, feasBuf [4]uint64
+		adjColors = colorSet(adjBuf[:selector.stride])
+		used = colorSet(usedBuf[:selector.stride])
+		feasible = colorSet(feasBuf[:selector.stride])
+	} else {
+		adjColors = make(colorSet, selector.stride)
+		used = make(colorSet, selector.stride)
+		feasible = make(colorSet, selector.stride)
+	}
+	// Snapshot the adjacent colors for the selected node; child
+	// recurrences update the selector's adjColors in place via
+	// colorNode/uncolorNode.
+	copy(adjColors, selector.adjColorSet(idx))
 
 	// Collect all feasible existing colors plus one, remembering it.
-	feasible := make(set.Ints[int])
 	for _, c := range cand.colors {
-		if adjColors.Has(c) {
-			continue
-		}
-		feasible.Add(c)
+		used.set(c)
 	}
-	var newCol int
+	for w := range feasible {
+		feasible[w] = used[w] &^ adjColors[w]
+	}
+	newCol := -1
 	for c := 0; c < ub; c++ {
-		if feasible.Has(c) || adjColors.Has(c) {
+		if feasible.isSet(c) || adjColors.isSet(c) {
 			continue
 		}
-		feasible.Add(c)
+		feasible.set(c)
 		newCol = c
 		break
 	}
 
-	// Recur over every feasible color.
-	for c := range feasible {
-		cand.colors[vid] = c
-		effK := k
-		if c == newCol {
-			effK++
-		}
-		// In the published algorithm, the expression max(effK, lb) < ub is
-		// used, but lb < ub always since it is not updated and dSaturExact
-		// is not called if lb == ub, and it cannot be greater.
-		if effK < ub {
-			ub, best, err = dSaturExact(term, selector, cand, effK, ub, best)
-			if err != nil {
-				return ub, best, err
+	// Recur over every feasible color. The inner loop
+	// extracts set bits one at a time (f &= f-1 clears the
+	// lowest set bit) to iterate without allocation.
+	for w := range feasible {
+		for f := feasible[w]; f != 0; f &= f - 1 {
+			c := w*64 + bits.TrailingZeros64(f)
+			cand.colors[vid] = c
+			selector.colorNode(idx, c)
+			effK := k
+			if c == newCol {
+				effK++
 			}
+			// In the published algorithm, the expression max(effK, lb) < ub is
+			// used, but lb < ub always since it is not updated and dSaturExact
+			// is not called if lb == ub, and it cannot be greater.
+			if effK < ub {
+				ub, best, err = dSaturExact(term, selector, cand, effK, ub, best)
+				if err != nil {
+					return ub, best, err
+				}
+			}
+			selector.uncolorNode(idx)
 		}
 	}
 
@@ -256,7 +286,7 @@ func dSaturExact(term Terminator, selector *saturationDegree, cand dSaturColorin
 // maximumClique returns a maximum clique in g and its order.
 func maximumClique(g graph.Undirected) (k int, maxClique []graph.Node, cliques [][]graph.Node) {
 	cliques = topo.BronKerbosch(g)
-	for _, c := range topo.BronKerbosch(g) {
+	for _, c := range cliques {
 		if len(c) > len(maxClique) {
 			maxClique = c
 		}
@@ -653,11 +683,10 @@ func (n *saturationDegreeIterator) Next() bool {
 				}
 			}
 		default:
-			prev := n.Node().ID()
-			c := n.colors[prev]
-			to := n.g.From(prev)
-			for to.Next() {
-				n.adjColors[n.indexOf[to.Node().ID()]].Add(c)
+			prev := n.curr
+			c := n.colors[n.nodes[prev].ID()]
+			for _, j := range n.adj[prev] {
+				n.adjColorSet(j).set(c)
 			}
 
 			chosen := n.heuristic()
@@ -679,6 +708,14 @@ func (n *saturationDegreeIterator) Node() graph.Node { return n.nodes[n.curr] }
 func (n *saturationDegreeIterator) Reset() { panic("coloring: invalid call to Reset") }
 
 // saturationDegree is a saturation degree node choice heuristic.
+//
+// Adjacent colors are tracked as multi-word bit sets rather than
+// maps to eliminate per-node allocation in the recursive search.
+// The adjacency structure is cached as integer index lists so
+// that the search never calls g.From (each call allocates an
+// iterator). Together these two changes make the recursive path
+// of dSaturExact allocation-free for graphs with up to 256
+// colors (4-word bit sets that fit in stack-allocated arrays).
 type saturationDegree struct {
 	// nodes is the set of nodes being
 	// iterated over.
@@ -689,57 +726,129 @@ type saturationDegree struct {
 	// adjColors. degrees holds the
 	// degree of each node and adjColors
 	// holds the current adjacent
-	// colors of each node.
+	// colors of each node as a bitset.
+	//
+	// adjColors is stored flat with stride
+	// words per node: node i's bitset is
+	// adjColors[i*stride : (i+1)*stride].
 	indexOf   map[int64]int
 	degrees   []int
-	adjColors []set.Ints[int]
+	adjColors colorSet
+	stride    int
 
-	// g and colors are the graph coloring.
-	// colors is held by both the iterator
-	// and greedyColoringOf.
-	g      graph.Undirected
+	// adj holds adjacency lists as integer
+	// indices into the nodes slice. Built once
+	// from g.From during construction, then
+	// used for all subsequent neighbour traversals.
+	adj [][]int
+
+	// colors is the graph coloring, held
+	// by both the iterator and greedyColoringOf.
 	colors map[int64]int
 
 	// work is a temporary workspace.
 	work []int
 }
 
+// adjColorSet returns node i's adjacent color bit set.
+func (sd *saturationDegree) adjColorSet(i int) colorSet {
+	off := i * sd.stride
+	return sd.adjColors[off : off+sd.stride]
+}
+
+type colorSet []uint64
+
+func (s colorSet) set(c int)        { s[c>>6] |= 1 << uint(c&63) }
+func (s colorSet) isSet(c int) bool { return s[c>>6]&(1<<uint(c&63)) != 0 }
+func (s colorSet) colors() int {
+	n := 0
+	for _, w := range s {
+		n += bits.OnesCount64(w)
+	}
+	return n
+}
+
 // newSaturationDegree returns a saturationDegree heuristic based on the
 // nodes in the given node iterator and graph, using the provided coloring.
 func newSaturationDegree(it graph.Nodes, g graph.Undirected, colors map[int64]int) saturationDegree {
 	nodes := graph.NodesOf(it)
+	stride := 1
 	sd := saturationDegree{
 		nodes:     nodes,
 		indexOf:   make(map[int64]int, len(nodes)),
 		degrees:   make([]int, len(nodes)),
-		adjColors: make([]set.Ints[int], len(nodes)),
-		g:         g,
+		adjColors: make([]uint64, len(nodes)*stride),
+		stride:    stride,
+		adj:       make([][]int, len(nodes)),
 		colors:    colors,
 	}
 	for i, u := range nodes {
-		sd.degrees[i] = g.From(u.ID()).Len()
-		sd.adjColors[i] = make(set.Ints[int])
 		sd.indexOf[u.ID()] = i
 	}
-	for uid, c := range colors {
-		to := g.From(uid)
+	for i, u := range nodes {
+		to := g.From(u.ID())
+		sd.degrees[i] = to.Len()
 		for to.Next() {
-			sd.adjColors[sd.indexOf[to.Node().ID()]].Add(c)
+			if j, ok := sd.indexOf[to.Node().ID()]; ok {
+				sd.adj[i] = append(sd.adj[i], j)
+			}
+		}
+	}
+	for uid, c := range colors {
+		for _, j := range sd.adj[sd.indexOf[uid]] {
+			sd.adjColorSet(j).set(c)
 		}
 	}
 	return sd
 }
 
-// reset re-initializes the saturation with the provided colors.
-func (sd *saturationDegree) reset(colors map[int64]int) {
-	sd.colors = colors
-	for i := range sd.nodes {
-		sd.adjColors[i] = make(set.Ints[int])
+// reset re-initializes the saturation with the provided colors
+// and adjusts the stride for ub color values.
+func (sd *saturationDegree) reset(colors map[int64]int, ub int) {
+	stride := colorWords(ub)
+	if stride != sd.stride {
+		sd.stride = stride
+		sd.adjColors = make([]uint64, len(sd.nodes)*stride)
+	} else {
+		clear(sd.adjColors)
 	}
+	sd.colors = colors
 	for uid, c := range colors {
-		to := sd.g.From(uid)
-		for to.Next() {
-			sd.adjColors[sd.indexOf[to.Node().ID()]].Add(c)
+		for _, j := range sd.adj[sd.indexOf[uid]] {
+			sd.adjColorSet(j).set(c)
+		}
+	}
+}
+
+func colorWords(ub int) int { return (ub + 63) / 64 }
+
+// colorNode updates adjColors to reflect that the node at index i
+// has been assigned color c. Only i's neighbors are touched.
+func (sd *saturationDegree) colorNode(i, c int) {
+	for _, j := range sd.adj[i] {
+		sd.adjColorSet(j).set(c)
+	}
+}
+
+// uncolorNode reverses a colorNode call. A single bit cannot
+// simply be cleared because another neighbour of j may share
+// the same color, so each affected neighbour's bit set is rebuilt
+// from its own adjacency. This is O(deg(i) * maxDeg) per call,
+// but avoids the O(|E|) full reset that would otherwise run at
+// every recursion level.
+//
+// The node at index i is excluded from the rebuild since its
+// color entry has not yet been removed from the colors map.
+func (sd *saturationDegree) uncolorNode(i int) {
+	for _, j := range sd.adj[i] {
+		s := sd.adjColorSet(j)
+		clear(s)
+		for _, k := range sd.adj[j] {
+			if k != i {
+				if c, ok := sd.colors[sd.nodes[k].ID()]; ok {
+					s.set(c)
+				}
+			}
 		}
 	}
 }
@@ -752,7 +861,7 @@ func (sd *saturationDegree) dsatur() int {
 		if _, ok := sd.colors[uid]; ok {
 			continue
 		}
-		s := saturationDegreeOf(uid, sd.g, sd.colors)
+		s := sd.adjColorSet(i).colors()
 		d := sd.degrees[i]
 		switch {
 		// Choose a vertex with a maximal saturation degree.
@@ -776,7 +885,7 @@ func (sd *saturationDegree) pass() int {
 		if _, ok := sd.colors[uid]; ok {
 			continue
 		}
-		s := saturationDegreeOf(uid, sd.g, sd.colors)
+		s := sd.adjColorSet(i).colors()
 		switch {
 		case s > maxSat:
 			maxSat = s
@@ -791,7 +900,7 @@ func (sd *saturationDegree) pass() int {
 		var avail int
 		for _, v := range sd.work {
 			if v != vs {
-				avail += sd.same(sd.adjColors[vs], sd.adjColors[v])
+				avail += sd.same(sd.adjColorSet(vs), sd.adjColorSet(v))
 			}
 		}
 		switch {
@@ -804,31 +913,20 @@ func (sd *saturationDegree) pass() int {
 }
 
 // same implements the same function from San Segundo doi:10.1016/j.cor.2011.10.008.
-func (sd *saturationDegree) same(vi, vj set.Ints[int]) int {
-	valid := make(set.Ints[int])
-	for _, c := range sd.colors {
-		if !vi.Has(c) {
-			valid.Add(c)
+func (sd *saturationDegree) same(vi, vj colorSet) int {
+	n := 0
+	for w := range vi {
+		var used uint64
+		for _, c := range sd.colors {
+			// Select colors that belong in w and
+			// set the corresponding bit within it.
+			// c>>6 is the word index and c&63 is
+			// the bit position.
+			if c>>6 == w {
+				used |= 1 << uint(c&63)
+			}
 		}
+		n += bits.OnesCount64(used &^ vi[w] &^ vj[w])
 	}
-	for c := range vj {
-		valid.Remove(c)
-	}
-	return valid.Count()
-}
-
-// saturationDegreeOf returns the saturation degree of the node corresponding to
-// vid in g with the given coloring.
-func saturationDegreeOf(vid int64, g graph.Undirected, colors map[int64]int) int {
-	if _, ok := colors[vid]; ok {
-		panic("coloring: saturation degree not defined for colored node")
-	}
-	adjColors := make(set.Ints[int])
-	to := g.From(vid)
-	for to.Next() {
-		if c, ok := colors[to.Node().ID()]; ok {
-			adjColors.Add(c)
-		}
-	}
-	return adjColors.Count()
+	return n
 }

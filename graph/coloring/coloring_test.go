@@ -21,7 +21,7 @@ var runLong = flag.Bool("color.long", false, "run long exact coloring tests")
 
 var coloringTests = []struct {
 	name   string
-	g      graph.Undirected
+	g      graph6.Graph
 	colors int
 
 	long bool
@@ -36,7 +36,7 @@ var coloringTests = []struct {
 }{
 	{
 		name:   "empty",
-		g:      simple.NewUndirectedGraph(),
+		g:      graph6.Graph("?"),
 		colors: 0,
 	},
 	{
@@ -420,102 +420,17 @@ func setOf(vals ...int) set.Ints[int] {
 
 func TestDsatur(t *testing.T) {
 	for _, test := range coloringTests {
-		for _, partial := range []map[int64]int{nil, test.partial} {
-			k, colors, err := Dsatur(test.g, partial)
-
-			if partial == nil && k != test.colors && !test.dsatur.Has(k) {
-				t.Errorf("unexpected chromatic number for %q: got:%d want:%d or in %v\ncolors:%v",
-					test.name, k, test.colors, test.dsatur, colors)
+		t.Run(test.name, func(t *testing.T) {
+			if !graph6.IsValid(test.g) {
+				t.Fatal("graph is not valid g6")
 			}
-			if s := Sets(colors); len(s) != k {
-				t.Errorf("mismatch between number of color sets and k: |sets|=%d k=%d", len(s), k)
-			}
-			if missing, ok := isCompleteColoring(colors, test.g); !ok {
-				t.Errorf("incomplete coloring for %q: missing %d\ngot:%v", test.name, missing, colors)
-			}
-			if xid, yid, ok := isValidColoring(colors, test.g); !ok {
-				t.Errorf("invalid coloring for %q: %d--%d match color\ncolors:%v",
-					test.name, xid, yid, colors)
-			}
-			if err != nil {
-				t.Errorf("unexpected error: %v", err)
-			}
-
-			for id, c := range partial {
-				if colors[id] != c {
-					t.Errorf("coloring not consistent with input partial for %q:\ngot:%v\nwant superset of:%v",
-						test.name, colors, partial)
-					break
-				}
-			}
-		}
-	}
-}
-
-func TestDsaturExact(t *testing.T) {
-	timeout := time.Microsecond
-	for _, test := range coloringTests {
-		for _, useTimeout := range []bool{false, true} {
-			if test.long && !*runLong && !useTimeout {
-				continue
-			}
-			var (
-				term   Terminator
-				cancel func()
-			)
-			if useTimeout {
-				term, cancel = context.WithTimeout(context.Background(), timeout)
-			} else {
-				// Set a backstop to safeguard against occasional long running
-				// cases crashing the entire test set so get as much time as we can.
-				deadline, ok := t.Deadline()
-				if ok {
-					// But make sure we are faster than the watchdog.
-					deadline = deadline.Add(-10 * time.Second)
-					if deadline.Before(time.Now()) {
-						t.Errorf("we ran out of time by %q", test.name)
-					}
-					term, cancel = context.WithDeadline(context.Background(), deadline)
-				} else {
-					cancel = func() {}
-				}
-			}
-			k, colors, err := DsaturExact(term, test.g)
-			cancel()
-			if k != test.colors && (useTimeout && !test.dsatur.Has(k)) {
-				t.Errorf("unexpected chromatic number for %q timeout=%t: got:%d want:%d or in %v\ncolors:%v",
-					test.name, useTimeout, k, test.colors, test.dsatur, colors)
-			}
-			if s := Sets(colors); len(s) != k {
-				t.Errorf("mismatch between number of color sets and k: |sets|=%d k=%d", len(s), k)
-			}
-			if missing, ok := isCompleteColoring(colors, test.g); !ok {
-				t.Errorf("incomplete coloring for %q: missing %d\ngot:%v", test.name, missing, colors)
-			}
-			if xid, yid, ok := isValidColoring(colors, test.g); !ok {
-				t.Errorf("invalid coloring for %q: %d--%d match color\ncolors:%v",
-					test.name, xid, yid, colors)
-			}
-			if err != nil && !useTimeout {
-				if err != context.DeadlineExceeded {
-					t.Errorf("unexpected error for %q: %v", test.name, err)
-				} else {
-					t.Logf("test ran too long for %q", test.name)
-				}
-			}
-		}
-	}
-}
-
-func TestRandomized(t *testing.T) {
-	for seed := uint64(1); seed <= 1000; seed++ {
-		for _, test := range coloringTests {
 			for _, partial := range []map[int64]int{nil, test.partial} {
-				k, colors, err := Randomized(test.g, partial, rand.NewPCG(seed, seed))
 
-				if partial == nil && k != test.colors && !test.randomized.Has(k) {
-					t.Errorf("unexpected chromatic number for %q with seed=%d: got:%d want:%d or in %v\ncolors:%v",
-						test.name, seed, k, test.colors, test.randomized, colors)
+				k, colors, err := Dsatur(test.g, partial)
+
+				if partial == nil && k != test.colors && !test.dsatur.Has(k) {
+					t.Errorf("unexpected chromatic number for %q: got:%d want:%d or in %v\ncolors:%v",
+						test.name, k, test.colors, test.dsatur, colors)
 				}
 				if s := Sets(colors); len(s) != k {
 					t.Errorf("mismatch between number of color sets and k: |sets|=%d k=%d", len(s), k)
@@ -539,70 +454,119 @@ func TestRandomized(t *testing.T) {
 					}
 				}
 			}
+		})
+	}
+}
+
+func TestDsaturExact(t *testing.T) {
+	timeout := time.Microsecond
+	for _, test := range coloringTests {
+		t.Run(test.name, func(t *testing.T) {
+			if !graph6.IsValid(test.g) {
+				t.Fatal("graph is not valid g6")
+			}
+			for _, useTimeout := range []bool{false, true} {
+				if test.long && !*runLong && !useTimeout {
+					continue
+				}
+				var (
+					term   Terminator
+					cancel func()
+				)
+				if useTimeout {
+					term, cancel = context.WithTimeout(context.Background(), timeout)
+				} else {
+					// Set a backstop to safeguard against occasional long running
+					// cases crashing the entire test set so get as much time as we can.
+					deadline, ok := t.Deadline()
+					if ok {
+						// But make sure we are faster than the watchdog.
+						deadline = deadline.Add(-10 * time.Second)
+						if deadline.Before(time.Now()) {
+							t.Errorf("we ran out of time by %q", test.name)
+						}
+						term, cancel = context.WithDeadline(context.Background(), deadline)
+					} else {
+						cancel = func() {}
+					}
+				}
+				k, colors, err := DsaturExact(term, test.g)
+				cancel()
+				if k != test.colors && (useTimeout && !test.dsatur.Has(k)) {
+					t.Errorf("unexpected chromatic number for %q timeout=%t: got:%d want:%d or in %v\ncolors:%v",
+						test.name, useTimeout, k, test.colors, test.dsatur, colors)
+				}
+				if s := Sets(colors); len(s) != k {
+					t.Errorf("mismatch between number of color sets and k: |sets|=%d k=%d", len(s), k)
+				}
+				if missing, ok := isCompleteColoring(colors, test.g); !ok {
+					t.Errorf("incomplete coloring for %q: missing %d\ngot:%v", test.name, missing, colors)
+				}
+				if xid, yid, ok := isValidColoring(colors, test.g); !ok {
+					t.Errorf("invalid coloring for %q: %d--%d match color\ncolors:%v",
+						test.name, xid, yid, colors)
+				}
+				if err != nil && !useTimeout {
+					if err != context.DeadlineExceeded {
+						t.Errorf("unexpected error for %q: %v", test.name, err)
+					} else {
+						t.Logf("test ran too long for %q", test.name)
+					}
+				}
+			}
+		})
+	}
+}
+
+func TestRandomized(t *testing.T) {
+	for seed := uint64(1); seed <= 1000; seed++ {
+		for _, test := range coloringTests {
+			t.Run(test.name, func(t *testing.T) {
+				if !graph6.IsValid(test.g) {
+					t.Fatal("graph is not valid g6")
+				}
+				for _, partial := range []map[int64]int{nil, test.partial} {
+					k, colors, err := Randomized(test.g, partial, rand.NewPCG(seed, seed))
+
+					if partial == nil && k != test.colors && !test.randomized.Has(k) {
+						t.Errorf("unexpected chromatic number for %q with seed=%d: got:%d want:%d or in %v\ncolors:%v",
+							test.name, seed, k, test.colors, test.randomized, colors)
+					}
+					if s := Sets(colors); len(s) != k {
+						t.Errorf("mismatch between number of color sets and k: |sets|=%d k=%d", len(s), k)
+					}
+					if missing, ok := isCompleteColoring(colors, test.g); !ok {
+						t.Errorf("incomplete coloring for %q: missing %d\ngot:%v", test.name, missing, colors)
+					}
+					if xid, yid, ok := isValidColoring(colors, test.g); !ok {
+						t.Errorf("invalid coloring for %q: %d--%d match color\ncolors:%v",
+							test.name, xid, yid, colors)
+					}
+					if err != nil {
+						t.Errorf("unexpected error: %v", err)
+					}
+
+					for id, c := range partial {
+						if colors[id] != c {
+							t.Errorf("coloring not consistent with input partial for %q:\ngot:%v\nwant superset of:%v",
+								test.name, colors, partial)
+							break
+						}
+					}
+				}
+			})
 		}
 	}
 }
 
 func TestRecursiveLargestFirst(t *testing.T) {
 	for _, test := range coloringTests {
-		k, colors := RecursiveLargestFirst(test.g)
-		if k != test.colors && !test.rlf.Has(k) {
-			t.Errorf("unexpected chromatic number for %q: got:%d want:%d",
-				test.name, k, test.colors)
-		}
-		if s := Sets(colors); len(s) != k {
-			t.Errorf("mismatch between number of color sets and k: |sets|=%d k=%d", len(s), k)
-		}
-		if missing, ok := isCompleteColoring(colors, test.g); !ok {
-			t.Errorf("incomplete coloring for %q: missing %d\ngot:%v", test.name, missing, colors)
-		}
-		if xid, yid, ok := isValidColoring(colors, test.g); !ok {
-			t.Errorf("invalid coloring for %q: %d--%d match color\ncolors:%v",
-				test.name, xid, yid, colors)
-		}
-	}
-}
-
-func TestSanSegundo(t *testing.T) {
-	for _, test := range coloringTests {
-		for _, partial := range []map[int64]int{nil, test.partial} {
-			k, colors, err := SanSegundo(test.g, partial)
-
-			if partial == nil && k != test.colors && !test.sanSegundo.Has(k) {
-				t.Errorf("unexpected chromatic number for %q: got:%d want:%d\ncolors:%v",
-					test.name, k, test.colors, colors)
+		t.Run(test.name, func(t *testing.T) {
+			if !graph6.IsValid(test.g) {
+				t.Fatal("graph is not valid g6")
 			}
-			if s := Sets(colors); len(s) != k {
-				t.Errorf("mismatch between number of color sets and k: |sets|=%d k=%d", len(s), k)
-			}
-			if missing, ok := isCompleteColoring(colors, test.g); !ok {
-				t.Errorf("incomplete coloring for %q: missing %d\ngot:%v", test.name, missing, colors)
-			}
-			if xid, yid, ok := isValidColoring(colors, test.g); !ok {
-				t.Errorf("invalid coloring for %q: %d--%d match color\ncolors:%v",
-					test.name, xid, yid, colors)
-			}
-			if err != nil {
-				t.Errorf("unexpected error: %v", err)
-			}
-
-			for id, c := range partial {
-				if colors[id] != c {
-					t.Errorf("coloring not consistent with input partial for %q:\ngot:%v\nwant superset of:%v",
-						test.name, colors, partial)
-					break
-				}
-			}
-		}
-	}
-}
-
-func TestWelshPowell(t *testing.T) {
-	for _, test := range coloringTests {
-		for _, partial := range []map[int64]int{nil, test.partial} {
-			k, colors, err := WelshPowell(test.g, partial)
-
-			if partial == nil && k != test.colors && !test.welshPowell.Has(k) {
+			k, colors := RecursiveLargestFirst(test.g)
+			if k != test.colors && !test.rlf.Has(k) {
 				t.Errorf("unexpected chromatic number for %q: got:%d want:%d",
 					test.name, k, test.colors)
 			}
@@ -616,18 +580,85 @@ func TestWelshPowell(t *testing.T) {
 				t.Errorf("invalid coloring for %q: %d--%d match color\ncolors:%v",
 					test.name, xid, yid, colors)
 			}
-			if err != nil {
-				t.Errorf("unexpected error: %v", err)
-			}
+		})
+	}
+}
 
-			for id, c := range partial {
-				if colors[id] != c {
-					t.Errorf("coloring not consistent with input partial for %q:\ngot:%v\nwant superset of:%v",
-						test.name, colors, partial)
-					break
+func TestSanSegundo(t *testing.T) {
+	for _, test := range coloringTests {
+		t.Run(test.name, func(t *testing.T) {
+			if !graph6.IsValid(test.g) {
+				t.Fatal("graph is not valid g6")
+			}
+			for _, partial := range []map[int64]int{nil, test.partial} {
+				k, colors, err := SanSegundo(test.g, partial)
+
+				if partial == nil && k != test.colors && !test.sanSegundo.Has(k) {
+					t.Errorf("unexpected chromatic number for %q: got:%d want:%d\ncolors:%v",
+						test.name, k, test.colors, colors)
+				}
+				if s := Sets(colors); len(s) != k {
+					t.Errorf("mismatch between number of color sets and k: |sets|=%d k=%d", len(s), k)
+				}
+				if missing, ok := isCompleteColoring(colors, test.g); !ok {
+					t.Errorf("incomplete coloring for %q: missing %d\ngot:%v", test.name, missing, colors)
+				}
+				if xid, yid, ok := isValidColoring(colors, test.g); !ok {
+					t.Errorf("invalid coloring for %q: %d--%d match color\ncolors:%v",
+						test.name, xid, yid, colors)
+				}
+				if err != nil {
+					t.Errorf("unexpected error: %v", err)
+				}
+
+				for id, c := range partial {
+					if colors[id] != c {
+						t.Errorf("coloring not consistent with input partial for %q:\ngot:%v\nwant superset of:%v",
+							test.name, colors, partial)
+						break
+					}
 				}
 			}
-		}
+		})
+	}
+}
+
+func TestWelshPowell(t *testing.T) {
+	for _, test := range coloringTests {
+		t.Run(test.name, func(t *testing.T) {
+			if !graph6.IsValid(test.g) {
+				t.Fatal("graph is not valid g6")
+			}
+			for _, partial := range []map[int64]int{nil, test.partial} {
+				k, colors, err := WelshPowell(test.g, partial)
+
+				if partial == nil && k != test.colors && !test.welshPowell.Has(k) {
+					t.Errorf("unexpected chromatic number for %q: got:%d want:%d",
+						test.name, k, test.colors)
+				}
+				if s := Sets(colors); len(s) != k {
+					t.Errorf("mismatch between number of color sets and k: |sets|=%d k=%d", len(s), k)
+				}
+				if missing, ok := isCompleteColoring(colors, test.g); !ok {
+					t.Errorf("incomplete coloring for %q: missing %d\ngot:%v", test.name, missing, colors)
+				}
+				if xid, yid, ok := isValidColoring(colors, test.g); !ok {
+					t.Errorf("invalid coloring for %q: %d--%d match color\ncolors:%v",
+						test.name, xid, yid, colors)
+				}
+				if err != nil {
+					t.Errorf("unexpected error: %v", err)
+				}
+
+				for id, c := range partial {
+					if colors[id] != c {
+						t.Errorf("coloring not consistent with input partial for %q:\ngot:%v\nwant superset of:%v",
+							test.name, colors, partial)
+						break
+					}
+				}
+			}
+		})
 	}
 }
 
@@ -748,6 +779,9 @@ func undirectedGraphFrom(g []intset) graph.Undirected {
 func BenchmarkColoring(b *testing.B) {
 	for _, bench := range coloringTests {
 		b.Run(bench.name, func(b *testing.B) {
+			if !graph6.IsValid(bench.g) {
+				b.Fatalf("graph is not valid g6")
+			}
 			b.Run("Dsatur", func(b *testing.B) {
 				for i := 0; i < b.N; i++ {
 					_, _, err := Dsatur(bench.g, nil)

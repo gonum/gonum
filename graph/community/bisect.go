@@ -77,6 +77,26 @@ func ModularScore(g graph.Graph, score func(ReducedGraph) float64, effort int, s
 	}
 }
 
+// LeidenScore returns a Leiden modularized scoring function for Profile based on
+// the graph g and the given score function. The effort parameter determines how
+// many attempts will be made to get an improved score for any given resolution.
+// It uses the Leiden algorithm instead of Louvain, yielding well-connected communities.
+func LeidenScore(g graph.Graph, score func(ReducedGraph) float64, effort int, src rand.Source) func(float64) (float64, Reduced) {
+	return func(resolution float64) (float64, Reduced) {
+		max := math.Inf(-1)
+		var best Reduced
+		for i := 0; i < effort; i++ {
+			r := Leiden(g, resolution, src)
+			s := score(r)
+			if s > max {
+				max = s
+				best = r
+			}
+		}
+		return max, best
+	}
+}
+
 // SizeMultiplex is a score function that is the reciprocal of the number of communities.
 func SizeMultiplex(g ReducedMultiplex) float64 { return 1 / float64(len(g.Structure())) }
 

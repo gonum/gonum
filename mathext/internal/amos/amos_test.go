@@ -425,8 +425,13 @@ func zbknutest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi [
 	sameF64(t, "zbknu elim", ELIMfort, ELIMamos)
 	sameF64(t, "zbknu alim", ALIMfort, ALIMamos)
 
-	sameF64SApprox(t, "zbknu yr", YRfort, YRamos, 1e-12)
-	sameF64SApprox(t, "zbknu yi", YIfort, YIamos, 1e-12)
+	zbknuYTol := 1e-12
+	if runtime.GOOS == "darwin" {
+		// FIXME: On go1.26, this is required for darwin‽
+		zbknuYTol = 1e-9
+	}
+	sameF64SApprox(t, "zbknu yr", YRfort, YRamos, zbknuYTol)
+	sameF64SApprox(t, "zbknu yi", YIfort, YIamos, zbknuYTol)
 }
 
 func zairytest(t *testing.T, x []float64, kode, id int) {

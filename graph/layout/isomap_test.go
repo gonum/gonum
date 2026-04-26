@@ -26,6 +26,10 @@ var (
 	// and "_386" on 386 to allow differences in numerical precision
 	// to be allowed for.
 	arch string
+
+	// version is modified in isomap_version_1_26_test.go to "_1_26" on go1.26
+	// to allow differences in numerical precision to be allowed for.
+	version string
 )
 
 func TestIsomapR2(t *testing.T) {
@@ -169,7 +173,7 @@ func TestIsomapR2(t *testing.T) {
 		p := plot.New()
 		p.Add(render{o})
 		p.HideAxes()
-		path := filepath.Join("testdata", test.name+tag+arch+".png")
+		path := filepath.Join("testdata", test.name+tag+arch+version+".png")
 		err := p.Save(10*vg.Centimeter, 10*vg.Centimeter, path)
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)

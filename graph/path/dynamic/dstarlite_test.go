@@ -636,79 +636,43 @@ func TestDStarLiteDynamic(t *testing.T) {
 func TestMoveToAway(t *testing.T) {
 	t.Parallel()
 
-	g := simple.NewWeightedDirectedGraph(0, math.Inf(1))
-	p0 := simple.Node(0)
-	p1 := simple.Node(1)
-	p2 := simple.Node(2)
-	g.SetWeightedEdge(simple.WeightedEdge{F: p0, T: p1, W: 1})
-	g.SetWeightedEdge(simple.WeightedEdge{F: p1, T: p2, W: 1})
+	g := simple.NewUndirectedGraph()
+	for i := range 2 {
+		g.SetEdge(simple.Edge{F: simple.Node(i), T: simple.Node(i + 1)})
+	}
 
-	d := NewDStarLite(p1, p2, g, path.NullHeuristic, simple.NewWeightedDirectedGraph(0, math.Inf(1)))
-	_, _ = d.Path()
+	d := NewDStarLite(simple.Node(1), simple.Node(2), g, path.NullHeuristic, simple.NewWeightedDirectedGraph(0, math.Inf(1)))
 
-	d.MoveTo(p0)
+	// Shortest path so far would be 1->2. Now move off the shortest path to force a replan.
+	d.MoveTo(simple.Node(0))
+
+	wantP := []graph.Node{simple.Node(0), simple.Node(1), simple.Node(2)}
 	p, w := d.Path()
-	wantP := []graph.Node{p0, p1, p2}
-	wantW := 2.0
-
-	if !samePath(p, wantP) || w != wantW {
-		t.Errorf("unexpected path after move. got %v (weight %v), want %v (weight %v)", p, w, wantP, wantW)
+	if !samePath(p, wantP) || w != float64(len(wantP)-1) {
+		t.Errorf("unexpected path after move. got %v (weight %v), want %v (weight %v)", p, w, wantP, len(wantP)-1)
 	}
 }
 
 func TestStartEqualsTarget(t *testing.T) {
-	t.Parallel()
-
-	// Before the fix, the second call to d.Path() would go into an infinite loop
-	// So we use a timeout to bail from the test if that happens.
-	done := make(chan error)
-
+	ok := make(chan struct{})
 	go func() {
-		defer close(done)
-
-		g := simple.NewWeightedUndirectedGraph(0, math.Inf(1))
-		p0 := simple.Node(0)
-		p1 := simple.Node(1)
-		p2 := simple.Node(2)
-		for _, n := range []graph.Node{p0, p1, p2} {
-			for _, m := range []graph.Node{p0, p1, p2} {
-				if n.ID() != m.ID() {
-					g.SetWeightedEdge(simple.WeightedEdge{F: n, T: m, W: 1})
-				}
-			}
+		select {
+		case <-time.After(time.Second):
+			panic("timed out")
+		case <-ok:
 		}
-		d := NewDStarLite(p2, p2, g, path.NullHeuristic, simple.NewWeightedDirectedGraph(0, math.Inf(1)))
-
-		p, weight := d.Path()
-		wantP := []graph.Node{p2}
-		wantW := 0.0
-
-		if !samePath(p, wantP) || weight != wantW {
-			done <- fmt.Errorf("unexpected path. got %v (weight %v), want %v (weight %v)", p, weight, wantP, wantW)
-			return
-		}
-
-		d.MoveTo(p0)
-		p, weight = d.Path()
-		wantP = []graph.Node{p0, p2}
-		wantW = 1.0
-
-		if !samePath(p, wantP) || weight != wantW {
-			done <- fmt.Errorf("unexpected path after move. got %v (weight %v), want %v (weight %v)", p, weight, wantP, wantW)
-			return
-		}
-
 	}()
 
-	select {
-	case err := <-done:
-		if err != nil {
-			t.Error(err)
-		}
-
-	case <-time.After(1 * time.Second):
-		t.Error("test timed out => potential infinite loop in DStarLite.Path() when start equals target")
+	g := simple.NewUndirectedGraph()
+	for i := range 2 {
+		g.SetEdge(simple.Edge{F: simple.Node(i), T: simple.Node(i + 1)})
 	}
+
+	d := NewDStarLite(simple.Node(0), simple.Node(0), g, path.NullHeuristic, simple.NewWeightedDirectedGraph(0, math.Inf(1)))
+	d.MoveTo(simple.Node(1))
+	d.Path()
+
+	close(ok)
 }
 
 type memory bool

@@ -655,10 +655,11 @@ func TestMoveToAway(t *testing.T) {
 
 func TestStartEqualsTarget(t *testing.T) {
 	ok := make(chan struct{})
+	hang := make(chan struct{})
 	go func() {
 		select {
 		case <-time.After(time.Second):
-			panic("timed out")
+			close(hang)
 		case <-ok:
 		}
 	}()
@@ -668,11 +669,18 @@ func TestStartEqualsTarget(t *testing.T) {
 		g.SetEdge(simple.Edge{F: simple.Node(i), T: simple.Node(i + 1)})
 	}
 
-	d := NewDStarLite(simple.Node(0), simple.Node(0), g, path.NullHeuristic, simple.NewWeightedDirectedGraph(0, math.Inf(1)))
-	d.MoveTo(simple.Node(1))
-	d.Path()
+	go func() {
+		defer close(ok)
+		d := NewDStarLite(simple.Node(0), simple.Node(0), g, path.NullHeuristic, simple.NewWeightedDirectedGraph(0, math.Inf(1)))
+		d.MoveTo(simple.Node(1))
+		d.Path()
+	}()
 
-	close(ok)
+	select {
+	case <-ok:
+	case <-hang:
+		t.Error("timed out")
+	}
 }
 
 type memory bool

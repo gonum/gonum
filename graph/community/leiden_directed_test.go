@@ -47,7 +47,14 @@ func testLeidenDirected(t *testing.T, test communityDirectedQTest, g graph.Direc
 
 	src := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < iterations; i++ {
-		r := Leiden(g, 1, src).(*ReducedDirected)
+		rr, err := Leiden(g, 1, src)
+		if err != nil {
+			if rr == nil {
+				continue
+			}
+			t.Errorf("%s: Leiden returned error: %v", test.name, err)
+		}
+		r := rr.(*ReducedDirected)
 		// Q calculation for directed graph
 		q := Q(r, nil, 1)
 
@@ -121,7 +128,10 @@ func testLeidenDirected(t *testing.T, test communityDirectedQTest, g graph.Direc
 func TestLeidenDirectedWorks(t *testing.T) {
 	g := simple.NewDirectedGraph()
 	g.SetEdge(simple.Edge{F: simple.Node(0), T: simple.Node(1)})
-	r := Leiden(g, 1, nil)
+	r, err := Leiden(g, 1, nil)
+	if err != nil {
+		t.Fatalf("Leiden directed returned error: %v", err)
+	}
 	if r == nil {
 		t.Fatal("Leiden directed returned nil")
 	}
@@ -131,6 +141,8 @@ func TestLeidenDirectedWorks(t *testing.T) {
 func BenchmarkLeidenDirected(b *testing.B) {
 	src := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < b.N; i++ {
-		Leiden(dupGraphDirected, 1, src)
+		if _, err := Leiden(dupGraphDirected, 1, src); err != nil {
+			b.Fatal(err)
+		}
 	}
 }

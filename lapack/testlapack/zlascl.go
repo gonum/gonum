@@ -108,4 +108,55 @@ func ZlasclTest(t *testing.T, impl Zlascler) {
 			}
 		}
 	}
+
+	testZlasclStructuredStorage(t, impl)
+}
+
+func testZlasclStructuredStorage(t *testing.T, impl Zlascler) {
+	for _, test := range []struct {
+		name       string
+		kind       lapack.MatrixType
+		m, n       int
+		kl, ku     int
+		lda, width int
+		stored     func(row, col int) bool
+	}{
+		{
+			name: "upper Hessenberg", kind: 'H', m: 4, n: 5, lda: 7, width: 5,
+			stored: func(row, col int) bool { return row < 4 && col >= max(0, row-1) },
+		},
+		{
+			name: "lower symmetric band", kind: 'B', m: 5, n: 5, kl: 2, ku: 2, lda: 4, width: 3,
+			stored: func(row, col int) bool { return col <= min(2, 4-row) },
+		},
+		{
+			name: "upper symmetric band", kind: 'Q', m: 5, n: 5, kl: 2, ku: 2, lda: 4, width: 3,
+			stored: func(row, col int) bool { return col >= max(2-row, 0) && col <= 2 },
+		},
+		{
+			name: "general band", kind: 'Z', m: 5, n: 6, kl: 1, ku: 2, lda: 7, width: 5,
+			stored: func(row, col int) bool {
+				return col >= max(3-row, 1) && col <= min(4, 7-row)
+			},
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			a := make([]complex128, test.n*test.lda)
+			for i := range a {
+				a[i] = complex(float64(i+1), -float64(i+1))
+			}
+			want := append([]complex128(nil), a...)
+			impl.Zlascl(test.kind, test.kl, test.ku, 1, 2, test.m, test.n, a, test.lda)
+			for row := 0; row < test.n; row++ {
+				for col := 0; col < test.lda; col++ {
+					if col < test.width && test.stored(row, col) {
+						want[row*test.lda+col] *= 2
+					}
+					if a[row*test.lda+col] != want[row*test.lda+col] {
+						t.Errorf("entry (%d,%d)=%v, want %v", row, col, a[row*test.lda+col], want[row*test.lda+col])
+					}
+				}
+			}
+		})
+	}
 }

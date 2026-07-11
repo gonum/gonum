@@ -17,16 +17,6 @@ import (
 //
 // Zlascl is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Zlascl(kind lapack.MatrixType, kl, ku int, cfrom, cto float64, m, n int, a []complex128, lda int) {
-	switch kind {
-	default:
-		panic(badMatrixType)
-	case 'H', 'B', 'Q', 'Z': // See zlascl.f.
-		panic("not implemented")
-	case lapack.General, lapack.UpperTri, lapack.LowerTri:
-		if lda < max(1, n) {
-			panic(badLdA)
-		}
-	}
 	switch {
 	case cfrom == 0:
 		panic(zeroCFrom)
@@ -40,13 +30,48 @@ func (impl Implementation) Zlascl(kind lapack.MatrixType, kl, ku int, cfrom, cto
 		panic(nLT0)
 	}
 
+	width := n
+	switch kind {
+	default:
+		panic(badMatrixType)
+	case lapack.General, lapack.UpperTri, lapack.LowerTri, lapack.UpperHessenberg:
+		if lda < max(1, n) {
+			panic(badLdA)
+		}
+	case lapack.SymBandLower, lapack.SymBandUpper, lapack.Band:
+		if kl < 0 || kl > max(m-1, 0) {
+			panic(badKL)
+		}
+		if ku < 0 || ku > max(n-1, 0) || (kind != lapack.Band && kl != ku) {
+			panic(badKU)
+		}
+		if kind != lapack.Band && m != n {
+			panic(mNotN)
+		}
+		switch kind {
+		case lapack.SymBandLower:
+			width = kl + 1
+		case lapack.SymBandUpper:
+			width = ku + 1
+		case lapack.Band:
+			width = 2*kl + ku + 1
+		}
+		if lda < max(1, width) {
+			panic(badLdA)
+		}
+	}
+
 	if n == 0 || m == 0 {
 		return
 	}
 
 	switch kind {
-	case lapack.General, lapack.UpperTri, lapack.LowerTri:
+	case lapack.General, lapack.UpperTri, lapack.LowerTri, lapack.UpperHessenberg:
 		if len(a) < (m-1)*lda+n {
+			panic(shortA)
+		}
+	case lapack.SymBandLower, lapack.SymBandUpper, lapack.Band:
+		if len(a) < (n-1)*lda+width {
 			panic(shortA)
 		}
 	}
@@ -102,6 +127,32 @@ func (impl Implementation) Zlascl(kind lapack.MatrixType, kl, ku int, cfrom, cto
 			for i := 0; i < m; i++ {
 				for j := 0; j <= min(i, n-1); j++ {
 					a[i*lda+j] = a[i*lda+j] * cmul
+				}
+			}
+		case lapack.UpperHessenberg:
+			for i := 0; i < m; i++ {
+				for j := max(0, i-1); j < n; j++ {
+					a[i*lda+j] *= cmul
+				}
+			}
+		case lapack.SymBandLower:
+			for i := 0; i < n; i++ {
+				for j := 0; j <= min(kl, n-i-1); j++ {
+					a[i*lda+j] *= cmul
+				}
+			}
+		case lapack.SymBandUpper:
+			for i := 0; i < n; i++ {
+				for j := max(ku-i, 0); j <= ku; j++ {
+					a[i*lda+j] *= cmul
+				}
+			}
+		case lapack.Band:
+			for i := 0; i < n; i++ {
+				j0 := max(kl+ku-i, kl)
+				j1 := min(2*kl+ku, kl+ku+m-i-1)
+				for j := j0; j <= j1; j++ {
+					a[i*lda+j] *= cmul
 				}
 			}
 		}

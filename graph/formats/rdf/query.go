@@ -36,6 +36,19 @@ func (g *Graph) Query(from ...Term) Query {
 // starting nodes via statements that satisfy fn.
 func (q Query) Out(fn func(s *Statement) bool) Query {
 	r := Query{g: q.g}
+	if g, ok := q.g.(*Graph); ok {
+		for _, s := range q.terms {
+			for vid, lines := range g.from[s.ID()] {
+				for _, l := range lines {
+					if stmt, ok := l.(*Statement); ok && fn(stmt) {
+						r.terms = append(r.terms, g.nodes[vid].(Term))
+						break
+					}
+				}
+			}
+		}
+		return r
+	}
 	for _, s := range q.terms {
 		it := q.g.From(s.ID())
 		for it.Next() {
@@ -51,6 +64,19 @@ func (q Query) Out(fn func(s *Statement) bool) Query {
 // starting nodes via statements that satisfy fn.
 func (q Query) In(fn func(s *Statement) bool) Query {
 	r := Query{g: q.g}
+	if g, ok := q.g.(*Graph); ok {
+		for _, s := range q.terms {
+			for uid, lines := range g.to[s.ID()] {
+				for _, l := range lines {
+					if stmt, ok := l.(*Statement); ok && fn(stmt) {
+						r.terms = append(r.terms, g.nodes[uid].(Term))
+						break
+					}
+				}
+			}
+		}
+		return r
+	}
 	for _, s := range q.terms {
 		it := q.g.To(s.ID())
 		for it.Next() {
@@ -69,6 +95,20 @@ func (q Query) In(fn func(s *Statement) bool) Query {
 func (q Query) HasAllOut(fn func(s *Statement) bool) Query {
 	r := Query{g: q.g}
 	notFn := not(fn)
+	if g, ok := q.g.(*Graph); ok {
+	loop1:
+		for _, s := range q.terms {
+			for _, lines := range g.from[s.ID()] {
+				for _, l := range lines {
+					if stmt, ok := l.(*Statement); ok && notFn(stmt) {
+						continue loop1
+					}
+				}
+			}
+			r.terms = append(r.terms, s)
+		}
+		return r
+	}
 loop:
 	for _, s := range q.terms {
 		it := q.g.From(s.ID())
@@ -89,6 +129,20 @@ loop:
 func (q Query) HasAllIn(fn func(s *Statement) bool) Query {
 	r := Query{g: q.g}
 	notFn := not(fn)
+	if g, ok := q.g.(*Graph); ok {
+	loop1:
+		for _, s := range q.terms {
+			for _, lines := range g.to[s.ID()] {
+				for _, l := range lines {
+					if stmt, ok := l.(*Statement); ok && notFn(stmt) {
+						continue loop1
+					}
+				}
+			}
+			r.terms = append(r.terms, s)
+		}
+		return r
+	}
 loop:
 	for _, s := range q.terms {
 		it := q.g.To(s.ID())
@@ -107,6 +161,20 @@ loop:
 // query short circuits, so fn is not called after the first match.
 func (q Query) HasAnyOut(fn func(s *Statement) bool) Query {
 	r := Query{g: q.g}
+	if g, ok := q.g.(*Graph); ok {
+	loop1:
+		for _, s := range q.terms {
+			for _, lines := range g.from[s.ID()] {
+				for _, l := range lines {
+					if stmt, ok := l.(*Statement); ok && fn(stmt) {
+						r.terms = append(r.terms, s)
+						continue loop1
+					}
+				}
+			}
+		}
+		return r
+	}
 	for _, s := range q.terms {
 		it := q.g.From(s.ID())
 		for it.Next() {
@@ -124,6 +192,20 @@ func (q Query) HasAnyOut(fn func(s *Statement) bool) Query {
 // query short circuits, so fn is not called after the first match.
 func (q Query) HasAnyIn(fn func(s *Statement) bool) Query {
 	r := Query{g: q.g}
+	if g, ok := q.g.(*Graph); ok {
+	loop1:
+		for _, s := range q.terms {
+			for _, lines := range g.to[s.ID()] {
+				for _, l := range lines {
+					if stmt, ok := l.(*Statement); ok && fn(stmt) {
+						r.terms = append(r.terms, s)
+						continue loop1
+					}
+				}
+			}
+		}
+		return r
+	}
 	for _, s := range q.terms {
 		it := q.g.To(s.ID())
 		for it.Next() {

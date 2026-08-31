@@ -638,6 +638,21 @@ func TestDtbtrs(t *testing.T) {
 	testlapack.DtbtrsTest(t, impl)
 }
 
+func TestDlaic1(t *testing.T) {
+	t.Parallel()
+	testlapack.Dlaic1Test(t, impl)
+}
+
+func TestDormrz(t *testing.T) {
+	t.Parallel()
+	testlapack.DormrzTest(t, impl)
+}
+
+func TestDtzrzf(t *testing.T) {
+	t.Parallel()
+	testlapack.DtzrzfTest(t, impl)
+}
+
 func TestDtrcon(t *testing.T) {
 	t.Parallel()
 	testlapack.DtrconTest(t, impl)

@@ -37,7 +37,14 @@ func TestLeidenDirectedMultiplex(t *testing.T) {
 
 		src := rand.New(rand.NewPCG(1, 1))
 		for i := 0; i < iterations; i++ {
-			r := LeidenMultiplex(g, weights, nil, true, src).(*ReducedDirectedMultiplex)
+			rr, err := LeidenMultiplex(g, weights, nil, true, src)
+			if err != nil {
+				if rr == nil {
+					continue
+				}
+				t.Errorf("%s: LeidenMultiplex returned error: %v", test.name, err)
+			}
+			r := rr.(*ReducedDirectedMultiplex)
 
 			qVec := QMultiplex(r, nil, weights, nil)
 			q := floats.Sum(qVec)
@@ -126,11 +133,12 @@ func TestLeidenNonContiguousDirectedMultiplex(t *testing.T) {
 
 	func() {
 		defer func() {
-			r := recover()
-			if r != nil {
+			if r := recover(); r != nil {
 				t.Error("unexpected panic with non-contiguous ID range")
 			}
 		}()
-		LeidenMultiplex(DirectedLayers{g}, nil, nil, true, nil)
+		if _, err := LeidenMultiplex(DirectedLayers{g}, nil, nil, true, nil); err != nil {
+			t.Errorf("unexpected error with non-contiguous ID range: %v", err)
+		}
 	}()
 }

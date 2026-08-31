@@ -23,19 +23,22 @@ import (
 // [Traag, Waltman & Van Eck, Sci Rep 9, 5233 (2019)].
 //
 // If src is nil, rand.IntN is used as the random generator. Leiden will panic
-// if g has any edge with negative edge weight.
+// if g has any edge with negative edge weight. Leiden will return an error if
+// g has an unsupported type or if the algorithm does not converge within the
+// iteration limit. On non-convergence the returned ReducedGraph holds the best
+// partition found so far and may be used if a suboptimal result is acceptable.
 //
 // graph.Undirect may be used as a shim to allow modularization of directed graphs.
 //
 // [Traag, Waltman & Van Eck, Sci Rep 9, 5233 (2019)]: https://doi.org/10.1038/s41598-019-41695-z
-func Leiden(g graph.Graph, resolution float64, src rand.Source) ReducedGraph {
+func Leiden(g graph.Graph, resolution float64, src rand.Source) (ReducedGraph, error) {
 	switch g := g.(type) {
 	case graph.Undirected:
 		return leidenUndirected(g, resolution, src)
 	case graph.Directed:
 		return leidenDirected(g, resolution, src)
 	default:
-		panic(fmt.Sprintf("community: invalid graph type: %T", g))
+		return nil, fmt.Errorf("community: invalid graph type: %T", g)
 	}
 }
 
@@ -45,7 +48,7 @@ const maxLeidenIterations = 1000
 
 // leidenUndirected returns the hierarchical modularization of g at the given
 // resolution using the Leiden algorithm.
-func leidenUndirected(g graph.Undirected, resolution float64, src rand.Source) *ReducedUndirected {
+func leidenUndirected(g graph.Undirected, resolution float64, src rand.Source) (*ReducedUndirected, error) {
 	c := reduceUndirected(g, nil)
 	rnd := rand.IntN
 	if src != nil {
@@ -54,11 +57,11 @@ func leidenUndirected(g graph.Undirected, resolution float64, src rand.Source) *
 	for iter := 0; iter < maxLeidenIterations; iter++ {
 		l := newUndirectedLocalMover(c, c.communities, resolution)
 		if l == nil {
-			return c
+			return c, nil
 		}
 		done := l.localMovingHeuristic(rnd)
 		if done {
-			return c
+			return c, nil
 		}
 		refined := refineUndirected(l, resolution, rnd)
 		// If the refinement phase resulted in no reduction in the number of
@@ -70,11 +73,11 @@ func leidenUndirected(g graph.Undirected, resolution float64, src rand.Source) *
 			}
 		}
 		if nonEmpty == len(c.nodes) {
-			return c
+			return c, nil
 		}
 		c = reduceUndirected(c, refined)
 	}
-	panic("community: Leiden did not converge within 1000 iterations")
+	return c, fmt.Errorf("community: Leiden did not converge within %d iterations", maxLeidenIterations)
 }
 
 // inducedUndirected is an undirected graph view over a subset of nodes of a
@@ -201,8 +204,11 @@ func refineUndirected(l *undirectedLocalMover, resolution float64, rnd func(int)
 // communities will be searched during the modularization. If src is nil, rand.IntN is
 // used as the random generator.
 // LeidenMultiplex will panic if g has any edge whose weight has
-// the opposite sign to its layer weight.
-func LeidenMultiplex(g Multiplex, weights, resolutions []float64, all bool, src rand.Source) ReducedMultiplex {
+// the opposite sign to its layer weight, or if weights or resolutions have the wrong length.
+// LeidenMultiplex returns an error if the algorithm does not converge within the iteration
+// limit. On non-convergence the returned ReducedMultiplex holds the best partition found
+// so far and may be used if a suboptimal result is acceptable.
+func LeidenMultiplex(g Multiplex, weights, resolutions []float64, all bool, src rand.Source) (ReducedMultiplex, error) {
 	if weights != nil && len(weights) != g.Depth() {
 		panic("community: weights vector length mismatch")
 	}

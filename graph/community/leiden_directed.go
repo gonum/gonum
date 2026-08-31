@@ -5,6 +5,7 @@
 package community
 
 import (
+	"fmt"
 	"math/rand/v2"
 	"slices"
 
@@ -16,7 +17,7 @@ import (
 
 // leidenDirected returns the hierarchical modularization of g at the given
 // resolution using the Leiden algorithm.
-func leidenDirected(g graph.Directed, resolution float64, src rand.Source) *ReducedDirected {
+func leidenDirected(g graph.Directed, resolution float64, src rand.Source) (*ReducedDirected, error) {
 	c := reduceDirected(g, nil)
 	rnd := rand.IntN
 	if src != nil {
@@ -25,11 +26,11 @@ func leidenDirected(g graph.Directed, resolution float64, src rand.Source) *Redu
 	for iter := 0; iter < maxLeidenIterations; iter++ {
 		l := newDirectedLocalMover(c, c.communities, resolution)
 		if l == nil {
-			return c
+			return c, nil
 		}
 		done := l.localMovingHeuristic(rnd)
 		if done {
-			return c
+			return c, nil
 		}
 		refined := refineDirected(l, resolution, rnd)
 		// If the refinement phase resulted in no reduction in the number of
@@ -41,11 +42,11 @@ func leidenDirected(g graph.Directed, resolution float64, src rand.Source) *Redu
 			}
 		}
 		if nonEmpty == len(c.nodes) {
-			return c
+			return c, nil
 		}
 		c = reduceDirected(c, refined)
 	}
-	panic("community: Leiden did not converge within 1000 iterations")
+	return c, fmt.Errorf("community: Leiden did not converge within %d iterations", maxLeidenIterations)
 }
 
 // inducedDirected is a directed graph view over a subset of nodes of a

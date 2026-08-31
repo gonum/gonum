@@ -5,6 +5,7 @@
 package community
 
 import (
+	"fmt"
 	"math/rand/v2"
 	"slices"
 
@@ -52,7 +53,7 @@ func refineDirectedMultiplex(l *directedMultiplexLocalMover, weights, resolution
 	return refined
 }
 
-func leidenDirectedMultiplex(g DirectedMultiplex, weights, resolutions []float64, all bool, src rand.Source) *ReducedDirectedMultiplex {
+func leidenDirectedMultiplex(g DirectedMultiplex, weights, resolutions []float64, all bool, src rand.Source) (*ReducedDirectedMultiplex, error) {
 	if weights != nil && len(weights) != g.Depth() {
 		panic("community: weights vector length mismatch")
 	}
@@ -68,11 +69,11 @@ func leidenDirectedMultiplex(g DirectedMultiplex, weights, resolutions []float64
 	for iter := 0; iter < maxLeidenIterations; iter++ {
 		l := newDirectedMultiplexLocalMover(c, c.communities, weights, resolutions, all)
 		if l == nil {
-			return c
+			return c, nil
 		}
 		done := l.localMovingHeuristic(rnd)
 		if done {
-			return c
+			return c, nil
 		}
 		refined := refineDirectedMultiplex(l, weights, resolutions, all, rnd)
 		// If the refinement phase resulted in no reduction in the number of
@@ -84,11 +85,11 @@ func leidenDirectedMultiplex(g DirectedMultiplex, weights, resolutions []float64
 			}
 		}
 		if nonEmpty == len(c.nodes) {
-			return c
+			return c, nil
 		}
 		c = reduceDirectedMultiplex(c, refined, weights)
 	}
-	panic("community: Leiden did not converge within 1000 iterations")
+	return c, fmt.Errorf("community: Leiden did not converge within %d iterations", maxLeidenIterations)
 }
 
 // inducedDirectedMultiplex is an directed multiplex view over a subset of

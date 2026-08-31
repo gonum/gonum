@@ -48,8 +48,14 @@ func TestLeidenVsLouvainArxiv(t *testing.T) {
 						srcL := rand.New(rand.NewPCG(uint64(i), 0))
 						srcD := rand.New(rand.NewPCG(uint64(i), 0))
 
-						rLouvain := Modularize(test.g, γ, srcL)
-						rLeiden := Leiden(test.g, γ, srcD)
+						rLouvain, err := Modularize(test.g, γ, srcL)
+						if err != nil {
+							t.Fatalf("unexpected error from Modularize: %v", err)
+						}
+						rLeiden, err := Leiden(test.g, γ, srcD)
+						if err != nil {
+							t.Fatalf("unexpected error from Leiden: %v", err)
+						}
 
 						qL := Q(rLouvain, nil, γ)
 						qD := Q(rLeiden, nil, γ)
@@ -80,7 +86,6 @@ func TestLeidenVsLouvainArxiv(t *testing.T) {
 	}
 }
 
-
 // TestLeidenVsLouvainDisconnected demonstrates Louvain's known weakness:
 // it can produce communities that are not internally connected.
 //
@@ -99,12 +104,18 @@ func TestLeidenVsLouvainDisconnected(t *testing.T) {
 	const γ = 1.5
 
 	srcLouvain := rand.New(rand.NewPCG(4, 19))
-	rLouvain := Modularize(g, γ, srcLouvain)
+	rLouvain, err := Modularize(g, γ, srcLouvain)
+	if err != nil {
+		t.Fatalf("unexpected error from Modularize: %v", err)
+	}
 	louvainComms := rLouvain.Communities()
 	qLouvain := Q(rLouvain, nil, γ)
 
 	srcLeiden := rand.New(rand.NewPCG(4, 19))
-	rLeiden := Leiden(g, γ, srcLeiden)
+	rLeiden, err := Leiden(g, γ, srcLeiden)
+	if err != nil {
+		t.Fatalf("unexpected error from Leiden: %v", err)
+	}
 	leidenComms := rLeiden.Communities()
 	qLeiden := Q(rLeiden, nil, γ)
 

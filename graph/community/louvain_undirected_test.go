@@ -695,7 +695,11 @@ func testModularizeUndirected(t *testing.T, test communityUndirectedQTest, g gra
 	// ensure the level tests are consistent.
 	src := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < louvainIterations; i++ {
-		r := Modularize(g, 1, src).(*ReducedUndirected)
+		reduced, err := Modularize(g, 1, src)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		r := reduced.(*ReducedUndirected)
 		if q := Q(r, nil, 1); q > bestQ || math.IsNaN(q) {
 			bestQ = q
 			got = r
@@ -768,7 +772,7 @@ func TestNonContiguousUndirected(t *testing.T) {
 				t.Error("unexpected panic with non-contiguous ID range")
 			}
 		}()
-		Modularize(g, 1, nil)
+		_, _ = Modularize(g, 1, nil)
 	}()
 }
 
@@ -788,13 +792,13 @@ func TestNonContiguousWeightedUndirected(t *testing.T) {
 				t.Error("unexpected panic with non-contiguous ID range")
 			}
 		}()
-		Modularize(g, 1, nil)
+		_, _ = Modularize(g, 1, nil)
 	}()
 }
 
 func BenchmarkLouvain(b *testing.B) {
 	src := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < b.N; i++ {
-		Modularize(dupGraph, 1, src)
+		_, _ = Modularize(dupGraph, 1, src)
 	}
 }

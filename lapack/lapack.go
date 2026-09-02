@@ -238,3 +238,14 @@ const (
 	OrthoExplicit OrthoComp = 'I' // The orthogonal matrix is formed explicitly and returned in the argument.
 	OrthoPostmul  OrthoComp = 'V' // The orthogonal matrix is post-multiplied into the matrix stored in the argument on entry.
 )
+
+// SchurSort specifies eigenvalue sorting in Dgees and Dgges.
+type SchurSort byte
+
+const (
+	SortNone     SchurSort = 'N' // No sorting.
+	SortSelected SchurSort = 'S' // Sort selected eigenvalues to top-left.
+)
+
+// SchurSelect is a function type for generalized eigenvalue selection.
+type SchurSelect func(alphar, alphai, beta float64) bool

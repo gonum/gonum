@@ -25,6 +25,7 @@ const (
 	badPivot            = "lapack: bad Pivot"
 	badRightEVJob       = "lapack: bad RightEVJob"
 	badSVDJob           = "lapack: bad SVDJob"
+	badSchurSort        = "lapack: bad SchurSort"
 	badSchurComp        = "lapack: bad SchurComp"
 	badSchurJob         = "lapack: bad SchurJob"
 	badSide             = "lapack: bad Side"
@@ -37,6 +38,7 @@ const (
 
 	// Panic strings for bad numerical and string values.
 	badIfst     = "lapack: ifst out of range"
+	badIJob     = "lapack: bad ijob value"
 	badIhi      = "lapack: ihi out of range"
 	badIhiz     = "lapack: ihiz out of range"
 	badIlo      = "lapack: ilo out of range"

@@ -668,6 +668,76 @@ func TestDtrtrs(t *testing.T) {
 	testlapack.DtrtrsTest(t, impl)
 }
 
+func TestZlacpy(t *testing.T) {
+	t.Parallel()
+	testlapack.ZlacpyTest(t, impl)
+}
+
+func TestZlange(t *testing.T) {
+	t.Parallel()
+	testlapack.ZlangeTest(t, impl)
+}
+
+func TestZlanhs(t *testing.T) {
+	t.Parallel()
+	testlapack.ZlanhsTest(t, impl)
+}
+
+func TestZlartg(t *testing.T) {
+	t.Parallel()
+	testlapack.ZlartgTest(t, impl)
+}
+
+func TestZlascl(t *testing.T) {
+	t.Parallel()
+	testlapack.ZlasclTest(t, impl)
+}
+
+func TestZlaset(t *testing.T) {
+	t.Parallel()
+	testlapack.ZlasetTest(t, impl)
+}
+
+func TestZlarf(t *testing.T) {
+	t.Parallel()
+	testlapack.ZlarfTest(t, impl)
+}
+
+func TestZlarfb(t *testing.T) {
+	t.Parallel()
+	testlapack.ZlarfbTest(t, impl)
+}
+
+func TestZlarfg(t *testing.T) {
+	t.Parallel()
+	testlapack.ZlarfgTest(t, impl)
+}
+
+func TestZlarft(t *testing.T) {
+	t.Parallel()
+	testlapack.ZlarftTest(t, impl)
+}
+
+func TestZlasr(t *testing.T) {
+	t.Parallel()
+	testlapack.ZlasrTest(t, impl)
+}
+
+func TestZgetrf(t *testing.T) {
+	t.Parallel()
+	testlapack.ZgetrfTest(t, impl)
+}
+
+func TestZgetrs(t *testing.T) {
+	t.Parallel()
+	testlapack.ZgetrsTest(t, impl)
+}
+
+func TestZgesv(t *testing.T) {
+	t.Parallel()
+	testlapack.ZgesvTest(t, impl)
+}
+
 func TestIladlc(t *testing.T) {
 	t.Parallel()
 	testlapack.IladlcTest(t, impl)

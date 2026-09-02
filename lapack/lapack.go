@@ -84,9 +84,13 @@ const (
 type MatrixType byte
 
 const (
-	General  MatrixType = 'G' // A general dense matrix.
-	UpperTri MatrixType = 'U' // An upper triangular matrix.
-	LowerTri MatrixType = 'L' // A lower triangular matrix.
+	General         MatrixType = 'G' // A general dense matrix.
+	UpperTri        MatrixType = 'U' // An upper triangular matrix.
+	LowerTri        MatrixType = 'L' // A lower triangular matrix.
+	UpperHessenberg MatrixType = 'H' // An upper Hessenberg matrix.
+	SymBandLower    MatrixType = 'B' // The lower half of a symmetric band matrix.
+	SymBandUpper    MatrixType = 'Q' // The upper half of a symmetric band matrix.
+	Band            MatrixType = 'Z' // A general band matrix.
 )
 
 // Pivot specifies the pivot type for plane rotations.

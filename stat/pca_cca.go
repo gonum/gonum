@@ -48,6 +48,9 @@ func (c *PC) PrincipalComponents(a mat.Matrix, weights []float64) (ok bool) {
 
 // VectorsTo returns the component direction vectors of a principal components
 // analysis. The vectors are returned in the columns of a d×min(n, d) matrix.
+// The columns are ordered to correspond to the variances returned by VarsTo,
+// so the first column is the direction of greatest variance and subsequent
+// columns are in order of decreasing variance.
 //
 // If dst is empty, VectorsTo will resize dst to be d×min(n, d). When dst is
 // non-empty, VectorsTo will panic if dst is not d×min(n, d). VectorsTo will also

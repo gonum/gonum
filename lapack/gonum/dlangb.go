@@ -57,7 +57,7 @@ func (impl Implementation) Dlangb(norm lapack.MatrixNorm, m, n, kl, ku int, ab [
 		for i := 0; i < min(m, n+kl); i++ {
 			l := max(0, kl-i)
 			u := min(n+kl-i, ncol)
-			sum := f64.L1Norm(ab[i*ldab+l : i*ldab+u])
+			sum := f64.L1NormUnitary(ab[i*ldab+l : i*ldab+u])
 			if sum > value || math.IsNaN(sum) {
 				value = sum
 			}

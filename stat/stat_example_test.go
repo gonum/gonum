@@ -14,18 +14,6 @@ import (
 )
 
 func ExampleBivariateMoment() {
-	// The bivariate central moment
-	//
-	//	μ_rs = E[(x-μ_x)^r*(y-μ_y)^s]
-	//
-	// generalises the covariance, which is the (1,1) moment. The (2,2)
-	// moment gives the leading term of the sampling variance of a
-	// covariance estimate,
-	//
-	//	Var(cov) ≈ (μ_22 - μ_11^2)/n
-	//
-	// so BivariateMoment can be used to attach a standard error to a
-	// covariance. See https://stats.stackexchange.com/q/48366.
 	const n = 1000
 
 	xs := make([]float64, n)
@@ -39,24 +27,29 @@ func ExampleBivariateMoment() {
 		ys[i] = 0.5*xs[i] + rnd.NormFloat64()
 	}
 
+	// The (2,2) moment leads the sampling variance of a covariance
+	// estimate, Var(cov) ≈ (μ_22 - μ_11^2)/n, so BivariateMoment can be
+	// used to attach a standard error to a covariance. See
+	// https://stats.stackexchange.com/q/48366.
+	//
 	// BivariateMoment applies no degrees of freedom correction, so the
 	// (1,1) moment divides by n where Covariance divides by n-1.
 	m11 := stat.BivariateMoment(1, 1, xs, ys, nil)
 	m22 := stat.BivariateMoment(2, 2, xs, ys, nil)
-	cov := stat.Covariance(xs, ys, nil)
-
 	stdErr := math.Sqrt((m22 - m11*m11) / n)
 
-	fmt.Printf("μ_11     = %.6f\n", m11)
-	fmt.Printf("cov      = %.6f\n", cov)
-	fmt.Printf("μ_22     = %.6f\n", m22)
-	fmt.Printf("std err  = %.6f\n", stdErr)
+	cov := stat.Covariance(xs, ys, nil)
+
+	fmt.Printf("μ_11    = %.6f\n", m11)
+	fmt.Printf("cov     = %.6f\n", cov)
+	fmt.Printf("μ_22    = %.6f\n", m22)
+	fmt.Printf("std err = %.6f\n", stdErr)
 
 	// Output:
-	// μ_11     = 0.490614
-	// cov      = 0.491105
-	// μ_22     = 1.685326
-	// std err  = 0.038008
+	// μ_11    = 0.490614
+	// cov     = 0.491105
+	// μ_22    = 1.685326
+	// std err = 0.038008
 }
 
 func ExampleLinearRegression() {

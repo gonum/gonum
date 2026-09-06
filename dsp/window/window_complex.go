@@ -21,7 +21,7 @@ import "math"
 //
 // for k=0,1,...,N-1 where N is the length of the window.
 //
-// Spectral leakage parameters: ΔF_0 = 2, ΔF_0.5 = 0.89, K = 1, ɣ_max = -13, β = 0.
+// Spectral leakage parameters: ΔF_0 = 2, ΔF_0.5 = 0.88, ENBW = 1, K = 1, ɣ_max = -13.3, β = 0.
 func RectangularComplex(seq []complex128) []complex128 {
 	return seq
 }
@@ -39,7 +39,7 @@ func RectangularComplex(seq []complex128) []complex128 {
 //
 // for k=0,1,...,N-1 where N is the length of the window.
 //
-// Spectral leakage parameters: ΔF_0 = 3, ΔF_0.5 = 1.23, K = 1.5, ɣ_max = -23, β = -3.93.
+// Spectral leakage parameters: ΔF_0 = 3, ΔF_0.5 = 1.19, ENBW = 1.23, K = 1.5, ɣ_max = -23, β = -3.92.
 func SineComplex(seq []complex128) []complex128 {
 	k := math.Pi / float64(len(seq)-1)
 	for i, v := range seq {
@@ -62,7 +62,7 @@ func SineComplex(seq []complex128) []complex128 {
 //
 // for k=0,1,...,N-1 where N is the length of the window.
 //
-// Spectral leakage parameters: ΔF_0 = 3.24, ΔF_0.5 = 1.3, K = 1.62, ɣ_max = -26.4, β = -4.6.
+// Spectral leakage parameters: ΔF_0 = 3.28, ΔF_0.5 = 1.25, ENBW = 1.3, K = 1.64, ɣ_max = -26.4, β = -4.59.
 func LanczosComplex(seq []complex128) []complex128 {
 	k := 2 / float64(len(seq)-1)
 	for i, v := range seq {
@@ -90,7 +90,7 @@ func LanczosComplex(seq []complex128) []complex128 {
 //
 // for k=0,1,...,N-1 where N is the length of the window.
 //
-// Spectral leakage parameters: ΔF_0 = 4, ΔF_0.5 = 1.33, K = 2, ɣ_max = -26.5, β = -6.
+// Spectral leakage parameters: ΔF_0 = 4, ΔF_0.5 = 1.27, ENBW = 1.33, K = 2, ɣ_max = -26.5, β = -6.02.
 func TriangularComplex(seq []complex128) []complex128 {
 	a := float64(len(seq)-1) / 2
 	for i, v := range seq {
@@ -112,7 +112,7 @@ func TriangularComplex(seq []complex128) []complex128 {
 //
 // for k=0,1,...,N-1 where N is the length of the window.
 //
-// Spectral leakage parameters: ΔF_0 = 4, ΔF_0.5 = 1.5, K = 2, ɣ_max = -31.5, β = -6.
+// Spectral leakage parameters: ΔF_0 = 4, ΔF_0.5 = 1.44, ENBW = 1.5, K = 2, ɣ_max = -31.5, β = -6.02.
 func HannComplex(seq []complex128) []complex128 {
 	k := 2 * math.Pi / float64(len(seq)-1)
 	for i, v := range seq {
@@ -135,7 +135,7 @@ func HannComplex(seq []complex128) []complex128 {
 //
 // for k=0,1,...,N-1 where N is the length of the window.
 //
-// Spectral leakage parameters: ΔF_0 = 4, ΔF_0.5 = 1.45, K = 2, ɣ_max = -35.9, β = -6.
+// Spectral leakage parameters: ΔF_0 = 4, ΔF_0.5 = 1.39, ENBW = 1.46, K = 2, ɣ_max = -35.9, β = -6.02.
 func BartlettHannComplex(seq []complex128) []complex128 {
 	const (
 		a0 = 0.62
@@ -165,7 +165,7 @@ func BartlettHannComplex(seq []complex128) []complex128 {
 //
 // for k=0,1,...,N-1 where N is the length of the window.
 //
-// Spectral leakage parameters: ΔF_0 = 4, ΔF_0.5 = 1.33, K = 2, ɣ_max = -42, β = -5.37.
+// Spectral leakage parameters: ΔF_0 = 4, ΔF_0.5 = 1.3, ENBW = 1.36, K = 2, ɣ_max = -42.7, β = -5.35.
 func HammingComplex(seq []complex128) []complex128 {
 	const (
 		a0 = 0.54
@@ -193,7 +193,7 @@ func HammingComplex(seq []complex128) []complex128 {
 //
 // for k=0,1,...,N-1 where N is the length of the window.
 //
-// Spectral leakage parameters: ΔF_0 = 6, ΔF_0.5 = 1.7, K = 3, ɣ_max = -58, β = -7.54.
+// Spectral leakage parameters: ΔF_0 = 6, ΔF_0.5 = 1.64, ENBW = 1.73, K = 3, ɣ_max = -58.1, β = -7.54.
 func BlackmanComplex(seq []complex128) []complex128 {
 	const (
 		a0 = 0.42
@@ -224,7 +224,7 @@ func BlackmanComplex(seq []complex128) []complex128 {
 //
 // for k=0,1,...,N-1 where N is the length of the window.
 //
-// Spectral leakage parameters:  ΔF_0 = 8, ΔF_0.5 = 1.97, K = 4, ɣ_max = -92, β = -8.91.
+// Spectral leakage parameters: ΔF_0 = 8, ΔF_0.5 = 1.9, ENBW = 2.01, K = 4, ɣ_max = -92, β = -8.91.
 func BlackmanHarrisComplex(seq []complex128) []complex128 {
 	const (
 		a0 = 0.35875
@@ -256,7 +256,7 @@ func BlackmanHarrisComplex(seq []complex128) []complex128 {
 //
 // for k=0,1,...,N-1 where N is the length of the window.
 //
-// Spectral leakage parameters: ΔF_0 = 8, ΔF_0.5 = 1.98, K = 4, ɣ_max = -93, β = -9.
+// Spectral leakage parameters: ΔF_0 = 8, ΔF_0.5 = 1.91, ENBW = 2.02, K = 4, ɣ_max = -93.3, β = -8.98.
 func NuttallComplex(seq []complex128) []complex128 {
 	const (
 		a0 = 0.355768
@@ -288,7 +288,7 @@ func NuttallComplex(seq []complex128) []complex128 {
 //
 // for k=0,1,...,N-1 where N is the length of the window.
 //
-// Spectral leakage parameters: ΔF_0 = 8, ΔF_0.5 = 1.94, K = 4, ɣ_max = -98, β = -8.8.
+// Spectral leakage parameters: ΔF_0 = 8, ΔF_0.5 = 1.87, ENBW = 1.98, K = 4, ɣ_max = -98.2, β = -8.79.
 func BlackmanNuttallComplex(seq []complex128) []complex128 {
 	const (
 		a0 = 0.3635819
@@ -321,7 +321,7 @@ func BlackmanNuttallComplex(seq []complex128) []complex128 {
 //
 // for k=0,1,...,N-1 where N is the length of the window.
 //
-// Spectral leakage parameters: ΔF_0 = 10, ΔF_0.5 = 3.72, K = 5, ɣ_max = -93.0, β = -13.34.
+// Spectral leakage parameters: ΔF_0 = 9.44, ΔF_0.5 = 3.16, ENBW = 3.77, K = 4.72, ɣ_max = -93, β = -13.33.
 func FlatTopComplex(seq []complex128) []complex128 {
 	const (
 		a0 = 0.21557895

@@ -143,13 +143,14 @@ func main() {
 	name := flag.String("window", "", "specify a built-in window name (required if csv not given)")
 	param := flag.Float64("param", math.NaN(), "specify parameter for parametric windows")
 	symm := flag.Bool("symm", true, "specify whether the window is symmetric")
-	n := flag.Int("n", 20, "specify window length")
-	m := flag.Int("m", 1000, "specify sample length (must be greater than n)")
+	n := flag.Int("n", 1024, "specify window length")
+	m := flag.Int("m", 1<<16, "specify sample length (must be greater than n)")
 	csv := flag.String("csv", "", "specify an input file of dB transformed frequency amplitudes (required if window not given)")
 	out := flag.String("o", "", "specify output file for plot (required, formats eps, jpg, jpeg, pdf, png, svg, tex or tif)")
 	width := flag.Float64("width", 16, "specify plot width (cm)")
 	height := flag.Float64("height", 8, "specify plot height (cm)")
 	comment := flag.Bool("comment", false, "output a comment line for the window (only for window function)")
+	eps := flag.Float64("eps", 1e-3, "warn if parameters have not converged to this relative tolerance at -n (zero disables the check)")
 	flag.Parse()
 
 	win := windows[strings.ToLower(*name)]
@@ -190,9 +191,12 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+		if *eps > 0 {
+			warnUnconverged(os.Stderr, win.fn(*param), *n, *m, *symm, c, *eps)
+		}
 		if *comment {
-			fmt.Printf("// Spectral leakage parameters: ΔF_0 = %2f, ΔF_0.5 = %.2f, K = %.2f, ɣ_max = %2f, β = %2f.\n",
-				c.deltaF0, c.deltaFhalf, c.k(), c.gammaMax, c.beta)
+			fmt.Printf("// Spectral leakage parameters: ΔF_0 = %2f, ΔF_0.5 = %.2f, ENBW = %.3f, K = %.2f, ɣ_max = %2f, β = %2f.\n",
+				c.deltaF0, c.deltaFhalf, c.enbw, c.k(), c.gammaMax, c.beta)
 		}
 	} else {
 		f, err := os.Open(*csv)
@@ -266,6 +270,11 @@ type characteristics struct {
 	deltaFhalf float64
 	gammaMax   float64
 	beta       float64
+
+	// enbw is the equivalent noise bandwidth, which is a distinct
+	// parameter from deltaFhalf. It is NaN when the window itself is not
+	// available, as when reading a spectrum from csv.
+	enbw float64
 }
 
 // k returns the K window parameter which is the ratio of the window's
@@ -309,7 +318,7 @@ func funcCharacteristics(fn func([]float64) []float64, n, m int, symm bool) (c *
 		xy[i] = plotter.XY{X: float64(i) * float64(n) / float64(m), Y: a - max}
 	}
 
-	c = &characteristics{beta: db(stat.Mean(w, nil))}
+	c = &characteristics{beta: db(stat.Mean(w, nil)), enbw: enbw(w)}
 	c.deltaF0, c.deltaFhalf, c.gammaMax = parameters(t, n, m)
 
 	return c, xy, min - max, nil
@@ -361,22 +370,58 @@ func csvCharacteristics(r io.Reader, n, m int) (c *characteristics, xy plotter.X
 }
 
 func parameters(spectrum []float64, n, m int) (deltaF0, deltaFhalf, gammaMax float64) {
-	max := spectrum[0]
-	var peaks []float64
-	for i, r := range spectrum {
-		if i > 1 {
-			if spectrum[i-1] < r && deltaF0 == 0 {
-				deltaF0 = 2 * float64((i-1)*n) / float64(m)
-			}
-			if thresh := max - 3; thresh < spectrum[i-1] && r <= thresh {
-				deltaFhalf = 2 * float64((i-1)*n) / float64(m)
-			}
+	// Locate the peak rather than assuming it is at DC. A flat top window
+	// is designed to have a flat passband and its maximum lies a little
+	// away from zero frequency, so taking spectrum[0] as the reference
+	// makes its main lobe width and maximum sidelobe meaningless.
+	half := len(spectrum) / 2
+	pk := 0
+	for i := 1; i < half; i++ {
+		if spectrum[i] > spectrum[pk] {
+			pk = i
 		}
-		if i > 2 && spectrum[i-2] <= spectrum[i-1] && spectrum[i-1] > r {
-			peaks = append(peaks, spectrum[i-1])
+	}
+	max := spectrum[pk]
+
+	// Frequency of bin i in DFT bins of the window.
+	freq := func(i int) float64 { return float64(i) * float64(n) / float64(m) }
+
+	// First null: the first point past the peak where the response stops
+	// falling, refined to the local minimum.
+	null := half - 1
+	for i := pk + 1; i < half; i++ {
+		if spectrum[i] > spectrum[i-1] {
+			null = i - 1
+			break
+		}
+	}
+	deltaF0 = 2 * (freq(null) - freq(pk))
+
+	// Half power width, linearly interpolated between the samples that
+	// straddle the -3 dB crossing. Taking the last sample above the
+	// threshold instead biases the result low by up to one bin.
+	thresh := max - 3
+	for i := pk + 1; i <= null; i++ {
+		if spectrum[i] <= thresh {
+			x0, x1 := freq(i-1), freq(i)
+			y0, y1 := spectrum[i-1], spectrum[i]
+			cross := x0
+			if y0 != y1 {
+				cross = x0 + (x1-x0)*(y0-thresh)/(y0-y1)
+			}
+			deltaFhalf = 2 * (cross - freq(pk))
+			break
 		}
 	}
 
+	// Highest sidelobe, measured beyond the main lobe and relative to the
+	// true peak.
+	var peaks []float64
+	for i := null + 1; i < half-1; i++ {
+		if spectrum[i-1] <= spectrum[i] && spectrum[i] > spectrum[i+1] {
+			peaks = append(peaks, spectrum[i])
+		}
+	}
 	if len(peaks) == 0 {
 		gammaMax = math.NaN()
 	} else {
@@ -384,6 +429,56 @@ func parameters(spectrum []float64, n, m int) (deltaF0, deltaFhalf, gammaMax flo
 	}
 
 	return deltaF0, deltaFhalf, gammaMax
+}
+
+// enbw returns the equivalent noise bandwidth of the window w, in DFT bins.
+//
+// ENBW is the width of the ideal rectangular filter passing the same noise
+// power as the window, and is a distinct parameter from the half power width
+// ΔF_0.5: for a Hann window ENBW is 1.5 bins while ΔF_0.5 is about 1.44.
+func enbw(w []float64) float64 {
+	var sum, sumSq float64
+	for _, v := range w {
+		sum += v
+		sumSq += v * v
+	}
+	if sum == 0 {
+		return math.NaN()
+	}
+	return float64(len(w)) * sumSq / (sum * sum)
+}
+
+// warnUnconverged recomputes the characteristics at twice the window length
+// and reports any parameter that still moves by more than eps in relative
+// terms. The leakage parameters are asymptotic in the window length, so a
+// short window reports values that have not settled: at n = 20 a Blackman
+// Nuttall window appears to have a maximum sidelobe of -85 dB where the
+// converged figure is -98 dB.
+func warnUnconverged(w io.Writer, fn func([]float64) []float64, n, m int, symm bool, c *characteristics, eps float64) {
+	ref, _, _, err := funcCharacteristics(fn, 2*n, 2*m, symm)
+	if err != nil {
+		fmt.Fprintf(w, "warning: cannot check convergence: %v\n", err)
+		return
+	}
+	for _, p := range []struct {
+		name     string
+		got, ref float64
+	}{
+		{"ΔF_0", c.deltaF0, ref.deltaF0},
+		{"ΔF_0.5", c.deltaFhalf, ref.deltaFhalf},
+		{"ENBW", c.enbw, ref.enbw},
+		{"K", c.k(), ref.k()},
+		{"ɣ_max", c.gammaMax, ref.gammaMax},
+		{"β", c.beta, ref.beta},
+	} {
+		if math.IsNaN(p.got) || math.IsNaN(p.ref) || p.ref == 0 {
+			continue
+		}
+		if d := math.Abs(p.got-p.ref) / math.Abs(p.ref); d > eps {
+			fmt.Fprintf(w, "warning: %s has not converged at n=%d: %.6g here against %.6g at n=%d (%.2g relative)\n",
+				p.name, n, p.got, p.ref, 2*n, d)
+		}
+	}
 }
 
 func db(m float64) float64 {

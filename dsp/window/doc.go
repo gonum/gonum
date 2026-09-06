@@ -17,7 +17,7 @@
 //
 // The characteristic changes associated with each window function may
 // be described using a set of spectral leakage parameters; β, ΔF_0, ΔF_0.5,
-// K and ɣ_max.
+// ENBW, K and ɣ_max.
 //
 // The β, attenuation, coefficient of a window is the ratio of the
 // constant component of the spectrum resulting from use of the window
@@ -30,7 +30,16 @@
 // the frequency spectrum at zero amplitude.
 //
 // The ΔF_0.5 parameter describes the normalized width of the main lobe of
-// the frequency spectrum at -3 dB (half maximum amplitude).
+// the frequency spectrum at -3 dB, that is at half the power of the peak.
+//
+// The ENBW parameter is the equivalent noise bandwidth: the width of the
+// ideal rectangular filter that would pass the same noise power as the
+// window, in DFT bins,
+//
+//	ENBW = N sum(w[i]^2) / (sum(w[i]))^2
+//
+// ENBW and ΔF_0.5 are distinct and should not be substituted for one
+// another; for the Hann window ENBW is 1.5 bins while ΔF_0.5 is 1.44.
 //
 // The K parameter describes the relative width of the main lobe of the
 // frequency spectrum produced by the window compared with the rectangular

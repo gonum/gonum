@@ -272,11 +272,11 @@ TEXT ·Ger(SB), NOSPLIT, $0
 	NEGQ    TMP1
 	CMPQ    INC_X, $0
 	CMOVQLT TMP1, TMP2
-	LEAQ    (X_PTR)(TMP2*SIZE), X_PTR
+	LEAQ    (X_PTR)(TMP2*1), X_PTR
 
 	CMPQ incY+80(FP), $1 // Check for dense vector Y (fast-path)
 	JG   inc
-	JL   end
+	JL   negative_y
 
 	SHRQ $2, M
 	JZ   r2
@@ -441,7 +441,8 @@ inc:  // Algorithm for incY != 1 ( split loads in kernel )
 	NEGQ    TMP1
 	CMPQ    INC_Y, $0
 	CMOVQLT TMP1, TMP2
-	LEAQ    (Y_PTR)(TMP2*SIZE), Y_PTR
+	LEAQ    (Y_PTR)(TMP2*1), Y_PTR
+	MOVQ    Y_PTR, TMP2 // Retain the adjusted start for subsequent row blocks.
 
 	SHRQ $2, M
 	JZ   inc_r2
@@ -490,7 +491,7 @@ inc_r4c1:
 
 inc_r4end:
 	LEAQ (X_PTR)(INC_X*4), X_PTR
-	MOVQ Y, Y_PTR
+	MOVQ TMP2, Y_PTR
 	LEAQ (A_ROW)(LDA*4), A_ROW
 	MOVQ A_ROW, A_PTR
 
@@ -541,7 +542,7 @@ inc_r2c1:
 
 inc_r2end:
 	LEAQ (X_PTR)(INC_X*2), X_PTR
-	MOVQ Y, Y_PTR
+	MOVQ TMP2, Y_PTR
 	LEAQ (A_ROW)(LDA*2), A_ROW
 	MOVQ A_ROW, A_PTR
 
@@ -589,3 +590,10 @@ inc_r1c1:
 
 inc_end:
 	RET
+
+// Negative increments use the split-load path. Preserve the existing zero-Y
+// increment quick return; public BLAS rejects zero increments.
+negative_y:
+	CMPQ incY+80(FP), $0
+	JE   end
+	JMP  inc

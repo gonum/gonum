@@ -128,7 +128,7 @@ dotu_tail: // do {
 	MOVSD  (X_PTR), X3    // X_i = { imag(x[i]), real(x[i]) }
 	MOVSHDUP_X3_X2        // X_(i-1) = { imag(x[i]), imag(x[i]) }
 	MOVSLDUP_X3_X3        // X_i = { real(x[i]), real(x[i]) }
-	MOVUPS (Y_PTR), X10   // X_j = { imag(y[i]), real(y[i]) }
+	MOVSD  (Y_PTR), X10   // Load exactly one complex64.
 	MULPS  X10, X3        // X_i = { imag(y[i]) * real(x[i]), real(y[i]) * real(x[i]) }
 	SHUFPS $0x1, X10, X10 // X_j = { real(y[i]), imag(y[i]) }
 	MULPS  X10, X2        // X_(i-1) = { real(y[i]) * imag(x[i]), imag(y[i]) * imag(x[i]) }

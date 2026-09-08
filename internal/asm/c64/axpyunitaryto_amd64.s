@@ -54,6 +54,8 @@ TEXT ·AxpyUnitaryTo(SB), NOSPLIT, $0
 	MOVQ    DX, BX             // Align on 16-byte boundary for ADDPS
 	ANDQ    $15, BX            // BX = &y & 15
 	JZ      caxy_no_trim       // if BX == 0 { goto caxy_no_trim }
+	CMPQ    BX, $8            // Only 8-byte-aligned y can be trimmed to 16 bytes.
+	JNE     caxy_tail          // Otherwise use scalar loads for all elements.
 
 	MOVSD (SI)(AX*8), X3 // X3 = { imag(x[i]), real(x[i]) }
 	MOVSHDUP_X3_X2       // X2 = { imag(x[i]), imag(x[i]) }
@@ -68,7 +70,7 @@ TEXT ·AxpyUnitaryTo(SB), NOSPLIT, $0
 	MOVSD X3, (DI)(AX*8) // dst[i]  = X3
 	INCQ  AX             // i++
 	DECQ  CX             // --CX
-	JZ    caxy_tail      // if BX == 0 { goto caxy_tail }
+	JZ    caxy_end       // if CX == 0 { return }
 
 caxy_no_trim:
 	MOVAPS X0, X10   // Copy X0 and X1 for pipelineing

@@ -86,10 +86,14 @@ caxy_loop: // do {
 	ADDSUBPD_X8_X9
 
 	// X_(i+1) = { imag(result[i]) + imag(y[i]), real(result[i]) + real(y[i]) }
-	ADDPD  (DX)(AX*8), X3
-	ADDPD  16(DX)(AX*8), X5
-	ADDPD  32(DX)(AX*8), X7
-	ADDPD  48(DX)(AX*8), X9
+	MOVUPS (DX)(AX*8), X2
+	ADDPD  X2, X3
+	MOVUPS 16(DX)(AX*8), X4
+	ADDPD  X4, X5
+	MOVUPS 32(DX)(AX*8), X6
+	ADDPD  X6, X7
+	MOVUPS 48(DX)(AX*8), X8
+	ADDPD  X8, X9
 	MOVUPS X3, (DI)(AX*8)   // y[i] = X_(i+1)
 	MOVUPS X5, 16(DI)(AX*8)
 	MOVUPS X7, 32(DI)(AX*8)
@@ -114,7 +118,8 @@ caxy_tail: // Same calculation, but read in values to avoid trampling memory
 	ADDSUBPD_X2_X3
 
 	// X_(i+1) = { imag(result[i]) + imag(y[i]), real(result[i]) + real(y[i]) }
-	ADDPD  (DX)(AX*8), X3
+	MOVUPS (DX)(AX*8), X2
+	ADDPD  X2, X3
 	MOVUPS X3, (DI)(AX*8) // y[i] = X_(i+1)
 	ADDQ   $2, AX         // i += 2
 	LOOP   caxy_tail      // }  while --CX > 0

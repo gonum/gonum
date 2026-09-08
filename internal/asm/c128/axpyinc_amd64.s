@@ -92,11 +92,15 @@ axpyi_loop: // do {
 	ADDSUBPD_X8_X9
 
 	// X_(i+1) = { imag(result[i]) + imag(y[i]), real(result[i]) + real(y[i]) }
-	ADDPD  (DX), X3
-	ADDPD  (DX)(R9*1), X5
+	MOVUPS (DX), X2
+	ADDPD  X2, X3
+	MOVUPS (DX)(R9*1), X4
+	ADDPD  X4, X5
 	LEAQ   (DX)(R9*2), DX // DX = &(DX[incY*2])
-	ADDPD  (DX), X7
-	ADDPD  (DX)(R9*1), X9
+	MOVUPS (DX), X6
+	ADDPD  X6, X7
+	MOVUPS (DX)(R9*1), X8
+	ADDPD  X8, X9
 	MOVUPS X3, (DI)       // dst[i] = X_(i+1)
 	MOVUPS X5, (DI)(R9*1)
 	LEAQ   (DI)(R9*2), DI
@@ -124,7 +128,8 @@ axpyi_tail: // do {
 	ADDSUBPD_X2_X3
 
 	// X_(i+1) = { imag(result[i]) + imag(y[i]), real(result[i]) + real(y[i]) }
-	ADDPD  (DI), X3
+	MOVUPS (DI), X2
+	ADDPD  X2, X3
 	MOVUPS X3, (DI)   // y[i] = X_i
 	ADDQ   R8, SI     // SI = &(SI[incX])
 	ADDQ   R9, DI     // DI = &(DI[incY])

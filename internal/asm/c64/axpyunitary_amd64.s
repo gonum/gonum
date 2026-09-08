@@ -53,6 +53,8 @@ TEXT ·AxpyUnitary(SB), NOSPLIT, $0
 	MOVQ    DI, BX            // Align on 16-byte boundary for ADDPS
 	ANDQ    $15, BX           // BX = &y & 15
 	JZ      caxy_no_trim      // if BX == 0 { goto caxy_no_trim }
+	CMPQ    BX, $8           // Only 8-byte-aligned y can be trimmed to 16 bytes.
+	JNE     caxy_tail         // Otherwise use scalar loads for all elements.
 
 	// Trim first value in unaligned buffer
 	XORPS X2, X2         // Clear work registers and cache-align loop

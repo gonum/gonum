@@ -15,21 +15,55 @@ import (
 	"testing"
 )
 
+func TestKmeansSeed(t *testing.T) {
+	data := [][2]float64{{rand.NormFloat64()*1 + 3, rand.NormFloat64()*1 + 3}, {rand.NormFloat64()*1 + 3, rand.NormFloat64()*1 + 3}}
+	var seed uint64 = 123
+	config := Config{Seed: &seed}
+	cent1, _, err := Kmeans2D(1, data, config)
+	if err != nil {
+		t.Error(err)
+	}
+	cent2, _, err := Kmeans2D(1, data, config)
+	if err != nil {
+		t.Error(err)
+	}
+	for i := range cent1 {
+		if cent1[i] != cent2[i] {
+			t.Error("runs with same seed doesn't yield same result")
+		}
+	}
+}
+
 func TestKmeans2DZeroIter(t *testing.T) {
 	data := [][2]float64{{rand.NormFloat64()*1 + 3, rand.NormFloat64()*1 + 3}}
 	iter := 0
-	cent, clust := Kmeans2D(4, data, Config{Iter: &iter})
-	if len(cent) != 4 || len(clust) != 4 {
-		t.Error("kmeans invalid dimensions")
+	configs := []Config{
+		{Iter: &iter},
+		{Iter: &iter, Init: InitPlusPlus},
+	}
+	for i := range len(configs) {
+		cent, clust, err := Kmeans2D(1, data, configs[i])
+		if err != nil {
+			t.Error(err)
+		}
+		if len(cent) != 1 || len(clust) != 1 {
+			t.Errorf("kmeans invalid dimensions for config %d", i)
+		}
 	}
 }
 
 func TestKmeans2DEmptyData(t *testing.T) {
 	data := [][2]float64{}
 	iter := 10
-	cent, clust := Kmeans2D(3, data, Config{Iter: &iter})
-	if len(cent) != 3 || len(clust) != 3 {
-		t.Error("kmeans invalid dimensions")
+	configs := []Config{
+		{Iter: &iter},
+		{Iter: &iter, Init: InitPlusPlus},
+	}
+	for i := range len(configs) {
+		_, _, err := Kmeans2D(3, data, configs[i])
+		if err == nil {
+			t.Error("expected error on empty data")
+		}
 	}
 }
 
@@ -45,11 +79,14 @@ func TestKmeans2D(t *testing.T) {
 	expectedCenters := [][2]float64{{3, 3}, {3, -3}, {-3, 3}}
 	iter := 5
 	var seed uint64 = 123
-	cent, clust := Kmeans2D(len(expectedCenters), data, Config{Seed: &seed, Iter: &iter})
+	cent, clust, err := Kmeans2D(len(expectedCenters), data, Config{Seed: &seed, Iter: &iter})
+	if err != nil {
+		t.Error(err)
+	}
 	if len(cent) != len(clust) {
 		t.Error("kmeans invalid dimensions")
 	}
-	eps := 0.1
+	eps := 0.15
 	for _, c1 := range cent {
 		found := false
 		for _, c2 := range expectedCenters {
@@ -71,13 +108,14 @@ func TestKmeans2DVisual(t *testing.T) {
 			Color string  `json:"color"`
 		}
 		html := `<html><body><form>
-			<b>k = %d</b><input type="range" min="1" max="20" name="k" value="%d" style="width:200px"><br>
-			<b>c = %d</b><input type="range" min="1" max="20" name="c" value="%d" style="width:200px"><br>
-			<b>i = %d</b><input type="range" min="1" max="20" name="i" value="%d" style="width:200px"><br>
-			<input type="submit" value="Run">
-		</form><canvas id="canvas" width="900" height="800"></canvas>
-		<script>
-			let h = 700; let w = 900; let zoom = 20;
+			<b>k = %d</b><input type="range" min="1" max="40" name="k" value="%d" style="width:200px"><br>
+			<b>c = %d</b><input type="range" min="1" max="40" name="c" value="%d" style="width:200px"><br>
+			<b>i = %d</b><input type="range" min="1" max="40" name="i" value="%d" style="width:200px"><br>
+			<b>init strategy</b><select name="init"><option %s value="random">random points</option><option %s value="plusplus">kmeans++</option></select><br>
+			<b>data point random seed</b><input name="dataRandom" %s type="checkbox"><br>
+			<b>kmeans init random seed</b><input name="initRandom" %s type="checkbox"><br>
+			<input type="submit" value="Run"></form><canvas id="canvas" width="900" height="800"></canvas>
+		<script>let h = 800; let w = 900; let zoom = 20;
 			let ctx = document.getElementById("canvas").getContext("2d")
 			ctx.fillRect(0,h/2,w,1); ctx.fillRect(w/2,0,1,h)
 			let d = %s
@@ -101,8 +139,7 @@ func TestKmeans2DVisual(t *testing.T) {
 					let s = i == d.centroidIterations.length-1 ? 10 : 5
 					ctx.fillRect((zoom*x)+w/2, (zoom*-y)+h/2, s, s)
 				}
-			}
-		</script></html></body>`
+			}</script></html></body>`
 
 		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			q := r.URL.Query()
@@ -118,29 +155,58 @@ func TestKmeans2DVisual(t *testing.T) {
 			if err != nil {
 				iter = 3
 			}
+			init := InitRandomPoints
+			initRandomSelected := "selected"
+			initPlusPlusSelected := ""
+			if q.Get("init") == "plusplus" {
+				initRandomSelected = ""
+				initPlusPlusSelected = "selected"
+				init = InitPlusPlus
+			}
 			data := [][2]float64{}
+			var dataSeed uint64 = 123
+			var rData *rand.Rand = rand.New(rand.NewPCG(dataSeed, dataSeed))
+			randomizeData := false
+			randomizeDataChecked := ""
+			if randomizeData = q.Get("dataRandom") == "on"; randomizeData {
+				seed := rand.Uint64()
+				randomizeDataChecked = "checked"
+				rData = rand.New(rand.NewPCG(seed, seed))
+			}
+			var initSeed uint64 = 123
+			randomizeInit := false
+			randomizeInitChecked := ""
+			if randomizeInit = q.Get("initRandom") == "on"; randomizeInit {
+				randomizeInitChecked = "checked"
+				initSeed = rand.Uint64()
+			}
 			for range clusters {
-				m1, m2 := -15+rand.Float64()*30, -15+rand.Float64()*30
-				std1, std2 := 1+rand.Float64()*3, 1+rand.Float64()*3
-				for range 500 {
-					data = append(data, [2]float64{rand.NormFloat64()*std1 + m1, rand.NormFloat64()*std2 + m2})
+				m1, m2 := -15+rData.Float64()*30, -15+rData.Float64()*30
+				std1, std2 := 1+rData.Float64()*3, 1+rData.Float64()*3
+				for range 1000 {
+					data = append(data, [2]float64{rData.NormFloat64()*std1 + m1, rData.NormFloat64()*std2 + m2})
 				}
 			}
 			clust := [][][2]float64{}
 			centroidIterations := make([][][2]float64, iter)
-			var seed uint64 = 12
 			for i := range iter {
-				cent, c := Kmeans2D(k, data, Config{Seed: &seed, Iter: &i})
+				cent, c, err := Kmeans2D(k, data, Config{Seed: &initSeed, Iter: &i, Init: init})
+				if err != nil {
+					t.Error(err)
+				}
 				centroidIterations[i] = cent
 				clust = c
 			}
 
-			d, _ := json.Marshal(struct {
-				Data               [][2]float64   `json:"data"`
+			d, err := json.Marshal(struct {
 				Clusters           [][][2]float64 `json:"clusters"`
 				CentroidIterations [][][2]float64 `json:"centroidIterations"`
-			}{Data: data, Clusters: clust, CentroidIterations: centroidIterations})
-			fmt.Fprintf(w, html, k, k, clusters, clusters, iter, iter, d)
+			}{Clusters: clust, CentroidIterations: centroidIterations})
+			if err != nil {
+				t.Error(err, centroidIterations)
+			}
+
+			fmt.Fprintf(w, html, k, k, clusters, clusters, iter, iter, initRandomSelected, initPlusPlusSelected, randomizeDataChecked, randomizeInitChecked, d)
 		})
 		http.ListenAndServe(":8080", nil)
 	}

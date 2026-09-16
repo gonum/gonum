@@ -6,14 +6,16 @@ package cluster
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"math"
 	"math/rand/v2"
 	"net/http"
-	"os"
 	"strconv"
 	"testing"
 )
+
+var visualTest *bool = flag.Bool("visual", false, "run visual tests")
 
 func TestKmeansSeed(t *testing.T) {
 	data := [][2]float64{{rand.NormFloat64()*1 + 3, rand.NormFloat64()*1 + 3}, {rand.NormFloat64()*1 + 3, rand.NormFloat64()*1 + 3}}
@@ -101,7 +103,7 @@ func TestKmeans2D(t *testing.T) {
 }
 
 func TestKmeans2DVisual(t *testing.T) {
-	if os.Getenv("VISUAL_TEST") == "1" {
+	if visualTest != nil && *visualTest {
 		type point struct {
 			X     float64 `json:"x"`
 			Y     float64 `json:"y"`

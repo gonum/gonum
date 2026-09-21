@@ -36,6 +36,26 @@ func TestKmeansSeed(t *testing.T) {
 	}
 }
 
+// https://en.wikipedia.org/wiki/K-means++#Example_of_a_suboptimal_clustering
+func TestKmeansPP2D(t *testing.T) {
+	data := [][2]float64{
+		{0, 0}, {0, 1}, //  |X         X
+		{6, 0}, {6, 1}, // _|X_________X________
+	}
+	var seed uint64 = 10
+	cent, clust, err := Kmeans2D(2, data, Config{Seed: &seed, Init: InitPlusPlus})
+	if err != nil {
+		t.Error(err)
+	}
+	if len(clust[0]) != 2 {
+		t.Error("non optimal kmeans++ result")
+	}
+	// Cluster should be [[6 0.5] [0 0.5]] (or other way around)
+	if math.Abs(cent[0][0]) > 0.1 && math.Abs(cent[1][0]) > 0.1 {
+		t.Error("non optimal kmeans++ result")
+	}
+}
+
 func TestKmeans2DZeroIter(t *testing.T) {
 	data := [][2]float64{{rand.NormFloat64()*1 + 3, rand.NormFloat64()*1 + 3}}
 	iter := 0

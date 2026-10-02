@@ -144,6 +144,64 @@ func TestLogisticLogProb(t *testing.T) {
 	if result := l.LogProb(input); result != want {
 		t.Errorf("Wrong LogProb(%f) with Mu=%f, S=%f: %f != %f", input, l.Mu, l.S, result, want)
 	}
+
+	// At the mean the density is 1/(4*S), so the log density is -log(4*S)
+	// for any location and scale.
+	for _, test := range []struct {
+		dist Logistic
+		want float64
+	}{
+		{dist: Logistic{Mu: 0, S: 3}, want: -2.4849066497880004},   // -log(12)
+		{dist: Logistic{Mu: 2, S: 0.5}, want: -0.6931471805599453}, // -log(2)
+	} {
+		if got := test.dist.LogProb(test.dist.Mu); !scalar.EqualWithinAbsOrRel(got, test.want, 1e-14, 1e-14) {
+			t.Errorf("Wrong LogProb(%g) with Mu=%g, S=%g: got %g, want %g", test.dist.Mu, test.dist.Mu, test.dist.S, got, test.want)
+		}
+	}
+
+	// Check the log density against the density away from the far tails,
+	// where Prob is accurate.
+	for _, dist := range []Logistic{
+		{Mu: 0, S: 1},
+		{Mu: 2, S: 1},
+		{Mu: 0, S: 3},
+		{Mu: 3, S: 630},
+		{Mu: -5, S: 0.125},
+	} {
+		for _, x := range []float64{-8, -1, 0, 0.5, 2, 10} {
+			want := math.Log(dist.Prob(x))
+			if got := dist.LogProb(x); !scalar.EqualWithinAbsOrRel(got, want, 1e-14, 1e-14) {
+				t.Errorf("Wrong LogProb(%g) with Mu=%g, S=%g: got %g, want %g", x, dist.Mu, dist.S, got, want)
+			}
+		}
+	}
+}
+
+func TestLogisticLogProbTails(t *testing.T) {
+	t.Parallel()
+
+	for _, dist := range []Logistic{
+		{Mu: 0, S: 1},
+		{Mu: 2, S: 3},
+		{Mu: -5, S: 0.125},
+	} {
+		// At 1000 scale units from the mean, the log density is
+		// -1000-log(S) to float64 precision: the remaining term,
+		// -2*log1p(exp(-1000)), is far below the resolution at this
+		// magnitude.
+		for _, z := range []float64{-1000, 1000} {
+			x := dist.Mu + dist.S*z
+			want := -1000 - math.Log(dist.S)
+			if got := dist.LogProb(x); !scalar.EqualWithinAbsOrRel(got, want, 1e-14, 1e-14) {
+				t.Errorf("Wrong LogProb(%g) with Mu=%g, S=%g: got %g, want %g", x, dist.Mu, dist.S, got, want)
+			}
+		}
+		for _, x := range []float64{math.Inf(-1), math.Inf(1)} {
+			if got := dist.LogProb(x); !math.IsInf(got, -1) {
+				t.Errorf("Wrong LogProb(%g) with Mu=%g, S=%g: got %g, want -Inf", x, dist.Mu, dist.S, got)
+			}
+		}
+	}
 }
 
 func TestQuantile(t *testing.T) {

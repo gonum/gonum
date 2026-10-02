@@ -730,8 +730,17 @@ func Span(dst []float64, l, u float64) []float64 {
 		return dst
 	}
 
+	dst[0], dst[n-1] = l, u
 	step := (u - l) / float64(n-1)
-	for i := range dst {
+	if math.IsInf(step, 0) {
+		// The finite endpoints have opposite signs and their difference overflowed.
+		for i := 1; i < n-1; i++ {
+			f := float64(i) / float64(n-1)
+			dst[i] = (1-f)*l + f*u
+		}
+		return dst
+	}
+	for i := 1; i < n-1; i++ {
 		dst[i] = l + step*float64(i)
 	}
 	return dst

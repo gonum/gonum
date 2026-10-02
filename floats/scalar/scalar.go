@@ -6,6 +6,7 @@ package scalar
 
 import (
 	"math"
+	"math/big"
 	"strconv"
 )
 
@@ -120,6 +121,11 @@ func Round(x float64, prec int) float64 {
 	if prec >= 0 && x == math.Trunc(x) {
 		return x
 	}
+	// math.Pow10(prec) is not the integer 10^prec once prec exceeds 22.
+	// 2.5 rounded to 24 places came back as 2.4999999999999996.
+	if prec > 22 && prec < 309 {
+		return roundScaled(x, prec, false)
+	}
 	pow := math.Pow10(prec)
 	intermed := x * pow
 	if math.IsInf(intermed, 0) {
@@ -151,6 +157,11 @@ func RoundEven(x float64, prec int) float64 {
 	if prec >= 0 && x == math.Trunc(x) {
 		return x
 	}
+	// math.Pow10(prec) is not the integer 10^prec once prec exceeds 22.
+	// 1.5e-23 rounded to 23 places came back as 1e-23.
+	if prec > 22 && prec < 309 {
+		return roundScaled(x, prec, true)
+	}
 	pow := math.Pow10(prec)
 	intermed := x * pow
 	if math.IsInf(intermed, 0) {
@@ -163,6 +174,48 @@ func RoundEven(x float64, prec int) float64 {
 	}
 
 	return x / pow
+}
+
+// roundScaled rounds x to prec decimal places using the integer 10^prec.
+// prec is in 23..308, where that power is finite and not an exact float64.
+// even selects half-to-even. Otherwise ties round away from zero.
+// A scaled magnitude that does not fit in a float64 returns x, matching the
+// overflow path of the Pow10 implementation.
+func roundScaled(x float64, prec int, even bool) float64 {
+	if math.IsNaN(x) || math.IsInf(x, 0) {
+		return x
+	}
+	bits := uint(prec)*4 + 128
+	scale := new(big.Int).Exp(big.NewInt(10), big.NewInt(int64(prec)), nil)
+	xf := new(big.Float).SetPrec(bits).SetMode(big.ToNearestEven).SetFloat64(x)
+	sf := new(big.Float).SetPrec(bits).SetMode(big.ToNearestEven).SetInt(scale)
+	scaled := new(big.Float).SetPrec(bits).SetMode(big.ToNearestEven).Mul(xf, sf)
+	if s64, _ := scaled.Float64(); math.IsInf(s64, 0) {
+		return x
+	}
+	neg := scaled.Sign() < 0
+	mag := new(big.Float).SetPrec(bits).SetMode(big.ToNearestEven)
+	if neg {
+		mag.Neg(scaled)
+	} else {
+		mag.Set(scaled)
+	}
+	ip, _ := mag.Int(nil)
+	frac := new(big.Float).SetPrec(bits).SetMode(big.ToNearestEven).Sub(mag, new(big.Float).SetPrec(bits).SetInt(ip))
+	half := new(big.Float).SetPrec(bits).SetFloat64(0.5)
+	cmp := frac.Cmp(half)
+	if cmp > 0 || (cmp == 0 && (!even || ip.Bit(0) == 1)) {
+		ip.Add(ip, big.NewInt(1))
+	}
+	if neg {
+		ip.Neg(ip)
+	}
+	quot := new(big.Float).SetPrec(bits).SetMode(big.ToNearestEven).Quo(new(big.Float).SetPrec(bits).SetInt(ip), sf)
+	f, _ := quot.Float64()
+	if f == 0 {
+		return 0
+	}
+	return f
 }
 
 // Same returns true when the inputs have the same value, allowing NaN equality.

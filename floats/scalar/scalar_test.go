@@ -255,6 +255,13 @@ func TestRound(t *testing.T) {
 		{x: 500, prec: -4, want: 0},
 		{x: 1500, prec: -3, want: 2000},
 		{x: 1500, prec: -4, want: 0},
+
+		// 2.5 is an exact float64, so 24 places must leave it unchanged.
+		// math.Pow10(24) is not 10^24, and the round trip was 2.4999999999999996.
+		{x: 2.5, prec: 24, want: 2.5},
+		// 1.5e-23 is just above a halfway point at 23 places, so the result is 2e-23.
+		// Scaling by math.Pow10(23) dropped it below the halfway point, and the result was 1e-23.
+		{x: 1.5e-23, prec: 23, want: 2e-23},
 	} {
 		for _, sign := range []float64{1, -1} {
 			got := Round(sign*test.x, test.prec)
@@ -326,6 +333,13 @@ func TestRoundEven(t *testing.T) {
 		{x: 500, prec: -4, want: 0},
 		{x: 1500, prec: -3, want: 2000},
 		{x: 1500, prec: -4, want: 0},
+
+		// 2.5 is an exact float64, so 24 places must leave it unchanged.
+		// math.Pow10(24) is not 10^24, and the round trip was 2.4999999999999996.
+		{x: 2.5, prec: 24, want: 2.5},
+		// 1.5e-23 is just above a halfway point at 23 places, so the result is 2e-23.
+		// Scaling by math.Pow10(23) dropped it below the halfway point, and the result was 1e-23.
+		{x: 1.5e-23, prec: 23, want: 2e-23},
 	} {
 		for _, sign := range []float64{1, -1} {
 			got := RoundEven(sign*test.x, test.prec)

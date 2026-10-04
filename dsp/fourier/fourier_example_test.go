@@ -10,7 +10,6 @@ import (
 	"math/cmplx"
 
 	"gonum.org/v1/gonum/dsp/fourier"
-	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -142,19 +141,19 @@ func Example_fFT2() {
 		}
 		cfft.Coefficients(column, column)
 		for i, v := range column[:c] {
-			freqs.Set(i, j, scalar.Round(cmplx.Abs(v), 1))
+			freqs.Set(i, j, cmplx.Abs(v))
 		}
 	}
 
-	fmt.Printf("%v\n", mat.Formatted(freqs))
+	fmt.Printf("%.1f\n", mat.Formatted(freqs))
 
 	// Output:
 	//
-	// ⎡  40   0.4   0.5   1.4   3.2   1.1⎤
-	// ⎢ 0.4   0.5   0.7   1.8     4   1.2⎥
+	// ⎡40.0   0.4   0.5   1.4   3.2   1.1⎤
+	// ⎢ 0.4   0.5   0.7   1.8   4.0   1.2⎥
 	// ⎢ 0.5   0.7   1.1   2.8   5.9   1.7⎥
 	// ⎢ 1.4   1.8   2.8   6.8  14.1   3.8⎥
-	// ⎢ 3.2     4   5.9  14.1  27.5   6.8⎥
+	// ⎢ 3.2   4.0   5.9  14.1  27.5   6.8⎥
 	// ⎣ 1.1   1.2   1.7   3.8   6.8   1.6⎦
 
 }
@@ -202,24 +201,24 @@ func Example_cmplxFFT2() {
 		cfft.Coefficients(column, column)
 		for i, v := range column {
 			// Center the frequencies.
-			freqs.Set(cfft.UnshiftIdx(i), cfft.UnshiftIdx(j), scalar.Round(cmplx.Abs(v), 1))
+			freqs.Set(cfft.UnshiftIdx(i), cfft.UnshiftIdx(j), cmplx.Abs(v))
 		}
 	}
 
-	fmt.Printf("%v\n", mat.Formatted(freqs))
+	fmt.Printf("%0.1f\n", mat.Formatted(freqs))
 
 	// Output:
 	//
 	// ⎡ 1.6   6.8   3.8   1.7   1.2   1.1   1.1   1.4   2.6   3.9   1.1⎤
-	// ⎢ 6.8  27.5  14.1   5.9     4   3.2     3     3   3.9   3.2   3.9⎥
+	// ⎢ 6.8  27.5  14.1   5.9   4.0   3.2   3.0   3.0   3.9   3.2   3.9⎥
 	// ⎢ 3.8  14.1   6.8   2.8   1.8   1.4   1.2   1.1   1.4   3.9   2.6⎥
-	// ⎢ 1.7   5.9   2.8   1.1   0.7   0.5   0.5   0.5   1.1     3   1.4⎥
-	// ⎢ 1.2     4   1.8   0.7   0.5   0.4   0.4   0.5   1.2     3   1.1⎥
-	// ⎢ 1.1   3.2   1.4   0.5   0.4    40   0.4   0.5   1.4   3.2   1.1⎥
-	// ⎢ 1.1     3   1.2   0.5   0.4   0.4   0.5   0.7   1.8     4   1.2⎥
-	// ⎢ 1.4     3   1.1   0.5   0.5   0.5   0.7   1.1   2.8   5.9   1.7⎥
+	// ⎢ 1.7   5.9   2.8   1.1   0.7   0.5   0.5   0.5   1.1   3.0   1.4⎥
+	// ⎢ 1.2   4.0   1.8   0.7   0.5   0.4   0.4   0.5   1.2   3.0   1.1⎥
+	// ⎢ 1.1   3.2   1.4   0.5   0.4  40.0   0.4   0.5   1.4   3.2   1.1⎥
+	// ⎢ 1.1   3.0   1.2   0.5   0.4   0.4   0.5   0.7   1.8   4.0   1.2⎥
+	// ⎢ 1.4   3.0   1.1   0.5   0.5   0.5   0.7   1.1   2.8   5.9   1.7⎥
 	// ⎢ 2.6   3.9   1.4   1.1   1.2   1.4   1.8   2.8   6.8  14.1   3.8⎥
-	// ⎢ 3.9   3.2   3.9     3     3   3.2     4   5.9  14.1  27.5   6.8⎥
+	// ⎢ 3.9   3.2   3.9   3.0   3.0   3.2   4.0   5.9  14.1  27.5   6.8⎥
 	// ⎣ 1.1   3.9   2.6   1.4   1.1   1.1   1.2   1.7   3.8   6.8   1.6⎦
 
 }

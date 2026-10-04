@@ -103,68 +103,6 @@ func ParseWithNA(s, missing string) (value, weight float64, err error) {
 	return value, weight, err
 }
 
-// Round returns the half away from zero rounded value of x with prec precision.
-//
-// Special cases are:
-//
-//	Round(±0) = +0
-//	Round(±Inf) = ±Inf
-//	Round(NaN) = NaN
-func Round(x float64, prec int) float64 {
-	if x == 0 {
-		// Make sure zero is returned
-		// without the negative bit set.
-		return 0
-	}
-	// Fast path for positive precision on integers.
-	if prec >= 0 && x == math.Trunc(x) {
-		return x
-	}
-	pow := math.Pow10(prec)
-	intermed := x * pow
-	if math.IsInf(intermed, 0) {
-		return x
-	}
-	x = math.Round(intermed)
-
-	if x == 0 {
-		return 0
-	}
-
-	return x / pow
-}
-
-// RoundEven returns the half even rounded value of x with prec precision.
-//
-// Special cases are:
-//
-//	RoundEven(±0) = +0
-//	RoundEven(±Inf) = ±Inf
-//	RoundEven(NaN) = NaN
-func RoundEven(x float64, prec int) float64 {
-	if x == 0 {
-		// Make sure zero is returned
-		// without the negative bit set.
-		return 0
-	}
-	// Fast path for positive precision on integers.
-	if prec >= 0 && x == math.Trunc(x) {
-		return x
-	}
-	pow := math.Pow10(prec)
-	intermed := x * pow
-	if math.IsInf(intermed, 0) {
-		return x
-	}
-	x = math.RoundToEven(intermed)
-
-	if x == 0 {
-		return 0
-	}
-
-	return x / pow
-}
-
 // Same returns true when the inputs have the same value, allowing NaN equality.
 func Same(a, b float64) bool {
 	return a == b || (math.IsNaN(a) && math.IsNaN(b))

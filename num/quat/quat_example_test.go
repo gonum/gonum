@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"math"
 
-	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/num/quat"
 )
 
@@ -59,11 +58,11 @@ func Example_rotate() {
 		pp := rotate(p, q, scale)
 
 		// Clean up floating point error for clarity.
-		pp.x = scalar.Round(pp.x, 2)
-		pp.y = scalar.Round(pp.y, 2)
-		pp.z = scalar.Round(pp.z, 2)
+		pp.x = round(pp.x)
+		pp.y = round(pp.y)
+		pp.z = round(pp.z)
 
-		fmt.Printf("%d %+v -> %+v\n", i, p, pp)
+		fmt.Printf("%d %+.1v -> %+.1v\n", i, p, pp)
 	}
 
 	// Output:
@@ -76,4 +75,11 @@ func Example_rotate() {
 	// 5 {x:1 y:0 z:1} -> {x:1 y:1 z:0}
 	// 6 {x:1 y:1 z:0} -> {x:0 y:1 z:1}
 	// 7 {x:1 y:1 z:1} -> {x:1 y:1 z:1}
+}
+
+func round(f float64) float64 {
+	if math.Abs(f) < 1e-15 {
+		return 0
+	}
+	return f
 }

@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"math"
 
-	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/num/dualcmplx"
 )
 
@@ -81,10 +80,10 @@ func Example() {
 		)
 
 		// Clean up floating point error for clarity.
-		pp.x = scalar.Round(pp.x, 2)
-		pp.y = scalar.Round(pp.y, 2)
+		pp.x = round(pp.x)
+		pp.y = round(pp.y)
 
-		fmt.Printf(" %d %+v -> %+v\n", i, p, pp)
+		fmt.Printf(" %d %+.1v -> %+.1v\n", i, p, pp)
 	}
 
 	// Rotate a line segment 90° around its lower end [2, 2].
@@ -112,10 +111,10 @@ func Example() {
 		)
 
 		// Clean up floating point error for clarity.
-		pp.x = scalar.Round(pp.x, 2)
-		pp.y = scalar.Round(pp.y, 2)
+		pp.x = round(pp.x)
+		pp.y = round(pp.y)
 
-		fmt.Printf(" %d %+v -> %+v\n", i, p, pp)
+		fmt.Printf(" %d %+.1v -> %+.1v\n", i, p, pp)
 	}
 
 	// Output:
@@ -129,4 +128,11 @@ func Example() {
 	// line segment:
 	//  0 {x:2 y:2} -> {x:2 y:2}
 	//  1 {x:2 y:3} -> {x:1 y:2}
+}
+
+func round(f float64) float64 {
+	if math.Abs(f) < 1e-15 {
+		return 0
+	}
+	return f
 }

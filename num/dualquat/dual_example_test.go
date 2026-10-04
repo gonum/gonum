@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"math"
 
-	"gonum.org/v1/gonum/floats/scalar"
 	"gonum.org/v1/gonum/num/dualquat"
 	"gonum.org/v1/gonum/num/quat"
 )
@@ -89,11 +88,11 @@ func Example() {
 		)
 
 		// Clean up floating point error for clarity.
-		pp.x = scalar.Round(pp.x, 2)
-		pp.y = scalar.Round(pp.y, 2)
-		pp.z = scalar.Round(pp.z, 2)
+		pp.x = round(pp.x)
+		pp.y = round(pp.y)
+		pp.z = round(pp.z)
 
-		fmt.Printf(" %d %+v -> %+v\n", i, p, pp)
+		fmt.Printf(" %d %+.1v -> %+.1v\n", i, p, pp)
 	}
 
 	// Rotate a line segment from {[2, 1, 1], [2, 1, 2]} 120° around
@@ -122,11 +121,11 @@ func Example() {
 		)
 
 		// Clean up floating point error for clarity.
-		pp.x = scalar.Round(pp.x, 2)
-		pp.y = scalar.Round(pp.y, 2)
-		pp.z = scalar.Round(pp.z, 2)
+		pp.x = round(pp.x)
+		pp.y = round(pp.y)
+		pp.z = round(pp.z)
 
-		fmt.Printf(" %d %+v -> %+v\n", i, p, pp)
+		fmt.Printf(" %d %+.1v -> %+.1v\n", i, p, pp)
 	}
 
 	// Output:
@@ -144,4 +143,11 @@ func Example() {
 	// line segment:
 	//  0 {x:2 y:1 z:1} -> {x:2 y:1 z:1}
 	//  1 {x:2 y:1 z:2} -> {x:3 y:1 z:1}
+}
+
+func round(f float64) float64 {
+	if math.Abs(f) < 1e-15 {
+		return 0
+	}
+	return f
 }

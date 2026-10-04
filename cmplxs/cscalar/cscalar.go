@@ -7,8 +7,6 @@ package cscalar
 import (
 	"math"
 	"math/cmplx"
-
-	"gonum.org/v1/gonum/floats/scalar"
 )
 
 // EqualWithinAbs returns true when a and b have an absolute difference
@@ -57,38 +55,6 @@ func ParseWithNA(s, missing string) (value complex128, weight float64, err error
 		weight = 1
 	}
 	return value, weight, err
-}
-
-// Round returns the half away from zero rounded value of x with prec precision.
-//
-// Special cases are:
-//
-//	Round(±0) = +0
-//	Round(±Inf) = ±Inf
-//	Round(NaN) = NaN
-func Round(x complex128, prec int) complex128 {
-	if x == 0 {
-		// Make sure zero is returned
-		// without the negative bit set.
-		return 0
-	}
-	return complex(scalar.Round(real(x), prec), scalar.Round(imag(x), prec))
-}
-
-// RoundEven returns the half even rounded value of x with prec precision.
-//
-// Special cases are:
-//
-//	RoundEven(±0) = +0
-//	RoundEven(±Inf) = ±Inf
-//	RoundEven(NaN) = NaN
-func RoundEven(x complex128, prec int) complex128 {
-	if x == 0 {
-		// Make sure zero is returned
-		// without the negative bit set.
-		return 0
-	}
-	return complex(scalar.RoundEven(real(x), prec), scalar.RoundEven(imag(x), prec))
 }
 
 // Same returns true when the inputs have the same value, allowing NaN equality.

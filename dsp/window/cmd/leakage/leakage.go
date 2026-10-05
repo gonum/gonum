@@ -270,11 +270,7 @@ type characteristics struct {
 	deltaFhalf float64
 	gammaMax   float64
 	beta       float64
-
-	// enbw is the equivalent noise bandwidth, which is a distinct
-	// parameter from deltaFhalf. It is NaN when the window itself is not
-	// available, as when reading a spectrum from csv.
-	enbw float64
+	enbw       float64
 }
 
 // k returns the K window parameter which is the ratio of the window's

@@ -38,9 +38,6 @@
 //
 //	ENBW = N sum(w[i]^2) / (sum(w[i]))^2
 //
-// ENBW and ΔF_0.5 are distinct and should not be substituted for one
-// another; for the Hann window ENBW is 1.5 bins while ΔF_0.5 is 1.44.
-//
 // The K parameter describes the relative width of the main lobe of the
 // frequency spectrum produced by the window compared with the rectangular
 // window. The rectangular window has the lowest ΔF_0 at a value of 2.

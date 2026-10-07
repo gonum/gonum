@@ -1,0 +1,63 @@
+name: Generate numerical reference docs
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/sourcey-bin
+            ~/sourcey-cache
+          key: sourcey-${{ runner.os }}-v3.6.12
+          restore-keys: |
+            sourcey-${{ runner.os }}-
+      - name: Install Sourcey
+        run: |
+          if [ ! -f ~/sourcey-bin/sourcey ]; then
+            mkdir -p ~/sourcey-bin ~/sourcey-cache
+            curl -fsSL https://github.com/sourcey/sourcey/releases/download/v3.6.12/sourcey-linux-amd64.tar.gz \
+              | tar -xz -C ~/sourcey-bin --strip-components=1
+            chmod +x ~/sourcey-bin/sourcey
+          fi
+          echo "$HOME/sourcey-bin" >> $GITHUB_PATH
+      - name: Generate godoc.json
+        run: sourcey godoc --module ./gonum --packages ./mat,./floats,./stat --out godoc.json
+      - name: Build documentation
+        run: sourcey build --out docs/numref
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/numref
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

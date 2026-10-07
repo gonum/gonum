@@ -1,0 +1,16 @@
+{
+  "name": "Gonum Numerical Reference",
+  "tagline": "mat · floats · stat",
+  "theme": "dark",
+  "logo": "https://raw.githubusercontent.com/gonum/gonum/master/logo/gonum-logo.png",
+  "nav": [
+    { "label": "mat", "href": "#mat" },
+    { "label": "floats", "href": "#floats" },
+    { "label": "stat", "href": "#stat" },
+    { "label": "Examples", "href": "examples/" }
+  ],
+  "meta": {
+    "repository": "https://github.com/gonum/gonum",
+    "license": "BSD-3-Clause"
+  }
+}

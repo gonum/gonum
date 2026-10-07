@@ -1,0 +1,6 @@
+{
+  "adapter": "go",
+  "module": "./gonum",
+  "packages": ["./mat", "./floats", "./stat"],
+  "output": "godoc.json"
+}

@@ -41,6 +41,14 @@ func DsterfTest(t *testing.T, impl Dsterfer) {
 			// Computed from original Fortran code.
 			want: []float64{11.046227528488854, 4.795922173417400, -2.546379458290125, 0.704229756383872},
 		},
+		{
+			// A block whose norm is below ssfmin followed by a block of normal size.
+			// The small block is scaled; this must not need a longer d or e.
+			d:    []float64{1e-200, 1e-200, 1, 2},
+			e:    []float64{1e-200, 0, 0.5},
+			n:    4,
+			want: []float64{0, 2e-200, 1.5 - math.Sqrt(0.5), 1.5 + math.Sqrt(0.5)},
+		},
 	} {
 		n := test.n
 		got := make([]float64, len(test.d))

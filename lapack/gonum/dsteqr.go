@@ -101,7 +101,8 @@ func (impl Implementation) Dsteqr(compz lapack.EVComp, n int, d, e, z []float64,
 
 	type scaletype int
 	const (
-		down scaletype = iota + 1
+		none scaletype = iota
+		down
 		up
 	)
 	var iscale scaletype
@@ -158,6 +159,7 @@ func (impl Implementation) Dsteqr(compz lapack.EVComp, n int, d, e, z []float64,
 		}
 
 		// Scale submatrix in rows and columns L to Lend
+		iscale = none
 		anorm := impl.Dlanst(lapack.MaxAbs, lend-l+1, d[l:], e[l:])
 		switch {
 		case anorm == 0:

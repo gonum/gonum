@@ -97,12 +97,12 @@ func (impl Implementation) Dsterf(n int, d, e []float64) (ok bool) {
 		}
 		if anorm > ssfmax {
 			iscale = down
-			impl.Dlascl(lapack.General, 0, 0, anorm, ssfmax, lend-l+1, 1, d[l:], n)
-			impl.Dlascl(lapack.General, 0, 0, anorm, ssfmax, lend-l, 1, e[l:], n)
+			impl.Dlascl(lapack.General, 0, 0, anorm, ssfmax, lend-l+1, 1, d[l:], 1)
+			impl.Dlascl(lapack.General, 0, 0, anorm, ssfmax, lend-l, 1, e[l:], 1)
 		} else if anorm < ssfmin {
 			iscale = up
-			impl.Dlascl(lapack.General, 0, 0, anorm, ssfmin, lend-l+1, 1, d[l:], n)
-			impl.Dlascl(lapack.General, 0, 0, anorm, ssfmin, lend-l, 1, e[l:], n)
+			impl.Dlascl(lapack.General, 0, 0, anorm, ssfmin, lend-l+1, 1, d[l:], 1)
+			impl.Dlascl(lapack.General, 0, 0, anorm, ssfmin, lend-l, 1, e[l:], 1)
 		}
 
 		el := e[l:lend]
@@ -265,9 +265,9 @@ func (impl Implementation) Dsterf(n int, d, e []float64) (ok bool) {
 		// Undo scaling if necessary
 		switch iscale {
 		case down:
-			impl.Dlascl(lapack.General, 0, 0, ssfmax, anorm, lendsv-lsv+1, 1, d[lsv:], n)
+			impl.Dlascl(lapack.General, 0, 0, ssfmax, anorm, lendsv-lsv+1, 1, d[lsv:], 1)
 		case up:
-			impl.Dlascl(lapack.General, 0, 0, ssfmin, anorm, lendsv-lsv+1, 1, d[lsv:], n)
+			impl.Dlascl(lapack.General, 0, 0, ssfmin, anorm, lendsv-lsv+1, 1, d[lsv:], 1)
 		}
 
 		// Check for no convergence to an eigenvalue after a total of n*maxit iterations.

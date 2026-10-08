@@ -5,6 +5,7 @@
 package testlapack
 
 import (
+	"math"
 	"math/rand/v2"
 	"testing"
 
@@ -20,6 +21,28 @@ type Dsteqrer interface {
 }
 
 func DsteqrTest(t *testing.T, impl Dsteqrer) {
+	// A block whose norm is below ssfmin followed by a block of normal size.
+	// Only the small block is scaled, so only it must be scaled back.
+	for _, compz := range []lapack.EVComp{lapack.EVOrig, lapack.EVTridiag} {
+		const n = 4
+		d := []float64{1e-200, 1e-200, 1, 2}
+		e := []float64{1e-200, 0, 0.5}
+		z := make([]float64, n*n)
+		for i := 0; i < n; i++ {
+			z[i*n+i] = 1
+		}
+		work := make([]float64, 2*n-2)
+		ok := impl.Dsteqr(compz, n, d, e, z, n, work)
+		if !ok {
+			t.Errorf("compz=%v, small block first: Dsteqr failed", string(compz))
+			continue
+		}
+		want := []float64{0, 2e-200, 1.5 - math.Sqrt(0.5), 1.5 + math.Sqrt(0.5)}
+		if diff := floats.Distance(d, want, math.Inf(1)); diff > 1e-14 {
+			t.Errorf("compz=%v, small block first: unexpected eigenvalues %v, want %v", string(compz), d, want)
+		}
+	}
+
 	rnd := rand.New(rand.NewPCG(1, 1))
 	for _, compz := range []lapack.EVComp{lapack.EVOrig, lapack.EVTridiag} {
 		for _, test := range []struct {

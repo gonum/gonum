@@ -8,6 +8,7 @@ Checklist:
 - packages with generated code have had code generation run
 - tests pass locally
 - linked to relevant issues
+- contribution guidelines have been respected (no AI)
 
 Please make sure your commit message summary line and pull request
 title match the Go convention; a one-line summary of the change,

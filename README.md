@@ -52,6 +52,21 @@ If you find any bugs, feel free to file an issue on the github issue tracker. Di
 
 https://groups.google.com/forum/#!forum/gonum-dev
 
+## Contributing
+
+Details about the contributing process are provided in the [Contributing](https://github.com/gonum/gonum/blob/master/CONTRIBUTING.md) document.
+
+### Use of generative AI (genAI, LLMs, ...)
+
+Do note the Gonum project **does NOT accept genAI-based contributions** (issues, code or pull requests.)
+
+The Gonum project won't allow genAI-based contributions in its source code, documentation, commit messages or any other areas of the project:
+- license compatibility and proper attribution to original authors are foggy, to say the least
+- shared understanding of code is weakened when AI/LLM are used at scale
+- environmental cost and misallocation of resources are also sore points against the possibility of an ethical use of AI/LLM tools.
+
+For more informations about the social, ethical, and political problems posed by LLMs, [consult this reference](https://codeberg.org/ethical-foss/open-slopware/src/branch/main/why_not_llms.md).
+
 ## License
 
 Original code is licensed under the Gonum License found in the LICENSE file. Portions of the code are subject to the additional licenses found in THIRD_PARTY_LICENSES. All third party code is licensed either under a BSD or MIT license.

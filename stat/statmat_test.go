@@ -302,6 +302,212 @@ func TestMahalanobis(t *testing.T) {
 	}
 }
 
+var lassoRegressionTests = []struct {
+	name      string
+	x         *mat.Dense
+	y         *mat.Dense
+	model     LassoModel
+	err       error
+	tol       float64
+	intercept float64
+	coef      []float64
+}{
+	{
+		name: "invalid_lambda",
+		x: mat.NewDense(4, 2,
+			[]float64{
+				0, 0,
+				3, 5,
+				9, 20,
+				12, 6,
+			},
+		),
+		y:     mat.NewDense(4, 1, []float64{2, 31, 109, 62}),
+		model: LassoModel{Lambda: -1.0},
+		err:   ErrNegativeLambda,
+	},
+	{
+		name: "invalid_iterations",
+		x: mat.NewDense(4, 2,
+			[]float64{
+				0, 0,
+				3, 5,
+				9, 20,
+				12, 6,
+			},
+		),
+		y:     mat.NewDense(4, 1, []float64{2, 31, 109, 62}),
+		model: LassoModel{Iterations: -1.0},
+		err:   ErrNegativeIterations,
+	},
+	{
+		name: "invalid_tolerance",
+		x: mat.NewDense(4, 2,
+			[]float64{
+				0, 0,
+				3, 5,
+				9, 20,
+				12, 6,
+			},
+		),
+		y:     mat.NewDense(4, 1, []float64{2, 31, 109, 62}),
+		model: LassoModel{Tolerance: -1.0},
+		err:   ErrNegativeTolerance,
+	},
+	{
+		name: "fit_with_intercept",
+		x: mat.NewDense(4, 2,
+			[]float64{
+				0, 0,
+				3, 5,
+				9, 20,
+				12, 6,
+			},
+		),
+		y: mat.NewDense(4, 1, []float64{2, 31, 109, 62}),
+		model: LassoModel{
+			Lambda:       0.0,
+			Tolerance:    1e-6,
+			FitIntercept: true,
+			Iterations:   1000,
+		},
+		err:       nil,
+		tol:       1e-5,
+		intercept: 2.0,
+		coef:      []float64{3.0, 4.0},
+	},
+	{
+		name: "fit_with_no_intercept",
+		x: mat.NewDense(4, 3,
+			[]float64{
+				1, 0, 0,
+				1, 3, 5,
+				1, 9, 20,
+				1, 12, 6,
+			},
+		),
+		y: mat.NewDense(4, 1, []float64{2, 31, 109, 62}),
+		model: LassoModel{
+			Lambda:       0.0,
+			Tolerance:    1e-6,
+			FitIntercept: false,
+			Iterations:   1000,
+		},
+		err:       nil,
+		tol:       1e-5,
+		intercept: 0.0,
+		coef:      []float64{2.0, 3.0, 4.0},
+	},
+}
+
+func TestLassoRegression(t *testing.T) {
+	for _, td := range lassoRegressionTests {
+		t.Run(td.name, func(t *testing.T) {
+			if td.err != nil {
+				if !panics(func() { td.model.Fit(td.x, td.y) }) {
+					t.Errorf("Fit did not panic with %v", td.err)
+				}
+				return
+			}
+
+			td.model.Fit(td.x, td.y)
+			if math.Abs(td.model.Intercept-td.intercept) > td.tol {
+				t.Errorf("expected intercept to be in tolerance of %v, got %v, but expected, %v", td.tol, td.model.Intercept, td.intercept)
+			}
+
+			if len(td.model.Coef) != len(td.coef) {
+				t.Errorf("expected %d coefficients, but got %d", len(td.coef), len(td.model.Coef))
+				return
+			}
+
+			for i := range td.coef {
+				if math.Abs(td.model.Coef[i]-td.coef[i]) > td.tol {
+					t.Errorf("expected coefficient at index, %d, to be in tolerance of %v, got %v, but expected, %v", i, td.tol, td.model.Coef[i], td.coef[i])
+				}
+			}
+
+			r2 := td.model.Score(td.x, td.y)
+			if math.Abs(r2-1.0) > td.tol {
+				t.Errorf("expected coefficient of determination to be in tolerance of %v, got %v, but expected, %v", td.tol, r2, 1.0)
+			}
+		})
+	}
+}
+
+var olsRegressionTests = []struct {
+	name      string
+	x         *mat.Dense
+	y         *mat.Dense
+	model     OLSModel
+	tol       float64
+	intercept float64
+	coef      []float64
+}{
+	{
+		name: "fit_with_intercept",
+		x: mat.NewDense(4, 2,
+			[]float64{
+				0, 0,
+				3, 5,
+				9, 20,
+				12, 6,
+			},
+		),
+		y: mat.NewDense(4, 1, []float64{2, 31, 109, 62}),
+		model: OLSModel{
+			FitIntercept: true,
+		},
+		tol:       1e-5,
+		intercept: 2.0,
+		coef:      []float64{3.0, 4.0},
+	},
+	{
+		name: "fit_with_no_intercept",
+		x: mat.NewDense(4, 3,
+			[]float64{
+				1, 0, 0,
+				1, 3, 5,
+				1, 9, 20,
+				1, 12, 6,
+			},
+		),
+		y: mat.NewDense(4, 1, []float64{2, 31, 109, 62}),
+		model: OLSModel{
+			FitIntercept: false,
+		},
+		tol:       1e-5,
+		intercept: 0.0,
+		coef:      []float64{2.0, 3.0, 4.0},
+	},
+}
+
+func TestOLSRegression(t *testing.T) {
+	for _, td := range olsRegressionTests {
+		t.Run(td.name, func(t *testing.T) {
+			td.model.Fit(td.x, td.y)
+			if math.Abs(td.model.Intercept-td.intercept) > td.tol {
+				t.Errorf("expected intercept to be in tolerance of %v, got %v, but expected, %v", td.tol, td.model.Intercept, td.intercept)
+			}
+
+			if len(td.model.Coef) != len(td.coef) {
+				t.Errorf("expected %d coefficients, but got %d", len(td.coef), len(td.model.Coef))
+				return
+			}
+
+			for i := range td.coef {
+				if math.Abs(td.model.Coef[i]-td.coef[i]) > td.tol {
+					t.Errorf("expected coefficient at index, %d, to be in tolerance of %v, got %v, but expected, %v", i, td.tol, td.model.Coef[i], td.coef[i])
+				}
+			}
+
+			r2 := td.model.Score(td.x, td.y)
+			if math.Abs(r2-1.0) > td.tol {
+				t.Errorf("expected coefficient of determination to be in tolerance of %v, got %v, but expected, %v", td.tol, r2, 1.0)
+			}
+		})
+	}
+}
+
 // benchmarks
 
 func randMat(r, c int) mat.Matrix {
@@ -475,5 +681,67 @@ func BenchmarkCorrToCov(b *testing.B) {
 		cc.CopySym(&corr)
 		b.StartTimer()
 		corrToCov(cc, sigma)
+	}
+}
+
+func BenchmarkLassoRegression(b *testing.B) {
+	nObs := 1000
+	nFeat := 100
+
+	data := make([]float64, nObs*nFeat)
+	for i := 0; i < nObs; i++ {
+		for j := 0; j < nFeat; j++ {
+			val := float64(i*nFeat + j)
+			if j == 0 {
+				val = 1.0
+			}
+			data[i*nFeat+j] = val
+		}
+	}
+
+	data2 := make([]float64, 0, nObs)
+	for i := 0; i < cap(data2); i++ {
+		data2 = append(data2, float64(i))
+	}
+
+	x := mat.NewDense(nObs, nFeat, data)
+	y := mat.NewDense(nObs, 1, data2)
+
+	model := &LassoModel{FitIntercept: false}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		model.Fit(x, y)
+	}
+}
+
+func BenchmarkOLSRegression(b *testing.B) {
+	nObs := 1000
+	nFeat := 100
+
+	data := make([]float64, nObs*nFeat)
+	for i := 0; i < nObs; i++ {
+		for j := 0; j < nFeat; j++ {
+			val := float64(i*nFeat + j)
+			if j == 0 {
+				val = 1.0
+			}
+			data[i*nFeat+j] = val
+		}
+	}
+
+	data2 := make([]float64, 0, nObs)
+	for i := 0; i < cap(data2); i++ {
+		data2 = append(data2, float64(i))
+	}
+
+	x := mat.NewDense(nObs, nFeat, data)
+	y := mat.NewDense(nObs, 1, data2)
+	model := &OLSModel{
+		FitIntercept: false,
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		model.Fit(x, y)
 	}
 }

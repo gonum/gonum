@@ -37,7 +37,14 @@ func TestLeidenUndirectedMultiplex(t *testing.T) {
 
 		src := rand.New(rand.NewPCG(1, 1))
 		for i := 0; i < iterations; i++ {
-			r := LeidenMultiplex(g, weights, nil, true, src).(*ReducedUndirectedMultiplex)
+			rr, err := LeidenMultiplex(g, weights, nil, true, src)
+			if err != nil {
+				if rr == nil {
+					continue
+				}
+				t.Errorf("%s: LeidenMultiplex returned error: %v", test.name, err)
+			}
+			r := rr.(*ReducedUndirectedMultiplex)
 
 			qVec := QMultiplex(r, nil, weights, nil)
 			q := floats.Sum(qVec)
@@ -136,18 +143,21 @@ func TestLeidenNonContiguousUndirectedMultiplex(t *testing.T) {
 
 	func() {
 		defer func() {
-			r := recover()
-			if r != nil {
+			if r := recover(); r != nil {
 				t.Error("unexpected panic with non-contiguous ID range")
 			}
 		}()
-		LeidenMultiplex(UndirectedLayers{g}, nil, nil, true, nil)
+		if _, err := LeidenMultiplex(UndirectedLayers{g}, nil, nil, true, nil); err != nil {
+			t.Errorf("unexpected error with non-contiguous ID range: %v", err)
+		}
 	}()
 }
 
 func BenchmarkLeidenUndirectedMultiplex(b *testing.B) {
 	src := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < b.N; i++ {
-		LeidenMultiplex(UndirectedLayers{dupGraph}, nil, nil, true, src)
+		if _, err := LeidenMultiplex(UndirectedLayers{dupGraph}, nil, nil, true, src); err != nil {
+			b.Fatal(err)
+		}
 	}
 }

@@ -66,7 +66,14 @@ func testLeidenUndirected(t *testing.T, test communityUndirectedQTest, g graph.U
 	// Leiden is randomised so we do this to ensure the level tests are consistent.
 	src := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < iterations; i++ {
-		r := Leiden(g, 1, src).(*ReducedUndirected)
+		rr, err := Leiden(g, 1, src)
+		if err != nil {
+			if rr == nil {
+				continue
+			}
+			t.Errorf("%s: Leiden returned error: %v", test.name, err)
+		}
+		r := rr.(*ReducedUndirected)
 		if q := Q(r, nil, 1); q > bestQ || math.IsNaN(q) {
 			bestQ = q
 			got = r
@@ -142,10 +149,18 @@ func TestLeidenVsLouvainModularity(t *testing.T) {
 	}
 
 	src := rand.New(rand.NewPCG(42, 42))
-	louvainResult := Modularize(g, 1, src).(*ReducedUndirected)
-	leidenResult := Leiden(g, 1, src).(*ReducedUndirected)
+	louvainResult, err := Modularize(g, 1, src)
+	if err != nil {
+		t.Fatalf("unexpected error from Modularize: %v", err)
+	}
+	louvainResultCast := louvainResult.(*ReducedUndirected)
+	leidenRaw, err := Leiden(g, 1, src)
+	if err != nil {
+		t.Fatalf("unexpected error from Leiden: %v", err)
+	}
+	leidenResult := leidenRaw.(*ReducedUndirected)
 
-	qLouvain := Q(louvainResult, nil, 1)
+	qLouvain := Q(louvainResultCast, nil, 1)
 	qLeiden := Q(leidenResult, nil, 1)
 
 	if math.IsNaN(qLeiden) {
@@ -172,7 +187,9 @@ func TestLeidenNonContiguousUndirected(t *testing.T) {
 				t.Error("unexpected panic with non-contiguous ID range")
 			}
 		}()
-		Leiden(g, 1, nil)
+		if _, err := Leiden(g, 1, nil); err != nil {
+			t.Errorf("unexpected error with non-contiguous ID range: %v", err)
+		}
 	}()
 }
 
@@ -190,14 +207,19 @@ func TestLeidenNonContiguousWeightedUndirected(t *testing.T) {
 				t.Error("unexpected panic with non-contiguous ID range")
 			}
 		}()
-		Leiden(g, 1, nil)
+		if _, err := Leiden(g, 1, nil); err != nil {
+			t.Errorf("unexpected error with non-contiguous ID range: %v", err)
+		}
 	}()
 }
 
 func TestLeidenDirectedSupported(t *testing.T) {
 	g := simple.NewDirectedGraph()
 	g.SetEdge(simple.Edge{F: simple.Node(0), T: simple.Node(1)})
-	r := Leiden(g, 1, nil)
+	r, err := Leiden(g, 1, nil)
+	if err != nil {
+		t.Errorf("Leiden directed returned error: %v", err)
+	}
 	if r == nil {
 		t.Error("Leiden directed returned nil")
 	}
@@ -206,7 +228,9 @@ func TestLeidenDirectedSupported(t *testing.T) {
 func BenchmarkLeiden(b *testing.B) {
 	src := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < b.N; i++ {
-		Leiden(dupGraph, 1, src)
+		if _, err := Leiden(dupGraph, 1, src); err != nil {
+			b.Fatal(err)
+		}
 	}
 }
 
@@ -220,7 +244,11 @@ func TestLeidenRefinementConnectivity(t *testing.T) {
 	g.SetEdge(simple.Edge{F: simple.Node(2), T: simple.Node(3)})
 
 	src := rand.New(rand.NewPCG(1, 1))
-	r := Leiden(g, 1, src).(*ReducedUndirected)
+	rr, err := Leiden(g, 1, src)
+	if err != nil {
+		t.Fatalf("Leiden returned error: %v", err)
+	}
+	r := rr.(*ReducedUndirected)
 	communities := r.Communities()
 	for _, c := range communities {
 		order.ByID(c)
@@ -241,8 +269,16 @@ func TestLeidenDeterminism(t *testing.T) {
 	}
 	src1 := rand.New(rand.NewPCG(42, 42))
 	src2 := rand.New(rand.NewPCG(42, 42))
-	r1 := Leiden(g, 1, src1).(*ReducedUndirected)
-	r2 := Leiden(g, 1, src2).(*ReducedUndirected)
+	rr1, err := Leiden(g, 1, src1)
+	if err != nil {
+		t.Fatalf("Leiden returned error: %v", err)
+	}
+	rr2, err := Leiden(g, 1, src2)
+	if err != nil {
+		t.Fatalf("Leiden returned error: %v", err)
+	}
+	r1 := rr1.(*ReducedUndirected)
+	r2 := rr2.(*ReducedUndirected)
 	c1 := r1.Communities()
 	c2 := r2.Communities()
 	for _, c := range c1 {
@@ -309,7 +345,11 @@ func TestLeidenMultiplex(t *testing.T) {
 	layers := UndirectedLayers{g0, g1}
 	weights := []float64{1, 1}
 	src := rand.New(rand.NewPCG(1, 1))
-	r := LeidenMultiplex(layers, weights, nil, false, src).(*ReducedUndirectedMultiplex)
+	rr, err := LeidenMultiplex(layers, weights, nil, false, src)
+	if err != nil {
+		t.Fatalf("LeidenMultiplex returned error: %v", err)
+	}
+	r := rr.(*ReducedUndirectedMultiplex)
 	communities := r.Communities()
 	seen := make(map[int64]int)
 	for i, c := range communities {

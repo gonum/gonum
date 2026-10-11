@@ -5,6 +5,7 @@
 package community
 
 import (
+	"fmt"
 	"math/rand/v2"
 	"slices"
 
@@ -16,7 +17,7 @@ import (
 
 // leidenUndirectedMultiplex returns the hierarchical modularization of g at the
 // given resolution using the Leiden algorithm.
-func leidenUndirectedMultiplex(g UndirectedMultiplex, weights, resolutions []float64, all bool, src rand.Source) *ReducedUndirectedMultiplex {
+func leidenUndirectedMultiplex(g UndirectedMultiplex, weights, resolutions []float64, all bool, src rand.Source) (*ReducedUndirectedMultiplex, error) {
 	if weights != nil && len(weights) != g.Depth() {
 		panic("community: weights vector length mismatch")
 	}
@@ -32,11 +33,11 @@ func leidenUndirectedMultiplex(g UndirectedMultiplex, weights, resolutions []flo
 	for iter := 0; iter < maxLeidenIterations; iter++ {
 		l := newUndirectedMultiplexLocalMover(c, c.communities, weights, resolutions, all)
 		if l == nil {
-			return c
+			return c, nil
 		}
 		done := l.localMovingHeuristic(rnd)
 		if done {
-			return c
+			return c, nil
 		}
 		refined := refineUndirectedMultiplex(l, weights, resolutions, all, rnd)
 		// If the refinement phase resulted in no reduction in the number of
@@ -48,11 +49,11 @@ func leidenUndirectedMultiplex(g UndirectedMultiplex, weights, resolutions []flo
 			}
 		}
 		if nonEmpty == len(c.nodes) {
-			return c
+			return c, nil
 		}
 		c = reduceUndirectedMultiplex(c, refined, weights)
 	}
-	panic("community: Leiden did not converge within 1000 iterations")
+	return c, fmt.Errorf("community: Leiden did not converge within %d iterations", maxLeidenIterations)
 }
 
 // inducedUndirectedMultiplex is an undirected multiplex view over a subset of

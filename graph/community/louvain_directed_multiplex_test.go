@@ -595,7 +595,11 @@ func TestLouvainDirectedMultiplex(t *testing.T) {
 		// ensure the level tests are consistent.
 		src := rand.New(rand.NewPCG(1, 1))
 		for i := 0; i < louvainIterations; i++ {
-			r := ModularizeMultiplex(g, weights, nil, true, src).(*ReducedDirectedMultiplex)
+			rr, err := ModularizeMultiplex(g, weights, nil, true, src)
+			if err != nil {
+				t.Fatalf("unexpected error from ModularizeMultiplex: %v", err)
+			}
+			r := rr.(*ReducedDirectedMultiplex)
 			if q := floats.Sum(QMultiplex(r, nil, weights, nil)); q > bestQ || math.IsNaN(q) {
 				bestQ = q
 				got = r
@@ -664,12 +668,13 @@ func TestNonContiguousDirectedMultiplex(t *testing.T) {
 
 	func() {
 		defer func() {
-			r := recover()
-			if r != nil {
+			if r := recover(); r != nil {
 				t.Error("unexpected panic with non-contiguous ID range")
 			}
 		}()
-		ModularizeMultiplex(DirectedLayers{g}, nil, nil, true, nil)
+		if _, err := ModularizeMultiplex(DirectedLayers{g}, nil, nil, true, nil); err != nil {
+			t.Errorf("unexpected error with non-contiguous ID range: %v", err)
+		}
 	}()
 }
 
@@ -684,19 +689,22 @@ func TestNonContiguousWeightedDirectedMultiplex(t *testing.T) {
 
 	func() {
 		defer func() {
-			r := recover()
-			if r != nil {
+			if r := recover(); r != nil {
 				t.Error("unexpected panic with non-contiguous ID range")
 			}
 		}()
-		ModularizeMultiplex(DirectedLayers{g}, nil, nil, true, nil)
+		if _, err := ModularizeMultiplex(DirectedLayers{g}, nil, nil, true, nil); err != nil {
+			t.Errorf("unexpected error with non-contiguous ID range: %v", err)
+		}
 	}()
 }
 
 func BenchmarkLouvainDirectedMultiplex(b *testing.B) {
 	src := rand.New(rand.NewPCG(1, 1))
 	for i := 0; i < b.N; i++ {
-		ModularizeMultiplex(DirectedLayers{dupGraphDirected}, nil, nil, true, src)
+		if _, err := ModularizeMultiplex(DirectedLayers{dupGraphDirected}, nil, nil, true, src); err != nil {
+			b.Fatal(err)
+		}
 	}
 }
 

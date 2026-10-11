@@ -633,6 +633,16 @@ func TestDtgsja(t *testing.T) {
 	testlapack.DtgsjaTest(t, impl)
 }
 
+func TestDtgsy2(t *testing.T) {
+	t.Parallel()
+	testlapack.Dtgsy2Test(t, impl)
+}
+
+func TestDtgsyl(t *testing.T) {
+	t.Parallel()
+	testlapack.DtgsylTest(t, impl)
+}
+
 func TestDtbtrs(t *testing.T) {
 	t.Parallel()
 	testlapack.DtbtrsTest(t, impl)

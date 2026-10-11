@@ -217,7 +217,7 @@ func (impl Implementation) Ilaenv(ispec int, name string, opts string, n1, n2, n
 	case 2:
 		switch c2 {
 		default:
-			panic(badName)
+			return 2 // Default NBMIN.
 		case "GE":
 			switch c3 {
 			default:

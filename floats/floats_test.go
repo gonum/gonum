@@ -1846,3 +1846,36 @@ func BenchmarkReverseSmall(b *testing.B)  { benchmarkReverse(b, Small) }
 func BenchmarkReverseMedium(b *testing.B) { benchmarkReverse(b, Medium) }
 func BenchmarkReverseLarge(b *testing.B)  { benchmarkReverse(b, Large) }
 func BenchmarkReverseHuge(b *testing.B)   { benchmarkReverse(b, Huge) }
+
+func TestSpanFiniteExtremes(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name string
+		l, u float64
+		want []float64
+	}{
+		// The interior values divide the symmetric finite interval into equal parts.
+		{"opposite_maximum", -math.MaxFloat64, math.MaxFloat64, []float64{-math.MaxFloat64, 0, math.MaxFloat64}},
+		{"opposite_maximum_five", -math.MaxFloat64, math.MaxFloat64, []float64{-math.MaxFloat64, -math.MaxFloat64 / 2, 0, math.MaxFloat64 / 2, math.MaxFloat64}},
+		{"reverse_maximum", math.MaxFloat64, -math.MaxFloat64, []float64{math.MaxFloat64, 0, -math.MaxFloat64}},
+		{"two_endpoints", -math.MaxFloat64, math.MaxFloat64, []float64{-math.MaxFloat64, math.MaxFloat64}},
+		{"subnormal_endpoint", 0, math.SmallestNonzeroFloat64, []float64{0, 0, math.SmallestNonzeroFloat64}},
+		{"negative_zero_endpoint", math.Copysign(0, -1), 0, []float64{math.Copysign(0, -1), 0}},
+		{"equal_bounds", math.MaxFloat64, math.MaxFloat64, []float64{math.MaxFloat64, math.MaxFloat64, math.MaxFloat64}},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			dst := make([]float64, len(tc.want))
+			got := Span(dst, tc.l, tc.u)
+			if &got[0] != &dst[0] {
+				t.Error("Span did not return its destination")
+			}
+			if math.Float64bits(got[0]) != math.Float64bits(tc.l) || math.Float64bits(got[len(got)-1]) != math.Float64bits(tc.u) {
+				t.Errorf("endpoint values = %v, want %v", got, tc.want)
+			}
+			if !EqualApprox(got, tc.want, EqTolerance) {
+				t.Errorf("Span(%v, %v) = %v, want %v", tc.l, tc.u, got, tc.want)
+			}
+		})
+	}
+}

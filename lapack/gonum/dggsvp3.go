@@ -134,7 +134,7 @@ func (impl Implementation) Dggsvp3(jobU, jobV, jobQ lapack.GSVDJob, m, p, n int,
 	// QR with column pivoting of B: B*P = V*[ S11 S12 ].
 	//                                       [  0   0  ]
 	for i := range iwork[:n] {
-		iwork[i] = 0
+		iwork[i] = -1
 	}
 	impl.Dgeqp3(p, n, b, ldb, iwork, tau, work, lwork)
 
@@ -204,7 +204,7 @@ func (impl Implementation) Dggsvp3(jobU, jobV, jobQ lapack.GSVDJob, m, p, n int,
 	//          A11 = U*[  0  T12 ]*P1ᵀ.
 	//                  [  0   0  ]
 	for i := range iwork[:n-l] {
-		iwork[i] = 0
+		iwork[i] = -1
 	}
 	impl.Dgeqp3(m, n-l, a, lda, iwork[:n-l], tau, work, lwork)
 
@@ -251,7 +251,10 @@ func (impl Implementation) Dggsvp3(jobU, jobV, jobQ lapack.GSVDJob, m, p, n int,
 
 		if wantq {
 			// Update Q[0:n, 0:n-l] := Q[0:n, 0:n-l]*Z1ᵀ.
-			impl.Dorm2r(blas.Right, blas.Trans, n, n-l, k, a, lda, tau[:k], q, ldq, work)
+			// Dgerq2 stores its reflectors in the rows of A, so they must be
+			// applied with Dormr2; Dorm2r reads them as column-stored and
+			// leaves Q non-orthogonal.
+			impl.Dormr2(blas.Right, blas.Trans, n, n-l, k, a, lda, tau[:k], q, ldq, work)
 		}
 
 		// Clean up A.
@@ -259,7 +262,7 @@ func (impl Implementation) Dggsvp3(jobU, jobV, jobQ lapack.GSVDJob, m, p, n int,
 		for i := 1; i < k; i++ {
 			r := a[i*lda+n-k-l : i*lda+i+n-k-l]
 			for j := range r {
-				a[j] = 0
+				r[j] = 0
 			}
 		}
 	}

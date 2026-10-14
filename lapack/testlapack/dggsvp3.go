@@ -24,6 +24,9 @@ func Dggsvp3Test(t *testing.T, impl Dggsvp3er) {
 	rnd := rand.New(rand.NewPCG(1, 1))
 	for cas, test := range []struct {
 		m, p, n, lda, ldb, ldu, ldv, ldq int
+		dupColA, dupColB                 bool
+		dupPairsA                        bool
+		wantK, wantL                     int
 	}{
 		{m: 3, p: 3, n: 5, lda: 0, ldb: 0, ldu: 0, ldv: 0, ldq: 0},
 		{m: 5, p: 5, n: 5, lda: 0, ldb: 0, ldu: 0, ldv: 0, ldq: 0},
@@ -44,6 +47,15 @@ func Dggsvp3Test(t *testing.T, impl Dggsvp3er) {
 		{m: 10, p: 5, n: 5, lda: 10, ldb: 10, ldu: 20, ldv: 10, ldq: 10},
 		{m: 10, p: 10, n: 10, lda: 20, ldb: 20, ldu: 20, ldv: 20, ldq: 20},
 		{m: 10, p: 10, n: 10, lda: 20, ldb: 20, ldu: 20, ldv: 20, ldq: 20},
+
+		// The rank-deficient cases below take the k < n-l branch of Dggsvp3,
+		// which the random full-rank cases above never reach, and check that
+		// the effective rank l of a rank-deficient B is computed correctly.
+		// (k is not asserted: where duplicated columns of A fall relative to
+		// the first n-l pivot columns is not defined when B has tied norms.)
+		{m: 4, p: 2, n: 5, dupColA: true, dupColB: true, wantL: 2},
+		{m: 4, p: 3, n: 3, dupColB: true, wantK: 1, wantL: 2},
+		{m: 4, p: 2, n: 6, dupPairsA: true, wantL: 2},
 	} {
 		m := test.m
 		p := test.p
@@ -70,8 +82,30 @@ func Dggsvp3Test(t *testing.T, impl Dggsvp3er) {
 		}
 
 		a := randomGeneral(m, n, lda, rnd)
+		if test.dupColA {
+			// Make column 1 equal to column 0.
+			for i := 0; i < m; i++ {
+				a.Data[i*a.Stride+1] = a.Data[i*a.Stride]
+			}
+		}
+		if test.dupPairsA {
+			// Make every odd column equal to the preceding one, so that any
+			// n-l >= 4 of the permuted columns of A are rank-deficient and
+			// the RQ factorization branch of Dggsvp3 is taken.
+			for j := 0; j < n; j += 2 {
+				for i := 0; i < m; i++ {
+					a.Data[i*a.Stride+j+1] = a.Data[i*a.Stride+j]
+				}
+			}
+		}
 		aCopy := cloneGeneral(a)
 		b := randomGeneral(p, n, ldb, rnd)
+		if test.dupColB {
+			// Make column 1 equal to column 0.
+			for i := 0; i < p; i++ {
+				b.Data[i*b.Stride+1] = b.Data[i*b.Stride]
+			}
+		}
 		bCopy := cloneGeneral(b)
 
 		tola := float64(max(m, n)) * impl.Dlange(lapack.Frobenius, m, n, a.Data, a.Stride, nil) * dlamchE
@@ -109,6 +143,13 @@ func Dggsvp3Test(t *testing.T, impl Dggsvp3er) {
 			q.Data, q.Stride,
 			iwork, tau,
 			work, lwork)
+
+		if test.wantK > 0 && k != test.wantK {
+			t.Errorf("Case %d: got k=%d, want %d", cas, k, test.wantK)
+		}
+		if test.wantL > 0 && l != test.wantL {
+			t.Errorf("Case %d: got l=%d, want %d", cas, l, test.wantL)
+		}
 
 		// Check orthogonality of U, V and Q.
 		if resid := residualOrthogonal(u, false); resid > tol {

@@ -55,7 +55,7 @@ func AddScaled(dst []float64, alpha float64, s []float64) {
 	if len(dst) != len(s) {
 		panic(badLength)
 	}
-	f64.AxpyUnitaryTo(dst, alpha, s, dst)
+	f64.AxpyUnitary(alpha, s, dst)
 }
 
 // AddScaledTo performs dst = y + alpha * s, where alpha is a scalar,

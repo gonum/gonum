@@ -507,7 +507,11 @@ func (Implementation) Ssyrk(ul blas.Uplo, tA blas.Transpose, n, k int, alpha flo
 	}
 	for i := 0; i < n; i++ {
 		ctmp := c[i*ldc : i*ldc+i+1]
-		if beta != 1 {
+		if beta == 0 {
+			for j := range ctmp {
+				ctmp[j] = 0
+			}
+		} else if beta != 1 {
 			for j := range ctmp {
 				ctmp[j] *= beta
 			}

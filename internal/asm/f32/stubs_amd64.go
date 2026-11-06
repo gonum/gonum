@@ -7,6 +7,8 @@
 
 package f32
 
+import "gonum.org/v1/gonum/internal/math32"
+
 // AxpyUnitary is
 //
 //	for i, v := range x {
@@ -75,6 +77,32 @@ func DotUnitary(x, y []float32) (sum float32)
 //	}
 //	return sum
 func DotInc(x, y []float32, n, incX, incY, ix, iy uintptr) (sum float32)
+
+// L1NormUnitary is
+//
+//	for _, v := range x {
+//		sum += math.Abs(v)
+//	}
+//	return sum
+func L1NormUnitary(x []float32) (sum float32) {
+	for _, v := range x {
+		sum += math32.Abs(v)
+	}
+	return sum
+}
+
+// L1NormInc is
+//
+//	for i := 0; i < n*incX; i += incX {
+//		sum += math.Abs(x[i])
+//	}
+//	return sum
+func L1NormInc(x []float32, n, incX int) (sum float32) {
+	for i := 0; i < n*incX; i += incX {
+		sum += math32.Abs(x[i])
+	}
+	return sum
+}
 
 // Sum is
 //

@@ -7,13 +7,13 @@
 
 package f64
 
-// L1Norm is
+// L1NormUnitary is
 //
 //	for _, v := range x {
 //		sum += math.Abs(v)
 //	}
 //	return sum
-func L1Norm(x []float64) (sum float64)
+func L1NormUnitary(x []float64) (sum float64)
 
 // L1NormInc is
 //

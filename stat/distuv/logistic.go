@@ -35,7 +35,9 @@ func (l Logistic) ExKurtosis() float64 {
 // LogProb computes the natural logarithm of the value of the probability
 // density function at x.
 func (l Logistic) LogProb(x float64) float64 {
-	return x - 2*math.Log(math.Exp(x)+1)
+	z := math.Abs((x - l.Mu) / l.S)
+	// Use symmetry to avoid overflow in the exponential in either tail.
+	return -z - 2*math.Log1p(math.Exp(-z)) - math.Log(l.S)
 }
 
 // Mean returns the mean of the probability distribution.

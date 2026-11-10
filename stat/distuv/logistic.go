@@ -66,8 +66,26 @@ func (l Logistic) NumParameters() int {
 
 // Prob computes the value of the probability density function at x.
 func (l Logistic) Prob(x float64) float64 {
-	E := math.Exp(-(x - l.Mu) / l.S)
-	return E / (l.S * math.Pow(1+E, 2))
+	z := math.Abs((x - l.Mu) / l.S)
+	e := math.Exp(-z)
+	if e < 0x1p-1022 {
+		// In the tails, apply the scale before the exponential underflows.
+		// Compute the square root of the density to preserve subnormal results.
+		var logS float64
+		if l.S > 0 && l.S < 0x1p-1022 {
+			// Normalize subnormal scales before taking the logarithm;
+			// math.Log is inaccurate for subnormal arguments on amd64.
+			logS = math.Log(l.S*0x1p52) - 52*math.Ln2
+		} else {
+			logS = math.Log(l.S)
+		}
+		e = math.Exp((-z - logS) / 2)
+		return e * e
+	}
+	// Use symmetry to avoid exponential overflow, and divide by the scale
+	// last so that the denominator cannot overflow for large scales.
+	d := 1 + e
+	return (e / (d * d)) / l.S
 }
 
 // Quantile returns the inverse of the cumulative distribution function.

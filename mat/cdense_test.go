@@ -197,3 +197,139 @@ func TestCDenseGrow(t *testing.T) {
 		t.Errorf("unexpected value for At(0, 0): got: %v want: 0", v.At(0, 0))
 	}
 }
+
+func TestCDenseAdd(t *testing.T) {
+	type args struct {
+		a CMatrix
+		b CMatrix
+	}
+	tests := []struct {
+		name string
+		args args
+		want *CDense
+	}{
+		{
+			name: "1 + 1 ?= 2",
+			args: args{
+				a: NewCDense(3, 3, []complex128{
+					1.0 + 0.0i, 0.0 + 0.0i, 0.0 + 0.0i,
+					0.0 + 0.0i, 1.0 + 0.0i, 0.0 + 0.0i,
+					0.0 + 0.0i, 0.0 + 0.0i, 1.0 + 0.0i,
+				}),
+				b: NewCDense(3, 3, []complex128{
+					1.0 + 0.0i, 0.0 + 0.0i, 0.0 + 0.0i,
+					0.0 + 0.0i, 1.0 + 0.0i, 0.0 + 0.0i,
+					0.0 + 0.0i, 0.0 + 0.0i, 1.0 + 0.0i,
+				}),
+			},
+			want: NewCDense(3, 3, []complex128{
+				2.0 + 0.0i, 0.0 + 0.0i, 0.0 + 0.0i,
+				0.0 + 0.0i, 2.0 + 0.0i, 0.0 + 0.0i,
+				0.0 + 0.0i, 0.0 + 0.0i, 2.0 + 0.0i,
+			}),
+		},
+		{
+			name: "Random 5x5 matrices sum",
+			args: args{
+				a: NewCDense(5, 5, []complex128{
+					1.34 + 0.56i, 0.78 + 0.90i, 0.12 + 0.34i, 0.56 + 0.78i, 0.90 + 0.12i,
+					0.56 + 0.78i, 0.90 + 0.12i, 0.34 + 0.56i, 0.78 + 0.90i, 0.12 + 0.34i,
+					0.78 + 0.90i, 0.12 + 0.34i, 0.56 + 0.78i, 0.90 + 0.12i, 0.34 + 0.56i,
+					0.90 + 0.12i, 0.34 + 0.56i, 0.78 + 0.90i, 0.12 + 0.34i, 0.56 + 0.78i,
+					0.12 + 0.34i, 0.56 + 0.78i, 0.90 + 0.12i, 0.34 + 0.56i, 0.78 + 0.90i,
+				}),
+				b: NewCDense(5, 5, []complex128{
+					1.12 + 0.23i, 0.45 + 0.67i, 0.78 + 0.89i, 0.12 + 0.34i, 0.56 + 0.78i,
+					0.34 + 0.56i, 0.78 + 0.90i, 0.12 + 0.34i, 0.56 + 0.78i, 0.90 + 0.12i,
+					0.56 + 0.78i, 0.90 + 0.12i, 0.34 + 0.56i, 0.78 + 0.90i, 0.12 + 0.34i,
+					0.78 + 0.90i, 0.12 + 0.34i, 0.56 + 0.78i, 0.90 + 0.12i, 0.34 + 0.56i,
+					0.90 + 0.12i, 0.34 + 0.56i, 0.78 + 0.90i, 0.12 + 0.34i, 0.56 + 0.78i,
+				}),
+			},
+			want: NewCDense(5, 5, []complex128{
+				2.46 + 0.79i, 1.23 + 1.57i, 0.9 + 1.23i, 0.68 + 1.12i, 1.46 + 0.9i,
+				0.9 + 1.34i, 1.68 + 1.02i, 0.46 + 0.9i, 1.34 + 1.68i, 1.02 + 0.46i,
+				1.34 + 1.68i, 1.02 + 0.46i, 0.9 + 1.34i, 1.68 + 1.02i, 0.46 + 0.9i,
+				1.68 + 1.02i, 0.46 + 0.9i, 1.34 + 1.68i, 1.02 + 0.46i, 0.9 + 1.34i,
+				1.02 + 0.46i, 0.9 + 1.34i, 1.68 + 1.02i, 0.46 + 0.9i, 1.34 + 1.68i,
+			}),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var receiver CDense
+			receiver.Add(tt.args.a, tt.args.b)
+			if !CEqualApprox(&receiver, tt.want, 1e-14) {
+				t.Errorf("CDense Addition fail. Wanted: %v, got: %v", tt.want, receiver)
+			}
+		})
+	}
+}
+
+func TestCDenseSub(t *testing.T) {
+	type args struct {
+		a CMatrix
+		b CMatrix
+	}
+	tests := []struct {
+		name string
+		args args
+		want *CDense
+	}{
+		{
+			name: "1 - 1 ?= 0",
+			args: args{
+				a: NewCDense(3, 3, []complex128{
+					1.0 + 0.0i, 0.0 + 0.0i, 0.0 + 0.0i,
+					0.0 + 0.0i, 1.0 + 0.0i, 0.0 + 0.0i,
+					0.0 + 0.0i, 0.0 + 0.0i, 1.0 + 0.0i,
+				}),
+				b: NewCDense(3, 3, []complex128{
+					1.0 + 0.0i, 0.0 + 0.0i, 0.0 + 0.0i,
+					0.0 + 0.0i, 1.0 + 0.0i, 0.0 + 0.0i,
+					0.0 + 0.0i, 0.0 + 0.0i, 1.0 + 0.0i,
+				}),
+			},
+			want: NewCDense(3, 3, []complex128{
+				0.0 + 0.0i, 0.0 + 0.0i, 0.0 + 0.0i,
+				0.0 + 0.0i, 0.0 + 0.0i, 0.0 + 0.0i,
+				0.0 + 0.0i, 0.0 + 0.0i, 0.0 + 0.0i,
+			}),
+		},
+		{
+			name: "Random 5x5 matrices sum",
+			args: args{
+				a: NewCDense(5, 5, []complex128{
+					1.34 + 0.56i, 0.78 + 0.90i, 0.12 + 0.34i, 0.56 + 0.78i, 0.90 + 0.12i,
+					0.56 + 0.78i, 0.90 + 0.12i, 0.34 + 0.56i, 0.78 + 0.90i, 0.12 + 0.34i,
+					0.78 + 0.90i, 0.12 + 0.34i, 0.56 + 0.78i, 0.90 + 0.12i, 0.34 + 0.56i,
+					0.90 + 0.12i, 0.34 + 0.56i, 0.78 + 0.90i, 0.12 + 0.34i, 0.56 + 0.78i,
+					0.12 + 0.34i, 0.56 + 0.78i, 0.90 + 0.12i, 0.34 + 0.56i, 0.78 + 0.90i,
+				}),
+				b: NewCDense(5, 5, []complex128{
+					-1.12 - 0.23i, -0.45 - 0.67i, -0.78 - 0.89i, -0.12 - 0.34i, -0.56 - 0.78i,
+					-0.34 - 0.56i, -0.78 - 0.90i, -0.12 - 0.34i, -0.56 - 0.78i, -0.90 - 0.12i,
+					-0.56 - 0.78i, -0.90 - 0.12i, -0.34 - 0.56i, -0.78 - 0.90i, -0.12 - 0.34i,
+					-0.78 - 0.90i, -0.12 - 0.34i, -0.56 - 0.78i, -0.90 - 0.12i, -0.34 - 0.56i,
+					-0.90 - 0.12i, -0.34 - 0.56i, -0.78 - 0.90i, -0.12 - 0.34i, -0.56 - 0.78i,
+				}),
+			},
+			want: NewCDense(5, 5, []complex128{
+				2.46 + 0.79i, 1.23 + 1.57i, 0.9 + 1.23i, 0.68 + 1.12i, 1.46 + 0.9i,
+				0.9 + 1.34i, 1.68 + 1.02i, 0.46 + 0.9i, 1.34 + 1.68i, 1.02 + 0.46i,
+				1.34 + 1.68i, 1.02 + 0.46i, 0.9 + 1.34i, 1.68 + 1.02i, 0.46 + 0.9i,
+				1.68 + 1.02i, 0.46 + 0.9i, 1.34 + 1.68i, 1.02 + 0.46i, 0.9 + 1.34i,
+				1.02 + 0.46i, 0.9 + 1.34i, 1.68 + 1.02i, 0.46 + 0.9i, 1.34 + 1.68i,
+			}),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var receiver CDense
+			receiver.Sub(tt.args.a, tt.args.b)
+			if !CEqualApprox(&receiver, tt.want, 1e-14) {
+				t.Errorf("CDense Subtraction fail. Wanted: %v, got: %v", tt.want, receiver)
+			}
+		})
+	}
+}

@@ -1689,6 +1689,9 @@ func meanUnnormalisedVarianceSumWeights(x, weights []float64) (mean, unnormalise
 			compensation += d
 		}
 		unnormalisedVariance = (ss - compensation*compensation/float64(len(x)))
+		if unnormalisedVariance < 0 {
+			unnormalisedVariance = 0
+		}
 		return mean, unnormalisedVariance, float64(len(x))
 	}
 
@@ -1701,5 +1704,8 @@ func meanUnnormalisedVarianceSumWeights(x, weights []float64) (mean, unnormalise
 		sumWeights += w
 	}
 	unnormalisedVariance = (ss - compensation*compensation/sumWeights)
+	if unnormalisedVariance < 0 {
+		unnormalisedVariance = 0
+	}
 	return mean, unnormalisedVariance, sumWeights
 }

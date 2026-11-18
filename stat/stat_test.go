@@ -1800,6 +1800,18 @@ func TestVariance(t *testing.T) {
 	}
 }
 
+func TestStdDevConstantData(t *testing.T) {
+	// The corrected two-pass variance can land on a tiny negative value from
+	// rounding when the data is constant; the standard deviation must be 0,
+	// not NaN from a square root of that negative.
+	if got := StdDev([]float64{3, 3, 3, 3, 3}, []float64{1, 1, 1.7, 5, 4.7}); got != 0 {
+		t.Errorf("StdDev of constant data = %v, want 0", got)
+	}
+	if _, got := PopMeanStdDev([]float64{0.1}, []float64{0.4}); got != 0 {
+		t.Errorf("PopMeanStdDev of a single value = %v, want 0", got)
+	}
+}
+
 func TestPopVariance(t *testing.T) {
 	for i, test := range []struct {
 		x       []float64

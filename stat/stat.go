@@ -6,6 +6,7 @@ package stat
 
 import (
 	"math"
+	"slices"
 	"sort"
 
 	"gonum.org/v1/gonum/floats"
@@ -32,7 +33,7 @@ const (
 // WassersteinDistance computes the Wasserstein distance (Earth Mover's Distance)
 // between two 1D distributions p and q with optional weights. p and q are
 // the support points of each distribution. pWeights and qWeights are the weights
-// for each point.
+// for each point. The weights are normalized without modifying pWeights or qWeights.
 // If a weights slice is nil, then uniform weights are used. If it is not nil,
 // then the length of the weights slice must equal the length of the corresponding points.
 // Otherwise, the function will panic.
@@ -67,13 +68,13 @@ func WassersteinDistance(p, q, pWeights, qWeights []float64) float64 {
 	if pUniform {
 		pUniformWeight = 1 / float64(len(p))
 	} else {
-		normalizeWeights(pWeights)
+		pWeights = normalizeWeights(pWeights)
 	}
 
 	if qUniform {
 		qUniformWeight = 1 / float64(len(q))
 	} else {
-		normalizeWeights(qWeights)
+		qWeights = normalizeWeights(qWeights)
 	}
 
 	// Pair values with weights and sort.
@@ -168,6 +169,7 @@ func WassersteinDistance(p, q, pWeights, qWeights []float64) float64 {
 // WassersteinDistanceND computes the Wasserstein distance (Earth Mover's Distance)
 // between two n-dimensional distributions p and q with optional weights. p and q are
 // matrices where each row represents a point. pWeights and qWeights are the weights for each point.
+// The weights are normalized without modifying pWeights or qWeights.
 // The number of columns in p and q must be equal.
 // If a weights slice is nil, then uniform weights are used. If it is not nil, then the
 // length of the weights slice must equal the number of rows in the corresponding matrix.
@@ -224,14 +226,14 @@ func WassersteinDistanceND(p, q mat.Matrix, pWeights, qWeights []float64, tol fl
 		pWeights = make([]float64, pRows)
 		floats.AddConst(1/float64(pRows), pWeights)
 	} else {
-		normalizeWeights(pWeights)
+		pWeights = normalizeWeights(pWeights)
 	}
 
 	if qWeights == nil {
 		qWeights = make([]float64, qRows)
 		floats.AddConst(1/float64(qRows), qWeights)
 	} else {
-		normalizeWeights(qWeights)
+		qWeights = normalizeWeights(qWeights)
 	}
 
 	// Create cost matrix using Euclidean distance.
@@ -253,8 +255,8 @@ func WassersteinDistanceND(p, q mat.Matrix, pWeights, qWeights []float64, tol fl
 	return solveOptimalTransportLP(cost, pWeights, qWeights, tol)
 }
 
-// normalizeWeights checks and normalizes the provided weight array if needed.
-func normalizeWeights(weights []float64) {
+// normalizeWeights checks the weights and returns a normalized copy.
+func normalizeWeights(weights []float64) []float64 {
 	var sum float64
 
 	for _, w := range weights {
@@ -264,7 +266,9 @@ func normalizeWeights(weights []float64) {
 		sum += w
 	}
 
+	weights = slices.Clone(weights)
 	floats.Scale(1/sum, weights)
+	return weights
 }
 
 // solveOptimalTransportLP solves the optimal transport problem.

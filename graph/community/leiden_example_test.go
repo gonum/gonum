@@ -23,7 +23,10 @@ func ExampleLeiden() {
 	g.SetEdge(simple.Edge{F: simple.Node(4), T: simple.Node(5)})
 	g.SetEdge(simple.Edge{F: simple.Node(5), T: simple.Node(3)})
 	src := rand.New(rand.NewPCG(1, 1))
-	r := Leiden(g, 1, src)
+	r, err := Leiden(g, 1, src)
+	if err != nil {
+		panic(err)
+	}
 	communities := r.Communities()
 	fmt.Println("communities:", len(communities))
 	for i, c := range communities {

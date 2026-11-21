@@ -72,7 +72,8 @@ type ReducedGraph interface {
 
 // Modularize returns the hierarchical modularization of g at the given resolution
 // using the Louvain algorithm. If src is nil, rand.IntN is used as the random
-// generator. Modularize will panic if g has any edge with negative edge weight.
+// generator. Modularize will return an error if g has an unsupported type.
+// Modularize will panic if g has any edge with negative edge weight.
 //
 // If g is undirected it is modularised to minimise
 //
@@ -87,14 +88,14 @@ type ReducedGraph interface {
 //
 // graph.Undirect may be used as a shim to allow modularization of
 // directed graphs with the undirected modularity function.
-func Modularize(g graph.Graph, resolution float64, src rand.Source) ReducedGraph {
+func Modularize(g graph.Graph, resolution float64, src rand.Source) (ReducedGraph, error) {
 	switch g := g.(type) {
 	case graph.Undirected:
-		return louvainUndirected(g, resolution, src)
+		return louvainUndirected(g, resolution, src), nil
 	case graph.Directed:
-		return louvainDirected(g, resolution, src)
+		return louvainDirected(g, resolution, src), nil
 	default:
-		panic(fmt.Sprintf("community: invalid graph type: %T", g))
+		return nil, fmt.Errorf("community: invalid graph type: %T", g)
 	}
 }
 
@@ -188,7 +189,8 @@ type ReducedMultiplex interface {
 // using the Louvain algorithm. If all is true and g have negatively weighted layers, all
 // communities will be searched during the modularization. If src is nil, rand.IntN is
 // used as the random generator. ModularizeMultiplex will panic if g has any edge with
-// edge weight that does not sign-match the layer weight.
+// edge weight that does not sign-match the layer weight. ModularizeMultiplex will return
+// an error if g has an unsupported type.
 //
 // If g is undirected it is modularised to minimise
 //
@@ -203,7 +205,7 @@ type ReducedMultiplex interface {
 //
 // graph.Undirect may be used as a shim to allow modularization of
 // directed graphs with the undirected modularity function.
-func ModularizeMultiplex(g Multiplex, weights, resolutions []float64, all bool, src rand.Source) ReducedMultiplex {
+func ModularizeMultiplex(g Multiplex, weights, resolutions []float64, all bool, src rand.Source) (ReducedMultiplex, error) {
 	if weights != nil && len(weights) != g.Depth() {
 		panic("community: weights vector length mismatch")
 	}
@@ -213,11 +215,11 @@ func ModularizeMultiplex(g Multiplex, weights, resolutions []float64, all bool, 
 
 	switch g := g.(type) {
 	case UndirectedMultiplex:
-		return louvainUndirectedMultiplex(g, weights, resolutions, all, src)
+		return louvainUndirectedMultiplex(g, weights, resolutions, all, src), nil
 	case DirectedMultiplex:
-		return louvainDirectedMultiplex(g, weights, resolutions, all, src)
+		return louvainDirectedMultiplex(g, weights, resolutions, all, src), nil
 	default:
-		panic(fmt.Sprintf("community: invalid graph type: %T", g))
+		return nil, fmt.Errorf("community: invalid graph type: %T", g)
 	}
 }
 

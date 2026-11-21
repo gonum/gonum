@@ -76,12 +76,16 @@ func LeidenScore(g graph.Graph, score func(ReducedGraph) float64, effort int, sr
 // reducedScore returns a scoring function for Profile that applies the given
 // reducer to g for each resolution, running effort attempts and returning the
 // best score found.
-func reducedScore(g graph.Graph, reducer func(graph.Graph, float64, rand.Source) ReducedGraph, score func(ReducedGraph) float64, effort int, src rand.Source) func(float64) (float64, Reduced) {
+func reducedScore(g graph.Graph, reducer func(graph.Graph, float64, rand.Source) (ReducedGraph, error), score func(ReducedGraph) float64, effort int, src rand.Source) func(float64) (float64, Reduced) {
 	return func(resolution float64) (float64, Reduced) {
 		max := math.Inf(-1)
 		var best Reduced
 		for i := 0; i < effort; i++ {
-			r := reducer(g, resolution, src)
+			r, err := reducer(g, resolution, src)
+			if err != nil {
+				// Skip failed attempts (unsupported graph type or non-convergence).
+				continue
+			}
 			s := score(r)
 			if s > max {
 				max = s
@@ -127,7 +131,10 @@ func ModularMultiplexScore(g Multiplex, weights []float64, all bool, score func(
 		max := math.Inf(-1)
 		var best Reduced
 		for i := 0; i < effort; i++ {
-			r := ModularizeMultiplex(g, weights, []float64{resolution}, all, src)
+			r, err := ModularizeMultiplex(g, weights, []float64{resolution}, all, src)
+			if err != nil {
+				continue
+			}
 			s := score(r)
 			if s > max {
 				max = s

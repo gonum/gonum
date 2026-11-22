@@ -36,6 +36,7 @@ const (
 	bothSVDOver         = "lapack: both jobU and jobVT are lapack.SVDOverwrite"
 
 	// Panic strings for bad numerical and string values.
+	badBDiag    = "lapack: bad diagonal elements of B for Dlagv2"
 	badIfst     = "lapack: ifst out of range"
 	badIhi      = "lapack: ihi out of range"
 	badIhiz     = "lapack: ihiz out of range"

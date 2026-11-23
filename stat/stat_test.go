@@ -1548,6 +1548,24 @@ func TestQuantile(t *testing.T) {
 	}
 }
 
+func TestQuantileWeightsRounding(t *testing.T) {
+	t.Parallel()
+	// floats.Sum may add the weights in a different order than the
+	// running sum in Quantile, so the total can differ in the last bit.
+	x := []float64{1, 2, 3, 4}
+	w := []float64{0.3, 0.1, 0.1, 0.1}
+	for _, kind := range []CumulantKind{Empirical, LinInterp} {
+		var got float64
+		if panics(func() { got = Quantile(1, kind, x, w) }) {
+			t.Errorf("Quantile panicked for kind %v at p=1", kind)
+			continue
+		}
+		if got != 4 {
+			t.Errorf("unexpected Quantile for kind %v at p=1: got %v, want 4", kind, got)
+		}
+	}
+}
+
 func TestQuantileInvalidInput(t *testing.T) {
 	cumulantKinds := []CumulantKind{
 		Empirical,

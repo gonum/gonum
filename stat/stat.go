@@ -1402,7 +1402,7 @@ func empiricalQuantile(p float64, x, weights []float64, sumWeights float64) floa
 			return x[i]
 		}
 	}
-	panic("impossible")
+	return x[len(x)-1]
 }
 
 func linInterpQuantile(p float64, x, weights []float64, sumWeights float64) float64 {
@@ -1425,7 +1425,7 @@ func linInterpQuantile(p float64, x, weights []float64, sumWeights float64) floa
 			return t*x[i-1] + (1-t)*x[i]
 		}
 	}
-	panic("impossible")
+	return x[len(x)-1]
 }
 
 func type7Quantile(p float64, x, weights []float64, sumWeights float64) float64 {

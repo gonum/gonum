@@ -235,6 +235,73 @@ func TestStudentsTConditional(t *testing.T) {
 	}
 }
 
+func TestStudentsTMarginal(t *testing.T) {
+	for cas, test := range []struct {
+		mu       []float64
+		sigma    *mat.SymDense
+		nu       float64
+		marginal []int
+	}{
+		{
+			mu:       []float64{2, 3, 4},
+			sigma:    mat.NewSymDense(3, []float64{2, 0.5, 3, 0.5, 1, 0.6, 3, 0.6, 10}),
+			nu:       8,
+			marginal: []int{0},
+		},
+		{
+			mu:       []float64{2, 3, 4},
+			sigma:    mat.NewSymDense(3, []float64{2, 0.5, 3, 0.5, 1, 0.6, 3, 0.6, 10}),
+			nu:       10,
+			marginal: []int{0, 2},
+		},
+		{
+			mu:       []float64{2, 3, 4, 5},
+			sigma:    mat.NewSymDense(4, []float64{2, 0.5, 3, 0.1, 0.5, 1, 0.6, 0.2, 3, 0.6, 10, 0.3, 0.1, 0.2, 0.3, 3}),
+			nu:       12,
+			marginal: []int{3, 0},
+		},
+	} {
+		studentst, ok := NewStudentsT(test.mu, test.sigma, test.nu, rand.NewPCG(1, 2))
+		if !ok {
+			t.Fatal("bad test, scale matrix not positive definite")
+		}
+		marginal, ok := studentst.MarginalStudentsT(test.marginal, rand.NewPCG(3, 4))
+		if !ok {
+			t.Fatal("bad test, marginal scale matrix not positive definite")
+		}
+		if marginal.Nu() != test.nu {
+			t.Errorf("Case %d: Nu mismatch: got %v, want %v", cas, marginal.Nu(), test.nu)
+		}
+
+		// Use the sample count and tolerances from TestMarginal for Normal.
+		const nSamples = 1000000
+		dim := studentst.Dim()
+		samples := mat.NewDense(nSamples, dim, nil)
+		for i := 0; i < nSamples; i++ {
+			studentst.Rand(samples.RawRowView(i))
+		}
+		for i, v := range test.marginal {
+			mean := stat.Mean(mat.Col(nil, v, samples), nil)
+			if !scalar.EqualWithinAbs(marginal.mu[i], mean, 1e-2) {
+				t.Errorf("Case %d: mean mismatch at %d: got %v, want %v", cas, i, marginal.mu[i], mean)
+			}
+		}
+
+		var marginalCov, sampleCov mat.SymDense
+		marginal.CovarianceMatrix(&marginalCov)
+		stat.CovarianceMatrix(&sampleCov, samples, nil)
+		for i, v1 := range test.marginal {
+			for j, v2 := range test.marginal {
+				got := marginalCov.At(i, j)
+				want := sampleCov.At(v1, v2)
+				if !scalar.EqualWithinAbs(got, want, 5e-2) {
+					t.Errorf("Case %d: covariance mismatch at (%d, %d): got %v, want %v", cas, i, j, got, want)
+				}
+			}
+		}
+	}
+}
+
 func TestStudentsTMarginalSingle(t *testing.T) {
 	for _, test := range []struct {
 		mu    []float64
@@ -267,6 +334,22 @@ func TestStudentsTMarginalSingle(t *testing.T) {
 			}
 			if st.Nu != test.nu {
 				t.Errorf("Nu mismatch nil Sigma, idx %v: want %v, got %v ", i, test.nu, st.Nu)
+			}
+
+			marginal, ok := studentst.MarginalStudentsT([]int{i}, rand.NewPCG(5, 6))
+			if !ok {
+				t.Fatal("bad test, marginal scale matrix not positive definite")
+			}
+			if st.Mean() != marginal.Mean(nil)[0] {
+				t.Errorf("Mean mismatch between marginal methods at %d", i)
+			}
+			var cov mat.SymDense
+			marginal.CovarianceMatrix(&cov)
+			if !scalar.EqualWithinAbsOrRel(st.Variance(), cov.At(0, 0), 1e-14, 1e-14) {
+				t.Errorf("Variance mismatch between marginal methods at %d: got %v, want %v", i, st.Variance(), cov.At(0, 0))
+			}
+			if st.Nu != marginal.Nu() {
+				t.Errorf("Nu mismatch between marginal methods at %d: got %v, want %v", i, st.Nu, marginal.Nu())
 			}
 		}
 	}

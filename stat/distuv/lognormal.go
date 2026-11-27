@@ -21,6 +21,9 @@ type LogNormal struct {
 
 // CDF computes the value of the cumulative density function at x.
 func (l LogNormal) CDF(x float64) float64 {
+	if x < 0 {
+		return 0
+	}
 	return 0.5 * math.Erfc(-(math.Log(x)-l.Mu)/(math.Sqrt2*l.Sigma))
 }
 
@@ -103,6 +106,9 @@ func (l LogNormal) StdDev() float64 {
 
 // Survival returns the survival function (complementary CDF) at x.
 func (l LogNormal) Survival(x float64) float64 {
+	if x < 0 {
+		return 1
+	}
 	return 0.5 * (1 - math.Erf((math.Log(x)-l.Mu)/(math.Sqrt2*l.Sigma)))
 }
 

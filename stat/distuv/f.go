@@ -29,6 +29,9 @@ type F struct {
 
 // CDF computes the value of the cumulative density function at x.
 func (f F) CDF(x float64) float64 {
+	if x < 0 {
+		return 0
+	}
 	return mathext.RegIncBeta(f.D1/2, f.D2/2, f.D1*x/(f.D1*x+f.D2))
 }
 
@@ -45,6 +48,9 @@ func (f F) ExKurtosis() float64 {
 // LogProb computes the natural logarithm of the value of the probability
 // density function at x.
 func (f F) LogProb(x float64) float64 {
+	if x < 0 {
+		return math.Inf(-1)
+	}
 	return 0.5*(f.D1*math.Log(f.D1*x)+f.D2*math.Log(f.D2)-(f.D1+f.D2)*math.Log(f.D1*x+f.D2)) - math.Log(x) - mathext.Lbeta(f.D1/2, f.D2/2)
 }
 
@@ -118,6 +124,9 @@ func (f F) StdDev() float64 {
 
 // Survival returns the survival function (complementary CDF) at x.
 func (f F) Survival(x float64) float64 {
+	if x < 0 {
+		return 1
+	}
 	return 1 - f.CDF(x)
 }
 

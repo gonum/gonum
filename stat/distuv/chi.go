@@ -29,6 +29,9 @@ type Chi struct {
 
 // CDF computes the value of the cumulative density function at x.
 func (c Chi) CDF(x float64) float64 {
+	if x < 0 {
+		return 0
+	}
 	return mathext.GammaIncReg(c.K/2, (x*x)/2)
 }
 

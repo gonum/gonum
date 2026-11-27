@@ -292,3 +292,42 @@ func panics(fun func()) (b bool) {
 	fun()
 	return
 }
+
+func TestBelowSupport(t *testing.T) {
+	t.Parallel()
+	// None of these distributions has any probability below zero.
+	for _, test := range []struct {
+		name string
+		dist interface {
+			LogProber
+			Prob(float64) float64
+			CDF(float64) float64
+			Survival(float64) float64
+		}
+	}{
+		{"Beta", Beta{Alpha: 2, Beta: 3}},
+		{"Chi", Chi{K: 3}},
+		{"ChiSquared", ChiSquared{K: 3}},
+		{"Exponential", Exponential{Rate: 2}},
+		{"F", F{D1: 2, D2: 5}},
+		{"Gamma", Gamma{Alpha: 2, Beta: 1}},
+		{"InverseGamma", InverseGamma{Alpha: 2, Beta: 1}},
+		{"LogNormal", LogNormal{Mu: 0, Sigma: 1}},
+		{"Weibull", Weibull{K: 2, Lambda: 1}},
+	} {
+		for _, x := range []float64{math.Inf(-1), -1, -math.SmallestNonzeroFloat64} {
+			if got := test.dist.CDF(x); got != 0 {
+				t.Errorf("unexpected CDF for %s at %v: got %v, want 0", test.name, x, got)
+			}
+			if got := test.dist.Survival(x); got != 1 {
+				t.Errorf("unexpected Survival for %s at %v: got %v, want 1", test.name, x, got)
+			}
+			if got := test.dist.LogProb(x); !math.IsInf(got, -1) {
+				t.Errorf("unexpected LogProb for %s at %v: got %v, want -Inf", test.name, x, got)
+			}
+			if got := test.dist.Prob(x); got != 0 {
+				t.Errorf("unexpected Prob for %s at %v: got %v, want 0", test.name, x, got)
+			}
+		}
+	}
+}

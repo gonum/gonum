@@ -22,8 +22,15 @@ func Dggsvp3Test(t *testing.T, impl Dggsvp3er) {
 	const tol = 1e-14
 
 	rnd := rand.New(rand.NewPCG(1, 1))
+	dupCol := func(g blas64.General, src, dst int) {
+		for i := 0; i < g.Rows; i++ {
+			g.Data[i*g.Stride+dst] = g.Data[i*g.Stride+src]
+		}
+	}
 	for cas, test := range []struct {
 		m, p, n, lda, ldb, ldu, ldv, ldq int
+		dupA, dupB                       []int // column indices src, dst to duplicate; nil means none
+		wantL                            int   // effective rank of B; zero means don't check
 	}{
 		{m: 3, p: 3, n: 5, lda: 0, ldb: 0, ldu: 0, ldv: 0, ldq: 0},
 		{m: 5, p: 5, n: 5, lda: 0, ldb: 0, ldu: 0, ldv: 0, ldq: 0},
@@ -44,6 +51,10 @@ func Dggsvp3Test(t *testing.T, impl Dggsvp3er) {
 		{m: 10, p: 5, n: 5, lda: 10, ldb: 10, ldu: 20, ldv: 10, ldq: 10},
 		{m: 10, p: 10, n: 10, lda: 20, ldb: 20, ldu: 20, ldv: 20, ldq: 20},
 		{m: 10, p: 10, n: 10, lda: 20, ldb: 20, ldu: 20, ldv: 20, ldq: 20},
+		// Rank-deficient pairs that take the k < n-l branch. Random full-rank
+		// inputs never exercise it, which is why the bugs below went unnoticed.
+		{m: 4, p: 2, n: 5, dupA: []int{0, 1}, dupB: []int{0, 1}, wantL: 2},
+		{m: 4, p: 3, n: 3, dupB: []int{0, 1}, wantL: 2},
 	} {
 		m := test.m
 		p := test.p
@@ -70,8 +81,14 @@ func Dggsvp3Test(t *testing.T, impl Dggsvp3er) {
 		}
 
 		a := randomGeneral(m, n, lda, rnd)
+		if test.dupA != nil {
+			dupCol(a, test.dupA[0], test.dupA[1])
+		}
 		aCopy := cloneGeneral(a)
 		b := randomGeneral(p, n, ldb, rnd)
+		if test.dupB != nil {
+			dupCol(b, test.dupB[0], test.dupB[1])
+		}
 		bCopy := cloneGeneral(b)
 
 		tola := float64(max(m, n)) * impl.Dlange(lapack.Frobenius, m, n, a.Data, a.Stride, nil) * dlamchE
@@ -109,6 +126,10 @@ func Dggsvp3Test(t *testing.T, impl Dggsvp3er) {
 			q.Data, q.Stride,
 			iwork, tau,
 			work, lwork)
+
+		if test.wantL != 0 && l != test.wantL {
+			t.Errorf("Case %d: effective rank of B is %d, want %d", cas, l, test.wantL)
+		}
 
 		// Check orthogonality of U, V and Q.
 		if resid := residualOrthogonal(u, false); resid > tol {
